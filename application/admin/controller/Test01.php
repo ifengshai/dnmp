@@ -441,41 +441,42 @@ class Test01 extends Backend
 
     public function update_11_3_stock()
     {
+        $data = '2020-11-04';
         Db::name('datacenter_sku_day')
-            ->where(['day_date'=>'2020-11-03','site'=>1,'goods_type'=>0])
+            ->where(['day_date'=>$data,'site'=>1,'goods_type'=>0])
             ->update(['goods_type'=>1]);
         set_time_limit(0);
-        // Db::connect('database.db_zeelool')->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
-        // Db::connect('database.db_zeelool')->table('sales_flat_order_item')->query("set time_zone='+8:00'");
-        // Db::connect('database.db_zeelool')->table('sales_flat_order')->query("set time_zone='+8:00'");
-        // $data = '2020-11-03';
-        // $z_sku_list = Db::name('datacenter_sku_day')->where(['day_date'=>'2020-11-03','site'=>2])->field('sku,platform_sku,site,goods_grade,glass_num')->select();
-        // $itemMap[] = ['exp', Db::raw("DATE_FORMAT(a.created_at, '%Y-%m-%d') = '" . $data . "'")];
-        // foreach ($z_sku_list as $k =>$v){
-        //     // dump($v);
-        //     //获取这个sku所有的订单情况
-        //     $sku_order_data = Db::connect('database.db_zeelool')->table('sales_flat_order')
-        //         ->where('c.sku','like',$v['platform_sku'] . '%')
-        //         ->where('a.status','in',['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete'])
-        //         ->where('a.order_type','=',1)
-        //         ->where($itemMap)
-        //         ->alias('a')
-        //         ->field('c.sku,a.created_at,c.goods_type')
-        //         ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
-        //         ->join(['sales_flat_order_item_prescription' => 'c'], 'a.entity_id=c.order_id')
-        //         ->find();
-        //
-        //     if (!empty($sku_order_data)){
-        //         Db::name('datacenter_sku_day')
-        //             ->where(['day_date'=>'2020-11-03','site'=>2,'sku'=>$v['sku']])
-        //             ->update(['goods_type'=>$sku_order_data['goods_type']]);
-        //     }
-        // }
+        Db::connect('database.db_zeelool')->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
+        Db::connect('database.db_zeelool')->table('sales_flat_order_item')->query("set time_zone='+8:00'");
+        Db::connect('database.db_zeelool')->table('sales_flat_order')->query("set time_zone='+8:00'");
+
+        $z_sku_list = Db::name('datacenter_sku_day')->where(['day_date'=>$data,'site'=>1])->field('sku,platform_sku,site,goods_grade,glass_num')->select();
+        $itemMap[] = ['exp', Db::raw("DATE_FORMAT(a.created_at, '%Y-%m-%d') = '" . $data . "'")];
+        foreach ($z_sku_list as $k =>$v){
+            // dump($v);
+            //获取这个sku所有的订单情况
+            $sku_order_data = Db::connect('database.db_zeelool')->table('sales_flat_order')
+                ->where('c.sku','like',$v['platform_sku'] . '%')
+                ->where('a.status','in',['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete'])
+                ->where('a.order_type','=',1)
+                ->where($itemMap)
+                ->alias('a')
+                ->field('c.sku,a.created_at,c.goods_type')
+                ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
+                ->join(['sales_flat_order_item_prescription' => 'c'], 'a.entity_id=c.order_id')
+                ->find();
+
+            if (!empty($sku_order_data)){
+                Db::name('datacenter_sku_day')
+                    ->where(['day_date'=>$data,'site'=>1,'sku'=>$v['sku']])
+                    ->update(['goods_type'=>$sku_order_data['goods_type']]);
+            }
+        }
         Db::connect('database.db_voogueme')->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
         Db::connect('database.db_voogueme')->table('sales_flat_order_item')->query("set time_zone='+8:00'");
         Db::connect('database.db_voogueme')->table('sales_flat_order')->query("set time_zone='+8:00'");
-        $data = '2020-11-03';
-        $z_sku_list = Db::name('datacenter_sku_day')->where(['day_date'=>'2020-11-03','site'=>2])->field('sku,platform_sku,site,goods_grade,glass_num')->select();
+
+        $z_sku_list = Db::name('datacenter_sku_day')->where(['day_date'=>$data,'site'=>2])->field('sku,platform_sku,site,goods_grade,glass_num')->select();
         $itemMap[] = ['exp', Db::raw("DATE_FORMAT(a.created_at, '%Y-%m-%d') = '" . $data . "'")];
         foreach ($z_sku_list as $k =>$v){
             // dump($v);
@@ -493,15 +494,15 @@ class Test01 extends Backend
 
             if (!empty($sku_order_data)){
                 Db::name('datacenter_sku_day')
-                    ->where(['day_date'=>'2020-11-03','site'=>2,'sku'=>$v['sku']])
+                    ->where(['day_date'=>$data,'site'=>2,'sku'=>$v['sku']])
                     ->update(['goods_type'=>$sku_order_data['goods_type']]);
             }
         }
         Db::connect('database.db_nihao')->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
         Db::connect('database.db_nihao')->table('sales_flat_order_item')->query("set time_zone='+8:00'");
         Db::connect('database.db_nihao')->table('sales_flat_order')->query("set time_zone='+8:00'");
-        $data = '2020-11-03';
-        $z_sku_list = Db::name('datacenter_sku_day')->where(['day_date'=>'2020-11-03','site'=>3])->field('sku,platform_sku,site,goods_grade,glass_num')->select();
+
+        $z_sku_list = Db::name('datacenter_sku_day')->where(['day_date'=>$data,'site'=>3])->field('sku,platform_sku,site,goods_grade,glass_num')->select();
         $itemMap[] = ['exp', Db::raw("DATE_FORMAT(a.created_at, '%Y-%m-%d') = '" . $data . "'")];
         foreach ($z_sku_list as $k =>$v){
             // dump($v);
@@ -519,61 +520,61 @@ class Test01 extends Backend
 
             if (!empty($sku_order_data)){
                 Db::name('datacenter_sku_day')
-                    ->where(['day_date'=>'2020-11-03','site'=>3,'sku'=>$v['sku']])
+                    ->where(['day_date'=>$data,'site'=>3,'sku'=>$v['sku']])
                     ->update(['goods_type'=>$sku_order_data['goods_type']]);
             }
         }
         die;
-
-        $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
-        $sku_data_stock = $_item_platform_sku
-            ->field('sku,platform_sku,stock,plat_on_way_stock')
-            ->where(['platform_type' => 1, 'outer_sku_status' => 1])
-            ->column('stock','sku');
-        $sku_data_plat_stock = $_item_platform_sku
-            ->field('sku,platform_sku,stock,plat_on_way_stock')
-            ->where(['platform_type' => 1, 'outer_sku_status' => 1])
-            ->column('plat_on_way_stock','sku');
-
-        $z_sku_list = Db::name('datacenter_sku_day')->where(['day_date'=>'2020-11-03','site'=>1])->field('sku,site')->select();
-        foreach ($z_sku_list as $k =>$v){
-            Db::name('datacenter_sku_day')
-                ->where(['day_date'=>'2020-11-03','site'=>1,'sku'=>$v['sku']])
-                ->update(['day_stock'=>$sku_data_stock[$v['sku']],'day_onway_stock'=>$sku_data_plat_stock[$v['sku']]]);
-        }
-
-        $sku_data_stock = $_item_platform_sku
-            ->field('sku,platform_sku,stock,plat_on_way_stock')
-            ->where(['platform_type' => 2, 'outer_sku_status' => 1])
-            ->column('stock','sku');
-        $sku_data_plat_stock = $_item_platform_sku
-            ->field('sku,platform_sku,stock,plat_on_way_stock')
-            ->where(['platform_type' => 2, 'outer_sku_status' => 1])
-            ->column('plat_on_way_stock','sku');
-
-        $z_sku_list = Db::name('datacenter_sku_day')->where(['day_date'=>'2020-11-03','site'=>2])->field('sku,site')->select();
-        foreach ($z_sku_list as $k =>$v){
-            Db::name('datacenter_sku_day')
-                ->where(['day_date'=>'2020-11-03','site'=>2,'sku'=>$v['sku']])
-                ->update(['day_stock'=>$sku_data_stock[$v['sku']],'day_onway_stock'=>$sku_data_plat_stock[$v['sku']]]);
-        }
-
-
-        $sku_data_stock = $_item_platform_sku
-            ->field('sku,platform_sku,stock,plat_on_way_stock')
-            ->where(['platform_type' => 3, 'outer_sku_status' => 1])
-            ->column('stock','sku');
-        $sku_data_plat_stock = $_item_platform_sku
-            ->field('sku,platform_sku,stock,plat_on_way_stock')
-            ->where(['platform_type' => 3, 'outer_sku_status' => 1])
-            ->column('plat_on_way_stock','sku');
-
-        $z_sku_list = Db::name('datacenter_sku_day')->where(['day_date'=>'2020-11-03','site'=>3])->field('sku,site')->select();
-        foreach ($z_sku_list as $k =>$v){
-            Db::name('datacenter_sku_day')
-                ->where(['day_date'=>'2020-11-03','site'=>3,'sku'=>$v['sku']])
-                ->update(['day_stock'=>$sku_data_stock[$v['sku']],'day_onway_stock'=>$sku_data_plat_stock[$v['sku']]]);
-        }
+        //
+        // $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
+        // $sku_data_stock = $_item_platform_sku
+        //     ->field('sku,platform_sku,stock,plat_on_way_stock')
+        //     ->where(['platform_type' => 1, 'outer_sku_status' => 1])
+        //     ->column('stock','sku');
+        // $sku_data_plat_stock = $_item_platform_sku
+        //     ->field('sku,platform_sku,stock,plat_on_way_stock')
+        //     ->where(['platform_type' => 1, 'outer_sku_status' => 1])
+        //     ->column('plat_on_way_stock','sku');
+        //
+        // $z_sku_list = Db::name('datacenter_sku_day')->where(['day_date'=>'2020-11-03','site'=>1])->field('sku,site')->select();
+        // foreach ($z_sku_list as $k =>$v){
+        //     Db::name('datacenter_sku_day')
+        //         ->where(['day_date'=>'2020-11-03','site'=>1,'sku'=>$v['sku']])
+        //         ->update(['day_stock'=>$sku_data_stock[$v['sku']],'day_onway_stock'=>$sku_data_plat_stock[$v['sku']]]);
+        // }
+        //
+        // $sku_data_stock = $_item_platform_sku
+        //     ->field('sku,platform_sku,stock,plat_on_way_stock')
+        //     ->where(['platform_type' => 2, 'outer_sku_status' => 1])
+        //     ->column('stock','sku');
+        // $sku_data_plat_stock = $_item_platform_sku
+        //     ->field('sku,platform_sku,stock,plat_on_way_stock')
+        //     ->where(['platform_type' => 2, 'outer_sku_status' => 1])
+        //     ->column('plat_on_way_stock','sku');
+        //
+        // $z_sku_list = Db::name('datacenter_sku_day')->where(['day_date'=>'2020-11-03','site'=>2])->field('sku,site')->select();
+        // foreach ($z_sku_list as $k =>$v){
+        //     Db::name('datacenter_sku_day')
+        //         ->where(['day_date'=>'2020-11-03','site'=>2,'sku'=>$v['sku']])
+        //         ->update(['day_stock'=>$sku_data_stock[$v['sku']],'day_onway_stock'=>$sku_data_plat_stock[$v['sku']]]);
+        // }
+        //
+        //
+        // $sku_data_stock = $_item_platform_sku
+        //     ->field('sku,platform_sku,stock,plat_on_way_stock')
+        //     ->where(['platform_type' => 3, 'outer_sku_status' => 1])
+        //     ->column('stock','sku');
+        // $sku_data_plat_stock = $_item_platform_sku
+        //     ->field('sku,platform_sku,stock,plat_on_way_stock')
+        //     ->where(['platform_type' => 3, 'outer_sku_status' => 1])
+        //     ->column('plat_on_way_stock','sku');
+        //
+        // $z_sku_list = Db::name('datacenter_sku_day')->where(['day_date'=>'2020-11-03','site'=>3])->field('sku,site')->select();
+        // foreach ($z_sku_list as $k =>$v){
+        //     Db::name('datacenter_sku_day')
+        //         ->where(['day_date'=>'2020-11-03','site'=>3,'sku'=>$v['sku']])
+        //         ->update(['day_stock'=>$sku_data_stock[$v['sku']],'day_onway_stock'=>$sku_data_plat_stock[$v['sku']]]);
+        // }
     }
 
 
