@@ -684,14 +684,6 @@ class GoodsSaleDetail extends Backend
         //眼镜正常售卖数
         $frame_onsales_num = $this->itemPlatformSku->putawayDifferenceSku(1, $platform);
 
-        //总的眼镜动销数
-        $whole_frame_in_print_num = $model->table('sales_flat_order_item m')
-            ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
-            ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
-            ->where($whereItem)
-            ->where($itemMap)
-            ->where('m.sku', 'in', $frame_sku)
-            ->count('distinct m.sku');
         //眼镜动销数
         $frame_in_print_num = $model->table('sales_flat_order_item m')
             ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
@@ -701,8 +693,7 @@ class GoodsSaleDetail extends Backend
             ->where($itemMap)
             ->where('m.sku', 'in', $frame_sku)
             ->count('distinct m.sku');
-
-        $frame_onsales_num = round($frame_onsales_num * ($frame_in_print_num / $whole_frame_in_print_num), 0);
+        $frame_onsales_num = $frame_in_print_num;
         //眼镜总共的数量
         //$frame_num                 = $this->item->getDifferenceSkuNUm(1);
         //眼镜动销率
@@ -752,16 +743,6 @@ class GoodsSaleDetail extends Backend
 
         //新品眼镜数量
         $frame_new_num = $this->item->getDifferenceNewSkuNum(1);
-        dump($frame_new_num);
-        //新品眼镜动销数
-        $whole_frame_new_in_print_num = $model->table('sales_flat_order_item m')
-            ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
-            ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
-            ->where($whereItem)
-            ->where($itemMap)
-            ->where('m.sku', 'in', $frame_new_sku)
-            ->count('distinct m.sku');
-        dump($whole_frame_new_in_print_num);
 
         //新品眼镜动销数
         $frame_new_in_print_num = $model->table('sales_flat_order_item m')
@@ -772,9 +753,7 @@ class GoodsSaleDetail extends Backend
             ->where($itemMap)
             ->where('m.sku', 'in', $frame_new_sku)
             ->count('distinct m.sku');
-        dump($frame_new_in_print_num);
-        $frame_new_num = round($frame_new_num * ($frame_new_in_print_num / $whole_frame_new_in_print_num),0);
-        dump($frame_new_num);
+        $frame_new_num = $frame_new_in_print_num;
         //新品眼镜动销率
         if (0 < $frame_new_num) {
             $frame_new_in_print_rate = round(($frame_new_in_print_num / $frame_new_num) * 100, 2);
