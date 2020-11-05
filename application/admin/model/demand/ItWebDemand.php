@@ -37,6 +37,7 @@ class ItWebDemand extends Model
             ['name' => 'BUG任务', 'field' => 'label', 'value' => 3],
             ['name' => '开发任务', 'field' => 'label', 'value' => 4],
             ['name' => '其他任务', 'field' => 'label', 'value' => 5],
+
         ];
     }
 }
