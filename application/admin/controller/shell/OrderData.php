@@ -1441,7 +1441,7 @@ class OrderData extends Backend
     public function set_order_id()
     {
         //查询未生成子单号的数据
-        $list = $this->orderitemoption->where('order_id', 0)->field('id,site,magento_order_id')->limit(1000)->select();
+        $list = $this->orderitemoption->where('order_id', 0)->field('id,site,magento_order_id')->limit(4000)->select();
         $list = collection($list)->toArray();
         $params = [];
         foreach ($list as $k => $v) {
