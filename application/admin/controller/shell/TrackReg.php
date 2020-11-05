@@ -756,6 +756,7 @@ class TrackReg extends Backend
         $zeelool_model->table('customer_entity')->query("set time_zone='+8:00'");
         $zeelool_model->table('oc_vip_order')->query("set time_zone='+8:00'");
         $zeelool_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
+        $zeelool_model->table('sales_flat_order')->query("set time_zone='+8:00'");
 
         $date_time = date('Y-m-d', strtotime("-1 day"));
         //查询时间
@@ -768,12 +769,22 @@ class TrackReg extends Backend
         $register_where = [];
         $register_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
         $arr['register_num'] = $zeelool_model->table('customer_entity')->where($register_where)->count();
+
+        //总的订单数
+        $order_where = [];
+        $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
+        $arr['sum_order_num'] = $zeelool_model->table('sales_flat_order')->where($order_where)->where('order_type',1)->count();
+        //登录用户数
+        $customer_where = [];
+        $customer_where[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '" . $date_time . "'")];
+        $arr['login_user_num'] = $zeelool_model->table('customer_entity')->where($customer_where)->count();
+
         //新增vip用户数
         $vip_where = [];
         $vip_where[] = ['exp', Db::raw("DATE_FORMAT(start_time, '%Y-%m-%d') = '" . $date_time . "'")];
         $vip_where['order_status'] = 'Success';
         $arr['vip_user_num'] = $zeelool_model->table('oc_vip_order')->where($vip_where)->count();
-        //订单数
+        //支付成功的订单数
         $order_where = [];
         $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
         $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
@@ -921,6 +932,7 @@ class TrackReg extends Backend
         $zeelool_model->table('oc_vip_order')->query("set time_zone='+8:00'");
         $zeelool_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
         $zeelool_data = new \app\admin\model\operatedatacenter\Zeelool();
+        $zeelool_model->table('sales_flat_order')->query("set time_zone='+8:00'");
 
         $date_time = date('Y-m-d', strtotime("-1 day"));
 
@@ -934,12 +946,22 @@ class TrackReg extends Backend
         $register_where = [];
         $register_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
         $arr['register_num'] = $zeelool_model->table('customer_entity')->where($register_where)->count();
+
+        //总的订单数
+        $order_where = [];
+        $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
+        $arr['sum_order_num'] = $zeelool_model->table('sales_flat_order')->where($order_where)->where('order_type',1)->count();
+        //登录用户数
+        $customer_where = [];
+        $customer_where[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '" . $date_time . "'")];
+        $arr['login_user_num'] = $zeelool_model->table('customer_entity')->where($customer_where)->count();
+
         //新增vip用户数
         $vip_where = [];
         $vip_where[] = ['exp', Db::raw("DATE_FORMAT(start_time, '%Y-%m-%d') = '" . $date_time . "'")];
         $vip_where['order_status'] = 'Success';
         $arr['vip_user_num'] = $zeelool_model->table('oc_vip_order')->where($vip_where)->count();
-        //订单数
+        //支付成功的订单数
         $order_where = [];
         $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
         $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
@@ -1007,6 +1029,7 @@ class TrackReg extends Backend
         $zeelool_model->table('oc_vip_order')->query("set time_zone='+8:00'");
         $zeelool_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
         $zeelool_data = new \app\admin\model\operatedatacenter\Zeelool();
+        $zeelool_model->table('sales_flat_order')->query("set time_zone='+8:00'");
 
         $date_time = date('Y-m-d', strtotime("-1 day"));
 
@@ -1020,7 +1043,17 @@ class TrackReg extends Backend
         $register_where = [];
         $register_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
         $arr['register_num'] = $zeelool_model->table('customer_entity')->where($register_where)->count();
-        //订单数
+
+        //总的订单数
+        $order_where = [];
+        $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
+        $arr['sum_order_num'] = $zeelool_model->table('sales_flat_order')->where($order_where)->where('order_type',1)->count();
+        //登录用户数
+        $customer_where = [];
+        $customer_where[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '" . $date_time . "'")];
+        $arr['login_user_num'] = $zeelool_model->table('customer_entity')->where($customer_where)->count();
+
+        //支付成功的订单数
         $order_where = [];
         $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
         $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
