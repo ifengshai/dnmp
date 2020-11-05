@@ -485,7 +485,7 @@ class ScmDistribution extends Scm
     }
 
     /**
-     * 配货提交
+     * 配货提交--ok
      *
      * @参数 string item_order_number  子订单号
      * @参数 string barcode  商品条形码
