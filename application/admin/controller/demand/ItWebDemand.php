@@ -784,7 +784,7 @@ class ItWebDemand extends Backend
     {
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
-//            dump($params);die();
+            dump($params);die();
             if ($params) {
 
                 if ($params['pm_audit_status'] == 4) {//拒绝
@@ -837,9 +837,9 @@ class ItWebDemand extends Backend
                     }
                     $add['type'] = $params['type'];
                     $add['site'] = $params['site'];
-
-                    $add['copy_to_user_id'] = implode(',', $params['copy_to_user_id']);
-
+                    if (!empty($params['copy_to_user_id'])){
+                        $add['copy_to_user_id'] = implode(',', $params['copy_to_user_id']);
+                    }
                     $add['title'] = $params['title'];
                     $add['content'] = $params['content'];
                     $add['remark'] = $params['remark'];
