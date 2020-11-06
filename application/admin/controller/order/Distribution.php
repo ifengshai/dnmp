@@ -10,6 +10,17 @@ use think\Loader;
 use think\Db;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use Util\SKUHelper;
+use app\admin\model\order\order\NewOrderItemProcess;
+use app\admin\model\warehouse\StockHouse;
+use app\admin\model\DistributionAbnormal;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use app\admin\model\order\order\NewOrder;
+use app\admin\model\warehouse\StockSku;
+use app\admin\model\order\order\NewOrderItemOption;
+use app\admin\model\itemmanage\ItemPlatformSku;
+use app\admin\model\itemmanage\Item;
+use app\admin\model\order\order\NewOrderProcess;
+use app\admin\model\StockLog;
 
 /**
  * 配货列表
@@ -22,7 +33,7 @@ class Distribution extends Backend
     public function _initialize()
     {
         parent::_initialize();
-        $this->model = new \app\admin\model\order\order\NewOrderItemProcess();
+        $this->model = new NewOrderItemProcess();
     }
 
     /**
@@ -50,19 +61,20 @@ class Distribution extends Backend
                 $map['a.temporary_house_id|a.abnormal_house_id'] = 0;
             }
 
-            $_stock_house = new \app\admin\model\warehouse\StockHouse();
+            $_stock_house = new StockHouse();
             $filter = json_decode($this->request->get('filter'), true);
             if ($filter['abnormal'] || $filter['stock_house_num']) {
                 //筛选异常
                 if ($filter['abnormal']) {
-                    $_distribution_abnormal = new \app\admin\model\DistributionAbnormal();
-                    $abnormal_where['type'] = $filter['abnormal'];
+                    $_distribution_abnormal = new DistributionAbnormal();
+                    $abnormal_where['type'] = ['in',$filter['abnormal']];
                     if (8 == $label) {
                         $abnormal_where['status'] = 1;
                     }
                     $item_process_id = $_distribution_abnormal
                         ->where($abnormal_where)
-                        ->column('item_process_id');
+                        ->column('item_process_id')
+                    ;
                     $map['a.id'] = ['in', $item_process_id];
                 }
 
@@ -168,12 +180,12 @@ class Distribution extends Backend
                 $map['a.temporary_house_id|a.abnormal_house_id|c.store_house_id'] = 0;
             }
 
-            $_stock_house = new \app\admin\model\warehouse\StockHouse();
+            $_stock_house = new StockHouse();
             $filter = json_decode($this->request->get('filter'), true);
             if ($filter['abnormal'] || $filter['stock_house_num']) {
                 //筛选异常
                 if ($filter['abnormal']) {
-                    $_distribution_abnormal = new \app\admin\model\DistributionAbnormal();
+                    $_distribution_abnormal = new DistributionAbnormal();
                     $abnormal_where['type'] = $filter['abnormal'];
                     if (8 == $label) {
                         $abnormal_where['status'] = 1;
@@ -216,7 +228,7 @@ class Distribution extends Backend
             ->select();
         $list = collection($list)->toArray();
 
-        $_stock_house = new \app\admin\model\warehouse\StockHouse();
+        $_stock_house = new StockHouse();
         $stock_house_data = $_stock_house
             ->where(['status' => 1, 'type' => ['>', 1], 'occupy' => ['>', 0]])
             ->column('coding', 'id');
@@ -350,7 +362,7 @@ class Distribution extends Backend
         header('Content-Disposition: attachment;filename="' . $save_name . '.xlsx"');
         //禁止缓存
         header('Cache-Control: max-age=0');
-        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $writer = new Xlsx($spreadsheet);
         $writer->save('php://output');
     }
 
@@ -432,7 +444,7 @@ EOF;
             }
 
             //获取订单数据
-            $_new_order = new \app\admin\model\order\order\NewOrder();
+            $_new_order = new NewOrder();
             $order_list = $_new_order
                 ->field('id,total_qty_ordered,increment_id')
                 ->where(['id' => ['in', array_unique($order_ids)]])
@@ -441,7 +453,7 @@ EOF;
             $order_list = array_column($order_list,NULL,'id');
 
             //获取sku绑定库位数据
-            $_stock_sku = new \app\admin\model\warehouse\StockSku();
+            $_stock_sku = new StockSku();
             $store_house_list = $_stock_sku
                 ->alias('a')
                 ->field('a.sku,b.coding')
@@ -627,7 +639,7 @@ EOF;
             }
 
             //检测异常状态
-            $_distribution_abnormal = new \app\admin\model\DistributionAbnormal();
+            $_distribution_abnormal = new DistributionAbnormal();
             $abnormal_count = $_distribution_abnormal
                 ->where(['item_process_id'=>['in', $ids],'status'=>1])
                 ->count()
@@ -655,14 +667,14 @@ EOF;
             }
 
             //获取订单购买总数
-            $_new_order = new \app\admin\model\order\order\NewOrder();
+            $_new_order = new NewOrder();
             $total_list = $_new_order
                 ->where(['id' => ['in', array_unique($order_ids)]])
                 ->column('total_qty_ordered','id')
             ;
 
             //获取子订单处方数据
-            $_new_order_item_option = new \app\admin\model\order\order\NewOrderItemOption();
+            $_new_order_item_option = new NewOrderItemOption();
             $option_list = $_new_order_item_option
                 ->field('id,is_print_logo,sku,index_name')
                 ->where(['id' => ['in', array_unique($option_ids)]])
@@ -671,8 +683,8 @@ EOF;
             $option_list = array_column($option_list,NULL,'id');
 
             //库存、关系映射表
-            $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
-            $_item = new \app\admin\model\itemmanage\Item();
+            $_item_platform_sku = new ItemPlatformSku();
+            $_item = new Item();
 
             //状态类型
             $status_arr = [
@@ -690,7 +702,7 @@ EOF;
             Db::startTrans();
             try {
                 //主订单状态表
-                $_new_order_process = new \app\admin\model\order\order\NewOrderProcess();
+                $_new_order_process = new NewOrderProcess();
 
                 //更新状态
                 foreach($item_list as $value){
@@ -787,7 +799,7 @@ EOF;
             }
 
             //检测异常状态
-            $_distribution_abnormal = new \app\admin\model\DistributionAbnormal();
+            $_distribution_abnormal = new DistributionAbnormal();
             $abnormal_count = $_distribution_abnormal
                 ->where(['item_process_id'=>['in', $ids],'status'=>1])
                 ->count()
@@ -811,9 +823,9 @@ EOF;
             }
 
             //库存、关系映射、库存日志表
-            $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
-            $_item = new \app\admin\model\itemmanage\Item();
-            $_stock_log = new \app\admin\model\StockLog();
+            $_item_platform_sku = new ItemPlatformSku();
+            $_item = new Item();
+            $_stock_log = new StockLog();
 
             //状态
             $status_arr = [
@@ -912,7 +924,7 @@ EOF;
         }
 
         //检测异常状态
-        $_distribution_abnormal = new \app\admin\model\DistributionAbnormal();
+        $_distribution_abnormal = new DistributionAbnormal();
         $abnormal_info = $_distribution_abnormal
             ->field('type')
             ->where(['id'=>$item_info['abnormal_house_id'],'status'=>1])
@@ -1006,7 +1018,7 @@ EOF;
                 $remark = '处理异常：'.$abnormal_arr[$abnormal_info['type']].',当前节点：'.$status_arr[$item_info['distribution_status']].',返回节点：'.$status_arr[$status];
                 if(3 == $status){
                     //获取true_sku
-                    $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
+                    $_item_platform_sku = new ItemPlatformSku();
                     $true_sku = $_item_platform_sku->getTrueSku($item_info['sku'], $item_info['site']);
 
                     //扣减虚拟仓库存
@@ -1017,7 +1029,7 @@ EOF;
                     ;
 
                     //扣减可用库存、配货占用库存、总库存
-                    $_item = new \app\admin\model\itemmanage\Item();
+                    $_item = new Item();
                     $_item
                         ->where(['sku'=>$true_sku])
                         ->dec('available_stock', 1)
@@ -1038,7 +1050,7 @@ EOF;
                         'create_time'               => date('Y-m-d H:i:s'),
                         'remark'                    => '成检拒绝：减少总库存,减少可用库存'
                     ];
-                    $_stock_log = new \app\admin\model\StockLog();
+                    $_stock_log = new StockLog();
                     $_stock_log->allowField(true)->save($stock_data);
 
                     $remark .= ',扣减可用库存、虚拟仓库存、配货占用库存、总库存数量：1';
