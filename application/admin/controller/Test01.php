@@ -72,12 +72,21 @@ class Test01 extends Backend
         $frame_texture = [1 => '塑料', 2 => '板材', 3 => 'TR90', 4 => '金属', 5 => '钛', 6 => '尼龙', 7 => '木质', 8 => '混合材质', 9 => '合金', 10 => '其他材质'];
         $frame_shape = [1 => '长方形', 2 => '正方形', 3 => '猫眼', 4 => '圆形', 5 => '飞行款', 6 => '多边形', 7 => '蝴蝶款'];
         $shape = [1 => '全框', 2 => '半框', 3 => '无框'];
-
+        $purchase = new \app\admin\model\purchase\PurchaseOrder();
         $file_content = '';
         foreach ($list as $key => $value) {
+            //获取平均采购价
+            $res = $purchase->alias('a')->field('sum(b.purchase_num) as purchase_num,sum(b.purchase_total) as purchase_total')
+                ->where(['a.purchase_status' => ['in', [2, 5, 6, 7, 9, 10]]])
+                ->where(['b.sku' => $value['sku']])
+                ->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
+                ->where(['a.createtime' => ['>=', '2019-10-01 00:00:00']])
+                ->where(['a.createtime' => ['<=', '2020-09-30 23:59:59']])
+                ->select();
+
             $statistics = $this->voogueme
                 ->alias('a')
-                ->field("COUNT(b.item_id) AS num,sum(base_price) as price,DATE_FORMAT(b.created_at, '%Y-%m') AS time")
+                ->field("sum(b.qty_ordered) AS num,sum(base_price) as price,DATE_FORMAT(b.created_at, '%Y-%m') AS time")
                 ->where(['a.status' => ['in', ['processing', 'complete', 'creditcard_proccessing', 'free_processing']]])
                 ->where(['b.created_at' => ['>=', '2019-10-01 00:00:00']])
                 ->where(['b.created_at' => ['<=', '2020-09-30 23:59:59']])
@@ -90,13 +99,15 @@ class Test01 extends Backend
             array_multisort($ages, SORT_DESC, $statistics);
 
             $all_count = 0;
+            $all_money = 0;
             foreach ($statistics as $item) {
                 $all_count += $item['num'];
+                $all_count += $item['price'];
             }
 
             $prescription = $this->voogueme
                 ->alias('a')
-                ->field("COUNT(b.item_id) AS num")
+                ->field("sum(b.qty_ordered) AS num")
                 ->where(['a.status' => ['in', ['processing', 'complete', 'creditcard_proccessing', 'free_processing']]])
                 ->where(['b.created_at' => ['>=', '2019-10-01 00:00:00']])
                 ->where(['b.created_at' => ['<=', '2020-09-30 23:59:59']])
@@ -129,6 +140,7 @@ class Test01 extends Backend
             $arr = [
                 $value['sku'],
                 $grade[$value['sku']],
+                $res[0]['purchase_total']/$res[0]['purchase_num'],
                 $frame_texture[$value['frame_texture']],
                 $frame_shape[$value['frame_shape']],
                 $shape[$value['shape']],
@@ -139,13 +151,14 @@ class Test01 extends Backend
                 $statistics[0]['num'],
                 $statistics[0]['time'],
                 $all_count,
+                $all_money,
                 $proportion
             ];
             $file_content = $file_content . implode(',', $arr) . "\n";
             echo "{$value['sku']}:success\n";
         }
 
-        $export_str = ['SKU', '产品评级', '材质', '框型', '形状', '颜色', '进价', '平均月销量', '平均售价', '最大月销量', '最大月销量月份', '201910~202009总销量', '配镜率'];
+        $export_str = ['SKU', '产品评级', '平均采购价CNY', '材质', '框型', '形状', '颜色', '进价', '平均月销量', '平均售价', '最大月销量', '最大月销量月份', '201910~202009总销量', '19年10月~20年9月总销售额', '配镜率'];
         $file_title = implode(',', $export_str) . " \n";
         $file = $file_title . $file_content;
         file_put_contents('/www/wwwroot/mojing/runtime/log/analysis.csv', $file);
