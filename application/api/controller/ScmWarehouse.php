@@ -296,6 +296,7 @@ class ScmWarehouse extends Scm
                 ->where(['out_stock_id'=>$out_stock_id])
                 ->field('sku,code')
                 ->select();
+            $bar_code_list = collection($bar_code_list)->toArray();
 
             foreach($item_data as $key=>$value){
                 $sku = $value['sku'];
