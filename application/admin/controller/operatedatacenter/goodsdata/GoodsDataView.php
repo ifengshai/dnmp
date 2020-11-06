@@ -834,13 +834,14 @@ class GoodsDataView extends Backend
                 ->group('goods_grade')
                 ->field('site,sum(order_num) as total_order_num,goods_type,goods_grade,count(goods_type) as goods_num,sum(glass_num) as total_sales_num')
                 ->select();
+            dump($data_center_day);
             $skus = Db::name('datacenter_sku_day')
                 ->where(['site' => $params['order_platform']])
                 ->where($map)
                 ->order('day_date', 'asc')
                 ->field('sku,day_date,day_stock,day_onway_stock,goods_grade')
                 ->select();
-
+            dump($skus);
 
             $data_center_day = array_column($data_center_day, null, 'goods_grade');
             $skus = array_column($skus, null, 'sku');
