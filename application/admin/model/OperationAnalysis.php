@@ -319,14 +319,6 @@ class OperationAnalysis extends Model
             $arr['thisyear_order_success']                      += $v['thisyear_order_success'];
             $arr['lastyear_order_success']                      += $v['lastyear_order_success'];
             $arr['total_order_success']                         += $v['total_order_success'];
-            $arr['yesterday_unit_price']                        += $v['yesterday_unit_price'];
-            $arr['pastsevenday_unit_price']                     += $v['pastsevenday_unit_price'];
-            $arr['pastthirtyday_unit_price']                    += $v['pastthirtyday_unit_price'];
-            $arr['thismonth_unit_price']                        += $v['thismonth_unit_price'];
-            $arr['lastmonth_unit_price']                        += $v['lastmonth_unit_price'];
-            $arr['thisyear_unit_price']                         += $v['thisyear_unit_price'];
-            $arr['lastyear_unit_price']                         += $v['lastyear_unit_price'];
-            $arr['total_unit_price']                            += $v['total_unit_price'];
             $arr['yesterday_shoppingcart_total']                += $v['yesterday_shoppingcart_total'];
             $arr['pastsevenday_shoppingcart_total']             += $v['pastsevenday_shoppingcart_total'];
             $arr['pastthirtyday_shoppingcart_total']            += $v['pastthirtyday_shoppingcart_total'];
@@ -335,14 +327,6 @@ class OperationAnalysis extends Model
             $arr['thisyear_shoppingcart_total']                 += $v['thisyear_shoppingcart_total'];
             $arr['lastyear_shoppingcart_total']                 += $v['lastyear_shoppingcart_total'];
             $arr['total_shoppingcart_total']                    += $v['total_shoppingcart_total'];
-            $arr['yesterday_shoppingcart_conversion']           += $v['yesterday_shoppingcart_conversion'];
-            $arr['pastsevenday_shoppingcart_conversion']        += $v['pastsevenday_shoppingcart_conversion'];
-            $arr['pastthirtyday_shoppingcart_conversion']       += $v['pastthirtyday_shoppingcart_conversion'];
-            $arr['thismonth_shoppingcart_conversion']           += $v['thismonth_shoppingcart_conversion'];
-            $arr['lastmonth_shoppingcart_conversion']           += $v['lastmonth_shoppingcart_conversion'];  
-            $arr['thisyear_shoppingcart_conversion']            += $v['thisyear_shoppingcart_conversion'];
-            $arr['lastyear_shoppingcart_conversion']            += $v['lastyear_shoppingcart_conversion']; 
-            $arr['total_shoppingcart_conversion']               += $v['total_shoppingcart_conversion']; 
             $arr['yesterday_shoppingcart_new']                  += $v['yesterday_shoppingcart_new'];
             $arr['pastsevenday_shoppingcart_new']               += $v['pastsevenday_shoppingcart_new'];
             $arr['pastthirtyday_shoppingcart_new']              += $v['pastthirtyday_shoppingcart_new'];
@@ -350,15 +334,7 @@ class OperationAnalysis extends Model
             $arr['lastmonth_shoppingcart_new']                  += $v['lastmonth_shoppingcart_new'];  
             $arr['thisyear_shoppingcart_new']                   += $v['thisyear_shoppingcart_new'];
             $arr['lastyear_shoppingcart_new']                   += $v['lastyear_shoppingcart_new'];  
-            $arr['total_shoppingcart_new']                      += $v['total_shoppingcart_new']; 
-            $arr['yesterday_shoppingcart_newconversion']        += $v['yesterday_shoppingcart_newconversion'];
-            $arr['pastsevenday_shoppingcart_newconversion']     += $v['pastsevenday_shoppingcart_newconversion'];
-            $arr['pastthirtyday_shoppingcart_newconversion']    += $v['pastthirtyday_shoppingcart_newconversion'];
-            $arr['thismonth_shoppingcart_newconversion']        += $v['thismonth_shoppingcart_newconversion'];
-            $arr['lastmonth_shoppingcart_newconversion']        += $v['lastmonth_shoppingcart_newconversion'];  
-            $arr['thisyear_shoppingcart_newconversion']         += $v['thisyear_shoppingcart_newconversion'];
-            $arr['lastyear_shoppingcart_newconversion']         += $v['lastyear_shoppingcart_newconversion']; 
-            $arr['total_shoppingcart_newconversion']            += $v['total_shoppingcart_newconversion']; 
+            $arr['total_shoppingcart_new']                      += $v['total_shoppingcart_new'];
             $arr['yesterday_register_customer']                 += $v['yesterday_register_customer'];
             $arr['pastsevenday_register_customer']              += $v['pastsevenday_register_customer'];
             $arr['pastthirtyday_register_customer']             += $v['pastthirtyday_register_customer'];
@@ -459,16 +435,7 @@ class OperationAnalysis extends Model
             $arr['total_unit_price']                       = round($arr['total_sales_money']/$arr['total_order_success'],2);
         }else{
             $arr['total_unit_price']                       = 0;
-        }                                                
-        // $arr['yesterday_shoppingcart_conversion']           = round($arr['yesterday_shoppingcart_conversion']/3,2);
-        // $arr['pastsevenday_shoppingcart_conversion']        = round($arr['pastsevenday_shoppingcart_conversion']/3,2);
-        // $arr['pastthirtyday_shoppingcart_conversion']       = round($arr['pastthirtyday_shoppingcart_conversion']/3,2);
-        // $arr['thismonth_shoppingcart_conversion']           = round($arr['thismonth_shoppingcart_conversion']/3,2);
-        // $arr['lastmonth_shoppingcart_conversion']           = round($arr['lastmonth_shoppingcart_conversion']/3,2);  
-        // $arr['thisyear_shoppingcart_conversion']            = round($arr['thisyear_shoppingcart_conversion']/3,2);
-        // $arr['lastyear_shoppingcart_conversion']            = round($arr['lastyear_shoppingcart_conversion']/3,2); 
-        // $arr['total_shoppingcart_conversion']               = round($arr['total_shoppingcart_conversion']/3,2);
-        // $yesterday_order_success_data / $yesterday_shoppingcart_total_data
+        }
         if($arr['yesterday_shoppingcart_total']>0){
             $arr['yesterday_shoppingcart_conversion']      = round($arr['yesterday_order_success']/$arr['yesterday_shoppingcart_total']*100,2);
         }else{
@@ -549,15 +516,7 @@ class OperationAnalysis extends Model
             $arr['total_shoppingcart_newconversion']   = round($arr['total_order_success']/$arr['total_shoppingcart_new']*100,2);
         }else{
             $arr['total_shoppingcart_newconversion']   = 0; 
-        }                                          
-        // $arr['yesterday_shoppingcart_newconversion']        = round($arr['yesterday_shoppingcart_newconversion']/3,2);
-        // $arr['pastsevenday_shoppingcart_newconversion']     = round($arr['pastsevenday_shoppingcart_newconversion']/3,2);
-        // $arr['pastthirtyday_shoppingcart_newconversion']    = round($arr['pastthirtyday_shoppingcart_newconversion']/3,2);
-        // $arr['thismonth_shoppingcart_newconversion']        = round($arr['thismonth_shoppingcart_newconversion']/3,2);
-        // $arr['lastmonth_shoppingcart_newconversion']        = round($arr['lastmonth_shoppingcart_newconversion']/3,2);  
-        // $arr['thisyear_shoppingcart_newconversion']         = round($arr['thisyear_shoppingcart_newconversion']/3,2);
-        // $arr['lastyear_shoppingcart_newconversion']         = round($arr['lastyear_shoppingcart_newconversion']/3,2); 
-        // $arr['total_shoppingcart_newconversion']            = round($arr['total_shoppingcart_newconversion']/3,2);
+        }
         $arr['yesterday_sales_money']                       = round($arr['yesterday_sales_money'],2);
         $arr['pastsevenday_sales_money']                    = round($arr['pastsevenday_sales_money'],2);
         $arr['pastthirtyday_sales_money']                   = round($arr['pastthirtyday_sales_money'],2);

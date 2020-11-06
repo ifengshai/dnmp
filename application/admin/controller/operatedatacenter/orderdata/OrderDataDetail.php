@@ -58,6 +58,7 @@ class OrderDataDetail extends Backend
             $web_model->table('sales_flat_order_payment')->query("set time_zone='+8:00'");
             $web_model->table('sales_flat_order_address')->query("set time_zone='+8:00'");
             $web_model->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
+            $map['o.order_type'] = 1;
             if($filter['time_str']){
                 $createat = explode(' ', $filter['time_str']);
                 $map['o.created_at'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];

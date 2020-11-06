@@ -350,7 +350,7 @@ class SingleItems extends Backend
             $json['columnData'] = [
                 'type' => 'bar',
                 'data' => array_values($recent_30_day),
-                'name' => '最近30天销量'
+                'name' => '销量'
             ];
 
             return json(['code' => 1, 'data' => $json]);
