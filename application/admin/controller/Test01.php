@@ -630,7 +630,7 @@ class Test01 extends Backend
         foreach ($z_sku_list as $k => $v) {
             // dump($v);
             //获取这个sku所有的订单情况
-            $sku_order_data = Db::connect('database.db_voogueme')->table('sales_flat_order')
+            $sku_order_data = Db::connect('database.db_nihao')->table('sales_flat_order')
                 ->where('c.sku', 'like', $v['platform_sku'] . '%')
                 ->where('a.status', 'in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete'])
                 ->where('a.order_type', '=', 1)
@@ -642,11 +642,12 @@ class Test01 extends Backend
                 ->find();
 
             if (!empty($sku_order_data)) {
-                Db::name('datacenter_sku_day')
+                $res = Db::name('datacenter_sku_day')
                     ->where(['day_date' => $data, 'site' => 3, 'sku' => $v['sku']])
                     ->update(['goods_type' => $sku_order_data['goods_type']]);
             }
         }
+        dump($res);
         die;
         //
         // $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
