@@ -29,9 +29,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                 search:false,
                 columns: [
                     [
-                        {checkbox: true},
+                        // {checkbox: true},
                         {field: 'id', title: __('Id'),operate: false},
-                        {field: 'sku', title: __('sku'),operate: false},
+                        {field: 'sku', title: __('sku'),search: true},
                         {field: 'sku_change', title: __('SKU转换'),operate: false},
                         {field: 'cart_num', title: __('购物车数量'),operate: false},
                         {field: 'order_num', title: __('订单成功数'),operate: false},
