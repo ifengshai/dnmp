@@ -5,11 +5,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
             Controller.api.bindevent();
             // 初始化表格参数配置
             Table.api.init({
-                commonSearch: false,
-                search: false,
+                commonSearch: true,
+                search: true,
                 showExport: false,
-                showColumns: false,
-                showToggle: false,
+                showColumns: true,
+                showToggle: true,
                 extend: {
                     index_url: 'operatedatacenter/goodsdata/goods_change/index' + location.search,
                     add_url: 'operatedatacenter/goodsdata/goods_change/add',
@@ -56,6 +56,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
             Table.api.bindevent(table);
             $("#sku_submit").click(function () {
                 order_data_view();
+                $("#top_sku").val('');
                 var params = table.bootstrapTable('getOptions')
                 params.queryParams = function (params) {
 
@@ -73,6 +74,35 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                 }
 
                 table.bootstrapTable('refresh', params);
+            });
+            $('.btn-success').click(function () {
+                var sku =  $("#sku").val();
+                // alert(sku)
+                $("#top_sku").val(sku);
+            });
+            // $("#search_sku_submit").click(function () {
+            //     var order_platform = $('#order_platform').val();
+            //     var time_str = $('#time_str').val();
+            //     var sku = $('#search_sku').val();
+            //     // alert(order_platform);
+            //     // alert(time_str);
+            //     // alert(sku);
+            //     Backend.api.ajax({
+            //         url: 'operatedatacenter/goodsdata/goods_change/index',
+            //         data: {order_platform: order_platform, time_str: time_str,sku:sku}
+            //     },  function (data, ret) {
+            //         alert(111)
+            //         console.log(ret)
+            //         console.log(data)
+            //         $("#table").bootstrapTable('refreshOptions',{});
+            //         // table.bootstrapTable('refresh');
+            //         return false;
+            //     });
+            // });
+            $("#sku_reset").click(function () {
+                $("#order_platform").val(1);
+                $("#time_str").val('');
+                $("#sku").val('');
             });
 
         },
