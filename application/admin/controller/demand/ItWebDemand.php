@@ -826,6 +826,7 @@ class ItWebDemand extends Backend
                         empty($params['priority']) && $this->error('请选择优先级');
                         empty($params['node_time']) && $this->error('任务周期不能为空');
 
+
                         $add['priority'] = $params['priority'];
                         $add['node_time'] = $params['node_time'];
                         $time_data = $this->start_time($params['priority'], $params['node_time']);
@@ -851,7 +852,10 @@ class ItWebDemand extends Backend
                     $add['importance'] = $params['importance'];
                     $add['degree_of_urgency'] = $params['degree_of_urgency'];
                     $add['development_difficulty'] = $params['development_difficulty'];
-                    $add['important_reasons'] = implode(',', $params['important_reasons']);
+                    if (!empty($params['important_reasons'])){
+                        $add['important_reasons'] = implode(',', $params['important_reasons']);
+                    }
+
 
                 }
 
