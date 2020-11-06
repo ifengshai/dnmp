@@ -137,10 +137,11 @@ class Test01 extends Backend
             $spreadsheet->getActiveSheet()->setCellValue("L{$num}", $all_count);
             $spreadsheet->getActiveSheet()->setCellValue("M{$num}", $proportion);*/
 
+            $ava_purchase_price = $res[0]['purchase_num'] > 0 && $res[0]['purchase_total'] > 0 ? $res[0]['purchase_total'] / $res[0]['purchase_num'] : 0;
             $arr = [
                 $value['sku'],
                 $grade[$value['sku']],
-                $res[0]['purchase_total']/$res[0]['purchase_num'],
+                $ava_purchase_price,
                 $frame_texture[$value['frame_texture']],
                 $frame_shape[$value['frame_shape']],
                 $shape[$value['shape']],
