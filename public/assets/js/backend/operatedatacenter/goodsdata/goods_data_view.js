@@ -24,6 +24,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
             //     $('.nihao-div').show();
             // }
             order_data_view();
+            $('#c-order_platform').hide();
             $("#sku_submit").click(function(){
                 var order_platform =$('#order_platform').val();
                 if (order_platform == 1) {
@@ -36,10 +37,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                     $('.zeelool-div').hide();
                     $('.voogueme-div').show();
                     $('.nihao-div').hide();
+                    $('#c-order_platform').show();
                 } else if (order_platform == 3) {
                     $('.zeelool-div').hide();
                     $('.voogueme-div').hide();
                     $('.nihao-div').show();
+                    $('#c-order_platform').show();
                 }
                 order_data_view();
                 Controller.api.formatter.line_chart();

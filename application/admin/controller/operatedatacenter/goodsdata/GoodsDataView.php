@@ -24,7 +24,8 @@ class GoodsDataView extends Backend
      */
     public function index()
     {
-        $label = input('label', 1);
+        // $label = input('label', 1);
+        $label = input('order_platform', 1);
         switch ($label) {
             case 1:
                 $goods_type = [1 => '光学镜', 2 => '太阳镜', 3 => '运动镜', 4 => '老花镜', 5 => '儿童镜', 6 => '配饰'];
