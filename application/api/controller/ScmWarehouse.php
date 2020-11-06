@@ -305,9 +305,13 @@ class ScmWarehouse extends Scm
                         return $v;
                     }
                 });
-                array_walk($sku_agg, function (&$value, $k, $p) {
-                    $value = array_merge($value, $p);
-                },['is_new' => 0]);
+
+                if(!empty($sku_agg)){
+                    array_walk($sku_agg, function (&$value, $k, $p) {
+                        $value = array_merge($value, $p);
+                    },['is_new' => 0]);
+                }
+
                 $item_data[$key]['sku_agg'] = $sku_agg;
                 $item_data[$key]['stock'] = $stock_list[$sku];
             }
