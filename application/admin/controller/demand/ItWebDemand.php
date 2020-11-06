@@ -784,9 +784,8 @@ class ItWebDemand extends Backend
     {
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
-            dump($params);die();
+            empty($params['priority']) && $this->error('数据异常');
             if ($params) {
-
                 if ($params['pm_audit_status'] == 4) {//拒绝
                     $add['pm_audit_status'] = $params['pm_audit_status'];
                     $add['pm_audit_status_time'] = date('Y-m-d H:i', time());
