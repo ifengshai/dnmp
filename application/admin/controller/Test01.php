@@ -102,7 +102,7 @@ class Test01 extends Backend
             $all_money = 0;
             foreach ($statistics as $item) {
                 $all_count += $item['num'];
-                $all_count += $item['price'];
+                $all_money += $item['price'];
             }
 
             $prescription = $this->voogueme
