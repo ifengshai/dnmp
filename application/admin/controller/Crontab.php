@@ -3518,137 +3518,89 @@ class Crontab extends Backend
         if (false === $model) {
             return false;
         }
-        $order_status = $this->order_status;
-        //昨天订单支付成功数sql
-        $yesterday_order_success_sql   = "SELECT count(*) counter FROM sales_flat_order WHERE DATEDIFF(created_at,NOW())=-1 $order_status";
-        //过去7天订单支付成功数sql
-        $pastsevenday_order_success_sql    = "SELECT count(*) counter FROM sales_flat_order WHERE DATE_SUB(CURDATE(),INTERVAL 7 DAY) <= date(created_at) and created_at< curdate() $order_status";
-        //过去30天订单支付成功数sql
-        $pastthirtyday_order_success_sql   = "SELECT count(*) counter FROM sales_flat_order WHERE DATE_SUB(CURDATE(),INTERVAL 30 DAY) <= date(created_at) and created_at< curdate() $order_status";
-        //当月订单支付成功数sql
-        $thismonth_order_success_sql       = "SELECT count(*) counter FROM sales_flat_order WHERE DATE_FORMAT(created_at,'%Y%m') = DATE_FORMAT(CURDATE(),'%Y%m') $order_status";
-        //上月订单支付成功数sql
-        $lastmonth_order_success_sql       = "SELECT count(*) counter FROM sales_flat_order WHERE PERIOD_DIFF(date_format(now(),'%Y%m'),date_format(created_at,'%Y%m')) =1 $order_status";
-        //今年订单支付成功数sql
-        $thisyear_order_success_sql        = "SELECT count(*) counter FROM sales_flat_order WHERE YEAR(created_at)=YEAR(NOW()) $order_status";
-        //上一年订单支付成功数sql
-        $lastyear_order_success_sql        = "SELECT count(*) counter FROM sales_flat_order WHERE year(created_at)=year(date_sub(now(),interval 1 year)) $order_status";
-        //总共订单支付成功数sql
-        $total_order_success_sql           = "SELECT count(*) counter FROM sales_flat_order WHERE 1 $order_status";
-        //昨天购物车总数sql
-        $yesterday_shoppingcart_total_sql     = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND DATEDIFF(created_at,NOW())=-1";
-        //过去7天购物车总数sql
-        $pastsevenday_shoppingcart_total_sql  = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND DATE_SUB(CURDATE(),INTERVAL 7 DAY) <= date(created_at) and created_at< curdate()";
-        //过去30天购物车总数sql
-        $pastthirtyday_shoppingcart_total_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND DATE_SUB(CURDATE(),INTERVAL 30 DAY) <= date(created_at) and created_at< curdate()";
-        //当月购物车总数sql
-        $thismonth_shoppingcart_total_sql     = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND DATE_FORMAT(created_at,'%Y%m') = DATE_FORMAT(CURDATE(),'%Y%m')";
-        //上月购物车总数sql
-        $lastmonth_shoppingcart_total_sql     = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND PERIOD_DIFF(date_format(now(),'%Y%m'),date_format(created_at,'%Y%m')) =1";
-        //今年购物车总数sql
-        $thisyear_shoppingcart_total_sql      = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND YEAR(created_at)=YEAR(NOW())";
-        //上年购物车总数sql
-        $lastyear_shoppingcart_total_sql      = "SELECT count(*) counter FROM sales_flat_quote WHERE year(created_at)=year(date_sub(now(),interval 1 year))";
-        //总共购物车总数sql
-        $total_shoppingcart_total_sql         = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0";
-        //昨天新增购物车总数sql
-        $yesterday_shoppingcart_new_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND DATEDIFF(updated_at,NOW())=-1";
-        //过去7天新增购物车总数sql
-        $pastsevenday_shoppingcart_new_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND DATE_SUB(CURDATE(),INTERVAL 7 DAY) <= date(updated_at) and created_at< curdate()";
-        //过去30天新增购物车总数sql
-        $pastthirtyday_shoppingcart_new_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND DATE_SUB(CURDATE(),INTERVAL 30 DAY) <= date(updated_at) and created_at< curdate()";
-        //当月新增购物车总数sql
-        $thismonth_shoppingcart_new_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND  DATE_FORMAT(updated_at,'%Y%m') = DATE_FORMAT(CURDATE(),'%Y%m')";
-        //上月新增购物车总数sql
-        $lastmonth_shoppingcart_new_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND PERIOD_DIFF(date_format(now(),'%Y%m'),date_format(updated_at,'%Y%m')) =1";
-        //今年新增购物车总数sql
-        $thisyear_shoppingcart_new_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND YEAR(updated_at)=YEAR(NOW())";
-        //上年新增购物车总数sql
-        $lastyear_shoppingcart_new_sql = "SELECT count(*) counter FROM sales_flat_quote WHERE base_grand_total>0 AND year(updated_at)=year(date_sub(now(),interval 1 year))";
-        //总共新增购物车总数sql
-        $total_shoppingcart_new_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0";
+        $today = date('Y-m-d 23:59:59');
         $model->table('sales_flat_order')->query("set time_zone='+8:00'");
         $model->table('sales_flat_quote')->query("set time_zone='+8:00'");
         //昨天支付成功数
-        $yesterday_order_success_rs                 = $model->query($yesterday_order_success_sql);
+        $order_where['order_type'] = 1;
+        $order_success_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        $yes_date = date("Y-m-d",strtotime("-1 day"));
+        $yestime_where = [];
+        $yestime_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $yes_date . "'")];
+        $yestime_where1[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '" . $yes_date . "'")];
+        $yesterday_order_success_data = $model->table('sales_flat_order')->where($yestime_where)->where($order_where)->where($order_success_where)->count();
         //过去7天支付成功数
-        $pastsevenday_order_success_rs              = $model->query($pastsevenday_order_success_sql);
+        $seven_start = date("Y-m-d", strtotime("-7 day"));
+        $seven_end = date("Y-m-d 23:59:59",strtotime("-1 day"));
+        $sev_where['created_at'] = ['between', [$seven_start, $seven_end]];
+        $sev_where1['updated_at'] = ['between', [$seven_start, $seven_end]];
+        $pastsevenday_order_success_data = $model->table('sales_flat_order')->where($sev_where)->where($order_where)->where($order_success_where)->count();
         //过去30天支付成功数
-        $pastthirtyday_order_success_rs             = $model->query($pastthirtyday_order_success_sql);
+        $thirty_start = date("Y-m-d", strtotime("-30 day"));
+        $thirty_end = date("Y-m-d 23:59:59",strtotime("-1 day"));
+        $thirty_where['created_at'] = ['between', [$thirty_start, $thirty_end]];
+        $thirty_where1['updated_at'] = ['between', [$thirty_start, $thirty_end]];
+        $pastthirtyday_order_success_data = $model->table('sales_flat_order')->where($thirty_where)->where($order_where)->where($order_success_where)->count();
         //当月支付成功数
-        $thismonth_order_success_rs                 = $model->query($thismonth_order_success_sql);
+        $thismonth_start = date('Y-m-01', strtotime($today));
+        $thismonth_end =  $today;
+        $thismonth_where['created_at'] = ['between', [$thismonth_start, $thismonth_end]];
+        $thismonth_where1['updated_at'] = ['between', [$thismonth_start, $thismonth_end]];
+        $thismonth_order_success_data = $model->table('sales_flat_order')->where($thismonth_where)->where($order_where)->where($order_success_where)->count();
         //上月支付成功数
-        $lastmonth_order_success_rs                 = $model->query($lastmonth_order_success_sql);
+        $lastmonth_start = date('Y-m-01', strtotime("$today -1 month"));
+        $lastmonth_end = date('Y-m-t 23:59:59', strtotime("$today -1 month"));
+        $lastmonth_where['created_at'] = ['between', [$lastmonth_start, $lastmonth_end]];
+        $lastmonth_where1['updated_at'] = ['between', [$lastmonth_start, $lastmonth_end]];
+        $lastmonth_order_success_data = $model->table('sales_flat_order')->where($lastmonth_where)->where($order_where)->where($order_success_where)->count();
         //今年支付成功数
-        $thisyear_order_success_rs                  = $model->query($thisyear_order_success_sql);
+        $thisyear_start = date("Y",time())."-1"."-1"; //本年开始
+        $thisyear_end = date("Y-m-d 23:59:59",strtotime("-1 day"));
+        $thisyear_where['created_at'] = ['between', [$thisyear_start, $thisyear_end]];
+        $thisyear_where1['updated_at'] = ['between', [$thisyear_start, $thisyear_end]];
+        $thisyear_order_success_data = $model->table('sales_flat_order')->where($thisyear_where)->where($order_where)->where($order_success_where)->count();
         //上年支付成功数
-        $lastyear_order_success_rs                  = $model->query($lastyear_order_success_sql);
+        $lastyear_start = date('Y-01-01 00:00:00', strtotime('last year'));
+        $lastyear_end = date('Y-12-31 23:59:59', strtotime('last year'));
+        $lastyear_where['created_at'] = ['between', [$lastyear_start, $lastyear_end]];
+        $lastyear_where1['updated_at'] = ['between', [$lastyear_start, $lastyear_end]];
+        $lastyear_order_success_data = $model->table('sales_flat_order')->where($lastyear_where)->where($order_where)->where($order_success_where)->count();
         //总共支付成功数
-        $total_order_success_rs                     = $model->query($total_order_success_sql);
+        $total_order_success_data = $model->table('sales_flat_order')->where($order_where)->where($order_success_where)->count();
         //昨天购物车总数
-        $yesterday_shoppingcart_total_rs            = $model->query($yesterday_shoppingcart_total_sql);
+        $quote_where['base_grand_total'] = ['>',0];
+        $yesterday_shoppingcart_total_data = $model->table('sales_flat_quote')->where($yestime_where)->where($quote_where)->count();
         //过去7天购物车总数
-        $pastsevenday_shoppingcart_total_rs         = $model->query($pastsevenday_shoppingcart_total_sql);
+        $pastsevenday_shoppingcart_total_data = $model->table('sales_flat_quote')->where($sev_where)->where($quote_where)->count();
         //过去30天购物车总数
-        $pastthirtyday_shoppingcart_total_rs        = $model->query($pastthirtyday_shoppingcart_total_sql);
+        $pastthirtyday_shoppingcart_total_data = $model->table('sales_flat_quote')->where($thirty_where)->where($quote_where)->count();
         //当月购物车总数
-        $thismonth_shoppingcart_total_rs            = $model->query($thismonth_shoppingcart_total_sql);
+        $thismonth_shoppingcart_total_data = $model->table('sales_flat_quote')->where($thismonth_where)->where($quote_where)->count();
         //上月购物车总数
-        $lastmonth_shoppingcart_total_rs            = $model->query($lastmonth_shoppingcart_total_sql);
+        $lastmonth_shoppingcart_total_data = $model->table('sales_flat_quote')->where($lastmonth_where)->where($quote_where)->count();
         //今年购物车总数
-        $thisyear_shoppingcart_total_rs             = $model->query($thisyear_shoppingcart_total_sql);
+        $thisyear_shoppingcart_total_data = $model->table('sales_flat_quote')->where($thisyear_where)->where($quote_where)->count();
         //上年购物车总数
-        $lastyear_shoppingcart_total_rs             = $model->query($lastyear_shoppingcart_total_sql);
+        $lastyear_shoppingcart_total_data = $model->table('sales_flat_quote')->where($lastyear_where)->where($quote_where)->count();
         //总共购物车总数
-        $total_shoppingcart_total_rs                = $model->query($total_shoppingcart_total_sql);
+        $total_shoppingcart_total_data = $model->table('sales_flat_quote')->where($quote_where)->count();
         //昨天新增购物车总数
-        $yesterday_shoppingcart_new_rs              = $model->query($yesterday_shoppingcart_new_sql);
+        $yesterday_shoppingcart_new_data = $model->table('sales_flat_quote')->where($yestime_where1)->where($quote_where)->count();
         //过去7天新增购物车总数
-        $pastsevenday_shoppingcart_new_rs           = $model->query($pastsevenday_shoppingcart_new_sql);
+        $pastsevenday_shoppingcart_new_data = $model->table('sales_flat_quote')->where($sev_where1)->where($quote_where)->count();
         //过去30天新增购物车总数
-        $pastthirtyday_shoppingcart_new_rs          = $model->query($pastthirtyday_shoppingcart_new_sql);
+        $pastthirtyday_shoppingcart_new_data = $model->table('sales_flat_quote')->where($thirty_where1)->where($quote_where)->count();
         //当月新增购物车总数
-        $thismonth_shoppingcart_new_rs              = $model->query($thismonth_shoppingcart_new_sql);
+        $thismonth_shoppingcart_new_data = $model->table('sales_flat_quote')->where($thismonth_where1)->where($quote_where)->count();
         //上月新增购物车总数
-        $lastmonth_shoppingcart_new_rs              = $model->query($lastmonth_shoppingcart_new_sql);
+        $lastmonth_shoppingcart_new_data = $model->table('sales_flat_quote')->where($lastmonth_where1)->where($quote_where)->count();
         //今年新增购物车总数
-        $thisyear_shoppingcart_new_rs               = $model->query($thisyear_shoppingcart_new_sql);
+        $thisyear_shoppingcart_new_data = $model->table('sales_flat_quote')->where($thisyear_where1)->where($quote_where)->count();
         //上年新增购物车总数
-        $lastyear_shoppingcart_new_rs               = $model->query($lastyear_shoppingcart_new_sql);
+        $lastyear_shoppingcart_new_data = $model->table('sales_flat_quote')->where($lastyear_where1)->where($quote_where)->count();
         //总共新增购物车总数
-        $total_shoppingcart_new_rs                  = $model->query($total_shoppingcart_new_sql);
-        //昨日支付成功数data
-        $yesterday_order_success_data               = $yesterday_order_success_rs[0]['counter'];
-        //过去7天支付成功数data
-        $pastsevenday_order_success_data            = $pastsevenday_order_success_rs[0]['counter'];
-        //过去30天支付成功数data
-        $pastthirtyday_order_success_data           = $pastthirtyday_order_success_rs[0]['counter'];
-        //当月支付成功数data
-        $thismonth_order_success_data               = $thismonth_order_success_rs[0]['counter'];
-        //上月支付成功数data
-        $lastmonth_order_success_data               = $lastmonth_order_success_rs[0]['counter'];
-        //今年支付成功数data
-        $thisyear_order_success_data                = $thisyear_order_success_rs[0]['counter'];
-        //去年支付成功数data
-        $lastyear_order_success_data                = $lastyear_order_success_rs[0]['counter'];
-        //总共支付成功数data
-        $total_order_success_data                   = $total_order_success_rs[0]['counter'];
-        //昨天购物车总数data
-        $yesterday_shoppingcart_total_data          = $yesterday_shoppingcart_total_rs[0]['counter'];
-        //过去7天购物车总数data
-        $pastsevenday_shoppingcart_total_data       = $pastsevenday_shoppingcart_total_rs[0]['counter'];
-        //过去30天购物车总数data
-        $pastthirtyday_shoppingcart_total_data      = $pastthirtyday_shoppingcart_total_rs[0]['counter'];
-        //当月购物车总数data
-        $thismonth_shoppingcart_total_data          = $thismonth_shoppingcart_total_rs[0]['counter'];
-        //上月购物车总数data
-        $lastmonth_shoppingcart_total_data          = $lastmonth_shoppingcart_total_rs[0]['counter'];
-        //今年购物车总数data
-        $thisyear_shoppingcart_total_data           = $thisyear_shoppingcart_total_rs[0]['counter'];
-        //上一年购物车总数data
-        $lastyear_shoppingcart_total_data           = $lastyear_shoppingcart_total_rs[0]['counter'];
-        //总共购物车总数data
-        $total_shoppingcart_total_data              = $total_shoppingcart_total_rs[0]['counter'];
+        $total_shoppingcart_new_data  = $total_shoppingcart_total_data;
+
         //昨天购物车转化率data
         $yesterday_shoppingcart_conversion_data     = @round(($yesterday_order_success_data / $yesterday_shoppingcart_total_data), 4) * 100;
         //过去7天购物车转化率data
@@ -3665,22 +3617,7 @@ class Crontab extends Backend
         $lastyear_shoppingcart_conversion_data      = @round(($lastyear_order_success_data / $lastyear_shoppingcart_total_data), 4) * 100;
         //总共购物车转化率
         $total_shoppingcart_conversion_data         = @round(($total_order_success_data / $total_shoppingcart_total_data), 4) * 100;
-        //昨天新增购物车数
-        $yesterday_shoppingcart_new_data            = $yesterday_shoppingcart_new_rs[0]['counter'];
-        //过去7天新增购物车数
-        $pastsevenday_shoppingcart_new_data         = $pastsevenday_shoppingcart_new_rs[0]['counter'];
-        //过去30天新增购物车数
-        $pastthirtyday_shoppingcart_new_data        = $pastthirtyday_shoppingcart_new_rs[0]['counter'];
-        //当月新增购物车数
-        $thismonth_shoppingcart_new_data            = $thismonth_shoppingcart_new_rs[0]['counter'];
-        //上月新增购物车数
-        $lastmonth_shoppingcart_new_data            = $lastmonth_shoppingcart_new_rs[0]['counter'];
-        //今年新增购物车数
-        $thisyear_shoppingcart_new_data             = $thisyear_shoppingcart_new_rs[0]['counter'];
-        //上年新增购物车数
-        $lastyear_shoppingcart_new_data             = $lastyear_shoppingcart_new_rs[0]['counter'];
-        //总共新增购物车数
-        $total_shoppingcart_new_data                = $total_shoppingcart_new_rs[0]['counter'];
+
         //昨天新增购物车转化率
         $yesterday_shoppingcart_newconversion_data  = @round(($yesterday_order_success_data / $yesterday_shoppingcart_new_data), 4) * 100;
         //过去7天新增购物车转化率
