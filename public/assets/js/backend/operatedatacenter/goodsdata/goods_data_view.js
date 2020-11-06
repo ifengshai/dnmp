@@ -63,7 +63,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                 var goods_type = $('#c-order_platform').val();
                 var order_platform =$('#order_platform').val();
                 Backend.api.ajax({
-                    url: 'operatedatacenter/goodsdata/goods_data_view/ajax_data_goods_type',
+                    url: 'operatedatacenter/goodsdata/goods_data_view/ajax_dowm_data',
                     data: { order_platform: order_platform, time_str: time_str,goods_type:goods_type}
                 }, function (data, ret) {
 

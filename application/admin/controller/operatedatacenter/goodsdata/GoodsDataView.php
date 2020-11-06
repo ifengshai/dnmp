@@ -823,7 +823,9 @@ class GoodsDataView extends Backend
             $map['day_date'] = ['between', [$createat[0], $createat[3]]];
             $map1 = $map;
             if ($params['goods_type']) {
-                $map['goods_type'] = ['=', $params['goods_type']];
+                if ($params['goods_type'] !=4){
+                    $map['goods_type'] = ['=', $params['goods_type']];
+                }
             }
             //根据产品等级分组
             $data_center_day = Db::name('datacenter_sku_day')
@@ -972,37 +974,18 @@ class GoodsDataView extends Backend
                 ->where(['site' => $params['order_platform']])
                 ->where($map)
                 ->distinct(true)->field('platform_sku,goods_grade')
-                // ->group('goods_grade')
-                // ->field('site,sum(order_num) as total_order_num,goods_type,goods_grade,count(goods_type) as goods_num,sum(glass_num) as total_sales_num')
                 ->select();
 
-            $skus = Db::name('datacenter_sku_day')
-                ->where(['site' => $params['order_platform']])
-                ->where($map)
-                ->order('day_date', 'asc')
-                ->field('sku,day_date,day_stock,day_onway_stock,goods_grade')
-                ->select();
-            // dump($data_center_day);
             $newArray=array();
             foreach($data_center_day as $v){
                 $newArray[$v['goods_grade']][]=$v['platform_sku'];
             }
-            dump($newArray);
-            $data_center_day = array_column($data_center_day, 'sku','goods_grade');
-            dump($data_center_day);die;
-            $skus = array_column($skus, null, 'sku');
-            $arr = [];
-            //统计筛选时间最近一天的在途和虚拟仓库存
-            foreach ($skus as $k => $v) {
-                if ($arr[$v['goods_grade']]) {
-                    $arr[$v['goods_grade']]['day_stock'] += $v['day_stock'];
-                    $arr[$v['goods_grade']]['day_onway_stock'] += $v['day_onway_stock'];
-                } else {
-                    $arr[$v['goods_grade']]['day_stock'] = $v['day_stock'];
-                    $arr[$v['goods_grade']]['day_onway_stock'] = $v['day_onway_stock'];
-                }
+            unset($newArray['F']);
+            foreach ($newArray['A+'] as $v){
 
             }
+
+
 
             $a_plus_data['day_stock'] = $arr['A+']['day_stock'] ? $arr['A+']['day_stock'] : 0;
             $a_plus_data['day_onway_stock'] = $arr['A+']['day_onway_stock'] ? $arr['A+']['day_onway_stock'] : 0;
