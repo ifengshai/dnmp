@@ -305,7 +305,7 @@ class ScmWarehouse extends Scm
                         return $v;
                     }
                 });
-
+print_r($sku_agg);exit;
                 if(!empty($sku_agg)){
                     array_walk($sku_agg, function (&$value, $k, $p) {
                         $value = array_merge($value, $p);
