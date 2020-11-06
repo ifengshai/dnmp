@@ -3,6 +3,8 @@
 namespace app\api\controller;
 
 use app\common\controller\Api;
+use app\admin\model\warehouse\ProductBarCodeItem;
+use app\admin\model\itemmanage\ItemPlatformSku;
 
 /**
  * 供应链基础接口类
@@ -137,6 +139,58 @@ class Scm extends Api
             if(!empty($value['menu'])){
                 $list[] = $value;
             }
+        }
+
+        $this->success('', ['list' => $list],200);
+    }
+
+    /**
+     * 根据条形码获取商品信息
+     *
+     * @参数 string code_data  条形码集合（以英文逗号分隔）
+     * @参数 int platform_id  平台ID
+     * @author lzh
+     * @return mixed
+     */
+    public function scan_code_product()
+    {
+        $platform_id = $this->request->request('platform_id');
+        $code_data = $this->request->request('code_data');
+        empty($code_data) && $this->error(__('条形码集合不能为空'), [], 403);
+        $code_data = array_unique(array_filter(explode(',',$code_data)));
+
+        $_product_bar_code_item = new ProductBarCodeItem();
+        $code_list = $_product_bar_code_item
+            ->field('code,sku,is_quantity')
+            ->where(['code'=>['in',$code_data]])
+            ->select()
+        ;
+        empty($code_list) && $this->error(__('条形码不存在'), [], 403);
+
+        $sku_data = [];
+        foreach($code_list as $key=>$value){
+            if(1 == $value['is_quantity']){
+                $sku_data[$value['sku']]['qualified'][] = $value['code'];
+            }
+            $sku_data[$value['sku']]['collection'][] = $value['code'];
+        }
+
+        if($platform_id){
+            $_item_platform_sku = new ItemPlatformSku();
+            $stock_data = $_item_platform_sku
+                ->where(['sku'=>['in',array_keys($sku_data)],'platform_type'=>$platform_id])
+                ->column('stock','sku')
+            ;
+        }
+
+        $list = [];
+        foreach($sku_data as $k=>$v){
+            $list[] = [
+                'sku'=>$k,
+                'qualified'=>$v['qualified'],
+                'collection'=>$v['collection'],
+                'stock'=>isset($stock_data) ? $stock_data[$k] : 0
+            ];
         }
 
         $this->success('', ['list' => $list],200);
