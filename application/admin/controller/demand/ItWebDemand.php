@@ -836,6 +836,7 @@ class ItWebDemand extends Backend
                     }
                     $add['type'] = $params['type'];
                     $add['site'] = $params['site'];
+                    //非空
                     if (!empty($params['copy_to_user_id'])){
                         $add['copy_to_user_id'] = implode(',', $params['copy_to_user_id']);
                     }
