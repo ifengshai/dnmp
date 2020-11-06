@@ -441,11 +441,11 @@ class Test01 extends Backend
 
     public function update_11_3_stock()
     {
-        $data = '2020-11-04';
+        set_time_limit(0);
+        $data = '2020-11-05';
         Db::name('datacenter_sku_day')
             ->where(['day_date'=>$data,'site'=>1,'goods_type'=>0])
             ->update(['goods_type'=>1]);
-        set_time_limit(0);
         Db::connect('database.db_zeelool')->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
         Db::connect('database.db_zeelool')->table('sales_flat_order_item')->query("set time_zone='+8:00'");
         Db::connect('database.db_zeelool')->table('sales_flat_order')->query("set time_zone='+8:00'");
