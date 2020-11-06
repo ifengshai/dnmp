@@ -39,7 +39,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                     $('.nihao-div').hide();
 
                     var $table = $('#c-order_platform');
-                    $table.html($("<option value='4'>All</option>" +"<option value='1'>平光镜</option>" + "<option value='2'>太阳镜</option>" + "<option value='3'>配饰</option>"));
+                    $table.html($("<option value='4'>All</option>" +"<option value='1'>平光镜</option>" + "<option value='2'>太阳镜</option>" + "<option value='6'>配饰</option>"));
                     $('#c-order_platform').show();
                     // $('#c-order_platform').show();
                 } else if (order_platform == 3) {
