@@ -84,7 +84,7 @@ class Test01 extends Backend
                 ->where(['a.createtime' => ['<=', '2020-09-30 23:59:59']])
                 ->select();
 
-            $statistics = $this->voogueme
+            $statistics = $this->zeelool
                 ->alias('a')
                 ->field("sum(b.qty_ordered) AS num,sum(base_price) as price,DATE_FORMAT(b.created_at, '%Y-%m') AS time")
                 ->where(['a.status' => ['in', ['processing', 'complete', 'creditcard_proccessing', 'free_processing']]])
@@ -105,7 +105,7 @@ class Test01 extends Backend
                 $all_money += $item['price'];
             }
 
-            $prescription = $this->voogueme
+            $prescription = $this->zeelool
                 ->alias('a')
                 ->field("sum(b.qty_ordered) AS num")
                 ->where(['a.status' => ['in', ['processing', 'complete', 'creditcard_proccessing', 'free_processing']]])
