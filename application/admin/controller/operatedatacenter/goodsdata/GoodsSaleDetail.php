@@ -694,24 +694,29 @@ class GoodsSaleDetail extends Backend
 
         //眼镜正常售卖数某一品类的眼镜正常售卖数
         $frame_onsales_num = $this->itemPlatformSku->putawayDifferenceSku(1, $platform);
-        $frame_onsales_lilist = Db::name('datacenter_sku_day')
-            ->where(['site' =>$platform])
-            ->where($maps)
-            ->where('goods_type',$goods_type)
-            ->distinct(true)
-            ->field('sku')
-            ->select();
-
-        //求某个类型的眼镜的正常售卖数
-        $item = new ItemPlatformSku();
-        $frame_onsales_num = 0;
-        foreach ($frame_onsales_lilist as $k=>$v){
-            $is_new = $item->where('sku',$v['sku'])->where('outer_sku_status',1)->where('platform_type',$platform)->find();
-            if (!empty($is_new)){
-                $frame_onsales_num += 1;
-            }
-        }
-
+        // $frame_onsales_lilist = Db::name('datacenter_sku_day')
+        //     ->where(['site' =>$platform])
+        //     ->where($maps)
+        //     ->where('goods_type',$goods_type)
+        //     ->distinct(true)
+        //     ->field('sku')
+        //     ->select();
+        //
+        // //求某个类型的眼镜的正常售卖数
+        // $item = new ItemPlatformSku();
+        // $frame_onsales_num = 0;
+        // foreach ($frame_onsales_lilist as $k=>$v){
+        //     $is_new = $item->where('sku',$v['sku'])->where('outer_sku_status',1)->where('platform_type',$platform)->find();
+        //     if (!empty($is_new)){
+        //         $frame_onsales_num += 1;
+        //     }
+        // }
+        $frame_onsales_num = $model->table('sales_flat_order_item m')
+            ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
+            ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
+            ->where('p.goods_type', '=', $goods_type)
+            ->where($whereItem)
+            ->count('distinct m.sku');
         //某个类型的眼镜动销数
         $frame_in_print_num = $model->table('sales_flat_order_item m')
             ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
