@@ -475,12 +475,21 @@ class GoodsSaleDetail extends Backend
 
 
             $filter = json_decode($this->request->get('filter'), true);
+            // dump($filter);
             //如果发送的来源是Selectpage，则转发到Selectpage
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
             if ($filter['create_time-operate']) {
                 unset($filter['create_time-operate']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
+            if ($filter['sku']) {
+                $map['sku'] = ['like', '%' . $filter['sku'] . '%'];
+                unset($filter['sku']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            } else {
+                unset($filter['sku']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
             if ($filter['create_time']) {
@@ -608,11 +617,13 @@ class GoodsSaleDetail extends Backend
         if ($time) {
             $time = explode(' ', $time);
             $map['created_at'] = $itemMap['m.created_at'] = ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
+            $maps['day_date'] = ['between', [$time[0] , $time[3]]];
         } else {
             $map['created_at'] = $itemMap['m.created_at'] = ['between', [date('Y-m-d 00:00:00', strtotime('-7 day')), date('Y-m-d H:i:s', time())]];
+            $maps['day_date'] = ['between', [date('Y-m-d', strtotime('-7 day')), date('Y-m-d', time())]];
         }
-        $platform = $platform;
-        $arr = Cache::get('Operationalreport_platformOrderInfo1' . $platform . md5(serialize($map)));
+        // $arr = Cache::get('Operationalreport_platformOrderInfo1' . $platform . md5(serialize($map)));
+        $arr = Cache::get('Operationalreport_platformOrderInfo1' . $platform . $goods_type . md5(serialize($map)));
         if ($arr) {
             return $arr;
         }
@@ -681,8 +692,13 @@ class GoodsSaleDetail extends Backend
             $frame_avg_money = 0;
         }
 
-        //眼镜正常售卖数
+        //眼镜正常售卖数某一品类的眼镜正常售卖数
         $frame_onsales_num = $this->itemPlatformSku->putawayDifferenceSku(1, $platform);
+        $frame_onsales_num = Db::name('datacenter_sku_day')
+            ->where(['site' =>$platform])
+            ->where($maps)
+            ->where('goods_type',$goods_type)
+            ->count('distinct sku');
 
         //眼镜动销数
         $frame_in_print_num = $model->table('sales_flat_order_item m')
@@ -693,9 +709,8 @@ class GoodsSaleDetail extends Backend
             ->where($itemMap)
             ->where('m.sku', 'in', $frame_sku)
             ->count('distinct m.sku');
-        $frame_onsales_num = $frame_in_print_num;
-        //眼镜总共的数量
-        //$frame_num                 = $this->item->getDifferenceSkuNUm(1);
+        // $frame_onsales_num = $frame_in_print_num;
+
         //眼镜动销率
         if (0 < $frame_onsales_num) {
             $frame_in_print_rate = round(($frame_in_print_num / $frame_onsales_num) * 100, 2);
@@ -743,7 +758,24 @@ class GoodsSaleDetail extends Backend
 
         //新品眼镜数量
         $frame_new_num = $this->item->getDifferenceNewSkuNum(1);
+        $frame_new_list = Db::name('datacenter_sku_day')
+            ->where(['site' =>$platform])
+            ->where($maps)
+            ->where('goods_type',$goods_type)
+            ->distinct(true)
+            ->field('sku')
+            ->select();
 
+        //求某个类型的新品眼镜的数量
+        $item = new Item();
+        $frame_new_num = 0;
+        foreach ($frame_new_list as $k=>$v){
+            $is_new = $item->where('sku',$v['sku'])->where('is_new',1)->find();
+            if (!empty($is_new)){
+                $frame_new_num += 1;
+            }
+        }
+        // dump($frame_new_num);die;
         //新品眼镜动销数
         $frame_new_in_print_num = $model->table('sales_flat_order_item m')
             ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
@@ -753,7 +785,7 @@ class GoodsSaleDetail extends Backend
             ->where($itemMap)
             ->where('m.sku', 'in', $frame_new_sku)
             ->count('distinct m.sku');
-        $frame_new_num = $frame_new_in_print_num;
+        // $frame_new_num = $frame_new_in_print_num;
         //新品眼镜动销率
         if (0 < $frame_new_num) {
             $frame_new_in_print_rate = round(($frame_new_in_print_num / $frame_new_num) * 100, 2);

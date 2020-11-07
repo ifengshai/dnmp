@@ -5,7 +5,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
             Controller.api.bindevent();
             // 初始化表格参数配置
             Table.api.init({
-                commonSearch: false,
+                commonSearch: true,
                 search: false,
                 showExport: false,
                 showColumns: false,
@@ -30,7 +30,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                 columns: [
                     [
                         {field: 'sku_change', title: __('平台SKU'), operate: false},
-                        {field: 'sku', title: __('SKU'), operate: false},
+                        {field: 'sku', title: __('SKU'), search: true},
                         {field: 'glass_num', title: __('销量'), operate: false},
                         {field: 'available_stock', title: __('虚拟仓库存'), sortable: true, operate: false},
                         {field: 'grade', title: __('产品等级'), operate: false},
@@ -47,6 +47,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
             });
             // 为表格绑定事件
             Table.api.bindevent(table);
+            $('.btn-success').click(function () {
+                var sku =  $("#sku").val();
+                // alert(sku)
+                $("#top_sku").val(sku);
+            });
             $("#sku_submit").click(function () {
                 var time = $('#create_time').val();
                 var platform = $('#order_platform').val();
@@ -113,7 +118,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                     alert(ret.msg);
                     return false;
                 });
-                //其他关键指标
+                // 其他关键指标
                 Backend.api.ajax({
                     url: "operatedatacenter/goodsdata/goods_sale_detail/mid_data",
                     data: {
@@ -181,12 +186,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                     return false;
                 });
             });
-            // $("#sku_reset").click(function () {
-            //     $("#sku_data").css('display', 'none');
-            //     $("#order_platform").val(1);
-            //     $("#time_str").val('');
-            //     $("#sku").val('');
-            // });
+            $("#sku_reset").click(function () {
+                $("#order_platform").val(1);
+                $("#create_time").val('');
+                $("#sku").val('');
+            });
         },
         add: function () {
             Controller.api.bindevent();
