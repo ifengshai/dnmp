@@ -17,6 +17,7 @@ use Util\MeeloogPrescriptionDetailHelper;
 use Util\WeseeopticalPrescriptionDetailHelper;
 use Util\ZeeloolEsPrescriptionDetailHelper;
 use Util\ZeeloolDePrescriptionDetailHelper;
+use Util\ZeeloolJpPrescriptionDetailHelper;
 use app\admin\model\saleaftermanage\WorkOrderMeasure;
 use app\admin\model\saleaftermanage\WorkOrderChangeSku;
 use app\admin\model\saleaftermanage\WorkOrderRecept;
@@ -360,7 +361,6 @@ class WorkOrderList extends Backend
                             throw new Exception("措施不能为空");
                         }
                     }
-                    
                     //判断是否选择措施
                     //更换镜框判断是否有库存 
                     if ($params['change_frame'] && in_array(1,array_filter($params['measure_choose_id']))) {
@@ -375,7 +375,6 @@ class WorkOrderList extends Backend
                         //判断SKU是否有库存
                         $this->skuIsStock($skus, $params['work_platform'], $num);
                     }
-
                     //判断赠品是否有库存
                     //判断补发是否有库存
                     if (in_array(7, array_filter($params['measure_choose_id'])) || in_array(6, array_filter($params['measure_choose_id']))) {
@@ -432,7 +431,6 @@ class WorkOrderList extends Backend
                             throw new Exception("补差价金额不能为空");
                         }
                     }
-
                     //判断是否选择积分措施
                     if (!in_array(10, array_filter($params['measure_choose_id']))) {
                         unset($params['integral']);
@@ -838,8 +836,11 @@ class WorkOrderList extends Backend
                             
                         }
                     }
-                    
 
+                    //非草稿状态进入审核阶段
+                    if ($this->model->work_status != 1) {
+                        $this->model->checkWork($work_id);
+                    }
                     //不需要审核且是非草稿状态时直接发送积分，赠送优惠券
                     if ($params['is_check'] != 1 && $this->model->work_status != 1) {
                         //赠送积分
@@ -854,13 +855,7 @@ class WorkOrderList extends Backend
                         if (in_array(13, array_filter($params['measure_choose_id'])) && (1 == $changeArr_auto_complete)) {
                             $this->model->changeAddress($params, $work_id, 13, $res);
                         }
-
                     }
-                    //非草稿状态进入审核阶段
-                    if ($this->model->work_status != 1) {
-                        $this->model->checkWork($work_id);
-                    }
-
                     Db::commit();
                 } catch (ValidateException $e) {
                     Db::rollback();
@@ -1875,6 +1870,8 @@ class WorkOrderList extends Backend
                 $result = ZeeloolEsPrescriptionDetailHelper::get_one_by_increment_id($order_number);
             } elseif ($ordertype == 10){
                 $result = ZeeloolDePrescriptionDetailHelper::get_one_by_increment_id($order_number);
+            } elseif ($ordertype == 11){
+                $result = ZeeloolJpPrescriptionDetailHelper::get_one_by_increment_id($order_number);
             }
             if (!$result) {
                 $this->error('找不到这个订单,请重新尝试', '', 'error', 0);
@@ -1926,6 +1923,8 @@ class WorkOrderList extends Backend
                     $result = ZeeloolEsPrescriptionDetailHelper::get_one_by_increment_id($order_number);
                 } elseif ($ordertype == 10) {
                     $result = ZeeloolDePrescriptionDetailHelper::get_one_by_increment_id($order_number);
+                } elseif ($ordertype == 11) {
+                    $result = ZeeloolJpPrescriptionDetailHelper::get_one_by_increment_id($order_number);
                 }
             } else {
                 $result = collection($result)->toArray();
@@ -2097,6 +2096,8 @@ class WorkOrderList extends Backend
             $url = config('url.new_zeelooles_url') . 'price-difference?customer_email=' . $row['email'] . '&origin_order_number=' . $row['platform_order'] . '&order_amount=' . $row['replenish_money'] . '&sign='  . $row->id;
         } elseif ($row['work_platform'] == 10 && $row['replenish_money']) {
             $url = config('url.new_zeeloolde_url') . 'price-difference?customer_email=' . $row['email'] . '&origin_order_number=' . $row['platform_order'] . '&order_amount=' . $row['replenish_money'] . '&sign='  . $row->id;
+        } elseif ($row['work_platform'] == 11 && $row['replenish_money']) {
+            $url = config('url.new_zeelooljp_url') . 'price-difference?customer_email=' . $row['email'] . '&origin_order_number=' . $row['platform_order'] . '&order_amount=' . $row['replenish_money'] . '&sign='  . $row->id;
         }
 
         $this->view->assign('url', $url);
@@ -2968,6 +2969,9 @@ EOF;
                 case 10:
                     $work_platform = 'zeelool_de';
                     break;
+                case 11:
+                    $work_platform = 'zeelool_jp';
+                    break;
                 default:
                     $work_platform = 'zeelool';
                     break;
@@ -3340,6 +3344,9 @@ EOF;
                 case 10:
                     $work_platform = 'zeelool_de';
                     break;
+                case 11:
+                    $work_platform = 'zeelool_jp';
+                    break;
                 default:
                     $work_platform = 'zeelool';
                     break;
@@ -3633,6 +3640,9 @@ EOF;
                     break;
                 case 10:
                     $value['work_platform'] = 'zeelool_de';
+                    break;
+                case 11:
+                    $value['work_platform'] = 'zeelool_jp';
                     break;
                 default:
                     $value['work_platform'] = 'zeelool';
@@ -3992,6 +4002,9 @@ EOF;
                 break;
             case 10:
                 $model = Db::connect('database.db_zeelool_de');
+                break;
+            case 11:
+                $model = Db::connect('database.db_zeelool_jp');
                 break;
             default:
                 $model = false;

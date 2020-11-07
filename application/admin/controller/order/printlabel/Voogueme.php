@@ -72,7 +72,7 @@ class Voogueme extends Backend
             if ($filter['is_task'] == 1 || $filter['is_task'] == '0') {
                 $swhere = [];
                 $swhere['work_platform'] = 2;
-                $swhere['work_status'] = ['not in', [0,4,6]];
+                $swhere['work_status'] = ['not in', [0, 4, 6]];
                 $order_arr = $workorder->where($swhere)->column('platform_order');
                 if ($filter['is_task'] == 1) {
                     $map['increment_id'] = ['in', $order_arr];
@@ -113,7 +113,7 @@ class Voogueme extends Backend
                 unset($filter['p_id']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
-            
+
 
             //SKU搜索
             if ($filter['sku']) {
@@ -148,7 +148,7 @@ class Voogueme extends Backend
             $increment_ids = array_column($list, 'increment_id');
             $swhere['platform_order'] = ['in', $increment_ids];
             $swhere['work_platform'] = 2;
-            $swhere['work_status'] = ['not in', [0,4,6]];
+            $swhere['work_status'] = ['not in', [0, 4, 6]];
             $order_arr = $workorder->where($swhere)->column('platform_order');
 
 
@@ -202,7 +202,7 @@ class Voogueme extends Backend
                     $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
                     $swhere['platform_order'] = $increment_id;
                     $swhere['work_platform'] = 2;
-                    $swhere['work_status'] = ['not in', [0,4,6]];
+                    $swhere['work_status'] = ['not in', [0, 4, 6]];
                     $count = $workorder->where($swhere)->count();
                     //查询是否存在协同任务
                     $infoSynergyTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;
@@ -534,7 +534,7 @@ class Voogueme extends Backend
                     ->select();
                 $cancel_data = collection($cancel_data)->toArray();
                 $cancel_list = [];
-                foreach($cancel_data as $v) {
+                foreach ($cancel_data as $v) {
                     $cancel_list[$v['increment_id']][$v['original_sku']] += $v['num'];
                 }
 
@@ -665,7 +665,7 @@ class Voogueme extends Backend
                         ]);
                     }
                 }
-                
+
                 //查询是否有取消订单
                 $skus = array_column($list, 'sku');
                 $cancel_data = $infotask->alias('a')
@@ -682,7 +682,7 @@ class Voogueme extends Backend
                     ->select();
                 $cancel_data = collection($cancel_data)->toArray();
                 $cancel_list = [];
-                foreach($cancel_data as $v) {
+                foreach ($cancel_data as $v) {
                     $cancel_list[$v['increment_id']][$v['original_sku']] += $v['num'];
                 }
 
@@ -1010,9 +1010,14 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             $finalResult[$key]['created_at'] = substr($value['created_at'], 0, 10);
 
             $tmp_product_options = unserialize($value['product_options']);
-            // dump($product_options);
             $finalResult[$key]['coatiing_name'] = $tmp_product_options['info_buyRequest']['tmplens']['coatiing_name'];
             $finalResult[$key]['index_type'] = $tmp_product_options['info_buyRequest']['tmplens']['index_type'];
+            //镜片颜色   
+            if ($tmp_product_options['info_buyRequest']['tmplens']['index_color']) {
+                $finalResult[$key]['index_type'] = $tmp_product_options['info_buyRequest']['tmplens']['index_type']  . '-' . $tmp_product_options['info_buyRequest']['tmplens']['index_color'];
+            }
+
+
 
             $tmp_prescription_params = $tmp_product_options['info_buyRequest']['tmplens']['prescription'];
             if (isset($tmp_prescription_params)) {
@@ -1064,7 +1069,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             $finalResult[$key]['lens_height'] = $tmp_bridge['lens_height'];
             $finalResult[$key]['bridge'] = $tmp_bridge['bridge'];
         }
-    
+
         $spreadsheet = new Spreadsheet();
         //常规方式：利用setCellValue()填充数据
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "日期")
@@ -1367,7 +1372,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             $finalResult[$key]['lens_height'] = $tmp_bridge['lens_height'];
             $finalResult[$key]['bridge'] = $tmp_bridge['bridge'];
         }
-    
+
         $spreadsheet = new Spreadsheet();
         //常规方式：利用setCellValue()填充数据
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "日期")
@@ -1645,7 +1650,13 @@ EOF;
                 // dump($product_options);
                 $final_print['coatiing_name'] = substr($product_options['info_buyRequest']['tmplens']['coatiing_name'], 0, 60);
                 // $final_print['index_type'] = substr($product_options['info_buyRequest']['tmplens']['index_type'],0,60);
+
+                //镜片颜色   
                 $final_print['index_type'] = $product_options['info_buyRequest']['tmplens']['index_type'];
+                if ($product_options['info_buyRequest']['tmplens']['index_color']) {
+                    $final_print['index_type'] = $product_options['info_buyRequest']['tmplens']['index_type']  . '-' . $product_options['info_buyRequest']['tmplens']['index_color'];
+                }
+
 
                 $prescription_params = $product_options['info_buyRequest']['tmplens']['prescription'];
                 if ($prescription_params) {

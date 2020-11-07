@@ -22,6 +22,7 @@ return [
         '9' => 'ZeeloolEs',
         '10' => 'ZeeloolDe',
         '11' => 'ZeeloolJp',
+        '12' => 'Voogmechic',
         
     ],
     //类型

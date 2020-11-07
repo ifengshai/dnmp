@@ -18,7 +18,7 @@ class OrderDataView extends Backend
         $this->zeeloolOperate  = new \app\admin\model\operatedatacenter\Zeelool;
         $this->vooguemeOperate  = new \app\admin\model\operatedatacenter\Voogueme;
         $this->nihaoOperate  = new \app\admin\model\operatedatacenter\Nihao;
-
+        $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform();
     }
 
     /**
@@ -50,7 +50,14 @@ class OrderDataView extends Backend
         $order_shipping = $this->zeeloolOperate->getOrderShipping();
         //国家地域统计
         $country = $this->zeeloolOperate->getCountryNum();
-        $this->view->assign(compact('order_num', 'order_unit_price', 'sales_total_money', 'shipping_total_money', 'replacement_order_num', 'replacement_order_total', 'online_celebrity_order_num', 'online_celebrity_order_total', 'zeeloolSalesNumList','order_total_distribution','order_shipping','country'));
+        //查询对应平台权限
+        $magentoplatformarr = $this->magentoplatform->getAuthSite();
+        foreach ($magentoplatformarr as $key=>$val){
+            if(!in_array($val['name'],['zeelool','voogueme','nihao'])){
+                unset($magentoplatformarr[$key]);
+            }
+        }
+        $this->view->assign(compact('order_num', 'order_unit_price', 'sales_total_money', 'shipping_total_money', 'replacement_order_num', 'replacement_order_total', 'online_celebrity_order_num', 'online_celebrity_order_total', 'zeeloolSalesNumList','order_total_distribution','order_shipping','country','magentoplatformarr'));
         return $this->view->fetch();
     }
     /*
@@ -81,10 +88,10 @@ class OrderDataView extends Backend
             $order_unit_price = $model->getOrderUnitPrice(1,$time_str); //客单价
             $sales_total_money = $model->getSalesTotalMoney(1,$time_str); //销售额
             $shipping_total_money = $model->getShippingTotalMoney(1,$time_str);  //邮费
-            $replacement_order_num = $model->getReplacementOrderNum(1,$time_str);  //补发单订单数
-            $replacement_order_total = $model->getReplacementOrderTotal(1,$time_str); //补发单销售额
-            $online_celebrity_order_num = $model->getOnlineCelebrityOrderNum(1,$time_str); //网红单订单数
-            $online_celebrity_order_total = $model->getOnlineCelebrityOrderTotal(1,$time_str);  //网红单销售额
+            $replacement_order_num = $model->getReplacementOrderNum($time_str);  //补发单订单数
+            $replacement_order_total = $model->getReplacementOrderTotal($time_str); //补发单销售额
+            $online_celebrity_order_num = $model->getOnlineCelebrityOrderNum($time_str); //网红单订单数
+            $online_celebrity_order_total = $model->getOnlineCelebrityOrderTotal($time_str);  //网红单销售额
             $order_total_distribution = $model->getMoneyOrderNum($time_str); //订单金额分布
             $order_shipping = $model->getOrderShipping($time_str);//订单运费数据统计
             $country = $model->getCountryNum($time_str);//国家地域统计
