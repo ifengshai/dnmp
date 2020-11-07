@@ -77,7 +77,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
 
                     //参数转为json字符串
                     params.filter = JSON.stringify(filter)
-                    console.info(params);
                     return params;
                 }
                 //眼镜和饰品关键指标

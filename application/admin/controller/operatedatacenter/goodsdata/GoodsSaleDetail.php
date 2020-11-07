@@ -656,7 +656,7 @@ class GoodsSaleDetail extends Backend
         //求出眼镜所有sku
         $frame_sku = $this->itemPlatformSku->getDifferencePlatformSku(1, $platform);
 
-        //求出眼镜的销售额 base_price  base_discount_amount 太阳镜
+        //某个类型的求出眼镜的销售额 base_price  base_discount_amount 太阳镜
         $frame_money_price = $model->table('sales_flat_order_item m')
             ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
             ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
@@ -665,7 +665,7 @@ class GoodsSaleDetail extends Backend
             ->where($itemMap)
             ->where('m.sku', 'in', $frame_sku)
             ->sum('m.base_price');
-        //眼镜的折扣价格
+        //某个类型的眼镜的折扣价格
         $frame_money_discount = $model->table('sales_flat_order_item m')
             ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
             ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
@@ -674,9 +674,9 @@ class GoodsSaleDetail extends Backend
             ->where($itemMap)
             ->where('m.sku', 'in', $frame_sku)
             ->sum('m.base_discount_amount');
-        //眼镜的实际销售额
+        //某个类型的眼镜的实际销售额
         $frame_money = round(($frame_money_price - $frame_money_discount), 2);
-        //眼镜的销售副数
+        //某个类型的眼镜的销售副数
         $frame_sales_num = $model->table('sales_flat_order_item m')
             ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
             ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
@@ -685,7 +685,7 @@ class GoodsSaleDetail extends Backend
             ->where($itemMap)
             ->where('m.sku', 'in', $frame_sku)
             ->count('*');
-        //眼镜平均副金额
+        //某个类型的眼镜平均副金额
         if (0 < $frame_sales_num) {
             $frame_avg_money = round(($frame_money / $frame_sales_num), 2);
         } else {
@@ -694,13 +694,25 @@ class GoodsSaleDetail extends Backend
 
         //眼镜正常售卖数某一品类的眼镜正常售卖数
         $frame_onsales_num = $this->itemPlatformSku->putawayDifferenceSku(1, $platform);
-        $frame_onsales_num = Db::name('datacenter_sku_day')
+        $frame_onsales_lilist = Db::name('datacenter_sku_day')
             ->where(['site' =>$platform])
             ->where($maps)
             ->where('goods_type',$goods_type)
-            ->count('distinct sku');
+            ->distinct(true)
+            ->field('sku')
+            ->select();
 
-        //眼镜动销数
+        //求某个类型的眼镜的正常售卖数
+        $item = new ItemPlatformSku();
+        $frame_onsales_num = 0;
+        foreach ($frame_onsales_lilist as $k=>$v){
+            $is_new = $item->where('sku',$v['sku'])->where('outer_sku_status',1)->where('platform_type',$platform)->find();
+            if (!empty($is_new)){
+                $frame_onsales_num += 1;
+            }
+        }
+
+        //某个类型的眼镜动销数
         $frame_in_print_num = $model->table('sales_flat_order_item m')
             ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
             ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
@@ -711,7 +723,7 @@ class GoodsSaleDetail extends Backend
             ->count('distinct m.sku');
         // $frame_onsales_num = $frame_in_print_num;
 
-        //眼镜动销率
+        //某个类型的眼镜动销率
         if (0 < $frame_onsales_num) {
             $frame_in_print_rate = round(($frame_in_print_num / $frame_onsales_num) * 100, 2);
         } else {
@@ -721,7 +733,7 @@ class GoodsSaleDetail extends Backend
         //求出所有新品眼镜sku
         $frame_new_sku = $this->itemPlatformSku->getDifferencePlatformNewSku(1, $platform);
 
-        //求出新品眼镜的销售额 base_price  base_discount_amount
+        //求出某个类型的新品眼镜的销售额 base_price  base_discount_amount
         $frame_new_money_price = $model->table('sales_flat_order_item m')
             ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
             ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
@@ -730,7 +742,7 @@ class GoodsSaleDetail extends Backend
             ->where($itemMap)
             ->where('m.sku', 'in', $frame_new_sku)
             ->sum('m.base_price');
-        //新品眼镜的折扣价格
+        //某个类型的新品眼镜的折扣价格
         $frame_new_money_discount = $model->table('sales_flat_order_item m')
             ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
             ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
@@ -739,10 +751,10 @@ class GoodsSaleDetail extends Backend
             ->where($itemMap)
             ->where('m.sku', 'in', $frame_new_sku)
             ->sum('m.base_discount_amount');
-        //新品眼镜的实际销售额
+        //某个类型的新品眼镜的实际销售额
         $frame_new_money = round(($frame_new_money_price - $frame_new_money_discount), 2);
 
-        //眼镜下单客户数
+        //某个类型的眼镜下单客户数
         $frame_order_customer = $model->table('sales_flat_order o')
             ->join('sales_flat_order_item m', 'o.entity_id=m.order_id', 'left')
             ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
@@ -751,12 +763,12 @@ class GoodsSaleDetail extends Backend
             ->where('m.sku', 'in', $frame_sku)
             ->where($itemMap)
             ->count('distinct o.customer_email');
-        //眼镜客户平均副数
+        //某个类型的眼镜客户平均副数
         if (0 < $frame_order_customer) {
             $frame_avg_customer = round(($frame_sales_num / $frame_order_customer), 2);
         }
 
-        //新品眼镜数量
+        //某个类型的新品眼镜数量
         $frame_new_num = $this->item->getDifferenceNewSkuNum(1);
         $frame_new_list = Db::name('datacenter_sku_day')
             ->where(['site' =>$platform])
@@ -776,7 +788,7 @@ class GoodsSaleDetail extends Backend
             }
         }
         // dump($frame_new_num);die;
-        //新品眼镜动销数
+        //某个类型的新品眼镜动销数
         $frame_new_in_print_num = $model->table('sales_flat_order_item m')
             ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
             ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
@@ -786,7 +798,7 @@ class GoodsSaleDetail extends Backend
             ->where('m.sku', 'in', $frame_new_sku)
             ->count('distinct m.sku');
         // $frame_new_num = $frame_new_in_print_num;
-        //新品眼镜动销率
+        //某个类型的新品眼镜动销率
         if (0 < $frame_new_num) {
             $frame_new_in_print_rate = round(($frame_new_in_print_num / $frame_new_num) * 100, 2);
         } else {
