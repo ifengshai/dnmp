@@ -711,12 +711,23 @@ class GoodsSaleDetail extends Backend
         //         $frame_onsales_num += 1;
         //     }
         // }
-        $frame_onsales_num = $model->table('sales_flat_order_item m')
-            ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
-            ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
-            ->where('p.goods_type', '=', $goods_type)
-            ->where($whereItem)
-            ->count('distinct m.sku');
+        if ($goods_type == 1){
+            $frame_onsales_num = $model->table('sales_flat_order_item m')
+                ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
+                ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
+                ->where('p.goods_type', '=', $goods_type)
+                ->where($whereItem)
+                ->where($itemMap)
+                ->count('distinct m.sku');
+        }else{
+            $frame_onsales_num = $model->table('sales_flat_order_item m')
+                ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
+                ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
+                ->where('p.goods_type', '=', $goods_type)
+                ->where($whereItem)
+                ->count('distinct m.sku');
+        }
+
         //某个类型的眼镜动销数
         $frame_in_print_num = $model->table('sales_flat_order_item m')
             ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
