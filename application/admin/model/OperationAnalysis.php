@@ -35,26 +35,29 @@ class OperationAnalysis extends Model
     {
         switch($id){
             case 1:
-            $model = Db::connect('database.db_zeelool');
-            break;
+                $model = Db::connect('database.db_zeelool');
+                break;
             case 2:
-            $model = Db::connect('database.db_voogueme');
-            break;
+                $model = Db::connect('database.db_voogueme');
+                break;
             case 3:
-            $model = Db::connect('database.db_nihao');
-            break;
+                $model = Db::connect('database.db_nihao');
+                break;
             case 4:
-            $model = Db::connect('database.db_meeloog');
-            break;
+                $model = Db::connect('database.db_meeloog');
+                break;
             case 9:
-            $model = Db::connect('database.db_zeelool_es');
-            break;
+                $model = Db::connect('database.db_zeelool_es');
+                break;
             case 10:
-            $model = Db::connect('database.db_zeelool_de');
-            break;        
+                $model = Db::connect('database.db_zeelool_de');
+                break;
+            case 11:
+                $model = Db::connect('database.db_zeelool_jp');
+                break;
             default:
-            $model = false;
-            break;            
+                $model = false;
+                break;
         }
         return $model;
     }
