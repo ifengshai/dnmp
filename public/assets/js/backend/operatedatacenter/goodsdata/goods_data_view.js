@@ -39,7 +39,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                     $('.nihao-div').hide();
 
                     var $table = $('#c-order_platform');
-                    $table.html($("<option value='1'>平光镜</option>" + "<option value='2'>太阳镜</option>" + "<option value='3'>配饰</option>"));
+                    $table.html($("<option value='4'>All</option>" +"<option value='1'>平光镜</option>" + "<option value='2'>太阳镜</option>" + "<option value='6'>配饰</option>"));
                     $('#c-order_platform').show();
                     // $('#c-order_platform').show();
                 } else if (order_platform == 3) {
@@ -47,7 +47,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                     $('.voogueme-div').hide();
                     $('.nihao-div').show();
                     var $table = $('#c-order_platform');
-                    $table.html($("<option value='1'>平光镜</option>" + "<option value='2'>太阳镜</option>"));
+                    $table.html($("<option value='4'>All</option>" +"<option value='1'>平光镜</option>" + "<option value='2'>太阳镜</option>"));
                     $('#c-order_platform').show();
                 }
                 order_data_view();
@@ -55,12 +55,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                 Controller.api.formatter.goods_type_chart();
                 Form.api.bindevent($("form[role=form]"));
 
-                table.bootstrapTable('refresh',params);
+                // table.bootstrapTable('refresh',params);
 
             });
             $(document).on('change', '#c-order_platform', function () {
-
-                var order_platform =Config.label;
                 var time_str = $('#create_time').val();
                 var goods_type = $('#c-order_platform').val();
                 var order_platform =$('#order_platform').val();
