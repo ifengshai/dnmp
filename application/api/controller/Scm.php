@@ -161,7 +161,7 @@ class Scm extends Api
 
         $_product_bar_code_item = new ProductBarCodeItem();
         $code_list = $_product_bar_code_item
-            ->field('code,sku,is_quantity')
+            ->field('code,sku')
             ->where(['code'=>['in',$code_data]])
             ->select()
         ;
@@ -169,9 +169,6 @@ class Scm extends Api
 
         $sku_data = [];
         foreach($code_list as $key=>$value){
-            if(1 == $value['is_quantity']){
-                $sku_data[$value['sku']]['qualified'][] = $value['code'];
-            }
             $sku_data[$value['sku']]['collection'][] = $value['code'];
         }
 
@@ -187,7 +184,6 @@ class Scm extends Api
         foreach($sku_data as $k=>$v){
             $list[] = [
                 'sku'=>$k,
-                'qualified'=>$v['qualified'],
                 'collection'=>$v['collection'],
                 'stock'=>isset($stock_data) ? $stock_data[$k] : 0
             ];
