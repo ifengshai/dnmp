@@ -487,6 +487,8 @@ class ScmDistribution extends Scm
     /**
      * 配货提交--ok
      *
+     * 商品条形码与商品SKU是多对一关系，paltform_sku与SKU（true_sku）也是多对一关系
+     *
      * @参数 string item_order_number  子订单号
      * @参数 string barcode  商品条形码
      * @author wgj
@@ -498,19 +500,26 @@ class ScmDistribution extends Scm
         $barcode = $this->request->request('barcode');
         empty($item_order_number) && $this->error(__('子订单号不能为空'), [], 403);
         empty($barcode) && $this->error(__('商品条形码不能为空'), [], 403);
-        //查询订单绑定SKU与扫码传入商品条形码
-        $product_info = $this->_new_order_item_process
+
+        //查询订单绑定platform_sku
+        $item_order_info = $this->_new_order_item_process
             ->alias('a')
             ->where('a.item_order_number',$item_order_number)
-            ->field('a.id,c.code')
+            ->field('a.id,b.sku')
             ->join(['stock.fa_item_platform_sku'=> 'b'],'a.sku=b.platform_sku','left')
-            ->join(['mojing.fa_product_barcode_item'=> 'c'],'b.sku=c.sku','left')
             ->find();
 
-        if ($barcode != $product_info['code']){
-            //扫描获取的条形码 和 子订单查询出的条形码对比失败则配货失败
+        $bar_code_item_info = $this->_product_bar_code_item
+            ->alias('a')
+            ->where('a.code',$barcode)
+            ->field('b.sku')
+            ->join(['stock.fa_item_platform_sku'=> 'b'],'a.sku=b.platform_sku','left')
+            ->find();
+
+        if ($bar_code_item_info['sku'] != $item_order_info['sku']){
+            //扫描获取的条形码 和 子订单查询出的 SKU(即true_sku)对比失败则配货失败
             //操作失败记录
-            DistributionLog::record($this->auth,$product_info['id'],2,'配货失败：sku配错');
+            DistributionLog::record($this->auth,$item_order_info['id'],2,'配货失败：sku配错');
 
             //失败返回
             $this->error(__('sku配错'), [], 404);
@@ -797,7 +806,6 @@ class ScmDistribution extends Scm
         $this->success('', ['info' => $info],200);
     }
 
-
     /**
      * 合单--确认放入合单架---最后一个子单扫描合单时，检查子单合单是否有异常，无异常且全部为已合单，则更新主单合单状态和时间--ok
      *
@@ -984,7 +992,6 @@ class ScmDistribution extends Scm
 
     }
 
-
     /**
      * 合单--合单完成提交-------修改原型图待定----合单完成（下一步）、失败（展示失败原因）---产品修改ing---可能删除不用，在最后一个子单合单完成时判断更改
      *
@@ -1019,15 +1026,14 @@ class ScmDistribution extends Scm
             ->select();
         empty($item_process_info) && $this->error(__('订单数据异常'), [], 403);
 
-        foreach($item_process_info as $key => $value){
-        }
+//        foreach($item_process_info as $key => $value){
+//        }
 
         //获取库位信息，判断是否被占用
         $store_house_info = $this->_stock_house->field('id,coding,subarea,occupy')->where('id',$order_process_info['store_house_id'])->find();//查询合单库位--占用数量
 
 
     }
-
 
     /**
      * 合单待取列表---ok
