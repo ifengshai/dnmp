@@ -816,10 +816,30 @@ class ScmWarehouse extends Scm
             $result = $this->_in_stock->allowField(true)->save($_in_stock_data, ['id' => $in_stock_id]);
             if ($result !== false){
                 $save_data = [];
+
+                //检测条形码是否已绑定
+                $where['out_stock_id'] = [['>',0], ['neq',$in_stock_id]];
+
                 foreach (array_filter($item_sku) as $k => $v) {
                     $save_data['sku'] = $v['sku'];
                     $save_data['in_stock_num'] = $v['in_stock_num'];//入库数量
                     $this->_in_stock_item->allowField(true)->save($save_data, ['in_stock_id' => $in_stock_id]);
+
+                    $sku_code = array_column($v['sku_agg'],'code');
+                    count($v['sku_agg']) != count(array_unique($sku_code))
+                    &&
+                    $this->error(__('条形码有重复，请检查'), [], 405);
+
+                    $where['code'] = ['in',$sku_code];
+                    $check_quantity = $this->_product_bar_code_item
+                        ->where($where)
+                        ->field('code')
+                        ->find();
+                    if(!empty($check_quantity['code'])){
+                        $this->error(__('条形码:'.$check_quantity['code'].' 已绑定,请移除'), [], 405);
+                        exit;
+                    }
+
                 }
                 $this->success($msg.'成功', [],200);
             }
@@ -1369,6 +1389,7 @@ class ScmWarehouse extends Scm
             //点击保存，创建盘点单
             //继续写
             $item_sku = $this->request->request("item_sku");
+            empty($item_sku) && $this->error(__('sku集合不能为空！！'), [], 523);
             $item_sku = html_entity_decode($item_sku);
             $item_sku = array_filter(json_decode($item_sku,true));
             if (count(array_filter($item_sku)) < 1) {
