@@ -4,6 +4,7 @@ namespace app\admin\controller\operatedatacenter\goodsdata;
 
 use app\admin\model\itemmanage\ItemPlatformSku;
 use app\common\controller\Backend;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use think\Controller;
 use think\Db;
 use think\Request;
@@ -355,6 +356,109 @@ class SingleItems extends Backend
 
             return json(['code' => 1, 'data' => $json]);
         }
+    }
+
+    //导出关联购买数据
+    public function export(){
+        set_time_limit(0);
+        ini_set('memory_limit', '512M');
+        $order_platform = input('order_platform');
+        $time_str = input('time_str');
+        $sku = input('sku');
+
+        if ($time_str) {
+            $createat = explode(' ', $time_str);
+        }
+        switch ($order_platform) {
+            case 1:
+                $model = Db::connect('database.db_zeelool');
+                break;
+            case 2:
+                $model = Db::connect('database.db_voogueme');
+                break;
+            case 3:
+                $model = Db::connect('database.db_nihao');
+                break;
+        }
+        $model->table('sales_flat_order')->query("set time_zone='+8:00'");
+        $model->table('sales_flat_order_item')->query("set time_zone='+8:00'");
+        $model->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
+        //关联购买
+        $connect_buy = $model->table('sales_flat_order_item')
+            ->where('sku', 'like', $sku . '%')
+            ->where('created_at', 'between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]])
+            ->distinct('order_id')
+            ->field('order_id')
+            ->select();//包含此sku的所有订单好
+        $connect_buy = array_column($connect_buy, 'order_id');
+        $skus = array();
+        foreach ($connect_buy as $value) {
+            $arr = $model->table('sales_flat_order_item')
+                ->where('order_id', $value)
+                ->field('sku')
+                ->select();//这些订单号内的所有sku
+            $skus[] = array_column($arr, 'sku');
+        }
+        $array_sku = [];
+        //获取关联购买的数量
+        foreach ($skus as $k => $v) {
+            foreach ($v as $vv) {
+                if ($vv != $sku) {
+                    $array_sku[$vv] += 1;
+                }
+            }
+        }
+        // dump($array_sku);die;
+        //从数据库查询需要的数据
+        $spreadsheet = new Spreadsheet();
+        $spreadsheet->setActiveSheetIndex(0);
+        $spreadsheet->getActiveSheet()->setCellValue("A1", "sku");
+        $spreadsheet->getActiveSheet()->setCellValue("B1", "数量");
+
+
+
+        $spreadsheet->setActiveSheetIndex(0)->setTitle('SKU明细');
+        $spreadsheet->setActiveSheetIndex(0);
+        $num = 0;
+        foreach ($array_sku as $k=>$v){
+            $spreadsheet->getActiveSheet()->setCellValue('A' . ($num * 1 + 2), $k);
+            $spreadsheet->getActiveSheet()->setCellValue('B' . ($num * 1 + 2), $v);
+            $num += 1;
+        }
+        //设置边框
+        $border = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
+                    'color'       => ['argb' => 'FF000000'], // 设置border颜色
+                ],
+            ],
+        ];
+        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
+        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
+
+        $spreadsheet->getActiveSheet()->getStyle('A1:Q' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+        $spreadsheet->setActiveSheetIndex(0);
+        $format = 'xlsx';
+        $savename = 'sku:'.$sku .' '. $createat[0] .'至'.$createat[3] .'关联购买情况';
+
+        if ($format == 'xls') {
+            //输出Excel03版本
+            header('Content-Type:application/vnd.ms-excel');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
+        } elseif ($format == 'xlsx') {
+            //输出07Excel版本
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
+        }
+        //输出名称
+        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
+        //禁止缓存
+        header('Cache-Control: max-age=0');
+        $writer = new $class($spreadsheet);
+        $writer->save('php://output');
     }
 }
 
