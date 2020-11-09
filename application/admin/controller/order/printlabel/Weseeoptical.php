@@ -614,18 +614,8 @@ where cped.attribute_id in(146,147) and cped.store_id=0 and cped.entity_id=$prod
             $finalResult[$key]['created_at'] = substr($value['created_at'], 0, 10);
 
             $tmp_product_options = unserialize($value['product_options']);
+            $finalResult[$key]['index_type'] = $tmp_product_options['info_buyRequest']['tmplens']['index_type'];
 
-
-            $finalResult[$key]['second_name'] = $tmp_product_options['info_buyRequest']['tmplens']['second_name'];
-            $finalResult[$key]['third_name'] = $tmp_product_options['info_buyRequest']['tmplens']['index_type'];
-            $finalResult[$key]['four_name'] = $tmp_product_options['info_buyRequest']['tmplens']['four_name'];
-            $finalResult[$key]['zsl'] = $tmp_product_options['info_buyRequest']['tmplens']['zsl'];
-
-            //如果为太阳镜 拼接颜色
-            if (@$tmp_product_options['info_buyRequest']['tmplens']['sungless_color_name']) {
-                $finalResult[$key]['third_name'] .= ' ' . $tmp_product_options['info_buyRequest']['tmplens']['sungless_color_name'];
-            }
-         
             $tmp_lens_params = array();
             $tmp_lens_params = json_decode($tmp_product_options['info_buyRequest']['tmplens']['prescription'], true);
 
@@ -677,14 +667,16 @@ where cped.attribute_id in(146,147) and cped.store_id=0 and cped.entity_id=$prod
             $finalResult[$key]['bridge'] = $tmp_bridge['bridge'];
 
             //判断是否为成品老花镜
-            if ($finalResult[$key]['degrees']) {
+            if ($finalResult[$key]['index_type']) {
+                $finalResult[$key]['od_sph'] = $finalResult[$key]['degrees'];
+                $finalResult[$key]['os_sph'] = $finalResult[$key]['degrees'];
+            } elseif ($finalResult[$key]['degrees']) {
                 $finalResult[$key]['od_sph'] = $finalResult[$key]['degrees'];
                 $finalResult[$key]['os_sph'] = $finalResult[$key]['degrees'];
                 $finalResult[$key]['index_type'] = '1.61 Index Standard  Reading Glasses - Non Prescription';
             }
-
         }
-      
+
         $spreadsheet = new Spreadsheet();
         // Add title
 
@@ -1007,7 +999,11 @@ EOF;
 
                 $final_print['prismcheck'] = isset($final_print['prismcheck']) ? $final_print['prismcheck'] : '';
 
-                if ($final_print['degrees']) {
+                //判断是否为成品老花镜
+                if ($final_print['index_type']) {
+                    $final_print['od_sph'] = $final_print['degrees'];
+                    $final_print['os_sph'] = $final_print['degrees'];
+                } elseif ($final_print['degrees']) {
                     $final_print['od_sph'] = $final_print['degrees'];
                     $final_print['os_sph'] = $final_print['degrees'];
                     $final_print['index_type'] = '1.61 Index Standard  Reading Glasses - Non Prescription';
