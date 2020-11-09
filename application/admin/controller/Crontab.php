@@ -3499,6 +3499,7 @@ class Crontab extends Backend
         $updateData['thisyear_sign_customer']       = $thisyear_sign_customer_data ?? 0;
         $updateData['lastyear_sign_customer']       = $lastyear_sign_customer_data ?? 0;
         $updateData['total_sign_customer']          = $total_sign_customer_data ?? 0;
+        dump($updateData);exit;
         //查找是否存在的记录
         $result = Db::name('operation_analysis')->where(['order_platform' => $platform])->field('id,order_platform')->find();
         if (!$result) {
