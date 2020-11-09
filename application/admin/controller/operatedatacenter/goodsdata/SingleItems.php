@@ -414,7 +414,9 @@ class SingleItems extends Backend
         $spreadsheet->setActiveSheetIndex(0);
         $spreadsheet->getActiveSheet()->setCellValue("A1", "sku");
         $spreadsheet->getActiveSheet()->setCellValue("B1", "数量");
-
+        //设置宽度
+        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(60);
+        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(12);
 
 
         $spreadsheet->setActiveSheetIndex(0)->setTitle('SKU明细');
