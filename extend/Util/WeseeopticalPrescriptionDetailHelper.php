@@ -108,70 +108,91 @@ class WeseeopticalPrescriptionDetailHelper
 	* 解析处方  依据 $item_list
 	* 参数说明 $item_list 查询的结果列表
 	*/
-	protected function list_convert($item_list)
-	{
-		$items = array();
+	protected function list_convert($item_list){
+		$items = array();	
 		foreach ($item_list as $item_key => $item_value) {
+
+			$items[$item_key]['increment_id'] = $item_value['increment_id'];   
+			$items[$item_key]['status'] = $item_value['status'];    		 
+			$items[$item_key]['order_id'] = $item_value['order_id'];
+			$items[$item_key]['item_id'] = $item_value['item_id'];
+			$items[$item_key]['name'] = $item_value['name'];
+			$items[$item_key]['sku'] = $item_value['sku'];
+			$items[$item_key]['created_at'] = $item_value['created_at'];
+			$items[$item_key]['qty_ordered'] = $item_value['qty_ordered'];
+			$items[$item_key]['quote_item_id'] = $item_value['quote_item_id'];
+			$items[$item_key]['discount_amount'] = $item_value['base_discount_amount'];    
+			$items[$item_key]['base_row_total'] = $item_value['base_row_total'];    
+			$items[$item_key]['original_price'] = $item_value['original_price'];
 			$product_options = unserialize($item_value['product_options']);
+            // dump($product_options);
+			$final_params = array();
 
-			$final_params['prescription_type'] = substr($product_options['info_buyRequest']['tmplens']['prescription_type'], 0, 100);
+			$final_params['coatiing_name'] = substr($product_options['info_buyRequest']['tmplens']['coatiing_name'],0,100);
+			$final_params['index_type'] = substr($product_options['info_buyRequest']['tmplens']['index_type'],0,100);
 
-			$final_params['second_name'] = substr($product_options['info_buyRequest']['tmplens']['second_name'], 0, 100);
-			$final_params['third_name'] = $product_options['info_buyRequest']['tmplens']['third_name'];
-			$final_params['four_name'] = $product_options['info_buyRequest']['tmplens']['four_name'];
-			$final_params['zsl'] = $product_options['info_buyRequest']['tmplens']['zsl'];
+			$final_params['frame_price'] = $product_options['info_buyRequest']['tmplens']['frame_price'];
+			$final_params['index_price'] = $product_options['info_buyRequest']['tmplens']['index_price'];
+			$final_params['coatiing_price'] = $product_options['info_buyRequest']['tmplens']['coatiing_price'];
+			$final_params['index_color'] = $product_options['info_buyRequest']['tmplens']['index_color'];
 			$final_params['degrees'] = $product_options['info_buyRequest']['tmplens']['degrees'];
+				
 
-			$items[$item_key]['frame_price'] = $product_options['info_buyRequest']['tmplens']['frame_price'];
-			$items[$item_key]['frame_regural_price'] = $product_options['info_buyRequest']['tmplens']['frame_regural_price'];
-			$items[$item_key]['second_price'] = $product_options['info_buyRequest']['tmplens']['second_price'];
-			$items[$item_key]['third_price'] = $product_options['info_buyRequest']['tmplens']['third_price'];
-			$items[$item_key]['four_price'] = $product_options['info_buyRequest']['tmplens']['four_price'];
-			$items[$item_key]['total'] = $product_options['info_buyRequest']['tmplens']['total'];
-			$items[$item_key]['lens_price'] = $product_options['info_buyRequest']['tmplens']['lens_price'];
-			$items[$item_key]['second_id'] = $product_options['info_buyRequest']['tmplens']['second_id'];
-			$items[$item_key]['third_id'] = $product_options['info_buyRequest']['tmplens']['third_id'];
-			$items[$item_key]['four_id'] = $product_options['info_buyRequest']['tmplens']['four_id'];
-			$items[$item_key]['is_frame_only'] = $product_options['info_buyRequest']['tmplens']['is_frame_only'];
-			$items[$item_key]['cart_currency'] = $product_options['info_buyRequest']['cart_currency'];
+			$items[$item_key]['frame_regural_price'] = $final_params['frame_regural_price'] = $product_options['info_buyRequest']['tmplens']['frame_regural_price'];
+			$items[$item_key]['is_special_price'] = $final_params['is_special_price'] = $product_options['info_buyRequest']['tmplens']['is_special_price'];
+			$items[$item_key]['index_price_old'] = $final_params['index_price_old'] = $product_options['info_buyRequest']['tmplens']['index_price_old'];
+			$items[$item_key]['index_name'] = $final_params['index_name'] = $product_options['info_buyRequest']['tmplens']['index_name'];
+			$items[$item_key]['index_id'] = $final_params['index_id'] = $product_options['info_buyRequest']['tmplens']['index_id'];
+			$items[$item_key]['lens'] = $final_params['lens'] = $product_options['info_buyRequest']['tmplens']['lens'];
+			$items[$item_key]['lens_old'] = $final_params['lens_old'] = $product_options['info_buyRequest']['tmplens']['lens_old'];
+			$items[$item_key]['total'] = $final_params['total'] = $product_options['info_buyRequest']['tmplens']['total'];
+			$items[$item_key]['total_old'] = $final_params['total_old'] = $product_options['info_buyRequest']['tmplens']['total_old'];
 			$items[$item_key]['options']  = $product_options['options'];
+			$items[$item_key]['cart_currency'] = $product_options['info_buyRequest']['cart_currency'];  
+			$prescription_params = $product_options['info_buyRequest']['tmplens']['prescription'];
+            $items[$item_key]['index_type'] = $final_params['index_type'] = $product_options['info_buyRequest']['tmplens']['index_type'];
+            $items[$item_key]['coating_id'] = $final_params['coating_id'] = $product_options['info_buyRequest']['tmplens']['coating_id'];
+            $items[$item_key]['coatiing_name'] = $final_params['coatiing_name'] = $product_options['info_buyRequest']['tmplens']['coatiing_name'];
+            // dump($prescription_params);
+			$prescription_params = explode("&", $prescription_params);
+			$lens_params = array();
+			foreach ($prescription_params as $key => $value) {
+                // dump($value);
+				$arr_value = explode("=", $value);
+				$lens_params[$arr_value[0]] = $arr_value[1];
+			}
+            // dump($lens_params);
+			$final_params = array_merge($lens_params, $final_params);
+          	// dump($final_params);      
 
-			$items[$item_key]['index_type']  = $final_params['zsl'] . ' ' . $product_options['info_buyRequest']['tmplens']['index_type'];
+			$items[$item_key]['coatiing_name'] = $final_params['coatiing_name'];
 
-			//如果为太阳镜 拼接颜色
-			if (@$product_options['info_buyRequest']['tmplens']['sungless_color_name']) {
-				$items[$item_key]['index_type'] .= ' ' . $product_options['info_buyRequest']['tmplens']['sungless_color_name'];
+			//判断是否为成品老花镜
+			if ($final_params['index_type']) {
+				$final_params['od_sph'] = $final_params['degrees'];
+				$final_params['os_sph'] = $final_params['degrees'];
+			} elseif ($final_params['degrees']) {
+				$final_print['od_sph'] = $final_params['degrees'];
+				$final_print['os_sph'] = $final_params['degrees'];
+				$final_print['index_type'] = '1.61 Index Standard  Reading Glasses - Non Prescription';
 			}
 
-			$items[$item_key]['coating_id']  = $product_options['info_buyRequest']['tmplens']['four_id'];
-			$items[$item_key]['coatiing_name']  = $product_options['info_buyRequest']['tmplens']['third_name'];
-			$items[$item_key]['index_name']  = $product_options['info_buyRequest']['tmplens']['index_type'];
-			$items[$item_key]['index_id']  = $product_options['info_buyRequest']['tmplens']['third_id'];
+			if ($final_params['index_color']) {
+				$items[$item_key]['index_type'] = $final_params['index_type'] . '-' .  $final_params['index_color'];
+			} else {
+				$items[$item_key]['index_type'] = $final_params['index_type'];
+			}
+			
+			$items[$item_key]['prescription_type'] = $final_params['prescription_type'];	
 
-			$prescription_params = json_decode($product_options['info_buyRequest']['tmplens']['prescription'], true) ?? [];
+			$items[$item_key]['frame_price'] = $final_params['frame_price']?$final_params['frame_price']:0;
+			$items[$item_key]['index_price'] = $final_params['index_price']?$final_params['index_price']:0;
+			$items[$item_key]['coatiing_price'] = $final_params['coatiing_price']?$final_params['coatiing_price']:0;
 
-			$final_params = array_merge($prescription_params, $final_params);
-			// dump($final_params);            
-			$items[$item_key]['order_item_id'] = $item_value['item_id'];
-			$items[$item_key]['order_id'] = $item_value['order_id'];
-			$items[$item_key]['increment_id'] = $item_value['increment_id'];
-			$items[$item_key]['status'] = $item_value['status'];
-			$items[$item_key]['qty_ordered'] = $item_value['qty_ordered'];
-			$items[$item_key]['discount_amount'] = $item_value['discount_amount'];
-			$items[$item_key]['original_price'] = $item_value['original_price'];
-			$items[$item_key]['sku'] = $item_value['sku'];
-			$items[$item_key]['name'] = $item_value['name'];
-			$items[$item_key]['created_at'] = $item_value['created_at'];
-			$items[$item_key]['year'] = $final_params['year'];
-			$items[$item_key]['month'] = $final_params['month'];
+			$items[$item_key]['year'] = $final_params['year']?$final_params['year']:'';
+			$items[$item_key]['month'] = $final_params['month']?$final_params['month']:'';
 
-			$items[$item_key]['zsl'] = $final_params['zsl'];
-			// $items[$order_item_key]['prescription_type'] = $final_params['prescription_type'];
-			$items[$item_key]['prescription_type'] = $final_params['prescription_type'];
-
-			$items[$item_key]['second_name'] = $final_params['second_name'];
-			$items[$item_key]['third_name'] = $final_params['third_name'];
-			$items[$item_key]['four_name'] = $final_params['four_name'];
+			$items[$item_key]['information'] = str_replace("+"," ",urldecode(urldecode($final_params['information'])));
 
 			$items[$item_key]['od_sph'] = $final_params['od_sph'];
 			$items[$item_key]['os_sph'] = $final_params['os_sph'];
@@ -183,29 +204,28 @@ class WeseeopticalPrescriptionDetailHelper
 			$items[$item_key]['os_axis'] = $final_params['os_axis'];
 			$items[$item_key]['pdcheck'] = $final_params['pdcheck'];
 
-			//判断是否为成品老花镜
-			if ($final_params['degrees']) {
-				$items[$item_key]['od_sph'] = $final_params['degrees'];
-				$items[$item_key]['os_sph'] = $final_params['degrees'];
-				$items[$item_key]['index_type'] = '1.61 Index Standard  Reading Glasses - Non Prescription';
-			}
-
-
-			if ($final_params['prescription_type'] == 'Reading Glasses' && strlen($final_params['os_add']) > 0 && strlen($final_params['od_add']) > 0) {
+			if($final_params['os_add'] && $final_params['od_add']){
 				$items[$item_key]['os_add'] = $final_params['os_add'];
 				$items[$item_key]['od_add'] = $final_params['od_add'];
-			} else {
-				$items[$item_key]['total_add'] = $final_params['od_add'];
+			}else{
+				if ((float) $final_params['os_add'] != 0) {
+					$items[$item_key]['total_add'] = $final_params['os_add'];
+				}
+
+				if ((float) $final_params['od_add'] != 0) {
+					$items[$item_key]['total_add'] = $final_params['od_add'];
+				}
+				
 			}
 
-			if ($final_params['pdcheck'] == 'on') {
+			if($final_params['pdcheck'] =='on'){
 				$items[$item_key]['pd_l'] = $final_params['pd_l'];
 				$items[$item_key]['pd_r'] = $final_params['pd_r'];
-			} else {
+			}else{
 				$items[$item_key]['pd'] = $final_params['pd'];
 			}
 
-			if ($final_params['prismcheck'] == 'on') {
+			if($final_params['prismcheck'] == 'on'){
 				$items[$item_key]['prismcheck'] = $final_params['prismcheck'];
 				$items[$item_key]['od_pv'] = $final_params['od_pv'];
 				$items[$item_key]['od_bd'] = $final_params['od_bd'];
@@ -217,24 +237,20 @@ class WeseeopticalPrescriptionDetailHelper
 				$items[$item_key]['os_pv_r'] = $final_params['os_pv_r'];
 				$items[$item_key]['os_bd_r'] = $final_params['os_bd_r'];
 			}
-			unset($final_params);
-			unset($lens_params);
-			unset($prescription_params);
-			unset($product_options);
 			//添加上客户邮箱,客户姓名
-			if (isset($item_value['customer_email'])) {
+			if(isset($item_value['customer_email'])){
 				$items[$item_key]['customer_email'] = $item_value['customer_email'];
 			}
-			if (isset($item_value['customer_firstname'])) {
+			if(isset($item_value['customer_firstname'])){
 				$items[$item_key]['customer_firstname'] = $item_value['customer_firstname'];
 			}
-			if (isset($item_value['customer_lastname'])) {
+			if(isset($item_value['customer_lastname'])){
 				$items[$item_key]['customer_lastname']  = $item_value['customer_lastname'];
 			}
 			//添加上订单来源
-			if (isset($item_value['store_id'])) {
+			if(isset($item_value['store_id'])){
 				$items[$item_key]['store_id'] = $item_value['store_id'];
-			}
+			}				                           
 		}
 
 		return $items;
