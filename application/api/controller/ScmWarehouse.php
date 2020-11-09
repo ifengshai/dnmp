@@ -1565,14 +1565,20 @@ class ScmWarehouse extends Scm
             $this->error(__('此状态不能编辑'), [], 512);
         }
 //        $inventory_item_info = $_inventory_item->field('id,sku,inventory_qty,error_qty,real_time_qty,available_stock,distribution_occupy_stock')->where(['inventory_id'=>$inventory_id])->select();
+        $item = $this->_item->field('sku')->where(['id'=>$inventory_id])->select();
+        $item = collection($item)->toArray();
+        $sku_list = array_column($item, 'sku');
+        $where['sku'] = ['in', $sku_list];
         $inventory_item_info = $this->_inventory_item
-            ->alias('a')
-            ->field('a.id,a.sku,a.inventory_qty,b.stock,a.error_qty,a.real_time_qty,a.available_stock,a.distribution_occupy_stock')
-            ->where(['a.inventory_id'=>$inventory_id])
-            ->join(['stock.fa_item'=> 'b'],'a.sku=b.sku','left')
-            ->order('a.id', 'desc')
+            ->field('id,sku,inventory_qty,error_qty,real_time_qty,available_stock,distribution_occupy_stock')
+            ->where($where)
+            ->order('id', 'desc')
             ->select();
         $item_list = collection($inventory_item_info)->toArray();
+        foreach (array_filter($item_list) as $k => $v) {
+            $item_list[$k]['stock'] = $this->_item->where('sku',$v['sku'])->value('stock');
+            $stock = $this->_item->where('sku',$v['sku'])->value('stock');
+        }
 
         //盘点单所需数据
         $info =[
