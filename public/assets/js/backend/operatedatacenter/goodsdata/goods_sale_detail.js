@@ -7,7 +7,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
             Table.api.init({
                 commonSearch: true,
                 search: false,
-                showExport: false,
+                showExport: true,
                 showColumns: false,
                 showToggle: false,
                 extend: {
@@ -27,6 +27,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
                 pk: 'id',
                 sortName: 'id',
+                exportTypes:['excel'],
                 columns: [
                     [
                         {field: 'sku_change', title: __('平台SKU'), operate: false},

@@ -27,6 +27,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
                 pk: 'id',
                 sortName: 'id',
+                exportTypes:['excel'],
                 columns: [
                     [
                         // { field: 'number', title: __('序号') },
