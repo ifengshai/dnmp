@@ -902,7 +902,7 @@ class OrderData extends Backend
         $arr['os_bd_r'] = $options_params['os_bd_r'];
 
         //判断是否为成品老花镜
-        if ($options['info_buyRequest']['tmplens']['degrees']) {
+        if ($options['info_buyRequest']['tmplens']['degrees'] && !$arr['index_type']) {
             $arr['od_sph'] = $options['info_buyRequest']['tmplens']['degrees'];
             $arr['os_sph'] = $options['info_buyRequest']['tmplens']['degrees'];
             $arr['index_type'] = '1.61 Index Standard  Reading Glasses - Non Prescription';
