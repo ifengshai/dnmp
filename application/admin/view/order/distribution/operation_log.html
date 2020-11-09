@@ -9,8 +9,8 @@
     {foreach name="list" item="value"}
     <tr role="row" class="odd">
         <td>{$value.remark}</td>
-        <td>{$value.create_person|date='Y-m-d H:i:s'}</td>
-        <td>{$value.create_time}</td>
+        <td>{$value.create_person}</td>
+        <td>{$value.create_time|date='Y-m-d H:i:s',###}</td>
     </tr>
     {/foreach}
     </tbody>
