@@ -143,7 +143,6 @@
         </style>
         <table class="altrowstable" style="border:#0f0 solid 1px;margin:0px auto;margin-bottom:10px;width:90%;">
             <tbody>
-                {foreach $result as $v}
                 <tr>
                     <td>
                         <table class="altrowstable" style="margin:0 auto;margin:30px;width:90%;">
@@ -151,24 +150,24 @@
                                 <tr></tr>                               
                                 <tr>
                                     <td>SKU：</td>
-                                    <td>{$v.sku}</td>
+                                    <td>{$result.sku}</td>
                                 </tr>
                                 <tr>
                                     <td>数量：</td>
-                                    <td>{:round($v['qty_ordered'])}</td>
+                                    <td>1</td>
                                 </tr>
                                 <tr>
                                     <td>处方类型：</td>
-                                    <td>{$v.prescription_type}</td>
+                                    <td>{$result.prescription_type}</td>
                                 </tr>
    
                                 <tr>
                                     <td>镜片类型：</td>
-                                    <td>{$v['index_name']}</td>
+                                    <td>{$result['index_name']}</td>
                                 </tr>
                                 <tr>
                                     <td>镀膜类型：</td>
-                                    <td>{$v['coatiing_name']}</td>
+                                    <td>{$result['coatiing_name']}</td>
                                 </tr>
                                
                             </tbody>
@@ -191,35 +190,35 @@
                                 </tr>
                                 <tr>
                                     <td>Right(OD)</td>
-                                    <td>{:$v['od_sph'] ?? ''}</td>
-                                    <td>{:$v['od_cyl'] ?? ''}</td>
-                                    <td>{:$v['od_axis'] ?? ''}</td>
-                                    {if $v['os_add'] && $v['od_add'] && (float) $v['os_add'] * 1 != 0 && (float) $v['od_add'] * 1 != 0}
-                                    <td>{:$v['os_add'] ?? ''}</td>
+                                    <td>{:$result['od_sph'] ?? ''}</td>
+                                    <td>{:$result['od_cyl'] ?? ''}</td>
+                                    <td>{:$result['od_axis'] ?? ''}</td>
+                                    {if $result['os_add'] && $result['od_add'] && (float) $result['os_add'] * 1 != 0 && (float) $result['od_add'] * 1 != 0}
+                                    <td>{:$result['os_add'] ?? ''}</td>
                                     {else/}
-                                    <td rowspan="2">{:$v['os_add'] ?? $v['od_add']}</td>
+                                    <td rowspan="2">{:$result['os_add'] ?? $result['od_add']}</td>
                                     {/if}
-                                    {if $v['pdcheck'] == 'on'}
-                                    <td>{:$v['pd_r'] ?? ''}</td>
+                                    {if $result['pdcheck'] == 'on'}
+                                    <td>{:$result['pd_r'] ?? ''}</td>
                                     {else/}
-                                    <td rowspan="2">{:$v['pd'] ?? ''}</td>
+                                    <td rowspan="2">{:$result['pd'] ?? ''}</td>
                                     {/if}
                                 </tr>
                                 <tr>
                                     <td>Left(OS)</td>
-                                    <td>{:$v['os_sph'] ?? ''}</td>
-                                    <td>{:$v['os_cyl'] ?? ''}</td>
-                                    <td>{:$v['os_axis'] ?? ''}</td>
-                                    {if $v['os_add'] && $v['od_add'] && (float) $v['os_add'] * 1 != 0 && (float) $v['od_add'] * 1 != 0}
-                                    <td>{:$v['od_add'] ?? ''}</td>
+                                    <td>{:$result['os_sph'] ?? ''}</td>
+                                    <td>{:$result['os_cyl'] ?? ''}</td>
+                                    <td>{:$result['os_axis'] ?? ''}</td>
+                                    {if $result['os_add'] && $result['od_add'] && (float) $result['os_add'] * 1 != 0 && (float) $result['od_add'] * 1 != 0}
+                                    <td>{:$result['od_add'] ?? ''}</td>
                                     {/if}
-                                    {if $v['pdcheck'] == 'on'}
-                                    <td>{:$v['pd_l'] ?? ''}</td>
+                                    {if $result['pdcheck'] == 'on'}
+                                    <td>{:$result['pd_l'] ?? ''}</td>
                                     {/if}                                    
                                 </tr>
                             </tbody>
                         </table>
-                        {if $v['prismcheck'] == 'on'}
+                        {if $result['prismcheck'] == 'on'}
                         <table class="altrowstable" border="0" cellspacing="0" cellpadding="0"
                             style="margin:0 auto;margin-top:18px;width:90%;">
                             <tbody cellpadding="0">
@@ -235,24 +234,23 @@
                                 </tr>
                                 <tr>
                                     <td>Right(OD)</td>
-                                    <td>{:$v['od_pv'] ?? ''}</td>
-                                    <td>{:$v['od_bd'] ?? ''}</td>
-                                    <td>{:$v['od_pv_r'] ?? ''}</td>
-                                    <td>{:$v['od_bd_r'] ?? ''}</td>                                   
+                                    <td>{:$result['od_pv'] ?? ''}</td>
+                                    <td>{:$result['od_bd'] ?? ''}</td>
+                                    <td>{:$result['od_pv_r'] ?? ''}</td>
+                                    <td>{:$result['od_bd_r'] ?? ''}</td>                                   
                                 </tr>
                                 <tr>
                                     <td>Left(OS)</td>
-                                    <td>{:$v['os_pv'] ?? ''}</td>
-                                    <td>{:$v['os_bd'] ?? ''}</td>
-                                    <td>{:$v['os_pv_r'] ?? ''}</td>
-                                    <td>{:$v['os_bd_r'] ?? ''}</td>                                                                  
+                                    <td>{:$result['os_pv'] ?? ''}</td>
+                                    <td>{:$result['os_bd'] ?? ''}</td>
+                                    <td>{:$result['os_pv_r'] ?? ''}</td>
+                                    <td>{:$result['os_bd_r'] ?? ''}</td>                                                                  
                                 </tr>
                             </tbody>
                         </table>
                         {/if}      
                     </td>
                 </tr>
-                {/foreach}
             </tbody>
         </table>
     </div>
