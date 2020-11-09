@@ -203,6 +203,22 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                 },
                                 {
                                     name: 'detail',
+                                    text: '镜片参数',
+                                    title: __('镜片参数'),
+                                    classname: 'btn btn-xs btn-primary btn-dialog',
+                                    icon: 'fa fa-list',
+                                    url: 'order/distribution/detail',
+                                    extend: 'data-area = \'["60%","50%"]\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        return true;
+                                    }
+                                },
+                                {
+                                    name: 'detail',
                                     text: '操作记录',
                                     title: __('操作记录'),
                                     classname: 'btn btn-xs btn-primary btn-dialog',

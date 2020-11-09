@@ -713,8 +713,8 @@ class ScmWarehouse extends Scm
         $list = $this->_in_stock
             ->alias('a')
             ->where($where)
-            ->field('a.id,a.in_stock_number,b.check_order_number,a.createtime,a.status')
-            ->join(['fa_check_order' => 'b'], 'a.check_id=b.id')
+            ->field('a.id,a.check_id,a.in_stock_number,b.check_order_number,a.createtime,a.status')
+            ->join(['fa_check_order' => 'b'], 'a.check_id=b.id','left')
             ->group('a.id')
             ->order('a.createtime', 'desc')
             ->limit($offset, $limit)
@@ -725,6 +725,11 @@ class ScmWarehouse extends Scm
         foreach($list as $key=>$value){
             $list[$key]['status'] = $status_list[$value['status']];
             //按钮
+            if ($list[$key]['check_id']){
+                $list[$key]['check_in'] = 1;//是否有质检单 1有 0没有
+            } else {
+                $list[$key]['check_in'] = 0;//是否有质检单 1有 0没有
+            }
             $list[$key]['show_edit'] = 0 == $value['status'] ? 1 : 0;//编辑按钮
             $list[$key]['cancel_show'] = 0 == $value['status'] ? 1 : 0;//取消按钮
             $list[$key]['show_examine'] = 1 == $value['status'] ? 1 : 0;//审核按钮
@@ -1035,7 +1040,8 @@ class ScmWarehouse extends Scm
     }
 
     /**
-     * 编辑入库单页面/详情/入库单审核页面--只允许编辑入库分类和SKU入库数量--去除了质检合格数量--ok
+     * 编辑入库单页面/详情/入库单审核页面--只允许编辑入库分类和SKU入库数量--去除了质检合格数量--ok.
+     * 修改编辑页面可更改
      *
      * @参数 int in_stock_id  入库单ID
      * @author wgj
@@ -1442,13 +1448,24 @@ class ScmWarehouse extends Scm
             $skus = collection($skus)->toArray();
             $skus = array_column($skus, 'sku');
             if($skus){
-                $where['a.sku'] = ['not in', $skus];
-            }
-            if($query){
-                $where['a.sku|b.coding'] = ['like', '%' . $query . '%'];//coding库位编码，library_name库位名称
+                $where_item['sku'] = ['not in', $skus];
             }
             if($start_stock && $end_stock){
-                $where['c.stock'] = ['between', [$start_stock, $end_stock]];
+                $where_item['stock'] = ['between', [$start_stock, $end_stock]];
+                $item = $this->_item->field('sku')->where($where_item)->select();
+                $item = collection($item)->toArray();
+                $sku_list = array_column($item, 'sku');
+                if ($sku_list) {
+                    $where['a.sku'] = ['in', $sku_list];
+                } else {
+                    $this->success('暂无数据', ['info' => []],200);
+                }
+            } elseif ($skus) {
+                $where['a.sku'] = ['not in', $skus];
+            }
+
+            if($query){
+                $where['a.sku|b.coding'] = ['like', '%' . $query . '%'];//coding库位编码，library_name库位名称
             }
 
             $offset = ($page - 1) * $page_size;

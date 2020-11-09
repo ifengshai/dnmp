@@ -21,6 +21,7 @@ use app\admin\model\itemmanage\ItemPlatformSku;
 use app\admin\model\itemmanage\Item;
 use app\admin\model\order\order\NewOrderProcess;
 use app\admin\model\StockLog;
+use app\admin\model\order\order\LensData;
 
 /**
  * 配货列表
@@ -34,6 +35,8 @@ class Distribution extends Backend
     {
         parent::_initialize();
         $this->model = new NewOrderItemProcess();
+        $this->orderitemoption = new NewOrderItemOption();
+        $this->lensdata = new LensData();
     }
 
     /**
@@ -67,14 +70,13 @@ class Distribution extends Backend
                 //筛选异常
                 if ($filter['abnormal']) {
                     $_distribution_abnormal = new DistributionAbnormal();
-                    $abnormal_where['type'] = ['in',$filter['abnormal']];
+                    $abnormal_where['type'] = ['in', $filter['abnormal']];
                     if (8 == $label) {
                         $abnormal_where['status'] = 1;
                     }
                     $item_process_id = $_distribution_abnormal
                         ->where($abnormal_where)
-                        ->column('item_process_id')
-                    ;
+                        ->column('item_process_id');
                     $map['a.id'] = ['in', $item_process_id];
                 }
 
@@ -144,6 +146,25 @@ class Distribution extends Backend
         $label_list = ['全部', '待打印标签', '待配货', '待配镜片', '待加工', '待印logo', '待成品质检', '待合单', '跟单'];
         $this->assign('label_list', $label_list);
 
+        return $this->view->fetch();
+    }
+
+
+    /**
+     * 镜片详情
+     */
+    public function detail($ids = null)
+    {
+        $row = $this->model->get($ids);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+        //查询处方详情
+        $result = $this->orderitemoption->get($row['option_id'])->toArray();
+   
+        //根据镜片编码查询仓库镜片名称
+        $result['index_name'] = $this->lensdata->where('lens_number', $result['lens_number'])->value('lens_name');
+        $this->assign('result', $result);
         return $this->view->fetch();
     }
 
@@ -254,7 +275,7 @@ class Distribution extends Backend
             ->setCellValue("B1", "子单号")
             ->setCellValue("C1", "SKU")
             ->setCellValue("D1", "订单副数")
-//            ->setCellValue("E1", "工单")
+            //            ->setCellValue("E1", "工单")
             ->setCellValue("F1", "站点")
             ->setCellValue("G1", "加工类型")
             ->setCellValue("H1", "订单类型")
@@ -315,7 +336,7 @@ class Distribution extends Backend
             $spreadsheet->getActiveSheet()->setCellValue("B{$line}", $value['item_order_number']);
             $spreadsheet->getActiveSheet()->setCellValue("C{$line}", $value['sku']);
             $spreadsheet->getActiveSheet()->setCellValue("D{$line}", $value['total_qty_ordered']);
-//            $spreadsheet->getActiveSheet()->setCellValue("E{$line}", $value['base_grand_total']);
+            //            $spreadsheet->getActiveSheet()->setCellValue("E{$line}", $value['base_grand_total']);
             $spreadsheet->getActiveSheet()->setCellValue("F{$line}", $site_list[$value['site']]);
             $spreadsheet->getActiveSheet()->setCellValue("G{$line}", $prescription_type_list[$value['order_prescription_type']]);
             $spreadsheet->getActiveSheet()->setCellValue("H{$line}", $order_type_list[$value['order_type']]);
@@ -330,7 +351,7 @@ class Distribution extends Backend
         $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(40);
         $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(30);
         $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(20);
-//        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(20);
+        //        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(15);
         $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(15);
         $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(15);
@@ -397,13 +418,12 @@ class Distribution extends Backend
                 //标记状态
                 $this->model
                     ->allowField(true)
-                    ->isUpdate(true, ['id'=>['in', $ids]])
-                    ->save(['distribution_status'=>2])
-                ;
+                    ->isUpdate(true, ['id' => ['in', $ids]])
+                    ->save(['distribution_status' => 2]);
 
                 //记录配货日志
                 $admin = (object)session('admin');
-                DistributionLog::record($admin,$ids,1,'标记打印完成');
+                DistributionLog::record($admin, $ids, 1, '标记打印完成');
 
                 Db::commit();
             } catch (PDOException $e) {
@@ -448,9 +468,8 @@ EOF;
             $order_list = $_new_order
                 ->field('id,total_qty_ordered,increment_id')
                 ->where(['id' => ['in', array_unique($order_ids)]])
-                ->select()
-            ;
-            $order_list = array_column($order_list,NULL,'id');
+                ->select();
+            $order_list = array_column($order_list, NULL, 'id');
 
             //获取sku绑定库位数据
             $_stock_sku = new StockSku();
@@ -458,10 +477,9 @@ EOF;
                 ->alias('a')
                 ->field('a.sku,b.coding')
                 ->join(['fa_store_house' => 'b'], 'a.store_id=b.id')
-                ->where(['a.sku' => ['in', array_unique($sku_arr)],'b.type' => 1])
-                ->select()
-            ;
-            $store_house_list = array_column($store_house_list,NULL,'sku');
+                ->where(['a.sku' => ['in', array_unique($sku_arr)], 'b.type' => 1])
+                ->select();
+            $store_house_list = array_column($store_house_list, NULL, 'sku');
 
             $file_content = '';
             foreach ($list as $processing_value) {
@@ -506,11 +524,11 @@ EOF;
                     $prism_os_value = '';
                     $coating_name = "<td colspan='4' rowspan='3' style='background-color:#fff;word-break: break-word;line-height: 12px;'>" . $processing_value['coatiing_name'] . "</td>";
                 }
-                $serial = explode('-',$item_order_number);
+                $serial = explode('-', $item_order_number);
 
-                if($store_house_list[$processing_value['sku']]['coding']){
+                if ($store_house_list[$processing_value['sku']]['coding']) {
                     $coding = "<b>" . $store_house_list[$processing_value['sku']]['coding'] . "</b><br>";
-                }else{
+                } else {
                     $coding = '';
                 }
 
@@ -526,7 +544,7 @@ EOF;
                 <tbody cellpadding='0'>
                 <tr>
                 <td colspan='10' style=' text-align:center;padding:0px 0px 0px 0px;'>
-                ".$processing_value['prescription_type']."
+                " . $processing_value['prescription_type'] . "
                 &nbsp;&nbsp;Order:" . $order_list[$processing_value['order_id']]['increment_id'] . "
                 <span style=' margin-left:5px;'>SKU:" . $processing_value['sku'] . "</span>
                 <span style=' margin-left:5px;'>Num:<strong>" . $serial[1] . "/" . $order_list[$processing_value['order_id']]['total_qty_ordered'] . "</strong></span>
@@ -641,10 +659,9 @@ EOF;
             //检测异常状态
             $_distribution_abnormal = new DistributionAbnormal();
             $abnormal_count = $_distribution_abnormal
-                ->where(['item_process_id'=>['in', $ids],'status'=>1])
-                ->count()
-            ;
-            if($abnormal_count > 0){
+                ->where(['item_process_id' => ['in', $ids], 'status' => 1])
+                ->count();
+            if ($abnormal_count > 0) {
                 return $this->error('有异常待处理的子订单', url('index?ref=addtabs'));
             }
 
@@ -654,11 +671,10 @@ EOF;
             $item_list = $this->model
                 ->field('id,site,distribution_status,order_id,option_id')
                 ->where(['id' => ['in', $ids]])
-                ->select()
-            ;
+                ->select();
             $order_ids = [];
             $option_ids = [];
-            foreach($item_list as $value){
+            foreach ($item_list as $value) {
                 if ($value['distribution_status'] != $check_status) {
                     return $this->error('存在非当前节点的子订单', url('index?ref=addtabs'));
                 }
@@ -670,17 +686,15 @@ EOF;
             $_new_order = new NewOrder();
             $total_list = $_new_order
                 ->where(['id' => ['in', array_unique($order_ids)]])
-                ->column('total_qty_ordered','id')
-            ;
+                ->column('total_qty_ordered', 'id');
 
             //获取子订单处方数据
             $_new_order_item_option = new NewOrderItemOption();
             $option_list = $_new_order_item_option
                 ->field('id,is_print_logo,sku,index_name')
                 ->where(['id' => ['in', array_unique($option_ids)]])
-                ->select()
-            ;
-            $option_list = array_column($option_list,NULL,'id');
+                ->select();
+            $option_list = array_column($option_list, NULL, 'id');
 
             //库存、关系映射表
             $_item_platform_sku = new ItemPlatformSku();
@@ -688,12 +702,12 @@ EOF;
 
             //状态类型
             $status_arr = [
-                2=>'配货',
-                3=>'配镜片',
-                4=>'加工',
-                5=>'印logo',
-                6=>'成品质检',
-                8=>'合单'
+                2 => '配货',
+                3 => '配镜片',
+                4 => '加工',
+                5 => '印logo',
+                6 => '成品质检',
+                8 => '合单'
             ];
 
             //操作人信息
@@ -705,36 +719,36 @@ EOF;
                 $_new_order_process = new NewOrderProcess();
 
                 //更新状态
-                foreach($item_list as $value){
+                foreach ($item_list as $value) {
                     //下一步状态
-                    if(2 == $check_status){
-                        if($option_list[$value['option_id']]['index_name']){
+                    if (2 == $check_status) {
+                        if ($option_list[$value['option_id']]['index_name']) {
                             $save_status = 3;
-                        }else{
-                            if($option_list[$value['option_id']]['is_print_logo']){
+                        } else {
+                            if ($option_list[$value['option_id']]['is_print_logo']) {
                                 $save_status = 5;
-                            }else{
-                                if($total_list[$value['order_id']]['total_qty_ordered'] > 1){
+                            } else {
+                                if ($total_list[$value['order_id']]['total_qty_ordered'] > 1) {
                                     $save_status = 7;
-                                }else{
+                                } else {
                                     $save_status = 9;
                                 }
                             }
                         }
-                    }elseif(3 == $check_status){
+                    } elseif (3 == $check_status) {
                         $save_status = 4;
-                    }elseif(4 == $check_status){
-                        if($option_list[$value['option_id']]['is_print_logo']){
+                    } elseif (4 == $check_status) {
+                        if ($option_list[$value['option_id']]['is_print_logo']) {
                             $save_status = 5;
-                        }else{
+                        } else {
                             $save_status = 6;
                         }
-                    }elseif(5 == $check_status){
+                    } elseif (5 == $check_status) {
                         $save_status = 6;
-                    }elseif(6 == $check_status){
-                        if($total_list[$value['order_id']]['total_qty_ordered'] > 1){
+                    } elseif (6 == $check_status) {
+                        if ($total_list[$value['order_id']]['total_qty_ordered'] > 1) {
                             $save_status = 7;
-                        }else{
+                        } else {
                             $save_status = 9;
                         }
 
@@ -743,31 +757,28 @@ EOF;
 
                         //扣减订单占用库存、配货占用库存、总库存
                         $_item
-                            ->where(['sku'=>$true_sku])
+                            ->where(['sku' => $true_sku])
                             ->dec('occupy_stock', 1)
                             ->dec('distribution_occupy_stock', 1)
                             ->dec('stock', 1)
-                            ->update()
-                        ;
+                            ->update();
                     }
 
                     //订单主表标记已合单
-                    if(9 == $save_status){
+                    if (9 == $save_status) {
                         $_new_order_process
                             ->allowField(true)
-                            ->isUpdate(true, ['order_id'=>$value['order_id']])
-                            ->save(['combine_status'=>1,'combine_time'=>time()])
-                        ;
+                            ->isUpdate(true, ['order_id' => $value['order_id']])
+                            ->save(['combine_status' => 1, 'combine_time' => time()]);
                     }
 
                     $this->model
                         ->allowField(true)
-                        ->isUpdate(true, ['id'=>$value['id']])
-                        ->save(['distribution_status'=>$save_status])
-                    ;
+                        ->isUpdate(true, ['id' => $value['id']])
+                        ->save(['distribution_status' => $save_status]);
 
                     //操作成功记录
-                    DistributionLog::record($admin,$value['id'],$check_status,$status_arr[$check_status].'完成');
+                    DistributionLog::record($admin, $value['id'], $check_status, $status_arr[$check_status] . '完成');
                 }
 
                 Db::commit();
@@ -794,17 +805,16 @@ EOF;
         $ids = input('id_params/a');
         if ($ids) {
             $reason = input('reason');
-            if (!in_array($reason,[1,2,3,4])) {
+            if (!in_array($reason, [1, 2, 3, 4])) {
                 return $this->error('拒绝原因错误', url('index?ref=addtabs'));
             }
 
             //检测异常状态
             $_distribution_abnormal = new DistributionAbnormal();
             $abnormal_count = $_distribution_abnormal
-                ->where(['item_process_id'=>['in', $ids],'status'=>1])
-                ->count()
-            ;
-            if($abnormal_count > 0){
+                ->where(['item_process_id' => ['in', $ids], 'status' => 1])
+                ->count();
+            if ($abnormal_count > 0) {
                 return $this->error('有异常待处理的子订单', url('index?ref=addtabs'));
             }
 
@@ -814,9 +824,8 @@ EOF;
             $item_list = $this->model
                 ->field('id,site,sku,distribution_status')
                 ->where(['id' => ['in', $ids]])
-                ->select()
-            ;
-            foreach($item_list as $value){
+                ->select();
+            foreach ($item_list as $value) {
                 if ($value['distribution_status'] != 6) {
                     return $this->error('存在非当前节点的子订单', url('index?ref=addtabs'));
                 }
@@ -829,10 +838,10 @@ EOF;
 
             //状态
             $status_arr = [
-                1=>['status'=>4,'name'=>'质检拒绝：加工调整'],
-                2=>['status'=>2,'name'=>'质检拒绝：镜架报损'],
-                3=>['status'=>3,'name'=>'质检拒绝：镜片报损'],
-                4=>['status'=>5,'name'=>'质检拒绝：logo调整']
+                1 => ['status' => 4, 'name' => '质检拒绝：加工调整'],
+                2 => ['status' => 2, 'name' => '质检拒绝：镜架报损'],
+                3 => ['status' => 3, 'name' => '质检拒绝：镜片报损'],
+                4 => ['status' => 5, 'name' => '质检拒绝：logo调整']
             ];
 
             //操作人信息
@@ -843,32 +852,29 @@ EOF;
                 //子订单状态回滚
                 $this->model
                     ->allowField(true)
-                    ->isUpdate(true, ['id'=>['in', $ids]])
-                    ->save(['distribution_status'=>$status_arr[$reason]['status']])
-                ;
+                    ->isUpdate(true, ['id' => ['in', $ids]])
+                    ->save(['distribution_status' => $status_arr[$reason]['status']]);
 
                 //更新状态
-                foreach($item_list as $value){
+                foreach ($item_list as $value) {
                     //镜片报损扣减可用库存、虚拟仓库存、配货占用库存、总库存
-                    if(2 == $reason){
+                    if (2 == $reason) {
                         //获取true_sku
                         $true_sku = $_item_platform_sku->getTrueSku($value['sku'], $value['site']);
 
                         //扣减虚拟仓库存
                         $_item_platform_sku
-                            ->where(['sku'=>$true_sku,'platform_type'=>$value['site']])
+                            ->where(['sku' => $true_sku, 'platform_type' => $value['site']])
                             ->dec('stock', 1)
-                            ->update()
-                        ;
+                            ->update();
 
                         //扣减可用库存、配货占用库存、总库存
                         $_item
-                            ->where(['sku'=>$true_sku])
+                            ->where(['sku' => $true_sku])
                             ->dec('available_stock', 1)
                             ->dec('distribution_occupy_stock', 1)
                             ->dec('stock', 1)
-                            ->update()
-                        ;
+                            ->update();
 
                         //扣库存日志
                         $stock_data = [
@@ -886,7 +892,7 @@ EOF;
                     }
 
                     //记录日志
-                    DistributionLog::record($admin,$value['id'],6,$status_arr[$reason]['name']);
+                    DistributionLog::record($admin, $value['id'], 6, $status_arr[$reason]['name']);
                 }
 
                 Db::commit();
@@ -914,8 +920,7 @@ EOF;
         $item_info = $this->model
             ->field('id,site,sku,distribution_status,abnormal_house_id')
             ->where(['id' => $ids])
-            ->find()
-        ;
+            ->find();
         if (empty($item_info)) {
             return $this->error('子订单不存在', url('index?ref=addtabs'));
         }
@@ -927,40 +932,39 @@ EOF;
         $_distribution_abnormal = new DistributionAbnormal();
         $abnormal_info = $_distribution_abnormal
             ->field('type')
-            ->where(['id'=>$item_info['abnormal_house_id'],'status'=>1])
-            ->find()
-        ;
+            ->where(['id' => $item_info['abnormal_house_id'], 'status' => 1])
+            ->find();
         if (empty($abnormal_info)) {
             return $this->error('当前子订单异常信息获取失败', url('index?ref=addtabs'));
         }
 
         //状态列表
         $status_arr = [
-            1=>'待打印标签',
-            2=>'待配货',
-            3=>'待配镜片',
-            4=>'待加工',
-            5=>'待印logo',
-            6=>'待成品质检'
+            1 => '待打印标签',
+            2 => '待配货',
+            3 => '待配镜片',
+            4 => '待加工',
+            5 => '待印logo',
+            6 => '待成品质检'
         ];
 
         //异常原因列表
         $abnormal_arr = [
-            1=>'配货缺货',
-            2=>'商品条码贴错',
-            3=>'核实处方',
-            4=>'镜片缺货',
-            5=>'镜片重做',
-            6=>'定制片超时',
-            7=>'不可加工',
-            8=>'镜架加工报损',
-            9=>'镜片加工报损',
-            10=>'logo不可加工',
-            11=>'镜架印logo报损',
-            12=>'合单缺货',
-            13=>'核实地址',
-            14=>'物流退件',
-            15=>'客户退件'
+            1 => '配货缺货',
+            2 => '商品条码贴错',
+            3 => '核实处方',
+            4 => '镜片缺货',
+            5 => '镜片重做',
+            6 => '定制片超时',
+            7 => '不可加工',
+            8 => '镜架加工报损',
+            9 => '镜片加工报损',
+            10 => 'logo不可加工',
+            11 => '镜架印logo报损',
+            12 => '合单缺货',
+            13 => '核实地址',
+            14 => '物流退件',
+            15 => '客户退件'
         ];
 
         if ($this->request->isAjax()) {
@@ -974,16 +978,16 @@ EOF;
             $status = input('status');
             switch ($status) {
                 case 1:
-                    $check_status = [4,5,6];
+                    $check_status = [4, 5, 6];
                     break;
                 case 2:
-                    $check_status = [4,5,6];
+                    $check_status = [4, 5, 6];
                     break;
                 case 3:
-                    $check_status = [4,5,6];
+                    $check_status = [4, 5, 6];
                     break;
                 case 4:
-                    $check_status = [5,6];
+                    $check_status = [5, 6];
                     break;
                 case 5:
                     $check_status = [6];
@@ -994,7 +998,7 @@ EOF;
             }
 
             //检测状态
-            if (!in_array($item_info['distribution_status'],$check_status)) {
+            if (!in_array($item_info['distribution_status'], $check_status)) {
                 return $this->error('当前子订单不可返回至此节点', url('index?ref=addtabs'));
             }
 
@@ -1003,40 +1007,36 @@ EOF;
                 //子订单状态回滚
                 $this->model
                     ->allowField(true)
-                    ->isUpdate(true, ['id'=>$ids])
-                    ->save(['distribution_status'=>$status])
-                ;
+                    ->isUpdate(true, ['id' => $ids])
+                    ->save(['distribution_status' => $status]);
 
                 //标记异常状态
                 $_distribution_abnormal
                     ->allowField(true)
-                    ->isUpdate(true, ['id'=>$item_info['abnormal_house_id']])
-                    ->save(['status'=>2,'do_time'=>time(),'do_person'=>$admin->nickname])
-                ;
+                    ->isUpdate(true, ['id' => $item_info['abnormal_house_id']])
+                    ->save(['status' => 2, 'do_time' => time(), 'do_person' => $admin->nickname]);
 
                 //镜片报损扣减可用库存、虚拟仓库存、配货占用库存、总库存
-                $remark = '处理异常：'.$abnormal_arr[$abnormal_info['type']].',当前节点：'.$status_arr[$item_info['distribution_status']].',返回节点：'.$status_arr[$status];
-                if(3 == $status){
+                $remark = '处理异常：' . $abnormal_arr[$abnormal_info['type']] . ',当前节点：' . $status_arr[$item_info['distribution_status']] . ',返回节点：' . $status_arr[$status];
+                if (3 == $status) {
                     //获取true_sku
                     $_item_platform_sku = new ItemPlatformSku();
                     $true_sku = $_item_platform_sku->getTrueSku($item_info['sku'], $item_info['site']);
 
                     //扣减虚拟仓库存
                     $_item_platform_sku
-                        ->where(['sku'=>$true_sku,'platform_type'=>$item_info['site']])
+                        ->where(['sku' => $true_sku, 'platform_type' => $item_info['site']])
                         ->dec('stock', 1)
-                        ->update()
-                    ;
+                        ->update();
 
                     //扣减可用库存、配货占用库存、总库存
                     $_item = new Item();
                     $_item
-                        ->where(['sku'=>$true_sku])
+                        ->where(['sku' => $true_sku])
                         ->dec('available_stock', 1)
                         ->dec('distribution_occupy_stock', 1)
                         ->dec('stock', 1)
-                        ->update()
-                    ;
+                        ->update();
 
                     //扣库存日志
                     $stock_data = [
@@ -1090,21 +1090,18 @@ EOF;
         $item_info = $this->model
             ->field('id')
             ->where(['id' => $ids])
-            ->find()
-        ;
+            ->find();
         if (empty($item_info)) {
             return $this->error('子订单不存在', url('index?ref=addtabs'));
         }
 
         //检测异常状态
         $list = (new DistributionLog())
-            ->where(['item_process_id'=>$ids])
-            ->select()
-        ;
+            ->where(['item_process_id' => $ids])
+            ->select();
         $list = collection($list)->toArray();
 
         $this->view->assign("list", $list);
         return $this->view->fetch();
     }
-
 }
