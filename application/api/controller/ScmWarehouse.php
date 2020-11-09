@@ -817,28 +817,10 @@ class ScmWarehouse extends Scm
             if ($result !== false){
                 $save_data = [];
 
-                //检测条形码是否已绑定
-                $where['out_stock_id'] = [['>',0], ['neq',$in_stock_id]];
-
                 foreach (array_filter($item_sku) as $k => $v) {
                     $save_data['sku'] = $v['sku'];
                     $save_data['in_stock_num'] = $v['in_stock_num'];//入库数量
                     $this->_in_stock_item->allowField(true)->save($save_data, ['in_stock_id' => $in_stock_id]);
-
-                    $sku_code = array_column($v['sku_agg'],'code');
-                    count($v['sku_agg']) != count(array_unique($sku_code))
-                    &&
-                    $this->error(__('条形码有重复，请检查'), [], 405);
-
-                    $where['code'] = ['in',$sku_code];
-                    $check_quantity = $this->_product_bar_code_item
-                        ->where($where)
-                        ->field('code')
-                        ->find();
-                    if(!empty($check_quantity['code'])){
-                        $this->error(__('条形码:'.$check_quantity['code'].' 已绑定,请移除'), [], 405);
-                        exit;
-                    }
 
                 }
                 $this->success($msg.'成功', [],200);
@@ -854,6 +836,24 @@ class ScmWarehouse extends Scm
             $result = false;
             Db::startTrans();
             try {
+
+                //检测条形码是否已绑定
+                foreach ($item_sku as $key => $value) {
+                    $sku_code = array_column($value['sku_agg'],'code');
+                    count($value['sku_agg']) != count(array_unique($sku_code))
+                    &&
+                    $this->error(__('条形码有重复，请检查'), [], 405);
+
+                    $where['code'] = ['in',$sku_code];
+                    $check_quantity = $this->_product_bar_code_item
+                        ->where($where)
+                        ->field('code')
+                        ->find();
+                    if(!empty($check_quantity['code'])){
+                        $this->error(__('条形码:'.$check_quantity['code'].' 已绑定,请移除'), [], 405);
+                        exit;
+                    }
+                }
 
                 //存在平台id 代表把当前入库单的sku分给这个平台 首先做判断 判断入库单的sku是否都有此平台对应的映射关系
                 $params['create_person'] = $this->auth->nickname;
@@ -876,6 +876,14 @@ class ScmWarehouse extends Scm
                             $data[$k]['sku'] = $v['sku'];
                             $data[$k]['in_stock_num'] = $v['in_stock_num'];//入库数量
                             $data[$k]['in_stock_id'] = $this->_in_stock->id;
+
+                            //入库单绑定条形码
+                            if(!empty($v['sku_agg'])){
+                                $code_clear = [
+                                    'in_stock_id' => $this->_in_stock->id
+                                ];
+                                $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => ['in',$v['sku_agg']]])->save($code_clear);
+                            }
                         }
                         //批量添加
                         $this->_in_stock_item->allowField(true)->saveAll($data);
@@ -893,6 +901,14 @@ class ScmWarehouse extends Scm
                             $data[$k]['sku'] = $v['sku'];
                             $data[$k]['in_stock_num'] = $v['in_stock_num'];//入库数量
                             $data[$k]['in_stock_id'] = $this->_in_stock->id;
+
+                            //入库单绑定条形码
+                            if(!empty($v['sku_agg'])){
+                                $code_clear = [
+                                    'in_stock_id' => $this->_in_stock->id
+                                ];
+                                $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => ['in',$v['sku_agg']]])->save($code_clear);
+                            }
                         }
                         //批量添加
                         $this->_in_stock_item->allowField(true)->saveAll($data);
