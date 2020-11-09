@@ -1477,7 +1477,6 @@ class ScmWarehouse extends Scm
                 ->field('a.id,a.sku,b.coding')
                 ->where($where)
                 ->join(['fa_store_house'=> 'b'],'a.store_id=b.id','left')
-                ->join(['stock.fa_item'=> 'c'],'a.sku=c.sku','left')
                 ->order('a.id', 'desc')
                 ->limit($offset, $limit)
                 ->select();
