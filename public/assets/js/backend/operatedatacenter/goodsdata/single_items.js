@@ -7,7 +7,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
             Table.api.init({
                 commonSearch: false,
                 search: false,
-                showExport: false,
+                showExport: true,
                 showColumns: false,
                 showToggle: false,
                 extend: {

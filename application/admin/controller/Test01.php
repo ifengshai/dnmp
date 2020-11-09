@@ -568,7 +568,7 @@ class Test01 extends Backend
 //        $data = '2020-11-04';
         //统计昨天的数据
         $data = date('Y-m-d', strtotime('-1 day'));
-        $data = '2020-11-07';
+        // $data = '2020-11-07';
 //         Db::name('datacenter_sku_day')
 //             ->where(['day_date'=>$data,'site'=>1,'goods_type'=>0])
 //             ->update(['goods_type'=>1]);
