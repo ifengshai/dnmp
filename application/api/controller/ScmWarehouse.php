@@ -1051,7 +1051,6 @@ class ScmWarehouse extends Scm
         if ($_in_stock_info['status'] != 0){
             $this->error(__('只有新建状态才可以修改'), [], 510);
         }
-        $check_order_number = $this->_check->get($_in_stock_info['check_id']);
 
         //获取入库单列表数据
         $item_list = $this->_in_stock
@@ -1064,21 +1063,32 @@ class ScmWarehouse extends Scm
             ->order('a.createtime', 'desc')
             ->select();
         $item_list = collection($item_list)->toArray();
-
         //入库单所需数据
         $info =[
             'in_stock_id'=>$_in_stock_info['id'],
             'in_stock_number'=>$_in_stock_info['in_stock_number'],
-            'check_order_number'=>$check_order_number['check_order_number'],
             'item_list'=>$item_list,
         ];
 
+        $check_order_info = $this->_check->get($_in_stock_info['check_id']);
         //查询入库分类
         $in_stock_type = $this->_in_stock_type->field('id, name')->where('is_del', 1)->select();
-        if ($_in_stock_info['check_id']){
-            //有关联质检单ID，则入库类型只取第一条数据：采购入库
+
+        if ($check_order_info){
+            //存在质检单号，则入库类型只取第一条数据：采购入库
             $in_stock_type = $in_stock_type[0];
+            foreach($item_list as $key=>$value){
+                //质检单默认留样数量为1，质检合格数量为入库数量 + 留样数量
+                $item_list[$key]['quantity_num'] = $value['in_stock_num'] + $value['sample_num'];
+            }
+            $info['check_order_number'] = $check_order_info['check_order_number'];
+
+        } else {
+            $platform_list = $this->_magento_platform->field('id, name')->where(['is_del' => 1,'status' => 1])->select();
+            $info['platform_check_id'] = $_in_stock_info['platform_id'];
+            $info['platform_list'] = $platform_list;
         }
+        $info['in_stock_type_check_id'] = $_in_stock_info['type_id'];
 
         $info['in_stock_type_list'] = $in_stock_type;
 
