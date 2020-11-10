@@ -1563,7 +1563,7 @@ class ScmWarehouse extends Scm
         //获取盘点单数据
         $_inventory_info = $this->_inventory->get($inventory_id);
         empty($_inventory_info) && $this->error(__('盘点单不存在'), [], 531);
-        if ($_inventory_info['status'] > 0) {
+        if ($_inventory_info['status'] > 1) {
             $this->error(__('此状态不能编辑'), [], 512);
         }
 //        $inventory_item_info = $_inventory_item->field('id,sku,inventory_qty,error_qty,real_time_qty,available_stock,distribution_occupy_stock')->where(['inventory_id'=>$inventory_id])->select();
