@@ -1012,7 +1012,8 @@ class ScmWarehouse extends Scm
             $info['check_id'] = $check_id;
             $info['check_order_number'] = $check_data['check_order_number'];
             //有关联质检单ID，则入库类型只取第一条数据：采购入库
-            $in_stock_type = $in_stock_type[0];
+//            $in_stock_type = $in_stock_type[0];
+            $in_stock_type_list[] = $in_stock_type[0];
 
             //获取质检单商品数据
             $item_list = $this->_check_item
@@ -1031,10 +1032,11 @@ class ScmWarehouse extends Scm
             //入库单直接添加，查询站点数据
             $platform_list = $this->_magento_platform->field('id, name')->where(['is_del' => 1,'status' => 1])->select();
             $info['platform_list'] = $platform_list;
+            $in_stock_type_list = $in_stock_type;
 
         }
 
-        $info['in_stock_type'] = $in_stock_type;
+        $info['in_stock_type'] = $in_stock_type_list;
 
         $this->success('', ['info' => $info],200);
     }
