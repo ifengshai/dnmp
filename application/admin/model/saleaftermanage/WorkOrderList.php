@@ -46,7 +46,7 @@ class WorkOrderList extends Model
      */
     public function getWorkPlatFormFormatAttr($value, $data)
     {
-        $status = ['1' => 'zeelool', '2' => 'voogueme', '3' => 'nihao','4'=>'meeloog','9'=>'zeelool_es','10'=>'zeelool_de'];
+        $status = ['1' => 'zeelool', '2' => 'voogueme', '3' => 'nihao','4'=>'meeloog','5'=>'weseeoptical','8'=>'rufoo','9'=>'zeelool_es','10'=>'zeelool_de','11'=>'zeelooljp'];
         return $status[$data['work_platform']];
     }
 
