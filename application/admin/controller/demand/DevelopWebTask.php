@@ -184,7 +184,7 @@ class DevelopWebTask extends Backend
         $authUserIds = Auth::getGroupUserId(config('demand.php_group_id')) ?: [];
         //组员ID
         $usersId = Auth::getGroupUserId(config('demand.php_group_person_id')) ?: [];
-        $usersId = array_merge($usersId, [$authUserIds]);
+        $usersId = array_merge($usersId, $authUserIds);
         $admin = new \app\admin\model\Admin();
         $phper_user = $admin->whereIn('id',$usersId)->column('nickname','id');
         $this->assign('phper_user', $phper_user);
