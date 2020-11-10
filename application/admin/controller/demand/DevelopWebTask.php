@@ -179,7 +179,16 @@ class DevelopWebTask extends Backend
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
-        $this->assign('phper_user', config('develop_demand.phper_user'));
+       
+        //是否是开发主管
+        $authUserIds = Auth::getGroupUserId(config('demand.php_group_id')) ?: [];
+        //组员ID
+        $usersId = Auth::getGroupUserId(config('demand.php_group_person_id')) ?: [];
+        $usersId = array_merge($usersId, [$authUserIds]);
+        $admin = new \app\admin\model\Admin();
+        $phper_user = $admin->whereIn('id',$usersId)->column('nickname','id');
+        $this->assign('phper_user', $phper_user);
+
         return $this->view->fetch();
     }
 
