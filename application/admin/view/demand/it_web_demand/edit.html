@@ -273,9 +273,9 @@
                          <button type="submit" value="sub" disabled class="btn btn-sub" style='background-color: #169BD5;width: 150px;color: white;font-size: 14px;font-weight: 700;float: right;'>{:__('修  改')}</button>
                         {else}
                             {if $pm_status}
-                            <button type="submit" value="sub" class="btn btn-sub" style='background-color: #169BD5;width: 150px;color: white;font-size: 14px;font-weight: 700;float: right;'>{if $row['pm_audit_status'] == 3}{:__('修  改11')}{else}{:__('提  交')}{/if}</button>
+                            <button type="submit" value="sub" class="btn btn-sub" style='background-color: #169BD5;width: 150px;color: white;font-size: 14px;font-weight: 700;float: right;'>{if $row['pm_audit_status'] == 3}{:__('修  改')}{else}{:__('提  交')}{/if}</button>
                             {else}
-                            <button type="submit" value="sub" disabled class="btn btn-sub" style='background-color: #169BD5;width: 150px;color: white;font-size: 14px;font-weight: 700;float: right;'>{if $row['pm_audit_status'] == 3}{:__('修  改22')}{else}{:__('提  交')}{/if}</button>
+                            <button type="submit" value="sub" disabled class="btn btn-sub" style='background-color: #169BD5;width: 150px;color: white;font-size: 14px;font-weight: 700;float: right;'>{if $row['pm_audit_status'] == 3}{:__('修  改')}{else}{:__('提  交')}{/if}</button>
                             {/if}
                         {/if}
                 {else}
