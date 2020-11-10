@@ -145,7 +145,7 @@
         <div class="input_item">
             <label class="input_tiem_label">重要原因：</label>
             <span class="input_tiem_span">
-                {:Form::select('row[important_reasons][]', config('demand.important_reasons'), $row['important_reasons'], ['class'=>'selectpicker select_input', 'data-rule'=>'required','title'=>'请选择','multiple'=>true])}
+                {:Form::select('row[important_reasons][]', config('demand.important_reasons'), $row['important_reasons'], ['class'=>'selectpicker select_input','title'=>'请选择','multiple'=>true])}
             </span>
         </div>
 
@@ -165,7 +165,7 @@
             <label class="input_tiem_label ">任务周期：</label>
             <span class="input_tiem_span">
 <!--                <input name="row[node_time]" class="select_input" data-rule="required" type="text" value="" style="height: 31px;" placeholder="输入整数(单位：天)">-->
-                <input  style="width: 60%" class="form-control datetimepicker form-control" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[node_time]" type="text" >
+                <input  style="width: 60%" class="form-control datetimepicker form-control" data-date-format="YYYY-MM-DD" data-use-current="true" name="row[node_time]" type="text" >
             </span>
         </div>
         {/if}
