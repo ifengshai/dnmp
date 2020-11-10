@@ -74,9 +74,18 @@
                 <label class="input_tiem_label">计划完成：</label>
                 <span class="input_tiem_span">
                     {if $row['test_status'] == 1}
-                        <input class="selectpicker datetimepicker select_input" type="text" name="row[web_designer_expect_time]" value="{$row.web_designer_expect_time}" data-date-format="YYYY-MM-DD" data-date-min-date="{$row.start_time}" data-date-max-date="{$row.end_time}" data-date-default-date="{$row.end_time}">
+<!--                        <input class="selectpicker datetimepicker select_input" type="text" name="row[web_designer_expect_time]" value="{$row.web_designer_expect_time}" data-date-format="YYYY-MM-DD" data-date-min-date="{$row.start_time}" data-date-max-date="{$row.end_time}" data-date-default-date="{$row.end_time}">-->
+<!--                        <input  class="selectpicker datetimepicker select_input" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[node_time]" type="text" value="{$row.web_designer_expect_time|datetime}">-->
+                        {if $row['web_designer_expect_time'] !== null}
+
+                     <input  class="selectpicker datetimepicker select_input" data-date-format="YYYY-MM-DD" data-use-current="true" name="row[web_designer_expect_time]" type="text" value="{$row.web_designer_expect_time|datetime}">
+                       {else/}
+                     <input  class="selectpicker datetimepicker select_input" data-date-format="YYYY-MM-DD" data-use-current="true" name="row[web_designer_expect_time]" type="text" >
+
+                        {/if}
                     {else}
-                        <input class="selectpicker datetimepicker select_input" disabled type="text" name="row[web_designer_expect_time]" value="{$row.web_designer_expect_time}" data-date-format="YYYY-MM-DD" data-date-min-date="{$row.start_time}" data-date-max-date="{$row.end_time}" data-date-default-date="{$row.end_time}">
+<!--                        <input class="selectpicker datetimepicker select_input" disabled type="text" name="row[web_designer_expect_time]" value="{$row.web_designer_expect_time}" data-date-format="YYYY-MM-DD" data-date-min-date="{$row.start_time}" data-date-max-date="{$row.end_time}" data-date-default-date="{$row.end_time}">-->
+                        <input  class="selectpicker datetimepicker select_input"  disabled data-date-format="YYYY-MM-DD" data-use-current="true" name="row[web_designer_expect_time]" type="text" value="{$row.web_designer_expect_time|datetime}">
                     {/if}
                 </span>
             </div>
@@ -155,9 +164,10 @@
                 <label class="input_tiem_label">计划完成：</label>
                 <span class="input_tiem_span">
                     {if $row['test_status'] == 1}
-                        <input class="selectpicker datetimepicker select_input" type="text" name="row[phper_expect_time]" value="{$row.phper_expect_time}" data-date-format="YYYY-MM-DD" data-date-min-date="{$row.start_time}" data-date-max-date="{$row.end_time}" data-date-default-date="{$row.end_time}">
+                      <input  class="selectpicker datetimepicker select_input" data-date-format="YYYY-MM-DD" data-use-current="true" name="row[phper_expect_time]" type="text"  value="{$row.phper_expect_time}">
+
                     {else}
-                        <input class="selectpicker datetimepicker select_input" disabled type="text" name="row[phper_expect_time]" value="{$row.phper_expect_time}" data-date-format="YYYY-MM-DD" data-date-min-date="{$row.start_time}" data-date-max-date="{$row.end_time}" data-date-default-date="{$row.end_time}">
+                     <input  class="selectpicker datetimepicker select_input"  disabled data-date-format="YYYY-MM-DD" data-use-current="true" name="row[phper_expect_time]" type="text"  value="{$row.phper_expect_time}">
                     {/if}
                 </span>
             </div>
@@ -236,9 +246,12 @@
                     <label class="input_tiem_label">计划完成：</label>
                     <span class="input_tiem_span">
                         {if $row['test_status'] == 1}
-                            <input class="selectpicker datetimepicker select_input" type="text" name="row[app_expect_time]" value="{$row.app_expect_time}" data-date-format="YYYY-MM-DD" data-date-min-date="{$row.start_time}" data-date-max-date="{$row.end_time}" data-date-default-date="{$row.end_time}">
+<!--                            <input class="selectpicker datetimepicker select_input" type="text" name="row[app_expect_time]" value="{$row.app_expect_time}" data-date-format="YYYY-MM-DD" data-date-min-date="{$row.start_time}" data-date-max-date="{$row.end_time}" data-date-default-date="{$row.end_time}">-->
+                            <input  class="selectpicker datetimepicker select_input" data-date-format="YYYY-MM-DD" data-use-current="true" name="row[app_expect_time]" type="text"  value="{$row.app_expect_time}">
+
                         {else}
-                            <input class="selectpicker datetimepicker select_input" disabled type="text" name="row[app_expect_time]" value="{$row.app_expect_time}" data-date-format="YYYY-MM-DD" data-date-min-date="{$row.start_time}" data-date-max-date="{$row.end_time}" data-date-default-date="{$row.end_time}">
+<!--                            <input class="selectpicker datetimepicker select_input" disabled type="text" name="row[app_expect_time]" value="{$row.app_expect_time}" data-date-format="YYYY-MM-DD" data-date-min-date="{$row.start_time}" data-date-max-date="{$row.end_time}" data-date-default-date="{$row.end_time}">-->
+                         <input  class="selectpicker datetimepicker select_input" disabled data-date-format="YYYY-MM-DD" data-use-current="true" name="row[app_expect_time]" type="text"  value="{$row.app_expect_time}">
                         {/if}
                     </span>
                 </div>

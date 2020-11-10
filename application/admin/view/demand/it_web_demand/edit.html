@@ -120,7 +120,7 @@
         <div class="input_item">
             <label class="input_tiem_label">重要原因：</label>
             <span class="input_tiem_span">
-                {:Form::select('row[important_reasons][]', config('demand.important_reasons'), $row['important_reasons'], ['class'=>'selectpicker select_input', 'data-rule'=>'required','title'=>'请选择','multiple'=>true])}
+                {:Form::select('row[important_reasons][]', config('demand.important_reasons'), $row['important_reasons'], ['class'=>'selectpicker select_input','title'=>'请选择','multiple'=>true])}
             </span>
         </div>
         <div class="input_item">
@@ -229,18 +229,20 @@
             <button type="submit" value="pending" class="btn btn-sub" style='background-color: #333333;width: 80px;color: white;font-size: 14px;font-weight: 700;'>{:__('Pending')}</button>
             <button type="submit" value="refuse" class="btn btn-sub" style='background-color: #333333;width: 80px;color: white;font-size: 14px;font-weight: 700;'>{:__('拒绝')}</button>
             {else}
-            <button type="submit" value="pending" disabled class="btn btn-sub" style='background-color: #333333;width: 80px;color: white;font-size: 14px;font-weight: 700;'>{:__('Pending')}</button>
+            <button type="submit" value="pending"  class="btn btn-sub" style='background-color: #333333;width: 80px;color: white;font-size: 14px;font-weight: 700;'>{:__('Pending')}</button>
             <button type="submit" value="refuse" disabled class="btn btn-sub" style='background-color: #333333;width: 80px;color: white;font-size: 14px;font-weight: 700;'>{:__('拒绝')}</button>
             {/if}
             {else}
-            <button type="submit" value="pending" disabled class="btn btn-sub" style='background-color: #333333;width: 80px;color: white;font-size: 14px;font-weight: 700;'>{:__('Pending')}</button>
+            <button type="submit" value="pending"  class="btn btn-sub" style='background-color: #333333;width: 80px;color: white;font-size: 14px;font-weight: 700;'>{:__('Pending')}</button>
             <button type="submit" value="refuse" disabled class="btn btn-sub" style='background-color: #333333;width: 80px;color: white;font-size: 14px;font-weight: 700;'>{:__('拒绝')}</button>
             {/if}
 
                 {if $row['pm_audit_status'] == 3}
                 <button type="submit" value="edit" class="btn btn-sub" style='background-color: #333333;width: 150px;color: white;font-size: 14px;font-weight: 700;float: right;' disabled>{:__('已提交')}</button>
                 {else}
-                    {if $pm_status || $admin_id == $row['entry_user_id']}
+
+<!--            只要状态不是开发完成，都可以编辑 原判断逻辑：if $pm_status || $admin_id == $row['entry_user_id']-->
+                    {if $row['develop_finish_status'] !== 3}
                     <button type="submit" value="edit" class="btn btn-sub" style='background-color: #333333;width: 150px;color: white;font-size: 14px;font-weight: 700;float: right;'>{:__('修  改')}</button>
                     {else}
                     <button type="submit" value="edit" disabled class="btn btn-sub" style='background-color: #333333;width: 150px;color: white;font-size: 14px;font-weight: 700;float: right;'>{:__('修  改')}</button>
@@ -256,15 +258,15 @@
                         <button type="submit" value="pending" class="btn btn-sub" style='background-color: #333333;width: 80px;color: white;font-size: 14px;font-weight: 700;'>{:__('Pending')}</button>
                         <button type="submit" value="refuse" class="btn btn-sub" style='background-color: #333333;width: 80px;color: white;font-size: 14px;font-weight: 700;'>{:__('拒绝')}</button>
                     {else}
-                        <button type="submit" value="pending" disabled class="btn btn-sub" style='background-color: #333333;width: 80px;color: white;font-size: 14px;font-weight: 700;'>{:__('Pending')}</button>
+                        <button type="submit" value="pending"  class="btn btn-sub" style='background-color: #333333;width: 80px;color: white;font-size: 14px;font-weight: 700;'>{:__('Pending')}</button>
                         <button type="submit" value="refuse" disabled class="btn btn-sub" style='background-color: #333333;width: 80px;color: white;font-size: 14px;font-weight: 700;'>{:__('拒绝')}</button>
                     {/if}
                 {else}
-                    <button type="submit" value="pending" disabled class="btn btn-sub" style='background-color: #333333;width: 80px;color: white;font-size: 14px;font-weight: 700;'>{:__('Pending')}</button>
+                    <button type="submit" value="pending"  class="btn btn-sub" style='background-color: #333333;width: 80px;color: white;font-size: 14px;font-weight: 700;'>{:__('Pending')}</button>
                     <button type="submit" value="refuse" disabled class="btn btn-sub" style='background-color: #333333;width: 80px;color: white;font-size: 14px;font-weight: 700;'>{:__('拒绝')}</button>
                 {/if}
 
-                {if $row['test_status'] >= 2}
+                {if $row['develop_finish_status'] !== 3}
                     <button type="submit" value="sub" disabled class="btn btn-sub" style='background-color: #169BD5;width: 150px;color: white;font-size: 14px;font-weight: 700;float: right;'>{:__('修  改')}</button>
                 {else}
                     {if $pm_status}
