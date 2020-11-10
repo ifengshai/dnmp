@@ -118,7 +118,7 @@ class ZeeloolEs extends Backend
             $swhere = [];
             $increment_ids = array_column($list, 'increment_id');
             $swhere['platform_order'] = ['in', $increment_ids];
-            $swhere['work_platform'] = 8;
+            $swhere['work_platform'] = 9;
             $swhere['work_status'] = ['not in', [0, 4, 6]];
             $order_arr = $workorder->where($swhere)->column('platform_order');
             foreach ($list as $k => $v) {
