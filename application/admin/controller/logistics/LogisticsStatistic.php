@@ -183,9 +183,6 @@ class LogisticsStatistic extends Backend
         $fourteen_time_out = config('logistics.delievered_time_out')['fourteen'];
         //20天妥投时间
         $twenty_time_out = config('logistics.delievered_time_out')['twenty'];
-        //$orderNode['order_node'] = ['egt', 3];
-        // $orderNode['node_type'] = ['egt', 7];
-        //$all_shipment_type = $this->orderNode->where($whereSite)->distinct(true)->field('shipment_data_type')->whereNotIn('shipment_data_type', ['', 'CPC', 'EYB','China Post','CHINA_EMS','USPS_3'])->select();
         $all_shipment_type = $this->orderNode->where($whereSite)->where($map)->where('track_number is not null')->distinct(true)->field('shipment_data_type')->select();
         if ($all_shipment_type) {
             $arr = $rs = $rate = [];
