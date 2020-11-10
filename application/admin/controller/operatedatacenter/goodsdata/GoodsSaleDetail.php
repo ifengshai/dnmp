@@ -713,6 +713,9 @@ class GoodsSaleDetail extends Backend
                     $frame_onsales_num += 1;
                 }
             }
+            if ($frame_onsales_num == 0){
+                $frame_onsales_num = $this->itemPlatformSku->putawayDifferenceSku(1, $platform);
+            }
         }else{//其他类型眼镜
             $frame_onsales_num = $model->table('sales_flat_order_item m')
                 ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
