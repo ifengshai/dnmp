@@ -800,32 +800,27 @@ class ItWebDemand extends Backend
                         $row = $this->model->get($params['id']);
                         $row = $row->toArray();
                         $add['site_type'] = implode(',', $params['site_type']);
-
-                        if ($row['status'] == 1) {
-                            if ($params['priority'] == 1) {
-                                if ($params['pm_audit_status'] == 3) {
-                                    $add['status'] = 2;
-                                }
-                            }
-                        } else {
+//                        if ($row['status'] == 1) {
+//                            if ($params['priority'] == 1) {
+//                                if ($params['pm_audit_status'] == 3) {
+//                                    $add['status'] = 2;
+//                                }
+//                            }
+//                        } else {
                             if ($row['priority'] != $params['priority'] || $row['node_time'] != $params['node_time'] || $row['site_type'] != $add['site_type']) {
-                                $add['status'] = 2;
-
+//                                $add['status'] = 2;
                                 $add['web_designer_group'] = 0;
                                 $add['web_designer_complexity'] = null;
                                 $add['web_designer_expect_time'] = null;
-
                                 $add['phper_group'] = 0;
                                 $add['phper_complexity'] = null;
                                 $add['phper_expect_time'] = null;
-
                                 $add['app_group'] = 0;
                                 $add['app_complexity'] = null;
                                 $add['app_expect_time'] = null;
-
                                 $add['develop_finish_status'] = 1;
                             }
-                        }
+//                        }
 
                         empty($params['priority']) && $this->error('请选择优先级');
                         empty($params['node_time']) && $this->error('任务周期不能为空');
@@ -917,6 +912,7 @@ class ItWebDemand extends Backend
     {
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
+
             //$params['type']的值，1：响应编辑，2：完成
             if ($params['type'] == 2) {
                 $update = array();
@@ -1049,20 +1045,20 @@ class ItWebDemand extends Backend
                         $update['app_complexity'] = null;
                     }
                 }
-
+                $update['status'] = 3;
                 $res = $this->model->allowField(true)->save($update, ['id' => $params['id']]);
                 if ($res) {
                     //确认后 钉钉通知
                     $row = $this->model->get(['id' => $params['id']]);
                     $info = $row->toArray();
                     if ($params['web_status'] == 1 || $params['php_status'] == 1 || $params['app_status'] == 1){
-                       Ding::cc_ding($info['entry_user_id'], '任务ID:' . $params['id'] . '+任务已被确认', $row['title'], $this->request->domain() . url('index') . '?ref=addtabs');
+//                       Ding::cc_ding($info['entry_user_id'], '任务ID:' . $params['id'] . '+任务已被确认', $row['title'], $this->request->domain() . url('index') . '?ref=addtabs');
                     }
                     //判断是否达到下一个阶段的状态
                     $develop_finish_status = array();
                     $row = $this->model->get(['id' => $params['id']]);
                     $row_arr = $row->toArray();
-                    if ($row_arr['develop_finish_status'] == 1 && $row_arr['status'] == 2) {
+                    if ($row_arr['develop_finish_status'] == 1 && $row_arr['status'] == 3) {
                         if (strpos($row_arr['site_type'], '3') !== false) {
                             if ($row_arr['web_designer_group'] != 0 && $row_arr['phper_group'] != 0 && $row_arr['app_group'] != 0) {
                                 //可以进入下一个状态
