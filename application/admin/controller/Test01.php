@@ -175,7 +175,7 @@ class Test01 extends Backend
         ->select();
         foreach($list as $k => $v) {
             //根据物流单号查询发货物流渠道
-            $shipment_data_type = Db::connect('database.db_delivery')->table('ld_deliver_order')->where(['track_number' => $v['track_number'], 'increment_id' => $v['increment_id']])->value('agent_way_title');
+            $shipment_data_type = Db::connect('database.db_delivery')->table('ld_deliver_order')->where(['track_number' => $v['track_number'], 'increment_id' => $v['order_number']])->value('agent_way_title');
             if (!$shipment_data_type) continue;
             $this->ordernode->where('id', $v['id'])->update(['shipment_data_type' => $shipment_data_type]);
             $this->ordernodedetail->where('order_id', $v['order_id'])->where('site', $v['site'])->update(['shipment_data_type' => $shipment_data_type]);
