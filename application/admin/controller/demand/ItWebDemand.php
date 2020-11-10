@@ -1056,7 +1056,7 @@ class ItWebDemand extends Backend
                     $row = $this->model->get(['id' => $params['id']]);
                     $info = $row->toArray();
                     if ($params['web_status'] == 1 || $params['php_status'] == 1 || $params['app_status'] == 1){
-//                       Ding::cc_ding($info['entry_user_id'], '任务ID:' . $params['id'] . '+任务已被确认', $row['title'], $this->request->domain() . url('index') . '?ref=addtabs');
+                       Ding::cc_ding($info['entry_user_id'], '任务ID:' . $params['id'] . '+任务已被确认', $row['title'], $this->request->domain() . url('index') . '?ref=addtabs');
                     }
                     //判断是否达到下一个阶段的状态
                     $develop_finish_status = array();
