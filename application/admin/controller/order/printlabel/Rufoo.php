@@ -103,9 +103,10 @@ class Rufoo extends Backend
 
 
             $list = collection($list)->toArray();
-            //查询订单是否存在工单
+
             $swhere = [];
             $increment_ids = array_column($list, 'increment_id');
+
             $swhere['platform_order'] = ['in', $increment_ids];
             $swhere['work_platform'] = 8;
             $swhere['work_status'] = ['not in', [0, 4, 6]];

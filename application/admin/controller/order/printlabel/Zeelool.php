@@ -143,7 +143,7 @@ class Zeelool extends Backend
                 ->select();
 
             $list = collection($list)->toArray();
-
+            dump($list);die();
             //查询订单是否存在工单
             $swhere = [];
             $increment_ids = array_column($list, 'increment_id');
