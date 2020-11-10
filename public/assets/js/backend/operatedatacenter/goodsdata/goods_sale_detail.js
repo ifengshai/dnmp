@@ -148,16 +148,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                     $('#glass_xinpin_dongxiao_shu').text(ret.data.glass.frame_new_in_print_num);
                     $('#glass_xinpin_dongxiao_lv').text(ret.data.glass.frame_new_in_print_rate);
 
-                    $('#run_sales_num').text(ret.data.sun_glass.frame_money);
-                    $('#run_run_sales_num').text(ret.data.sun_glass.frame_in_print_num);
-                    $('#run_run_sales_rate').text(ret.data.sun_glass.frame_in_print_rate);
-                    $('#new_run_run_sales_num').text(ret.data.sun_glass.frame_new_money);
-                    $('#avg_run_run_sales_num').text(ret.data.sun_glass.frame_avg_money);
-                    $('#user_avg_run_run_sales_num').text(ret.data.sun_glass.frame_avg_customer);
-                    $('#run_zhengchang_shoumai').text(ret.data.sun_glass.frame_onsales_num);
-                    $('#run_xinpin_shuliang').text(ret.data.sun_glass.frame_new_num);
-                    $('#run_xinpin_dongxiao_shu').text(ret.data.sun_glass.frame_new_in_print_num);
-                    $('#run_xinpin_dongxiao_lv').text(ret.data.sun_glass.frame_new_in_print_rate);
+                    $('#run_sales_num').text(ret.data.run_glass.frame_money);
+                    $('#run_run_sales_num').text(ret.data.run_glass.frame_in_print_num);
+                    $('#run_run_sales_rate').text(ret.data.run_glass.frame_in_print_rate);
+                    $('#new_run_run_sales_num').text(ret.data.run_glass.frame_new_money);
+                    $('#avg_run_run_sales_num').text(ret.data.run_glass.frame_avg_money);
+                    $('#user_avg_run_run_sales_num').text(ret.data.run_glass.frame_avg_customer);
+                    $('#run_zhengchang_shoumai').text(ret.data.run_glass.frame_onsales_num);
+                    $('#run_xinpin_shuliang').text(ret.data.run_glass.frame_new_num);
+                    $('#run_xinpin_dongxiao_shu').text(ret.data.run_glass.frame_new_in_print_num);
+                    $('#run_xinpin_dongxiao_lv').text(ret.data.run_glass.frame_new_in_print_rate);
 
                     $('#old_sales_num').text(ret.data.old_glass.frame_money);
                     $('#old_run_sales_num').text(ret.data.old_glass.frame_in_print_num);
