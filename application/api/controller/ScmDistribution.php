@@ -501,6 +501,12 @@ class ScmDistribution extends Scm
         empty($item_order_number) && $this->error(__('子订单号不能为空'), [], 403);
         empty($barcode) && $this->error(__('商品条形码不能为空'), [], 403);
 
+        //子订单号获取平台platform_sku
+        $true_sku = $this->_new_order_item_process->where('item_order_number',$item_order_number)->value('sku');
+        //商品平台SKU查询SKU绑定的条形码
+        $sku = $this->_item_platform_sku->where('platform_sku',$true_sku)->value('sku');
+        $code = $this->_product_bar_code_item->where('sku',$sku)->value('code');
+
         //查询订单绑定platform_sku
         $item_order_info = $this->_new_order_item_process
             ->alias('a')

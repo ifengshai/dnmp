@@ -152,6 +152,12 @@ class Distribution extends Backend
 
     /**
      * 镜片详情
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/11/09 18:03:41 
+     * @param [type] $ids
+     * @return void
      */
     public function detail($ids = null)
     {
