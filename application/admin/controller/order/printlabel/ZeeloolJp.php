@@ -72,7 +72,6 @@ class ZeeloolJp extends Backend
             } elseif (!$filter['status']) {
                 $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal']];
             }
-            dump($map);die();
             //是否有工单
             $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
             if ($filter['is_task'] == 1 || $filter['is_task'] == '0') {
@@ -105,7 +104,6 @@ class ZeeloolJp extends Backend
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
-            dump($total);die();
             $field = 'order_type,custom_order_prescription_type,entity_id,status,base_shipping_amount,increment_id,base_grand_total,
                 total_qty_ordered,custom_is_match_frame_new,custom_is_match_lens_new,
                 custom_is_send_factory_new,custom_is_delivery_new,custom_print_label_new,custom_order_prescription,created_at';
