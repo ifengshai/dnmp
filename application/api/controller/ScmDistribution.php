@@ -317,11 +317,11 @@ class ScmDistribution extends Scm
             ]
         ];
         $abnormal_list = $abnormal_arr[$check_status] ?? [];
-        //配货返回数据
-        if(2 == $check_status){
-            //获取子订单处方数据
-            $this->success('', ['abnormal_list' => $abnormal_list,'option_info' => $option_info['sku']],200);
-        }
+//        //配货返回数据
+//        if(2 == $check_status){
+//            //获取子订单处方数据
+//            $this->success('', ['abnormal_list' => $abnormal_list,'option_info' => $option_info['sku']],200);
+//        }
 
         $this->success('', ['abnormal_list' => $abnormal_list,'option_info' => $option_info],200);
     }
