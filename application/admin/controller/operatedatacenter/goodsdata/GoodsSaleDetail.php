@@ -624,10 +624,10 @@ class GoodsSaleDetail extends Backend
         }
         // $arr = Cache::get('Operationalreport_platformOrderInfo1' . $platform . md5(serialize($map)));
         $arr = Cache::get('Operationalreport_platformOrderInfo1' . $platform . $goods_type . md5(serialize($map)));
-        // if ($arr) {
-        //     // Cache::rm('Operationalreport_platformOrderInfo1' . $platform . $goods_type . md5(serialize($map)));
-        //     return $arr;
-        // }
+        if ($arr) {
+            // Cache::rm('Operationalreport_platformOrderInfo1' . $platform . $goods_type . md5(serialize($map)));
+            return $arr;
+        }
         $this->item = new \app\admin\model\itemmanage\Item;
         $this->itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
         switch ($platform) {
