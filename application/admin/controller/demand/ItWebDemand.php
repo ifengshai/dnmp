@@ -704,6 +704,7 @@ class ItWebDemand extends Backend
             $params = input();
 
             if ($params) {
+
                 if ($params['is_user_confirm'] == 1) {
                     //提出人确认
                     $row = $this->model->get(['id' => $params['ids']]);
@@ -726,6 +727,7 @@ class ItWebDemand extends Backend
                         $data['entry_user_confirm'] = 1;
                         $data['entry_user_confirm_time'] = date('Y-m-d H:i', time());
                     }
+
 
                     //如果当前登录人有产品确认权限，并且提出人==当前登录的人，则一个确认，就可以直接当成提出人确认&产品确认。
 
@@ -760,9 +762,11 @@ class ItWebDemand extends Backend
                     $add['status'] = 1;
                     $add['create_time'] = date('Y-m-d H:i', time());
                     $add['pm_audit_status'] = 1;
+
                     if (!empty($data['important_reasons'])){
                         $add['important_reasons'] = implode(',', $data['important_reasons']);
                     }
+                    $add['functional_module'] = $data['functional_module'];
                     $result = $this->model->allowField(true)->save($add);
 
                     if ($result) {
