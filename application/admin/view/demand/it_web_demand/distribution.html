@@ -93,7 +93,7 @@
             <div class="input_item web_html">
                 <label class="input_tiem_label">备注：</label>
                 <span class="input_tiem_span">
-                    <input type="text" id="web_remarks" name="row['web_remarks']" style="width: 65%;height: 35px" value="{$row['web_remarks']}">
+                    <input type="text" id="web_remarks" required name="row['web_remarks']" style="width: 65%;height: 35px" value="{$row['web_remarks']}">
                 </span>
             </div>
             <div class="item_button">
@@ -101,7 +101,7 @@
                         {if $row['web_designer_group'] == 0}
                             {if $distribution_status}
                                 <button type="submit" class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('前端确认')}</button>
-                                <button  onclick="jujue({$row['id']},1)" class="btn btn-sub" style='background-color: cadetblue;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('前端拒绝')}</button>
+                                <button type='button' onsubmit='return false'; onclick="jujue({$row['id']},1)" class="btn btn-sub" style='background-color: cadetblue;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('前端拒绝')}</button>
                             {else}
                                 <button type="submit" disabled class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('前端确认')}</button>
                                 <button type="submit" disabled class="btn btn-sub" style='background-color: cadetblue;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('前端拒绝')}</button>
@@ -183,7 +183,7 @@
                     {if $row['phper_group'] == 0}
                         {if $distribution_status}
                             <button type="submit" class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('后端确认')}</button>
-                            <button onclick="jujue({$row['id']},2)" class="btn btn-sub" style='background-color: cadetblue;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('后端拒绝')}</button>
+                            <button type='button' onsubmit='return false';  onclick="jujue({$row['id']},2)"  class="btn btn-sub" style='background-color: cadetblue;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('后端拒绝')}</button>
                         {else}
                             <button type="submit" disabled class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('后端确认')}</button>
                         {/if}
@@ -264,7 +264,7 @@
                         {if $row['app_group'] == 0}
                             {if $distribution_status}
                                 <button type="submit" class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('APP确认')}</button>
-                                <button onclick="jujue({$row['id']},3)" class="btn btn-sub" style='background-color: cadetblue;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('APP拒绝')}</button>
+                                <button type='button' onsubmit='return false';   onclick="jujue({$row['id']},3)" class="btn btn-sub" style='background-color: cadetblue;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('APP拒绝')}</button>
                             {else}
                                 <button type="submit" disabled class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('APP确认')}</button>
                             {/if}
@@ -294,13 +294,18 @@
 </div>
 <script>
     function jujue(ids,status){
+
         var url = "{:url('demand/It_web_demand/distriRefuse')}";
         if (status ==1){
             var remarks = $('#web_remarks').val();
         }else if(status ==2){
-            var remarks = $('#peper_remarks').val();
+            var remarks = $('#phper_remarks').val();
         }else{
             var remarks = $('#app_remarks').val();
+        }
+        if (remarks == ''){
+            layer.msg('备注内容不能为空');
+            return  false;
         }
         Fast.api.ajax({
             url:url,

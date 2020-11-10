@@ -760,6 +760,9 @@ class ItWebDemand extends Backend
                     $add['status'] = 1;
                     $add['create_time'] = date('Y-m-d H:i', time());
                     $add['pm_audit_status'] = 1;
+                    if (!empty($data['important_reasons'])){
+                        $add['important_reasons'] = implode(',', $data['important_reasons']);
+                    }
                     $result = $this->model->allowField(true)->save($add);
 
                     if ($result) {
@@ -1127,7 +1130,7 @@ class ItWebDemand extends Backend
             if ($save) {
                 $row = $this->model->get(['id' => $params['ids']]);
                 $info = $row->toArray();
-//                Ding::cc_ding($info['entry_user_id'],  '任务ID:' .  $params['ids'] . '任务已被拒绝,', '任务标题：'.$info['title'].',拒绝原因：'.$params['remarks'], $this->request->domain() . url('index') . '?ref=addtabs');
+                Ding::cc_ding($info['entry_user_id'],  '任务ID:' .  $params['ids'] . '任务已被拒绝,', '任务标题：'.$info['title'].',拒绝原因：'.$params['remarks'], $this->request->domain() . url('index') . '?ref=addtabs');
                 $this->success('成功');
             } else {
                 $this->success('失败');
