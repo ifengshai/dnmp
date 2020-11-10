@@ -1421,6 +1421,7 @@ class ScmWarehouse extends Scm
      * 创建盘点单页面/筛选/保存
      *
      * @参数 int type  新建入口 1.筛选，2.保存
+     * @参数 json item_sku  sku集合
      * @author wgj
      * @return mixed
      */
@@ -1497,6 +1498,14 @@ class ScmWarehouse extends Scm
             if (count(array_filter($item_sku)) < 1) {
                 $this->error(__('sku集合不能为空！！'), [], 524);
             }
+            $no_sku = [];
+            foreach ($item_sku as $k => $v) {
+                $item_id = $this->_item->where('sku',$v['sku'])->value('id');
+                if (!$item_id){
+                    $no_sku[] = $v['sku'];
+                }
+            }
+            if($no_sku) $this->error(__('SKU：'.implode(',',$no_sku).'不存在'), [], 523);
 
             $result = false;
             Db::startTrans();
@@ -1514,6 +1523,7 @@ class ScmWarehouse extends Scm
                         $list[$k]['inventory_id'] = $this->_inventory->id;
                         $list[$k]['sku'] = $v['sku'];
                         $item = $this->_item->field('name,stock,available_stock,distribution_occupy_stock')->where('sku',$v['sku'])->find();
+                        empty($item) && $this->error(__($v['sku'].'不存在'), [], 523);
 
                         $list[$k]['name'] = $item['name'];//商品名
                         $list[$k]['distribution_occupy_stock'] = $item['distribution_occupy_stock'];//配货站用数量
