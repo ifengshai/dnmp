@@ -86,31 +86,74 @@
 
 <form role="form" method="POST" data-toggle="validator"  action="">
     <div class="left_input">
+<!--        <div class="input_item">-->
+<!--            <label class="input_tiem_label">项目：</label>-->
+<!--            <span class="input_tiem_span">-->
+<!--                {:Form::select('row[site]', config('demand.site'), null, ['class'=>'selectpicker select_input', 'data-rule'=>'required','title'=>'请选择'])}-->
+<!--            </span>-->
+<!--        </div>-->
+<!--        <div class="input_item">-->
+<!--            <label class="input_tiem_label">设备端：</label>-->
+<!--            <span class="input_tiem_span">-->
+<!--                {:Form::select('row[site_type][]', config('demand.siteType'), null, ['class'=>'selectpicker select_input', 'data-rule'=>'required','title'=>'请选择','multiple'=>true])}-->
+<!--            </span>-->
+<!--        </div>-->
+<!--        <div class="input_item">-->
+<!--            <label class="input_tiem_label">抄送：</label>-->
+<!--            <span class="input_tiem_span">-->
+<!--                {:Form::select('row[copy_to_user_id][]', config('demand.copyToUserId'), null, ['class'=>'selectpicker select_input', null,'data-live-search' => true,'multiple'=>true])}-->
+<!--            </span>-->
+<!--        </div>-->
+<!--        <div class="input_item">-->
+<!--            <label class="input_tiem_label">类型：</label>-->
+<!--            <span class="input_tiem_span">-->
+<!--                {:Form::select('row[type]', config('demand.type'), null, ['class'=>'selectpicker select_input', 'data-rule'=>'required','title'=>'请选择'])}-->
+
+<!--            </span>-->
+<!--        </div>-->
+
         <div class="input_item">
             <label class="input_tiem_label">项目：</label>
             <span class="input_tiem_span">
-                {:Form::select('row[site]', config('demand.site'), null, ['class'=>'selectpicker select_input', 'data-rule'=>'required','title'=>'请选择'])}
+                {:Form::select('row[site]', config('demand.site'), $row['site'], ['class'=>'selectpicker select_input', 'data-rule'=>'required','title'=>'请选择'])}
             </span>
         </div>
         <div class="input_item">
             <label class="input_tiem_label">设备端：</label>
             <span class="input_tiem_span">
-                {:Form::select('row[site_type][]', config('demand.siteType'), null, ['class'=>'selectpicker select_input', 'data-rule'=>'required','title'=>'请选择','multiple'=>true])}
+                {:Form::select('row[site_type][]', config('demand.siteType'), $row['site_type_arr'], ['class'=>'selectpicker select_input', 'data-rule'=>'required','title'=>'请选择','multiple'=>true])}
+            </span>
+        </div>
+        <div class="input_item">
+            <label class="input_tiem_label">功能模块：</label>
+            <span class="input_tiem_span">
+              {:Form::select('row[functional_module]', config('demand.functional_module'), $row['functional_module'], ['class'=>'selectpicker select_input', 'data-rule'=>'required','title'=>'请选择'])}
             </span>
         </div>
         <div class="input_item">
             <label class="input_tiem_label">抄送：</label>
             <span class="input_tiem_span">
-                {:Form::select('row[copy_to_user_id][]', config('demand.copyToUserId'), null, ['class'=>'selectpicker select_input', null,'data-live-search' => true,'multiple'=>true])}
+                {:Form::select('row[copy_to_user_id][]', config('demand.copyToUserId'), $row['copy_to_user_id_arr'], ['class'=>'selectpicker select_input', null,'data-live-search' => true,'multiple'=>true])}
             </span>
         </div>
         <div class="input_item">
             <label class="input_tiem_label">类型：</label>
             <span class="input_tiem_span">
-                {:Form::select('row[type]', config('demand.type'), null, ['class'=>'selectpicker select_input', 'data-rule'=>'required','title'=>'请选择'])}
-
+                {:Form::select('row[type]', config('demand.type'), $row['type'], ['class'=>'selectpicker select_input', 'data-rule'=>'required','title'=>'请选择'])}
             </span>
         </div>
+        <div class="input_item">
+            <label class="input_tiem_label">重要原因：</label>
+            <span class="input_tiem_span">
+                {:Form::select('row[important_reasons][]', config('demand.important_reasons'), $row['important_reasons'], ['class'=>'selectpicker select_input', 'data-rule'=>'required','title'=>'请选择','multiple'=>true])}
+            </span>
+        </div>
+
+
+
+
+
+
         <div class="input_item">
             <label class="input_tiem_label2">
                 <input name="row[is_emergency]" type="checkbox" value="1"><span>紧急需求</span>
@@ -121,7 +164,8 @@
         <div class="input_item">
             <label class="input_tiem_label ">任务周期：</label>
             <span class="input_tiem_span">
-                <input name="row[node_time]" class="select_input" data-rule="required" type="text" value="" style="height: 31px;" placeholder="输入整数(单位：天)">
+<!--                <input name="row[node_time]" class="select_input" data-rule="required" type="text" value="" style="height: 31px;" placeholder="输入整数(单位：天)">-->
+                <input  style="width: 60%" class="form-control datetimepicker form-control" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[node_time]" type="text" >
             </span>
         </div>
         {/if}
