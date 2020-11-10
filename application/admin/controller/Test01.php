@@ -170,7 +170,7 @@ class Test01 extends Backend
         $this->ordernodedetail = new \app\admin\model\OrderNodeDetail();
         $this->ordernodecourier = new \app\admin\model\OrderNodeCourier();
         $list = $this->ordernode
-        ->where(['create_time' => ['between', ['2020-09-01 00:00:00', '2020-12-01 00:00:00']]])
+        ->where(['create_time' => ['between', ['2020-09-01 00:00:00', '2020-10-01 00:00:00']]])
         ->where('track_number is not null')
         ->select();
         foreach($list as $k => $v) {
