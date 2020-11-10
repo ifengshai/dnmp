@@ -99,7 +99,7 @@
                     {/if}
                 </span>
             </div>
-            <div class="input_item web_html">
+            <div class="input_item web_htmls">
                 <label class="input_tiem_label">备注：</label>
                 <span class="input_tiem_span">
                     <input type="text" id="web_remarks" required name="row['web_remarks']" style="width: 65%;height: 35px" value="{$row['web_remarks']}">
@@ -109,9 +109,13 @@
                 {if $row['test_status'] == 1}
                         {if $row['web_designer_group'] == 0}
                             {if $distribution_status}
-                                <button type="submit" class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('前端确认')}</button>
-                                <button type='button' onsubmit='return false'; onclick="jujue({$row['id']},1)" class="btn btn-sub" style='background-color: cadetblue;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('前端拒绝')}</button>
-                            {else}
+                                {if $row['develop_finish_status'] ==4 && $row['web_remarks'] !== null}
+                                    <button type='button' disabled onsubmit='return false'; onclick="jujue({$row['id']},1)" class="btn btn-sub" style='background-color: cadetblue;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('前端拒绝')}</button>
+                                {else/}
+                                    <button type="submit" class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('前端确认')}</button>
+                                    <button type='button' onsubmit='return false'; onclick="jujue({$row['id']},1)" class="btn btn-sub" style='background-color: cadetblue;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('前端拒绝')}</button>
+                                 {/if}
+                               {else}
                                 <button type="submit" disabled class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('前端确认')}</button>
                                 <button type="submit" disabled class="btn btn-sub" style='background-color: cadetblue;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('前端拒绝')}</button>
                             {/if}
@@ -181,7 +185,7 @@
                     {/if}
                 </span>
             </div>
-            <div class="input_item web_html">
+            <div class="input_item php_htmls">
                 <label class="input_tiem_label">备注：</label>
                 <span class="input_tiem_span">
                     <input type="text" id="phper_remarks" name="row['phper_remarks']" style="width: 65%;height: 35px" value="{$row['phper_remarks']}">
@@ -192,9 +196,13 @@
                 {if $row['test_status'] == 1}
                     {if $row['phper_group'] == 0}
                         {if $distribution_status}
-                            <button type="submit" class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('后端确认')}</button>
-                            <button type='button' onsubmit='return false';  onclick="jujue({$row['id']},2)"  class="btn btn-sub" style='background-color: cadetblue;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('后端拒绝')}</button>
-                        {else}
+                                {if $row['develop_finish_status'] ==4 && $row['phper_remarks'] !== null}
+                                        <button type='button'  disabled onsubmit='return false';  onclick="jujue({$row['id']},2)"  class="btn btn-sub" style='background-color: cadetblue;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('后端拒绝')}</button>
+                                 {else/}
+                                        <button type="submit" class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('后端确认')}</button>
+                                        <button type='button' onsubmit='return false';  onclick="jujue({$row['id']},2)"  class="btn btn-sub" style='background-color: cadetblue;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('后端拒绝')}</button>
+                                {/if}
+                             {else}
                             <button type="submit" disabled class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('后端确认')}</button>
                         {/if}
                     {else}
@@ -265,7 +273,7 @@
                         {/if}
                     </span>
                 </div>
-                <div class="input_item web_html">
+                <div class="input_item app_htmls">
                     <label class="input_tiem_label">备注：</label>
                     <span class="input_tiem_span">
                     <input type="text" id="app_remarks" name="row['app_remarks']" style="width: 65%;height: 35px" value="{$row['app_remarks']}">

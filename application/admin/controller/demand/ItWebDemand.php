@@ -974,12 +974,12 @@ class ItWebDemand extends Backend
                         Ding::cc_ding($row->entry_user_id, '任务ID:' . $params['id'] . '+任务已完成', $row->title, $this->request->domain() . url('index') . '?ref=addtabs');
                         if ($row->copy_to_user_id) {
                             $usersId = explode(',', $row->copy_to_user_id);
-//                            Ding::cc_ding($usersId, '任务ID:' . $params['id'] . '+任务已完成', $row->title, $this->request->domain() . url('index') . '?ref=addtabs');
+                            Ding::cc_ding($usersId, '任务ID:' . $params['id'] . '+任务已完成', $row->title, $this->request->domain() . url('index') . '?ref=addtabs');
                         }
 
                         //测试主管
                         $testAuthUserIds = Auth::getGroupUserId(config('demand.test_group_id')) ?: [];
-//                        Ding::cc_ding($testAuthUserIds, '任务ID:' . $params['id'] . '+任务等待完成', $row['title'], $this->request->domain() . url('index') . '?ref=addtabs');
+                        Ding::cc_ding($testAuthUserIds, '任务ID:' . $params['id'] . '+任务等待完成', $row['title'], $this->request->domain() . url('index') . '?ref=addtabs');
                     }
 
                     $this->success('成功');
@@ -1056,7 +1056,7 @@ class ItWebDemand extends Backend
                     $row = $this->model->get(['id' => $params['id']]);
                     $info = $row->toArray();
                     if ($params['web_status'] == 1 || $params['php_status'] == 1 || $params['app_status'] == 1){
-//                       Ding::cc_ding($info['entry_user_id'], '任务ID:' . $params['id'] . '+任务已被确认', $row['title'], $this->request->domain() . url('index') . '?ref=addtabs');
+                       Ding::cc_ding($info['entry_user_id'], '任务ID:' . $params['id'] . '+任务已被确认', $row['title'], $this->request->domain() . url('index') . '?ref=addtabs');
                     }
                     //判断是否达到下一个阶段的状态
                     $develop_finish_status = array();
@@ -1084,7 +1084,7 @@ class ItWebDemand extends Backend
                     if ($develop_finish_status['develop_finish_status'] == 2) {
                         //测试主管
                         $testAuthUserIds = Auth::getGroupUserId(config('demand.test_group_id')) ?: [];
-//                        Ding::cc_ding($testAuthUserIds, '任务ID:' . $params['id'] . '+任务等待确认', $row['title'], $this->request->domain() . url('index') . '?ref=addtabs');
+                        Ding::cc_ding($testAuthUserIds, '任务ID:' . $params['id'] . '+任务等待确认', $row['title'], $this->request->domain() . url('index') . '?ref=addtabs');
                     }
                     $this->success('成功');
                 } else {
