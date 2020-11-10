@@ -797,7 +797,7 @@ class GoodsSaleDetail extends Backend
             ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
             ->where('p.goods_type', '=', $goods_type)
             ->where($whereItem)
-            ->where($itemMap)
+            // ->where($itemMap)
             ->where('m.sku', 'in', $frame_new_sku)
             ->distinct(true)
             ->field('m.sku')
