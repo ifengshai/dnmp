@@ -502,30 +502,19 @@ class ScmDistribution extends Scm
         empty($barcode) && $this->error(__('商品条形码不能为空'), [], 403);
 
         //子订单号获取平台platform_sku
-        $true_sku = $this->_new_order_item_process->where('item_order_number',$item_order_number)->value('sku');
-        //商品平台SKU查询SKU绑定的条形码
-        $sku = $this->_item_platform_sku->where('platform_sku',$true_sku)->value('sku');
-        $code = $this->_product_bar_code_item->where('sku',$sku)->value('code');
+        $order_item_id = $this->_new_order_item_process->where('item_order_number',$item_order_number)->value('id');
+        empty($order_item_id) && $this->error(__('订单不存在'), [], 403);
 
-        //查询订单绑定platform_sku
-        $item_order_info = $this->_new_order_item_process
-            ->alias('a')
-            ->where('a.item_order_number',$item_order_number)
-            ->field('a.id,b.sku')
-            ->join(['stock.fa_item_platform_sku'=> 'b'],'a.sku=b.platform_sku','left')
-            ->find();
+        $order_item_true_sku = $this->_new_order_item_process->where('item_order_number',$item_order_number)->value('sku');
+        $order_item_sku = $this->_item_platform_sku->where('platform_sku',$order_item_true_sku)->value('sku');
 
-        $bar_code_item_info = $this->_product_bar_code_item
-            ->alias('a')
-            ->where('a.code',$barcode)
-            ->field('b.sku')
-            ->join(['stock.fa_item_platform_sku'=> 'b'],'a.sku=b.platform_sku','left')
-            ->find();
+        $code_item_sku = $this->_product_bar_code_item->where('code',$barcode)->value('sku');
+        empty($code_item_sku) && $this->error(__('此条形码未绑定SKU'), [], 403);
 
-        if ($bar_code_item_info['sku'] != $item_order_info['sku']){
+        if ($order_item_sku != $code_item_sku){
             //扫描获取的条形码 和 子订单查询出的 SKU(即true_sku)对比失败则配货失败
             //操作失败记录
-            DistributionLog::record($this->auth,$item_order_info['id'],2,'配货失败：sku配错');
+            DistributionLog::record($this->auth,$order_item_id,2,'配货失败：sku配错');
 
             //失败返回
             $this->error(__('sku配错'), [], 404);
