@@ -704,6 +704,7 @@ class ItWebDemand extends Backend
             $params = input();
 
             if ($params) {
+
                 if ($params['is_user_confirm'] == 1) {
                     //提出人确认
                     $row = $this->model->get(['id' => $params['ids']]);
@@ -726,6 +727,7 @@ class ItWebDemand extends Backend
                         $data['entry_user_confirm'] = 1;
                         $data['entry_user_confirm_time'] = date('Y-m-d H:i', time());
                     }
+
 
                     //如果当前登录人有产品确认权限，并且提出人==当前登录的人，则一个确认，就可以直接当成提出人确认&产品确认。
 
@@ -760,6 +762,11 @@ class ItWebDemand extends Backend
                     $add['status'] = 1;
                     $add['create_time'] = date('Y-m-d H:i', time());
                     $add['pm_audit_status'] = 1;
+
+                    if (!empty($data['important_reasons'])){
+                        $add['important_reasons'] = implode(',', $data['important_reasons']);
+                    }
+                    $add['functional_module'] = $data['functional_module'];
                     $result = $this->model->allowField(true)->save($add);
 
                     if ($result) {
@@ -784,8 +791,9 @@ class ItWebDemand extends Backend
     {
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
-            empty($params['priority']) && $this->error('数据异常');
-            empty($params['pm_audit_status']) && $this->error('数据异常,请刷新页面');
+
+//            empty($params['priority']) && $this->error('数据异常');
+//            empty($params['pm_audit_status']) && $this->error('数据异常,请刷新页面');
             if ($params) {
                 if ($params['pm_audit_status'] == 4) {//拒绝
                     $add['pm_audit_status'] = $params['pm_audit_status'];
@@ -796,32 +804,27 @@ class ItWebDemand extends Backend
                         $row = $this->model->get($params['id']);
                         $row = $row->toArray();
                         $add['site_type'] = implode(',', $params['site_type']);
-
-                        if ($row['status'] == 1) {
-                            if ($params['priority'] == 1) {
-                                if ($params['pm_audit_status'] == 3) {
-                                    $add['status'] = 2;
-                                }
-                            }
-                        } else {
+//                        if ($row['status'] == 1) {
+//                            if ($params['priority'] == 1) {
+//                                if ($params['pm_audit_status'] == 3) {
+//                                    $add['status'] = 2;
+//                                }
+//                            }
+//                        } else {
                             if ($row['priority'] != $params['priority'] || $row['node_time'] != $params['node_time'] || $row['site_type'] != $add['site_type']) {
-                                $add['status'] = 2;
-
+//                                $add['status'] = 2;
                                 $add['web_designer_group'] = 0;
                                 $add['web_designer_complexity'] = null;
                                 $add['web_designer_expect_time'] = null;
-
                                 $add['phper_group'] = 0;
                                 $add['phper_complexity'] = null;
                                 $add['phper_expect_time'] = null;
-
                                 $add['app_group'] = 0;
                                 $add['app_complexity'] = null;
                                 $add['app_expect_time'] = null;
-
                                 $add['develop_finish_status'] = 1;
                             }
-                        }
+//                        }
 
                         empty($params['priority']) && $this->error('请选择优先级');
                         empty($params['node_time']) && $this->error('任务周期不能为空');
@@ -876,8 +879,8 @@ class ItWebDemand extends Backend
         $row['site_type_arr'] = explode(',', $row['site_type']);
         $row['copy_to_user_id_arr'] = explode(',', $row['copy_to_user_id']);
         $row['important_reasons'] = explode(',', $row['important_reasons']);
-//        dump($row);die();
         $this->view->assign('demand_type', input('demand_type'));
+
         $this->view->assign("type", input('type'));
         $this->view->assign("row", $row);
 
@@ -913,6 +916,7 @@ class ItWebDemand extends Backend
     {
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
+
             //$params['type']的值，1：响应编辑，2：完成
             if ($params['type'] == 2) {
                 $update = array();
@@ -1045,7 +1049,7 @@ class ItWebDemand extends Backend
                         $update['app_complexity'] = null;
                     }
                 }
-
+                $update['status'] = 3;
                 $res = $this->model->allowField(true)->save($update, ['id' => $params['id']]);
                 if ($res) {
                     //确认后 钉钉通知
@@ -1058,7 +1062,7 @@ class ItWebDemand extends Backend
                     $develop_finish_status = array();
                     $row = $this->model->get(['id' => $params['id']]);
                     $row_arr = $row->toArray();
-                    if ($row_arr['develop_finish_status'] == 1 && $row_arr['status'] == 2) {
+                    if ($row_arr['develop_finish_status'] == 1 && $row_arr['status'] == 3) {
                         if (strpos($row_arr['site_type'], '3') !== false) {
                             if ($row_arr['web_designer_group'] != 0 && $row_arr['phper_group'] != 0 && $row_arr['app_group'] != 0) {
                                 //可以进入下一个状态
@@ -1127,7 +1131,7 @@ class ItWebDemand extends Backend
             if ($save) {
                 $row = $this->model->get(['id' => $params['ids']]);
                 $info = $row->toArray();
-//                Ding::cc_ding($info['entry_user_id'],  '任务ID:' .  $params['ids'] . '任务已被拒绝,', '任务标题：'.$info['title'].',拒绝原因：'.$params['remarks'], $this->request->domain() . url('index') . '?ref=addtabs');
+                Ding::cc_ding($info['entry_user_id'],  '任务ID:' .  $params['ids'] . '任务已被拒绝,', '任务标题：'.$info['title'].',拒绝原因：'.$params['remarks'], $this->request->domain() . url('index') . '?ref=addtabs');
                 $this->success('成功');
             } else {
                 $this->success('失败');
