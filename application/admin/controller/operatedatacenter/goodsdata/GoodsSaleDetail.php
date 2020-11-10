@@ -624,10 +624,10 @@ class GoodsSaleDetail extends Backend
         }
         // $arr = Cache::get('Operationalreport_platformOrderInfo1' . $platform . md5(serialize($map)));
         $arr = Cache::get('Operationalreport_platformOrderInfo1' . $platform . $goods_type . md5(serialize($map)));
-        if ($arr) {
-            // Cache::rm('Operationalreport_platformOrderInfo1' . $platform . $goods_type . md5(serialize($map)));
-            return $arr;
-        }
+        // if ($arr) {
+        //     // Cache::rm('Operationalreport_platformOrderInfo1' . $platform . $goods_type . md5(serialize($map)));
+        //     return $arr;
+        // }
         $this->item = new \app\admin\model\itemmanage\Item;
         $this->itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
         switch ($platform) {
@@ -791,12 +791,25 @@ class GoodsSaleDetail extends Backend
             ->distinct(true)
             ->field('sku')
             ->select();
-
+        // dump($frame_new_sku);
+        $frame_new_list = $model->table('sales_flat_order_item m')
+            ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
+            ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
+            ->where('p.goods_type', '=', $goods_type)
+            ->where($whereItem)
+            ->where($itemMap)
+            ->where('m.sku', 'in', $frame_new_sku)
+            ->distinct(true)
+            ->field('m.sku')
+            ->select();
+        // dump($frame_new_list);die;
         //求某个类型的新品眼镜的数量
         $item = new Item();
+        $item_platform = new ItemPlatformSku();
         $frame_new_num = 0;
         foreach ($frame_new_list as $k=>$v){
-            $is_new = $item->where('sku',$v['sku'])->where('is_new',1)->find();
+            $platform_sku =$item_platform->where('platform_sku',$v['sku'])->value('sku');
+            $is_new = $item->where('sku',$platform_sku)->where('is_new',1)->find();
             if (!empty($is_new)){
                 $frame_new_num += 1;
             }
