@@ -1,0 +1,194 @@
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<style>
+    body {
+        margin: 0;
+        padding: 0
+    }
+
+    .single_box {
+        margin: 0 auto;
+        width: 400px;
+        display: list-item;
+        list-style: none;
+        margin-bottom: 10px;
+    }
+
+    table.addpro {
+        clear: both;
+        table-layout: fixed;
+        border-top: 1px solid #000;
+        border-left: 1px solid #000;
+        font-size: 12px;
+    }
+
+    table.addpro .title {
+        background: none repeat scroll 0 0 #f5f5f5;
+    }
+
+    table.addpro .title td {
+        border-collapse: collapse;
+        color: #000;
+        text-align: center;
+        font-weight: normal;
+    }
+
+    table.addpro tbody td {
+        word-break: break-all;
+        text-align: center;
+        border-bottom: 1px solid #000;
+        border-right: 1px solid #000;
+    }
+
+    table.addpro.re tbody td {
+        position: relative
+    }
+</style>
+
+<div class='single_box' id="single_box">
+    <table width='400mm' height='102px' border='0' cellspacing='0' cellpadding='0' class='addpro'>
+        <tbody cellpadding='0'>
+            <tr>
+                <td rowspan='' colspan='2' style='padding:2px;'>
+                    2020-08-15 10:10:00 <br>
+                    A-10-11
+                </td>
+                <td rowspan='' colspan='8' style='padding:10px;'><img style='width:100%;height:80%;'
+                        src='{$img_url}'><br></td>
+            </tr>
+            <tr>
+                <td colspan='10'>
+                    <span style='margin-left:5px;'> Order:10084620</span>
+                    <span style=' margin-left:5px;'>SKU:FA0249-01</span>
+                    <span style=' margin-left:5px;'>Num:<strong>1/3</strong></span>
+                </td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>SPH</td>
+                <td>CYL</td>
+                <td>AXI</td>
+                <td>ADD</td>
+                <td>PD</td>
+
+                <td colspan='4' rowspan="3">
+                    1.61超薄型累進（ノーライン多焦点）
+                </td>
+            </tr>
+            <tr>
+                <td>R</td>
+                <td>123</td>
+                <td>3444</td>
+                <td>123</td>
+                <td>123</td>
+                <td>123</td>
+
+            </tr>
+            <tr>
+                <td>L</td>
+                <td>123</td>
+                <td>123</td>
+                <td>333</td>
+                <td>123</td>
+                <td>123</td>
+            </tr>
+            <tr>
+                <td colspan='10' style=' text-align:center'>
+                    prescription:singlevision <br>
+                    Lens：1.57 Mid-Index Lens with Color Tint (Light Brown)-Light Brown
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+
+
+<script>
+    let info = {
+        name: "小明",
+        phone: "9527"
+    };
+
+    function watermark(settings) {
+        //此处可以更改自己想要初始化的id。
+        var ele = document.getElementById("single_box");
+        //默认设置
+        var defaultSettings = {
+            watermark_txt: "Zeelool",
+            watermark_x: 10, //水印起始位置x轴坐标
+            watermark_y: 30, //水印起始位置Y轴坐标
+            watermark_rows: 20, //水印行数 
+            watermark_cols: 20, //水印列数
+            watermark_x_space: 10, //水印x轴间隔
+            watermark_y_space: 30, //水印y轴间隔
+            watermark_color: '#aaa', //水印字体颜色
+            watermark_alpha: 0.4, //水印透明度
+            watermark_fontsize: '30px', //水印字体大小
+            watermark_font: '微软雅黑', //水印字体
+            watermark_width: 340, //水印宽度
+            watermark_height: 50, //水印长度
+            watermark_angle: 20 //水印倾斜度数
+        };
+        if (arguments.length === 1 && typeof arguments[0] === "object") {
+            var src = arguments[0] || {};
+            for (key in src) {
+                if (src[key] && defaultSettings[key] && src[key] === defaultSettings[key]) continue;
+                else if (src[key]) defaultSettings[key] = src[key];
+            }
+        }
+        var oTemp = document.createDocumentFragment();
+        //获取页面最大宽度
+        var page_width = Math.max(ele.scrollWidth, ele.clientWidth);
+        var cutWidth = page_width * 0.0150;
+        var page_width = page_width - cutWidth;
+        //获取页面最大高度
+        var page_height = Math.max(ele.scrollHeight, ele.clientHeight);
+        //如果将水印列数设置为0，或水印列数设置过大，超过页面最大宽度，则重新计算水印列数和水印x轴间隔
+        if (defaultSettings.watermark_cols == 0 || (parseInt(defaultSettings.watermark_x + defaultSettings.watermark_width * defaultSettings.watermark_cols + defaultSettings.watermark_x_space * (defaultSettings.watermark_cols - 1)) > page_width)) {
+            defaultSettings.watermark_cols = parseInt((page_width - defaultSettings.watermark_x + defaultSettings.watermark_x_space) / (defaultSettings.watermark_width + defaultSettings.watermark_x_space));
+            defaultSettings.watermark_x_space = parseInt((page_width - defaultSettings.watermark_x - defaultSettings.watermark_width * defaultSettings.watermark_cols) / (defaultSettings.watermark_cols - 1));
+        }
+        //如果将水印行数设置为0，或水印行数设置过大，超过页面最大长度，则重新计算水印行数和水印y轴间隔
+        if (defaultSettings.watermark_rows == 0 || (parseInt(defaultSettings.watermark_y + defaultSettings.watermark_height * defaultSettings.watermark_rows + defaultSettings.watermark_y_space * (defaultSettings.watermark_rows - 1)) > page_height)) {
+            defaultSettings.watermark_rows = parseInt((defaultSettings.watermark_y_space + page_height - defaultSettings.watermark_y) / (defaultSettings.watermark_height + defaultSettings.watermark_y_space));
+            defaultSettings.watermark_y_space = parseInt(((page_height - defaultSettings.watermark_y) - defaultSettings.watermark_height * defaultSettings.watermark_rows) / (defaultSettings.watermark_rows - 1));
+        }
+        var x;
+        var y;
+        for (var i = 0; i < defaultSettings.watermark_rows; i++) {
+            y = defaultSettings.watermark_y + (defaultSettings.watermark_y_space + defaultSettings.watermark_height) * i;
+            for (var j = 0; j < defaultSettings.watermark_cols; j++) {
+                x = defaultSettings.watermark_x + (defaultSettings.watermark_width + defaultSettings.watermark_x_space) * j;
+                var mask_div = document.createElement('div');
+                mask_div.id = 'mask_div' + i + j;
+                mask_div.className = 'mask_div';
+                mask_div.appendChild(document.createTextNode(defaultSettings.watermark_txt));
+                //设置水印div倾斜显示
+                mask_div.style.webkitTransform = "rotate(-" + defaultSettings.watermark_angle + "deg)";
+                mask_div.style.MozTransform = "rotate(-" + defaultSettings.watermark_angle + "deg)";
+                mask_div.style.msTransform = "rotate(-" + defaultSettings.watermark_angle + "deg)";
+                mask_div.style.OTransform = "rotate(-" + defaultSettings.watermark_angle + "deg)";
+                mask_div.style.transform = "rotate(-" + defaultSettings.watermark_angle + "deg)";
+                mask_div.style.visibility = "";
+                mask_div.style.position = "absolute";
+                mask_div.style.left = x + 'px';
+                mask_div.style.top = y + 'px';
+                mask_div.style.overflow = "hidden";
+                mask_div.style.zIndex = "9999";
+                //让水印不遮挡页面的点击事件
+                mask_div.style.pointerEvents = 'none';
+                mask_div.style.opacity = defaultSettings.watermark_alpha;
+                mask_div.style.fontSize = defaultSettings.watermark_fontsize;
+                mask_div.style.fontFamily = defaultSettings.watermark_font;
+                mask_div.style.color = defaultSettings.watermark_color;
+                mask_div.style.textAlign = "center";
+                mask_div.style.width = defaultSettings.watermark_width + 'px';
+                mask_div.style.height = defaultSettings.watermark_height + 'px';
+                mask_div.style.display = "block";
+                oTemp.appendChild(mask_div);
+            };
+        };
+        ele.appendChild(oTemp);
+    }
+    watermark(info);
+</script>

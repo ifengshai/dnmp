@@ -167,7 +167,7 @@ class Distribution extends Backend
         }
         //查询处方详情
         $result = $this->orderitemoption->get($row['option_id'])->toArray();
-   
+
         //根据镜片编码查询仓库镜片名称
         $result['index_name'] = $this->lensdata->where('lens_number', $result['lens_number'])->value('lens_name');
         $this->assign('result', $result);
@@ -442,14 +442,14 @@ class Distribution extends Backend
 
             //TODO::条形码样式判断显示处理
             $file_header = <<<EOF
-                <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<style>
-body{ margin:0; padding:0}
-.single_box{margin:0 auto;width: 400px;padding:1mm;margin-bottom:2mm;}
-table.addpro {clear: both;table-layout: fixed; margin-top:6px; border-top:1px solid #000;border-left:1px solid #000; font-size:12px;}
-table.addpro .title {background: none repeat scroll 0 0 #f5f5f5; }
-table.addpro .title  td {border-collapse: collapse;color: #000;text-align: center; font-weight:normal; }
-table.addpro tbody td {word-break: break-all; text-align: center;border-bottom:1px solid #000;border-right:1px solid #000;}
+                            <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+            <style>
+            body{ margin:0; padding:0}
+            .single_box{margin:0 auto;width: 400px;padding:1mm;margin-bottom:2mm;}
+            table.addpro {clear: both;table-layout: fixed; margin-top:6px; border-top:1px solid #000;border-left:1px solid #000; font-size:12px;}
+            table.addpro .title {background: none repeat scroll 0 0 #f5f5f5; }
+            table.addpro .title  td {border-collapse: collapse;color: #000;text-align: center; font-weight:normal; }
+            table.addpro tbody td {word-break: break-all; text-align: center;border-bottom:1px solid #000;border-right:1px solid #000;}
 table.addpro.re tbody td{ position:relative}
 </style>
 EOF;
@@ -588,6 +588,31 @@ EOF;
             }
             echo $file_header . $file_content;
         }
+    }
+
+    /**
+     * 测试打印标签
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/11/10 10:36:22 
+     * @return void
+     */
+    public function print_test()
+    {
+        $item_order_number = '430223092-11';
+        $this->view->engine->layout(false);
+        $img_url = "/uploads/printOrder/distribution/new/$item_order_number.png";
+        $fileName = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "distribution" . DS . "new" . DS . "$item_order_number.png";
+        $dir = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "distribution" . DS . "new";
+        if (!file_exists($dir)) {
+            mkdir($dir, 0777, true);
+        }
+        //生成条形码
+        $this->generate_barcode_new($item_order_number, $fileName);
+        $this->assign('img_url', $img_url);
+        $html = $this->view->fetch('label');
+        echo $html;
     }
 
     /**
