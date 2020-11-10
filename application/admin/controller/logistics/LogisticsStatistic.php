@@ -183,7 +183,7 @@ class LogisticsStatistic extends Backend
         $fourteen_time_out = config('logistics.delievered_time_out')['fourteen'];
         //20天妥投时间
         $twenty_time_out = config('logistics.delievered_time_out')['twenty'];
-        $all_shipment_type = $this->orderNode->where($whereSite)->where($map)->where('track_number is not null')->distinct(true)->field('shipment_data_type')->select();
+        $all_shipment_type = $this->orderNode->where($whereSite)->where($map)->where('track_number is not null')->field('shipment_data_type')->group('shipment_data_type')->select();
         if ($all_shipment_type) {
             $arr = $rs = $rate = [];
             //$rate['serven'] = $rate['fourteen'] = $rate['twenty'] = $rate['gtTwenty'] = 0;

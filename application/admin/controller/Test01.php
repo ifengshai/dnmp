@@ -170,10 +170,11 @@ class Test01 extends Backend
         $this->ordernodedetail = new \app\admin\model\OrderNodeDetail();
         $this->ordernodecourier = new \app\admin\model\OrderNodeCourier();
         $list = $this->ordernode
-        ->where(['create_time' => ['between', ['2020-09-01 00:00:00', '2020-10-01 00:00:00']]])
-        ->where('track_number is not null')
-        ->select();
-        foreach($list as $k => $v) {
+            ->where(['delivery_time' => ['between', ['2020-08-01 00:00:00', '2020-10-01 00:00:00']]])
+            ->where('track_number is not null')
+            ->where(['shipment_data_type' => ['in', ['FEDEX', 'USPS_2', 'USPS_1', 'USPS_3', 'CHINA_EMS', 'DHL', 'CHINA_POST']]])
+            ->select();
+        foreach ($list as $k => $v) {
             //根据物流单号查询发货物流渠道
             $shipment_data_type = Db::connect('database.db_delivery')->table('ld_deliver_order')->where(['track_number' => $v['track_number'], 'increment_id' => $v['order_number']])->value('agent_way_title');
             if (!$shipment_data_type) continue;
