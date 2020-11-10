@@ -713,8 +713,8 @@ class ScmWarehouse extends Scm
         $list = $this->_in_stock
             ->alias('a')
             ->where($where)
-            ->field('a.id,a.in_stock_number,b.check_order_number,a.createtime,a.status')
-            ->join(['fa_check_order' => 'b'], 'a.check_id=b.id')
+            ->field('a.id,a.check_id,a.in_stock_number,b.check_order_number,a.createtime,a.status')
+            ->join(['fa_check_order' => 'b'], 'a.check_id=b.id','left')
             ->group('a.id')
             ->order('a.createtime', 'desc')
             ->limit($offset, $limit)
@@ -725,6 +725,11 @@ class ScmWarehouse extends Scm
         foreach($list as $key=>$value){
             $list[$key]['status'] = $status_list[$value['status']];
             //按钮
+            if ($list[$key]['check_id']){
+                $list[$key]['check_in'] = 1;//是否有质检单 1有 0没有
+            } else {
+                $list[$key]['check_in'] = 0;//是否有质检单 1有 0没有
+            }
             $list[$key]['show_edit'] = 0 == $value['status'] ? 1 : 0;//编辑按钮
             $list[$key]['cancel_show'] = 0 == $value['status'] ? 1 : 0;//取消按钮
             $list[$key]['show_examine'] = 1 == $value['status'] ? 1 : 0;//审核按钮
@@ -1007,7 +1012,8 @@ class ScmWarehouse extends Scm
             $info['check_id'] = $check_id;
             $info['check_order_number'] = $check_data['check_order_number'];
             //有关联质检单ID，则入库类型只取第一条数据：采购入库
-            $in_stock_type = $in_stock_type[0];
+//            $in_stock_type = $in_stock_type[0];
+            $in_stock_type_list[] = $in_stock_type[0];
 
             //获取质检单商品数据
             $item_list = $this->_check_item
@@ -1026,16 +1032,18 @@ class ScmWarehouse extends Scm
             //入库单直接添加，查询站点数据
             $platform_list = $this->_magento_platform->field('id, name')->where(['is_del' => 1,'status' => 1])->select();
             $info['platform_list'] = $platform_list;
+            $in_stock_type_list = $in_stock_type;
 
         }
 
-        $info['in_stock_type'] = $in_stock_type;
+        $info['in_stock_type'] = $in_stock_type_list;
 
         $this->success('', ['info' => $info],200);
     }
 
     /**
-     * 编辑入库单页面/详情/入库单审核页面--只允许编辑入库分类和SKU入库数量--去除了质检合格数量--ok
+     * 编辑入库单页面/详情/入库单审核页面--只允许编辑入库分类和SKU入库数量--去除了质检合格数量--ok.
+     * 修改编辑页面可更改
      *
      * @参数 int in_stock_id  入库单ID
      * @author wgj
@@ -1442,13 +1450,24 @@ class ScmWarehouse extends Scm
             $skus = collection($skus)->toArray();
             $skus = array_column($skus, 'sku');
             if($skus){
-                $where['a.sku'] = ['not in', $skus];
-            }
-            if($query){
-                $where['a.sku|b.coding'] = ['like', '%' . $query . '%'];//coding库位编码，library_name库位名称
+                $where_item['sku'] = ['not in', $skus];
             }
             if($start_stock && $end_stock){
-                $where['c.stock'] = ['between', [$start_stock, $end_stock]];
+                $where_item['stock'] = ['between', [$start_stock, $end_stock]];
+                $item = $this->_item->field('sku')->where($where_item)->select();
+                $item = collection($item)->toArray();
+                $sku_list = array_column($item, 'sku');
+                if ($sku_list) {
+                    $where['a.sku'] = ['in', $sku_list];
+                } else {
+                    $this->success('暂无数据', ['info' => []],200);
+                }
+            } elseif ($skus) {
+                $where['a.sku'] = ['not in', $skus];
+            }
+
+            if($query){
+                $where['a.sku|b.coding'] = ['like', '%' . $query . '%'];//coding库位编码，library_name库位名称
             }
 
             $offset = ($page - 1) * $page_size;
@@ -1460,7 +1479,6 @@ class ScmWarehouse extends Scm
                 ->field('a.id,a.sku,b.coding')
                 ->where($where)
                 ->join(['fa_store_house'=> 'b'],'a.store_id=b.id','left')
-                ->join(['stock.fa_item'=> 'c'],'a.sku=c.sku','left')
                 ->order('a.id', 'desc')
                 ->limit($offset, $limit)
                 ->select();
@@ -1549,14 +1567,20 @@ class ScmWarehouse extends Scm
             $this->error(__('此状态不能编辑'), [], 512);
         }
 //        $inventory_item_info = $_inventory_item->field('id,sku,inventory_qty,error_qty,real_time_qty,available_stock,distribution_occupy_stock')->where(['inventory_id'=>$inventory_id])->select();
+        $item = $this->_item->field('sku')->where(['id'=>$inventory_id])->select();
+        $item = collection($item)->toArray();
+        $sku_list = array_column($item, 'sku');
+        $where['sku'] = ['in', $sku_list];
         $inventory_item_info = $this->_inventory_item
-            ->alias('a')
-            ->field('a.id,a.sku,a.inventory_qty,b.stock,a.error_qty,a.real_time_qty,a.available_stock,a.distribution_occupy_stock')
-            ->where(['a.inventory_id'=>$inventory_id])
-            ->join(['stock.fa_item'=> 'b'],'a.sku=b.sku','left')
-            ->order('a.id', 'desc')
+            ->field('id,sku,inventory_qty,error_qty,real_time_qty,available_stock,distribution_occupy_stock')
+            ->where($where)
+            ->order('id', 'desc')
             ->select();
         $item_list = collection($inventory_item_info)->toArray();
+        foreach (array_filter($item_list) as $k => $v) {
+            $item_list[$k]['stock'] = $this->_item->where('sku',$v['sku'])->value('stock');
+            $stock = $this->_item->where('sku',$v['sku'])->value('stock');
+        }
 
         //盘点单所需数据
         $info =[
