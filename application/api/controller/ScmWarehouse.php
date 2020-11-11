@@ -1589,7 +1589,7 @@ class ScmWarehouse extends Scm
         $item_list = collection($inventory_item_info)->toArray();
         foreach (array_filter($item_list) as $k => $v) {
             $item_list[$k]['stock'] = $this->_item->where('sku',$v['sku'])->value('stock');
-            $stock = $this->_item->where('sku',$v['sku'])->value('stock');
+//            $stock = $this->_item->where('sku',$v['sku'])->value('stock');
         }
 
         //盘点单所需数据
