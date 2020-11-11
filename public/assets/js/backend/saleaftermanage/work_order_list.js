@@ -1304,6 +1304,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 }
             }
 
+            //子单号的折叠框生成
+            $(document).on('click', '#item_order_but', function () {
+                var target = $('.box-body');
+                if (target.is(':hidden')) {
+                    target.show("500");
+                } else {
+                    target.hide("500");
+                }
+            });
+
         },
         edit: function () {
             Controller.api.bindevent();
@@ -2828,3 +2838,10 @@ function changeOrderAddress(){
     }
 }
 
+//根据状态折叠和展开
+function switchDisplay(){
+    var parent = this.parentNode;
+    var target = parent.getElementsByTagName("div")[1];//class为elements的div
+
+    
+}
