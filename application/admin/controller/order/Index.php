@@ -323,9 +323,8 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
      */
     public function account_order()
     {
+
         $label = $this->request->get('label', 1);
-
-
         //设置过滤方法
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
@@ -335,18 +334,16 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                 return $this->selectpage();
             }
             $rep    = $this->request->get('filter');
-
             $addWhere = '1=1';
             if ($rep != '{}') {
-                // $whereArr = json_decode($rep,true);
-                // if(!array_key_exists('created_at',$whereArr)){
-                //     $addWhere  .= " AND DATE_SUB(CURDATE(), INTERVAL 7 DAY) <= date(created_at)";
-                // }
+                 $whereArr = json_decode($rep,true);
+                 if(!array_key_exists('created_at',$whereArr)){
+                     $addWhere  .= " AND DATE_SUB(CURDATE(), INTERVAL 7 DAY) <= date(created_at)";
+                 }
             } else {
                 $addWhere  .= " AND DATE_SUB(CURDATE(), INTERVAL 7 DAY) <= date(created_at)";
             }
-            // echo $addWhere;
-            // exit;
+
             //根据传的标签切换对应站点数据库
             $label = $this->request->get('label', 1);
             if ($label == 1) {
@@ -356,19 +353,19 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
             } elseif ($label == 3) {
                 $model = $this->nihao;
             }
-
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $model
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
-
             $list = $model
                 ->where($where)
-                //                ->field('increment_id,customer_firstname,customer_email,status,base_grand_total,base_shipping_amount,custom_order_prescription_type,order_type,created_at,base_total_paid,base_total_due')
+                ->where($whereArr)
+//                ->field('increment_id,customer_firstname,customer_email,status,base_grand_total,base_shipping_amount,custom_order_prescription_type,order_type,created_at,base_total_paid,base_total_due')
+//                ->field('increment_id,customer_firstname')
                 ->order($sort, $order)
                 ->limit($offset, $limit)
-                ->select();
+                 ->select();
             $totalId = $model
                 ->where($where)
                 ->where($addWhere)
@@ -380,6 +377,14 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                 ->column('entity_id');
             $costInfo = $model->getOrderCostInfo($totalId, $thisPageId);
             $list = collection($list)->toArray();
+            $listone = $model
+                ->where($where)
+                ->whereNotIn('order_type',['1','2'])
+                ->field('increment_id,order_type')
+                ->order($sort,$order)
+                ->limit($offset,$limit)
+                ->select();
+            $lists = collection($listone)->toArray();
 
             foreach ($list as $k => $v) {
                 //原先
@@ -424,6 +429,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                     }
                 }
             }
+            dump($list);die();
             $result = array(
                 "total"             =>  $total,
                 "rows"              =>  $list,
@@ -434,7 +440,6 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                 "totalRefundMoney"  =>  round($costInfo['totalRefundMoney'], 2),
                 "totalFullPostMoney" =>  round($costInfo['totalFullPostMoney'], 2),
                 "totalProcessCost"  =>  round($costInfo['totalProcessCost'], 2)
-
             );
             return json($result);
         }
