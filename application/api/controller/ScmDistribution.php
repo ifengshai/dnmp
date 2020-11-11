@@ -832,7 +832,7 @@ class ScmDistribution extends Scm
         $order_process_info = $this->_new_order
             ->alias('a')
             ->where('a.id', $item_process_info['order_id'])
-            ->join(['mojing_order.fa_order_process'=> 'b'],'a.id=b.order_id','left')
+            ->join(['fa_order_process'=> 'b'],'a.id=b.order_id','left')
             ->field('a.id,a.increment_id,b.store_house_id')
             ->find();
         empty($order_process_info) && $this->error(__('主订单不存在'), [], 403);
@@ -969,7 +969,7 @@ class ScmDistribution extends Scm
         $order_process_info = $this->_new_order
             ->alias('a')
             ->where('a.increment_id', $order_number)
-            ->join(['mojing_order.fa_order_process'=> 'b'],'a.id=b.order_id','left')
+            ->join(['fa_order_process'=> 'b'],'a.id=b.order_id','left')
             ->field('a.id,a.increment_id,b.store_house_id')
             ->find();
         empty($order_process_info) && $this->error(__('主订单不存在'), [], 403);
@@ -1008,7 +1008,7 @@ class ScmDistribution extends Scm
         $order_process_info = $this->_new_order
             ->alias('a')
             ->where('a.increment_id', $order_number)
-            ->join(['mojing_order.fa_order_process'=> 'b'],'a.id=b.order_id','left')
+            ->join(['fa_order_process'=> 'b'],'a.id=b.order_id','left')
             ->field('a.id,a.increment_id,b.store_house_id')
             ->find();
         empty($order_process_info) && $this->error(__('订单不存在'), [], 403);
@@ -1060,14 +1060,26 @@ class ScmDistribution extends Scm
         empty($page_size) && $this->error(__('Page size can not be empty'), [], 521);
 
         $where = [];
-        $where['a.combine_status'] = 1;//合单中状态
+        $where['a.combine_status'] = 1;//合单完成状态
         $offset = ($page - 1) * $page_size;
         $limit = $page_size;
 
         if ($type == 1){
             //合单待取出列表，主单为合单完成状态且子单都已合单
             if($query){
-                $where['b.sku|c.coding'] = ['like', '%' . $query . '%'];
+                $where_temp = [];
+                $where_temp['sku|coding'] = ['like', '%' . $query . '%'];
+                //线上不允许跨库联合查询，拆分，由于字段值明显差异，可以分别模糊匹配
+                $store_house_id_item = $this->_stock_house->field('id')->where($where_temp)->select();
+                $store_house_id_item = collection($store_house_id_item)->toArray();
+                $store_house_ids = array_column($store_house_id_item, 'id');
+                if($store_house_ids) $where['store_house_id'] = ['in', $store_house_ids];
+
+                $sku_item = $this->_new_order_item_process->field('id')->where($where_temp)->select();
+                $sku_item = collection($sku_item)->toArray();
+                $sku = array_column($sku_item, 'id');
+                if($sku) $where['sku'] = ['in', $sku];
+
             }
             if($start_time && $end_time){
                 $where['a.combine_time'] = ['between', [$start_time, $end_time]];
@@ -1076,28 +1088,41 @@ class ScmDistribution extends Scm
             $list = $this->_new_order_process
                 ->alias('a')
                 ->where($where)
-                ->join(['mojing_order.fa_order_item_process'=> 'b'],'a.order_id=b.order_id','left')
-                ->join(['mojing.fa_store_house'=> 'c'],'a.store_house_id=c.id','left')
-                ->field('a.order_id,c.coding,a.combine_time')
+                ->join(['fa_order_item_process'=> 'b'],'a.order_id=b.order_id','left')
+                ->field('a.order_id,a.store_house_id,a.combine_time')
                 ->limit($offset, $limit)
                 ->select();
-            empty($list) && $this->error(__('订单不存在'), [], 403);
+            empty($list) && $this->error(__('暂无合单待取出'), [], 403);
 
         } else {
             //异常待处理列表
             if($query){
-                $where['b.item_order_number|c.coding'] = ['like', '%' . $query . '%'];
+                $where_temp = [];
+                $where_temp['item_order_number|coding'] = ['like', '%' . $query . '%'];
+                //线上不允许跨库联合查询，拆分，由于字段值明显差异，可以分别模糊匹配
+                $store_house_id_item = $this->_stock_house->field('id')->where($where_temp)->select();
+                $store_house_id_item = collection($store_house_id_item)->toArray();
+                $store_house_ids = array_column($store_house_id_item, 'id');
+                if($store_house_ids) $where['store_house_id'] = ['in', $store_house_ids];
+
+                $item_order_number_item = $this->_new_order_item_process->field('item_order_number')->where($where_temp)->select();
+                $item_order_number_item = collection($item_order_number_item)->toArray();
+                $item_order_number = array_column($item_order_number_item, 'item_order_number');
+                if($item_order_number) $where['item_order_number'] = ['in', $item_order_number];
+
             }
             $where['b.abnormal_house_id'] = ['>',0];
             $list = $this->_new_order_process
                 ->alias('a')
                 ->where($where)
-                ->join(['mojing_order.fa_order_item_process'=> 'b'],'a.order_id=b.order_id','left')
-                ->join(['mojing.fa_store_house'=> 'c'],'b.abnormal_house_id=c.id','left')
-                ->field('c.coding,b.item_order_number')
+                ->join(['fa_order_item_process'=> 'b'],'a.order_id=b.order_id','left')
+                ->field('a.store_house_id,b.item_order_number')
                 ->limit($offset, $limit)
                 ->select();
             empty($list) && $this->error(__('暂无合单异常待处理'), [], 403);
+        }
+        foreach (array_filter($list) as $k => $v) {
+            $list[$k]['coding'] = $this->_stock_house->where('id',$v['store_house_id'])->value('coding');
         }
 
         $info['list'] = $list;
@@ -1120,7 +1145,7 @@ class ScmDistribution extends Scm
         $order_process_info = $this->_new_order
             ->alias('a')
             ->where('a.increment_id', $order_number)
-            ->join(['mojing_order.fa_order_process'=> 'b'],'a.id=b.order_id','left')
+            ->join(['fa_order_process'=> 'b'],'a.id=b.order_id','left')
             ->field('a.id,b.combine_status,b.store_house_id')
             ->find();
         empty($order_process_info) && $this->error(__('主订单不存在'), [], 403);
@@ -1229,7 +1254,7 @@ class ScmDistribution extends Scm
             $order_process_info = $this->_new_order
                 ->alias('a')
                 ->where('a.increment_id', $order_number)
-                ->join(['mojing_order.fa_order_process'=> 'b'],'a.id=b.order_id','left')
+                ->join(['fa_order_process'=> 'b'],'a.id=b.order_id','left')
                 ->field('a.id,a.increment_id,b.store_house_id')
                 ->find();
             empty($order_process_info) && $this->error(__('主订单不存在'), [], 403);
