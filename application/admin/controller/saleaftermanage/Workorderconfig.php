@@ -422,8 +422,11 @@ class Workorderconfig extends Backend
         //所有问题类型
         $where['is_del'] = 1;
         $all_problem_type = $this->model->where($where)->select();
-        //所有措施类型
+        //所有主单措施类型
         $all_step = (new WorkOrderStepType)->where($where)->select();
+        //所有子单措施类型
+        $all_step_item = (new WorkOrderStepType)->where($where)->select();
+
         //所有平台
         $all_platform     = (new MagentoPlatform)->field('id,name')->select();
         //所有的可用用户
