@@ -150,6 +150,8 @@ class Voogueme extends Backend
             $swhere['work_platform'] = 2;
             $swhere['work_status'] = ['not in', [0, 4, 6]];
             $order_arr = $workorder->where($swhere)->column('platform_order');
+
+
             //查询是否存在协同任务
             $swhere = [];
             $swhere['synergy_order_number'] = ['in', $increment_ids];

@@ -58,6 +58,7 @@ class OrderDataDetail extends Backend
             $web_model->table('sales_flat_order_payment')->query("set time_zone='+8:00'");
             $web_model->table('sales_flat_order_address')->query("set time_zone='+8:00'");
             $web_model->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
+            $map['o.order_type'] = 1;
             if($filter['time_str']){
                 $createat = explode(' ', $filter['time_str']);
                 $map['o.created_at'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
@@ -105,13 +106,13 @@ class OrderDataDetail extends Backend
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $sort = 'o.entity_id';
             $total = $order_model->alias('o')
-                ->join('customer_entity c','o.customer_id=c.entity_id')
+                ->join('customer_entity c','o.customer_id=c.entity_id','left')
                 ->where($where)
                 ->where($map)
                 ->order($sort, $order)
                 ->count('o.entity_id');
             $list = $order_model->alias('o')
-                ->join('customer_entity c','o.customer_id=c.entity_id')
+                ->join('customer_entity c','o.customer_id=c.entity_id','left')
                 ->where($where)
                 ->where($map)
                 ->order($sort, $order)
@@ -403,6 +404,7 @@ class OrderDataDetail extends Backend
         $web_model->table('sales_flat_order_payment')->query("set time_zone='+8:00'");
         $web_model->table('sales_flat_order_address')->query("set time_zone='+8:00'");
         $web_model->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
+        $map['o.order_type'] = 1;
         if($time_str){
             $createat = explode(' ', $time_str);
             $map['o.created_at'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
@@ -437,7 +439,7 @@ class OrderDataDetail extends Backend
             $map['o.store_id'] = $store_id;
         }
         $total_export_count = $order_model->alias('o')
-            ->join('customer_entity c','o.customer_id=c.entity_id')
+            ->join('customer_entity c','o.customer_id=c.entity_id','left')
             ->where($map)
             ->count();
         $pre_count = 5000;
@@ -445,7 +447,7 @@ class OrderDataDetail extends Backend
             $start = $i*$pre_count;
             //切割每份数据
             $list = $order_model->alias('o')
-                ->join('customer_entity c','o.customer_id=c.entity_id')
+                ->join('customer_entity c','o.customer_id=c.entity_id','left')
                 ->where($map)
                 ->field('o.entity_id,o.increment_id,o.created_at,o.base_grand_total,o.base_shipping_amount,o.status,o.store_id,o.coupon_code,o.shipping_method,o.customer_email,o.customer_id,o.base_discount_amount')
                 ->limit($start,$pre_count)

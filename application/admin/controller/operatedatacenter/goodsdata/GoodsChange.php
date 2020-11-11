@@ -39,7 +39,6 @@ class GoodsChange extends Backend
         if ($this->request->isAjax()) {
             $filter = json_decode($this->request->get('filter'), true);
             // dump($filter);
-
             //如果发送的来源是Selectpage，则转发到Selectpage
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
@@ -50,10 +49,20 @@ class GoodsChange extends Backend
                 unset($filter['time_str']);
                 $this->request->get(['filter' => json_encode($filter)]);
             } else {
+                unset($filter['time_str']);
+                $this->request->get(['filter' => json_encode($filter)]);
                 $createat = explode(' ', $seven_days);
             }
             if ($filter['create_time-operate']) {
                 unset($filter['create_time-operate']);
+            }
+            if ($filter['sku']) {
+                $map['sku'] = ['like', '%' . $filter['sku'] . '%'];
+                unset($filter['sku']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            } else {
+                unset($filter['sku']);
+                $this->request->get(['filter' => json_encode($filter)]);
             }
             if ($filter['order_platform']) {
                 $order_platform = $filter['order_platform'];
@@ -62,9 +71,9 @@ class GoodsChange extends Backend
             } else {
                 $order_platform = 1;
             }
-
             $map['site'] = $order_platform;
             $map['day_date'] = ['between', [$createat[0], $createat[3]]];
+            // dump($map);
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = Db::name('datacenter_sku_day')
                 ->where($where)
@@ -86,7 +95,7 @@ class GoodsChange extends Backend
                 $sku_detail = $_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $order_platform])->field('platform_sku,stock,plat_on_way_stock,outer_sku_status')->find();
                 //sku转换
                 $sku_data_day[$k]['sku_change'] = $sku_detail['platform_sku'];
-                $sku_data_day[$k]['single_price'] = $sku_data_day[$k]['glass_num'] != 0 ? round($sku_data_day[$k]['sku_row_total'] / $sku_data_day[$k]['glass_num'],2) : 0;
+                $sku_data_day[$k]['single_price'] = $sku_data_day[$k]['glass_num'] != 0 ? round($sku_data_day[$k]['sku_row_total'] / $sku_data_day[$k]['glass_num'], 2) : 0;
                 //上下架状态
                 $sku_data_day[$k]['status'] = $sku_detail['outer_sku_status'];
                 $sku_data_day[$k]['stock'] = $sku_detail['stock'];

@@ -22,6 +22,7 @@ return [
         '9' => 'ZeeloolEs',
         '10' => 'ZeeloolDe',
         '11' => 'ZeeloolJp',
+        '12' => 'Voogmechic',
         
     ],
     //类型
@@ -199,5 +200,7 @@ return [
     'app_group_person_id' => 116,
     'product_group_id' => 105,
     'product_group_person_id' => 111,
+    'develop_group_id' => 106,
+    'develop_group_person_id' => 112,
 
 ];

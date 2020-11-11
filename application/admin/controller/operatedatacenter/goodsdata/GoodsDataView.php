@@ -24,7 +24,9 @@ class GoodsDataView extends Backend
      */
     public function index()
     {
-        $label = input('label', 1);
+        // $label = input('label', 1);
+        $label = input('order_platform', 1);
+        // dump($label);
         switch ($label) {
             case 1:
                 $goods_type = [1 => '光学镜', 2 => '太阳镜', 3 => '运动镜', 4 => '老花镜', 5 => '儿童镜', 6 => '配饰'];
@@ -36,13 +38,23 @@ class GoodsDataView extends Backend
                 $goods_type = [1 => '平光镜', 2 => '太阳镜'];
                 break;
         }
+        $this->assign('goods_type', $goods_type);
         if ($this->request->isAjax()) {
             $result = [];
             return json(['code' => 1, 'rows' => $result]);
         }
+        $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform();
+        //查询对应平台权限
+        $magentoplatformarr = $this->magentoplatform->getAuthSite();
+        foreach ($magentoplatformarr as $key => $val) {
+            if (!in_array($val['name'], ['zeelool', 'voogueme', 'nihao'])) {
+                unset($magentoplatformarr[$key]);
+            }
+        }
+        $this->view->assign('magentoplatformarr', $magentoplatformarr);
         $this->assign('label', $label);
         $this->assignconfig('label', $label);
-        $this->assign('goods_type', $goods_type);
+
         return $this->view->fetch();
     }
 
@@ -360,7 +372,7 @@ class GoodsDataView extends Backend
                 $createat = explode(' ', $seven_days);
             }
             $map['day_date'] = ['between', [$createat[0], $createat[3]]];
-            
+
             $data_center_day = Db::name('datacenter_goods_type_data')
                 ->where(['site' => $params['order_platform']])
                 ->where($map)
@@ -811,7 +823,9 @@ class GoodsDataView extends Backend
             $map['day_date'] = ['between', [$createat[0], $createat[3]]];
             $map1 = $map;
             if ($params['goods_type']) {
-                $map['goods_type'] = ['=', $params['goods_type']];
+                if ($params['goods_type'] !=4){
+                    $map['goods_type'] = ['=', $params['goods_type']];
+                }
             }
             //根据产品等级分组
             $data_center_day = Db::name('datacenter_sku_day')
@@ -820,13 +834,14 @@ class GoodsDataView extends Backend
                 ->group('goods_grade')
                 ->field('site,sum(order_num) as total_order_num,goods_type,goods_grade,count(goods_type) as goods_num,sum(glass_num) as total_sales_num')
                 ->select();
+//            dump($data_center_day);
             $skus = Db::name('datacenter_sku_day')
                 ->where(['site' => $params['order_platform']])
                 ->where($map)
                 ->order('day_date', 'asc')
                 ->field('sku,day_date,day_stock,day_onway_stock,goods_grade')
                 ->select();
-
+//            dump($skus);
 
             $data_center_day = array_column($data_center_day, null, 'goods_grade');
             $skus = array_column($skus, null, 'sku');
@@ -936,4 +951,133 @@ class GoodsDataView extends Backend
         $this->success('', '', $data);
     }
 
+    public function ajax_data_goods_type()
+    {
+        // if ($this->request->isAjax()) {
+            $params = $this->request->param();
+            if ($params['time_str']) {
+                //时间段总和
+                $createat = explode(' ', $params['time_str']);
+            } else {
+                $start = date('Y-m-d', strtotime('-6 day'));
+                $end = date('Y-m-d 23:59:59');
+                $seven_days = $start . ' 00:00:00 - ' . $end . ' 00:00:00';
+                $createat = explode(' ', $seven_days);
+            }
+
+            $params['order_platform'] = $params['order_platform'] ? $params['order_platform'] : 1;
+            $map['day_date'] = ['between', [$createat[0], $createat[3]]];
+            if ($params['goods_type']) {
+                $map['goods_type'] = ['=', $params['goods_type']];
+            }
+            //根据产品等级分组
+            $data_center_day = Db::name('datacenter_sku_day')
+                ->where(['site' => $params['order_platform']])
+                ->where($map)
+                ->distinct(true)->field('platform_sku,goods_grade')
+                ->select();
+
+            $newArray=array();
+            foreach($data_center_day as $v){
+                $newArray[$v['goods_grade']][]=$v['platform_sku'];
+            }
+            unset($newArray['F']);
+            foreach ($newArray['A+'] as $v){
+
+            }
+
+
+
+            $a_plus_data['day_stock'] = $arr['A+']['day_stock'] ? $arr['A+']['day_stock'] : 0;
+            $a_plus_data['day_onway_stock'] = $arr['A+']['day_onway_stock'] ? $arr['A+']['day_onway_stock'] : 0;
+            $a_data['day_stock'] = $arr['A']['day_stock'] ? $arr['A']['day_stock'] : 0;
+            $a_data['day_onway_stock'] = $arr['A']['day_onway_stock'] ? $arr['A']['day_onway_stock'] : 0;
+            $b_data['day_stock'] = $arr['B']['day_stock'] ? $arr['B']['day_stock'] : 0;
+            $b_data['day_onway_stock'] = $arr['B']['day_onway_stock'] ? $arr['B']['day_onway_stock'] : 0;
+            $c_plus_data['day_stock'] = $arr['C+']['day_stock'] ? $arr['C+']['day_stock'] : 0;
+            $c_plus_data['day_onway_stock'] = $arr['C+']['day_onway_stock'] ? $arr['C+']['day_onway_stock'] : 0;
+            $c_data['day_stock'] = $arr['C']['day_stock'] ? $arr['C']['day_stock'] : 0;
+            $c_data['day_onway_stock'] = $arr['C']['day_onway_stock'] ? $arr['C']['day_onway_stock'] : 0;
+            $d_data['day_stock'] = $arr['D']['day_stock'] ? $arr['D']['day_stock'] : 0;
+            $d_data['day_onway_stock'] = $arr['D']['day_onway_stock'] ? $arr['D']['day_onway_stock'] : 0;
+            $e_data['day_stock'] = $arr['E']['day_stock'] ? $arr['E']['day_stock'] : 0;
+            $e_data['day_onway_stock'] = $arr['E']['day_onway_stock'] ? $arr['E']['day_onway_stock'] : 0;
+            // dump($data_center_day);
+            //总数
+            $total_sales_num = $data_center_day['A+']['total_sales_num'] + $data_center_day['A']['total_sales_num']
+                + $data_center_day['B']['total_sales_num'] + $data_center_day['C+']['total_sales_num']
+                + $data_center_day['C']['total_sales_num'] + $data_center_day['D']['total_sales_num']
+                + $data_center_day['E']['total_sales_num'];
+            $goods_num = $data_center_day['A+']['goods_num'] + $data_center_day['A']['goods_num']
+                + $data_center_day['B']['goods_num'] + $data_center_day['C+']['goods_num']
+                + $data_center_day['C']['goods_num'] + $data_center_day['D']['goods_num']
+                + $data_center_day['E']['goods_num'];
+            $total_stock = $a_plus_data['day_stock'] + $a_data['day_stock']
+                + $b_data['day_stock'] + $c_plus_data['day_stock']
+                + $c_data['day_stock'] + $d_data['day_stock']
+                + $e_data['day_stock'];
+            $total_onway_stock = $a_plus_data['day_onway_stock'] + $a_data['day_onway_stock']
+                + $b_data['day_onway_stock'] + $c_plus_data['day_onway_stock']
+                + $c_data['day_onway_stock'] + $d_data['day_onway_stock']
+                + $e_data['day_onway_stock'];
+            //goods_num 某个等级产品个数
+            $a_plus_data['total_sales_num'] = $data_center_day['A+']['total_sales_num'] ? $data_center_day['A+']['total_sales_num'] : 0;
+            $a_plus_data['goods_num'] = $data_center_day['A+']['goods_num'] ? $data_center_day['A+']['goods_num'] : 0;
+            $a_plus_data['total_sales_num_rate'] = $total_sales_num != 0 ? round($data_center_day['A+']['total_sales_num'] / $total_sales_num * 100, 2) . '%' : '0%';
+            $a_plus_data['goods_num_rate'] = $goods_num != 0 ? round($data_center_day['A+']['goods_num'] / $goods_num * 100, 2) . '%' : '0%';
+            $a_plus_data['day_stock_rate'] = $total_stock != 0 ? round($a_plus_data['day_stock'] / $total_stock * 100, 2) . '%' : '0%';
+            $a_plus_data['day_onway_stock_rate'] = $total_onway_stock != 0 ? round($a_plus_data['day_onway_stock'] / $total_onway_stock * 100, 2) . '%' : '0%';
+
+            $a_data['total_sales_num'] = $data_center_day['A']['total_sales_num'] ? $data_center_day['A']['total_sales_num'] : 0;
+            $a_data['goods_num'] = $data_center_day['A']['goods_num'] ? $data_center_day['A']['goods_num'] : 0;
+            $a_data['total_sales_num_rate'] = $total_sales_num != 0 ? round($data_center_day['A']['total_sales_num'] / $total_sales_num * 100, 2) . '%' : '0%';
+            $a_data['goods_num_rate'] = $goods_num != 0 ? round($data_center_day['A']['goods_num'] / $goods_num * 100, 2) . '%' : '0%';
+            $a_data['day_stock_rate'] = $total_stock != 0 ? round($a_data['day_stock'] / $total_stock * 100, 2) . '%' : '0%';
+            $a_data['day_onway_stock_rate'] = $total_onway_stock != 0 ? round($a_data['day_onway_stock'] / $total_onway_stock * 100, 2) . '%' : '0%';
+
+            $b_data['total_sales_num'] = $data_center_day['B']['total_sales_num'] ? $data_center_day['B']['total_sales_num'] : 0;
+            $b_data['goods_num'] = $data_center_day['B']['goods_num'] ? $data_center_day['B']['goods_num'] : 0;
+            $b_data['total_sales_num_rate'] = $total_sales_num != 0 ? round($data_center_day['B']['total_sales_num'] / $total_sales_num * 100, 2) . '%' : '0%';
+            $b_data['goods_num_rate'] = $goods_num != 0 ? round($data_center_day['B']['goods_num'] / $goods_num * 100, 2) . '%' : '0%';
+            $b_data['day_stock_rate'] = $total_stock != 0 ? round($b_data['day_stock'] / $total_stock * 100, 2) . '%' : '0%';
+            $b_data['day_onway_stock_rate'] = $total_onway_stock != 0 ? round($b_data['day_onway_stock'] / $total_onway_stock * 100, 2) . '%' : '0%';
+
+            $c_plus_data['total_sales_num'] = $data_center_day['C+']['total_sales_num'] ? $data_center_day['C+']['total_sales_num'] : 0;
+            $c_plus_data['goods_num'] = $data_center_day['C+']['goods_num'] ? $data_center_day['C+']['goods_num'] : 0;
+            $c_plus_data['total_sales_num_rate'] = $total_sales_num != 0 ? round($data_center_day['C+']['total_sales_num'] / $total_sales_num * 100, 2) . '%' : '0%';
+            $c_plus_data['goods_num_rate'] = $goods_num != 0 ? round($data_center_day['C+']['goods_num'] / $goods_num * 100, 2) . '%' : '0%';
+            $c_plus_data['day_stock_rate'] = $total_stock != 0 ? round($c_plus_data['day_stock'] / $total_stock * 100, 2) . '%' : '0%';
+            $c_plus_data['day_onway_stock_rate'] = $total_onway_stock != 0 ? round($c_plus_data['day_onway_stock'] / $total_onway_stock * 100, 2) . '%' : '0%';
+
+            $c_data ['total_sales_num'] = $data_center_day['C']['total_sales_num'] ? $data_center_day['C']['total_sales_num'] : 0;
+            $c_data ['goods_num'] = $data_center_day['C']['goods_num'] ? $data_center_day['C']['goods_num'] : 0;
+            $c_data ['total_sales_num_rate'] = $total_sales_num != 0 ? round($data_center_day['C']['total_sales_num'] / $total_sales_num * 100, 2) . '%' : '0%';
+            $c_data ['goods_num_rate'] = $goods_num != 0 ? round($data_center_day['C']['goods_num'] / $goods_num * 100, 2) . '%' : '0%';
+            $c_data['day_stock_rate'] = $total_stock != 0 ? round($c_data['day_stock'] / $total_stock * 100, 2) . '%' : '0%';
+            $c_data['day_onway_stock_rate'] = $total_onway_stock != 0 ? round($c_data['day_onway_stock'] / $total_onway_stock * 100, 2) . '%' : '0%';
+
+            $d_data['total_sales_num'] = $data_center_day['D']['total_sales_num'] ? $data_center_day['D']['total_sales_num'] : 0;
+            $d_data['goods_num'] = $data_center_day['D']['goods_num'] ? $data_center_day['D']['goods_num'] : 0;
+            $d_data['total_sales_num_rate'] = $total_sales_num != 0 ? round($data_center_day['D']['total_sales_num'] / $total_sales_num * 100, 2) . '%' : '0%';
+            $d_data['goods_num_rate'] = $goods_num != 0 ? round($data_center_day['D']['goods_num'] / $goods_num * 100, 2) . '%' : '0%';
+            $d_data['day_stock_rate'] = $total_stock != 0 ? round($d_data['day_stock'] / $total_stock * 100, 2) . '%' : '0%';
+            $d_data['day_onway_stock_rate'] = $total_onway_stock != 0 ? round($d_data['day_onway_stock'] / $total_onway_stock * 100, 2) . '%' : '0%';
+
+            $e_data ['total_sales_num'] = $data_center_day['E']['total_sales_num'] ? $data_center_day['E']['total_sales_num'] : 0;
+            $e_data ['goods_num'] = $data_center_day['E']['goods_num'] ? $data_center_day['E']['goods_num'] : 0;
+            $e_data ['total_sales_num_rate'] = $total_sales_num != 0 ? round($data_center_day['E']['total_sales_num'] / $total_sales_num * 100, 2) . '%' : '0%';
+            $e_data ['goods_num_rate'] = $goods_num != 0 ? round($data_center_day['E']['goods_num'] / $goods_num * 100, 2) . '%' : '0%';
+            $e_data['day_stock_rate'] = $total_stock != 0 ? round($e_data['day_stock'] / $total_stock * 100, 2) . '%' : '0%';
+            $e_data['day_onway_stock_rate'] = $total_onway_stock != 0 ? round($e_data['day_onway_stock'] / $total_onway_stock * 100, 2) . '%' : '0%';
+            // dump($a_plus_data);
+            // dump($a_data);
+            // dump($b_data);
+            // dump($c_plus_data);
+            // dump($c_data);
+            // dump($d_data);
+            // dump($e_data);
+        // }
+        $data = compact('a_plus_data', 'a_data', 'b_data', 'c_plus_data', 'c_data', 'd_data', 'e_data', 'f_data', 'total_sales_num', 'goods_num', 'total_stock', 'total_onway_stock');
+        $this->success('', '', $data);
+    }
 }

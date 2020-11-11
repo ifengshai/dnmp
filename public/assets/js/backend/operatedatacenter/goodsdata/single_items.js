@@ -7,7 +7,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
             Table.api.init({
                 commonSearch: false,
                 search: false,
-                showExport: false,
+                showExport: true,
                 showColumns: false,
                 showToggle: false,
                 extend: {
@@ -27,6 +27,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
                 pk: 'id',
                 sortName: 'id',
+                exportTypes:['excel'],
                 columns: [
                     [
                         // { field: 'number', title: __('序号') },
@@ -89,6 +90,20 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                 $("#order_platform").val(1);
                 $("#time_str").val('');
                 $("#sku").val('');
+            });
+            $("#export_guanlian").click(function(){
+                var order_platform = $('#order_platform').val();
+                var time_str = $('#time_str').val();
+                var sku = $('#sku').val();
+                if(sku.length <= 0){
+                    Layer.alert('请填写平台sku');
+                    return false;
+                }
+                if(time_str.length <= 0){
+                    Layer.alert('请选择时间');
+                    return false;
+                }
+                window.location.href=Config.moduleurl+'/operatedatacenter/goodsdata/single_items/export?order_platform='+order_platform+'&time_str='+time_str+'&sku='+sku;
             });
         },
         add: function () {

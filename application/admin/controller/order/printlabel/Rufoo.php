@@ -67,22 +67,6 @@ class Rufoo extends Backend
 
             $filter = json_decode($this->request->get('filter'), true);
 
-            //是否有工单
-            $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
-            if ($filter['is_task'] == 1 || $filter['is_task'] == '0') {
-                $swhere = [];
-                $swhere['work_platform'] = 8;
-                $swhere['work_status'] = ['not in', [0, 4, 6]];
-                $order_arr = $workorder->where($swhere)->column('platform_order');
-                if ($filter['is_task'] == 1) {
-                    $map['increment_id'] = ['in', $order_arr];
-                } elseif ($filter['is_task'] == '0') {
-                    $map['increment_id'] = ['not in', $order_arr];
-                }
-                unset($filter['is_task']);
-                $this->request->get(['filter' => json_encode($filter)]);
-            }
-
             if (!$filter['ordersn'] && !$filter['status']) {
                 $map['status'] = 1;
             }
@@ -103,19 +87,6 @@ class Rufoo extends Backend
 
 
             $list = collection($list)->toArray();
-
-            $swhere = [];
-            $increment_ids = array_column($list, 'increment_id');
-
-            $swhere['platform_order'] = ['in', $increment_ids];
-            $swhere['work_platform'] = 8;
-            $swhere['work_status'] = ['not in', [0, 4, 6]];
-            $order_arr = $workorder->where($swhere)->column('platform_order');
-            foreach ($list as $k => $v) {
-                if (in_array($v['increment_id'], $order_arr)) {
-                    $list[$k]['task_info'] = 1;
-                }
-            }
             $result = array("total" => $total, "rows" => $list);
             return json($result);
         }
@@ -319,9 +290,6 @@ class Rufoo extends Backend
             if (false === $result) {
                 throw new Exception("操作失败！！");
             }
-
-            //sku映射表
-            $ItemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
             //配镜架
             if ($status == 1) {
                 //查询出订单数据
@@ -337,22 +305,19 @@ class Rufoo extends Backend
                 //查出订单SKU映射表对应的仓库SKU
                 $number = 0;
                 foreach ($list as $k => &$v) {
-
-                    //转仓库SKU
-                    $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 1);
-                    if (!$trueSku) {
-                        throw new Exception("增加配货占用库存失败！！请检查SKU:" . $v['sku'] . ',订单号：' . $v['ordersn']);
+                    if (!$v['sku']) {
+                        throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['sku']);
                     }
 
                     $qty = $v['total'];
 
                     $map = [];
-                    $map['sku'] = $trueSku;
+                    $map['sku'] = $v['sku'];
                     $map['is_del'] = 1;
                     //增加配货占用
                     $res = $item->where($map)->setInc('distribution_occupy_stock', $qty);
                     if (false === $res) {
-                        throw new Exception("增加配货占用库存失败！！请检查SKU:" . $v['sku']);
+                        throw new Exception("增加配货占用库存失败！！请检查更换镜框SKU:" . $v['sku']);
                     }
 
                     $number++;
@@ -397,19 +362,13 @@ class Rufoo extends Backend
                     if (!$v['sku']) {
                         throw new Exception("扣减库存失败！！请检查SKU:" . $v['sku']);
                     }
-                    //转仓库SKU
-                    $trueSku = $ItemPlatformSku->getTrueSku(trim($v['sku']), 1);
-                    if (!$trueSku) {
-                        throw new Exception("扣减库存失败！！请检查SKU:" . $v['sku'] . ',订单号：' . $v['ordersn']);
-                    }
-
                     $qty = $v['total'];
                     if ($qty == 0) {
                         continue;
                     }
 
                     //总库存
-                    $item_map['sku'] = $trueSku;
+                    $item_map['sku'] = $v['sku'];
                     $item_map['is_del'] = 1;
                     //扣减总库存 扣减占用库存 扣减配货占用
                     $res = $item->where($item_map)->dec('stock', $qty)->dec('occupy_stock', $qty)->dec('distribution_occupy_stock', $qty)->update();

@@ -183,10 +183,7 @@ class LogisticsStatistic extends Backend
         $fourteen_time_out = config('logistics.delievered_time_out')['fourteen'];
         //20天妥投时间
         $twenty_time_out = config('logistics.delievered_time_out')['twenty'];
-        //$orderNode['order_node'] = ['egt', 3];
-        // $orderNode['node_type'] = ['egt', 7];
-        //$all_shipment_type = $this->orderNode->where($whereSite)->distinct(true)->field('shipment_data_type')->whereNotIn('shipment_data_type', ['', 'CPC', 'EYB','China Post','CHINA_EMS','USPS_3'])->select();
-        $all_shipment_type = $this->orderNode->where($whereSite)->where($map)->where('track_number is not null')->distinct(true)->field('shipment_data_type')->select();
+        $all_shipment_type = $this->orderNode->where($whereSite)->where($map)->where('track_number is not null')->field('shipment_data_type')->group('shipment_data_type')->select();
         if ($all_shipment_type) {
             $arr = $rs = $rate = [];
             //$rate['serven'] = $rate['fourteen'] = $rate['twenty'] = $rate['gtTwenty'] = 0;
@@ -294,13 +291,6 @@ class LogisticsStatistic extends Backend
             $total_send_order_num = $total_deliverd_order_num = 0;
             $info = [];
             foreach ($arr['shipment_data_type'] as $ak => $av) {
-                if ('USPS_1' == $av) {
-                    $av = '郭伟峰';
-                } elseif ('USPS_2' == $av) {
-                    $av = '加诺';
-                } elseif ('USPS_3' == $av) {
-                    $av = '杜明明';
-                }
                 $info[$ak]['shipment_data_type'] = $av;
                 $info[$ak]['send_order_num'] = $arr['send_order_num'][$ak];
                 $info[$ak]['deliverd_order_num'] = $arr['deliverd_order_num'][$ak];

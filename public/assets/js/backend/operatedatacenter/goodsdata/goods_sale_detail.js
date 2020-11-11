@@ -5,9 +5,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
             Controller.api.bindevent();
             // 初始化表格参数配置
             Table.api.init({
-                commonSearch: false,
+                commonSearch: true,
                 search: false,
-                showExport: false,
+                showExport: true,
                 showColumns: false,
                 showToggle: false,
                 extend: {
@@ -27,10 +27,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
                 pk: 'id',
                 sortName: 'id',
+                exportTypes:['excel'],
                 columns: [
                     [
                         {field: 'sku_change', title: __('平台SKU'), operate: false},
-                        {field: 'sku', title: __('SKU'), operate: false},
+                        {field: 'sku', title: __('SKU'), search: true},
                         {field: 'glass_num', title: __('销量'), operate: false},
                         {field: 'available_stock', title: __('虚拟仓库存'), sortable: true, operate: false},
                         {field: 'grade', title: __('产品等级'), operate: false},
@@ -47,6 +48,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
             });
             // 为表格绑定事件
             Table.api.bindevent(table);
+            $('.btn-success').click(function () {
+                var sku =  $("#sku").val();
+                // alert(sku)
+                $("#top_sku").val(sku);
+            });
             $("#sku_submit").click(function () {
                 var time = $('#create_time').val();
                 var platform = $('#order_platform').val();
@@ -72,7 +78,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
 
                     //参数转为json字符串
                     params.filter = JSON.stringify(filter)
-                    console.info(params);
                     return params;
                 }
                 //眼镜和饰品关键指标
@@ -113,7 +118,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                     alert(ret.msg);
                     return false;
                 });
-                //其他关键指标
+                // 其他关键指标
                 Backend.api.ajax({
                     url: "operatedatacenter/goodsdata/goods_sale_detail/mid_data",
                     data: {
@@ -143,16 +148,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                     $('#glass_xinpin_dongxiao_shu').text(ret.data.glass.frame_new_in_print_num);
                     $('#glass_xinpin_dongxiao_lv').text(ret.data.glass.frame_new_in_print_rate);
 
-                    $('#run_sales_num').text(ret.data.sun_glass.frame_money);
-                    $('#run_run_sales_num').text(ret.data.sun_glass.frame_in_print_num);
-                    $('#run_run_sales_rate').text(ret.data.sun_glass.frame_in_print_rate);
-                    $('#new_run_run_sales_num').text(ret.data.sun_glass.frame_new_money);
-                    $('#avg_run_run_sales_num').text(ret.data.sun_glass.frame_avg_money);
-                    $('#user_avg_run_run_sales_num').text(ret.data.sun_glass.frame_avg_customer);
-                    $('#run_zhengchang_shoumai').text(ret.data.sun_glass.frame_onsales_num);
-                    $('#run_xinpin_shuliang').text(ret.data.sun_glass.frame_new_num);
-                    $('#run_xinpin_dongxiao_shu').text(ret.data.sun_glass.frame_new_in_print_num);
-                    $('#run_xinpin_dongxiao_lv').text(ret.data.sun_glass.frame_new_in_print_rate);
+                    $('#run_sales_num').text(ret.data.run_glass.frame_money);
+                    $('#run_run_sales_num').text(ret.data.run_glass.frame_in_print_num);
+                    $('#run_run_sales_rate').text(ret.data.run_glass.frame_in_print_rate);
+                    $('#new_run_run_sales_num').text(ret.data.run_glass.frame_new_money);
+                    $('#avg_run_run_sales_num').text(ret.data.run_glass.frame_avg_money);
+                    $('#user_avg_run_run_sales_num').text(ret.data.run_glass.frame_avg_customer);
+                    $('#run_zhengchang_shoumai').text(ret.data.run_glass.frame_onsales_num);
+                    $('#run_xinpin_shuliang').text(ret.data.run_glass.frame_new_num);
+                    $('#run_xinpin_dongxiao_shu').text(ret.data.run_glass.frame_new_in_print_num);
+                    $('#run_xinpin_dongxiao_lv').text(ret.data.run_glass.frame_new_in_print_rate);
 
                     $('#old_sales_num').text(ret.data.old_glass.frame_money);
                     $('#old_run_sales_num').text(ret.data.old_glass.frame_in_print_num);
@@ -181,12 +186,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                     return false;
                 });
             });
-            // $("#sku_reset").click(function () {
-            //     $("#sku_data").css('display', 'none');
-            //     $("#order_platform").val(1);
-            //     $("#time_str").val('');
-            //     $("#sku").val('');
-            // });
+            $("#sku_reset").click(function () {
+                $("#order_platform").val(1);
+                $("#create_time").val('');
+                $("#sku").val('');
+            });
         },
         add: function () {
             Controller.api.bindevent();

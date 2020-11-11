@@ -68,24 +68,9 @@ class ZeeloolJp extends Backend
             $filter = json_decode($this->request->get('filter'), true);
 
             if ($filter['increment_id']) {
-                 $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
+                // $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
             } elseif (!$filter['status']) {
                 $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal']];
-            }
-            //是否有工单
-            $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
-            if ($filter['is_task'] == 1 || $filter['is_task'] == '0') {
-                $swhere = [];
-                $swhere['work_platform'] = 11;
-                $swhere['work_status'] = ['not in', [0, 4, 6]];
-                $order_arr = $workorder->where($swhere)->column('platform_order');
-                if ($filter['is_task'] == 1) {
-                    $map['increment_id'] = ['in', $order_arr];
-                } elseif ($filter['is_task'] == '0') {
-                    $map['increment_id'] = ['not in', $order_arr];
-                }
-                unset($filter['is_task']);
-                $this->request->get(['filter' => json_encode($filter)]);
             }
 
             //SKU搜索
@@ -114,20 +99,8 @@ class ZeeloolJp extends Backend
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
-            $list = collection($list)->toArray();
-            //查询订单是否存在工单
-            $swhere = [];
-            $increment_ids = array_column($list, 'increment_id');
-            $swhere['platform_order'] = ['in', $increment_ids];
-            $swhere['work_platform'] = 11;
-            $swhere['work_status'] = ['not in', [0, 4, 6]];
-            $order_arr = $workorder->where($swhere)->column('platform_order');
-            foreach ($list as $k => $v) {
-                if (in_array($v['increment_id'], $order_arr)) {
-                    $list[$k]['task_info'] = 1;
-                }
 
-            }
+            $list = collection($list)->toArray();
             
             $result = array("total" => $total, "rows" => $list);
             return json($result);

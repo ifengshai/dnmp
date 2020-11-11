@@ -5,37 +5,63 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
 
 
             Controller.api.bindevent();
-
-            var val = Config.label;
-            if (val == 1) {
-                $('.zeelool-div').show();
-                $('.voogueme-div').hide();
-                $('.nihao-div').hide();
-                $('#c-order_platform').hide();
-
-            } else if (val == 2) {
-                $('.zeelool-div').hide();
-                $('.voogueme-div').show();
-                $('.nihao-div').hide();
-            } else if (val == 3) {
-                $('.zeelool-div').hide();
-                $('.voogueme-div').hide();
-                $('.nihao-div').show();
-            }
+            //
+            // var val = Config.label;
+            // var time_str = Config.create_time;
+            // if (val == 1) {
+            //     $('.zeelool-div').show();
+            //     $('.voogueme-div').hide();
+            //     $('.nihao-div').hide();
+            //     $('#c-order_platform').hide();
+            //
+            // } else if (val == 2) {
+            //     $('.zeelool-div').hide();
+            //     $('.voogueme-div').show();
+            //     $('.nihao-div').hide();
+            // } else if (val == 3) {
+            //     $('.zeelool-div').hide();
+            //     $('.voogueme-div').hide();
+            //     $('.nihao-div').show();
+            // }
             order_data_view();
+            $('#c-order_platform').hide();
             $("#sku_submit").click(function(){
+                var order_platform =$('#order_platform').val();
+                if (order_platform == 1) {
+                    $('.zeelool-div').show();
+                    $('.voogueme-div').hide();
+                    $('.nihao-div').hide();
+                    $('#c-order_platform').hide();
+
+                } else if (order_platform == 2) {
+                    $('.zeelool-div').hide();
+                    $('.voogueme-div').show();
+                    $('.nihao-div').hide();
+
+                    var $table = $('#c-order_platform');
+                    $table.html($("<option value='4'>All</option>" +"<option value='1'>平光镜</option>" + "<option value='2'>太阳镜</option>" + "<option value='6'>配饰</option>"));
+                    $('#c-order_platform').show();
+                    // $('#c-order_platform').show();
+                } else if (order_platform == 3) {
+                    $('.zeelool-div').hide();
+                    $('.voogueme-div').hide();
+                    $('.nihao-div').show();
+                    var $table = $('#c-order_platform');
+                    $table.html($("<option value='4'>All</option>" +"<option value='1'>平光镜</option>" + "<option value='2'>太阳镜</option>"));
+                    $('#c-order_platform').show();
+                }
                 order_data_view();
                 Controller.api.formatter.line_chart();
                 Controller.api.formatter.goods_type_chart();
                 Form.api.bindevent($("form[role=form]"));
 
-                table.bootstrapTable('refresh',params);
+                // table.bootstrapTable('refresh',params);
 
             });
             $(document).on('change', '#c-order_platform', function () {
-                var order_platform =Config.label;
                 var time_str = $('#create_time').val();
                 var goods_type = $('#c-order_platform').val();
+                var order_platform =$('#order_platform').val();
                 Backend.api.ajax({
                     url: 'operatedatacenter/goodsdata/goods_data_view/ajax_dowm_data',
                     data: { order_platform: order_platform, time_str: time_str,goods_type:goods_type}
@@ -176,7 +202,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                     var options = {
                         type: 'post',
                         url: 'operatedatacenter/goodsdata/goods_data_view/goods_sales_data_line',
-                        data: { order_platform: Config.label, time_str: $('#create_time').val()}
+                        data: { order_platform: $('#order_platform').val(), time_str: $('#create_time').val()}
 
                     }
                     EchartObj.api.ajax(options, chartOptions)
@@ -190,7 +216,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                     var options = {
                         type: 'post',
                         url: 'operatedatacenter/goodsdata/goods_data_view/goods_type_data_line',
-                        data: { order_platform: Config.label, time_str: $('#create_time').val()}
+                        data: { order_platform: $('#order_platform').val(), time_str: $('#create_time').val()}
 
                     }
                     EchartObj.api.ajax(options, chartOptions)
@@ -206,6 +232,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
 function order_data_view(){
     var order_platform =Config.label;
     var time_str = $('#create_time').val();
+    var order_platform =$('#order_platform').val();
     Backend.api.ajax({
         url: 'operatedatacenter/goodsdata/goods_data_view/ajax_top_data',
         data: { order_platform: order_platform, time_str: time_str}
