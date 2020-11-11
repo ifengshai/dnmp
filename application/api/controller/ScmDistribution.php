@@ -1247,7 +1247,7 @@ class ScmDistribution extends Scm
     {
         $type = $this->request->request("type") ?? 1;
         $item_order_number = $this->request->request('item_order_number');
-        $order_id = $this->request->request('order_number');
+        $order_id = $this->request->request('order_id');
 
         if ($type == 1){
             empty($order_id) && $this->error(__('主订单ID不能为空'), [], 403);
