@@ -1047,7 +1047,7 @@ class OrderData extends Backend
          * 4、当cyl<=-4或cyl>=4 或 sph < -8或 sph>8
          */
 
-        if ($arr['index_name'] == '' || $arr['index_name'] == 'Lentes Plásticas' || $arr['index_name'] == 'SOLO MONTURA' ||  $arr['index_name'] == 'SÓLO MONTURA') {
+        if ($arr['index_name'] == '' || $arr['index_name'] == 'SÓLO MONTURA (Lentes Plásticas)' ||  $arr['index_name'] == 'SÓLO MONTURA') {
             $arr['order_prescription_type'] = 1;
         }
 

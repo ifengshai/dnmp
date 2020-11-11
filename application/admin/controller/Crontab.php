@@ -1812,11 +1812,11 @@ class Crontab extends Backend
             $label = [];
             foreach ($items as $k => $v) {
                 //如果镜片参数为真 或 不等于 Plastic Lenses 并且不等于 FRAME ONLY则此订单为含处方
-                if ($v['index_type'] == '' || $v['index_type'] == 'Lentes  Plástico' || stripos($v['index_type'], 'SOLO MONTURA') !== false || stripos($v['index_type'], 'SOLO MONTURA (Lentes  Plástico)') !== false) {
+                if ($v['index_type'] == '' || $v['index_type'] == 'Lentes  Plástico' || stripos($v['index_type'], 'SÓLO MONTURA') !== false || stripos($v['index_type'], 'SÓLO MONTURA (Lentes  Plástico)') !== false) {
                     $label[] = 1; //仅镜架
-                } elseif (($v['index_type'] && $v['index_type'] != 'Lentes  Plástico' && stripos($v['index_type'], 'SOLO MONTURA') === false && stripos($v['index_type'], 'SOLO MONTURA (Lentes  Plástico)') === false) && $v['is_custom_lens'] == 0) {
+                } elseif (($v['index_type'] && $v['index_type'] != 'Lentes  Plástico' && stripos($v['index_type'], 'SÓLO MONTURA') === false && stripos($v['index_type'], 'SÓLO MONTURA (Lentes  Plástico)') === false) && $v['is_custom_lens'] == 0) {
                     $label[] = 2; //现片含处方
-                } elseif (($v['index_type'] && $v['index_type'] != 'Lentes  Plástico' && stripos($v['index_type'], 'SOLO MONTURA') === false && stripos($v['index_type'], 'SOLO MONTURA (Lentes  Plástico)') === false) && $v['is_custom_lens'] == 1) {
+                } elseif (($v['index_type'] && $v['index_type'] != 'Lentes  Plástico' && stripos($v['index_type'], 'SÓLO MONTURA') === false && stripos($v['index_type'], 'SÓLO MONTURA (Lentes  Plástico)') === false) && $v['is_custom_lens'] == 1) {
                     $label[] = 3; //定制含处方
                 }
             }
@@ -2000,7 +2000,7 @@ class Crontab extends Backend
                 $items[$order_item_key]['is_custom_lens'] = 1;
             }
 
-            if (strpos($final_params['index_type'], 'Lens with Color Tint') !== false) {
+            if (strpos($final_params['index_type'], 'Tinte de color') !== false) {
                 $items[$order_item_key]['is_custom_lens'] = 1;
             }
 
@@ -2349,7 +2349,7 @@ class Crontab extends Backend
                 $items[$order_item_key]['is_custom_lens'] = 1;
             }
 
-            if (strpos($final_params['index_type'], 'Lens with Color Tint') !== false) {
+            if (strpos($final_params['index_type'], 'Farbtönung') !== false) {
                 $items[$order_item_key]['is_custom_lens'] = 1;
             }
 
