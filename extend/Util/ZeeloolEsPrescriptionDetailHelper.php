@@ -135,7 +135,14 @@ class ZeeloolEsPrescriptionDetailHelper
 			$final_params['frame_price'] = $product_options['info_buyRequest']['tmplens']['frame_price'];
 			$final_params['index_price'] = $product_options['info_buyRequest']['tmplens']['index_price'];
 			$final_params['coatiing_price'] = $product_options['info_buyRequest']['tmplens']['coatiing_price'];
+			$final_params['lenstype_data_name'] = $product_options['info_buyRequest']['tmplens']['lens_type'];
+			$final_params['lenstype_base_price'] = $product_options['info_buyRequest']['tmplens']['lens_type_price'];
 
+			//西语站添加镜片类型 镜片颜色
+			if ($product_options['info_buyRequest']['tmplens']['lens_type'] || $product_options['info_buyRequest']['tmplens']['lens_color']) {
+				$final_params['index_type'] = $final_params['index_type'] . '-' . $product_options['info_buyRequest']['tmplens']['lens_type'];
+				$final_params['index_type'] = $final_params['index_type'] . '-' . $product_options['info_buyRequest']['tmplens']['lens_color'];
+			}
 
 			$items[$item_key]['frame_regural_price'] = $final_params['frame_regural_price'] = $product_options['info_buyRequest']['tmplens']['frame_regural_price'];
 			$items[$item_key]['is_special_price'] = $final_params['is_special_price'] = $product_options['info_buyRequest']['tmplens']['is_special_price'];
