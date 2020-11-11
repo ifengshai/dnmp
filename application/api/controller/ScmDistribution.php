@@ -1238,7 +1238,7 @@ class ScmDistribution extends Scm
      * 合单--合单完成页面--合单待取详情页面--修改原型图待定---子单合单状态、异常状态展示--ok
      *
      * @参数 int type  待取出类型 1 合单 2异常
-     * @参数 string order_number  主订单号
+     * @参数 int order_id  主订单ID
      * @参数 string item_order_number  子单号
      * @author wgj
      * @return mixed
@@ -1247,17 +1247,18 @@ class ScmDistribution extends Scm
     {
         $type = $this->request->request("type") ?? 1;
         $item_order_number = $this->request->request('item_order_number');
-        $order_number = $this->request->request('order_number');
+        $order_id = $this->request->request('order_number');
 
         if ($type == 1){
-            empty($order_number) && $this->error(__('主订单号不能为空'), [], 403);
+            empty($order_id) && $this->error(__('主订单ID不能为空'), [], 403);
+            $order_number = $this->_new_order->where(['id' => $order_id])->value('increment_id');
+            empty($order_number) && $this->error(__('主订单不存在'), [], 403);
             $order_process_info = $this->_new_order
                 ->alias('a')
-                ->where('a.increment_id', $order_number)
+                ->where('a.id', $order_id)
                 ->join(['fa_order_process'=> 'b'],'a.id=b.order_id','left')
                 ->field('a.id,a.increment_id,b.store_house_id')
                 ->find();
-            empty($order_process_info) && $this->error(__('主订单不存在'), [], 403);
 
             //获取子订单数据
             $item_process_info = $this->_new_order_item_process
