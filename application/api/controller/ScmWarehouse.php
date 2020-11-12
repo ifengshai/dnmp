@@ -1577,7 +1577,7 @@ class ScmWarehouse extends Scm
             $this->error(__('此状态不能编辑'), [], 512);
         }
 //        $inventory_item_info = $_inventory_item->field('id,sku,inventory_qty,error_qty,real_time_qty,available_stock,distribution_occupy_stock')->where(['inventory_id'=>$inventory_id])->select();
-        $item = $this->_item->field('sku')->where(['id'=>$inventory_id])->select();
+        $item = $this->_inventory_item->field('sku')->where(['inventory_id'=>$inventory_id])->select();
         $item = collection($item)->toArray();
         $sku_list = array_column($item, 'sku');
         $where['sku'] = ['in', $sku_list];
@@ -1591,9 +1591,6 @@ class ScmWarehouse extends Scm
             $item_list[$k]['stock'] = $this->_item->where('sku',$v['sku'])->value('stock');
 //            $stock = $this->_item->where('sku',$v['sku'])->value('stock');
         }
-        print_r($inventory_item_info);
-
-        print_r($item_list);
 
         //盘点单所需数据
         $info =[
@@ -1602,8 +1599,6 @@ class ScmWarehouse extends Scm
 //            'status'=>$_inventory_info['status'],
             'item_list'=>$item_list
         ];
-        print_r($info);
-        die;
 
         $this->success('', ['info' => $info],200);
     }
