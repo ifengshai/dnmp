@@ -794,28 +794,30 @@ class ScmWarehouse extends Scm
         if (count(array_filter($item_sku)) < 1) {
             $this->error(__('sku集合不能为空！！'), [], 507);
         }
-        //检测条形码是否已绑定
-        foreach ($item_sku as $key => $value) {
-            $sku_code = array_column($value['sku_agg'],'code');
-            count($value['sku_agg']) != count(array_unique($sku_code))
-            &&
-            $this->error(__('条形码有重复，请检查'), [], 405);
-
-            $where['code'] = ['in',$sku_code];
-            $check_quantity = $this->_product_bar_code_item
-                ->where($where)
-                ->field('code')
-                ->find();
-            if(!empty($check_quantity['code'])){
-                $this->error(__('条形码:'.$check_quantity['code'].' 已绑定,请移除'), [], 405);
-                exit;
-            }
-        }
 
         $in_stock_id = $this->request->request("in_stock_id");//入库单ID，
         $platform_id = $this->request->request("platform_id");//站点，判断是否是新创建入库 还是 质检单入库
         if ($in_stock_id) {
             //有入库单ID，编辑
+            //检测条形码是否已绑定
+            $where['in_stock_id'] = [['>',0], ['neq',$in_stock_id]];
+            foreach ($item_sku as $key => $value) {
+                $sku_code = array_column($value['sku_agg'],'code');
+                count($value['sku_agg']) != count(array_unique($sku_code))
+                &&
+                $this->error(__('条形码有重复，请检查'), [], 405);
+
+                $where['code'] = ['in',$sku_code];
+                $check_quantity = $this->_product_bar_code_item
+                    ->where($where)
+                    ->field('code')
+                    ->find();
+                if(!empty($check_quantity['code'])){
+                    $this->error(__('条形码:'.$check_quantity['code'].' 已绑定,请移除'), [], 405);
+                    exit;
+                }
+            }
+
             $_in_stock_info = $this->_in_stock->get($in_stock_id);
             empty($_in_stock_info) && $this->error(__('入库单不存在'), [], 510);
             if ($_in_stock_info['status'] != 0){
@@ -926,17 +928,20 @@ class ScmWarehouse extends Scm
                             $data[$k]['in_stock_id'] = $this->_in_stock->id;
 
                             //入库单绑定条形码
-                            if(!empty($v['sku_agg'])){
-                                $code_clear = [
-                                    'in_stock_id' => $this->_in_stock->id
-                                ];
-                                $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => ['in',$v['sku_agg']]])->save($code_clear);
+                            foreach($v['sku_agg'] as $v_code){
+                                $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => $v_code['code']])->save(['in_stock_id'=>$this->_in_stock->id]);
                             }
                         }
                         //批量添加
                         $this->_in_stock_item->allowField(true)->saveAll($data);
                     }
                 } else {
+                    //无站点，是质检单入口
+                    $check_order_number = $this->request->request("check_order_number");
+                    empty($check_order_number) && $this->error(__('质检单号不能为空'), [], 509);
+                    $check_id = $this->_check->where(['check_order_number'=>$check_order_number])->value('id');
+                    empty($check_id) && $this->error(__('质检单不存在'), [], 509);
+                    $params['check_id'] = $check_id;
                     //质检单页面去创建入库单
                     $result = $this->_in_stock->allowField(true)->save($params);
 
@@ -945,18 +950,17 @@ class ScmWarehouse extends Scm
                         //更改质检单为已创建入库单
                         $this->_check->allowField(true)->save(['is_stock' => 1], ['id' => $params['check_id']]);
                         $data = [];
+
                         foreach (array_filter($item_sku) as $k => $v) {
                             $data[$k]['sku'] = $v['sku'];
                             $data[$k]['in_stock_num'] = $v['in_stock_num'];//入库数量
                             $data[$k]['in_stock_id'] = $this->_in_stock->id;
 
                             //入库单绑定条形码
-                            if(!empty($v['sku_agg'])){
-                                $code_clear = [
-                                    'in_stock_id' => $this->_in_stock->id
-                                ];
-                                $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => ['in',$v['sku_agg']]])->save($code_clear);
+                            foreach($v['sku_agg'] as $v_code){
+                                $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => $v_code['code']])->save(['in_stock_id'=>$this->_in_stock->id]);
                             }
+
                         }
                         //批量添加
                         $this->_in_stock_item->allowField(true)->saveAll($data);
@@ -1646,20 +1650,76 @@ class ScmWarehouse extends Scm
             $msg = '保存成功';
         }
 
-        //保存不需要编辑盘点单
-        //编辑盘点单明细item
-        foreach (array_filter($item_sku) as $k => $v) {
-            $save_data = [];
-            $save_data['is_add'] = $is_add;//是否盘点
-            $save_data['inventory_qty'] = $v['inventory_qty'];//盘点数量
-            $save_data['error_qty'] = $v['error_qty'];//误差数量
-            $save_data['remark'] = $v['remark'];//备注
-            $this->_inventory_item->where(['inventory_id' => $inventory_id,'sku' => $v['sku']])->update($save_data);
+        //检测条形码是否已绑定
+        $where['inventory_id'] = [['>',0], ['neq',$inventory_id]];
+        foreach ($item_sku as $key => $value) {
+            $sku_code = array_column($value['sku_agg'],'code');
+            count($value['sku_agg']) != count(array_unique($sku_code))
+            &&
+            $this->error(__('条形码有重复，请检查'), [], 405);
+
+            $where['code'] = ['in',$sku_code];
+            $inventory_info = $this->_product_bar_code_item
+                ->where($where)
+                ->field('code')
+                ->find();
+            if(!empty($inventory_info['code'])){
+                $this->error(__('条形码:'.$inventory_info['code'].' 已绑定,请移除'), [], 405);
+                exit;
+            }
         }
 
-        //提交盘点单状态为已完成，保存盘点单状态为盘点中
-        $this->_inventory->allowField(true)->save($params, ['id' => $inventory_id]);
-        $this->success($msg, ['info' => ''],200);
+        //保存不需要编辑盘点单
+        //编辑盘点单明细item
+        $result = false;
+        Db::startTrans();
+        try {
+            //更新数据
+            //提交盘点单状态为已完成，保存盘点单状态为盘点中
+            $this->_inventory->allowField(true)->save($params, ['id' => $inventory_id]);
+            if ($result !== false){
+                foreach (array_filter($item_sku) as $k => $v) {
+                    $save_data = [];
+                    $save_data['is_add'] = $is_add;//是否盘点
+                    $save_data['inventory_qty'] = $v['inventory_qty'];//盘点数量
+                    $save_data['error_qty'] = $v['error_qty'];//误差数量
+                    $save_data['remark'] = $v['remark'];//备注
+                    $this->_inventory_item->where(['inventory_id' => $inventory_id,'sku' => $v['sku']])->update($save_data);
+
+                    //盘点单绑定条形码
+                    foreach($v['sku_agg'] as $v_code){
+                        $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => $v_code['code']])->save(['inventory_id'=>$inventory_id]);
+                    }
+
+                    //盘点单移除条形码
+                    if(!empty($value['remove_agg'])){
+                        $code_clear = [
+                            'inventory_id' => 0
+                        ];
+                        $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => ['in',$value['remove_agg']]])->save($code_clear);
+                    }
+
+                }
+            }
+
+            Db::commit();
+        } catch (ValidateException $e) {
+            Db::rollback();
+            $this->error($e->getMessage(), [], 444);
+        } catch (PDOException $e) {
+            Db::rollback();
+            $this->error($e->getMessage(), [], 444);
+        } catch (Exception $e) {
+            Db::rollback();
+            $this->error($e->getMessage(), [], 444);
+        }
+
+        if ($result !== false) {
+            $this->success($msg.'成功！！', '', 200);
+        } else {
+            $this->error(__($msg.'失败'), [], 511);
+        }
+
     }
 
     /**
