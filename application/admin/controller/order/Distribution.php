@@ -176,13 +176,13 @@ class Distribution extends Backend
 
     /**
      * 批量导出xls
-     *
+     * @todo 弃用
      * @Description
      * @author lzh
      * @since 2020/10/28 14:45:39
      * @return void
      */
-    public function batch_export_xls()
+    public function batch_export_xls_bak()
     {
         set_time_limit(0);
         ini_set('memory_limit', '512M');
@@ -394,14 +394,216 @@ class Distribution extends Backend
     }
 
     /**
-     * 批量打印
+     * 批量导出
      *
+     * @Description
+     * @author wpl
+     * @since 2020/11/12 08:54:05 
+     * @return void
+     */
+    public function batch_export_xls()
+    {
+        set_time_limit(0);
+        ini_set('memory_limit', '512M');
+        //根据传的标签切换状态
+        $label = $this->request->get('label', 0);
+
+        $ids = input('ids');
+        $map = [];
+        if ($ids) {
+            $map['id'] = ['in', $ids];
+            $where = [];
+            $sort = 'a.created_at';
+            $order = 'desc';
+        } else {
+            //普通状态剔除跟单数据
+            if (!in_array($label, [0, 8])) {
+                if (7 == $label) {
+                    $map['a.status'] = [['>', 6], ['<', 9]];
+                } else {
+                    $map['a.status'] = $label;
+                }
+                $map['a.temporary_house_id|a.abnormal_house_id'] = 0;
+            }
+
+            $_stock_house = new StockHouse();
+            $filter = json_decode($this->request->get('filter'), true);
+            if ($filter['abnormal'] || $filter['stock_house_num']) {
+                //筛选异常
+                if ($filter['abnormal']) {
+                    $_distribution_abnormal = new DistributionAbnormal();
+                    $abnormal_where['type'] = $filter['abnormal'];
+                    if (8 == $label) {
+                        $abnormal_where['status'] = 1;
+                    }
+                    $item_process_id = $_distribution_abnormal
+                        ->where($abnormal_where)
+                        ->column('item_process_id');
+                    $map['a.id'] = ['in', $item_process_id];
+                }
+
+                //筛选库位号
+                if ($filter['stock_house_num']) {
+                    $stock_house_where['coding'] = ['like', $filter['stock_house_num'] . '%'];
+                    if (8 == $label) {
+                        $stock_house_where['type'] = ['>', 2];
+                    } else {
+                        $stock_house_where['type'] = 2;
+                    }
+                    $stock_house_id = $_stock_house
+                        ->where($stock_house_where)
+                        ->column('id');
+                    $map['a.temporary_house_id|a.abnormal_house_id'] = ['in', $stock_house_id];
+                }
+                unset($filter['abnormal']);
+                unset($filter['stock_house_num']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
+
+            list($where, $sort, $order) = $this->buildparams();
+        }
+
+        $list = $this->model
+            ->alias('a')
+            ->field('a.id,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.total_qty_ordered,b.site,a.distribution_status,a.temporary_house_id,a.abnormal_house_id,a.created_at')
+            ->join(['fa_order' => 'b'], 'a.order_id=b.id')
+            ->join(['fa_order_item_option' => 'c'], 'a.option_id=c.id')
+            ->where($where)
+            ->where($map)
+            ->order($sort, $order)
+            ->select();
+        $list = collection($list)->toArray();
+
+        //从数据库查询需要的数据
+        $spreadsheet = new Spreadsheet();
+
+        //常规方式：利用setCellValue()填充数据
+        $spreadsheet->setActiveSheetIndex(0)
+            ->setCellValue("A1", "订单号")
+            ->setCellValue("B1", "子单号")
+            ->setCellValue("C1", "SKU")
+            ->setCellValue("D1", "订单副数")
+            //            ->setCellValue("E1", "工单")
+            ->setCellValue("F1", "站点")
+            ->setCellValue("G1", "加工类型")
+            ->setCellValue("H1", "订单类型")
+            ->setCellValue("I1", "订单状态")
+            ->setCellValue("J1", "子单号状态")
+            ->setCellValue("K1", "库位号")
+            ->setCellValue("L1", "创建时间");
+
+        //站点列表
+        $site_list = [
+            1 => 'Zeelool',
+            2 => 'Voogueme',
+            3 => 'Nihao',
+            4 => 'Meeloog',
+            5 => 'Wesee',
+            8 => 'Amazon',
+            9 => 'Zeelool_es',
+            10 => 'Zeelool_de',
+            11 => 'Zeelool_jp'
+        ];
+
+        //加工类型
+        $prescription_type_list = [
+            1 => '仅镜架',
+            2 => '现货处方镜',
+            3 => '定制处方镜',
+            4 => '镜架+现货',
+            5 => '镜架+定制',
+            6 => '现片+定制片'
+        ];
+
+        //订单类型
+        $order_type_list = [
+            1 => '普通订单',
+            2 => '批发单',
+            3 => '网红单',
+            4 => '补发单',
+            5 => '补差价',
+            6 => '一件代发'
+        ];
+
+        //子单号状态
+        $distribution_status_list = [
+            1 => '待打印标签',
+            2 => '待配货',
+            3 => '待配镜片',
+            4 => '待加工',
+            5 => '待印logo',
+            6 => '待成品质检',
+            7 => '待合单',
+            8 => '合单中',
+            9 => '合单完成'
+        ];
+
+        foreach ($list as $key => $value) {
+            $line = $key + 2;
+            $spreadsheet->getActiveSheet()->setCellValueExplicit("A{$line}", $value['increment_id'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $spreadsheet->getActiveSheet()->setCellValue("B{$line}", $value['item_order_number']);
+            $spreadsheet->getActiveSheet()->setCellValue("C{$line}", $value['sku']);
+            $spreadsheet->getActiveSheet()->setCellValue("D{$line}", $value['total_qty_ordered']);
+            //            $spreadsheet->getActiveSheet()->setCellValue("E{$line}", $value['base_grand_total']);
+            $spreadsheet->getActiveSheet()->setCellValue("F{$line}", $site_list[$value['site']]);
+            $spreadsheet->getActiveSheet()->setCellValue("G{$line}", $prescription_type_list[$value['order_prescription_type']]);
+            $spreadsheet->getActiveSheet()->setCellValue("H{$line}", $order_type_list[$value['order_type']]);
+            $spreadsheet->getActiveSheet()->setCellValue("I{$line}", $value['status']);
+            $spreadsheet->getActiveSheet()->setCellValue("J{$line}", $distribution_status_list[$value['distribution_status']]);
+            $spreadsheet->getActiveSheet()->setCellValue("K{$line}", $value['stock_house_num']);
+            $spreadsheet->getActiveSheet()->setCellValue("L{$line}", $value['created_at']);
+        }
+
+        //设置宽度
+        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(40);
+        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(20);
+        //        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('I')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('J')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('K')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('L')->setWidth(30);
+
+        //设置边框
+        $border = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
+                    'color' => ['argb' => 'FF000000'], // 设置border颜色
+                ],
+            ],
+        ];
+
+        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
+        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
+        $spreadsheet->getActiveSheet()->getStyle('A1:I' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->setActiveSheetIndex(0);
+
+        $save_name = '配货列表' . date("YmdHis", time());
+        //输出07Excel版本
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        //输出名称
+        header('Content-Disposition: attachment;filename="' . $save_name . '.xlsx"');
+        //禁止缓存
+        header('Cache-Control: max-age=0');
+        $writer = new Xlsx($spreadsheet);
+        $writer->save('php://output');
+    }
+
+    /**
+     * 批量打印
+     * @todo 弃用
      * @Description
      * @author lzh
      * @since 2020/10/28 14:45:39
      * @return void
      */
-    public function batch_print_label()
+    public function batch_print_label_bak()
     {
         ob_start();
         $ids = input('ids');
@@ -450,8 +652,8 @@ class Distribution extends Backend
             table.addpro .title {background: none repeat scroll 0 0 #f5f5f5; }
             table.addpro .title  td {border-collapse: collapse;color: #000;text-align: center; font-weight:normal; }
             table.addpro tbody td {word-break: break-all; text-align: center;border-bottom:1px solid #000;border-right:1px solid #000;}
-table.addpro.re tbody td{ position:relative}
-</style>
+            table.addpro.re tbody td{ position:relative}
+            </style>
 EOF;
 
             //获取子订单列表
@@ -591,27 +793,85 @@ EOF;
     }
 
     /**
-     * 测试打印标签
+     * 打印标签
      *
      * @Description
      * @author wpl
      * @since 2020/11/10 10:36:22 
      * @return void
      */
-    public function print_test()
+    public function batch_print_label()
     {
-        $item_order_number = '430223092-11';
+        //禁用默认模板
         $this->view->engine->layout(false);
-        $img_url = "/uploads/printOrder/distribution/new/$item_order_number.png";
-        $fileName = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "distribution" . DS . "new" . DS . "$item_order_number.png";
-        $dir = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "distribution" . DS . "new";
-        if (!file_exists($dir)) {
-            mkdir($dir, 0777, true);
+        ob_start();
+        $ids = input('ids');
+        if (!$ids) {
+            return $this->error('缺少参数', url('index?ref=addtabs'));
         }
-        //生成条形码
-        $this->generate_barcode_new($item_order_number, $fileName);
-        $this->assign('img_url', $img_url);
-        $html = $this->view->fetch('label');
+
+        //获取子订单列表
+        $list = $this->model
+            ->alias('a')
+            ->field('a.item_order_number,a.order_id,a.created_at,b.os_add,b.od_add,b.pdcheck,b.prismcheck,b.pd_r,b.pd_l,b.pd,b.od_pv,b.os_pv,b.od_bd,b.os_bd,b.od_bd_r,b.os_bd_r,b.od_pv_r,b.os_pv_r,b.index_name,b.coatiing_name,b.prescription_type,b.sku,b.od_sph,b.od_cyl,b.od_axis,b.os_sph,b.os_cyl,b.os_axis,b.lens_number')
+            ->join(['fa_order_item_option' => 'b'], 'a.option_id=b.id')
+            ->where(['a.id' => ['in', $ids]])
+            ->select();
+        $list = collection($list)->toArray();
+        $order_ids = array_column($list, 'order_id');
+        $sku_arr = array_column($list, 'sku');
+        $lens_number = array_column($list, 'lens_number');
+
+        //查询sku映射表
+        $item = new \app\admin\model\itemmanage\ItemPlatformSku;
+        $item_res = $item->cache(3600)->where(['platform_sku' => ['in', array_unique($sku_arr)]])->column('sku', 'platform_sku');
+
+        //获取订单数据
+        $_new_order = new NewOrder();
+        $order_list = $_new_order->where(['id' => ['in', array_unique($order_ids)]])->column('total_qty_ordered,increment_id', 'id');
+
+        //查询产品货位号
+        $store_sku = new \app\admin\model\warehouse\StockHouse;
+        $cargo_number = $store_sku->alias('a')->where(['status' => 1, 'b.is_del' => 1, 'a.type' => 1])->join(['fa_store_sku' => 'b'], 'a.id=b.store_id')->column('coding', 'sku');
+
+        //根据镜片编码查询仓库镜片名称
+        $index_name = $this->lensdata->where(['lens_number' => ['in', $lens_number]])->column('lens_name', 'lens_number');
+
+        foreach ($list as $k => $v) {
+            $item_order_number = $v['item_order_number'];
+            $fileName = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "distribution" . DS . "new" . DS . "$item_order_number.png";
+            $dir = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "distribution" . DS . "new";
+            if (!file_exists($dir)) {
+                mkdir($dir, 0777, true);
+            }
+            $img_url = "/uploads/printOrder/distribution/new/$item_order_number.png";
+
+            //生成条形码
+            $this->generate_barcode_new($item_order_number, $fileName);
+            $list[$k]['created_at'] = date('Y-m-d H:i:s', $v['created_at']);
+            $list[$k]['img_url'] = $img_url;
+            //序号
+            $serial = explode('-', $item_order_number);
+            $list[$k]['serial'] = $serial[1];
+            $list[$k]['total_qty_ordered'] = $order_list[$v['order_id']]['total_qty_ordered'];
+            $list[$k]['increment_id'] = $order_list[$v['order_id']]['increment_id'];
+            //库位号
+            $list[$k]['coding'] = $cargo_number[$item_res[$v['sku']]];
+
+            //判断双ADD逻辑
+            if ($v['os_add'] && $v['od_add'] && (float) $v['os_add'] * 1 != 0 && (float) $v['od_add'] * 1 != 0) {
+                $list[$k]['total_add'] = '';
+            } else {
+                if ($v['os_add'] && (float) $v['os_add'] * 1 != 0) {
+                    $list[$k]['total_add'] = $v['os_add'];
+                } else {
+                    $list[$k]['total_add'] = $v['od_add'];
+                }
+            }
+            $list[$k]['lens_name'] = $index_name[$v['lens_number']];
+        }
+        $this->assign('list', $list);
+        $html = $this->view->fetch('print_label');
         echo $html;
     }
 

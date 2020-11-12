@@ -1591,14 +1591,19 @@ class ScmWarehouse extends Scm
             $item_list[$k]['stock'] = $this->_item->where('sku',$v['sku'])->value('stock');
 //            $stock = $this->_item->where('sku',$v['sku'])->value('stock');
         }
+        print_r($inventory_item_info);
+
+        print_r($item_list);
 
         //盘点单所需数据
         $info =[
             'inventory_id'=>$_inventory_info['id'],
             'inventory_number'=>$_inventory_info['number'],
 //            'status'=>$_inventory_info['status'],
-            'item_list'=>$item_list,
+            'item_list'=>$item_list
         ];
+        print_r($info);
+        die;
 
         $this->success('', ['info' => $info],200);
     }
