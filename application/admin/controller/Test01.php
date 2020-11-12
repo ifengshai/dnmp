@@ -18,6 +18,8 @@ class Test01 extends Backend
         $this->zeelool = new \app\admin\model\order\order\Zeelool();
         $this->voogueme = new \app\admin\model\order\order\Voogueme();
         $this->nihao = new \app\admin\model\order\order\Nihao();
+        $this->orderitemprocess = new \app\admin\model\order\order\NewOrderItemProcess();
+        $this->order = new \app\admin\model\order\order\NewOrder();
     }
 
     public function test01()
@@ -204,18 +206,34 @@ class Test01 extends Backend
 
     public function test02()
     {
-        $this->ordernode = new \app\admin\model\OrderNode();
-        $this->ordernodedetail = new \app\admin\model\OrderNodeDetail();
-        $list = $this->ordernode->where(['node_type' => ['<', 7]])->where('track_number is not null')->where(['delivery_time' => ['>', '2020-08-30 00:00:00']])->select();
-        $list = collection($list)->toArray();
-        foreach ($list as $k => $v) {
-            $res = $this->ordernodedetail->where(['order_id' => $v['order_id'], 'site' => $v['site']])->order('node_type desc')->find();
+      //查询未生成子单号的数据
+      $list = $this->orderprocess->where('LENGTH(trim(item_order_number))=0')->order('id desc')->limit(10000)->select();
+      $list = collection($list)->toArray();
+      foreach ($list as $v) {
+          $res = $this->order->where(['entity_id' => $v['magento_order_id'], 'site' => $v['site']])->field('id,increment_id')->find();
+          $data = $this->orderitemprocess->where(['magento_order_id' => $v['magento_order_id'], 'site' => $v['site']])->select();
+          $item_params = [];
+          foreach ($data as $key => $val) {
+              $item_params[$key]['id'] = $val['id'];
+              $str = '';
+              if ($key < 9) {
+                  $str = '0' . ($key + 1);
+              } else {
+                  $str = $key + 1;
+              }
 
-            $this->ordernode->where(['order_id' => $v['order_id'], 'site' => $v['site']])->update(['order_node' => $res['order_node'], 'node_type' => $res['node_type']]);
+              $item_params[$key]['item_order_number'] = $res->increment_id . '-' . $str;
+              $item_params[$key]['order_id'] = $res->id ?? 0;
+          }
+          //更新数据
+          if ($item_params) $this->orderitemprocess->saveAll($item_params);
 
-            echo $k . "\n";
-        }
-        echo 'ok';
+          echo $v['id'] . "\n";
+          usleep(10000);
+      }
+
+      echo "ok";
+
     }
 
     //跑sku每天的数据
