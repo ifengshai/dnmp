@@ -1782,7 +1782,7 @@ class OrderData extends Backend
      */
     public function order_product_id_data()
     {
-        $list = $this->orderitemoption->where('product_id is not null')->limit(4000)->select();
+        $list = $this->orderitemoption->where('product_id is null')->limit(4000)->select();
         $list = collection($list)->toArray();
 
         $params = [];
