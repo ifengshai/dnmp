@@ -86,7 +86,7 @@ class TimeData extends Backend
             $web_model = Db::connect('database.db_zeelool');
         }
         $web_model->table('sales_flat_order')->query("set time_zone='+8:00'");
-        $web_model->table('sales_flat_order')->query("set time_zone='+8:00'");
+        $web_model->table('sales_flat_order_item')->query("set time_zone='+8:00'");
         $web_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
         $cache_vag = 'day_hour_order_quote_'.$site.$time;
         $cache_arr = Cache::get($cache_vag);
