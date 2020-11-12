@@ -429,12 +429,12 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                         $list[$k]['fill_post']    = $costInfo['thispageFullPostMoney'][$v['increment_id']];
                     }
                 }
-                //订单加工费
-                if (isset($costInfo['thisPageProcessCost'])) {
-                    if (array_key_exists($v['entity_id'], $costInfo['thisPageProcessCost'])) {
-                        $list[$k]['process_cost'] = $costInfo['thisPageProcessCost'][$v['entity_id']];
-                    }
-                }
+//                //订单加工费
+//                if (isset($costInfo['thisPageProcessCost'])) {
+//                    if (array_key_exists($v['entity_id'], $costInfo['thisPageProcessCost'])) {
+//                        $list[$k]['process_cost'] = $costInfo['thisPageProcessCost'][$v['entity_id']];
+//                    }
+//                }
                 //查询工单里是否有补差价记录
                 $work_order_list = M('work_order_list')->where($where_order)->where(array('platform_order'=>$v['increment_id']))->field('replenish_money')->select();
                 if (!empty($work_order_list)){
