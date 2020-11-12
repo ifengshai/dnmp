@@ -1084,7 +1084,8 @@ class ScmWarehouse extends Scm
 
         if ($check_order_info){
             //存在质检单号，则入库类型只取第一条数据：采购入库
-            $in_stock_type = $in_stock_type[0];
+//            $in_stock_type = $in_stock_type[0];
+            $in_stock_type_list[] = $in_stock_type[0];
             foreach($item_list as $key=>$value){
                 //质检单默认留样数量为1，质检合格数量为入库数量 + 留样数量
                 $item_list[$key]['quantity_num'] = $value['in_stock_num'] + $value['sample_num'];
@@ -1095,10 +1096,11 @@ class ScmWarehouse extends Scm
             $platform_list = $this->_magento_platform->field('id, name')->where(['is_del' => 1,'status' => 1])->select();
             $info['platform_check_id'] = $_in_stock_info['platform_id'];
             $info['platform_list'] = $platform_list;
+            $in_stock_type_list = $in_stock_type;
         }
         $info['in_stock_type_check_id'] = $_in_stock_info['type_id'];
 
-        $info['in_stock_type_list'] = $in_stock_type;
+        $info['in_stock_type_list'] = $in_stock_type_list;
 
         $this->success('', ['info' => $info],200);
     }
