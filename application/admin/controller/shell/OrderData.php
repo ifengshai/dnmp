@@ -1431,7 +1431,7 @@ class OrderData extends Backend
         echo "ok";
     }
 
-    
+
     /**
      * 更新订单商品总数量
      *
@@ -1481,29 +1481,29 @@ class OrderData extends Backend
         if ($site == 1) {
             $id = $this->order->where('site=' . $site . ' and entity_id < 534244')->max('entity_id');
             $list = $this->zeelool->where(['entity_id' => ['between', [$id, 534244]]])->limit(3000)->select();
-        } elseif($site == 2) {
+        } elseif ($site == 2) {
             $id = $this->order->where('site=' . $site . ' and entity_id < 281018')->max('entity_id');
             $list = $this->voogueme->where(['entity_id' => ['between', [$id, 281018]]])->limit(3000)->select();
-        } elseif($site == 3) {
+        } elseif ($site == 3) {
             $id = $this->order->where('site=' . $site . ' and entity_id < 46246')->max('entity_id');
             $list = $this->nihao->where(['entity_id' => ['between', [$id, 46246]]])->limit(3000)->select();
-        } elseif($site == 4) {
+        } elseif ($site == 4) {
             $id = $this->order->where('site=' . $site . ' and entity_id < 2856')->max('entity_id');
             $list = $this->meeloog->where(['entity_id' => ['between', [$id, 2856]]])->limit(3000)->select();
-        } elseif($site == 5) {
+        } elseif ($site == 5) {
             $id = $this->order->where('site=' . $site . ' and entity_id < 1300')->max('entity_id');
             $list = $this->wesee->where(['entity_id' => ['between', [$id, 1300]]])->limit(3000)->select();
-        } elseif($site == 9) {
+        } elseif ($site == 9) {
             $id = $this->order->where('site=' . $site . ' and entity_id < 102')->max('entity_id');
             $list = $this->zeelool_es->where(['entity_id' => ['between', [$id, 102]]])->limit(3000)->select();
-        } elseif($site == 10) {
+        } elseif ($site == 10) {
             $id = $this->order->where('site=' . $site . ' and entity_id < 665')->max('entity_id');
             $list = $this->zeelool_de->where(['entity_id' => ['between', [$id, 665]]])->limit(3000)->select();
-        } elseif($site == 11) {
+        } elseif ($site == 11) {
             $id = $this->order->where('site=' . $site . ' and entity_id < 122')->max('entity_id');
             $list = $this->zeelool_jp->where(['entity_id' => ['between', [$id, 122]]])->limit(3000)->select();
         }
-       
+
         $list = collection($list)->toArray();
 
         $order_params = [];
@@ -1552,8 +1552,6 @@ class OrderData extends Backend
         if ($order_params) $this->orderprocess->saveAll($order_params);
         echo "ok";
     }
-
-
 
     public function order_address_data_shell()
     {
@@ -1611,8 +1609,109 @@ class OrderData extends Backend
         echo $site . 'ok';
     }
 
+    /**
+     * 临时处理订单子表数据
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/11/12 16:47:50 
+     * @return void
+     */
+    public function order_item_data_shell()
+    {
+        $this->order_item_shell(1);
+        $this->order_item_shell(2);
+        $this->order_item_shell(3);
+        $this->order_item_shell(4);
+        $this->order_item_shell(5);
+        $this->order_item_shell(9);
+        $this->order_item_shell(10);
+        $this->order_item_shell(11);
+    }
 
-    
+    protected function order_item_shell($site)
+    {
+        if ($site == 1) {
+            $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 929673')->max('item_id');
+            $list = Db::connect('database.db_zeelool')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 929673]]])->limit(3000)->select();
+        } elseif ($site == 2) {
+            $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 515947')->max('item_id');
+            $list = Db::connect('database.db_voogueme')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 515947]]])->limit(3000)->select();
+        } elseif ($site == 3) {
+            $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 74885')->max('item_id');
+            $list = Db::connect('database.db_nihao')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 74885]]])->limit(3000)->select();
+        } elseif ($site == 4) {
+            $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 4111')->max('item_id');
+            $list = Db::connect('database.db_meeloog')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 4111]]])->limit(3000)->select();
+        } elseif ($site == 5) {
+            $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 13412')->max('item_id');
+            $list = Db::connect('database.db_weseeoptical')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 13412]]])->limit(3000)->select();
+        } elseif ($site == 9) {
+            $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 139')->max('item_id');
+            $list = Db::connect('database.db_zeelool_es')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 139]]])->limit(3000)->select();
+        } elseif ($site == 10) {
+            $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 1038')->max('item_id');
+            $list = Db::connect('database.db_zeelool_de')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 1038]]])->limit(3000)->select();
+        } elseif ($site == 11) {
+            $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 215')->max('item_id');
+            $list = Db::connect('database.db_zeelool_jp')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 215]]])->limit(3000)->select();
+        }
+
+        foreach($list as $k => $v) {
+            $count = $this->orderitemoption->where('site=' . $site . ' and item_id='.$v['item_id'])->count();
+            if ($count > 0) {
+                continue;
+            }
+            $options = [];
+            //处方解析 不同站不同字段
+            if ($site == 1) {
+                $options =  $this->zeelool_prescription_analysis($v['product_options']);
+            } elseif ($site == 2) {
+                $options =  $this->voogueme_prescription_analysis($v['product_options']);
+            } elseif ($site == 3) {
+                $options =  $this->nihao_prescription_analysis($v['product_options']);
+            } elseif ($site == 4) {
+                $options =  $this->meeloog_prescription_analysis($v['product_options']);
+            } elseif ($site == 5) {
+                $options =  $this->wesee_prescription_analysis($v['product_options']);
+            } elseif ($site == 9) {
+                $options =  $this->zeelool_es_prescription_analysis($v['product_options']);
+            } elseif ($site == 10) {
+                $options =  $this->zeelool_de_prescription_analysis($v['product_options']);
+            } elseif ($site == 11) {
+                $options =  $this->zeelool_jp_prescription_analysis($v['product_options']);
+            }
+
+            $options['item_id'] = $v['item_id'];
+            $options['site'] = $site;
+            $options['magento_order_id'] = $v['order_id'];
+            $options['sku'] = $v['sku'];
+            $options['qty'] = $v['qty_ordered'];
+            $options['base_row_total'] = $v['base_row_total'];
+            $order_prescription_type = $options['order_prescription_type'];
+            unset($options['order_prescription_type']);
+            if ($options) {
+                $options_id = $this->orderitemoption->insertGetId($options);
+                $data = []; //子订单表数据
+                for ($i = 0; $i < $v['qty_ordered']; $i++) {
+                    $data[$i]['item_id'] = $v['item_id'];
+                    $data[$i]['magento_order_id'] = $v['order_id'];
+                    $data[$i]['site'] = $site;
+                    $data[$i]['option_id'] = $options_id;
+                    $data[$i]['sku'] = $v['sku'];
+                    $data[$i]['order_prescription_type'] = $order_prescription_type;
+                    $data[$i]['created_at'] = strtotime($v['created_at']) + 28800;
+                    $data[$i]['updated_at'] = strtotime($v['updated_at']) + 28800;
+                }
+                $this->orderitemprocess->insertAll($data);
+            }
+            echo $v['item_id'] . "\n";
+            usleep(10000);
+        }
+        echo "ok";
+    }
+
+
 
     /**
      * 处理旧数据分类
