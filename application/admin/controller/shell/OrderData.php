@@ -165,7 +165,6 @@ class OrderData extends Backend
                                     $params['customer_lastname'] = $v['customer_lastname'];
                                     $params['taxno'] = $v['taxno'];
                                     $params['base_to_order_rate'] = $v['base_to_order_rate'];
-                                    $params['payment_method'] = $v['payment_method'];
                                     $params['mw_rewardpoint_discount'] = $v['mw_rewardpoint_discount'];
                                     $params['created_at'] = strtotime($v['created_at']) + 28800;
                                     $params['updated_at'] = strtotime($v['updated_at']) + 28800;
@@ -220,6 +219,14 @@ class OrderData extends Backend
                                 }
                             }
 
+                            //支付表插入时或更新时更新主表地址
+                            if (($payload['type'] == 'UPDATE' || $payload['type'] == 'INSERT') && $payload['table'] == 'sales_flat_order_payment') {
+                                $params = [];
+                                foreach ($payload['data'] as $k => $v) {
+                                    $params['payment_method'] = $v['method'];
+                                    $this->order->where(['entity_id' => $v['parent_id'], 'site' => $site])->update($params);
+                                }
+                            }
 
                             //新增子表
                             if ($payload['type'] == 'INSERT' && $payload['table'] == 'sales_flat_order_item') {
@@ -1431,7 +1438,65 @@ class OrderData extends Backend
 
 
 
+    ################################################处理旧数据脚本##########################################################################
 
+
+
+    public function zeelool_old_order()
+    {
+        $site = 4;
+        $id = $this->order->where('site=4 and entity_id < 2748')->max('entity_id');
+        $list = $this->meeloog->where(['entity_id' => ['between', [$id, 2748]]])->limit(3000)->select();
+        $site = 10;
+        $id = $this->order->where('site=10 and entity_id < 561')->max('entity_id');
+        $list = $this->zeelool_de->where(['entity_id' => ['between', [$id, 561]]])->limit(3000)->select();
+        $list = collection($list)->toArray();
+        $params = [];
+        $order_params = [];
+        foreach ($list as $k => $v) {
+            $count = $this->order->where('site=4 and entity_id=' . $v['entity_id'])->count();
+            $count = $this->order->where('site=10 and entity_id=' . $v['entity_id'])->count();
+            if ($count > 0) {
+                continue;
+            }
+            $params['entity_id'] = $v['entity_id'];
+            $params['site'] = $site;
+            $params['increment_id'] = $v['increment_id'];
+            $params['status'] = $v['status'] ?: '';
+            $params['store_id'] = $v['store_id'];
+            $params['base_grand_total'] = $v['base_grand_total'];
+            $params['total_item_count'] = $v['total_qty_ordered'];
+            $params['order_type'] = $v['order_type'];
+            $params['order_prescription_type'] = $v['custom_order_prescription_type'] ?? 0;
+            $params['base_currency_code'] = $v['base_currency_code'];
+            $params['shipping_method'] = $v['shipping_method'];
+            $params['shipping_title'] = $v['shipping_description'];
+            $params['country_id'] = $v['country_id'];
+            $params['region'] = $v['region'];
+            $params['city'] = $v['city'];
+            $params['street'] = $v['street'];
+            $params['postcode'] = $v['postcode'];
+            $params['telephone'] = $v['telephone'];
+            $params['customer_email'] = $v['customer_email'];
+            $params['customer_firstname'] = $v['customer_firstname'];
+            $params['customer_lastname'] = $v['customer_lastname'];
+            $params['taxno'] = $v['taxno'];
+            $params['created_at'] = strtotime($v['created_at']);
+            $params['updated_at'] = strtotime($v['updated_at']);
+            //插入订单主表
+            $order_id = $this->order->insertGetId($params);
+            $order_params[$k]['site'] = $site;
+            $order_params[$k]['order_id'] = $order_id;
+            $order_params[$k]['entity_id'] = $v['entity_id'];
+            $order_params[$k]['increment_id'] = $v['increment_id'];
+
+            echo $v['entity_id'] . "\n";
+            usleep(3000);
+        }
+        //插入订单处理表
+        $this->orderprocess->saveAll($order_params);
+        echo "ok";
+    }
 
     /**
      * 更新订单商品总数量
