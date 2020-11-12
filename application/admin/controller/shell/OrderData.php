@@ -181,7 +181,7 @@ class OrderData extends Backend
 
                             //更新主表
                             if ($payload['type'] == 'UPDATE' && $payload['table'] == 'sales_flat_order') {
-                               
+
                                 foreach ($payload['data'] as $k => $v) {
                                     $params = [];
                                     $params['base_grand_total'] = $v['base_grand_total'];
@@ -1441,15 +1441,44 @@ class OrderData extends Backend
     public function process_order_data_temp()
     {
         $this->zeelool_old_order(1);
+        $this->zeelool_old_order(2);
+        $this->zeelool_old_order(3);
+        $this->zeelool_old_order(4);
+        $this->zeelool_old_order(5);
+        $this->zeelool_old_order(9);
+        $this->zeelool_old_order(10);
+        $this->zeelool_old_order(11);
     }
-
     protected function zeelool_old_order($site)
     {
-        $site = 4;
-        $id = $this->order->where('site=4 and entity_id < 2748')->max('entity_id');
-        $list = $this->meeloog->where(['entity_id' => ['between', [$id, 2748]]])->limit(3000)->select();
+        if ($site == 1) {
+            $id = $this->order->where('site=' . $site . ' and entity_id < 534244')->max('entity_id');
+            $list = $this->zeelool->where(['entity_id' => ['between', [$id, 534244]]])->limit(5000)->select();
+        } elseif($site == 2) {
+            $id = $this->order->where('site=' . $site . ' and entity_id < 281018')->max('entity_id');
+            $list = $this->voogueme->where(['entity_id' => ['between', [$id, 281018]]])->limit(5000)->select();
+        } elseif($site == 3) {
+            $id = $this->order->where('site=' . $site . ' and entity_id < 46246')->max('entity_id');
+            $list = $this->nihao->where(['entity_id' => ['between', [$id, 46246]]])->limit(5000)->select();
+        } elseif($site == 4) {
+            $id = $this->order->where('site=' . $site . ' and entity_id < 2856')->max('entity_id');
+            $list = $this->meeloog->where(['entity_id' => ['between', [$id, 2856]]])->limit(5000)->select();
+        } elseif($site == 5) {
+            $id = $this->order->where('site=' . $site . ' and entity_id < 1300')->max('entity_id');
+            $list = $this->wesee->where(['entity_id' => ['between', [$id, 1300]]])->limit(5000)->select();
+        } elseif($site == 9) {
+            $id = $this->order->where('site=' . $site . ' and entity_id < 102')->max('entity_id');
+            $list = $this->zeelool_es->where(['entity_id' => ['between', [$id, 102]]])->limit(5000)->select();
+        } elseif($site == 10) {
+            $id = $this->order->where('site=' . $site . ' and entity_id < 665')->max('entity_id');
+            $list = $this->zeelool_de->where(['entity_id' => ['between', [$id, 665]]])->limit(5000)->select();
+        } elseif($site == 11) {
+            $id = $this->order->where('site=' . $site . ' and entity_id < 122')->max('entity_id');
+            $list = $this->zeelool_jp->where(['entity_id' => ['between', [$id, 122]]])->limit(5000)->select();
+        }
+       
         $list = collection($list)->toArray();
-        
+
         $order_params = [];
         foreach ($list as $k => $v) {
             $count = $this->order->where('site=' . $site . ' and entity_id=' . $v['entity_id'])->count();
@@ -1465,7 +1494,6 @@ class OrderData extends Backend
             $params['base_grand_total'] = $v['base_grand_total'];
             $params['total_item_count'] = $v['total_qty_ordered'];
             $params['order_type'] = $v['order_type'];
-            $params['order_prescription_type'] = $v['custom_order_prescription_type'] ?? 0;
             $params['base_currency_code'] = $v['base_currency_code'];
             $params['shipping_method'] = $v['shipping_method'];
             $params['shipping_title'] = $v['shipping_description'];
@@ -1479,8 +1507,10 @@ class OrderData extends Backend
             $params['customer_firstname'] = $v['customer_firstname'];
             $params['customer_lastname'] = $v['customer_lastname'];
             $params['taxno'] = $v['taxno'];
-            $params['created_at'] = strtotime($v['created_at']);
-            $params['updated_at'] = strtotime($v['updated_at']);
+            $params['base_to_order_rate'] = $v['base_to_order_rate'];
+            $params['mw_rewardpoint_discount'] = $v['mw_rewardpoint_discount'];
+            $params['created_at'] = strtotime($v['created_at']) + 28800;
+            $params['updated_at'] = strtotime($v['updated_at']) + 28800;
             //插入订单主表
             $order_id = $this->order->insertGetId($params);
             $order_params[$k]['site'] = $site;
@@ -1489,10 +1519,10 @@ class OrderData extends Backend
             $order_params[$k]['increment_id'] = $v['increment_id'];
 
             echo $v['entity_id'] . "\n";
-            usleep(3000);
+            usleep(10000);
         }
         //插入订单处理表
-        $this->orderprocess->saveAll($order_params);
+        if ($order_params) $this->orderprocess->saveAll($order_params);
         echo "ok";
     }
 
