@@ -341,7 +341,6 @@ class Zeelool extends Model
      */
     public function getOrderCostInfo($totalId, $thisPageId)
     {
-
         $arr = [];
         if (!$totalId || !$thisPageId) {
             return $arr;
