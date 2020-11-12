@@ -1780,7 +1780,7 @@ class OrderData extends Backend
      * @since 2020/11/02 18:31:12 
      * @return void
      */
-    public function order_product_id_data($site)
+    public function order_product_id_data()
     {
         $list = $this->orderitemoption->where('product_id is null')->limit(4000)->select();
         $list = collection($list)->toArray();
