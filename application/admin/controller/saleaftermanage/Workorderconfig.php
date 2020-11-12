@@ -162,6 +162,13 @@ class Workorderconfig extends Backend
             $result = Cache::rm('Workorderconfig_getConfigInfo');
         }
         $step = $this->model->getAllStep();
+        //所有措施类型
+        $all_step = (new WorkOrderStepType)->where(['is_del'=>1])->select();
+        //所有主单措施类型
+        $all_step_main = (new WorkOrderStepType)->where(['is_del'=>1,'type'=>1])->select();
+        //所有子单措施类型
+        $all_step_item = (new WorkOrderStepType)->where(['is_del'=>1,'type'=>2])->select();
+
         $extend_team = $this->model->getAllExtend();
         $extend_team = $this->model->getAllExtendArr();
         array_unshift($extend_team,['id'=>0,'name'=>'不选择']);
@@ -226,6 +233,8 @@ class Workorderconfig extends Backend
             $this->success();
         }
         $this->view->assign("step", $step);
+        $this->view->assign("step_main", $all_step_main);
+        $this->view->assign("step_item", $all_step_item);
         $this->view->assign("extend_team", $extend_team);
         return $this->view->fetch();
     }
@@ -357,10 +366,10 @@ class Workorderconfig extends Backend
 
                     } else if ($problem_step && !in_array($v['id'], array_keys($params['choose_id']))) {
                         if ($params['choose_id'][$v['id']]['is_on'] != 'on') {
-                        //存在但是没有选择 就把他从记录中删除掉
-                        Db::name('work_order_problem_step')
-                            ->where(['problem_id' => $params['problem_id'], 'step_id' => $v['id']])
-                            ->delete();
+                            //存在但是没有选择 就把他从记录中删除掉
+                            Db::name('work_order_problem_step')
+                                ->where(['problem_id' => $params['problem_id'], 'step_id' => $v['id']])
+                                ->delete();
                         }
                     } else if ($problem_step && in_array($v['id'], array_keys($params['choose_id']))) {
                         //存在但是没有勾选 就把他从记录中删除掉
@@ -422,11 +431,12 @@ class Workorderconfig extends Backend
         //所有问题类型
         $where['is_del'] = 1;
         $all_problem_type = $this->model->where($where)->select();
-        //所有主单措施类型
+        //所有措施类型
         $all_step = (new WorkOrderStepType)->where($where)->select();
+        //所有主单措施类型
+        $all_step_main = (new WorkOrderStepType)->where(['is_del'=>1,'type'=>1])->select();
         //所有子单措施类型
-        $all_step_item = (new WorkOrderStepType)->where($where)->select();
-
+        $all_step_item = (new WorkOrderStepType)->where(['is_del'=>1,'type'=>2])->select();
         //所有平台
         $all_platform     = (new MagentoPlatform)->field('id,name')->select();
         //所有的可用用户
@@ -448,9 +458,9 @@ class Workorderconfig extends Backend
         //客服问题类型，仓库问题类型，大的问题类型分类,所有措施,所有平台,客服A/B分组,跟单组分组,
         //跟单人分组,大的问题类型分类two,问题类型/措施关系集合,分组对应的用户集合,审核人权重规则,审核组权重规则,所有的承接组,所有的承接人
         $customer_problem_type = $warehouse_problem_type = $customer_problem_classify_arr
-        = $step = $platform = $kefumanage = $documentary_group = $documentary_person
-        = $customer_problem_classify = $relation_problem_step = $group = $check_person_weight = $check_group_weight = $all_extend_group = $all_extend_person = [];
-        //客服a,b组ID a,b组的主管ID,客服经理ID 
+            = $step = $step_main = $step_item = $platform = $kefumanage = $documentary_group = $documentary_person
+            = $customer_problem_classify = $relation_problem_step = $group = $check_person_weight = $check_group_weight = $all_extend_group = $all_extend_person = [];
+        //客服a,b组ID a,b组的主管ID,客服经理ID
         $a_group_id = $b_group_id = $a_uid = $b_uid = $customer_manager_id = 0;
         //所有的组分别对应的有哪些用户
         //$all_group_user = Db::name('auth_group')->alias('a')->join('auth_group_access s ', 'a.id=s.group_id')->field('a.id,a.name,s.uid')->select();
@@ -466,22 +476,22 @@ class Workorderconfig extends Backend
                 switch($v['problem_belong']){
                     case 1:
                         $customer_problem_classify['订单修改'][] = $v['id'];
-                    break;
+                        break;
                     case 2:
                         $customer_problem_classify['物流仓库'][] = $v['id'];
-                    break;
+                        break;
                     case 3:
                         $customer_problem_classify['产品质量'][] = $v['id'];
-                    break;
+                        break;
                     case 4:
                         $customer_problem_classify['客户问题'][] = $v['id'];
-                    break;
+                        break;
                     case 5:
                         $customer_problem_classify['仓库问题'][] = $v['id'];
-                    break;
+                        break;
                     case 6:
                         $customer_problem_classify['其他'][]    = $v['id'];
-                    break;    
+                        break;
                 }
                 $customer_problem_classify_arr[$v['problem_belong']][] =$v['id'];
 
@@ -493,6 +503,18 @@ class Workorderconfig extends Backend
             $all_step         = collection($all_step)->toArray();
             foreach ($all_step as $sv) {
                 $step[$sv['id']] = $sv['step_name'];
+            }
+        }
+        if (!empty($all_step_main)) {
+            $all_step_main         = collection($all_step_main)->toArray();
+            foreach ($all_step_main as $sv) {
+                $step_main[$sv['id']] = $sv['step_name'];
+            }
+        }
+        if (!empty($all_step_item)) {
+            $all_step_item         = collection($all_step_item)->toArray();
+            foreach ($all_step_item as $sv) {
+                $step_item[$sv['id']] = $sv['step_name'];
             }
         }
         //存在A、B组
@@ -531,7 +553,7 @@ class Workorderconfig extends Backend
                 //组创建
                 if(1 == $dv['type']){
                     $documentary_group[$dv['create_id']] = $dv;
-                //人创建
+                    //人创建
                 }elseif(2 == $dv['type']){
                     $documentary_person[$dv['create_id']] = $dv;
 
@@ -545,7 +567,7 @@ class Workorderconfig extends Backend
                 $relation_problem_step[$fv['problem_id']][] = $fv;
                 if(0 != $fv['extend_group_id']){
                     $all_extend_group[] = $fv['extend_group_id'];
-                } 
+                }
             }
         }
         //根据所有的承接组求出所有的承接人
@@ -579,7 +601,9 @@ class Workorderconfig extends Backend
         $arr['warehouse_problem_type'] = $warehouse_problem_type;
         $arr['customer_problem_classify_arr'] = $customer_problem_classify_arr;
         $arr['customer_problem_classify']     = $customer_problem_classify;
-        $arr['step']                          = $step;
+//        $arr['step']                          = $step;
+        $arr['step']                          = $step_main;
+        $arr['step_item']                     = $step_item;
         $arr['platform']                      = $platform;
         $arr['kefumanage']                    = $kefumanage;
         $arr['all_problem_step']              = $relation_problem_step;
