@@ -1658,8 +1658,8 @@ class OrderData extends Backend
             $list = Db::connect('database.db_zeelool_jp')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 215]]])->limit(3000)->select();
         }
 
-        foreach($list as $k => $v) {
-            $count = $this->orderitemoption->where('site=' . $site . ' and item_id='.$v['item_id'])->count();
+        foreach ($list as $k => $v) {
+            $count = $this->orderitemoption->where('site=' . $site . ' and item_id=' . $v['item_id'])->count();
             if ($count > 0) {
                 continue;
             }
@@ -1772,4 +1772,45 @@ class OrderData extends Backend
     }
 
 
+    /**
+     * 支付方式处理
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/11/02 18:31:12 
+     * @return void
+     */
+    public function order_product_id_data($site)
+    {
+        $list = $this->orderitemoption->where('product_id is null')->limit(4000)->select();
+        $list = collection($list)->toArray();
+
+        $params = [];
+        foreach ($list as $k => $v) {
+
+            if ($v['site'] == 1) {
+                $product_id = Db::connect('database.db_zeelool')->table('sales_flat_order_item')->where('order_id', $v['magento_order_id'])->value('product_id');
+            } elseif ($v['site'] == 2) {
+                $product_id = Db::connect('database.db_voogueme')->table('sales_flat_order_item')->where('order_id', $v['magento_order_id'])->value('product_id');
+            } elseif ($v['site'] == 3) {
+                $product_id = Db::connect('database.db_nihao')->table('sales_flat_order_item')->where('order_id', $v['magento_order_id'])->value('product_id');
+            } elseif ($v['site'] == 4) {
+                $product_id = Db::connect('database.db_meeloog')->table('sales_flat_order_item')->where('order_id', $v['magento_order_id'])->value('product_id');
+            } elseif ($v['site'] == 5) {
+                $product_id = Db::connect('database.db_weseeoptical')->table('sales_flat_order_item')->where('order_id', $v['magento_order_id'])->value('product_id');
+            } elseif ($v['site'] == 9) {
+                $product_id = Db::connect('database.db_zeelool_es')->table('sales_flat_order_item')->where('order_id', $v['magento_order_id'])->value('product_id');
+            } elseif ($v['site'] == 10) {
+                $product_id = Db::connect('database.db_zeelool_de')->table('sales_flat_order_item')->where('order_id', $v['magento_order_id'])->value('product_id');
+            } elseif ($v['site'] == 11) {
+                $product_id = Db::connect('database.db_zeelool_jp')->table('sales_flat_order_item')->where('order_id', $v['magento_order_id'])->value('product_id');
+            }
+            $params[$k]['id'] = $v['id'];
+            $params[$k]['product_id'] = $product_id;
+
+            echo $k . "\n";
+        }
+        $this->orderitemoption->saveAll($params);
+        echo $site . 'ok';
+    }
 }
