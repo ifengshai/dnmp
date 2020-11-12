@@ -1100,7 +1100,7 @@ class ScmWarehouse extends Scm
         }
         $info['in_stock_type_check_id'] = $_in_stock_info['type_id'];
 
-        $info['in_stock_type_list'] = $in_stock_type_list;
+        $info['in_stock_type'] = $in_stock_type_list;
 
         $this->success('', ['info' => $info],200);
     }
