@@ -1673,27 +1673,25 @@ class WorkOrderList extends Backend
         $this->assignconfig('work_status',$row->work_status);
         return $this->view->fetch();
     }
+
     /**
      * 获取订单sku数据
      *
-     * @Description
-     * @author wpl
-     * @since 2020/04/10 15:41:09 
-     * @return void
+     * @参数 string order_number  订单号
+     * @author lzh
+     * @return array
      */
     public function get_sku_list()
     {
-        if (request()->isAjax()) {
-            $sitetype = input('sitetype');
-            $order_number = input('order_number');
-            $skus = $this->model->getSkuList($sitetype, $order_number);
-            if ($skus) {
-                $this->success('操作成功！！', '', $skus);
-            } else {
-                $this->error('未获取到数据！！');
-            }
-        }
-        $this->error('404 not found');
+        !request()->isAjax() && $this->error('404 not found');
+
+        $order_number = request()->post('order_number');
+        empty($order_number) && $this->error('订单号不能为空');
+
+        $result = $this->model->getSkuListNew($order_number);
+        empty($result) && $this->error('未获取到数据');
+
+        $this->success('', '', $result, 0);
     }
 
     /**
@@ -1762,7 +1760,7 @@ class WorkOrderList extends Backend
             $isNewVersion = input('is_new_version',0);
             try {
                 //获取地址、处方等信息
-                $res = $this->model->getAddress($siteType, $incrementId);
+                $res = $this->model->getAddress($siteType, 300035202);
                 $lens = $this->model->getReissueLens($siteType, $res['prescriptions'], 2,$isNewVersion);
             } catch (\Exception $e) {
                 $this->error($e->getMessage());
@@ -1862,7 +1860,7 @@ class WorkOrderList extends Backend
             } elseif ($ordertype == 2) {
                 $result = VooguemePrescriptionDetailHelper::get_one_by_increment_id($order_number);
             } elseif ($ordertype == 3) {
-                $result = NihaoPrescriptionDetailHelper::get_one_by_increment_id($order_number);
+                $result = NihaoPrescriptionDetailHelper::get_one_by_increment_id(300035202);
             } elseif ($ordertype == 4) {
                 $result = MeeloogPrescriptionDetailHelper::get_one_by_increment_id($order_number);
             } elseif ($ordertype == 5) {

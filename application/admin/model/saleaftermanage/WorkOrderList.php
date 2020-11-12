@@ -3,7 +3,6 @@
 namespace app\admin\model\saleaftermanage;
 
 use app\admin\model\Admin;
-use fast\Http;
 use think\Cache;
 use think\Db;
 use think\Exception;
@@ -17,11 +16,9 @@ use Util\ZeeloolEsPrescriptionDetailHelper;
 use Util\ZeeloolDePrescriptionDetailHelper;
 use Util\ZeeloolJpPrescriptionDetailHelper;
 use GuzzleHttp\Client;
-use app\admin\model\saleaftermanage\WorkOrderMeasure;
-use app\admin\model\saleaftermanage\WorkOrderRecept;
-use app\admin\model\saleaftermanage\WorkOrderChangeSku;
 use app\admin\controller\warehouse\Inventory;
-use app\api\controller\Ding;
+use app\admin\model\order\order\NewOrder;
+use app\admin\model\order\order\NewOrderItemProcess;
 
 class WorkOrderList extends Model
 {
@@ -172,6 +169,52 @@ class WorkOrderList extends Model
         $result['mw_rewardpoint_discount'] = round($orderInfo['mw_rewardpoint_discount'],2);
         $result['payment_time'] = $this->model->where('increment_id', $increment_id)->value('created_at');
         return $result ? $result : [];
+    }
+
+    /**
+     * 根据订单号获取SKU列表-新
+     *
+     * @param string $increment_id  订单号
+     * @author lzh
+     * @return array
+     */
+    public function getSkuListNew($increment_id)
+    {
+        $order_field = 'id,site,base_grand_total,base_to_order_rate,payment_method,customer_email,customer_firstname,customer_lastname,order_type,mw_rewardpoint_discount,base_currency_code,shipping_method,country_id,region,city,street,postcode,telephone';
+
+        $_new_order = new NewOrder();
+        $result = $_new_order
+            ->where('increment_id', $increment_id)
+            ->field($order_field)
+            ->find()
+        ;
+        if(empty($result)){
+            return [];
+        }
+
+        $sku_field = 'a.sku,b.prescription_type,b.coating_name,b.od_sph,b.os_sph,b.od_cyl,b.os_cyl,b.od_axis,b.os_axis,b.pd_l,b.pd_r,b.pd,b.pdcheck,b.os_add,b.od_add,b.prismcheck,b.od_pv,b.os_pv,b.od_pv_r,b.os_pv_r,b.od_bd,b.os_bd,b.od_bd_r,b.os_bd_r,b.lens_number';
+        $_new_order_item_process = new NewOrderItemProcess();
+        $sku_list = $_new_order_item_process
+            ->alias('a')
+            ->where('a.order_id', $result['id'])
+            ->join(['fa_order_item_option' => 'b'], 'a.option_id=b.id')
+            ->column($sku_field,'a.item_order_number')
+        ;
+
+        //TODO::镜片列表、镀膜列表
+        $lens_key = 'get_lens_'.$result['site'];
+        $lens_data = Cache::get($lens_key);
+        if (!$lens_data) {
+            $lens_data = $this->httpRequest($result['site'], 'magic/product/lensData');
+            Cache::set($lens_key, $lens_data, 3600 * 24);
+        }
+
+        $result['sku_list'] = $sku_list;
+        $result['lens_list'] = $lens_data['lens_list'];
+        $result['coating_list'] = $lens_data['coating_list'];
+        $result['mw_rewardpoint_discount'] = round($result['mw_rewardpoint_discount'],2);
+
+        return $result;
     }
 
     /**
