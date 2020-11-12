@@ -835,7 +835,7 @@ class ScmWarehouse extends Scm
                 if ($platform_id){
                     //有站点，入库单创建入口
                     $row = $this->_in_stock->get($in_stock_id);
-                    empty($row) && $this->error(__('入库单不存在'), [], 512);
+                    empty($row) && $this->error(__('入库单不存在'), [], 511);
 
                     //编辑入库单主表
                     $_in_stock_data['platform_id'] = $platform_id;
@@ -892,8 +892,6 @@ class ScmWarehouse extends Scm
                 Db::rollback();
                 $this->error($e->getMessage(), [], 444);
             }
-
-            $this->error(__($msg.'失败'), [], 512);
 
         } else {
             //无入库单ID，新建入库单
