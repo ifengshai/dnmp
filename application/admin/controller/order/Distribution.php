@@ -423,7 +423,7 @@ class Distribution extends Backend
                 } else {
                     $map['a.status'] = $label;
                 }
-                $map['a.temporary_house_id|a.abnormal_house_id|c.store_house_id'] = 0;
+                $map['a.temporary_house_id|a.abnormal_house_id'] = 0;
             }
 
             $_stock_house = new StockHouse();
@@ -453,7 +453,7 @@ class Distribution extends Backend
                     $stock_house_id = $_stock_house
                         ->where($stock_house_where)
                         ->column('id');
-                    $map['a.temporary_house_id|a.abnormal_house_id|c.store_house_id'] = ['in', $stock_house_id];
+                    $map['a.temporary_house_id|a.abnormal_house_id'] = ['in', $stock_house_id];
                 }
                 unset($filter['abnormal']);
                 unset($filter['stock_house_num']);
@@ -467,29 +467,12 @@ class Distribution extends Backend
             ->alias('a')
             ->field('a.id,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.total_qty_ordered,b.site,a.distribution_status,a.temporary_house_id,a.abnormal_house_id,a.created_at')
             ->join(['fa_order' => 'b'], 'a.order_id=b.id')
-            ->join(['fa_order_item_option' => 'c'], 'a.order_id=c.order_id')
+            ->join(['fa_order_item_option' => 'c'], 'a.option_id=c.id')
             ->where($where)
             ->where($map)
             ->order($sort, $order)
             ->select();
         $list = collection($list)->toArray();
-
-        $_stock_house = new StockHouse();
-        $stock_house_data = $_stock_house
-            ->where(['status' => 1, 'type' => ['>', 1], 'occupy' => ['>', 0]])
-            ->column('coding', 'id');
-
-        foreach ($list as $key => $value) {
-            if (!empty($value['temporary_house_id'])) {
-                $stock_house_num = $stock_house_data[$value['temporary_house_id']]['coding'];
-            } elseif (!empty($value['temporary_house_id'])) {
-                $stock_house_num = $stock_house_data[$value['abnormal_house_id']]['coding'];
-            } elseif (!empty($value['store_house_id'])) {
-                $stock_house_num = $stock_house_data[$value['store_house_id']]['coding'];
-            }
-            $list[$key]['stock_house_num'] = $stock_house_num ?? '-';
-            $list[$key]['created_at'] = date('Y-m-d H:i:s', $value['created_at']);
-        }
 
         //从数据库查询需要的数据
         $spreadsheet = new Spreadsheet();
