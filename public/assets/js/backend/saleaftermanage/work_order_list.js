@@ -921,13 +921,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         // //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end  
 
                         //子订单列表
-                        var zhtml = '';
+                        var item_checkbox = '';
+                        item_checkbox += '<label><input type="checkbox" name="" class="item_step_type" id="step1" value="1"><span>更换镜框</span></label>';
+                        item_checkbox += '<label ><input type="checkbox" name="" class="item_step_type" id="step2" value="2"><span>更换镜片</span></label>';
+                        item_checkbox += '<label ><input type="checkbox" name="" class="item_step_type" id="step3" value="3"><span>取消</span></label>'
+
+                        var zhtml = '<tr ><th>子单号</th><th>措施</th><th>处理流程</th></tr>';
                         for (var i in data.sku) {
-                            zhtml += '<td>'+ data.sku[i] +'</td>';
-                            zhtml += '<td><label><input type="checkbox" name="" class="item_step_type" id="step1" value="1"><span>更换镜框</span></label>';
-                            zhtml += '<label ><input type="checkbox" name="" class="item_step_type" id="step2" value="2"><span>更换镜片</span></label>';
-                            zhtml += '<label ><input type="checkbox" name="" class="item_step_type" id="step3" value="3"><span>取消</span></label></td>';
-                            zhtml += '<td><label class="control-label col-xs-12 col-sm-2" id="appoint_item_group_users" style="text-align: left;"></label></td>';
+                            zhtml += '<tr><td>'+ data.sku[i] +'</td>';
+                            zhtml += '<td>'+item_checkbox+'</td>';
+                            zhtml += '<td><label class="control-label col-xs-12 col-sm-2" id="appoint_item_group_users" style="text-align: left;"></label></td></tr>';
                         }
                         $('#z-order_sku').append(zhtml);
                         $('#item_order_div').show();                                  
@@ -1142,6 +1145,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 $('.selectpicker ').selectpicker('refresh');
             })
 
+            //下拉框选择子单
+            $(document).on('change', '.item_order_selectpicker', function () {
+                var item_order_sku = $(this).val();
+                for (var i = item_order_sku.length - 1; i >= 0; i--) {
+                    item_order_sku[i].split("-");
+                }
+            })
+
             $(document).on('click', '.btn-add-box', function () {
                 $('.add_gift').after(gift_click_data);
                 $('.selectpicker ').selectpicker('refresh');
@@ -1308,9 +1319,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
             $(document).on('click', '#item_order_but', function () {
                 var target = $('.box-body');
                 if (target.is(':hidden')) {
-                    target.show("500");
+                    target.show("500","linear");
+                    $("#item_order_but_i").attr("class","fa fa-minus");
                 } else {
-                    target.hide("500");
+                    target.hide("500","linear");
+                    $("#item_order_but_i").attr("class","fa fa-plus");
                 }
             });
 
@@ -2836,12 +2849,4 @@ function changeOrderAddress(){
             $('.selectpicker ').selectpicker('refresh');
         });
     }
-}
-
-//根据状态折叠和展开
-function switchDisplay(){
-    var parent = this.parentNode;
-    var target = parent.getElementsByTagName("div")[1];//class为elements的div
-
-    
 }
