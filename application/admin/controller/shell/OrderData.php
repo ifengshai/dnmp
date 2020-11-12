@@ -140,9 +140,9 @@ class OrderData extends Backend
                             }
                             //主表
                             if ($payload['type'] == 'INSERT' && $payload['table'] == 'sales_flat_order') {
-                                $params = [];
                                 $order_params = [];
                                 foreach ($payload['data'] as $k => $v) {
+                                    $params = [];
                                     $params['entity_id'] = $v['entity_id'];
                                     $params['site'] = $site;
                                     $params['increment_id'] = $v['increment_id'];
@@ -181,8 +181,9 @@ class OrderData extends Backend
 
                             //更新主表
                             if ($payload['type'] == 'UPDATE' && $payload['table'] == 'sales_flat_order') {
-                                $params = [];
+                               
                                 foreach ($payload['data'] as $k => $v) {
+                                    $params = [];
                                     $params['base_grand_total'] = $v['base_grand_total'];
                                     $params['total_item_count'] = $v['total_qty_ordered'];
                                     $params['order_type'] = $v['order_type'];
@@ -206,8 +207,8 @@ class OrderData extends Backend
 
                             //地址表插入时或更新时更新主表地址
                             if (($payload['type'] == 'UPDATE' || $payload['type'] == 'INSERT') && $payload['table'] == 'sales_flat_order_address') {
-                                $params = [];
                                 foreach ($payload['data'] as $k => $v) {
+                                    $params = [];
                                     $params['country_id'] = $v['country_id'];
                                     $params['region'] = $v['region'];
                                     $params['city'] = $v['city'];
@@ -221,8 +222,8 @@ class OrderData extends Backend
 
                             //支付表插入时或更新时更新主表地址
                             if (($payload['type'] == 'UPDATE' || $payload['type'] == 'INSERT') && $payload['table'] == 'sales_flat_order_payment') {
-                                $params = [];
                                 foreach ($payload['data'] as $k => $v) {
+                                    $params = [];
                                     $params['payment_method'] = $v['method'];
                                     $this->order->where(['entity_id' => $v['parent_id'], 'site' => $site])->update($params);
                                 }
@@ -230,9 +231,8 @@ class OrderData extends Backend
 
                             //新增子表
                             if ($payload['type'] == 'INSERT' && $payload['table'] == 'sales_flat_order_item') {
-
-                                $options = [];
                                 foreach ($payload['data'] as $k => $v) {
+                                    $options = [];
                                     //处方解析 不同站不同字段
                                     if ($site == 1) {
                                         $options =  $this->zeelool_prescription_analysis($v['product_options']);
@@ -280,9 +280,8 @@ class OrderData extends Backend
 
                             //新增子表
                             if ($payload['type'] == 'UPDATE' && $payload['table'] == 'sales_flat_order_item') {
-
-                                $options = [];
                                 foreach ($payload['data'] as $k => $v) {
+                                    $options = [];
                                     //处方解析 不同站不同字段
                                     if ($site == 1) {
                                         $options =  $this->zeelool_prescription_analysis($v['product_options']);
@@ -319,15 +318,14 @@ class OrderData extends Backend
                         break;
                     case RD_KAFKA_RESP_ERR__TIMED_OUT: //超时
                         echo "Timed out\n";
-                        // var_dump("##################");
                         break;
                     default:
-                        // var_dump("nothing");
+                        echo "nothing \n";
                         throw new \Exception($message->errstr(), $message->err);
                         break;
                 }
             } else {
-                // var_dump('this is empty obj!!!');
+                echo "error\n";
             }
         }
     }
@@ -1440,25 +1438,25 @@ class OrderData extends Backend
 
     ################################################处理旧数据脚本##########################################################################
 
+    public function process_order_data_temp()
+    {
+        $this->zeelool_old_order(1);
+    }
 
-
-    public function zeelool_old_order()
+    protected function zeelool_old_order($site)
     {
         $site = 4;
         $id = $this->order->where('site=4 and entity_id < 2748')->max('entity_id');
         $list = $this->meeloog->where(['entity_id' => ['between', [$id, 2748]]])->limit(3000)->select();
-        $site = 10;
-        $id = $this->order->where('site=10 and entity_id < 561')->max('entity_id');
-        $list = $this->zeelool_de->where(['entity_id' => ['between', [$id, 561]]])->limit(3000)->select();
         $list = collection($list)->toArray();
-        $params = [];
+        
         $order_params = [];
         foreach ($list as $k => $v) {
-            $count = $this->order->where('site=4 and entity_id=' . $v['entity_id'])->count();
-            $count = $this->order->where('site=10 and entity_id=' . $v['entity_id'])->count();
+            $count = $this->order->where('site=' . $site . ' and entity_id=' . $v['entity_id'])->count();
             if ($count > 0) {
                 continue;
             }
+            $params = [];
             $params['entity_id'] = $v['entity_id'];
             $params['site'] = $site;
             $params['increment_id'] = $v['increment_id'];
