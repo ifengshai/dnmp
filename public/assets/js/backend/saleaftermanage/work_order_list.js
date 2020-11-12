@@ -880,7 +880,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
 
                     var sitetype = $('#work_platform').val();
                     $('#c-order_sku').html('');
-                    $('#z-order_sku').html('');
                     Layer.load();
                     Backend.api.ajax({
                         url: 'saleaftermanage/work_order_list/get_sku_list',
@@ -918,22 +917,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         if (!$('.step3').is(':hidden')) {
                             cancelOrder();
                         }
-                        // //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end  
-
-                        //子订单列表
-                        var item_checkbox = '';
-                        item_checkbox += '<label><input type="checkbox" name="" class="item_step_type" id="step1" value="1"><span>更换镜框</span></label>';
-                        item_checkbox += '<label ><input type="checkbox" name="" class="item_step_type" id="step2" value="2"><span>更换镜片</span></label>';
-                        item_checkbox += '<label ><input type="checkbox" name="" class="item_step_type" id="step3" value="3"><span>取消</span></label>'
-
-                        var zhtml = '<tr ><th>子单号</th><th>措施</th><th>处理流程</th></tr>';
-                        for (var i in data.sku) {
-                            zhtml += '<tr><td>'+ data.sku[i] +'</td>';
-                            zhtml += '<td>'+item_checkbox+'</td>';
-                            zhtml += '<td><label class="control-label col-xs-12 col-sm-2" id="appoint_item_group_users" style="text-align: left;"></label></td></tr>';
-                        }
-                        $('#z-order_sku').append(zhtml);
-                        $('#item_order_div').show();                                  
+                        // //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end                                   
                     });
                 }
             })
@@ -1145,14 +1129,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 $('.selectpicker ').selectpicker('refresh');
             })
 
-            //下拉框选择子单
-            $(document).on('change', '.item_order_selectpicker', function () {
-                var item_order_sku = $(this).val();
-                for (var i = item_order_sku.length - 1; i >= 0; i--) {
-                    item_order_sku[i].split("-");
-                }
-            })
-
             $(document).on('click', '.btn-add-box', function () {
                 $('.add_gift').after(gift_click_data);
                 $('.selectpicker ').selectpicker('refresh');
@@ -1315,7 +1291,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 }
             }
 
-            //子单号的折叠框生成
+            //子单号措施区域的折叠功能
             $(document).on('click', '#item_order_but', function () {
                 var target = $('.box-body');
                 if (target.is(':hidden')) {
@@ -1324,6 +1300,87 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 } else {
                     target.hide("500","linear");
                     $("#item_order_but_i").attr("class","fa fa-plus");
+                }
+            });
+
+             //下拉框选择子单联动子单列表
+            $(document).on('change', '.item_order_selectpicker', function () {
+                $('#z-order_sku').html('');
+
+                var item_order_sku = $(this).val();
+                /*for (var i = item_order_sku.length - 1; i >= 0; i--) {
+                    item_order_sku[i].split("-");
+                }*/
+
+                //根据下拉选择生成子订单列表
+                var step_item = Config.workOrderConfigValue.step_item;
+                console.log(typeof step_item);
+                var item_checkbox = '';
+                var zhtml = '<tr ><th>子单号</th><th>措施</th><th>处理流程</th></tr>';
+                var hidd = '';
+                for (var i in step_item) {
+                    item_checkbox += '<label><input type="checkbox" name="" class="item_step_type" id="step1" value="'+i+'"><span>'+step_item[i]+'</span></label>';
+
+                    hidd += '<input type="hidden" id="item_step'+i+'-is_check" value="">';
+                    hidd += '<input type="hidden" id="item_step'+i+'-is_auto_complete" value="">';
+                    hidd += '<input type="hidden" id="item_step'+i+'-appoint_group" value="">';
+                }
+                for (var i in item_order_sku) {
+                    zhtml += '<tr><td>'+ item_order_sku[i] +'</td>';
+                    zhtml += '<td>'+item_checkbox+'</td>';
+                    zhtml += '<td><label class="control-label col-xs-12 col-sm-2" id="appoint_item_group_users" style="text-align: left;"></label></td></tr>';
+                }
+                $('#z-order_sku').append(zhtml);
+                $('#item_order_div').show(); 
+            })
+
+            //子单措施选择联动
+            $(document).on('click', '.item_step_type', function () {
+                $("#input-hidden").html('');
+                var incrementId = $('#c-platform_order').val();
+                if (!incrementId) {
+                    Toastr.error('订单号不能为空');
+                    return false;
+                } else {
+                    $('.measure_item').hide();
+                    var checkID = [];//定义一个空数组
+                    var input_content = '';
+                    var is_check = [];
+                    var appoint_group = '';
+                    var username = [];
+                    var appoint_users = [];
+                    //判断是否出现没有承接组的情况
+                    var count = 0;
+                    //选中的问题类型
+                    $(".item_step_type:checked").each(function (i) {
+                        checkID[i] = $(this).val();
+                        var id = $(this).val();
+                        alert(id)
+                        /*//获取承接组
+                        appoint_group += $('#step' + id + '-appoint_group').val() + ',';
+                        var group_id = $('#step' + id + '-appoint_group').val();
+                        var choose_group = Config.workOrderConfigValue.group[group_id];
+                        if(choose_group){
+                            for(var j = 0;j<choose_group.length;j++){
+                                input_content += '<input type="hidden" name="row[order_recept][appoint_group][' + id + '][]" value="' + group_id + '"/>';
+                                input_content += '<input type="hidden" name="row[order_recept][appoint_ids][' + id + '][]" value="' + choose_group[j] + '"/>';
+                                input_content += '<input type="hidden" name="row[order_recept][appoint_users][' + id + '][]" value="' + Config.users[choose_group[j]] + '"/>';                            
+                            }
+                        }else{
+                            count = 1;
+                            input_content += '<input type="hidden" name="row[order_recept][appoint_group][' + id + '][]" value="0"/>';
+                            input_content += '<input type="hidden" name="row[order_recept][appoint_ids][' + id + '][]" value="' + Config.userid + '"/>';
+                            input_content += '<input type="hidden" name="row[order_recept][appoint_users][' + id + '][]" value="' + Config.users[Config.userid] + '"/>';                            
+                        }
+                        //获取是否需要审核
+                        var step_is_check = $('#step' + id + '-is_check').val();
+                        is_check.push(step_is_check);
+                        //是否自动审核完成 start
+                        var step_is_auto_complete = $('#step' + id + '-is_auto_complete').val();
+                        input_content +='<input type="hidden" name="row[order_recept][auto_complete][' + id + ']" value="' + step_is_auto_complete + '"/>';
+                        //是否自动审核完成  end*/
+                    });
+
                 }
             });
 
