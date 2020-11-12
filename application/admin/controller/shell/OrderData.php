@@ -1453,28 +1453,28 @@ class OrderData extends Backend
     {
         if ($site == 1) {
             $id = $this->order->where('site=' . $site . ' and entity_id < 534244')->max('entity_id');
-            $list = $this->zeelool->where(['entity_id' => ['between', [$id, 534244]]])->limit(5000)->select();
+            $list = $this->zeelool->where(['entity_id' => ['between', [$id, 534244]]])->limit(3000)->select();
         } elseif($site == 2) {
             $id = $this->order->where('site=' . $site . ' and entity_id < 281018')->max('entity_id');
-            $list = $this->voogueme->where(['entity_id' => ['between', [$id, 281018]]])->limit(5000)->select();
+            $list = $this->voogueme->where(['entity_id' => ['between', [$id, 281018]]])->limit(3000)->select();
         } elseif($site == 3) {
             $id = $this->order->where('site=' . $site . ' and entity_id < 46246')->max('entity_id');
-            $list = $this->nihao->where(['entity_id' => ['between', [$id, 46246]]])->limit(5000)->select();
+            $list = $this->nihao->where(['entity_id' => ['between', [$id, 46246]]])->limit(3000)->select();
         } elseif($site == 4) {
             $id = $this->order->where('site=' . $site . ' and entity_id < 2856')->max('entity_id');
-            $list = $this->meeloog->where(['entity_id' => ['between', [$id, 2856]]])->limit(5000)->select();
+            $list = $this->meeloog->where(['entity_id' => ['between', [$id, 2856]]])->limit(3000)->select();
         } elseif($site == 5) {
             $id = $this->order->where('site=' . $site . ' and entity_id < 1300')->max('entity_id');
-            $list = $this->wesee->where(['entity_id' => ['between', [$id, 1300]]])->limit(5000)->select();
+            $list = $this->wesee->where(['entity_id' => ['between', [$id, 1300]]])->limit(3000)->select();
         } elseif($site == 9) {
             $id = $this->order->where('site=' . $site . ' and entity_id < 102')->max('entity_id');
-            $list = $this->zeelool_es->where(['entity_id' => ['between', [$id, 102]]])->limit(5000)->select();
+            $list = $this->zeelool_es->where(['entity_id' => ['between', [$id, 102]]])->limit(3000)->select();
         } elseif($site == 10) {
             $id = $this->order->where('site=' . $site . ' and entity_id < 665')->max('entity_id');
-            $list = $this->zeelool_de->where(['entity_id' => ['between', [$id, 665]]])->limit(5000)->select();
+            $list = $this->zeelool_de->where(['entity_id' => ['between', [$id, 665]]])->limit(3000)->select();
         } elseif($site == 11) {
             $id = $this->order->where('site=' . $site . ' and entity_id < 122')->max('entity_id');
-            $list = $this->zeelool_jp->where(['entity_id' => ['between', [$id, 122]]])->limit(5000)->select();
+            $list = $this->zeelool_jp->where(['entity_id' => ['between', [$id, 122]]])->limit(3000)->select();
         }
        
         $list = collection($list)->toArray();
