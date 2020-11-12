@@ -92,9 +92,9 @@
         </div>
     </div>
     <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('措施')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('主单措施')}:</label>
         <div class="col-xs-12 col-sm-8 nav-list">
-            {foreach name="step" item="vo" key='k'}
+            {foreach name="step_main" item="vo" key='k'}
             <div class="col-xs-12 col-sm-8 list-inner">
                 <div class="text-muted-box">
                     <span class="text-muted is_on">
@@ -123,6 +123,40 @@
             </div>
 
 <!--                {:build_select('row[extend][]', $extend_team, $vo, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true])}-->
+            {/foreach}
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('子单措施')}:</label>
+        <div class="col-xs-12 col-sm-8 nav-list">
+            {foreach name="step_item" item="vo" key='k'}
+            <div class="col-xs-12 col-sm-8 list-inner">
+                <div class="text-muted-box">
+                    <span class="text-muted is_on">
+                        <input type="checkbox" name="row[choose_id][{$vo.id}][is_on]" id="name{$vo.id}" />
+                        <label for="name{$vo.id}">{$vo.step_name}</label>
+                    </span>
+                    <p>
+                        <span class="text-muted is_checked">
+                            <input type="checkbox" name="row[choose_id][{$vo.id}][is_checked]" id="step{$vo.id}" />
+
+                            <label for="step{$vo.id}">是否需要审核</label>
+                        </span>
+                        <span class="text-muted is_auto_complete">
+                            <input type="checkbox" name="row[choose_id][{$vo.id}][is_auto_complete]" id="auto{$vo.id}" />
+
+                            <label for="auto{$vo.id}">是否自动完成</label>
+                        </span>
+                    </p>
+                </div>
+                <p>承接组：</p>
+                <select class="form-control selectpicker" name="row[choose_id][{$vo.id}][extend]">
+                    {foreach name="groupdata" item="vv" key='kk'}
+                    <option value="{$vv.id}">{$vv.name}</option>
+                    {/foreach}
+                </select>
+            </div>
+
             {/foreach}
         </div>
     </div>

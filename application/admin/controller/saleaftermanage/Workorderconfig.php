@@ -162,6 +162,13 @@ class Workorderconfig extends Backend
             $result = Cache::rm('Workorderconfig_getConfigInfo');
         }
         $step = $this->model->getAllStep();
+        //所有措施类型
+        $all_step = (new WorkOrderStepType)->where(['is_del'=>1])->select();
+        //所有主单措施类型
+        $all_step_main = (new WorkOrderStepType)->where(['is_del'=>1,'type'=>1])->select();
+        //所有子单措施类型
+        $all_step_item = (new WorkOrderStepType)->where(['is_del'=>1,'type'=>2])->select();
+
         $extend_team = $this->model->getAllExtend();
         $extend_team = $this->model->getAllExtendArr();
         array_unshift($extend_team,['id'=>0,'name'=>'不选择']);
@@ -226,6 +233,8 @@ class Workorderconfig extends Backend
             $this->success();
         }
         $this->view->assign("step", $step);
+        $this->view->assign("step_main", $all_step_main);
+        $this->view->assign("step_item", $all_step_item);
         $this->view->assign("extend_team", $extend_team);
         return $this->view->fetch();
     }
