@@ -5,14 +5,18 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
             Controller.api.bindevent();
             // 初始化表格参数配置
             Table.api.init({
+                commonSearch: false,
+                search: false,
+                showExport: false,
+                showColumns: false,
+                showToggle: false,
                 extend: {
-                    // index_url: 'operatedatacenter/goodsdata/single_item/index'+ location.search,
-                    index_url: 'operatedatacenter/goodsdata/single_item/index',
-                    add_url: 'operatedatacenter/goodsdata/single_item/add',
-                    edit_url: 'operatedatacenter/goodsdata/single_item/edit',
-                    del_url: 'operatedatacenter/goodsdata/single_item/del',
-                    multi_url: 'operatedatacenter/goodsdata/single_item/multi',
-                    table: 'single_item',
+                    index_url: 'operatedatacenter/goodsdata/single_items/index' + location.search,
+                    add_url: 'operatedatacenter/goodsdata/single_items/add',
+                    edit_url: 'operatedatacenter/goodsdata/single_items/edit',
+                    del_url: 'operatedatacenter/goodsdata/single_items/del',
+                    multi_url: 'operatedatacenter/goodsdata/single_items/multi',
+                    table: 'sku_detail',
                 }
             });
 
@@ -25,80 +29,67 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                 sortName: 'id',
                 columns: [
                     [
-                        // { checkbox: true },
-                        { field: 'increment_id', title: __('订单编号') },
-                        { field: 'status', title: __('订单状态') },
-                        { field: 'base_grand_total', title: __('金额') },
-                        { field: 'base_discount_amount', title: __('优惠金额') },
-                        { field: 'created_at', title: __('订单日期') },
-                        { field: 'payer_email', title: __('支付邮箱') }
+                        // { field: 'number', title: __('序号') },
+                        // { field: 'increment_id', title: __('订单号') },
+                        // { field: 'created_at', title: __('订单时间') },
+                        // { field: 'customer_email', title: __('支付邮箱') },
+                        // { field: 'prescription_type', title: __('处方类型') },
+                        // { field: 'coatiing_name', title: __('镀膜类型') },
+                        // { field: 'price', title: __('价格（镜框+镜片）') },
+
+                        {field: 'increment_id', title: __('订单编号')},
+                        {field: 'status', title: __('订单状态')},
+                        {field: 'base_grand_total', title: __('金额')},
+                        {field: 'base_discount_amount', title: __('优惠金额')},
+                        {field: 'created_at', title: __('订单日期')},
+                        {field: 'payer_email', title: __('支付邮箱')}
+
                     ]
                 ]
             });
             // 为表格绑定事件
             Table.api.bindevent(table);
-            $("#sku_submit").click(function(){
+            $("#sku_submit").click(function () {
                 var sku = $("#sku").val();
                 var time_str = $("#time_str").val();
-                if(sku.length <= 0){
+                if (sku.length <= 0) {
                     Layer.alert('请填写平台sku');
                     return false;
                 }
-                if(time_str.length <= 0){
+                if (time_str.length <= 0) {
                     Layer.alert('请选择时间');
                     return false;
                 }
-                $("#dis1").css('display','block');
-                $("#dis3").css('display','block');
-                $("#dis2").css('display','block');
-                $("#dis4").css('display','block');
+                $("#sku_data").css('display', 'block');
+                // Controller.api.formatter.user_data_pie();
+                // Controller.api.formatter.lens_data_pie();
                 Controller.api.formatter.line_chart();
                 Controller.api.formatter.sku_sales_data_bar();
                 order_data_view();
-                // var params = table.bootstrapTable('getOptions')
-                // params.queryParams = function(params) {
-                //
-                //     //定义参数
-                //     var filter = {};
-                //     //遍历form 组装json
-                //     $.each($("#form").serializeArray(), function(i, field) {
-                //         filter[field.name] = field.value;
-                //     });
-                //
-                //     //参数转为json字符串
-                //     params.filter = JSON.stringify(filter)
-                //     console.info(params);
-                //     return params;
-                // }
+                var params = table.bootstrapTable('getOptions')
+                params.queryParams = function (params) {
 
-                // table.bootstrapTable('refresh',params);
+                    //定义参数
+                    var filter = {};
+                    //遍历form 组装json
+                    $.each($("#form").serializeArray(), function (i, field) {
+                        filter[field.name] = field.value;
+                    });
+
+                    //参数转为json字符串
+                    params.filter = JSON.stringify(filter)
+                    console.info(params);
+                    return params;
+                }
+
+                table.bootstrapTable('refresh', params);
             });
-            // Controller.api.formatter.line_chart();
-            // Controller.api.formatter.sku_sales_data_bar();
-            // $(document).on('change', '#btnsubmit', function () {
-            //     alert(111);
-            //     order_data_view();
-            //     Controller.api.formatter.line_chart();
-            //     Controller.api.formatter.sku_sales_data_bar();
-            // });
-            // var params = table.bootstrapTable('getOptions')
-            // params.queryParams = function(params) {
-            //
-            //     //定义参数
-            //     var filter = {};
-            //     //遍历form 组装json
-            //     $.each($("#form").serializeArray(), function(i, field) {
-            //         filter[field.name] = field.value;
-            //     });
-            //
-            //     //参数转为json字符串
-            //     params.filter = JSON.stringify(filter)
-            //     console.info(params);
-            //     return params;
-            // }
-
-            table.bootstrapTable('refresh',params);
-
+            $("#sku_reset").click(function () {
+                $("#sku_data").css('display', 'none');
+                $("#order_platform").val(1);
+                $("#time_str").val('');
+                $("#sku").val('');
+            });
         },
         add: function () {
             Controller.api.bindevent();
@@ -162,11 +153,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
 
                     var options = {
                         type: 'post',
-                        url: 'operatedatacenter/goodsdata/single_item/sku_sales_data_line',
+                        url: 'operatedatacenter/goodsdata/single_items/sku_sales_data_line',
                         data: {
-                            sku:$('#sku').val(),
-                            order_platform:$('#order_platform').val(),
-                            time_str:$('#time_str').val()
+                            sku: $('#sku').val(),
+                            order_platform: $('#order_platform').val(),
+                            time_str: $('#time_str').val()
                         }
                     }
                     EchartObj.api.ajax(options, chartOptions)
@@ -190,41 +181,41 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                             },
                             xAxis: {
                                 type: 'category',
-                                data:[]
+                                data: []
                             },
                             yAxis: {
                                 type: 'value'
                             }
                         }
                     };
-              
+
                     var options = {
                         type: 'post',
-                        url: 'operatedatacenter/goodsdata/single_item/sku_sales_data_bar',
+                        url: 'operatedatacenter/goodsdata/single_items/sku_sales_data_bar',
                         data: {
-                            sku:$('#sku').val(),
-                            order_platform:$('#order_platform').val(),
-                            time_str:$('#time_str').val()
+                            sku: $('#sku').val(),
+                            order_platform: $('#order_platform').val(),
+                            time_str: $('#time_str').val()
                         }
                     }
                     EchartObj.api.ajax(options, chartOptions)
                 },
             },
             bindevent: function () {
-
                 Form.api.bindevent($("form[role=form]"));
             }
         }
     };
     return Controller;
 });
-function order_data_view(){
+
+function order_data_view() {
     var order_platform = $('#order_platform').val();
     var sku = $('#sku').val();
     var time_str = $('#time_str').val();
     Backend.api.ajax({
-        url: 'operatedatacenter/goodsdata/single_item/ajax_top_data',
-        data: { order_platform: order_platform, time_str: time_str,sku:sku}
+        url: 'operatedatacenter/goodsdata/single_items/ajax_top_data',
+        data: {order_platform: order_platform, time_str: time_str, sku: sku}
     }, function (data, ret) {
 
         var total = ret.data.total;
@@ -247,6 +238,13 @@ function order_data_view(){
         $('#every_price').text(every_price);
         var whole_price = ret.data.whole_price;
         $('#whole_price').text(whole_price);
+
+        var $table = $('#guanliangoumai');
+        $table.html($("<tr>" + "<td>" + "SKU" + "</td>" + "<td>" + "数量" + "</td>" + "</tr>"));
+        $.each(ret.data.array_sku, function (i, val) {
+            var $tr = $("<tr>" + "<td>" + i + "</td>" + "<td>" + val + "</td>" + "</tr>");
+            $table.append($tr);
+        });
 
         return false;
     }, function (data, ret) {

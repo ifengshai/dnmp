@@ -44,12 +44,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
             });
             // 为表格绑定事件
             Table.api.bindevent(table);
-
-            Controller.api.formatter.order_sales_data_line();
             Controller.api.formatter.order_num_data_line();
+            Controller.api.formatter.order_sales_data_line();
             $("#change_submit").click(function(){
-                Controller.api.formatter.order_sales_data_line();
                 Controller.api.formatter.order_num_data_line();
+                Controller.api.formatter.order_sales_data_line();
 
                 var params = table.bootstrapTable('getOptions')
                 params.queryParams = function(params) {
@@ -72,8 +71,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
             $("#change_reset").click(function(){
                 $("#order_platform").val(1),
                 $("#time_str").val(''),
-                Controller.api.formatter.order_sales_data_line();
+            
                 Controller.api.formatter.order_num_data_line();
+                Controller.api.formatter.order_sales_data_line();
 
                 var params = table.bootstrapTable('getOptions')
                 params.queryParams = function(params) {
