@@ -95,8 +95,13 @@ class Distribution extends Backend
                 }
                 unset($filter['abnormal']);
                 unset($filter['stock_house_num']);
-                $this->request->get(['filter' => json_encode($filter)]);
             }
+
+            if ($filter['site']) {
+                $map['a.site'] = ['in', $filter['site']];
+                unset($filter['site']);
+            }
+            $this->request->get(['filter' => json_encode($filter)]);
 
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
@@ -169,7 +174,7 @@ class Distribution extends Backend
         $result = $this->orderitemoption->get($row['option_id'])->toArray();
 
         //根据镜片编码查询仓库镜片名称
-        $result['index_name'] = $this->lensdata->where('lens_number', $result['lens_number'])->value('lens_name');
+        $result['lens_name'] = $this->lensdata->where('lens_number', $result['lens_number'])->value('lens_name');
         $this->assign('result', $result);
         return $this->view->fetch();
     }
