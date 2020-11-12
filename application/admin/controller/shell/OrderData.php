@@ -1711,287 +1711,64 @@ class OrderData extends Backend
         echo "ok";
     }
 
-
+    /**
+     * 订单支付临时表
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/11/12 17:06:50 
+     * @return void
+     */
+    public function order_payment_data_shell()
+    {
+        $this->order_address_data(1);
+        $this->order_address_data(2);
+        $this->order_address_data(3);
+        $this->order_address_data(4);
+        $this->order_address_data(5);
+        $this->order_address_data(9);
+        $this->order_address_data(10);
+        $this->order_address_data(11);
+    }
 
     /**
-     * 处理旧数据分类
+     * 支付方式处理
      *
      * @Description
      * @author wpl
-     * @since 2020/11/05 13:37:22 
+     * @since 2020/11/02 18:31:12 
      * @return void
      */
-    public function order_prescription_type_shell()
+    protected function order_payment_data($site)
     {
-        $list = $this->orderitemprocess->alias('a')
-            ->field('a.id as p_id,b.*')
-            ->where('a.order_prescription_type=0')
-            ->join(['fa_order_item_option' => 'b'], 'a.option_id=b.id')
-            ->limit(3000)
-            ->select();
+        $list = $this->order->where('payment_method is null and site = ' . $site)->limit(4000)->select();
         $list = collection($list)->toArray();
+        $entity_id = array_column($list, 'entity_id');
+        if ($site == 1) {
+            $res = Db::connect('database.db_zeelool')->table('sales_flat_order_payment')->where(['parent_id' => ['in', $entity_id]])->column('method', 'parent_id');
+        } elseif ($site == 2) {
+            $res = Db::connect('database.db_voogueme')->table('sales_flat_order_payment')->where(['parent_id' => ['in', $entity_id]])->column('method', 'parent_id');
+        } elseif ($site == 3) {
+            $res = Db::connect('database.db_nihao')->table('sales_flat_order_payment')->where(['parent_id' => ['in', $entity_id]])->column('method', 'parent_id');
+        } elseif ($site == 4) {
+            $res = Db::connect('database.db_meeloog')->table('sales_flat_order_payment')->where(['parent_id' => ['in', $entity_id]])->column('method', 'parent_id');
+        } elseif ($site == 5) {
+            $res = Db::connect('database.db_weseeoptical')->table('sales_flat_order_payment')->where(['parent_id' => ['in', $entity_id]])->column('method', 'parent_id');
+        } elseif ($site == 9) {
+            $res = Db::connect('database.db_zeelool_es')->table('sales_flat_order_payment')->where(['parent_id' => ['in', $entity_id]])->column('method', 'parent_id');
+        } elseif ($site == 10) {
+            $res = Db::connect('database.db_zeelool_de')->table('sales_flat_order_payment')->where(['parent_id' => ['in', $entity_id]])->column('method', 'parent_id');
+        } elseif ($site == 11) {
+            $res = Db::connect('database.db_zeelool_jp')->table('sales_flat_order_payment')->where(['parent_id' => ['in', $entity_id]])->column('method', 'parent_id');
+        }
         $params = [];
         foreach ($list as $k => $v) {
-            $order_prescription_type = $this->prescription_analysis($v);
-            $params[$k]['id'] = $v['p_id'];
-            $params[$k]['order_prescription_type'] = $order_prescription_type;
-            echo $v['p_id'] . "\n";
+            $params[$k]['id'] = $v['id'];
+            $params[$k]['payment_method'] = $res[$v['entity_id']]['method'];
         }
-        $this->orderitemprocess->saveAll($params);
-        echo 'ok';
+        $this->order->saveAll($params);
+        echo $site . 'ok';
     }
 
-    protected function prescription_analysis($arr)
-    {
-        /**
-         * 仅镜架逻辑
-         * 镜片名称为空 或者 Plastic Lenses 或者 Frame Only
-         * 
-         * 现货处方镜逻辑
-         * 
-         * 
-         * 判断定制现片逻辑
-         * 1、渐进镜 Progressive
-         * 2、偏光镜 镜片类型包含Polarized
-         * 3、染色镜 镜片类型包含Lens with Color Tint 或 Tinted 或 Color Tint
-         * 4、当cyl<=-4或cyl>=4 或 sph < -8或 sph>8
-         */
 
-        if ($arr['site'] == 1) {
-            if ($arr['index_name'] == '' || $arr['index_name'] == 'Plastic Lenses' ||  $arr['index_name'] == 'Frame Only') {
-                $arr['order_prescription_type'] = 1;
-            }
-
-            if ($arr['prescription_type'] == 'Progressive') {
-                $arr['is_custom_lens'] = 1;
-            }
-
-
-            if (strpos($arr['index_name'], 'Polarized') !== false) {
-                $arr['is_custom_lens'] = 1;
-            }
-
-            if (strpos($arr['index_name'], 'Lens with Color Tint') !== false) {
-                $arr['is_custom_lens'] = 1;
-            }
-
-            //染色
-            if (strpos($arr['index_name'], 'Tinted') !== false) {
-                $arr['is_custom_lens'] = 1;
-            }
-
-            if (strpos($arr['index_name'], 'Color Tint') !== false) {
-                $arr['is_custom_lens'] = 1;
-            }
-        } elseif ($arr['site'] == 2) {
-            if ($arr['index_name'] == '' || $arr['index_name'] == 'FRAME ONLY (Plastic Lenses)' ||  $arr['index_name'] == 'Frame Only') {
-                $arr['order_prescription_type'] = 1;
-            }
-
-            if ($arr['prescription_type'] == 'Progressive') {
-                $arr['is_custom_lens'] = 1;
-            }
-
-
-            if (strpos($arr['index_name'], 'Polarized') !== false) {
-                $arr['is_custom_lens'] = 1;
-            }
-
-            if (strpos($arr['index_name'], 'Lens with Color Tint') !== false) {
-                $arr['is_custom_lens'] = 1;
-            }
-
-            //染色
-            if (strpos($arr['index_name'], 'Tinted') !== false) {
-                $arr['is_custom_lens'] = 1;
-            }
-
-            if (strpos($arr['index_name'], 'Color Tint') !== false) {
-                $arr['is_custom_lens'] = 1;
-            }
-        } elseif ($arr['site'] == 3) {
-            if ($arr['index_name'] == '' || $arr['index_name'] == 'Plastic Lenses' ||  $arr['index_name'] == 'FRAME ONLY') {
-                $arr['order_prescription_type'] = 1;
-            }
-
-            if ($arr['prescription_type'] == 'Progressive') {
-                $arr['is_custom_lens'] = 1;
-            }
-
-
-            if (strpos($arr['index_name'], 'Polarized') !== false) {
-                $arr['is_custom_lens'] = 1;
-            }
-
-            if (strpos($arr['index_name'], 'Lens with Color Tint') !== false) {
-                $arr['is_custom_lens'] = 1;
-            }
-
-            //染色
-            if (strpos($arr['index_name'], 'Tinted') !== false) {
-                $arr['is_custom_lens'] = 1;
-            }
-
-            if (strpos($arr['index_name'], 'Color Tint') !== false) {
-                $arr['is_custom_lens'] = 1;
-            }
-        } elseif ($arr['site'] == 4) {
-            if ($arr['index_name'] == '' || $arr['index_name'] == 'Plastic Lenses' ||  $arr['index_name'] == 'FRAME ONLY' || $arr['index_name'] == 'FRAME ONLY (Plastic lenses)') {
-                $arr['order_prescription_type'] = 1;
-            }
-
-            if ($arr['prescription_type'] == 'Progressive') {
-                $arr['is_custom_lens'] = 1;
-            }
-
-
-            if (strpos($arr['index_name'], 'Polarized') !== false) {
-                $arr['is_custom_lens'] = 1;
-            }
-
-            if (strpos($arr['index_name'], 'Lens with Color Tint') !== false) {
-                $arr['is_custom_lens'] = 1;
-            }
-
-            //染色
-            if (strpos($arr['index_name'], 'Tinted') !== false) {
-                $arr['is_custom_lens'] = 1;
-            }
-
-            if (strpos($arr['index_name'], 'Color Tint') !== false) {
-                $arr['is_custom_lens'] = 1;
-            }
-        } elseif ($arr['site'] == 5) {
-            if ($arr['index_name'] == '' || !$arr['index_name']) {
-                $arr['order_prescription_type'] = 1;
-            }
-
-            if ($arr['prescription_type'] == 'Progressive') {
-                $arr['is_custom_lens'] = 1;
-            }
-
-
-            if (strpos($arr['index_name'], 'Polarized') !== false) {
-                $arr['is_custom_lens'] = 1;
-            }
-
-            if (strpos($arr['index_name'], 'Lens with Color Tint') !== false) {
-                $arr['is_custom_lens'] = 1;
-            }
-
-            //染色
-            if (strpos($arr['index_name'], 'Tinted') !== false) {
-                $arr['is_custom_lens'] = 1;
-            }
-
-            if (strpos($arr['index_name'], 'Color Tint') !== false) {
-                $arr['is_custom_lens'] = 1;
-            }
-        } elseif ($arr['site'] == 9) {
-            if ($arr['index_name'] == '' || $arr['index_name'] == 'Lentes Plásticas' || $arr['index_name'] == 'SOLO MONTURA' ||  $arr['index_name'] == 'SÓLO MONTURA') {
-                $arr['order_prescription_type'] = 1;
-            }
-
-            if ($arr['prescription_type'] == 'Progresivo') {
-                $arr['is_custom_lens'] = 1;
-            }
-
-
-            if (strpos($arr['index_name'], 'Polarizado') !== false) {
-                $arr['is_custom_lens'] = 1;
-            }
-
-            if (strpos($arr['index_name'], 'Lens with Color Tint') !== false) {
-                $arr['is_custom_lens'] = 1;
-            }
-
-            //染色
-            if (strpos($arr['index_name'], 'Tinted') !== false) {
-                $arr['is_custom_lens'] = 1;
-            }
-
-            if (strpos($arr['index_name'], 'Tinte de color') !== false) {
-                $arr['is_custom_lens'] = 1;
-            }
-        } elseif ($arr['site'] == 10) {
-            if ($arr['index_name'] == '' || $arr['index_name'] == 'Kunststoffgläser' || $arr['index_name'] == 'NUR RAHMEN') {
-                $arr['order_prescription_type'] = 1;
-            }
-
-            if ($arr['prescription_type'] == 'Gleitsicht') {
-                $arr['is_custom_lens'] = 1;
-            }
-
-
-            if (strpos($arr['index_name'], 'Polarisierend') !== false) {
-                $arr['is_custom_lens'] = 1;
-            }
-
-            if (strpos($arr['index_name'], 'Lens with Color Tint') !== false) {
-                $arr['is_custom_lens'] = 1;
-            }
-
-            //染色
-            if (strpos($arr['index_name'], 'Tinted') !== false) {
-                $arr['is_custom_lens'] = 1;
-            }
-
-            if (strpos($arr['index_name'], 'Farbtönung') !== false) {
-                $arr['is_custom_lens'] = 1;
-            }
-        } elseif ($arr['site'] == 11) {
-            if ($arr['index_name'] == '' || $arr['index_name'] == 'プラスチックレンズ' || $arr['index_name'] == 'フレームのみ') {
-                $arr['order_prescription_type'] = 1;
-            }
-
-            if ($arr['prescription_type'] == '累進レンズ') {
-                $arr['is_custom_lens'] = 1;
-            }
-
-
-            if (strpos($arr['index_name'], '偏光レンズ') !== false) {
-                $arr['is_custom_lens'] = 1;
-            }
-
-            if (strpos($arr['index_name'], 'Lens with Color Tint') !== false) {
-                $arr['is_custom_lens'] = 1;
-            }
-
-            //染色
-            if (strpos($arr['index_name'], '色付き') !== false) {
-                $arr['is_custom_lens'] = 1;
-            }
-
-            if (strpos($arr['index_name'], '色合い') !== false) {
-                $arr['is_custom_lens'] = 1;
-            }
-        }
-
-        if ((float) urldecode($arr['od_cyl']) * 1 <= -4 || (float) urldecode($arr['od_cyl']) * 1 >= 4) {
-            $arr['is_custom_lens'] = 1;
-        }
-
-        if ((float) urldecode($arr['os_cyl']) * 1 <= -4 || (float) urldecode($arr['os_cyl']) * 1 >= 4) {
-            $arr['is_custom_lens'] = 1;
-        }
-        if ((float) urldecode($arr['od_sph']) * 1 < -8 || (float) urldecode($arr['od_sph']) * 1 > 8) {
-            $arr['is_custom_lens'] = 1;
-        }
-
-        if ((float) urldecode($arr['os_sph']) * 1 < -8 || (float) urldecode($arr['os_sph']) * 1 > 8) {
-            $arr['is_custom_lens'] = 1;
-        }
-
-        //定制处方镜
-        if ($arr['is_custom_lens'] == 1) {
-            $arr['order_prescription_type'] = 3;
-        }
-
-        //默认如果不是仅镜架 或定制片 则为现货处方镜
-        if ($arr['order_prescription_type'] != 1 && $arr['order_prescription_type'] != 3) {
-            $arr['order_prescription_type'] = 2;
-        }
-
-        return $arr['order_prescription_type'];
-    }
 }
