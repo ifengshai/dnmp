@@ -1431,13 +1431,40 @@ class OrderData extends Backend
         echo "ok";
     }
 
-
-
-
-
+    
+    /**
+     * 更新订单商品总数量
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/11/03 15:04:12 
+     * @return void
+     */
+    public function order_total_qty_ordered()
+    {
+        $list = $this->order->where('total_qty_ordered=0')->limit(10000)->select();
+        $list = collection($list)->toArray();
+        $params = [];
+        foreach ($list as $k => $v) {
+            $qty = $this->orderitemoption->where(['magento_order_id' => $v['entity_id'], 'site' => $v['site']])->sum('qty');
+            $params[$k]['total_qty_ordered'] = $qty;
+            $params[$k]['id'] = $v['id'];
+            echo $k . "\n";
+        }
+        $this->order->saveAll($params);
+        echo 'ok';
+    }
 
     ################################################处理旧数据脚本##########################################################################
 
+    /**
+     * 处理主单旧数据
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/11/12 15:47:45 
+     * @return void
+     */
     public function process_order_data_temp()
     {
         $this->zeelool_old_order(1);
@@ -1526,28 +1553,7 @@ class OrderData extends Backend
         echo "ok";
     }
 
-    /**
-     * 更新订单商品总数量
-     *
-     * @Description
-     * @author wpl
-     * @since 2020/11/03 15:04:12 
-     * @return void
-     */
-    public function order_total_qty_ordered()
-    {
-        $list = $this->order->where('total_qty_ordered=0')->limit(10000)->select();
-        $list = collection($list)->toArray();
-        $params = [];
-        foreach ($list as $k => $v) {
-            $qty = $this->orderitemoption->where(['magento_order_id' => $v['entity_id'], 'site' => $v['site']])->sum('qty');
-            $params[$k]['total_qty_ordered'] = $qty;
-            $params[$k]['id'] = $v['id'];
-            echo $k . "\n";
-        }
-        $this->order->saveAll($params);
-        echo 'ok';
-    }
+
 
     public function order_address_data_shell()
     {
@@ -1571,7 +1577,7 @@ class OrderData extends Backend
      */
     protected function order_address_data($site)
     {
-        $list = $this->order->where('country_id is null and site = ' . $site)->limit(1000)->select();
+        $list = $this->order->where('country_id is null and site = ' . $site)->limit(3000)->select();
         $list = collection($list)->toArray();
         $entity_id = array_column($list, 'entity_id');
         if ($site == 1) {
@@ -1605,6 +1611,8 @@ class OrderData extends Backend
         echo $site . 'ok';
     }
 
+
+    
 
     /**
      * 处理旧数据分类
