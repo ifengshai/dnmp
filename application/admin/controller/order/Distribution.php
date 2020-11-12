@@ -398,6 +398,41 @@ class Distribution extends Backend
         $writer->save('php://output');
     }
 
+
+    /**
+     * 获取镜架尺寸
+     */
+    protected function get_frame_lens_width_height_bridge($product_id)
+    {
+        if ($product_id) {
+            $querySql = "select cpev.entity_type_id,cpev.attribute_id,cpev.`value`,cpev.entity_id
+from catalog_product_entity_varchar cpev
+LEFT JOIN catalog_product_entity cpe on cpe.entity_id=cpev.entity_id 
+where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$product_id";
+            $resultList = Db::connect('database.db_zeelool')->query($querySql);
+            if ($resultList) {
+                $result = array();
+                foreach ($resultList as $key => $value) {
+                    if ($value['attribute_id'] == 161) {
+                        $result['lens_width'] = $value['value'];
+                    }
+                    if ($value['attribute_id'] == 164) {
+                        $result['lens_height'] = $value['value'];
+                    }
+                    if ($value['attribute_id'] == 163) {
+                        $result['bridge'] = $value['value'];
+                    }
+                }
+            } else {
+                $result['lens_width'] = '';
+                $result['lens_height'] = '';
+                $result['bridge'] = '';
+            }
+        }
+        return $result;
+    }
+
+    
     /**
      * 批量导出
      *
@@ -484,19 +519,53 @@ class Distribution extends Backend
 
         //常规方式：利用setCellValue()填充数据
         $spreadsheet->setActiveSheetIndex(0)
+            ->setCellValue("A1", "日期")
             ->setCellValue("A1", "订单号")
             ->setCellValue("B1", "子单号")
             ->setCellValue("C1", "SKU")
-            ->setCellValue("D1", "订单副数")
-            //            ->setCellValue("E1", "工单")
             ->setCellValue("F1", "站点")
-            ->setCellValue("G1", "加工类型")
-            ->setCellValue("H1", "订单类型")
-            ->setCellValue("I1", "订单状态")
             ->setCellValue("J1", "子单号状态")
-            ->setCellValue("K1", "库位号")
-            ->setCellValue("L1", "创建时间");
+            ->setCellValue("J1", "眼球")
+            ->setCellValue("J1", "CYL")
+            ->setCellValue("J1", "ADD")
+            ->setCellValue("J1", "单PD")
+            ->setCellValue("J1", "PD")
+            ->setCellValue("J1", "镜片")
+            ->setCellValue("J1", "镜框宽度")
+            ->setCellValue("J1", "镜框高度")
+            ->setCellValue("J1", "bridge")
+            ->setCellValue("J1", "处方类型")
+            ->setCellValue("J1", "Prism\n(out/in)")
+            ->setCellValue("J1", "Direct\n(out/in)")
+            ->setCellValue("J1", "Prism\n(up/down)")
+            ->setCellValue("J1", "Direct\n(up/down)");
+            $spreadsheet->setActiveSheetIndex(0)->setTitle('订单处方');
 
+
+            //常规方式：利用setCellValue()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "日期")
+        ->setCellValue("B1", "订单号")
+        ->setCellValue("C1", "SKUID")
+        ->setCellValue("D1", "SKU");   //利用setCellValues()填充数据
+    $spreadsheet->setActiveSheetIndex(0)->setCellValue("E1", "眼球")
+        ->setCellValue("F1", "SPH");
+    $spreadsheet->setActiveSheetIndex(0)->setCellValue("G1", "CYL")
+        ->setCellValue("H1", "AXI");
+    $spreadsheet->setActiveSheetIndex(0)->setCellValue("I1", "ADD")
+        ->setCellValue("J1", "单PD")
+        ->setCellValue("K1", "PD");
+    $spreadsheet->setActiveSheetIndex(0)->setCellValue("L1", "镜片")
+        ->setCellValue("M1", "镜框宽度")
+        ->setCellValue("N1", "镜框高度")
+        ->setCellValue("O1", "bridge")
+        ->setCellValue("P1", "处方类型")
+        ->setCellValue("Q1", "顾客留言");
+    $spreadsheet->setActiveSheetIndex(0)->setCellValue("R1", "Prism\n(out/in)")
+        ->setCellValue("S1", "Direct\n(out/in)")
+        ->setCellValue("T1", "Prism\n(up/down)")
+        ->setCellValue("U1", "Direct\n(up/down)");
+    // Rename worksheet
+    $spreadsheet->setActiveSheetIndex(0)->setTitle('订单处方');
         //站点列表
         $site_list = [
             1 => 'Zeelool',
