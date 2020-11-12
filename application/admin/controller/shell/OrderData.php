@@ -1806,9 +1806,12 @@ class OrderData extends Backend
             } elseif ($v['site'] == 11) {
                 $product_id = Db::connect('database.db_zeelool_jp')->table('sales_flat_order_item')->where('order_id', $v['magento_order_id'])->where('item_id', $v['item_id'])->value('product_id');
             }
+            echo $v['item_id'] . "\n";
+
+            if (!$product_id) continue;
             $params[$k]['id'] = $v['id'];
             $params[$k]['product_id'] = $product_id;
-
+            
             echo $k . "\n";
         }
         $this->orderitemoption->saveAll($params);
