@@ -180,9 +180,9 @@
                                 <label class="control-label col-xs-4">平台：</label>
                                 <div class="col-xs-8 new-col-xs-8">
                                     <select data-rule="required" class="form-control" name="order_platform" id="order_platform">
-                                        <option value="1" {if condition="$web_site == 1"}selected="selected"{/if}>Zeelool</option>
-                                        <option value="2" {if condition="$web_site == 2"}selected="selected"{/if}>Voogueme</option>
-                                        <option value="3" {if condition="$web_site == 3"}selected="selected"{/if}>Nihaooptical</option>
+                                        {foreach name="magentoplatformarr" item="vo" key="key"}
+                                        <option value="{$vo.id}" {if condition="$web_site == $vo.id"}selected="selected"{/if}>{$vo.name}</option>
+                                        {/foreach}
                                     </select>
                                 </div>
                             </div>

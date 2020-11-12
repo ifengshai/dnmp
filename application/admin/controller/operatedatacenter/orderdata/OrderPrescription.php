@@ -34,7 +34,15 @@ class OrderPrescription extends Backend
         $coating = $this->coating_data($web_site,$time_between);
         $coating_arr = $coating['data'];
         $coating_count = $coating['total'];
-        $this->view->assign(compact('data', 'total', 'coating_arr','coating_count','web_site','time_show'));
+        //查询对应平台权限
+        $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform();
+        $magentoplatformarr = $this->magentoplatform->getAuthSite();
+        foreach ($magentoplatformarr as $key=>$val){
+            if(!in_array($val['name'],['zeelool','voogueme','nihao'])){
+                unset($magentoplatformarr[$key]);
+            }
+        }
+        $this->view->assign(compact('data', 'total', 'coating_arr','coating_count','web_site','time_show','magentoplatformarr'));
         return $this->view->fetch();
     }
     //处方统计
@@ -83,7 +91,13 @@ class OrderPrescription extends Backend
             'num'=>$reading_glassesno_num,
             'rate'=>$reading_glassesno_rate
         );
-        $no_prescription_num = $this->prescrtion_num('NonPrescription',$site,$time_str);
+        if($site == 2){
+            $no_prescription_num1 = $this->prescrtion_num('NonPrescription',$site,$time_str);
+            $no_prescription_num2 = $this->prescrtion_num('Noprescription',$site,$time_str);
+            $no_prescription_num = $no_prescription_num1+$no_prescription_num2;
+        }else{
+            $no_prescription_num = $this->prescrtion_num('NonPrescription',$site,$time_str);
+        }
         $no_prescription_rate = $order_num ? round($no_prescription_num/$order_num*100,0).'%' : 0;
         $no_prescription_arr = array(
             'name'=>'no prescription',

@@ -112,7 +112,7 @@ class Scm extends Api
 
         $data = [
             'version'=>$pda_version['value'],
-            'download'=>$pda_download['value']
+            'download'=>$this->request->domain().$pda_download['value']
         ];
 
         $this->success('', $data,200);

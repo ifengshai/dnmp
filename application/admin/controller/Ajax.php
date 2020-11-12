@@ -10,6 +10,7 @@ use think\Config;
 use think\Db;
 use think\Lang;
 use think\Request;
+use app\admin\model\saleaftermanage\SaleAfterTask;
 
 /**
  * Ajax异步请求接口
@@ -371,24 +372,15 @@ class Ajax extends Backend
      */
     public function ajaxGetLikeOrder(Request $request)
     {
-        $saleaftertask = new \app\admin\model\saleaftermanage\SaleAfterTask;
-        if ($this->request->isAjax()) {
-            $order_number = $request->post('order_number');
-            $zeelool_order_number = $saleaftertask->getLikeOrder(1, $order_number);
-            
-            $voogueme_order_number = $saleaftertask->getLikeOrder(2, $order_number);
-            
-            $nihao_order_number = $saleaftertask->getLikeOrder(3, $order_number);
-            $meeloog_order_number = $saleaftertask->getLikeOrder(4, $order_number);
-            $zeelooles_order_number = $saleaftertask->getLikeOrder(9, $order_number);
-            $zeeloolde_order_number = $saleaftertask->getLikeOrder(10, $order_number);
-            $result = array_merge($zeelool_order_number,$voogueme_order_number,$nihao_order_number,$meeloog_order_number,$zeelooles_order_number,$zeeloolde_order_number);
-            if (!$result) {
-                return $this->error('订单不存在，请重新尝试');
-            }
-            return $this->success('', '', $result, 0);
-        } else {
-            $this->error('404 not found');
-        }
+        !$request->isAjax() && $this->error('404 not found');
+
+        $order_number = $request->post('order_number');
+        empty($order_number) && $this->error('订单号不能为空');
+
+        $sale_after_task = new SaleAfterTask();
+        $result = $sale_after_task->getLikeOrderNew($order_number);
+        empty($result) && $this->error('订单不存在');
+
+        $this->success('', '', $result, 0);
     }
 }

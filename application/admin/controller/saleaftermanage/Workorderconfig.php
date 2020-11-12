@@ -323,6 +323,38 @@ class Workorderconfig extends Backend
                 $step[$k]['is_auto_complete'] = '';
             }
         }
+        //所有主单措施类型
+        $all_step_main = (new WorkOrderStepType)->where(['is_del'=>1,'type'=>1])->select();
+        foreach ($all_step_main as $k => $v) {
+            $result = Db::name('work_order_problem_step')->where(['problem_id' => $ids, 'step_id' => $all_step_main[$k]['id']])->find();
+            if (!empty($result)) {
+                $all_step_main[$k]['is_selected'] = 1;
+                $all_step_main[$k]['is_check'] = $result['is_check'];
+                $all_step_main[$k]['extend_group_id'] = $result['extend_group_id'];
+                $all_step_main[$k]['is_auto_complete'] = $result['is_auto_complete'];
+            } else {
+                $all_step_main[$k]['is_selected'] = 0;
+                $all_step_main[$k]['is_check'] = '';
+                $all_step_main[$k]['extend_group_id'] = '';
+                $all_step_main[$k]['is_auto_complete'] = '';
+            }
+        }
+        //所有子单措施类型
+        $all_step_item = (new WorkOrderStepType)->where(['is_del'=>1,'type'=>2])->select();
+        foreach ($all_step_item as $k => $v) {
+            $result = Db::name('work_order_problem_step')->where(['problem_id' => $ids, 'step_id' => $all_step_item[$k]['id']])->find();
+            if (!empty($result)) {
+                $all_step_item[$k]['is_selected'] = 1;
+                $all_step_item[$k]['is_check'] = $result['is_check'];
+                $all_step_item[$k]['extend_group_id'] = $result['extend_group_id'];
+                $all_step_item[$k]['is_auto_complete'] = $result['is_auto_complete'];
+            } else {
+                $all_step_item[$k]['is_selected'] = 0;
+                $all_step_item[$k]['is_check'] = '';
+                $all_step_item[$k]['extend_group_id'] = '';
+                $all_step_item[$k]['is_auto_complete'] = '';
+            }
+        }
         $extend_team = $this->model->getAllExtend();
         $extend_team[0] = '不选择';
         $extend_team = $this->model->getAllExtendArr();
@@ -409,6 +441,8 @@ class Workorderconfig extends Backend
             $this->success();
         }
         $this->view->assign("step", $step);
+        $this->view->assign("step_main", $all_step_main);
+        $this->view->assign("step_item", $all_step_item);
         $this->view->assign("extend_team", $extend_team);
         $this->view->assign("row", $row);
         return $this->view->fetch();
