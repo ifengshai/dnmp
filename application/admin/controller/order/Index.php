@@ -429,16 +429,16 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                     }
                 }
                 //查询工单里是否有补差价记录
-                $mojing = Db::connect('mysql://fanzhigang:3QGz60R2E!@aVOXP@54.189.215.133:3306/mojing#utf8');
-                $where_order['platform_order'] = ['eq',$v['increment_id']];
-                $work_order_list = $mojing->table('fa_work_order_list')->where($where_order)->field('replenish_money')->select();
-                if (!empty($work_order_list)){
-                    $work_order_list = array_column($work_order_list,'replenish_money');
-                    $difference_log = implode(',',$work_order_list);
-                }else{
-                    $difference_log = '无';
-                }
-                $list[$k]['fill_post'] = $v['fill_post'].':'.$difference_log;
+//                $mojing = Db::connect('mysql://fanzhigang:3QGz60R2E!@aVOXP@54.189.215.133:3306/mojing#utf8');
+//                $where_order['platform_order'] = ['eq',$v['increment_id']];
+//                $work_order_list = $mojing->table('fa_work_order_list')->where($where_order)->field('replenish_money')->select();
+//                if (!empty($work_order_list)){
+//                    $work_order_list = array_column($work_order_list,'replenish_money');
+//                    $difference_log = implode(',',$work_order_list);
+//                }else{
+//                    $difference_log = '无';
+//                }
+//                $list[$k]['fill_post'] = $v['fill_post'].':'.$difference_log;
             }
             $result = array(
                 "total"             =>  $total,
