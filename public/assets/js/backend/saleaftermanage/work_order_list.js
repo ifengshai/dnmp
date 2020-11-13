@@ -911,8 +911,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         $('#c-order_type').val(data.order_type);
                         $('#is_new_version').val(data.is_new_version);
                         var shtml = '';
-                        for (var i in data.sku) {
-                            shtml += '<option value="' + data.sku[i] + '">' + data.sku[i] + '</option>'
+                        for (var i in data.sku_list) {
+                            shtml += '<option value="' + i + '">' + i + '&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp' + data.sku_list[i].sku + '</option>';
                         }
                         $('#c-order_sku').append(shtml);
                         $('.selectpicker ').selectpicker('refresh');
@@ -1316,9 +1316,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 $('#z-order_sku').html('');
 
                 var item_order_sku = $(this).val();
-                /*for (var i = item_order_sku.length - 1; i >= 0; i--) {
-                    item_order_sku[i].split("-");
-                }*/
 
                 //根据下拉选择生成子订单列表
                 var step_item = Config.workOrderConfigValue.step_item;
@@ -1329,9 +1326,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 for (var i in step_item) {
                     item_checkbox += '<label><input type="checkbox" name="" class="item_step_type" id="step1" value="'+i+'"><span>'+step_item[i]+'</span></label>';
 
-                    hidd += '<input type="hidden" id="item_step'+i+'-is_check" value="">';
-                    hidd += '<input type="hidden" id="item_step'+i+'-is_auto_complete" value="">';
-                    hidd += '<input type="hidden" id="item_step'+i+'-appoint_group" value="">';
+                    hidd += '<input type="hidden" id="item_step'+i+'-is_check" value="'++'">';
+                    hidd += '<input type="hidden" id="item_step'+i+'-is_auto_complete" value="'++'">';
+                    hidd += '<input type="hidden" id="item_step'+i+'-appoint_group" value="'++'">';
                 }
                 for (var i in item_order_sku) {
                     zhtml += '<tr><td>'+ item_order_sku[i] +'</td>';
