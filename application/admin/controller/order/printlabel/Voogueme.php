@@ -158,6 +158,8 @@ class Voogueme extends Backend
             $swhere['synergy_order_id'] = 2;
             $synergy_order_arr = $infoSynergyTask->where($swhere)->column('synergy_order_number');
 
+
+
             foreach ($list as $k => $v) {
                 if (in_array($v['increment_id'], $order_arr)) {
                     $list[$k]['task_info'] = 1;

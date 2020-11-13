@@ -102,6 +102,9 @@ class Rufoo extends Backend
                 ->select();
 
 
+
+
+
             $list = collection($list)->toArray();
 
             $swhere = [];
