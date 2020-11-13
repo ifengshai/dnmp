@@ -1763,13 +1763,16 @@ class OrderData extends Backend
         } elseif ($site == 11) {
             $res = Db::connect('database.db_zeelool_jp')->table('sales_flat_order_payment')->where(['parent_id' => ['in', $entity_id]])->column('method', 'parent_id');
         }
-        $params = [];
-        foreach ($list as $k => $v) {
-            $params[$k]['id'] = $v['id'];
-            $params[$k]['payment_method'] = $res[$v['entity_id']]['method'];
+        if ($res) {
+            $params = [];
+            foreach ($list as $k => $v) {
+                $params[$k]['id'] = $v['id'];
+                $params[$k]['payment_method'] = $res[$v['entity_id']]['method'];
+            }
+            $this->order->saveAll($params);
+            echo $site . 'ok';
         }
-        $this->order->saveAll($params);
-        echo $site . 'ok';
+       
     }
 
 
