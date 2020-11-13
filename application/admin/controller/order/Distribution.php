@@ -705,14 +705,14 @@ class Distribution extends Backend
         $spreadsheet->getActiveSheet()->getColumnDimension('J')->setWidth(15);
         $spreadsheet->getActiveSheet()->getColumnDimension('K')->setWidth(15);
         $spreadsheet->getActiveSheet()->getColumnDimension('L')->setWidth(15);
-        $spreadsheet->getActiveSheet()->getColumnDimension('O')->setWidth(20);
-        $spreadsheet->getActiveSheet()->getColumnDimension('P')->setWidth(20);
-        $spreadsheet->getActiveSheet()->getColumnDimension('Q')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('O')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('P')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('Q')->setWidth(15);
         $spreadsheet->getActiveSheet()->getColumnDimension('R')->setWidth(20);
-        $spreadsheet->getActiveSheet()->getColumnDimension('S')->setWidth(20);
-        $spreadsheet->getActiveSheet()->getColumnDimension('T')->setWidth(20);
-        $spreadsheet->getActiveSheet()->getColumnDimension('U')->setWidth(20);
-        $spreadsheet->getActiveSheet()->getColumnDimension('V')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('S')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('T')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('U')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('V')->setWidth(15);
         //自动换行
         $spreadsheet->getDefaultStyle()->getAlignment()->setWrapText(true);
         $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
