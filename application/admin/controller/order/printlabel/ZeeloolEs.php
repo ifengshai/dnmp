@@ -73,19 +73,7 @@ class ZeeloolEs extends Backend
             }
 //            //是否有工单
             $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
-//            if ($filter['is_task'] == 1 || $filter['is_task'] == '0') {
-//                $swhere = [];
-//                $swhere['work_platform'] = 9;
-//                $swhere['work_status'] = ['not in', [0, 4, 6]];
-//                $order_arr = $workorder->where($swhere)->column('platform_order');
-//                if ($filter['is_task'] == 1) {
-//                    $map['increment_id'] = ['in', $order_arr];
-//                } elseif ($filter['is_task'] == '0') {
-//                    $map['increment_id'] = ['not in', $order_arr];
-//                }
-//                unset($filter['is_task']);
-//                $this->request->get(['filter' => json_encode($filter)]);
-//            }
+
             //SKU搜索
             if ($filter['sku']) {
                 $smap['sku'] = ['like',  $filter['sku'] . '%'];
