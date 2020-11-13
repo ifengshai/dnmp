@@ -1763,6 +1763,7 @@ class OrderData extends Backend
         } elseif ($site == 11) {
             $res = Db::connect('database.db_zeelool_jp')->table('sales_flat_order_payment')->where(['parent_id' => ['in', $entity_id]])->column('method', 'parent_id');
         }
+        dump($res);die;
         if ($res) {
             $params = [];
             foreach ($list as $k => $v) {
