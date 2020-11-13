@@ -22,6 +22,7 @@ class TrackReg extends Backend
     {
         parent::_initialize();
         $this->ordernodedetail = new \app\admin\model\OrderNodeDetail();
+        $this->ordernode = new \app\admin\model\OrderNode();
     }
 
     public function site_reg()
@@ -48,26 +49,6 @@ class TrackReg extends Backend
             ->select();
         foreach ($order_shipment as $k => $v) {
             $title = strtolower(str_replace(' ', '-', $v['title']));
-            // //区分usps运营商
-            // if (strtolower($title) == 'usps') {
-            //     $track_num1 = substr($v['track_number'], 0, 4);
-            //     if ($track_num1 == '9200' || $track_num1 == '9205') {
-            //         //郭伟峰
-            //         $shipment_data_type = 'USPS_1';
-            //     } else {
-            //         $track_num2 = substr($v['track_number'], 0, 4);
-            //         if ($track_num2 == '9400') {
-            //             //加诺
-            //             $shipment_data_type = 'USPS_2';
-            //         } else {
-            //             //杜明明
-            //             $shipment_data_type = 'USPS_3';
-            //         }
-            //     }
-            // } else {
-            //     $shipment_data_type = $title;
-            // }
-
             //根据物流单号查询发货物流渠道
             $shipment_data_type = Db::connect('database.db_delivery')->table('ld_deliver_order')->where(['track_number' => $v['track_number'], 'increment_id' => $v['increment_id']])->value('agent_way_title');
 
@@ -121,6 +102,23 @@ class TrackReg extends Backend
             usleep(500000);
         }
         echo $site_str . ' is ok' . "\n";
+    }
+
+
+    public function process_shipment_type()
+    {
+        $list = $this->ordernode->where('shipment_data_type is null')->select();
+        $list = collection($list)->toArray();
+        $params = [];
+        foreach ($list as $k => $v) {
+            //根据物流单号查询发货物流渠道
+            $shipment_data_type = Db::connect('database.db_delivery')->table('ld_deliver_order')->where(['track_number' => $v['track_number'], 'increment_id' => $v['order_number']])->value('agent_way_title');
+            $params[$k]['id'] = $v['id'];
+            $params[$k]['shipment_data_type'] = $shipment_data_type;
+            $this->ordernodedetail->where(['order_number' => $v['order_number'],'track_number' => $v['track_number']])->update(['shipment_data_type' => $shipment_data_type]);
+        }
+        if ($params) $this->ordernode->saveAll($params);
+        echo "ok";
     }
 
     /**
