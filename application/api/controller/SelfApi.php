@@ -241,7 +241,7 @@ class SelfApi extends Api
         }
         //根据物流单号查询发货物流渠道
         $shipment_data_type = Db::connect('database.db_delivery')->table('ld_deliver_order')->where(['track_number' => $track_number, 'increment_id' => $order_number])->value('agent_way_title');
-
+        $sql = Db::connect('database.db_delivery')->table('ld_deliver_order')->getLastSql;
         //更新节点主表
         $row->allowField(true)->save([
             'order_node' => 2,
@@ -266,8 +266,8 @@ class SelfApi extends Api
             'shipment_data_type' => $shipment_data_type,
             'track_number' => $track_number,
         ]);
-
-        file_put_contents('/www/wwwroot/mojing/runtime/log/order_delivery.log', $track_number . '-' . $shipment_data_type  . "\r\n", FILE_APPEND);
+        
+        file_put_contents('/www/wwwroot/mojing/runtime/log/order_delivery.log', $track_number . '-' . $shipment_data_type . '-' . $sql . "\r\n", FILE_APPEND);
         //注册17track
         $title = strtolower(str_replace(' ', '-', $title));
         $carrier = $this->getCarrier($title);
