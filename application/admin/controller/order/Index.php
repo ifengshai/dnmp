@@ -334,14 +334,15 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                 return $this->selectpage();
             }
             $rep    = $this->request->get('filter');
+
             $addWhere = '1=1';
             if ($rep != '{}') {
                  $whereArr = json_decode($rep,true);
                  if(!array_key_exists('created_at',$whereArr)){
-                     $addWhere  .= " AND DATE_SUB(CURDATE(), INTERVAL 10000 DAY) <= date(created_at)";
+                     $addWhere  .= " AND DATE_SUB(CURDATE(), INTERVAL 1000 DAY) <= date(created_at)";
                  }
             } else {
-                $addWhere  .= " AND DATE_SUB(CURDATE(), INTERVAL 10000 DAY) <= date(created_at)";
+                $addWhere  .= " AND DATE_SUB(CURDATE(), INTERVAL 1000 DAY) <= date(created_at)";
             }
 
             //根据传的标签切换对应站点数据库
@@ -365,33 +366,25 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
             $list = $model
                 ->where($where)
 //                ->field('increment_id,customer_firstname,customer_email,status,base_grand_total,base_shipping_amount,custom_order_prescription_type,order_type,created_at,base_total_paid,base_total_due')
-//                ->field('increment_id,customer_firstname')
+//                ->field('fill_post,increment_id')
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
             $totalId = $model
-                ->where($where)
+//                ->where($where)
                 ->whereNotIn('order_type',['3','4'])
                 ->where($addWhere)
                 ->field('entity_id')
                 ->column('entity_id');
 
             $thisPageId = $model
-                ->where($where)
+//                ->where($where)
                 ->whereNotIn('order_type',['3','4'])
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->column('entity_id');
             $costInfo = $model->getOrderCostInfo($totalId, $thisPageId);
             $list = collection($list)->toArray();
-            $listone = $model
-                ->where($where)
-                ->whereNotIn('order_type',['1','2'])
-                ->field('increment_id,order_type')
-                ->order($sort,$order)
-                ->limit($offset,$limit)
-                ->select();
-            $lists = collection($listone)->toArray();
 
             foreach ($list as $k => $v) {
                 //原先
@@ -436,16 +429,16 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                     }
                 }
                 //查询工单里是否有补差价记录
-//                $work_order_list = $model->table('work_order_list')->where($where_order)->where(array('platform_order'=>$v['increment_id']))->field('replenish_money')->select();
                 $mojing = Db::connect('mysql://fanzhigang:3QGz60R2E!@aVOXP@54.189.215.133:3306/mojing#utf8');
                 $where_order['platform_order'] = ['eq',$v['increment_id']];
                 $work_order_list = $mojing->table('fa_work_order_list')->where($where_order)->field('replenish_money')->select();
                 if (!empty($work_order_list)){
                     $work_order_list = array_column($work_order_list,'replenish_money');
-                    $list[$k]['difference_log'] = implode(',',$work_order_list);
+                    $difference_log = implode(',',$work_order_list);
                 }else{
-                    $list[$k]['difference_log'] = '空';
+                    $difference_log = '无';
                 }
+                $list[$k]['fill_post'] = $v['fill_post'].':'.$difference_log;
             }
             $result = array(
                 "total"             =>  $total,
