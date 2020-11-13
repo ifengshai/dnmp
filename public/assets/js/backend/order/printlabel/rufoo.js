@@ -35,6 +35,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                         { field: 'custom_is_send_factory_new', title: __('加工'), custom: { 0: 'danger', 1: 'green' }, searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status },
                         { field: 'custom_is_delivery_new', title: __('质检'), custom: { 0: 'danger', 1: 'green' }, searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status },
 
+                        
                         {
                             field: 'task_info', title: __('工单'), operate: false, formatter: function (value, row) {
                                 if (value) {
