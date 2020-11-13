@@ -213,7 +213,8 @@ class ScmDistribution extends Scm
             3=>'待配镜片',
             4=>'待加工',
             5=>'待印logo',
-            6=>'待成品质检'
+            6=>'待成品质检',
+            7=>'待合单'
         ];
         $check_status != $item_process_info['distribution_status'] && $this->error(__('只有'.$status_arr[$check_status].'状态才能操作'), [], 405);
 
@@ -317,11 +318,11 @@ class ScmDistribution extends Scm
             ]
         ];
         $abnormal_list = $abnormal_arr[$check_status] ?? [];
-//        //配货返回数据
-//        if(2 == $check_status){
-//            //获取子订单处方数据
-//            $this->success('', ['abnormal_list' => $abnormal_list,'option_info' => $option_info['sku']],200);
-//        }
+        //配货返回数据
+        if(7 == $check_status){
+            //获取子订单处方数据
+            return $abnormal_list;
+        }
 
         $this->success('', ['abnormal_list' => $abnormal_list,'option_info' => $option_info],200);
     }
@@ -797,11 +798,16 @@ class ScmDistribution extends Scm
             //主单中无库位号，首个子单进入时，分配一个合单库位给PDA，暂不占用根据是否确认放入合单架占用或取消
             $store_house_info = $this->_stock_house->field('id,coding,subarea')->where(['status'=>1,'type'=>2])->find();
             $info['store_id'] = $store_house_info['id'];
+            $info['coding'] = $store_house_info['coding'];
         } else {
             //主单已绑定合单库位,根据ID查询库位信息
             $store_house_info = $this->_stock_house->field('id,coding,subarea')->where('id',$order_process_info['store_house_id'])->find();
             $info['store_id'] = $store_house_info['id'];
+            $info['coding'] = $store_house_info['coding'];
         }
+
+        $abnormal_list = $this->info($item_order_number,7);
+        $info['abnormal_list'] = $abnormal_list;
 
         $this->success('', ['info' => $info],200);
     }
