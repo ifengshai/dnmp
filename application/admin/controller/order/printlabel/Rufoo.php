@@ -86,6 +86,9 @@ class Rufoo extends Backend
                 ->select();
 
 
+
+
+
             $list = collection($list)->toArray();
             $result = array("total" => $total, "rows" => $list);
             return json($result);
