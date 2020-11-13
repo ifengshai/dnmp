@@ -71,6 +71,8 @@ class ZeeloolEs extends Backend
             } elseif (!$filter['status']) {
                 $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal']];
             }
+//            //是否有工单
+            $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
 
             //SKU搜索
             if ($filter['sku']) {
@@ -100,6 +102,19 @@ class ZeeloolEs extends Backend
                 ->select();
 
             $list = collection($list)->toArray();
+
+            //查询订单是否存在工单
+            $swhere = [];
+            $increment_ids = array_column($list, 'increment_id');
+            $swhere['platform_order'] = ['in', $increment_ids];
+            $swhere['work_platform'] = 9;
+            $swhere['work_status'] = ['not in', [0, 4, 6]];
+            $order_arr = $workorder->where($swhere)->column('platform_order');
+            foreach ($list as $k => $v) {
+                if (in_array($v['increment_id'], $order_arr)) {
+                    $list[$k]['task_info'] = 1;
+                }
+            }
             $result = array("total" => $total, "rows" => $list);
             return json($result);
         }
@@ -881,12 +896,6 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
                 }
             }
 
-            //西语站添加镜片类型 镜片颜色
-            if ($tmp_product_options['info_buyRequest']['tmplens']['lens_type'] || $tmp_product_options['info_buyRequest']['tmplens']['lens_color']) {
-                $finalResult[$key]['index_type'] = $finalResult[$key]['index_type'] . '-' . $tmp_product_options['info_buyRequest']['tmplens']['lens_type'];
-                $finalResult[$key]['index_type'] = $finalResult[$key]['index_type'] . '-' . $tmp_product_options['info_buyRequest']['tmplens']['lens_color'];
-            }
-
             $finalResult[$key]['prescription_type'] = isset($tmp_lens_params['prescription_type']) ? $tmp_lens_params['prescription_type'] : '';
             $finalResult[$key]['od_sph'] = isset($tmp_lens_params['od_sph']) ? $tmp_lens_params['od_sph'] : '';
             $finalResult[$key]['od_cyl'] = isset($tmp_lens_params['od_cyl']) ? $tmp_lens_params['od_cyl'] : '';
@@ -1209,12 +1218,6 @@ EOF;
                 $final_print['coatiing_name'] = substr($product_options['info_buyRequest']['tmplens']['coatiing_name'], 0, 60);
                 // $final_print['index_type'] = substr($product_options['info_buyRequest']['tmplens']['index_type'],0,60);
                 $final_print['index_type'] = $product_options['info_buyRequest']['tmplens']['index_type'];
-
-                //西语站添加镜片类型 镜片颜色
-                if ($product_options['info_buyRequest']['tmplens']['lens_type'] || $product_options['info_buyRequest']['tmplens']['lens_color']) {
-                    $final_print['index_type'] = $final_print['index_type'] . '-' . $product_options['info_buyRequest']['tmplens']['lens_type'];
-                    $final_print['index_type'] = $final_print['index_type'] . '-' . $product_options['info_buyRequest']['tmplens']['lens_color'];
-                }
 
                 $prescription_params = $product_options['info_buyRequest']['tmplens']['prescription'];
                 if ($prescription_params) {
