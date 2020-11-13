@@ -64,6 +64,21 @@ class Weseeoptical extends Backend
             } elseif (!$filter['status']) {
                 $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed']];
             }
+            //是否有工单
+            $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
+            if ($filter['is_task'] == 1 || $filter['is_task'] == '0') {
+                $swhere = [];
+                $swhere['work_platform'] = 5;
+                $swhere['work_status'] = ['not in', [0, 4, 6]];
+                $order_arr = $workorder->where($swhere)->column('platform_order');
+                if ($filter['is_task'] == 1) {
+                    $map['increment_id'] = ['in', $order_arr];
+                } elseif ($filter['is_task'] == '0') {
+                    $map['increment_id'] = ['not in', $order_arr];
+                }
+                unset($filter['is_task']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
 
             //SKU搜索
             if ($filter['sku']) {
@@ -94,6 +109,20 @@ class Weseeoptical extends Backend
                 ->select();
 
             $list = collection($list)->toArray();
+            //查询订单是否存在工单
+            $swhere = [];
+            $increment_ids = array_column($list, 'increment_id');
+            $swhere['platform_order'] = ['in', $increment_ids];
+            $swhere['work_platform'] = 5;
+            $swhere['work_status'] = ['not in', [0, 4, 6]];
+            $order_arr = $workorder->where($swhere)->column('platform_order');
+
+
+            foreach ($list as $k => $v) {
+                if (in_array($v['increment_id'], $order_arr)) {
+                    $list[$k]['task_info'] = 1;
+                }
+            }
             $result = array("total" => $total, "rows" => $list);
             return json($result);
         }
@@ -614,8 +643,18 @@ where cped.attribute_id in(146,147) and cped.store_id=0 and cped.entity_id=$prod
             $finalResult[$key]['created_at'] = substr($value['created_at'], 0, 10);
 
             $tmp_product_options = unserialize($value['product_options']);
-            $finalResult[$key]['index_type'] = $tmp_product_options['info_buyRequest']['tmplens']['index_type'];
 
+
+            $finalResult[$key]['second_name'] = $tmp_product_options['info_buyRequest']['tmplens']['second_name'];
+            $finalResult[$key]['third_name'] = $tmp_product_options['info_buyRequest']['tmplens']['index_type'];
+            $finalResult[$key]['four_name'] = $tmp_product_options['info_buyRequest']['tmplens']['four_name'];
+            $finalResult[$key]['zsl'] = $tmp_product_options['info_buyRequest']['tmplens']['zsl'];
+
+            //如果为太阳镜 拼接颜色
+            if (@$tmp_product_options['info_buyRequest']['tmplens']['sungless_color_name']) {
+                $finalResult[$key]['third_name'] .= ' ' . $tmp_product_options['info_buyRequest']['tmplens']['sungless_color_name'];
+            }
+         
             $tmp_lens_params = array();
             $tmp_lens_params = json_decode($tmp_product_options['info_buyRequest']['tmplens']['prescription'], true);
 
@@ -667,16 +706,14 @@ where cped.attribute_id in(146,147) and cped.store_id=0 and cped.entity_id=$prod
             $finalResult[$key]['bridge'] = $tmp_bridge['bridge'];
 
             //判断是否为成品老花镜
-            if ($finalResult[$key]['index_type']) {
-                $finalResult[$key]['od_sph'] = $finalResult[$key]['degrees'];
-                $finalResult[$key]['os_sph'] = $finalResult[$key]['degrees'];
-            } elseif ($finalResult[$key]['degrees']) {
+            if ($finalResult[$key]['degrees']) {
                 $finalResult[$key]['od_sph'] = $finalResult[$key]['degrees'];
                 $finalResult[$key]['os_sph'] = $finalResult[$key]['degrees'];
                 $finalResult[$key]['index_type'] = '1.61 Index Standard  Reading Glasses - Non Prescription';
             }
-        }
 
+        }
+      
         $spreadsheet = new Spreadsheet();
         // Add title
 
@@ -999,11 +1036,7 @@ EOF;
 
                 $final_print['prismcheck'] = isset($final_print['prismcheck']) ? $final_print['prismcheck'] : '';
 
-                //判断是否为成品老花镜
-                if ($final_print['index_type']) {
-                    $final_print['od_sph'] = $final_print['degrees'];
-                    $final_print['os_sph'] = $final_print['degrees'];
-                } elseif ($final_print['degrees']) {
+                if ($final_print['degrees']) {
                     $final_print['od_sph'] = $final_print['degrees'];
                     $final_print['os_sph'] = $final_print['degrees'];
                     $final_print['index_type'] = '1.61 Index Standard  Reading Glasses - Non Prescription';
