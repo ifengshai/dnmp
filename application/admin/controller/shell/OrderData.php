@@ -1443,7 +1443,7 @@ class OrderData extends Backend
      */
     public function order_total_qty_ordered()
     {
-        $list = $this->order->where('total_qty_ordered=0')->limit(10000)->select();
+        $list = $this->order->where('total_qty_ordered=0')->limit(5000)->select();
         $list = collection($list)->toArray();
         $params = [];
         foreach ($list as $k => $v) {
