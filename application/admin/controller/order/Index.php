@@ -434,10 +434,13 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                 if (!empty($work_order_list)){
                     $work_order_list = array_column($work_order_list,'replenish_money');
                     $difference_log = implode(',',$work_order_list);
-                }else{
-                    $difference_log = '无';
                 }
-                $list[$k]['fill_post'] = $v['fill_post'].':'.$difference_log;
+                if ($v['fill_post'] == null){
+                    $list[$k]['fill_post'] = '-';
+                }else{
+                    $list[$k]['fill_post'] = $v['fill_post'].'-'.$difference_log;
+                }
+
             }
             $result = array(
                 "total"             =>  $total,
