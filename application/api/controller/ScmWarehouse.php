@@ -888,81 +888,81 @@ class ScmWarehouse extends Scm
                 $params['type_id'] = $type_id;
                 $params['status'] = 1 == $do_type ? 1 : 0;
 
-                    //存在平台id 代表把当前入库单的sku分给这个平台 首先做判断 判断入库单的sku是否都有此平台对应的映射关系
-                    $params['create_person'] = $this->auth->nickname;
-                    $params['createtime'] = date('Y-m-d H:i:s', time());
-                    if ($platform_id) {
-                        $params['platform_id'] = $platform_id;
-                        foreach (array_filter($item_sku) as $k => $v) {
-                            $sku_platform = $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $params['platform_id']])->find();
-                            if (!$sku_platform) {
-                                $this->error('此sku：' . $v['sku'] . '没有同步至此平台，请先同步后重试');
-                            }
-                        }
-                        //新增入库单
-                        $result = $this->_in_stock->allowField(true)->save($params);
-
-                        //添加入库商品信息
-                        if ($result !== false) {
-                            $data = [];
-                            foreach (array_filter($item_sku) as $k => $v) {
-                                $data[$k]['sku'] = $v['sku'];
-                                $data[$k]['in_stock_num'] = $v['in_stock_num'];//入库数量
-                                $data[$k]['in_stock_id'] = $this->_in_stock->id;
-
-                                //入库单绑定条形码数组组装
-                                foreach($v['sku_agg'] as $k_code => $v_code){
-                                    if (!empty($v_code['code'])){
-                                        $where_code[] = $v_code['code'];
-                                    }
-                                }
-                            }
-                            //入库单绑定条形码执行
-                            $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => ['in', $where_code]])->save(['in_stock_id'=>$this->_in_stock->id]);
-                            //批量添加
-                            $this->_in_stock_item->allowField(true)->saveAll($data);
-                        }
-                    } else {
-                        //无站点，是质检单入口
-                        $check_order_number = $this->request->request("check_order_number");
-                        empty($check_order_number) && $this->error(__('质检单号不能为空'), [], 509);
-                        $check_id = $this->_check->where(['check_order_number'=>$check_order_number])->value('id');
-                        empty($check_id) && $this->error(__('质检单不存在'), [], 509);
-                        $params['check_id'] = $check_id;
-                        //质检单页面去创建入库单
-                        $result = $this->_in_stock->allowField(true)->save($params);
-
-                        //添加入库信息
-                        if ($result !== false) {
-                            //更改质检单为已创建入库单
-                            $this->_check->allowField(true)->save(['is_stock' => 1], ['id' => $params['check_id']]);
-                            $data = [];
-
-                            foreach (array_filter($item_sku) as $k => $v) {
-                                $data[$k]['sku'] = $v['sku'];
-                                $data[$k]['in_stock_num'] = $v['in_stock_num'];//入库数量
-                                $data[$k]['in_stock_id'] = $this->_in_stock->id;
-
-                                //入库单绑定条形码数组组装
-                                foreach($v['sku_agg'] as $k_code => $v_code){
-                                    if (!empty($v_code['code'])){
-                                        $where_code[] = $v_code['code'];
-                                    }
-                                }
-
-                            }
-                            //入库单绑定条形码执行
-                            $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => ['in', $where_code]])->save(['in_stock_id'=>$this->_in_stock->id]);
-                            //批量添加
-                            $this->_in_stock_item->allowField(true)->saveAll($data);
+                //存在平台id 代表把当前入库单的sku分给这个平台 首先做判断 判断入库单的sku是否都有此平台对应的映射关系
+                $params['create_person'] = $this->auth->nickname;
+                $params['createtime'] = date('Y-m-d H:i:s', time());
+                if ($platform_id) {
+                    $params['platform_id'] = $platform_id;
+                    foreach (array_filter($item_sku) as $k => $v) {
+                        $sku_platform = $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $params['platform_id']])->find();
+                        if (!$sku_platform) {
+                            $this->error('此sku：' . $v['sku'] . '没有同步至此平台，请先同步后重试');
                         }
                     }
+                    //新增入库单
+                    $result = $this->_in_stock->allowField(true)->save($params);
+
+                    //添加入库商品信息
+                    if ($result !== false) {
+                        $data = [];
+                        foreach (array_filter($item_sku) as $k => $v) {
+                            $data[$k]['sku'] = $v['sku'];
+                            $data[$k]['in_stock_num'] = $v['in_stock_num'];//入库数量
+                            $data[$k]['in_stock_id'] = $this->_in_stock->id;
+
+                            //入库单绑定条形码数组组装
+                            foreach($v['sku_agg'] as $k_code => $v_code){
+                                if (!empty($v_code['code'])){
+                                    $where_code[] = $v_code['code'];
+                                }
+                            }
+                        }
+                        //入库单绑定条形码执行
+                        $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => ['in', $where_code]])->save(['in_stock_id'=>$this->_in_stock->id]);
+                        //批量添加
+                        $this->_in_stock_item->allowField(true)->saveAll($data);
+                    }
+                } else {
+                    //无站点，是质检单入口
+                    $check_order_number = $this->request->request("check_order_number");
+                    empty($check_order_number) && $this->error(__('质检单号不能为空'), [], 509);
+                    $check_id = $this->_check->where(['check_order_number'=>$check_order_number])->value('id');
+                    empty($check_id) && $this->error(__('质检单不存在'), [], 509);
+                    $params['check_id'] = $check_id;
+                    //质检单页面去创建入库单
+                    $result = $this->_in_stock->allowField(true)->save($params);
+
+                    //添加入库信息
+                    if ($result !== false) {
+                        //更改质检单为已创建入库单
+                        $this->_check->allowField(true)->save(['is_stock' => 1], ['id' => $params['check_id']]);
+                        $data = [];
+
+                        foreach (array_filter($item_sku) as $k => $v) {
+                            $data[$k]['sku'] = $v['sku'];
+                            $data[$k]['in_stock_num'] = $v['in_stock_num'];//入库数量
+                            $data[$k]['in_stock_id'] = $this->_in_stock->id;
+
+                            //入库单绑定条形码数组组装
+                            foreach($v['sku_agg'] as $k_code => $v_code){
+                                if (!empty($v_code['code'])){
+                                    $where_code[] = $v_code['code'];
+                                }
+                            }
+
+                        }
+                        //入库单绑定条形码执行
+                        $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => ['in', $where_code]])->save(['in_stock_id'=>$this->_in_stock->id]);
+                        //批量添加
+                        $this->_in_stock_item->allowField(true)->saveAll($data);
+                    }
+                }
 
             }
-        Db::commit();
+            Db::commit();
         } catch (ValidateException $e) {
-        Db::rollback();
-        $this->error($e->getMessage(), [], 444);
+            Db::rollback();
+            $this->error($e->getMessage(), [], 444);
         } catch (PDOException $e) {
             Db::rollback();
             $this->error($e->getMessage(), [], 444);
@@ -1054,24 +1054,13 @@ class ScmWarehouse extends Scm
         if ($_in_stock_info['status'] > 1){
             $this->error(__('入库单状态不可以修改'), [], 510);
         }
-
-        //获取入库单列表数据
-        $item_list = $this->_in_stock
-            ->alias('a')
-            ->where(['a.id'=>$in_stock_id])
-            ->field('b.sku,c.quantity_num,b.in_stock_num')
-            ->join(['fa_in_stock_item' => 'b'], 'a.id=b.in_stock_id')
-            ->join(['fa_check_order_item' => 'c'], 'a.check_id=c.check_id')
-            ->join(['fa_check_order' => 'd'], 'a.check_id=d.id')
-            ->order('a.createtime', 'desc')
+        $item_list = $this->_in_stock_item
+            ->where(['in_stock_id'=>$in_stock_id])
+            ->field('sku,in_stock_num')
             ->select();
+        empty($item_list) && $this->error(__('入库单子单数据异常'), [], 515);
+
         $item_list = collection($item_list)->toArray();
-        //入库单所需数据
-        $info =[
-            'in_stock_id'=>$_in_stock_info['id'],
-            'in_stock_number'=>$_in_stock_info['in_stock_number'],
-            'item_list'=>$item_list,
-        ];
 
         $check_order_info = $this->_check->get($_in_stock_info['check_id']);
         //查询入库分类
@@ -1079,7 +1068,6 @@ class ScmWarehouse extends Scm
 
         if ($check_order_info){
             //存在质检单号，则入库类型只取第一条数据：采购入库
-//            $in_stock_type = $in_stock_type[0];
             $in_stock_type_list[] = $in_stock_type[0];
             foreach($item_list as $key=>$value){
                 //质检单默认留样数量为1，质检合格数量为入库数量 + 留样数量
@@ -1093,8 +1081,44 @@ class ScmWarehouse extends Scm
             $info['platform_list'] = $platform_list;
             $in_stock_type_list = $in_stock_type;
         }
-        $info['in_stock_type_check_id'] = $_in_stock_info['type_id'];
 
+        //获取条形码数据
+        $bar_code_list = $this->_product_bar_code_item
+            ->where(['in_stock_id'=>$in_stock_id])
+            ->field('sku,code')
+            ->select()
+        ;
+
+        empty($bar_code_list) && $this->error(__('条形码数据异常'), [], 515);
+        $bar_code_list = collection($bar_code_list)->toArray();
+        foreach($item_list as $key=>$value){
+            $sku = $value['sku'];
+            //条形码列表
+            $sku_agg = array_filter($bar_code_list,function($v) use ($sku){
+                if($v['sku'] == $sku){
+                    return $v;
+                }
+            });
+
+            if(!empty($sku_agg)){
+                array_walk($sku_agg, function (&$value, $k, $p) {
+                    $value = array_merge($value, $p);
+                },['is_new' => 0]);
+            }
+
+            $item_list[$key]['sku_agg'] = $sku_agg;
+        }
+
+//        $info['item_data'] = $item_list;
+
+        //入库单所需数据
+        $info =[
+            'in_stock_id'=>$_in_stock_info['id'],
+            'in_stock_number'=>$_in_stock_info['in_stock_number'],
+            'item_list'=>$item_list,
+        ];
+
+        $info['in_stock_type_check_id'] = $_in_stock_info['type_id'];
         $info['in_stock_type'] = $in_stock_type_list;
 
         $this->success('', ['info' => $info],200);
@@ -1584,9 +1608,34 @@ class ScmWarehouse extends Scm
             ->order('id', 'desc')
             ->select();
         $item_list = collection($inventory_item_info)->toArray();
-        foreach (array_filter($item_list) as $k => $v) {
-            $item_list[$k]['stock'] = $this->_item->where('sku',$v['sku'])->value('stock');
-//            $stock = $this->_item->where('sku',$v['sku'])->value('stock');
+        //获取条形码数据
+        $bar_code_list = $this->_product_bar_code_item
+            ->where(['inventory_id'=>$inventory_id])
+            ->field('sku,code')
+            ->select()
+        ;
+
+        empty($bar_code_list) && $this->error(__('条形码数据异常'), [], 515);
+        $bar_code_list = collection($bar_code_list)->toArray();
+
+        foreach (array_filter($item_list) as $key => $value) {
+            $item_list[$key]['stock'] = $this->_item->where('sku',$value['sku'])->value('stock');
+//            $stock = $this->_item->where('sku',$value['sku'])->value('stock');
+            $sku = $value['sku'];
+            //条形码列表
+            $sku_agg = array_filter($bar_code_list,function($v) use ($sku){
+                if($v['sku'] == $sku){
+                    return $v;
+                }
+            });
+
+            if(!empty($sku_agg)){
+                array_walk($sku_agg, function (&$value, $k, $p) {
+                    $value = array_merge($value, $p);
+                },['is_new' => 0]);
+            }
+
+            $item_list[$key]['sku_agg'] = $sku_agg;
         }
 
         //盘点单所需数据
