@@ -107,7 +107,7 @@ class TrackReg extends Backend
 
     public function process_shipment_type()
     {
-        $list = $this->ordernode->where('shipment_data_type is null')->select();
+        $list = $this->ordernode->where('shipment_data_type is null and shipment_type is not null')->select();
         $list = collection($list)->toArray();
         $params = [];
         foreach ($list as $k => $v) {
