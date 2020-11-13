@@ -210,7 +210,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                         { field: 'postage_money', title: __('邮费成本金额（￥）'), operate: false, formatter: Controller.api.formatter.float_format },
                         { field: 'process_cost', title: __('加工费成本金额（￥）'), operate: false, formatter: Controller.api.formatter.float_format },
                         { field: 'refund_money', title: __('退款金额'), operate: false, formatter: Controller.api.formatter.float_format },
-                        { field: 'fill_post', title: __('补差价金额'), operate: false, formatter: Controller.api.formatter.float_format },
+                        { field: 'fill_post', title: __('补差价金额'), operate: false,},
                         { field: 'created_at', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange' },
                     ],
                 ],

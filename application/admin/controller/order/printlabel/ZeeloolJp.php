@@ -123,12 +123,10 @@ class ZeeloolJp extends Backend
             $swhere['work_status'] = ['not in', [0, 4, 6]];
             $order_arr = $workorder->where($swhere)->column('platform_order');
 
-
             foreach ($list as $k => $v) {
                 if (in_array($v['increment_id'], $order_arr)) {
                     $list[$k]['task_info'] = 1;
                 }
-
             }
             
             $result = array("total" => $total, "rows" => $list);
