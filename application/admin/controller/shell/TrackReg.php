@@ -104,7 +104,14 @@ class TrackReg extends Backend
         echo $site_str . ' is ok' . "\n";
     }
 
-
+    /**
+     * 处理物流商类型为空的数据
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/11/13 15:05:24 
+     * @return void
+     */
     public function process_shipment_type()
     {
         $list = $this->ordernode->where('shipment_data_type is null and shipment_type is not null')->select();
