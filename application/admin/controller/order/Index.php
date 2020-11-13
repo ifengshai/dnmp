@@ -43,6 +43,8 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
         $this->zeelool_de = new \app\admin\model\order\order\ZeeloolDe;
         $this->zeelool_jp = new \app\admin\model\order\order\ZeeloolJp;
         $this->ordernodedeltail = new \app\admin\model\order\order\Ordernodedeltail;
+
+        $this->order = new \app\admin\model\order\order\NewOrder();
     }
 
     /**
@@ -51,11 +53,91 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
      * 需要将application/admin/library/traits/Backend.php中对应的方法复制到当前控制器,然后进行修改
      */
 
-
     /**
      * 查看
      */
     public function index()
+    {
+        //设置过滤方法
+        $this->request->filter(['strip_tags']);
+        if ($this->request->isAjax()) {
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
+            }
+
+            $filter = json_decode($this->request->get('filter'), true);
+            //默认Z站数据
+            if (!$filter['site']) {
+                $map['site'] = 1;
+            }
+
+            //SKU搜索
+            if ($filter['sku']) {
+                $smap['sku'] = ['like', $filter['sku'] . '%'];
+                if ($filter['status']) {
+                    $smap['status'] = ['in', $filter['status']];
+                }
+                $ids = $this->order->getOrderId($smap);
+                $map['entity_id'] = ['in', $ids];
+                unset($filter['sku']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
+
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $total = $this->order
+                ->where($where)
+                ->where($map)
+                ->order($sort, $order)
+                ->count();
+
+            $list = $this->order
+                ->where($where)
+                ->where($map)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();
+
+            $list = collection($list)->toArray();
+
+            $arr = [
+                'Business express(4-7 business days)',
+                'Expedited',
+                'Business express(7-14 Days)',
+                'Business express(7-12 Days)',
+                'Business express',
+                'Business express (7-12 days)',
+                'Business express(7-12 days)',
+                'Express Shipping (3-5 Days)',
+                'Express Shipping (5-8Days)',
+                'Express Shipping (3-5 Business Days)',
+                'Express Shipping (5-8 Business Days)',
+                'Business Express(7-12 Days)',
+                'Business express(7-12 business days)'
+            ];
+            foreach ($list as &$v) {
+                if (in_array($v['shipping_title'], $arr)) {
+                    $v['label'] = 1;
+                } else {
+                    $v['label'] = 0;
+                }
+                $v['created_at'] = date('Y-m-d H:i:s', $v['created_at']);
+            }
+            unset($v);
+
+            $result = array("total" => $total, "rows" => $list);
+
+            return json($result);
+        }
+        //选项卡
+        $this->assign('getTabList', $this->order->getTabList());
+        return $this->view->fetch();
+    }
+
+    /**
+     * 查看
+     */
+    public function index_bak()
     {
         $label = $this->request->get('label', 1);
         //设置过滤方法
@@ -174,28 +256,9 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
     public function detail($ids = null)
     {
         $ids = $ids ?? $this->request->get('id');
-        //根据传的标签切换对应站点数据库
-        $label = $this->request->get('label', 1);
-        if ($label == 1) {
-            $model = $this->zeelool;
-        } elseif ($label == 2) {
-            $model = $this->voogueme;
-        } elseif ($label == 3) {
-            $model = $this->nihao;
-        } elseif ($label == 4) {
-            $model = $this->weseeoptical;
-        } elseif ($label == 5) {
-            $model = $this->meeloog;
-        } elseif ($label == 9) {
-            $model = $this->zeelool_es;
-        } elseif ($label == 10) {
-            $model = $this->zeelool_de;
-        } elseif ($label == 11) {
-            $model = $this->zeelool_jp;
-        }
-
+    
         //查询订单详情
-        $row = $model->where('entity_id', '=', $ids)->find();
+        $row = $this->order->where('id', '=', $ids)->find();
         if (!$row) {
             $this->error(__('No Results were found'));
         }
@@ -208,25 +271,6 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
 
         //获取订单收货信息
         $address = $this->zeelool->getOrderDetail($label, $ids);
-
-        //获取订单处方信息
-        if ($label == 1) {
-            $goods = ZeeloolPrescriptionDetailHelper::get_list_by_entity_ids($ids);
-        } elseif ($label == 2) {
-            $goods = VooguemePrescriptionDetailHelper::get_list_by_entity_ids($ids);
-        } elseif ($label == 3) {
-            $goods = NihaoPrescriptionDetailHelper::get_list_by_entity_ids($ids);
-        } elseif ($label == 4) {
-            $goods = WeseeopticalPrescriptionDetailHelper::get_list_by_entity_ids($ids);
-        } elseif ($label == 5) {
-            $goods = MeeloogPrescriptionDetailHelper::get_list_by_entity_ids($ids);
-        } elseif ($label == 9) {
-            $goods = ZeeloolEsPrescriptionDetailHelper::get_list_by_entity_ids($ids);
-        } elseif ($label == 10) {
-            $goods = ZeeloolDePrescriptionDetailHelper::get_list_by_entity_ids($ids);
-        } elseif ($label == 11) {
-            $goods = ZeeloolJpPrescriptionDetailHelper::get_list_by_entity_ids($ids);
-        }
 
         //获取支付信息
         $pay = $this->zeelool->getPayDetail($label, $ids);

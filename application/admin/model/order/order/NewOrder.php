@@ -23,4 +23,18 @@ class NewOrder extends Model
     // 追加属性
     protected $append = [];
 
+    //获取选项卡列表
+    public function getTabList()
+    {
+        return [
+            ['name' => 'Zeelool', 'field' => 'site', 'value' => 1],
+            ['name' => 'Voogueme', 'field' => 'site', 'value' => 2],
+            ['name' => 'Nihao', 'field' => 'site', 'value' => 3],
+            ['name' => 'Meeloog', 'field' => 'site', 'value' => 4],
+            ['name' => 'Wesee', 'field' => 'site', 'value' => 5],
+            ['name' => 'Zeelool_es', 'field' => 'site', 'value' => 9],
+            ['name' => 'Zeelool_de', 'field' => 'site', 'value' => 10],
+            ['name' => 'Zeelool_jp', 'field' => 'site', 'value' => 11],
+        ];
+    }
 }
