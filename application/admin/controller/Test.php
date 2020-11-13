@@ -85,49 +85,7 @@ class Test extends Backend
         echo $site_str . ' is ok' . "\n";
     }
 
-    /**
-     * 更新物流表状态 handle 改为1
-     *
-     * @Description
-     * @author wpl
-     * @since 2020/05/18 18:16:48 
-     * @return void
-     */
-    protected function setLogisticsStatus($params)
-    {
-        switch ($params['site']) {
-            case 1:
-                $url = config('url.zeelool_url');
-                break;
-            case 2:
-                $url = config('url.voogueme_url');
-                break;
-            case 3:
-                $url = config('url.nihao_url');
-                break;
-            case 4:
-                $url = config('url.meeloog_url');
-                break;
-            default:
-                return false;
-                break;
-        }
-
-        if ($params['site'] == 4) {
-            $url = $url . 'rest/mj/update_order_handle';
-        } else {
-            $url = $url . 'magic/order/logistics';
-        }
-        unset($params['site']);
-        $client = new Client(['verify' => false]);
-        //请求URL
-        $response = $client->request('POST', $url, array('form_params' => $params));
-        $body = $response->getBody();
-        $stringBody = (string)$body;
-        $res = json_decode($stringBody);
-        return $res;
-    }
-
+    
     /**
      * 重启跟踪2-7状态的物流
      *
