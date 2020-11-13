@@ -37,6 +37,17 @@ class Test extends Backend
         $this->ordernode = new \app\admin\model\OrderNode();
     }
 
+    public function test001()
+    {
+        $track_number = '9400111108296818283602';
+        $order_number = '100171868';
+        //根据物流单号查询发货物流渠道
+        $shipment_data_type = Db::connect('database.db_delivery')->table('ld_deliver_order')->where(['track_number' => $track_number,'increment_id' => $order_number])->value('agent_way_title');
+
+        dump($shipment_data_type);die;
+    }
+
+
     public function site_reg()
     {
         $this->reg_shipment('database.db_zeelool', 1);
