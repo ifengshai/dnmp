@@ -371,14 +371,14 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                 ->limit($offset, $limit)
                 ->select();
             $totalId = $model
-//                ->where($where)
+                ->where($where)
                 ->whereNotIn('order_type',['3','4'])
                 ->where($addWhere)
                 ->field('entity_id')
                 ->column('entity_id');
 
             $thisPageId = $model
-//                ->where($where)
+                ->where($where)
                 ->whereNotIn('order_type',['3','4'])
                 ->order($sort, $order)
                 ->limit($offset, $limit)
