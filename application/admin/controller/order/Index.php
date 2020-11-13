@@ -368,7 +368,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
 //                ->field('increment_id,customer_firstname')
                 ->order($sort, $order)
                 ->limit($offset, $limit)
-                 ->select();
+                ->select();
             $totalId = $model
                 ->where($where)
                 ->whereNotIn('order_type',['3','4'])
@@ -437,7 +437,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                 }
                 //查询工单里是否有补差价记录
 //                $work_order_list = $model->table('work_order_list')->where($where_order)->where(array('platform_order'=>$v['increment_id']))->field('replenish_money')->select();
-                $mojing = Db::connect('mysql://root:UI3ftz6trrLk7qW1@192.168.12.105:3306/mojing#utf8');
+                $mojing = Db::connect('mysql://fanzhigang:3QGz60R2E!@aVOXP@54.189.215.133:3306/mojing#utf8');
                 $where_order['platform_order'] = ['eq',$v['increment_id']];
                 $work_order_list = $mojing->table('fa_work_order_list')->where($where_order)->field('replenish_money')->select();
                 if (!empty($work_order_list)){
