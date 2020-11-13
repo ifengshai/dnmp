@@ -346,16 +346,16 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
 
             //根据传的标签切换对应站点数据库
             $label = $this->request->get('label', 1);
-            $where_order[] = array('replenish_money','gt',0);
+            $where_order['replenish_money'] =['gt',0];
             if ($label == 1) {
                 $model = $this->zeelool;
-                $where_order[] = array('work_platform','eq',1);
+                $where_order['work_platform'] = ['eq',1];
             } elseif ($label == 2) {
                 $model = $this->voogueme;
-                $where_order[] = array('work_platform','eq',2);
+                $where_order['work_platform'] = ['eq',2];
             } elseif ($label == 3) {
                 $model = $this->nihao;
-                $where_order[] = array('work_platform','eq',3);
+                $where_order['work_platform'] = ['eq',3];
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $model
@@ -436,10 +436,16 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                     }
                 }
                 //查询工单里是否有补差价记录
-//                $work_order_list = M('work_order_list')->where($where_order)->where(array('platform_order'=>$v['increment_id']))->field('replenish_money')->select();
-//                if (!empty($work_order_list)){
-//                    $list[$k]['difference_log'] = implode(',',$work_order_list);
-//                }
+//                $work_order_list = $model->table('work_order_list')->where($where_order)->where(array('platform_order'=>$v['increment_id']))->field('replenish_money')->select();
+                $mojing = Db::connect('mysql://root:UI3ftz6trrLk7qW1@192.168.12.105:3306/mojing#utf8');
+                $where_order['platform_order'] = ['eq',$v['increment_id']];
+                $work_order_list = $mojing->table('fa_work_order_list')->where($where_order)->field('replenish_money')->select();
+                if (!empty($work_order_list)){
+                    $work_order_list = array_column($work_order_list,'replenish_money');
+                    $list[$k]['difference_log'] = implode(',',$work_order_list);
+                }else{
+                    $list[$k]['difference_log'] = '空';
+                }
             }
             $result = array(
                 "total"             =>  $total,
