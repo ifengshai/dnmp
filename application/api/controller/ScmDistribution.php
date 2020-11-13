@@ -875,7 +875,7 @@ class ScmDistribution extends Scm
 
         if($order_process_info['store_house_id']){
             //存在合单库位ID，获取合单库位号存入
-            if ($total_qty_ordered > $count){
+            if ($total_qty_ordered > $count+1){
                 //不是最后一个子单
                 $num = '';
                 $next = 1;//是否有下一个子单 1有，0没有
