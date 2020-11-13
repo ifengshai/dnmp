@@ -489,7 +489,7 @@ class Distribution extends Backend
         $ids = input('ids');
         $map = [];
         if ($ids) {
-            $map['id'] = ['in', $ids];
+            $map['a.id'] = ['in', $ids];
             $where = [];
             $sort = 'a.created_at';
             $order = 'desc';
@@ -688,36 +688,53 @@ class Distribution extends Backend
             $spreadsheet->getActiveSheet()->mergeCells("O" . ($key * 2 + 2) . ":O" . ($key * 2 + 3));
             $spreadsheet->getActiveSheet()->mergeCells("P" . ($key * 2 + 2) . ":P" . ($key * 2 + 3));
             $spreadsheet->getActiveSheet()->mergeCells("Q" . ($key * 2 + 2) . ":Q" . ($key * 2 + 3));
+            $spreadsheet->getActiveSheet()->mergeCells("R" . ($key * 2 + 2) . ":R" . ($key * 2 + 3));
         }
 
         //设置宽度
-        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(30);
-        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(30);
-        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('N')->setWidth(40);
         $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(15);
         $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(15);
         $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(15);
-        $spreadsheet->getActiveSheet()->getColumnDimension('I')->setWidth(30);
-        $spreadsheet->getActiveSheet()->getColumnDimension('J')->setWidth(30);
-        $spreadsheet->getActiveSheet()->getColumnDimension('K')->setWidth(30);
-        $spreadsheet->getActiveSheet()->getColumnDimension('L')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('I')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('J')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('K')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('L')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('O')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('P')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('Q')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('R')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('S')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('T')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('U')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('V')->setWidth(20);
+        //自动换行
+        $spreadsheet->getDefaultStyle()->getAlignment()->setWrapText(true);
+        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
 
         //设置边框
         $border = [
             'borders' => [
                 'allBorders' => [
                     'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
-                    'color' => ['argb' => 'FF000000'], // 设置border颜色
+                    'color'       => ['argb' => 'FF000000'], // 设置border颜色
                 ],
             ],
         ];
 
-        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+
         $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
         $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
-        $spreadsheet->getActiveSheet()->getStyle('A1:I' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+        // $spreadsheet->getActiveSheet()->getStyle('A1:Z'.$key)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle('A1:V' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle('A1:V' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+
         $spreadsheet->setActiveSheetIndex(0);
 
         $save_name = '配货列表' . date("YmdHis", time());
