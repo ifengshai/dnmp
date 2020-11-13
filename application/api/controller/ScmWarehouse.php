@@ -958,8 +958,6 @@ class ScmWarehouse extends Scm
                         }
                     }
 
-
-
             }
         Db::commit();
         } catch (ValidateException $e) {
@@ -1053,7 +1051,7 @@ class ScmWarehouse extends Scm
         //获取入库单数据
         $_in_stock_info = $this->_in_stock->get($in_stock_id);
         empty($_in_stock_info) && $this->error(__('入库单不存在'), [], 515);
-        if ($_in_stock_info['status'] != 0){
+        if ($_in_stock_info['status'] != 0 || $_in_stock_info['status'] != 1){
             $this->error(__('只有新建状态才可以修改'), [], 510);
         }
 
