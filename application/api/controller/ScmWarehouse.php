@@ -1089,7 +1089,6 @@ class ScmWarehouse extends Scm
             ->select()
         ;
 
-        empty($bar_code_list) && $this->error(__('条形码数据异常'), [], 515);
         $bar_code_list = collection($bar_code_list)->toArray();
         foreach($item_list as $key=>$value){
             $sku = $value['sku'];
@@ -1615,7 +1614,6 @@ class ScmWarehouse extends Scm
             ->select()
         ;
 
-        empty($bar_code_list) && $this->error(__('条形码数据异常'), [], 515);
         $bar_code_list = collection($bar_code_list)->toArray();
 
         foreach (array_filter($item_list) as $key => $value) {
