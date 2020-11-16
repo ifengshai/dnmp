@@ -288,12 +288,10 @@ class StockHouse extends Backend
 
     function getRepeat($arr)
     {
-
         // 获取去掉重复数据的数组
         $unique_arr = array_unique($arr);
         // 获取重复数据的数组
         $repeat_arr = array_diff_assoc($arr, $unique_arr);
-
         return $repeat_arr;
     }
 
