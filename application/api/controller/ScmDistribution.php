@@ -1100,7 +1100,6 @@ class ScmDistribution extends Scm
                 ->field('a.order_id,a.store_house_id,a.combine_time')
                 ->limit($offset, $limit)
                 ->select();
-            empty($list) && $this->error(__('暂无合单待取出'), [], 403);
 
         } else {
             //异常待处理列表
@@ -1127,7 +1126,6 @@ class ScmDistribution extends Scm
                 ->field('a.store_house_id,b.item_order_number')
                 ->limit($offset, $limit)
                 ->select();
-            empty($list) && $this->error(__('暂无合单异常待处理'), [], 403);
         }
         foreach (array_filter($list) as $k => $v) {
             $list[$k]['coding'] = $this->_stock_house->where('id',$v['store_house_id'])->value('coding');
