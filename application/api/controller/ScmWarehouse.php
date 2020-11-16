@@ -1076,19 +1076,15 @@ class ScmWarehouse extends Scm
         foreach($item_list as $key=>$value){
             $sku = $value['sku'];
             //条形码列表
-            $sku_agg = array_filter($bar_code_list,function($v) use ($sku){
-                if($v['sku'] == $sku){
-                    return $v;
+            foreach($bar_code_list as $k=>$v){
+                $sku_agg = [];
+                if ($v['sku'] == $sku){
+                    $v['is_new'] = 0;
+                    $sku_agg[] = $v;
+                    $item_list[$key]['sku_agg'] = $sku_agg;
                 }
-            });
-
-            if(!empty($sku_agg)){
-                array_walk($sku_agg, function (&$value, $k, $p) {
-                    $value = array_merge($value, $p);
-                },['is_new' => 0]);
             }
 
-            $item_list[$key]['sku_agg'] = $sku_agg;
         }
 
         $info = [];
