@@ -1650,8 +1650,8 @@ class ScmWarehouse extends Scm
     public function inventory_submit()
     {
         $do_type = $this->request->request('do_type');
-        $item_sku = $this->request->request("item_sku");
-        $item_sku = html_entity_decode($item_sku);
+        $item_sku = $this->request->request("item_data");
+        empty($item_sku) && $this->error(__('sku集合不能为空！！'), [], 508);
         $item_sku = json_decode(htmlspecialchars_decode($item_sku),true);
         empty($item_sku) && $this->error(__('sku集合不能为空'), [], 403);
         $item_sku = array_filter($item_sku);
@@ -1680,9 +1680,9 @@ class ScmWarehouse extends Scm
 
         //检测条形码是否已绑定
         $where['inventory_id'] = [['>',0], ['neq',$inventory_id]];
-        foreach ($item_sku as $key => $value) {
+        foreach (array_filter($item_sku) as $key => $value) {
 //            empty($value['sku_agg']) && $this->error(__($value['sku'].'的条形码数据为空，请检查'), [], 541);
-            !empty($value['sku_agg']) && $sku_code = array_column($value['sku_agg'],'code');
+            $sku_code = array_column($value['sku_agg'],'code');
             count($value['sku_agg']) != count(array_unique($sku_code))
             &&
             $this->error(__('条形码有重复，请检查'), [], 405);
