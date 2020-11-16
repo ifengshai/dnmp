@@ -338,11 +338,11 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
 
             $addWhere = '1=1';
             if ($rep != '{}') {
-                 $whereArr = json_decode($rep,true);
-                 if(!array_key_exists('created_at',$whereArr)){
-                     $addWhere  .= " AND DATE_SUB(CURDATE(), INTERVAL 7 DAY) <= date(created_at)";
-                 }
-            } else {
+//                 $whereArr = json_decode($rep,true);
+//                 if(!array_key_exists('created_at',$whereArr)){
+//                     $addWhere  .= " AND DATE_SUB(CURDATE(), INTERVAL 7 DAY) <= date(created_at)";
+//                 }
+            }else {
                 $addWhere  .= " AND DATE_SUB(CURDATE(), INTERVAL 7 DAY) <= date(created_at)";
             }
 
@@ -366,24 +366,25 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                 ->count();
             $list = $model
                 ->where($where)
-                ->field('increment_id,customer_firstname,customer_email,status,base_grand_total,base_shipping_amount,custom_order_prescription_type,order_type,created_at,base_total_paid,base_total_due')
+//                ->field('increment_id,customer_firstname,customer_email,status,base_grand_total,base_shipping_amount,custom_order_prescription_type,order_type,created_at,base_total_paid,base_total_due')
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
             $totalId = $model
                 ->where($where)
-                ->whereNotIn('order_type',['3','4'])
                 ->where($addWhere)
-                ->field('entity_id')
+                ->whereNotIn('order_type',['3','4'])
                 ->column('entity_id');
 
             $thisPageId = $model
                 ->where($where)
-                ->whereNotIn('order_type',['3','4'])
                 ->order($sort, $order)
+                ->whereNotIn('order_type',['3','4'])
                 ->limit($offset, $limit)
                 ->column('entity_id');
+
             $costInfo = $model->getOrderCostInfo($totalId, $thisPageId);
+         
             $list = collection($list)->toArray();
 
             foreach ($list as $k => $v) {
