@@ -732,7 +732,7 @@ EOF;
 
         $ids = input('ids');
         if ($ids) {
-            $map['entity_id'] = ['in', $ids];
+            $map['id'] = ['in', $ids];
         }
 
         $filter = json_decode($this->request->get('filter'), true);
