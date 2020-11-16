@@ -99,6 +99,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
             //批量导出xls 
             $('.btn-batch-export-xls').click(function () {
                 var ids = Table.api.selectedids(table);
+
+                
                 if (ids.length > 0) {
                     window.open(Config.moduleurl + '/order/index/batch_export_xls?ids=' + ids + '&label=' + Config.label, '_blank');
                 } else {
