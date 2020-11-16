@@ -49,7 +49,6 @@ class Meeloog extends Backend
      */
     public function index()
     {
-
         //设置过滤方法
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
@@ -66,7 +65,7 @@ class Meeloog extends Backend
             } elseif (!$filter['status']) {
                 $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal']];
             }
-            //是否有工单
+            //是否有工单....
             $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
             if ($filter['is_task'] == 1 || $filter['is_task'] == '0') {
                 $swhere = [];
