@@ -118,7 +118,6 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
             }
 
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-            dump($sort);die();
             $map['b.address_type'] = 'shipping';
             $total = $model->alias('a')->join(['sales_flat_order_address' => 'b'], 'a.entity_id=b.parent_id')
                 ->where($where)
