@@ -383,10 +383,10 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
             if ($rep != '{}') {
                  $whereArr = json_decode($rep,true);
                  if(!array_key_exists('created_at',$whereArr)){
-                     $addWhere  .= " AND DATE_SUB(CURDATE(), INTERVAL 1000 DAY) <= date(created_at)";
+                     $addWhere  .= " AND DATE_SUB(CURDATE(), INTERVAL 7 DAY) <= date(created_at)";
                  }
             } else {
-                $addWhere  .= " AND DATE_SUB(CURDATE(), INTERVAL 1000 DAY) <= date(created_at)";
+                $addWhere  .= " AND DATE_SUB(CURDATE(), INTERVAL 7 DAY) <= date(created_at)";
             }
 
             //根据传的标签切换对应站点数据库
@@ -410,7 +410,6 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
             $list = $model
                 ->where($where)
 //                ->field('increment_id,customer_firstname,customer_email,status,base_grand_total,base_shipping_amount,custom_order_prescription_type,order_type,created_at,base_total_paid,base_total_due')
-//                ->field('fill_post,increment_id')
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
@@ -479,10 +478,13 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                 if (!empty($work_order_list)){
                     $work_order_list = array_column($work_order_list,'replenish_money');
                     $difference_log = implode(',',$work_order_list);
-                }else{
-                    $difference_log = '无';
                 }
-                $list[$k]['fill_post'] = $v['fill_post'].':'.$difference_log;
+                if ($v['fill_post'] == null){
+                    $list[$k]['fill_post'] = '-';
+                }else{
+                    $list[$k]['fill_post'] = $v['fill_post'].'-'.$difference_log;
+                }
+
             }
             $result = array(
                 "total"             =>  $total,
