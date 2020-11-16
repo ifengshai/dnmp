@@ -769,7 +769,7 @@ class Distribution extends Backend
         //获取子订单列表
         $list = $this->model
             ->alias('a')
-            ->field('a.item_order_number,a.order_id,a.created_at,b.os_add,b.od_add,b.pdcheck,b.prismcheck,b.pd_r,b.pd_l,b.pd,b.od_pv,b.os_pv,b.od_bd,b.os_bd,b.od_bd_r,b.os_bd_r,b.od_pv_r,b.os_pv_r,b.index_name,b.coatiing_name,b.prescription_type,b.sku,b.od_sph,b.od_cyl,b.od_axis,b.os_sph,b.os_cyl,b.os_axis,b.lens_number')
+            ->field('a.item_order_number,a.order_id,a.created_at,b.os_add,b.od_add,b.pdcheck,b.prismcheck,b.pd_r,b.pd_l,b.pd,b.od_pv,b.os_pv,b.od_bd,b.os_bd,b.od_bd_r,b.os_bd_r,b.od_pv_r,b.os_pv_r,b.index_name,b.coating_name,b.prescription_type,b.sku,b.od_sph,b.od_cyl,b.od_axis,b.os_sph,b.os_cyl,b.os_axis,b.lens_number')
             ->join(['fa_order_item_option' => 'b'], 'a.option_id=b.id')
             ->where(['a.id' => ['in', $ids]])
             ->select();
@@ -938,7 +938,7 @@ class Distribution extends Backend
             //获取子订单处方数据
             $_new_order_item_option = new NewOrderItemOption();
             $option_list = $_new_order_item_option
-                ->field('id,is_print_logo,sku,index_name')
+                ->field('id,is_print_logo,sku,index_name,order_prescription_type')
                 ->where(['id' => ['in', array_unique($option_ids)]])
                 ->select();
             $option_list = array_column($option_list, NULL, 'id');
@@ -967,40 +967,46 @@ class Distribution extends Backend
 
                 //更新状态
                 foreach ($item_list as $value) {
-                    //下一步状态
+                    //下一步状态 待配货
                     if (2 == $check_status) {
-                        if ($option_list[$value['option_id']]['index_name']) {
-                            $save_status = 3;
+                        //如果处方类型为现货处方镜或定制处方镜 则需配镜片
+                        if ($option_list[$value['option_id']]['order_prescription_type'] == 2 || $option_list[$value['option_id']]['order_prescription_type'] == 3) {
+                            $save_status = 3; //待配镜片
                         } else {
+                            //判断是否需要印logo
                             if ($option_list[$value['option_id']]['is_print_logo']) {
-                                $save_status = 5;
+                                $save_status = 5; //待印logo
                             } else {
+                                //判断是否需要合单
                                 if ($total_list[$value['order_id']]['total_qty_ordered'] > 1) {
-                                    $save_status = 7;
+                                    $save_status = 7; //待合单
                                 } else {
-                                    $save_status = 9;
+                                    //不需要配镜片、印logo、合单
+                                    $save_status = 9; //合单完成
                                 }
                             }
                         }
-                    } elseif (3 == $check_status) {
-                        $save_status = 4;
-                    } elseif (4 == $check_status) {
+                    } elseif (3 == $check_status) { //待配镜片
+                        $save_status = 4; //待加工
+                    } elseif (4 == $check_status) { //待加工
+                        //判断是否需要印logo
                         if ($option_list[$value['option_id']]['is_print_logo']) {
-                            $save_status = 5;
+                            $save_status = 5; //待印logo
                         } else {
-                            $save_status = 6;
+                            $save_status = 6; //待成品质检
                         }
-                    } elseif (5 == $check_status) {
-                        $save_status = 6;
-                    } elseif (6 == $check_status) {
+                    } elseif (5 == $check_status) { //待印logo
+                        $save_status = 6; //待成品质检
+                    } elseif (6 == $check_status) { //待成品质检
+                        //判断是否需要合单
                         if ($total_list[$value['order_id']]['total_qty_ordered'] > 1) {
-                            $save_status = 7;
+                            $save_status = 7; //待合单
                         } else {
-                            $save_status = 9;
+                            $save_status = 9; //合单完成
                         }
 
                         //获取true_sku
-                        $true_sku = $_item_platform_sku->getTrueSku($option_list[$value['option_id']]['sku'], $value['site']);
+                        $true_sku = $_item_platform_sku->getTrueSku($value['sku'], $value['site']);
 
                         //扣减订单占用库存、配货占用库存、总库存
                         $_item
