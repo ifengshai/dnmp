@@ -118,7 +118,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
             }
 
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-            dump($sort);die();
+
             $map['b.address_type'] = 'shipping';
             $total = $model->alias('a')->join(['sales_flat_order_address' => 'b'], 'a.entity_id=b.parent_id')
                 ->where($where)
@@ -846,12 +846,6 @@ EOF;
 
         list($where) = $this->buildparams();
 
-//        $list = $model
-////          ->field('increment_id,customer_firstname,customer_email,status,base_grand_total,base_shipping_amount,custom_order_prescription_type,order_type,created_at')
-//            ->where($where)
-//            ->where($map)
-//            ->select();
-//        $list = collection($list)->toArray();
         if ($label ==1){
             $field = 'sfo.entity_id,sfo.increment_id,sfo.customer_firstname,sfo.customer_email,sfo.status,sfo.base_grand_total,sfo.base_shipping_amount,
         sfo.custom_order_prescription_type,sfo.order_type,sfo.created_at,sfo.is_new_version,sfo.global_currency_code,
@@ -870,7 +864,6 @@ EOF;
             ->order('sfoi.order_id desc')
             ->select();
         $resultList = collection($resultList)->toArray();
-
         foreach ($resultList as $key=>$value){
             $finalResult[$key]['country_id'] = $model->table('sales_flat_order_address')->where(array('parent_id'=>$value['entity_id']))->value('country_id');
             $finalResult[$key]['method'] = $model->table('sales_flat_order_payment')->where(array('parent_id'=>$value['entity_id']))->value('method');
