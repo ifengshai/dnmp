@@ -1068,6 +1068,7 @@ class ScmWarehouse extends Scm
         $bar_code_list = $this->_product_bar_code_item
             ->where(['in_stock_id'=>$in_stock_id])
             ->field('sku,code')
+            ->order('id', 'desc')
             ->select()
         ;
         $bar_code_list = collection($bar_code_list)->toArray();
