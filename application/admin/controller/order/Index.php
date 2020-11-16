@@ -45,6 +45,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
         $this->ordernodedeltail = new \app\admin\model\order\order\Ordernodedeltail;
 
         $this->order = new \app\admin\model\order\order\NewOrder();
+        $this->orderitemoption = new \app\admin\model\order\order\NewOrderItemOption();
     }
 
     /**
@@ -54,7 +55,12 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
      */
 
     /**
-     * 查看
+     * 订单列表
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/11/16 09:42:29 
+     * @return void
      */
     public function index()
     {
@@ -72,17 +78,17 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                 $map['site'] = 1;
             }
 
-            //SKU搜索
-            if ($filter['sku']) {
-                $smap['sku'] = ['like', $filter['sku'] . '%'];
-                if ($filter['status']) {
-                    $smap['status'] = ['in', $filter['status']];
-                }
-                $ids = $this->order->getOrderId($smap);
-                $map['entity_id'] = ['in', $ids];
-                unset($filter['sku']);
-                $this->request->get(['filter' => json_encode($filter)]);
-            }
+            // //SKU搜索
+            // if ($filter['sku']) {
+            //     $smap['sku'] = ['like', $filter['sku'] . '%'];
+            //     if ($filter['status']) {
+            //         $smap['status'] = ['in', $filter['status']];
+            //     }
+            //     $ids = $this->orderitemoption->where();
+            //     $map['entity_id'] = ['in', $ids];
+            //     unset($filter['sku']);
+            //     $this->request->get(['filter' => json_encode($filter)]);
+            // }
 
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->order
@@ -251,14 +257,19 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
     }
 
     /**
-     * 详情
+     * 订单详情
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/11/16 09:42:40 
+     * @param [type] $ids
+     * @return void
      */
     public function detail($ids = null)
     {
         $ids = $ids ?? $this->request->get('id');
-    
         //查询订单详情
-        $row = $this->order->where('id', '=', $ids)->find();
+        $row = $this->order->get($ids);
         if (!$row) {
             $this->error(__('No Results were found'));
         }
@@ -269,22 +280,26 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
             }
         }
 
-        //获取订单收货信息
-        $address = $this->zeelool->getOrderDetail($label, $ids);
-
         //获取支付信息
-        $pay = $this->zeelool->getPayDetail($label, $ids);
+        $pay = $this->zeelool->getPayDetail($row->site, $row->entity_id);
 
-        $this->view->assign("label", $label);
+        //订单明细数据
+        $item = $this->orderitemoption->where('order_id', $ids)->select();
+
+        $this->view->assign("item", $item);
         $this->view->assign("row", $row);
-        $this->view->assign("address", $address);
-        $this->view->assign("goods", $goods);
         $this->view->assign("pay", $pay);
         return $this->view->fetch();
     }
 
     /**
-     * 订单信息2
+     * 订单节点
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/11/16 09:42:52 
+     * @param [type] $order_number
+     * @return void
      */
     public function orderDetail($order_number = null)
     {
@@ -295,72 +310,13 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
         $new_ruleList = array_column($ruleList, NULL, 'node_type');
         $key_list = array_keys($new_ruleList);
 
-        $entity_id = $this->request->get('id');
+        $id = $this->request->get('id');
         $label = $this->request->get('label', 1);
-        $this->view->assign(compact('order_number', 'entity_id', 'label'));
+        $this->view->assign(compact('order_number', 'id', 'label'));
         $this->view->assign("list", $new_ruleList);
         $this->view->assign("key_list", $key_list);
         return $this->view->fetch();
     }
-
-    /**
-     * 订单执行信息
-     */
-    public function checkDetail($ids = null)
-    {
-        $ids = $ids ?? $this->request->get('id');
-        //根据传的标签切换对应站点数据库
-        $label = $this->request->get('label', 1);
-        if ($label == 1) {
-            $model = $this->zeelool;
-        } elseif ($label == 2) {
-            $model = $this->voogueme;
-        } elseif ($label == 3) {
-            $model = $this->nihao;
-        } elseif ($label == 4) {
-            $model = $this->weseeoptical;
-        } elseif ($label == 5) {
-            $model = $this->meeloog;
-        } elseif ($label == 9) {
-            $model = $this->zeelool_es;
-        } elseif ($label == 10) {
-            $model = $this->zeelool_de;
-        } elseif ($label == 11) {
-            $model = $this->zeelool_jp;
-        }
-
-        //查询订单详情
-        $row = $model->where('entity_id', '=', $ids)->find();
-        if (!$row) {
-            $this->error(__('No Results were found'));
-        }
-        //查询订单快递单号
-        $express = $this->zeelool->getExpressData($label, $ids);
-
-        if ($express) {
-            //缓存一个小时
-            $express_data = session('order_checkDetail_' . $express['track_number'] . '_' . date('YmdH'));
-            if (!$express_data) {
-                try {
-                    //查询物流信息
-                    $title = str_replace(' ', '-', $express['title']);
-                    $track = new Trackingmore();
-                    $track = $track->getRealtimeTrackingResults($title, $express['track_number']);
-                    $express_data = $track['data']['items'][0];
-                    session('order_checkDetail_' . $express['track_number'] . '_' . date('YmdH'), $express_data);
-                } catch (\Exception $e) {
-                    $this->error($e->getMessage());
-                }
-            }
-
-            $this->view->assign("express_data", $express_data);
-        }
-
-        $this->view->assign("row", $row);
-        $this->view->assign("label", $label);
-        return $this->view->fetch();
-    }
-
 
     /**
      * 订单成本核算 create@lsw
@@ -682,73 +638,25 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
         $drawing->finish(\BCGDrawing::IMG_FORMAT_PNG);
     }
 
-    //批量打印标签
+    /**
+     * 批量打印标签
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/11/16 09:58:44 
+     * @return void
+     */
     public function batch_print_label_new()
     {
-        //根据传的标签切换对应站点数据库
-        $label = $this->request->get('label', 1);
-        switch ($label) {
-            case 1:
-                $db = 'database.db_zeelool';
-                $model = $this->zeelool;
-                break;
-            case 2:
-                $db = 'database.db_voogueme';
-                $model = $this->voogueme;
-                break;
-            case 3:
-                $db = 'database.db_nihao';
-                $model = $this->nihao;
-                break;
-            case 4:
-                $db = 'database.db_weseeoptical';
-                $model = $this->weseeoptical;
-                break;
-            case 5:
-                $db = 'database.db_meeloog';
-                $model = $this->meeloog;
-                break;
-            case 9:
-                $db = 'database.db_zeelool_es';
-                $model = $this->zeelool_es;
-                break;
-            case 10:
-                $db = 'database.db_zeelool_de';
-                $model = $this->zeelool_de;
-                break;
-            case 11:
-                $db = 'database.db_zeelool_jp';
-                $model = $this->zeelool_jp;
-                break;
-            default:
-                return false;
-                break;
-        }
         ob_start();
-        $entity_ids = rtrim(input('id_params'), ',');
+        $ids = rtrim(input('id_params'), ',');
+        if (!$ids) {
+            return $this->error('缺少参数', url('index?ref=addtabs'));
+        }
 
-        if ($entity_ids) {
+        $row = $this->order->where(['id' => ['in', $ids]])->where(['country_id' => ['in', ['US', 'PR']]])->select();
 
-            //判断是否为美国且 非商业快递
-            $smap['parent_id'] = ['in', $entity_ids];
-            $smap['country_id'] = ['not in', ['US', 'PR']];
-            $smap['address_type'] = 'shipping';
-            $count = Db::connect($db)
-                ->table('sales_flat_order_address')
-                ->where($smap)
-                ->count(1);
-            if ($count > 0) {
-                return $this->error('存在非美国的订单', url('index?ref=addtabs&label=' . $label));
-            }
-
-
-            $processing_order_querySql = "select sfo.shipping_description,sfo.increment_id,round(sfo.total_qty_ordered,0) NUM,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.qty_ordered,sfo.created_at
-from sales_flat_order_item sfoi
-left join sales_flat_order sfo on  sfoi.order_id=sfo.entity_id 
-where sfo.`status` in ('processing','creditcard_proccessing','free_processing','complete','paypal_reversed','paypal_canceled_reversal') and sfo.entity_id in($entity_ids)
-order by NUM asc;";
-            $processing_order_list = $model->query($processing_order_querySql);
-            $file_header = <<<EOF
+        $file_header = <<<EOF
                 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <style>
 body{ margin:0; padding:0}
@@ -761,54 +669,52 @@ table.addpro.re tbody td{ position:relative}
 </style>
 EOF;
 
-            $arr = [
-                'Business express(4-7 business days)',
-                'Expedited',
-                'Business express(7-14 Days)',
-                'Business express(7-12 Days)',
-                'Business express',
-                'Business express (7-12 days)',
-                'Business express(7-12 days)',
-                'Express Shipping (3-5 Days)',
-                'Express Shipping (5-8Days)',
-                'Express Shipping (3-5 Business Days)',
-                'Express Shipping (5-8 Business Days)',
-                'Business Express(7-12 Days)'
-            ];
+        $arr = [
+            'Business express(4-7 business days)',
+            'Expedited',
+            'Business express(7-14 Days)',
+            'Business express(7-12 Days)',
+            'Business express',
+            'Business express (7-12 days)',
+            'Business express(7-12 days)',
+            'Express Shipping (3-5 Days)',
+            'Express Shipping (5-8Days)',
+            'Express Shipping (3-5 Business Days)',
+            'Express Shipping (5-8 Business Days)',
+            'Business Express(7-12 Days)'
+        ];
 
-            $file_content = '';
-            $temp_increment_id = 0;
-            foreach ($processing_order_list as $processing_key => $processing_value) {
-                if (in_array($processing_value['shipping_description'], $arr)) {
-                    return $this->error('存在商业快递的订单', url('index?ref=addtabs&label=' . $label));
+        $file_content = '';
+        $temp_increment_id = 0;
+        foreach ($row as $processing_key => $processing_value) {
+            if (in_array($processing_value['shipping_title'], $arr)) {
+                continue;
+            }
+
+            if ($temp_increment_id != $processing_value['increment_id']) {
+                $temp_increment_id = $processing_value['increment_id'];
+
+                $date = substr($processing_value['created_at'], 0, strpos($processing_value['created_at'], " "));
+                $fileName = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "zeelool" . DS . "new" . DS . "$date" . DS . "$temp_increment_id.png";
+                // dump($fileName);
+                $dir = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "zeelool" . DS . "new"  . DS . "$date";
+                if (!file_exists($dir)) {
+                    mkdir($dir, 0777, true);
+                    // echo '创建文件夹$dir成功';
+                } else {
+                    // echo '需创建的文件夹$dir已经存在';
                 }
-
-                if ($temp_increment_id != $processing_value['increment_id']) {
-                    $temp_increment_id = $processing_value['increment_id'];
-
-                    $date = substr($processing_value['created_at'], 0, strpos($processing_value['created_at'], " "));
-                    $fileName = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "zeelool" . DS . "new" . DS . "$date" . DS . "$temp_increment_id.png";
-                    // dump($fileName);
-                    $dir = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "zeelool" . DS . "new"  . DS . "$date";
-                    if (!file_exists($dir)) {
-                        mkdir($dir, 0777, true);
-                        // echo '创建文件夹$dir成功';
-                    } else {
-                        // echo '需创建的文件夹$dir已经存在';
-                    }
-                    $img_url = "/uploads/printOrder/zeelool/new/$date/$temp_increment_id.png";
-                    //生成条形码
-                    $this->generate_barcode_new($temp_increment_id, $fileName);
-                    // echo '<br>需要打印'.$temp_increment_id;
-                    $file_content .= "<div  class = 'single_box'>
+                $img_url = "/uploads/printOrder/zeelool/new/$date/$temp_increment_id.png";
+                //生成条形码
+                $this->generate_barcode_new($temp_increment_id, $fileName);
+                $file_content .= "<div  class = 'single_box'>
                 <table width='400mm' height='102px' border='0' cellspacing='0' cellpadding='0' class='addpro' style='margin:0px auto;margin-top:0px;padding:0px;'>
                 <tr>
                 <td rowspan='5' colspan='3' style='padding:10px;'><img src='" . $img_url . "' height='80%'><br></td></tr>                
                 </table></div>";
-                }
             }
-            echo $file_header . $file_content;
         }
+        echo $file_header . $file_content;
     }
 
     /**
@@ -823,34 +729,6 @@ EOF;
     {
         set_time_limit(0);
         ini_set('memory_limit', '512M');
-        //根据传的标签切换对应站点数据库
-        $label = $this->request->get('label', 1);
-        switch ($label) {
-            case 1:
-                $model = $this->zeelool;
-                break;
-            case 2:
-                $model = $this->voogueme;
-                break;
-            case 3:
-                $model = $this->nihao;
-                break;
-            case 4:
-                $model = $this->weseeoptical;
-                break;
-            case 5:
-                $model = $this->meeloog;
-                break;
-            case 9:
-                $model = $this->zeelool_es;
-                break;
-            case 10:
-                $model = $this->zeelool_de;
-                break;
-            default:
-                return false;
-                break;
-        }
 
         $ids = input('ids');
         if ($ids) {
@@ -858,23 +736,15 @@ EOF;
         }
 
         $filter = json_decode($this->request->get('filter'), true);
-        //SKU搜索
-        if ($filter['sku']) {
-            $smap['sku'] = ['like', $filter['sku'] . '%'];
-            if ($filter['status']) {
-                $smap['status'] = ['in', $filter['status']];
-            }
-            $ids = $model->getOrderId($smap);
-            $map['entity_id'] = ['in', $ids];
-            unset($filter['sku']);
-            $this->request->get(['filter' => json_encode($filter)]);
+        //默认Z站数据
+        if (!$filter['site']) {
+            $map['site'] = 1;
         }
-
 
         list($where) = $this->buildparams();
 
-        $list = $model
-            ->field('increment_id,customer_firstname,customer_email,status,base_grand_total,base_shipping_amount,custom_order_prescription_type,order_type,created_at')
+        $list = $this->order
+            ->field('increment_id,customer_firstname,customer_email,status,base_grand_total,order_type,created_at')
             ->where($where)
             ->where($map)
             ->select();
@@ -890,28 +760,13 @@ EOF;
             ->setCellValue("C1", "邮箱");   //利用setCellValues()填充数据
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "状态")
             ->setCellValue("E1", "订单金额");
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("F1", "邮费")
-            ->setCellValue("G1", "处方类型");
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("H1", "订单类型")
-            ->setCellValue("I1", "创建时间");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("F1", "订单类型")
+            ->setCellValue("G1", "创建时间");
         foreach ($list as $key => $value) {
 
             $spreadsheet->getActiveSheet()->setCellValueExplicit("A" . ($key * 1 + 2), $value['increment_id'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
             $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['customer_firstname']);
             $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['customer_email']);
-            if ($value['custom_order_prescription_type'] == 1) {
-                $custom_order_prescription_type = '仅镜架';
-            } elseif ($value['custom_order_prescription_type'] == 2) {
-                $custom_order_prescription_type = '现货处方镜';
-            } elseif ($value['custom_order_prescription_type'] == 3) {
-                $custom_order_prescription_type = '定制处方镜';
-            } elseif ($value['custom_order_prescription_type'] == 4) {
-                $custom_order_prescription_type = '镜架+现货';
-            } elseif ($value['custom_order_prescription_type'] == 5) {
-                $custom_order_prescription_type = '镜架+定制';
-            } elseif ($value['custom_order_prescription_type'] == 6) {
-                $custom_order_prescription_type = '现片+定制片';
-            }
 
             if ($value['order_type'] == 1) {
                 $order_type = '普通订单';
@@ -930,23 +785,18 @@ EOF;
 
             $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['status']);
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['base_grand_total']);
-            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['base_shipping_amount']);
-            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $custom_order_prescription_type);
-            $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $order_type);
-            $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), $value['created_at']);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $order_type);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), date('Y-m-d H:i:s', $value['created_at']));
         }
 
         //设置宽度
         $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(30);
-        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(40);
+        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(30);
         $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(30);
         $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(15);
-        $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(15);
-        $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(15);
-        $spreadsheet->getActiveSheet()->getColumnDimension('I')->setWidth(30);
-
+        $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(30);
 
         //设置边框
         $border = [
@@ -964,7 +814,7 @@ EOF;
         $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
         $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
 
-        $spreadsheet->getActiveSheet()->getStyle('A1:I' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle('A1:G' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         $spreadsheet->setActiveSheetIndex(0);
 
         $format = 'xlsx';
@@ -988,6 +838,10 @@ EOF;
 
         $writer->save('php://output');
     }
+
+
+
+
 
     /**
      * 批量导出订单成本核算xls
