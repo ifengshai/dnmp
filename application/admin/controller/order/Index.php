@@ -118,7 +118,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
             }
 
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-            dump($sort);die();
+
             $map['b.address_type'] = 'shipping';
             $total = $model->alias('a')->join(['sales_flat_order_address' => 'b'], 'a.entity_id=b.parent_id')
                 ->where($where)
@@ -366,7 +366,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                 ->count();
             $list = $model
                 ->where($where)
-//                ->field('increment_id,customer_firstname,customer_email,status,base_grand_total,base_shipping_amount,custom_order_prescription_type,order_type,created_at,base_total_paid,base_total_due')
+                ->field('increment_id,customer_firstname,customer_email,status,base_grand_total,base_shipping_amount,custom_order_prescription_type,order_type,created_at,base_total_paid,base_total_due')
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
