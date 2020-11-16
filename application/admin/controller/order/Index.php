@@ -732,13 +732,7 @@ EOF;
 
         $ids = input('ids');
         if ($ids) {
-            $map['entity_id'] = ['in', $ids];
-        }
-
-        $filter = json_decode($this->request->get('filter'), true);
-        //默认Z站数据
-        if (!$filter['site']) {
-            $map['site'] = 1;
+            $map['id'] = ['in', $ids];
         }
 
         list($where) = $this->buildparams();
@@ -748,7 +742,7 @@ EOF;
             ->where($where)
             ->where($map)
             ->select();
-
+        
         $list = collection($list)->toArray();
 
         //从数据库查询需要的数据

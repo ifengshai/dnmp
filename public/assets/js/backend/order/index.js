@@ -19,12 +19,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
             // 初始化表格
             table.bootstrapTable({
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
-                pk: 'entity_id',
-                sortName: 'entity_id',
+                pk: 'id',
+                sortName: 'id',
                 columns: [
                     [
                         { checkbox: true },
-                        { field: 'entity_id', title: __('记录标识'), operate: false },
+                        { field: 'id', title: __('记录标识'), operate: false },
                         { field: 'increment_id', title: __('订单号'), operate: 'like' },
                         { field: 'label', title: __('是否为商业快递'), custom: { 1: 'danger', 0: 'gray' }, searchList: { 1: '是', 0: '否' }, operate: false, formatter: Table.api.formatter.status },
                         { field: 'country_id', title: __('国家'), operate: 'like' },
@@ -46,7 +46,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                     title: __('Detail'),
                                     classname: 'btn btn-xs  btn-primary  btn-dialog',
                                     icon: 'fa fa-list',
-                                    url: 'order/index/detail?label=' + Config.label,
+                                    url: 'order/index/detail',
                                     extend: 'data-area = \'["100%","100%"]\'',
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
@@ -99,6 +99,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
             //批量导出xls 
             $('.btn-batch-export-xls').click(function () {
                 var ids = Table.api.selectedids(table);
+
+                
                 if (ids.length > 0) {
                     window.open(Config.moduleurl + '/order/index/batch_export_xls?ids=' + ids + '&label=' + Config.label, '_blank');
                 } else {
