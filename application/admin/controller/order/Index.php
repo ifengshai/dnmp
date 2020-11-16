@@ -852,11 +852,17 @@ EOF;
             ->where($where)
             ->where($map)
             ->select();
-
         $list = collection($list)->toArray();
-        $field = 'sfo.entity_id,sfo.increment_id,sfo.customer_firstname,sfo.customer_email,sfo.status,sfo.base_grand_total,sfo.base_shipping_amount,
+        if ($label ==1){
+            $field = 'sfo.entity_id,sfo.increment_id,sfo.customer_firstname,sfo.customer_email,sfo.status,sfo.base_grand_total,sfo.base_shipping_amount,
         sfo.custom_order_prescription_type,sfo.order_type,sfo.created_at,sfo.is_new_version,sfo.global_currency_code,
         sfoi.product_options,sfo.total_qty_ordered as NUM,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.product_id,sfoi.qty_ordered';
+        }else{
+            $field = 'sfo.entity_id,sfo.increment_id,sfo.customer_firstname,sfo.customer_email,sfo.status,sfo.base_grand_total,sfo.base_shipping_amount,
+        sfo.custom_order_prescription_type,sfo.order_type,sfo.created_at,sfo.global_currency_code,
+        sfoi.product_options,sfo.total_qty_ordered as NUM,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.product_id,sfoi.qty_ordered';
+        }
+
         $resultList = $model->alias('sfo')
             ->join(['sales_flat_order_item' => 'sfoi'], 'sfoi.order_id=sfo.entity_id')
             ->field($field)
@@ -883,18 +889,26 @@ EOF;
             $finalResult[$key]['global_currency_code'] = $value['global_currency_code'];
             $finalResult[$key]['NUM'] = $value['NUM'];
             $tmp_product_options = unserialize($value['product_options']);
-
-            //新处方
-            if ($value['is_new_version'] == 1) {
-                //镀膜
-                $finalResult[$key]['coatiing_name'] = $tmp_product_options['info_buyRequest']['tmplens']['coating_name'];
-                //镜片类型
-                $finalResult[$key]['index_type'] = $tmp_product_options['info_buyRequest']['tmplens']['lens_data_name'];
-                //镜片类型拼接颜色字段
-                if ($tmp_product_options['info_buyRequest']['tmplens']['color_id']) {
-                    $finalResult[$key]['index_type'] .= '-' . $tmp_product_options['info_buyRequest']['tmplens']['color_data_name'];
+           //新处方
+            if ($label ==1){
+                if ($value['is_new_version'] == 1) {
+                    //镀膜
+                    $finalResult[$key]['coatiing_name'] = $tmp_product_options['info_buyRequest']['tmplens']['coating_name'];
+                    //镜片类型
+                    $finalResult[$key]['index_type'] = $tmp_product_options['info_buyRequest']['tmplens']['lens_data_name'];
+                    //镜片类型拼接颜色字段
+                    if ($tmp_product_options['info_buyRequest']['tmplens']['color_id']) {
+                        $finalResult[$key]['index_type'] .= '-' . $tmp_product_options['info_buyRequest']['tmplens']['color_data_name'];
+                    }
+                } else {
+                    $finalResult[$key]['coatiing_name'] = $tmp_product_options['info_buyRequest']['tmplens']['coatiing_name'];
+                    $finalResult[$key]['index_type'] = $tmp_product_options['info_buyRequest']['tmplens']['index_type'];
+                    //镜片类型拼接颜色字段
+                    if ($tmp_product_options['info_buyRequest']['tmplens']['color_name']) {
+                        $finalResult[$key]['index_type'] .= '-' . $tmp_product_options['info_buyRequest']['tmplens']['color_name'];
+                    }
                 }
-            } else {
+            }else{
                 $finalResult[$key]['coatiing_name'] = $tmp_product_options['info_buyRequest']['tmplens']['coatiing_name'];
                 $finalResult[$key]['index_type'] = $tmp_product_options['info_buyRequest']['tmplens']['index_type'];
                 //镜片类型拼接颜色字段
@@ -902,6 +916,7 @@ EOF;
                     $finalResult[$key]['index_type'] .= '-' . $tmp_product_options['info_buyRequest']['tmplens']['color_name'];
                 }
             }
+
             $tmp_prescription_params = $tmp_product_options['info_buyRequest']['tmplens']['prescription'];
             if (isset($tmp_prescription_params)) {
                 $tmp_prescription_params = explode("&", $tmp_prescription_params);
@@ -1033,21 +1048,16 @@ EOF;
             $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['status']);//订单状态
             $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 2 + 2), $value['NUM']);//SKU数量
             $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 2 + 2), $value['sku']);//SKU
-
-
             $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 2 + 2), '右眼');//眼球
             $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 2 + 3), '左眼');//眼球
-
             $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 2 + 2),(float) $value['od_sph'] > 0 ? ' +' . number_format($value['od_sph'] * 1, 2) : ' ' . $value['od_sph']);//SPH
             $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 2 + 3),(float) $value['os_sph'] > 0 ? ' +' . number_format($value['os_sph'] * 1, 2) : ' ' . $value['os_sph']);//SPH
             $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 2 + 2), (float) $value['od_cyl'] > 0 ? ' +' . number_format($value['od_cyl'] * 1, 2) : ' ' . $value['od_cyl']);//CYL
             $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 2 + 3), (float) $value['os_cyl'] > 0 ? ' +' . number_format($value['os_cyl'] * 1, 2) : ' ' . $value['os_cyl']);//CYL
             $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 2 + 2), $value['od_axis']);//AXI
             $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 2 + 3), $value['os_axis']);//AXI
-
             $value['os_add'] = urldecode($value['os_add']);
             $value['od_add'] = urldecode($value['od_add']);
-
             if ($value['os_add'] && $value['os_add'] && (float) ($value['os_add']) * 1 != 0 && (float) ($value['od_add']) * 1 != 0) {
                 //新处方版本
                 if ($value['is_new_version'] == 1) {
@@ -1059,7 +1069,6 @@ EOF;
                     $spreadsheet->getActiveSheet()->setCellValue("P" . ($key * 2 + 3), $value['od_add']);
                 }
             } else {
-
                 if ($value['os_add'] && (float) $value['os_add'] * 1 != 0) {
                     //数值在上一行合并有效，数值在下一行合并后为空
                     $spreadsheet->getActiveSheet()->setCellValue("P" . ($key * 2 + 2), $value['os_add']);
@@ -1084,27 +1093,19 @@ EOF;
             $spreadsheet->getActiveSheet()->setCellValue("U" . ($key * 2 + 2), $value['lens_height']);//镜框高度
             $spreadsheet->getActiveSheet()->setCellValue("V" . ($key * 2 + 2), $value['bridge']);//bridge
             $spreadsheet->getActiveSheet()->setCellValue("W" . ($key * 2 + 2), $custom_order_prescription_type);//处方类型
-
             $spreadsheet->getActiveSheet()->setCellValue("X" . ($key * 2 + 2), isset($value['od_pv']) ? $value['od_pv'] : '');//Prism
             $spreadsheet->getActiveSheet()->setCellValue("X" . ($key * 2 + 3), isset($value['os_pv']) ? $value['os_pv'] : '');
-
             $spreadsheet->getActiveSheet()->setCellValue("Y" . ($key * 2 + 2), isset($value['od_bd']) ? $value['od_bd'] : '');//Direct
             $spreadsheet->getActiveSheet()->setCellValue("Y" . ($key * 2 + 3), isset($value['os_bd']) ? $value['os_bd'] : '');
-
             $spreadsheet->getActiveSheet()->setCellValue("Z" . ($key * 2 + 2), isset($value['od_pv_r']) ? $value['od_pv_r'] : '');//Prism
             $spreadsheet->getActiveSheet()->setCellValue("Z" . ($key * 2 + 3), isset($value['os_pv_r']) ? $value['os_pv_r'] : '');
-
             $spreadsheet->getActiveSheet()->setCellValue("AA" . ($key * 2 + 2), isset($value['od_bd_r']) ? $value['od_bd_r'] : '');//Direct
             $spreadsheet->getActiveSheet()->setCellValue("AA" . ($key * 2 + 3), isset($value['os_bd_r']) ? $value['os_bd_r'] : '');
-
             $spreadsheet->getActiveSheet()->setCellValue("AB" . ($key * 2 + 2), $value['method']);//支付方式
             $spreadsheet->getActiveSheet()->setCellValue("AC" . ($key * 2 + 2), $value['global_currency_code']);//原币种
-
             $spreadsheet->getActiveSheet()->setCellValue("AD" . ($key * 2 + 2), $value['base_grand_total']);//原支付金额
             $spreadsheet->getActiveSheet()->setCellValue("AE" . ($key * 2 + 2), $value['created_at']);//订单支付时间
-
             $spreadsheet->getActiveSheet()->setCellValue("AF" . ($key * 2 + 2), $value['created_at']);//订单创建时间
-
             //合并单元格
             $spreadsheet->getActiveSheet()->mergeCells("A" . ($key * 2 + 2) . ":A" . ($key * 2 + 3));
             $spreadsheet->getActiveSheet()->mergeCells("B" . ($key * 2 + 2) . ":B" . ($key * 2 + 3));
