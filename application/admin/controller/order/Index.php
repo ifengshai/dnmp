@@ -324,7 +324,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
      */
     public function account_order()
     {
-        ini_set('memory_limit','256M');
+        ini_set('memory_limit','512M');
         $label = $this->request->get('label', 1);
         //设置过滤方法
         $this->request->filter(['strip_tags']);
