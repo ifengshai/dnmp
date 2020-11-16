@@ -680,6 +680,7 @@ class SaleAfterTask extends Model
 
     //     return $result;
     // }
+
     /****
      * @param $order_platform  订单平台
      * @param string $increment_id  订单号
@@ -722,14 +723,16 @@ class SaleAfterTask extends Model
                 return false;
                 break;
         }
+
+        $order = new \app\admin\model\order\order\NewOrder();
         //求出用户的邮箱
         $customer_email = '';
         //根据订单号搜索
         if ($increment_id) {
             //如果输入的是订单号
-            $customer_email = Db::connect($db)->table('sales_flat_order')->where('increment_id', $increment_id)->value('customer_email');
+            $customer_email = $order->where(['increment_id' => $increment_id,'site' => $order_platform])->value('customer_email');
             //如果输入的是vip订单号
-            if (!$customer_email && $order_platform != 3) {
+            if (!$customer_email) {
                 $customer_email = Db::connect($db_online)->table('oc_vip_order')->where('order_number', $increment_id)->value('customer_email');
             }
         }
