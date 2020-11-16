@@ -288,86 +288,10 @@ class OrderReturn extends Backend
     {
     }
 
-    /**
-     * 订单检索功能 重构
-     *
-     * @Description
-     * @author wpl
-     * @since 2020/11/16 10:27:13 
-     * @param Request $request
-     * @return void
-     */
-    public function search(Request $request)
-    {
-        $order_platform = intval(input('order_platform', 1));
-        $customer_email = input('email', '');
-        if ($request->isPost()) {
-            //获取输入的订单号
-            $increment_id = trim($request->post('increment_id'));
-           
-            //获取输入的平台
-            if (!$order_platform) {
-                $order_platform = trim($request->post('order_platform'));
-            }
-
-            //获取客户邮箱地址
-            if (!$customer_email) {
-                $customer_email = trim($request->post('customer_email'));
-            }
-            //获取客户姓名
-            $customer_name  = trim($request->post('customer_name'));
-            //获取客户电话
-            $customer_phone = trim($request->post('customer_phone'));
-            //获取运单号
-            $track_number   = trim($request->post('track_number'));
-            //获取交易号
-            $transaction_id  = trim($request->post('transaction_id'));
-            if ($order_platform < 1) {
-                
-                return json(['code' => 0,'msg' => '请选择正确的订单平台']);
-            }
-            if ($customer_name) {
-                $customer_name = explode(' ', $customer_name);
-            }
-            //求出用户的所有订单信息
-            $customer = (new SaleAfterTask())->getCustomerEmail($order_platform, $increment_id, $customer_name, $customer_phone, $track_number, $transaction_id, $customer_email);
-            if (!$customer) {
-                return json(['code' => 0,'msg' => '找不到订单信息，请重新尝试']);
-            }
-           
-            //求出会员的个人信息
-            $customerInfo = $customer['info'];
-            unset($customer['info']);
-            unset($customer['increment_id']);
-            //求出订单平台
-            $orderPlatformList = (new MagentoPlatform())->getOrderPlatformList();
-            $this->view->assign('orderInfoResult', $customer);
-            $this->view->assign('orderPlatformId', $order_platform);
-            $this->view->assign('orderPlatform', $orderPlatformList[$order_platform]);
-            $this->view->assign('customerInfo', $customerInfo);
-            
-            //上传订单平台
-            $this->view->assign('order_platform', $order_platform);
-            $this->view->engine->layout(false);
-            $html = $this->view->fetch('item');
-            return json(['code' => 1,'data' => $html]);
-        }
-      
-        $this->view->assign("order_platform", $order_platform);
-        $this->view->assign("customer_email", $customer_email);
-        $this->view->assign("orderPlatformList", (new MagentoPlatform())->getOrderPlatformList());
-        return $this->view->fetch();
-    }
-
-
-
-
-
-
     /***
      * 订单检索功能(修改之后)
      */
-    public function search_bak(Request $request)
+    public function search(Request $request)
     {
         $order_platform = intval(input('order_platform', 1));
         $customer_email = input('email', '');
