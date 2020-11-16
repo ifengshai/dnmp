@@ -843,16 +843,14 @@ EOF;
             $this->request->get(['filter' => json_encode($filter)]);
         }
 
-
         list($where) = $this->buildparams();
 
-        $list = $model
-//            ->field('increment_id,customer_firstname,customer_email,status,base_grand_total,base_shipping_amount,custom_order_prescription_type,order_type,created_at')
-
-            ->where($where)
-            ->where($map)
-            ->select();
-        $list = collection($list)->toArray();
+//        $list = $model
+////          ->field('increment_id,customer_firstname,customer_email,status,base_grand_total,base_shipping_amount,custom_order_prescription_type,order_type,created_at')
+//            ->where($where)
+//            ->where($map)
+//            ->select();
+//        $list = collection($list)->toArray();
         if ($label ==1){
             $field = 'sfo.entity_id,sfo.increment_id,sfo.customer_firstname,sfo.customer_email,sfo.status,sfo.base_grand_total,sfo.base_shipping_amount,
         sfo.custom_order_prescription_type,sfo.order_type,sfo.created_at,sfo.is_new_version,sfo.global_currency_code,
