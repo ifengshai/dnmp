@@ -3,6 +3,8 @@
 namespace app\admin\controller\saleaftermanage;
 
 use app\admin\model\saleaftermanage\WorkOrderNote;
+use app\admin\model\saleaftermanage\WorkOrderProblemStep;
+use app\admin\model\saleaftermanage\WorkOrderStepType;
 use app\common\controller\Backend;
 use think\Cache;
 use think\Db;
@@ -974,6 +976,40 @@ class WorkOrderList extends Backend
                 $this->view->assign('problem_type', $problem_type); //客服问题类型
             }
         }
+        //所有主单措施类型
+        $all_step_main = (new WorkOrderStepType)->where(['is_del'=>1,'type'=>1])->select();
+        //所有子单措施类型
+        $all_step_item = (new WorkOrderStepType)->where(['is_del'=>1,'type'=>2])->select();
+        //存在子单措施
+        if (!empty($all_step_item)) {
+            $all_step_item         = collection($all_step_item)->toArray();
+            foreach ($all_step_item as $sv) {
+                $step_item[$sv['id']] = $sv['step_name'];
+            }
+        }
+        //所有工单类型措施关系表
+        $where_step = [];
+        $where_step['b.is_del'] = 1;
+        $where_step['b.type'] = 2;
+//        $item_problem_step = (new WorkOrderProblemStep)
+//            ->alias('a')
+//            ->field('a.id,a.problem_id')
+//            ->join(['fa_work_order_step_type'=> 'b'], 'a.step_id=b.id','left')
+//            ->where($where_step)
+//            ->select();
+
+        //存在工单类型措施关系表
+//        if(!empty($item_problem_step)){
+//            $item_problem_step = collection($item_problem_step)->toArray();
+//            foreach($item_problem_step as $fv){
+//                $relation_problem_step[$fv['problem_id']][] = $fv;
+//                if(0 != $fv['extend_group_id']){
+//                    $all_extend_group[] = $fv['extend_group_id'];
+//                }
+//            }
+//        }
+//        var_dump($all_step_item);
+//        die;
 
         $this->assignconfig('userid', session('admin.id'));
         return $this->view->fetch();
