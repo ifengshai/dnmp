@@ -13,7 +13,7 @@ class Test01 extends Backend
     public function _initialize()
     {
         parent::_initialize();
-        // $this->zeelool = new \app\admin\model\order\order\Zeelool();
+        $this->zeelool = new \app\admin\model\order\order\Zeelool();
         // $this->voogueme = new \app\admin\model\order\order\Voogueme();
         // $this->nihao = new \app\admin\model\order\order\Nihao();
     }
