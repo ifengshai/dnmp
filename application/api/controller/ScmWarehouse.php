@@ -791,9 +791,9 @@ class ScmWarehouse extends Scm
         $item_sku = $this->request->request("item_data");
         empty($item_sku) && $this->error(__('sku集合不能为空！！'), [], 508);
         $item_sku = json_decode(htmlspecialchars_decode($item_sku),true);
-        if (count(array_filter($item_sku)) < 1) {
-            $this->error(__('sku集合不能为空！！'), [], 507);
-        }
+        empty($item_sku) && $this->error(__('sku集合不能为空'), [], 403);
+        $item_sku = array_filter($item_sku);
+
 
         $in_stock_id = $this->request->request("in_stock_id");//入库单ID，
         $platform_id = $this->request->request("platform_id");//站点，判断是否是新创建入库 还是 质检单入库
@@ -1652,10 +1652,9 @@ class ScmWarehouse extends Scm
         $do_type = $this->request->request('do_type');
         $item_sku = $this->request->request("item_sku");
         $item_sku = html_entity_decode($item_sku);
-        $item_sku = array_filter(json_decode($item_sku,true));
-        if (count(array_filter($item_sku)) < 1) {
-            $this->error(__('sku集合不能为空！！'), [], 540);
-        }
+        $item_sku = json_decode(htmlspecialchars_decode($item_sku),true);
+        empty($item_sku) && $this->error(__('sku集合不能为空'), [], 403);
+        $item_sku = array_filter($item_sku);
 
         $inventory_id = $this->request->request("inventory_id");
         empty($inventory_id) && $this->error(__('盘点单号不能为空'), [], 541);
@@ -1682,7 +1681,8 @@ class ScmWarehouse extends Scm
         //检测条形码是否已绑定
         $where['inventory_id'] = [['>',0], ['neq',$inventory_id]];
         foreach ($item_sku as $key => $value) {
-            $sku_code = array_column($value['sku_agg'],'code');
+//            empty($value['sku_agg']) && $this->error(__($value['sku'].'的条形码数据为空，请检查'), [], 541);
+            !empty($value['sku_agg']) && $sku_code = array_column($value['sku_agg'],'code');
             count($value['sku_agg']) != count(array_unique($sku_code))
             &&
             $this->error(__('条形码有重复，请检查'), [], 405);
