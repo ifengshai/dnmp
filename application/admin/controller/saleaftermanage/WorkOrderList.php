@@ -4,6 +4,7 @@ namespace app\admin\controller\saleaftermanage;
 
 use app\admin\model\saleaftermanage\WorkOrderNote;
 use app\admin\model\saleaftermanage\WorkOrderProblemStep;
+use app\admin\model\saleaftermanage\WorkOrderProblemType;
 use app\admin\model\saleaftermanage\WorkOrderStepType;
 use app\common\controller\Backend;
 use think\Cache;
@@ -988,29 +989,22 @@ class WorkOrderList extends Backend
             }
         }
         //所有工单类型措施关系表
+        $item_problem_step = [];
         $where_step = [];
-        $where_step['b.is_del'] = 1;
-        $where_step['b.type'] = 2;
-//        $item_problem_step = (new WorkOrderProblemStep)
-//            ->alias('a')
-//            ->field('a.id,a.problem_id')
-//            ->join(['fa_work_order_step_type'=> 'b'], 'a.step_id=b.id','left')
-//            ->where($where_step)
-//            ->select();
-
-        //存在工单类型措施关系表
-//        if(!empty($item_problem_step)){
-//            $item_problem_step = collection($item_problem_step)->toArray();
-//            foreach($item_problem_step as $fv){
-//                $relation_problem_step[$fv['problem_id']][] = $fv;
-//                if(0 != $fv['extend_group_id']){
-//                    $all_extend_group[] = $fv['extend_group_id'];
-//                }
-//            }
-//        }
-//        var_dump($all_step_item);
-//        die;
-
+        $where_step['c.is_del'] = 1;
+        $where_step['c.order_type'] = 2;
+        $item_problem_step_list = (new WorkOrderProblemStep)
+            ->alias('a')
+            ->field('a.id,a.problem_id,a.step_id,a.extend_group_id,a.is_check,a.is_auto_complete')
+            ->join(['fa_work_order_problem_type'=> 'c'], 'a.problem_id=c.id','left')
+            ->where($where_step)
+            ->order('a.id')
+            ->select();
+        $item_problem_step_list = $item_problem_step_list->toArray();
+        foreach ($item_problem_step_list as $v) {
+            $item_problem_step[$v['step_id']] = $v;
+        }
+        $this->view->assign('item_problem_step', $item_problem_step);
         $this->assignconfig('userid', session('admin.id'));
         return $this->view->fetch();
     }
