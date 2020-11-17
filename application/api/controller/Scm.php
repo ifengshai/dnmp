@@ -44,14 +44,14 @@ class Scm extends Api
                 ['name'=>'成品质检', 'link'=>'distribution/quality', 'href'=>'com.nextmar.mojing.ui.quality.OrderQualityActivity'],
                 ['name'=>'合单', 'link'=>'distribution/merge', 'href'=>'com.nextmar.mojing.ui.merge.OrderMergeActivity'],
                 ['name'=>'合单待取', 'link'=>'distribution/waitmerge', 'href'=>'com.nextmar.mojing.ui.merge.OrderMergeCompletedActivity'],
-                ['name'=>'审单', 'link'=>'distribution/audit', 'href'=>'com.nextmar.mojing.ui.audit.AuditOrderActivity']
+                ['name'=>'设置', 'link'=>'distribution/audit', 'href'=>'com.nextmar.mojing.ui.setting.SettingActivity']
             ],
         ],
         [
             'title'=>'质检管理',
             'menu'=>[
                 ['name'=>'物流检索', 'link'=>'warehouse/logistics_info/index', 'href'=>'com.nextmar.mojing.ui.logistics.LogisticsActivity'],
-                ['name'=>'质检单', 'link'=>'warehouse/check', 'href'=>'com.nextmar.mojing.ui.quality.QualityListActivity']
+                ['name'=>'质检单', 'link'=>'warehouse/check', 'href'=>'com.nextmar.mojing.ui.qualitylist.QualityListActivity']
             ],
         ],
         [
