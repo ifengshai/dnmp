@@ -786,6 +786,7 @@ class Distribution extends Backend
             Db::rollback();
             $this->error($e->getMessage());
         }
+        $this->success('标记成功!', '', 'success', 200);
     }
 
     /**
@@ -935,146 +936,142 @@ class Distribution extends Backend
     public function set_status()
     {
         $ids = input('id_params/a');
-        if ($ids) {
-            $check_status = input('status');
-            empty($check_status) && $this->error('状态值不能为空');
+        !$ids && $this->error('请选择要标记的数据');
 
-            //检测异常状态
-            $_distribution_abnormal = new DistributionAbnormal();
-            $abnormal_count = $_distribution_abnormal
-                ->where(['item_process_id' => ['in', $ids], 'status' => 1])
-                ->count();
-            0 < $abnormal_count && $this->error('有异常待处理的子订单');
+        $check_status = input('status');
+        empty($check_status) && $this->error('状态值不能为空');
 
-            //TODO::检测工单状态
+        //检测异常状态
+        $_distribution_abnormal = new DistributionAbnormal();
+        $abnormal_count = $_distribution_abnormal
+            ->where(['item_process_id' => ['in', $ids], 'status' => 1])
+            ->count();
+        0 < $abnormal_count && $this->error('有异常待处理的子订单');
 
-            //检测配货状态
-            $item_list = $this->model
-                ->field('id,site,distribution_status,order_id,option_id')
-                ->where(['id' => ['in', $ids]])
-                ->select();
-            $order_ids = [];
-            $option_ids = [];
+        //TODO::检测工单状态
+
+        //检测配货状态
+        $item_list = $this->model
+            ->field('id,site,distribution_status,order_id,option_id')
+            ->where(['id' => ['in', $ids]])
+            ->select();
+        $order_ids = [];
+        $option_ids = [];
+        foreach ($item_list as $value) {
+            $value['distribution_status'] != $check_status && $this->error('存在非当前节点的子订单');
+            $order_ids[] = $value['order_id'];
+            $option_ids[] = $value['option_id'];
+        }
+
+        //获取订单购买总数
+        $_new_order = new NewOrder();
+        $total_list = $_new_order
+            ->where(['id' => ['in', array_unique($order_ids)]])
+            ->column('total_qty_ordered', 'id');
+
+        //获取子订单处方数据
+        $_new_order_item_option = new NewOrderItemOption();
+        $option_list = $_new_order_item_option
+            ->field('id,is_print_logo,sku,index_name')
+            ->where(['id' => ['in', array_unique($option_ids)]])
+            ->select();
+        $option_list = array_column($option_list, NULL, 'id');
+
+        //库存、关系映射表
+        $_item_platform_sku = new ItemPlatformSku();
+        $_item = new Item();
+
+        //状态类型
+        $status_arr = [
+            2 => '配货',
+            3 => '配镜片',
+            4 => '加工',
+            5 => '印logo',
+            6 => '成品质检',
+            8 => '合单'
+        ];
+
+        //操作人信息
+        $admin = (object)session('admin');
+
+        Db::startTrans();
+        try {
+            //主订单状态表
+            $_new_order_process = new NewOrderProcess();
+
+            //更新状态
             foreach ($item_list as $value) {
-                $value['distribution_status'] != $check_status && $this->error('存在非当前节点的子订单');
-                $order_ids[] = $value['order_id'];
-                $option_ids[] = $value['option_id'];
-            }
-
-            //获取订单购买总数
-            $_new_order = new NewOrder();
-            $total_list = $_new_order
-                ->where(['id' => ['in', array_unique($order_ids)]])
-                ->column('total_qty_ordered', 'id');
-
-            //获取子订单处方数据
-            $_new_order_item_option = new NewOrderItemOption();
-            $option_list = $_new_order_item_option
-                ->field('id,is_print_logo,sku,index_name,order_prescription_type')
-                ->where(['id' => ['in', array_unique($option_ids)]])
-                ->select();
-            $option_list = array_column($option_list, NULL, 'id');
-
-            //库存、关系映射表
-            $_item_platform_sku = new ItemPlatformSku();
-            $_item = new Item();
-
-            //状态类型
-            $status_arr = [
-                2 => '配货',
-                3 => '配镜片',
-                4 => '加工',
-                5 => '印logo',
-                6 => '成品质检',
-                8 => '合单'
-            ];
-
-            //操作人信息
-            $admin = (object)session('admin');
-
-            Db::startTrans();
-            try {
-                //主订单状态表
-                $_new_order_process = new NewOrderProcess();
-
-                //更新状态
-                foreach ($item_list as $value) {
-                    //下一步状态 待配货
-                    if (2 == $check_status) {
-                        //如果处方类型为现货处方镜或定制处方镜 则需配镜片
-                        if ($option_list[$value['option_id']]['order_prescription_type'] == 2 || $option_list[$value['option_id']]['order_prescription_type'] == 3) {
-                            $save_status = 3; //待配镜片
-                        } else {
-                            //判断是否需要印logo
-                            if ($option_list[$value['option_id']]['is_print_logo']) {
-                                $save_status = 5; //待印logo
-                            } else {
-                                //判断是否需要合单
-                                if ($total_list[$value['order_id']]['total_qty_ordered'] > 1) {
-                                    $save_status = 7; //待合单
-                                } else {
-                                    //不需要配镜片、印logo、合单
-                                    $save_status = 9; //合单完成
-                                }
-                            }
-                        }
-                    } elseif (3 == $check_status) { //待配镜片
-                        $save_status = 4; //待加工
-                    } elseif (4 == $check_status) { //待加工
-                        //判断是否需要印logo
+                //下一步状态
+                if (2 == $check_status) {
+                    if ($option_list[$value['option_id']]['index_name']) {
+                        $save_status = 3;
+                    } else {
                         if ($option_list[$value['option_id']]['is_print_logo']) {
                             $save_status = 5; //待印logo
                         } else {
-                            $save_status = 6; //待成品质检
+                            if ($total_list[$value['order_id']]['total_qty_ordered'] > 1) {
+                                $save_status = 7;
+                            } else {
+                                $save_status = 9;
+                            }
                         }
-                    } elseif (5 == $check_status) { //待印logo
-                        $save_status = 6; //待成品质检
-                    } elseif (6 == $check_status) { //待成品质检
-                        //判断是否需要合单
-                        if ($total_list[$value['order_id']]['total_qty_ordered'] > 1) {
-                            $save_status = 7; //待合单
-                        } else {
-                            $save_status = 9; //合单完成
-                        }
-
-                        //获取true_sku
-                        $true_sku = $_item_platform_sku->getTrueSku($value['sku'], $value['site']);
-
-                        //扣减订单占用库存、配货占用库存、总库存
-                        $_item
-                            ->where(['sku' => $true_sku])
-                            ->dec('occupy_stock', 1)
-                            ->dec('distribution_occupy_stock', 1)
-                            ->dec('stock', 1)
-                            ->update();
+                    }
+                } elseif (3 == $check_status) {
+                    $save_status = 4;
+                } elseif (4 == $check_status) {
+                    if ($option_list[$value['option_id']]['is_print_logo']) {
+                        $save_status = 5;
+                    } else {
+                        $save_status = 6;
+                    }
+                } elseif (5 == $check_status) {
+                    $save_status = 6;
+                } elseif (6 == $check_status) {
+                    if ($total_list[$value['order_id']]['total_qty_ordered'] > 1) {
+                        $save_status = 7;
+                    } else {
+                        $save_status = 9;
                     }
 
-                    //订单主表标记已合单
-                    if (9 == $save_status) {
-                        $_new_order_process
-                            ->allowField(true)
-                            ->isUpdate(true, ['order_id' => $value['order_id']])
-                            ->save(['combine_status' => 1, 'combine_time' => time()]);
-                    }
+                    //获取true_sku
+                    $true_sku = $_item_platform_sku->getTrueSku($option_list[$value['option_id']]['sku'], $value['site']);
 
-                    $this->model
-                        ->allowField(true)
-                        ->isUpdate(true, ['id' => $value['id']])
-                        ->save(['distribution_status' => $save_status]);
-
-                    //操作成功记录
-                    DistributionLog::record($admin, $value['id'], $check_status, $status_arr[$check_status] . '完成');
+                    //扣减订单占用库存、配货占用库存、总库存
+                    $_item
+                        ->where(['sku' => $true_sku])
+                        ->dec('occupy_stock', 1)
+                        ->dec('distribution_occupy_stock', 1)
+                        ->dec('stock', 1)
+                        ->update();
                 }
 
-                Db::commit();
-            } catch (PDOException $e) {
-                Db::rollback();
-                $this->error($e->getMessage());
-            } catch (Exception $e) {
-                Db::rollback();
-                $this->error($e->getMessage());
+                //订单主表标记已合单
+                if (9 == $save_status) {
+                    $_new_order_process
+                        ->allowField(true)
+                        ->isUpdate(true, ['order_id' => $value['order_id']])
+                        ->save(['combine_status' => 1, 'combine_time' => time()]);
+                }
+
+                $this->model
+                    ->allowField(true)
+                    ->isUpdate(true, ['id' => $value['id']])
+                    ->save(['distribution_status' => $save_status]);
+
+                //操作成功记录
+                DistributionLog::record($admin, $value['id'], $check_status, $status_arr[$check_status] . '完成');
             }
+
+            Db::commit();
+        } catch (PDOException $e) {
+            Db::rollback();
+            $this->error($e->getMessage());
+        } catch (Exception $e) {
+            Db::rollback();
+            $this->error($e->getMessage());
         }
+
+        $this->success('操作成功!', '', 'success', 200);
     }
 
     /**
@@ -1088,102 +1085,103 @@ class Distribution extends Backend
     public function finish_refuse()
     {
         $ids = input('id_params/a');
-        if ($ids) {
-            $reason = input('reason');
-            !in_array($reason, [1, 2, 3, 4]) && $this->error('拒绝原因错误');
+        !$ids && $this->error('请选择要标记的数据');
 
-            //检测异常状态
-            $_distribution_abnormal = new DistributionAbnormal();
-            $abnormal_count = $_distribution_abnormal
-                ->where(['item_process_id' => ['in', $ids], 'status' => 1])
-                ->count();
-            0 < $abnormal_count && $this->error('有异常待处理的子订单');
+        $reason = input('reason');
+        !in_array($reason, [1, 2, 3, 4]) && $this->error('拒绝原因错误');
 
-            //TODO::检测工单状态
+        //检测异常状态
+        $_distribution_abnormal = new DistributionAbnormal();
+        $abnormal_count = $_distribution_abnormal
+            ->where(['item_process_id' => ['in', $ids], 'status' => 1])
+            ->count();
+        0 < $abnormal_count && $this->error('有异常待处理的子订单');
 
-            //检测配货状态
-            $item_list = $this->model
-                ->field('id,site,sku,distribution_status')
-                ->where(['id' => ['in', $ids]])
-                ->select();
-            empty($item_list) && $this->error('数据不存在');
+        //TODO::检测工单状态
+
+        //检测配货状态
+        $item_list = $this->model
+            ->field('id,site,sku,distribution_status')
+            ->where(['id' => ['in', $ids]])
+            ->select();
+        empty($item_list) && $this->error('数据不存在');
+        foreach ($item_list as $value) {
+            6 != $value['distribution_status'] && $this->error('存在非当前节点的子订单');
+        }
+
+        //库存、关系映射、库存日志表
+        $_item_platform_sku = new ItemPlatformSku();
+        $_item = new Item();
+        $_stock_log = new StockLog();
+
+        //状态
+        $status_arr = [
+            1 => ['status' => 4, 'name' => '质检拒绝：加工调整'],
+            2 => ['status' => 2, 'name' => '质检拒绝：镜架报损'],
+            3 => ['status' => 3, 'name' => '质检拒绝：镜片报损'],
+            4 => ['status' => 5, 'name' => '质检拒绝：logo调整']
+        ];
+
+        //操作人信息
+        $admin = (object)session('admin');
+
+        Db::startTrans();
+        try {
+            //子订单状态回滚
+            $this->model
+                ->allowField(true)
+                ->isUpdate(true, ['id' => ['in', $ids]])
+                ->save(['distribution_status' => $status_arr[$reason]['status']]);
+
+            //更新状态
             foreach ($item_list as $value) {
-                6 != $value['distribution_status'] && $this->error('存在非当前节点的子订单');
-            }
+                //镜片报损扣减可用库存、虚拟仓库存、配货占用库存、总库存
+                if (2 == $reason) {
+                    //获取true_sku
+                    $true_sku = $_item_platform_sku->getTrueSku($value['sku'], $value['site']);
 
-            //库存、关系映射、库存日志表
-            $_item_platform_sku = new ItemPlatformSku();
-            $_item = new Item();
-            $_stock_log = new StockLog();
+                    //扣减虚拟仓库存
+                    $_item_platform_sku
+                        ->where(['sku' => $true_sku, 'platform_type' => $value['site']])
+                        ->dec('stock', 1)
+                        ->update();
 
-            //状态
-            $status_arr = [
-                1 => ['status' => 4, 'name' => '质检拒绝：加工调整'],
-                2 => ['status' => 2, 'name' => '质检拒绝：镜架报损'],
-                3 => ['status' => 3, 'name' => '质检拒绝：镜片报损'],
-                4 => ['status' => 5, 'name' => '质检拒绝：logo调整']
-            ];
+                    //扣减可用库存、配货占用库存、总库存
+                    $_item
+                        ->where(['sku' => $true_sku])
+                        ->dec('available_stock', 1)
+                        ->dec('distribution_occupy_stock', 1)
+                        ->dec('stock', 1)
+                        ->update();
 
-            //操作人信息
-            $admin = (object)session('admin');
-
-            Db::startTrans();
-            try {
-                //子订单状态回滚
-                $this->model
-                    ->allowField(true)
-                    ->isUpdate(true, ['id' => ['in', $ids]])
-                    ->save(['distribution_status' => $status_arr[$reason]['status']]);
-
-                //更新状态
-                foreach ($item_list as $value) {
-                    //镜片报损扣减可用库存、虚拟仓库存、配货占用库存、总库存
-                    if (2 == $reason) {
-                        //获取true_sku
-                        $true_sku = $_item_platform_sku->getTrueSku($value['sku'], $value['site']);
-
-                        //扣减虚拟仓库存
-                        $_item_platform_sku
-                            ->where(['sku' => $true_sku, 'platform_type' => $value['site']])
-                            ->dec('stock', 1)
-                            ->update();
-
-                        //扣减可用库存、配货占用库存、总库存
-                        $_item
-                            ->where(['sku' => $true_sku])
-                            ->dec('available_stock', 1)
-                            ->dec('distribution_occupy_stock', 1)
-                            ->dec('stock', 1)
-                            ->update();
-
-                        //扣库存日志
-                        $stock_data = [
-                            'type'                      => 2,
-                            'two_type'                  => 4,
-                            'sku'                       => $value['sku'],
-                            'public_id'                 => $value['id'],
-                            'stock_change'              => -1,
-                            'available_stock_change'    => -1,
-                            'create_person'             => $admin->nickname,
-                            'create_time'               => date('Y-m-d H:i:s'),
-                            'remark'                    => '成检拒绝：减少总库存,减少可用库存'
-                        ];
-                        $_stock_log->allowField(true)->save($stock_data);
-                    }
-
-                    //记录日志
-                    DistributionLog::record($admin, $value['id'], 6, $status_arr[$reason]['name']);
+                    //扣库存日志
+                    $stock_data = [
+                        'type'                      => 2,
+                        'two_type'                  => 4,
+                        'sku'                       => $value['sku'],
+                        'public_id'                 => $value['id'],
+                        'stock_change'              => -1,
+                        'available_stock_change'    => -1,
+                        'create_person'             => $admin->nickname,
+                        'create_time'               => date('Y-m-d H:i:s'),
+                        'remark'                    => '成检拒绝：减少总库存,减少可用库存'
+                    ];
+                    $_stock_log->allowField(true)->save($stock_data);
                 }
 
-                Db::commit();
-            } catch (PDOException $e) {
-                Db::rollback();
-                $this->error($e->getMessage());
-            } catch (Exception $e) {
-                Db::rollback();
-                $this->error($e->getMessage());
+                //记录日志
+                DistributionLog::record($admin, $value['id'], 6, $status_arr[$reason]['name']);
             }
+
+            Db::commit();
+        } catch (PDOException $e) {
+            Db::rollback();
+            $this->error($e->getMessage());
+        } catch (Exception $e) {
+            Db::rollback();
+            $this->error($e->getMessage());
         }
+        $this->success('操作成功!', '', 'success', 200);
     }
 
     /**
