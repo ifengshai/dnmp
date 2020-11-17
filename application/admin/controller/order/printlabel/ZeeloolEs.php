@@ -881,7 +881,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
                 }
             }
 
-            //西语站添加镜片类型 镜片颜色
+            //西语站添加镜片类型 镜片颜色 ....
             if ($tmp_product_options['info_buyRequest']['tmplens']['lens_type'] || $tmp_product_options['info_buyRequest']['tmplens']['lens_color']) {
                 $finalResult[$key]['index_type'] = $finalResult[$key]['index_type'] . '-' . $tmp_product_options['info_buyRequest']['tmplens']['lens_type'];
                 $finalResult[$key]['index_type'] = $finalResult[$key]['index_type'] . '-' . $tmp_product_options['info_buyRequest']['tmplens']['lens_color'];
@@ -1210,7 +1210,7 @@ EOF;
                 // $final_print['index_type'] = substr($product_options['info_buyRequest']['tmplens']['index_type'],0,60);
                 $final_print['index_type'] = $product_options['info_buyRequest']['tmplens']['index_type'];
 
-                //西语站添加镜片类型 镜片颜色
+                //西语站添加镜片类型 镜片颜色....
                 if ($product_options['info_buyRequest']['tmplens']['lens_type'] || $product_options['info_buyRequest']['tmplens']['lens_color']) {
                     $final_print['index_type'] = $final_print['index_type'] . '-' . $product_options['info_buyRequest']['tmplens']['lens_type'];
                     $final_print['index_type'] = $final_print['index_type'] . '-' . $product_options['info_buyRequest']['tmplens']['lens_color'];
