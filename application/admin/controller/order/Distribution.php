@@ -9,13 +9,11 @@ use think\Exception;
 use think\Loader;
 use think\Db;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use Util\SKUHelper;
 use app\admin\model\order\order\NewOrderItemProcess;
 use app\admin\model\warehouse\StockHouse;
 use app\admin\model\DistributionAbnormal;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use app\admin\model\order\order\NewOrder;
-use app\admin\model\warehouse\StockSku;
 use app\admin\model\order\order\NewOrderItemOption;
 use app\admin\model\itemmanage\ItemPlatformSku;
 use app\admin\model\itemmanage\Item;
@@ -167,9 +165,8 @@ class Distribution extends Backend
     public function detail($ids = null)
     {
         $row = $this->model->get($ids);
-        if (!$row) {
-            $this->error(__('No Results were found'));
-        }
+        !$row && $this->error(__('No Results were found'));
+
         //查询处方详情
         $result = $this->orderitemoption->get($row['option_id'])->toArray();
 
@@ -601,199 +598,45 @@ class Distribution extends Backend
     }
 
     /**
-     * 批量打印
-     * @todo 弃用
+     * 标记已打印
      * @Description
      * @author lzh
      * @since 2020/10/28 14:45:39
      * @return void
      */
-    public function batch_print_label_bak()
+    public function tag_printed()
     {
-        ob_start();
-        $ids = input('ids');
-        if ($ids) {
-            //检测配货状态
-            $where = [
-                'id' => ['in', $ids],
-                'distribution_status' => ['neq', 1]
-            ];
-            $count = $this->model
-                ->where($where)
-                ->count();
-            if ($count > 0) {
-                return $this->error('存在非当前节点的子订单', url('index?ref=addtabs'));
-            }
+        $ids = input('id_params/a');
+        !$ids && $this->error('请选择要标记的数据');
 
-            //标记打印状态
-            Db::startTrans();
-            try {
-                //标记状态
-                $this->model
-                    ->allowField(true)
-                    ->isUpdate(true, ['id' => ['in', $ids]])
-                    ->save(['distribution_status' => 2]);
+        //检测子订单状态
+        $where = [
+            'id' => ['in', $ids],
+            'distribution_status' => ['neq', 1]
+        ];
+        $count = $this->model->where($where)->count();
+        0 < $count && $this->error('存在非当前节点的子订单');
 
-                //记录配货日志
-                $admin = (object)session('admin');
-                DistributionLog::record($admin, $ids, 1, '标记打印完成');
+        //标记打印状态
+        Db::startTrans();
+        try {
+            //标记状态
+            $this->model
+                ->allowField(true)
+                ->isUpdate(true, ['id' => ['in', $ids]])
+                ->save(['distribution_status' => 2]);
 
-                Db::commit();
-            } catch (PDOException $e) {
-                Db::rollback();
-                $this->error($e->getMessage());
-            } catch (Exception $e) {
-                Db::rollback();
-                $this->error($e->getMessage());
-            }
+            //记录配货日志
+            $admin = (object)session('admin');
+            DistributionLog::record($admin, $ids, 1, '标记打印完成');
 
-            //TODO::条形码样式判断显示处理
-            $file_header = <<<EOF
-                            <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-            <style>
-            body{ margin:0; padding:0}
-            .single_box{margin:0 auto;width: 400px;padding:1mm;margin-bottom:2mm;}
-            table.addpro {clear: both;table-layout: fixed; margin-top:6px; border-top:1px solid #000;border-left:1px solid #000; font-size:12px;}
-            table.addpro .title {background: none repeat scroll 0 0 #f5f5f5; }
-            table.addpro .title  td {border-collapse: collapse;color: #000;text-align: center; font-weight:normal; }
-            table.addpro tbody td {word-break: break-all; text-align: center;border-bottom:1px solid #000;border-right:1px solid #000;}
-            table.addpro.re tbody td{ position:relative}
-            </style>
-EOF;
-
-            //获取子订单列表
-            $list = $this->model
-                ->alias('a')
-                ->field('a.item_order_number,a.order_id,a.created_at,b.os_add,b.od_add,b.pdcheck,b.prismcheck,b.pd_r,b.pd_l,b.pd,b.od_pv,b.os_pv,b.od_bd,b.os_bd,b.od_bd_r,b.os_bd_r,b.od_pv_r,b.os_pv_r,b.index_name,b.coatiing_name,b.prescription_type,b.sku,b.od_sph,b.od_cyl,b.od_axis,b.os_sph,b.os_cyl,b.os_axis')
-                ->join(['fa_order_item_option' => 'b'], 'a.option_id=b.id')
-                ->where(['a.id' => ['in', $ids]])
-                ->select();
-
-            $order_ids = [];
-            $sku_arr = [];
-            foreach ($list as $processing_value) {
-                $order_ids[] = $processing_value['order_id'];
-                $sku_arr[] = $processing_value['sku'];
-            }
-
-            //获取订单数据
-            $_new_order = new NewOrder();
-            $order_list = $_new_order
-                ->field('id,total_qty_ordered,increment_id')
-                ->where(['id' => ['in', array_unique($order_ids)]])
-                ->select();
-            $order_list = array_column($order_list, NULL, 'id');
-
-            //获取sku绑定库位数据
-            $_stock_sku = new StockSku();
-            $store_house_list = $_stock_sku
-                ->alias('a')
-                ->field('a.sku,b.coding')
-                ->join(['fa_store_house' => 'b'], 'a.store_id=b.id')
-                ->where(['a.sku' => ['in', array_unique($sku_arr)], 'b.type' => 1])
-                ->select();
-            $store_house_list = array_column($store_house_list, NULL, 'sku');
-
-            $file_content = '';
-            foreach ($list as $processing_value) {
-                $item_order_number = $processing_value['item_order_number'];
-                $fileName = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "distribution" . DS . "new" . DS . "$item_order_number.png";
-                $dir = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "distribution" . DS . "new";
-                if (!file_exists($dir)) {
-                    mkdir($dir, 0777, true);
-                }
-                $img_url = "/uploads/printOrder/distribution/new/$item_order_number.png";
-
-                //生成条形码
-                $this->generate_barcode_new($item_order_number, $fileName);
-
-                //处理ADD
-                if (strlen($processing_value['os_add']) > 0 && strlen($processing_value['od_add']) > 0) {
-                    $os_add = "<td>" . $processing_value['od_add'] . "</td> ";
-                    $od_add = "<td>" . $processing_value['os_add'] . "</td> ";
-                } else {
-                    $od_add = "<td rowspan='2'>" . $processing_value['od_add'] . "</td>";
-                    $os_add = "";
-                }
-
-                //判断双PD
-                if ('on' == $processing_value['pdcheck']) {
-                    $od_pd = "<td>" . $processing_value['pd_r'] . "</td> ";
-                    $os_pd = "<td>" . $processing_value['pd_l'] . "</td> ";
-                } else {
-                    $od_pd = "<td rowspan='2'>" . $processing_value['pd'] . "</td>";
-                    $os_pd = "";
-                }
-
-                //判断斜视值
-                if ('on' == $processing_value['prismcheck']) {
-                    $prism_title = "<td>Prism</td><td colspan=''>Direc</td><td>Prism</td><td colspan=''>Direc</td>";
-                    $prism_od_value = "<td>" . $processing_value['od_pv'] . "</td><td colspan=''>" . $processing_value['od_bd'] . "</td>" . "<td>" . $processing_value['od_pv_r'] . "</td><td>" . $processing_value['od_bd_r'] . "</td>";
-                    $prism_os_value = "<td>" . $processing_value['os_pv'] . "</td><td colspan=''>" . $processing_value['os_bd'] . "</td>" . "<td>" . $processing_value['os_pv_r'] . "</td><td>" . $processing_value['os_bd_r'] . "</td>";
-                    $coating_name = '';
-                } else {
-                    $prism_title = '';
-                    $prism_od_value = '';
-                    $prism_os_value = '';
-                    $coating_name = "<td colspan='4' rowspan='3' style='background-color:#fff;word-break: break-word;line-height: 12px;'>" . $processing_value['coatiing_name'] . "</td>";
-                }
-                $serial = explode('-', $item_order_number);
-
-                if ($store_house_list[$processing_value['sku']]['coding']) {
-                    $coding = "<b>" . $store_house_list[$processing_value['sku']]['coding'] . "</b><br>";
-                } else {
-                    $coding = '';
-                }
-
-                $file_content .= "<div  class = 'single_box'>
-                    <table width='400mm' height='102px' border='0' cellspacing='0' cellpadding='0' class='addpro' style='margin:0px auto;margin-top:0px;padding:0px;'>
-                    <tr>
-                    <td rowspan='5' colspan='2' style='padding:2px;width:20%'>" . date("Y-m-d H:i:s", $processing_value['created_at']) . "</td>
-                    <td rowspan='5' colspan='3' style='padding:10px;'><img style='width:100%;height:80%;' src='" . $img_url . "'><br></td>
-                    </tr>                
-                    </table></div>
-                    <div  class = 'single_box'>
-                <table width='400mm' height='102px' border='0' cellspacing='0' cellpadding='0' class='addpro' style='margin:0px auto;margin-top:0px;' >
-                <tbody cellpadding='0'>
-                <tr>
-                <td colspan='10' style=' text-align:center;padding:0px 0px 0px 0px;'>
-                " . $processing_value['prescription_type'] . "
-                &nbsp;&nbsp;Order:" . $order_list[$processing_value['order_id']]['increment_id'] . "
-                <span style=' margin-left:5px;'>SKU:" . $processing_value['sku'] . "</span>
-                <span style=' margin-left:5px;'>Num:<strong>" . $serial[1] . "/" . $order_list[$processing_value['order_id']]['total_qty_ordered'] . "</strong></span>
-                </td>
-                </tr>  
-                <tr class='title'>      
-                <td></td>  
-                <td>SPH</td>
-                <td>CYL</td>
-                <td>AXI</td>
-                " . $prism_title . "
-                <td>ADD</td>
-                <td>PD</td> 
-                " . $coating_name . "
-                </tr>   
-                <tr>  
-                <td>R</td>      
-                <td>" . $processing_value['od_sph'] . "</td> 
-                <td>" . $processing_value['od_cyl'] . "</td>
-                <td>" . $processing_value['od_axis'] . "</td>    
-                " . $prism_od_value . $od_add . $od_pd .
-                    "</tr>
-                <tr>
-                <td>L</td> 
-                <td>" . $processing_value['os_sph'] . "</td>    
-                <td>" . $processing_value['os_cyl'] . "</td>  
-                <td>" . $processing_value['os_axis'] . "</td> 
-                " . $prism_os_value . $os_add . $os_pd .
-                    " </tr>
-                <tr>
-                <td colspan='2'>" . $coding . substr(SKUHelper::sku_filter($processing_value['sku']), -7) . "</td>
-                <td colspan='8' style=' text-align:center'>" . $processing_value['index_name'] . "</td>
-                </tr>  
-                </tbody></table></div>";
-            }
-            echo $file_header . $file_content;
+            Db::commit();
+        } catch (PDOException $e) {
+            Db::rollback();
+            $this->error($e->getMessage());
+        } catch (Exception $e) {
+            Db::rollback();
+            $this->error($e->getMessage());
         }
     }
 
@@ -811,9 +654,7 @@ EOF;
         $this->view->engine->layout(false);
         ob_start();
         $ids = input('ids');
-        if (!$ids) {
-            return $this->error('缺少参数', url('index?ref=addtabs'));
-        }
+        !$ids && $this->error('缺少参数', url('index?ref=addtabs'));
 
         //获取子订单列表
         $list = $this->model
@@ -948,18 +789,14 @@ EOF;
         $ids = input('id_params/a');
         if ($ids) {
             $check_status = input('status');
-            if (empty($check_status)) {
-                return $this->error('状态值不能为空', url('index?ref=addtabs'));
-            }
+            empty($check_status) && $this->error('状态值不能为空');
 
             //检测异常状态
             $_distribution_abnormal = new DistributionAbnormal();
             $abnormal_count = $_distribution_abnormal
                 ->where(['item_process_id' => ['in', $ids], 'status' => 1])
                 ->count();
-            if ($abnormal_count > 0) {
-                return $this->error('有异常待处理的子订单', url('index?ref=addtabs'));
-            }
+            0 < $abnormal_count && $this->error('有异常待处理的子订单');
 
             //TODO::检测工单状态
 
@@ -971,9 +808,7 @@ EOF;
             $order_ids = [];
             $option_ids = [];
             foreach ($item_list as $value) {
-                if ($value['distribution_status'] != $check_status) {
-                    return $this->error('存在非当前节点的子订单', url('index?ref=addtabs'));
-                }
+                $value['distribution_status'] != $check_status && $this->error('存在非当前节点的子订单');
                 $order_ids[] = $value['order_id'];
                 $option_ids[] = $value['option_id'];
             }
@@ -1101,18 +936,14 @@ EOF;
         $ids = input('id_params/a');
         if ($ids) {
             $reason = input('reason');
-            if (!in_array($reason, [1, 2, 3, 4])) {
-                return $this->error('拒绝原因错误', url('index?ref=addtabs'));
-            }
+            !in_array($reason, [1, 2, 3, 4]) && $this->error('拒绝原因错误');
 
             //检测异常状态
             $_distribution_abnormal = new DistributionAbnormal();
             $abnormal_count = $_distribution_abnormal
                 ->where(['item_process_id' => ['in', $ids], 'status' => 1])
                 ->count();
-            if ($abnormal_count > 0) {
-                return $this->error('有异常待处理的子订单', url('index?ref=addtabs'));
-            }
+            0 < $abnormal_count && $this->error('有异常待处理的子订单');
 
             //TODO::检测工单状态
 
@@ -1121,10 +952,9 @@ EOF;
                 ->field('id,site,sku,distribution_status')
                 ->where(['id' => ['in', $ids]])
                 ->select();
+            empty($item_list) && $this->error('数据不存在');
             foreach ($item_list as $value) {
-                if ($value['distribution_status'] != 6) {
-                    return $this->error('存在非当前节点的子订单', url('index?ref=addtabs'));
-                }
+                6 != $value['distribution_status'] && $this->error('存在非当前节点的子订单');
             }
 
             //库存、关系映射、库存日志表
@@ -1217,12 +1047,8 @@ EOF;
             ->field('id,site,sku,distribution_status,abnormal_house_id')
             ->where(['id' => $ids])
             ->find();
-        if (empty($item_info)) {
-            return $this->error('子订单不存在', url('index?ref=addtabs'));
-        }
-        if (empty($item_info['abnormal_house_id'])) {
-            return $this->error('当前子订单未标记异常', url('index?ref=addtabs'));
-        }
+        empty($item_info) && $this->error('子订单不存在');
+        empty($item_info['abnormal_house_id']) && $this->error('当前子订单未标记异常');
 
         //检测异常状态
         $_distribution_abnormal = new DistributionAbnormal();
@@ -1230,9 +1056,7 @@ EOF;
             ->field('type')
             ->where(['id' => $item_info['abnormal_house_id'], 'status' => 1])
             ->find();
-        if (empty($abnormal_info)) {
-            return $this->error('当前子订单异常信息获取失败', url('index?ref=addtabs'));
-        }
+        empty($abnormal_info) && $this->error('当前子订单异常信息获取失败');
 
         //状态列表
         $status_arr = [
@@ -1294,9 +1118,7 @@ EOF;
             }
 
             //检测状态
-            if (!in_array($item_info['distribution_status'], $check_status)) {
-                return $this->error('当前子订单不可返回至此节点', url('index?ref=addtabs'));
-            }
+            !in_array($item_info['distribution_status'], $check_status) && $this->error('当前子订单不可返回至此节点');
 
             Db::startTrans();
             try {
@@ -1387,9 +1209,7 @@ EOF;
             ->field('id')
             ->where(['id' => $ids])
             ->find();
-        if (empty($item_info)) {
-            return $this->error('子订单不存在', url('index?ref=addtabs'));
-        }
+        empty($item_info) && $this->error('子订单不存在');
 
         //检测异常状态
         $list = (new DistributionLog())
