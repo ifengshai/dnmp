@@ -72,12 +72,21 @@
         </div>
     </div>
     <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('订单类型')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <select id="c-work_order_type" class="form-control selectpicker" name="order_type" disabled="disabled">
+                <option value="1" {eq name="1" value="$order_type" }selected{/eq}>主订单</option>
+                <option value="2" {eq name="2" value="$order_type" }selected{/eq}>子订单</option>
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('问题类型')}:</label>
         <div class="col-xs-12 col-sm-8">
             <input id="c-problem_name" data-rule="required" class="form-control" name="row[problem_name]" type="text" value="{$row.problem_name|htmlentities}" disabled="disabled">
         </div>
     </div>
-    <div class="form-group">
+    <div class="form-group" {if $order_type==2} style="display: none" {/if}>
         <label class="control-label col-xs-12 col-sm-2">{:__('主单措施')}:</label>
         <div class="col-xs-12 col-sm-8 nav-list">
             {foreach name="step_main" item="vo" key='k'}
@@ -112,7 +121,7 @@
             </br>
         </div>
     </div>
-    <div class="form-group">
+    <div class="form-group" {if $order_type==1} style="display: none" {/if}>
         <label class="control-label col-xs-12 col-sm-2">{:__('子单措施')}:</label>
         <div class="col-xs-12 col-sm-8 nav-list">
             {foreach name="step_item" item="vo" key='k'}
