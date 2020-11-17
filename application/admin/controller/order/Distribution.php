@@ -9,13 +9,11 @@ use think\Exception;
 use think\Loader;
 use think\Db;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use Util\SKUHelper;
 use app\admin\model\order\order\NewOrderItemProcess;
 use app\admin\model\warehouse\StockHouse;
 use app\admin\model\DistributionAbnormal;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use app\admin\model\order\order\NewOrder;
-use app\admin\model\warehouse\StockSku;
 use app\admin\model\order\order\NewOrderItemOption;
 use app\admin\model\itemmanage\ItemPlatformSku;
 use app\admin\model\itemmanage\Item;
@@ -172,9 +170,8 @@ class Distribution extends Backend
     public function detail($ids = null)
     {
         $row = $this->model->get($ids);
-        if (!$row) {
-            $this->error(__('No Results were found'));
-        }
+        !$row && $this->error(__('No Results were found'));
+
         //查询处方详情
         $result = $this->orderitemoption->get($row['option_id'])->toArray();
 
@@ -749,6 +746,49 @@ class Distribution extends Backend
     }
 
     /**
+     * 标记已打印
+     * @Description
+     * @author lzh
+     * @since 2020/10/28 14:45:39
+     * @return void
+     */
+    public function tag_printed()
+    {
+        $ids = input('id_params/a');
+        !$ids && $this->error('请选择要标记的数据');
+
+        //检测子订单状态
+        $where = [
+            'id' => ['in', $ids],
+            'distribution_status' => ['neq', 1]
+        ];
+        $count = $this->model->where($where)->count();
+        0 < $count && $this->error('存在非当前节点的子订单');
+
+        //标记打印状态
+        Db::startTrans();
+        try {
+            //标记状态
+            $this->model
+                ->allowField(true)
+                ->isUpdate(true, ['id' => ['in', $ids]])
+                ->save(['distribution_status' => 2]);
+
+            //记录配货日志
+            $admin = (object)session('admin');
+            DistributionLog::record($admin, $ids, 1, '标记打印完成');
+
+            Db::commit();
+        } catch (PDOException $e) {
+            Db::rollback();
+            $this->error($e->getMessage());
+        } catch (Exception $e) {
+            Db::rollback();
+            $this->error($e->getMessage());
+        }
+    }
+
+    /**
      * 打印标签
      *
      * @Description
@@ -762,9 +802,7 @@ class Distribution extends Backend
         $this->view->engine->layout(false);
         ob_start();
         $ids = input('ids');
-        if (!$ids) {
-            return $this->error('缺少参数', url('index?ref=addtabs'));
-        }
+        !$ids && $this->error('缺少参数', url('index?ref=addtabs'));
 
         //获取子订单列表
         $list = $this->model
@@ -899,18 +937,14 @@ class Distribution extends Backend
         $ids = input('id_params/a');
         if ($ids) {
             $check_status = input('status');
-            if (empty($check_status)) {
-                return $this->error('状态值不能为空', url('index?ref=addtabs'));
-            }
+            empty($check_status) && $this->error('状态值不能为空');
 
             //检测异常状态
             $_distribution_abnormal = new DistributionAbnormal();
             $abnormal_count = $_distribution_abnormal
                 ->where(['item_process_id' => ['in', $ids], 'status' => 1])
                 ->count();
-            if ($abnormal_count > 0) {
-                return $this->error('有异常待处理的子订单', url('index?ref=addtabs'));
-            }
+            0 < $abnormal_count && $this->error('有异常待处理的子订单');
 
             //TODO::检测工单状态
 
@@ -922,9 +956,7 @@ class Distribution extends Backend
             $order_ids = [];
             $option_ids = [];
             foreach ($item_list as $value) {
-                if ($value['distribution_status'] != $check_status) {
-                    return $this->error('存在非当前节点的子订单', url('index?ref=addtabs'));
-                }
+                $value['distribution_status'] != $check_status && $this->error('存在非当前节点的子订单');
                 $order_ids[] = $value['order_id'];
                 $option_ids[] = $value['option_id'];
             }
@@ -1058,18 +1090,14 @@ class Distribution extends Backend
         $ids = input('id_params/a');
         if ($ids) {
             $reason = input('reason');
-            if (!in_array($reason, [1, 2, 3, 4])) {
-                return $this->error('拒绝原因错误', url('index?ref=addtabs'));
-            }
+            !in_array($reason, [1, 2, 3, 4]) && $this->error('拒绝原因错误');
 
             //检测异常状态
             $_distribution_abnormal = new DistributionAbnormal();
             $abnormal_count = $_distribution_abnormal
                 ->where(['item_process_id' => ['in', $ids], 'status' => 1])
                 ->count();
-            if ($abnormal_count > 0) {
-                return $this->error('有异常待处理的子订单', url('index?ref=addtabs'));
-            }
+            0 < $abnormal_count && $this->error('有异常待处理的子订单');
 
             //TODO::检测工单状态
 
@@ -1078,10 +1106,9 @@ class Distribution extends Backend
                 ->field('id,site,sku,distribution_status')
                 ->where(['id' => ['in', $ids]])
                 ->select();
+            empty($item_list) && $this->error('数据不存在');
             foreach ($item_list as $value) {
-                if ($value['distribution_status'] != 6) {
-                    return $this->error('存在非当前节点的子订单', url('index?ref=addtabs'));
-                }
+                6 != $value['distribution_status'] && $this->error('存在非当前节点的子订单');
             }
 
             //库存、关系映射、库存日志表
@@ -1174,12 +1201,8 @@ class Distribution extends Backend
             ->field('id,site,sku,distribution_status,abnormal_house_id')
             ->where(['id' => $ids])
             ->find();
-        if (empty($item_info)) {
-            return $this->error('子订单不存在', url('index?ref=addtabs'));
-        }
-        if (empty($item_info['abnormal_house_id'])) {
-            return $this->error('当前子订单未标记异常', url('index?ref=addtabs'));
-        }
+        empty($item_info) && $this->error('子订单不存在');
+        empty($item_info['abnormal_house_id']) && $this->error('当前子订单未标记异常');
 
         //检测异常状态
         $_distribution_abnormal = new DistributionAbnormal();
@@ -1187,9 +1210,7 @@ class Distribution extends Backend
             ->field('type')
             ->where(['id' => $item_info['abnormal_house_id'], 'status' => 1])
             ->find();
-        if (empty($abnormal_info)) {
-            return $this->error('当前子订单异常信息获取失败', url('index?ref=addtabs'));
-        }
+        empty($abnormal_info) && $this->error('当前子订单异常信息获取失败');
 
         //状态列表
         $status_arr = [
@@ -1251,9 +1272,7 @@ class Distribution extends Backend
             }
 
             //检测状态
-            if (!in_array($item_info['distribution_status'], $check_status)) {
-                return $this->error('当前子订单不可返回至此节点', url('index?ref=addtabs'));
-            }
+            !in_array($item_info['distribution_status'], $check_status) && $this->error('当前子订单不可返回至此节点');
 
             Db::startTrans();
             try {
@@ -1344,9 +1363,7 @@ class Distribution extends Backend
             ->field('id')
             ->where(['id' => $ids])
             ->find();
-        if (empty($item_info)) {
-            return $this->error('子订单不存在', url('index?ref=addtabs'));
-        }
+        empty($item_info) && $this->error('子订单不存在');
 
         //检测异常状态
         $list = (new DistributionLog())
