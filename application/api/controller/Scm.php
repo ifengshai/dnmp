@@ -3,6 +3,7 @@
 namespace app\api\controller;
 
 use app\common\controller\Api;
+use app\admin\library\Auth;
 use app\admin\model\warehouse\ProductBarCodeItem;
 use app\admin\model\itemmanage\ItemPlatformSku;
 
@@ -67,6 +68,8 @@ class Scm extends Api
     protected function _initialize()
     {
         parent::_initialize();
+
+        $this->auth = Auth::instance();
 
         //校验Token
         $this->auth->match(['login','version']) || $this->auth->id || $this->error(__('Token invalid, please log in again'), [], 401);
