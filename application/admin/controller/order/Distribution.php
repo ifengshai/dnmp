@@ -1206,7 +1206,7 @@ class Distribution extends Backend
         $_distribution_abnormal = new DistributionAbnormal();
         $abnormal_info = $_distribution_abnormal
             ->field('type')
-            ->where(['id' => $item_info['abnormal_house_id'], 'status' => 1])
+            ->where(['id' => $item_info['id'], 'status' => 1])
             ->find();
         empty($abnormal_info) && $this->error('当前子订单异常信息获取失败');
 
