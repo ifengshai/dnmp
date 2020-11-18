@@ -774,6 +774,10 @@ class Test4 extends Controller
         $skus = Db::table('fa_zz_temp2')->column('sku');
 
         foreach ($skus as $k => $v) {
+            if ($k < 250) {
+                continue;
+            }
+
             $map = [];
             $zeelool_sku = $this->itemplatformsku->getWebSku($v, 1);
             $voogueme_sku = $this->itemplatformsku->getWebSku($v, 2);
@@ -817,7 +821,7 @@ class Test4 extends Controller
             $res = $this->item->where($p_map)->update($data);
 
             echo $v. "\n";
-            usleep(200000);
+            usleep(20000);
         }
 
         echo 'ok';
