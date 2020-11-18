@@ -338,7 +338,7 @@ class ScmDistribution extends Scm
 
         //获取子订单数据
         $item_process_info = $this->_new_order_item_process
-            ->field('id,distribution_status,option_id,order_id,site')
+            ->field('id,distribution_status,order_prescription_type,option_id,order_id,site')
             ->where('item_order_number', $item_order_number)
             ->find()
         ;
@@ -393,7 +393,28 @@ class ScmDistribution extends Scm
 
         //下一步提示信息及状态
         if(2 == $check_status){
-            if($item_option_info['index_name']){
+            //获取true_sku
+            $true_sku = $this->_item_platform_sku->getTrueSku($item_option_info['sku'], $item_process_info['site']);
+            //判断sku实时库存是否满足
+            $stock = $this->_item->where(['sku'=>$true_sku])->value('stock');
+            empty($stock) && $this->error(__('sku实时库存不足'), [], 403);
+            //配货节点 条形码绑定子单号
+            $barcode = $this->request->request('barcode');
+            $this->_product_bar_code_item
+                ->allowField(true)
+                ->isUpdate(true, ['code'=>$barcode])
+                ->save(['item_order_number'=>$item_order_number])
+            ;
+            //增加订单占用库存、配货占用库存，扣减总库存
+            $this->_item
+                ->where(['sku'=>$true_sku])
+                ->inc('occupy_stock', 1)
+                ->inc('distribution_occupy_stock', 1)
+                ->dec('stock', 1)
+                ->update()
+            ;
+            //根据处方类型字段order_prescription_type(现货处方镜、定制处方镜)判断是否需要配镜片
+            if(in_array($item_process_info['order_prescription_type'],[2,3])){
                 $save_status = 3;
             }else{
                 if($item_option_info['is_print_logo']){
@@ -511,6 +532,8 @@ class ScmDistribution extends Scm
         $order_item_true_sku = $this->_new_order_item_process->where('item_order_number',$item_order_number)->value('sku');
         $order_item_sku = $this->_item_platform_sku->where('platform_sku',$order_item_true_sku)->value('sku');
 
+        $barcode_item_order_number = $this->_product_bar_code_item->where('code',$barcode)->value('item_order_number');
+        !empty($barcode_item_order_number) && $this->error(__('此条形码已经绑定过其他订单'), [], 403);
         $code_item_sku = $this->_product_bar_code_item->where('code',$barcode)->value('sku');
         empty($code_item_sku) && $this->error(__('此条形码未绑定SKU'), [], 403);
 
