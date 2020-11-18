@@ -936,7 +936,7 @@ class Test4 extends Controller
     {
         $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
         $item = new \app\admin\model\itemmanage\Item();
-        $skus = Db::table('fa_zz_temp2')->column('sku');
+        $skus = Db::table('fa_zz_temp2')->limit(50)->column('sku');
         // $list = $itemplatformsku->field('sku,stock')->where(['sku' => ['in', $skus]])->select();
         foreach ($skus as $k => $v) {
             //同步对应SKU库存
