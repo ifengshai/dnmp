@@ -11,6 +11,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                     index_url: 'warehouse/stock_house/index' + location.search,
                     add_url: 'warehouse/stock_house/add?type=1',
                     edit_url: 'warehouse/stock_house/edit?type=1',
+                    import_url: 'warehouse/stock_house/import',
                     table: 'store_house'
                 }
             });
