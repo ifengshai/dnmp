@@ -738,7 +738,7 @@ class Test4 extends Controller
     public function set_product_relstock()
     {
 
-        $list = Db::table('fa_zz_temp2')->limit(50)->select();
+        $list = Db::table('fa_zz_temp2')->select();
 
         foreach ($list as $k => $v) {
             $p_map['sku'] = $v['sku'];
@@ -771,7 +771,7 @@ class Test4 extends Controller
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
 
-        $skus = Db::table('fa_zz_temp2')->limit(50)->column('sku');
+        $skus = Db::table('fa_zz_temp2')->column('sku');
 
         foreach ($skus as $k => $v) {
             $map = [];
@@ -847,7 +847,7 @@ class Test4 extends Controller
         $this->zeelool_jp = new \app\admin\model\order\order\ZeeloolJp();
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
-        $skus = Db::table('fa_zz_temp2')->limit(50)->column('sku');
+        $skus = Db::table('fa_zz_temp2')->column('sku');
 
         foreach ($skus as $k => $v) {
             $map = [];
@@ -909,7 +909,7 @@ class Test4 extends Controller
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
 
-        $skus = Db::table('fa_zz_temp2')->limit(50)->column('sku');
+        $skus = Db::table('fa_zz_temp2')->column('sku');
         $list = $this->item->field('sku,stock,occupy_stock,available_stock,real_time_qty,distribution_occupy_stock')->where(['sku' => ['in', $skus]])->select();
         foreach ($list as $k => $v) {
             $data['stock'] = $v['real_time_qty'] + $v['distribution_occupy_stock'];
@@ -936,7 +936,7 @@ class Test4 extends Controller
     {
         $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
         $item = new \app\admin\model\itemmanage\Item();
-        $skus = Db::table('fa_zz_temp2')->limit(50)->column('sku');
+        $skus = Db::table('fa_zz_temp2')->column('sku');
         // $list = $itemplatformsku->field('sku,stock')->where(['sku' => ['in', $skus]])->select();
         foreach ($skus as $k => $v) {
             //同步对应SKU库存
