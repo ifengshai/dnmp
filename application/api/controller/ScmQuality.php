@@ -191,16 +191,16 @@ class ScmQuality extends Scm
         empty($page_size) && $this->error(__('Page size can not be empty'), [], 403);
 
         $where = [];
-        if($query){
+        if ($query) {
             $where['a.check_order_number|a.create_person|b.sku|c.purchase_number|c.create_person'] = ['like', '%' . $query . '%'];
         }
-        if(isset($status)){
+        if (isset($status)) {
             $where['a.status'] = $status;
         }
-        if($is_stock){
+        if ($is_stock) {
             $where['a.is_stock'] = $is_stock;
         }
-        if($start_time && $end_time){
+        if ($start_time && $end_time) {
             $where['a.createtime'] = ['between', [$start_time, $end_time]];
         }
 
@@ -212,22 +212,22 @@ class ScmQuality extends Scm
             ->alias('a')
             ->where($where)
             ->field('a.id,a.check_order_number,a.createtime,a.status,c.purchase_number')
-            ->join(['fa_check_order_item' => 'b'], 'a.id=b.check_id','left')
+            ->join(['fa_check_order_item' => 'b'], 'a.id=b.check_id', 'left')
             ->join(['fa_purchase_order' => 'c'], 'a.purchase_id=c.id')
             ->order('a.createtime', 'desc')
             ->limit($offset, $limit)
             ->select();
         $list = collection($list)->toArray();
 
-        $status = [ 0=>'新建',1=>'待审核',2=>'已审核',3=>'已拒绝',4=>'已取消' ];
-        foreach($list as $key=>$value){
+        $status = [0 => '新建', 1 => '待审核', 2 => '已审核', 3 => '已拒绝', 4 => '已取消'];
+        foreach ($list as $key => $value) {
             $list[$key]['status'] = $status[$value['status']];
             $list[$key]['cancel_show'] = 0 == $value['status'] ? 1 : 0;
             $list[$key]['edit_show'] = 0 == $value['status'] ? 1 : 0;
             $list[$key]['examine_show'] = 1 == $value['status'] ? 1 : 0;
         }
 
-        $this->success('', ['list' => $list],200);
+        $this->success('', ['list' => $list], 200);
     }
 
     /**
@@ -252,7 +252,7 @@ class ScmQuality extends Scm
 
         //获取采购单商品数据
         $order_item_list = $this->_purchase_order_item
-            ->where(['purchase_id'=>$logistics_data['purchase_id']])
+            ->where(['purchase_id' => $logistics_data['purchase_id']])
             ->field('sku,supplier_sku,purchase_num')
             ->select();
         $order_item_list = collection($order_item_list)->toArray();
@@ -263,24 +263,24 @@ class ScmQuality extends Scm
 
         //获取采购批次数据
         $batch = 0;
-        if($logistics_data['batch_id']){
+        if ($logistics_data['batch_id']) {
             $batch_data = $this->_purchase_batch->where('id', $logistics_data['batch_id'])->field('batch')->find();
             empty($batch_data) && $this->error(__('采购单批次不存在'), [], 403);
 
             $batch = $batch_data['batch'];
             $item_list = $this->_purchase_batch_item
-                ->where(['purchase_batch_id'=>$logistics_data['batch_id']])
+                ->where(['purchase_batch_id' => $logistics_data['batch_id']])
                 ->field('sku,arrival_num as should_arrival_num')
                 ->select();
             $item_list = collection($item_list)->toArray();
-            $order_item = array_column($order_item_list,NULL,'sku');
-            foreach($item_list as $key=>$value){
+            $order_item = array_column($order_item_list, NULL, 'sku');
+            foreach ($item_list as $key => $value) {
                 $item_list[$key]['supplier_sku'] = $order_item[$value['sku']]['supplier_sku'] ?? '';
                 $item_list[$key]['purchase_num'] = $order_item[$value['sku']]['purchase_num'] ?? 0;
             }
-        }else{
+        } else {
             $item_list = [];
-            foreach($order_item_list as $key=>$value){
+            foreach ($order_item_list as $key => $value) {
                 $value['should_arrival_num'] = $value['purchase_num'];
                 $item_list[] = $value;
             }
@@ -289,22 +289,22 @@ class ScmQuality extends Scm
         //默认合格、不合格、留样sku集合
         array_walk($item_list, function (&$value, $k, $p) {
             $value = array_merge($value, $p);
-        },['quantity_agg' => [],'unqualified_agg' => [],'sample_agg' => []]);
+        }, ['quantity_agg' => [], 'unqualified_agg' => [], 'sample_agg' => []]);
 
         //质检单所需数据
         $info = [
-            'check_order_number'=>'QC' . date('YmdHis') . rand(100, 999) . rand(100, 999),
-            'purchase_number'=>$purchase_data['purchase_number'],
-            'supplier_name'=>$supplier_data['supplier_name'],
-            'batch'=>$batch,
-            'purchase_id'=>$logistics_data['purchase_id'],
-            'supplier_id'=>$purchase_data['supplier_id'],
-            'batch_id'=>$logistics_data['batch_id'],
-            'replenish_id'=>$purchase_data['replenish_id'],
-            'item_list'=>$item_list,
+            'check_order_number' => 'QC' . date('YmdHis') . rand(100, 999) . rand(100, 999),
+            'purchase_number' => $purchase_data['purchase_number'],
+            'supplier_name' => $supplier_data['supplier_name'],
+            'batch' => $batch,
+            'purchase_id' => $logistics_data['purchase_id'],
+            'supplier_id' => $purchase_data['supplier_id'],
+            'batch_id' => $logistics_data['batch_id'],
+            'replenish_id' => $purchase_data['replenish_id'],
+            'item_list' => $item_list,
         ];
 
-        $this->success('', ['info' => $info],200);
+        $this->success('', ['info' => $info], 200);
     }
 
     /**
@@ -333,7 +333,7 @@ class ScmQuality extends Scm
 
         //获取采购批次数据
         $batch = 0;
-        if($check_data['batch_id']){
+        if ($check_data['batch_id']) {
             $batch_data = $this->_purchase_batch->where('id', $check_data['batch_id'])->field('batch')->find();
             empty($batch_data) && $this->error(__('采购单批次不存在'), [], 403);
             $batch = $batch_data['batch'];
@@ -341,75 +341,75 @@ class ScmQuality extends Scm
 
         //获取质检单商品数据
         $item_list = $this->_check_item
-            ->where(['check_id'=>$check_id])
+            ->where(['check_id' => $check_id])
             ->field('sku,supplier_sku,arrivals_num,quantity_num,unqualified_num,sample_num,should_arrival_num')
             ->select();
         $item_list = collection($item_list)->toArray();
 
         //获取条形码数据
         $bar_code_list = $this->_product_bar_code_item
-            ->where(['check_id'=>$check_id])
+            ->where(['check_id' => $check_id])
             ->field('sku,code,is_quantity,is_sample')
             ->select();
 
         //合格
-        $quantity_list = array_filter($bar_code_list,function($v){
-            if($v['is_quantity'] == 1){
+        $quantity_list = array_filter($bar_code_list, function ($v) {
+            if ($v['is_quantity'] == 1) {
                 return $v;
             }
         });
 
         //不合格
-        $unqualified_list = array_filter($bar_code_list,function($v){
-            if($v['is_quantity'] == 2){
+        $unqualified_list = array_filter($bar_code_list, function ($v) {
+            if ($v['is_quantity'] == 2) {
                 return $v;
             }
         });
 
         //留样合格
-        $sample_list = array_filter($bar_code_list,function($v){
-            if($v['is_sample'] == 1){
+        $sample_list = array_filter($bar_code_list, function ($v) {
+            if ($v['is_sample'] == 1) {
                 return $v;
             }
         });
 
         //拼接sku条形码数据
-        foreach($item_list as $key=>$value){
+        foreach ($item_list as $key => $value) {
             $quantity_agg = [];
             $unqualified_agg = [];
             $sample_agg = [];
 
             //合格条形码集合
-            if(!empty($quantity_list)){
-                foreach($quantity_list as $val){
-                    if($value['sku'] == $val['sku']){
+            if (!empty($quantity_list)) {
+                foreach ($quantity_list as $val) {
+                    if ($value['sku'] == $val['sku']) {
                         $quantity_agg[] = [
-                            'code'=>$val['code'],
-                            'is_new'=>0
+                            'code' => $val['code'],
+                            'is_new' => 0
                         ];
                     }
                 }
             }
 
             //不合格条形码集合
-            if(!empty($unqualified_list)){
-                foreach($unqualified_list as $val){
-                    if($value['sku'] == $val['sku']){
+            if (!empty($unqualified_list)) {
+                foreach ($unqualified_list as $val) {
+                    if ($value['sku'] == $val['sku']) {
                         $unqualified_agg[] = [
-                            'code'=>$val['code'],
-                            'is_new'=>0
+                            'code' => $val['code'],
+                            'is_new' => 0
                         ];
                     }
                 }
             }
 
             //留样条形码集合
-            if(!empty($sample_list)){
-                foreach($sample_list as $val){
-                    if($value['sku'] == $val['sku']){
+            if (!empty($sample_list)) {
+                foreach ($sample_list as $val) {
+                    if ($value['sku'] == $val['sku']) {
                         $sample_agg[] = [
-                            'code'=>$val['code'],
-                            'is_new'=>0
+                            'code' => $val['code'],
+                            'is_new' => 0
                         ];
                     }
                 }
@@ -422,15 +422,15 @@ class ScmQuality extends Scm
 
         //质检单所需数据
         $info = [
-            'check_order_number'=>$check_data['check_order_number'],
-            'purchase_number'=>$purchase_data['purchase_number'],
-            'supplier_name'=>$supplier_data['supplier_name'],
-            'is_error'=>$check_data['is_error'],
-            'batch'=>$batch,
-            'item_list'=>$item_list
+            'check_order_number' => $check_data['check_order_number'],
+            'purchase_number' => $purchase_data['purchase_number'],
+            'supplier_name' => $supplier_data['supplier_name'],
+            'is_error' => $check_data['is_error'],
+            'batch' => $batch,
+            'item_list' => $item_list
         ];
 
-        $this->success('', ['info' => $info],200);
+        $this->success('', ['info' => $info], 200);
     }
 
     /**
@@ -452,7 +452,7 @@ class ScmQuality extends Scm
     public function submit()
     {
         $item_data = $this->request->request('item_data');
-        $item_data = json_decode(htmlspecialchars_decode($item_data),true);
+        $item_data = json_decode(htmlspecialchars_decode($item_data), true);
         empty($item_data) && $this->error(__('sku集合不能为空'), [], 403);
         $item_data = array_filter($item_data);
 
@@ -460,7 +460,7 @@ class ScmQuality extends Scm
         $is_error = $this->request->request('is_error');
         $get_check_id = $this->request->request('check_id');
 
-        if($get_check_id){
+        if ($get_check_id) {
             $row = $this->_check->get($get_check_id);
             empty($row) && $this->error(__('质检单不存在'), [], 403);
             0 != $row['status'] && $this->error(__('只有新建状态才能编辑'), [], 405);
@@ -471,11 +471,11 @@ class ScmQuality extends Scm
 
             //编辑质检单
             $check_data = [
-                'is_error'=>1 == $is_error ?: 0,
-                'status'=>1 == $do_type ?: 0
+                'is_error' => 1 == $is_error ?: 0,
+                'status' => 1 == $do_type ?: 0
             ];
             $result = $row->allowField(true)->save($check_data);
-        }else{
+        } else {
             $batch_id = $this->request->request('batch_id');
             $logistics_id = $this->request->request('logistics_id');
             empty($logistics_id) && $this->error(__('物流单ID不能为空'), [], 403);
@@ -493,23 +493,22 @@ class ScmQuality extends Scm
             empty($replenish_id) && $this->error(__('补货单ID不能为空'), [], 403);
 
             $existence = $this->_check
-                ->where(['logistics_id'=>$logistics_id])
-                ->value('id')
-            ;
+                ->where(['logistics_id' => $logistics_id])
+                ->value('id');
             !empty($existence) && $this->error(__('质检单已创建，请勿重复操作'), [], 405);
 
             //创建质检单
             $check_data = [
-                'check_order_number'=>$check_order_number,
-                'purchase_id'=>$purchase_id,
-                'supplier_id'=>$supplier_id,
-                'batch_id'=>$batch_id,
-                'is_error'=>1 == $is_error ?: 0,
-                'status'=>1 == $do_type ?: 0,
-                'logistics_id'=>$logistics_id,
-                'replenish_id'=>$replenish_id,
-                'create_person'=>$this->auth->nickname,
-                'createtime'=>date('Y-m-d H:i:s')
+                'check_order_number' => $check_order_number,
+                'purchase_id' => $purchase_id,
+                'supplier_id' => $supplier_id,
+                'batch_id' => $batch_id,
+                'is_error' => 1 == $is_error ?: 0,
+                'status' => 1 == $do_type ?: 0,
+                'logistics_id' => $logistics_id,
+                'replenish_id' => $replenish_id,
+                'create_person' => $this->auth->nickname,
+                'createtime' => date('Y-m-d H:i:s')
             ];
             $result = $this->_check->allowField(true)->save($check_data);
             $check_id = $this->_check->id;
@@ -520,53 +519,53 @@ class ScmQuality extends Scm
         Db::startTrans();
         try {
             //检测条形码是否已绑定
-            $where['check_id'] = [['>',0], ['neq',$check_id]];
+            $where['check_id'] = [['>', 0], ['neq', $check_id]];
             foreach ($item_data as $key => $value) {
                 //检测合格条形码
-                $quantity_code = array_column($value['quantity_agg'],'code');
+                $quantity_code = array_column($value['quantity_agg'], 'code');
                 count($value['quantity_agg']) != count(array_unique($quantity_code))
-                &&
-                $this->error(__('合格条形码有重复，请检查'), [], 405);
+                    &&
+                    $this->error(__('合格条形码有重复，请检查'), [], 405);
 
-                $where['code'] = ['in',$quantity_code];
+                $where['code'] = ['in', $quantity_code];
                 $check_quantity = $this->_product_bar_code_item
                     ->where($where)
                     ->field('code')
                     ->find();
-                if(!empty($check_quantity['code'])){
-                    $this->error(__('合格条形码:'.$check_quantity['code'].' 已绑定,请移除'), [], 405);
+                if (!empty($check_quantity['code'])) {
+                    $this->error(__('合格条形码:' . $check_quantity['code'] . ' 已绑定,请移除'), [], 405);
                     exit;
                 }
 
                 //检测不合格条形码
-                $unqualified_code = array_column($value['unqualified_agg'],'code');
+                $unqualified_code = array_column($value['unqualified_agg'], 'code');
                 count($value['unqualified_agg']) != count(array_unique($unqualified_code))
-                &&
-                $this->error(__('不合格条形码有重复，请检查'), [], 405);
+                    &&
+                    $this->error(__('不合格条形码有重复，请检查'), [], 405);
 
-                $where['code'] = ['in',$unqualified_code];
+                $where['code'] = ['in', $unqualified_code];
                 $check_unqualified = $this->_product_bar_code_item
                     ->where($where)
                     ->field('code')
                     ->find();
-                if(!empty($check_unqualified['code'])){
-                    $this->error(__('不合格条形码:'.$check_unqualified['code'].' 已绑定,请移除'), [], 405);
+                if (!empty($check_unqualified['code'])) {
+                    $this->error(__('不合格条形码:' . $check_unqualified['code'] . ' 已绑定,请移除'), [], 405);
                     exit;
                 }
 
                 //检测留样条形码
-                $sample_code = array_column($value['sample_agg'],'code');
+                $sample_code = array_column($value['sample_agg'], 'code');
                 count($value['sample_agg']) != count(array_unique($sample_code))
-                &&
-                $this->error(__('不合格条形码有重复，请检查'), [], 405);
+                    &&
+                    $this->error(__('不合格条形码有重复，请检查'), [], 405);
 
-                $where['code'] = ['in',$sample_code];
+                $where['code'] = ['in', $sample_code];
                 $check_sample = $this->_product_bar_code_item
                     ->where($where)
                     ->field('code')
                     ->find();
-                if(!empty($check_sample)){
-                    $this->error(__('留样条形码:'.$check_sample['code'].' 已绑定,请移除'), [], 405);
+                if (!empty($check_sample)) {
+                    $this->error(__('留样条形码:' . $check_sample['code'] . ' 已绑定,请移除'), [], 405);
                     exit;
                 }
             }
@@ -574,39 +573,39 @@ class ScmQuality extends Scm
             //批量创建或更新质检单商品
             foreach ($item_data as $key => $value) {
                 //错误类型、合格率
-                if($value['should_arrival_num'] > $value['arrival_num']){
+                if ($value['should_arrival_num'] > $value['arrival_num']) {
                     $error_type = 2;
-                }elseif($value['should_arrival_num'] < $value['arrival_num']){
+                } elseif ($value['should_arrival_num'] < $value['arrival_num']) {
                     $error_type = 1;
-                }else{
+                } else {
                     $error_type = 0;
                 }
-                $quantity_rate = $value['quantity_num'] && $value['arrivals_num'] ? round(($value['quantity_num'] / $value['arrivals_num'] * 100),2) : 0;
+                $quantity_rate = $value['quantity_num'] && $value['arrivals_num'] ? round(($value['quantity_num'] / $value['arrivals_num'] * 100), 2) : 0;
 
                 $item_save = [
-                    'arrivals_num'=>$value['arrivals_num'],
-                    'quantity_num'=>$value['quantity_num'],
-                    'sample_num'=>$value['sample_num'],
-                    'unqualified_num'=>$value['unqualified_num'],
-                    'quantity_rate'=>$quantity_rate,
-                    'error_type'=>$error_type,
-                    'remark'=>$value['remark']
+                    'arrivals_num' => $value['arrivals_num'],
+                    'quantity_num' => $value['quantity_num'],
+                    'sample_num' => $value['sample_num'],
+                    'unqualified_num' => $value['unqualified_num'],
+                    'quantity_rate' => $quantity_rate,
+                    'error_type' => $error_type,
+                    'remark' => $value['remark']
                 ];
-                if($get_check_id){//更新
-                    $where = ['sku' => $value['sku'],'check_id' => $check_id];
+                if ($get_check_id) { //更新
+                    $where = ['sku' => $value['sku'], 'check_id' => $check_id];
                     $this->_check_item->allowField(true)->isUpdate(true, $where)->save($item_save);
 
                     //质检单移除条形码
-                    if(!empty($value['remove_agg'])){
+                    if (!empty($value['remove_agg'])) {
                         $code_clear = [
                             'sku' => '',
                             'purchase_id' => 0,
                             'logistics_id' => 0,
                             'check_id' => 0
                         ];
-                        $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => ['in',$value['remove_agg']]])->save($code_clear);
+                        $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => ['in', $value['remove_agg']]])->save($code_clear);
                     }
-                }else{//新增
+                } else { //新增
                     $item_save['check_id'] = $check_id;
                     $item_save['sku'] = $value['sku'];
                     $item_save['supplier_sku'] = $value['supplier_sku'];
@@ -617,18 +616,18 @@ class ScmQuality extends Scm
                 }
 
                 $code_item = [
-                    'purchase_id'=>$purchase_id,
-                    'sku'=>$value['sku'],
-                    'logistics_id'=>$logistics_id,
-                    'check_id'=>$check_id,
-                    'create_person'=>$this->auth->nickname,
-                    'create_time'=>date('Y-m-d H:i:s')
+                    'purchase_id' => $purchase_id,
+                    'sku' => $value['sku'],
+                    'logistics_id' => $logistics_id,
+                    'check_id' => $check_id,
+                    'create_person' => $this->auth->nickname,
+                    'create_time' => date('Y-m-d H:i:s')
                 ];
 
                 //绑定合格条形码
-                if(!empty($value['quantity_agg'])){
-                    foreach($value['quantity_agg'] as $v){
-                        if($v['is_new'] == 1){
+                if (!empty($value['quantity_agg'])) {
+                    foreach ($value['quantity_agg'] as $v) {
+                        if ($v['is_new'] == 1) {
                             $code_item['is_quantity'] = 1;
                             $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => $v['code']])->save($code_item);
                         }
@@ -636,9 +635,9 @@ class ScmQuality extends Scm
                 }
 
                 //绑定不合格条形码
-                if(!empty($value['unqualified_agg'])){
-                    foreach($value['unqualified_agg'] as $v){
-                        if($v['is_new'] == 1){
+                if (!empty($value['unqualified_agg'])) {
+                    foreach ($value['unqualified_agg'] as $v) {
+                        if ($v['is_new'] == 1) {
                             $code_item['is_quantity'] = 2;
                             $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => $v['code']])->save($code_item);
                         }
@@ -646,9 +645,9 @@ class ScmQuality extends Scm
                 }
 
                 //绑定留样条形码
-                if(!empty($value['sample_agg'])){
-                    foreach($value['sample_agg'] as $v){
-                        if($v['is_new'] == 1){
+                if (!empty($value['sample_agg'])) {
+                    foreach ($value['sample_agg'] as $v) {
+                        if ($v['is_new'] == 1) {
                             $code_item['is_sample'] = 1;
                             $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => $v['code']])->save($code_item);
                         }
@@ -668,7 +667,7 @@ class ScmQuality extends Scm
             $this->error($e->getMessage(), [], 408);
         }
 
-        $this->success('提交成功', [],200);
+        $this->success('提交成功', [], 200);
     }
 
     /**
@@ -698,8 +697,8 @@ class ScmQuality extends Scm
             ];
             $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['check_id' => $check_id])->save($code_clear);
 
-            $res = $this->_check->allowField(true)->isUpdate(true, ['id'=>$check_id])->save(['status'=>4]);
-            $res ? $this->success('取消成功', [],200) : $this->error(__('取消失败'), [], 404);
+            $res = $this->_check->allowField(true)->isUpdate(true, ['id' => $check_id])->save(['status' => 4]);
+            $res ? $this->success('取消成功', [], 200) : $this->error(__('取消失败'), [], 404);
 
             Db::commit();
         } catch (ValidateException $e) {
@@ -729,13 +728,13 @@ class ScmQuality extends Scm
 
         $do_type = $this->request->request('do_type');
         empty($do_type) && $this->error(__('审核类型不能为空'), [], 403);
-        !in_array($do_type,[2,3]) && $this->error(__('审核类型错误'), [], 403);
+        !in_array($do_type, [2, 3]) && $this->error(__('审核类型错误'), [], 403);
 
         //检测质检单状态
         $row = $this->_check->get($check_id);
         1 != $row['status'] && $this->error(__('只有待审核状态才能审核'), [], 405);
 
-        $res = $this->_check->allowField(true)->isUpdate(true, ['id'=>$check_id])->save(['status'=>$do_type,'examine_time'=>date('Y-m-d H:i:s')]);
+        $res = $this->_check->allowField(true)->isUpdate(true, ['id' => $check_id])->save(['status' => $do_type, 'examine_time' => date('Y-m-d H:i:s')]);
         false === $res && $this->error(__('审核失败'), [], 404);
 
         Db::startTrans();
@@ -743,7 +742,7 @@ class ScmQuality extends Scm
             //审核通过关联操作
             if ($do_type == 2) {
                 //标记物流单检索为已创建质检单
-                $this->_logistics_info->allowField(true)->isUpdate(true, ['id'=>$row['logistics_id']])->save(['is_check_order'=>1]);
+                $this->_logistics_info->allowField(true)->isUpdate(true, ['id' => $row['logistics_id']])->save(['is_check_order' => 1]);
 
                 //查询物流信息表对应采购单数据是否全部质检完毕
                 if ($row['purchase_id']) {
@@ -751,7 +750,7 @@ class ScmQuality extends Scm
                     $count = $this->_logistics_info->where(['purchase_id' => $row['purchase_id'], 'is_check_order' => 0])->count();
 
                     //修改采购单质检状态
-                    $this->_purchase_order->allowField(true)->isUpdate(true, ['id'=>$row['purchase_id']])->save(['check_status'=>$count > 0 ? 1 : 2]);
+                    $this->_purchase_order->allowField(true)->isUpdate(true, ['id' => $row['purchase_id']])->save(['check_status' => $count > 0 ? 1 : 2]);
                 }
 
                 //查询质检单明细表有样品的数据
@@ -759,12 +758,12 @@ class ScmQuality extends Scm
                 if ($list) {
                     //生成样品入库主表数据
                     $work_order_data = [
-                        'location_number'=>'IN2' . date('YmdHis') . rand(100, 999) . rand(100, 999),
-                        'status'=>1,
-                        'type'=>1,
-                        'description'=>'质检入库',
-                        'create_user'=>$this->auth->nickname,
-                        'createtime'=>date('Y-m-d H:i:s')
+                        'location_number' => 'IN2' . date('YmdHis') . rand(100, 999) . rand(100, 999),
+                        'status' => 1,
+                        'type' => 1,
+                        'description' => '质检入库',
+                        'create_user' => $this->auth->nickname,
+                        'createtime' => date('Y-m-d H:i:s')
                     ];
                     $this->_sample_work_order->allowField(true)->save($work_order_data);
 
@@ -772,9 +771,9 @@ class ScmQuality extends Scm
                     $work_order_item_data = [];
                     foreach ($list as $value) {
                         $work_order_item_data[] = [
-                            'parent_id'=>$this->_sample_work_order->id,
-                            'sku'=>$value['sku'],
-                            'stock'=>$value['sample_num'],
+                            'parent_id' => $this->_sample_work_order->id,
+                            'sku' => $value['sku'],
+                            'stock' => $value['sample_num'],
                         ];
                     }
                     $this->_sample_work_order_item->allowField(true)->saveAll($work_order_item_data);
@@ -782,7 +781,7 @@ class ScmQuality extends Scm
 
                 //检测批次或采购单是否全部质检完成
                 $where = ['purchase_id' => $row['purchase_id'], 'is_check_order' => 0];
-                if($row['batch_id'] ){
+                if ($row['batch_id']) {
                     $where['batch_id'] = $row['batch_id'];
                 }
                 $count = $this->_logistics_info->where($where)->count();
@@ -793,31 +792,29 @@ class ScmQuality extends Scm
                         ->alias('a')
                         ->join(['fa_check_order_item' => 'b'], 'a.id=b.check_id')
                         ->where(['a.batch_id' => $row['batch_id'], 'a.purchase_id' => $row['purchase_id'], 'a.status' => 2])
-                        ->where('a.is_error = :is_error or b.error_type > :error_type ',['is_error'=>1, 'error_type'=>0])
-                        ->select()
-                    ;
+                        ->where('a.is_error = :is_error or b.error_type > :error_type ', ['is_error' => 1, 'error_type' => 0])
+                        ->select();
                     if ($check_item_list) {
                         //获取采购价格
                         $purchase_item_list = $this->_purchase_order_item
                             ->field('sku,purchase_price')
                             ->where(['purchase_id' => $row['purchase_id']])
-                            ->select()
-                        ;
-                        $purchase_item_list = array_column($purchase_item_list,NULL,'sku');
+                            ->select();
+                        $purchase_item_list = array_column($purchase_item_list, NULL, 'sku');
 
                         //获取采购单商品数据
                         $abnormal_item_save = [];
                         $is_error = 0;
                         foreach ($check_item_list as $v) {
                             $abnormal_item_save[] = [
-                                'sku'=>$v['sku'],
-                                'supplier_sku'=>$v['supplier_sku'],
-                                'purchase_num'=>$v['purchase_num'],
-                                'should_arrival_num'=>$v['should_arrival_num'],
-                                'arrival_num'=>$v['arrival_num'],
-                                'error_type'=>$v['error_type'],
-                                'purchase_id'=>$row['purchase_id'],
-                                'purchase_price'=>$purchase_item_list[$v['sku']] ?? 0
+                                'sku' => $v['sku'],
+                                'supplier_sku' => $v['supplier_sku'],
+                                'purchase_num' => $v['purchase_num'],
+                                'should_arrival_num' => $v['should_arrival_num'],
+                                'arrival_num' => $v['arrival_num'],
+                                'error_type' => $v['error_type'],
+                                'purchase_id' => $row['purchase_id'],
+                                'purchase_price' => $purchase_item_list[$v['sku']] ?? 0
                             ];
                             if (1 == $v['is_error']) {
                                 $is_error = 1;
@@ -826,24 +823,24 @@ class ScmQuality extends Scm
 
                         //新增收货异常主表数据
                         $abnormal_save = [
-                            'error_number'=>'YC' . date('YmdHis') . rand(100, 999) . rand(100, 999),
-                            'supplier_id'=>$row['supplier_id'],
-                            'purchase_id'=>$row['purchase_id'],
-                            'batch_id'=>$row['batch_id'],
-                            'createtime'=>date('Y-m-d H:i:s'),
-                            'is_error'=>$is_error
+                            'error_number' => 'YC' . date('YmdHis') . rand(100, 999) . rand(100, 999),
+                            'supplier_id' => $row['supplier_id'],
+                            'purchase_id' => $row['purchase_id'],
+                            'batch_id' => $row['batch_id'],
+                            'createtime' => date('Y-m-d H:i:s'),
+                            'is_error' => $is_error
                         ];
                         $this->_purchase_abnormal->allowField(true)->save($abnormal_save);
 
                         //新增收货异常子表数据
                         array_walk($abnormal_item_save, function (&$value, $k, $p) {
                             $value = array_merge($value, $p);
-                        },['abnormal_id' => $this->_purchase_abnormal->id]);
+                        }, ['abnormal_id' => $this->_purchase_abnormal->id]);
 
                         $this->_purchase_abnormal_item->allowField(true)->saveAll($abnormal_item_save);
                     }
                 }
-            }else{//审核拒绝关联操作
+            } else { //审核拒绝关联操作
                 //移除质检单条形码绑定关系
                 $code_clear = [
                     'sku' => '',
@@ -866,7 +863,7 @@ class ScmQuality extends Scm
             $this->error($e->getMessage(), [], 408);
         }
 
-        $this->success('审核成功', [],200);
+        $this->success('审核成功', [], 200);
     }
 
     /**
@@ -898,35 +895,35 @@ class ScmQuality extends Scm
         empty($page_size) && $this->error(__('Page size can not be empty'), [], 403);
 
         $where = [];
-        if($logistics_number){
+        if ($logistics_number) {
             $where['logistics_number'] = ['like', '%' . $logistics_number . '%'];
         }
-        if($sign_number){
+        if ($sign_number) {
             $where['sign_number'] = ['like', '%' . $sign_number . '%'];
         }
-        if(isset($status)){
+        if (isset($status)) {
             $where['status'] = $status;
         }
-        if($start_time && $end_time){
+        if ($start_time && $end_time) {
             $where['createtime'] = ['between', [$start_time, $end_time]];
         }
 
         //获取采购单数据
         $purchase_list = $this->_purchase_order
-            ->where(['purchase_status'=>[['=',6], ['=',7], 'or']])
+            ->where(['purchase_status' => [['=', 6], ['=', 7], 'or']])
             ->field('id,purchase_number,is_new_product')
             ->select();
-        $purchase_list = array_column($purchase_list,NULL,'id');
+        $purchase_list = array_column($purchase_list, NULL, 'id');
 
         //拼接采购单条件
-        if(isset($is_new_product)){
-            $purchase_ids = array_filter($purchase_list,function($v) use ($is_new_product){
-                if($v['is_new_product'] == $is_new_product){
+        if (isset($is_new_product)) {
+            $purchase_ids = array_filter($purchase_list, function ($v) use ($is_new_product) {
+                if ($v['is_new_product'] == $is_new_product) {
                     return $v;
                 }
             });
             $purchase_ids = array_keys($purchase_ids);
-            $where['purchase_id'] = ['in',$purchase_ids];
+            $where['purchase_id'] = ['in', $purchase_ids];
         }
 
         $offset = ($page - 1) * $page_size;
@@ -935,16 +932,17 @@ class ScmQuality extends Scm
         //获取物流单列表数据
         $list = $this->_logistics_info
             ->where($where)
+            ->where('type', 1) //采购单类型
             ->field('id,logistics_number,sign_number,createtime,sign_time,status,purchase_id,type')
             ->order('createtime', 'desc')
             ->limit($offset, $limit)
             ->select();
         $list = collection($list)->toArray();
 
-        foreach($list as $key=>$value){
+        foreach ($list as $key => $value) {
             $purchase_number = '';
             $is_new_product = 0;
-            if($value['purchase_id']){
+            if ($value['purchase_id']) {
                 $purchase_number = $purchase_list[$value['purchase_id']]['purchase_number'];
                 $is_new_product = 1 == $purchase_list[$value['purchase_id']]['is_new_product'] ?: 0;
             }
@@ -955,7 +953,7 @@ class ScmQuality extends Scm
             $list[$key]['show_quality'] = 1 == $value['status'] && 1 == $value['type'] ? 1 : 0;
         }
 
-        $this->success('', ['list' => $list],200);
+        $this->success('', ['list' => $list], 200);
     }
 
     /**
@@ -981,21 +979,21 @@ class ScmQuality extends Scm
         Db::startTrans();
         try {
             $logistics_save = [
-                'sign_person'=>$this->auth->nickname,
-                'sign_time'=>date('Y-m-d H:i:s'),
-                'status'=>1,
-                'sign_number'=>$sign_number
+                'sign_person' => $this->auth->nickname,
+                'sign_time' => date('Y-m-d H:i:s'),
+                'status' => 1,
+                'sign_number' => $sign_number
             ];
-            $res = $this->_logistics_info->allowField(true)->isUpdate(true, ['id'=>$logistics_id])->save($logistics_save);
+            $res = $this->_logistics_info->allowField(true)->isUpdate(true, ['id' => $logistics_id])->save($logistics_save);
             false === $res && $this->error(__('签收失败'), [], 404);
 
             //签收成功时更改采购单签收状态
             $count = $this->_logistics_info->where(['purchase_id' => $row['purchase_id'], 'status' => 0])->count();
             $purchase_save = [
-                'purchase_status'=>$count > 0 ? 9 : 7,
-                'receiving_time'=>date('Y-m-d H:i:s')
+                'purchase_status' => $count > 0 ? 9 : 7,
+                'receiving_time' => date('Y-m-d H:i:s')
             ];
-            $this->_purchase_order->allowField(true)->isUpdate(true, ['id'=>$row['purchase_id']])->save($purchase_save);
+            $this->_purchase_order->allowField(true)->isUpdate(true, ['id' => $row['purchase_id']])->save($purchase_save);
 
             //根据采购单获取补货单ID
             $replenish_id = $this->_purchase_order->where(['id' => $row['purchase_id']])->value('replenish_id');
@@ -1003,9 +1001,8 @@ class ScmQuality extends Scm
             //获取补货单数据
             $mapping_list = $this->_new_product_mapping
                 ->field('website_type,rate,sku')
-                ->where(['replenish_id'=>$replenish_id])
-                ->select()
-            ;
+                ->where(['replenish_id' => $replenish_id])
+                ->select();
 
             //批次物流签收
             if ($row['batch_id']) {
@@ -1013,14 +1010,13 @@ class ScmQuality extends Scm
                 $batch_item_list = $this->_purchase_batch_item
                     ->field('sku,arrival_num')
                     ->where(['purchase_batch_id' => $row['batch_id']])
-                    ->select()
-                ;
+                    ->select();
                 foreach ($batch_item_list as $v) {
                     $sku = $v['sku'];
                     $arrival_num = $v['arrival_num'];
                     //获取各站虚拟仓占比
-                    $rate_arr = array_filter($mapping_list,function($value) use ($sku){
-                        if($value['sku'] == $sku){
+                    $rate_arr = array_filter($mapping_list, function ($value) use ($sku) {
+                        if ($value['sku'] == $sku) {
                             return $value;
                         }
                     });
@@ -1038,28 +1034,27 @@ class ScmQuality extends Scm
                             $stock_num -= $num;
                         }
                         //减站点在途
-                        $this->_item_platform_sku->where(['sku'=>$sku,'platform_type'=>$website_type])->setDec('plat_on_way_stock',$num);
+                        $this->_item_platform_sku->where(['sku' => $sku, 'platform_type' => $website_type])->setDec('plat_on_way_stock', $num);
                         //加站点待入库数量
-                        $this->_item_platform_sku->where(['sku'=>$sku,'platform_type'=>$website_type])->setInc('wait_instock_num',$num);
+                        $this->_item_platform_sku->where(['sku' => $sku, 'platform_type' => $website_type])->setInc('wait_instock_num', $num);
                     }
                     //减全部在途
                     $this->_item->where(['sku' => $sku])->setDec('on_way_stock', $arrival_num);
                     //加全部待入库数量
                     $this->_item->where(['sku' => $sku])->setInc('wait_instock_num', $arrival_num);
                 }
-            } elseif ($row['purchase_id']) {//采购物流签收
+            } elseif ($row['purchase_id']) { //采购物流签收
                 //获取采购单商品数据
                 $purchase_item_list = $this->_purchase_order_item
                     ->field('sku,purchase_num')
                     ->where(['purchase_id' => $row['purchase_id']])
-                    ->select()
-                ;
+                    ->select();
                 foreach ($purchase_item_list as $v) {
                     $sku = $v['sku'];
                     $purchase_num = $v['purchase_num'];
                     //获取各站虚拟仓占比
-                    $rate_arr = array_filter($mapping_list,function($value) use ($sku){
-                        if($value['sku'] == $sku){
+                    $rate_arr = array_filter($mapping_list, function ($value) use ($sku) {
+                        if ($value['sku'] == $sku) {
                             return $value;
                         }
                     });
@@ -1077,9 +1072,9 @@ class ScmQuality extends Scm
                             $stock_num -= $num;
                         }
                         //减站点在途
-                        $this->_item_platform_sku->where(['sku'=>$sku,'platform_type'=>$website_type])->setDec('plat_on_way_stock',$num);
+                        $this->_item_platform_sku->where(['sku' => $sku, 'platform_type' => $website_type])->setDec('plat_on_way_stock', $num);
                         //加站点待入库数量
-                        $this->_item_platform_sku->where(['sku'=>$sku,'platform_type'=>$website_type])->setInc('wait_instock_num',$num);
+                        $this->_item_platform_sku->where(['sku' => $sku, 'platform_type' => $website_type])->setInc('wait_instock_num', $num);
                     }
                     //减全部在途
                     $this->_item->where(['sku' => $sku])->setDec('on_way_stock', $purchase_num);
@@ -1100,7 +1095,6 @@ class ScmQuality extends Scm
             $this->error($e->getMessage(), [], 408);
         }
 
-        $this->success('签收成功', [],200);
+        $this->success('签收成功', [], 200);
     }
-
 }
