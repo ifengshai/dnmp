@@ -993,6 +993,7 @@ class Test4 extends Controller
                     }
                 }
             }
+            usleep(10000);
             echo $k . "\n";
         }
         echo "ok";
