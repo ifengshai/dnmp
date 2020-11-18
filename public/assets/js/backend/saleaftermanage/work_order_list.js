@@ -1328,6 +1328,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
 
                 //根据下拉选择生成子订单列表
                 var step_item = Config.workOrderConfigValue.step_item;
+                var item_problem_step = Config.workOrderConfigValue.item_problem_step;
+                alert(item_problem_step);
+                return false;
                 var item_checkbox = '';
                 var zhtml = '<tr ><th>子单号</th><th>措施</th><th>处理流程</th></tr>';
 
@@ -1345,10 +1348,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     ihtml += '</div></div>';
                     ihtml += '<div class="box-body'+item_order_sku[i]+'">';
                     for (var j in step_item) {
+                        if(item_problem_step[j].extend_group_id ==undefined && item_problem_step[j].extend_group_id ==0){
+                            item_problem_step[j].extend_group_id = 0;
+                        }
                             ihtml += '<label><input type="checkbox" name="" class="item_step_type item_step_type'+item_order_sku[i]+'" id="item_step'+j+'" value="'+j+'" flag="'+item_order_sku[i]+'" sku="'+item_order_sku_number[i]+'"><span>'+step_item[j]+'</span></label>';
-                            ihtml += '<input type="hidden" id="item_step'+j+'-is_check" value="0">';
-                            ihtml += '<input type="hidden" id="item_step'+j+'-is_auto_complete" value="0">';
-                            ihtml += '<input type="hidden" id="item_step'+j+'-appoint_group" value="44">';
+                            ihtml += '<input type="hidden" id="item_step'+j+'-is_check" value="'+item_problem_step[j].is_check+'">';
+                            ihtml += '<input type="hidden" id="item_step'+j+'-is_auto_complete" value="'+item_problem_step[j].is_auto_complete+'">';
+                            ihtml += '<input type="hidden" id="item_step'+j+'-appoint_group" value="'+item_problem_step[j].extend_group_id+'">';
                     }
                     item_measure += '<div class="form-group-child4 measure_item'+item_order_sku[i]+' item'+item_order_sku[i]+'_step19-19" style="display:none;"  flag="'+item_order_sku[i]+'"><div class="caigou frame-info item_info"><p style="font-size: 16px;"><b>更换镜框</b></p><div ><table class="caigou-table-sku" id="change-frame'+item_order_sku[i]+'"><tr><th>原SKU</th><th>原数量(+增加)</th><th>新SKU</th><th>新数量(-减少)</th></tr></table></div></div></div>';
                     item_measure += '<div class="form-group-child4 measure_item'+item_order_sku[i]+' item'+item_order_sku[i]+'_step20-20" style="display:none;" flag="'+item_order_sku[i]+'"><div class="col-xs-12 col-sm-8" style="width: 100%"><p style="font-size: 16px;"><b>更改镜片</b></p><div id="lens_contents" ></div></div></div>';
