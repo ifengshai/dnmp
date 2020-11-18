@@ -29,6 +29,12 @@ class Scm extends Api
     protected $noNeedRight = '*';
 
     /**
+     * 权限控制类
+     * @var Auth
+     */
+    protected $auth = null;
+
+    /**
      * PDA菜单
      * @var array
      * @access protected
@@ -71,8 +77,8 @@ class Scm extends Api
 
         $this->auth = Auth::instance();
 
-        //校验Token
-        $this->auth->match(['login','version']) || $this->auth->id || $this->error(__('Token invalid, please log in again'), [], 401);
+        //校验api_key
+        $this->auth->match(['login','version']) || $this->auth->id || $this->error(__('Api key invalid, please log in again'), [], 401);
 
         //校验请求类型
         $this->request->isPost() || $this->error(__('Request method must be post'), [], 402);
@@ -95,7 +101,7 @@ class Scm extends Api
 
         if ($this->auth->login($account, $password)) {
             $user = $this->auth->getUserinfo();
-            $data = ['token' => $user['token']];
+            $data = ['api_key' => $user['api_key']];
             $this->success(__('Logged in successful'), $data,200);
         } else {
             $this->error($this->auth->getError(), [], 404);
