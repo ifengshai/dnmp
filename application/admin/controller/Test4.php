@@ -738,12 +738,13 @@ class Test4 extends Controller
     public function set_product_relstock()
     {
 
-        $list = Db::table('fa_zz_temp2')->select();
+        $list = Db::table('fa_zz_temp2')->limit(50)->select();
 
         foreach ($list as $k => $v) {
             $p_map['sku'] = $v['sku'];
             $data['real_time_qty'] = $v['stock'];
             $res = $this->item->where($p_map)->update($data);
+            echo $v['sku'] . "\n";
         }
         echo 'ok';
         die;
@@ -770,7 +771,7 @@ class Test4 extends Controller
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
 
-        $skus = Db::table('fa_zz_temp2')->column('sku');
+        $skus = Db::table('fa_zz_temp2')->limit(50)->column('sku');
 
         foreach ($skus as $k => $v) {
             $map = [];
@@ -815,7 +816,7 @@ class Test4 extends Controller
 
             $res = $this->item->where($p_map)->update($data);
 
-            echo $k . "\n";
+            echo $v['sku'] . "\n";
             usleep(200000);
         }
 
@@ -846,7 +847,7 @@ class Test4 extends Controller
         $this->zeelool_jp = new \app\admin\model\order\order\ZeeloolJp();
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
-        $skus = Db::table('fa_zz_temp2')->column('sku');
+        $skus = Db::table('fa_zz_temp2')->limit(50)->column('sku');
 
         foreach ($skus as $k => $v) {
             $map = [];
@@ -888,7 +889,7 @@ class Test4 extends Controller
             $data['occupy_stock'] = $zeelool_qty + $voogueme_qty + $nihao_qty + $weseeoptical_qty + $meeloog_qty + $zeelool_jp_qty + $zeelool_es_qty + $zeelool_de_qty;
             $res = $this->item->where($p_map)->update($data);
 
-            echo $k . "\n";
+            echo $v['sku'] . "\n";
             usleep(200000);
         }
         echo 'ok';
@@ -908,7 +909,7 @@ class Test4 extends Controller
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
 
-        $skus = Db::table('fa_zz_temp2')->column('sku');
+        $skus = Db::table('fa_zz_temp2')->limit(50)->column('sku');
         $list = $this->item->field('sku,stock,occupy_stock,available_stock,real_time_qty,distribution_occupy_stock')->where(['sku' => ['in', $skus]])->select();
         foreach ($list as $k => $v) {
             $data['stock'] = $v['real_time_qty'] + $v['distribution_occupy_stock'];
