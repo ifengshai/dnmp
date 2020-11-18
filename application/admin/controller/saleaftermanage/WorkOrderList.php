@@ -977,34 +977,6 @@ class WorkOrderList extends Backend
                 $this->view->assign('problem_type', $problem_type); //客服问题类型
             }
         }
-        //所有主单措施类型
-        $all_step_main = (new WorkOrderStepType)->where(['is_del'=>1,'type'=>1])->select();
-        //所有子单措施类型
-        $all_step_item = (new WorkOrderStepType)->where(['is_del'=>1,'type'=>2])->select();
-        //存在子单措施
-        if (!empty($all_step_item)) {
-            $all_step_item         = collection($all_step_item)->toArray();
-            foreach ($all_step_item as $sv) {
-                $step_item[$sv['id']] = $sv['step_name'];
-            }
-        }
-        //所有工单类型措施关系表
-        $item_problem_step = [];
-        $where_step = [];
-        $where_step['c.is_del'] = 1;
-        $where_step['c.order_type'] = 2;
-        $item_problem_step_list = (new WorkOrderProblemStep)
-            ->alias('a')
-            ->field('a.id,a.problem_id,a.step_id,a.extend_group_id,a.is_check,a.is_auto_complete')
-            ->join(['fa_work_order_problem_type'=> 'c'], 'a.problem_id=c.id','left')
-            ->where($where_step)
-            ->order('a.id')
-            ->select();
-        $item_problem_step_list = $item_problem_step_list->toArray();
-        foreach ($item_problem_step_list as $v) {
-            $item_problem_step[$v['step_id']] = $v;
-        }
-        $this->view->assign('item_problem_step', $item_problem_step);
         $this->assignconfig('userid', session('admin.id'));
         return $this->view->fetch();
     }
