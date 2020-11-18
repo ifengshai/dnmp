@@ -910,7 +910,7 @@ class ScmQuality extends Scm
 
         //获取采购单数据
         $purchase_list = $this->_purchase_order
-            ->where(['purchase_status' => [['=', 6], ['=', 7], 'or']])
+            ->where(['purchase_status' => ['in', [6, 7, 9, 10]]])
             ->field('id,purchase_number,is_new_product')
             ->select();
         $purchase_list = array_column($purchase_list, NULL, 'id');
