@@ -1199,15 +1199,21 @@ class Distribution extends Backend
             ->field('id,site,sku,distribution_status,abnormal_house_id')
             ->where(['id' => $ids])
             ->find();
+        print_r($ids);
+        print_r('----------');
+        print_r($item_info);
         empty($item_info) && $this->error('子订单不存在');
         empty($item_info['abnormal_house_id']) && $this->error('当前子订单未标记异常');
 
         //检测异常状态
         $_distribution_abnormal = new DistributionAbnormal();
         $abnormal_info = $_distribution_abnormal
-            ->field('type')
-            ->where(['id' => $item_info['id'], 'status' => 1])
+            ->field('id,type')
+            ->where(['item_process_id' => $ids, 'status' => 1])
             ->find();
+        print_r('----------');
+        print_r($abnormal_info);
+        exit;
         empty($abnormal_info) && $this->error('当前子订单异常信息获取失败');
 
         //状态列表
@@ -1278,12 +1284,12 @@ class Distribution extends Backend
                 $this->model
                     ->allowField(true)
                     ->isUpdate(true, ['id' => $ids])
-                    ->save(['distribution_status' => $status]);
+                    ->save(['distribution_status' => $status,'abnormal_house_id' => 0]);
 
                 //标记异常状态
                 $_distribution_abnormal
                     ->allowField(true)
-                    ->isUpdate(true, ['id' => $item_info['abnormal_house_id']])
+                    ->isUpdate(true, ['id' => $abnormal_info['id']])
                     ->save(['status' => 2, 'do_time' => time(), 'do_person' => $admin->nickname]);
 
                 //镜片报损扣减可用库存、虚拟仓库存、配货占用库存、总库存
