@@ -942,17 +942,17 @@ class Test4 extends Controller
             //同步对应SKU库存
             //更新商品表商品总库存
             //总库存
-            $item_map['sku'] = $v['sku'];
+            $item_map['sku'] = $v;
             $item_map['is_del'] = 1;
-            if ($v['sku']) {
+            if ($v) {
                 $available_stock = $item->where($item_map)->value('available_stock');
 
                 //盘点的时候盘盈入库 盘亏出库 的同时要对虚拟库存进行一定的操作
                 //查出映射表中此sku对应的所有平台sku 并根据库存数量进行排序（用于遍历数据的时候首先分配到那个站点）
-                $item_platform_sku = $platform->where('sku', $v['sku'])->order('stock asc')->field('platform_type,stock')->select();
+                $item_platform_sku = $platform->where('sku', $v)->order('stock asc')->field('platform_type,stock')->select();
                 $all_num = count($item_platform_sku);
                 $whole_num = $platform
-                    ->where('sku', $v['sku'])
+                    ->where('sku', $v)
                     ->field('stock')
                     ->select();
                 $num_num = 0;
@@ -969,22 +969,22 @@ class Test4 extends Controller
                     foreach ($item_platform_sku as $key => $val) {
                         //最后一个站点 剩余数量分给最后一个站
                         if (($all_num - $key) == 1) {
-                            $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->update(['stock' => $stock_num]);
+                            $platform->where(['sku' => $v, 'platform_type' => $val['platform_type']])->update(['stock' => $stock_num]);
                         } else {
                             $num = round($available_stock * $rate_rate);
                             $stock_num -= $num;
-                            $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->update(['stock' => $num]);
+                            $platform->where(['sku' => $v, 'platform_type' => $val['platform_type']])->update(['stock' => $num]);
                         }
                     }
                 } else {
                     foreach ($item_platform_sku as $key => $val) {
                         //最后一个站点 剩余数量分给最后一个站
                         if (($all_num - $key) == 1) {
-                            $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->update(['stock' => $stock_num]);
+                            $platform->where(['sku' => $v, 'platform_type' => $val['platform_type']])->update(['stock' => $stock_num]);
                         } else {
                             $num = round($available_stock * abs($val['stock']) / $num_num);
                             $stock_num -= $num;
-                            $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->update(['stock' => $num]);
+                            $platform->where(['sku' => $v, 'platform_type' => $val['platform_type']])->update(['stock' => $num]);
                         }
                     }
                 }
