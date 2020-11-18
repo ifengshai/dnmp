@@ -92,6 +92,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                                 formatter: Table.api.formatter.status
                             },
                             {
+                                field: 'functional_module',
+                                title: __('功能模块'),
+                                searchList: { 1: '购物车', 2: '个人中心', 3: '列表页', 4: '详情页', 5: '首页', 6: '优惠券', 7: '支付页', 8: 'magento后台',9:'活动页',10:'其他' },
+                                formatter: Table.api.formatter.status
+                            },
+                            {
                                 field: 'title',
                                 title: __('标题'),
                                 operate: 'LIKE',
@@ -331,25 +337,28 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                                 field: 'priority',
                                 title: __('优先级'),
                                 searchList: { '': '-', 1: '低', 2: '低+', 3: '中', 4: '中+', 5: '高',6:'高+' },
-                                custom: { 1: 'red', 2: 'blue', 3: 'blue', 4: 'blue', 5: 'green' },
+                                custom: { 1: 'green', 2: 'blue', 3: 'black', 4: 'yellow', 5: 'red' },
                                 formatter: Table.api.formatter.status
                             },
                             {
                                 field: 'degree_of_urgency',
                                 title: __('重要程度'),
-                                searchList: { 1: 'S0', 2: 'S1', 3: 'S2', 4: 'S3' },
+                                searchList: { 1: 'S0:不重要', 2: 'S1：不太重要', 3: 'S2：一般', 4: 'S3：比较重要',5:'非常重要' },
+                                custom: { 1: 'green', 2: 'black', 3: 'black', 4: 'yellow', 5: 'red' },
                                 formatter: Table.api.formatter.status
                             },
                             {
                                 field: 'importance',
                                 title: __('紧急程度'),
-                                searchList: { 1: 'P1', 2: 'P2', 3: 'P3' },
+                                searchList: { 1: 'P0：不紧急', 2: 'P1：正常', 3: 'P2：比较紧急', 4: 'P3：非常紧急' },
+                                custom: { 1: 'green', 2: 'blue', 3: 'black', 4: 'red' },
                                 formatter: Table.api.formatter.status
                             },
                             {
                                 field: 'development_difficulty',
                                 title: __('开发难度'),
-                                searchList: { 1: 'D1', 2: 'D2', 3: 'D3' },
+                                searchList: { 1: 'D1：简单', 2: 'D2：中等', 3: 'D3：复杂' },
+                                custom: { 1: 'green', 2: 'black', 3: 'red' },
                                 formatter: Table.api.formatter.status
                             },
                             {
@@ -888,7 +897,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                 get_develop_status: function (value, row, index) {
                     // if (row.status >= 2) {
                     if (row.develop_finish_status == 1) {
-                        return '<div><span class="check_develop_status status1_color">未响应</span></div>';
+                        if (row.status ==1){
+                            return '<div><span>未响应</span></div>';
+                        }else{
+                            return '<div><span class="check_develop_status status1_color">未响应</span></div>';
+                        }
+
                     } else if (row.develop_finish_status == 2) {
                         return '<div><span class="check_develop_status status1_color">开发中</span></div>';
                     } else if (row.develop_finish_status == 3) {
@@ -1060,7 +1074,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                             Backend.api.ajax({
                                 url: 'demand/it_web_demand/add/is_user_confirm/1/ids/' + row.id,
                             }, function (data, ret) {
-                                $("#table").bootstrapTable('refresh');
+                                $("#table1").bootstrapTable('refresh');
                                 Layer.closeAll();
                             }, function (data, ret) {
                                 //失败的回调
