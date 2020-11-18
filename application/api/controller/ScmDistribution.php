@@ -213,7 +213,8 @@ class ScmDistribution extends Scm
             3=>'待配镜片',
             4=>'待加工',
             5=>'待印logo',
-            6=>'待成品质检'
+            6=>'待成品质检',
+            7=>'待合单'
         ];
         $check_status != $item_process_info['distribution_status'] && $this->error(__('只有'.$status_arr[$check_status].'状态才能操作'), [], 405);
 
@@ -313,15 +314,15 @@ class ScmDistribution extends Scm
                 ['id'=>4,'name'=>'logo调整']
             ],
             7=>[
-                [['id'=>12,'name'=>'缺货']]
+                ['id'=>12,'name'=>'缺货']
             ]
         ];
         $abnormal_list = $abnormal_arr[$check_status] ?? [];
-//        //配货返回数据
-//        if(2 == $check_status){
-//            //获取子订单处方数据
-//            $this->success('', ['abnormal_list' => $abnormal_list,'option_info' => $option_info['sku']],200);
-//        }
+        //配货返回数据
+        if(7 == $check_status){
+            //获取子订单处方数据
+            return $abnormal_list;
+        }
 
         $this->success('', ['abnormal_list' => $abnormal_list,'option_info' => $option_info],200);
     }
@@ -797,11 +798,16 @@ class ScmDistribution extends Scm
             //主单中无库位号，首个子单进入时，分配一个合单库位给PDA，暂不占用根据是否确认放入合单架占用或取消
             $store_house_info = $this->_stock_house->field('id,coding,subarea')->where(['status'=>1,'type'=>2])->find();
             $info['store_id'] = $store_house_info['id'];
+            $info['coding'] = $store_house_info['coding'];
         } else {
             //主单已绑定合单库位,根据ID查询库位信息
             $store_house_info = $this->_stock_house->field('id,coding,subarea')->where('id',$order_process_info['store_house_id'])->find();
             $info['store_id'] = $store_house_info['id'];
+            $info['coding'] = $store_house_info['coding'];
         }
+
+        $abnormal_list = $this->info($item_order_number,7);
+        $info['abnormal_list'] = $abnormal_list;
 
         $this->success('', ['info' => $info],200);
     }
@@ -813,7 +819,7 @@ class ScmDistribution extends Scm
      * @author wgj
      * @return mixed
      */
-    public function item_order_merge_submit()
+    public function merge_submit()
     {
         $item_order_number = $this->request->request('item_order_number');
         $store_house_id = $this->request->request('store_house_id');
@@ -841,13 +847,15 @@ class ScmDistribution extends Scm
         $store_house_info = $this->_stock_house->field('id,coding,subarea,occupy')->where('id',$store_house_id)->find();//查询合单库位--占用数量
         empty($store_house_info) && $this->error(__('合单库位不存在'), [], 403);
 
-        if ($store_house_info['occupy'] && empty($order_process_info['store_house_id'])){
-            //主单无绑定库位，且分配的库位被占用，重新分配合单库位后再次提交确认放入新分配合单架
-            $new_store_house_info = $this->_stock_house->field('id,coding,subarea')->where(['status'=>1,'type'=>2,'occupy'=>0])->find();
-            empty($new_store_house_info) && $this->error(__('合单库位已用完，请检查合单库位情况'), [], 403);
+        if ($order_process_info['store_house_id'] != $store_house_id){
+            if ($store_house_info['occupy'] && empty($order_process_info['store_house_id'])){
+                //主单无绑定库位，且分配的库位被占用，重新分配合单库位后再次提交确认放入新分配合单架
+                $new_store_house_info = $this->_stock_house->field('id,coding,subarea')->where(['status'=>1,'type'=>2,'occupy'=>0])->find();
+                empty($new_store_house_info) && $this->error(__('合单库位已用完，请检查合单库位情况'), [], 403);
 
-            $info['store_id'] = $new_store_house_info['id'];
-            $this->error(__('合单架'.$store_house_info['coding'].'库位已被占用，'.'请将子单号'.$item_order_number.'的商品放入新合单架'.$new_store_house_info['coding'].'库位'), ['info' => $info], 403);
+                $info['store_id'] = $new_store_house_info['id'];
+                $this->error(__('合单架'.$store_house_info['coding'].'库位已被占用，'.'请将子单号'.$item_order_number.'的商品放入新合单架'.$new_store_house_info['coding'].'库位'), ['info' => $info], 403);
+            }
         }
 
         if ($item_process_info['distribution_status'] == 8){
@@ -867,7 +875,7 @@ class ScmDistribution extends Scm
 
         if($order_process_info['store_house_id']){
             //存在合单库位ID，获取合单库位号存入
-            if ($total_qty_ordered > $count){
+            if ($total_qty_ordered > $count+1){
                 //不是最后一个子单
                 $num = '';
                 $next = 1;//是否有下一个子单 1有，0没有
@@ -999,7 +1007,7 @@ class ScmDistribution extends Scm
      * @author wgj
      * @return mixed
      */
-    public function merge_submit()
+    public function merge_submit_test()
     {
         $order_number = $this->request->request('order_number');
         empty($order_number) && $this->error(__('订单号不能为空'), [], 403);
@@ -1092,7 +1100,6 @@ class ScmDistribution extends Scm
                 ->field('a.order_id,a.store_house_id,a.combine_time')
                 ->limit($offset, $limit)
                 ->select();
-            empty($list) && $this->error(__('暂无合单待取出'), [], 403);
 
         } else {
             //异常待处理列表
@@ -1119,7 +1126,6 @@ class ScmDistribution extends Scm
                 ->field('a.store_house_id,b.item_order_number')
                 ->limit($offset, $limit)
                 ->select();
-            empty($list) && $this->error(__('暂无合单异常待处理'), [], 403);
         }
         foreach (array_filter($list) as $k => $v) {
             $list[$k]['coding'] = $this->_stock_house->where('id',$v['store_house_id'])->value('coding');

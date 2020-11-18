@@ -168,6 +168,9 @@ class Workorderconfig extends Backend
         $all_step_main = (new WorkOrderStepType)->where(['is_del'=>1,'type'=>1])->select();
         //所有子单措施类型
         $all_step_item = (new WorkOrderStepType)->where(['is_del'=>1,'type'=>2])->select();
+        $order_type = [];
+        $order_type[] = ['id' => 1,'name' => '主订单'];
+        $order_type[] = ['id' => 2,'name' => '子订单'];
 
         $extend_team = $this->model->getAllExtend();
         $extend_team = $this->model->getAllExtendArr();
@@ -216,6 +219,8 @@ class Workorderconfig extends Backend
                         }else{
                             $data['is_auto_complete'] = 0;
                         }
+                        //添加问题类型，区分主单和子单
+                        $data['order_type'] = $params['order_type'];
                         Db::name('work_order_problem_step')->insert($data);
                     }
                 }
@@ -235,6 +240,7 @@ class Workorderconfig extends Backend
         $this->view->assign("step", $step);
         $this->view->assign("step_main", $all_step_main);
         $this->view->assign("step_item", $all_step_item);
+        $this->view->assign("order_type", $order_type);
         $this->view->assign("extend_team", $extend_team);
         return $this->view->fetch();
     }
@@ -308,6 +314,7 @@ class Workorderconfig extends Backend
             $result = Cache::rm('Workorderconfig_getConfigInfo');
         }
         $row = $this->model->getQuetionMeasure($ids);
+        $order_type = Db::name('work_order_problem_type')->where(['id' => $ids])->value('order_type');
         $step = $this->model->getAllStep();
         foreach ($step as $k => $v) {
             $result = Db::name('work_order_problem_step')->where(['problem_id' => $ids, 'step_id' => $step[$k]['id']])->find();
@@ -443,6 +450,7 @@ class Workorderconfig extends Backend
         $this->view->assign("step", $step);
         $this->view->assign("step_main", $all_step_main);
         $this->view->assign("step_item", $all_step_item);
+        $this->view->assign("order_type", $order_type);
         $this->view->assign("extend_team", $extend_team);
         $this->view->assign("row", $row);
         return $this->view->fetch();

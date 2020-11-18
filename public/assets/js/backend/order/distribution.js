@@ -14,12 +14,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
             $('.btn-batch-printed').removeClass('hide');
             $('.btn-tag-printed').removeClass('hide');
         }else if(2 == value){
+            $('.btn-batch-printed').removeClass('hide');
             $('.btn-product').removeClass('hide');
         }else if(3 == value){
+            $('.btn-batch-printed').removeClass('hide');
             $('.btn-lens').removeClass('hide');
         }else if(4 == value){
+            $('.btn-batch-printed').removeClass('hide');
             $('.btn-machining').removeClass('hide');
         }else if(5 == value){
+            $('.btn-batch-printed').removeClass('hide');
             $('.btn-logo').removeClass('hide');
         }else if(6 == value){
             $('.btn-finish-adopt').removeClass('hide');
@@ -285,6 +289,27 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
             $('.btn-batch-printed').click(function () {
                 var ids = Table.api.selectedids(table);
                 window.open(Config.moduleurl + '/order/distribution/batch_print_label/ids/' + ids, '_blank');
+            });
+
+            //批量标记已打印
+            $('.btn-tag-printed').click(function () {
+                var ids = Table.api.selectedids(table);
+                Layer.confirm(
+                    __('确定要标记这%s条记录已打印吗?', ids.length),
+                    { icon: 3, title: __('Warning'), shadeClose: true },
+                    function (index) {
+                        Layer.close(index);
+                        Backend.api.ajax({
+                            url: Config.moduleurl + '/order/distribution/tag_printed',
+                            data: { id_params: ids },
+                            type: 'post'
+                        }, function (data, ret) {
+                            if (data == 'success') {
+                                table.bootstrapTable('refresh');
+                            }
+                        });
+                    }
+                );
             });
 
             //配货完成、配镜片完成、加工完成、印logo完成
