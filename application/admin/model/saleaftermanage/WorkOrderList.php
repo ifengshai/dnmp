@@ -175,10 +175,12 @@ class WorkOrderList extends Model
      * 根据订单号获取SKU列表-新
      *
      * @param string $increment_id  订单号
+     * @param mixed $item_order_number  子订单号
+     * @param int $work_id  工单ID
      * @author lzh
      * @return array
      */
-    public function getSkuListNew($increment_id)
+    public function getOrderItem($increment_id,$item_order_number='',$work_id=0)
     {
         $order_field = 'id,site,base_grand_total,base_to_order_rate,payment_method,customer_email,customer_firstname,customer_lastname,order_type,mw_rewardpoint_discount,base_currency_code,shipping_method,country_id,region,city,street,postcode,telephone';
 
@@ -192,14 +194,61 @@ class WorkOrderList extends Model
             return [];
         }
 
-        $sku_field = 'a.sku,b.prescription_type,b.coating_name,b.od_sph,b.os_sph,b.od_cyl,b.os_cyl,b.od_axis,b.os_axis,b.pd_l,b.pd_r,b.pd,b.pdcheck,b.os_add,b.od_add,b.prismcheck,b.od_pv,b.os_pv,b.od_pv_r,b.os_pv_r,b.od_bd,b.os_bd,b.od_bd_r,b.os_bd_r,b.lens_number';
+        $order_item_field = 'a.sku,b.prescription_type,b.coating_name,b.od_sph,b.os_sph,b.od_cyl,b.os_cyl,b.od_axis,b.os_axis,b.pd_l,b.pd_r,b.pd,b.pdcheck,b.os_add,b.od_add,b.prismcheck,b.od_pv,b.os_pv,b.od_pv_r,b.os_pv_r,b.od_bd,b.os_bd,b.od_bd_r,b.os_bd_r,b.lens_number';
+        $order_item_where = ['a.order_id'=>$result['id']];
+        if(!empty($item_order_number)){
+            $order_item_where = ['a.item_order_number'=>['in',$item_order_number]];
+        }
         $_new_order_item_process = new NewOrderItemProcess();
-        $sku_list = $_new_order_item_process
+        $order_item_list = $_new_order_item_process
             ->alias('a')
-            ->where('a.order_id', $result['id'])
+            ->where($order_item_where)
             ->join(['fa_order_item_option' => 'b'], 'a.option_id=b.id')
-            ->column($sku_field,'a.item_order_number')
+            ->column($order_item_field,'a.item_order_number')
         ;
+
+
+        //已创建工单获取最新镜架和镜片数据
+        if($work_id){
+            //获取更改镜框sku集
+            $_work_order_change_sku = new WorkOrderChangeSku();
+            $sku_list = $_work_order_change_sku
+                ->where(['word_id'=>$work_id,'change_type'=>1])
+                ->column('change_sku as sku','item_order_number')
+            ;
+
+            //获取更改镜片sku集
+            $prescription_field = 'recipe_type as prescription_type,coating_type as coating_name,od_sph,os_sph,od_cyl,os_cyl,od_axis,os_axis,pd_l,pd_r,pd,os_add,od_add,od_pv,os_pv,od_pv_r,os_pv_r,od_bd,os_bd,od_bd_r,os_bd_r';
+            $prescription_list = $_work_order_change_sku
+                ->where(['word_id'=>$work_id,'change_type'=>2])
+                ->column($prescription_field,'item_order_number')
+            ;
+
+            //获取措施ID
+            $_work_order_measure = new WorkOrderMeasure();
+            $measure_list = $_work_order_measure
+                ->field('id,item_order_number')
+                ->where(['word_id'=>$work_id])
+                ->select();
+            ;
+
+            //替换最新子订单数据
+            foreach($order_item_list as $key=>$value){
+                if(isset($sku_list[$key])){
+                    $order_item_list[$key] = array_replace($value,$sku_list[$key]);
+                }
+                if(isset($prescription_list[$key])){
+                    $order_item_list[$key] = array_replace($value,$prescription_list[$key]);
+                }
+                $measure_ids = [];
+                foreach($measure_list as $v){
+                    if($v['item_order_number'] == $key){
+                        $measure_ids[] = $v['id'];
+                    }
+                }
+                $order_item_list[$key]['measure_ids'] = $measure_ids;
+            }
+        }
 
         //TODO::镜片列表、镀膜列表
         $lens_key = 'get_lens_'.$result['site'];
@@ -209,7 +258,7 @@ class WorkOrderList extends Model
             Cache::set($lens_key, $lens_data, 3600 * 24);
         }
 
-        $result['sku_list'] = $sku_list;
+        $result['sku_list'] = $order_item_list;
         $result['lens_list'] = $lens_data['lens_list'];
         $result['coating_list'] = $lens_data['coating_list'];
         $result['mw_rewardpoint_discount'] = round($result['mw_rewardpoint_discount'],2);
