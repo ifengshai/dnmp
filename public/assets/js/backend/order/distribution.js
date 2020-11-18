@@ -14,12 +14,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
             $('.btn-batch-printed').removeClass('hide');
             $('.btn-tag-printed').removeClass('hide');
         }else if(2 == value){
+            $('.btn-batch-printed').removeClass('hide');
             $('.btn-product').removeClass('hide');
         }else if(3 == value){
+            $('.btn-batch-printed').removeClass('hide');
             $('.btn-lens').removeClass('hide');
         }else if(4 == value){
+            $('.btn-batch-printed').removeClass('hide');
             $('.btn-machining').removeClass('hide');
         }else if(5 == value){
+            $('.btn-batch-printed').removeClass('hide');
             $('.btn-logo').removeClass('hide');
         }else if(6 == value){
             $('.btn-finish-adopt').removeClass('hide');
