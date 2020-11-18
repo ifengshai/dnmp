@@ -205,7 +205,7 @@ class ScmDistribution extends Scm
         //获取子订单数据
         $item_process_info = $this->_new_order_item_process
             ->where('item_order_number', $item_order_number)
-            ->field('id,option_id,distribution_status,temporary_house_id')
+            ->field('id,option_id,distribution_status,temporary_house_id,order_prescription_type')
             ->find()
         ;
         empty($item_process_info) && $this->error(__('子订单不存在'), [], 403);
@@ -240,14 +240,8 @@ class ScmDistribution extends Scm
                     ->value('coding')
                 ;
             }else{
-                //获取子订单处方数据
-                $is_custom_lens = $this->_new_order_item_option
-                    ->where('id', $item_process_info['option_id'])
-                    ->value('is_custom_lens')
-                ;
-
                 //判断是否定制片
-                if(1 == $is_custom_lens){
+                if(3 == $item_process_info['order_prescription_type']){
                     //暂存自动分配库位
                     $stock_house_info = $this->_stock_house
                         ->field('id,coding')
