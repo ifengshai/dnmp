@@ -36,7 +36,14 @@ class Auth extends \fast\Auth
 
     public function __get($name)
     {
-        return Session::get('admin.' . $name);
+        $api_key = $this->request->request('api_key');
+        if($api_key){
+            $admin = Admin::get(['api_key'=>$api_key]);
+            $result = $admin[$name];
+        }else{
+            $result = Session::get('admin.' . $name);
+        }
+        return $result;
     }
 
     /**
@@ -71,6 +78,9 @@ class Auth extends \fast\Auth
         $admin->loginfailure = 0;
         $admin->logintime = time();
         $admin->token = Random::uuid();
+        if(!$admin->api_key){
+            $admin->api_key = Random::uuid();
+        }
         $admin->save();
         Session::set("admin", $admin->toArray());
         $this->keeplogin($keeptime);
