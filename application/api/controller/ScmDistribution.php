@@ -323,7 +323,7 @@ class ScmDistribution extends Scm
             //获取子订单处方数据
             return $abnormal_list;
         }
-
+        
         $this->success('', ['abnormal_list' => $abnormal_list,'option_info' => $option_info],200);
     }
 
