@@ -1330,6 +1330,7 @@ class Distribution extends Backend
                 DistributionLog::record($admin, $ids, 10, $remark);
 
                 Db::commit();
+                $this->success('处理成功!', '', 'success', 200);
             } catch (PDOException $e) {
                 Db::rollback();
                 $this->error($e->getMessage());
