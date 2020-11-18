@@ -889,8 +889,8 @@ class Test4 extends Controller
             $data['occupy_stock'] = $zeelool_qty + $voogueme_qty + $nihao_qty + $weseeoptical_qty + $meeloog_qty + $zeelool_jp_qty + $zeelool_es_qty + $zeelool_de_qty;
             $res = $this->item->where($p_map)->update($data);
 
-            echo $v['sku'] . "\n";
-            usleep(200000);
+            echo $v . "\n";
+            usleep(20000);
         }
         echo 'ok';
         die;
@@ -918,7 +918,7 @@ class Test4 extends Controller
             $res = $this->item->where($p_map)->update($data);
 
             echo $k . "\n";
-            usleep(200000);
+            usleep(20000);
         }
         echo 'ok';
         die;
