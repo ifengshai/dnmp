@@ -816,7 +816,7 @@ class Test4 extends Controller
 
             $res = $this->item->where($p_map)->update($data);
 
-            echo $v['sku'] . "\n";
+            echo $v. "\n";
             usleep(200000);
         }
 
