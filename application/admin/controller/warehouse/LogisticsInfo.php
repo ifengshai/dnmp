@@ -303,7 +303,7 @@ class LogisticsInfo extends Backend
                             //减总的在途库存也就是商品表里的在途库存
                             $item->where(['sku' => $val['sku']])->setDec('on_way_stock', $val['arrival_num']);
                             //减在途加待入库数量
-                            $item->where(['sku' => $v['sku']])->setInc('wait_instock_num', $v['arrival_num']);
+                            $item->where(['sku' => $val['sku']])->setInc('wait_instock_num', $val['arrival_num']);
                         }
                     } else {
                         if ($v['purchase_id']) {
@@ -339,7 +339,7 @@ class LogisticsInfo extends Backend
                                 //减总的在途库存也就是商品表里的在途库存
                                 $item->where(['sku' => $val['sku']])->setDec('on_way_stock', $val['purchase_num']);
                                 //减在途加待入库数量
-                                $item->where(['sku' => $v['sku']])->setInc('wait_instock_num', $v['purchase_num']);
+                                $item->where(['sku' => $val['sku']])->setInc('wait_instock_num', $val['purchase_num']);
                             }
                         }
                     }

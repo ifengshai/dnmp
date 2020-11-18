@@ -7,6 +7,7 @@ use think\Db;
 use think\Exception;
 use think\exception\PDOException;
 use think\exception\ValidateException;
+use app\common\model\Auth;
 
 /**
  * 开发任务管理
@@ -21,7 +22,7 @@ class DevelopWebTask extends Backend
      * @var array
      */
     protected $noNeedRight = ['deleteItem'];
-    
+
     /**
      * DevelopWebTask模型对象
      * @var \app\admin\model\demand\DevelopWebTask
@@ -94,8 +95,8 @@ class DevelopWebTask extends Backend
         $this->assignconfig('is_regression_test_info', $this->auth->check('demand/develop_web_task/regression_test_info'));
         $this->assignconfig('is_finish_task', $this->auth->check('demand/develop_web_task/is_finish_task'));
         $this->assignconfig('is_del_btu', $this->auth->check('demand/develop_web_task/del'));
-        $this->assignconfig('is_test_info_btu', $this->auth->check('demand/develop_web_task/test_info'));//开发管理 记录测试问题
-        $this->assignconfig('is_set_test_status_btu', $this->auth->check('demand/develop_web_task/set_test_status'));//开发管理 记录测试问题
+        $this->assignconfig('is_test_info_btu', $this->auth->check('demand/develop_web_task/test_info')); //开发管理 记录测试问题
+        $this->assignconfig('is_set_test_status_btu', $this->auth->check('demand/develop_web_task/set_test_status')); //开发管理 记录测试问题
         return $this->view->fetch();
     }
 
@@ -178,7 +179,16 @@ class DevelopWebTask extends Backend
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
-        $this->assign('phper_user', config('develop_demand.phper_user'));
+
+        //是否是开发主管
+        $authUserIds = Auth::getGroupUserId(config('demand.develop_group_id')) ?: [];
+        //组员ID
+        $usersId = Auth::getGroupUserId(config('demand.develop_group_person_id')) ?: [];
+        $usersId = array_merge($usersId, $authUserIds);
+        $admin = new \app\admin\model\Admin();
+        $phper_user = $admin->whereIn('id', $usersId)->where('status', 'normal')->column('nickname', 'id');
+        $this->assign('phper_user', $phper_user);
+
         return $this->view->fetch();
     }
 
@@ -374,9 +384,10 @@ class DevelopWebTask extends Backend
 
             return json($result);
         }
+        $test_user_id = array_merge(Auth::getGroupUserId(config('demand.test_group_id')), Auth::getGroupUserId(config('demand.test_group_person_id')));
         $this->assignconfig('id', $ids);
         $this->assignconfig('user_id', session('admin.id'));
-        $this->assignconfig('test_user', array_keys(config('demand.test_user')));
+        $this->assignconfig('test_user', $test_user_id);
         return $this->view->fetch();
     }
 

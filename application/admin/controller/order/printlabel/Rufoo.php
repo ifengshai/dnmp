@@ -29,6 +29,12 @@ class Rufoo extends Backend
      */
     protected $model = null;
 
+     /**
+     * 无需登录的方法,同时也就不需要鉴权了
+     * @var array
+     */
+    protected $noNeedLogin = ['detail', 'operational', 'tag_printed', 'setOrderStatus', 'batch_export_xls', 'batch_print_label'];
+    
     protected $searchFields = 'id';
 
     public function _initialize()
@@ -61,6 +67,22 @@ class Rufoo extends Backend
 
             $filter = json_decode($this->request->get('filter'), true);
 
+            //是否有工单
+            $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
+            if ($filter['is_task'] == 1 || $filter['is_task'] == '0') {
+                $swhere = [];
+                $swhere['work_platform'] = 8;
+                $swhere['work_status'] = ['not in', [0, 4, 6]];
+                $order_arr = $workorder->where($swhere)->column('platform_order');
+                if ($filter['is_task'] == 1) {
+                    $map['increment_id'] = ['in', $order_arr];
+                } elseif ($filter['is_task'] == '0') {
+                    $map['increment_id'] = ['not in', $order_arr];
+                }
+                unset($filter['is_task']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
+
             if (!$filter['ordersn'] && !$filter['status']) {
                 $map['status'] = 1;
             }
@@ -78,9 +100,38 @@ class Rufoo extends Backend
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
+            $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
+            if ($filter['is_task'] == 1 || $filter['is_task'] == '0') {
+                $swhere = [];
+                $swhere['work_platform'] = 4;
+                $swhere['work_status'] = ['not in', [0, 4, 6]];
+                $order_arr = $workorder->where($swhere)->column('platform_order');
+                if ($filter['is_task'] == 1) {
+                    $map['increment_id'] = ['in', $order_arr];
+                } elseif ($filter['is_task'] == '0') {
+                    $map['increment_id'] = ['not in', $order_arr];
+                }
+                unset($filter['is_task']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
+
+
 
 
             $list = collection($list)->toArray();
+
+            $swhere = [];
+            $increment_ids = array_column($list, 'increment_id');
+
+            $swhere['platform_order'] = ['in', $increment_ids];
+            $swhere['work_platform'] = 8;
+            $swhere['work_status'] = ['not in', [0, 4, 6]];
+            $order_arr = $workorder->where($swhere)->column('platform_order');
+            foreach ($list as $k => $v) {
+                if (in_array($v['increment_id'], $order_arr)) {
+                    $list[$k]['task_info'] = 1;
+                }
+            }
             $result = array("total" => $total, "rows" => $list);
             return json($result);
         }

@@ -1,4 +1,3 @@
-
 <div class="panel panel-default panel-intro">
     {:build_heading()}
 
@@ -7,24 +6,39 @@
             <div class="tab-pane fade active in" id="one">
                 <div class="widget-body no-padding">
                     <div id="toolbar" class="toolbar">
-                        <a href="javascript:;" class="btn btn-primary btn-refresh" title="{:__('Refresh')}" ><i class="fa fa-refresh"></i> </a>
-                        <a href="javascript:;" data-area='["100%","100%"]' class="btn btn-success btn-add {:$auth->check('purchase/purchase_order/add')?'':'hide'}" title="{:__('Add')}" ><i class="fa fa-plus"></i> {:__('Add')}</a>
-                        <a href="javascript:;" data-area='["100%","100%"]' class="btn btn-success btn-edit btn-disabled disabled {:$auth->check('purchase/purchase_order/edit')?'':'hide'}" title="{:__('Edit')}" ><i class="fa fa-pencil"></i> {:__('Edit')}</a>
+                        <a href="javascript:;" class="btn btn-primary btn-refresh" title="{:__('Refresh')}"><i
+                                class="fa fa-refresh"></i> </a>
+                        <a href="javascript:;" data-area='["100%","100%"]'
+                            class="btn btn-success btn-add {:$auth->check('purchase/purchase_order/add')?'':'hide'}"
+                            title="{:__('Add')}"><i class="fa fa-plus"></i> {:__('Add')}</a>
+                        <a href="javascript:;" data-area='["100%","100%"]'
+                            class="btn btn-success btn-edit btn-disabled disabled {:$auth->check('purchase/purchase_order/edit')?'':'hide'}"
+                            title="{:__('Edit')}"><i class="fa fa-pencil"></i> {:__('Edit')}</a>
                         <!-- <a href="javascript:;" class="btn btn-danger btn-del btn-disabled disabled {:$auth->check('purchase/purchase_order/del')?'':'hide'}" title="{:__('Delete')}" ><i class="fa fa-trash"></i> {:__('Delete')}</a> -->
                         <!-- <a href="javascript:;" class="btn btn-danger btn-import {:$auth->check('purchase/purchase_order/import')?'':'hide'}" title="{:__('Import')}" id="btn-import-file" data-url="ajax/upload" data-mimetype="csv,xls,xlsx" data-multiple="false"><i class="fa fa-upload"></i> {:__('Import')}</a> -->
-                        <a href="javascript:;" class="btn btn-success btn-open btn-disabled disabled {:$auth->check('purchase/purchase_order/setStatus') ?'':'hide'}" title="审核通过" >审核通过</a>
-                        <a href="javascript:;" class="btn btn-danger btn-close btn-disabled disabled {:$auth->check('purchase/purchase_order/setStatus')?'':'hide'}" title="审核拒绝" >审核拒绝</a>
-                        <a href="javascript:;" class="btn btn-success btn-matching {:$auth->check('purchase/purchase_order/matching') ?'':'hide'}" title="批量匹配SKU" ><i class="fa fa-leaf"></i>批量匹配SKU</a>
-                        <a href="javascript:;" class="btn btn-success btn-remark btn-disabled disabled {:$auth->check('purchase/purchase_order/remark') ?'':'hide'}" title="添加备注" >添加备注</a>
-                        <a href="javascript:;" class="btn btn-success btn-logistics btn-disabled disabled {:$auth->check('purchase/purchase_order/logistics') ?'':'hide'}" title="添加备注" >录入物流单号</a>
                         <a href="javascript:;"
-                                class="btn btn-danger btn-batch-export-xls"
-                                title="{:__('批量导出')}"><i class="fa fa-upload"></i> {:__('批量导出')}</a>
+                            class="btn btn-success btn-open btn-disabled disabled {:$auth->check('purchase/purchase_order/setStatus') ?'':'hide'}"
+                            title="审核通过">审核通过</a>
+                        <a href="javascript:;"
+                            class="btn btn-danger btn-close btn-disabled disabled {:$auth->check('purchase/purchase_order/setStatus')?'':'hide'}"
+                            title="审核拒绝">审核拒绝</a>
+                        <a href="javascript:;"
+                            class="btn btn-success btn-matching {:$auth->check('purchase/purchase_order/matching') ?'':'hide'}"
+                            title="批量匹配SKU"><i class="fa fa-leaf"></i>批量匹配SKU</a>
+                        <a href="javascript:;"
+                            class="btn btn-success btn-remark btn-disabled disabled {:$auth->check('purchase/purchase_order/remark') ?'':'hide'}"
+                            title="添加备注">添加备注</a>
+                        <a href="javascript:;"
+                            class="btn btn-success btn-logistics btn-disabled disabled {:$auth->check('purchase/purchase_order/logistics') ?'':'hide'}"
+                            title="添加备注">录入物流单号</a>
+                        <a href="javascript:;" class="btn btn-danger btn-batch-export-xls" title="{:__('批量导出')}"><i
+                                class="fa fa-upload"></i> {:__('批量导出')}</a>
+                            <a href="javascript:;" class="btn btn-danger btn-import {:$auth->check('purchase/purchase_order/logistics_info_import')?'':'hide'}" title="{:__('Import')}" id="btn-logistics-import" data-url="ajax/upload" data-mimetype="csv,xls,xlsx" data-multipart={"dir":"purchase/purchase_order"} data-multiple="false"><i class="fa fa-upload"></i> {:__('录入1688物流单号')}</a>
+                            <a href="/template/1688_template.xlsx" class="btn btn-primary" title="模板下载" >模板下载</a>
                     </div>
                     <table id="table" class="table table-striped table-bordered table-hover table-nowrap"
-                           data-operate-edit="{:$auth->check('purchase/purchase_order/edit')}" 
-                           data-operate-del="{:$auth->check('purchase/purchase_order/del')}" 
-                           width="100%">
+                        data-operate-edit="{:$auth->check('purchase/purchase_order/edit')}"
+                        data-operate-del="{:$auth->check('purchase/purchase_order/del')}" width="100%">
                     </table>
                 </div>
             </div>

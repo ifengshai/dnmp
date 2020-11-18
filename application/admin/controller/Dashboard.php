@@ -108,6 +108,7 @@ class Dashboard extends Backend
 
         //实时用户数量
         $total_customer_count = Cache::get('dashboard_total_customer_count');
+        $swhere = [];
         if (!$total_customer_count) {
             $stime = date("Y-m-d 00:00:00", time());
             $etime = date("Y-m-d H:i:s", time());

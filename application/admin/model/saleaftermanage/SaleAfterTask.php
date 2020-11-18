@@ -6,6 +6,9 @@ use think\Model;
 use think\Db;
 use Util\NihaoPrescriptionDetailHelper;
 use Util\ZeeloolPrescriptionDetailHelper;
+use Util\ZeeloolDePrescriptionDetailHelper;
+use Util\ZeeloolEsPrescriptionDetailHelper;
+use Util\ZeeloolJpPrescriptionDetailHelper;
 use Util\VooguemePrescriptionDetailHelper;
 use Util\MeeloogPrescriptionDetailHelper;
 use app\admin\model\saleaftermanage\SaleAfterTaskRemark;
@@ -256,6 +259,9 @@ class SaleAfterTask extends Model
             case 10:
                 $db = 'database.db_zeelool_de';
                 break;
+            case 11:
+                $db = 'database.db_zeelool_jp';
+                break;
             default:
                 return false;
                 break;
@@ -296,6 +302,9 @@ class SaleAfterTask extends Model
             case 10:
                 $db = 'database.db_zeelool_de';
                 break;
+            case 11:
+                $db = 'database.db_zeelool_jp';
+                break;
             default:
                 return false;
                 break;
@@ -334,6 +343,9 @@ class SaleAfterTask extends Model
                 break;
             case 10:
                 $db = 'database.db_zeelool_de';
+                break;
+            case 11:
+                $db = 'database.db_zeelool_jp';
                 break;
             default:
                 return false;
@@ -377,6 +389,9 @@ class SaleAfterTask extends Model
             case 10:
                 $db = 'database.db_zeelool_de';
                 break;
+            case 11:
+                $db = 'database.db_zeelool_jp';
+                break;
             default:
                 return false;
                 break;
@@ -418,6 +433,9 @@ class SaleAfterTask extends Model
             case 10:
                 $db = 'database.db_zeelool_de';
                 break;
+            case 11:
+                $db = 'database.db_zeelool_jp';
+                break;
             default:
                 return false;
                 break;
@@ -458,6 +476,9 @@ class SaleAfterTask extends Model
                 break;
             case 10:
                 $db = 'database.db_zeelool_de';
+                break;
+            case 11:
+                $db = 'database.db_zeelool_jp';
                 break;
             default:
                 return false;
@@ -678,6 +699,9 @@ class SaleAfterTask extends Model
             case 10:
                 $db = 'database.db_zeelool_de';
                 break;
+            case 11:
+                $db = 'database.db_zeelool_jp';
+                break;
             default:
                 return false;
                 break;
@@ -747,6 +771,12 @@ class SaleAfterTask extends Model
                     $result[$k]['item'] = NihaoPrescriptionDetailHelper::get_one_by_increment_id($v['increment_id']);
                 } elseif ($order_platform == 4) {
                     $result[$k]['item'] = MeeloogPrescriptionDetailHelper::get_one_by_increment_id($v['increment_id']);
+                } elseif ($order_platform == 9) {
+                    $result[$k]['item'] = ZeeloolEsPrescriptionDetailHelper::get_one_by_increment_id($v['increment_id']);
+                } elseif ($order_platform == 10) {
+                    $result[$k]['item'] = ZeeloolDePrescriptionDetailHelper::get_one_by_increment_id($v['increment_id']);
+                } elseif ($order_platform == 11) {
+                    $result[$k]['item'] = ZeeloolJpPrescriptionDetailHelper::get_one_by_increment_id($v['increment_id']);
                 }
 
                 //订单地址表

@@ -148,63 +148,68 @@ class PurchaseReturn extends Backend
     //添加物流单号
     public function logistics($ids = null)
     {
-        $row = $this->model->get($ids);
-        if (!$row) {
-            $this->error(__('No Results were found'));
+        $do_type = input('do_type');
+        if(1 == $do_type){//批量录入
+            $ids = explode(',', $ids);
+            $row = $this->model->where(['id' => ['in', $ids]])->select();
+            foreach ($row as $v) {
+                1 != $v['status'] && $this->error(__('批量录入必须是待发货状态'), url('index'));
+            }
+        }else{//单个
+            $row = $this->model->get($ids);
+            !$row && $this->error(__('No Results were found'));
         }
 
         $adminIds = $this->getDataLimitAdminIds();
-        if (is_array($adminIds)) {
-            if (!in_array($row[$this->dataLimitField], $adminIds)) {
-                $this->error(__('You have no permission'));
-            }
-        }
+        is_array($adminIds) && !in_array($row[$this->dataLimitField], $adminIds) && $this->error(__('You have no permission'));
+
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
-            if ($params) {
-                $params = $this->preExcludeFields($params);
-                $result = false;
-                Db::startTrans();
-                try {
-                    //是否采用模型验证
-                    if ($this->modelValidate) {
-                        $name = str_replace("\\model\\", "\\validate\\", get_class($this->model));
-                        $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.edit' : $name) : $this->modelValidate;
-                        $row->validateFailException(true)->validate($validate);
-                    }
-                    $params['status'] = 2;
-                    $result = $row->allowField(true)->save($params);
+            !$params && $this->error(__('Parameter %s can not be empty', ''));
+            $params = $this->preExcludeFields($params);
 
-                    if ($params['logistics_number']) {
+            $result = false;
+            Db::startTrans();
+            try {
+                //是否采用模型验证
+                if ($this->modelValidate) {
+                    $name = str_replace("\\model\\", "\\validate\\", get_class($this->model));
+                    $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.edit' : $name) : $this->modelValidate;
+                    $row->validateFailException(true)->validate($validate);
+                }
+
+                $logistics = new \app\admin\model\LogisticsInfo();
+                $params['status'] = 2;
+                if(1 == $do_type){
+                    $result = $this->model->allowField(true)->isUpdate(true, ['id' => ['in', $ids]])->save($params);
+                    foreach ($row as $v) {
+                        if ($params['logistics_number'])
                         //添加物流汇总表
-                        $logistics = new \app\admin\model\LogisticsInfo();
-                        $list['logistics_number'] = $params['logistics_number'];
-                        $list['type'] = 2;
-                        $list['order_number'] = $row['return_number'];
-                        $logistics->addLogisticsInfo($list);
+                        $logistics->addLogisticsInfo([
+                            'logistics_number'=>$params['logistics_number'],
+                            'type'=>2,
+                            'order_number'=>$v['return_number']
+                        ]);
                     }
-
-
-                    Db::commit();
-                } catch (ValidateException $e) {
-                    Db::rollback();
-                    $this->error($e->getMessage());
-                } catch (PDOException $e) {
-                    Db::rollback();
-                    $this->error($e->getMessage());
-                } catch (Exception $e) {
-                    Db::rollback();
-                    $this->error($e->getMessage());
+                }else{
+                    $result = $row->allowField(true)->save($params);
                 }
-                if ($result !== false) {
-                    $this->success('添加成功！！', '', url('index'));
-                } else {
-                    $this->error(__('No rows were updated'));
-                }
+                Db::commit();
+            } catch (ValidateException $e) {
+                Db::rollback();
+                $this->error($e->getMessage());
+            } catch (PDOException $e) {
+                Db::rollback();
+                $this->error($e->getMessage());
+            } catch (Exception $e) {
+                Db::rollback();
+                $this->error($e->getMessage());
             }
-            $this->error(__('Parameter %s can not be empty', ''));
+            false !== $result ? $this->success('添加成功！！', '', url('index')) : $this->error(__('No rows were updated'));
         }
+
         $this->view->assign("row", $row);
+        $this->view->assign("do_type", $do_type);
         return $this->view->fetch();
     }
 

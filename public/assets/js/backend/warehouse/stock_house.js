@@ -13,6 +13,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                     edit_url: 'warehouse/stock_house/edit',
                     // del_url: 'warehouse/stock_house/del',
                     multi_url: 'warehouse/stock_house/multi',
+                    import_url: 'warehouse/stock_house/import',
                     table: 'store_house',
                 }
             });
@@ -73,6 +74,22 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
         },
         edit: function () {
             Controller.api.bindevent();
+        },
+        store_house:function (){
+            console.log(1111)
+            // 导入按钮事件
+            Upload.api.plupload($('.btn-import'), function (data, ret) {
+                console.log(22222);return false;
+                Fast.api.ajax({
+                    url: 'warehouse/stock_house/import',
+                    data: { file: data.url },
+                }, function (data, ret) {
+                    layer.msg('导入成功！！', { time: 3000, icon: 6 }, function () {
+                        location.reload();
+                    });
+
+                });
+            });
         },
         api: {
             bindevent: function () {

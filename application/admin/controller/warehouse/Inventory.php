@@ -48,6 +48,7 @@ class Inventory extends Backend
      */
     public function index()
     {
+        $this->relationSearch = true;
         //设置过滤方法
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
@@ -57,31 +58,33 @@ class Inventory extends Backend
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
+                ->with(['Inventoryone', 'Inventoryitemtwo'])
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
+                ->with(['Inventoryone', 'Inventoryitemtwo'])
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
 
             $list = collection($list)->toArray();
+
             foreach ($list as &$v) {
-                $map['inventory_id'] = $v['id'];
+                $map['inventory_id'] = $v['inventoryone']['id'];
                 //查询总数量
                 $allCount = $this->item->where($map)->count();
                 $smap['is_add'] = 1;
-                $smap['inventory_id'] = $v['id'];
+                $smap['inventory_id'] = $v['inventoryone']['id'];
                 //查询盘点数量
                 $count = $this->item->where($smap)->count();
                 $count = $count ?? '0';
-                $v['num'] = $count . '/' . $allCount;
+                $v['inventoryone.num'] = $count . '/' . $allCount;
             }
             unset($v);
             $result = array("total" => $total, "rows" => $list);
-
             return json($result);
         }
         return $this->view->fetch();
@@ -1212,6 +1215,8 @@ class Inventory extends Backend
             $db = 'database.db_zeelool_es';
         } elseif (10 == $order_platform) {
             $db = 'database.db_zeelool_de';
+        } elseif (11 == $order_platform) {
+            $db = 'database.db_zeelool_jp';
         }
         foreach ($changeRow as $v) {
             //原先sku
@@ -1375,6 +1380,8 @@ class Inventory extends Backend
             $db = 'database.db_zeelool_es';
         } elseif (10 == $order_platform) {
             $db = 'database.db_zeelool_de';
+        } elseif (11 == $order_platform) {
+            $db = 'database.db_zeelool_jp';
         }
         foreach ($changeRow as $v) {
             //原先sku
@@ -1475,6 +1482,8 @@ class Inventory extends Backend
             $db = 'database.db_zeelool_es';
         } elseif (10 == $order_platform) {
             $db = 'database.db_zeelool_de';
+        } elseif (11 == $order_platform) {
+            $db = 'database.db_zeelool_jp';
         }
         foreach ($changeRow as $v) {
             //原先sku
@@ -1640,6 +1649,8 @@ class Inventory extends Backend
             $db = 'database.db_zeelool_es';
         } elseif (10 == $order_platform) {
             $db = 'database.db_zeelool_de';
+        } elseif (11 == $order_platform) {
+            $db = 'database.db_zeelool_jp';
         }
         foreach ($changeRow as $v) {
             //原先sku

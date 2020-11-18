@@ -1,24 +1,22 @@
 <form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
-
-
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">物流公司编码:</label>
         <div class="col-xs-12 col-sm-8">
-            <textarea id="c-remark" class="form-control" name="row[logistics_company_no]"
-                placeholder="注意复制下方手册对应物流公司编码,多个英文逗号拼接。例如：yunda,yuantong">{$row.logistics_company_no}</textarea>
+            <textarea id="logistics_company_no" class="form-control" name="row[logistics_company_no]"
+                placeholder="注意复制下方手册对应物流公司编码,多个英文逗号拼接。例如：yunda,yuantong">{:$do_type == 1 ? '' : $row.logistics_company_no }</textarea>
         </div>
     </div>
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">物流单号:</label>
         <div class="col-xs-12 col-sm-8">
-            <textarea id="c-remark" class="form-control" name="row[logistics_number]"
-                placeholder="注意多个物流单号英文逗号拼接,并与上方物流公司顺序一一对应。">{$row.logistics_number}</textarea>
+            <textarea id="logistics_number" class="form-control" name="row[logistics_number]"
+                placeholder="注意多个物流单号英文逗号拼接,并与上方物流公司顺序一一对应。">{:$do_type == 1 ? '' : $row.logistics_number }</textarea>
         </div>
     </div>
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">物流公司编码手册:</label>
         <div class="col-xs-12 col-sm-8">
-            <textarea id="c-remark" class="form-control" style="height: 240px;">
+            <textarea class="form-control" style="height: 240px;">
 韵达快递 => yunda
 邮政快递包裹 =>  youzhengguonei
 中通快递 =>  zhongtong
@@ -34,8 +32,6 @@ EMS => ems
                     </textarea>
         </div>
     </div>
-
-
     <div class="form-group layer-footer">
         <label class="control-label col-xs-12 col-sm-2"></label>
         <div class="col-xs-12 col-sm-8">

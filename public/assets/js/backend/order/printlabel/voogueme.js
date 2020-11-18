@@ -30,15 +30,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                         { field: 'status', title: __('状态'), addClass: 'selectpicker', data: 'multiple', operate: 'IN', searchList: { "processing": __('processing'), "free_processing": __('free_processing'), "paypal_reversed": "paypal_reversed", "paypal_canceled_reversal": "paypal_canceled_reversal", "creditcard_proccessing": "creditcard_proccessing", 'complete': 'complete' } },
                         { field: 'base_grand_total', title: __('订单金额'), operate: false, formatter: Controller.api.formatter.float_format },
                         { field: 'base_shipping_amount', title: __('运费'), operate: false, formatter: Controller.api.formatter.float_format },
-
                         { field: 'total_qty_ordered', title: __('SKU数量'), sortable: true, operate: 'between', formatter: Controller.api.formatter.int_format },
                         { field: 'custom_print_label_new', title: __('打印标签'), custom: { 0: 'danger', 1: 'green' }, searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status },
                         { field: 'custom_is_match_frame_new', title: __('配镜架'), custom: { 0: 'danger', 1: 'green' }, searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status },
                         { field: 'custom_is_match_lens_new', title: __('配镜片'), custom: { 0: 'danger', 1: 'green' }, searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status },
                         { field: 'custom_is_send_factory_new', title: __('加工'), custom: { 0: 'danger', 1: 'green' }, searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status },
                         { field: 'custom_is_delivery_new', title: __('质检'), custom: { 0: 'danger', 1: 'green' }, searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status },
-                        { field: 'task_label', title: __('是否有协同任务'), visible: false, searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status },
                         { field: 'is_task', title: __('是否有工单'), visible: false, searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status },
+
                         {
                             field: 'task_info', title: __('工单'), operate: false, formatter: function (value, row) {
                                 if (value) {

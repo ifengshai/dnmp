@@ -213,9 +213,9 @@ class Test4 extends Controller
         $zeelool_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
 
         //查询时间
-        $date_time = $this->zeelool->query("SELECT DATE_FORMAT(created_at, '%Y-%m-%d') AS date_time FROM `sales_flat_order` where created_at between '2020-10-11' and '2020-10-13' GROUP BY DATE_FORMAT(created_at, '%Y%m%d') order by DATE_FORMAT(created_at, '%Y%m%d') asc");
+        $date_time = $this->zeelool->query("SELECT DATE_FORMAT(created_at, '%Y-%m-%d') AS date_time FROM `sales_flat_order` where created_at between '2020-10-01' and '2020-10-21' GROUP BY DATE_FORMAT(created_at, '%Y%m%d') order by DATE_FORMAT(created_at, '%Y%m%d') asc");
         foreach ($date_time as $val) {
-            $is_exist = Db::name('datacenter_day')->where('day_date', $val['date_time'])->value('id');
+            $is_exist = Db::name('datacenter_day')->where('day_date', $val['date_time'])->where('site',1)->value('id');
             if (!$is_exist) {
                 $arr = [];
                 $arr['site'] = 1;
@@ -235,33 +235,44 @@ class Test4 extends Controller
                 $order_where = [];
                 $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $val['date_time'] . "'")];
                 $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-                $arr['order_num'] = $this->zeelool->where($order_where)->count();
+                $arr['order_num'] = $this->zeelool->where($order_where)->where('order_type',1)->count();
                 //销售额
-                $arr['sales_total_money'] = $this->zeelool->where($order_where)->sum('base_grand_total');
+                $arr['sales_total_money'] = $this->zeelool->where($order_where)->where('order_type',1)->sum('base_grand_total');
                 //邮费
-                $arr['shipping_total_money'] = $this->zeelool->where($order_where)->sum('base_shipping_amount');
-                //购买人数
-                $order_user = $this->zeelool->where($order_where)->count('distinct customer_id');
+                $arr['shipping_total_money'] = $this->zeelool->where($order_where)->where('order_type',1)->sum('base_shipping_amount');
                 //客单价
-                $arr['order_unit_price'] = $order_user ? round($arr['sales_total_money'] / $order_user, 2) : 0;
+                $arr['order_unit_price'] = $arr['order_num'] ? round($arr['sales_total_money'] / $arr['order_num'], 2) : 0;
+                //中位数
+                $sales_total_money = $this->zeelool->where($order_where)->where('order_type',1)->column('base_grand_total');
+                $arr['order_total_midnum'] = $this->median($sales_total_money);
+                //标准差
+                $arr['order_total_standard'] = $this->getVariance($sales_total_money);
+                //补发订单数
+                $arr['replacement_order_num'] = $this->zeelool->where($order_where)->where('order_type',4)->count();
+                //补发销售额
+                $arr['replacement_order_total'] = $this->zeelool->where($order_where)->where('order_type',4)->sum('base_grand_total');
+                //网红订单数
+                $arr['online_celebrity_order_num'] = $this->zeelool->where($order_where)->where('order_type',3)->count();
+                //补发销售额
+                $arr['online_celebrity_order_total'] = $this->zeelool->where($order_where)->where('order_type',3)->sum('base_grand_total');
                 //会话
                 $arr['sessions'] = $this->google_session(1, $val['date_time']);
                 //新建购物车数量
                 $cart_where1 = [];
                 $cart_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $val['date_time'] . "'")];
-                $arr['new_cart_num'] = $zeelool_model->table('sales_flat_quote')->where($cart_where1)->count();
+                $arr['new_cart_num'] = $zeelool_model->table('sales_flat_quote')->where($cart_where1)->where('base_grand_total','gt',0)->count();
                 //更新购物车数量
                 $cart_where2 = [];
                 $cart_where2[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '" . $val['date_time'] . "'")];
-                $arr['update_cart_num'] = $zeelool_model->table('sales_flat_quote')->where($cart_where2)->count();
+                $arr['update_cart_num'] = $zeelool_model->table('sales_flat_quote')->where($cart_where2)->where('base_grand_total','gt',0)->count();
                 //新增加购率
-                $arr['add_cart_rate'] = $arr['sessions'] ? round($arr['new_cart_num'] / $arr['sessions'], 2) : 0;
+                $arr['add_cart_rate'] = $arr['sessions'] ? round($arr['new_cart_num'] / $arr['sessions']*100, 2) : 0;
                 //更新加购率
-                $arr['update_add_cart_rate'] = $arr['sessions'] ? round($arr['update_cart_num'] / $arr['sessions'], 2) : 0;
+                $arr['update_add_cart_rate'] = $arr['sessions'] ? round($arr['update_cart_num'] / $arr['sessions']*100, 2) : 0;
                 //新增购物车转化率
-                $arr['cart_rate'] = $arr['new_cart_num'] ? round($arr['order_num'] / $arr['new_cart_num'], 2) : 0;
+                $arr['cart_rate'] = $arr['new_cart_num'] ? round($arr['order_num'] / $arr['new_cart_num']*100, 2) : 0;
                 //更新购物车转化率
-                $arr['update_cart_cart'] = $arr['update_cart_num'] ? round($arr['order_num'] / $arr['update_cart_num'], 2) : 0;
+                $arr['update_cart_cart'] = $arr['update_cart_num'] ? round($arr['order_num'] / $arr['update_cart_num']*100, 2) : 0;
                 //插入数据
                 Db::name('datacenter_day')->insert($arr);
                 echo $val['date_time'] . "\n";
@@ -278,7 +289,7 @@ class Test4 extends Controller
         $voogueme_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
 
         //查询时间
-        $date_time = $this->voogueme->query("SELECT DATE_FORMAT(created_at, '%Y-%m-%d') AS date_time FROM `sales_flat_order` where created_at between '2020-10-11' and '2020-10-13' GROUP BY DATE_FORMAT(created_at, '%Y%m%d') order by DATE_FORMAT(created_at, '%Y%m%d') asc");
+        $date_time = $this->voogueme->query("SELECT DATE_FORMAT(created_at, '%Y-%m-%d') AS date_time FROM `sales_flat_order` where created_at between '2020-10-01' and '2020-10-21' GROUP BY DATE_FORMAT(created_at, '%Y%m%d') order by DATE_FORMAT(created_at, '%Y%m%d') asc");
         foreach ($date_time as $val) {
             $is_exist = Db::name('datacenter_day')->where(['day_date' => $val['date_time'], 'site' => 2])->value('id');
             if (!$is_exist) {
@@ -300,33 +311,44 @@ class Test4 extends Controller
                 $order_where = [];
                 $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $val['date_time'] . "'")];
                 $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-                $arr['order_num'] = $this->voogueme->where($order_where)->count();
+                $arr['order_num'] = $this->voogueme->where($order_where)->where('order_type',1)->count();
                 //销售额
-                $arr['sales_total_money'] = $this->voogueme->where($order_where)->sum('base_grand_total');
+                $arr['sales_total_money'] = $this->voogueme->where($order_where)->where('order_type',1)->sum('base_grand_total');
                 //邮费
-                $arr['shipping_total_money'] = $this->voogueme->where($order_where)->sum('base_shipping_amount');
-                //购买人数
-                $order_user = $this->voogueme->where($order_where)->count('distinct customer_id');
+                $arr['shipping_total_money'] = $this->voogueme->where($order_where)->where('order_type',1)->sum('base_shipping_amount');
                 //客单价
-                $arr['order_unit_price'] = $order_user ? round($arr['sales_total_money'] / $order_user, 2) : 0;
+                $arr['order_unit_price'] = $arr['order_num'] ? round($arr['sales_total_money'] / $arr['order_num'], 2) : 0;
+                //中位数
+                $sales_total_money = $this->voogueme->where($order_where)->where('order_type',1)->column('base_grand_total');
+                $arr['order_total_midnum'] = $this->median($sales_total_money);
+                //标准差
+                $arr['order_total_standard'] = $this->getVariance($sales_total_money);
+                //补发订单数
+                $arr['replacement_order_num'] = $this->voogueme->where($order_where)->where('order_type',4)->count();
+                //补发销售额
+                $arr['replacement_order_total'] = $this->voogueme->where($order_where)->where('order_type',4)->sum('base_grand_total');
+                //网红订单数
+                $arr['online_celebrity_order_num'] = $this->voogueme->where($order_where)->where('order_type',3)->count();
+                //补发销售额
+                $arr['online_celebrity_order_total'] = $this->voogueme->where($order_where)->where('order_type',3)->sum('base_grand_total');
                 //会话
                 $arr['sessions'] = $this->google_session(2, $val['date_time']);
                 //新建购物车数量
                 $cart_where1 = [];
                 $cart_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $val['date_time'] . "'")];
-                $arr['new_cart_num'] = $voogueme_model->table('sales_flat_quote')->where($cart_where1)->count();
+                $arr['new_cart_num'] = $voogueme_model->table('sales_flat_quote')->where($cart_where1)->where('base_grand_total','gt',0)->count();
                 //更新购物车数量
                 $cart_where2 = [];
                 $cart_where2[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '" . $val['date_time'] . "'")];
-                $arr['update_cart_num'] = $voogueme_model->table('sales_flat_quote')->where($cart_where2)->count();
+                $arr['update_cart_num'] = $voogueme_model->table('sales_flat_quote')->where($cart_where2)->where('base_grand_total','gt',0)->count();
                 //新增加购率
-                $arr['add_cart_rate'] = $arr['sessions'] ? round($arr['new_cart_num'] / $arr['sessions'], 2) : 0;
+                $arr['add_cart_rate'] = $arr['sessions'] ? round($arr['new_cart_num'] / $arr['sessions']*100, 2) : 0;
                 //更新加购率
-                $arr['update_add_cart_rate'] = $arr['sessions'] ? round($arr['update_cart_num'] / $arr['sessions'], 2) : 0;
+                $arr['update_add_cart_rate'] = $arr['sessions'] ? round($arr['update_cart_num'] / $arr['sessions']*100, 2) : 0;
                 //新增购物车转化率
-                $arr['cart_rate'] = $arr['new_cart_num'] ? round($arr['order_num'] / $arr['new_cart_num'], 2) : 0;
+                $arr['cart_rate'] = $arr['new_cart_num'] ? round($arr['order_num'] / $arr['new_cart_num']*100, 2) : 0;
                 //更新购物车转化率
-                $arr['update_cart_cart'] = $arr['update_cart_num'] ? round($arr['order_num'] / $arr['update_cart_num'], 2) : 0;
+                $arr['update_cart_cart'] = $arr['update_cart_num'] ? round($arr['order_num'] / $arr['update_cart_num']*100, 2) : 0;
                 //插入数据
                 Db::name('datacenter_day')->insert($arr);
                 echo $val['date_time'] . "\n";
@@ -343,7 +365,7 @@ class Test4 extends Controller
         $nihao_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
 
         //查询时间
-        $date_time = $this->nihao->query("SELECT DATE_FORMAT(created_at, '%Y-%m-%d') AS date_time FROM `sales_flat_order` where created_at between '2020-10-11' and '2020-10-13' GROUP BY DATE_FORMAT(created_at, '%Y%m%d') order by DATE_FORMAT(created_at, '%Y%m%d') asc");
+        $date_time = $this->nihao->query("SELECT DATE_FORMAT(created_at, '%Y-%m-%d') AS date_time FROM `sales_flat_order` where created_at between '2020-10-01' and '2020-10-21' GROUP BY DATE_FORMAT(created_at, '%Y%m%d') order by DATE_FORMAT(created_at, '%Y%m%d') asc");
         foreach ($date_time as $val) {
             $is_exist = Db::name('datacenter_day')->where(['day_date' => $val['date_time'], 'site' => 3])->value('id');
             if (!$is_exist) {
@@ -360,33 +382,44 @@ class Test4 extends Controller
                 $order_where = [];
                 $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $val['date_time'] . "'")];
                 $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-                $arr['order_num'] = $this->nihao->where($order_where)->count();
+                $arr['order_num'] = $this->nihao->where($order_where)->where('order_type',1)->count();
                 //销售额
-                $arr['sales_total_money'] = $this->nihao->where($order_where)->sum('base_grand_total');
+                $arr['sales_total_money'] = $this->nihao->where($order_where)->where('order_type',1)->sum('base_grand_total');
                 //邮费
-                $arr['shipping_total_money'] = $this->nihao->where($order_where)->sum('base_shipping_amount');
-                //购买人数
-                $order_user = $this->nihao->where($order_where)->count('distinct customer_id');
+                $arr['shipping_total_money'] = $this->nihao->where($order_where)->where('order_type',1)->sum('base_shipping_amount');
                 //客单价
-                $arr['order_unit_price'] = $order_user ? round($arr['sales_total_money'] / $order_user, 2) : 0;
+                $arr['order_unit_price'] = $arr['order_num'] ? round($arr['sales_total_money'] / $arr['order_num'], 2) : 0;
+                //中位数
+                $sales_total_money = $this->nihao->where($order_where)->where('order_type',1)->column('base_grand_total');
+                $arr['order_total_midnum'] = $this->median($sales_total_money);
+                //标准差
+                $arr['order_total_standard'] = $this->getVariance($sales_total_money);
+                //补发订单数
+                $arr['replacement_order_num'] = $this->nihao->where($order_where)->where('order_type',4)->count();
+                //补发销售额
+                $arr['replacement_order_total'] = $this->nihao->where($order_where)->where('order_type',4)->sum('base_grand_total');
+                //网红订单数
+                $arr['online_celebrity_order_num'] = $this->nihao->where($order_where)->where('order_type',3)->count();
+                //补发销售额
+                $arr['online_celebrity_order_total'] = $this->nihao->where($order_where)->where('order_type',3)->sum('base_grand_total');
                 //会话
                 $arr['sessions'] = $this->google_session(3, $val['date_time']);
                 //新建购物车数量
                 $cart_where1 = [];
                 $cart_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $val['date_time'] . "'")];
-                $arr['new_cart_num'] = $nihao_model->table('sales_flat_quote')->where($cart_where1)->count();
+                $arr['new_cart_num'] = $nihao_model->table('sales_flat_quote')->where($cart_where1)->where('base_grand_total','gt',0)->count();
                 //更新购物车数量
                 $cart_where2 = [];
                 $cart_where2[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '" . $val['date_time'] . "'")];
-                $arr['update_cart_num'] = $nihao_model->table('sales_flat_quote')->where($cart_where2)->count();
+                $arr['update_cart_num'] = $nihao_model->table('sales_flat_quote')->where($cart_where2)->where('base_grand_total','gt',0)->count();
                 //新增加购率
-                $arr['add_cart_rate'] = $arr['sessions'] ? round($arr['new_cart_num'] / $arr['sessions'], 2) : 0;
+                $arr['add_cart_rate'] = $arr['sessions'] ? round($arr['new_cart_num'] / $arr['sessions']*100, 2) : 0;
                 //更新加购率
-                $arr['update_add_cart_rate'] = $arr['sessions'] ? round($arr['update_cart_num'] / $arr['sessions'], 2) : 0;
+                $arr['update_add_cart_rate'] = $arr['sessions'] ? round($arr['update_cart_num'] / $arr['sessions']*100, 2) : 0;
                 //新增购物车转化率
-                $arr['cart_rate'] = $arr['new_cart_num'] ? round($arr['order_num'] / $arr['new_cart_num'], 2) : 0;
+                $arr['cart_rate'] = $arr['new_cart_num'] ? round($arr['order_num'] / $arr['new_cart_num']*100, 2) : 0;
                 //更新购物车转化率
-                $arr['update_cart_cart'] = $arr['update_cart_num'] ? round($arr['order_num'] / $arr['update_cart_num'], 2) : 0;
+                $arr['update_cart_cart'] = $arr['update_cart_num'] ? round($arr['order_num'] / $arr['update_cart_num']*100, 2) : 0;
                 //插入数据
                 Db::name('datacenter_day')->insert($arr);
                 echo $val['date_time'] . "\n";
@@ -397,25 +430,18 @@ class Test4 extends Controller
     //更新运营数据中心
     public function zeelool_operate_data_center_update()
     {
-        $date_time = Db::name('datacenter_day')->where('site',1)->field('id,day_date')->order('id asc')->select();
+        $model = Db::connect('database.db_zeelool_online');
+        $model->table('sales_flat_order')->query("set time_zone='+8:00'");
+        $model->table('customer_entity')->query("set time_zone='+8:00'");
+        $date_time = Db::name('datacenter_day')->where('site',1)->field('id,day_date,sessions,order_num,new_cart_num,update_cart_num')->order('id asc')->select();
         foreach ($date_time as $val) {
             $arr = [];
-            //补发订单数
             $order_where = [];
             $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $val['day_date'] . "'")];
-            $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-            $order_where['order_type'] = 4;  //补发
-            $arr['replacement_order_num'] = $this->zeelool->where($order_where)->count();
-            //补发销售额
-            $arr['replacement_order_total'] = $this->zeelool->where($order_where)->sum('base_grand_total');
-            //网红订单数
-            $order_where1 = [];
-            $order_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $val['day_date'] . "'")];
-            $order_where1['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-            $order_where1['order_type'] = 3;  //网红
-            $arr['online_celebrity_order_num'] = $this->zeelool->where($order_where1)->count();
-            //补发销售额
-            $arr['online_celebrity_order_total'] = $this->zeelool->where($order_where1)->sum('base_grand_total');
+            $arr['sum_order_num'] = $model->table('sales_flat_order')->where($order_where)->where('order_type',1)->count();
+            $customer_where = [];
+            $customer_where[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '" . $val['day_date'] . "'")];
+            $arr['login_user_num'] = $model->table('customer_entity')->where($customer_where)->count();
             //更新数据
             Db::name('datacenter_day')->where('id',$val['id'])->update($arr);
             echo $val['day_date'] . "\n";
@@ -425,25 +451,19 @@ class Test4 extends Controller
     //更新运营数据中心
     public function voogueme_operate_data_center_update()
     {
-        $date_time = Db::name('datacenter_day')->where('site',2)->field('id,day_date')->order('id asc')->select();
+        $model = Db::connect('database.db_voogueme_online');
+        $model->table('sales_flat_order')->query("set time_zone='+8:00'");
+        $model->table('customer_entity')->query("set time_zone='+8:00'");
+        $date_time = Db::name('datacenter_day')->where('site',2)->field('id,day_date,sessions,order_num,new_cart_num,update_cart_num')->order('id asc')->select();
         foreach ($date_time as $val) {
             $arr = [];
-            //补发订单数
             $order_where = [];
             $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $val['day_date'] . "'")];
-            $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-            $order_where['order_type'] = 4;  //补发
-            $arr['replacement_order_num'] = $this->voogueme->where($order_where)->count();
-            //补发销售额
-            $arr['replacement_order_total'] = $this->voogueme->where($order_where)->sum('base_grand_total');
-            //网红订单数
-            $order_where1 = [];
-            $order_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $val['day_date'] . "'")];
-            $order_where1['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-            $order_where1['order_type'] = 3;  //网红
-            $arr['online_celebrity_order_num'] = $this->voogueme->where($order_where1)->count();
-            //补发销售额
-            $arr['online_celebrity_order_total'] = $this->voogueme->where($order_where1)->sum('base_grand_total');
+            $arr['sum_order_num'] = $model->table('sales_flat_order')->where($order_where)->where('order_type',1)->count();
+            $customer_where = [];
+            $customer_where[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '" . $val['day_date'] . "'")];
+            $arr['login_user_num'] = $model->table('customer_entity')->where($customer_where)->count();
+
             //更新数据
             Db::name('datacenter_day')->where('id',$val['id'])->update($arr);
             echo $val['day_date'] . "\n";
@@ -453,30 +473,54 @@ class Test4 extends Controller
     //更新运营数据中心
     public function nihao_operate_data_center_update()
     {
-        $date_time = Db::name('datacenter_day')->where('site',3)->field('id,day_date')->order('id asc')->select();
+        $model = Db::connect('database.db_nihao_online');
+        $model->table('sales_flat_order')->query("set time_zone='+8:00'");
+        $model->table('customer_entity')->query("set time_zone='+8:00'");
+        $date_time = Db::name('datacenter_day')->where('site',3)->field('id,day_date,sessions,order_num,new_cart_num,update_cart_num')->order('id asc')->select();
         foreach ($date_time as $val) {
             $arr = [];
-            //补发订单数
             $order_where = [];
             $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $val['day_date'] . "'")];
-            $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-            $order_where['order_type'] = 4;  //补发
-            $arr['replacement_order_num'] = $this->nihao->where($order_where)->count();
-            //补发销售额
-            $arr['replacement_order_total'] = $this->nihao->where($order_where)->sum('base_grand_total');
-            //网红订单数
-            $order_where1 = [];
-            $order_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $val['day_date'] . "'")];
-            $order_where1['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-            $order_where1['order_type'] = 3;  //网红
-            $arr['online_celebrity_order_num'] = $this->nihao->where($order_where1)->count();
-            //补发销售额
-            $arr['online_celebrity_order_total'] = $this->nihao->where($order_where1)->sum('base_grand_total');
+            $arr['sum_order_num'] = $model->table('sales_flat_order')->where($order_where)->where('order_type',1)->count();
+            $customer_where = [];
+            $customer_where[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '" . $val['day_date'] . "'")];
+            $arr['login_user_num'] = $model->table('customer_entity')->where($customer_where)->count();
             //更新数据
             Db::name('datacenter_day')->where('id',$val['id'])->update($arr);
             echo $val['day_date'] . "\n";
             usleep(100000);
         }
+    }
+    /**
+     *计算中位数 中位数：是指一组数据从小到大排列，位于中间的那个数。可以是一个（数据为奇数），也可以是2个的平均（数据为偶数）
+     */
+    function median($numbers)
+    {
+        sort($numbers);
+        $totalNumbers = count($numbers);
+        $mid = floor($totalNumbers / 2);
+
+        return ($totalNumbers % 2) === 0 ? ($numbers[$mid - 1] + $numbers[$mid]) / 2 : $numbers[$mid];
+    }
+    /**
+     * 得到数组的标准差
+     * @param unknown type $avg
+     * @param Array $list
+     * @param Boolen $isSwatch
+     * @return unknown type
+     */
+    function getVariance($arr) {
+        $length = count($arr);
+        if ($length == 0) {
+            return 0;
+        }
+        $average = array_sum($arr)/$length;
+        $count = 0;
+        foreach ($arr as $v) {
+            $count += pow($average-$v, 2);
+        }
+        $variance = $count/$length;
+        return sqrt($variance);
     }
     public function test006()
     {

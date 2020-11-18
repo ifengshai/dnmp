@@ -28,8 +28,8 @@ define(['jquery', 'bootstrap', 'moment', 'moment/locale/zh-cn', 'bootstrap-table
             singleSelect: false, //是否启用单选
             showRefresh: false,
             locale: 'zh-CN',
-            showToggle: true,
-            showColumns: true,
+            showToggle: true,//是否启用切换按钮
+            showColumns: true,//是否启用 多选显示隐藏table列
             pk: 'id',
             sortName: 'id',
             sortOrder: 'desc',

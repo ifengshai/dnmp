@@ -412,6 +412,7 @@ class Outstock extends Backend
                 //                dump(collection($list)->toArray());die;
 
                 //出库扣减库存
+                $stock_data = [];
                 foreach ($list as $v) {
                     //扣除商品表商品总库存
                     //总库存
@@ -421,6 +422,18 @@ class Outstock extends Backend
 
                     //直接扣减此平台sku的库存
                     $platform->where(['sku' => $v['sku'], 'platform_type' => $v['platform_id']])->dec('stock', $v['out_stock_num'])->update();
+
+                    $stock_data[] = [
+                        'type'                      => 2,
+                        'two_type'                  => 4,
+                        'sku'                       => $v['sku'],
+                        'public_id'                 => $v['out_stock_id'],
+                        'stock_change'              => -$v['out_stock_num'],
+                        'available_stock_change'    => -$v['out_stock_num'],
+                        'create_person'             => session('admin.nickname'),
+                        'create_time'               => date('Y-m-d H:i:s'),
+                        'remark'                    => '出库单减少总库存,减少可用库存'
+                    ];
 
                     // //同事配镜 厂家质量问题 带回办公室 扣减库存最大的那个站
                     // if (in_array($v['type_id'], [3, 5, 9,23])) {
@@ -447,21 +460,11 @@ class Outstock extends Backend
                     // }
                 }
 
-                //插入日志表
-                (new StockLog())->setData([
-                    'type'                      => 2,
-                    'two_type'                  => 4,
-                    'sku'                       => $v['sku'],
-                    'public_id'                 => $v['out_stock_id'],
-                    'stock_change'              => -$v['out_stock_num'],
-                    'available_stock_change'    => -$v['out_stock_num'],
-                    'create_person'             => session('admin.nickname'),
-                    'create_time'               => date('Y-m-d H:i:s'),
-                    'remark'                    => '出库单减少总库存,减少可用库存'
-                ]);
+                //库存变动日志
+                (new StockLog())->allowField(true)->saveAll($stock_data);
 
                 //先入先出逻辑
-                $this->item->setPurchaseOrder($list);
+//                $this->item->setPurchaseOrder($list);
             }
 
             $this->success();

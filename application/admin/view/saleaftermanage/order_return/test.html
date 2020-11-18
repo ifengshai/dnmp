@@ -104,6 +104,7 @@
                             <th>Discount</th>
                             <th>Row Total</th>
                         </tr>
+                        {if is_array($orderInfoList.item)}
                         {foreach $orderInfoList.item as $itemInfoList}
                         <tr>
                             <td>
@@ -210,6 +211,7 @@
                             <td>{:round($itemInfoList['base_row_total']-$itemInfoList['discount_amount'],2)}</td>
                         </tr>
                         {/foreach}
+                        {/if}
                     </table>
                 </div>
 

@@ -1,0 +1,540 @@
+<style>
+
+    .echart-style td {
+        width: 60px;
+    }
+
+    .echart-style td {
+        width: 60px;
+    }
+
+    .caigou-table tr {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: #a9c6c9;
+        border-radius: 6px;
+        line-height: 50px;
+    }
+
+    .caigou-table tr th {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: #a9c6c9;
+        border-radius: 6px;
+        text-align: center;
+        font-size: 14px;
+    }
+
+    .caigou-table tr td {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: #a9c6c9;
+        border-radius: 6px;
+    }
+
+    .margin-div {
+        margin-top: 30px;
+    }
+
+    .btn-div {
+        line-height: 50px;
+        background: inherit;
+        background-color: rgba(255, 255, 255, 1);
+        border: none;
+        border-radius: 4px;
+        box-shadow: 0px 0px 7px rgba(0, 0, 0, 0.349019607843137);
+        border-width: 0px;
+        font-family: 'Arial Negreta', 'Arial';
+        font-weight: 700;
+        font-style: normal;
+        margin-right: 10px;
+        margin-left: 10px;
+        width: 23%;
+    }
+
+    .title {
+        font-size: 18px;
+        color: rgb(127, 127, 127);
+    }
+
+    .rate_class {
+        font-size: 12px;
+    }
+
+    /*第一块*/
+    .new-form-group {
+        margin-top: 2%;
+        float: left;
+        min-width: 33%;
+        height: 30px;
+        line-height: 30px;
+    }
+
+    .new-form-group label {
+        text-align: right;
+    }
+
+    .col-xs-4 {
+        width: 30%;
+    }
+
+    .new-col-xs-8 {
+        width: 60%;
+    }
+
+    .new-background {
+        border-radius: 2px;
+        margin-bottom: 10px;
+        background: #f5f5f5;
+        padding: 20px;
+    }
+
+    /*表格*/
+    table.altrowstable {
+        margin: 0 auto;
+        width: 100%;
+        font-family: verdana, arial, sans-serif;
+        font-size: 11px;
+        color: #333333;
+        border-width: 1px;
+        border-color: #247692;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+
+    table.altrowstable th {
+        border-width: 1px;
+        padding: 8px;
+        font-size: 14px;
+        border-style: solid;
+        border-color: #d2d6de;
+        text-align: center;
+        vertical-align: middle;
+        color: #666666;
+    }
+
+    table.altrowstable td {
+        border-width: 1px;
+        padding: 8px;
+        text-align: center;
+        font-size: 12px;
+        border-style: solid;
+        border-color: #ddd;
+        vertical-align: middle;
+        color: #666666;
+    }
+
+    table.altrowstable tr:nth-child(odd) {
+        background: #E9F1F4;
+        background: #F5F5F5;
+    }
+
+    table.altrowstable tr:nth-child(even) {
+        background: #fff;
+        background: #eee;
+    }
+
+    table.new-altrowstable {
+        float: left;
+        margin: 0 auto;
+        width: 48%;
+        font-family: verdana, arial, sans-serif;
+        font-size: 11px;
+        color: #333333;
+        border-width: 1px;
+        border-color: #247692;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+
+    table.new-altrowstable th {
+        border-width: 1px;
+        padding: 8px;
+        font-size: 14px;
+        border-style: solid;
+        border-color: #d2d6de;
+        text-align: center;
+        vertical-align: middle;
+        color: #666666;
+    }
+
+    table.new-altrowstable td {
+        border-width: 1px;
+        padding: 8px;
+        text-align: center;
+        font-size: 12px;
+        border-style: solid;
+        border-color: #ddd;
+        vertical-align: middle;
+        color: #666666;
+    }
+
+    table.new-altrowstable tr:nth-child(odd) {
+        background: #E9F1F4;
+        background: #F5F5F5;
+    }
+
+    table.new-altrowstable tr:nth-child(even) {
+        background: #fff;
+        background: #eee;
+    }
+
+    table.height-table td {
+        height: 76.5px;
+    }
+
+</style>
+
+<style type="text/css">
+    table.altrowstable {
+        margin: 0 auto;
+        width: 100%;
+        font-family: verdana, arial, sans-serif;
+        font-size: 11px;
+        color: #333333;
+        border-width: 1px;
+        border-color: #247692;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+
+    table.altrowstable th {
+        border-width: 1px;
+        padding: 8px;
+        font-size: 14px;
+        border-style: solid;
+        border-color: #d2d6de;
+    }
+
+    table.altrowstable td {
+        border-width: 1px;
+        padding: 8px;
+        text-align: center;
+        font-size: 12px;
+        border-style: solid;
+        border-color: #ddd;
+    }
+
+    table.altrowstable tr:nth-child(odd) {
+        background: #E9F1F4;
+        background: #F5F5F5;
+    }
+
+    table.altrowstable tr:nth-child(even) {
+        background: #fff;
+        background: #eee;
+    }
+
+    .caigou-table tr {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: #a9c6c9;
+        border-radius: 6px;
+        line-height: 50px;
+    }
+
+    .caigou-table tr th {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: #a9c6c9;
+        border-radius: 6px;
+        text-align: center;
+        font-size: 14px;
+    }
+
+    .caigou-table tr td {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: #a9c6c9;
+        border-radius: 6px;
+    }
+
+    .margin-div {
+        /*margin-top: 30px;*/
+    }
+
+    .btn-div {
+        line-height: 50px;
+        background: inherit;
+        background-color: rgba(255, 255, 255, 1);
+        border: none;
+        border-radius: 4px;
+        box-shadow: 0px 0px 7px rgba(0, 0, 0, 0.349019607843137);
+        border-width: 0px;
+        font-family: 'Arial Negreta', 'Arial';
+        font-weight: 700;
+        font-style: normal;
+        margin-right: 100px;
+        margin-top: 30px;
+        width: 260px;
+    }
+
+    .title {
+        font-size: 18px;
+        color: rgb(127, 127, 127);
+    }
+
+    .rate_class {
+        font-size: 12px;
+    }
+</style>
+<div class="panel panel-default panel-intro">
+    {:build_heading()}
+    <div class="panel-body">
+        <div id="myTabContent" class="tab-content">
+            <div class="tab-pane fade active in" id="one">
+
+                <div class="widget-body no-padding">
+                    <div class="new-background">
+                        <div class="row">
+
+                            <div class="form-group new-form-group">
+                                <label class="control-label col-xs-4">平台：</label>
+                                <div class="col-xs-8 new-col-xs-8">
+                                    <select data-rule="required" class="form-control" id="order_platform">
+                                        {foreach name="magentoplatformarr" item="vo" key="key"}
+                                        <option value="{$key}" {if condition="$key == 0"}selected="selected"{/if}>{$vo}</option>
+                                        {/foreach}
+<!--                                        <option value="1" selected="selected">Zeelool</option>-->
+<!--                                        <option value="2">Voogueme</option>-->
+<!--                                        <option value="3">Nihaooptical</option>-->
+<!--                                        <option value="4">全部</option>-->
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group new-form-group">
+                                <label class="control-label col-xs-4">时间：</label>
+                                <div class="col-xs-8 new-col-xs-8" id="timetime" role="form">
+                                    <input type="hidden" class="form-control operate" name="one_time-operate"
+                                           data-name="time_str"
+                                           value="RANGE" readonly="">
+                                    <input type="text" autocomplete="off" class="form-control datetimerange"
+                                           name="time_str"
+                                           id="time_str" value="{$time_str}" data-index="14">
+                                </div>
+                            </div>
+                            <div class="form-group new-form-group">
+                                <div class="col-xs-8 new-col-xs-8">
+                                    <input type="submit" class="btn btn-success" id="sku_submit" value="提交">
+                                    <input type="reset" class="btn btn-default reset" id="sku_reset" value="重置">
+                                </div>
+                            </div>
+
+                        </div>
+
+
+                        <div class="row">
+                            <div class="margin-div" style="text-align: center">
+                                <div class="btn btn-div">
+                                <span class="extend">
+                                    <div class="title">活跃用户数：<span style="color: red;" id="active_user_num">{$active_user_num.active_user_num}</span></div>
+                                    <div class="rate_class">
+                                        同比：<span
+                                            id="same_active_user_num">
+                                        {if (float)$active_user_num.same_active_user_num/100 < 0}
+                                        <img src="/xiadie.png">
+                                        {else /}
+                                        <img style="transform:rotate(180deg);" src="/shangzhang.png">
+                                        {/if}
+                                        {$active_user_num.same_active_user_num}
+                                    </span>
+                                        环比：<span
+                                            id="huan_active_user_num">
+                                        {if (float)$active_user_num.huan_active_user_num/100 < 0}
+                                        <img src="/xiadie.png">
+                                        {else /}
+                                        <img style="transform:rotate(180deg);" src="/shangzhang.png">
+                                        {/if}
+                                        {$active_user_num.huan_active_user_num}
+                                    </span></div>
+                                </span>
+                                </div>
+                                <div class="btn btn-div">
+                                <span class="extend">
+                                    <div class="title">注册用户数：<span style="color: red;" id="register_user_num">{$register_user_num.register_user_num}</span></div>
+                                    <div class="rate_class">同比：
+                                        <span id="same_register_user_num">
+                                        {if (float)$register_user_num.same_register_user_num/100 < 0}
+                                        <img src="/xiadie.png">
+                                        {else /}
+                                        <img style="transform:rotate(180deg);"  src="/shangzhang.png">
+                                        {/if}
+                                        {$register_user_num.same_register_user_num}
+                                    </span>
+
+                                        环比：<span id="huan_register_user_num">
+                                        {if (float)$register_user_num.huan_register_user_num/100 < 0}
+                                        <img src="/xiadie.png">
+                                        {else /}
+                                        <img style="transform:rotate(180deg);"  src="/shangzhang.png">
+                                        {/if}
+                                        {$register_user_num.huan_register_user_num}</span>
+                                    </div>
+                                </span>
+                                </div>
+                                <div class="btn btn-div">
+                                <span class="extend">
+                                    <div class="title">复购用户数：<span style="color: red;" id="again_user_num">{$again_user_num.again_user_num}</span></div>
+                                    <div class="rate_class">
+                                        同比：<span id="same_again_user_num">
+                                        {if (float)$again_user_num.same_again_user_num/100 < 0}
+                                        <img src="/xiadie.png">
+                                        {else /}
+                                        <img style="transform:rotate(180deg);"  src="/shangzhang.png">
+                                        {/if}
+                                        {$again_user_num.same_again_user_num}</span>
+                                        环比：<span
+                                            id="huan_again_user_num">
+                                        {if (float)$again_user_num.huan_again_user_num/100 < 0}
+                                        <img src="/xiadie.png">
+                                        {else /}
+                                        <img  style="transform:rotate(180deg);" src="/shangzhang.png">
+                                        {/if}
+                                        {$again_user_num.huan_again_user_num}</span></div>
+                                </span>
+                                </div>
+                                <div class="btn btn-div">
+                                <span class="extend">
+                                    <div class="title">VIP用户数：<span style="color: red;" id="vip_user_num">{$vip_user_num.vip_user_num}</span></div>
+                                    <div class="rate_class">
+                                        同比：<span id="same_vip_user_num">
+                                        {if (float)$vip_user_num.same_vip_user_num/100 < 0}
+                                        <img src="/xiadie.png">
+                                        {else /}
+                                        <img  style="transform:rotate(180deg);" src="/shangzhang.png">
+                                        {/if}
+                                        {$vip_user_num.same_vip_user_num}</span>
+                                        环比：<span id="huan_vip_user_num">
+                                        {if (float)$vip_user_num.huan_vip_user_num/100 < 0}
+                                        <img src="/xiadie.png">
+                                        {else /}
+                                        <img  style="transform:rotate(180deg);" src="/shangzhang.png">
+                                        {/if}
+                                        {$vip_user_num.huan_vip_user_num}</span></div>
+                                </span>
+                                </div>
+                                <br>
+                                <div class="btn btn-div">
+                                <span class="extend">
+                                    <div class="title">订单数：<span style="color: red;" id="order_num">{$order_num.order_num}</span></div>
+                                    <div class="rate_class">同比：<span
+                                            id="same_order_num">
+                                        {if (float)$order_num.same_order_num/100 < 0}
+                                        <img src="/xiadie.png">
+                                        {else /}
+                                        <img  style="transform:rotate(180deg);" src="/shangzhang.png">
+                                        {/if}
+                                        {$order_num.same_order_num}%</span>  环比：<span
+                                            id="huan_order_num">
+                                        {if (float)$order_num.huan_order_num/100 < 0}
+                                        <img src="/xiadie.png">
+                                        {else /}
+                                        <img  style="transform:rotate(180deg);" src="/shangzhang.png">
+                                        {/if}
+                                        {$order_num.huan_order_num}%</span></div>
+                                </span>
+                                </div>
+                                <div class="btn btn-div">
+                                <span class="extend">
+                                    <div class="title">客单价：<span style="color: red;" id="order_unit_price">
+
+                                        {$order_unit_price.order_unit_price}</span></div>
+                                    <div class="rate_class">同比：<span id="same_order_unit_price">
+                                        {if (float)$order_unit_price.same_order_unit_price/100 < 0}
+                                        <img src="/xiadie.png">
+                                        {else /}
+                                        <img  style="transform:rotate(180deg);" src="/shangzhang.png">
+                                        {/if}
+                                        {$order_unit_price.same_order_unit_price}%</span>  环比：<span
+                                            id="huan_order_unit_price">
+                                        {if (float)$order_unit_price.huan_order_unit_price/100 < 0}
+                                        <img src="/xiadie.png">
+                                        {else /}
+                                        <img  style="transform:rotate(180deg);" src="/shangzhang.png">
+                                        {/if}
+                                        {$order_unit_price.huan_order_unit_price}%</span></div>
+                                </span>
+                                </div>
+                                <div class="btn btn-div">
+                                <span class="extend">
+                                    <div class="title">销售额：<span style="color: red;" id="sales_total_money">{$sales_total_money.sales_total_money}</span></div>
+                                    <div class="rate_class">同比：<span id="same_sales_total_money">
+                                        {if (float)$sales_total_money.same_sales_total_money/100 < 0}
+                                        <img src="/xiadie.png">
+                                        {else /}
+                                        <img  style="transform:rotate(180deg);" src="/shangzhang.png">
+                                        {/if}
+                                        {$sales_total_money.same_sales_total_money}%</span>  环比：<span
+                                            id="huan_sales_total_money">
+                                        {if (float)$sales_total_money.huan_sales_total_money/100 < 0}
+                                        <img src="/xiadie.png">
+                                        {else /}
+                                        <img  style="transform:rotate(180deg);" src="/shangzhang.png">
+                                        {/if}
+                                        {$sales_total_money.huan_sales_total_money}%</span></div>
+                                </span>
+                                </div>
+                                <div class="btn btn-div">
+                                <span class="extend">
+                                    <div class="title">邮费：<span style="color: red;" id="shipping_total_money">{$shipping_total_money.shipping_total_money}</span></div>
+                                    <div class="rate_class">同比：<span id="same_shipping_total_money">
+                                         {if (float)$shipping_total_money.same_shipping_total_money/100 < 0}
+                                        <img src="/xiadie.png">
+                                        {else /}
+                                        <img  style="transform:rotate(180deg);" src="/shangzhang.png">
+                                        {/if}
+                                        {$shipping_total_money.same_shipping_total_money}%</span>  环比：<span
+                                            id="huan_shipping_total_money">
+                                         {if (float)$shipping_total_money.huan_shipping_total_money/100 < 0}
+                                        <img src="/xiadie.png">
+                                        {else /}
+                                        <img  style="transform:rotate(180deg);" src="/shangzhang.png">
+                                        {/if}
+                                        {$shipping_total_money.huan_shipping_total_money}%</span></div>
+                                </span>
+                                </div>
+                            </div>
+
+
+                        </div>
+                    </div>
+                </div>
+
+
+                <select id="type" style="display:none">
+                    <option value="1">订单数</option>
+                </select>
+                <div class="new-background">
+                    <div class="row">
+                        <div class="form-group">
+                            <label class="control-label col-xs-4">订单趋势统计</label>
+                        </div>
+                    </div>
+                    <div id="echart1" style="height:800px;width:80%;margin-left: 200px;"></div>
+                </div>
+                <div class="new-background">
+                    <div class="row">
+                        <div class="form-group">
+                            <label class="control-label col-xs-4">活跃用户趋势统计</label>
+                        </div>
+                    </div>
+                    <div id="echart2" style="height:800px;width:80%;margin-left: 200px;"></div>
+                </div>
+                <div class="new-background">
+                    <div class="row">
+                        <div class="form-group">
+                            <label class="control-label col-xs-4">用户购买转化漏斗（该模块统计开始时间为：2020-10-21日）</label>
+                        </div>
+                    </div>
+                    <div id="echart3" style="height:800px;width:80%;margin-left: 330px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

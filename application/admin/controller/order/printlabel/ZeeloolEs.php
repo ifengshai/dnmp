@@ -71,6 +71,21 @@ class ZeeloolEs extends Backend
             } elseif (!$filter['status']) {
                 $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal']];
             }
+            //是否有工单
+            $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
+            if ($filter['is_task'] == 1 || $filter['is_task'] == '0') {
+                $swhere = [];
+                $swhere['work_platform'] = 4;
+                $swhere['work_status'] = ['not in', [0, 4, 6]];
+                $order_arr = $workorder->where($swhere)->column('platform_order');
+                if ($filter['is_task'] == 1) {
+                    $map['increment_id'] = ['in', $order_arr];
+                } elseif ($filter['is_task'] == '0') {
+                    $map['increment_id'] = ['not in', $order_arr];
+                }
+                unset($filter['is_task']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
 
             //SKU搜索
             if ($filter['sku']) {
@@ -100,6 +115,21 @@ class ZeeloolEs extends Backend
                 ->select();
 
             $list = collection($list)->toArray();
+
+            //查询订单是否存在工单
+            $swhere = [];
+            $increment_ids = array_column($list, 'increment_id');
+            $swhere['platform_order'] = ['in', $increment_ids];
+            $swhere['work_platform'] = 9;
+            $swhere['work_status'] = ['not in', [0, 4, 6]];
+            $order_arr = $workorder->where($swhere)->column('platform_order');
+
+
+            foreach ($list as $k => $v) {
+                if (in_array($v['increment_id'], $order_arr)) {
+                    $list[$k]['task_info'] = 1;
+                }
+            }
             $result = array("total" => $total, "rows" => $list);
             return json($result);
         }
@@ -700,7 +730,7 @@ class ZeeloolEs extends Backend
                     $data['node_type'] = 6;
                 }
 
-                Db::name('order_node')->where(['order_id' => $v['entity_id'], 'site' => 9])->update($data);
+                Db::name('order_node')->where(['order_id' => $v['entity_id'], 'site' => 9, 'node_type' => ['<', $data['node_type']]])->update($data);
             }
             if ($list) {
                 $ordernodedetail = new \app\admin\model\OrderNodeDetail();
