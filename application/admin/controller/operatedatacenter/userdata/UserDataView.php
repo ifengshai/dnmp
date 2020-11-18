@@ -59,19 +59,13 @@ class UserDataView extends Backend
     {
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getNewAuthSite();
-        // dump(collection($magentoplatformarr)->toArray());
         foreach ($magentoplatformarr as $key => $val) {
-            if (!in_array($val, ['zeelool', 'voogueme', 'nihao', '全部'])) {
+            if (!in_array($val, ['zeelool', 'voogueme', 'nihao'])) {
                 unset($magentoplatformarr[$key]);
-            }
-            if ($key == 100) {
-                unset($magentoplatformarr[$key]);
-                $magentoplatformarr[4] = '全部';
             }
         }
-        // dump(collection($magentoplatformarr)->toArray());
         //默认进入页面是z站的数据
-        $arr = Cache::get('Operatedatacenter_dataviews' . 1 . md5(serialize('index')));
+        $arr = Cache::get('Operatedatacenter_userdata' . 1 . md5(serialize('index')));
         if ($arr) {
             $this->view->assign($arr);
         }else{
@@ -80,21 +74,10 @@ class UserDataView extends Backend
             //注册用户数
             $register_user_num = $this->zeeloolOperate->getRegisterUser();
             $time_arr = date('Y-m-d 00:00:00', strtotime('-6 day')) . ' - ' . date('Y-m-d H:i:s', time());
-            // dump($time_arr);die;
             //复购用户数
             $again_user_num = $this->zeeloolOperate->getAgainUser($time_arr, 0);
-            //vip用户数
-            $vip_user_num = $this->zeeloolOperate->getVipUser();
-            //订单数
-            $order_num = $this->zeeloolOperate->getOrderNum();
-            //客单价
-            $order_unit_price = $this->zeeloolOperate->getOrderUnitPrice();
-            //销售额
-            $sales_total_money = $this->zeeloolOperate->getSalesTotalMoney();
-            //邮费
-            $shipping_total_money = $this->zeeloolOperate->getShippingTotalMoney();
-            $data = compact('order_num', 'order_unit_price', 'sales_total_money', 'shipping_total_money', 'active_user_num', 'register_user_num', 'again_user_num', 'vip_user_num', 'magentoplatformarr');
-            Cache::set('Operatedatacenter_dataviews' . 1 . md5(serialize('index')), $data, 7200);
+            $data = compact(  'active_user_num', 'register_user_num', 'again_user_num',  'magentoplatformarr');
+            Cache::set('Operatedatacenter_userdata' . 1 . md5(serialize('index')), $data, 7200);
             $this->view->assign($data);
         }
         return $this->view->fetch();
@@ -117,6 +100,7 @@ class UserDataView extends Backend
             $now_day = date('Y-m-d') . ' ' . '00:00:00' . ' - ' . date('Y-m-d');
             //时间
             $time_str = $params['time_str'] ? $params['time_str'] : $now_day;
+            $time_str2 = $params['time_str2'] ? $params['time_str2'] : '';
 
             switch ($order_platform) {
                 case 1:
@@ -127,9 +111,6 @@ class UserDataView extends Backend
                     break;
                 case 3:
                     $model = $this->nihaoOperate;
-                    break;
-                case 4:
-                    $model = $this->datacenterday;
                     break;
             }
             $arr = Cache::get('Operatedatacenter_dataviews' . $order_platform . md5(serialize($time_str)));
