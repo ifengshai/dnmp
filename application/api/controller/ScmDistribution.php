@@ -117,11 +117,14 @@ class ScmDistribution extends Scm
         empty($type) && $this->error(__('异常类型不能为空'), [], 403);
 
         //获取子订单数据
-        $item_process_id = $this->_new_order_item_process
+        $item_process_info = $this->_new_order_item_process
+            ->field('id,abnormal_house_id')
             ->where('item_order_number', $item_order_number)
-            ->value('id')
+            ->find()
         ;
-        empty($item_process_id) && $this->error(__('子订单不存在'), [], 403);
+        empty($item_process_info) && $this->error(__('子订单不存在'), [], 403);
+        !empty($item_process_info['abnormal_house_id']) && $this->error(__('已标记异常，不能多次标记'), [], 403);
+        $item_process_id = $item_process_info['id'];
 
         //自动分配异常库位号
         $stock_house_info = $this->_stock_house

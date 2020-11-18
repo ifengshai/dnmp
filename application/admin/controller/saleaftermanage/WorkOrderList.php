@@ -1068,6 +1068,15 @@ class WorkOrderList extends Backend
 
                 //检测主订单措施
                 if(!empty($measure_choose_id)){
+                    /**
+                     * 审核判断条件
+                     * 1、退款金额大于30 经理审核
+                     * 2、赠品数量大于1 经理审核
+                     * 3、补发数量大于1 经理审核
+                     * 4、优惠券等于100% 经理审核  50%主管审核 固定额度无需审核
+                     * 5、运营客服组的优惠券都由客服经理审核
+                     */
+
                     //校验退款、vip退款
                     if(array_intersect([2, 15], $measure_choose_id)){
                         !$params['refund_money'] && $this->error("退款金额不能为空");
@@ -1137,6 +1146,16 @@ class WorkOrderList extends Backend
                             $params['is_check'] = 1;
                             $params['coupon_id'] = $params['need_coupon_id'];
                             $check_coupon = $workOrderConfigValue['need_check_coupon'];
+
+                            //优惠券折扣
+                            $discount = $workOrderConfigValue['need_check_coupon'][$params['need_coupon_id']]['sum'];
+                            if (100 == $discount || (0 < $discount && in_array(131, $user_group_access))) {
+                                //创建人上级经理
+                                $params['assign_user_id'] = $workOrderConfigValue['customer_manager'];
+                            } elseif (50 == $discount) {
+                                //创建人上级主管
+                                $params['assign_user_id'] = $this->assign_user_id ?: $admin_id;
+                            }
                         }
                         foreach ($check_coupon as $v) {
                             if ($v['id'] == $params['coupon_id']) {
@@ -1155,29 +1174,7 @@ class WorkOrderList extends Backend
                     //判断是否选择退件措施
                     in_array(11, $measure_choose_id)  && !$params['refund_logistics_num'] && $this->error("退回物流单号不能为空");
 
-                    /**检测是否需要审核 start*/
-
-                    /**
-                     * 1、退款金额大于30 经理审核
-                     * 2、赠品数量大于1 经理审核
-                     * 3、补发数量大于1 经理审核
-                     * 4、优惠券等于100% 经理审核  50%主管审核 固定额度无需审核
-                     * 5、运营客服组的优惠券都由客服经理审核
-                     */
-
-                    //获取审核人ID
-                    if (1 == $params['is_check'] || $params['need_coupon_id']) {
-                        //优惠券折扣
-                        $discount = $workOrderConfigValue['need_check_coupon'][$params['need_coupon_id']]['sum'];
-                        if (100 == $discount || (0 < $discount && in_array(131, $user_group_access))) {
-                            //创建人上级经理
-                            $params['assign_user_id'] = $workOrderConfigValue['customer_manager'];
-                        } elseif (50 == $discount) {
-                            //创建人上级主管
-                            $params['assign_user_id'] = $this->assign_user_id ?: $admin_id;
-                        }
-                    }
-
+                    /**获取审核人 start*/
                     $check_person_weight = $workOrderConfigValue['check_person_weight'];//审核人列表
                     $check_group_weight = $workOrderConfigValue['check_group_weight'];//审核组列表
                     $all_group = $workOrderConfigValue['group'];//所有的成员组
@@ -1301,12 +1298,12 @@ class WorkOrderList extends Backend
                         }
                     }
 
-                    //没有审核人不需要审核
+                    //没有审核人则不需要审核
                     if (!$params['assign_user_id']) {
                         $params['is_check'] = 0;
                     }
 
-                    /**检测是否需要审核 end*/
+                    /**获取审核人 end*/
                 }
 
                 //检测子订单措施
