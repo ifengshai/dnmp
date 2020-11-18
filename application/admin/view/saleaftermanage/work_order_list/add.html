@@ -395,7 +395,7 @@
     .question-type .control-label{
         padding: 0;}
 
-    .item_table {
+/*    .item_table {
         width: 96%;
         height: 130px;
         border-width: 1px;
@@ -428,7 +428,7 @@
         border-radius: 6px;
         text-align: center;
         font-size: 14px;
-    }
+    }*/
 </style>
 
 <form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
@@ -449,6 +449,7 @@
 
     <!-- 承接人id -->
     <input type="hidden" name="row[recept_person_id]" id="recept_person_id" value="{:session('admin.id')}">
+    <input type="hidden" name="row[recept_item_person_id]" id="recept_item_person_id" value="{:session('admin.id')}">
     <input type="hidden" name="row[id]" id="work_id" value="{$row.id}">
     <!-- 问题类型id传递 -->
     <input type="hidden" name="row[problem_id]" id="problem_id" value="{$row.problem_type_id}">
@@ -548,7 +549,6 @@
                 <ul class="row list-inline plupload-preview" id="p-work_picture"></ul>
             </div>
         </div>
-
     </div>
 
     <hr style="border-top: 1px solid #000;">
@@ -773,11 +773,6 @@
     </div>
     <!--赠品 end-->
 
-    
-
-
-
-    
 
     <!--补发 start-->
     <div class="form-group-child4 measure step7" style="display:none;">
@@ -985,87 +980,25 @@
     <!--修改地址 end-->
     </div>
 
-
+<hr style="border-top: 1px solid #000;">
       <!--子订单 start-->
         <div class="form-group-content question-type" style="display: none;" id="item_order_div">
             <div class="caigou item_info" style="margin-top:15px; margin-bottom:15px; margin-left: 5%;">
                 <div  class="radio" style="width: 90%;float: left;">
-                    <table class="item_table" id="z-order_sku">
-
-                    </table>
+                    <!-- 子单号折叠框 -->
+                    <div id="div_item_content">
+                      
+                    </div>
+                    <!-- 子单号折叠框-->
                 </div>
             </div>
         </div>
       <!--子订单 end-->
 
-      <!-- 子单号折叠框 -->
-        <section class="content">
-          <div class="box">
-              <div class="box-header with-border">
-                <h3 class="box-title">子订单措施</h3>
-                <div class="box-tools pull-right">
-                  <button type="button" class="btn btn-box-tool" data-widget="collapse" data-toggle="tooltip" title="Collapse" id="item_order_but">
-                    <i class="fa fa-plus" id="item_order_but_i"></i></button>
-                </div>
-              </div>
-          <div class="box-body">
-
-          <!--更换镜框 start-->
-          <div class="form-group-child4 measure_item step1-1 " style="display:none;">
-              <div class="caigou frame-info item_info">
-                  <p style="font-size: 16px;"><b>更换镜框</b></p>
-                  <div >
-                      <!-- <div id="toolbar" class="toolbar">
-                              <a href="javascript:;" class="btn btn-success btn-add-frame" title="增加"><i class="fa fa-plus"></i>
-                                  增加</a>
-                          </div> -->
-                      <table class="caigou-table-sku" id="change-frame">
-                          <tr>
-                              <th>原SKU</th>
-                              <th>原数量(+增加)</th>
-                              <th>新SKU</th>
-                              <th>新数量(-减少)</th>
-                              <!-- <th>操作</th> -->
-                          </tr>
-                          <!-- <tr>
-                                  <td><input class="form-control" name="row[change_frame][original_sku][]" type="text" value="">
-                                  </td>
-                                  <td><input class="form-control" name="row[change_frame][original_number][]" type="text"
-                                          value=""></td>
-                                  <td><input class="form-control change_sku" name="row[change_frame][change_sku][]" type="text">
-                                  </td>
-                                  <td><input class="form-control change_number" name="row[change_frame][change_number][]"
-                                          type="text"></td>
-                                  <td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i
-                                              class="fa fa-trash"></i>删除</a></td>
-                              </tr> -->
-                      </table>
-                  </div>
-              </div>
-          </div>
-          <!--更换镜框 end-->
-
-          <!--更换处方 start-->
-          <div class="form-group-child4 measure_item step12-12" style="display:none;">
-              <div class="col-xs-12 col-sm-8" style="width: 100%">
-                  <p style="font-size: 16px;"><b>更改镜片</b></p>
-
-                  <!--                <div id="toolbar" class="toolbar">-->
-                  <!--                    <a href="javascript:;" class="btn btn-success btn-add-lens" title="增加"><i class="fa fa-plus"></i>-->
-                  <!--                        增加</a>-->
-                  <!--                </div>-->
-                  <div id="lens_contents" >
-
-
-                  </div>
-
-
-              </div>
-          </div>
-          <!--更换处方 end-->
+          
 
           <!--取消 start-->
-          <div class="form-group-child4 measure step3" style="display:none;">
+          <!-- <div class="form-group-child4 measure item_step17" style="display:none;">
               <div class="caigou item_info" style="margin-top:15px;">
                   <p style="font-size: 16px;"><b>取消订单</b></p>
                   <div>
@@ -1079,18 +1012,14 @@
                               <td>
                                   <input class="form-control" name="row[cancel_order][original_sku][]" type="text" value="">
                               </td>
-                              <td><input id="c-original_number" class="form-control"
-                                      name="row[cancel_order][original_number][]" type="text" value=""></td>
+                              <td><input id="c-original_number" class="form-control" name="row[cancel_order][original_number][]" type="text" value=""></td>
                           </tr>
                       </table>
                   </div>
               </div>
-          </div>
+          </div> -->
           <!--取消 end-->
-        </div>
-      </div>
-      </section>
-      <!-- 子单号折叠框-->
+      
 
     <div class="form-group layer-footer">
         <label class="control-label col-xs-12 col-sm-2"></label>
