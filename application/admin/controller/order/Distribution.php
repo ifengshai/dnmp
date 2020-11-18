@@ -1199,9 +1199,6 @@ class Distribution extends Backend
             ->field('id,site,sku,distribution_status,abnormal_house_id')
             ->where(['id' => $ids])
             ->find();
-        print_r($ids);
-        print_r('----------');
-        print_r($item_info);
         empty($item_info) && $this->error('子订单不存在');
         empty($item_info['abnormal_house_id']) && $this->error('当前子订单未标记异常');
 
@@ -1211,9 +1208,6 @@ class Distribution extends Backend
             ->field('id,type')
             ->where(['item_process_id' => $ids, 'status' => 1])
             ->find();
-        print_r('----------');
-        print_r($abnormal_info);
-        exit;
         empty($abnormal_info) && $this->error('当前子订单异常信息获取失败');
 
         //状态列表
