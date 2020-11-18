@@ -501,7 +501,7 @@ class Workorderconfig extends Backend
         //跟单人分组,大的问题类型分类two,问题类型/措施关系集合,分组对应的用户集合,审核人权重规则,审核组权重规则,所有的承接组,所有的承接人
         $customer_problem_type = $warehouse_problem_type = $customer_problem_classify_arr
             = $step = $step_main = $step_item = $platform = $kefumanage = $documentary_group = $documentary_person
-            = $customer_problem_classify = $relation_problem_step = $group = $check_person_weight = $check_group_weight = $all_extend_group = $all_extend_person = [];
+            = $customer_problem_classify = $relation_problem_step = $group = $check_person_weight = $check_group_weight = $all_extend_group = $all_extend_person = $item_problem_step = [];
         //客服a,b组ID a,b组的主管ID,客服经理ID
         $a_group_id = $b_group_id = $a_uid = $b_uid = $customer_manager_id = 0;
         //所有的组分别对应的有哪些用户
@@ -558,6 +558,22 @@ class Workorderconfig extends Backend
             foreach ($all_step_item as $sv) {
                 $step_item[$sv['id']] = $sv['step_name'];
             }
+        }
+        //所有子单工单类型措施关系表
+        $item_problem_step = [];
+        $where_step = [];
+        $where_step['c.is_del'] = 1;
+        $where_step['c.order_type'] = 2;
+        $item_problem_step_list = (new WorkOrderProblemStep)
+            ->alias('a')
+            ->field('a.id,a.problem_id,a.step_id,a.extend_group_id,a.is_check,a.is_auto_complete')
+            ->join(['fa_work_order_problem_type'=> 'c'], 'a.problem_id=c.id','left')
+            ->where($where_step)
+            ->order('a.id')
+            ->select();
+        $item_problem_step_list = $item_problem_step_list->toArray();
+        foreach ($item_problem_step_list as $v) {
+            $item_problem_step[$v['step_id']] = $v;
         }
         //存在A、B组
         if (!empty($all_group)) {
@@ -646,6 +662,7 @@ class Workorderconfig extends Backend
 //        $arr['step']                          = $step;
         $arr['step']                          = $step_main;
         $arr['step_item']                     = $step_item;
+        $arr['item_problem_step']             = $item_problem_step;
         $arr['platform']                      = $platform;
         $arr['kefumanage']                    = $kefumanage;
         $arr['all_problem_step']              = $relation_problem_step;
