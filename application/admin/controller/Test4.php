@@ -967,7 +967,7 @@ class Test4 extends Controller
                 foreach ($whole_num as $kk => $vv) {
                     $num_num += abs($vv['stock']);
                 }
-
+                echo $v;
                 $stock_num = $available_stock;
                
                 $stock_all_num = array_sum(array_column($item_platform_sku, 'stock'));
