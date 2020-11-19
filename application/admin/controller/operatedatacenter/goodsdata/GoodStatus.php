@@ -44,6 +44,24 @@ class GoodStatus extends Backend
             $params = $this->request->param();
             $order_platform = $params['order_platform'];
             $json['xColumnName'] = ['zeelool','voogueme','nihao','wesee','zeelool-de','zeelool-es','zeelool-jp','meeloog'];
+            $item = new \app\admin\model\itemmanage\Item();
+            if ($order_platform == 1){
+                $skus = $item->getFrameSku();
+                $map['sku'] = ['in', $skus];
+            }elseif ($order_platform == 2){
+                $skus = $item->getOrnamentsSku();
+                $map['sku'] = ['in', $skus];
+            }else{
+                $map = [];
+            }
+            $platform_z_num =$this->item_platform->where('platform_type',$platform_a)->where($map)->count();
+            $platform_v_num =$this->item_platform->where('platform_type',$platform_b)->where($map)->count();
+            $platform_n_num =$this->item_platform->where('platform_type',$platform_b)->where($map)->count();
+            $platform_w_num =$this->item_platform->where('platform_type',$platform_b)->where($map)->count();
+            $platform_m_num =$this->item_platform->where('platform_type',$platform_b)->where($map)->count();
+            $platform_es_num =$this->item_platform->where('platform_type',$platform_b)->where($map)->count();
+            $platform_de_num =$this->item_platform->where('platform_type',$platform_b)->where($map)->count();
+            $platform_jp_num =$this->item_platform->where('platform_type',$platform_b)->where($map)->count();
             $json['columnData'] = [
                 [
                     'type' => 'bar',
@@ -81,14 +99,21 @@ class GoodStatus extends Backend
     {
         if ($this->request->isAjax()) {
             $params = $this->request->param();
+            //站点a id
             $platform_a = $params['platform_a'];
+            //站点a名称
             $platform_a_name = $params['platform_a_name'];
+            //站点b id
             $platform_b = $params['platform_b'];
+            //站点b名称
             $platform_b_name = $params['platform_b_name'];
+            $item = new \app\admin\model\itemmanage\Item();
+            //获取仓库镜架SKU
+            $skus = $item->getFrameSku();
+            $map['sku'] = ['in', $skus];
             //镜框数量
-            $platform_a_num =$this->item_platform->where('platform_type',$platform_a)->count();
-            $platform_b_num =$this->item_platform->where('platform_type',$platform_b)->count();
-
+            $platform_a_num =$this->item_platform->where('platform_type',$platform_a)->where($map)->count();
+            $platform_b_num =$this->item_platform->where('platform_type',$platform_b)->where($map)->count();
 
             $json['column'] = [$platform_a_name, $platform_b_name];
             $json['columnData'] = [
@@ -102,6 +127,39 @@ class GoodStatus extends Backend
                 ],
             ];
             return json(['code' => 1, 'data' => $json]);
+        }
+    }
+
+    /**
+     * 获取重复数量和重复占比
+     *
+     * Created by Phpstorm.
+     * User: jhh
+     * Date: 2020/11/19
+     * Time: 10:37:44
+     */
+    public function again_glass_same_data()
+    {
+        if ($this->request->isAjax()) {
+            $params = $this->request->param();
+            $platform_a = $params['platform_a'];
+            $platform_b = $params['platform_b'];
+            //镜框数量
+            $platform_a_num =$this->item_platform->where('platform_type',$platform_a)->count();
+            $item = new \app\admin\model\itemmanage\Item();
+            //获取仓库镜架SKU
+            $skus = $item->getFrameSku();
+            $map['sku'] = ['in', $skus];
+            $again_num = $this->item_platform
+                ->where('platform_type','in',[$platform_a,$platform_b])
+                ->where($map)
+                ->group('sku')
+                ->having('count(platform_type)>1')
+                ->count();
+            $again_rate = round($again_num/$platform_a_num * 100,2).'%';
+
+            $data = compact('again_num','again_rate');
+            $this->success('', '', $data);
         }
     }
 }

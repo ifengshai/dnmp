@@ -2,38 +2,36 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
 
     var Controller = {
         index: function () {
-            // 初始化表格参数配置
-            Table.api.init({
-                extend: {
-                    index_url: 'operatedatacenter/orderdata/order_data_view/index' + location.search,
-                    add_url: 'operatedatacenter/orderdata/order_data_view/add',
-                    edit_url: 'operatedatacenter/orderdata/order_data_view/edit',
-                    del_url: 'operatedatacenter/orderdata/order_data_view/del',
-                    multi_url: 'operatedatacenter/orderdata/order_data_view/multi',
-                    table: 'order_data_view',
-                }
-            });
             Controller.api.formatter.line_histogram();
             Controller.api.formatter.user_data_pie();
-            $("#platform_submit").click(function() {
+            $("#platform_submit").click(function () {
                 Controller.api.formatter.user_data_pie();
+                Backend.api.ajax({
+                    url: 'operatedatacenter/goodsdata/good_status/again_glass_same_data',
+                    data: {
+                        platform_a: $("#platform_a").val(),
+                        platform_b: $("#platform_b").val(),
+                    }
+                }, function (data, ret) {
+                    var again_num = ret.data.again_num;
+                    var again_rate = ret.data.again_rate;
+                    $('#again_num').text(again_num);
+                    $('#again_rate').text(again_rate);
+                    return false;
+                }, function (data, ret) {
+                    Layer.alert(ret.msg);
+                    return false;
+                });
             });
-        },
-        add: function () {
-            Controller.api.bindevent();
-        },
-        edit: function () {
-            Controller.api.bindevent();
         },
         api: {
             formatter: {
-                line_histogram: function (){
-                    //柱状图和折线图的结合
+                line_histogram: function () {
                     var chartOptions = {
                         targetId: 'echart3',
                         downLoadTitle: '图表',
                         type: 'bar',
-                        bar:{
+                        bar: {
                             legend: {},
                             tooltip: {},
                             xAxis: {type: 'category'},
@@ -52,7 +50,6 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                         url: 'operatedatacenter/goodsdata/good_status/ajax_histogram',
                         data: {
                             order_platform: $("#order_platform").val(),
-                            time_str: $("#time_str").val(),
                         }
                     }
                     EchartObj.api.ajax(options, chartOptions);
@@ -78,10 +75,10 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                         type: 'post',
                         url: 'operatedatacenter/goodsdata/good_status/glass_same_data',
                         data: {
-                            platform_a:$("#platform_a").val(),
-                            platform_a_name:$("#platform_a option:selected").text(),
-                            platform_b:$("#platform_b").val(),
-                            platform_b_name:$("#platform_b option:selected").text(),
+                            platform_a: $("#platform_a").val(),
+                            platform_a_name: $("#platform_a option:selected").text(),
+                            platform_b: $("#platform_b").val(),
+                            platform_b_name: $("#platform_b option:selected").text(),
                         }
                     };
                     EchartObj.api.ajax(options, chartOptions);

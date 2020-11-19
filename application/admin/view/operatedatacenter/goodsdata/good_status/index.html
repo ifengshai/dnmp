@@ -21,7 +21,7 @@
     <div class="panel-body">
         <div class="form-group">
             <label class="control-label col-xs-4"><i class="fa fa-search-plus"></i>  商品状态分析</label>
-            <select id="c-order_platform" data-rule="required" name="order_platform">
+            <select id="order_platform" data-rule="required" name="order_platform">
                 <option value="1">镜框</option>
                 <option value="2">饰品</option>
                 <option value="3">All</option>
@@ -59,8 +59,8 @@
         <div class="row" class="chart_father">
             <div id="echart2" class="charts"></div>
             <div class="charts">
-                <p style="display: inline-block">重复数量</p>
-                <p style="display: inline-block">重复占比</p>
+                <p style="display: inline-block" id="again_num">重复数量</p>
+                <p style="display: inline-block" id="again_rate">重复占比</p>
             </div>
         </div>
     </div>
