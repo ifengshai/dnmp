@@ -2053,78 +2053,8 @@ class Crontab extends Backend
 
         if ($items) {
 
-            Db::connect('database.db_zeelool_es')->table('sales_flat_order_item_prescription')->insertAll($items);
-            die;
-
-            $batch_order_item_prescription_values = "";
-            $batch_order_item_updateSql = "";
-            $batch_order_updateSql = "";
-            $frameArr = $orderArr = [];
-            foreach ($items as $key => $value) {
-                $frameArr[] = $value['sku'];
-                $orderArr[] = $value['item_id'];
-                $batch_order_item_prescription_values .= "("
-                    . $value['order_id'] . ","
-                    . $value['item_id'] . ","
-                    . $value['product_id'] . ","
-                    . $value['qty_ordered'] . ","
-                    . $value['quote_item_id'] . ","
-
-                    . "'" . $this->filter($value['name']) . "',"
-                    . "'" . $value['sku'] . "',"
-                    . "'" . $value['created_at'] . "',"
-
-                    . "'" . $value['index_type'] . "',"
-                    . "'" . $value['prescription_type'] . "',"
-                    . "'" . $value['coatiing_name'] . "',"
-
-                    . "'" . $value['year'] . "',"
-                    . "'" . $value['month'] . "',"
-
-                    . "'" . $value['frame_price'] . "',"
-                    . "'" . $value['index_price'] . "',"
-                    . "'" . $value['coatiing_price'] . "',"
-
-                    . "'" . $value['frame_regural_price'] . "',"
-                    . "'" . $value['is_special_price'] ?: 0 . "',"
-                    . "'" . 0 . "',"
-                    . "'" . $value['index_name'] . "',"
-                    . "'" . $value['index_id'] . "',"
-                    . "'" . $value['lens'] . "',"
-                    . "'" . 0 . "',"
-                    . "'" . $value['total'] . "',"
-                    . "'" . 0 . "',"
-                    . "'" . $this->filter($value['information']) . "',"
-
-                    . "'" . $value['od_sph'] . "',"
-                    . "'" . $value['os_sph'] . "',"
-                    . "'" . $value['od_cyl'] . "',"
-                    . "'" . $value['os_cyl'] . "',"
-                    . "'" . $value['od_axis'] . "',"
-                    . "'" . $value['os_axis'] . "',"
-                    . "'" . $value['pd_l'] . "',"
-                    . "'" . $value['pd_r'] . "',"
-                    . "'" . $value['pd'] . "',"
-                    . "'" . $value['os_add'] . "',"
-                    . "'" . $value['od_add'] . "',"
-                    . "'" . $value['total_add'] . "',"
-                    . "'" . $value['od_pv'] . "',"
-                    . "'" . $value['od_bd'] . "',"
-                    . "'" . $value['od_pv_r'] . "',"
-                    . "'" . $value['od_bd_r'] . "',"
-                    . "'" . $value['os_pv'] . "',"
-                    . "'" . $value['os_bd'] . "',"
-                    . "'" . $value['os_pv_r'] . "',"
-                    . "'" . $value['os_bd_r'] . "',"
-                    . "'" . $value['is_custom_lens'] . "'"
-                    . "),";
-            }
-
-            $batch_order_item_prescription_insertSql = "INSERT INTO sales_flat_order_item_prescription(order_id,item_id,product_id,qty_ordered,quote_item_id,name,sku,created_at,index_type,prescription_type,coatiing_name,year,month,frame_price,index_price,coatiing_price,
-                frame_regural_price,is_special_price,index_price_old,index_name,index_id,lens,lens_old,total,total_old,information,od_sph,os_sph,od_cyl,os_cyl,od_axis,os_axis,pd_l,pd_r,pd,os_add,od_add,total_add,od_pv,od_bd,od_pv_r,od_bd_r,os_pv,os_bd,os_pv_r,os_bd_r,is_custom_lens) values$batch_order_item_prescription_values";
-            $batch_order_item_prescription_insertSql = rtrim($batch_order_item_prescription_insertSql, ',');
-
-            $result = Db::connect('database.db_zeelool_es')->execute($batch_order_item_prescription_insertSql);
+            $result = Db::connect('database.db_zeelool_es')->table('sales_flat_order_item_prescription')->insertAll($items);
+    
             if ($result) {
                 echo '<br>执行成功';
             } else {
@@ -2275,8 +2205,8 @@ class Crontab extends Backend
             $final_params['index_price'] = $product_options['info_buyRequest']['tmplens']['index_price'];
             $final_params['coatiing_price'] = $product_options['info_buyRequest']['tmplens']['coatiing_price'];
 
-            $items[$order_item_key]['frame_regural_price'] = $final_params['frame_regural_price'] = $product_options['info_buyRequest']['tmplens']['frame_regural_price'];
-            $items[$order_item_key]['is_special_price'] = $final_params['is_special_price'] = $product_options['info_buyRequest']['tmplens']['is_special_price'];
+            $items[$order_item_key]['frame_regural_price'] = $final_params['frame_regural_price'] = $product_options['info_buyRequest']['tmplens']['frame_regural_price']?: 0;
+            $items[$order_item_key]['is_special_price'] = $final_params['is_special_price'] = $product_options['info_buyRequest']['tmplens']['is_special_price']?: 0;
             $items[$order_item_key]['index_name'] = $final_params['index_name'] = $product_options['info_buyRequest']['tmplens']['index_name'];
             $items[$order_item_key]['index_id'] = $final_params['index_id'] = $product_options['info_buyRequest']['tmplens']['index_id'];
             $items[$order_item_key]['lens'] = $final_params['lens'] = $product_options['info_buyRequest']['tmplens']['lens'];
@@ -2327,14 +2257,22 @@ class Crontab extends Backend
             if ($final_params['os_add'] && $final_params['od_add']) {
                 $items[$order_item_key]['os_add'] = $final_params['os_add'];
                 $items[$order_item_key]['od_add'] = $final_params['od_add'];
+                $items[$order_item_key]['total_add'] = '';
             } else {
+                $items[$order_item_key]['os_add'] = $final_params['os_add'];
+                $items[$order_item_key]['od_add'] = $final_params['od_add'];
                 $items[$order_item_key]['total_add'] = $final_params['os_add'];
             }
+
+            
 
             if ($final_params['pdcheck'] == 'on') {
                 $items[$order_item_key]['pd_l'] = $final_params['pd_l'];
                 $items[$order_item_key]['pd_r'] = $final_params['pd_r'];
+                $items[$order_item_key]['pd'] = '';
             } else {
+                $items[$order_item_key]['pd_l'] = $final_params['pd_l'];
+                $items[$order_item_key]['pd_r'] = $final_params['pd_r'];
                 $items[$order_item_key]['pd'] = $final_params['pd'];
             }
 
@@ -2348,6 +2286,16 @@ class Crontab extends Backend
                 $items[$order_item_key]['os_bd'] = $final_params['os_bd'];
                 $items[$order_item_key]['os_pv_r'] = $final_params['os_pv_r'];
                 $items[$order_item_key]['os_bd_r'] = $final_params['os_bd_r'];
+            } else {
+                $items[$order_item_key]['od_pv'] = '';
+                $items[$order_item_key]['od_bd'] = '';
+                $items[$order_item_key]['od_pv_r'] = '';
+                $items[$order_item_key]['od_bd_r'] = '';
+
+                $items[$order_item_key]['os_pv'] = '';
+                $items[$order_item_key]['os_bd'] = '';
+                $items[$order_item_key]['os_pv_r'] = '';
+                $items[$order_item_key]['os_bd_r'] = '';
             }
 
             /**
@@ -2401,77 +2349,8 @@ class Crontab extends Backend
             unset($product_options);
         }
 
-
         if ($items) {
-            $batch_order_item_prescription_values = "";
-            $batch_order_item_updateSql = "";
-            $batch_order_updateSql = "";
-            $frameArr = $orderArr = [];
-            foreach ($items as $key => $value) {
-                $frameArr[] = $value['sku'];
-                $orderArr[] = $value['item_id'];
-                $batch_order_item_prescription_values .= "("
-                    . $value['order_id'] . ","
-                    . $value['item_id'] . ","
-                    . $value['product_id'] . ","
-                    . $value['qty_ordered'] . ","
-                    . $value['quote_item_id'] . ","
-
-                    . "'" . $this->filter($value['name']) . "',"
-                    . "'" . $value['sku'] . "',"
-                    . "'" . $value['created_at'] . "',"
-
-                    . "'" . $value['index_type'] . "',"
-                    . "'" . $value['prescription_type'] . "',"
-                    . "'" . $value['coatiing_name'] . "',"
-
-                    . "'" . $value['year'] . "',"
-                    . "'" . $value['month'] . "',"
-
-                    . "'" . $value['frame_price'] . "',"
-                    . "'" . $value['index_price'] . "',"
-                    . "'" . $value['coatiing_price'] . "',"
-
-                    . "'" . $value['frame_regural_price'] . "',"
-                    . "'" . $value['is_special_price'] ?: 0 . "',"
-                    . "'" . 0 . "',"
-                    . "'" . $value['index_name'] . "',"
-                    . "'" . $value['index_id'] . "',"
-                    . "'" . $value['lens'] . "',"
-                    . "'" . 0 . "',"
-                    . "'" . $value['total'] . "',"
-                    . "'" . 0 . "',"
-                    . "'" . $this->filter($value['information']) . "',"
-
-                    . "'" . $value['od_sph'] . "',"
-                    . "'" . $value['os_sph'] . "',"
-                    . "'" . $value['od_cyl'] . "',"
-                    . "'" . $value['os_cyl'] . "',"
-                    . "'" . $value['od_axis'] . "',"
-                    . "'" . $value['os_axis'] . "',"
-                    . "'" . $value['pd_l'] . "',"
-                    . "'" . $value['pd_r'] . "',"
-                    . "'" . $value['pd'] . "',"
-                    . "'" . $value['os_add'] . "',"
-                    . "'" . $value['od_add'] . "',"
-                    . "'" . $value['total_add'] . "',"
-                    . "'" . $value['od_pv'] . "',"
-                    . "'" . $value['od_bd'] . "',"
-                    . "'" . $value['od_pv_r'] . "',"
-                    . "'" . $value['od_bd_r'] . "',"
-                    . "'" . $value['os_pv'] . "',"
-                    . "'" . $value['os_bd'] . "',"
-                    . "'" . $value['os_pv_r'] . "',"
-                    . "'" . $value['os_bd_r'] . "',"
-                    . "'" . $value['is_custom_lens'] . "'"
-                    . "),";
-            }
-
-            $batch_order_item_prescription_insertSql = "INSERT INTO sales_flat_order_item_prescription(order_id,item_id,product_id,qty_ordered,quote_item_id,name,sku,created_at,index_type,prescription_type,coatiing_name,year,month,frame_price,index_price,coatiing_price,
-                frame_regural_price,is_special_price,index_price_old,index_name,index_id,lens,lens_old,total,total_old,information,od_sph,os_sph,od_cyl,os_cyl,od_axis,os_axis,pd_l,pd_r,pd,os_add,od_add,total_add,od_pv,od_bd,od_pv_r,od_bd_r,os_pv,os_bd,os_pv_r,os_bd_r,is_custom_lens) values$batch_order_item_prescription_values";
-            $batch_order_item_prescription_insertSql = rtrim($batch_order_item_prescription_insertSql, ',');
-
-            $result = Db::connect('database.db_zeelool_de')->execute($batch_order_item_prescription_insertSql);
+            $result = Db::connect('database.db_zeelool_de')->table('sales_flat_order_item_prescription')->insertAll($items);
             if ($result) {
                 echo '<br>执行成功';
             } else {
