@@ -2026,7 +2026,7 @@ class Crontab extends Backend
                     $items[$order_item_key]['is_custom_lens'] = 1;
                 }
             }
-
+            $items[$order_item_key]['is_custom_lens'] = $items[$order_item_key]['is_custom_lens'] ?: 0;
             unset($final_params);
             unset($lens_params);
             unset($prescription_params);
@@ -2373,7 +2373,7 @@ class Crontab extends Backend
                     $items[$order_item_key]['is_custom_lens'] = 1;
                 }
             }
-
+            $items[$order_item_key]['is_custom_lens'] = $items[$order_item_key]['is_custom_lens'] ?: 0;
             unset($final_params);
             unset($lens_params);
             unset($prescription_params);
