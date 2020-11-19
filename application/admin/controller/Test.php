@@ -1135,8 +1135,8 @@ class Test extends Backend
                 $data['custom_match_frame_created_at_new'] = $v['createtime'];
             } elseif ($v['type'] == 3) {
                 $data['custom_is_match_lens_new'] = 1;
-                $data['custom_match_lens_created_at_new'] = $v['create_person'];
-                $data['custom_match_lens_person_new'] = $v['createtime'];
+                $data['custom_match_lens_created_at_new'] = $v['createtime'];
+                $data['custom_match_lens_person_new'] = $v['create_person'];
             } elseif ($v['type'] == 4) {
                 $data['custom_is_send_factory_new'] = 1;
                 $data['custom_match_factory_person_new'] = $v['create_person'];
