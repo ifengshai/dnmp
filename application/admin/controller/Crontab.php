@@ -1959,14 +1959,22 @@ class Crontab extends Backend
             if ($final_params['os_add'] && $final_params['od_add']) {
                 $items[$order_item_key]['os_add'] = $final_params['os_add'];
                 $items[$order_item_key]['od_add'] = $final_params['od_add'];
+                $items[$order_item_key]['total_add'] = '';
             } else {
+                $items[$order_item_key]['os_add'] = $final_params['os_add'];
+                $items[$order_item_key]['od_add'] = $final_params['od_add'];
                 $items[$order_item_key]['total_add'] = $final_params['os_add'];
             }
+
+            
 
             if ($final_params['pdcheck'] == 'on') {
                 $items[$order_item_key]['pd_l'] = $final_params['pd_l'];
                 $items[$order_item_key]['pd_r'] = $final_params['pd_r'];
+                $items[$order_item_key]['pd'] = '';
             } else {
+                $items[$order_item_key]['pd_l'] = $final_params['pd_l'];
+                $items[$order_item_key]['pd_r'] = $final_params['pd_r'];
                 $items[$order_item_key]['pd'] = $final_params['pd'];
             }
 
@@ -1980,6 +1988,16 @@ class Crontab extends Backend
                 $items[$order_item_key]['os_bd'] = $final_params['os_bd'];
                 $items[$order_item_key]['os_pv_r'] = $final_params['os_pv_r'];
                 $items[$order_item_key]['os_bd_r'] = $final_params['os_bd_r'];
+            } else {
+                $items[$order_item_key]['od_pv'] = '';
+                $items[$order_item_key]['od_bd'] = '';
+                $items[$order_item_key]['od_pv_r'] = '';
+                $items[$order_item_key]['od_bd_r'] = '';
+
+                $items[$order_item_key]['os_pv'] = '';
+                $items[$order_item_key]['os_bd'] = '';
+                $items[$order_item_key]['os_pv_r'] = '';
+                $items[$order_item_key]['os_bd_r'] = '';
             }
 
             /**
