@@ -2033,8 +2033,11 @@ class Crontab extends Backend
             unset($product_options);
         }
 
-
         if ($items) {
+
+            Db::connect('database.db_zeelool_es')->table('sales_flat_order_item_prescription')->insertAll($items);
+            die;
+
             $batch_order_item_prescription_values = "";
             $batch_order_item_updateSql = "";
             $batch_order_updateSql = "";
