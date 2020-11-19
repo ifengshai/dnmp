@@ -975,7 +975,7 @@ class Test4 extends Controller
                         if (($all_num - $key) == 1) {
                             $platform->where(['sku' => $v, 'platform_type' => $val['platform_type']])->update(['stock' => $stock_num]);
                         } else {
-                            $num = round($available_stock * $rate_rate);
+                           
                             $stock_num -= $num;
                             $platform->where(['sku' => $v, 'platform_type' => $val['platform_type']])->update(['stock' => $num]);
                         }
@@ -986,7 +986,13 @@ class Test4 extends Controller
                         if (($all_num - $key) == 1) {
                             $platform->where(['sku' => $v, 'platform_type' => $val['platform_type']])->update(['stock' => $stock_num]);
                         } else {
-                            $num = round($available_stock * abs($val['stock']) / $num_num);
+                            if ($num_num  == 0) {
+                                $rate_rate = 1 / $all_num;
+                                $num = round($available_stock * $rate_rate);
+                            }  else {
+                                $num = round($available_stock * abs($val['stock']) / $num_num);
+                            }
+                            
                             $stock_num -= $num;
                             $platform->where(['sku' => $v, 'platform_type' => $val['platform_type']])->update(['stock' => $num]);
                         }
