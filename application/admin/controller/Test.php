@@ -1146,7 +1146,10 @@ class Test extends Backend
                 $data['custom_match_delivery_person_new'] = $v['create_person'];
                 $data['custom_match_delivery_created_at_new'] = $v['createtime'];
             }
-            $nihao->where(['entity_id' => ['in', $v['order_ids']]])->update($data);
+            if ($data) {
+                $nihao->where(['entity_id' => ['in', $v['order_ids']]])->update($data);
+            }
+            
         }
         echo "ok";
     }
