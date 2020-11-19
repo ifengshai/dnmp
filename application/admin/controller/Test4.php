@@ -970,6 +970,8 @@ class Test4 extends Controller
 
                 $stock_num = $available_stock;
                 
+                echo $all_num;
+                echo $num_num;
                 $stock_all_num = array_sum(array_column($item_platform_sku, 'stock'));
                 //如果现有总库存为0 平均分给各站点
                 if ($stock_all_num == 0) {
