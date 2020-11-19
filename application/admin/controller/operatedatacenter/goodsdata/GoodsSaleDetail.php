@@ -145,7 +145,7 @@ class GoodsSaleDetail extends Backend
     {
         $arr = Cache::get('Operationalreport_platformOrderInfo' . $platform . md5(serialize($map)));
         if ($arr) {
-            // return $arr;
+            return $arr;
         }
         $this->item = new \app\admin\model\itemmanage\Item;
         $this->itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
