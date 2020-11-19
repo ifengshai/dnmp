@@ -2065,7 +2065,7 @@ class Crontab extends Backend
                     . "'" . $value['coatiing_price'] . "',"
 
                     . "'" . $value['frame_regural_price'] . "',"
-                    . "'" . $value['is_special_price'] . "',"
+                    . "'" . $value['is_special_price'] ?: 0 . "',"
                     . "'" . 0 . "',"
                     . "'" . $value['index_name'] . "',"
                     . "'" . $value['index_id'] . "',"
@@ -2412,7 +2412,7 @@ class Crontab extends Backend
                     . "'" . $value['coatiing_price'] . "',"
 
                     . "'" . $value['frame_regural_price'] . "',"
-                    . "'" . $value['is_special_price'] . "',"
+                    . "'" . $value['is_special_price'] ?: 0 . "',"
                     . "'" . 0 . "',"
                     . "'" . $value['index_name'] . "',"
                     . "'" . $value['index_id'] . "',"
