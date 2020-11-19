@@ -958,6 +958,9 @@ class Test4 extends Controller
                 //盘点的时候盘盈入库 盘亏出库 的同时要对虚拟库存进行一定的操作
                 //查出映射表中此sku对应的所有平台sku 并根据库存数量进行排序（用于遍历数据的时候首先分配到那个站点）
                 $item_platform_sku = $platform->where('sku', $v)->order('stock asc')->field('platform_type,stock')->select();
+                if (!$item_platform_sku) {
+                    continue;
+                }
                 $all_num = count($item_platform_sku);
                 $whole_num = $platform
                     ->where('sku', $v)
@@ -967,7 +970,6 @@ class Test4 extends Controller
                 foreach ($whole_num as $kk => $vv) {
                     $num_num += abs($vv['stock']);
                 }
-                echo $v;
                 $stock_num = $available_stock;
                
                 $stock_all_num = array_sum(array_column($item_platform_sku, 'stock'));
