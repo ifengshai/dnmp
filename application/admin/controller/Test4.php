@@ -969,6 +969,7 @@ class Test4 extends Controller
                 }
 
                 $stock_num = $available_stock;
+                dump($item_platform_sku);
                 
                 echo $all_num;
                 echo $num_num;
