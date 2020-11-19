@@ -943,6 +943,10 @@ class Test4 extends Controller
         $skus = Db::table('fa_zz_temp2')->column('sku');
         // $list = $itemplatformsku->field('sku,stock')->where(['sku' => ['in', $skus]])->select();
         foreach ($skus as $k => $v) {
+
+            if ($k < 1294) {
+                continue;
+            }
             //同步对应SKU库存
             //更新商品表商品总库存
             //总库存
@@ -975,7 +979,7 @@ class Test4 extends Controller
                         if (($all_num - $key) == 1) {
                             $platform->where(['sku' => $v, 'platform_type' => $val['platform_type']])->update(['stock' => $stock_num]);
                         } else {
-                           
+                            $num = round($available_stock * $rate_rate);
                             $stock_num -= $num;
                             $platform->where(['sku' => $v, 'platform_type' => $val['platform_type']])->update(['stock' => $num]);
                         }
@@ -988,8 +992,10 @@ class Test4 extends Controller
                         } else {
                             if ($num_num  == 0) {
                                 $rate_rate = 1 / $all_num;
-                                $num = round($available_stock * $rate_rate);
+                                $num_num =  round($available_stock * $rate_rate);
+                                
                             }  else {
+                               
                                 $num = round($available_stock * abs($val['stock']) / $num_num);
                             }
                             
