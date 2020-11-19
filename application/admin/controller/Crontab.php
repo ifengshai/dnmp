@@ -2066,13 +2066,13 @@ class Crontab extends Backend
 
                     . "'" . $value['frame_regural_price'] . "',"
                     . "'" . $value['is_special_price'] . "',"
-                    . "'" . $value['index_price_old'] . "',"
+                    . "'" . 0 . "',"
                     . "'" . $value['index_name'] . "',"
                     . "'" . $value['index_id'] . "',"
                     . "'" . $value['lens'] . "',"
-                    . "'" . $value['lens_old'] . "',"
+                    . "'" . 0 . "',"
                     . "'" . $value['total'] . "',"
-                    . "'" . $value['total_old'] . "',"
+                    . "'" . 0 . "',"
                     . "'" . $this->filter($value['information']) . "',"
 
                     . "'" . $value['od_sph'] . "',"
@@ -2413,13 +2413,13 @@ class Crontab extends Backend
 
                     . "'" . $value['frame_regural_price'] . "',"
                     . "'" . $value['is_special_price'] . "',"
-                    . "'" . $value['index_price_old'] . "',"
+                    . "'" . 0 . "',"
                     . "'" . $value['index_name'] . "',"
                     . "'" . $value['index_id'] . "',"
                     . "'" . $value['lens'] . "',"
-                    . "'" . $value['lens_old'] . "',"
+                    . "'" . 0 . "',"
                     . "'" . $value['total'] . "',"
-                    . "'" . $value['total_old'] . "',"
+                    . "'" . 0 . "',"
                     . "'" . $this->filter($value['information']) . "',"
 
                     . "'" . $value['od_sph'] . "',"
