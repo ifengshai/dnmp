@@ -1927,7 +1927,93 @@ class TrackReg extends Backend
             echo '<br>';
         }
     }
-
+    public function sku_day_data_other_11_16()
+    {
+        //z站
+        set_time_limit(0);
+        //购物车数量
+        $zeelool_model = Db::connect('database.db_zeelool_online');
+        $zeelool_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
+        //统计昨天的数据
+        $data = date('Y-m-d', strtotime('-1 day'));
+        $data = '2020-11-16';
+        $z_sku_list = Db::name('datacenter_sku_day')->where(['day_date' => $data, 'site' => 1])->select();
+        foreach ($z_sku_list as $k => $v) {
+            $cart_where1 = [];
+            $cart_where1[] = ['exp', Db::raw("DATE_FORMAT(a.created_at, '%Y-%m-%d') = '" . $data . "'")];
+            $cart_where1['b.sku'] = ['like', $v['platform_sku'] . '%'];
+            $z_sku_list[$k]['cart_num'] = $zeelool_model->table('sales_flat_quote')
+                ->alias('a')
+                ->join(['sales_flat_quote_item' => 'b'], 'a.entity_id=b.quote_id')
+                ->where($cart_where1)
+                ->where('base_grand_total', 'gt', 0)
+                ->field('b.sku,a.base_grand_total,a.created_at')
+                ->count();
+            $z_sku_list[$k]['now_pricce'] = Db::connect('database.db_zeelool_online')
+                ->table('catalog_product_index_price') //为了获取现价找的表
+                ->alias('a')
+                ->join(['catalog_product_entity' => 'b'], 'a.entity_id=b.entity_id') //商品主表
+                ->where('b.sku', 'like', $v['platform_sku'] . '%')
+                ->value('a.final_price');
+            Db::name('datacenter_sku_day')->update($z_sku_list[$k]);
+            echo $z_sku_list[$k]['sku'] . "\n";
+            echo '<br>';
+        }
+        //v站
+        //购物车数量
+        $zeelool_model = Db::connect('database.db_voogueme_online');
+        $zeelool_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
+        //统计昨天的数据
+        $z_sku_list = Db::name('datacenter_sku_day')->where(['day_date' => $data, 'site' => 2])->select();
+        foreach ($z_sku_list as $k => $v) {
+            $cart_where1 = [];
+            $cart_where1[] = ['exp', Db::raw("DATE_FORMAT(a.created_at, '%Y-%m-%d') = '" . $data . "'")];
+            $cart_where1['b.sku'] = ['like', $v['platform_sku'] . '%'];
+            $z_sku_list[$k]['cart_num'] = $zeelool_model->table('sales_flat_quote')
+                ->alias('a')
+                ->join(['sales_flat_quote_item' => 'b'], 'a.entity_id=b.quote_id')
+                ->where($cart_where1)
+                ->where('base_grand_total', 'gt', 0)
+                ->field('b.sku,a.base_grand_total,a.created_at')
+                ->count();
+            $z_sku_list[$k]['now_pricce'] = Db::connect('database.db_voogueme_online')
+                ->table('catalog_product_index_price') //为了获取现价找的表
+                ->alias('a')
+                ->join(['catalog_product_entity' => 'b'], 'a.entity_id=b.entity_id') //商品主表
+                ->where('b.sku', 'like', $v['platform_sku'] . '%')
+                ->value('a.final_price');
+            Db::name('datacenter_sku_day')->update($z_sku_list[$k]);
+            echo $z_sku_list[$k]['sku'] . "\n";
+            echo '<br>';
+        }
+        //nihao站
+        //购物车数量
+        $zeelool_model = Db::connect('database.db_nihao_online');
+        $zeelool_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
+        //统计昨天的数据
+        $z_sku_list = Db::name('datacenter_sku_day')->where(['day_date' => $data, 'site' => 3])->select();
+        foreach ($z_sku_list as $k => $v) {
+            $cart_where1 = [];
+            $cart_where1[] = ['exp', Db::raw("DATE_FORMAT(a.created_at, '%Y-%m-%d') = '" . $data . "'")];
+            $cart_where1['b.sku'] = ['like', $v['platform_sku'] . '%'];
+            $z_sku_list[$k]['cart_num'] = $zeelool_model->table('sales_flat_quote')
+                ->alias('a')
+                ->join(['sales_flat_quote_item' => 'b'], 'a.entity_id=b.quote_id')
+                ->where($cart_where1)
+                ->where('base_grand_total', 'gt', 0)
+                ->field('b.sku,a.base_grand_total,a.created_at')
+                ->count();
+            $z_sku_list[$k]['now_pricce'] = Db::connect('database.db_nihao_online')
+                ->table('catalog_product_index_price') //为了获取现价找的表
+                ->alias('a')
+                ->join(['catalog_product_entity' => 'b'], 'a.entity_id=b.entity_id') //商品主表
+                ->where('b.sku', 'like', $v['platform_sku'] . '%')
+                ->value('a.final_price');
+            Db::name('datacenter_sku_day')->update($z_sku_list[$k]);
+            echo $z_sku_list[$k]['sku'] . "\n";
+            echo '<br>';
+        }
+    }
     public function update_11_3_stock()
     {
         set_time_limit(0);

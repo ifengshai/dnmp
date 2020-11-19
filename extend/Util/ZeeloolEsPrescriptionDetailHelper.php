@@ -135,7 +135,14 @@ class ZeeloolEsPrescriptionDetailHelper
 			$final_params['frame_price'] = $product_options['info_buyRequest']['tmplens']['frame_price'];
 			$final_params['index_price'] = $product_options['info_buyRequest']['tmplens']['index_price'];
 			$final_params['coatiing_price'] = $product_options['info_buyRequest']['tmplens']['coatiing_price'];
+			$final_params['lenstype_data_name'] = $product_options['info_buyRequest']['tmplens']['lens_type'];
+			$final_params['lenstype_base_price'] = $product_options['info_buyRequest']['tmplens']['lens_type_price'];
 
+			//西语站添加镜片类型 镜片颜色
+			if ($product_options['info_buyRequest']['tmplens']['lens_type'] || $product_options['info_buyRequest']['tmplens']['lens_color']) {
+				$final_params['index_type'] = $final_params['index_type'] . '-' . $product_options['info_buyRequest']['tmplens']['lens_type'];
+				$final_params['index_type'] = $final_params['index_type'] . '-' . $product_options['info_buyRequest']['tmplens']['lens_color'];
+			}
 
 			$items[$item_key]['frame_regural_price'] = $final_params['frame_regural_price'] = $product_options['info_buyRequest']['tmplens']['frame_regural_price'];
 			$items[$item_key]['is_special_price'] = $final_params['is_special_price'] = $product_options['info_buyRequest']['tmplens']['is_special_price'];
@@ -149,7 +156,7 @@ class ZeeloolEsPrescriptionDetailHelper
 			$items[$item_key]['options']  = $product_options['options'];
 			$items[$item_key]['cart_currency'] = $product_options['info_buyRequest']['cart_currency'];
 			$prescription_params = $product_options['info_buyRequest']['tmplens']['prescription'];
-			$items[$item_key]['index_type'] = $final_params['index_type'] = $product_options['info_buyRequest']['tmplens']['index_type'];
+			$items[$item_key]['index_type'] = $final_params['index_type'];
 			$items[$item_key]['coating_id'] = $final_params['coating_id'] = $product_options['info_buyRequest']['tmplens']['coating_id'];
 			$items[$item_key]['coatiing_name'] = $final_params['coatiing_name'] = $product_options['info_buyRequest']['tmplens']['coatiing_name'];
 			// dump($prescription_params);
@@ -167,6 +174,8 @@ class ZeeloolEsPrescriptionDetailHelper
 			$items[$item_key]['coatiing_name'] = $final_params['coatiing_name'];
 			$items[$item_key]['index_type'] = $final_params['index_type'];
 			$items[$item_key]['prescription_type'] = $final_params['prescription_type'];
+			$items[$item_key]['lenstype_data_name'] = $final_params['lenstype_data_name'];
+			$items[$item_key]['lenstype_base_price'] = $final_params['lenstype_base_price'];
 
 			$items[$item_key]['frame_price'] = $final_params['frame_price'] ? $final_params['frame_price'] : 0;
 			$items[$item_key]['index_price'] = $final_params['index_price'] ? $final_params['index_price'] : 0;
