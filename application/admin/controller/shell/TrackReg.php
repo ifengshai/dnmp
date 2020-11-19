@@ -1579,7 +1579,7 @@ class TrackReg extends Backend
         set_time_limit(0);
         //统计昨天的数据
         $data = date('Y-m-d', strtotime('-1 day'));
-        $data = '2020-11-11';
+        // $data = '2020-11-11';
         $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
         $sku_data = $_item_platform_sku
             ->field('sku,grade,platform_sku,stock,plat_on_way_stock')
@@ -1675,7 +1675,7 @@ class TrackReg extends Backend
         Db::connect('database.db_zeelool')->table('sales_flat_order')->query("set time_zone='+8:00'");
         //统计昨天的数据
         $data = date('Y-m-d', strtotime('-1 day'));
-        $data = '2020-11-11';
+        // $data = '2020-11-11';
         $z_sku_list = Db::name('datacenter_sku_day')->where(['day_date' => $data, 'site' => 1])->select();
         foreach ($z_sku_list as $k => $v) {
             $map['sku'] = ['like', $v['platform_sku'] . '%'];
