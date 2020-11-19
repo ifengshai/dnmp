@@ -1153,4 +1153,15 @@ class Test extends Backend
         }
         echo "ok";
     }
+
+    public function order_data2()
+    {
+        $nihao = new \app\admin\model\order\order\Nihao();
+        $data['custom_print_label_new'] = 1;
+        $data['custom_is_match_frame_new'] = 1;
+        $data['custom_is_match_lens_new'] = 1;
+        $data['custom_is_send_factory_new'] = 1;
+        $data['custom_is_delivery_new'] = 1;
+        $nihao->where(['created_at' => ['<','2020-01-01']])->update($data);
+    }
 }
