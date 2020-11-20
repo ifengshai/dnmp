@@ -2199,7 +2199,7 @@ class Crontab extends Backend
             $product_options = unserialize($order_item_value['product_options']);
 
             $final_params['coatiing_name'] = substr($product_options['info_buyRequest']['tmplens']['coatiing_name'], 0, 100);
-            $final_params['index_type'] = substr($product_options['info_buyRequest']['tmplens']['index_type'], 0, 100);
+            $final_params['index_type'] = $product_options['info_buyRequest']['tmplens']['index_type'];
 
             $final_params['frame_price'] = $product_options['info_buyRequest']['tmplens']['frame_price'];
             $final_params['index_price'] = $product_options['info_buyRequest']['tmplens']['index_price'];
@@ -2298,6 +2298,7 @@ class Crontab extends Backend
                 $items[$order_item_key]['os_bd_r'] = '';
             }
 
+            echo $final_params['index_type'];
             /**
              * 判断定制现片逻辑
              * 1、渐进镜 Progressive
@@ -2349,6 +2350,7 @@ class Crontab extends Backend
             unset($product_options);
         }
 
+       
         if ($items) {
             $result = Db::connect('database.db_zeelool_de')->table('sales_flat_order_item_prescription')->insertAll($items);
             if ($result) {
