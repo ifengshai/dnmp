@@ -289,7 +289,6 @@ class Wangpenglei extends Backend
             }
             usleep(10000);
             echo $k . "\n";
-            die;
         }
         echo "ok";
     }
