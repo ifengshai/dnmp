@@ -48,26 +48,26 @@
             <div class="new-background">
                 <div class="row">
                     <form id="form" class="form-commonsearch form-horizontal" role="form" method="post">
-                    <div class="form-group new-form-group" >
-                        <label class="control-label col-xs-4">平台：</label>
-                        <div class="col-xs-8 new-col-xs-8">
-                            <select data-rule="required" class="form-control" id="order_platform">
-                                {foreach name="magentoplatformarr" item="vo" key="key"}
-                                <option value="{$vo.id}" {if condition="$key == 0"}selected="selected"{/if}>{$vo.name}</option>
-                                {/foreach}
-                            </select>
+                        <div class="form-group new-form-group" >
+                            <label class="control-label col-xs-4">平台：</label>
+                            <div class="col-xs-8 new-col-xs-8">
+                                <select data-rule="required" class="form-control" id="order_platform">
+                                    {foreach name="magentoplatformarr" item="vo" key="key"}
+                                    <option value="{$vo.id}" {if condition="$key == 0"}selected="selected"{/if}>{$vo.name}</option>
+                                    {/foreach}
+                                </select>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="form-group new-form-group" style="margin-left: 80px">
-                        <div class="time">
-                            <span>近12个月</span>
+                        <div class="form-group new-form-group" style="margin-left: 80px">
+                            <div class="time">
+                                <span>近12个月</span>
+                            </div>
                         </div>
-                    </div>
-                    <div class="form-group new-form-group">
-                        <input type="button" class="btn btn-success" value="提交">
-                        <input type="button" class="btn btn-default reset" value="重置" >
-                    </div>
+                        <div class="form-group new-form-group">
+                            <input type="button" class="btn btn-success" value="提交">
+                            <input type="button" class="btn btn-default reset" value="重置" >
+                        </div>
                     </form>
                 </div>
             </div>
@@ -75,7 +75,7 @@
                 <div class="new-background">
                     <div class="row">
                         <div>
-                            <label style="margin: 20px 40px -10px;">总消费金额分布</label>
+                            <label style="margin: 20px 40px -10px;">总消费次数分布</label>
                         </div>
                     </div>
                     <div class="row" style="background-color: rgba(255, 255, 255, 1);margin: 20px 40px 20px 40px;">
