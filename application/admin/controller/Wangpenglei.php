@@ -217,8 +217,8 @@ class Wangpenglei extends Backend
     {
         $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
         $item = new \app\admin\model\itemmanage\Item();
-        // $skus = Db::table('fa_zz_temp2')->where(['sku' => ['in',['OA01815-01','OA01822-01','OA01901-06','TT598617-06']]])->column('sku');
-        $skus = ['OP01967-03','OX01557-02','OA01829-02','OP687951-01','OX797437-01','OX002546-03','OX519935-02','OP080978-01','OP080978-02'];
+        $skus1 = $platform->where(['stock' => ['<','-10']])->column('sku');
+        $skus = Db::table('fa_zz_temp2')->where(['sku' => ['in',$skus1]])->column('sku');
         // dump($skus);die;
         foreach ($skus as $k => $v) {
             // $v = 'OA01901-06';
@@ -250,6 +250,9 @@ class Wangpenglei extends Backend
                 // dump($stock_num);
                
                 $stock_all_num = array_sum(array_column($item_platform_sku, 'stock'));
+                if ($stock_all_num < 0) {
+                    $stock_all_num = 0;
+                }
                 //如果现有总库存为0 平均分给各站点
                 if ($stock_all_num == 0) {
                     $rate_rate = 1 / $all_num;
