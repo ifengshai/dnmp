@@ -35,13 +35,21 @@ class ThirdApi extends Api
         $track_arr = json_decode($track_info, true);
         $verify_sign = $track_arr['event'] . '/' . json_encode($track_arr['data']) . '/' . $this->apiKey;
         $verify_sign = hash("sha256", $verify_sign);
-        file_put_contents('/www/wwwroot/mojing/runtime/log/track.txt', $verify_sign . "\r\n", FILE_APPEND);
-        file_put_contents('/www/wwwroot/mojing/runtime/log/track.txt', $track_arr['sign'] . "\r\n", FILE_APPEND);
-        file_put_contents('/www/wwwroot/mojing/runtime/log/track.txt', $track_info . "\r\n", FILE_APPEND);
+//        file_put_contents('/www/wwwroot/mojing/runtime/log/track.txt', $verify_sign . "\r\n", FILE_APPEND);
+//        file_put_contents('/www/wwwroot/mojing/runtime/log/track.txt', $track_arr['sign'] . "\r\n", FILE_APPEND);
+//        file_put_contents('/www/wwwroot/mojing/runtime/log/track.txt', $track_info . "\r\n", FILE_APPEND);
         // if($verify_sign == $track_arr['sign']){
+        //妥投给maagento接口
+        if ($track_arr['data']['track']['e'] ==40){
+            $order_node = Db::name('order_node')->field('site,order_id,order_number,shipment_type,shipment_data_type')->where('track_number', $track_arr['data']['number'])->find();
+            $url = 'https://z.zhaokuangyi.com/magic/order/updateOrderStatus';
+            $value['increment_id']  = $order_node['order_number'];
+            $this->request_post($url,$value);
+        }
         if ($track_arr['event'] != 'TRACKING_STOPPED') {
             // file_put_contents('/www/wwwroot/mojing/runtime/log/track.txt',$track_info."\r\n",FILE_APPEND);
             $order_node = Db::name('order_node')->field('site,order_id,order_number,shipment_type,shipment_data_type')->where('track_number', $track_arr['data']['number'])->find();
+
             $add['site'] = $order_node['site'];
             $add['order_id'] = $order_node['order_id'];
             $add['order_number'] = $order_node['order_number'];
@@ -54,6 +62,15 @@ class ThirdApi extends Api
         }
         // }
     }
+
+    public function test(){
+        $url = 'https://z.zhaokuangyi.com/magic/order/updateOrderStatus';
+        $order_node['order_number'] = '400324285';
+        $value['increment_id'] =$order_node['order_number'];
+        $data = $this->request_post($url,$value);
+        dump($data);die();
+    }
+
 
     /**
      * @author wgj
@@ -877,4 +894,35 @@ class ThirdApi extends Api
         }
         return ['title' => $title, 'carrierId' => $carrierId];
     }
+
+
+
+    public function request_post($url = '', $post_data = array()) {
+        if (empty($url) || empty($post_data)) {
+            return false;
+        }
+
+        $o = "";
+        foreach ( $post_data as $k => $v )
+        {
+            $o.= "$k=" . urlencode( $v ). "&" ;
+        }
+        $post_data = substr($o,0,-1);
+
+
+        $postUrl = $url;
+        $curlPost = $post_data;
+        $ch = curl_init();//初始化curl
+        curl_setopt($ch, CURLOPT_URL,$postUrl);//抓取指定网页
+        curl_setopt($ch, CURLOPT_HEADER, 0);//设置header
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);//要求结果为字符串且输出到屏幕上
+        curl_setopt($ch, CURLOPT_POST, 1);//post提交方式
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $curlPost);
+        $data = curl_exec($ch);//运行curl
+        curl_close($ch);
+
+        return $data;
+    }
+
+
 }
