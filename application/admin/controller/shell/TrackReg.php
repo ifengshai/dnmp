@@ -1936,7 +1936,7 @@ class TrackReg extends Backend
     public function sku_day_data_other_11_16()
     {
         // $zeeloolOperate = new \app\admin\model\operatedatacenter\Zeelool;
-        // set_time_limit(0);
+        set_time_limit(0);
         // //统计昨天的数据
         // for ($day = 5; $day <= 8; $day++) {
         //     $data = date('Y-m-d', strtotime('-' . $day . 'day'));
