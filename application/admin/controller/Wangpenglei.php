@@ -4,6 +4,9 @@ namespace app\admin\controller;
 
 use app\common\controller\Backend;
 use think\Db;
+use FacebookAds\Api;
+use FacebookAds\Object\Campaign;
+use app\admin\model\financial\Fackbook;
 
 class Wangpenglei extends Backend
 {
@@ -14,6 +17,12 @@ class Wangpenglei extends Backend
     {
         parent::_initialize();
         $this->zeelool = new \app\admin\model\order\order\Zeelool();
+
+        $this->facebook = Fackbook::where('platform', 1)->find();
+        $this->app_id = $this->facebook->app_id;
+        $this->app_secret = $this->facebook->app_secret;
+        $this->access_token = $this->facebook->access_token;
+        $this->accounts   = $this->facebook->accounts;
     }
 
     /************************跑库存数据用START*****勿删*****************************/
@@ -57,7 +66,7 @@ class Wangpenglei extends Backend
         $skus = Db::table('fa_zz_temp2')->column('sku');
 
         foreach ($skus as $k => $v) {
-            
+
             $map = [];
             $zeelool_sku = $this->itemplatformsku->getWebSku($v, 1);
             $voogueme_sku = $this->itemplatformsku->getWebSku($v, 2);
@@ -100,7 +109,7 @@ class Wangpenglei extends Backend
 
             $res = $this->item->where($p_map)->update($data);
 
-            echo $v. "\n";
+            echo $v . "\n";
             usleep(20000);
         }
 
@@ -217,8 +226,8 @@ class Wangpenglei extends Backend
     {
         $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
         $item = new \app\admin\model\itemmanage\Item();
-        $skus1 = $platform->where(['stock' => ['<',0]])->column('sku');
-        $skus = Db::table('fa_zz_temp2')->where(['sku' => ['in',$skus1]])->column('sku');
+        $skus1 = $platform->where(['stock' => ['<', 0]])->column('sku');
+        $skus = Db::table('fa_zz_temp2')->where(['sku' => ['in', $skus1]])->column('sku');
         // dump($skus);die;
         foreach ($skus as $k => $v) {
             // $v = 'OA01901-06';
@@ -248,7 +257,7 @@ class Wangpenglei extends Backend
                 $stock_num = $available_stock;
                 // dump($available_stock);
                 // dump($stock_num);
-               
+
                 $stock_all_num = array_sum(array_column($item_platform_sku, 'stock'));
                 if ($stock_all_num < 0) {
                     $stock_all_num = 0;
@@ -278,12 +287,11 @@ class Wangpenglei extends Backend
                             if ($num_num  == 0) {
                                 $rate_rate = 1 / $all_num;
                                 $num_num =  round($available_stock * $rate_rate);
-                                
-                            }  else {
-                               
+                            } else {
+
                                 $num = round($available_stock * abs($val['stock']) / $num_num);
                             }
-                            
+
                             $stock_num -= $num;
                             $platform->where(['sku' => $v, 'platform_type' => $val['platform_type']])->update(['stock' => $num]);
                         }
@@ -297,4 +305,35 @@ class Wangpenglei extends Backend
     }
 
     /************************跑库存数据用END**********************************/
+
+
+
+    /**
+     * facebook调取用户评论
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/11/20 17:31:02 
+     * @return void
+     */
+    public function facebookTest()
+    {
+        Api::init($this->app_id, $this->app_secret, $this->access_token);
+
+        $all_facebook_spend = 0;
+        $accounts = explode(",", $this->accounts);
+        foreach ($accounts as $key => $value) {
+            $campaign = new Campaign($value);
+            $params = array(
+                'time_range' => array('since' => $start_time, 'until' => $end_time),
+            );
+            $cursor = $campaign->getInsights([], $params);
+            foreach ($cursor->getObjects() as $key => $value) {
+                if ($value) {
+                    $all_facebook_spend += $cursor->getObjects()[0]->getData()['spend'];
+                }
+            }
+        }
+        return $all_facebook_spend ? round($all_facebook_spend, 2) : 0;
+    }
 }
