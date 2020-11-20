@@ -1029,73 +1029,75 @@ class WorkOrderList extends Model
      */
     public function checkWork($work_id, $params = [])
     {
-
         $work = self::find($work_id);
+
         //判断是否已审核
         if ($work->check_time) return true;
+
         Db::startTrans();
         try {
             $time = date('Y-m-d H:i:s');
             $admin_id = session('admin.id');
+
             //如果承接人是自己的话表示处理完成，不是自己的不做处理
             $orderRecepts = WorkOrderRecept::where('work_id', $work_id)->select();
-            $allComplete = 1;
             $count = count($orderRecepts);
 
-            //不需要审核的，
-            if (($work->is_check == 0 && $work->work_type == 1) || ($work->is_check == 0 && $work->work_type == 2 && $work->is_after_deal_with == 1)) {
+            //不需要审核
+            if ( 0 == $work->is_check ) {
+                //客服工单或仓库工单经手人已处理，自动审核通过
+                if ( 1 == $work->work_type || (2 == $work->work_type && 1 == $work->is_after_deal_with) ) {
+                    $work->check_note = '系统自动审核通过';
+                    $work->check_time = $time;
+                    $key = 0;
+                    foreach ($orderRecepts as $orderRecept) {
+                        //获取措施配置表ID
+                        $measure_choose_id = WorkOrderMeasure::where('id', $orderRecept->measure_id)->value('measure_choose_id');
 
-                $work->check_note = '系统自动审核通过';
-                $work->check_time = $time;
-                //$work->submit_time = $time;
-                $key = 0;
-                foreach ($orderRecepts as $orderRecept) {
-                    //查找措施的id
-                    $measure_choose_id = WorkOrderMeasure::where('id', $orderRecept->measure_id)->value('measure_choose_id');
-                    //承接人的自动完成状态
-                    if ((1 == $orderRecept->is_auto_complete)) {
-                        WorkOrderRecept::where('id', $orderRecept->id)->update(['recept_status' => 1, 'finish_time' => $time, 'note' => '自动处理完成']);
-                        WorkOrderMeasure::where('id', $orderRecept->measure_id)->update(['operation_type' => 1, 'operation_time' => $time]);
-                        if(7 == $measure_choose_id){
-                            $this->createOrder($work->work_platform, $work_id, $work->is_new_version);
+                        //承接人的自动完成状态
+                        if (1 == $orderRecept->is_auto_complete) {
+                            if(0 == $orderRecept->recept_status){
+                                WorkOrderRecept::where('id', $orderRecept->id)->update(['recept_status' => 1, 'finish_time' => $time, 'note' => '自动处理完成']);
+                                WorkOrderMeasure::where('id', $orderRecept->measure_id)->update(['operation_type' => 1, 'operation_time' => $time]);
+
+                                //TODO::补发触发网站端接口
+                                if(7 == $measure_choose_id){
+                                    $this->createOrder($work->work_platform, $work_id, $work->is_new_version);
+                                }
+                            }
+                            $key++;
                         }
-                        $key++;
-                    } else {
-                        $allComplete = 0;
                     }
-                }
-                if ($allComplete == 1 && $count == $key) {
-                    //处理完成
-                    $work_status = 6;
-                } elseif ($key > 0 && $count > $key) {
-                    //部分处理
-                    $work_status = 5;
-                } else {
-                    $work_status = 3;
-                }
-                $work->work_status = $work_status;
+                    if ($count == $key) {
+                        //处理完成
+                        $work_status = 6;
+                        $work->complete_time = $time;
+                    } elseif ($key > 0 && $count > $key) {
+                        //部分处理
+                        $work_status = 5;
+                    } else {
+                        //审核成功
+                        $work_status = 3;
+                    }
+                    $work->work_status = $work_status;
+                    $work->save();
 
-                if ($work_status == 6) {
-                    $work->complete_time = $time;
+                    //工单备注表
+                    $remarkData = [
+                        'work_id' => $work_id,
+                        'remark_type' => 1,
+                        'remark_record' => '系统自动审核通过',
+                        'create_person_id' => $admin_id,
+                        'create_person' => session('admin.nickname'),
+                        'create_time' => $time
+                    ];
+                    WorkOrderRemark::create($remarkData);
                 }
-                $work->save();
-                //工单备注表
-                $remarkData = [
-                    'work_id' => $work_id,
-                    'remark_type' => 1,
-                    'remark_record' => '系统自动审核通过',
-                    'create_person_id' => $admin_id,
-                    'create_person' => session('admin.nickname'),
-                    'create_time' => $time
-                ];
-                WorkOrderRemark::create($remarkData);
-            }
-            //需要审核的，有参数才进行审核处理，其余跳过
-            if (!empty($params)) {
-                if ($work->is_check == 1) {
+            }else{
+                //需要审核
+                if (!empty($params)) {
                     $work->operation_user_id = $admin_id;
                     $work->check_note = $params['check_note'];
-                    //$work->submit_time = $time;
                     $work->check_time = $time;
                     $key = 0;
                     foreach ($orderRecepts as $orderRecept) {
@@ -1105,45 +1107,38 @@ class WorkOrderList extends Model
                         //承接人是自己并且是优惠券、补价、积分，承接默认完成
                         /* if (($orderRecept->recept_person_id == $work->create_user_id || $orderRecept->recept_person_id == $work->after_user_id) && in_array($measure_choose_id, [8, 9, 10])) { */
                         //优惠券、补价、积分，承接默认完成--修改时间20200528--lx
-                        if ((1 == $orderRecept->is_auto_complete)) {
+                        if (1 == $orderRecept->is_auto_complete) {
                             //审核成功直接进行处理
                             if ($params['success'] == 1) {
                                 WorkOrderRecept::where('id', $orderRecept->id)->update(['recept_status' => 1, 'finish_time' => $time, 'note' => '自动处理完成']);
                                 WorkOrderMeasure::where('id', $orderRecept->measure_id)->update(['operation_type' => 1, 'operation_time' => $time]);
-                                if ($measure_choose_id == 9) {
+                                if (9 == $measure_choose_id) {//优惠券
                                     $this->presentCoupon($work->id);
-                                } elseif ($measure_choose_id == 10) {
+                                } elseif (10 == $measure_choose_id) {//积分
                                     $this->presentIntegral($work->id);
-                                } elseif(7 == $measure_choose_id){
+                                } elseif(7 == $measure_choose_id){//补发
                                     $this->createOrder($work->work_platform, $work_id, $work->is_new_version);
                                 }
                                 $key++;
                             }
-                        } else {
-                            $allComplete = 0;
                         }
                     }
-                    if ($allComplete == 1  && $count == $key) {
+                    if ($count == $key) {
                         //处理完成
                         $work_status = 6;
+                        if ($params['success'] == 1) {
+                            $work->complete_time = $time;
+                        }
                     } elseif ($key > 0  && $count > $key) {
                         //部分处理
                         $work_status = 5;
                     } else {
                         $work_status = 3;
                     }
-                    $work->work_status = $work_status;
                     if ($params['success'] == 2) {
-                        $work->work_status = 4;
-                    } elseif ($params['success'] == 1) {
-                        $work->work_status = $work_status;
-                        if ($work_status == 6) {
-                            $work->complete_time = $time;
-                        }
-                        //存在补发审核通过后生成补发单
-                        //$this->createOrder($work->work_platform, $work_id, $work->is_new_version);
+                        $work_status = 4;
                     }
-
+                    $work->work_status = $work_status;
                     $work->save();
 
                     //工单备注表
