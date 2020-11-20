@@ -1141,10 +1141,12 @@ class CustomerService extends Backend
             // dump($kefu_create_num);dump($allCustomers);
             //统计仓库工单 工单类型work_type = 2 完成时间跟非仓库工单保持一致 counter仓库工单数 base_grand_total仓库工单订单总金额 replacement_counter补发单数 refund_num退款单数
             $where2 = $where;
+
             $where2['work_type'] = 2;
             $where5 = $where2;
             $where5['work_status'] = ['in', [0, 1, 2, 3, 4, 5, 6, 7]];
             $map5['create_time'] = $map['complete_time'];
+
             $warehouseWorkList = $this->model->where($where2)->where($map)->field('count(*) as counter,sum(base_grand_total) as base_grand_total,count(replacement_order !="" or null) as replacement_counter,
             sum(is_refund) as refund_num,sum(refund_money) as refund_money')->select();
             $warehouseWorkList = collection($warehouseWorkList)->toArray();
@@ -1154,6 +1156,7 @@ class CustomerService extends Backend
             $warehouseWorkList1['refund_num'] = $warehouseWorkList[0]['refund_num'];
             $warehouseWorkList1['refund_money'] = $warehouseWorkList[0]['refund_money'];
             $warehouseWorkList1['create_counter'] = $this->model->where($where5)->where($map5)->count();
+
             $this->assign('warehouseWorkList1',$warehouseWorkList1);
 
             //统计所有工单
@@ -1166,8 +1169,10 @@ class CustomerService extends Backend
             $allWorkList[0]['create_counter'] = $this->model->where($where6)->where($map5)->count();
             $allWorkList = collection($allWorkList)->toArray();
             //订单创建量
-            $all_work_list_creat_num = $this->model->count();
-            $this->assign('all_work_list_creat_num',$all_work_list_creat_num);
+
+            $all_work_list_creat_num = $this->model->where($where6)->where($map)->count();
+            $allWorkList[0]['create_counter'] = $this->model->where($where6)->where($map5)->count();
+            $this->assign('all_work_list_creat_num',$allWorkList[0]['create_counter']);
             //所有工单完成量
             $this->assign('all_work_list_num',$allWorkList[0]['counter']);
             //所有工单总金额
