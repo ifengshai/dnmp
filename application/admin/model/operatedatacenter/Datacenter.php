@@ -777,56 +777,26 @@ class Datacenter extends Model
      * Date: 2020/10/14
      * Time: 11:40:15
      */
-    public function getVipUser($type = 1,$time_str = '')
+    public function getVipUser($time_str = '',$time_str2 = '')
     {
-        if ($type == 1) {
-            //默认查询7天的数据
-            if (!$time_str) {
-                $start = date('Y-m-d', strtotime('-6 day'));
-                $end   = date('Y-m-d 23:59:59');
-                $time_str = $start .' 00:00:00 - ' .$end.' 00:00:00';
-            }
-            //时间段总和
-            $createat = explode(' ', $time_str);
-            $where['day_date'] = ['between', [$createat[0], $createat[3]]];
-            $arr['vip_user_num'] = $this->where($where)->sum('vip_user_num');
-
-            $same_start = date('Y-m-d', strtotime("-1 years", strtotime($createat[0])));
-            $same_end = date('Y-m-d', strtotime("-1 years", strtotime($createat[3])));
-            $same_where['day_date'] = ['between', [$same_start, $same_end]];
-            //同比搜索时间段内的所有站的数据 同比时间段内的数据为0 那么同比增长为100%
-            $same_order_unit_price = $this->where($same_where)->sum('vip_user_num');
-            $arr['same_vip_user_num'] = $same_order_unit_price == 0 ? '100%' : round(($arr['vip_user_num'] - $same_order_unit_price) / $same_order_unit_price * 100, 2) . '%';
-
-            $huan_start = date('Y-m-d', strtotime("-1 months", strtotime($createat[0])));
-            $huan_end = date('Y-m-d', strtotime("-1 months", strtotime($createat[3])));
-            $huan_where['day_date'] = ['between', [$huan_start, $huan_end]];
-            //环比时间段内的所有站的数据 环比时间段内的数据为0 那么环比增长为100%
-            $huan_order_unit_price = $this->where($huan_where)->sum('vip_user_num');
-            $arr['huan_vip_user_num'] = $huan_order_unit_price == 0 ? '100%' : round(($arr['vip_user_num'] - $huan_order_unit_price) / $huan_order_unit_price * 100, 2) . '%';
-
-
-        } else {
-            //查询某天的数据
-            $where = [];
-            $where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $time_str . "'")];
-            $arr['vip_user_num'] = $this->where($where)->sum('vip_user_num');
-
-            $same_start = date('Y-m-d', strtotime("-1 years", strtotime($time_str)));
-            $same_where = [];
-            $same_where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $same_start . "'")];
-            //同比搜索时间段内的所有站的数据 同比时间段内的数据为0 那么同比增长为100%
-            $same_order_unit_price = $this->where($same_where)->sum('vip_user_num');
-            $arr['same_vip_user_num'] = $same_order_unit_price == 0 ? '100%' : round(($arr['vip_user_num'] - $same_order_unit_price) / $same_order_unit_price * 100, 2) . '%';
-
-            $huan_start = date('Y-m-d', strtotime("-1 months", strtotime($time_str)));
-            $huan_where = [];
-            $huan_where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $huan_start . "'")];
-            //环比时间段内的所有站的数据 环比时间段内的数据为0 那么环比增长为100%
-            $huan_order_unit_price = $this->where($huan_where)->sum('vip_user_num');
-            $arr['huan_vip_user_num'] = $huan_order_unit_price == 0 ? '100%' : round(($arr['vip_user_num'] - $huan_order_unit_price) / $huan_order_unit_price * 100, 2) . '%';
+        //默认查询7天的数据
+        if (!$time_str) {
+            $start = date('Y-m-d', strtotime('-6 day'));
+            $end   = date('Y-m-d 23:59:59');
+            $time_str = $start .' 00:00:00 - ' .$end.' 00:00:00';
         }
+        //时间段总和
+        $createat = explode(' ', $time_str);
+        $where['day_date'] = ['between', [$createat[0], $createat[3]]];
+        $arr['vip_user_num'] = $this->where($where)->sum('vip_user_num');
 
+        //对比数据
+        if($time_str2){
+            $createat2 = explode(' ', $time_str2);
+            $contrast_where['day_date'] = ['between', [$createat2[0], $createat2[3]]];
+            $contrast_vip_user_num = $this->where($contrast_where)->sum('vip_user_num');
+            $arr['contrast_vip_user_num'] = $contrast_vip_user_num == 0 ? '100%' : round(($arr['vip_user_num'] - $contrast_vip_user_num) / $contrast_vip_user_num * 100, 2) . '%';
+        }
         return $arr;
     }
     /**
