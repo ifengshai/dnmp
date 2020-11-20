@@ -1475,41 +1475,17 @@ class OrderData extends Backend
      */
     public function process_order_data_temp()
     {
-        $this->zeelool_old_order(1);
-        $this->zeelool_old_order(2);
         $this->zeelool_old_order(3);
-        $this->zeelool_old_order(4);
         $this->zeelool_old_order(5);
-        $this->zeelool_old_order(9);
-        $this->zeelool_old_order(10);
-        $this->zeelool_old_order(11);
     }
     protected function zeelool_old_order($site)
     {
-        if ($site == 1) {
-            $id = $this->order->where('site=' . $site . ' and entity_id < 534244')->max('entity_id');
-            $list = $this->zeelool->where(['entity_id' => ['between', [$id, 534244]]])->limit(3000)->select();
-        } elseif ($site == 2) {
-            $id = $this->order->where('site=' . $site . ' and entity_id < 281018')->max('entity_id');
-            $list = $this->voogueme->where(['entity_id' => ['between', [$id, 281018]]])->limit(3000)->select();
-        } elseif ($site == 3) {
-            $id = $this->order->where('site=' . $site . ' and entity_id < 46246')->max('entity_id');
-            $list = $this->nihao->where(['entity_id' => ['between', [$id, 46246]]])->limit(3000)->select();
-        } elseif ($site == 4) {
-            $id = $this->order->where('site=' . $site . ' and entity_id < 2856')->max('entity_id');
-            $list = $this->meeloog->where(['entity_id' => ['between', [$id, 2856]]])->limit(3000)->select();
+      if ($site == 3) {
+            $id = $this->order->where('site=' . $site . ' and entity_id < 47304')->max('entity_id');
+            $list = $this->nihao->where(['entity_id' => ['between', [$id, 47304]]])->limit(3000)->select();
         } elseif ($site == 5) {
-            $id = $this->order->where('site=' . $site . ' and entity_id < 1300')->max('entity_id');
-            $list = $this->wesee->where(['entity_id' => ['between', [$id, 1300]]])->limit(3000)->select();
-        } elseif ($site == 9) {
-            $id = $this->order->where('site=' . $site . ' and entity_id < 102')->max('entity_id');
-            $list = $this->zeelool_es->where(['entity_id' => ['between', [$id, 102]]])->limit(3000)->select();
-        } elseif ($site == 10) {
-            $id = $this->order->where('site=' . $site . ' and entity_id < 665')->max('entity_id');
-            $list = $this->zeelool_de->where(['entity_id' => ['between', [$id, 665]]])->limit(3000)->select();
-        } elseif ($site == 11) {
-            $id = $this->order->where('site=' . $site . ' and entity_id < 122')->max('entity_id');
-            $list = $this->zeelool_jp->where(['entity_id' => ['between', [$id, 122]]])->limit(3000)->select();
+            $id = $this->order->where('site=' . $site . ' and entity_id < 1375')->max('entity_id');
+            $list = $this->wesee->where(['entity_id' => ['between', [$id, 1375]]])->limit(3000)->select();
         }
 
         $list = collection($list)->toArray();
@@ -1563,14 +1539,9 @@ class OrderData extends Backend
 
     public function order_address_data_shell()
     {
-        $this->order_address_data(1);
-        $this->order_address_data(2);
+        
         $this->order_address_data(3);
-        $this->order_address_data(4);
         $this->order_address_data(5);
-        $this->order_address_data(9);
-        $this->order_address_data(10);
-        $this->order_address_data(11);
     }
 
     /**
@@ -1627,14 +1598,9 @@ class OrderData extends Backend
      */
     public function order_item_data_shell()
     {
-        $this->order_item_shell(1);
-        $this->order_item_shell(2);
         $this->order_item_shell(3);
-        $this->order_item_shell(4);
         $this->order_item_shell(5);
-        $this->order_item_shell(9);
-        $this->order_item_shell(10);
-        $this->order_item_shell(11);
+      
     }
 
     protected function order_item_shell($site)
@@ -1646,14 +1612,14 @@ class OrderData extends Backend
             $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 515947')->max('item_id');
             $list = Db::connect('database.db_voogueme')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 515947]]])->limit(3000)->select();
         } elseif ($site == 3) {
-            $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 74885')->max('item_id');
-            $list = Db::connect('database.db_nihao')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 74885]]])->limit(3000)->select();
+            $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 76642')->max('item_id');
+            $list = Db::connect('database.db_nihao')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 76642]]])->limit(3000)->select();
         } elseif ($site == 4) {
             $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 4111')->max('item_id');
             $list = Db::connect('database.db_meeloog')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 4111]]])->limit(3000)->select();
         } elseif ($site == 5) {
-            $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 13412')->max('item_id');
-            $list = Db::connect('database.db_weseeoptical')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 13412]]])->limit(3000)->select();
+            $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 14134')->max('item_id');
+            $list = Db::connect('database.db_weseeoptical')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 14134]]])->limit(3000)->select();
         } elseif ($site == 9) {
             $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 139')->max('item_id');
             $list = Db::connect('database.db_zeelool_es')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 139]]])->limit(3000)->select();
@@ -1730,14 +1696,9 @@ class OrderData extends Backend
      */
     public function order_payment_data_shell()
     {
-        $this->order_payment_data(1);
-        $this->order_payment_data(2);
         $this->order_payment_data(3);
-        $this->order_payment_data(4);
         $this->order_payment_data(5);
-        $this->order_payment_data(9);
-        $this->order_payment_data(10);
-        $this->order_payment_data(11);
+       
     }
 
     /**
