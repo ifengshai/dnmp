@@ -217,9 +217,10 @@ class Wangpenglei extends Backend
     {
         $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
         $item = new \app\admin\model\itemmanage\Item();
-        $skus = Db::table('fa_zz_temp2')->column('sku');
+        $skus = Db::table('fa_zz_temp2')->where(['sku' => ['in',['OA01815-01','OA01822-01','OA01901-06','TT598617-06']]])->column('sku');
+        dump($skus);die;
         foreach ($skus as $k => $v) {
-            $v = 'OA01901-06';
+            // $v = 'OA01901-06';
             //同步对应SKU库存
             //更新商品表商品总库存
             //总库存
