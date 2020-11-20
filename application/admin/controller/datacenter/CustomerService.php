@@ -1009,7 +1009,8 @@ class CustomerService extends Backend
                     'one_time' =>$params['one_time'],
                     'check'=>0,
                 ]);
-            } elseif ($worklistOne && $worklistTwo) { //两个提交的数据
+            }
+            elseif ($worklistOne && $worklistTwo) { //两个提交的数据
                 //取出总数
                 $workOrderNum       = $worklistOne['workOrderNum'] + $worklistTwo['workOrderNum'];
                 $totalOrderMoney    = $worklistOne['totalOrderMoney'] + $worklistTwo['totalOrderMoney'];
@@ -1162,9 +1163,12 @@ class CustomerService extends Backend
             $where6 = $whereall;
             $where6['work_status'] = ['in', [0, 1, 2, 3, 4, 5, 6, 7]];
             $allWorkList = $this->model->where($whereall)->where($map)->field('count(*) as counter,sum(base_grand_total) as base_grand_total,count(replacement_order !="" or null) as replacement_counter,
-            sum(is_refund) as refund_num,sum(refund_money) as refund_money')->select();
+            sum(is_refund) as refund_num,sum(refund_money) as refund_money,count(coupon_str !="" or null) as coupon_str ')->select();
             $allWorkList[0]['create_counter'] = $this->model->where($where6)->where($map5)->count();
             $allWorkList = collection($allWorkList)->toArray();
+            //订单创建量
+            $all_work_list_creat_num = $this->model->count();
+            $this->assign('all_work_list_creat_num',$all_work_list_creat_num);
             //所有工单完成量
             $this->assign('all_work_list_num',$allWorkList[0]['counter']);
             //所有工单总金额
@@ -1173,23 +1177,55 @@ class CustomerService extends Backend
             $this->assign('all_work_list_replacement_counter',$allWorkList[0]['replacement_counter']);
             //所有工单中的退款单数
             $this->assign('all_work_list_refund_num',$allWorkList[0]['refund_num']);
-            //所有工单的退款订单比
-            $this->assign('all_work_list_refund_rate',round($allWorkList[0]['refund_num']/$allWorkList[0]['counter']*100,2).'%');
             //所有工单退款总金额
             $this->assign('all_work_list_refund_money',round($allWorkList[0]['refund_money'],2));
-            //所有工单退款金额比
-            $this->assign('all_work_list_refund_money_rate',round($allWorkList[0]['refund_money']/$allWorkList[0]['base_grand_total']*100,2).'%');
+            //优惠券订单
+            $this->assign('all_work_list_coupon_str',$allWorkList[0]['coupon_str']);
+            if ($allWorkList[0]['counter']<1){
+                //补发订单占比
+                $this->assign('all_work_list_replacement_counter_proportion',0);
 
-            //非客服的数据 总的减去客服的 再减去仓库的
-            $notCustomer['conuter'] = $allWorkList[0]['counter'] - $workOrderNum - $warehouseWorkList[0]['counter'];
-            $notCustomer['base_grand_total'] = $allWorkList[0]['base_grand_total'] - $totalOrderMoney - $warehouseWorkList[0]['base_grand_total'];
-            $notCustomer['replacement_counter'] = $allWorkList[0]['replacement_counter'] - $replacementNum - $warehouseWorkList[0]['replacement_counter'];
-            $notCustomer['refund_num'] = $allWorkList[0]['refund_num'] - $refundMoneyNum - $warehouseWorkList[0]['refund_num'];
-            $notCustomer['refund_money'] = round($allWorkList[0]['refund_money'] - $refundMoney - $warehouseWorkList[0]['refund_money'],2);
-            $notCustomer['create_counter'] = $allWorkList[0]['create_counter'] - $warehouseWorkList1['create_counter'] - $kefu_create_num;
+                //所有工单的退款订单比
+                $this->assign('all_work_list_refund_rate',0);
+
+                //所有工单退款金额比
+                $this->assign('all_work_list_refund_money_rate',0);
+
+                //优惠券订单占比
+                $this->assign('all_work_list_coupon_str_proportion',0);
+
+            }else{
+                //补发订单占比
+                $this->assign('all_work_list_replacement_counter_proportion',round($allWorkList[0]['replacement_counter']/$allWorkList[0]['counter']*100,2).'%');
+
+                //所有工单的退款订单比
+                $this->assign('all_work_list_refund_rate',round($allWorkList[0]['refund_num']/$allWorkList[0]['counter']*100,2).'%');
+
+                //所有工单退款金额比
+                $this->assign('all_work_list_refund_money_rate',round($allWorkList[0]['refund_money']/$allWorkList[0]['base_grand_total']*100,2).'%');
+
+                //优惠券订单占比
+                $this->assign('all_work_list_coupon_str_proportion',round($allWorkList[0]['coupon_str']/$allWorkList[0]['counter']*100,2).'%');
+
+            }
+            //查找group_id为131的所有用户   运营客服角色
+            $mat['group_id'] = 131;
+            $cat = model('AuthGroupAccess')->field('uid')->where($mat)->select();
+            $cat = collection($cat)->toArray();
+            $cat = array_column($cat,'uid');
+            $notCustomer_where['create_user_id'] = ['in',$cat];
+            $notCustomer_where['work_status'] = 6;
+            $notCustomer_where_other['work_status'] = ['in',[0, 1, 2, 3, 4, 5, 6, 7]];
+            $notCustomer_where_other['create_user_id'] = ['in',$cat];
+            //非客服工单已完成数据
+            $notCustomer = $this->model->where($notCustomer_where)->where($map5)->where('work_status = 6')->field('count(*) as counter,sum(base_grand_total) as base_grand_total,count(replacement_order !="" or null) as replacement_counter,
+            sum(is_refund) as refund_num,sum(refund_money) as refund_money,count(coupon_str !="" or null) as coupon_str ')->select();
+            if (!empty($notCustomer)){
+                $notCustomer = collection($notCustomer)->toArray();
+            }
+            //非客服工单已完成数据
+            $notCustomer[0]['create_counter'] =$this->model->where($notCustomer_where_other)->where($map5)->count();
             $this->assign('notCustomer',$notCustomer);
-
-
             $orderPlatformList = config('workorder.platform');
             $this->view->assign('type', 1);
             $this->view->assign(compact('orderPlatformList', 'allCustomers', 'start', 'end', 'workOrderNum', 'totalOrderMoney', 'replacementNum', 'refundMoneyNum', 'refundMoney'));
@@ -1272,7 +1308,10 @@ class CustomerService extends Backend
             }
         }
         $arr[] = 75;
-        $result  = Admin::where('id', 'in', $arr)->field('id,nickname')->select();
+
+//        $result  = Admin::where('id', 'in', $arr)->field('id,nickname')->select();
+        $result = Admin::where('group_id','in',['1','2'])->field('id,nickname')->select();
+
         if (!empty($result)) {
             $result = collection($result)->toArray();
             foreach ($result as $k => $v) {
