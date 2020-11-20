@@ -393,6 +393,11 @@ class Nihao extends Model
         $web_model = Db::connect('database.db_nihao');
         $web_model->table('oc_vip_order')->query("set time_zone='+8:00'");
         $vip_where['order_status'] = 'Success';
+        if(!$createat){
+            $start = date('Y-m-d', strtotime('-6 day'));
+            $end   = date('Y-m-d 23:59:59');
+            $createat = $start .' 00:00:00 - ' .$end.' 00:00:00';
+        }
         $map_where['o.created_at'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
         $vip_userids = $web_model->table('oc_vip_order')->where($vip_where)->where($map_where)->column('customer_id');
         $order_where['o.created_at'] = ['lt',$createat[0]];

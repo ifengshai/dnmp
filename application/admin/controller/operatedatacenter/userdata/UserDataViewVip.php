@@ -15,7 +15,9 @@ class UserDataViewVip extends Backend
     {
         parent::_initialize();
 
-        //每日的数据
+        $this->zeelool = new \app\admin\model\order\order\Zeelool();
+        $this->voogueme = new \app\admin\model\order\order\Voogueme();
+        $this->nihao = new \app\admin\model\order\order\Nihao();
         $this->zeeloolOperate = new \app\admin\model\operatedatacenter\Zeelool;
         $this->vooguemeOperate = new \app\admin\model\operatedatacenter\Voogueme();
         $this->nihaoOperate = new \app\admin\model\operatedatacenter\Nihao();
@@ -81,25 +83,19 @@ class UserDataViewVip extends Backend
                 $web_model = Db::connect('database.db_zeelool');
                 $site = 1;
             }
-            if($filter['time_str']){
-                $createat = explode(' ', $filter['time_str']);
-                $time_where['start_time'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
-            }else{
-                $start = date('Y-m-d', strtotime('-6 day'));
-                $end   = date('Y-m-d 23:59:59');
-                $time_where['start_time'] = ['between', [$start,$end]];
-            }
-            if($filter['time_str2']){
-                $createat = explode(' ', $filter['time_str2']);
-                $time_where2['start_time'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
-            }
             $web_model->table('oc_vip_order')->query("set time_zone='+8:00'");
+            $map['order_status'] = 'success';
             //新增VIP会员数
             $vip_num = $model->getVipUser($filter['time_str'],$filter['time_str2']);
             //复购VIP会员数
             $again_user_num['again_user_num'] = $model->get_again_user_vip($filter['time_str']);
-            $contrast_again_user_num = $model->get_again_user_vip($filter['time_str2']);
-            $again_user_num['contrast_again_user_num'] = $contrast_again_user_num ? round(($again_user_num['again_user_num']-$contrast_again_user_num)/$contrast_again_user_num*100,2) : 100;
+            if($filter['time_str2']){
+                $contrast_again_user_num = $model->get_again_user_vip($filter['time_str2']);
+                $again_user_num['contrast_again_user_num'] = $contrast_again_user_num ? round(($again_user_num['again_user_num']-$contrast_again_user_num)/$contrast_again_user_num*100,2) : 100;
+            }
+            //总VIP会员数
+            $sum_vip_num = $web_model->table('customer_entity')->where('is_vip',1)->count();
+            $this->view->assign(compact('vip_num', 'again_user_num', 'sum_vip_num'));
 
             unset($filter['one_time-operate']);
             unset($filter['time_str']);
@@ -108,52 +104,48 @@ class UserDataViewVip extends Backend
             $this->request->get(['filter' => json_encode($filter)]);
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $web_model
-                ->table('customer_entity')
+                ->table('oc_vip_order')
                 ->where($where)
                 ->where($map)
                 ->count();
             $list = $web_model
-                ->table('customer_entity')
+                ->table('oc_vip_order')
                 ->where($where)
                 ->where($map)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
-                ->field('entity_id,created_at,email')
+                ->field('customer_id,customer_email,start_time,end_time')
                 ->select();
             $list = collection($list)->toArray();
             foreach ($list as $key=>$value){
-                $list[$key]['entity_id'] = $value['entity_id'];  //用户id
-                $list[$key]['email'] = $value['email'];          //注册邮箱
-                $list[$key]['created_at'] = $value['created_at'];  //注册时间
-                $order_where['customer_id'] = $value['entity_id'];
-                $order_status_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-                $list[$key]['order_num'] = $order_model->where($order_where)->where($order_status_where)->count();  //总支付订单数
-                $list[$key]['order_amount'] = $order_model->where($order_where)->where($order_status_where)->sum('base_grand_total');//总订单金额
-                if($site != 3){
-                    $list[$key]['point'] = $web_model->table('mw_reward_point_customer')->where('customer_id',$value['entity_id'])->value('mw_reward_point');  //积分
-                    $recommend_userids = $web_model->table('mw_reward_point_customer')->where('mw_friend_id',$value['entity_id'])->column('customer_id');
-                    if($recommend_userids){
-                        $recommend_order_num = $order_model->where($order_status_where)->where('customer_id','in',$recommend_userids)->count();   //推荐订单数
-                    }else{
-                        $recommend_order_num = 0;
-                    }
-                    $recommend_register_num = $web_model->table('mw_reward_point_customer')->where('mw_friend_id',$value['entity_id'])->count();   //推荐注册量
+                $list[$key]['customer_id'] = $value['customer_id'];  //用户id
+                $list[$key]['customer_email'] = $value['customer_email'];          //注册邮箱
+                $list[$key]['start_time'] = $value['start_time'];  //VIP开始时间
+                $list[$key]['end_time'] = $value['end_time'];  //VIP结束时间
+                $end_time = strtotime($value['end_time']);
+                $now_time = time();
+                if($now_time>$end_time){
+                    $list[$key]['rest_days'] = 0;
                 }else{
-                    $list[$key]['point'] = 0;  //积分
-                    $recommend_order_num = 0;   //推荐订单数
-                    $recommend_register_num = 0;   //推荐注册量
+                    $list[$key]['rest_days'] = 1 + ceil(($now_time-$end_time)/60/60/24);
                 }
-                $list[$key]['coupon_order_num'] = $order_model->where($order_where)->where($order_status_where)->where("coupon_code is not null")->count();//使用优惠券订单数
-                $list[$key]['coupon_order_amount'] = $order_model->where($order_where)->where($order_status_where)->where("coupon_code is not null")->sum('base_grand_total');//使用优惠券订单金额
-                $list[$key]['first_order_time'] = $order_model->where($order_where)->where($order_status_where)->order('created_at asc')->value('created_at');//首次下单时间
-                $list[$key]['last_order_time'] = $order_model->where($order_where)->where($order_status_where)->order('created_at desc')->value('created_at');//最后一次下单时间
-                $list[$key]['recommend_order_num'] = $recommend_order_num;   //推荐订单数
-                $list[$key]['recommend_register_num'] = $recommend_register_num;   //推荐注册量
+                $order_where['customer_id'] = $value['customer_id'];
+                $order_status_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+                $order_where['created_at'] = ['between',[$value['start_time'],$value['end_time']]];
+                $list[$key]['order_num'] = $order_model->where($order_where)->where($order_status_where)->count();  //VIP期间支付订单数
+                $list[$key]['order_amount'] = $order_model->where($order_where)->where($order_status_where)->sum('base_grand_total');//VIP期间支付金额
+                
             }
             $result = array("total" => $total, "rows" => $list);
 
             return json($result);
         }
+        //新增VIP用户数
+        $vip_num = $this->zeeloolOperate->getVipUser();
+        //复购VIP会员数
+        $again_user_num['again_user_num'] = $this->zeeloolOperate->get_again_user_vip();
+        //总VIP会员数
+        $sum_vip_num = Db::connect('database.db_zeelool')->table('customer_entity')->where('is_vip',1)->count();
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
         foreach ($magentoplatformarr as $key=>$val){
@@ -161,26 +153,8 @@ class UserDataViewVip extends Backend
                 unset($magentoplatformarr[$key]);
             }
         }
-        $this->view->assign('magentoplatformarr',$magentoplatformarr);
+        $this->view->assign(compact('vip_num', 'again_user_num', 'sum_vip_num', 'magentoplatformarr'));
         return $this->view->fetch();
-
-
-        //默认进入页面是z站的数据
-        $arr = Cache::get('Operatedatacenter_userdata' . 1 . md5(serialize('index')));
-        if ($arr) {
-            $this->view->assign($arr);
-        }else{
-            // 活跃用户数
-            $active_user_num = $this->zeeloolOperate->getActiveUser();
-            //注册用户数
-            $register_user_num = $this->zeeloolOperate->getRegisterUser();
-            $time_arr = date('Y-m-d 00:00:00', strtotime('-6 day')) . ' - ' . date('Y-m-d H:i:s', time());
-            //复购用户数
-            $again_user_num = $this->zeeloolOperate->getAgainUser($time_arr, 0);
-            $data = compact(  'active_user_num', 'register_user_num', 'again_user_num',  'magentoplatformarr');
-            Cache::set('Operatedatacenter_userdata' . 1 . md5(serialize('index')), $data, 7200);
-            $this->view->assign($data);
-        }
 
     }
 
