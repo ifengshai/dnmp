@@ -1207,7 +1207,7 @@ class CustomerService extends Backend
                 $this->assign('all_work_list_coupon_str_proportion',round($allWorkList[0]['coupon_str']/$allWorkList[0]['counter']*100,2).'%');
 
             }
-            //查找group_id为131的用户
+            //查找group_id为131的所有用户   运营客服角色
             $mat['group_id'] = 131;
             $cat = model('AuthGroupAccess')->field('uid')->where($mat)->select();
             $cat = collection($cat)->toArray();
@@ -1216,18 +1216,15 @@ class CustomerService extends Backend
             $notCustomer_where['work_status'] = 6;
             $notCustomer_where_other['work_status'] = ['in',[0, 1, 2, 3, 4, 5, 6, 7]];
             $notCustomer_where_other['create_user_id'] = ['in',$cat];
-
+            //非客服工单已完成数据
             $notCustomer = $this->model->where($notCustomer_where)->where($map5)->where('work_status = 6')->field('count(*) as counter,sum(base_grand_total) as base_grand_total,count(replacement_order !="" or null) as replacement_counter,
             sum(is_refund) as refund_num,sum(refund_money) as refund_money,count(coupon_str !="" or null) as coupon_str ')->select();
             if (!empty($notCustomer)){
                 $notCustomer = collection($notCustomer)->toArray();
             }
-
+            //非客服工单已完成数据
             $notCustomer[0]['create_counter'] =$this->model->where($notCustomer_where_other)->where($map5)->count();
-
             $this->assign('notCustomer',$notCustomer);
-
-
             $orderPlatformList = config('workorder.platform');
             $this->view->assign('type', 1);
             $this->view->assign(compact('orderPlatformList', 'allCustomers', 'start', 'end', 'workOrderNum', 'totalOrderMoney', 'replacementNum', 'refundMoneyNum', 'refundMoney'));
