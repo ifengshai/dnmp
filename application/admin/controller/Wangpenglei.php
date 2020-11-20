@@ -217,8 +217,9 @@ class Wangpenglei extends Backend
     {
         $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
         $item = new \app\admin\model\itemmanage\Item();
-        $skus = Db::table('fa_zz_temp2')->where(['sku' => ['in',['OA01815-01','OA01822-01','OA01901-06','TT598617-06']]])->column('sku');
-        dump($skus);die;
+        // $skus = Db::table('fa_zz_temp2')->where(['sku' => ['in',['OA01815-01','OA01822-01','OA01901-06','TT598617-06']]])->column('sku');
+        $skus = ['OA01815-01','OA01822-01','OA01901-06','TT598617-06'];
+        // dump($skus);die;
         foreach ($skus as $k => $v) {
             // $v = 'OA01901-06';
             //同步对应SKU库存
@@ -245,8 +246,8 @@ class Wangpenglei extends Backend
                     $num_num += abs($vv['stock']);
                 }
                 $stock_num = $available_stock;
-                dump($available_stock);
-                dump($stock_num);
+                // dump($available_stock);
+                // dump($stock_num);
                
                 $stock_all_num = array_sum(array_column($item_platform_sku, 'stock'));
                 //如果现有总库存为0 平均分给各站点
@@ -255,17 +256,17 @@ class Wangpenglei extends Backend
                     foreach ($item_platform_sku as $key => $val) {
                         //最后一个站点 剩余数量分给最后一个站
                         if (($all_num - $key) == 1) {
-                            dump($stock_num);
-                            // $platform->where(['sku' => $v, 'platform_type' => $val['platform_type']])->update(['stock' => $stock_num]);
+                            // dump($stock_num);
+                            $platform->where(['sku' => $v, 'platform_type' => $val['platform_type']])->update(['stock' => $stock_num]);
                         } else {
                             $num = round($available_stock * $rate_rate);
                             $stock_num -= $num;
-                            dump($num);
-                            // $platform->where(['sku' => $v, 'platform_type' => $val['platform_type']])->update(['stock' => $num]);
+                            // dump($num);
+                            $platform->where(['sku' => $v, 'platform_type' => $val['platform_type']])->update(['stock' => $num]);
                         }
                     }
                 } else {
-                    echo 1111;die;
+                    // echo 1111;die;
                     foreach ($item_platform_sku as $key => $val) {
                         //最后一个站点 剩余数量分给最后一个站
                         if (($all_num - $key) == 1) {
@@ -288,7 +289,6 @@ class Wangpenglei extends Backend
             }
             usleep(10000);
             echo $k . "\n";
-            die;
         }
         echo "ok";
     }
