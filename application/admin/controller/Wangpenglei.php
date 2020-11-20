@@ -218,7 +218,7 @@ class Wangpenglei extends Backend
         $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
         $item = new \app\admin\model\itemmanage\Item();
         // $skus = Db::table('fa_zz_temp2')->where(['sku' => ['in',['OA01815-01','OA01822-01','OA01901-06','TT598617-06']]])->column('sku');
-        $skus = ['OA01815-01','OA01822-01','OA01901-06','TT598617-06'];
+        $skus = ['OP01967-03','OX01557-02','OA01829-02','OP687951-01','OX797437-01','OX002546-03','OX519935-02','OP080978-01','OP080978-02'];
         // dump($skus);die;
         foreach ($skus as $k => $v) {
             // $v = 'OA01901-06';
