@@ -69,37 +69,22 @@ class UserDataViewVip extends Backend
             $filter = json_decode($this->request->get('filter'), true);
             if($filter['order_platform'] == 2){
                 $order_model = $this->voogueme;
-                $model = $this->vooguemeOperate;
                 $web_model = Db::connect('database.db_voogueme');
             }elseif($filter['order_platform'] == 3){
                 $order_model = $this->nihao;
-                $model = $this->nihaoOperate;
                 $web_model = Db::connect('database.db_nihao');
             }else{
                 $order_model = $this->zeelool;
-                $model = $this->zeeloolOperate;
                 $web_model = Db::connect('database.db_zeelool');
             }
-            $web_model->table('oc_vip_order')->query("set time_zone='+8:00'");
+
             $map['order_status'] = 'success';
-            //新增VIP会员数
-            $vip_num = $model->getVipUser($filter['time_str'],$filter['time_str2']);
-            //复购VIP会员数
-            $again_user_num['again_user_num'] = $model->get_again_user_vip($filter['time_str']);
-            if($filter['time_str2']){
-                $contrast_again_user_num = $model->get_again_user_vip($filter['time_str2']);
-                $again_user_num['contrast_again_user_num'] = $contrast_again_user_num ? round(($again_user_num['again_user_num']-$contrast_again_user_num)/$contrast_again_user_num*100,2) : 100;
-            }
-            //总VIP会员数
-            $sum_vip_num = $web_model->table('customer_entity')->where('is_vip',1)->count();
-            $this->view->assign(compact('vip_num', 'again_user_num', 'sum_vip_num'));
 
             unset($filter['one_time-operate']);
             unset($filter['time_str']);
             unset($filter['time_str2']);
             unset($filter['order_platform']);
             $this->request->get(['filter' => json_encode($filter)]);
-
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $web_model
                 ->table('oc_vip_order')
@@ -125,33 +110,31 @@ class UserDataViewVip extends Backend
                 if($now_time>$end_time){
                     $list[$key]['rest_days'] = 0;
                 }else{
-                    $list[$key]['rest_days'] = 1 + ceil(($now_time-$end_time)/60/60/24);
+                    $list[$key]['rest_days'] = 1 + ceil(($end_time-$now_time)/60/60/24);
                 }
                 $order_where['customer_id'] = $value['customer_id'];
-                $order_status_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-                $order_where['created_at'] = ['between',[$value['start_time'],$value['end_time']]];
-                $list[$key]['order_num'] = $order_model->where($order_where)->where($order_status_where)->count();  //VIP期间支付订单数
-                $list[$key]['order_amount'] = $order_model->where($order_where)->where($order_status_where)->sum('base_grand_total');//VIP期间支付金额
+                $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+                $order_time_where['created_at'] = ['between',[$value['start_time'],$value['end_time']]];
+                $list[$key]['vip_order_num'] = $order_model->where($order_where)->where($order_time_where)->count();  //VIP期间支付订单数
+                $list[$key]['vip_order_amount'] = $order_model->where($order_where)->where($order_time_where)->sum('base_grand_total');//VIP期间支付金额
+                $order_amount = $order_model->where($order_where)->sum('base_grand_total');  //总订单金额
+                $order_num = $order_model->where($order_where)->count();  //总订单数
+                $list[$key]['avg_order_amount'] = $order_num ? round($order_amount/$order_num,2) : 0;
+                $list[$key]['order_num'] = $order_num;
 
             }
             $result = array("total" => $total, "rows" => $list);
 
             return json($result);
         }
-        //新增VIP用户数
-        $vip_num = $this->zeeloolOperate->getVipUser();
-        //复购VIP会员数
-        $again_user_num['again_user_num'] = $this->zeeloolOperate->get_again_user_vip();
-        //总VIP会员数
-        $sum_vip_num = Db::connect('database.db_zeelool')->table('customer_entity')->where('is_vip',1)->count();
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
         foreach ($magentoplatformarr as $key=>$val){
-            if(!in_array($val['name'],['zeelool','voogueme','nihao'])){
+            if(!in_array($val['name'],['zeelool','voogueme'])){
                 unset($magentoplatformarr[$key]);
             }
         }
-        $this->view->assign(compact('vip_num', 'again_user_num', 'sum_vip_num', 'magentoplatformarr'));
+        $this->view->assign(compact('magentoplatformarr'));
         return $this->view->fetch();
 
     }
@@ -170,50 +153,117 @@ class UserDataViewVip extends Backend
             $params = $this->request->param();
             //站点
             $order_platform = $params['order_platform'] ? $params['order_platform'] : 1;
-            $now_day = date('Y-m-d') . ' ' . '00:00:00' . ' - ' . date('Y-m-d');
-            //时间
-            $time_str = $params['time_str'] ? $params['time_str'] : $now_day;
-            $time_str2 = $params['time_str2'] ? $params['time_str2'] : '';
-
-            switch ($order_platform) {
-                case 1:
-                    $model = $this->zeeloolOperate;
-                    break;
-                case 2:
-                    $model = $this->vooguemeOperate;
-                    break;
-                case 3:
-                    $model = $this->nihaoOperate;
-                    break;
+            if($order_platform == 2){
+                $model = $this->vooguemeOperate;
+                $web_model = Db::connect('database.db_voogueme');
+            }elseif($order_platform == 3){
+                $model = $this->nihaoOperate;
+                $web_model = Db::connect('database.db_nihao');
+            }else{
+                $model = $this->zeeloolOperate;
+                $web_model = Db::connect('database.db_zeelool');
             }
-            $arr = Cache::get('Operatedatacenter_dataviews' . $order_platform . md5(serialize($time_str)));
-            if ($arr) {
-                // Cache::rm('Operatedatacenter_dataview' . $order_platform . md5(serialize($time_str)));
-                $this->success('', '', $arr);
+            $web_model->table('oc_vip_order')->query("set time_zone='+8:00'");
+            $map['order_status'] = 'success';
+            //新增VIP会员数
+            $vip_num = $model->getVipUser($params['time_str'],$params['time_str2']);
+            //复购VIP会员数
+            $again_user_num['again_user_num'] = $model->get_again_user_vip($params['time_str']);
+            if($params['time_str2']){
+                $contrast_again_user_num = $model->get_again_user_vip($params['time_str2']);
+                $again_user_num['contrast_again_user_num'] = $contrast_again_user_num ? round(($again_user_num['again_user_num']-$contrast_again_user_num)/$contrast_again_user_num*100,2) : '0';
             }
-            //活跃用户数
-            $active_user_num = $model->getActiveUser(1, $time_str);
-            //注册用户数
-            $register_user_num = $model->getRegisterUser(1, $time_str);
-            //复购用户数
-            $again_user_num = $model->getAgainUser($time_str, 1);
-            // $again_user_num = 0;
-            //vip用户数
-            $vip_user_num = $model->getVipUser(1, $time_str);
-            //订单数
-            $order_num = $model->getOrderNum(1, $time_str);
-            //客单价
-            $order_unit_price = $model->getOrderUnitPrice(1, $time_str);
-            //销售额
-            $sales_total_money = $model->getSalesTotalMoney(1, $time_str);
-            //邮费
-            $shipping_total_money = $model->getShippingTotalMoney(1, $time_str);
+            //总VIP会员数
+            $sum_vip_num = $web_model->table('customer_entity')->where('is_vip',1)->count();
 
-            $data = compact('order_num', 'order_unit_price', 'sales_total_money', 'shipping_total_money', 'active_user_num', 'register_user_num', 'again_user_num', 'vip_user_num');
-            Cache::set('Operatedatacenter_dataviews' . $order_platform . md5(serialize($time_str)), $data, 7200);
+            $data = compact('vip_num', 'again_user_num', 'sum_vip_num');
             $this->success('', '', $data);
         }
-        $this->view->assign(compact('order_num', 'order_unit_price', 'sales_total_money', 'shipping_total_money', 'active_user_num', 'register_user_num', 'again_user_num', 'vip_user_num'));
     }
+    public function export(){
+        set_time_limit(0);
+        header ( "Content-type:application/vnd.ms-excel" );
+        header ( "Content-Disposition:filename=" . iconv ( "UTF-8", "GB18030", date('Y-m-d-His',time()) ) . ".csv" );//导出文件名
 
+        // 打开PHP文件句柄，php://output 表示直接输出到浏览器
+        $fp = fopen('php://output', 'a');
+        $order_platform = input('order_platform');
+
+        // 将中文标题转换编码，否则乱码
+        $field_arr = array(
+            '用户ID','注册邮箱','VIP开始时间','VIP结束时间','VIP剩余天数','VIP期间订单数','VIP期间订单金额','平均订单金额','总订单数'
+        );
+        foreach ($field_arr as $i => $v) {
+            $field_arr[$i] = iconv('utf-8', 'GB18030', $v);
+        }
+        // 将标题名称通过fputcsv写到文件句柄
+        fputcsv($fp, $field_arr);
+
+        if($order_platform == 2){
+            $order_model = $this->voogueme;
+            $web_model = Db::connect('database.db_voogueme');
+        }elseif($order_platform == 3){
+            $order_model = $this->nihao;
+            $web_model = Db::connect('database.db_nihao');
+        }else{
+            $order_model = $this->zeelool;
+            $web_model = Db::connect('database.db_zeelool');
+        }
+        $web_model->table('oc_vip_order')->query("set time_zone='+8:00'");
+        $map['order_status'] = 'success';
+        $total_export_count = $web_model
+            ->table('oc_vip_order')
+            ->where($map)
+            ->count();
+        $pre_count = 5000;
+        for ($i=0;$i<intval($total_export_count/$pre_count)+1;$i++){
+            $start = $i*$pre_count;
+            //切割每份数据
+            $list = $web_model
+                ->table('oc_vip_order')
+                ->where($map)
+                ->field('customer_id,customer_email,start_time,end_time')
+                ->order('id desc')
+                ->limit($start,$pre_count)
+                ->select();
+            $list = collection($list)->toArray();
+            //整理数据
+            foreach ( $list as &$val ) {
+                $tmpRow = [];
+                $tmpRow['customer_id'] =$val['customer_id'];//用户ID
+                $tmpRow['customer_email'] =$val['customer_email'];//注册邮箱
+                $tmpRow['start_time'] =$val['start_time'];//VIP开始时间
+                $tmpRow['end_time'] =$val['end_time'];//VIP结束时间
+                //VIP剩余天数
+                $end_time = strtotime($val['end_time']);
+                $now_time = time();
+                if($now_time>$end_time){
+                    $tmpRow['rest_days'] = 0;
+                }else{
+                    $tmpRow['rest_days'] = 1 + ceil(($end_time-$now_time)/60/60/24);
+                }
+                //VIP期间支付订单数
+                $order_where['customer_id'] = $val['customer_id'];
+                $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+                $order_time_where['created_at'] = ['between',[$val['start_time'],$val['end_time']]];
+                $tmpRow['vip_order_num'] = $order_model->where($order_where)->where($order_time_where)->count();
+                $tmpRow['vip_order_amount'] = $order_model->where($order_where)->where($order_time_where)->sum('base_grand_total');//VIP期间支付金额
+                $order_amount = $order_model->where($order_where)->sum('base_grand_total');  //总订单金额
+                $order_num = $order_model->where($order_where)->count();  //总订单数
+                $tmpRow['avg_order_amount'] = $order_num ? round($order_amount/$order_num,2) : 0;
+                $tmpRow['order_num'] = $order_num;
+                
+                $rows = array();
+                foreach ( $tmpRow as $export_obj){
+                    $rows[] = iconv('utf-8', 'GB18030', $export_obj);
+                }
+                fputcsv($fp, $rows);
+            }
+            // 将已经写到csv中的数据存储变量销毁，释放内存占用
+            unset($list);
+            ob_flush();
+            flush();
+        }
+        fclose($fp);
+    }
 }

@@ -266,7 +266,7 @@ class Nihao extends Model
             $createat2 = explode(' ', $time_str2);
             $contrast_where['day_date'] = ['between', [$createat2[0], $createat2[3]]];
             $contrast_vip_user_num = $this->where($map)->where($contrast_where)->sum('vip_user_num');
-            $arr['contrast_vip_user_num'] = $contrast_vip_user_num == 0 ? '100%' : round(($arr['vip_user_num'] - $contrast_vip_user_num) / $contrast_vip_user_num * 100, 2) . '%';
+            $arr['contrast_vip_user_num'] = $contrast_vip_user_num == 0 ? '0' : round(($arr['vip_user_num'] - $contrast_vip_user_num) / $contrast_vip_user_num * 100, 2);
         }
         return $arr;
     }

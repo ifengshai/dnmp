@@ -65,9 +65,9 @@
                     <div class="form-group new-form-group">
                         <label class="control-label col-xs-4">平台：</label>
                         <div class="col-xs-6 new-col-xs-6">
-                            <select data-rule="required" class="form-control" id="order_platform">
+                            <select data-rule="required" class="form-control" id="order_platform" name="order_platform">
                                 {foreach name="magentoplatformarr" item="vo" key="key"}
-                                <option value="{$key}" {if condition="$key == 0"}selected="selected"{/if}>{$vo}</option>
+                                <option value="{$vo.id}" {if condition="$key == 0"}selected="selected"{/if}>{$vo.name}</option>
                                 {/foreach}
                             </select>
                         </div>
@@ -106,8 +106,7 @@
                     <div class="margin-div" style="text-align: center;margin: 0 0 20px 0;">
                         <div class="btn btn-div">
                                 <span class="extend">
-                                    <div class="title">新增VIP会员数：<div style="color: red;" id="active_user_num">{$active_user_num.active_user_num}</div>
-
+                                    <div class="title">新增VIP会员数：<div style="color: red;" id="vip_user_num">{$vip_num.vip_user_num}</div>
                                     <span id="contrast_active_user_num">
 
                                     </span>
@@ -117,31 +116,22 @@
                         </div>
                         <div class="btn btn-div">
                                 <span class="extend">
-                                    <div class="title">复购VIP会员数：<div style="color: red;" id="register_user_num">{$register_user_num.register_user_num}</div></div>
-                                    <span id="contrast_register_user_num">
+                                    <div class="title">复购VIP会员数：<div style="color: red;" id="again_user_num">{$again_user_num.again_user_num}</div></div>
+                                    <span id="contrast_again_user_num">
 
                                     </span>
                                 </span>
                         </div>
                         <div class="btn btn-div">
                                 <span class="extend">
-                                    <div class="title">总VIP会员数：<div style="color: red;" id="again_user_num">{$again_user_num.again_user_num}</div></div>
-                                    <span id="contrast_again_user_num">
-                                        <!--<div class="rate_class">
-                                        <span id="contrast_again_user_num">
-                                        {if (float)$again_user_num.contrast_again_user_num/100 < 0}
-                                        <img src="/xiadie.png">
-                                        {else /}
-                                        <img style="transform:rotate(180deg);"  src="/shangzhang.png">
-                                        {/if}
-                                        {$again_user_num.contrast_again_user_num}
-                                        </span>
-                                    </div>-->
-                                    </span>
+                                    <div class="title">总VIP会员数：<div style="color: red;" id="sum_vip_num">{$sum_vip_num}</div></div>
                                 </span>
                         </div>
                     </div>
                 </div>
+            </div>
+            <div style="float: right;margin: 10px 50px 10px 0px;">
+                <input type="button" value="导出" id="export" class="btn" style="background: #18bc9c;color: #fefefe">
             </div>
             <table id="table" class="table table-striped table-bordered table-hover table-nowrap" width="100%">
             </table>
