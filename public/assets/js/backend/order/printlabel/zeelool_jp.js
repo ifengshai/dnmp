@@ -416,13 +416,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
 
             //搜索
             $(document).on('input', '#search_val', function (events) {
-                if (event.target.value.length == 9) {
+                if (event.target.value.length > 8) {
                     Backend.api.ajax({
                         url: Config.moduleurl + '/order/printlabel/zeelool_jp/_list',
                         data: { increment_id: event.target.value },
                         type: 'post'
                     }, function (data, ret) {
                         $('#search_val').val('');
+                        console.log(data)
                         table.bootstrapTable("prepend", data);
                     });
                 }
