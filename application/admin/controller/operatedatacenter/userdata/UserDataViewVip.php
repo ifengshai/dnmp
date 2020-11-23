@@ -71,17 +71,14 @@ class UserDataViewVip extends Backend
                 $order_model = $this->voogueme;
                 $model = $this->vooguemeOperate;
                 $web_model = Db::connect('database.db_voogueme');
-                $site = 2;
             }elseif($filter['order_platform'] == 3){
                 $order_model = $this->nihao;
                 $model = $this->nihaoOperate;
                 $web_model = Db::connect('database.db_nihao');
-                $site = 3;
             }else{
                 $order_model = $this->zeelool;
                 $model = $this->zeeloolOperate;
                 $web_model = Db::connect('database.db_zeelool');
-                $site = 1;
             }
             $web_model->table('oc_vip_order')->query("set time_zone='+8:00'");
             $map['order_status'] = 'success';
@@ -102,6 +99,7 @@ class UserDataViewVip extends Backend
             unset($filter['time_str2']);
             unset($filter['order_platform']);
             $this->request->get(['filter' => json_encode($filter)]);
+
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $web_model
                 ->table('oc_vip_order')
@@ -134,7 +132,7 @@ class UserDataViewVip extends Backend
                 $order_where['created_at'] = ['between',[$value['start_time'],$value['end_time']]];
                 $list[$key]['order_num'] = $order_model->where($order_where)->where($order_status_where)->count();  //VIP期间支付订单数
                 $list[$key]['order_amount'] = $order_model->where($order_where)->where($order_status_where)->sum('base_grand_total');//VIP期间支付金额
-                
+
             }
             $result = array("total" => $total, "rows" => $list);
 
@@ -216,244 +214,6 @@ class UserDataViewVip extends Backend
             $this->success('', '', $data);
         }
         $this->view->assign(compact('order_num', 'order_unit_price', 'sales_total_money', 'shipping_total_money', 'active_user_num', 'register_user_num', 'again_user_num', 'vip_user_num'));
-    }
-
-    /*
-     * 活跃用户折线图
-     */
-    public function active_user_trend()
-    {
-        // $date_arr = ["2020-10-07" => 0, "2020-10-08" => 0, "2020-10-09" => 1, "2020-10-10" => 500, "2020-10-11" => 20, "2020-10-12" => 1000];
-
-        if ($this->request->isAjax()) {
-            $params = $this->request->param();
-            $order_platform = $params['order_platform'];
-            switch ($order_platform) {
-                case 1:
-                    $model = new \app\admin\model\operatedatacenter\Zeelool;
-                    break;
-                case 2:
-                    $model = new \app\admin\model\operatedatacenter\Voogueme();
-                    break;
-                case 3:
-                    $model = new \app\admin\model\operatedatacenter\Nihao();
-                    break;
-                case 4:
-                    $model = new \app\admin\model\operatedatacenter\Datacenter();
-                    break;
-            }
-            $time_str = $params['time_str'];
-
-            if ($order_platform) {
-                $where['site'] = $order_platform;
-            }
-            if ($time_str) {
-                $createat = explode(' ', $time_str);
-                $where['day_date'] = ['between', [$createat[0], $createat[3]]];
-            } else {
-                $start = date('Y-m-d', strtotime('-6 day'));
-                $end = date('Y-m-d 23:59:59');
-                $where['day_date'] = ['between', [$start, $end]];
-            }
-            if ($order_platform == 4) {
-                unset($where['site']);
-                $sales_total = $model->where($where)->column('day_date', 'active_user_num');
-                $arr = array();
-                foreach ($sales_total as $k => $v) {
-                    if ($arr[$v]) {
-                        $arr[$v] += $k;
-                    } else {
-                        $arr[$v] = $k;
-                    }
-                }
-                $date_arr = $arr;
-                $name = '活跃用户数';
-
-                $json['xcolumnData'] = array_keys($date_arr);
-                $json['column'] = [$name];
-                $json['columnData'] = [
-                    [
-                        'name' => $name,
-                        'type' => 'line',
-                        'smooth' => true,
-                        'data' => array_values($date_arr)
-                    ],
-
-                ];
-            } else {
-                $arr = $model->where($where)->column('day_date', 'active_user_num');
-                $date_arr = $arr;
-                $name = '活跃用户数';
-
-                $json['xcolumnData'] = array_values($date_arr);
-                $json['column'] = [$name];
-                $json['columnData'] = [
-                    [
-                        'name' => $name,
-                        'type' => 'line',
-                        'smooth' => true,
-                        'data' => array_keys($date_arr)
-                    ],
-
-                ];
-            }
-            return json(['code' => 1, 'data' => $json]);
-        }
-    }
-
-    /*
-     * 订单趋势折线图
-     */
-    public function order_trend()
-    {
-        // $date_arr = ["2020-10-07" => 0, "2020-10-08" => 0, "2020-10-09" => 1, "2020-10-10" => 500, "2020-10-11" => 20, "2020-10-12" => 1000];
-
-        if ($this->request->isAjax()) {
-            $params = $this->request->param();
-            $order_platform = $params['order_platform'];
-            switch ($order_platform) {
-                case 1:
-                    $model = new \app\admin\model\operatedatacenter\Zeelool;
-                    break;
-                case 2:
-                    $model = new \app\admin\model\operatedatacenter\Voogueme();
-                    break;
-                case 3:
-                    $model = new \app\admin\model\operatedatacenter\Nihao();
-                    break;
-                case 4:
-                    $model = new \app\admin\model\operatedatacenter\Datacenter();
-                    break;
-            }
-            $time_str = $params['time_str'];
-
-            if ($order_platform) {
-                $where['site'] = $order_platform;
-            }
-            if ($time_str) {
-                $createat = explode(' ', $time_str);
-                $where['day_date'] = ['between', [$createat[0], $createat[3]]];
-            } else {
-                $start = date('Y-m-d', strtotime('-6 day'));
-                $end = date('Y-m-d 23:59:59');
-                $where['day_date'] = ['between', [$start, $end]];
-            }
-            if ($order_platform == 4) {
-                unset($where['site']);
-
-                $sales_total = Db::name('datacenter_day')->where($where)->order('day_date', 'asc')->field('day_date,order_num')->select();
-
-                $arr = array();
-                foreach ($sales_total as $k => $v) {
-                    if ($arr[$v['day_date']]) {
-                        $arr[$v['day_date']] += $v['order_num'];
-                    } else {
-                        $arr[$v['day_date']] = $v['order_num'];
-                    }
-                }
-                $date_arr = $arr;
-                $name = '订单数';
-
-                $json['xcolumnData'] = array_keys($date_arr);
-                $json['column'] = [$name];
-                $json['columnData'] = [
-                    [
-                        'name' => $name,
-                        'type' => 'line',
-                        'smooth' => true,
-                        'data' => array_values($date_arr)
-                    ],
-
-                ];
-            } else {
-                // $arr = $model->where($where)->order('day_date', 'asc')->column('day_date', 'order_num');
-                $sales_total = Db::name('datacenter_day')->where($where)->order('day_date', 'asc')->field('day_date,order_num')->select();
-                $arr = array();
-                foreach ($sales_total as $k => $v) {
-                    if ($arr[$v['day_date']]) {
-                        $arr[$v['day_date']] += $v['order_num'];
-                    } else {
-                        $arr[$v['day_date']] = $v['order_num'];
-                    }
-                }
-                $date_arr = $arr;
-                $name = '订单数';
-
-                $json['xcolumnData'] = array_keys($date_arr);
-                $json['column'] = [$name];
-                $json['columnData'] = [
-                    [
-                        'name' => $name,
-                        'type' => 'line',
-                        'smooth' => true,
-                        'data' => array_values($date_arr)
-                    ],
-
-                ];
-            }
-
-            return json(['code' => 1, 'data' => $json]);
-        }
-    }
-
-    /*
-     * 用户购买转化漏斗
-     */
-    public function user_change_trend()
-    {
-        if ($this->request->isAjax()) {
-            $params = $this->request->param();
-            $order_platform = $params['order_platform'];
-            switch ($order_platform) {
-                case 1:
-                    $model = $this->zeeloolOperate;
-                    break;
-                case 2:
-                    $model = $this->vooguemeOperate;
-                    break;
-                case 3:
-                    $model = $this->nihaoOperate;
-                    break;
-                case 4:
-                    $model = $this->datacenterday;
-                    break;
-            }
-            $time_str = $params['time_str'];
-            if ($time_str) {
-                //着陆页数据
-                $landing_num = $model->getLanding($time_str, 1);
-                $detail_num = $model->getDetail($time_str, 1);
-                $cart_num = $model->getCart($time_str, 1);
-                $complete_num = $model->getComplete($time_str, 1);
-            } else {
-                $start = date('Y-m-d', strtotime('-6 day'));
-                $end = date('Y-m-d 23:59:59');
-                $time_str = $start . ' 00:00:00 - ' . $end . ' 00:00:00';
-                //着陆页数据
-                $landing_num = $model->getLanding($time_str, 1);
-                $detail_num = $model->getDetail($time_str, 1);
-                $cart_num = $model->getCart($time_str, 1);
-                $complete_num = $model->getComplete($time_str, 1);
-            }
-
-            if ($order_platform) {
-                $where['site'] = $order_platform;
-            }
-
-            $name = '用户购买转化漏斗';
-            $date_arr = [
-                ['value' => round($landing_num['landing_num'], 0), 'percent' => '100%', 'name' => '着陆页'],
-                ['value' => round($detail_num['detail_num'], 0), 'percent' => $landing_num['landing_num'] == 0 ? '0%' : round($detail_num['detail_num'] / $landing_num['landing_num'] * 100, 2) . '%', 'name' => '商品详情页'],
-                ['value' => round($cart_num['cart_num'], 0), 'percent' => $detail_num['detail_num'] == 0 ? '0%' : round($cart_num['cart_num'] / $detail_num['detail_num'] * 100, 2) . '%', 'name' => '加购物车'],
-                ['value' => round($complete_num['complete_num'], 0), 'percent' => $cart_num['cart_num'] == 0 ? '0%' : round($complete_num['complete_num'] / $cart_num['cart_num'] * 100, 2) . '%', 'name' => '支付转化']
-            ];
-
-            $json['column'] = [$name];
-            $json['columnData'] = $date_arr;
-            // $json['legendData'] = ['着陆页','商品详情页','加购物车','支付转化'];
-            // $json['legendShow'] = true;
-            return json(['code' => 1, 'data' => $json]);
-        }
     }
 
 }

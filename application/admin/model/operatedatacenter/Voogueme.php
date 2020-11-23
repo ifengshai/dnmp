@@ -402,8 +402,9 @@ class Voogueme extends Model
             $end   = date('Y-m-d 23:59:59');
             $createat = $start .' 00:00:00 - ' .$end.' 00:00:00';
         }
+        $vip_where['start_time'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
+        $vip_userids = $web_model->table('oc_vip_order')->where($vip_where)->column('customer_id');
         $map_where['o.created_at'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
-        $vip_userids = $web_model->table('oc_vip_order')->where($vip_where)->where($map_where)->column('customer_id');
         $order_where['o.created_at'] = ['lt',$createat[0]];
         $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
         $map['o.customer_id'] = ['in',$vip_userids];
