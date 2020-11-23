@@ -34,6 +34,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
         }else if(8 == value){
             $('select[name="abnormal"]').parents('.form-group').show();
             $('#stock_house_num').parents('.form-group').show();
+            $('.btn-creat-work-order').removeClass('hide');
             $('.btn-batch-export-xls').removeClass('hide');
             // $('.btn-abnormal-handle').removeClass('hide');
             // $('.btn-abnormal-sign').removeClass('hide');
@@ -384,6 +385,28 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                         }, function (data, ret) {
                             if (data == 'success') {
                                 table.bootstrapTable('refresh');
+                            }
+                        });
+                    }
+                );
+            });
+
+            //创建工单，ids为子单ID
+            $('.btn-creat-work-order').click(function () {
+                var ids = Table.api.selectedids(table);
+                Layer.confirm(
+                    __('确定要为这%s条记录创建工单吗?', ids.length),
+                    { icon: 3, title: __('Warning'), shadeClose: true },
+                    function (index) {
+                        Layer.close(index);
+                        Backend.api.ajax({
+                            url: Config.moduleurl + '/order/distribution/add',
+                            data: { id_params: ids },
+                            type: 'post'
+                        }, function (data, ret) {
+                            if (data.url) {
+                                window.location.href = data.url;//跳转添加工单页面
+                                // table.bootstrapTable('refresh');
                             }
                         });
                     }
