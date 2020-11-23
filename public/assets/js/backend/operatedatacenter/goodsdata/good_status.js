@@ -34,13 +34,15 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                         bar: {
                             legend: {},
                             tooltip: {},
-                            xAxis: {type: 'category'},
+                            xAxis: [{type: 'category'},{type: 'category'}],
                             yAxis: {},
                             series: [
                                 {type: 'bar'},
                                 {type: 'bar'},
                                 {type: 'bar'},
-                                {type: 'bar'}
+                                {type: 'bar'},
+                                {type: 'bar'},
+                                {type: 'bar'},
                             ]
                         }
                     };

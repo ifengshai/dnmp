@@ -45,23 +45,41 @@ class GoodStatus extends Backend
             $order_platform = $params['order_platform'];
             $json['xColumnName'] = ['zeelool','voogueme','nihao','wesee','zeelool-de','zeelool-es','zeelool-jp','meeloog'];
             $item = new \app\admin\model\itemmanage\Item();
-            if ($order_platform == 1){
-                $skus = $item->getFrameSku();
-                $map['sku'] = ['in', $skus];
-            }elseif ($order_platform == 2){
-                $skus = $item->getOrnamentsSku();
-                $map['sku'] = ['in', $skus];
-            }else{
-                $map = [];
-            }
-            $platform_z_num =$this->item_platform->where('platform_type',$platform_a)->where($map)->count();
-            $platform_v_num =$this->item_platform->where('platform_type',$platform_b)->where($map)->count();
-            $platform_n_num =$this->item_platform->where('platform_type',$platform_b)->where($map)->count();
-            $platform_w_num =$this->item_platform->where('platform_type',$platform_b)->where($map)->count();
-            $platform_m_num =$this->item_platform->where('platform_type',$platform_b)->where($map)->count();
-            $platform_es_num =$this->item_platform->where('platform_type',$platform_b)->where($map)->count();
-            $platform_de_num =$this->item_platform->where('platform_type',$platform_b)->where($map)->count();
-            $platform_jp_num =$this->item_platform->where('platform_type',$platform_b)->where($map)->count();
+            // if ($order_platform == 1){
+            //     $skus = $item->getFrameSku();
+            //     $map['sku'] = ['in', $skus];
+            // }elseif ($order_platform == 2){
+            //     $skus = $item->getOrnamentsSku();
+            //     $map['sku'] = ['in', $skus];
+            // }else{
+            //     $map = [];
+            // }
+            $map = [];
+            $platform_z_up_num =$this->item_platform->where('platform_type',1)->where($map)->where('outer_sku_status',1)->count();
+            $platform_z_down_num =$this->item_platform->where('platform_type',1)->where($map)->where('outer_sku_status',2)->count();
+            $platform_z_yushou_num =$this->item_platform->where('platform_type',1)->where($map)->where('presell_status',1)->count();
+            $platform_v_up_num =$this->item_platform->where('platform_type',2)->where($map)->where('outer_sku_status',1)->count();
+            $platform_v_down_num =$this->item_platform->where('platform_type',2)->where($map)->where('outer_sku_status',2)->count();
+            $platform_v_yushou_num =$this->item_platform->where('platform_type',2)->where($map)->where('presell_status',1)->count();
+            $platform_n_up_num =$this->item_platform->where('platform_type',3)->where($map)->where('outer_sku_status',1)->count();
+            $platform_n_down_num =$this->item_platform->where('platform_type',3)->where($map)->where('outer_sku_status',2)->count();
+            $platform_n_yushou_num =$this->item_platform->where('platform_type',3)->where($map)->where('presell_status',1)->count();
+            $platform_w_up_num =$this->item_platform->where('platform_type',4)->where($map)->where('outer_sku_status',1)->count();
+            $platform_w_down_num =$this->item_platform->where('platform_type',4)->where($map)->where('outer_sku_status',2)->count();
+            $platform_w_yushou_num =$this->item_platform->where('platform_type',4)->where($map)->where('presell_status',1)->count();
+            $platform_m_up_num =$this->item_platform->where('platform_type',5)->where($map)->where('outer_sku_status',1)->count();
+            $platform_m_down_num =$this->item_platform->where('platform_type',5)->where($map)->where('outer_sku_status',2)->count();
+            $platform_m_yushou_num =$this->item_platform->where('platform_type',5)->where($map)->where('presell_status',1)->count();
+            $platform_es_up_num =$this->item_platform->where('platform_type',9)->where($map)->where('outer_sku_status',1)->count();
+            $platform_es_down_num =$this->item_platform->where('platform_type',9)->where($map)->where('outer_sku_status',2)->count();
+            $platform_es_yushou_num =$this->item_platform->where('platform_type',9)->where($map)->where('presell_status',1)->count();
+            $platform_de_up_num =$this->item_platform->where('platform_type',10)->where($map)->where('outer_sku_status',1)->count();
+            $platform_de_down_num =$this->item_platform->where('platform_type',10)->where($map)->where('outer_sku_status',2)->count();
+            $platform_de_yushou_num =$this->item_platform->where('platform_type',10)->where($map)->where('presell_status',1)->count();
+            $platform_jp_up_num =$this->item_platform->where('platform_type',11)->where($map)->where('outer_sku_status',1)->count();
+            $platform_jp_down_num =$this->item_platform->where('platform_type',11)->where($map)->where('outer_sku_status',2)->count();
+            $platform_jp_yushou_num =$this->item_platform->where('platform_type',11)->where($map)->where('presell_status',1)->count();
+
             $json['columnData'] = [
                 [
                     'type' => 'bar',
@@ -80,8 +98,7 @@ class GoodStatus extends Backend
                     'barWidth' => '20%',
                     'data' => [7,8,9],
                     'name' => '标准差'
-                ]
-
+                ],
             ];
             return json(['code' => 1, 'data'=>$json]);
         }

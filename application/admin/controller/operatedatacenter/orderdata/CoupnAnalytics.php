@@ -136,12 +136,15 @@ class CoupnAnalytics extends Backend
             switch ($site) {
                 case 1:
                     $model = Db::connect('database.db_zeelool');
+                    $salesrule = Db::connect('database.db_zeelool_online');
                     break;
                 case 2:
                     $model = Db::connect('database.db_voogueme');
+                    $salesrule = Db::connect('database.db_voogueme_online');
                     break;
                 case 3:
                     $model = Db::connect('database.db_nihao');
+                    $salesrule = Db::connect('database.db_niaho_online');
                     break;
             }
             $model->table('sales_flat_order')->query("set time_zone='+8:00'");
@@ -149,11 +152,23 @@ class CoupnAnalytics extends Backend
             $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
             $map['created_at'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]]];
             $map['order_type'] = ['=', 1];
+            //时间段内所有的订单使用的优惠券的ids
             $total = $model->table('sales_flat_order')
                 ->where($map)
-                ->field('entity_id,created_at,applied_rule_ids')
+                // ->where('coupon_code','!=',null)
+                ->field('entity_id,created_at,applied_rule_ids,coupon_code')
                 ->select();
-            dump($total);die;
+            //所有的优惠券
+            $all_coupon = $salesrule->table('salesrule')
+                ->where('channel','>',0)
+                // ->where('is_quan',1)
+                ->column('name','rule_id');
+            foreach ($total as $k=>$v){
+                $total[$k]['applied_rule_ids'] = explode(',',$total[$k]['applied_rule_ids']);
+            }
+            dump($all_coupon);
+            dump($total);
+            die;
 
             $json['column'] = ['网站优惠券', '主页优惠券','用户优惠券','渠道优惠券','客服优惠券','未使用优惠券',];
             $json['columnData'] = [
