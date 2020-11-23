@@ -394,7 +394,7 @@ class Zeelool extends Model
     }
 
     //获取某一段时间内的复购VIP用户数 new
-    public function get_again_user_vip($createat){
+    public function get_again_user_vip($createat = ''){
         $web_model = Db::connect('database.db_zeelool');
         $web_model->table('oc_vip_order')->query("set time_zone='+8:00'");
         $vip_where['order_status'] = 'Success';
