@@ -152,11 +152,11 @@ class Distribution extends Backend
 
             foreach ($list as $key => $value) {
                 if (!empty($value['temporary_house_id'])) {
-                    $stock_house_num = $stock_house_data[$value['temporary_house_id']]['coding'];
+                    $stock_house_num = $stock_house_data[$value['temporary_house_id']];
                 } elseif (!empty($value['temporary_house_id'])) {
-                    $stock_house_num = $stock_house_data[$value['abnormal_house_id']]['coding'];
+                    $stock_house_num = $stock_house_data[$value['abnormal_house_id']];
                 } elseif (!empty($value['store_house_id'])) {
-                    $stock_house_num = $stock_house_data[$value['store_house_id']]['coding'];
+                    $stock_house_num = $stock_house_data[$value['store_house_id']];
                 }
                 $list[$key]['stock_house_num'] = $stock_house_num ?? '-';
                 $list[$key]['created_at'] = date('Y-m-d H:i:s', $value['created_at']);
