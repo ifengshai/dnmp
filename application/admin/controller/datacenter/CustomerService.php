@@ -1311,19 +1311,30 @@ class CustomerService extends Backend
                 $arr[] = $val;
             }
         }
-        $arr[] = 75;
+//        $arr[] = 75;
 
 //        $result  = Admin::where('id', 'in', $arr)->field('id,nickname')->select();
-        $result = Admin::where('group_id','in',['1','2'])->field('id,nickname')->select();
+        $result = Admin::where('group_id','in',['1','2'])->field('id,group_id,nickname')->select();
 
         if (!empty($result)) {
             $result = collection($result)->toArray();
+
+//            foreach ($result as $k => $v) {
+//                if (in_array($v['id'], $kefumanage[95]) || (95 == $v['id'])) {
+//                    $result[$k]['group'] = 'B组';
+//                } elseif (in_array($v['id'], $kefumanage[117]) || (117 == $v['id'])) {
+//                    $result[$k]['group'] = 'A组';
+//                } else {
+//                    $result[$k]['group'] = '未知';
+//                }
+//            }
+
             foreach ($result as $k => $v) {
-                if (in_array($v['id'], $kefumanage[95]) || (95 == $v['id'])) {
-                    $result[$k]['group'] = 'B组';
-                } elseif (in_array($v['id'], $kefumanage[117]) || (117 == $v['id'])) {
+                if ($v['group_id'] ==1){
                     $result[$k]['group'] = 'A组';
-                } else {
+                }elseif ($v['group_id'] ==2){
+                    $result[$k]['group'] = 'B组';
+                }else{
                     $result[$k]['group'] = '未知';
                 }
             }
