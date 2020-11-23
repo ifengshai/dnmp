@@ -238,7 +238,7 @@ class ItWebDemand extends Backend
                 $testAuthUserIds = array_merge(Auth::getGroupUserId(config('demand.test_group_id')) ?: [], Auth::getGroupUserId(config('demand.test_group_person_id')) ?: []);
                 $map['status'] = ['eq', 3];
                 if (in_array($adminId, $authUserIds)) {
-                    $map['pm_audit_status'] = ['in', [1, 2]];
+                    $map['pm_audit_status'] = ['in', [1, 2,3,4]];
                     $map['status'] = ['eq', 3];
                 } elseif (in_array($adminId, $testAuthUserIds)) {
                     //测试 未上线都算未完成
@@ -1099,7 +1099,7 @@ class ItWebDemand extends Backend
         $ids = $ids ?? input('ids');
         $row = $this->model->get(['id' => $ids]);
         $row_arr = $row->toArray();
-
+//        dump($row_arr);die();
         $row_arr['start_time'] = date('Y-m-d', strtotime($row_arr['start_time']));
         $row_arr['end_time'] = date('Y-m-d', strtotime($row_arr['end_time']));
 
