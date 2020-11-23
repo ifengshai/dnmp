@@ -252,7 +252,7 @@ class UserDataViewVip extends Backend
                 $order_num = $order_model->where($order_where)->count();  //总订单数
                 $tmpRow['avg_order_amount'] = $order_num ? round($order_amount/$order_num,2) : 0;
                 $tmpRow['order_num'] = $order_num;
-                
+
                 $rows = array();
                 foreach ( $tmpRow as $export_obj){
                     $rows[] = iconv('utf-8', 'GB18030', $export_obj);
