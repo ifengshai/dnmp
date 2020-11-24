@@ -151,8 +151,13 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                                     type: 'shadow' //指示器类型。可选项'line' 直线指示器。'shadow' 阴影指示器。'cross' 十字准星指示器。其实是种简写，表示启用两个正交的轴的 axisPointer。
                                 },
                                 formatter: function (param) { //格式化提示信息
-                                    console.log(param);
-                                    return param[0].name + '<br/>' + param[0].seriesName + '：' + param[0].value + '<br/>' + param[1].seriesName + '：' + param[1].value + '<br/>' + param[2].seriesName + '：' + param[2].value;
+                                    if(param.length == 3){
+                                        return param[0].name + '<br/>' + param[0].seriesName + '：' + param[0].value + '<br/>' + param[1].seriesName + '：' + param[1].value + '<br/>' + param[2].seriesName + '：' + param[2].value;
+                                    }else if(param.length == 2){
+                                        return param[0].name + '<br/>' + param[0].seriesName + '：' + param[0].value + '<br/>' + param[1].seriesName + '：' + param[1].value;
+                                    }else{
+                                        return param[0].name + '<br/>' + param[0].seriesName + '：' + param[0].value;
+                                    }
                                 }
                             },                        
                             xAxis: {
