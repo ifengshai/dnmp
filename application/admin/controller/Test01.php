@@ -22,6 +22,12 @@ class Test01 extends Backend
         $this->order = new \app\admin\model\order\order\NewOrder();
     }
 
+    public function test0001()
+    {
+        sleep(50);
+        echo "ok";
+    }
+
     public function test01()
     {
         set_time_limit(0);
