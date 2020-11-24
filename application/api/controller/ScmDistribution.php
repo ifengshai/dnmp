@@ -1088,7 +1088,7 @@ class ScmDistribution extends Scm
 
             }
             if($start_time && $end_time){
-                $where['a.combine_time'] = ['between', [$start_time, $end_time]];
+                $where['a.combine_time'] = ['between', [strtotime($start_time), strtotime($end_time)]];
             }
 
             $list = $this->_new_order_process
