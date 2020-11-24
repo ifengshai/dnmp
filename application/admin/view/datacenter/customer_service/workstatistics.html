@@ -267,16 +267,36 @@ table.altrowstable tr:nth-child(even){
                                     <span style="color: red;" id="totalPayInfo">{$workOrderNum}</span>
                                 </span>
                             </div>
-                            <div class="btn btn-div" style="width: 20%;">
+                            <div class="btn btn-div">
                                 <p>订单总金额（<i class="fa fa-dollar"></i>）</p>
                                 <span class="extend">
                                     <span style="color: red;" id="totalPayInfo">{$totalOrderMoney}</span>
                                 </span>
                             </div>
+
+
                             <div class="btn btn-div">
                                 <p>补发单数</p>
                                 <span class="extend">
                                     <span style="color: red;" id="totalPayInfo">{$replacementNum}</span>
+                                </span>
+                            </div>
+                            <div class="btn btn-div">
+                                <p>补发订单比</p>
+                                <span class="extend">
+                                    <span style="color: red;" id="totalPayInfo">{$replacement_counter_proportion}</span>
+                                </span>
+                            </div>
+                            <div class="btn btn-div">
+                                <p>优惠券发放量</p>
+                                <span class="extend">
+                                    <span style="color: red;" id="totalPayInfo">{$all_work_list_coupon_str}</span>
+                                </span>
+                            </div>
+                            <div class="btn btn-div">
+                                <p>优惠券发放比</p>
+                                <span class="extend">
+                                    <span style="color: red;" id="totalPayInfo">{$all_work_list_coupon_str_proportion}</span>
                                 </span>
                             </div>
                             <div class="btn btn-div">
@@ -289,7 +309,7 @@ table.altrowstable tr:nth-child(even){
                             <div class="btn btn-div">
                                 <p>退款订单比</p>
                                 <span class="extend">
-                                    <span style="color: red;" id="totalPayInfo">{:round($refundMoneyNum/$workOrderNum*100,2)}%</span>
+                                    <span style="color: red;" id="totalPayInfo">{$refundMoneyNum_proportion}</span>
                                 </span>
                             </div>
                             {else/}
@@ -310,7 +330,7 @@ table.altrowstable tr:nth-child(even){
                             <div class="btn btn-div">
                                 <p>退款金额比（<i class="fa fa-dollar"></i>）</p>
                                 <span class="extend">
-                                    <span style="color: red;" id="totalPayInfo">{:round($refundMoney/$totalOrderMoney*100,2)}%</span>
+                                    <span style="color: red;" id="totalPayInfo">{$refund_money_proportion}</span>
                                 </span>
                             </div>
                             {else/}
