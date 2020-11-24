@@ -3309,7 +3309,9 @@ EOF;
             ->setCellValue("AH1", "措施")
             ->setCellValue("AI1", "措施详情")
             ->setCellValue("AJ1", "承接详情")
-            ->setCellValue("AK1", "工单回复备注");
+            ->setCellValue("AK1", "工单回复备注")
+            ->setCellValue("AP1", "订单支付时间")
+            ->setCellValue("AQ1", "补发订单号");
         $spreadsheet->setActiveSheetIndex(0)->setTitle('工单数据');
         foreach ($list as $key => $value) {
             if ($value['after_user_id']) {
@@ -3448,6 +3450,7 @@ EOF;
             } else {
                 $spreadsheet->getActiveSheet()->setCellValue("AJ" . ($key * 1 + 2), '');
             }
+
             //回复
             if ($noteInfo && array_key_exists($value['id'], $noteInfo)) {
                 $value['note'] = $noteInfo[$value['id']];
@@ -3455,6 +3458,8 @@ EOF;
             } else {
                 $spreadsheet->getActiveSheet()->setCellValue("AO" . ($key * 1 + 2), '');
             }
+            $spreadsheet->getActiveSheet()->setCellValue("AP" . ($key * 1 + 2), $value['payment_time']);
+            $spreadsheet->getActiveSheet()->setCellValue("AQ" . ($key * 1 + 2), $value['replacement_order']);
         }
 
         //设置宽度
@@ -3500,6 +3505,8 @@ EOF;
         $spreadsheet->getActiveSheet()->getColumnDimension('AM')->setWidth(200);
         $spreadsheet->getActiveSheet()->getColumnDimension('AN')->setWidth(200);
         $spreadsheet->getActiveSheet()->getColumnDimension('AO')->setWidth(200);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AP')->setWidth(400);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AQ')->setWidth(400);
         //设置边框
         $border = [
             'borders' => [
