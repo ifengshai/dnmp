@@ -5,9 +5,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
             Controller.api.bindevent();
             // 初始化表格参数配置
             Table.api.init({
-                commonSearch: false,
+                commonSearch: true,
                 search: false,
-                showExport: false,
+                showExport: true,
                 showColumns: false,
                 showToggle: false,
                 extend: {
@@ -29,13 +29,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                 sortName: 'id',
                 columns: [
                     [
-                        { field: 'number', title: __('序号') },
-                        { field: 'increment_id', title: __('优惠卷类型') },
-                        { field: 'created_at', title: __('优惠卷名称') },
-                        { field: 'customer_email', title: __('应用订单数量') },
-                        { field: 'prescription_type', title: __('订单数量占比') },
-                        { field: 'coatiing_name', title: __('订单金额') },
-                        { field: 'price', title: __('订单金额占比') }
+                        { field: 'rule_id', title: __('序号'),operate: false},
+                        { field: 'channel', title: __('优惠卷类型'), custom: { 1: 'danger', 2: 'green' , 3: 'blue', 4: 'yellow', 5: 'pink'}, searchList: { 1:'网站优惠券', 2:'主页优惠券', 3:'用户优惠券', 4:'渠道优惠券',5:'客服优惠券'}, formatter: Table.api.formatter.status },
+                        { field: 'name', title: __('优惠卷名称'),operate: 'like'},
+                        { field: 'use_order_num', title: __('应用订单数量'),operate: false},
+                        { field: 'use_order_num_rate', title: __('订单数量占比'),operate: false},
+                        { field: 'use_order_total_price', title: __('订单金额'),operate: false},
+                        { field: 'use_order_total_price_rate', title: __('订单金额占比'),operate: false}
                         
                     ]
                 ]
@@ -45,13 +45,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
             Controller.api.formatter.lens_data_pie();
             Table.api.bindevent(table);
             $("#sku_submit").click(function(){
-                var sku = $("#sku").val();
-                var time_str = $("#time_str").val();
 
-                // if(time_str.length <= 0){
-                //     Layer.alert('请选择时间');
-                //     return false;
-                // }
                 Controller.api.formatter.user_data_pie();
                 Controller.api.formatter.lens_data_pie();
 
@@ -96,20 +90,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
 
                 table.bootstrapTable('refresh',params);
             });
-            $("#export").click(function(){
-                var order_platform = $('#order_platform').val();
-                var time_str = $('#time_str').val();
-                var sku = $('#sku').val();
-                if(sku.length <= 0){
-                    Layer.alert('请填写平台sku');
-                    return false;
-                }
-                if(time_str.length <= 0){
-                    Layer.alert('请选择时间');
-                    return false;
-                }
-                window.location.href=Config.moduleurl+'/operatedatacenter/orderdata/sku_detail/export?order_platform='+order_platform+'&time_str='+time_str+'&sku='+sku;
-            });
         },
         add: function () {
             Controller.api.bindevent();
@@ -141,7 +121,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                         type: 'post',
                         url: 'operatedatacenter/orderdata/coupn_analytics/user_data_pie',
                         data: {
-                            'sku':$("#sku").val(),
                             'time_str' :  $("#time_str").val(),
                             'order_platform' :  $("#order_platform").val(),
                         }
@@ -169,7 +148,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                         type: 'post',
                         url: 'operatedatacenter/orderdata/coupn_analytics/lens_data_pie',
                         data: {
-                            'sku':$("#sku").val(),
                             'time_str' :  $("#time_str").val(),
                             'order_platform' :  $("#order_platform").val(),
                         }

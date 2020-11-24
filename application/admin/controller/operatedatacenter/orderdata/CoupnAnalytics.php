@@ -11,9 +11,12 @@ use think\Request;
 class CoupnAnalytics extends Backend
 {
     /**
-     * sku明细分析
+     * 优惠券明细列表
      *
-     * @return \think\Response
+     * Created by Phpstorm.
+     * User: jhh
+     * Date: 2020/11/24
+     * Time: 13:53:21
      */
     public function index()
     {
@@ -21,80 +24,95 @@ class CoupnAnalytics extends Backend
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
             $filter = json_decode($this->request->get('filter'), true);
+            // dump($filter);
             //如果发送的来源是Selectpage，则转发到Selectpage
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
-            if($filter['create_time-operate']){
+            if ($filter['create_time-operate']) {
                 unset($filter['create_time-operate']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
             if ($filter['time_str']) {
                 $createat = explode(' ', $filter['time_str']);
-                $map['p.created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
+                $map['created_at'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]]];
                 unset($filter['time_str']);
                 $this->request->get(['filter' => json_encode($filter)]);
-            } else{
-                if(isset($filter['time_str'])){
+            } else {
+                if (isset($filter['time_str'])) {
                     unset($filter['time_str']);
                     $this->request->get(['filter' => json_encode($filter)]);
                 }
                 $start = date('Y-m-d', strtotime('-6 day'));
-                $end   = date('Y-m-d 23:59:59');
-                $map['p.created_at'] = ['between', [$start,$end]];
+                $end = date('Y-m-d 23:59:59');
+                $map['created_at'] = ['between', [$start, $end]];
             }
 
-            if($filter['sku']){
-                $map['p.sku'] = $filter['sku'];
-                unset($filter['sku']);
-                $this->request->get(['filter' => json_encode($filter)]);
-            }else{
-                $map['p.sku'] = '';
-            }
-            if($filter['order_platform']){
+            if ($filter['order_platform']) {
                 $site = $filter['order_platform'];
                 unset($filter['order_platform']);
                 $this->request->get(['filter' => json_encode($filter)]);
-            }else{
+            } else {
                 $site = 1;
             }
-            $field = 'p.id,o.increment_id,o.created_at,o.customer_email,p.prescription_type,p.coatiing_name,p.frame_price,p.index_price';
-            if($site == 2){
-                $order_model = Db::connect('database.db_voogueme');
-
-            }elseif($site == 3){
-                $order_model = Db::connect('database.db_nihao');
-                $field = 'p.id,o.increment_id,o.created_at,o.customer_email,p.prescription_type,p.frame_price,p.index_price';
-            }else{
-                $order_model = Db::connect('database.db_zeelool');
+            switch ($site) {
+                case 1:
+                    $model = Db::connect('database.db_zeelool');
+                    $salesrule = Db::connect('database.db_zeelool_online');
+                    break;
+                case 2:
+                    $model = Db::connect('database.db_voogueme');
+                    $salesrule = Db::connect('database.db_voogueme_online');
+                    break;
+                case 3:
+                    $model = Db::connect('database.db_nihao');
+                    $salesrule = Db::connect('database.db_niaho_online');
+                    break;
             }
-            $order_model->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
-            $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-            $map['o.order_type'] = 1;
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-            $total = $order_model->table('sales_flat_order_item_prescription')
-                ->alias('p')
-                ->join('sales_flat_order o','p.order_id=o.entity_id')
-                ->field($field)
-                ->where($where)
-                ->where($map)
-                ->order($sort, $order)
-                ->count();
+            $model->table('sales_flat_order')->query("set time_zone='+8:00'");
 
-            $list = $order_model->table('sales_flat_order_item_prescription')
-                ->alias('p')
-                ->join('sales_flat_order o','p.order_id=o.entity_id')
-                ->field($field)
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $total = $salesrule->table('salesrule')
+                ->where('channel', '>', 0)
+                ->field('name,rule_id,channel')
                 ->where($where)
-                ->where($map)
-                ->order($sort, $order)
+                ->count();
+            //所有的优惠券
+            $list = $salesrule->table('salesrule')
+                ->where('channel', '>', 0)
+                ->field('name,rule_id,channel')
+                ->where($where)
                 ->limit($offset, $limit)
                 ->select();
             $list = collection($list)->toArray();
-            foreach ($list as $key=>$value){
-                $list[$key]['number'] = $key+1;
-                $list[$key]['price'] = round($value['frame_price']+$value['index_price'],2);
+            // dump($list);die;
+            //判断订单的某些条件
+            $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+            $map['order_type'] = ['=', 1];
+            $whole_order = $model->table('sales_flat_order')
+                ->where($map)
+                ->count();
+            $whole_order_price = $model->table('sales_flat_order')
+                ->where($map)
+                ->sum('base_grand_total');
+            foreach ($list as $k => $v) {
+                $andWhere = "FIND_IN_SET({$v['rule_id']},applied_rule_ids)";
+                //应用订单数量
+                $list[$k]['use_order_num'] = $model->table('sales_flat_order')
+                    ->where($map)
+                    ->where($andWhere)
+                    ->count();
+                //应用订单数量占比
+                $list[$k]['use_order_num_rate'] = $whole_order != 0 ? round($list[$k]['use_order_num'] / $whole_order, 2) : 0;
+                //应用订单金额
+                $list[$k]['use_order_total_price'] = $model->table('sales_flat_order')
+                    ->where($map)
+                    ->where($andWhere)
+                    ->sum('base_grand_total');
+                //应用订单金额占比
+                $list[$k]['use_order_total_price_rate'] = $whole_order_price != 0 ? round($list[$k]['use_order_total_price'] / $whole_order_price, 2) : 0;
             }
+
             $result = array("total" => $total, "rows" => $list);
 
             return json($result);
@@ -102,22 +120,22 @@ class CoupnAnalytics extends Backend
         $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform();
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
-        foreach ($magentoplatformarr as $key=>$val){
-            if(!in_array($val['name'],['zeelool','voogueme','nihao'])){
+        foreach ($magentoplatformarr as $key => $val) {
+            if (!in_array($val['name'], ['zeelool', 'voogueme', 'nihao'])) {
                 unset($magentoplatformarr[$key]);
             }
         }
-        $this->view->assign('magentoplatformarr',$magentoplatformarr);
+        $this->view->assign('magentoplatformarr', $magentoplatformarr);
         return $this->view->fetch();
     }
 
     /**
-     * 首购人数/复购人数
+     * 优惠券应用订单占比
      *
-     * @Description
-     * @author wpl
-     * @since 2020/10/14 15:02:02 
-     * @return void
+     * Created by Phpstorm.
+     * User: jhh
+     * Date: 2020/11/24
+     * Time: 10:32:4
      */
     public function user_data_pie()
     {
@@ -126,9 +144,8 @@ class CoupnAnalytics extends Backend
             $site = $params['order_platform'] ? $params['order_platform'] : 1;
             if ($params['time_str']) {
                 $createat = explode(' ', $params['time_str']);
-            } else{
+            } else {
                 $start = date('Y-m-d', strtotime('-6 day'));
-                $start = date('Y-m-d', strtotime('-1000 day'));
                 $end = date('Y-m-d 23:59:59');
                 $seven_days = $start . ' 00:00:00 - ' . $end . ' 00:00:00';
                 $createat = explode(' ', $seven_days);
@@ -149,58 +166,83 @@ class CoupnAnalytics extends Backend
             }
             $model->table('sales_flat_order')->query("set time_zone='+8:00'");
 
+            //判断订单的某些条件
             $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
             $map['created_at'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]]];
             $map['order_type'] = ['=', 1];
+            //coupon_code不能为空
+            $map['coupon_code'] = ['neq', 'not null'];
+
+            //coupon_code为空 目的是为了查到未使用优惠券的订单的数量
+            $maps = $map;
+            $maps['coupon_code'] = null;
+
             //时间段内所有的订单使用的优惠券的ids
             $total = $model->table('sales_flat_order')
                 ->where($map)
-                // ->where('coupon_code','!=',null)
-                ->field('entity_id,created_at,applied_rule_ids,coupon_code')
+                ->field('entity_id,created_at,applied_rule_ids')
                 ->select();
             //所有的优惠券
             $all_coupon = $salesrule->table('salesrule')
-                ->where('channel','>',0)
-                // ->where('is_quan',1)
-                ->column('name','rule_id');
-            foreach ($total as $k=>$v){
-                $total[$k]['applied_rule_ids'] = explode(',',$total[$k]['applied_rule_ids']);
+                ->where('channel', '>', 0)
+                ->field('name,rule_id,channel')
+                ->select();
+            $arr = [];
+            foreach ($total as $k => $v) {
+                $total[$k]['applied_rule_ids'] = explode(',', $total[$k]['applied_rule_ids']);
+                foreach ($total[$k]['applied_rule_ids'] as $kk => $vv) {
+                    //去除订单中多余的网站的固定优惠规则 只保留使用优惠券的优惠券的id
+                    if ($vv == 56 || $vv == 359) {
+                        unset($total[$k]['applied_rule_ids'][$kk]);
+                    }
+                }
+                foreach ($total[$k]['applied_rule_ids'] as $kk => $vv) {
+                    $total[$k]['applied_rule_ids'] = $vv;
+                }
+                //某个优惠券所对应的订单的数量
+                if (!$arr[$total[$k]['applied_rule_ids']]) {
+                    $arr[$total[$k]['applied_rule_ids']] = 1;
+                } else {
+                    $arr[$total[$k]['applied_rule_ids']] += 1;
+                }
             }
-            dump($all_coupon);
-            dump($total);
-            die;
 
-            $json['column'] = ['网站优惠券', '主页优惠券','用户优惠券','渠道优惠券','客服优惠券','未使用优惠券',];
+            //根据优惠券所属的分组 计算某个分组的订单的数量
+            $num = ['1' => 0, '2' => 0, '3' => 0, '4' => 0, '5' => 0];
+            foreach ($all_coupon as $k => $v) {
+                $num[$v['channel']] += $arr[$v['rule_id']];
+            }
+
+            $json['column'] = ['网站优惠券', '主页优惠券', '用户优惠券', '渠道优惠券', '客服优惠券', '未使用优惠券',];
             $json['columnData'] = [
                 [
                     'name' => '网站优惠券',
-                    'value' => 1,
+                    'value' => $num[1],
                 ],
                 [
                     'name' => '主页优惠券',
-                    'value' => 2,
+                    'value' => $num[2],
                 ],
                 [
                     'name' => '用户优惠券',
-                    'value' => 3,
+                    'value' => $num[3],
                 ],
                 [
                     'name' => '渠道优惠券',
-                    'value' => 4,
+                    'value' => $num[4],
                 ],
                 [
                     'name' => '客服优惠券',
-                    'value' => 5,
+                    'value' => $num[5],
                 ],
                 [
                     'name' => '未使用优惠券',
-                    'value' => 6,
+                    'value' => $model->table('sales_flat_order')->where($maps)->count(),
                 ],
             ];
             return json(['code' => 1, 'data' => $json]);
         }
     }
-
 
     /**
      * 处方类型占比饼图
@@ -214,39 +256,111 @@ class CoupnAnalytics extends Backend
     {
         if ($this->request->isAjax()) {
             $params = $this->request->param();
+            if ($params['time_str']) {
+                $createat = explode(' ', $params['time_str']);
+            } else {
+                $start = date('Y-m-d', strtotime('-6 day'));
+                $end = date('Y-m-d 23:59:59');
+                $seven_days = $start . ' 00:00:00 - ' . $end . ' 00:00:00';
+                $createat = explode(' ', $seven_days);
+            }
             $site = $params['order_platform'] ? $params['order_platform'] : 1;
-            $json['column'] = ['网站优惠券', '主页优惠券','用户优惠券','渠道优惠券','客服优惠券','未使用优惠券',];
+            switch ($site) {
+                case 1:
+                    $model = Db::connect('database.db_zeelool');
+                    $salesrule = Db::connect('database.db_zeelool_online');
+                    break;
+                case 2:
+                    $model = Db::connect('database.db_voogueme');
+                    $salesrule = Db::connect('database.db_voogueme_online');
+                    break;
+                case 3:
+                    $model = Db::connect('database.db_nihao');
+                    $salesrule = Db::connect('database.db_niaho_online');
+                    break;
+            }
+            $model->table('sales_flat_order')->query("set time_zone='+8:00'");
+
+            //判断订单的某些条件
+            $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+            $map['created_at'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]]];
+            $map['order_type'] = ['=', 1];
+            //coupon_code不能为空
+            $map['coupon_code'] = ['neq', 'not null'];
+
+            //coupon_code为空 目的是为了查到未使用优惠券的订单的金额的数量
+            $maps = $map;
+            $maps['coupon_code'] = null;
+
+            //时间段内所有的订单使用的优惠券的ids
+            $total = $model->table('sales_flat_order')
+                ->where($map)
+                ->field('entity_id,created_at,applied_rule_ids,base_grand_total')
+                ->select();
+            //所有的优惠券
+            $all_coupon = $salesrule->table('salesrule')
+                ->where('channel', '>', 0)
+                ->field('name,rule_id,channel')
+                ->select();
+            $arr = [];
+            foreach ($total as $k => $v) {
+                $total[$k]['applied_rule_ids'] = explode(',', $total[$k]['applied_rule_ids']);
+                foreach ($total[$k]['applied_rule_ids'] as $kk => $vv) {
+                    //去除订单中多余的网站的固定优惠规则 只保留使用优惠券的优惠券的id
+                    if ($vv == 56 || $vv == 359) {
+                        unset($total[$k]['applied_rule_ids'][$kk]);
+                    }
+                }
+                foreach ($total[$k]['applied_rule_ids'] as $kk => $vv) {
+                    $total[$k]['applied_rule_ids'] = $vv;
+                }
+                //某个优惠券所对应的订单的 总金额
+                if (!$arr[$total[$k]['applied_rule_ids']]) {
+                    $arr[$total[$k]['applied_rule_ids']] = $total[$k]['base_grand_total'];
+                } else {
+                    $arr[$total[$k]['applied_rule_ids']] += $total[$k]['base_grand_total'];
+                }
+            }
+
+            //根据优惠券所属的分组 计算某个分组的订单的金额
+            $num = ['1' => 0, '2' => 0, '3' => 0, '4' => 0, '5' => 0];
+            foreach ($all_coupon as $k => $v) {
+                $num[$v['channel']] += $arr[$v['rule_id']];
+            }
+
+            $json['column'] = ['网站优惠券', '主页优惠券', '用户优惠券', '渠道优惠券', '客服优惠券', '未使用优惠券',];
             $json['columnData'] = [
                 [
                     'name' => '网站优惠券',
-                    'value' => 1000.25,
+                    'value' => $num[1],
                 ],
                 [
                     'name' => '主页优惠券',
-                    'value' => 2000.25,
+                    'value' => $num[2],
                 ],
                 [
                     'name' => '用户优惠券',
-                    'value' => 3000.25,
+                    'value' => $num[3],
                 ],
                 [
                     'name' => '渠道优惠券',
-                    'value' => 4000.25,
+                    'value' => $num[4],
                 ],
                 [
                     'name' => '客服优惠券',
-                    'value' => 5000.25,
+                    'value' => $num[5],
                 ],
                 [
                     'name' => '未使用优惠券',
-                    'value' => 6000.25,
+                    'value' => $model->table('sales_flat_order')->where($maps)->sum('base_grand_total'),
                 ],
             ];
             return json(['code' => 1, 'data' => $json]);
         }
     }
 
-    public function export(){
+    public function export()
+    {
         $this->model = new \app\admin\model\warehouse\Check;
         $this->check_item = new \app\admin\model\warehouse\CheckItem;
         set_time_limit(0);
@@ -257,18 +371,18 @@ class CoupnAnalytics extends Backend
 
         if ($time_str) {
             $createat = explode(' ', $time_str);
-            $map['p.created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
+            $map['p.created_at'] = ['between', [$createat[0], $createat[3] . ' 23:59:59']];
         }
-        if($sku){
+        if ($sku) {
             $map['p.sku'] = $sku;
         }
         $field = 'p.id,o.increment_id,o.created_at,o.customer_email,p.prescription_type,p.coatiing_name,p.frame_price,p.index_price';
-        if($order_platform == 2){
+        if ($order_platform == 2) {
             $order_model = Db::connect('database.db_voogueme');
-        }elseif($order_platform == 3){
+        } elseif ($order_platform == 3) {
             $order_model = Db::connect('database.db_nihao');
             $field = 'p.id,o.increment_id,o.created_at,o.customer_email,p.prescription_type,p.frame_price,p.index_price';
-        }else{
+        } else {
             $order_model = Db::connect('database.db_zeelool');
         }
         $order_model->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
@@ -277,14 +391,14 @@ class CoupnAnalytics extends Backend
 
         $list = $order_model->table('sales_flat_order_item_prescription')
             ->alias('p')
-            ->join('sales_flat_order o','p.order_id=o.entity_id')
+            ->join('sales_flat_order o', 'p.order_id=o.entity_id')
             ->field($field)
             ->where($map)
             ->select();
         $list = collection($list)->toArray();
-        foreach ($list as $key=>$value){
-            $list[$key]['number'] = $key+1;
-            $list[$key]['price'] = round($value['frame_price']+$value['index_price'],2);
+        foreach ($list as $key => $value) {
+            $list[$key]['number'] = $key + 1;
+            $list[$key]['price'] = round($value['frame_price'] + $value['index_price'], 2);
         }
         //从数据库查询需要的数据
         $spreadsheet = new Spreadsheet();
@@ -300,7 +414,7 @@ class CoupnAnalytics extends Backend
 
         $spreadsheet->setActiveSheetIndex(0)->setTitle('SKU明细');
         $spreadsheet->setActiveSheetIndex(0);
-        foreach ($list as $k=>$v){
+        foreach ($list as $k => $v) {
             $spreadsheet->getActiveSheet()->setCellValue('A' . ($k * 1 + 2), $v['number']);
             $spreadsheet->getActiveSheet()->setCellValue('B' . ($k * 1 + 2), $v['increment_id']);
             $spreadsheet->getActiveSheet()->setCellValue('C' . ($k * 1 + 2), $v['created_at']);
@@ -314,7 +428,7 @@ class CoupnAnalytics extends Backend
             'borders' => [
                 'allBorders' => [
                     'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
-                    'color'       => ['argb' => 'FF000000'], // 设置border颜色
+                    'color' => ['argb' => 'FF000000'], // 设置border颜色
                 ],
             ],
         ];
