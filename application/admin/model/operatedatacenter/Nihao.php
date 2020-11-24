@@ -224,7 +224,7 @@ class Nihao extends Model
         if($time_str2){
             $createat2 = explode(' ', $time_str2);
             $contrast_again_num = $this->get_again_user($createat2);
-            $arrs['same_again_user_num'] = $contrast_again_num ? round(($arrs['again_user_num'] - $contrast_again_num) / $contrast_again_num * 100, 2) : 0;
+            $arrs['contrast_again_user_num'] = $contrast_again_num ? round(($arrs['again_user_num'] - $contrast_again_num) / $contrast_again_num * 100, 2) : 0;
         }
         return $arrs;
     }
