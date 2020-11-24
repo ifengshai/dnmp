@@ -4,6 +4,8 @@ namespace app\admin\controller\order;
 
 use app\admin\model\DistributionLog;
 use app\common\controller\Backend;
+use fast\Http;
+use think\Request;
 use think\exception\PDOException;
 use think\Exception;
 use think\Loader;
@@ -20,6 +22,8 @@ use app\admin\model\itemmanage\Item;
 use app\admin\model\order\order\NewOrderProcess;
 use app\admin\model\StockLog;
 use app\admin\model\order\order\LensData;
+use app\admin\model\saleaftermanage\WorkOrderMeasure;
+use app\admin\controller\saleaftermanage;
 
 /**
  * 配货列表
@@ -59,11 +63,11 @@ class Distribution extends Backend
                 } else {
                     $map['a.distribution_status'] = $label;
                 }
-                $map['a.temporary_house_id|a.abnormal_house_id'] = 0;
+                $map['a.abnormal_house_id'] = 0;
             }
 
             $_stock_house = new StockHouse();
-            $filter = json_decode($this->request->get('filter'), true);
+            $filter = json_decode($this->request->get('filter'), true);//处理异常选项
             if ($filter['abnormal'] || $filter['stock_house_num']) {
                 //筛选异常
                 if ($filter['abnormal']) {
@@ -75,6 +79,7 @@ class Distribution extends Backend
                     $item_process_id = $_distribution_abnormal
                         ->where($abnormal_where)
                         ->column('item_process_id');
+
                     $map['a.id'] = ['in', $item_process_id];
                 }
 
@@ -94,6 +99,19 @@ class Distribution extends Backend
                 unset($filter['abnormal']);
                 unset($filter['stock_house_num']);
             }
+            //-------------------跟单数据不全，配货列表--跟单列表展示注释释放----------------------//
+            /*elseif (8 == $label) {
+                //查询有未处理工单的子单，异常表中存在有工单异常数据，后续要去重
+                $_work_order_measure = new WorkOrderMeasure();
+                $work_order_where['a.operation_type'] = 0;//fa_work_order_measure子单工单：0未处理
+                $work_order_where['b.work_status'] = ['in', [0,6,7]];//fa_work_order_list主工单状态：0取消 6 已处理 7 取消
+                $item_process_numbers = $_work_order_measure
+                    ->alias('a')
+                    ->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')
+                    ->where($work_order_where)
+                    ->column('item_order_number');
+                $map['a.item_order_number'] = ['in', $item_process_numbers];
+            }*/
 
             if ($filter['site']) {
                 $map['a.site'] = ['in', $filter['site']];
@@ -107,6 +125,7 @@ class Distribution extends Backend
             $this->request->get(['filter' => json_encode($filter)]);
 
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+
             $total = $this->model
                 ->alias('a')
                 ->join(['fa_order' => 'b'], 'a.order_id=b.id')
@@ -116,7 +135,6 @@ class Distribution extends Backend
                 ->order($sort, $order)
                 ->count();
 
-            //TODO::是否有工单
             $list = $this->model
                 ->alias('a')
                 ->field('a.id,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.total_qty_ordered,b.site,b.order_type,b.status,a.distribution_status,a.temporary_house_id,a.abnormal_house_id,order_type,a.created_at,c.store_house_id')
@@ -135,11 +153,11 @@ class Distribution extends Backend
 
             foreach ($list as $key => $value) {
                 if (!empty($value['temporary_house_id'])) {
-                    $stock_house_num = $stock_house_data[$value['temporary_house_id']]['coding'];
+                    $stock_house_num = $stock_house_data[$value['temporary_house_id']];
                 } elseif (!empty($value['temporary_house_id'])) {
-                    $stock_house_num = $stock_house_data[$value['abnormal_house_id']]['coding'];
+                    $stock_house_num = $stock_house_data[$value['abnormal_house_id']];
                 } elseif (!empty($value['store_house_id'])) {
-                    $stock_house_num = $stock_house_data[$value['store_house_id']]['coding'];
+                    $stock_house_num = $stock_house_data[$value['store_house_id']];
                 }
                 $list[$key]['stock_house_num'] = $stock_house_num ?? '-';
                 $list[$key]['created_at'] = date('Y-m-d H:i:s', $value['created_at']);
@@ -1373,4 +1391,54 @@ class Distribution extends Backend
         $this->view->assign("list", $list);
         return $this->view->fetch();
     }
+
+    /**
+     * 批量创建工单
+     *
+     * @Description
+     * @author wgj
+     * @since 2020/11/20 14:54:39
+     * @return void
+     */
+    public function add()
+    {
+        $ids = input('id_params/a');//子单ID
+        !$ids && $this->error('请选择要创建工单的数据');
+        //判断子单是否为同一主单
+        $order_id = $this->model->where(['id' => ['in', $ids]])->column('order_id');
+        $order_id = array_unique(array_filter($order_id));//数组去空、去重
+        !$order_id && $this->error('子单不存在');
+        1 < count($order_id) && $this->error('所选子订单的主单不唯一');
+
+        $item_process_numbers = $this->model->where(['id' => ['in', $ids]])->column('item_order_number');
+        $item_process_numbers = array_filter($item_process_numbers);
+        $_work_order_measure = new WorkOrderMeasure();
+        $work_order_where['a.operation_type'] = 0;//fa_work_order_measure子单工单：0未处理
+        $work_order_where['a.item_order_number'] = ['in', $item_process_numbers];//fa_work_order_measure子单订单号
+        $work_order_where['b.work_status'] = ['not in', [0,6,7]];//fa_work_order_list主工单状态：0取消 6 已处理 7 取消
+        $item_process_number_no = $_work_order_measure
+            ->alias('a')
+            ->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')
+            ->where($work_order_where)
+            ->column('item_order_number');
+        $item_process_number_no && $this->error('以下子单号有未完成工单不可创建工单'.implode('', $item_process_number_no));
+
+        //检测异常状态
+        $_distribution_abnormal = new DistributionAbnormal();
+        $abnormal_count = $_distribution_abnormal
+            ->where(['item_process_id' => ['in', $ids], 'status' => 1])
+            ->count();
+        0 < $abnormal_count && $this->error('有异常待处理的子订单');
+
+        //调用创建工单接口
+        //saleaftermanage/work_order_list/add?order_number=123&order_item_numbers=35456,23465,1111
+        $request = Request::instance();
+        $url_domain = $request->domain();
+        $url_root = $request->root();
+        $url = $url_domain.$url_root;
+        $url = $url.'/saleaftermanage/work_order_list/add?order_number='.$order_id[0].'&order_item_numbers='.implode(',', $item_process_numbers);
+        //http://www.mojing.cn/admin_1biSSnWyfW.php/saleaftermanage/work_order_list/add?order_number=859063&order_item_numbers=430224120-03,430224120-04
+        $this->success('跳转!', '', ['url'=>$url], 200);
+    }
+
 }

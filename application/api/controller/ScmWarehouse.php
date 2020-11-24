@@ -1772,9 +1772,7 @@ class ScmWarehouse extends Scm
         //获取盘点单数据
         $row = $this->_inventory->get($inventory_id);
         empty($row) && $this->error(__('盘点单不存在'), [], 546);
-        if ($row['check_status'] != 1 || $row['status'] !=2) {
-            $this->error(__('只有待审核、已完成状态才能操作'), [], 547);
-        }
+        !in_array($row['check_status'],[1,2]) && $this->error(__('只有待审核、已完成状态才能操作'), [], 547);
         $data['check_time'] = date('Y-m-d H:i:s', time());
         $data['check_person'] = $this->auth->nickname;
 
