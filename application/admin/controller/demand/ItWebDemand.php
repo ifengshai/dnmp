@@ -1153,9 +1153,15 @@ class ItWebDemand extends Backend
             $params = $this->request->post("row/a");
 
             if ($params) {
+                //查看该需求是否被确认过
+                $row = $this->model->get(['id' => $params['id']])->toArray();
+                if ($row['web_designer_group'] ==0 && $row['phper_group'] ==0 && $row['app_group'] ==0){
+                    $this->error('开发还未确认，暂时无法操作');
+                }
                 $update = array();
                 $label = 0;
                 if ($params['type'] == 'queren') {
+
                     $update['test_group'] = $params['test_group'];
                     $update['test_status'] = 2;
                     $update['test_confirm_time'] = date('Y-m-d H:i', time());
