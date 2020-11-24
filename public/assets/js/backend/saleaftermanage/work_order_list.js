@@ -888,7 +888,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
 
                     var sitetype = $('#work_platform').val();
                     $('#c-order_sku').html('');
-                    $('#z-order_sku').html('');
                     Layer.load();
                     Backend.api.ajax({
                         url: 'saleaftermanage/work_order_list/get_sku_list',
@@ -926,19 +925,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         if (!$('.step3').is(':hidden')) {
                             cancelOrder();
                         }
-                        // //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end  
-
-                        //子订单列表
-                        var zhtml = '';
-                        for (var i in data.sku) {
-                            zhtml += '<td>'+ data.sku[i] +'</td>';
-                            zhtml += '<td><label><input type="checkbox" name="" class="item_step_type" id="step1" value="1"><span>更换镜框</span></label>';
-                            zhtml += '<label ><input type="checkbox" name="" class="item_step_type" id="step2" value="2"><span>更换镜片</span></label>';
-                            zhtml += '<label ><input type="checkbox" name="" class="item_step_type" id="step3" value="3"><span>取消</span></label></td>';
-                            zhtml += '<td><label class="control-label col-xs-12 col-sm-2" id="appoint_item_group_users" style="text-align: left;"></label></td>';
-                        }
-                        $('#z-order_sku').append(zhtml);
-                        $('#item_order_div').show();                                  
+                        // //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end                                        
                     });
                 }
             })
@@ -2295,6 +2282,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     delOne(Config.create_user_id,appoint_users);
                                 } 
                             }
+
                             //循环根据承接人id获取对应人名称
                             var appoint_users = array_filter(appoint_users);
                             console.log(appoint_users);
