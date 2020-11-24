@@ -104,7 +104,7 @@ class Distribution extends Backend
                 //查询有未处理工单的子单，异常表中存在有工单异常数据，后续要去重
                 $_work_order_measure = new WorkOrderMeasure();
                 $work_order_where['a.operation_type'] = 0;//fa_work_order_measure子单工单：0未处理
-                $work_order_where['b.work_status'] = ['in', [0,6,7]];//fa_work_order_list主工单状态：0取消 6 已处理 7 取消
+                $work_order_where['b.work_status'] = [['>', 0], ['<', 6]];//fa_work_order_list主工单状态
                 $item_process_numbers = $_work_order_measure
                     ->alias('a')
                     ->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')

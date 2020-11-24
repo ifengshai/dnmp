@@ -178,26 +178,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function (row) {
-                                        //返回true时按钮显示,返回false隐藏
-                                        if(8 == Config.label && row.abnormal_house_id > 0){
-                                            return true;
-                                        }else{
-                                            return false;
-                                        }
-                                    }
-                                },
-                                {
-                                    name: 'detail',
-                                    text: '创建工单',
-                                    title: __('创建工单'),
-                                    classname: 'btn btn-xs btn-primary btn-dialog',
-                                    icon: 'fa fa-list',
-                                    url: 'order/distribution/operational',
-                                    extend: 'data-area = \'["60%","50%"]\'',
-                                    callback: function (data) {
-                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
-                                    },
-                                    visible: function (row) {
+                                        console.log(1111);
+                                        console.log(row);
                                         //返回true时按钮显示,返回false隐藏
                                         if(8 == Config.label && row.abnormal_house_id > 0){
                                             return true;
