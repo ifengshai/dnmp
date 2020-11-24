@@ -395,40 +395,7 @@
     .question-type .control-label{
         padding: 0;}
 
-/*    .item_table {
-        width: 96%;
-        height: 130px;
-        border-width: 1px;
-        border-style: solid;
-        border-color: rgba(188, 188, 188, 1);
-        border-radius: 6px;
-        text-align: center;
-    }
 
-    .item_table tr td {
-        border-width: 1px;
-        border-style: solid;
-        border-color: rgba(188, 188, 188, 1);
-        border-radius: 6px;
-    }
-
-    .item_table tr {
-        border-width: 1px;
-        border-style: solid;
-        border-color: rgba(188, 188, 188, 1);
-        border-radius: 6px;
-        line-height: 50px;
-    }
-
-    .item_table tr th {
-        background-color: #f4f4f4;
-        border-width: 1px;
-        border-style: solid;
-        border-color: rgba(188, 188, 188, 1);
-        border-radius: 6px;
-        text-align: center;
-        font-size: 14px;
-    }*/
 </style>
 
 <form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
@@ -446,7 +413,7 @@
     <!--是否需要审核-->
     <input type="hidden" id='is_check' name="row[is_check]" value="{$row.is_check}" />
     <div id="input-hidden"></div>
-
+    <div id="item_input-hidden"></div>
     <!-- 承接人id -->
     <input type="hidden" name="row[recept_person_id]" id="recept_person_id" value="{:session('admin.id')}">
     <input type="hidden" name="row[recept_item_person_id]" id="recept_item_person_id" value="{:session('admin.id')}">
@@ -978,21 +945,16 @@
         </div>
     </div>
     <!--修改地址 end-->
-    </div>
 
-<hr style="border-top: 1px solid #000;">
       <!--子订单 start-->
-        <div class="form-group-content question-type" style="display: none;" id="item_order_div">
-            <div class="caigou item_info" style="margin-top:15px; margin-bottom:15px; margin-left: 5%;">
-                <div  class="radio" style="width: 90%;float: left;">
-                    <!-- 子单号折叠框 -->
-                    <div id="div_item_content">
-                      
-                    </div>
+
+          <!-- 子单号折叠框 -->
+          <div class="form-group-child4" id="div_item_content" style="display:none;">
+            <hr style="border-top: 1px solid #000;margin-top: 15px;">
+                <section class="content" id="section_item_content">
+                </section>
+          </div>
                     <!-- 子单号折叠框-->
-                </div>
-            </div>
-        </div>
       <!--子订单 end-->
 
           

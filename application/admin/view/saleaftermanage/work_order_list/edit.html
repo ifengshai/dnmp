@@ -429,7 +429,7 @@
         <div class="form-group-child">
             <label class="control-label col-xs-12 col-sm-2">{:__('order_sku')}：</label>
             <div class="col-xs-12 col-sm-8">
-                {:build_select('row[order_sku][]', $skus, $row.order_sku,['class'=>'form-control selectpicker','multiple'=>'multiple'])}
+                {:build_select('row[order_sku][]', $skus, $row.order_sku,['class'=>'form-control selectpicker item_order_selectpicker','multiple'=>'multiple'])}
             </div>
         </div>
 
@@ -878,7 +878,7 @@
     <!--更换处方 end-->
 
     <!--取消 start-->
-    <div class="form-group-child4 measure step3" style="display:none;">
+<!--     <div class="form-group-child4 measure step3" style="display:none;">
         <div class="caigou item_info" style="margin-top:15px;">
             <p style="font-size: 16px;"><b>取消订单</b></p>
             <div>
@@ -897,7 +897,7 @@
                 </table>
             </div>
         </div>
-    </div>
+    </div> -->
     <!--取消 end-->
 
     <!--补发 start-->
