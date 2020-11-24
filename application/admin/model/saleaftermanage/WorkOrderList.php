@@ -7,6 +7,7 @@ use think\Cache;
 use think\Db;
 use think\Exception;
 use think\Model;
+use think\View;
 use Util\NihaoPrescriptionDetailHelper;
 use Util\VooguemePrescriptionDetailHelper;
 use Util\ZeeloolPrescriptionDetailHelper;
@@ -182,7 +183,7 @@ class WorkOrderList extends Model
      */
     public function getOrderItem($increment_id,$item_order_number='',$work_id=0)
     {
-        $order_field = 'id,site,base_grand_total,base_to_order_rate,payment_method,customer_email,customer_firstname,customer_lastname,order_type,mw_rewardpoint_discount,base_currency_code,shipping_method,country_id,region,city,street,postcode,telephone';
+        $order_field = 'id,site,base_grand_total,base_to_order_rate,payment_method,customer_email,customer_firstname,customer_lastname,order_type,mw_rewardpoint_discount,base_currency_code';
 
         $_new_order = new NewOrder();
         $result = $_new_order
@@ -194,19 +195,15 @@ class WorkOrderList extends Model
             return [];
         }
 
-        $order_item_field = 'a.sku,b.prescription_type,b.coating_name,b.od_sph,b.os_sph,b.od_cyl,b.os_cyl,b.od_axis,b.os_axis,b.pd_l,b.pd_r,b.pd,b.pdcheck,b.os_add,b.od_add,b.prismcheck,b.od_pv,b.os_pv,b.od_pv_r,b.os_pv_r,b.od_bd,b.os_bd,b.od_bd_r,b.os_bd_r,b.lens_number';
-        $order_item_where = ['a.order_id'=>$result['id']];
+        $order_item_where = ['order_id'=>$result['id']];
         if(!empty($item_order_number)){
-            $order_item_where = ['a.item_order_number'=>['in',$item_order_number]];
+            $order_item_where = ['item_order_number'=>['in',$item_order_number]];
         }
         $_new_order_item_process = new NewOrderItemProcess();
         $order_item_list = $_new_order_item_process
-            ->alias('a')
             ->where($order_item_where)
-            ->join(['fa_order_item_option' => 'b'], 'a.option_id=b.id')
-            ->column($order_item_field,'a.item_order_number')
+            ->column('sku','item_order_number')
         ;
-
 
         //已创建工单获取最新镜架和镜片数据
         if($work_id){
@@ -214,7 +211,7 @@ class WorkOrderList extends Model
             $_work_order_change_sku = new WorkOrderChangeSku();
             $sku_list = $_work_order_change_sku
                 ->where(['word_id'=>$work_id,'change_type'=>1])
-                ->column('change_sku as sku','item_order_number')
+                ->column('change_sku,original_sku','item_order_number')
             ;
 
             //获取更改镜片sku集
@@ -232,42 +229,37 @@ class WorkOrderList extends Model
                 ->select();
             ;
 
-            //替换最新子订单数据
+            //获取子订单措施、镜框、镜片数据
+            $item_order_info = [];
             foreach($order_item_list as $key=>$value){
-                if(isset($sku_list[$key])){
-                    $order_item_list[$key] = array_replace($value,$sku_list[$key]);
-                }
-                if(isset($prescription_list[$key])){
-                    $order_item_list[$key] = array_replace($value,$prescription_list[$key]);
-                }
+                $info = [];
                 $measure_ids = [];
                 foreach($measure_list as $v){
                     if($v['item_order_number'] == $key){
                         $measure_ids[] = $v['id'];
                     }
                 }
-                $order_item_list[$key]['measure_ids'] = $measure_ids;
+                $info['item_choose'] = $measure_ids;
+                if(isset($sku_list[$key])){
+                    $info['change_frame'] = $sku_list[$key];
+                }
+                if(isset($prescription_list[$key])){
+                    $info['change_lens'] = $prescription_list[$key];
+                }
+                $item_order_info[] = $info;
             }
-        }
 
-        //TODO::镜片列表、镀膜列表
-        $lens_key = 'get_lens_'.$result['site'];
-        $lens_data = Cache::get($lens_key);
-        if (!$lens_data) {
-            $lens_data = $this->httpRequest($result['site'], 'magic/product/lensData');
-            Cache::set($lens_key, $lens_data, 3600 * 24);
+            $result['item_order_info'] = $item_order_info;
         }
 
         $result['sku_list'] = $order_item_list;
-        $result['lens_list'] = $lens_data['lens_list'];
-        $result['coating_list'] = $lens_data['coating_list'];
         $result['mw_rewardpoint_discount'] = round($result['mw_rewardpoint_discount'],2);
 
         return $result;
     }
 
     /**
-     * 获取订单的地址
+     * 获取订单的地址-弃用
      * @param $siteType
      * @param $incrementId
      * @return array|bool
@@ -275,7 +267,7 @@ class WorkOrderList extends Model
      * @throws \think\db\exception\ModelNotFoundException
      * @throws \think\exception\DbException
      */
-    public function getAddress($siteType, $incrementId)
+    public function getAddressOld($siteType, $incrementId)
     {
         //处方信息
         switch ($siteType) {
@@ -341,13 +333,54 @@ class WorkOrderList extends Model
     }
 
     /**
-     * 获取修改处方
+     * 获取订单地址及处方信息-新
+     * @param string $increment_id 订单号
+     * @param string $order_item_number 子单号
+     * @return array|bool
+     */
+    public function getAddress($increment_id, $order_item_number='')
+    {
+        //获取地址信息
+        $order_field = 'id,site,customer_email as email,customer_firstname as firstname,customer_lastname as lastname,order_type,country_id,region,region_id,city,street,postcode,telephone';
+        $_new_order = new NewOrder();
+        $address = $_new_order
+            ->where('increment_id', $increment_id)
+            ->field($order_field)
+            ->find()
+        ;
+        empty($address) && exception('无此订单号，请查询后重试');
+
+        //获取更改镜片sku集
+        $showPrescriptions = [];
+        $prescriptions = [];
+        if($order_item_number){
+            $prescription_field = 'b.prescription_type,b.index_type,b.index_id,b.coating_id,b.color_id,b.od_sph,b.os_sph,b.od_cyl,b.os_cyl,b.od_axis,b.os_axis,b.pd_l,b.pd_r,b.pd,b.os_add,b.od_add,b.od_pv,b.os_pv,b.od_pv_r,b.os_pv_r,b.od_bd,b.os_bd,b.od_bd_r,b.os_bd_r';
+            $_order_item_process = new NewOrderItemProcess();
+            $prescriptions = $_order_item_process
+                ->alias('a')
+                ->field($prescription_field)
+                ->where('a.order_item_number',$order_item_number)
+                ->join(['fa_order_item_option' => 'b'], 'a.option_id=b.id')
+                ->select()
+            ;
+            empty($prescriptions) && exception('子订单不存在，请查询后重试');
+
+            foreach ($prescriptions as $prescription) {
+                $showPrescriptions[] = $prescription['prescription_type'] . '--' . $prescription['index_type'];
+            }
+        }
+
+        return $address ? compact('address', 'prescriptions', 'showPrescriptions') : [];
+    }
+
+    /**
+     * 获取修改处方-弃用
      * @param $siteType
      * @param $showPrescriptions
      * @return array|bool
      * @throws \think\Exception
      */
-    public function getReissueLens($siteType, $showPrescriptions, $type = 1, $isNewVersion = 0)
+    public function getReissueLensOld($siteType, $showPrescriptions, $type = 1, $isNewVersion = 0)
     {
         $url = '';
         $key = $siteType . '_getlens_' . $isNewVersion;
@@ -379,6 +412,55 @@ class WorkOrderList extends Model
         } else {
             $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_add', compact('showPrescriptions', 'prescription', 'coating_type', 'prescriptions', 'colorList', 'type','lensColorList','isNewVersion'));
         }
+        return ['data' => $data, 'html' => $html];
+    }
+
+    /**
+     * 获取镜片、镀膜、颜色列表-新
+     * @param int $siteType 网站类型
+     * @param array $showPrescriptions 镜片类型列表
+     * @param int $type 操作类型：1补发 2更改镜片 3赠品
+     * @param string $order_item_number 子订单号
+     * @return array
+     * @throws \think\Exception
+     */
+    public function getReissueLens($siteType, $showPrescriptions, $type = 1, $order_item_number = '')
+    {
+        //从网站端获取镜片、镀膜、颜色等列表数据
+        $cache_key = $siteType . '_get_lens';
+        $data = Cache::get($cache_key);
+        if (!$data) {
+            $url = 1 == $siteType ? 'magic/product/newLensData' : 'magic/product/lensData';
+            $data = $this->httpRequest($siteType, $url);
+            Cache::set($cache_key, $data, 3600 * 24);
+        }
+
+        //html页面所需变量
+        $prescriptions = $coating_type = '';
+        $prescription = $data['lens_list'];
+        $colorList = $data['color_list'] ?? [];
+        $lensColorList = $data['lens_color_list'];
+        $coating_type = $data['coating_list'];
+
+        $rendering = [
+            'prescription',
+            'coating_type',
+            'prescriptions',
+            'colorList',
+            'type',
+            'lensColorList',
+            'order_item_number'
+        ];
+        if (1 == $type) {
+            foreach ($showPrescriptions as $key => $val) {
+                $prescriptions .= "<option value='{$key}'>{$val}</option>";
+            }
+        } else {
+            $rendering[] = 'showPrescriptions';
+        }
+
+        //拼接html页面
+        $html = (new View)->fetch('saleaftermanage/work_order_list/ajax_reissue_add', compact($rendering));
         return ['data' => $data, 'html' => $html];
     }
 
@@ -983,7 +1065,7 @@ class WorkOrderList extends Model
      * @return array|bool
      * @throws \think\Exception
      */
-    public function getEditReissueLens($siteType, $showPrescriptions, $type = 1, $info = [], $operate_type = '',$is_new_version = 0)
+    public function getEditReissueLensOld($siteType, $showPrescriptions, $type = 1, $info = [], $operate_type = '',$is_new_version = 0)
     {
         $url = '';
         $key = $siteType . '_getlens_' . $is_new_version;
@@ -1015,6 +1097,59 @@ class WorkOrderList extends Model
         } else {
             $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_edit', compact('showPrescriptions', 'prescription', 'coating_type', 'prescriptions', 'colorList', 'type', 'info', 'operate_type','lensColorList','is_new_version'));
         }
+        return ['data' => $data, 'html' => $html];
+    }
+
+    /**
+     * 获取修改处方(编辑的时候带出存储的信息)
+     * @param int $siteType 网站类型
+     * @param array $showPrescriptions 镜片类型列表
+     * @param int $type 操作类型：1补发 2更改镜片 3赠品
+     * @param array $info
+     * @param string $operate_type
+     * @param string $order_item_number 子订单号
+     * @return array|bool
+     * @throws \think\Exception
+     */
+    public function getEditReissueLens($siteType, $showPrescriptions, $type = 1, $info = [], $operate_type = '',$order_item_number = '')
+    {
+        //从网站端获取镜片、镀膜、颜色等列表数据
+        $cache_key = $siteType . '_get_lens';
+        $data = Cache::get($cache_key);
+        if (!$data) {
+            $url = 1 == $siteType ? 'magic/product/newLensData' : 'magic/product/lensData';
+            $data = $this->httpRequest($siteType, $url);
+            Cache::set($cache_key, $data, 3600 * 24);
+        }
+
+        //html页面所需变量
+        $prescriptions = $coating_type = '';
+        $prescription = $data['lens_list'];
+        $colorList = $data['color_list'] ?? [];
+        $lensColorList = $data['lens_color_list'];
+        $coating_type = $data['coating_list'];
+
+        $rendering = [
+            'prescription',
+            'coating_type',
+            'prescriptions',
+            'colorList',
+            'type',
+            'info',
+            'operate_type',
+            'lensColorList',
+            'order_item_number'
+        ];
+        if (1 == $type) {
+            foreach ($showPrescriptions as $key => $val) {
+                $prescriptions .= "<option value='{$key}'>{$val}</option>";
+            }
+        } else {
+            $rendering[] = 'showPrescriptions';
+        }
+
+        //拼接html页面
+        $html = (new View)->fetch('saleaftermanage/work_order_list/ajax_reissue_edit', compact($rendering));
         return ['data' => $data, 'html' => $html];
     }
 
