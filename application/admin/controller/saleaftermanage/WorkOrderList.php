@@ -2,8 +2,9 @@
 
 namespace app\admin\controller\saleaftermanage;
 
+use app\admin\model\DistributionAbnormal;
 use app\admin\model\order\order\NewOrder;
-use app\admin\model\order\order\NewOrderProcess;
+use app\admin\model\order\order\NewOrderItemProcess;
 use app\admin\model\saleaftermanage\WorkOrderNote;
 use app\common\controller\Backend;
 use think\Cache;
@@ -1305,6 +1306,23 @@ class WorkOrderList extends Backend
                         $result = $this->model->allowField(true)->save($params);
                         if (false === $result) throw new Exception("添加失败！！");
                         $work_id = $this->model->id;
+
+                        //仓库工单判断未处理异常，有则绑定异常
+                        if($params['order_item_numbers']){
+                            //获取子订单主键ID集合
+                            $_new_order_item_process = new NewOrderItemProcess();
+                            $item_process_ids = $_new_order_item_process
+                                ->where(['item_order_number'=>['in',$params['order_item_numbers']]])
+                                ->column('id')
+                            ;
+
+                            //绑定异常数据
+                            $_distribution_abnormal = new DistributionAbnormal();
+                            $_distribution_abnormal
+                                ->allowField(true)
+                                ->save(['work_id'=>$work_id], ['item_process_id' => ['in',$item_process_ids],'status'=>1])
+                            ;
+                        }
                     }
 
                     //工单备注
@@ -2021,7 +2039,7 @@ class WorkOrderList extends Backend
             $this->assignconfig('item_order_info', $order_data['item_order_info']);
 
             unset($order_data['item_order_info']);
-            $this->view->assign('skus', $order_data);
+            $this->assignconfig('order_item', $order_data);
         }
 
         //把问题类型传递到js页面
@@ -2187,17 +2205,11 @@ class WorkOrderList extends Backend
         if (request()->isAjax()) {
             $siteType = input('site_type');
             $prescriptionType = input('prescription_type', '');
-            $isNewVersion = input('is_new_version', 0);
             $color_id = input('color_id', '');
-            $key = $siteType . '_getlens_' . $isNewVersion;
+            $key = $siteType . '_get_lens';
             $data = Cache::get($key);
             if (!$data) {
-                if ($isNewVersion == 1) {
-                    $url = 'magic/product/newLensData';
-                } else {
-                    $url = 'magic/product/lensData';
-                }
-                $data = $this->model->httpRequest($siteType, $url);
+                $data = $this->model->httpRequest($siteType, 'magic/product/lensData');
                 Cache::set($key, $data, 3600 * 24);
             }
             if ($color_id) {
@@ -2385,7 +2397,7 @@ class WorkOrderList extends Backend
             $this->assignconfig('item_order_info', $order_data['item_order_info']);
 
             unset($order_data['item_order_info']);
-            $this->view->assign('skus', $order_data);
+            $this->assignconfig('order_item', $order_data);
         }
 
         //把问题类型传递到js页面
