@@ -892,6 +892,7 @@ class ScmDistribution extends Scm
 
     /**
      * 合单--确认放入合单架---最后一个子单扫描合单时，检查子单合单是否有异常，无异常且全部为已合单，则更新主单合单状态和时间--ok
+     * 合单库位预先分配，若被占用则提示被占用并分配新合单库位
      *
      * @参数 string item_order_number  子订单号
      * @author wgj
@@ -905,14 +906,13 @@ class ScmDistribution extends Scm
         empty($store_house_id) && $this->error(__('合单库位号不能为空'), [], 403);
 
         //获取子订单数据
-        //获取子订单数据
         $item_process_info = $this->_new_order_item_process
             ->where('item_order_number', $item_order_number)
             ->field('id,distribution_status,order_id')
             ->find();
         empty($item_process_info) && $this->error(__('子订单不存在'), [], 403);
 
-        //获取订单购买总数,商品总数即为子单数量
+        //查询主单数据
         $order_process_info = $this->_new_order
             ->alias('a')
             ->where('a.id', $item_process_info['order_id'])
@@ -921,7 +921,7 @@ class ScmDistribution extends Scm
             ->find();
         empty($order_process_info) && $this->error(__('主订单不存在'), [], 403);
 
-        //获取库位信息，判断是否被占用
+        //获取库位信息
         $store_house_info = $this->_stock_house->field('id,coding,subarea,occupy')->where('id',$store_house_id)->find();//查询合单库位--占用数量
         empty($store_house_info) && $this->error(__('合单库位不存在'), [], 403);
 
@@ -932,7 +932,7 @@ class ScmDistribution extends Scm
                 empty($new_store_house_info) && $this->error(__('合单库位已用完，请检查合单库位情况'), [], 403);
 
                 $info['store_id'] = $new_store_house_info['id'];
-                $this->error(__('合单架'.$store_house_info['coding'].'库位已被占用，'.'请将子单号'.$item_order_number.'的商品放入新合单架'.$new_store_house_info['coding'].'库位'), ['info' => $info], 403);
+                $this->error(__('合单架'.$store_house_info['coding'].'库位已被占用，'.'请将子单号'.$item_order_number.'的商品放入新合单架'.$new_store_house_info['coding'].'库位'), ['info' => $info], 2001);
             }
         }
 
@@ -1207,6 +1207,7 @@ class ScmDistribution extends Scm
         }
         foreach (array_filter($list) as $k => $v) {
             $list[$k]['coding'] = $this->_stock_house->where('id',$v['store_house_id'])->value('coding');
+            !empty($v['combine_time']) && $list[$k]['combine_time'] = date('Y-m-d H:i:s', $v['combine_time']);
         }
 
         $info['list'] = $list;
