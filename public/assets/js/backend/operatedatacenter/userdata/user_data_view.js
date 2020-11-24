@@ -4,7 +4,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
         index: function () {
             Controller.api.formatter.daterangepicker($("div[role=form]"));
             //订单数据概况折线图
-            Controller.api.formatter.user_chart();
+            Controller.api.formatter.user_chart(); 
             Controller.api.formatter.new_update_change_line();
             order_data_view();
             $("#sku_submit").click(function () {
