@@ -117,11 +117,14 @@ class ScmDistribution extends Scm
         empty($type) && $this->error(__('异常类型不能为空'), [], 403);
 
         //获取子订单数据
-        $item_process_id = $this->_new_order_item_process
+        $item_process_info = $this->_new_order_item_process
+            ->field('id,abnormal_house_id')
             ->where('item_order_number', $item_order_number)
-            ->value('id')
+            ->find()
         ;
-        empty($item_process_id) && $this->error(__('子订单不存在'), [], 403);
+        empty($item_process_info) && $this->error(__('子订单不存在'), [], 403);
+        !empty($item_process_info['abnormal_house_id']) && $this->error(__('已标记异常，不能多次标记'), [], 403);
+        $item_process_id = $item_process_info['id'];
 
         //自动分配异常库位号
         $stock_house_info = $this->_stock_house
@@ -202,7 +205,7 @@ class ScmDistribution extends Scm
         //获取子订单数据
         $item_process_info = $this->_new_order_item_process
             ->where('item_order_number', $item_order_number)
-            ->field('id,option_id,distribution_status,temporary_house_id')
+            ->field('id,option_id,distribution_status,temporary_house_id,order_prescription_type')
             ->find()
         ;
         empty($item_process_info) && $this->error(__('子订单不存在'), [], 403);
@@ -226,59 +229,6 @@ class ScmDistribution extends Scm
             ->value('id')
         ;
         $abnormal_id && $this->error(__('有异常待处理，无法操作'), [], 405);
-
-        //配镜片：判断定制片
-        if(3 == $check_status){
-            //判断定制片暂存
-            if(1 == $item_process_info['temporary_house_id']){
-                //获取库位号
-                $coding = $this->_stock_house
-                    ->where(['id'=>$item_process_info['temporary_house_id']])
-                    ->value('coding')
-                ;
-            }else{
-                //获取子订单处方数据
-                $is_custom_lens = $this->_new_order_item_option
-                    ->where('id', $item_process_info['option_id'])
-                    ->value('is_custom_lens')
-                ;
-
-                //判断是否定制片
-                if(1 == $is_custom_lens){
-                    //暂存自动分配库位
-                    $stock_house_info = $this->_stock_house
-                        ->field('id,coding')
-                        ->where(['status'=>1,'type'=>3,'occupy'=>['<',10]])
-                        ->order('occupy', 'desc')
-                        ->find()
-                    ;
-                    if(!empty($stock_house_info)){
-                        //子订单绑定定制片库位号
-                        $this->_new_order_item_process
-                            ->allowField(true)
-                            ->isUpdate(true, ['item_order_number'=>$item_order_number])
-                            ->save(['temporary_house_id'=>$stock_house_info['id']])
-                        ;
-
-                        //定制片库位号占用数量+1
-                        $this->_stock_house
-                            ->where(['id' => $stock_house_info['id']])
-                            ->setInc('occupy', 1)
-                        ;
-                        $coding = $stock_house_info['coding'];
-                    }else{
-                        DistributionLog::record($this->auth,$item_process_info['id'],0,'定制片暂存架没有空余库位');
-                        $this->error(__('定制片暂存架没有空余库位，请及时处理'), [], 405);
-                    }
-                }
-            }
-
-            //定制片提示库位号信息
-            if($coding){
-                DistributionLog::record($this->auth,$item_process_info['id'],0,"子单号{$item_order_number}，定制片库位号：{$coding}");
-                $this->error(__("请将子单号{$item_order_number}的商品放入定制片暂存架{$coding}库位"), [], 405);
-            }
-        }
 
         //获取子订单处方数据
         $option_info = $this->_new_order_item_option
@@ -318,6 +268,64 @@ class ScmDistribution extends Scm
             ]
         ];
         $abnormal_list = $abnormal_arr[$check_status] ?? [];
+
+        //配镜片：判断定制片
+        if(3 == $check_status){
+            //判断定制片暂存
+            $msg = [];
+            $second = 0;
+            if(0 < $item_process_info['temporary_house_id']){
+                //获取库位号，有暂存库位号，是第二次扫描，返回展示取出按钮
+                $coding = $this->_stock_house
+                    ->where(['id'=>$item_process_info['temporary_house_id']])
+                    ->value('coding')
+                ;
+                $second = 1;//是第二次扫描
+                $msg = "请将子单号{$item_order_number}的商品从定制片暂存架{$coding}库位取出";
+            }else{
+                //判断是否定制片
+                if(3 == $item_process_info['order_prescription_type']){
+                    //暂存自动分配库位
+                    $stock_house_info = $this->_stock_house
+                        ->field('id,coding')
+                        ->where(['status'=>1,'type'=>3,'occupy'=>['<',10]])
+                        ->order('occupy', 'desc')
+                        ->find()
+                    ;
+                    if(!empty($stock_house_info)){
+                        //子订单绑定定制片库位号
+                        $this->_new_order_item_process
+                            ->allowField(true)
+                            ->isUpdate(true, ['item_order_number'=>$item_order_number])
+                            ->save(['temporary_house_id'=>$stock_house_info['id']])
+                        ;
+
+                        //定制片库位号占用数量+1
+                        $this->_stock_house
+                            ->where(['id' => $stock_house_info['id']])
+                            ->setInc('occupy', 1)
+                        ;
+                        $coding = $stock_house_info['coding'];
+                        //定制片提示库位号信息
+                        if($coding){
+                            DistributionLog::record($this->auth,$item_process_info['id'],0,"子单号{$item_order_number}，定制片库位号：{$coding}");
+
+                            $second = 0;//是第一次扫描
+                            $msg = "请将子单号{$item_order_number}的商品放入定制片暂存架{$coding}库位";
+                        }
+                    }else{
+                        DistributionLog::record($this->auth,$item_process_info['id'],0,'定制片暂存架没有空余库位');
+                        $this->error(__('定制片暂存架没有空余库位，请及时处理'), [], 405);
+                    }
+                }
+            }
+
+            //定制片提示库位号信息
+            if($coding){
+                $this->success($msg, ['abnormal_list' => $abnormal_list,'option_info' => $option_info,'second' => $second],200);
+            }
+        }
+
         //配货返回数据
         if(7 == $check_status){
             //获取子订单处方数据
@@ -341,7 +349,7 @@ class ScmDistribution extends Scm
 
         //获取子订单数据
         $item_process_info = $this->_new_order_item_process
-            ->field('id,distribution_status,option_id,order_id,site')
+            ->field('id,distribution_status,order_prescription_type,option_id,order_id,site')
             ->where('item_order_number', $item_order_number)
             ->find()
         ;
@@ -396,7 +404,28 @@ class ScmDistribution extends Scm
 
         //下一步提示信息及状态
         if(2 == $check_status){
-            if($item_option_info['index_name']){
+            //获取true_sku
+            $true_sku = $this->_item_platform_sku->getTrueSku($item_option_info['sku'], $item_process_info['site']);
+            //判断sku实时库存是否满足
+            $stock = $this->_item->where(['sku'=>$true_sku])->value('stock');
+            empty($stock) && $this->error(__('sku实时库存不足'), [], 403);
+            //配货节点 条形码绑定子单号
+            $barcode = $this->request->request('barcode');
+            $this->_product_bar_code_item
+                ->allowField(true)
+                ->isUpdate(true, ['code'=>$barcode])
+                ->save(['item_order_number'=>$item_order_number])
+            ;
+            //增加订单占用库存、配货占用库存，扣减总库存
+            $this->_item
+                ->where(['sku'=>$true_sku])
+                ->inc('occupy_stock', 1)
+                ->inc('distribution_occupy_stock', 1)
+                ->dec('stock', 1)
+                ->update()
+            ;
+            //根据处方类型字段order_prescription_type(现货处方镜、定制处方镜)判断是否需要配镜片
+            if(in_array($item_process_info['order_prescription_type'],[2,3])){
                 $save_status = 3;
             }else{
                 if($item_option_info['is_print_logo']){
@@ -514,6 +543,8 @@ class ScmDistribution extends Scm
         $order_item_true_sku = $this->_new_order_item_process->where('item_order_number',$item_order_number)->value('sku');
         $order_item_sku = $this->_item_platform_sku->where('platform_sku',$order_item_true_sku)->value('sku');
 
+        $barcode_item_order_number = $this->_product_bar_code_item->where('code',$barcode)->value('item_order_number');
+        !empty($barcode_item_order_number) && $this->error(__('此条形码已经绑定过其他订单'), [], 403);
         $code_item_sku = $this->_product_bar_code_item->where('code',$barcode)->value('sku');
         empty($code_item_sku) && $this->error(__('此条形码未绑定SKU'), [], 403);
 
@@ -585,6 +616,52 @@ class ScmDistribution extends Scm
     {
         $item_order_number = $this->request->request('item_order_number');
         $this->info($item_order_number,3);
+    }
+
+    /**
+     * 配镜片二次扫码取出--释放子单号占用的暂存库位，记录日志
+     *
+     * @参数 string item_order_number  子订单号
+     * @author wgj
+     * @return mixed
+     */
+    public function lens_out()
+    {
+        $item_order_number = $this->request->request('item_order_number');
+        //获取子订单数据
+        $item_process_info = $this->_new_order_item_process
+            ->where('item_order_number', $item_order_number)
+            ->field('id,option_id,distribution_status,temporary_house_id,order_prescription_type')
+            ->find()
+        ;
+        empty($item_process_info) && $this->error(__('子订单不存在'), [], 403);
+        empty($item_process_info['temporary_house_id']) && $this->error(__('子订单未绑定暂存库位'), [], 403);
+        3 != $item_process_info['distribution_status'] && $this->error(__('只有待配镜片状态才能操作'), [], 403);
+        //获取库位号
+        $coding = $this->_stock_house
+            ->where(['id'=>$item_process_info['temporary_house_id']])
+            ->value('coding')
+        ;
+        //子订单释放定制片库位号
+        $result = $this->_new_order_item_process
+            ->allowField(true)
+            ->isUpdate(true, ['item_order_number'=>$item_order_number])
+            ->save(['temporary_house_id'=>0])
+        ;
+
+        $res = false;
+        if ($result != false){
+            //定制片库位号占用数量-1
+            $res = $this->_stock_house
+                ->where(['id' => $item_process_info['temporary_house_id']])
+                ->setDec('occupy', 1)
+            ;
+            DistributionLog::record($this->auth,$item_process_info['id'],0,"子单号{$item_order_number}，释放定制片库位号：{$coding}");
+        }
+
+        if ($res){
+            $this->success("子单号{$item_order_number}的商品从定制片暂存架{$coding}库位取出成功", [],200);
+        }
     }
 
     /**
@@ -763,7 +840,7 @@ class ScmDistribution extends Scm
         //获取子订单数据
         $item_process_info = $this->_new_order_item_process
             ->where('item_order_number', $item_order_number)
-            ->field('id,distribution_status,order_id,temporary_house_id,abnormal_house_id')
+            ->field('id,distribution_status,sku,order_id,temporary_house_id,abnormal_house_id')
             ->find();
         empty($item_process_info) && $this->error(__('子订单不存在'), [], 403);
 
@@ -794,6 +871,7 @@ class ScmDistribution extends Scm
 
         //未合单，首次扫描
         $info['item_order_number'] = $item_order_number;
+        $info['sku'] = $item_process_info['sku'];
         if (!$order_process_info['store_house_id']){
             //主单中无库位号，首个子单进入时，分配一个合单库位给PDA，暂不占用根据是否确认放入合单架占用或取消
             $store_house_info = $this->_stock_house->field('id,coding,subarea')->where(['status'=>1,'type'=>2])->find();
@@ -814,6 +892,7 @@ class ScmDistribution extends Scm
 
     /**
      * 合单--确认放入合单架---最后一个子单扫描合单时，检查子单合单是否有异常，无异常且全部为已合单，则更新主单合单状态和时间--ok
+     * 合单库位预先分配，若被占用则提示被占用并分配新合单库位
      *
      * @参数 string item_order_number  子订单号
      * @author wgj
@@ -827,14 +906,13 @@ class ScmDistribution extends Scm
         empty($store_house_id) && $this->error(__('合单库位号不能为空'), [], 403);
 
         //获取子订单数据
-        //获取子订单数据
         $item_process_info = $this->_new_order_item_process
             ->where('item_order_number', $item_order_number)
             ->field('id,distribution_status,order_id')
             ->find();
         empty($item_process_info) && $this->error(__('子订单不存在'), [], 403);
 
-        //获取订单购买总数,商品总数即为子单数量
+        //查询主单数据
         $order_process_info = $this->_new_order
             ->alias('a')
             ->where('a.id', $item_process_info['order_id'])
@@ -843,7 +921,7 @@ class ScmDistribution extends Scm
             ->find();
         empty($order_process_info) && $this->error(__('主订单不存在'), [], 403);
 
-        //获取库位信息，判断是否被占用
+        //获取库位信息
         $store_house_info = $this->_stock_house->field('id,coding,subarea,occupy')->where('id',$store_house_id)->find();//查询合单库位--占用数量
         empty($store_house_info) && $this->error(__('合单库位不存在'), [], 403);
 
@@ -854,7 +932,7 @@ class ScmDistribution extends Scm
                 empty($new_store_house_info) && $this->error(__('合单库位已用完，请检查合单库位情况'), [], 403);
 
                 $info['store_id'] = $new_store_house_info['id'];
-                $this->error(__('合单架'.$store_house_info['coding'].'库位已被占用，'.'请将子单号'.$item_order_number.'的商品放入新合单架'.$new_store_house_info['coding'].'库位'), ['info' => $info], 403);
+                $this->error(__('合单架'.$store_house_info['coding'].'库位已被占用，'.'请将子单号'.$item_order_number.'的商品放入新合单架'.$new_store_house_info['coding'].'库位'), ['info' => $info], 2001);
             }
         }
 
@@ -1090,7 +1168,7 @@ class ScmDistribution extends Scm
 
             }
             if($start_time && $end_time){
-                $where['a.combine_time'] = ['between', [$start_time, $end_time]];
+                $where['a.combine_time'] = ['between', [strtotime($start_time), strtotime($end_time)]];
             }
 
             $list = $this->_new_order_process
@@ -1129,6 +1207,7 @@ class ScmDistribution extends Scm
         }
         foreach (array_filter($list) as $k => $v) {
             $list[$k]['coding'] = $this->_stock_house->where('id',$v['store_house_id'])->value('coding');
+            !empty($v['combine_time']) && $list[$k]['combine_time'] = date('Y-m-d H:i:s', $v['combine_time']);
         }
 
         $info['list'] = $list;
@@ -1300,6 +1379,57 @@ class ScmDistribution extends Scm
         $info['list'] = $item_process_info;
         $this->success('', ['info'=>$info], 200);
 
+    }
+
+    /**
+     * 审单----ing---需添加审单结果状态
+     *
+     * @参数 int check_id  质检单ID
+     * @参数 int do_type  1审单通过，2审单拒绝
+     * @author wgj
+     * @return mixed
+     */
+    public function order_examine()
+    {
+        $order_id = $this->request->request('order_id');
+        empty($order_id) && $this->error(__('主订单ID不能为空'), [], 403);
+
+        $do_type = $this->request->request('do_type');
+        empty($do_type) && $this->error(__('审单类型不能为空'), [], 403);
+        !in_array($do_type, [1, 2]) && $this->error(__('审单类型错误'), [], 403);
+        var_dump($order_id);
+        var_dump($do_type);
+        die;
+
+        //检测订单审单状态
+        $row = $this->_new_order->get($order_id);
+        0 != $row['check_status'] && $this->error(__('只有待审单状态才能审单'), [], 405);
+
+        $res = $this->_new_order->allowField(true)->isUpdate(true, ['id' => $order_id])->save(['check_status' => $do_type, 'check_time' => date('Y-m-d H:i:s')]);
+        false === $res && $this->error(__('审单失败'), [], 404);
+
+        Db::startTrans();
+        try {
+            //审单通过关联操作
+            if ($do_type == 2) {
+
+            } else { //审单拒绝关联操作
+
+            }
+
+            Db::commit();
+        } catch (ValidateException $e) {
+            Db::rollback();
+            $this->error($e->getMessage(), [], 406);
+        } catch (PDOException $e) {
+            Db::rollback();
+            $this->error($e->getMessage(), [], 407);
+        } catch (Exception $e) {
+            Db::rollback();
+            $this->error($e->getMessage(), [], 408);
+        }
+
+        $this->success('审单成功', [], 200);
     }
 
 }

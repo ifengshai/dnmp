@@ -34,6 +34,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
         }else if(8 == value){
             $('select[name="abnormal"]').parents('.form-group').show();
             $('#stock_house_num').parents('.form-group').show();
+            $('.btn-creat-work-order').removeClass('hide');
             $('.btn-batch-export-xls').removeClass('hide');
             // $('.btn-abnormal-handle').removeClass('hide');
             // $('.btn-abnormal-sign').removeClass('hide');
@@ -98,11 +99,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                 9 : 'Zeelool_es',
                                 10 : 'Zeelool_de',
                                 11 : 'Zeelool_jp'
-                            },
+                            }, operate: 'IN',
                             formatter: Table.api.formatter.status
                         },
                         {
-                            field: 'order_prescription_type', title: __('加工类型'), addClass: 'selectpicker', data: 'multiple',
+                            field: 'order_prescription_type', title: __('加工类型'), addClass: 'selectpicker', data: 'multiple', operate: 'IN',
                             custom: { 0: 'gray',1: 'green', 2: 'green', 3: 'green', 4: 'green' },
                             searchList: { 0: '待处理',1: '仅镜架', 2: '现货处方镜', 3: '定制处方镜', 4: '其他'},
                             formatter: Table.api.formatter.status
@@ -110,7 +111,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                         {
                             field: 'order_type', title: __('订单类型'), addClass: 'selectpicker', data: 'multiple',
                             custom: { 1: 'blue', 2: 'blue', 3: 'blue', 4: 'blue', 5: 'blue' },
-                            searchList: { 1: '普通订单', 2: '批发单', 3: '网红单', 4: '补发单', 5: '补差价', 6: '一件代发' },
+                            searchList: { 1: '普通订单', 2: '批发单', 3: '网红单', 4: '补发单', 5: '补差价', 6: '一件代发' }, operate: 'IN',
                             formatter: Table.api.formatter.status
                         },
                         {
@@ -122,7 +123,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                 "creditcard_proccessing": __('creditcard_proccessing'),
                                 "paypal_canceled_reversal": __('paypal_canceled_reversal'),
                                 'complete': __('complete')
-                            },
+                            }, operate: 'IN',
                             formatter: Table.api.formatter.status
                         },
                         {
@@ -137,11 +138,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                 7: __('待合单'),
                                 8: __('合单中'),
                                 9: __('合单完成')
-                            },
+                            }, operate: 'IN',
                             formatter: Table.api.formatter.status
                         },
                         {
-                            field: 'abnormal', title: __('处理异常'), addClass: 'selectpicker', data: 'multiple',visible:false,
+                            field: 'abnormal', title: __('处理异常'), addClass: 'selectpicker', data: 'multiple', visible:false, operate: 'IN',
                             searchList: {
                                 1: __('缺货'),
                                 2: __('商品条码贴错'),
@@ -384,6 +385,28 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                         }, function (data, ret) {
                             if (data == 'success') {
                                 table.bootstrapTable('refresh');
+                            }
+                        });
+                    }
+                );
+            });
+
+            //创建工单，ids为子单ID
+            $('.btn-creat-work-order').click(function () {
+                var ids = Table.api.selectedids(table);
+                Layer.confirm(
+                    __('确定要为这%s条记录创建工单吗?', ids.length),
+                    { icon: 3, title: __('Warning'), shadeClose: true },
+                    function (index) {
+                        Layer.close(index);
+                        Backend.api.ajax({
+                            url: Config.moduleurl + '/order/distribution/add',
+                            data: { id_params: ids },
+                            type: 'post'
+                        }, function (data, ret) {
+                            if (data.url) {
+                                window.location.href = data.url;//跳转添加工单页面
+                                // table.bootstrapTable('refresh');
                             }
                         });
                     }
