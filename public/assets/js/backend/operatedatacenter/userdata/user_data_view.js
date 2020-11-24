@@ -2,55 +2,20 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
 
     var Controller = {
         index: function () {
-            // 初始化表格参数配置
-            Table.api.init({
-                extend: {
-                    index_url: 'operatedatacenter/dataview/dash_board/index' + location.search,
-                    add_url: 'operatedatacenter/dataview/dash_board/add',
-                    edit_url: 'operatedatacenter/dataview/dash_board/edit',
-                    del_url: 'operatedatacenter/dataview/dash_board/del',
-                    multi_url: 'operatedatacenter/dataview/dash_board/multi',
-                    table: 'dash_board',
-                }
-            });
             Controller.api.formatter.daterangepicker($("div[role=form]"));
             //订单数据概况折线图
             Controller.api.formatter.user_chart();
-            
+            Controller.api.formatter.new_update_change_line();
+            order_data_view();
             $("#sku_submit").click(function () {
                 order_data_view();
                 Controller.api.formatter.user_chart();
-            
+                Controller.api.formatter.new_update_change_line();
             });
             $("#sku_reset").click(function () {
                 $("#order_platform").val(1);
                 $("#time_str").val('');
             });
-            
-            var table = $("#table");
-
-            // 初始化表格
-            table.bootstrapTable({
-                url: $.fn.bootstrapTable.defaults.extend.index_url,
-                pk: 'id',
-                sortName: 'id',
-                columns: [
-                    [
-                        {checkbox: true},
-                        {field: 'id', title: __('Id')},
-                        {
-                            field: 'operate',
-                            title: __('Operate'),
-                            table: table,
-                            events: Table.api.events.operate,
-                            formatter: Table.api.formatter.operate
-                        }
-                    ]
-                ]
-            });
-
-            // 为表格绑定事件
-            Table.api.bindevent(table);
         },
         add: function () {
             Controller.api.bindevent();
@@ -114,7 +79,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
 
                     var options = {
                         type: 'post',
-                        url: 'operatedatacenter/dataview/dash_board/active_user_trend',
+                        url: 'operatedatacenter/userdata/user_data_view/active_user_trend',
                         data: {
                             order_platform: $("#order_platform").val(),
                             time_str: $("#time_str").val(),
@@ -123,7 +88,62 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                     }
                     EchartObj.api.ajax(options, chartOptions)
                 },
-               
+                new_update_change_line: function () {
+                    var chartOptions1 = {
+                        targetId: 'echart2',
+                        downLoadTitle: '图表',
+                        type: 'bar',
+                        bar: {
+                            tooltip: { //提示框组件。
+                                trigger: 'axis', // 触发类型。可选项item:数据项图形触发，主要在散点图，饼图等无类目轴的图表中使用。axis:坐标轴触发，主要在柱状图，折线图等会使用类目轴的图表中使用。
+                                axisPointer: { //坐标轴指示器配置项。
+                                    type: 'line' //指示器类型。可选项'line' 直线指示器。'shadow' 阴影指示器。'cross' 十字准星指示器。其实是种简写，表示启用两个正交的轴的 axisPointer。
+                                },
+                                formatter: function (param) { //格式化提示信息
+                                    console.log(param);
+                                    return param[0].name + '<br/>' + param[0].seriesName + '：' + param[0].value + '<br/>' + param[1].seriesName + '：' + param[1].value;
+                                }
+                            },
+                            grid: { //直角坐标系内绘图网格
+                                top: '10%', //grid 组件离容器上侧的距离。
+                                left: '5%', //grid 组件离容器左侧的距离。
+                                right: '10%', //grid 组件离容器右侧的距离。
+                                bottom: '10%', //grid 组件离容器下侧的距离。
+                                containLabel: true //grid 区域是否包含坐标轴的刻度标签。
+                            },
+                            legend: { //图例配置
+                                padding: 5,
+                                top: '2%',
+                                data: ['新用户', '活跃用户']
+                            },
+                            xAxis: [
+                                {
+                                    type: 'category',
+                                    boundaryGap:false
+                                }
+                            ],
+                            yAxis: [
+                                {
+                                    type: 'value',
+                                    name: '转化趋势，总体的转化率',
+                                    axisLabel: {
+                                        formatter: '{value} %'
+                                    }
+                                }
+                            ],
+                        }
+                    };
+                    
+                    var options1 = {
+                        type: 'post',
+                        url: 'operatedatacenter/userdata/user_data_view/new_old_change_line',
+                        data: {
+                            'order_platform': $("#order_platform").val(),
+                            'time_str': $("#time_str").val(),
+                        }
+                    }
+                    EchartObj.api.ajax(options1, chartOptions1)
+                },
             },
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
@@ -138,60 +158,47 @@ function order_data_view() {
     var time_str = $('#time_str').val();
     var time_str2 = $('#time_str2').val();
     Backend.api.ajax({
-        url: 'operatedatacenter/dataview/dash_board/ajax_top_data',
-        data: {order_platform: order_platform, time_str: time_str}
+        url: 'operatedatacenter/userdata/user_data_view/ajax_top_data',
+        data: {order_platform: order_platform, time_str: time_str, time_str2: time_str2}
     }, function (data, ret) {
         var active_user_num = ret.data.active_user_num;
         var register_user_num = ret.data.register_user_num;
         var again_user_num = ret.data.again_user_num;
-        $('#order_num').text(order_num.order_num);
-        if (parseInt(order_num.same_order_num) < 0) {
-            $('#same_order_num').html("<img src='/shangzhang.png'>" + order_num.same_order_num + '%');
-        } else {
-            $('#same_order_num').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + order_num.same_order_num + '%');
+        $("#active_user_num").html(active_user_num.active_user_num);
+        $("#register_user_num").html(register_user_num.register_user_num);
+        $("#again_user_num").html(again_user_num.again_user_num);
+        var str1 = '';
+        if(active_user_num.contrast_active_user_num){
+            str1 += '<div class="rate_class"><span>';
+            if(active_user_num.contrast_active_user_num < 0){
+                str1 += '<img src="/xiadie.png">';
+            }else{
+                str1 += '<img style="transform:rotate(180deg);"  src="/shangzhang.png">';
+            }
+            str1 += active_user_num.contrast_active_user_num+'%</span></div>';   
+            $("#contrast_active_user_num").html(str1);               
         }
-        
-        
-        $('#active_user_num').text(active_user_num.active_user_num);
-        // $('#same_active_user_num').text(active_user_num.same_active_user_num);
-        if (parseInt(active_user_num.same_active_user_num) < 0) {
-            $('#same_active_user_num').html("<img src='/xiadie.png'>" + active_user_num.same_active_user_num);
-        } else {
-            $('#same_active_user_num').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + active_user_num.same_active_user_num);
+        var str2 = '';
+        if(register_user_num.contrast_register_user_num){
+            str2 += '<div class="rate_class"><span>';
+            if(register_user_num.contrast_register_user_num < 0){
+                str2 += '<img src="/xiadie.png">';
+            }else{
+                str2 += '<img style="transform:rotate(180deg);"  src="/shangzhang.png">';
+            }              
+            str2 += register_user_num.contrast_register_user_num+'%</span></div>'; 
+            $("#contrast_register_user_num").html(str2);           
         }
-        // $('#huan_active_user_num').text(active_user_num.huan_active_user_num);
-        if (parseInt(active_user_num.huan_active_user_num) < 0) {
-            $('#huan_active_user_num').html("<img src='/xiadie.png'>" + active_user_num.huan_active_user_num);
-        } else {
-            $('#huan_active_user_num').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + active_user_num.huan_active_user_num);
-        }
-
-        $('#register_user_num').text(register_user_num.register_user_num);
-        // $('#same_register_user_num').text(register_user_num.same_register_user_num);
-        if (parseInt(register_user_num.same_register_user_num) < 0) {
-            $('#same_register_user_num').html("<img src='/xiadie.png'>" + register_user_num.same_register_user_num);
-        } else {
-            $('#same_register_user_num').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + register_user_num.same_register_user_num);
-        }
-        // $('#huan_register_user_num').text(register_user_num.huan_register_user_num);
-        if (parseInt(register_user_num.huan_register_user_num) < 0) {
-            $('#huan_register_user_num').html("<img src='/xiadie.png'>" + register_user_num.huan_register_user_num);
-        } else {
-            $('#huan_register_user_num').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + register_user_num.huan_register_user_num);
-        }
-
-        $('#again_user_num').text(again_user_num.again_user_num);
-        // $('#same_again_user_num').text(again_user_num.same_again_user_num);
-        if (parseInt(again_user_num.same_again_user_num) < 0) {
-            $('#same_again_user_num').html("<img src='/xiadie.png'>" + again_user_num.same_again_user_num);
-        } else {
-            $('#same_again_user_num').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + again_user_num.same_again_user_num);
-        }
-        // $('#huan_again_user_num').text(again_user_num.huan_again_user_num);
-        if (parseInt(again_user_num.huan_again_user_num) < 0) {
-            $('#huan_again_user_num').html("<img src='/xiadie.png'>" + again_user_num.huan_again_user_num);
-        } else {
-            $('#huan_again_user_num').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + again_user_num.huan_again_user_num);
+        var str3 = '';
+        if(again_user_num.contrast_again_user_num){
+            str3 += '<div class="rate_class"><span>';
+            if(again_user_num.contrast_again_user_num < 0){
+                str3 += '<img src="/xiadie.png">';
+            }else{
+                str3 += '<img style="transform:rotate(180deg);"  src="/shangzhang.png">';
+            }              
+            str3 += again_user_num.contrast_again_user_num+'%</span></div>'; 
+            $("#contrast_again_user_num").html(str3);           
         }
 
         return false;

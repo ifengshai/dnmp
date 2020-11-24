@@ -106,7 +106,7 @@
                             <div class="margin-div" style="text-align: center;margin: 0 0 20px 0;">
                                 <div class="btn btn-div">
                                 <span class="extend">
-                                    <div class="title">活跃用户数：<div style="color: red;" id="active_user_num">{$active_user_num.active_user_num}</div>
+                                    <div class="title">活跃用户数：<div style="color: red;" id="active_user_num"></div>
 
                                     <span id="contrast_active_user_num">
 
@@ -117,7 +117,7 @@
                                 </div>
                                 <div class="btn btn-div">
                                 <span class="extend">
-                                    <div class="title">注册用户数：<div style="color: red;" id="register_user_num">{$register_user_num.register_user_num}</div></div>
+                                    <div class="title">注册用户数：<div style="color: red;" id="register_user_num"></div></div>
                                     <span id="contrast_register_user_num">
 
                                     </span>
@@ -125,18 +125,9 @@
                                 </div>
                                 <div class="btn btn-div">
                                 <span class="extend">
-                                    <div class="title">复购用户数：<div style="color: red;" id="again_user_num">{$again_user_num.again_user_num}</div></div>
+                                    <div class="title">复购用户数：<div style="color: red;" id="again_user_num"></div></div>
                                     <span id="contrast_again_user_num">
-                                        <!--<div class="rate_class">
-                                        <span id="contrast_again_user_num">
-                                        {if (float)$again_user_num.contrast_again_user_num/100 < 0}
-                                        <img src="/xiadie.png">
-                                        {else /}
-                                        <img style="transform:rotate(180deg);"  src="/shangzhang.png">
-                                        {/if}
-                                        {$again_user_num.contrast_again_user_num}
-                                        </span>
-                                    </div>-->
+
                                     </span>
                                 </span>
                                 </div>
@@ -150,15 +141,15 @@
                                 <label class="control-label col-xs-4">活跃用户趋势统计</label>
                             </div>
                         </div>
-                        <div id="echart1" style="height:800px;width:80%;margin-left: 200px;"></div>
+                        <div id="echart1" style="height:400px;width:80%;margin-left: 140px;"></div>
                     </div>
                     <div class="new-background">
                         <div class="row">
                             <div class="form-group">
-                                <label class="control-label col-xs-4">活跃用户趋势统计</label>
+                                <label class="control-label col-xs-4">新老用户购买转化对比</label>
                             </div>
                         </div>
-                        <div id="echart2" style="height:800px;width:80%;margin-left: 200px;"></div>
+                        <div id="echart2" style="height:500px;width:80%;margin-left: 140px;"></div>
                     </div>
             </div>
     </div>
