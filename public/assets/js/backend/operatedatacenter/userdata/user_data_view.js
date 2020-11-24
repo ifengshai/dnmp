@@ -100,8 +100,12 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                                     type: 'line' //指示器类型。可选项'line' 直线指示器。'shadow' 阴影指示器。'cross' 十字准星指示器。其实是种简写，表示启用两个正交的轴的 axisPointer。
                                 },
                                 formatter: function (param) { //格式化提示信息
-                                    console.log(param);
-                                    return param[0].name + '<br/>' + param[0].seriesName + '：' + param[0].value + '<br/>' + param[1].seriesName + '：' + param[1].value;
+                                    if(param.length == 2){
+                                        return param[0].name + '<br/>' + param[0].seriesName + '：' + param[0].value + '<br/>' + param[1].seriesName + '：' + param[1].value;
+                                    }else{
+                                        return param[0].name + '<br/>' + param[0].seriesName + '：' + param[0].value;
+                                    }
+                                    
                                 }
                             },
                             grid: { //直角坐标系内绘图网格
@@ -116,21 +120,19 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                                 top: '2%',
                                 data: ['新用户', '活跃用户']
                             },
-                            xAxis: [
-                                {
-                                    type: 'category',
-                                    boundaryGap:false
+                            xAxis: 
+                            {
+                                type: 'category',
+                                boundaryGap:false
+                            },
+                            yAxis: 
+                            {
+                                type: 'value',
+                                name: '转化趋势，总体的转化率',
+                                axisLabel: {
+                                    formatter: '{value} %'
                                 }
-                            ],
-                            yAxis: [
-                                {
-                                    type: 'value',
-                                    name: '转化趋势，总体的转化率',
-                                    axisLabel: {
-                                        formatter: '{value} %'
-                                    }
-                                }
-                            ],
+                            },
                         }
                     };
                     
