@@ -335,11 +335,11 @@ class WorkOrderList extends Model
     /**
      * 获取订单地址及处方信息-新
      * @param string $increment_id 订单号
-     * @param string $order_item_number 子单号
+     * @param string $item_order_number 子单号
      * @author lzh
      * @return array|bool
      */
-    public function getAddress($increment_id, $order_item_number='')
+    public function getAddress($increment_id, $item_order_number='')
     {
         //获取地址信息
         $order_field = 'id,site,customer_email as email,customer_firstname as firstname,customer_lastname as lastname,order_type,country_id,region,region_id,city,street,postcode,telephone';
@@ -354,13 +354,13 @@ class WorkOrderList extends Model
         //获取更改镜片sku集
         $showPrescriptions = [];
         $prescriptions = [];
-        if($order_item_number){
+        if($item_order_number){
             $prescription_field = 'b.prescription_type,b.index_type,b.index_id,b.coating_id,b.color_id,b.od_sph,b.os_sph,b.od_cyl,b.os_cyl,b.od_axis,b.os_axis,b.pd_l,b.pd_r,b.pd,b.os_add,b.od_add,b.od_pv,b.os_pv,b.od_pv_r,b.os_pv_r,b.od_bd,b.os_bd,b.od_bd_r,b.os_bd_r';
             $_order_item_process = new NewOrderItemProcess();
             $prescriptions = $_order_item_process
                 ->alias('a')
                 ->field($prescription_field)
-                ->where('a.order_item_number',$order_item_number)
+                ->where('a.item_order_number',$item_order_number)
                 ->join(['fa_order_item_option' => 'b'], 'a.option_id=b.id')
                 ->select()
             ;
@@ -421,19 +421,18 @@ class WorkOrderList extends Model
      * @param int $siteType 网站类型
      * @param array $showPrescriptions 镜片类型列表
      * @param int $type 操作类型：1补发 2更改镜片 3赠品
-     * @param string $order_item_number 子订单号
+     * @param string $item_order_number 子订单号
      * @author lzh
      * @return array
      * @throws \think\Exception
      */
-    public function getReissueLens($siteType, $showPrescriptions, $type = 1, $order_item_number = '')
+    public function getReissueLens($siteType, $showPrescriptions, $type = 1, $item_order_number = '')
     {
         //从网站端获取镜片、镀膜、颜色等列表数据
         $cache_key = $siteType . '_get_lens';
         $data = Cache::get($cache_key);
         if (!$data) {
-            $url = 1 == $siteType ? 'magic/product/newLensData' : 'magic/product/lensData';
-            $data = $this->httpRequest($siteType, $url);
+            $data = $this->httpRequest($siteType, 'magic/product/lensData');
             Cache::set($cache_key, $data, 3600 * 24);
         }
 
@@ -451,7 +450,7 @@ class WorkOrderList extends Model
             'colorList',
             'type',
             'lensColorList',
-            'order_item_number'
+            'item_order_number'
         ];
         if (1 == $type) {
             foreach ($showPrescriptions as $key => $val) {
@@ -748,7 +747,7 @@ class WorkOrderList extends Model
 
                 //修改镜片
                 if (20 == $measure_choose_id) {
-                    $changeLens = $params[$work->item_order_number]['change_lens'];
+                    $changeLens = $params['item_order_info'][$work->item_order_number]['change_lens'];
                     $change_type = 2;
 
                     $lensId = $changeLens['lens_type'];
@@ -972,7 +971,7 @@ class WorkOrderList extends Model
     {
         $work = $this->find($work_id);
         if ($work && 1 == $measure_choose_id) {
-            $change_frame = $params[$work->item_order_number]['change_frame'];
+            $change_frame = $params['item_order_info'][$work->item_order_number]['change_frame'];
             empty($change_frame) && exception("请完善更改镜框信息！！");
 
             //插入更换镜框数据
@@ -1049,32 +1048,53 @@ class WorkOrderList extends Model
      */
     public function cancelOrder($params, $work_id, $measure_choose_id, $measure_id)
     {
-        //循环插入取消订单数据
-        $orderChangeList = [];
-        //判断是否选中取消措施
-        if ($params['cancel_order'] && (3 == $measure_choose_id)) {
-
-            foreach ($params['cancel_order']['original_sku'] as $k => $v) {
-
-                $orderChangeList[$k]['work_id'] = $work_id;
-                $orderChangeList[$k]['increment_id'] = $params['platform_order'];
-                $orderChangeList[$k]['platform_type'] = $params['work_platform'];
-                $orderChangeList[$k]['original_sku'] = $v;
-                $orderChangeList[$k]['original_number'] = $params['cancel_order']['original_number'][$k];
-                $orderChangeList[$k]['change_type'] = 3;
-                $orderChangeList[$k]['measure_id']  = $measure_id;
-                $orderChangeList[$k]['create_person'] = session('admin.nickname');
-                $orderChangeList[$k]['create_time'] = date('Y-m-d H:i:s');
-                $orderChangeList[$k]['update_time'] = date('Y-m-d H:i:s');
+        $work = $this->find($work_id);
+        if ($work && in_array($measure_choose_id,[3,18])) {
+            $orderChangeList = [];
+            if (3 == $measure_choose_id) {//主单取消
+                $_new_order_item_process = new NewOrderItemProcess();
+                $item_order_list = $_new_order_item_process
+                    ->alias('a')
+                    ->field('a.item_order_number,a.sku')
+                    ->join(['fa_order' => 'b'], 'a.order_id=b.id')
+                    ->where(['b.increment_id'=>$params['platform_order']])
+                    ->select()
+                ;
+                foreach ($item_order_list as $v) {
+                    $orderChangeList[] = [
+                        'work_id'=>$work_id,
+                        'increment_id'=>$params['platform_order'],
+                        'platform_type'=>$params['work_platform'],
+                        'item_order_number'=>$v['item_order_number'],
+                        'original_sku'=>$v['sku'],
+                        'original_number'=>1,
+                        'change_type'=>3,
+                        'measure_id'=>$measure_id,
+                        'create_person'=>session('admin.nickname'),
+                        'create_time'=>date('Y-m-d H:i:s'),
+                        'update_time'=>date('Y-m-d H:i:s')
+                    ];
+                }
+            }else{//子单取消
+                $orderChangeList[] = [
+                    'work_id'=>$work_id,
+                    'increment_id'=>$params['platform_order'],
+                    'platform_type'=>$params['work_platform'],
+                    'item_order_number'=>$params['item_order_info'][$work->item_order_number]['cancel_order']['item_order_number'],
+                    'original_sku'=>$params['item_order_info'][$work->item_order_number]['cancel_order']['sku'],
+                    'original_number'=>1,
+                    'change_type'=>3,
+                    'measure_id'=>$measure_id,
+                    'create_person'=>session('admin.nickname'),
+                    'create_time'=>date('Y-m-d H:i:s'),
+                    'update_time'=>date('Y-m-d H:i:s')
+                ];
             }
             $cancelOrderRes = (new WorkOrderChangeSku())->saveAll($orderChangeList);
-            if (false === $cancelOrderRes) {
-                throw new Exception("添加失败！！");
-            } else {
-                WorkOrderMeasure::where(['id' => $measure_id])->update(['sku_change_type' => 3]);
-            }
-        } else {
-            return false;
+            false === $cancelOrderRes && exception("取消失败！！");
+
+            //标记措施表更改类型
+            WorkOrderMeasure::where(['id' => $measure_id])->update(['sku_change_type' => 3]);
         }
     }
 
@@ -1148,14 +1168,14 @@ class WorkOrderList extends Model
      * @throws \think\db\exception\ModelNotFoundException
      * @throws \think\exception\DbException
      */
-    public function createOrder($siteType, $work_id, $isNewVersion = 0)
+    public function createOrder($siteType, $work_id)
     {
-        $changeSkus = WorkOrderChangeSku::where(['work_id' => $work_id, 'change_type' => 5])->select();
-        //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',json_encode(collection($changeSkus)->toArray()),FILE_APPEND);
+        $changeSkuList = WorkOrderChangeSku::where(['work_id' => $work_id, 'change_type' => 5])->select();
         //如果存在补发单的措施
-        if ($changeSkus) {
+        if ($changeSkuList) {
             $postData = $postDataCommon = [];
-            foreach ($changeSkus as $key => $changeSku) {
+            $measure_id = 0;
+            foreach ($changeSkuList as $key => $changeSku) {
                 if(!empty($changeSku['replacement_order'])){
                     continue;
                 }
@@ -1174,7 +1194,7 @@ class WorkOrderList extends Model
                     'region_id' => $address['region_id'],
                     'street' => $address['street'],
                 ];
-                $pdCheck = $pd = $prismcheck = '';
+                $pdCheck = $pd = $prismCheck = '';
                 $pd_r = $pd_l = '';
                 if ($changeSku['pd_r'] && $changeSku['pd_l']) {
                     $pdCheck = 'on';
@@ -1192,7 +1212,7 @@ class WorkOrderList extends Model
                 $od_bd_r = $changeSku['od_bd_r'];
                 $os_bd_r = $changeSku['os_bd_r'];
                 if ($od_pv || $os_pv || $od_bd || $os_bd || $od_pv_r || $os_pv_r || $od_bd_r || $os_bd_r) {
-                    $prismcheck = 'on';
+                    $prismCheck = 'on';
                 }
                 $is_frame_only = 0;
                 if ($prescriptions['lens_id'] || $prescriptions['coating_id'] || $prescriptions['color_id']) {
@@ -1216,7 +1236,7 @@ class WorkOrderList extends Model
                     'pdcheck' => $pdCheck,
                     'pd_r' => $pd_r,
                     'pd_l' => $pd_l,
-                    'prismcheck' => $prismcheck,
+                    'prismcheck' => $prismCheck,
                     'od_pv' => $changeSku['od_pv'],
                     'os_pv' => $changeSku['os_pv'],
                     'od_bd' => $changeSku['od_bd'],
@@ -1238,17 +1258,10 @@ class WorkOrderList extends Model
             $postData = array_merge($postData, $postDataCommon);
             if(!empty($postData)){
                 try {
-                    if(24558 == $work_id){
-                        file_put_contents('/www/wwwroot/mojing/runtime/log/abc.txt',json_encode($postData),FILE_APPEND);
-                    }
-                    if($isNewVersion == 0){
-                        $url = 'magic/order/createOrder';
-                    }elseif($isNewVersion == 1){
-                        $url = 'magic/order/newCreateOrder';
-                    }
-                    $res = $this->httpRequest($siteType, $url, $postData, 'POST');
+                    $res = $this->httpRequest($siteType, 'magic/order/createOrder', $postData, 'POST');
                     $increment_id = $res['increment_id'];
-                    //replacement_order添加补发的订单号
+
+                    //添加补发的订单号
                     WorkOrderChangeSku::where(['work_id' => $work_id, 'change_type' => 5])->setField('replacement_order', $increment_id);
                     self::where(['id' => $work_id])->setField('replacement_order', $increment_id);
     
@@ -1356,19 +1369,18 @@ class WorkOrderList extends Model
      * @param int $type 操作类型：1补发 2更改镜片 3赠品
      * @param array $info
      * @param string $operate_type
-     * @param string $order_item_number 子订单号
+     * @param string $item_order_number 子订单号
      * @author lzh
      * @return array|bool
      * @throws \think\Exception
      */
-    public function getEditReissueLens($siteType, $showPrescriptions, $type = 1, $info = [], $operate_type = '',$order_item_number = '')
+    public function getEditReissueLens($siteType, $showPrescriptions, $type = 1, $info = [], $operate_type = '',$item_order_number = '')
     {
         //从网站端获取镜片、镀膜、颜色等列表数据
         $cache_key = $siteType . '_get_lens';
         $data = Cache::get($cache_key);
         if (!$data) {
-            $url = 'magic/product/lensData';
-            $data = $this->httpRequest($siteType, $url);
+            $data = $this->httpRequest($siteType, 'magic/product/lensData');
             Cache::set($cache_key, $data, 3600 * 24);
         }
 
@@ -1388,7 +1400,7 @@ class WorkOrderList extends Model
             'info',
             'operate_type',
             'lensColorList',
-            'order_item_number'
+            'item_order_number'
         ];
         if (1 == $type) {
             foreach ($showPrescriptions as $key => $val) {
@@ -1416,6 +1428,8 @@ class WorkOrderList extends Model
     {
         $work = self::find($work_id);
 
+        !$work && exception("工单不存在！！");
+
         //判断是否已审核
         if ($work->check_time) return true;
 
@@ -1424,7 +1438,7 @@ class WorkOrderList extends Model
             $time = date('Y-m-d H:i:s');
             $admin_id = session('admin.id');
 
-            //如果承接人是自己的话表示处理完成，不是自己的不做处理
+            //获取工单承接列表
             $orderRecepts = WorkOrderRecept::where('work_id', $work_id)->select();
             $count = count($orderRecepts);
 
@@ -1439,18 +1453,15 @@ class WorkOrderList extends Model
                         //获取措施配置表ID
                         $measure_choose_id = WorkOrderMeasure::where('id', $orderRecept->measure_id)->value('measure_choose_id');
 
-                        //承接人的自动完成状态
-                        if (1 == $orderRecept->is_auto_complete) {
-                            if(0 == $orderRecept->recept_status){
-                                WorkOrderRecept::where('id', $orderRecept->id)->update(['recept_status' => 1, 'finish_time' => $time, 'note' => '自动处理完成']);
-                                WorkOrderMeasure::where('id', $orderRecept->measure_id)->update(['operation_type' => 1, 'operation_time' => $time]);
-
-                                //TODO::补发触发网站端接口
-                                if(7 == $measure_choose_id){
-                                    $this->createOrder($work->work_platform, $work_id, $work->is_new_version);
-                                }
-                            }
+                        //已处理
+                        if (0 < $orderRecept->recept_status) {
                             $key++;
+                        }else{
+                            //无需审核并且审核后自动完成，直接处理优惠券、补价、积分等流程
+                            if (1 == $orderRecept->is_auto_complete) {
+                                $this->follow_up($orderRecept,$measure_choose_id,$work,$params);
+                                $key++;
+                            }
                         }
                     }
                     if ($count == $key) {
@@ -1489,39 +1500,33 @@ class WorkOrderList extends Model
                         //查找措施的id
                         $measure_choose_id = WorkOrderMeasure::where('id', $orderRecept->measure_id)->value('measure_choose_id');
 
-                        //承接人是自己并且是优惠券、补价、积分，承接默认完成
-                        /* if (($orderRecept->recept_person_id == $work->create_user_id || $orderRecept->recept_person_id == $work->after_user_id) && in_array($measure_choose_id, [8, 9, 10])) { */
-                        //优惠券、补价、积分，承接默认完成--修改时间20200528--lx
-                        if (1 == $orderRecept->is_auto_complete) {
-                            //审核成功直接进行处理
-                            if ($params['success'] == 1) {
-                                WorkOrderRecept::where('id', $orderRecept->id)->update(['recept_status' => 1, 'finish_time' => $time, 'note' => '自动处理完成']);
-                                WorkOrderMeasure::where('id', $orderRecept->measure_id)->update(['operation_type' => 1, 'operation_time' => $time]);
-                                if (9 == $measure_choose_id) {//优惠券
-                                    $this->presentCoupon($work->id);
-                                } elseif (10 == $measure_choose_id) {//积分
-                                    $this->presentIntegral($work->id);
-                                } elseif(7 == $measure_choose_id){//补发
-                                    $this->createOrder($work->work_platform, $work_id, $work->is_new_version);
-                                }
+                        //已处理
+                        if (0 < $orderRecept->recept_status) {
+                            $key++;
+                        }else{
+                            //点击审核成功并且审核后自动完成，直接处理优惠券、补价、积分等流程
+                            if (1 == $orderRecept->is_auto_complete && 1 == $params['success']) {
+                                $this->follow_up($orderRecept,$measure_choose_id,$work,$params);
                                 $key++;
                             }
                         }
                     }
-                    if ($count == $key) {
-                        //处理完成
-                        $work_status = 6;
-                        if ($params['success'] == 1) {
-                            $work->complete_time = $time;
-                        }
-                    } elseif ($key > 0  && $count > $key) {
-                        //部分处理
-                        $work_status = 5;
-                    } else {
-                        $work_status = 3;
-                    }
+
+                    //审核拒绝
                     if ($params['success'] == 2) {
                         $work_status = 4;
+                    }else{//审核成功
+                        if ($count == $key) {
+                            //处理完成
+                            $work_status = 6;
+                            $work->complete_time = $time;
+                        } elseif ($key > 0  && $count > $key) {
+                            //部分处理
+                            $work_status = 5;
+                        } else {
+                            //审核成功
+                            $work_status = 3;
+                        }
                     }
                     $work->work_status = $work_status;
                     $work->save();
@@ -1546,6 +1551,35 @@ class WorkOrderList extends Model
             Db::rollback();
             exception($e->getMessage());
         }
+    }
+
+    /**
+     * 审核成功后自动完成处理相关流程
+     * @param object $orderRecept 承接表数据
+     * @param int $measure_choose_id 措施配置表ID
+     * @param object $work 工单表数据
+     * @param array $params 页面传参
+     * * @author lzh
+     * @return bool
+     */
+    public function follow_up($orderRecept,$measure_choose_id,$work,$params){
+        //承接表标记已处理
+        WorkOrderRecept::where('id', $orderRecept->id)->update(['recept_status' => 1, 'finish_time' => date('Y-m-d H:i:s'), 'note' => '自动处理完成']);
+
+        //工单措施标记已处理
+        WorkOrderMeasure::where('id', $orderRecept->measure_id)->update(['operation_type' => 1, 'operation_time' => date('Y-m-d H:i:s')]);
+
+        //补发
+        if(7 == $measure_choose_id){
+            $this->createOrder($work->work_platform, $work->id);
+        }elseif(9 == $measure_choose_id){//发送优惠券
+            $this->presentCoupon($work->id);
+        }elseif(10 == $measure_choose_id){//赠送积分
+            $this->presentIntegral($work->id);
+        }elseif(13 == $measure_choose_id){//修改地址
+            $this->changeAddress($params, $work->id, $measure_choose_id, $orderRecept->measure_id);
+        }
+        return true;
     }
 
     /**
