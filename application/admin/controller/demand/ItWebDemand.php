@@ -234,17 +234,18 @@ class ItWebDemand extends Backend
                  */
                 //是否为产品
                 $authUserIds = array_merge(Auth::getGroupUserId(config('demand.product_group_id')) ?: [], Auth::getGroupUserId(config('demand.product_group_person_id')) ?: []);
-
                 //是否为测试
                 $testAuthUserIds = array_merge(Auth::getGroupUserId(config('demand.test_group_id')) ?: [], Auth::getGroupUserId(config('demand.test_group_person_id')) ?: []);
+                $map['status'] = ['eq', 3];
                 if (in_array($adminId, $authUserIds)) {
-                    $map['pm_audit_status'] = ['in', [1, 2]];
+                    $map['pm_audit_status'] = ['in', [1, 2,3,4]];
+                    $map['status'] = ['eq', 3];
                 } elseif (in_array($adminId, $testAuthUserIds)) {
                     //测试 未上线都算未完成
                     $map['test_status'] = ['in', [1, 2, 3, 4]];
+                    $map['status'] = ['eq', 3];
                 } else {
                     //非产品 非测试  未激活、激活、已响应的任务
-                    $map['status'] = ['in', [1, 2, 3]];
                 }
             } elseif ($filter['label'] == 3) { //BUG任务
                 $map['type'] = 1;
@@ -507,7 +508,7 @@ class ItWebDemand extends Backend
                     $map['pm_audit_status'] = ['in', [1, 2]];
                 } else {
                     //非产品
-                    $map['status'] = ['in', [1, 2, 3]];
+                    $map['status'] = ['eq', 3];
                 }
             } elseif ($filter['label'] == 3) { //BUG任务
                 $map['type'] = 1;
@@ -791,7 +792,7 @@ class ItWebDemand extends Backend
     {
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
-
+//            dump($params);die();
 //            empty($params['priority']) && $this->error('数据异常');
 //            empty($params['pm_audit_status']) && $this->error('数据异常,请刷新页面');
             if ($params) {
@@ -804,15 +805,17 @@ class ItWebDemand extends Backend
                         $row = $this->model->get($params['id']);
                         $row = $row->toArray();
                         $add['site_type'] = implode(',', $params['site_type']);
+                        //status  状态  1 未激活 2 激活 3 已响应 4 完成 5超时完成
+                        //priority  优先级
+                        //pm_audit_status  产品审核状态 1 等待审核 2pend  3通过  4拒绝
 //                        if ($row['status'] == 1) {
 //                            if ($params['priority'] == 1) {
 //                                if ($params['pm_audit_status'] == 3) {
-//                                    $add['status'] = 2;
+//                                    $add['status'] = 3;
 //                                }
 //                            }
 //                        } else {
                             if ($row['priority'] != $params['priority'] || $row['node_time'] != $params['node_time'] || $row['site_type'] != $add['site_type']) {
-//                                $add['status'] = 2;
                                 $add['web_designer_group'] = 0;
                                 $add['web_designer_complexity'] = null;
                                 $add['web_designer_expect_time'] = null;
@@ -825,19 +828,21 @@ class ItWebDemand extends Backend
                                 $add['develop_finish_status'] = 1;
                             }
 //                        }
-
+                       if ($params['pm_audit_status'] ==3){
+                           $add['status'] = 3;
+                       }
                         empty($params['priority']) && $this->error('请选择优先级');
                         empty($params['node_time']) && $this->error('任务周期不能为空');
-
-
                         $add['priority'] = $params['priority'];
                         $add['node_time'] = $params['node_time'];
-                        $time_data = $this->start_time($params['priority'], $params['node_time']);
-                        $add['start_time'] = $time_data['start_time'];
-                        $add['end_time'] = $time_data['end_time'];
+                        //老版本计算周期方法，摒弃掉
+//                      $time_data = $this->start_time($params['priority'], $params['node_time']);
+//                      $add['start_time'] = $time_data['start_time'];
+//                      $add['end_time'] = $time_data['end_time'];
                         $add['pm_audit_status'] = $params['pm_audit_status'];
                         $add['pm_audit_status_time'] = date('Y-m-d H:i', time());
                     }
+                        if($params[''])
                     $add['type'] = $params['type'];
                     $add['site'] = $params['site'];
                     //非空
@@ -849,9 +854,9 @@ class ItWebDemand extends Backend
                     $add['remark'] = $params['remark'];
                     $add['accessory'] = $params['accessory'];
                     $add['is_emergency'] = $params['is_emergency'] ? $params['is_emergency'] : 0;
-                    if ($params['demand_type'] == 2) {
-                        $add['node_time'] = $params['node_time'];
-                    }
+//                    if ($params['demand_type'] == 2) {
+//                        $add['node_time'] = $params['node_time'];
+//                    }
                     $add['functional_module'] = $params['functional_module'];
                     $add['importance'] = $params['importance'];
                     $add['degree_of_urgency'] = $params['degree_of_urgency'];
@@ -859,8 +864,6 @@ class ItWebDemand extends Backend
                     if (!empty($params['important_reasons'])){
                         $add['important_reasons'] = implode(',', $params['important_reasons']);
                     }
-
-
                 }
 
                 $res = $this->model->allowField(true)->save($add, ['id' => $params['id']]);
@@ -1096,7 +1099,7 @@ class ItWebDemand extends Backend
         $ids = $ids ?? input('ids');
         $row = $this->model->get(['id' => $ids]);
         $row_arr = $row->toArray();
-
+//        dump($row_arr);die();
         $row_arr['start_time'] = date('Y-m-d', strtotime($row_arr['start_time']));
         $row_arr['end_time'] = date('Y-m-d', strtotime($row_arr['end_time']));
 
@@ -1150,9 +1153,15 @@ class ItWebDemand extends Backend
             $params = $this->request->post("row/a");
 
             if ($params) {
+                //查看该需求是否被确认过
+                $row = $this->model->get(['id' => $params['id']])->toArray();
+                if ($row['web_designer_group'] ==0 && $row['phper_group'] ==0 && $row['app_group'] ==0){
+                    $this->error('开发还未确认，暂时无法操作');
+                }
                 $update = array();
                 $label = 0;
                 if ($params['type'] == 'queren') {
+
                     $update['test_group'] = $params['test_group'];
                     $update['test_status'] = 2;
                     $update['test_confirm_time'] = date('Y-m-d H:i', time());
@@ -1174,8 +1183,8 @@ class ItWebDemand extends Backend
                         $update['test_status'] = 4;
 
                         $time = date('Y-m-d H:i', time());
-
-                        if ($time > $row_arr['end_time']) {
+//                        if ($time > $row_arr['end_time']) {
+                        if ($time > $row_arr['node_time']) {
                             $update['status'] = 5;
                         } else {
                             $update['status'] = 4;
@@ -1260,7 +1269,8 @@ class ItWebDemand extends Backend
         }
         rsort($time_arr);
 
-        $day_num = strtotime($row_arr['end_time']) - $time_arr[0];
+//        $day_num = strtotime($row_arr['end_time']) - $time_arr[0];
+        $day_num = strtotime($row_arr['node_time']) - $time_arr[0];
 
         if ($day_num < 0) {
             $day = 0;
