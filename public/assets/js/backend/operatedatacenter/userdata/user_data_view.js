@@ -7,16 +7,24 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
             Controller.api.formatter.user_chart(); 
             Controller.api.formatter.new_update_change_line();
             Controller.api.formatter.user_type_pie();
+            Controller.api.formatter.user_order_pie();
             order_data_view();
             $("#sku_submit").click(function () {
                 order_data_view();
                 Controller.api.formatter.user_chart();
                 Controller.api.formatter.new_update_change_line();
                 Controller.api.formatter.user_type_pie();
+                Controller.api.formatter.user_order_pie();
             });
             $("#sku_reset").click(function () {
                 $("#order_platform").val(1);
                 $("#time_str").val('');
+                $("#time_str2").val('');
+                order_data_view();
+                Controller.api.formatter.user_chart();
+                Controller.api.formatter.new_update_change_line();
+                Controller.api.formatter.user_type_pie();
+                Controller.api.formatter.user_order_pie();
             });
         },
         add: function () {
@@ -162,22 +170,16 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                                     return param.data.name + '<br/>数量：' + param.data.value + '<br/> 占比：' + param.percent.toFixed(2) + '%';
                                 }
                             },
-                            graphic:{
-                                type:"text",
+                            title:{
+                                subtext:'用户数',
                                 left:"center",
                                 top:"40%",
-                                style:{
-                                    text:"用户数",
+                                subtextStyle:{
                                     textAlign:"center",
                                     fill:"#333",
-                                    fontSize:20,
+                                    fontSize:16,
                                     fontWeight:700
-                                }
-                            },
-                            title:{
-                                
-                                left:"center",
-                                top:"50%",
+                                },
                                 textStyle:{
                                     color:"#27D9C8",
                                     fontSize:36,
@@ -186,30 +188,6 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                             },
                             series:[{
                                 radius: ['50%', '70%'],
-                                label: {
-                                    normal: {
-                                        show: true,
-                                        position: 'center',
-                                        color:'#4c4a4a',
-                                        formatter: '{total|' + this.total +'}'+ '\n\r' + '{active|共发布活动}',
-                                        rich: {
-                                            total:{
-                                                fontSize: 35,
-                                                fontFamily : "微软雅黑",
-                                                color:'#454c5c'
-                                            },
-                                            active: {
-                                                fontFamily : "微软雅黑",
-                                                fontSize: 16,
-                                                color:'#6c7a89',
-                                                lineHeight:30,
-                                            },
-                                        }
-                                    },
-                                    emphasis: {//中间文字显示
-                                        show: true,
-                                    }
-                                },
                             }]
                         }
                     };
@@ -224,6 +202,53 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
 
                     };
                     EchartObj.api.ajax(options3, chartOptions)
+                },
+                user_order_pie: function () {
+                    //库存分布
+                    var chartOptions = {
+                        targetId: 'echart4',
+                        downLoadTitle: '图表',
+                        type: 'pie',
+                        pie: {
+                            tooltip: { //提示框组件。
+                                trigger: 'item',
+                                formatter: function (param) {
+                                    console.log(param)
+                                    return param.data.name + '<br/>数量：' + param.data.value + '<br/> 占比：' + param.percent.toFixed(2) + '%';
+                                }
+                            },
+                            title:{
+                                subtext:'总销售额',
+                                left:"center",
+                                top:"40%",
+                                subtextStyle:{
+                                    textAlign:"center",
+                                    fill:"#333",
+                                    fontSize:16,
+                                    fontWeight:700
+                                },
+                                textStyle:{
+                                    color:"#27D9C8",
+                                    fontSize:36,
+                                    align:"center"
+                                }
+                            },
+                            series:[{
+                                radius: ['50%', '70%'],
+                            }]
+                        }
+                    };
+
+                    var options4 = {
+                        type: 'post',
+                        url: 'operatedatacenter/userdata/user_data_view/user_order_pie',
+                        data: {
+                            'time_str' :  $("#time_str").val(),
+                            'order_platform' :  $("#order_platform").val(),
+                        }
+
+                    };
+                    EchartObj.api.ajax(options4, chartOptions)
                 },
             },
             bindevent: function () {

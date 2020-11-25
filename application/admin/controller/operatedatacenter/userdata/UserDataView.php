@@ -294,7 +294,6 @@ class UserDataView extends Backend
                 $end   = date('Y-m-d 23:59:59');
                 $map_where['created_at'] = ['between', [$start,$end]];
             }
-            //首购人数
             if($order_platform == 2){
                 $web_model = Db::connect('database.db_voogueme');
             }elseif($order_platform == 3){
@@ -323,6 +322,67 @@ class UserDataView extends Backend
             $json['column'] = $column;
             $json['columnData'] = $data;
             $json['total'] = $count;
+
+            return json(['code' => 1, 'data' => $json]);
+        }
+    }
+    /**
+     * 不同用户类型销售额贡献饼图
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/10/14 15:02:23 
+     * @return void
+     */
+    public function user_order_pie()
+    {
+        if ($this->request->isAjax()) {
+            $params = $this->request->param();
+            $order_platform = $params['order_platform'] ? $params['order_platform'] : 1;
+            if ($params['time_str']) {
+                $createat = explode(' ', $params['time_str']);
+                $map_where['o.created_at'] =$order_where['created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
+            } else{
+                $start = date('Y-m-d', strtotime('-6 day'));
+                $end   = date('Y-m-d 23:59:59');
+                $map_where['o.created_at'] = ['between', [$start,$end]];
+            }
+            $map_where['o.status'] = $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+            if($order_platform == 2){
+                $model = $this->voogueme;
+            }elseif($order_platform == 3){
+                $model = $this->nihao;
+            }else{
+                $model = $this->zeelool;
+            }
+            $count = $model->where($order_where)->count();  //总订单
+            $order_amount = $model->where($order_where)->sum('base_grand_total'); //总订单金额
+            $count1 = $model->alias('o')->join('customer_entity c ','o.customer_id=c.entity_id','left')->where($map_where)->where('c.group_id',1)->count();  //普通用户人数
+            $count2 = $model->alias('o')->join('customer_entity c ','o.customer_id=c.entity_id','left')->where($map_where)->where('c.group_id',4)->count();    //vip用户人数
+            $count3 = $model->alias('o')->join('customer_entity c ','o.customer_id=c.entity_id','left')->where($map_where)->where('c.group_id',2)->count();  //批发用户人数
+            $count4 = $count-$count1-$count2-$count3;
+            $data = array(
+                array(
+                    'name'=>'普通用户',
+                    'value'=>$count1
+                ),
+                array(
+                    'name'=>'VIP用户',
+                    'value'=>$count2
+                ),
+                array(
+                    'name'=>'游客',
+                    'value'=>$count4
+                ),
+                array(
+                    'name'=>'批发',
+                    'value'=>$count3
+                ),
+            );
+            $column = ['普通用户','VIP用户','游客','批发'];
+            $json['column'] = $column;
+            $json['columnData'] = $data;
+            $json['total'] = $order_amount;
 
             return json(['code' => 1, 'data' => $json]);
         }
