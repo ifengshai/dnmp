@@ -1675,9 +1675,12 @@ class PurchaseOrder extends Backend
             if (!$row) {
                 $this->error('导入失败！！,1688单号' . $v[0] . '未查询到记录');
             }
+            if ($row->purchase_status  != 2) {
+                $this->error('导入失败！！,1688单号' . $v[0] . '订单状态必须是已审核');
+            }
             //拆分物流单号和物流公司
             $logistics_data = explode(':', $v[1]);
-            $result = $this->model->where(['1688_number' => $v[0]])->update(['purchase_status' => 6,'logistics_number' => $logistics_data[1], 'logistics_company_name' => $logistics_data[0],'logistics_company_no' => $logistics_data[0]]);
+            $result = $this->model->where(['1688_number' => $v[0]])->update(['purchase_status' => 6, 'logistics_number' => $logistics_data[1], 'logistics_company_name' => $logistics_data[0], 'logistics_company_no' => $logistics_data[0], 'is_add_logistics' => 1]);
 
             $list = [];
             $list['order_number'] = $row->purchase_number;
