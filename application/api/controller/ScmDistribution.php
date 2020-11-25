@@ -272,7 +272,7 @@ class ScmDistribution extends Scm
         //配镜片：判断定制片
         if(3 == $check_status){
             //判断定制片暂存
-            $msg = [];
+            $msg = '';
             $second = 0;
             if(0 < $item_process_info['temporary_house_id']){
                 //获取库位号，有暂存库位号，是第二次扫描，返回展示取出按钮
