@@ -69,6 +69,16 @@ class Distribution extends Backend
             $_stock_house = new StockHouse();
             $filter = json_decode($this->request->get('filter'), true);//处理异常选项
             $tmp_item_process_id = [];
+            //创建过工单且未处理的子单号集合
+            $_work_order_measure = new WorkOrderMeasure();
+            $work_order_where['a.operation_type'] = 7;//fa_work_order_measure子单工单：0未处理
+            $work_order_where['b.work_status'] = [['>', 0], ['<', 6]];//fa_work_order_list主工单状态
+            $item_process_number = $_work_order_measure
+                ->alias('a')
+                ->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')
+                ->where($work_order_where)
+                ->column('a.item_order_number');
+
             if ($filter['abnormal'] || $filter['stock_house_num']) {
                 //筛选异常
                 if ($filter['abnormal']) {
@@ -108,14 +118,6 @@ class Distribution extends Backend
             /*
             if (8 == $label) {
                 //查询有未处理工单的子单，异常表中存在有工单异常数据，后续要去重
-                $_work_order_measure = new WorkOrderMeasure();
-                $work_order_where['a.operation_type'] = 7;//fa_work_order_measure子单工单：0未处理
-                $work_order_where['b.work_status'] = [['>', 0], ['<', 6]];//fa_work_order_list主工单状态
-                $item_process_number = $_work_order_measure
-                    ->alias('a')
-                    ->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')
-                    ->where($work_order_where)
-                    ->column('a.item_order_number');
                 $item_process_id_work = $this->model->where(['item_order_number'=>['in', array_unique($item_process_number)]])->column('id');
                 $map['a.id'] = ['in', array_merge($tmp_item_process_id, $item_process_id_work)];
             }
@@ -167,10 +169,14 @@ class Distribution extends Backend
                 } elseif (!empty($value['store_house_id'])) {
                     $stock_house_num = $stock_house_data[$value['store_house_id']];
                 }
-                if (8 == $label && $value['abnormal_house_id'] > 0) {
+                //处理异常按钮显示 创建工单且未处理 或 跟单且未处理异常 handle_abnormal 1显示 0不显示
+                $handle_abnormal = 0;
+                if (8 == $label) {
+                    if ($value['abnormal_house_id'] > 0 || in_array($value['abnormal_house_id'], $item_process_number))
                     //处理异常按钮显示
                     $handle_abnormal = 1;
                 }
+                $list[$key]['handle_abnormal'] = $handle_abnormal;
                 $list[$key]['stock_house_num'] = $stock_house_num ?? '-';
                 $list[$key]['created_at'] = date('Y-m-d H:i:s', $value['created_at']);
             }

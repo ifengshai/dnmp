@@ -181,7 +181,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                         console.log(1111);
                                         console.log(row);
                                         //返回true时按钮显示,返回false隐藏
-                                        if(8 == Config.label && row.abnormal_house_id > 0){
+                                        if(row.handle_abnormal > 0){
                                             return true;
                                         }else{
                                             return false;
