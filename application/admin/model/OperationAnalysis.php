@@ -250,6 +250,7 @@ class OperationAnalysis extends Model
         $today_sales_money_data                 = $this->get_today_sales_money($id);
         $today_order_num_data                   = $this->get_today_order_num($id);
         $today_order_success_data               = $this->get_today_order_success($id);
+        //新增购物车数
         $today_shoppingcart_total_data          = $this->get_today_shoppingcart_total($id);
         $today_shoppingcart_new_data            = $this->get_today_shoppingcart_new($id);
         $today_register_customer_data           = $this->get_today_register_customer($id);
@@ -259,8 +260,21 @@ class OperationAnalysis extends Model
         }else{
             $today_unit_price_data = 0;
         }
+        //新增购物车传化率 2020-11-25要改成 新增购物车产生的订单/新增的购物车数量 现在的计算方法是 订单支付成功数/新增购物车的数量
         if(false != $today_shoppingcart_total_data){
-            $today_shoppingcart_conversion_data     = round(($today_order_success_data/$today_shoppingcart_total_data),4)*100;
+            //今日所有购物车的ids
+            $today_shoppingcart_total_sql = "SELECT entity_id from sales_flat_quote where base_grand_total>0 AND TO_DAYS(created_at) = TO_DAYS(NOW())";
+            $model->table('sales_flat_quote')->query("set time_zone='+8:00'");
+            $today_shoppingcart_total_ids  = $model->query($today_shoppingcart_total_sql);
+            //今天新增购物车产生的订单
+            $order_status = $this->order_status;
+            $today_order_success_sql = "SELECT count(*) counter FROM sales_flat_order WHERE TO_DAYS(created_at) = TO_DAYS(NOW()) $order_status and quote_id in ({$today_shoppingcart_total_ids})";
+            $model->table('sales_flat_order')->query("set time_zone='+8:00'");
+            $today_order_success_rs = $model->query($today_order_success_sql);
+            $today_order_success_data_cart = $today_order_success_rs[0]['counter'];
+
+            // $today_shoppingcart_conversion_data     = round(($today_order_success_data/$today_shoppingcart_total_data),4)*100;
+            $today_shoppingcart_conversion_data     = round(($today_order_success_data_cart/$today_shoppingcart_total_data),4)*100;
         }else{
             $today_shoppingcart_conversion_data = 0;
         }
