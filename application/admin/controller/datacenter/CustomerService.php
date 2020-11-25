@@ -1874,11 +1874,7 @@ class CustomerService extends Backend
         $notCustomer_where['work_status'] = 6;
         $notCustomer_where_other['work_status'] = ['in',[0, 1, 2, 3, 4, 5, 6, 7]];
         $notCustomer_where_other['create_user_id'] = ['in',$cat];
-        Log::write("运营客服信息");
-        Log::write($notCustomer_where);
-        Log::write($map);
-
-
+      
         //非客服工单已完成数据
         $notCustomer = $this->model->where($notCustomer_where)->where($map)->field('count(*) as counter,sum(base_grand_total) as base_grand_total,count(replacement_order !="" or null) as replacement_counter,
             sum(is_refund) as refund_num,sum(refund_money) as refund_money,count(coupon_str !="" or null) as coupon_str ')->select();
