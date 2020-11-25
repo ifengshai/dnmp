@@ -59,6 +59,7 @@ class WorkOrderList extends Backend
         ##### start ######
         //global $workOrderConfigValue;
         $workOrderConfigValue = $this->workOrderConfigValue = (new Workorderconfig)->getConfigInfo();
+        //print_r($workOrderConfigValue);die;
         $this->assignconfig('workOrderConfigValue', $this->workOrderConfigValue);
         ###### end ######
         $this->model = new \app\admin\model\saleaftermanage\WorkOrderList;
