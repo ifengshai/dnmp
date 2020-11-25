@@ -266,6 +266,7 @@ class OperationAnalysis extends Model
             $today_shoppingcart_total_sql = "SELECT entity_id from sales_flat_quote where base_grand_total>0 AND TO_DAYS(created_at) = TO_DAYS(NOW())";
             $model->table('sales_flat_quote')->query("set time_zone='+8:00'");
             $today_shoppingcart_total_ids  = $model->query($today_shoppingcart_total_sql);
+            $today_shoppingcart_total_ids = implode(',',$today_shoppingcart_total_ids);
             //今天新增购物车产生的订单
             $order_status = $this->order_status;
             $today_order_success_sql = "SELECT count(*) counter FROM sales_flat_order WHERE TO_DAYS(created_at) = TO_DAYS(NOW()) $order_status and quote_id in ({$today_shoppingcart_total_ids})";
