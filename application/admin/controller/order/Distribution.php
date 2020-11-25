@@ -68,6 +68,7 @@ class Distribution extends Backend
 
             $_stock_house = new StockHouse();
             $filter = json_decode($this->request->get('filter'), true);//处理异常选项
+            $tmp_item_process_id = [];
             if ($filter['abnormal'] || $filter['stock_house_num']) {
                 //筛选异常
                 if ($filter['abnormal']) {
@@ -80,7 +81,11 @@ class Distribution extends Backend
                         ->where($abnormal_where)
                         ->column('item_process_id');
 
-                    $map['a.id'] = ['in', $item_process_id];
+                    if (8 == $label){
+                        $tmp_item_process_id = $item_process_id;
+                    } else {
+                        $map['a.id'] = ['in', $item_process_id];
+                    }
                 }
 
                 //筛选库位号
@@ -100,18 +105,21 @@ class Distribution extends Backend
                 unset($filter['stock_house_num']);
             }
             //-------------------跟单数据不全，配货列表--跟单列表展示注释释放----------------------//
-            /*elseif (8 == $label) {
+            /*
+            if (8 == $label) {
                 //查询有未处理工单的子单，异常表中存在有工单异常数据，后续要去重
                 $_work_order_measure = new WorkOrderMeasure();
-                $work_order_where['a.operation_type'] = 0;//fa_work_order_measure子单工单：0未处理
+                $work_order_where['a.operation_type'] = 7;//fa_work_order_measure子单工单：0未处理
                 $work_order_where['b.work_status'] = [['>', 0], ['<', 6]];//fa_work_order_list主工单状态
-                $item_process_numbers = $_work_order_measure
+                $item_process_number = $_work_order_measure
                     ->alias('a')
                     ->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')
                     ->where($work_order_where)
-                    ->column('item_order_number');
-                $map['a.item_order_number'] = ['in', $item_process_numbers];
-            }*/
+                    ->column('a.item_order_number');
+                $item_process_id_work = $this->model->where(['item_order_number'=>['in', array_unique($item_process_number)]])->column('id');
+                $map['a.id'] = ['in', array_merge($tmp_item_process_id, $item_process_id_work)];
+            }
+            */
 
             if ($filter['site']) {
                 $map['a.site'] = ['in', $filter['site']];
@@ -158,6 +166,10 @@ class Distribution extends Backend
                     $stock_house_num = $stock_house_data[$value['abnormal_house_id']];
                 } elseif (!empty($value['store_house_id'])) {
                     $stock_house_num = $stock_house_data[$value['store_house_id']];
+                }
+                if (8 == $label && $value['abnormal_house_id'] > 0) {
+                    //处理异常按钮显示
+                    $handle_abnormal = 1;
                 }
                 $list[$key]['stock_house_num'] = $stock_house_num ?? '-';
                 $list[$key]['created_at'] = date('Y-m-d H:i:s', $value['created_at']);
