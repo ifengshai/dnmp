@@ -171,26 +171,28 @@ table.altrowstable tr:nth-child(even){
                             {if $customer_type111 eq 0 }
                             <div class="btn btn-div">
                                 <span class="extend">
-                                    <p>工单创建量</p>
+                                    <p>工单创建量01</p>
                                     <span style="color: red;" id="totalPayInfo">{$all_work_list_creat_num}</span>
                                 </span>
                             </div>
                             <div class="btn btn-div">
                                 <span class="extend">
                                     <p> 工单完成量</p>
-                                   <span style="color: red;" id="totalPayInfo">{$all_work_list_num}</span>
+                                   <span style="color: red;" id="totalPayInfo"> {if $all_work_list_num eq null}0 {else/}{$all_work_list_num}{/if}</span>
                                 </span>
                             </div>
                             <div class="btn btn-div" >
                                 <span class="extend">
                                     <p>订单总金额（<i class="fa fa-dollar"></i>）</p>
-                                    <span style="color: red;" id="totalPayInfo">{$all_work_list_base_grand_total}</span>
+                                    <span style="color: red;" id="totalPayInfo">  {if $all_work_list_base_grand_total eq null}0 {else/}{$all_work_list_base_grand_total}{/if}</span>
                                 </span>
                             </div>
                             <div class="btn btn-div">
                                 <p>补发单数</p>
                                 <span class="extend">
-                                    <span style="color: red;" id="totalPayInfo">{$all_work_list_replacement_counter}</span>
+                                    <span style="color: red;" id="totalPayInfo">
+                                    {if $all_work_list_replacement_counter eq null}0 {else/}{$all_work_list_replacement_counter}{/if}
+                                    </span>
                                 </span>
                             </div>
                             <div class="btn btn-div">
@@ -202,7 +204,9 @@ table.altrowstable tr:nth-child(even){
                             <div class="btn btn-div">
                                 <p>优惠券发放量</p>
                                 <span class="extend">
-                                    <span style="color: red;" id="totalPayInfo">{$all_work_list_coupon_str}</span>
+                                    <span style="color: red;" id="totalPayInfo">
+                                     {if $all_work_list_coupon_str eq null}0 {else/}{$all_work_list_coupon_str}{/if}
+                                    </span>
                                 </span>
                             </div>
                             <div class="btn btn-div">
@@ -214,7 +218,9 @@ table.altrowstable tr:nth-child(even){
                             <div class="btn btn-div">
                                 <p>退款单数</p>
                                 <span class="extend">
-                                    <span style="color: red;" id="totalPayInfo">{$all_work_list_refund_num}</span>
+                                    <span style="color: red;" id="totalPayInfo">
+                                        {if $all_work_list_refund_num eq null}0 {else/}{$all_work_list_refund_num}{/if}
+                                       </span>
                                 </span>
                             </div>
                             {if $workOrderNum gt 0 }
@@ -235,7 +241,9 @@ table.altrowstable tr:nth-child(even){
                             <div class="btn btn-div" >
                                 <p>退款金额（<i class="fa fa-dollar"></i>）</p>
                                 <span class="extend">
-                                    <span style="color: red;" id="totalPayInfo">{$all_work_list_refund_money}</span>
+                                    <span style="color: red;" id="totalPayInfo">
+                                    {if $all_work_list_refund_money eq null}0 {else/}{$all_work_list_refund_money}{/if}
+                                    </span>
                                 </span>
                             </div>
                             {if $totalOrderMoney gt 0 }
@@ -256,21 +264,26 @@ table.altrowstable tr:nth-child(even){
                             {/if}
                             {if $customer_type111 neq 0 }
                             <div class="btn btn-div">
-                                <p>工单创建量</p>
+                                <p>工单创建量02</p>
                                 <span class="extend">
-                                    <span style="color: red;" id="totalPayInfo">{$all_work_list_creat_num}</span>
+                                    <span style="color: red;" id="totalPayInfo">
+                                    {if $all_work_list_creat_num eq null}0 {else/}{$all_work_list_creat_num}{/if}
+                                    </span>
                                 </span>
                             </div>
                             <div class="btn btn-div">
                                 <p>工单完成量</p>
                                 <span class="extend">
-                                    <span style="color: red;" id="totalPayInfo">{$workOrderNum}</span>
+                                    <span style="color: red;" id="totalPayInfo">
+                                    {if $all_work_list_num eq null}0 {else/}{$all_work_list_num}{/if}</span>
                                 </span>
                             </div>
                             <div class="btn btn-div">
                                 <p>订单总金额（<i class="fa fa-dollar"></i>）</p>
                                 <span class="extend">
-                                    <span style="color: red;" id="totalPayInfo">{$totalOrderMoney}</span>
+                                    <span style="color: red;" id="totalPayInfo">
+                                    {if $all_work_list_base_grand_total eq null}0 {else/}{$all_work_list_base_grand_total}{/if}
+                                    </span>
                                 </span>
                             </div>
 
@@ -278,19 +291,23 @@ table.altrowstable tr:nth-child(even){
                             <div class="btn btn-div">
                                 <p>补发单数</p>
                                 <span class="extend">
-                                    <span style="color: red;" id="totalPayInfo">{$replacementNum}</span>
+                                    <span style="color: red;" id="totalPayInfo">
+                                        {if $all_work_list_replacement_counter eq null}0 {else/}{$all_work_list_replacement_counter}{/if}
+                                      </span>
                                 </span>
                             </div>
                             <div class="btn btn-div">
                                 <p>补发订单比</p>
                                 <span class="extend">
-                                    <span style="color: red;" id="totalPayInfo">{$replacement_counter_proportion}</span>
+                                    <span style="color: red;" id="totalPayInfo">{$all_work_list_replacement_counter_proportion}</span>
                                 </span>
                             </div>
                             <div class="btn btn-div">
                                 <p>优惠券发放量</p>
                                 <span class="extend">
-                                    <span style="color: red;" id="totalPayInfo">{$all_work_list_coupon_str}</span>
+                                    <span style="color: red;" id="totalPayInfo">
+                                    {if $all_work_list_coupon_str eq null}0 {else/}{$all_work_list_coupon_str}{/if}
+                                    </span>
                                 </span>
                             </div>
                             <div class="btn btn-div">
@@ -302,14 +319,16 @@ table.altrowstable tr:nth-child(even){
                             <div class="btn btn-div">
                                 <p>退款单数</p>
                                 <span class="extend">
-                                    <span style="color: red;" id="totalPayInfo">{$refundMoneyNum}</span>
+                                    <span style="color: red;" id="totalPayInfo">
+                                    {if $all_work_list_refund_num eq null}0 {else/}{$all_work_list_refund_num}{/if}
+                                    </span>
                                 </span>
                             </div>
                             {if $workOrderNum gt 0 }
                             <div class="btn btn-div">
                                 <p>退款订单比</p>
                                 <span class="extend">
-                                    <span style="color: red;" id="totalPayInfo">{$refundMoneyNum_proportion}</span>
+                                    <span style="color: red;" id="totalPayInfo">{$all_work_list_refund_rate}</span>
                                 </span>
                             </div>
                             {else/}
@@ -323,14 +342,16 @@ table.altrowstable tr:nth-child(even){
                             <div class="btn btn-div">
                                 <p>退款金额（<i class="fa fa-dollar"></i>）</p>
                                 <span class="extend">
-                                    <span style="color: red;" id="totalPayInfo">{$refundMoney}</span>
+                                    <span style="color: red;" id="totalPayInfo">
+                                    {if $all_work_list_refund_money eq null}0 {else/}{$all_work_list_refund_money}{/if}
+                                    </span>
                                 </span>
                             </div>
                             {if $totalOrderMoney gt 0 }
                             <div class="btn btn-div">
                                 <p>退款金额比（<i class="fa fa-dollar"></i>）</p>
                                 <span class="extend">
-                                    <span style="color: red;" id="totalPayInfo">{$refund_money_proportion}</span>
+                                    <span style="color: red;" id="totalPayInfo">{$all_work_list_refund_money_rate}</span>
                                 </span>
                             </div>
                             {else/}

@@ -1718,46 +1718,49 @@ class CustomerService extends Backend
         $workList_sum = collection($workList_sum)->toArray();
         //客服数据统计
         //累计工单完成量
-        $workOrderNum = $workList_sum[0]['counter'];
+        $all_work_list_num =$workOrderNum = $workList_sum[0]['counter'];
         //累计订单总金额
-        $totalOrderMoney = $workList_sum[0]['base_grand_total'];
+        $all_work_list_base_grand_total = $totalOrderMoney = $workList_sum[0]['base_grand_total'];
+
         //累计退款单数
-        $refundMoneyNum  = $workList_sum[0]['refund_num'];
+        $all_work_list_refund_num  = $workList_sum[0]['refund_num'];
         //累计使用优惠券单数
         $all_work_list_coupon_str   = $workList_sum[0]['coupon'];
         //累计补发单数
-        $replacement_counter  = $workList_sum[0]['replacement_counter'];
+        $all_work_list_replacement_counter  = $workList_sum[0]['replacement_counter'];
         //累计退款金额
-        $refund_money  = $workList_sum[0]['refund_money'];
+        $all_work_list_refund_money  = $workList_sum[0]['refund_money'];
         if ($workOrderNum <1){
             //优惠券占比
             $all_work_list_coupon_str_proportion =0;
             //补发订单量占比
-            $replacement_counter_proportion = 0;
+            $all_work_list_replacement_counter_proportion = 0;
             //退款金额占比
-            $refund_money_proportion = 0;
+            $all_work_list_refund_money_rate = 0;
             //退款订单占比
-            $refundMoneyNum_proportion = 0;
+            $all_work_list_refund_rate = 0;
         }else{
             //优惠券占比
             $all_work_list_coupon_str_proportion = round($workOrderNum/$all_work_list_coupon_str,2).'%';
             //补发订单量占比
-            $replacement_counter_proportion = round($workOrderNum/$replacement_counter,2).'%';
+            $all_work_list_replacement_counter_proportion = round($workOrderNum/$all_work_list_replacement_counter,2).'%';
             //退款金额占比
-            $refund_money_proportion = round($totalOrderMoney/$refund_money,2).'%';
+            $all_work_list_refund_money_rate = round($totalOrderMoney/$all_work_list_refund_money,2).'%';
             //退款订单占比
-            $refundMoneyNum_proportion = round($workOrderNum/$refundMoneyNum,2).'%';
+            $all_work_list_refund_rate = round($workOrderNum/$all_work_list_refund_num,2).'%';
         }
 
         $this->assign('all_work_list_coupon_str_proportion',$all_work_list_coupon_str_proportion);
-        $this->assign('replacement_counter_proportion',$replacement_counter_proportion);
-        $this->assign('refund_money_proportion',$refund_money_proportion);
-        $this->assign('refundMoneyNum_proportion',$refundMoneyNum_proportion);
-
-        $this->assign('totalOrderMoney',$totalOrderMoney);
+        $this->assign('all_work_list_num',$all_work_list_num);
+        $this->assign('all_work_list_base_grand_total',$all_work_list_base_grand_total);
+        $this->assign('all_work_list_refund_num',$all_work_list_refund_num);
         $this->assign('all_work_list_coupon_str',$all_work_list_coupon_str);
-        $this->assign('replacement_counter',$replacement_counter);
-        $this->assign('refund_money',$refund_money);
+        $this->assign('all_work_list_replacement_counter',$all_work_list_replacement_counter);
+        $this->assign('all_work_list_refund_money',$all_work_list_refund_money);
+        $this->assign('all_work_list_replacement_counter_proportion',$all_work_list_replacement_counter_proportion);
+        $this->assign('all_work_list_refund_money_rate',$all_work_list_refund_money_rate);
+        $this->assign('all_work_list_refund_rate',$all_work_list_refund_rate);
+
 
         $replacementOrder = $this->model->where($where)->where($map)->field('count(replacement_order !="" or null) as counter,count(coupon_str !="" or null) as coupon,create_user_id')->group('create_user_id')->select();
 
