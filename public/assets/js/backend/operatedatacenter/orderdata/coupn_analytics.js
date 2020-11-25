@@ -45,23 +45,22 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
             // 为表格绑定事件
             Controller.api.formatter.user_data_pie();
             Controller.api.formatter.lens_data_pie();
-            var params = table.bootstrapTable('getOptions')
-            params.queryParams = function(params) {
-
-                //定义参数
-                var filter = {};
-                //遍历form 组装json
-                $.each($("#form").serializeArray(), function(i, field) {
-                    filter[field.name] = field.value;
-                });
-
-                //参数转为json字符串
-                params.filter = JSON.stringify(filter)
-                console.info(params);
-                return params;
-            }
-
-            table.bootstrapTable('refresh',params);
+            // var params = table.bootstrapTable('getOptions')
+            // params.queryParams = function(params) {
+            //
+            //     //定义参数
+            //     var filter = {};
+            //     //遍历form 组装json
+            //     $.each($("#form").serializeArray(), function(i, field) {
+            //         filter[field.name] = field.value;
+            //     });
+            //
+            //     //参数转为json字符串
+            //     params.filter = JSON.stringify(filter)
+            //     return params;
+            // }
+            //
+            // table.bootstrapTable('refresh',params);
             Table.api.bindevent(table);
 
             $("#sku_submit").click(function(){

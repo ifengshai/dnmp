@@ -24,7 +24,7 @@ class CoupnAnalytics extends Backend
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
             $filter = json_decode($this->request->get('filter'), true);
-            // dump($filter);die;
+            // dump($filter);
             //如果发送的来源是Selectpage，则转发到Selectpage
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
@@ -72,6 +72,7 @@ class CoupnAnalytics extends Backend
             $model->table('sales_flat_order')->query("set time_zone='+8:00'");
 
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+
             $total = $salesrule->table('salesrule')
                 ->where('channel', '>', 0)
                 ->field('name,rule_id,channel')
