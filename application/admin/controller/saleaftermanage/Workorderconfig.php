@@ -450,6 +450,10 @@ class Workorderconfig extends Backend
         $all_documentary = (new WorkOrderDocumentary)->where($where)->select();
         //所有工单类型措施关系表
         $all_problem_step = (new WorkOrderProblemStep)->where($where)->select();
+        //所有主单工单类型措施关系表
+        $all_problem_main_step = (new WorkOrderProblemStep)->where(['is_del' => 1, 'is_item_order' => 0])->select();
+        //所有子单工单类型措施关系表
+        $all_problem_item_step = (new WorkOrderProblemStep)->where(['is_del' => 1, 'is_item_order' => 1])->select();
         //所有工单规则审核表
         $all_check_rule   = (new WorkOrderCheckRule)->where($where)->order('weight desc')->select();
         //客服部门角色组ID
@@ -462,7 +466,7 @@ class Workorderconfig extends Backend
         //跟单人分组,大的问题类型分类two,问题类型/措施关系集合,分组对应的用户集合,审核人权重规则,审核组权重规则,所有的承接组,所有的承接人
         $customer_problem_type = $warehouse_problem_type = $customer_problem_classify_arr
             = $step = $platform = $kefumanage = $documentary_group = $documentary_person
-            = $customer_problem_classify = $relation_problem_step = $group = $check_person_weight = $check_group_weight = $all_extend_group = $all_extend_person = [];
+            = $customer_problem_classify = $relation_problem_step = $group = $check_person_weight = $check_group_weight = $all_extend_group = $all_extend_person = $relation_problem_main_step = $relation_problem_item_step = [];
         //客服a,b组ID a,b组的主管ID,客服经理ID
         $a_group_id = $b_group_id = $a_uid = $b_uid = $customer_manager_id = 0;
         //所有的组分别对应的有哪些用户
@@ -562,6 +566,20 @@ class Workorderconfig extends Backend
                 }
             }
         }
+        //存在主单工单类型措施关系表
+        if(!empty($all_problem_main_step)){
+            $all_problem_main_step = collection($all_problem_main_step)->toArray();
+            foreach($all_problem_main_step as $fv){
+                $relation_problem_main_step[$fv['problem_id']][] = $fv;
+            }
+        }
+        //存在子单工单类型措施关系表
+        if(!empty($all_problem_item_step)){
+            $all_problem_item_step = collection($all_problem_item_step)->toArray();
+            foreach($all_problem_item_step as $fv){
+                $relation_problem_item_step[$fv['problem_id']][] = $fv;
+            }
+        }
         //根据所有的承接组求出所有的承接人
         if(!empty($all_extend_group)){
             $all_extend_group = array_unique($all_extend_group);
@@ -596,8 +614,9 @@ class Workorderconfig extends Backend
         $arr['step']                          = $step;
         $arr['platform']                      = $platform;
         $arr['kefumanage']                    = $kefumanage;
-        $arr['all_problem_step']              = $relation_problem_step;
-        $arr['all_problem_item_step']         = $relation_problem_step;
+        $arr['all_problem_step']              = $relation_problem_main_step;
+//        $arr['all_problem_main_step']         = $relation_problem_main_step;
+        $arr['all_problem_item_step']         = $relation_problem_item_step;
         $arr['check_group_weight']            = $check_group_weight;
         $arr['check_person_weight']           = $check_person_weight;
         $arr['customer_department_rule']      = $customer_department_rule;
