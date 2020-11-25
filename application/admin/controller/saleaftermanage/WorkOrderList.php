@@ -1406,10 +1406,11 @@ class WorkOrderList extends Backend
             $this->assignconfig('ids', $row->id);
             $this->view->assign('row', $row);
 
-            //获取订单信息及子订单列表
-            $order_data = $this->model->getOrderItem($row->platform_order, $row->order_item_numbers, $row->id);
-            if (!empty($order_data)) {
-                $this->view->assign('order_data', $order_data);
+            //子订单措施及数据
+            if(!empty($row->order_item_numbers)){
+                $order_data = $this->model->getOrderItem($row->platform_order,$row->order_item_numbers,$row->id);
+                unset($order_data['item_order_info']);
+                $this->assignconfig('order_item', $order_data);
             }
 
             //工单类型
@@ -1594,18 +1595,6 @@ class WorkOrderList extends Backend
             $this->model->changeFrame($params, $work_id, $choose_id, $measure_id);
         }elseif(in_array($choose_id,[3,18])){//取消
             $this->model->cancelOrder($params, $work_id, $choose_id, $measure_id);
-        }elseif(10 == $choose_id){//赠送积分
-            if(0 == $params['is_check'] && 1 != $params['work_status'] && 1 == $auto_complete){
-                $this->model->presentIntegral($work_id);
-            }
-        }elseif(9 == $choose_id){//发送优惠券
-            if(0 == $params['is_check'] && 1 != $params['work_status'] && 1 == $auto_complete){
-                $this->model->presentCoupon($work_id);
-            }
-        }elseif(13 == $choose_id){//修改地址
-            if(0 == $params['is_check'] && 1 != $params['work_status'] && 1 == $auto_complete){
-                $this->model->changeAddress($params, $work_id, $choose_id, $measure_id);
-            }
         }
 
         return ['result'=>true,'msg'=>''];
@@ -2150,11 +2139,11 @@ class WorkOrderList extends Backend
         if (request()->isAjax()) {
             $incrementId = input('increment_id');
             $siteType = input('site_type');
-            $order_item_number = input('order_item_number', '');
+            $item_order_number = input('item_order_number', '');
             try {
                 //获取地址、处方等信息
-                $res = $this->model->getAddress($incrementId, $order_item_number);
-                $lens = $this->model->getReissueLens($siteType, $res['prescriptions'], 2,$order_item_number);
+                $res = $this->model->getAddress($incrementId, $item_order_number);
+                $lens = $this->model->getReissueLens($siteType, $res['prescriptions'], 2,$item_order_number);
             } catch (\Exception $e) {
                 $this->error($e->getMessage());
             }
@@ -2179,7 +2168,6 @@ class WorkOrderList extends Backend
         if (request()->isAjax()) {
             $incrementId = input('increment_id');
             $siteType = input('site_type');
-            $isNewVersion = input('is_new_version', 0);
             try {
                 //获取地址、处方等信息
                 $res = $this->model->getAddress($incrementId);
@@ -2205,25 +2193,17 @@ class WorkOrderList extends Backend
         if (request()->isAjax()) {
             $siteType = input('site_type');
             $prescriptionType = input('prescription_type', '');
-            $color_id = input('color_id', '');
             $key = $siteType . '_get_lens';
             $data = Cache::get($key);
             if (!$data) {
                 $data = $this->model->httpRequest($siteType, 'magic/product/lensData');
                 Cache::set($key, $data, 3600 * 24);
             }
-            if ($color_id) {
-                $lensType = $data['lens_color_list'] ?: [];
-            } else {
-                $lensType = $data['lens_list'][$prescriptionType] ?: [];
-            }
-            if ($lensType) {
-                $this->success('操作成功！！', '', $lensType);
-            } else {
-                $this->error('未获取到数据！！');
-            }
+            $lensType = $data['lens_list'][$prescriptionType] ?: [];
+            $lensType ? $this->success('操作成功！！', '', $lensType) : $this->error('未获取到数据！！');
+        }else{
+            $this->error('404 not found');
         }
-        $this->error('404 not found');
     }
 
     /**
@@ -2488,19 +2468,11 @@ class WorkOrderList extends Backend
     public function check()
     {
         $params = input('post.row/a');
-        $workId = $params['id'];
-        $workType = $params['work_type'];
-        $success = $params['success'];
-        if (!$params['check_note']) {
-            $this->error('审核意见不能为空');
-        }
-        $work = $this->model->find($workId);
-        if (!$work) {
-            $this->error('工单不存在');
-        }
+        !$params['check_note'] && $this->error('审核意见不能为空');
+
         //开始审核
         try {
-            $this->model->checkWork($workId, $params);
+            $this->model->checkWork($params['id'], $params);
         } catch (Exception $e) {
             $this->error($e->getMessage());
         }
@@ -2518,7 +2490,7 @@ class WorkOrderList extends Backend
      * @param [type] $change_type
      * @return void
      */
-    public function ajax_change_order($work_id = null, $order_type = null, $order_number = null, $change_type = null, $operate_type = '', $is_new_version = 0, $order_item_number = null)
+    public function ajax_change_order($work_id = null, $order_type = null, $order_number = null, $change_type = null, $operate_type = '', $item_order_number = null)
     {
         if ($this->request->isAjax()) {
             (1 > $order_type || 11 < $order_type) && $this->error('选择平台错误,请重新选择', '', 'error', 0);
@@ -2543,7 +2515,7 @@ class WorkOrderList extends Backend
 
             //编辑镜片信息html代码
             if(in_array($change_type,[2,4,5])){
-                $res = $this->model->getAddress($order_number, $order_item_number);
+                $res = $this->model->getAddress($order_number, $item_order_number);
                 if (2 == $change_type) { //更改镜片
                     $type = 2;
                     $showPrescriptions = $res['prescriptions'];
@@ -2554,8 +2526,8 @@ class WorkOrderList extends Backend
                     $type = 1;
                     $showPrescriptions = $res['showPrescriptions'];
                 }
-                $lens = $this->model->getEditReissueLens($order_type, $showPrescriptions, $type, !empty($arr) ? $result : [], $operate_type, $order_item_number);
-                $lensForm = $this->model->getReissueLens($order_type, $showPrescriptions, $type, $order_item_number);
+                $lens = $this->model->getEditReissueLens($order_type, $showPrescriptions, $type, !empty($arr) ? $result : [], $operate_type, $item_order_number);
+                $lensForm = $this->model->getReissueLens($order_type, $showPrescriptions, $type, $item_order_number);
 
                 if ($res) {
                     $back_data = ['lens' => $lens, 'lensform' => $lensForm];
