@@ -35,60 +35,47 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                         { field: 'use_order_num', title: __('应用订单数量'),operate: false},
                         { field: 'use_order_num_rate', title: __('订单数量占比'),operate: false},
                         { field: 'use_order_total_price', title: __('订单金额'),operate: false},
-                        { field: 'use_order_total_price_rate', title: __('订单金额占比'),operate: false}
-                        
+                        { field: 'use_order_total_price_rate', title: __('订单金额占比'),operate: false},
+                        { field: 'time_str', title: __('订单创建时间'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime,visible:false},
+                        { field: 'order_platform', title: __('平台'),searchList: { 1:'zeelool', 2:'voogueme', 3:'nihao'}, formatter: Table.api.formatter.status,visible:false},
+
                     ]
                 ]
             });
             // 为表格绑定事件
             Controller.api.formatter.user_data_pie();
             Controller.api.formatter.lens_data_pie();
+            var params = table.bootstrapTable('getOptions')
+            params.queryParams = function(params) {
+
+                //定义参数
+                var filter = {};
+                //遍历form 组装json
+                $.each($("#form").serializeArray(), function(i, field) {
+                    filter[field.name] = field.value;
+                });
+
+                //参数转为json字符串
+                params.filter = JSON.stringify(filter)
+                console.info(params);
+                return params;
+            }
+
+            table.bootstrapTable('refresh',params);
             Table.api.bindevent(table);
+
             $("#sku_submit").click(function(){
 
                 Controller.api.formatter.user_data_pie();
                 Controller.api.formatter.lens_data_pie();
 
-                var params = table.bootstrapTable('getOptions')
-                params.queryParams = function(params) {
-         
-                    //定义参数
-                    var filter = {};
-                    //遍历form 组装json
-                    $.each($("#form").serializeArray(), function(i, field) {
-                        filter[field.name] = field.value;
-                    });
-         
-                    //参数转为json字符串
-                    params.filter = JSON.stringify(filter)
-                    console.info(params);
-                    return params;
-                }
-
-                table.bootstrapTable('refresh',params);
             });
             $("#sku_reset").click(function(){
                 $("#sku_data").css('display','none'); 
                 $("#order_platform").val(1);
                 $("#time_str").val('');
                 $("#sku").val('');
-                var params = table.bootstrapTable('getOptions')
-                params.queryParams = function(params) {
-         
-                    //定义参数
-                    var filter = {};
-                    //遍历form 组装json
-                    $.each($("#form").serializeArray(), function(i, field) {
-                        filter[field.name] = field.value;
-                    });
-         
-                    //参数转为json字符串
-                    params.filter = JSON.stringify(filter)
-                    console.info(params);
-                    return params;
-                }
 
-                table.bootstrapTable('refresh',params);
             });
         },
         add: function () {
@@ -99,7 +86,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
         },
         api: {
             formatter: {
-
                 user_data_pie: function () {
                     //库存分布
                     var chartOptions = {
