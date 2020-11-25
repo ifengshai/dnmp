@@ -183,7 +183,7 @@ class WorkOrderList extends Model
      */
     public function getOrderItem($increment_id,$item_order_number='',$work_id=0)
     {
-        $order_field = 'id,site,base_grand_total,base_to_order_rate,payment_method,customer_email,customer_firstname,customer_lastname,order_type,mw_rewardpoint_discount,base_currency_code';
+        $order_field = 'id,site,base_grand_total,base_to_order_rate,payment_method,customer_email,customer_firstname,customer_lastname,order_type,mw_rewardpoint_discount,base_currency_code,created_at as payment_time';
 
         $_new_order = new NewOrder();
         $result = $_new_order
@@ -254,6 +254,7 @@ class WorkOrderList extends Model
 
         $result['sku_list'] = $order_item_list;
         $result['mw_rewardpoint_discount'] = round($result['mw_rewardpoint_discount'],2);
+        $result['payment_time'] = date('Y-m-d H:i:s',$result['payment_time']);
 
         return $result;
     }
