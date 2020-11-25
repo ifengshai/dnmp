@@ -5,6 +5,7 @@ namespace app\admin\controller\saleaftermanage;
 use app\admin\model\DistributionAbnormal;
 use app\admin\model\order\order\NewOrder;
 use app\admin\model\order\order\NewOrderItemProcess;
+use app\admin\model\order\order\NewOrderProcess;
 use app\admin\model\saleaftermanage\WorkOrderNote;
 use app\admin\model\saleaftermanage\WorkOrderProblemStep;
 use app\admin\model\saleaftermanage\WorkOrderProblemType;
@@ -67,8 +68,6 @@ class WorkOrderList extends Backend
         $this->work_order_note = new \app\admin\model\saleaftermanage\WorkOrderNote;
         //$this->view->assign('step', config('workorder.step')); //措施
         $this->view->assign('step', $workOrderConfigValue['step']);
-        $this->view->assign('step_main', $workOrderConfigValue['step_main']);
-        $this->view->assign('step_item', $workOrderConfigValue['step_item']);
         //$this->assignconfig('workorder', config('workorder')); //JS专用，整个配置文件
         $this->assignconfig('workorder', $workOrderConfigValue);
 
@@ -1040,8 +1039,8 @@ class WorkOrderList extends Backend
                     0 < $count && $this->error("此订单存在未处理完成的工单");
 
                     //判断订单状态
-                    $_new_order = new NewOrder();
-                    $check_status = $_new_order
+                    $_new_order_process = new NewOrderProcess();
+                    $check_status = $_new_order_process
                         ->where('increment_id', $platform_order)
                         ->value('check_status')
                     ;
@@ -1597,6 +1596,8 @@ class WorkOrderList extends Backend
             $this->model->changeFrame($params, $work_id, $choose_id, $measure_id);
         }elseif(in_array($choose_id,[3,18])){//取消
             $this->model->cancelOrder($params, $work_id, $choose_id, $measure_id);
+        }elseif(13 == $choose_id){//修改地址
+            $this->model->changeAddress($params, $work_id, $choose_id, $measure_id);
         }
 
         return ['result'=>true,'msg'=>''];
