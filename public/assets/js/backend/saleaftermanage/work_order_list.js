@@ -1589,7 +1589,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             secondNode.hide();
                         }
                     }
-                    //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
+                    /*//判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
                     if (!$('.step1-1').is(':hidden')) {
                         changeFrame()
                     }
@@ -1598,7 +1598,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     if (!$('.step3').is(':hidden')) {
                         cancelOrder();
                     }
-                    //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end                   
+                    //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end */                  
                 }
             })
             //根据措施类型显示隐藏
@@ -1884,7 +1884,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             });
                         }
 
-                        //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
+                       /* //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
                         if (!$('.step1-1').is(':hidden')) {
                             changeFrame();
                         }
@@ -1893,7 +1893,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         if (!$('.step3').is(':hidden') && value == 3) {
                             cancelOrder();
                         }
-                        //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
+                        //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end*/
                     }
                 }
 
