@@ -1661,7 +1661,7 @@ class CustomerService extends Backend
 
         if (!empty($where['work_platform']) && ($where['work_platform'] != 10)) {
             //站点
-            $site  = $where['work_platform'];
+            $notCustomer_where['work_platform']  = $notCustomer_where_other['work_platform'] = $site  = $where['work_platform'];
         } else {
             $site  = 10;
         }
@@ -1846,7 +1846,6 @@ class CustomerService extends Backend
         unset($where2['work_status']);
         $where5 = $where2;
         $where5['work_status'] = ['in', [0, 1, 2, 3, 4, 5, 6, 7]];
-
         $map5['create_time'] = $map['complete_time'];
         $warehouseWorkList = $this->model->where($where2)->where($map)->field('count(*) as counter,sum(base_grand_total) as base_grand_total,count(replacement_order !="" or null) as replacement_counter,
             sum(is_refund) as refund_num,sum(refund_money) as refund_money,count(coupon_str !="" or null) as coupon')->select();
@@ -1881,7 +1880,7 @@ class CustomerService extends Backend
 
 
         //非客服工单已完成数据
-        $notCustomer = $this->model->where($notCustomer_where)->where($map)->where('work_status = 6')->field('count(*) as counter,sum(base_grand_total) as base_grand_total,count(replacement_order !="" or null) as replacement_counter,
+        $notCustomer = $this->model->where($notCustomer_where)->where($map)->field('count(*) as counter,sum(base_grand_total) as base_grand_total,count(replacement_order !="" or null) as replacement_counter,
             sum(is_refund) as refund_num,sum(refund_money) as refund_money,count(coupon_str !="" or null) as coupon_str ')->select();
         if (!empty($notCustomer)){
             $notCustomer = collection($notCustomer)->toArray();
