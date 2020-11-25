@@ -440,7 +440,6 @@ class WorkOrderList extends Model
         $prescriptions = $coating_type = '';
         $prescription = $data['lens_list'];
         $colorList = $data['color_list'] ?? [];
-        $lensColorList = $data['lens_color_list'];
         $coating_type = $data['coating_list'];
 
         $rendering = [
@@ -449,7 +448,6 @@ class WorkOrderList extends Model
             'prescriptions',
             'colorList',
             'type',
-            'lensColorList',
             'item_order_number'
         ];
         if (1 == $type) {
@@ -590,7 +588,7 @@ class WorkOrderList extends Model
                         'street'=>$changeAddress['street'],
                         'postcode'=>$changeAddress['postcode'],
                     );
-                    $res = $this->httpRequest($siteType, 'magic/order/editAddress', $postData, 'POST');
+                    $this->httpRequest($siteType, 'magic/order/editAddress', $postData, 'POST');
                 }
                 Db::commit();
             } catch (\Exception $e) {
@@ -1388,7 +1386,6 @@ class WorkOrderList extends Model
         $prescriptions = $coating_type = '';
         $prescription = $data['lens_list'];
         $colorList = $data['color_list'] ?? [];
-        $lensColorList = $data['lens_color_list'];
         $coating_type = $data['coating_list'];
 
         $rendering = [
@@ -1399,7 +1396,6 @@ class WorkOrderList extends Model
             'type',
             'info',
             'operate_type',
-            'lensColorList',
             'item_order_number'
         ];
         if (1 == $type) {
@@ -1459,7 +1455,7 @@ class WorkOrderList extends Model
                         }else{
                             //无需审核并且审核后自动完成，直接处理优惠券、补价、积分等流程
                             if (1 == $orderRecept->is_auto_complete) {
-                                $this->follow_up($orderRecept,$measure_choose_id,$work,$params);
+                                $this->follow_up($orderRecept,$measure_choose_id,$work);
                                 $key++;
                             }
                         }
@@ -1506,7 +1502,7 @@ class WorkOrderList extends Model
                         }else{
                             //点击审核成功并且审核后自动完成，直接处理优惠券、补价、积分等流程
                             if (1 == $orderRecept->is_auto_complete && 1 == $params['success']) {
-                                $this->follow_up($orderRecept,$measure_choose_id,$work,$params);
+                                $this->follow_up($orderRecept,$measure_choose_id,$work);
                                 $key++;
                             }
                         }
@@ -1558,11 +1554,10 @@ class WorkOrderList extends Model
      * @param object $orderRecept 承接表数据
      * @param int $measure_choose_id 措施配置表ID
      * @param object $work 工单表数据
-     * @param array $params 页面传参
      * * @author lzh
      * @return bool
      */
-    public function follow_up($orderRecept,$measure_choose_id,$work,$params){
+    public function follow_up($orderRecept,$measure_choose_id,$work){
         //承接表标记已处理
         WorkOrderRecept::where('id', $orderRecept->id)->update(['recept_status' => 1, 'finish_time' => date('Y-m-d H:i:s'), 'note' => '自动处理完成']);
 
@@ -1576,8 +1571,6 @@ class WorkOrderList extends Model
             $this->presentCoupon($work->id);
         }elseif(10 == $measure_choose_id){//赠送积分
             $this->presentIntegral($work->id);
-        }elseif(13 == $measure_choose_id){//修改地址
-            $this->changeAddress($params, $work->id, $measure_choose_id, $orderRecept->measure_id);
         }
         return true;
     }
@@ -1591,7 +1584,7 @@ class WorkOrderList extends Model
      * @param [type] $measure_id 措施表ID
      * @param [type] $success 是否成功 1 处理成功 2 处理失败
      * @param [type] $process_note 处理备注
-     * @return void
+     * @return boolean
      * @author lsw
      * @since 2020/04/21 10:13:28
      */
@@ -1600,36 +1593,39 @@ class WorkOrderList extends Model
         $work = self::find($work_id);
         Db::startTrans();
         try {
-        if (1 == $success) {
-            $data['recept_status'] = 1;
-        } else {
-            $data['recept_status'] = 2;
-        }
-        $data['note'] = $process_note;
-        $data['finish_time'] = date('Y-m-d H:i:s');
         //更新本条工单数据承接人状态
+        $data = [
+            'recept_status'=> 1 == $success ? 1 : 2,
+            'note'=> $process_note,
+            'finish_time'=> date('Y-m-d H:i:s')
+        ];
         $resultInfo = WorkOrderRecept::where(['id' => $id])->update($data);
-        //删除同组数据
-        $where['work_id'] = $work_id;
-        $where['measure_id'] = $measure_id;
-        $where['recept_group_id'] = $recept_group_id;
-        $where['recept_status'] = 0;
+
         //删除同样的承接组数据
+        $where = [
+            'work_id'=>$work_id,
+            'measure_id'=>$measure_id,
+            'recept_group_id'=>$recept_group_id,
+            'recept_status'=>0,
+        ];
         WorkOrderRecept::where($where)->delete();
+
         //如果是处理失败的状态
-        if (1 == $data['recept_status']) {
-            $dataMeasure['operation_type'] = 1;
-        } else {
-            $dataMeasure['operation_type'] = 2;
-        }
-        $dataMeasure['operation_time'] = date('Y-m-d H:i:s');
+        $dataMeasure = [
+            'operation_type'=>1 == $data['recept_status'] ? 1 : 2,
+            'operation_time'=>date('Y-m-d H:i:s')
+        ];
         WorkOrderMeasure::where(['id' => $measure_id])->update($dataMeasure);
+
         //求出承接措施是否完成
-        $whereMeasure['work_id'] = $work_id;
-        //$whereMeasure['measure_id'] = $measure_id;
-        $whereMeasure['recept_status'] = ['eq', 0];
+        $whereMeasure = [
+            'work_id'=>$work_id,
+            'recept_status'=>0
+        ];
         $resultRecept = WorkOrderRecept::where($whereMeasure)->count();
-        if (0 == $resultRecept) { //表明整个措施已经完成
+
+        //表明整个措施已经完成
+        if (0 == $resultRecept) {
             //求出整个工单的措施状态
             $whereWork['work_id'] = $work_id;
             $whereWork['operation_type'] = ['eq', 0];
@@ -1643,32 +1639,34 @@ class WorkOrderList extends Model
                 $dataWorkOrder['work_status'] = 5;
             }
             $dataWorkOrder['complete_time'] = date('Y-m-d H:i:s');
-            
         }else{
             $dataWorkOrder['work_status'] = 5;
         }
         WorkOrderList::where(['id' => $work_id])->update($dataWorkOrder);
+
+        $measure_choose_id = WorkOrderMeasure::where('id',$measure_id)->value('measure_choose_id');
         //不是自动处理完成
-        if($is_auto_complete != 1){
-            $measure_choose_id = WorkOrderMeasure::where('id',$measure_id)->value('measure_choose_id');
-            if ($measure_choose_id == 9) {
+        if(1 != $is_auto_complete){
+            //补发
+            if(7 == $measure_choose_id){
+                $this->createOrder($work->work_platform, $work->id);
+            }elseif(9 == $measure_choose_id){//发送优惠券
                 $this->presentCoupon($work->id);
-            } elseif ($measure_choose_id == 10) {
+            }elseif(10 == $measure_choose_id){//赠送积分
                 $this->presentIntegral($work->id);
-            } elseif($measure_choose_id == 7){
-                $this->createOrder($work->work_platform, $work_id, $work->is_new_version);
             }
         }
+
         //措施不是补发的时候扣减库存，是补发的时候不扣减库存，因为补发的时候库存已经扣减过了
-        if ($resultInfo  && (1 == $data['recept_status']) && ($measure_choose_id !=7)){
+        if ($resultInfo && 1 == $data['recept_status'] && 7 != $measure_choose_id){
             $this->deductionStock($work_id, $measure_id);
         }
         Db::commit();
-        return true;
     } catch (Exception $e) {
         Db::rollback();
         exception($e->getMessage());
-    }        
+    }
+    return true;
   }
     //扣减库存逻辑
     public function deductionStock($work_id, $measure_id)
