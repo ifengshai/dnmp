@@ -388,7 +388,7 @@
 
 <form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
     <input type="hidden" id = "work_id" name="row[id]" value="{$row.id}" />
-    <input type="hidden" name="row[work_type]" value="{$work_type}" />
+    <input type="hidden" name="row[work_type]" value="{$row->work_type}" />
     <!--工单类型，1 客服工单，2 仓库工单-->
     <input type="hidden" name="row[order_pay_currency]" id='order_pay_currency' value="{$row.order_pay_currency}" />
     <!--订单支付的货币类型 根据订单号读出来-->
@@ -481,7 +481,7 @@
 
     <div class="form-group">
         <div class="form-group-content question-type">
-            <?php if($work_type == 1){?>
+            <?php if($row->work_type == 1){?>
             <label class="control-label col-xs-12 col-sm-2" style="width:8%;float: left;">{:__('问题类型')}：</label>
             {foreach $problem_type as $key => $val}
             <div>
