@@ -162,17 +162,6 @@ class Workorderconfig extends Backend
             $result = Cache::rm('Workorderconfig_getConfigInfo');
         }
         $step = $this->model->getAllStep();
-        //所有措施类型
-        $all_step = (new WorkOrderStepType)->where(['is_del'=>1])->select();
-        //所有主单措施类型
-        $all_step_main = (new WorkOrderStepType)->where(['is_del'=>1,'type'=>1])->select();
-        //所有子单措施类型
-        $all_step_item = (new WorkOrderStepType)->where(['is_del'=>1,'type'=>2])->select();
-        $order_type = [];
-        $order_type[] = ['id' => 1,'name' => '主订单'];
-        $order_type[] = ['id' => 2,'name' => '子订单'];
-
-        $extend_team = $this->model->getAllExtend();
         $extend_team = $this->model->getAllExtendArr();
         array_unshift($extend_team,['id'=>0,'name'=>'不选择']);
         if ($this->request->isPost()) {
@@ -219,8 +208,11 @@ class Workorderconfig extends Backend
                         }else{
                             $data['is_auto_complete'] = 0;
                         }
-                        //添加问题类型，区分主单和子单
-                        $data['order_type'] = $params['order_type'];
+                        if ($params['choose_id'][$v['id']]['is_item_order'] == 'on') {
+                            $data['is_item_order'] = 1;
+                        }else{
+                            $data['is_item_order'] = 0;
+                        }
                         Db::name('work_order_problem_step')->insert($data);
                     }
                 }
@@ -238,9 +230,6 @@ class Workorderconfig extends Backend
             $this->success();
         }
         $this->view->assign("step", $step);
-        $this->view->assign("step_main", $all_step_main);
-        $this->view->assign("step_item", $all_step_item);
-        $this->view->assign("order_type", $order_type);
         $this->view->assign("extend_team", $extend_team);
         return $this->view->fetch();
     }
@@ -323,43 +312,13 @@ class Workorderconfig extends Backend
                 $step[$k]['is_check'] = $result['is_check'];
                 $step[$k]['extend_group_id'] = $result['extend_group_id'];
                 $step[$k]['is_auto_complete'] = $result['is_auto_complete'];
+                $step[$k]['is_item_order'] = $result['is_item_order'];
             } else {
                 $step[$k]['is_selected'] = 0;
                 $step[$k]['is_check'] = '';
                 $step[$k]['extend_group_id'] = '';
                 $step[$k]['is_auto_complete'] = '';
-            }
-        }
-        //所有主单措施类型
-        $all_step_main = (new WorkOrderStepType)->where(['is_del'=>1,'type'=>1])->select();
-        foreach ($all_step_main as $k => $v) {
-            $result = Db::name('work_order_problem_step')->where(['problem_id' => $ids, 'step_id' => $all_step_main[$k]['id']])->find();
-            if (!empty($result)) {
-                $all_step_main[$k]['is_selected'] = 1;
-                $all_step_main[$k]['is_check'] = $result['is_check'];
-                $all_step_main[$k]['extend_group_id'] = $result['extend_group_id'];
-                $all_step_main[$k]['is_auto_complete'] = $result['is_auto_complete'];
-            } else {
-                $all_step_main[$k]['is_selected'] = 0;
-                $all_step_main[$k]['is_check'] = '';
-                $all_step_main[$k]['extend_group_id'] = '';
-                $all_step_main[$k]['is_auto_complete'] = '';
-            }
-        }
-        //所有子单措施类型
-        $all_step_item = (new WorkOrderStepType)->where(['is_del'=>1,'type'=>2])->select();
-        foreach ($all_step_item as $k => $v) {
-            $result = Db::name('work_order_problem_step')->where(['problem_id' => $ids, 'step_id' => $all_step_item[$k]['id']])->find();
-            if (!empty($result)) {
-                $all_step_item[$k]['is_selected'] = 1;
-                $all_step_item[$k]['is_check'] = $result['is_check'];
-                $all_step_item[$k]['extend_group_id'] = $result['extend_group_id'];
-                $all_step_item[$k]['is_auto_complete'] = $result['is_auto_complete'];
-            } else {
-                $all_step_item[$k]['is_selected'] = 0;
-                $all_step_item[$k]['is_check'] = '';
-                $all_step_item[$k]['extend_group_id'] = '';
-                $all_step_item[$k]['is_auto_complete'] = '';
+                $step[$k]['is_item_order'] = '';
             }
         }
         $extend_team = $this->model->getAllExtend();
@@ -398,6 +357,9 @@ class Workorderconfig extends Backend
                             if ($params['choose_id'][$v['id']]['is_auto_complete'] == 'on') {
                                 $data['is_auto_complete'] = 1;
                             }
+                            if ($params['choose_id'][$v['id']]['is_item_order'] == 'on') {
+                                $data['is_item_order'] = 1;
+                            }
                             Db::name('work_order_problem_step')->insert($data);
                         }
                     } else if (!$problem_step && !in_array($v['id'], array_keys($params['choose_id']))) {
@@ -428,9 +390,14 @@ class Workorderconfig extends Backend
                             } else {
                                 $is_auto_complete = 0;
                             }
+                            if (isset($params['choose_id'][$v['id']]['is_item_order'])) {
+                                $is_item_order = 1;
+                            } else {
+                                $is_item_order = 0;
+                            }
                             Db::name('work_order_problem_step')
                                 ->where(['problem_id' => $params['problem_id'], 'step_id' => $v['id']])
-                                ->update(['extend_group_id' =>$params['choose_id'][$v['id']]['extend'], 'is_check' => $is_check, 'is_auto_complete' => $is_auto_complete]);
+                                ->update(['extend_group_id' =>$params['choose_id'][$v['id']]['extend'], 'is_check' => $is_check, 'is_auto_complete' => $is_auto_complete, 'is_item_order' => $is_item_order]);
                         }
                     }
                 }
@@ -448,8 +415,6 @@ class Workorderconfig extends Backend
             $this->success();
         }
         $this->view->assign("step", $step);
-        $this->view->assign("step_main", $all_step_main);
-        $this->view->assign("step_item", $all_step_item);
         $this->view->assign("order_type", $order_type);
         $this->view->assign("extend_team", $extend_team);
         $this->view->assign("row", $row);
@@ -475,10 +440,6 @@ class Workorderconfig extends Backend
         $all_problem_type = $this->model->where($where)->select();
         //所有措施类型
         $all_step = (new WorkOrderStepType)->where($where)->select();
-        //所有主单措施类型
-        $all_step_main = (new WorkOrderStepType)->where(['is_del'=>1,'type'=>1])->select();
-        //所有子单措施类型
-        $all_step_item = (new WorkOrderStepType)->where(['is_del'=>1,'type'=>2])->select();
         //所有平台
         $all_platform     = (new MagentoPlatform)->field('id,name')->select();
         //所有的可用用户
@@ -500,8 +461,8 @@ class Workorderconfig extends Backend
         //客服问题类型，仓库问题类型，大的问题类型分类,所有措施,所有平台,客服A/B分组,跟单组分组,
         //跟单人分组,大的问题类型分类two,问题类型/措施关系集合,分组对应的用户集合,审核人权重规则,审核组权重规则,所有的承接组,所有的承接人
         $customer_problem_type = $warehouse_problem_type = $customer_problem_classify_arr
-            = $step = $step_main = $step_item = $platform = $kefumanage = $documentary_group = $documentary_person
-            = $customer_problem_classify = $relation_problem_step = $group = $check_person_weight = $check_group_weight = $all_extend_group = $all_extend_person = $item_problem_step = [];
+            = $step = $platform = $kefumanage = $documentary_group = $documentary_person
+            = $customer_problem_classify = $relation_problem_step = $group = $check_person_weight = $check_group_weight = $all_extend_group = $all_extend_person = [];
         //客服a,b组ID a,b组的主管ID,客服经理ID
         $a_group_id = $b_group_id = $a_uid = $b_uid = $customer_manager_id = 0;
         //所有的组分别对应的有哪些用户
@@ -547,34 +508,7 @@ class Workorderconfig extends Backend
                 $step[$sv['id']] = $sv['step_name'];
             }
         }
-        if (!empty($all_step_main)) {
-            $all_step_main         = collection($all_step_main)->toArray();
-            foreach ($all_step_main as $sv) {
-                $step_main[$sv['id']] = $sv['step_name'];
-            }
-        }
-        if (!empty($all_step_item)) {
-            $all_step_item         = collection($all_step_item)->toArray();
-            foreach ($all_step_item as $sv) {
-                $step_item[$sv['id']] = $sv['step_name'];
-            }
-        }
-        //所有子单工单类型措施关系表
-        $item_problem_step = [];
-        $where_step = [];
-        $where_step['c.is_del'] = 1;
-        $where_step['c.order_type'] = 2;
-        $item_problem_step_list = (new WorkOrderProblemStep)
-            ->alias('a')
-            ->field('a.id,a.problem_id,a.step_id,a.extend_group_id,a.is_check,a.is_auto_complete')
-            ->join(['fa_work_order_problem_type'=> 'c'], 'a.problem_id=c.id','left')
-            ->where($where_step)
-            ->order('a.id')
-            ->select();
-        $item_problem_step_list = $item_problem_step_list->toArray();
-        foreach ($item_problem_step_list as $v) {
-            $item_problem_step[$v['step_id']] = $v;
-        }
+
         //存在A、B组
         if (!empty($all_group)) {
             foreach ($all_group as $av) {
@@ -659,13 +593,11 @@ class Workorderconfig extends Backend
         $arr['warehouse_problem_type'] = $warehouse_problem_type;
         $arr['customer_problem_classify_arr'] = $customer_problem_classify_arr;
         $arr['customer_problem_classify']     = $customer_problem_classify;
-//        $arr['step']                          = $step;
-        $arr['step']                          = $step_main;
-        $arr['step_item']                     = $step_item;
-        $arr['item_problem_step']             = $item_problem_step;
+        $arr['step']                          = $step;
         $arr['platform']                      = $platform;
         $arr['kefumanage']                    = $kefumanage;
         $arr['all_problem_step']              = $relation_problem_step;
+        $arr['all_problem_item_step']         = $relation_problem_step;
         $arr['check_group_weight']            = $check_group_weight;
         $arr['check_person_weight']           = $check_person_weight;
         $arr['customer_department_rule']      = $customer_department_rule;

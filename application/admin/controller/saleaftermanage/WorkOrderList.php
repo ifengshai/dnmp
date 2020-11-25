@@ -67,8 +67,6 @@ class WorkOrderList extends Backend
         $this->work_order_note = new \app\admin\model\saleaftermanage\WorkOrderNote;
         //$this->view->assign('step', config('workorder.step')); //措施
         $this->view->assign('step', $workOrderConfigValue['step']);
-        $this->view->assign('step_main', $workOrderConfigValue['step_main']);
-        $this->view->assign('step_item', $workOrderConfigValue['step_item']);
         //$this->assignconfig('workorder', config('workorder')); //JS专用，整个配置文件
         $this->assignconfig('workorder', $workOrderConfigValue);
 
