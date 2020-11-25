@@ -16,14 +16,14 @@ class UserDataView extends Backend
         parent::_initialize();
 
         //每日的数据
-        $this->zeelool = new \app\admin\model\order\order\Zeelool();
-        $this->voogueme = new \app\admin\model\order\order\Voogueme();
-        $this->nihao = new \app\admin\model\order\order\Nihao();
+        $this->zeelool = new \app\admin\model\order\order\Zeelool;
+        $this->voogueme = new \app\admin\model\order\order\Voogueme;
+        $this->nihao = new \app\admin\model\order\order\Nihao;
         $this->zeeloolOperate = new \app\admin\model\operatedatacenter\Zeelool;
-        $this->vooguemeOperate = new \app\admin\model\operatedatacenter\Voogueme();
-        $this->nihaoOperate = new \app\admin\model\operatedatacenter\Nihao();
-        $this->datacenterday = new \app\admin\model\operatedatacenter\Datacenter();
-        $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform();
+        $this->vooguemeOperate = new \app\admin\model\operatedatacenter\Voogueme;
+        $this->nihaoOperate = new \app\admin\model\operatedatacenter\Nihao;
+        $this->datacenterday = new \app\admin\model\operatedatacenter\Datacenter;
+        $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform;
     }
 
     /**
@@ -138,13 +138,13 @@ class UserDataView extends Backend
             $order_platform = $params['order_platform'];
             switch ($order_platform) {
                 case 1:
-                    $model = new \app\admin\model\operatedatacenter\Zeelool;
+                    $model = $this->zeeloolOperate;
                     break;
                 case 2:
-                    $model = new \app\admin\model\operatedatacenter\Voogueme();
+                    $model = $this->vooguemeOperate;
                     break;
                 case 3:
-                    $model = new \app\admin\model\operatedatacenter\Nihao();
+                    $model = $this->nihaoOperate;
                     break;
             }
             $time_str = $params['time_str'];
@@ -273,5 +273,58 @@ class UserDataView extends Backend
             return json(['code' => 1, 'data' => $json]);
         }
     }
+    /**
+     * 用户类型分布饼图
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/10/14 15:02:23 
+     * @return void
+     */
+    public function user_type_pie()
+    {
+        if ($this->request->isAjax()) {
+            $params = $this->request->param();
+            $order_platform = $params['order_platform'] ? $params['order_platform'] : 1;
+            if ($params['time_str']) {
+                $createat = explode(' ', $params['time_str']);
+                $map_where['created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
+            } else{
+                $start = date('Y-m-d', strtotime('-6 day'));
+                $end   = date('Y-m-d 23:59:59');
+                $map_where['created_at'] = ['between', [$start,$end]];
+            }
+            //首购人数
+            if($order_platform == 2){
+                $web_model = Db::connect('database.db_voogueme');
+            }elseif($order_platform == 3){
+                $web_model = Db::connect('database.db_nihao');
+            }else{
+                $web_model = Db::connect('database.db_zeelool');
+            }
+            $web_model->table('customer_entity')->query("set time_zone='+8:00'");
+            $data = array(
+                array(
+                    'name'=>'普通用户',
+                    'value'=>$web_model->table('customer_entity')->where($map_where)->where('group_id',1)->count(),  //普通用户人数
+                ),
+                array(
+                    'name'=>'VIP用户',
+                    'value'=>$web_model->table('customer_entity')->where($map_where)->where('group_id',4)->count(),    //vip用户人数
+                ),
+                array(
+                    'name'=>'批发',
+                    'value'=>$web_model->table('customer_entity')->where($map_where)->where('group_id',2)->count(),  //批发用户人数
+                ),
+            );
+            //总人数
+            $count = $web_model->table('customer_entity')->where($map_where)->count();
+            $column = ['普通用户','VIP用户','批发'];
+            $json['column'] = $column;
+            $json['columnData'] = $data;
+            $json['total'] = $count;
 
+            return json(['code' => 1, 'data' => $json]);
+        }
+    }
 }
