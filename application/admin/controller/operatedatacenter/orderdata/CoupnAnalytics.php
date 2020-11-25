@@ -24,7 +24,7 @@ class CoupnAnalytics extends Backend
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
             $filter = json_decode($this->request->get('filter'), true);
-            // dump($filter);
+            // dump($filter);die;
             //如果发送的来源是Selectpage，则转发到Selectpage
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
