@@ -158,16 +158,16 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                             tooltip: { //提示框组件。
                                 trigger: 'item',
                                 formatter: function (param) {
-                                
+                                    console.log(param)
                                     return param.data.name + '<br/>数量：' + param.data.value + '<br/> 占比：' + param.percent.toFixed(2) + '%';
                                 }
                             },
                             graphic:{
                                 type:"text",
                                 left:"center",
-                                top:"50%",
+                                top:"40%",
                                 style:{
-                                    text:"用户数11",
+                                    text:"用户数",
                                     textAlign:"center",
                                     fill:"#333",
                                     fontSize:20,
@@ -175,6 +175,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                                 }
                             },
                             title:{
+                                
                                 left:"center",
                                 top:"50%",
                                 textStyle:{
@@ -185,6 +186,30 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                             },
                             series:[{
                                 radius: ['50%', '70%'],
+                                label: {
+                                    normal: {
+                                        show: true,
+                                        position: 'center',
+                                        color:'#4c4a4a',
+                                        formatter: '{total|' + this.total +'}'+ '\n\r' + '{active|共发布活动}',
+                                        rich: {
+                                            total:{
+                                                fontSize: 35,
+                                                fontFamily : "微软雅黑",
+                                                color:'#454c5c'
+                                            },
+                                            active: {
+                                                fontFamily : "微软雅黑",
+                                                fontSize: 16,
+                                                color:'#6c7a89',
+                                                lineHeight:30,
+                                            },
+                                        }
+                                    },
+                                    emphasis: {//中间文字显示
+                                        show: true,
+                                    }
+                                },
                             }]
                         }
                     };
