@@ -8,6 +8,7 @@ use app\admin\model\AuthGroupAccess;
 use app\admin\model\Admin;
 use app\admin\model\zendesk\ZendeskAgents;
 use think\Db;
+use think\Log;
 
 class CustomerService extends Backend
 {
@@ -1741,13 +1742,17 @@ class CustomerService extends Backend
             $all_work_list_refund_rate = 0;
         }else{
             //优惠券占比
-            $all_work_list_coupon_str_proportion = round($workOrderNum/$all_work_list_coupon_str,2).'%';
+
+            $all_work_list_coupon_str_proportion = round($all_work_list_coupon_str/$workOrderNum*100,2).'%';
+
             //补发订单量占比
-            $all_work_list_replacement_counter_proportion = round($workOrderNum/$all_work_list_replacement_counter,2).'%';
+            $all_work_list_replacement_counter_proportion = round($all_work_list_replacement_counter/$workOrderNum*100,2).'%';
             //退款金额占比
-            $all_work_list_refund_money_rate = round($totalOrderMoney/$all_work_list_refund_money,2).'%';
+
+            $all_work_list_refund_money_rate = round($all_work_list_refund_money/$totalOrderMoney*100,2).'%';
             //退款订单占比
-            $all_work_list_refund_rate = round($workOrderNum/$all_work_list_refund_num,2).'%';
+            
+            $all_work_list_refund_rate = round($all_work_list_refund_num/$workOrderNum*100,2).'%';
         }
 
         $this->assign('all_work_list_coupon_str_proportion',$all_work_list_coupon_str_proportion);
@@ -1861,8 +1866,6 @@ class CustomerService extends Backend
         $this->assign('warehouseWorkList1',$warehouseWorkList1);
 
 
-
-
         //查找group_id为131的所有用户   运营客服角色
         $mat['group_id'] = 131;
         $cat = model('AuthGroupAccess')->field('uid')->where($mat)->select();
@@ -1872,6 +1875,11 @@ class CustomerService extends Backend
         $notCustomer_where['work_status'] = 6;
         $notCustomer_where_other['work_status'] = ['in',[0, 1, 2, 3, 4, 5, 6, 7]];
         $notCustomer_where_other['create_user_id'] = ['in',$cat];
+        Log::write("运营客服信息");
+        Log::write($notCustomer_where);
+        Log::write($map);
+
+
         //非客服工单已完成数据
         $notCustomer = $this->model->where($notCustomer_where)->where($map)->where('work_status = 6')->field('count(*) as counter,sum(base_grand_total) as base_grand_total,count(replacement_order !="" or null) as replacement_counter,
             sum(is_refund) as refund_num,sum(refund_money) as refund_money,count(coupon_str !="" or null) as coupon_str ')->select();
