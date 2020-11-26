@@ -1417,8 +1417,6 @@ class ScmDistribution extends Scm
             case 2:
                 $check_remark = '配错镜框';
                 break;
-            default:
-                $check_remark = 'SKU缺失';
         }
 
 //        $check_remark = $this->request->request('check_remark');
@@ -1442,7 +1440,7 @@ class ScmDistribution extends Scm
         $result = false;
         Db::startTrans();
         try {
-            $result = $this->_new_order->allowField(true)->isUpdate(true, ['id' => $order_id])->save($param);
+            $result = $this->_new_order_process->allowField(true)->isUpdate(true, ['order_id' => $order_id])->save($param);
             if (false === $result){
                 //审单通过结束，审单拒绝，回滚合单状态
                 if ($check_status == 2) {
@@ -1450,7 +1448,7 @@ class ScmDistribution extends Scm
                         //SKU缺失，绑定合单库位，回滚子单号为合单中状态
                         $new_store_house_info = $this->_stock_house->field('id,coding,subarea')->where(['status'=>1,'type'=>2,'occupy'=>0])->find();
                         empty($new_store_house_info) && $this->error(__('合单库位已用完，请检查合单库位情况'), [], 5000);
-                        $this->_new_order->allowField(true)->isUpdate(true, ['id' => $order_id])->save(['store_house_id'=>$new_store_house_info['id']]);
+                        $this->_new_order_process->allowField(true)->isUpdate(true, ['order_id' => $order_id])->save(['store_house_id'=>$new_store_house_info['id']]);
                         $this->_new_order_item_process->allowField(true)->isUpdate(true, ['order_id' => $order_id])->save(['distribution_status'=>8]);
                     } else {
                         //配错镜框，回滚子单为待配镜片
