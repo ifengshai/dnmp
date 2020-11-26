@@ -1500,7 +1500,6 @@ class ScmDistribution extends Scm
     {
         $order_id = $this->request->request('order_id');
         empty($order_id) && $this->error(__('主订单ID不能为空'), [], 403);
-
         $check_status = $this->request->request('check_status');
         empty($check_status) && $this->error(__('审单类型不能为空'), [], 403);
         !in_array($check_status, [1, 2]) && $this->error(__('审单类型错误'), [], 403);
@@ -1531,6 +1530,7 @@ class ScmDistribution extends Scm
         //检测订单审单状态
         $row = $this->_new_order_process->where(['order_id'=>$order_id])->find();
         $item_ids = $this->_new_order_item_process->where(['order_id'=>$order_id])->column('id');
+        $check_status == $row['check_status'] && $this->error(__('已经'.$msg.'，请勿重复操作'), [], 4000);
         0 != $row['check_status'] && $this->error(__('只有待审单状态才能审单'), [], 405);
 
         $result = false;
@@ -1538,7 +1538,24 @@ class ScmDistribution extends Scm
         try {
             $result = $this->_new_order_process->allowField(true)->isUpdate(true, ['order_id' => $order_id])->save($param);
             if (false !== $result){
-                //审单通过结束，审单拒绝，回滚合单状态
+                //审单通过，变更库存，获取true_sku集合
+                $item_info = $this->_new_order_item_process->field('sku,site')->where(['order_id'=>$order_id])->select();
+                $item_info = collection($item_info)->toArray();
+                foreach($item_info as $key => $value){
+                    $true_sku[] = $sku = $this->_item_platform_sku->getTrueSku($value['sku'], $value['site']);
+                    //判断sku实时库存是否满足
+                    $stock = $this->_item->where(['sku'=>$sku])->value('stock');
+                    empty($stock) && $this->error(__('sku实时库存不足'), [], 403);
+                }
+                //扣减订单占用库存、配货占用库存，扣减总库存
+                $this->_item
+                    ->where(['sku'=>['in',$true_sku]])
+                    ->dec('occupy_stock', 1)
+                    ->dec('distribution_occupy_stock', 1)
+                    ->dec('stock', 1)
+                    ->update()
+                ;
+                //审单拒绝，回滚合单状态
                 if ($check_status == 2) {
                     if ($check_refuse == 1){
                         //SKU缺失，绑定合单库位，回滚子单号为合单中状态
