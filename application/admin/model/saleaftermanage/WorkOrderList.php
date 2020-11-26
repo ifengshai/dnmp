@@ -240,7 +240,7 @@ class WorkOrderList extends Model
             //获取措施ID
             $_work_order_measure = new WorkOrderMeasure();
             $measure_list = $_work_order_measure
-                ->field('id,item_order_number')
+                ->field('measure_choose_id,item_order_number')
                 ->where(['work_id'=>$work_id])
                 ->select();
             ;
@@ -252,7 +252,7 @@ class WorkOrderList extends Model
                 $measure_ids = [];
                 foreach($measure_list as $v){
                     if($v['item_order_number'] == $key){
-                        $measure_ids[] = $v['id'];
+                        $measure_ids[] = $v['measure_choose_id'];
                     }
                 }
                 $info['item_choose'] = $measure_ids;
@@ -381,6 +381,7 @@ class WorkOrderList extends Model
                 ->join(['fa_order_item_option' => 'b'], 'a.option_id=b.id')
                 ->select()
             ;
+            $prescriptions = collection($prescriptions)->toArray();
             empty($prescriptions) && exception('子订单不存在，请查询后重试');
 
             //增加默认数量

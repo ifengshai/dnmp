@@ -829,6 +829,8 @@ class ScmDistribution extends Scm
                 DistributionLog::record($this->auth,$item_process_info['id'],6,$status_arr[$reason]['name']);
 
                 Db::commit();
+
+                $this->success('', [], 200);
             } catch (ValidateException $e) {
                 Db::rollback();
                 $this->error($e->getMessage(), [], 406);
@@ -839,6 +841,8 @@ class ScmDistribution extends Scm
                 Db::rollback();
                 $this->error($e->getMessage(), [], 408);
             }
+
+           
         }
     }
 
