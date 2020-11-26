@@ -115,13 +115,13 @@ class Distribution extends Backend
                 unset($filter['stock_house_num']);
             }
             //-------------------跟单数据不全，配货列表--跟单列表展示注释释放----------------------//
-            /*
+            
             if (8 == $label) {
                 //查询有未处理工单的子单，异常表中存在有工单异常数据，后续要去重
                 $item_process_id_work = $this->model->where(['item_order_number'=>['in', array_unique($item_process_number)]])->column('id');
                 $map['a.id'] = ['in', array_merge($tmp_item_process_id, $item_process_id_work)];
             }
-            */
+           
 
             if ($filter['site']) {
                 $map['a.site'] = ['in', $filter['site']];
