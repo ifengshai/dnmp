@@ -381,6 +381,7 @@ class WorkOrderList extends Model
                 ->join(['fa_order_item_option' => 'b'], 'a.option_id=b.id')
                 ->select()
             ;
+            $prescriptions = collection($prescriptions)->toArray();
             empty($prescriptions) && exception('子订单不存在，请查询后重试');
 
             //增加默认数量

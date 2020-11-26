@@ -1133,22 +1133,36 @@ class Distribution extends Backend
             ->count();
         0 < $abnormal_count && $this->error('有异常待处理的子订单');
 
+        //获取配货信息
+        $item_list = $this->model
+            ->field('id,site,sku,distribution_status,order_id')
+            ->where(['id' => ['in', $ids]])
+            ->select();
+        empty($item_list) && $this->error('数据不存在');
+
+        //检测配货状态
+        $order_ids = [];
+        foreach ($item_list as $value) {
+            $order_ids[] = $value['order_id'];
+            6 != $value['distribution_status'] && $this->error('存在非当前节点的子订单');
+        }
+
+        //查询订单号
+        $_new_order = new NewOrder();
+        $increment_ids = $_new_order->where(['id'=>['in',$order_ids]])->column('increment_id');
+
         //TODO::检测工单状态
         //主订单措施未处理
-        $check_work_order = (new WorkOrderList())->where([])->column();
+        $_work_order_measure = new WorkOrderMeasure();
+        $check_work_order = $_work_order_measure
+            ->alias('a')
+            ->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')
+            ->where(['b.platform_order'=>['in',$increment_ids],['b.work_status'=>['in',[1,2,3,5]]]])
+            ->column();
 
         //当前子订单措施未处理
         //当前子订单措施取消成功
 
-        //检测配货状态
-        $item_list = $this->model
-            ->field('id,site,sku,distribution_status')
-            ->where(['id' => ['in', $ids]])
-            ->select();
-        empty($item_list) && $this->error('数据不存在');
-        foreach ($item_list as $value) {
-            6 != $value['distribution_status'] && $this->error('存在非当前节点的子订单');
-        }
 
         //库存、关系映射、库存日志表
         $_item_platform_sku = new ItemPlatformSku();
