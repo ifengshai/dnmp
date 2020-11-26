@@ -880,11 +880,11 @@ class ScmDistribution extends Scm
             } elseif ($item_process_info['temporary_house_id']){
                 //有暂存库位ID
                 $store_house_info = $this->_stock_house->field('id,coding,subarea')->where('id',$item_process_info['temporary_house_id'])->find();
-                $this->error(__('请将子单号'.$item_order_number.'的商品放入'.$store_house_info['coding'].'异常库位'), [], 403);
+                $this->error(__('请将子单号'.$item_order_number.'的商品放入'.$store_house_info['coding'].'暂存库位'), [], 403);
             }elseif ($order_process_info['store_house_id']){
                 //有主单合单库位
                 $store_house_info = $this->_stock_house->field('id,coding,subarea')->where('id',$order_process_info['store_house_id'])->find();
-                $this->error(__('请将子单号'.$item_order_number.'的商品放入合单架'.$store_house_info['coding'].'库位'), [], 403);
+                $this->error(__('请将子单号'.$item_order_number.'的商品放入合单架'.$store_house_info['coding'].'合单库位'), [], 403);
             }
 
         }
@@ -894,7 +894,7 @@ class ScmDistribution extends Scm
         $info['sku'] = $item_process_info['sku'];
         if (!$order_process_info['store_house_id']){
             //主单中无库位号，首个子单进入时，分配一个合单库位给PDA，暂不占用根据是否确认放入合单架占用或取消
-            $store_house_info = $this->_stock_house->field('id,coding,subarea')->where(['status'=>1,'type'=>2])->find();
+            $store_house_info = $this->_stock_house->field('id,coding,subarea')->where(['status'=>1,'type'=>2,'occupy'=>0])->find();
             $info['store_id'] = $store_house_info['id'];
             $info['coding'] = $store_house_info['coding'];
         } else {
