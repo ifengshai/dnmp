@@ -1413,13 +1413,16 @@ class ScmDistribution extends Scm
         empty($order_id) && $this->error(__('主订单ID不能为空'), [], 403);
         $check_refuse = $this->request->request('check_refuse');//check_refuse   1SKU缺失  2 配错镜框
         empty($check_refuse) && $this->error(__('审单拒绝原因不能为空'), [], 403);
+        !in_array($check_refuse, [1, 2]) && $this->error(__('审单拒绝原因错误'), [], 403);
         switch ($check_refuse)
         {
             case 1:
                 $check_remark = 'SKU缺失';
+                $msg_info = 'SKU缺失，退回至待合单';
                 break;
             case 2:
                 $check_remark = '配错镜框';
+                $msg_info = '配错镜框，退回至待配货';
                 break;
         }
 
@@ -1439,13 +1442,14 @@ class ScmDistribution extends Scm
 
         //检测订单审单状态
         $row = $this->_new_order_process->where(['order_id'=>$order_id])->find();;
+        $item_ids = $this->_new_order_item_process->where(['order_id'=>$order_id])->column('id');;
         0 != $row['check_status'] && $this->error(__('只有待审单状态才能审单'), [], 405);
 
         $result = false;
         Db::startTrans();
         try {
             $result = $this->_new_order_process->allowField(true)->isUpdate(true, ['order_id' => $order_id])->save($param);
-            if (false === $result){
+            if (false !== $result){
                 //审单通过结束，审单拒绝，回滚合单状态
                 if ($check_status == 2) {
                     if ($check_refuse == 1){
@@ -1474,9 +1478,11 @@ class ScmDistribution extends Scm
         }
         if ($result === false) {
             $this->error(__($msg.'失败'), [], 404);
+            DistributionLog::record($this->auth,$item_ids,8,$row['order_id'].$msg.'失败'.$msg_info);
         }
 
         $this->success($msg.'成功', [], 200);
+        DistributionLog::record($this->auth,$item_ids,8,$row['order_id'].$msg.'成功'.$msg_info);
     }
 
 }
