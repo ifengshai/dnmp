@@ -371,10 +371,9 @@ class Nihao extends Model
      * @since 2020/02/26 17:36:58
      * @author wpl
      */
-    public function getOrderNum($type = 1,$time_str = '')
+    public function getOrderNum($time_str = '',$time_str2 = '')
     {
         $map['site'] = 3;
-        if ($type == 1) {
             if(!$time_str){
                 $start = date('Y-m-d', strtotime('-6 day'));
                 $end   = date('Y-m-d 23:59:59');
@@ -384,44 +383,20 @@ class Nihao extends Model
             $createat = explode(' ', $time_str);
             $where['day_date'] = ['between', [$createat[0], $createat[3]]];
             $arr['order_num'] = $this->where($map)->where($where)->sum('order_num');
-            //同比
-            $same_start = date('Y-m-d', strtotime("-1 years", strtotime($createat[0])));
-            $same_end = date('Y-m-d', strtotime("-1 years", strtotime($createat[3])));
-            $same_where['day_date'] = ['between', [$same_start, $same_end]];
-            $same_order_num = $this->where($map)->where($same_where)->sum('order_num');
-            $arr['same_order_num'] = $same_order_num != 0 ? round(($arr['order_num'] - $same_order_num) / $same_order_num * 100, 2) : 0;
-            //环比
-            $huan_start = date('Y-m-d', strtotime("-1 months", strtotime($createat[0])));
-            $huan_end = date('Y-m-d', strtotime("-1 months", strtotime($createat[3])));
-            $huan_where['day_date'] = ['between', [$huan_start, $huan_end]];
-            $huan_order_num = $this->where($map)->where($huan_where)->sum('order_num');
-            $arr['huan_order_num'] = $huan_order_num != 0 ? round(($arr['order_num'] - $huan_order_num) / $huan_order_num * 100, 2)  : 0;
-        } else {
-            //查询某天的数据
-            $where = [];
-            $where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $time_str . "'")];
-            $arr['order_num'] = $this->where($map)->where($where)->sum('order_num');
-            $same_start = date('Y-m-d', strtotime("-1 years", strtotime($time_str)));
-            $same_where = [];
-            $same_where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $same_start . "'")];
-            $same_order_num = $this->where($map)->where($same_where)->sum('order_num');
-            $arr['same_order_num'] = $same_order_num != 0 ? round(($arr['order_num'] - $same_order_num) / $same_order_num * 100, 2)  : 0;
-
-            $huan_start = date('Y-m-d', strtotime("-1 months", strtotime($time_str)));
-            $huan_where = [];
-            $huan_where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $huan_start . "'")];
-            $huan_order_num = $this->where($map)->where($huan_where)->sum('order_num');
-            $arr['huan_order_num'] = $huan_order_num != 0 ? round(($arr['order_num'] - $huan_order_num) / $huan_order_num * 100, 2) : 0;
-        }
+            if($time_str2){
+                $createat2 = explode(' ', $time_str2);
+                $huan_where['day_date'] = ['between', [$createat2[0], $createat2[3]]];
+                $contrast_order_num = $this->where($map)->where($huan_where)->sum('order_num');
+                $arr['contrast_order_num'] = $contrast_order_num ? round(($arr['order_num'] - $contrast_order_num) / $contrast_order_num * 100, 2) : 0;
+            }
         return $arr;
     }
     /*
      * 统计销售额
      * */
-    public function getSalesTotalMoney($type = 1,$time_str = '')
+    public function getSalesTotalMoney($time_str = '',$time_str2 = '')
     {
         $map['site'] = 3;
-        if ($type == 1) {
             if(!$time_str){
                 $start = date('Y-m-d', strtotime('-6 day'));
                 $end   = date('Y-m-d 23:59:59');
@@ -430,36 +405,12 @@ class Nihao extends Model
             $createat = explode(' ', $time_str);
             $where['day_date'] = ['between', [$createat[0], $createat[3]]];
             $arr['sales_total_money'] = $this->where($map)->where($where)->sum('sales_total_money');
-            //同比
-            $same_start = date('Y-m-d', strtotime("-1 years", strtotime($createat[0])));
-            $same_end = date('Y-m-d', strtotime("-1 years", strtotime($createat[3])));
-            $same_where['day_date'] = ['between', [$same_start, $same_end]];
-            $same_sales_total_money = $this->where($map)->where($same_where)->sum('sales_total_money');
-            $arr['same_sales_total_money'] = $same_sales_total_money != 0 ? round(($arr['sales_total_money'] - $same_sales_total_money) / $same_sales_total_money * 100, 2)  : 0;
-            //环比
-            $huan_start = date('Y-m-d', strtotime("-1 months", strtotime($createat[0])));
-            $huan_end = date('Y-m-d', strtotime("-1 months", strtotime($createat[3])));
-            $huan_where['day_date'] = ['between', [$huan_start, $huan_end]];
-            $huan_sales_total_money = $this->where($map)->where($huan_where)->sum('sales_total_money');
-            $arr['huan_sales_total_money'] = $huan_sales_total_money != 0 ? round(($arr['sales_total_money'] - $huan_sales_total_money) / $huan_sales_total_money * 100, 2)  : 0;
-        } else {
-            //判断当前时间是否等于当前时间，如果等于，则实时读取当天数据
-            $where = [];
-            $where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $time_str . "'")];
-            $arr['sales_total_money'] = $this->where($map)->where($where)->sum('sales_total_money');
-            //同比
-            $same_start = date('Y-m-d', strtotime("-1 years", strtotime($time_str)));
-            $same_where = [];
-            $same_where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $same_start . "'")];
-            $same_sales_total_money = $this->where($map)->where($same_where)->sum('sales_total_money');
-            $arr['same_sales_total_money'] = $same_sales_total_money != 0 ? round(($arr['sales_total_money'] - $same_sales_total_money) / $same_sales_total_money * 100, 2): 0;
-            //环比
-            $huan_start = date('Y-m-d', strtotime("-1 months", strtotime($time_str)));
-            $huan_where = [];
-            $huan_where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $huan_start . "'")];
-            $huan_sales_total_money = $this->where($map)->where($huan_where)->sum('sales_total_money');
-            $arr['huan_sales_total_money'] = $huan_sales_total_money != 0 ? round(($arr['sales_total_money'] - $huan_sales_total_money) / $huan_sales_total_money * 100, 2): 0;
-        }
+            if($time_str2){
+                $createat2 = explode(' ', $time_str2);
+                $huan_where['day_date'] = ['between', [$createat2[0], $createat2[3]]];
+                $contrast_order_num = $this->where($map)->where($huan_where)->sum('sales_total_money');
+                $arr['contrast_sales_total_num'] = $contrast_order_num ? round(($arr['sales_total_money'] - $contrast_order_num) / $contrast_order_num * 100, 2) : 0;
+            }
         return $arr;
     }
     /**
@@ -470,66 +421,34 @@ class Nihao extends Model
      * @since 2020/02/26 17:36:58
      * @author wpl
      */
-    public function getOrderUnitPrice($type = 1,$time_str = '')
+    public function getOrderUnitPrice($time_str = '',$time_str2 = '')
     {
         $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
         $map['order_type'] = 1;
-        if ($type == 1) {
             if(!$time_str){
                 $start = date('Y-m-d', strtotime('-6 day'));
                 $end   = date('Y-m-d 23:59:59');
                 $time_str = $start .' 00:00:00 - ' .$end.' 00:00:00';
             }
             //时间段统计客单价
-            $createat = explode(' ', $time_str);
-            $order_total = $this->getSalesTotalMoney(1,$time_str);
-            $order_num = $this->getOrderNum(1,$time_str);
+            $order_total = $this->getSalesTotalMoney($time_str);
+            $order_num = $this->getOrderNum($time_str);
 
             $arr['order_unit_price'] = $order_num['order_num'] != 0 ? round($order_total['sales_total_money'] / $order_num['order_num'], 2) : 0;
-            //同比
-            $same_start = date('Y-m-d', strtotime("-1 years", strtotime($createat[0])));
-            $same_end = date('Y-m-d', strtotime("-1 years", strtotime($createat[3])));
-            $same_where = $same_start .' 00:00:00 - ' .$same_end.' 00:00:00';
-            $same_order_total = $this->getSalesTotalMoney(1,$same_where);
-            $same_order_num = $this->getOrderNum(1,$same_where);
-            $same_order_unit_price = $same_order_num['order_num'] != 0 ? round($same_order_total['sales_total_money'] / $same_order_num['order_num'], 2) : 0;
-            $arr['same_order_unit_price'] = $same_order_unit_price != 0 ? round(($arr['order_unit_price'] - $same_order_unit_price) / $same_order_unit_price * 100, 2)  : 0;
-
-            //环比
-            $huan_start = date('Y-m-d', strtotime("-1 months", strtotime($createat[0])));
-            $huan_end = date('Y-m-d', strtotime("-1 months", strtotime($createat[3])));
-            $huan_where = $huan_start .' 00:00:00 - ' .$huan_end.' 00:00:00';
-            $huan_order_total = $this->getSalesTotalMoney(1,$huan_where);
-            $huan_order_num = $this->getOrderNum(1,$huan_where);
-            $huan_order_unit_price = $huan_order_num['order_num'] != 0 ? round($huan_order_total['sales_total_money'] / $huan_order_num['order_num'], 2) : 0;
-            $arr['huan_order_unit_price'] = $huan_order_unit_price != 0 ? round(($arr['order_unit_price'] - $huan_order_unit_price) / $huan_order_unit_price * 100, 2)  : 0;
-        } else {
-            $where = [];
-            $where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $time_str . "'")];
-            //读取数据库中的客单价
-            $arr['order_unit_price'] = $this->where('site', 3)->where($where)->value('order_unit_price');
-            //同比
-            $same_start = date('Y-m-d', strtotime("-1 years", strtotime($time_str)));
-            $same_where = [];
-            $same_where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $same_start . "'")];
-            $same_order_unit_price = $this->where('site', 3)->where($same_where)->value('order_unit_price');
-            $arr['same_order_unit_price'] = $same_order_unit_price != 0 ? round(($arr['order_unit_price'] - $same_order_unit_price) / $same_order_unit_price * 100, 2)  : 0;
-            //环比
-            $huan_start = date('Y-m-d', strtotime("-1 months", strtotime($time_str)));
-            $huan_where = [];
-            $huan_where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $huan_start . "'")];
-            $huan_order_unit_price = $this->where('site', 3)->where($huan_where)->value('order_unit_price');
-            $arr['huan_order_unit_price'] = $huan_order_unit_price != 0 ? round(($arr['order_unit_price'] - $huan_order_unit_price) / $huan_order_unit_price * 100, 2) : 0;
-        }
+            if($time_str2){
+                $huan_order_total = $this->getSalesTotalMoney($time_str2);
+                $huan_order_num = $this->getOrderNum($time_str2);
+                $huan_order_unit_price = $huan_order_num['order_num'] != 0 ? round($huan_order_total['sales_total_money'] / $huan_order_num['order_num'], 2) : 0;
+                $arr['contrast_order_unit_price'] = $huan_order_unit_price != 0 ? round(($arr['order_unit_price'] - $huan_order_unit_price) / $huan_order_unit_price * 100, 2) : 0;
+            }
         return $arr;
     }
     /*
      * 统计邮费
      * */
-    public function getShippingTotalMoney($type = 1,$time_str = '')
+    public function getShippingTotalMoney($time_str = '',$time_str2 = '')
     {
         $map['site'] = 3;
-        if ($type == 1) {
             if(!$time_str){
                 $start = date('Y-m-d', strtotime('-6 day'));
                 $end   = date('Y-m-d 23:59:59');
@@ -538,35 +457,12 @@ class Nihao extends Model
             $createat = explode(' ', $time_str);
             $where['day_date'] = ['between', [$createat[0], $createat[3]]];
             $arr['shipping_total_money'] = $this->where($map)->where($where)->sum('shipping_total_money');
-            //同比
-            $same_start = date('Y-m-d', strtotime("-1 years", strtotime($createat[0])));
-            $same_end = date('Y-m-d', strtotime("-1 years", strtotime($createat[3])));
-            $same_where['day_date'] = ['between', [$same_start, $same_end]];
-            $same_shipping_total_money = $this->where($map)->where($same_where)->sum('shipping_total_money');
-            $arr['same_shipping_total_money'] = $same_shipping_total_money != 0 ? round(($arr['shipping_total_money'] - $same_shipping_total_money) / $same_shipping_total_money * 100, 2) : 0;
-            //环比
-            $huan_start = date('Y-m-d', strtotime("-1 months", strtotime($createat[0])));
-            $huan_end = date('Y-m-d', strtotime("-1 months", strtotime($createat[3])));
-            $huan_where['day_date'] = ['between', [$huan_start, $huan_end]];
-            $huan_shipping_total_money = $this->where($map)->where($huan_where)->sum('shipping_total_money');
-            $arr['huan_shipping_total_money'] = $huan_shipping_total_money != 0 ? round(($arr['shipping_total_money'] - $huan_shipping_total_money) / $huan_shipping_total_money * 100, 2)  : 0;
-        } else {
-            $where = [];
-            $where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $time_str . "'")];
-            $arr['shipping_total_money'] = $this->where($map)->where($where)->sum('shipping_total_money');
-            //同比
-            $same_start = date('Y-m-d', strtotime("-1 years", strtotime($time_str)));
-            $same_where = [];
-            $same_where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $same_start . "'")];
-            $same_shipping_total_money = $this->where($map)->where($same_where)->sum('shipping_total_money');
-            $arr['same_shipping_total_money'] = $same_shipping_total_money != 0 ? round(($arr['shipping_total_money'] - $same_shipping_total_money) / $same_shipping_total_money * 100, 2) : 0;
-            //环比
-            $huan_start = date('Y-m-d', strtotime("-1 months", strtotime($time_str)));
-            $huan_where = [];
-            $huan_where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $huan_start . "'")];
-            $huan_shipping_total_money = $this->where($map)->where($huan_where)->sum('shipping_total_money');
-            $arr['huan_shipping_total_money'] = $huan_shipping_total_money != 0 ? round(($arr['shipping_total_money'] - $huan_shipping_total_money) / $huan_shipping_total_money * 100, 2) : 0;
-        }
+            if($time_str2){
+                $createat2 = explode(' ', $time_str2);
+                $huan_where['day_date'] = ['between', [$createat2[0], $createat2[3]]];
+                $contrast_order_num = $this->where($map)->where($huan_where)->sum('shipping_total_money');
+                $arr['contrast_shipping_total_money'] = $contrast_order_num ? round(($arr['shipping_total_money'] - $contrast_order_num) / $contrast_order_num * 100, 2) : 0;
+            }
         return $arr;
     }
 

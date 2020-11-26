@@ -30,39 +30,43 @@ class Datacenter extends Model
         $this->voogueme_order = new \app\admin\model\order\order\Voogueme();
         $this->nihao_order = new \app\admin\model\order\order\Nihao();
     }
+
     //获取着陆页数据
     public function getLanding($time_str = '', $type = 0)
     {
-        $z = $this->zeelool->getLanding($time_str,1);
-        $v = $this->voogueme->getLanding($time_str,1);
-        $n = $this->nihao->getLanding($time_str,1);
+        $z = $this->zeelool->getLanding($time_str, 1);
+        $v = $this->voogueme->getLanding($time_str, 1);
+        $n = $this->nihao->getLanding($time_str, 1);
         $num['landing_num'] = $z['landing_num'] + $v['landing_num'] + $n['landing_num'];
         return $num;
     }
+
     //产品详情页
     public function getDetail($time_str = '', $type = 0)
     {
-        $z = $this->zeelool->getDetail($time_str,1);
-        $v = $this->voogueme->getDetail($time_str,1);
-        $n = $this->nihao->getDetail($time_str,1);
+        $z = $this->zeelool->getDetail($time_str, 1);
+        $v = $this->voogueme->getDetail($time_str, 1);
+        $n = $this->nihao->getDetail($time_str, 1);
         $num['detail_num'] = $z['detail_num'] + $v['detail_num'] + $n['detail_num'];
         return $num;
     }
+
     //加购
     public function getCart($time_str = '', $type = 0)
     {
-        $z = $this->zeelool->getCart($time_str,1);
-        $v = $this->voogueme->getCart($time_str,1);
-        $n = $this->nihao->getCart($time_str,1);
+        $z = $this->zeelool->getCart($time_str, 1);
+        $v = $this->voogueme->getCart($time_str, 1);
+        $n = $this->nihao->getCart($time_str, 1);
         $num['cart_num'] = $z['cart_num'] + $v['cart_num'] + $n['cart_num'];
         return $num;
     }
+
     //交易次数
     public function getComplete($time_str = '', $type = 0)
     {
-        $z = $this->zeelool->getComplete($time_str,1);
-        $v = $this->voogueme->getComplete($time_str,1);
-        $n = $this->nihao->getComplete($time_str,1);
+        $z = $this->zeelool->getComplete($time_str, 1);
+        $v = $this->voogueme->getComplete($time_str, 1);
+        $n = $this->nihao->getComplete($time_str, 1);
         $num['complete_num'] = $z['complete_num'] + $v['complete_num'] + $n['complete_num'];
         return $num;
     }
@@ -145,6 +149,7 @@ class Datacenter extends Model
         return $result;
         // return $result[0]['ga:secondPagePath'] ? round($result[0]['ga:secondPagePath'], 2) : 0;
     }
+
     //着陆页会话数
     protected function getReport_landing1($site, $analytics, $startDate, $endDate)
     {
@@ -207,6 +212,7 @@ class Datacenter extends Model
         // return $result;
         return $result[0]['ga:goal13Starts'] ? round($result[0]['ga:goal13Starts'], 2) : 0;
     }
+
     //目标13会话数 产品详情页数据
     protected function getReport_target13($site, $analytics, $startDate, $endDate)
     {
@@ -271,6 +277,7 @@ class Datacenter extends Model
         // return $result;
         return $result[0]['ga:goal1Starts'] ? round($result[0]['ga:goal1Starts'], 2) : 0;
     }
+
     //目标1会话数 购物车页面数据
     protected function getReport_target1($site, $analytics, $startDate, $endDate)
     {
@@ -335,6 +342,7 @@ class Datacenter extends Model
         // return $result;
         return $result[0]['ga:transactions'] ? round($result[0]['ga:transactions'], 2) : 0;
     }
+
     //最终电子商务页面交易次数数据
     protected function getReport_target_end($site, $analytics, $startDate, $endDate)
     {
@@ -604,54 +612,26 @@ class Datacenter extends Model
      * Date: 2020/10/14
      * Time: 11:39:38
      */
-    public function getActiveUser( $type = 1,$time_str = '')
+    public function getActiveUser($time_str = '', $time_str2 = '')
     {
-        if ($type == 1) {
-            //默认查询7天的数据
-            if (!$time_str) {
-                $start = date('Y-m-d', strtotime('-6 day'));
-                $end   = date('Y-m-d 23:59:59');
-                $time_str = $start .' 00:00:00 - ' .$end.' 00:00:00';
-            }
-            //时间段总和
-            $createat = explode(' ', $time_str);
-            $where['day_date'] = ['between', [$createat[0], $createat[3]]];
-            $arr['active_user_num'] = $this->where($where)->sum('active_user_num');
-
-            $same_start = date('Y-m-d', strtotime("-1 years", strtotime($createat[0])));
-            $same_end = date('Y-m-d', strtotime("-1 years", strtotime($createat[3])));
-            $same_where['day_date'] = ['between', [$same_start, $same_end]];
-            //同比搜索时间段内的所有站的数据 同比时间段内的数据为0 那么同比增长为100%
-            $same_order_unit_price = $this->where($same_where)->sum('active_user_num');
-            $arr['same_active_user_num'] = $same_order_unit_price == 0 ? '100%' : round(($arr['active_user_num'] - $same_order_unit_price) / $same_order_unit_price * 100, 2) . '%';
-
-            $huan_start = date('Y-m-d', strtotime("-1 months", strtotime($createat[0])));
-            $huan_end = date('Y-m-d', strtotime("-1 months", strtotime($createat[3])));
-            $huan_where['day_date'] = ['between', [$huan_start, $huan_end]];
-            //环比时间段内的所有站的数据 环比时间段内的数据为0 那么环比增长为100%
-            $huan_order_unit_price = $this->where($huan_where)->sum('active_user_num');
-            $arr['huan_active_user_num'] = $huan_order_unit_price == 0 ? '100%' : round(($arr['active_user_num'] - $huan_order_unit_price) / $huan_order_unit_price * 100, 2) . '%';
-
-        } else {
-            //查询某天的数据
-            $where = [];
-            $where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $time_str . "'")];
-            $arr['active_user_num'] = $this->where($where)->sum('active_user_num');
-
-            $same_start = date('Y-m-d', strtotime("-1 years", strtotime($time_str)));
-            $same_where = [];
-            $same_where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $same_start . "'")];
-            //同比搜索时间段内的所有站的数据 同比时间段内的数据为0 那么同比增长为100%
-            $same_order_unit_price = $this->where($same_where)->sum('active_user_num');
-            $arr['same_active_user_num'] = $same_order_unit_price == 0 ? '100%' : round(($arr['active_user_num'] - $same_order_unit_price) / $same_order_unit_price * 100, 2) . '%';
-
-            $huan_start = date('Y-m-d', strtotime("-1 months", strtotime($time_str)));
-            $huan_where = [];
-            $huan_where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $huan_start . "'")];
-            //环比时间段内的所有站的数据 环比时间段内的数据为0 那么环比增长为100%
-            $huan_order_unit_price = $this->where($huan_where)->sum('active_user_num');
-            $arr['huan_active_user_num'] = $huan_order_unit_price == 0 ? '100%' : round(($arr['active_user_num'] - $huan_order_unit_price) / $huan_order_unit_price * 100, 2) . '%';
+        //默认查询7天的数据
+        if (!$time_str) {
+            $start = date('Y-m-d', strtotime('-6 day'));
+            $end = date('Y-m-d 23:59:59');
+            $time_str = $start . ' 00:00:00 - ' . $end . ' 00:00:00';
         }
+        //时间段总和
+        $createat = explode(' ', $time_str);
+        $where['day_date'] = ['between', [$createat[0], $createat[3]]];
+        $arr['active_user_num'] = $this->where($where)->sum('active_user_num');
+
+        if ($time_str2) {
+            $createat2 = explode(' ', $time_str2);
+            $contrast_where['day_date'] = ['between', [$createat2[0], $createat2[3]]];
+            $contrast_active_user_num = $this->where($contrast_where)->sum('active_user_num');
+            $arr['contrast_active_user_num'] = $contrast_active_user_num ? round(($arr['active_user_num'] - $contrast_active_user_num) / $contrast_active_user_num * 100, 2) : '0';
+        }
+
 
         return $arr;
     }
@@ -664,53 +644,24 @@ class Datacenter extends Model
      * Date: 2020/10/14
      * Time: 11:39:50
      */
-    public function getRegisterUser($type = 1,$time_str = '')
+    public function getRegisterUser($time_str = '', $time_str2 = '')
     {
-        if ($type == 1) {
-            //默认查询7天的数据
-            if (!$time_str) {
-                $start = date('Y-m-d', strtotime('-6 day'));
-                $end   = date('Y-m-d 23:59:59');
-                $time_str = $start .' 00:00:00 - ' .$end.' 00:00:00';
-            }
-            //时间段总和
-            $createat = explode(' ', $time_str);
-            $where['day_date'] = ['between', [$createat[0], $createat[3]]];
-            $arr['register_user_num'] = $this->where($where)->sum('register_num');
+        //默认查询7天的数据
+        if (!$time_str) {
+            $start = date('Y-m-d', strtotime('-6 day'));
+            $end = date('Y-m-d 23:59:59');
+            $time_str = $start . ' 00:00:00 - ' . $end . ' 00:00:00';
+        }
+        //时间段总和
+        $createat = explode(' ', $time_str);
+        $where['day_date'] = ['between', [$createat[0], $createat[3]]];
+        $arr['register_user_num'] = $this->where($where)->sum('register_num');
 
-            $same_start = date('Y-m-d', strtotime("-1 years", strtotime($createat[0])));
-            $same_end = date('Y-m-d', strtotime("-1 years", strtotime($createat[3])));
-            $same_where['day_date'] = ['between', [$same_start, $same_end]];
-            //同比搜索时间段内的所有站的数据 同比时间段内的数据为0 那么同比增长为100%
-            $same_order_unit_price = $this->where($same_where)->sum('register_num');
-            $arr['same_register_user_num'] = $same_order_unit_price == 0 ? '100%' : round(($arr['register_user_num'] - $same_order_unit_price) / $same_order_unit_price * 100, 2) . '%';
-
-            $huan_start = date('Y-m-d', strtotime("-1 months", strtotime($createat[0])));
-            $huan_end = date('Y-m-d', strtotime("-1 months", strtotime($createat[3])));
-            $huan_where['day_date'] = ['between', [$huan_start, $huan_end]];
-            //环比时间段内的所有站的数据 环比时间段内的数据为0 那么环比增长为100%
-            $huan_order_unit_price = $this->where($huan_where)->sum('register_num');
-            $arr['huan_register_user_num'] = $huan_order_unit_price == 0 ? '100%' : round(($arr['register_user_num'] - $huan_order_unit_price) / $huan_order_unit_price * 100, 2) . '%';
-
-        } else {
-            //查询某天的数据
-            $where = [];
-            $where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $time_str . "'")];
-            $arr['register_user_num'] = $this->where($where)->sum('register_num');
-
-            $same_start = date('Y-m-d', strtotime("-1 years", strtotime($time_str)));
-            $same_where = [];
-            $same_where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $same_start . "'")];
-            //同比搜索时间段内的所有站的数据 同比时间段内的数据为0 那么同比增长为100%
-            $same_order_unit_price = $this->where($same_where)->sum('register_num');
-            $arr['same_register_user_num'] = $same_order_unit_price == 0 ? '100%' : round(($arr['register_user_num'] - $same_order_unit_price) / $same_order_unit_price * 100, 2) . '%';
-
-            $huan_start = date('Y-m-d', strtotime("-1 months", strtotime($time_str)));
-            $huan_where = [];
-            $huan_where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $huan_start . "'")];
-            //环比时间段内的所有站的数据 环比时间段内的数据为0 那么环比增长为100%
-            $huan_order_unit_price = $this->where($huan_where)->sum('register_num');
-            $arr['huan_register_user_num'] = $huan_order_unit_price == 0 ? '100%' : round(($arr['register_user_num'] - $huan_order_unit_price) / $huan_order_unit_price * 100, 2) . '%';
+        if ($time_str2) {
+            $createat2 = explode(' ', $time_str2);
+            $contrast_where['day_date'] = ['between', [$createat2[0], $createat2[3]]];
+            $contrast_register_user_num = $this->where($contrast_where)->sum('register_num');
+            $arr['contrast_register_user_num'] = $contrast_register_user_num ? round(($arr['register_user_num'] - $contrast_register_user_num) / $contrast_register_user_num * 100, 2) : '0';
         }
 
         return $arr;
@@ -724,22 +675,8 @@ class Datacenter extends Model
      * Date: 2020/10/14
      * Time: 11:40:04
      */
-    public function getAgainUser1($time_str = '', $type = 0)
-    {
-        $arrzeelool = $this->zeelool->getAgainUser($time_str);
-        $arrvoogueme = $this->voogueme->getAgainUser($time_str);
-        $arrnihao = $this->nihao->getAgainUser($time_str);
-        //三个站所有的复购用户数
-        $arrs['again_user_num'] = $arrzeelool['again_user_num'] + $arrvoogueme['again_user_num'] + $arrnihao['again_user_num'];
-        //三个站所有的同比复购用户数
-        $same_again_num = $arrzeelool['same_again_user_num'] + $arrvoogueme['same_again_user_num'] + $arrnihao['same_again_user_num'];
-        //三个站所有的环比复购用户数
-        $huan_again_num = $arrzeelool['huan_again_user_num'] + $arrvoogueme['huan_again_user_num'] + $arrnihao['huan_again_user_num'];
-        $arrs['same_again_user_num'] = $same_again_num == 0 ? '100' . '%' : round(($arrs['again_user_num'] - $same_again_num) / $same_again_num * 100, 2).'%';
-        $arrs['huan_again_user_num'] = $huan_again_num == 0 ? '100' . '%' : round(($arrs['again_user_num'] - $huan_again_num) / $huan_again_num * 100, 2).'%';
-        return $arrs;
-    }
-    public function getAgainUser($time_str = '', $type = 0)
+
+    public function getAgainUser($time_str = '', $time_str2 = '')
     {
         $createat = explode(' ', $time_str);
         $again_user_numzeelool = $this->zeelool->get_again_user($createat);
@@ -748,23 +685,15 @@ class Datacenter extends Model
         //三个站所有的复购用户数
         $arrs['again_user_num'] = $again_user_numzeelool + $again_user_numvoogueme + $again_user_numnihao;
 
-        $same_create_at[0] = date('Y-m-d', strtotime("-1 years", strtotime($createat[0])));
-        $same_create_at[1] = $createat[1];
-        $same_create_at[3] = date('Y-m-d', strtotime("-1 years", strtotime($createat[3])));
-        $same_create_at[4] = $createat[4];
-        $same_again_num = $this->zeelool->get_again_user($same_create_at) + $this->voogueme->get_again_user($same_create_at) + $this->nihao->get_again_user($same_create_at);
-        $huan_create_at[0] = date('Y-m-d', strtotime("-1 months", strtotime($createat[0])));
-        $huan_create_at[1] = $createat[1];
-        $huan_create_at[3] = date('Y-m-d', strtotime("-1 months", strtotime($createat[3])));
-        $huan_create_at[4] = $createat[4];
-        $huan_again_num = $this->zeelool->get_again_user($huan_create_at) + $this->voogueme->get_again_user($huan_create_at) + $this->nihao->get_again_user($huan_create_at);
-        // dump($createat);
-        // dump($same_create_at);
-        // dump($huan_create_at);
-
-        $arrs['same_again_user_num'] = $same_again_num == 0 ? '100' . '%' : round(($arrs['again_user_num'] - $same_again_num) / $same_again_num * 100, 2).'%';
-        $arrs['huan_again_user_num'] = $huan_again_num == 0 ? '100' . '%' : round(($arrs['again_user_num'] - $huan_again_num) / $huan_again_num * 100, 2).'%';
-
+        if ($time_str2) {
+            $createat = explode(' ', $time_str);
+            $again_user_numzeelool = $this->zeelool->get_again_user($createat);
+            $again_user_numvoogueme = $this->voogueme->get_again_user($createat);
+            $again_user_numnihao = $this->nihao->get_again_user($createat);
+            //三个站所有的复购用户数
+            $arrs['contrast_again_user_num'] = $again_user_numzeelool + $again_user_numvoogueme + $again_user_numnihao;
+            $arrs['contrast_again_user_num'] = $arrs['again_user_num'] == 0 ? '100' : round(($arrs['contrast_again_user_num'] - $arrs['again_user_num']) / $arrs['again_user_num'] * 100, 2) . '%';
+        }
         return $arrs;
     }
 
@@ -777,13 +706,13 @@ class Datacenter extends Model
      * Date: 2020/10/14
      * Time: 11:40:15
      */
-    public function getVipUser($time_str = '',$time_str2 = '')
+    public function getVipUser($time_str = '', $time_str2 = '')
     {
         //默认查询7天的数据
         if (!$time_str) {
             $start = date('Y-m-d', strtotime('-6 day'));
-            $end   = date('Y-m-d 23:59:59');
-            $time_str = $start .' 00:00:00 - ' .$end.' 00:00:00';
+            $end = date('Y-m-d 23:59:59');
+            $time_str = $start . ' 00:00:00 - ' . $end . ' 00:00:00';
         }
         //时间段总和
         $createat = explode(' ', $time_str);
@@ -791,14 +720,15 @@ class Datacenter extends Model
         $arr['vip_user_num'] = $this->where($where)->sum('vip_user_num');
 
         //对比数据
-        if($time_str2){
+        if ($time_str2) {
             $createat2 = explode(' ', $time_str2);
             $contrast_where['day_date'] = ['between', [$createat2[0], $createat2[3]]];
             $contrast_vip_user_num = $this->where($contrast_where)->sum('vip_user_num');
-            $arr['contrast_vip_user_num'] = $contrast_vip_user_num == 0 ? '100%' : round(($arr['vip_user_num'] - $contrast_vip_user_num) / $contrast_vip_user_num * 100, 2) . '%';
+            $arr['contrast_vip_user_num'] = $contrast_vip_user_num == 0 ? '100' : round(($arr['vip_user_num'] - $contrast_vip_user_num) / $contrast_vip_user_num * 100, 2);
         }
         return $arr;
     }
+
     /**
      * 统计订单All
      * 0:计算某天的数据1：计算总的数据
@@ -809,46 +739,22 @@ class Datacenter extends Model
      * Date: 2020/10/14
      * Time: 10:44:38
      */
-    public function getOrderNum($type = 1,$time_str = '')
+    public function getOrderNum($time_str = '', $time_str2 = '')
     {
-        if ($type == 1) {
-            if(!$time_str){
-                $start = date('Y-m-d', strtotime('-6 day'));
-                $end   = date('Y-m-d 23:59:59');
-                $time_str = $start .' 00:00:00 - ' .$end.' 00:00:00';
-            }
-            //时间段总和
-            $createat = explode(' ', $time_str);
-            $where['day_date'] = ['between', [$createat[0], $createat[3]]];
-            $arr['order_num'] = $this->where($where)->sum('order_num');
-            //同比
-            $same_start = date('Y-m-d', strtotime("-1 years", strtotime($createat[0])));
-            $same_end = date('Y-m-d', strtotime("-1 years", strtotime($createat[3])));
-            $same_where['day_date'] = ['between', [$same_start, $same_end]];
-            $same_order_num = $this->where($same_where)->sum('order_num');
-            $arr['same_order_num'] = $same_order_num != 0 ? round(($arr['order_num'] - $same_order_num) / $same_order_num * 100, 2) : 0;
-            //环比
-            $huan_start = date('Y-m-d', strtotime("-1 months", strtotime($createat[0])));
-            $huan_end = date('Y-m-d', strtotime("-1 months", strtotime($createat[3])));
-            $huan_where['day_date'] = ['between', [$huan_start, $huan_end]];
-            $huan_order_num = $this->where($huan_where)->sum('order_num');
-            $arr['huan_order_num'] = $huan_order_num != 0 ? round(($arr['order_num'] - $huan_order_num) / $huan_order_num * 100, 2) : 0;
-        } else {
-            //查询某天的数据
-            $where = [];
-            $where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $time_str . "'")];
-            $arr['order_num'] = $this->where($where)->sum('order_num');
-            $same_start = date('Y-m-d', strtotime("-1 years", strtotime($time_str)));
-            $same_where = [];
-            $same_where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $same_start . "'")];
-            $same_order_num = $this->where($same_where)->sum('order_num');
-            $arr['same_order_num'] = $same_order_num != 0 ? round(($arr['order_num'] - $same_order_num) / $same_order_num * 100, 2): 0;
-
-            $huan_start = date('Y-m-d', strtotime("-1 months", strtotime($time_str)));
-            $huan_where = [];
-            $huan_where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $huan_start . "'")];
-            $huan_order_num = $this->where($huan_where)->sum('order_num');
-            $arr['huan_order_num'] = $huan_order_num != 0 ? round(($arr['order_num'] - $huan_order_num) / $huan_order_num * 100, 2) : 0;
+        if (!$time_str) {
+            $start = date('Y-m-d', strtotime('-6 day'));
+            $end = date('Y-m-d 23:59:59');
+            $time_str = $start . ' 00:00:00 - ' . $end . ' 00:00:00';
+        }
+        //时间段总和
+        $createat = explode(' ', $time_str);
+        $where['day_date'] = ['between', [$createat[0], $createat[3]]];
+        $arr['order_num'] = $this->where($where)->sum('order_num');
+        if ($time_str2) {
+            $createat2 = explode(' ', $time_str2);
+            $huan_where['day_date'] = ['between', [$createat2[0], $createat2[3]]];
+            $contrast_order_num = $this->where($huan_where)->sum('order_num');
+            $arr['contrast_order_num'] = $contrast_order_num ? round(($arr['order_num'] - $contrast_order_num) / $contrast_order_num * 100, 2) : 0;
         }
         return $arr;
     }
@@ -856,42 +762,39 @@ class Datacenter extends Model
     /*
      * 统计客单价
      */
-    public function getOrderUnitPrice($type = 1,$time_str = '')
+    public function getOrderUnitPrice($time_str = '', $time_str2 = '')
     {
-        $z = $this->zeelool->getOrderUnitPrice(1,$time_str);
-        $v = $this->voogueme->getOrderUnitPrice(1,$time_str);
-        $n = $this->nihao->getOrderUnitPrice(1,$time_str);
-        $num['order_unit_price'] = round($z['order_unit_price'] + $v['order_unit_price'] + $n['order_unit_price'],2);
-        $num['same_order_unit_price'] = round(($z['same_order_unit_price'] + $v['same_order_unit_price'] + $n['same_order_unit_price'])/3,2);
-        $num['huan_order_unit_price'] =round( ($z['huan_order_unit_price'] + $v['huan_order_unit_price'] + $n['huan_order_unit_price'])/3,2);
+        $z = $this->zeelool->getOrderUnitPrice(1, $time_str, $time_str2);
+        $v = $this->voogueme->getOrderUnitPrice(1, $time_str, $time_str2);
+        $n = $this->nihao->getOrderUnitPrice(1, $time_str, $time_str2);
+        $num['order_unit_price'] = round($z['order_unit_price'] + $v['order_unit_price'] + $n['order_unit_price'], 2);
+        $num['contrast_order_unit_price'] = round(($z['contrast_order_unit_price'] + $v['contrast_order_unit_price'] + $n['contrast_order_unit_price']) / 3, 2);
         return $num;
     }
 
     /*
      * 统计销售额
      */
-    public function getSalesTotalMoney($type = 1,$time_str = '')
+    public function getSalesTotalMoney($time_str = '', $time_str2 = '')
     {
-        $z = $this->zeelool->getSalesTotalMoney(1,$time_str);
-        $v = $this->voogueme->getSalesTotalMoney(1,$time_str);
-        $n = $this->nihao->getSalesTotalMoney(1,$time_str);
-        $num['sales_total_money'] = round($z['sales_total_money'] + $v['sales_total_money'] + $n['sales_total_money'],2);
-        $num['same_sales_total_money'] = round(($z['same_sales_total_money'] + $v['same_sales_total_money'] + $n['same_sales_total_money'])/3,2);
-        $num['huan_sales_total_money'] = round(($z['huan_sales_total_money'] + $v['huan_sales_total_money'] + $n['huan_sales_total_money'])/3,2);
+        $z = $this->zeelool->getSalesTotalMoney(1, $time_str, $time_str2);
+        $v = $this->voogueme->getSalesTotalMoney(1, $time_str, $time_str2);
+        $n = $this->nihao->getSalesTotalMoney(1, $time_str, $time_str2);
+        $num['sales_total_money'] = round($z['sales_total_money'] + $v['sales_total_money'] + $n['sales_total_money'], 2);
+        $num['contrast_sales_total_num'] = round(($z['contrast_sales_total_num'] + $v['contrast_sales_total_num'] + $n['contrast_sales_total_num']) / 3, 2);
         return $num;
     }
 
     /*
      * 统计邮费
      * */
-    public function getShippingTotalMoney($type = 1,$time_str = '')
+    public function getShippingTotalMoney($time_str = '', $time_str2 = '')
     {
-        $z = $this->zeelool->getShippingTotalMoney(1,$time_str);
-        $v = $this->voogueme->getShippingTotalMoney(1,$time_str);
-        $n = $this->nihao->getShippingTotalMoney(1,$time_str);
-        $num['shipping_total_money'] = round($z['shipping_total_money'] + $v['shipping_total_money'] + $n['shipping_total_money'],2);
-        $num['same_shipping_total_money'] = round(($z['same_shipping_total_money'] + $v['same_shipping_total_money'] + $n['same_shipping_total_money'])/3,2);
-        $num['huan_shipping_total_money'] = round(($z['huan_shipping_total_money'] + $v['huan_shipping_total_money'] + $n['huan_shipping_total_money'])/3,2);
+        $z = $this->zeelool->getShippingTotalMoney(1, $time_str, $time_str2);
+        $v = $this->voogueme->getShippingTotalMoney(1, $time_str, $time_str2);
+        $n = $this->nihao->getShippingTotalMoney(1, $time_str, $time_str2);
+        $num['shipping_total_money'] = round($z['shipping_total_money'] + $v['shipping_total_money'] + $n['shipping_total_money'], 2);
+        $num['contrast_shipping_total_money'] = round(($z['contrast_shipping_total_money'] + $v['contrast_shipping_total_money'] + $n['contrast_shipping_total_money']) / 3, 2);
         return $num;
     }
 

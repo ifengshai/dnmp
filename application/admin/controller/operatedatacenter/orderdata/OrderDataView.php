@@ -72,6 +72,7 @@ class OrderDataView extends Backend
             $end   = date('Y-m-d 23:59:59');
             $default_day = $start . ' ' . '00:00:00' . ' - ' . $end;
             $time_str = $params['time_str'] ? $params['time_str'] : $default_day;
+            $compare_time_str= $params['compare_time_str'] ? $params['compare_time_str'] : $default_day;
             switch ($order_platform) {
                 case 1:
                     $model = $this->zeeloolOperate;

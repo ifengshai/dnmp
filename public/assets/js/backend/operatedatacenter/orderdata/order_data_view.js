@@ -17,21 +17,31 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
             //订单数据概况折线图
             Controller.api.formatter.line_chart();
             Controller.api.formatter.line_histogram();
-            $("#time_str").on("apply.daterangepicker", function () {
-                setTimeout(() => {
-                    order_data_view();
-                    Controller.api.formatter.line_chart();
-                    Controller.api.formatter.line_histogram();
-                }, 0)
-            })
-            $(document).on('change', '#type', function () {
-                Controller.api.formatter.line_chart();
-            });
-            $(document).on('change', '#order_platform', function () {
+            $("#sku_submit").click(function () {
                 order_data_view();
                 Controller.api.formatter.line_chart();
                 Controller.api.formatter.line_histogram();
             });
+            $("#sku_reset").click(function () {
+                $("#order_platform").val(1);
+                $("#time_str").val('');
+                $("#compare_time_str").val('');
+            });
+            // $("#time_str").on("apply.daterangepicker", function () {
+            //     setTimeout(() => {
+            //         order_data_view();
+            //         Controller.api.formatter.line_chart();
+            //         Controller.api.formatter.line_histogram();
+            //     }, 0)
+            // })
+            $(document).on('change', '#type', function () {
+                Controller.api.formatter.line_chart();
+            });
+            // $(document).on('change', '#order_platform', function () {
+            //     order_data_view();
+            //     Controller.api.formatter.line_chart();
+            //     Controller.api.formatter.line_histogram();
+            // });
             
             
             var table = $("#table");
@@ -204,9 +214,10 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
 function order_data_view() {
     var order_platform = $('#order_platform').val();
     var time_str = $('#time_str').val();
+    var compare_time_str = $('#compare_time_str').val();
     Backend.api.ajax({
         url: 'operatedatacenter/orderdata/order_data_view/ajax_order_data_view',
-        data: { order_platform: order_platform, time_str: time_str }
+        data: { order_platform: order_platform, time_str: time_str,compare_time_str: compare_time_str}
     }, function (data, ret) {
         var order_num = ret.data.order_num;
         var order_unit_price = ret.data.order_unit_price;
@@ -216,6 +227,12 @@ function order_data_view() {
         var replacement_order_total = ret.data.replacement_order_total;
         var online_celebrity_order_num = ret.data.online_celebrity_order_num;
         var online_celebrity_order_total = ret.data.online_celebrity_order_total;
+        if(compare_time_str.length > 0){
+            $('.rate_class').show();
+        }
+        if(compare_time_str.length <= 0){
+            $('.rate_class').hide();
+        }
 
         $('#order_num').text(order_num.order_num);
         if(order_num.same_order_num >= 0){
@@ -229,7 +246,7 @@ function order_data_view() {
         }else{
             var huan_rate1 = '<img src="/xiadie.png">';
         }
-        $('#huan_order_num').html(huan_rate1+order_num.huan_order_num);
+        $('#huan_order_num').html(huan_rate1+order_num.contrast_order_num);
         $('#order_unit_price').html(order_unit_price.order_unit_price);
         if(order_unit_price.same_order_unit_price >= 0){
             var same_rate2 = '<img src="/shangsheng.png">';
@@ -242,7 +259,7 @@ function order_data_view() {
         }else{
             var huan_rate2 = '<img src="/xiadie.png">';
         }
-        $('#huan_order_unit_price').html(huan_rate2+order_unit_price.huan_order_unit_price);
+        $('#huan_order_unit_price').html(huan_rate2+order_unit_price.contrast_order_unit_price);
         $('#sales_total_money').html(sales_total_money.sales_total_money);
         if(sales_total_money.same_sales_total_money >= 0){
             var same_rate3 = '<img src="/shangsheng.png">';
@@ -255,7 +272,7 @@ function order_data_view() {
         }else{
             var huan_rate3 = '<img src="/xiadie.png">';
         }
-        $('#huan_sales_total_money').html(huan_rate3+sales_total_money.huan_sales_total_money);
+        $('#huan_sales_total_money').html(huan_rate3+sales_total_money.contrast_sales_total_num);
         $('#shipping_total_money').html(shipping_total_money.shipping_total_money);
         if(shipping_total_money.same_shipping_total_money >= 0){
             var same_rate4 = '<img src="/shangsheng.png">';
@@ -268,7 +285,8 @@ function order_data_view() {
         }else{
             var huan_rate4 = '<img src="/xiadie.png">';
         }
-        $('#huan_shipping_total_money').html(huan_rate4+shipping_total_money.huan_shipping_total_money);
+        $('#huan_shipping_total_money').html(huan_rate4+shipping_total_money.contrast_shipping_total_money);
+
         $('#replacement_order_num').html(replacement_order_num.replacement_order_num);
         $('#replacement_order_total').html(replacement_order_total.replacement_order_total);
         $('#online_celebrity_order_num').html(online_celebrity_order_num.online_celebrity_order_num);
