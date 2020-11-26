@@ -148,6 +148,7 @@ class ZeeloolDe extends Backend
         if ($this->request->isAjax()) {
             //订单号
             $increment_id = $this->request->post('increment_id');
+
             if ($increment_id) {
                 $map['increment_id'] = $increment_id;
                 $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
@@ -158,6 +159,23 @@ class ZeeloolDe extends Backend
                     ->field($field)
                     ->where($map)
                     ->find();
+                //查询订单是否存在工单
+                $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
+                $swhere = [];
+                $increment_ids = array_column($list, 'increment_id');
+                $swhere['platform_order'] = ['in', $increment_ids];
+                $swhere['work_platform'] = 10;
+                $swhere['work_status'] = ['not in', [0, 4, 6]];
+                $order_arr = $workorder->where($swhere)->column('platform_order');
+
+
+                foreach ($list as $k => $v) {
+                    if (in_array($v['increment_id'], $order_arr)) {
+                        $list[$k]['task_info'] = 1;
+                    }
+
+                }
+
                 $result = ['code' => 1, 'data' => $list ?? []];
             } else {
                 $result = array("total" => 0, "rows" => []);
