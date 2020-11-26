@@ -3,6 +3,8 @@
 namespace app\admin\model\saleaftermanage;
 
 use app\admin\model\Admin;
+use app\admin\model\DistributionAbnormal;
+use app\admin\model\DistributionLog;
 use think\Cache;
 use think\Db;
 use think\Exception;
@@ -210,14 +212,14 @@ class WorkOrderList extends Model
             //获取更改镜框sku集
             $_work_order_change_sku = new WorkOrderChangeSku();
             $sku_list = $_work_order_change_sku
-                ->where(['word_id'=>$work_id,'change_type'=>1])
+                ->where(['work_id'=>$work_id,'change_type'=>1])
                 ->column('change_sku,original_sku','item_order_number')
             ;
 
             //获取更改镜片sku集
             $prescription_field = 'recipe_type as prescription_type,coating_type as coating_name,od_sph,os_sph,od_cyl,os_cyl,od_axis,os_axis,pd_l,pd_r,pd,os_add,od_add,od_pv,os_pv,od_pv_r,os_pv_r,od_bd,os_bd,od_bd_r,os_bd_r';
             $prescription_list = $_work_order_change_sku
-                ->where(['word_id'=>$work_id,'change_type'=>2])
+                ->where(['work_id'=>$work_id,'change_type'=>2])
                 ->column($prescription_field,'item_order_number')
             ;
 
@@ -225,7 +227,7 @@ class WorkOrderList extends Model
             $_work_order_measure = new WorkOrderMeasure();
             $measure_list = $_work_order_measure
                 ->field('id,item_order_number')
-                ->where(['word_id'=>$work_id])
+                ->where(['work_id'=>$work_id])
                 ->select();
             ;
 
@@ -532,7 +534,7 @@ class WorkOrderList extends Model
     }
     
     /**
-     * 更改地址
+     * 更改地址-创建措施、保存地址信息
      * @param $params
      * @param $work_id
      * @throws \Exception
@@ -540,9 +542,8 @@ class WorkOrderList extends Model
     public function changeAddress($params, $work_id, $measure_choose_id, $measure_id)
     {
         $work = $this->find($work_id);
-        $siteType = $params['work_platform'];
         //修改地址
-        if (($work->work_type == 1 && $measure_choose_id == 13) || ($work->work_type == 2 && $measure_choose_id == 13)) {
+        if ($work && 13 == $measure_choose_id) {
             Db::startTrans();
             try {
                 if (!$params['modify_address']['country_id']) {
@@ -573,30 +574,45 @@ class WorkOrderList extends Model
                     $data['userinfo_option'] = serialize($params['modify_address']);
                     WorkOrderChangeSku::where(['work_id' => $work_id])->update($data);
                 }
-                if($params['work_status'] != 1){
-                    $changeAddress = $params['modify_address'];
-                    $postData = array(
-                        'increment_id'=>$params['platform_order'],
-                        'type'=>$changeAddress['address_id'],
-                        'first_name'=>$changeAddress['firstname'],
-                        'last_name'=>$changeAddress['lastname'],
-                        'email'=>$changeAddress['email'],
-                        'telephone'=>$changeAddress['telephone'],
-                        'country'=>$changeAddress['country_id'],
-                        'region_id'=>$changeAddress['region_id'],
-                        'region'=>$changeAddress['region'],
-                        'city'=>$changeAddress['city'],
-                        'street'=>$changeAddress['street'],
-                        'postcode'=>$changeAddress['postcode'],
-                    );
-                    $this->httpRequest($siteType, 'magic/order/editAddress', $postData, 'POST');
-                }
                 Db::commit();
             } catch (\Exception $e) {
                 Db::rollback();
                 exception($e->getMessage());
             }
         } 
+    }
+
+    /**
+     * 更改地址-通知网站
+     * @param object $work 工单数据
+     * @param int $measure_id 工单措施表自增ID
+     * @author lzh
+     * @return bool
+     * @throws \Exception
+     */
+    public function presentAddress($work, $measure_id)
+    {
+        $user_info_option = WorkOrderChangeSku::where(['measure_id' => $measure_id,'change_type' => 6])->value('userinfo_option');
+        if(!$user_info_option) return false;
+
+        $changeAddress = unserialize($user_info_option);
+        $postData = array(
+            'increment_id'=>$work->platform_order,
+            'type'=>$changeAddress['address_id'],
+            'first_name'=>$changeAddress['firstname'],
+            'last_name'=>$changeAddress['lastname'],
+            'email'=>$changeAddress['email'],
+            'telephone'=>$changeAddress['telephone'],
+            'country'=>$changeAddress['country_id'],
+            'region_id'=>$changeAddress['region_id'],
+            'region'=>$changeAddress['region'],
+            'city'=>$changeAddress['city'],
+            'street'=>$changeAddress['street'],
+            'postcode'=>$changeAddress['postcode'],
+        );
+        $this->httpRequest($work->platform_type, 'magic/order/editAddress', $postData, 'POST');
+
+        return true;
     }
 
     /**
@@ -1465,6 +1481,9 @@ class WorkOrderList extends Model
                         //处理完成
                         $work_status = 6;
                         $work->complete_time = $time;
+
+                        //检测是否标记异常，有则修改为已处理
+                        $this->handle_abnormal($work);
                     } elseif ($key > 0 && $count > $key) {
                         //部分处理
                         $work_status = 5;
@@ -1517,6 +1536,9 @@ class WorkOrderList extends Model
                             //处理完成
                             $work_status = 6;
                             $work->complete_time = $time;
+
+                            //检测是否标记异常，有则修改为已处理
+                            $this->handle_abnormal($work);
                         } elseif ($key > 0  && $count > $key) {
                             //部分处理
                             $work_status = 5;
@@ -1551,11 +1573,43 @@ class WorkOrderList extends Model
     }
 
     /**
+     * 工单绑定有异常则修改为已处理
+     * @param object $work 工单表数据
+     * @author lzh
+     * @return bool
+     */
+    public function handle_abnormal($work){
+        //检测是否有标记异常
+        $_distribution_abnormal = new DistributionAbnormal();
+        $item_process_ids = $_distribution_abnormal
+            ->where(['work_id' => $work->id, 'status' => 1])
+            ->column('item_process_id')
+        ;
+        if($item_process_ids){
+            //异常标记为已处理
+            $_distribution_abnormal
+                ->allowField(true)
+                ->save(['status' => 2, 'do_time' => time(), 'do_person' => session('admin.nickname')],['work_id' => $work->id, 'status' => 1])
+            ;
+
+            //解绑子订单的异常库位ID
+            (new NewOrderItemProcess)
+                ->allowField(true)
+                ->save(['abnormal_house_id' => 0],['id' => ['in',$item_process_ids]])
+            ;
+
+            //配货操作日志
+            DistributionLog::record((object)session('admin'),$item_process_ids,10,"工单处理完成，异常标记为已处理");
+        }
+        return true;
+    }
+
+    /**
      * 审核成功后自动完成处理相关流程
      * @param object $orderRecept 承接表数据
      * @param int $measure_choose_id 措施配置表ID
      * @param object $work 工单表数据
-     * * @author lzh
+     * @author lzh
      * @return bool
      */
     public function follow_up($orderRecept,$measure_choose_id,$work){
@@ -1572,6 +1626,8 @@ class WorkOrderList extends Model
             $this->presentCoupon($work->id);
         }elseif(10 == $measure_choose_id){//赠送积分
             $this->presentIntegral($work->id);
+        }elseif(13 == $measure_choose_id){//修改地址
+            $this->presentAddress($work, $orderRecept->measure_id);
         }
         return true;
     }
@@ -1633,13 +1689,16 @@ class WorkOrderList extends Model
             $resultMeasure = WorkOrderMeasure::where($whereWork)->count();
             if (0 == $resultMeasure) {
                 $dataWorkOrder['work_status'] = 6;
+                $dataWorkOrder['complete_time'] = date('Y-m-d H:i:s');
+
+                //检测是否标记异常，有则修改为已处理
+                $this->handle_abnormal($work);
 
                 //通知
                 //Ding::cc_ding(explode(',', $work->create_user_id), '', '工单ID：' . $work->id . '😎😎😎😎工单已处理完成😎😎😎😎',  '😎😎😎😎工单已处理完成😎😎😎😎');
             } else {
                 $dataWorkOrder['work_status'] = 5;
             }
-            $dataWorkOrder['complete_time'] = date('Y-m-d H:i:s');
         }else{
             $dataWorkOrder['work_status'] = 5;
         }
@@ -1655,6 +1714,8 @@ class WorkOrderList extends Model
                 $this->presentCoupon($work->id);
             }elseif(10 == $measure_choose_id){//赠送积分
                 $this->presentIntegral($work->id);
+            }elseif(13 == $measure_choose_id){//修改地址
+                $this->presentAddress($work, $measure_id);
             }
         }
 

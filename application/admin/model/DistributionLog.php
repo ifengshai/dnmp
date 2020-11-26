@@ -21,8 +21,8 @@ class DistributionLog extends Model
      * 记录配货流程操作日志
      *
      * @param object $auth  管理员
-     * @param int $item_process_id  子订单表ID
-     * @param int $distribution_node  操作类型
+     * @param mixed $item_process_id  子订单表ID
+     * @param int $distribution_node  操作类型：1 打印标签 2 配货 3 配镜片 4 加工 5 印logo 6 成品质检 7 合单 8 审单 9 标记异常 10 处理异常
      * @param string $remark  备注
      * @author lzh
      * @return bool
