@@ -1346,10 +1346,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         checkID[i] = $(this).val();
                         var id = $(this).val();
                         //获取承接组
-                        item_appoint_group += $('#item_step' + id + '-appoint_group').val() + ',';
-                        var group_id = $('#item_step' + id + '-appoint_group').val();
+                        item_appoint_group += $('#item' + use_flag + '_step' + id + '-appoint_group').val() + ',';
+                        var group_id = $('#item' + use_flag + '_step' + id + '-appoint_group').val();
                         var choose_group = Config.workOrderConfigValue.group[group_id];
-                        
                         if(choose_group){
                             for(var j = 0;j<choose_group.length;j++){
                                 item_input_content += '<input type="hidden" name="row[item_order_info]['+ use_flag +'][appoint_group][' + id + '][]" value="' + group_id + '"/>';
@@ -1366,9 +1365,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         var step_is_check = $('#item_step' + id + '-is_check').val();
                         is_check.push(step_is_check);
                         //是否自动审核完成 start
-                        var step_is_auto_complete = $('#item_step' + id + '-is_auto_complete').val();
+
+                        var step_is_auto_complete = $('#item' + use_flag +'_step' + id +'-is_auto_complete').val();
                         item_input_content +='<input type="hidden" name="row[item_order_info]['+ use_flag +'][auto_complete][' + id + ']" value="' + step_is_auto_complete + '"/>';
                         //是否自动审核完成  end
+
+                        //是否为子单取消
+                        if (id == 18) {
+                            item_input_content +='<input type="hidden" name="row[item_order_info]['+ use_flag +'][cancel_order]" value="' + sku + '"/>';
+                        }
                     });
 
                     //判断如果存在1 则改为需要审核
@@ -1612,7 +1617,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     if (!$('.step3').is(':hidden')) {
                         cancelOrder();
                     }
-                    //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end  */                 
+                    //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end */                  
                 }
             })
             //根据措施类型显示隐藏
@@ -1898,7 +1903,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             });
                         }
 
-                        /*//判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
+                       /* //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
                         if (!$('.step1-1').is(':hidden')) {
                             changeFrame();
                         }
@@ -3055,8 +3060,8 @@ function itemSelectpicker (type = 1,flag = null) {
                item_order_sku_number[i] = $split[1];
             }
             //根据下拉选择生成子订单列表
-            var step_item = Config.workOrderConfigValue.step_item;
-            var item_problem_step = Config.workOrderConfigValue.item_problem_step;
+            var step_item = Config.workOrderConfigValue.step;
+            var item_problem_step = Config.workOrderConfigValue.all_problem_item_step;
             var item_checkbox = '';
 
             $('#div_item_content').show();
@@ -3073,14 +3078,14 @@ function itemSelectpicker (type = 1,flag = null) {
                 ihtml += '<div class="box-body box-body'+item_order_sku[i]+'">承接人：<span id="recept_person_id_'+item_order_sku[i]+'"></span></div>';
                 ihtml += '<div class="box-body box-body'+item_order_sku[i]+'">';
                 ihtml += '<div class="form-group-content question-type"><div class="caigou item_info" style="margin-top:15px; margin-bottom:15px; margin-left: 5%;"><div  class="radio" style="width: 90%;float: left;">';
-                for (var j in step_item) {
-                    if(item_problem_step[j].extend_group_id ==undefined && item_problem_step[j].extend_group_id ==0){
-                        item_problem_step[j].extend_group_id = 0;
+                for (var j in item_problem_step[problem_id]) {
+                    if(item_problem_step[problem_id][j].extend_group_id ==undefined && item_problem_step[problem_id][j].extend_group_id ==0){
+                        item_problem_step[problem_id][j].extend_group_id = 0;
                     }
-                        ihtml += '<label><input type="checkbox" name="row[item_order_info]['+ item_order_sku[i] +'][item_choose][]" class="item_step_type item_step_type'+item_order_sku[i]+'" id="item_step'+j+'" value="'+j+'" flag="'+item_order_sku[i]+'" sku="'+item_order_sku_number[i]+'"><span>'+step_item[j]+'</span></label>';
-                        ihtml += '<input type="hidden" id="item_step'+j+'-is_check" value="'+item_problem_step[j].is_check+'">';
-                        ihtml += '<input type="hidden" id="item_step'+j+'-is_auto_complete" value="'+item_problem_step[j].is_auto_complete+'">';
-                        ihtml += '<input type="hidden" id="item_step'+j+'-appoint_group" value="'+item_problem_step[j].extend_group_id+'">';
+                        ihtml += '<label><input type="checkbox" name="row[item_order_info]['+ item_order_sku[i] +'][item_choose][]" class="item_step_type item_step_type'+item_order_sku[i]+'" id="item_step'+item_problem_step[problem_id][j].step_id+'" value="'+item_problem_step[problem_id][j].step_id+'" flag="'+item_order_sku[i]+'" sku="'+item_order_sku_number[i]+'"><span>'+step_item[item_problem_step[problem_id][j].step_id]+'</span></label>';
+                        ihtml += '<input type="hidden" id="item'+item_order_sku[i]+'_step'+item_problem_step[problem_id][j].step_id+'-is_check" value="'+item_problem_step[problem_id][j].is_check+'">';
+                        ihtml += '<input type="hidden" id="item'+item_order_sku[i]+'_step'+item_problem_step[problem_id][j].step_id+'-is_auto_complete" value="'+item_problem_step[problem_id][j].is_auto_complete+'">';
+                        ihtml += '<input type="hidden" id="item'+item_order_sku[i]+'_step'+item_problem_step[problem_id][j].step_id+'-appoint_group" value="'+item_problem_step[problem_id][j].extend_group_id+'">';
                 }
                 ihtml += '</div></div></div>';
                 ihtml += '<div class="form-group-child4 measure_item'+item_order_sku[i]+' item'+item_order_sku[i]+'_step19-19" style="display:none;"  flag="'+item_order_sku[i]+'"><div class="caigou frame-info item_info"><p style="font-size: 16px;"><b>更换镜框</b></p><div ><table class="caigou-table-sku" id="change-frame'+item_order_sku[i]+'"><tr><th>原SKU</th><th>原数量(+增加)</th><th>新SKU</th><th>新数量(-减少)</th></tr></table></div></div></div>';
