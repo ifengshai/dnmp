@@ -68,7 +68,7 @@ class OrderPrescription extends Backend
             'rate'=>$progressive_rate
         );
         if($site == 3){
-            $reading_glasses_num = $this->prescrtion_num('Readingglasses',$site,$time_str);
+            $reading_glasses_num = $this->prescrtion_num('Reading Glasses',$site,$time_str);
         }else{
             $reading_glasses_num = $this->prescrtion_num('Readingglasses',$site,$time_str);
         }
