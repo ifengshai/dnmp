@@ -155,6 +155,20 @@ class ZeeloolJp extends Backend
                     ->field($field)
                     ->where($map)
                     ->find();
+                $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
+                //查询订单是否存在工单
+                $swhere = [];
+                $increment_ids = array_column($list, 'increment_id');
+                $swhere['platform_order'] = ['in', $increment_ids];
+                $swhere['work_platform'] = 11;
+                $swhere['work_status'] = ['not in', [0, 4, 6]];
+                $order_arr = $workorder->where($swhere)->column('platform_order');
+
+                foreach ($list as $k => $v) {
+                    if (in_array($v['increment_id'], $order_arr)) {
+                        $list[$k]['task_info'] = 1;
+                    }
+                }
                 $result = ['code' => 1, 'data' => $list ?? []];
             } else {
                 $result = array("total" => 0, "rows" => []);

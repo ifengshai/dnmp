@@ -8,6 +8,7 @@ use app\admin\model\AuthGroupAccess;
 use app\admin\model\Admin;
 use app\admin\model\zendesk\ZendeskAgents;
 use think\Db;
+use think\Log;
 
 class CustomerService extends Backend
 {
@@ -1661,7 +1662,7 @@ class CustomerService extends Backend
 
         if (!empty($where['work_platform']) && ($where['work_platform'] != 10)) {
             //站点
-            $site  = $where['work_platform'];
+            $notCustomer_where['work_platform']  = $notCustomer_where_other['work_platform'] = $site  = $where['work_platform'];
         } else {
             $site  = 10;
         }
@@ -1742,13 +1743,17 @@ class CustomerService extends Backend
             $all_work_list_refund_rate = 0;
         }else{
             //优惠券占比
-            $all_work_list_coupon_str_proportion = round($workOrderNum/$all_work_list_coupon_str,2).'%';
+
+            $all_work_list_coupon_str_proportion = round($all_work_list_coupon_str/$workOrderNum*100,2).'%';
+
             //补发订单量占比
-            $all_work_list_replacement_counter_proportion = round($workOrderNum/$all_work_list_replacement_counter,2).'%';
+            $all_work_list_replacement_counter_proportion = round($all_work_list_replacement_counter/$workOrderNum*100,2).'%';
             //退款金额占比
-            $all_work_list_refund_money_rate = round($totalOrderMoney/$all_work_list_refund_money,2).'%';
+
+            $all_work_list_refund_money_rate = round($all_work_list_refund_money/$totalOrderMoney*100,2).'%';
             //退款订单占比
-            $all_work_list_refund_rate = round($workOrderNum/$all_work_list_refund_num,2).'%';
+            
+            $all_work_list_refund_rate = round($all_work_list_refund_num/$workOrderNum*100,2).'%';
         }
 
         $this->assign('all_work_list_coupon_str_proportion',$all_work_list_coupon_str_proportion);
@@ -1842,7 +1847,6 @@ class CustomerService extends Backend
         unset($where2['work_status']);
         $where5 = $where2;
         $where5['work_status'] = ['in', [0, 1, 2, 3, 4, 5, 6, 7]];
-
         $map5['create_time'] = $map['complete_time'];
         $warehouseWorkList = $this->model->where($where2)->where($map)->field('count(*) as counter,sum(base_grand_total) as base_grand_total,count(replacement_order !="" or null) as replacement_counter,
             sum(is_refund) as refund_num,sum(refund_money) as refund_money,count(coupon_str !="" or null) as coupon')->select();
@@ -1862,8 +1866,6 @@ class CustomerService extends Backend
         $this->assign('warehouseWorkList1',$warehouseWorkList1);
 
 
-
-
         //查找group_id为131的所有用户   运营客服角色
         $mat['group_id'] = 131;
         $cat = model('AuthGroupAccess')->field('uid')->where($mat)->select();
@@ -1873,8 +1875,9 @@ class CustomerService extends Backend
         $notCustomer_where['work_status'] = 6;
         $notCustomer_where_other['work_status'] = ['in',[0, 1, 2, 3, 4, 5, 6, 7]];
         $notCustomer_where_other['create_user_id'] = ['in',$cat];
+      
         //非客服工单已完成数据
-        $notCustomer = $this->model->where($notCustomer_where)->where($map)->where('work_status = 6')->field('count(*) as counter,sum(base_grand_total) as base_grand_total,count(replacement_order !="" or null) as replacement_counter,
+        $notCustomer = $this->model->where($notCustomer_where)->where($map)->field('count(*) as counter,sum(base_grand_total) as base_grand_total,count(replacement_order !="" or null) as replacement_counter,
             sum(is_refund) as refund_num,sum(refund_money) as refund_money,count(coupon_str !="" or null) as coupon_str ')->select();
         if (!empty($notCustomer)){
             $notCustomer = collection($notCustomer)->toArray();
