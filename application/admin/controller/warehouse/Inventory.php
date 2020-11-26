@@ -1071,9 +1071,9 @@ class Inventory extends Backend
         $params = [];
         foreach ($data as $k => $v) {
             $params[$k]['sku'] = $v[0];
-            $params[$k]['stock'] = $list[$v[0]]['stock'];
-            $params[$k]['available_stock'] = $list[$v[0]]['available_stock'];
-            $params[$k]['distribution_occupy_stock'] = $list[$v[0]]['distribution_occupy_stock'];
+            $params[$k]['stock'] = $list[$v[0]]['stock'] ?: 0;
+            $params[$k]['available_stock'] = $list[$v[0]]['available_stock'] ?: 0;
+            $params[$k]['distribution_occupy_stock'] = $list[$v[0]]['distribution_occupy_stock'] ?: 0;
         }
         if ($params) {
             $this->model->saveAll($params);
