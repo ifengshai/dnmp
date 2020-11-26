@@ -2,6 +2,8 @@
 
 namespace app\api\controller;
 
+use app\admin\model\saleaftermanage\WorkOrderChangeSku;
+use app\admin\model\saleaftermanage\WorkOrderMeasure;
 use think\Db;
 use think\Exception;
 use think\exception\PDOException;
@@ -86,6 +88,20 @@ class ScmDistribution extends Scm
      */
     protected $_new_order_process = null;
 
+    /**
+     * 工单措施模型对象
+     * @var object
+     * @access protected
+     */
+    protected $_work_order_measure = null;
+
+    /**
+     * 工单sku变动模型对象
+     * @var object
+     * @access protected
+     */
+    protected $_work_order_change_sku = null;
+
     protected function _initialize()
     {
         parent::_initialize();
@@ -99,6 +115,8 @@ class ScmDistribution extends Scm
         $this->_item = new Item();
         $this->_new_order_process = new NewOrderProcess();
         $this->_product_bar_code_item = new ProductBarCodeItem();
+        $this->_work_order_measure = new WorkOrderMeasure();
+        $this->_work_order_change_sku = new WorkOrderChangeSku();
     }
 
     /**
@@ -205,7 +223,7 @@ class ScmDistribution extends Scm
         //获取子订单数据
         $item_process_info = $this->_new_order_item_process
             ->where('item_order_number', $item_order_number)
-            ->field('id,option_id,distribution_status,temporary_house_id,order_prescription_type')
+            ->field('id,option_id,distribution_status,temporary_house_id,order_prescription_type,order_id')
             ->find()
         ;
         empty($item_process_info) && $this->error(__('子订单不存在'), [], 403);
@@ -221,14 +239,50 @@ class ScmDistribution extends Scm
         ];
         $check_status != $item_process_info['distribution_status'] && $this->error(__('只有'.$status_arr[$check_status].'状态才能操作'), [], 405);
 
-        //TODO::判断工单状态
-
         //判断异常状态
         $abnormal_id = $this->_distribution_abnormal
             ->where(['item_process_id'=>$item_process_info['id'],'status'=>1])
             ->value('id')
         ;
         $abnormal_id && $this->error(__('有异常待处理，无法操作'), [], 405);
+
+        //查询订单号
+        $increment_id = $this->_new_order->where(['id'=>$item_process_info['order_id']])->value('increment_id');
+
+        //检测是否有工单未处理
+        $check_work_order = $this->_work_order_measure
+            ->alias('a')
+            ->field('a.item_order_number,a.measure_choose_id')
+            ->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')
+            ->where([
+                'a.operation_type'=>0,
+                'b.platform_order'=>$increment_id,
+                'b.work_status'=>['in',[1,2,3,5]]
+            ])
+            ->select();
+        if($check_work_order){
+            foreach ($check_work_order as $val){
+                //子单措施:更改镜框-18、更改镜片-19、取消-20
+                (
+                    !in_array($val['measure_choose_id'],[18,19,20])//主单措施未处理
+                    ||
+                    $val['item_order_number'] == $item_order_number//子单措施未处理
+                )
+                && $this->error(__('有工单未处理，无法操作'), [], 405);
+            }
+        }
+
+        //子单是否取消
+        $check_cancel_order = $this->_work_order_change_sku
+            ->alias('a')
+            ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
+            ->where([
+                'a.change_type'=>3,
+                'a.item_order_number'=>$item_order_number,
+                'b.operation_type'=>1
+            ])
+            ->value('a.item_order_number');
+        $check_cancel_order && $this->error(__('子单已取消，无法操作'), [], 405);
 
         //获取子订单处方数据
         $option_info = $this->_new_order_item_option
@@ -394,7 +448,43 @@ class ScmDistribution extends Scm
             $this->error(__('有异常待处理无法操作'), [], 405);
         }
 
-        //TODO::检测工单状态
+        //查询订单号
+        $increment_id = $this->_new_order->where(['id'=>$item_process_info['order_id']])->value('increment_id');
+
+        //检测是否有工单未处理
+        $check_work_order = $this->_work_order_measure
+            ->alias('a')
+            ->field('a.item_order_number,a.measure_choose_id')
+            ->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')
+            ->where([
+                'a.operation_type'=>0,
+                'b.platform_order'=>$increment_id,
+                'b.work_status'=>['in',[1,2,3,5]]
+            ])
+            ->select();
+        if($check_work_order){
+            foreach ($check_work_order as $val){
+                //子单措施:更改镜框-18、更改镜片-19、取消-20
+                (
+                    !in_array($val['measure_choose_id'],[18,19,20])//主单措施未处理
+                    ||
+                    $val['item_order_number'] == $item_order_number//子单措施未处理
+                )
+                && $this->error(__('有工单未处理，无法操作'), [], 405);
+            }
+        }
+
+        //子单是否取消
+        $check_cancel_order = $this->_work_order_change_sku
+            ->alias('a')
+            ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
+            ->where([
+                'a.change_type'=>3,
+                'a.item_order_number'=>$item_order_number,
+                'b.operation_type'=>1
+            ])
+            ->value('a.item_order_number');
+        $check_cancel_order && $this->error(__('子单已取消，无法操作'), [], 405);
 
         //获取订单购买总数
         $total_qty_ordered = $this->_new_order
@@ -1379,8 +1469,7 @@ class ScmDistribution extends Scm
             $info['order_number'] = $order_number;
 
             //获取子订单数据
-            $_new_order_item_process = new \app\admin\model\order\order\NewOrderItemProcess();
-            $item_process_info = $_new_order_item_process
+            $item_process_info = $this->_new_order_item_process
                 ->where('order_id', $order_id)
                 ->field('id,item_order_number,distribution_status,abnormal_house_id')
                 ->select();
@@ -1411,20 +1500,6 @@ class ScmDistribution extends Scm
     {
         $order_id = $this->request->request('order_id');
         empty($order_id) && $this->error(__('主订单ID不能为空'), [], 403);
-        $check_refuse = $this->request->request('check_refuse');//check_refuse   1SKU缺失  2 配错镜框
-        empty($check_refuse) && $this->error(__('审单拒绝原因不能为空'), [], 403);
-        switch ($check_refuse)
-        {
-            case 1:
-                $check_remark = 'SKU缺失';
-                break;
-            case 2:
-                $check_remark = '配错镜框';
-                break;
-        }
-
-//        $check_remark = $this->request->request('check_remark');
-//        empty($check_remark) && $this->error(__('审单拒绝原因不能为空'), [], 403);
         $check_status = $this->request->request('check_status');
         empty($check_status) && $this->error(__('审单类型不能为空'), [], 403);
         !in_array($check_status, [1, 2]) && $this->error(__('审单类型错误'), [], 403);
@@ -1433,6 +1508,17 @@ class ScmDistribution extends Scm
         $param['check_time'] = time();
         $msg = '审单通过';
         if ($check_status == 2) {
+            $check_refuse = $this->request->request('check_refuse');//check_refuse   1SKU缺失  2 配错镜框
+            empty($check_refuse) && $this->error(__('审单拒绝原因不能为空'), [], 403);
+            switch ($check_refuse)
+            {
+                case 1:
+                    $check_remark = 'SKU缺失';
+                    break;
+                case 2:
+                    $check_remark = '配错镜框';
+                    break;
+            }
             $param['check_remark'] = $check_remark;
             $msg = '审单拒绝';
         }
