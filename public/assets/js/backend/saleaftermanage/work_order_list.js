@@ -1369,6 +1369,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         var step_is_auto_complete = $('#item' + use_flag +'_step' + id +'-is_auto_complete').val();
                         item_input_content +='<input type="hidden" name="row[item_order_info]['+ use_flag +'][auto_complete][' + id + ']" value="' + step_is_auto_complete + '"/>';
                         //是否自动审核完成  end
+
+                        //是否为子单取消
+                        if (id == 18) {
+                            item_input_content +='<input type="hidden" name="row[item_order_info]['+ use_flag +'][cancel_order]" value="' + sku + '"/>';
+                        }
                     });
 
                     //判断如果存在1 则改为需要审核
