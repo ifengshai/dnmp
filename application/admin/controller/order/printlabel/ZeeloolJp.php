@@ -128,7 +128,7 @@ class ZeeloolJp extends Backend
                     $list[$k]['task_info'] = 1;
                 }
             }
-            
+
             $result = array("total" => $total, "rows" => $list);
             return json($result);
         }
@@ -154,25 +154,23 @@ class ZeeloolJp extends Backend
                 $list = $this->model
                     ->field($field)
                     ->where($map)
-                    ->find();
-                $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
+                    ->find()->toArray();
                 //查询订单是否存在工单
+                $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
                 $swhere = [];
-                $increment_ids = array_column($list, 'increment_id');
-                $swhere['platform_order'] = ['in', $increment_ids];
+                $swhere['platform_order'] = ['eq', $list['increment_id']];
                 $swhere['work_platform'] = 11;
                 $swhere['work_status'] = ['not in', [0, 4, 6]];
                 $order_arr = $workorder->where($swhere)->column('platform_order');
-
-                foreach ($list as $k => $v) {
-                    if (in_array($v['increment_id'], $order_arr)) {
-                        $list[$k]['task_info'] = 1;
-                    }
+                if (!empty($order_arr)){
+                    $list['task_info'] = 1;
                 }
+
                 $result = ['code' => 1, 'data' => $list ?? []];
             } else {
                 $result = array("total" => 0, "rows" => []);
             }
+
             return json($result);
         }
         return $this->view->fetch('_list');
