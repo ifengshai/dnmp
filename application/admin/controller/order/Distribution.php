@@ -3,6 +3,7 @@
 namespace app\admin\controller\order;
 
 use app\admin\model\DistributionLog;
+use app\admin\model\saleaftermanage\WorkOrderList;
 use app\common\controller\Backend;
 use fast\Http;
 use think\Request;
@@ -115,13 +116,13 @@ class Distribution extends Backend
                 unset($filter['stock_house_num']);
             }
             //-------------------跟单数据不全，配货列表--跟单列表展示注释释放----------------------//
-            /*
+            
             if (8 == $label) {
                 //查询有未处理工单的子单，异常表中存在有工单异常数据，后续要去重
                 $item_process_id_work = $this->model->where(['item_order_number'=>['in', array_unique($item_process_number)]])->column('id');
                 $map['a.id'] = ['in', array_merge($tmp_item_process_id, $item_process_id_work)];
             }
-            */
+           
 
             if ($filter['site']) {
                 $map['a.site'] = ['in', $filter['site']];
@@ -219,7 +220,6 @@ class Distribution extends Backend
 
     /**
      * 批量导出xls
-     * @todo 弃用
      * @Description
      * @author lzh
      * @since 2020/10/28 14:45:39
@@ -1134,6 +1134,11 @@ class Distribution extends Backend
         0 < $abnormal_count && $this->error('有异常待处理的子订单');
 
         //TODO::检测工单状态
+        //主订单措施未处理
+        $check_work_order = (new WorkOrderList())->where([])->column();
+
+        //当前子订单措施未处理
+        //当前子订单措施取消成功
 
         //检测配货状态
         $item_list = $this->model
