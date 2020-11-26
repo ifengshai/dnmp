@@ -1332,10 +1332,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         checkID[i] = $(this).val();
                         var id = $(this).val();
                         //获取承接组
-                        item_appoint_group += $('#item_step' + id + '-appoint_group').val() + ',';
-                        var group_id = $('#item_step' + id + '-appoint_group').val();
+                        item_appoint_group += $('#item' + use_flag + '_step' + id + '-appoint_group').val() + ',';
+                        var group_id = $('#item' + use_flag + '_step' + id + '-appoint_group').val();
                         var choose_group = Config.workOrderConfigValue.group[group_id];
-                        
                         if(choose_group){
                             for(var j = 0;j<choose_group.length;j++){
                                 item_input_content += '<input type="hidden" name="row[item_order_info]['+ use_flag +'][appoint_group][' + id + '][]" value="' + group_id + '"/>';
@@ -1352,7 +1351,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         var step_is_check = $('#item_step' + id + '-is_check').val();
                         is_check.push(step_is_check);
                         //是否自动审核完成 start
-                        var step_is_auto_complete = $('#item_step' + id + '-is_auto_complete').val();
+
+                        var step_is_auto_complete = $('#item' + use_flag +'_step' + id +'-is_auto_complete').val();
                         item_input_content +='<input type="hidden" name="row[item_order_info]['+ use_flag +'][auto_complete][' + id + ']" value="' + step_is_auto_complete + '"/>';
                         //是否自动审核完成  end
                     });
@@ -3064,9 +3064,9 @@ function itemSelectpicker (type = 1,flag = null) {
                         item_problem_step[problem_id][j].extend_group_id = 0;
                     }
                         ihtml += '<label><input type="checkbox" name="row[item_order_info]['+ item_order_sku[i] +'][item_choose][]" class="item_step_type item_step_type'+item_order_sku[i]+'" id="item_step'+item_problem_step[problem_id][j].step_id+'" value="'+item_problem_step[problem_id][j].step_id+'" flag="'+item_order_sku[i]+'" sku="'+item_order_sku_number[i]+'"><span>'+step_item[item_problem_step[problem_id][j].step_id]+'</span></label>';
-                        ihtml += '<input type="hidden" id="item_step'+j+'-is_check" value="'+item_problem_step[problem_id][j].is_check+'">';
-                        ihtml += '<input type="hidden" id="item_step'+j+'-is_auto_complete" value="'+item_problem_step[problem_id][j].is_auto_complete+'">';
-                        ihtml += '<input type="hidden" id="item_step'+j+'-appoint_group" value="'+item_problem_step[problem_id][j].extend_group_id+'">';
+                        ihtml += '<input type="hidden" id="item'+item_order_sku[i]+'_step'+item_problem_step[problem_id][j].step_id+'-is_check" value="'+item_problem_step[problem_id][j].is_check+'">';
+                        ihtml += '<input type="hidden" id="item'+item_order_sku[i]+'_step'+item_problem_step[problem_id][j].step_id+'-is_auto_complete" value="'+item_problem_step[problem_id][j].is_auto_complete+'">';
+                        ihtml += '<input type="hidden" id="item'+item_order_sku[i]+'_step'+item_problem_step[problem_id][j].step_id+'-appoint_group" value="'+item_problem_step[problem_id][j].extend_group_id+'">';
                 }
                 ihtml += '</div></div></div>';
                 ihtml += '<div class="form-group-child4 measure_item'+item_order_sku[i]+' item'+item_order_sku[i]+'_step19-19" style="display:none;"  flag="'+item_order_sku[i]+'"><div class="caigou frame-info item_info"><p style="font-size: 16px;"><b>更换镜框</b></p><div ><table class="caigou-table-sku" id="change-frame'+item_order_sku[i]+'"><tr><th>原SKU</th><th>原数量(+增加)</th><th>新SKU</th><th>新数量(-减少)</th></tr></table></div></div></div>';
