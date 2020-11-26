@@ -1156,9 +1156,20 @@ class Distribution extends Backend
         $_work_order_measure = new WorkOrderMeasure();
         $check_work_order = $_work_order_measure
             ->alias('a')
+            ->field('a.item_order_number,a.sku_change_type,a.operation_type')
             ->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')
-            ->where(['b.platform_order'=>['in',$increment_ids],['b.work_status'=>['in',[1,2,3,5]]]])
-            ->column();
+            ->where([
+                'b.platform_order'=>['in',$increment_ids],
+                'b.work_status'=>['in',[1,2,3,5]]
+            ])
+            ->select();
+        if($check_work_order){
+            foreach ($check_work_order as $val){
+                if($val){
+
+                }
+            }
+        }
 
         //当前子订单措施未处理
         //当前子订单措施取消成功
