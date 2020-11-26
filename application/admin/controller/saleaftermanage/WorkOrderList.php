@@ -56,6 +56,7 @@ class WorkOrderList extends Backend
         ##### start ######
         //global $workOrderConfigValue;
         $workOrderConfigValue = $this->workOrderConfigValue = (new Workorderconfig)->getConfigInfo();
+        //print_r($workOrderConfigValue);die;
         $this->assignconfig('workOrderConfigValue', $this->workOrderConfigValue);
         ###### end ######
         $this->model = new \app\admin\model\saleaftermanage\WorkOrderList;
@@ -1606,11 +1607,11 @@ class WorkOrderList extends Backend
 
         //更改镜片、赠品、补发
         if(in_array($choose_id,[6,7,20])){
-            $this->model->changeLens($params, $work_id, $choose_id, $measure_id);
+            $this->model->changeLens($params, $work_id, $choose_id, $measure_id,$item_order_number);
         }elseif(19 == $choose_id){//更改镜框
-            $this->model->changeFrame($params, $work_id, $choose_id, $measure_id);
+            $this->model->changeFrame($params, $work_id, $choose_id, $measure_id,$item_order_number);
         }elseif(in_array($choose_id,[3,18])){//取消
-            $this->model->cancelOrder($params, $work_id, $choose_id, $measure_id);
+            $this->model->cancelOrder($params, $work_id, $choose_id, $measure_id,$item_order_number);
         }elseif(13 == $choose_id){//修改地址
             $this->model->changeAddress($params, $work_id, $choose_id, $measure_id);
         }

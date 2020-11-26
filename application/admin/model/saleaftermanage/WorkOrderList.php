@@ -222,18 +222,20 @@ class WorkOrderList extends Model
                 ->where(['work_id'=>$work_id,'change_type'=>2])
                 ->column($prescription_field,'item_order_number')
             ;
-            foreach($prescription_list as $k=>$v){
-                if($v['pd_l'] && $v['pd_r']){
-                    $pd = '';
-                }else{
-                    $pd = $v['pd_l'] ?: $v['pd_r'];
+            if($prescription_list){
+                foreach($prescription_list as $k=>$v){
+                    if($v['pd_l'] && $v['pd_r']){
+                        $pd = '';
+                    }else{
+                        $pd = $v['pd_l'] ?: $v['pd_r'];
+                    }
+                    $prescription_list[$k]['pd'] = $pd;
                 }
-                $prescription_list[$k]['pd'] = $pd;
+                //增加默认数量
+                array_walk($prescription_list, function (&$value, $k, $p) {
+                    $value = array_merge($value, $p);
+                }, ['qty_ordered' => 1]);
             }
-            //增加默认数量
-            array_walk($prescription_list, function (&$value, $k, $p) {
-                $value = array_merge($value, $p);
-            }, ['qty_ordered' => 1]);
 
             //获取措施ID
             $_work_order_measure = new WorkOrderMeasure();
@@ -260,7 +262,7 @@ class WorkOrderList extends Model
                 if(isset($prescription_list[$key])){
                     $info['change_lens'] = $prescription_list[$key];
                 }
-                $item_order_info[] = $info;
+                $item_order_info[$key] = $info;
             }
 
             $result['item_order_info'] = $item_order_info;
@@ -763,10 +765,11 @@ class WorkOrderList extends Model
      * @param int $work_id 工单ID
      * @param int $measure_choose_id 措施配置表ID
      * @param int $measure_id 措施ID
+     * @param string $item_order_number 子单号
      * @author lzh
      * @throws \Exception
      */
-    public function changeLens($params, $work_id, $measure_choose_id, $measure_id)
+    public function changeLens($params, $work_id, $measure_choose_id, $measure_id,$item_order_number)
     {
         $work = $this->find($work_id);
         if ($work && in_array($measure_choose_id,[6,7,20])) {
@@ -779,7 +782,7 @@ class WorkOrderList extends Model
 
                 //修改镜片
                 if (20 == $measure_choose_id) {
-                    $changeLens = $params['item_order_info'][$work->item_order_number]['change_lens'];
+                    $changeLens = $params['item_order_info'][$item_order_number]['change_lens'];
                     $change_type = 2;
 
                     $lensId = $changeLens['lens_type'];
@@ -808,6 +811,7 @@ class WorkOrderList extends Model
                         'prescription_option' => serialize($prescriptionOption),
                         'userinfo_option' => '',
                         'work_id' => $work_id,
+                        'item_order_number' => $item_order_number,
                         'increment_id' => $platform_order,
                         'platform_type' => $platform_type,
                         'original_name' => $changeLens['original_name'] ?? '',
@@ -995,20 +999,22 @@ class WorkOrderList extends Model
      * @param int $work_id 工单ID
      * @param int $measure_choose_id 措施配置表ID
      * @param int $measure_id 措施ID
+     * @param string $item_order_number 子单号
      * @Description
      * @author lzh
      * @return mixed
      */
-    public function changeFrame($params, $work_id, $measure_choose_id, $measure_id)
+    public function changeFrame($params, $work_id, $measure_choose_id, $measure_id, $item_order_number)
     {
         $work = $this->find($work_id);
         if ($work && 1 == $measure_choose_id) {
-            $change_frame = $params['item_order_info'][$work->item_order_number]['change_frame'];
+            $change_frame = $params['item_order_info'][$item_order_number]['change_frame'];
             empty($change_frame) && exception("请完善更改镜框信息！！");
 
             //插入更换镜框数据
             $orderChangeData = [
                 'work_id'=>$work_id,
+                'item_order_number'=>$item_order_number,
                 'increment_id'=>$params['platform_order'],
                 'platform_type'=>$params['work_platform'],
                 'original_sku'=>$change_frame['original_sku'],
@@ -1074,11 +1080,12 @@ class WorkOrderList extends Model
      * @param int $work_id 工单ID
      * @param int $measure_choose_id 措施配置表ID
      * @param int $measure_id 措施ID
+     * @param string $item_order_number 子单号
      * @Description
      * @author lzh
      * @return mixed
      */
-    public function cancelOrder($params, $work_id, $measure_choose_id, $measure_id)
+    public function cancelOrder($params, $work_id, $measure_choose_id, $measure_id, $item_order_number)
     {
         $work = $this->find($work_id);
         if ($work && in_array($measure_choose_id,[3,18])) {
@@ -1112,8 +1119,8 @@ class WorkOrderList extends Model
                     'work_id'=>$work_id,
                     'increment_id'=>$params['platform_order'],
                     'platform_type'=>$params['work_platform'],
-                    'item_order_number'=>$params['item_order_info'][$work->item_order_number]['cancel_order']['item_order_number'],
-                    'original_sku'=>$params['item_order_info'][$work->item_order_number]['cancel_order']['sku'],
+                    'item_order_number'=>$item_order_number,
+                    'original_sku'=>$params['item_order_info'][$item_order_number]['cancel_order']['sku'],
                     'original_number'=>1,
                     'change_type'=>3,
                     'measure_id'=>$measure_id,

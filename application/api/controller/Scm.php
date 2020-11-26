@@ -79,7 +79,7 @@ class Scm extends Api
         $this->auth = Auth::instance();
 
         //校验api_key
-        $this->auth->match(['login','version']) || $this->auth->id || $this->error(__('Api key invalid, please log in again'), [], 401);
+        $this->auth->match(['login','version','order_examine']) || $this->auth->id || $this->error(__('Api key invalid, please log in again'), [], 401);
 
         //校验请求类型
         $this->request->isPost() || $this->error(__('Request method must be post'), [], 402);
