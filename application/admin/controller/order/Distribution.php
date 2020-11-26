@@ -219,7 +219,6 @@ class Distribution extends Backend
 
     /**
      * 批量导出xls
-     * @todo 弃用
      * @Description
      * @author lzh
      * @since 2020/10/28 14:45:39
