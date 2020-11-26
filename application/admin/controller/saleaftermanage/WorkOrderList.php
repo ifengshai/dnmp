@@ -3,13 +3,10 @@
 namespace app\admin\controller\saleaftermanage;
 
 use app\admin\model\DistributionAbnormal;
-use app\admin\model\order\order\NewOrder;
+use app\admin\model\DistributionLog;
 use app\admin\model\order\order\NewOrderItemProcess;
 use app\admin\model\order\order\NewOrderProcess;
 use app\admin\model\saleaftermanage\WorkOrderNote;
-use app\admin\model\saleaftermanage\WorkOrderProblemStep;
-use app\admin\model\saleaftermanage\WorkOrderProblemType;
-use app\admin\model\saleaftermanage\WorkOrderStepType;
 use app\common\controller\Backend;
 use think\Cache;
 use think\Db;
@@ -237,12 +234,16 @@ class WorkOrderList extends Backend
                     $list[$k]['all_after_user_name'][] = $user_list[$v['after_user_id']];
                     $list[$k]['all_after_user_arr'] = [];
                 }
+
                 //工单类型
                 if ($v['work_type'] == 1) {
                     $list[$k]['work_type_str'] = '客服工单';
                 } else {
                     $list[$k]['work_type_str'] = '仓库工单';
                 }
+
+                //子单号
+                $list[$k]['order_item_number_arr'] = explode(',', $v['order_item_numbers']);
 
                 //是否审核
                 if ($v['is_check'] == 1) {
@@ -1321,10 +1322,19 @@ class WorkOrderList extends Backend
 
                             //绑定异常数据
                             $_distribution_abnormal = new DistributionAbnormal();
-                            $_distribution_abnormal
-                                ->allowField(true)
-                                ->save(['work_id'=>$work_id], ['item_process_id' => ['in',$item_process_ids],'status'=>1])
+                            $abnormal_count = $_distribution_abnormal
+                                ->where(['item_process_id' => ['in',$item_process_ids],'status'=>1])
+                                ->count()
                             ;
+                            if($abnormal_count){
+                                $_distribution_abnormal
+                                    ->allowField(true)
+                                    ->save(['work_id'=>$work_id], ['item_process_id' => ['in',$item_process_ids],'status'=>1])
+                                ;
+
+                                //配货操作日志
+                                DistributionLog::record((object)session('admin'),$item_process_ids,0,"创建工单绑定异常");
+                            }
                         }
                     }
 
@@ -1351,7 +1361,7 @@ class WorkOrderList extends Backend
                             $auto_complete = $params['order_recept']['auto_complete'][$v];
 
                             //插入措施、承接人数据
-                            $res = $this->handle_measure($work_id,$v,$workOrderConfigValue['step'][$v],$appoint_ids,$appoint_users,$appoint_group,$auto_complete,$this->assign_user_id,$admin_id,$nickname,$params,'');
+                            $res = $this->handle_measure($work_id,$v,$appoint_ids,$appoint_users,$appoint_group,$auto_complete,$this->assign_user_id,$admin_id,$nickname,$params,'');
                             if(!$res['result']) throw new Exception($res['msg']);
                         }
                     }
@@ -1368,7 +1378,7 @@ class WorkOrderList extends Backend
                                     $auto_complete = $item['auto_complete'][$v];
 
                                     //插入措施、承接人数据
-                                    $res = $this->handle_measure($work_id,$v,$workOrderConfigValue['step'][$v],$appoint_ids,$appoint_users,$appoint_group,$auto_complete,$this->assign_user_id,$admin_id,$nickname,$params,$key);
+                                    $res = $this->handle_measure($work_id,$v,$appoint_ids,$appoint_users,$appoint_group,$auto_complete,$this->assign_user_id,$admin_id,$nickname,$params,$key);
                                     if(!$res['result']) throw new Exception($res['msg']);
                                 }
                             }
@@ -1517,7 +1527,6 @@ class WorkOrderList extends Backend
      * @Author lzh
      * @param int $work_id 工单ID
      * @param int $choose_id 选择的措施ID
-     * @param string $measure_content 措施内容
      * @param array $appoint_ids 承接人ID集合
      * @param array $appoint_users 承接人名称集合
      * @param array $appoint_group 承接人所在组集合
@@ -1529,7 +1538,13 @@ class WorkOrderList extends Backend
      * @param string $item_order_number 子订单号
      * @return array
      */
-    protected function handle_measure($work_id,$choose_id,$measure_content,$appoint_ids,$appoint_users,$appoint_group,$auto_complete,$assign_user_id,$admin_id,$nickname,$params,$item_order_number){
+    protected function handle_measure($work_id,$choose_id,$appoint_ids,$appoint_users,$appoint_group,$auto_complete,$assign_user_id,$admin_id,$nickname,$params,$item_order_number){
+        //获取工单配置信息
+        $workOrderConfigValue = $this->workOrderConfigValue;
+
+        //措施内容
+        $measure_content = $workOrderConfigValue['step'][$choose_id] ?: '';
+
         //插入措施表
         $res = $this->step
             ->allowField(true)
@@ -1541,9 +1556,9 @@ class WorkOrderList extends Backend
                 'create_time'=>date('Y-m-d H:i:s')
             ])
         ;
-        if (false === $res) {
-            return ['result'=>false,'msg'=>'添加措施失败！！'];
-        }
+        if (false === $res) return ['result'=>false,'msg'=>'添加措施失败！！'];
+
+        //工单措施表自增ID
         $measure_id = $this->step->id;
 
         //循环插入承接人
@@ -1973,7 +1988,7 @@ class WorkOrderList extends Backend
                             $auto_complete = $params['order_recept']['auto_complete'][$v];
 
                             //插入措施、承接人数据
-                            $res = $this->handle_measure($row->id,$v,$workOrderConfigValue['step'][$v],$appoint_ids,$appoint_users,$appoint_group,$auto_complete,$this->assign_user_id,$admin_id,$nickname,$params,'');
+                            $res = $this->handle_measure($row->id,$v,$appoint_ids,$appoint_users,$appoint_group,$auto_complete,$this->assign_user_id,$admin_id,$nickname,$params,'');
                             if(!$res['result']) throw new Exception($res['msg']);
                         }
                     }
@@ -1990,7 +2005,7 @@ class WorkOrderList extends Backend
                                     $auto_complete = $item['auto_complete'][$v];
 
                                     //插入措施、承接人数据
-                                    $res = $this->handle_measure($row->id,$v,$workOrderConfigValue['step'][$v],$appoint_ids,$appoint_users,$appoint_group,$auto_complete,$this->assign_user_id,$admin_id,$nickname,$params,$key);
+                                    $res = $this->handle_measure($row->id,$v,$appoint_ids,$appoint_users,$appoint_group,$auto_complete,$this->assign_user_id,$admin_id,$nickname,$params,$key);
                                     if(!$res['result']) throw new Exception($res['msg']);
                                 }
                             }
