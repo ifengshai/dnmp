@@ -880,11 +880,11 @@ class ScmDistribution extends Scm
             } elseif ($item_process_info['temporary_house_id']){
                 //有暂存库位ID
                 $store_house_info = $this->_stock_house->field('id,coding,subarea')->where('id',$item_process_info['temporary_house_id'])->find();
-                $this->error(__('请将子单号'.$item_order_number.'的商品放入'.$store_house_info['coding'].'异常库位'), [], 403);
+                $this->error(__('请将子单号'.$item_order_number.'的商品放入'.$store_house_info['coding'].'暂存库位'), [], 403);
             }elseif ($order_process_info['store_house_id']){
                 //有主单合单库位
                 $store_house_info = $this->_stock_house->field('id,coding,subarea')->where('id',$order_process_info['store_house_id'])->find();
-                $this->error(__('请将子单号'.$item_order_number.'的商品放入合单架'.$store_house_info['coding'].'库位'), [], 403);
+                $this->error(__('请将子单号'.$item_order_number.'的商品放入合单架'.$store_house_info['coding'].'合单库位'), [], 403);
             }
 
         }
@@ -894,7 +894,7 @@ class ScmDistribution extends Scm
         $info['sku'] = $item_process_info['sku'];
         if (!$order_process_info['store_house_id']){
             //主单中无库位号，首个子单进入时，分配一个合单库位给PDA，暂不占用根据是否确认放入合单架占用或取消
-            $store_house_info = $this->_stock_house->field('id,coding,subarea')->where(['status'=>1,'type'=>2])->find();
+            $store_house_info = $this->_stock_house->field('id,coding,subarea')->where(['status'=>1,'type'=>2,'occupy'=>0])->find();
             $info['store_id'] = $store_house_info['id'];
             $info['coding'] = $store_house_info['coding'];
         } else {
@@ -1413,13 +1413,16 @@ class ScmDistribution extends Scm
         empty($order_id) && $this->error(__('主订单ID不能为空'), [], 403);
         $check_refuse = $this->request->request('check_refuse');//check_refuse   1SKU缺失  2 配错镜框
         empty($check_refuse) && $this->error(__('审单拒绝原因不能为空'), [], 403);
+        !in_array($check_refuse, [1, 2]) && $this->error(__('审单拒绝原因错误'), [], 403);
         switch ($check_refuse)
         {
             case 1:
                 $check_remark = 'SKU缺失';
+                $msg_info = 'SKU缺失，退回至待合单';
                 break;
             case 2:
                 $check_remark = '配错镜框';
+                $msg_info = '配错镜框，退回至待配货';
                 break;
         }
 
@@ -1439,13 +1442,14 @@ class ScmDistribution extends Scm
 
         //检测订单审单状态
         $row = $this->_new_order_process->where(['order_id'=>$order_id])->find();;
+        $item_ids = $this->_new_order_item_process->where(['order_id'=>$order_id])->column('id');;
         0 != $row['check_status'] && $this->error(__('只有待审单状态才能审单'), [], 405);
 
         $result = false;
         Db::startTrans();
         try {
             $result = $this->_new_order_process->allowField(true)->isUpdate(true, ['order_id' => $order_id])->save($param);
-            if (false === $result){
+            if (false !== $result){
                 //审单通过结束，审单拒绝，回滚合单状态
                 if ($check_status == 2) {
                     if ($check_refuse == 1){
@@ -1474,9 +1478,11 @@ class ScmDistribution extends Scm
         }
         if ($result === false) {
             $this->error(__($msg.'失败'), [], 404);
+            DistributionLog::record($this->auth,$item_ids,8,$row['order_id'].$msg.'失败'.$msg_info);
         }
 
         $this->success($msg.'成功', [], 200);
+        DistributionLog::record($this->auth,$item_ids,8,$row['order_id'].$msg.'成功'.$msg_info);
     }
 
 }
