@@ -3,6 +3,7 @@
 namespace app\admin\controller\order;
 
 use app\admin\model\DistributionLog;
+use app\admin\model\saleaftermanage\WorkOrderList;
 use app\common\controller\Backend;
 use fast\Http;
 use think\Request;
@@ -1133,6 +1134,11 @@ class Distribution extends Backend
         0 < $abnormal_count && $this->error('有异常待处理的子订单');
 
         //TODO::检测工单状态
+        //主订单措施未处理
+        $check_work_order = (new WorkOrderList())->where([])->column();
+
+        //当前子订单措施未处理
+        //当前子订单措施取消成功
 
         //检测配货状态
         $item_list = $this->model

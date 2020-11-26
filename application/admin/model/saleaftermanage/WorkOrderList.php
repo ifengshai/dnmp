@@ -217,11 +217,23 @@ class WorkOrderList extends Model
             ;
 
             //获取更改镜片sku集
-            $prescription_field = 'recipe_type as prescription_type,coating_type as coating_name,od_sph,os_sph,od_cyl,os_cyl,od_axis,os_axis,pd_l,pd_r,pd,os_add,od_add,od_pv,os_pv,od_pv_r,os_pv_r,od_bd,os_bd,od_bd_r,os_bd_r';
+            $prescription_field = 'recipe_type as prescription_type,coating_type as coating_name,od_sph,os_sph,od_cyl,os_cyl,od_axis,os_axis,pd_l,pd_r,os_add,od_add,od_pv,os_pv,od_pv_r,os_pv_r,od_bd,os_bd,od_bd_r,os_bd_r';
             $prescription_list = $_work_order_change_sku
                 ->where(['work_id'=>$work_id,'change_type'=>2])
                 ->column($prescription_field,'item_order_number')
             ;
+            foreach($prescription_list as $k=>$v){
+                if($v['pd_l'] && $v['pd_r']){
+                    $pd = '';
+                }else{
+                    $pd = $v['pd_l'] ?: $v['pd_r'];
+                }
+                $prescription_list[$k]['pd'] = $pd;
+            }
+            //增加默认数量
+            array_walk($prescription_list, function (&$value, $k, $p) {
+                $value = array_merge($value, $p);
+            }, ['qty_ordered' => 1]);
 
             //获取措施ID
             $_work_order_measure = new WorkOrderMeasure();
@@ -358,7 +370,7 @@ class WorkOrderList extends Model
         $showPrescriptions = [];
         $prescriptions = [];
         if($item_order_number){
-            $prescription_field = 'b.prescription_type,b.index_type,b.index_id,b.coating_id,b.color_id,b.od_sph,b.os_sph,b.od_cyl,b.os_cyl,b.od_axis,b.os_axis,b.pd_l,b.pd_r,b.pd,b.os_add,b.od_add,b.od_pv,b.os_pv,b.od_pv_r,b.os_pv_r,b.od_bd,b.os_bd,b.od_bd_r,b.os_bd_r';
+            $prescription_field = 'a.sku,a.name,b.prescription_type,b.index_type,b.index_id,b.coating_id,b.color_id,b.od_sph,b.os_sph,b.od_cyl,b.os_cyl,b.od_axis,b.os_axis,b.pd_l,b.pd_r,b.pd,b.os_add,b.od_add,b.od_pv,b.os_pv,b.od_pv_r,b.os_pv_r,b.od_bd,b.os_bd,b.od_bd_r,b.os_bd_r';
             $_order_item_process = new NewOrderItemProcess();
             $prescriptions = $_order_item_process
                 ->alias('a')
@@ -368,6 +380,11 @@ class WorkOrderList extends Model
                 ->select()
             ;
             empty($prescriptions) && exception('子订单不存在，请查询后重试');
+
+            //增加默认数量
+            array_walk($prescriptions, function (&$value, $k, $p) {
+                $value = array_merge($value, $p);
+            }, ['qty_ordered' => 1]);
 
             foreach ($prescriptions as $prescription) {
                 $showPrescriptions[] = $prescription['prescription_type'] . '--' . $prescription['index_type'];
