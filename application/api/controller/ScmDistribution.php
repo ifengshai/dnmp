@@ -158,7 +158,7 @@ class ScmDistribution extends Scm
             ;
 
             DistributionLog::record($this->auth,$item_process_id,9,"子单号{$item_order_number}，异常暂存架{$stock_house_info['coding']}库位");
-            $this->success(__("请将子单号{$item_order_number}的商品放入异常暂存架{$stock_house_info['coding']}库位"), [], 200);
+            $this->success(__("请将子单号{$item_order_number}的商品放入异常暂存架{$stock_house_info['coding']}库位"), ['coding' => $stock_house_info['coding']], 200);
         }else{
             DistributionLog::record($this->auth,$item_process_id,0,'异常暂存架没有空余库位');
             $this->error(__('异常暂存架没有空余库位'), [], 405);
