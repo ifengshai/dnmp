@@ -493,7 +493,7 @@ class ScmQuality extends Scm
             empty($replenish_id) && $this->error(__('补货单ID不能为空'), [], 403);
 
             $existence = $this->_check
-                ->where(['logistics_id' => $logistics_id])
+                ->where(['logistics_id' => $logistics_id, 'status' => ['<', 3]])
                 ->value('id');
             !empty($existence) && $this->error(__('质检单已创建，请勿重复操作'), [], 405);
 
