@@ -105,9 +105,7 @@ class OrderPrescription extends Backend
             'rate'=>$no_prescription_rate
         );
         if($site == 3){
-            $sunglasses_num1 = $this->prescrtion_num('SunSingleVision',$site,$time_str);
-            $sunglasses_num2 = $this->prescrtion_num('SunNonPrescription',$site,$time_str);
-            $sunglasses_num = $sunglasses_num1+$sunglasses_num2;
+            $sunglasses_num = $this->prescrtion_num('SunSingleVision',$site,$time_str);
         }else{
             $sunglasses_num = $this->prescrtion_num('Sunglasses',$site,$time_str);
         }
@@ -127,7 +125,7 @@ class OrderPrescription extends Backend
             $sunglassesno_num2 = $this->prescrtion_num('Non',$site,$time_str);
             $sunglassesno_num = $sunglassesno_num1 + $sunglassesno_num2;
         }else{
-            $sunglassesno_num = $this->prescrtion_num('SunGlassesNoprescription',$site,$time_str);
+            $sunglassesno_num = $this->prescrtion_num('SunNonPrescription',$site,$time_str);
         }
 
         $sunglassesno_rate = $order_num ? round($sunglassesno_num/$order_num*100,0).'%' : 0;
