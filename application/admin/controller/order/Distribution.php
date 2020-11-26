@@ -3,6 +3,7 @@
 namespace app\admin\controller\order;
 
 use app\admin\model\DistributionLog;
+use app\admin\model\saleaftermanage\WorkOrderChangeSku;
 use app\admin\model\saleaftermanage\WorkOrderList;
 use app\common\controller\Backend;
 use fast\Http;
@@ -984,8 +985,6 @@ class Distribution extends Backend
             ->count();
         0 < $abnormal_count && $this->error('有异常待处理的子订单');
 
-        //TODO::检测工单状态
-
         //检测配货状态
         $item_list = $this->model
             ->field('id,site,distribution_status,order_id,option_id')
@@ -993,14 +992,56 @@ class Distribution extends Backend
             ->select();
         $order_ids = [];
         $option_ids = [];
+        $item_order_numbers = [];
         foreach ($item_list as $value) {
             $value['distribution_status'] != $check_status && $this->error('存在非当前节点的子订单');
             $order_ids[] = $value['order_id'];
             $option_ids[] = $value['option_id'];
+            $item_order_numbers[] = $value['item_order_number'];
         }
 
-        //获取订单购买总数
+        //查询订单号
         $_new_order = new NewOrder();
+        $increment_ids = $_new_order->where(['id'=>['in',array_unique($order_ids)]])->column('increment_id');
+
+        //检测是否有工单未处理
+        $_work_order_measure = new WorkOrderMeasure();
+        $check_work_order = $_work_order_measure
+            ->alias('a')
+            ->field('a.item_order_number,a.measure_choose_id')
+            ->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')
+            ->where([
+                'a.operation_type'=>0,
+                'b.platform_order'=>['in',$increment_ids],
+                'b.work_status'=>['in',[1,2,3,5]]
+            ])
+            ->select();
+        if($check_work_order){
+            foreach ($check_work_order as $val){
+                //子单措施:更改镜框-18、更改镜片-19、取消-20
+                (
+                    !in_array($val['measure_choose_id'],[18,19,20]) //主单措施未处理
+                    ||
+                    in_array($val['item_order_number'],$item_order_numbers) //子单措施未处理
+                )
+                && $this->error('子单号：'.$val['item_order_number'].'有工单未处理');
+            }
+        }
+
+        //是否有子订单取消
+        $_work_order_change_sku = new WorkOrderChangeSku();
+        $check_cancel_order = $_work_order_change_sku
+            ->alias('a')
+            ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
+            ->where([
+                'a.change_type'=>3,
+                'a.item_order_number'=>['in',$item_order_numbers],
+                'b.operation_type'=>1
+            ])
+            ->value('a.item_order_number');
+        $check_cancel_order && $this->error('子单号：'.$check_cancel_order.' 已取消');
+
+        //获取订单购买总数
         $total_list = $_new_order
             ->where(['id' => ['in', array_unique($order_ids)]])
             ->column('total_qty_ordered', 'id');
@@ -1135,45 +1176,60 @@ class Distribution extends Backend
 
         //获取配货信息
         $item_list = $this->model
-            ->field('id,site,sku,distribution_status,order_id')
+            ->field('id,site,sku,distribution_status,order_id,item_order_number')
             ->where(['id' => ['in', $ids]])
             ->select();
         empty($item_list) && $this->error('数据不存在');
 
         //检测配货状态
         $order_ids = [];
+        $item_order_numbers = [];
         foreach ($item_list as $value) {
-            $order_ids[] = $value['order_id'];
             6 != $value['distribution_status'] && $this->error('存在非当前节点的子订单');
+            $order_ids[] = $value['order_id'];
+            $item_order_numbers[] = $value['item_order_number'];
         }
 
         //查询订单号
         $_new_order = new NewOrder();
-        $increment_ids = $_new_order->where(['id'=>['in',$order_ids]])->column('increment_id');
+        $increment_ids = $_new_order->where(['id'=>['in',array_unique($order_ids)]])->column('increment_id');
 
-        //TODO::检测工单状态
-        //主订单措施未处理
+        //检测是否有工单未处理
         $_work_order_measure = new WorkOrderMeasure();
         $check_work_order = $_work_order_measure
             ->alias('a')
-            ->field('a.item_order_number,a.sku_change_type,a.operation_type')
+            ->field('a.item_order_number,a.measure_choose_id')
             ->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')
             ->where([
+                'a.operation_type'=>0,
                 'b.platform_order'=>['in',$increment_ids],
                 'b.work_status'=>['in',[1,2,3,5]]
             ])
             ->select();
         if($check_work_order){
             foreach ($check_work_order as $val){
-                if($val){
-
-                }
+                //子单措施:更改镜框-18、更改镜片-19、取消-20
+                (
+                    !in_array($val['measure_choose_id'],[18,19,20]) //主单措施未处理
+                    ||
+                    in_array($val['item_order_number'],$item_order_numbers) //子单措施未处理
+                )
+                && $this->error('子单号：'.$val['item_order_number'].'有工单未处理');
             }
         }
 
-        //当前子订单措施未处理
-        //当前子订单措施取消成功
-
+        //是否有子订单取消
+        $_work_order_change_sku = new WorkOrderChangeSku();
+        $check_cancel_order = $_work_order_change_sku
+            ->alias('a')
+            ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
+            ->where([
+                'a.change_type'=>3,
+                'a.item_order_number'=>['in',$item_order_numbers],
+                'b.operation_type'=>1
+            ])
+            ->value('a.item_order_number');
+        $check_cancel_order && $this->error('子单号：'.$check_cancel_order.' 已取消');
 
         //库存、关系映射、库存日志表
         $_item_platform_sku = new ItemPlatformSku();
