@@ -68,9 +68,7 @@ class OrderPrescription extends Backend
             'rate'=>$progressive_rate
         );
         if($site == 3){
-            $reading_glasses_num1 = $this->prescrtion_num('Reading Glasses2',$site,$time_str);
-            $reading_glasses_num2 = $this->prescrtion_num('Readingglasses',$site,$time_str);
-            $reading_glasses_num = $reading_glasses_num1+$reading_glasses_num2;
+            $reading_glasses_num = $this->prescrtion_num('Readingglasses',$site,$time_str);
         }else{
             $reading_glasses_num = $this->prescrtion_num('Readingglasses',$site,$time_str);
         }
@@ -82,6 +80,8 @@ class OrderPrescription extends Backend
         );
         if($site == 2){
             $reading_glassesno_num = $this->prescrtion_num('ReadingNoprescription',$site,$time_str);
+        }elseif($site == 3){
+            $reading_glassesno_num = $this->prescrtion_num('Reading Glasses2',$site,$time_str);
         }else{
             $reading_glassesno_num = $this->prescrtion_num('ReadingGlassesNon',$site,$time_str);
         }
