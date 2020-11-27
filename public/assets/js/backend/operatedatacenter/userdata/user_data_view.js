@@ -182,7 +182,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                                 },
                                 textStyle:{
                                     color:"#27D9C8",
-                                    fontSize:36,
+                                    fontSize:32,
                                     align:"center"
                                 }
                             },
