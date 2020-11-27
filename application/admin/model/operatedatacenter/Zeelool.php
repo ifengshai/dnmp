@@ -283,8 +283,8 @@ class Zeelool extends Model
         $order_where['created_at'] = ['lt',$createat[0]];
 
         $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-        $map1['customer_id'] = ['>',0];
         $map['order_type'] = 1;
+        $map1['customer_id'] = ['>',0];
 
         $order_model = new \app\admin\model\order\order\Zeelool();
         //复购用户数
@@ -304,15 +304,8 @@ class Zeelool extends Model
             ->group('customer_id')
             ->having('count(customer_id)<=1')
             ->column('customer_id');
-        $again_buy_num2 = 0;
-        foreach ($again_buy_data2 as $v){
-            //查询时间段内是否进行购买行为
-            $order_where_arr['customer_id'] = $v;
-            $is_buy = $order_model->where($order_where)->where($order_where_arr)->where($map)->value('entity_id');
-            if($is_buy){
-                $again_buy_num2++;
-            }
-        }
+        $order_where_arr['customer_id'] = ['in',$again_buy_data2];
+        $again_buy_num2 = $order_model->where($order_where)->where($order_where_arr)->where($map)->value('entity_id');
 
         $again_buy_num = $again_buy_num1+$again_buy_num2;
         return $again_buy_num;
