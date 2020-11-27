@@ -1257,7 +1257,7 @@ class WorkOrderList extends Backend
 
                 //检测子订单措施
                 if($item_order_info){
-                    $item_order_info = array_unique(array_filter($item_order_info));
+                    $item_order_info = array_filter($item_order_info);
                     1 > count($item_order_info) && $this->error("子订单号错误");
                     foreach ($item_order_info as $key=>$item){
                         empty($item['item_choose']) && $this->error("请选择子订单：{$key} 的实施措施");
@@ -1600,9 +1600,7 @@ class WorkOrderList extends Backend
         //插入承接人表
         $_work_order_recept = new WorkOrderRecept();
         $recept_res = $_work_order_recept->allowField(true)->saveAll($appoint_save);
-        if (false === $recept_res) {
-            return ['result'=>false,'msg'=>'添加承接人失败！！'];
-        }
+        if (false === $recept_res) return ['result'=>false,'msg'=>'添加承接人失败！！'];
 
         //更改镜片、赠品、补发
         if(in_array($choose_id,[6,7,20])){
@@ -1916,7 +1914,7 @@ class WorkOrderList extends Backend
 
                 //检测子订单措施
                 if($item_order_info){
-                    $item_order_info = array_unique(array_filter($item_order_info));
+                    $item_order_info = array_filter($item_order_info);
                     1 > count($item_order_info) && $this->error("子订单号错误");
                     foreach ($item_order_info as $key=>$item){
                         empty($item['item_choose']) && $this->error("请选择子订单：{$key} 的实施措施");
