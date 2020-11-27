@@ -189,36 +189,53 @@ class Test01 extends Backend
 
     public function test99()
     {
-        $yes_date = date("Y-m-d",strtotime("-1 day"));
-        $yestime_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $yes_date . "'")];
-        $yesterday_shoppingcart_total_data = Db::connect('database.db_zeelool')
-            ->table('sales_flat_quote')
-            ->where($yestime_where)
-            ->where('base_grand_total','>',0)
-            ->count();
-        dump($yesterday_shoppingcart_total_data);
-        $yesterday_shoppingcart_total_data1 = Db::connect('database.db_zeelool')
-            ->table('sales_flat_quote')
-            ->where($yestime_where)
-            ->where('base_grand_total','>',0)
-            ->column('entity_id');
-        // dump($yesterday_shoppingcart_total_data1);
-        $quote_where1['quote_id'] = ['in',$yesterday_shoppingcart_total_data1];
-        $order_where['order_type'] = 1;
-        $order_success_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-        $yes_date = date("Y-m-d",strtotime("-1 day"));
+        // $yes_date = date("Y-m-d",strtotime("-1 day"));
+        // $yestime_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $yes_date . "'")];
+        // $yesterday_shoppingcart_total_data = Db::connect('database.db_zeelool')
+        //     ->table('sales_flat_quote')
+        //     ->where($yestime_where)
+        //     ->where('base_grand_total','>',0)
+        //     ->count();
+        // dump($yesterday_shoppingcart_total_data);
+        // $yesterday_shoppingcart_total_data1 = Db::connect('database.db_zeelool')
+        //     ->table('sales_flat_quote')
+        //     ->where($yestime_where)
+        //     ->where('base_grand_total','>',0)
+        //     ->column('entity_id');
+        // // dump($yesterday_shoppingcart_total_data1);
+        // $quote_where1['quote_id'] = ['in',$yesterday_shoppingcart_total_data1];
+        // $order_where['order_type'] = 1;
+        // $order_success_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        // $yes_date = date("Y-m-d",strtotime("-1 day"));
+        // $yestime_where = [];
+        // $yestime_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $yes_date . "'")];
+        // $yesterday_order_success_data1 = Db::connect('database.db_zeelool')
+        //     ->table('sales_flat_order')
+        //     ->where($quote_where1)
+        //     ->where($yestime_where)
+        //     ->where($order_where)
+        //     ->where($order_success_where)
+        //     ->count();
+        // dump($yesterday_order_success_data1);
+        // //昨天购物车转化率data
+        // $yesterday_shoppingcart_conversion_data     = @round(($yesterday_order_success_data1 / $yesterday_shoppingcart_total_data), 4) * 100;
+        // dump($yesterday_shoppingcart_conversion_data);
+
+        $order_where['o.order_type'] = 1;
+        $order_success_where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        $yes_date = date("Y-m-d", strtotime("-1 day"));
         $yestime_where = [];
-        $yestime_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $yes_date . "'")];
-        $yesterday_order_success_data1 = Db::connect('database.db_zeelool')
-            ->table('sales_flat_order')
-            ->where($quote_where1)
+        $yestime_where[] = ['exp', Db::raw("DATE_FORMAT(o.created_at, '%Y-%m-%d') = '" . $yes_date . "'")];
+        $yestime_wheres[] = ['exp', Db::raw("DATE_FORMAT(p.created_at, '%Y-%m-%d') = '" . $yes_date . "'")];
+        $yesterday_order_success_data1 = Db::connect('database.db_zeelool')->table('sales_flat_order')
+            ->alias('o')
+            ->join('sales_flat_quote p', 'o.quote_id=p.entity_id')
+            ->where($yestime_wheres)
+            ->where('p.base_grand_total','>',0)
             ->where($yestime_where)
             ->where($order_where)
             ->where($order_success_where)
             ->count();
         dump($yesterday_order_success_data1);
-        //昨天购物车转化率data
-        $yesterday_shoppingcart_conversion_data     = @round(($yesterday_order_success_data1 / $yesterday_shoppingcart_total_data), 4) * 100;
-        dump($yesterday_shoppingcart_conversion_data);
     }
 }
