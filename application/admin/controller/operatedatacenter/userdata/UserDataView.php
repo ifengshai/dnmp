@@ -306,42 +306,54 @@ class UserDataView extends Backend
         if ($this->request->isAjax()) {
             $params = $this->request->param();
             $order_platform = $params['order_platform'] ? $params['order_platform'] : 1;
-            if ($params['time_str']) {
-                $createat = explode(' ', $params['time_str']);
-                $map_where['created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
-            } else{
-                $start = date('Y-m-d', strtotime('-6 day'));
-                $end   = date('Y-m-d 23:59:59');
-                $map_where['created_at'] = ['between', [$start,$end]];
-            }
-            if($order_platform == 2){
-                $web_model = Db::connect('database.db_voogueme');
-            }elseif($order_platform == 3){
-                $web_model = Db::connect('database.db_nihao');
+            $time_str = $params['time_str'];
+            $cache_data = Cache::get('Operatedatacenter_userdataview' . $order_platform . $time_str.md5(serialize('user_type_pie')));
+            if ($cache_data) {
+                $result = $cache_data;
             }else{
-                $web_model = Db::connect('database.db_zeelool');
+                if ($time_str) {
+                    $createat = explode(' ', $time_str);
+                    $map_where['created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
+                } else{
+                    $start = date('Y-m-d', strtotime('-6 day'));
+                    $end   = date('Y-m-d 23:59:59');
+                    $map_where['created_at'] = ['between', [$start,$end]];
+                }
+                if($order_platform == 2){
+                    $web_model = Db::connect('database.db_voogueme');
+                }elseif($order_platform == 3){
+                    $web_model = Db::connect('database.db_nihao');
+                }else{
+                    $web_model = Db::connect('database.db_zeelool');
+                }
+                $web_model->table('customer_entity')->query("set time_zone='+8:00'");
+                $data = array(
+                    array(
+                        'name'=>'普通用户',
+                        'value'=>$web_model->table('customer_entity')->where($map_where)->where('group_id',1)->count(),  //普通用户人数
+                    ),
+                    array(
+                        'name'=>'VIP用户',
+                        'value'=>$web_model->table('customer_entity')->where($map_where)->where('group_id',4)->count(),    //vip用户人数
+                    ),
+                    array(
+                        'name'=>'批发',
+                        'value'=>$web_model->table('customer_entity')->where($map_where)->where('group_id',2)->count(),  //批发用户人数
+                    ),
+                );
+                //总人数
+                $count = $web_model->table('customer_entity')->where($map_where)->count();
+                $result = array(
+                    'total'=>$count,
+                    'data'=>$data,
+                );
+                Cache::set('Operatedatacenter_userdataview'  . $order_platform .$time_str. md5(serialize('user_type_pie')), $result, 7200);
             }
-            $web_model->table('customer_entity')->query("set time_zone='+8:00'");
-            $data = array(
-                array(
-                    'name'=>'普通用户',
-                    'value'=>$web_model->table('customer_entity')->where($map_where)->where('group_id',1)->count(),  //普通用户人数
-                ),
-                array(
-                    'name'=>'VIP用户',
-                    'value'=>$web_model->table('customer_entity')->where($map_where)->where('group_id',4)->count(),    //vip用户人数
-                ),
-                array(
-                    'name'=>'批发',
-                    'value'=>$web_model->table('customer_entity')->where($map_where)->where('group_id',2)->count(),  //批发用户人数
-                ),
-            );
-            //总人数
-            $count = $web_model->table('customer_entity')->where($map_where)->count();
+
             $column = ['普通用户','VIP用户','批发'];
             $json['column'] = $column;
-            $json['columnData'] = $data;
-            $json['total'] = $count;
+            $json['columnData'] = $result['data'];
+            $json['total'] = $result['total'];
 
             return json(['code' => 1, 'data' => $json]);
         }
@@ -359,50 +371,62 @@ class UserDataView extends Backend
         if ($this->request->isAjax()) {
             $params = $this->request->param();
             $order_platform = $params['order_platform'] ? $params['order_platform'] : 1;
-            if ($params['time_str']) {
-                $createat = explode(' ', $params['time_str']);
-                $map_where['o.created_at'] =$order_where['created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
-            } else{
-                $start = date('Y-m-d', strtotime('-6 day'));
-                $end   = date('Y-m-d 23:59:59');
-                $map_where['o.created_at'] = ['between', [$start,$end]];
-            }
-            $map_where['o.status'] = $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-            if($order_platform == 2){
-                $model = $this->voogueme;
-            }elseif($order_platform == 3){
-                $model = $this->nihao;
+            $time_str = $params['time_str'];
+            $cache_data = Cache::get('Operatedatacenter_userdataview' . $order_platform . $time_str.md5(serialize('user_order_pie')));
+            if ($cache_data) {
+                $result = $cache_data;
             }else{
-                $model = $this->zeelool;
+                if ($time_str) {
+                    $createat = explode(' ', $time_str);
+                    $map_where['o.created_at'] =$order_where['created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
+                } else{
+                    $start = date('Y-m-d', strtotime('-6 day'));
+                    $end   = date('Y-m-d 23:59:59');
+                    $map_where['o.created_at'] = ['between', [$start,$end]];
+                }
+                $map_where['o.status'] = $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+                if($order_platform == 2){
+                    $model = $this->voogueme;
+                }elseif($order_platform == 3){
+                    $model = $this->nihao;
+                }else{
+                    $model = $this->zeelool;
+                }
+                $count = $model->where($order_where)->count();  //总订单
+                $order_amount = $model->where($order_where)->sum('base_grand_total'); //总订单金额
+                $count1 = $model->alias('o')->join('customer_entity c ','o.customer_id=c.entity_id','left')->where($map_where)->where('c.group_id',1)->count();  //普通用户人数
+                $count2 = $model->alias('o')->join('customer_entity c ','o.customer_id=c.entity_id','left')->where($map_where)->where('c.group_id',4)->count();    //vip用户人数
+                $count3 = $model->alias('o')->join('customer_entity c ','o.customer_id=c.entity_id','left')->where($map_where)->where('c.group_id',2)->count();  //批发用户人数
+                $count4 = $count-$count1-$count2-$count3;
+                $data = array(
+                    array(
+                        'name'=>'普通用户',
+                        'value'=>$count1
+                    ),
+                    array(
+                        'name'=>'VIP用户',
+                        'value'=>$count2
+                    ),
+                    array(
+                        'name'=>'游客',
+                        'value'=>$count4
+                    ),
+                    array(
+                        'name'=>'批发',
+                        'value'=>$count3
+                    ),
+                );
+                $result = array(
+                    'data'=>$data,
+                    'total'=>$order_amount,
+                );
+                Cache::set('Operatedatacenter_userdataview'  . $order_platform .$time_str. md5(serialize('user_order_pie')), $result, 7200);
             }
-            $count = $model->where($order_where)->count();  //总订单
-            $order_amount = $model->where($order_where)->sum('base_grand_total'); //总订单金额
-            $count1 = $model->alias('o')->join('customer_entity c ','o.customer_id=c.entity_id','left')->where($map_where)->where('c.group_id',1)->count();  //普通用户人数
-            $count2 = $model->alias('o')->join('customer_entity c ','o.customer_id=c.entity_id','left')->where($map_where)->where('c.group_id',4)->count();    //vip用户人数
-            $count3 = $model->alias('o')->join('customer_entity c ','o.customer_id=c.entity_id','left')->where($map_where)->where('c.group_id',2)->count();  //批发用户人数
-            $count4 = $count-$count1-$count2-$count3;
-            $data = array(
-                array(
-                    'name'=>'普通用户',
-                    'value'=>$count1
-                ),
-                array(
-                    'name'=>'VIP用户',
-                    'value'=>$count2
-                ),
-                array(
-                    'name'=>'游客',
-                    'value'=>$count4
-                ),
-                array(
-                    'name'=>'批发',
-                    'value'=>$count3
-                ),
-            );
+
             $column = ['普通用户','VIP用户','游客','批发'];
             $json['column'] = $column;
-            $json['columnData'] = $data;
-            $json['total'] = $order_amount;
+            $json['columnData'] = $result['data'];
+            $json['total'] = $result['total'];
 
             return json(['code' => 1, 'data' => $json]);
         }
