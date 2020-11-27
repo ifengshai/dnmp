@@ -173,8 +173,7 @@ class ZeeloolJp extends Backend
         }
         //查询订单详情
         $result = ZeeloolJpPrescriptionDetailHelper::get_one_by_entity_id($ids);
-        dump($result);die;
-
+       
         $this->assign('result', $result);
         return $this->view->fetch();
     }
