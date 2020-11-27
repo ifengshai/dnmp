@@ -926,7 +926,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         $('#is_new_version').val(data.is_new_version);
                         var shtml = '';
                         for (var i in data.sku_list) {
-                            shtml += '<option value="' + i +'+'+data.sku_list[i]+ '">' + i + '&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp' + data.sku_list[i] + '</option>';
+                            shtml += '<option value="' + i +'/'+data.sku_list[i]+ '">' + i + '&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp' + data.sku_list[i] + '</option>';
                         }
                         $('#c-order_sku').append(shtml);
                         $('.selectpicker ').selectpicker('refresh');
@@ -1498,7 +1498,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     //修改地址
                     changeOrderAddress();
                 }
-            })
+            }) 
+
 
             //点击事件 #todo::需判断仓库或者客服
             $(document).on('click', '.problem_type', function () {
@@ -2814,12 +2815,17 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     itemSelectpicker(2);
                 });
                 
-                //如果子单号order_item存在
-                if (Config.order_item) {
+                //如果子单号item_order_info存在
+                if (Config.item_order_info) {
+                    //var item_order_info = Config.item_order_info;
                     
-                    /*$('.selectpicker').selectpicker('val', oldnumber);//默认选中
-                    $('.selectpicker').selectpicker('refresh');*/
+                    /*$('#editcolor .selectpicker').selectpicker('val', oldnumber);//默认选中
+                    $('#editcolor .selectpicker').selectpicker('refresh');*/
+                    /*$.each(item_order_info, function(key,val){
+
+                    })*/
                 }
+
             },
         }
     };
@@ -3055,7 +3061,7 @@ function itemSelectpicker (type = 1,flag = null) {
             var item_order_sku = [];
             var item_order_sku_number = [];
             for (var i = item_order_sku_arr.length - 1; i >= 0; i--) {
-               $split = item_order_sku_arr[i].split("+");
+               $split = item_order_sku_arr[i].split("/");
                item_order_sku[i] = $split[0];
                item_order_sku_number[i] = $split[1];
             }

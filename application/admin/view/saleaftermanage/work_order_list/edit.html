@@ -429,7 +429,19 @@
         <div class="form-group-child">
             <label class="control-label col-xs-12 col-sm-2">{:__('order_sku')}：</label>
             <div class="col-xs-12 col-sm-8">
-                {:build_select('row[order_sku][]', $skus, $row.order_sku,['class'=>'form-control selectpicker item_order_selectpicker','multiple'=>'multiple'])}
+                <?php
+                    $sku = [];
+                    $sku_value = [];
+                    foreach ($order_item['sku_list'] as $key => $value) {
+                        $sku[] = $key.'/'.$value;
+                    }
+                    foreach ($order_item['select_number'] as $key => $value) {
+                        $kv = $key.'/'.$value;
+                        $kv_arr = array_keys($sku,$kv);
+                        $sku_value[] = $kv_arr[0];
+                    }
+                ?>
+                {:build_select('row[order_sku][]', $sku, [0],['class'=>'form-control selectpicker item_order_selectpicker','multiple'=>'multiple'])}
             </div>
         </div>
 
@@ -1100,7 +1112,16 @@
     </div>
     <!--修改地址 end-->
 
-    </div>
+    <!--子订单 start-->
+
+        <!-- 子单号折叠框 -->
+          <div class="form-group-child4" id="div_item_content" style="display:none;">
+            <hr style="border-top: 1px solid #000;margin-top: 15px;">
+                <section class="content" id="section_item_content">
+                </section>
+          </div>
+        <!-- 子单号折叠框-->
+    <!--子订单 end-->
 
     <input type='hidden' name="row[work_status]" class="status" value="1">
     <div class="form-group layer-footer">
