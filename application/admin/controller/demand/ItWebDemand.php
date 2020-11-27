@@ -1128,10 +1128,14 @@ class ItWebDemand extends Backend
             $updateValue['develop_finish_status'] = 4;
             if ($params['status'] == 1) {
                 $updateValue['web_remarks'] = $params['remarks'];
+                $updateValue['web_designer_group'] =2;
+
             } elseif ($params['status'] == 2) {
                 $updateValue['phper_remarks'] = $params['remarks'];
+                $updateValue['phper_group'] = 2;
             } else {
                 $updateValue['app_remarks'] = $params['remarks'];
+                $updateValue['app_group'] = 2;
             }
             $save = $this->model->where('id=' . $params['ids'])->update($updateValue);
             if ($save) {
