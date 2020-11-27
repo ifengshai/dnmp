@@ -186,4 +186,36 @@ class Test01 extends Backend
         }
         echo "ok";
     }
+
+    public function test99()
+    {
+        $yes_date = date("Y-m-d",strtotime("-1 day"));
+        $yestime_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $yes_date . "'")];
+        $yesterday_shoppingcart_total_data = Db::connect('database.db_zeelool')
+            ->table('sales_flat_quote')
+            ->where($yestime_where)
+            ->where('base_grand_total','>',0)
+            ->count();
+        dump($yesterday_shoppingcart_total_data);
+        $yesterday_shoppingcart_total_data1 = Db::connect('database.db_zeelool')
+            ->table('sales_flat_quote')
+            ->where($yestime_where)
+            ->where('base_grand_total','>',0)
+            ->column('entity_id');
+        dump($yesterday_shoppingcart_total_data1);
+        $quote_where1['quote_id'] = ['in',$yesterday_shoppingcart_total_data1];
+        $order_where['order_type'] = 1;
+        $order_success_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        $yes_date = date("Y-m-d",strtotime("-1 day"));
+        $yestime_where = [];
+        $yestime_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $yes_date . "'")];
+        $yesterday_order_success_data1 = Db::connect('database.db_zeelool')
+            ->table('sales_flat_order')
+            ->where($quote_where1)
+            ->where($yestime_where)
+            ->where($order_where)
+            ->where($order_success_where)
+            ->count();
+        dump($yesterday_order_success_data1);
+    }
 }
