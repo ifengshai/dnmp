@@ -202,7 +202,7 @@ class Test01 extends Backend
             ->where($yestime_where)
             ->where('base_grand_total','>',0)
             ->column('entity_id');
-        dump($yesterday_shoppingcart_total_data1);
+        // dump($yesterday_shoppingcart_total_data1);
         $quote_where1['quote_id'] = ['in',$yesterday_shoppingcart_total_data1];
         $order_where['order_type'] = 1;
         $order_success_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
@@ -217,5 +217,8 @@ class Test01 extends Backend
             ->where($order_success_where)
             ->count();
         dump($yesterday_order_success_data1);
+        //昨天购物车转化率data
+        $yesterday_shoppingcart_conversion_data     = @round(($yesterday_order_success_data1 / $yesterday_shoppingcart_total_data), 4) * 100;
+        dump($yesterday_shoppingcart_conversion_data);
     }
 }
