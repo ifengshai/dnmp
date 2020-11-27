@@ -104,14 +104,14 @@ class CoupnAnalytics extends Backend
                     ->where($andWhere)
                     ->count();
                 //应用订单数量占比
-                $list[$k]['use_order_num_rate'] = $whole_order != 0 ? round($list[$k]['use_order_num'] / $whole_order, 2) : 0;
+                $list[$k]['use_order_num_rate'] = $whole_order != 0 ? round($list[$k]['use_order_num'] / $whole_order, 4) * 100 .'%' : 0;
                 //应用订单金额
                 $list[$k]['use_order_total_price'] = $model->table('sales_flat_order')
                     ->where($map)
                     ->where($andWhere)
                     ->sum('base_grand_total');
                 //应用订单金额占比
-                $list[$k]['use_order_total_price_rate'] = $whole_order_price != 0 ? round($list[$k]['use_order_total_price'] / $whole_order_price, 2) : 0;
+                $list[$k]['use_order_total_price_rate'] = $whole_order_price != 0 ? round($list[$k]['use_order_total_price'] / $whole_order_price, 4) * 100 .'%' : 0;
             }
 
             $result = array("total" => $total, "rows" => $list);
