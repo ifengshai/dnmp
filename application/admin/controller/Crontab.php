@@ -3721,6 +3721,7 @@ class Crontab extends Backend
     {
         //求出平台
         $platform = $this->request->get('platform');
+        $platform = 1;
         if (!$platform) {
             return false;
         }
