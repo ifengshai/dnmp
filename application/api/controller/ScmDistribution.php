@@ -673,6 +673,7 @@ class ScmDistribution extends Scm
         $where = [
             'a.distribution_status'=>3,
             'b.index_name'=>['neq',''],
+            'a.order_prescription_type'=>['neq',3],
         ];
         if($start_time && $end_time){
             $where['a.created_at'] = ['between', [strtotime($start_time), strtotime($end_time)]];
@@ -681,32 +682,57 @@ class ScmDistribution extends Scm
         $offset = ($page - 1) * $page_size;
         $limit = $page_size;
 
-        //获取出库单列表数据
-        $list = $this->_new_order_item_process
+        //获取出库单列表数据【od右眼、os左眼分开查询再组装，order_prescription_type 处方类型，index_name 镜片类型，lens_name 镜片名称】
+        //od右镜片
+        $list_od = $this->_new_order_item_process
             ->alias('a')
             ->where($where)
-            ->field('count(*) as all_count,b.prescription_type,a.order_prescription_type,b.prescription_type,b.index_name,b.od_sph,b.os_sph,b.os_add,b.od_add,b.od_cyl,b.os_cyl,b.od_axis,b.os_axis')
+            ->field('count(*) as all_count,a.order_prescription_type,b.index_name,b.od_sph,b.od_cyl,c.lens_name')
             ->join(['fa_order_item_option' => 'b'], 'a.option_id=b.id')
-            ->group('b.prescription_type,b.index_type,b.index_name')
+            ->join(['fa_lens_data' => 'c'], 'b.lens_number=c.lens_number')
+            ->group('a.order_prescription_type,b.lens_number,b.index_name,b.od_sph,b.od_cyl')
             ->limit($offset, $limit)
             ->select();
-        $list = collection($list)->toArray();
+        $list_od = collection($list_od)->toArray();
         //订单处方分类 0待处理  1 仅镜架 2 现货处方镜 3 定制处方镜 4 其他
         $order_prescription_type = [ 0=>'待处理',1=>'仅镜架',2=>'现货处方镜',3=>'定制处方镜',4=>'其他' ];
-        foreach($list as $key=>$value){
-            $list[$key]['order_prescription_type'] = $order_prescription_type[$value['order_prescription_type']];
-            //左右眼分别为一个镜片
-            $temp_os_od_add = '';
-            empty($value['os_add']) && $temp_os_od_add = $value['od_add'].' '.$value['od_add'];
-            empty($value['od_add']) && $temp_os_od_add = $value['os_add'].' '.$value['os_add'];
-            if (!empty($value['os_add']) && !empty($value['od_add'])) $temp_os_od_add = $value['od_add'].' '.$value['os_add'];
-            $list[$key]['light'] = $value['od_sph'].' '.$value['os_sph'].' '.$temp_os_od_add.' '.$value['os_sph'];
+        foreach($list_od as $key=>$value){
+            $list_od[$key]['order_prescription_type'] = $order_prescription_type[$value['order_prescription_type']];
+            $list_od[$key]['light'] = 'SPH：'.$value['od_sph'].' CYL:'.$value['od_cyl'];
 
-            unset($list[$key]['od_sph']);
-            unset($list[$key]['os_sph']);
-            unset($list[$key]['os_add']);
-            unset($list[$key]['od_add']);
+            unset($list_od[$key]['od_sph']);
+            unset($list_od[$key]['od_cyl']);
         }
+        //os左镜片
+        $list_os = $this->_new_order_item_process
+            ->alias('a')
+            ->where($where)
+            ->field('count(*) as all_count,a.order_prescription_type,b.index_name,b.os_sph,b.os_cyl,c.lens_name')
+            ->join(['fa_order_item_option' => 'b'], 'a.option_id=b.id')
+            ->join(['fa_lens_data' => 'c'], 'b.lens_number=c.lens_number')
+            ->group('a.order_prescription_type,b.lens_number,b.index_name,b.os_sph,b.os_cyl')
+            ->limit($offset, $limit)
+            ->select();
+        $list_os = collection($list_os)->toArray();
+        //订单处方分类 0待处理  1 仅镜架 2 现货处方镜 3 定制处方镜 4 其他
+        $order_prescription_type = [ 0=>'待处理',1=>'仅镜架',2=>'现货处方镜',3=>'定制处方镜',4=>'其他' ];
+        foreach($list_os as $key=>$value){
+            $list_os[$key]['order_prescription_type'] = $order_prescription_type[$value['order_prescription_type']];
+            $list_os[$key]['light'] = 'SPH：'.$value['os_sph'].' CYL:'.$value['os_cyl'];
+
+            unset($list_os[$key]['os_sph']);
+            unset($list_os[$key]['os_cyl']);
+        }
+        //左右镜片数组取交集求all_count和，再合并
+        foreach($list_os as $key=>$value){
+            foreach($list_od as $k=>$v){
+                if ($value['light'] == $v['light']){
+                    $list_od[$k['all_count']] = $value['all_count'] + $v['all_count'];
+                    unset($list_os[$key]);
+                }
+            }
+        }
+        $list = array_merge($list_od,$list_os);
 
         $this->success('', ['list' => $list],200);
     }
@@ -1061,17 +1087,17 @@ class ScmDistribution extends Scm
 
         $info['order_id'] = $item_process_info['order_id'];//合单确认放入合单架提交 接口返回自带主订单号
 
+        if ($total_qty_ordered > $count+1){
+            //不是最后一个子单
+            $num = '';
+            $next = 1;//是否有下一个子单 1有，0没有
+        } else {
+            //最后一个子单
+            $num = '最后一个';
+            $next = 0;//是否有下一个子单 1有，0没有
+        }
         if($order_process_info['store_house_id']){
             //存在合单库位ID，获取合单库位号存入
-            if ($total_qty_ordered > $count+1){
-                //不是最后一个子单
-                $num = '';
-                $next = 1;//是否有下一个子单 1有，0没有
-            } else {
-                //最后一个子单
-                $num = '最后一个';
-                $next = 0;//是否有下一个子单 1有，0没有
-            }
             $info['next'] = $next;
             //更新子单表
             $result = false;
@@ -1081,7 +1107,7 @@ class ScmDistribution extends Scm
                 DistributionLog::record($this->auth,$item_process_info['id'],7,'子单号：'.$item_order_number.'作为主单号'.$order_process_info['increment_id'].'的'.$num.'子单合单完成');
                 if (!$next){
                     //最后一个子单且合单完成，更新主单、子单状态为合单完成
-                    $this->_new_order_item_process->allowField(true)->isUpdate(true, ['item_order_number'=>$item_order_number])->save(['distribution_status'=>9]);
+                    $this->_new_order_item_process->allowField(true)->isUpdate(true, ['order_id'=>$item_process_info['order_id']])->save(['distribution_status'=>9]);
                     $this->_new_order_process->allowField(true)->isUpdate(true, ['order_id'=>$item_process_info['order_id']])->save(['combine_status'=>1,'combine_time'=>time()]);
                 }
 
@@ -1120,18 +1146,9 @@ class ScmDistribution extends Scm
             $this->error($e->getMessage(), [], 444);
         }
         if ($return !== false) {
-            if ($total_qty_ordered == 1){
-                //只有一个子单
-                $num = '';
-                $next = 0;//是否有下一个子单 1有，0没有
-            } else {
-                //多个子单的首个子单
-                $num = '首个';
-                $next = 1;//是否有下一个子单 1有，0没有
-            }
-            if (!$next){
+            if (0 == $next){
                 //只有一个子单且合单完成，更新主单、子单状态为合单完成
-                $this->_new_order_item_process->allowField(true)->isUpdate(true, ['item_order_number'=>$item_order_number])->save(['distribution_status'=>9]);
+                $this->_new_order_item_process->allowField(true)->isUpdate(true, ['order_id'=>$item_process_info['order_id']])->save(['distribution_status'=>9]);
                 $this->_new_order_process->allowField(true)->isUpdate(true, ['order_id'=>$item_process_info['order_id']])->save(['combine_status'=>1,'combine_time'=>time()]);
             }
             $info['next'] = $next;
@@ -1254,24 +1271,24 @@ class ScmDistribution extends Scm
 
         $where = [];
         $where['a.combine_status'] = 1;//合单完成状态
+        $where['a.store_house_id'] = ['>', 0];
         $offset = ($page - 1) * $page_size;
         $limit = $page_size;
 
         if ($type == 1){
             //合单待取出列表，主单为合单完成状态且子单都已合单
             if($query){
-                $where_temp = [];
-                $where_temp['sku|coding'] = ['like', '%' . $query . '%'];
                 //线上不允许跨库联合查询，拆分，由于字段值明显差异，可以分别模糊匹配
-                $store_house_id_item = $this->_stock_house->field('id')->where($where_temp)->select();
+                $store_house_id_item = $this->_stock_house->field('id')->where(['coding'=> ['like', '%' . $query . '%']])->select();
                 $store_house_id_item = collection($store_house_id_item)->toArray();
                 $store_house_ids = array_column($store_house_id_item, 'id');
-                if($store_house_ids) $where['store_house_id'] = ['in', $store_house_ids];
-
-                $sku_item = $this->_new_order_item_process->field('id')->where($where_temp)->select();
+                if($store_house_ids) {
+                    $where['a.store_house_id'] = ['in', $store_house_ids];
+                }
+                $sku_item = $this->_new_order_item_process->field('id')->where(['sku'=> ['like', '%' . $query . '%']])->select();
                 $sku_item = collection($sku_item)->toArray();
                 $sku = array_column($sku_item, 'id');
-                if($sku) $where['sku'] = ['in', $sku];
+                if($sku) $where['b.sku'] = ['in', $sku];
 
             }
             if($start_time && $end_time){
@@ -1289,18 +1306,16 @@ class ScmDistribution extends Scm
         } else {
             //异常待处理列表
             if($query){
-                $where_temp = [];
-                $where_temp['item_order_number|coding'] = ['like', '%' . $query . '%'];
                 //线上不允许跨库联合查询，拆分，由于字段值明显差异，可以分别模糊匹配
-                $store_house_id_item = $this->_stock_house->field('id')->where($where_temp)->select();
+                $store_house_id_item = $this->_stock_house->field('id')->where(['coding'=> ['like', '%' . $query . '%']])->select();
                 $store_house_id_item = collection($store_house_id_item)->toArray();
                 $store_house_ids = array_column($store_house_id_item, 'id');
-                if($store_house_ids) $where['store_house_id'] = ['in', $store_house_ids];
+                if($store_house_ids) $where['a.store_house_id'] = ['in', $store_house_ids];
 
-                $item_order_number_item = $this->_new_order_item_process->field('item_order_number')->where($where_temp)->select();
+                $item_order_number_item = $this->_new_order_item_process->field('item_order_number')->where(['item_order_number'=> ['like', '%' . $query . '%']])->select();
                 $item_order_number_item = collection($item_order_number_item)->toArray();
                 $item_order_number = array_column($item_order_number_item, 'item_order_number');
-                if($item_order_number) $where['item_order_number'] = ['in', $item_order_number];
+                if($item_order_number) $where['b.item_order_number'] = ['in', $item_order_number];
 
             }
             $where['b.abnormal_house_id'] = ['>',0];
