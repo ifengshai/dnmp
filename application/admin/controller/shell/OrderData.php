@@ -186,6 +186,7 @@ class OrderData extends Backend
                                     $params = [];
                                     $params['base_grand_total'] = $v['base_grand_total'];
                                     $params['total_item_count'] = $v['total_qty_ordered'];
+                                    $params['increment_id'] = $v['increment_id'];
                                     $params['order_type'] = $v['order_type'];
                                     if ($v['status']) {
                                         $params['status'] = $v['status'];
