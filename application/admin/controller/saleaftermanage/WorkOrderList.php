@@ -380,7 +380,8 @@ class WorkOrderList extends Backend
                         $num = $params['change_frame']['change_number'];
                         if (count(array_filter($skus)) < 1) throw new Exception("SKU不能为空");
                         //判断SKU是否有库存
-                        $this->skuIsStock($skus, $params['work_platform'], $num);
+                        $back_data = $this->skuIsStock($skus, $params['work_platform'], $num);
+                        !$back_data['result'] && $this->error($back_data['msg']);
                     }
                     //判断赠品是否有库存
                     //判断补发是否有库存
@@ -396,7 +397,8 @@ class WorkOrderList extends Backend
                         foreach ($originalSkus as $key => $originalSku) {
                             if (!$originalSku) exception('sku不能为空');
                             if (!$originalNums[$key]) exception('数量必须大于0');
-                            $this->skuIsStock([$originalSku], $params['work_platform'], [$originalNums[$key]]);
+                            $back_data = $this->skuIsStock([$originalSku], $params['work_platform'], [$originalNums[$key]]);
+                            !$back_data['result'] && $this->error($back_data['msg']);
                         }
                     }
                     //所有的成员组
@@ -1140,7 +1142,8 @@ class WorkOrderList extends Backend
 
                         //校验库存
                         if($original_sku){
-                            $this->skuIsStock(array_keys($original_sku), $params['work_platform'], array_values($original_sku));
+                            $back_data = $this->skuIsStock(array_keys($original_sku), $params['work_platform'], array_values($original_sku));
+                            !$back_data['result'] && $this->error($back_data['msg']);
                         }
                     }
 
@@ -1262,7 +1265,8 @@ class WorkOrderList extends Backend
                         //更改镜框校验库存
                         if(in_array(19, $item['item_choose'])){
                             !$item['change_frame']['change_sku'] && $this->error("子订单：{$key} 的新sku不能为空");
-                            $this->skuIsStock([$item['change_frame']['change_sku']], $params['work_platform'], [1]);
+                            $back_data = $this->skuIsStock([$item['change_frame']['change_sku']], $params['work_platform'], [1]);
+                            !$back_data['result'] && $this->error($back_data['msg']);
                         }
                     }
                 }
@@ -1283,7 +1287,6 @@ class WorkOrderList extends Backend
                 }
                 $params['recept_person_id'] = $params['recept_person_id'] ?: $admin_id;
 
-                $result = false;
                 Db::startTrans();
                 try {
                     //跟单处理
@@ -1385,9 +1388,7 @@ class WorkOrderList extends Backend
                     }
 
                     //非草稿状态进入审核阶段
-                    if (1 != $params['work_status']) {
-                        $this->model->checkWork($work_id);
-                    }
+                    1 != $params['work_status'] && $this->model->checkWork($work_id);
 
                     Db::commit();
                 } catch (ValidateException $e) {
@@ -1400,11 +1401,7 @@ class WorkOrderList extends Backend
                     Db::rollback();
                     $this->error($e->getMessage());
                 }
-                if ($result !== false) {
-                    $this->success();
-                } else {
-                    $this->error(__('No rows were inserted'));
-                }
+                $this->success();
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
@@ -1627,12 +1624,12 @@ class WorkOrderList extends Backend
      * @param array $skus sku列表
      * @param int $siteType 站点类型
      * @param array $num 站点类型
-     * @return boolean
+     * @return array
      */
     protected function skuIsStock($skus = [], $siteType, $num = [])
     {
         if (!array_filter($skus)) {
-            throw new Exception("SKU不能为空");
+            return ['result'=>false,'msg'=>'SKU不能为空'];
         }
 
         $itemPlatFormSku = new \app\admin\model\itemmanage\ItemPlatformSku();
@@ -1660,10 +1657,10 @@ class WorkOrderList extends Backend
             if ($stock < $num[$k]) {
                 // $params = ['sku'=>$sku,'siteType'=>$siteType,'stock'=>$stock,'num'=>$num[$k]];
                 // file_put_contents('/www/wwwroot/mojing/runtime/log/stock.txt',json_encode($params),FILE_APPEND);
-                throw new Exception($sku . '库存不足！！');
+                return ['result'=>false,'msg'=>$sku . '库存不足！！'];
             }
         }
-        return true;
+        return ['result'=>true,'msg'=>''];
     }
 
     /**
@@ -1801,7 +1798,8 @@ class WorkOrderList extends Backend
 
                         //校验库存
                         if($original_sku){
-                            $this->skuIsStock(array_keys($original_sku), $params['work_platform'], array_values($original_sku));
+                            $back_data = $this->skuIsStock(array_keys($original_sku), $params['work_platform'], array_values($original_sku));
+                            !$back_data['result'] && $this->error($back_data['msg']);
                         }
                     }
 
@@ -1924,7 +1922,8 @@ class WorkOrderList extends Backend
                         //更改镜框校验库存
                         if(in_array(19, $item['item_choose'])){
                             !$item['change_frame']['change_sku'] && $this->error("子订单：{$key} 的新sku不能为空");
-                            $this->skuIsStock([$item['change_frame']['change_sku']], $params['work_platform'], [1]);
+                            $back_data = $this->skuIsStock([$item['change_frame']['change_sku']], $params['work_platform'], [1]);
+                            !$back_data['result'] && $this->error($back_data['msg']);
                         }
                     }
                 }
@@ -1945,7 +1944,6 @@ class WorkOrderList extends Backend
                 }
                 $params['recept_person_id'] = $params['recept_person_id'] ?: $admin_id;
 
-                $result = false;
                 Db::startTrans();
                 try {
                     //更新之前清除部分字段
@@ -2012,9 +2010,7 @@ class WorkOrderList extends Backend
                     }
 
                     //非草稿状态进入审核阶段
-                    if (1 != $params['work_status']) {
-                        $this->model->checkWork($row->id);
-                    }
+                    1 != $params['work_status'] && $this->model->checkWork($row->id);
 
                     Db::commit();
                 } catch (ValidateException $e) {
@@ -2027,11 +2023,7 @@ class WorkOrderList extends Backend
                     Db::rollback();
                     $this->error($e->getMessage());
                 }
-                if ($result !== false) {
-                    $this->success();
-                } else {
-                    $this->error(__('No rows were inserted'));
-                }
+                $this->success();
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
