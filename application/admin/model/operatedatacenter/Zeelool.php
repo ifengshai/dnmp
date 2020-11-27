@@ -305,7 +305,7 @@ class Zeelool extends Model
             ->select();
         $again_buy_num2 = 0;
         foreach ($again_buy_data2 as $v){
-            dump($v);exit;
+            dump($v['customer_id']);exit;
             //查询时间段内是否进行购买行为
             $order_where_arr['customer_id'] = $v['customer_id'];
             $is_buy = $order_model->where($order_where)->where($order_where_arr)->where($map)->value('entity_id');
