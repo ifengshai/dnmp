@@ -3721,7 +3721,6 @@ class Crontab extends Backend
     {
         //求出平台
         $platform = $this->request->get('platform');
-        $platform = 1;
         if (!$platform) {
             return false;
         }
@@ -3851,15 +3850,6 @@ class Crontab extends Backend
         $lastyear_shoppingcart_total_data1 = $model->table('sales_flat_quote')->where($lastyear_where)->where($quote_where)->column('entity_id');
         //总共购物车总数的所有ids
         $total_shoppingcart_total_data1 = $model->table('sales_flat_quote')->where($quote_where)->column('entity_id');
-        dump($yesterday_shoppingcart_total_data1);
-        echo '<br>';
-        dump($pastsevenday_shoppingcart_total_data1);
-        echo '<br>';
-        dump($pastthirtyday_shoppingcart_total_data1);
-        echo '<br>';
-        dump($thismonth_shoppingcart_total_data1);
-        echo '<br>';
-
 
         //昨天支付成功数 从新增购物车中成功支付数
         $quote_where1['quote_id'] = ['in',$yesterday_shoppingcart_total_data1];
@@ -3912,24 +3902,6 @@ class Crontab extends Backend
         $quote_where8['quote_id'] = ['in',$total_shoppingcart_total_data1];
         $total_order_success_data1 = $model->table('sales_flat_order')->where($quote_where8)->where($order_where)->where($order_success_where)->count();
         //2020-11-25 更换仪表盘页面新增购物车转化率(%)的计算方法 end
-
-        dump($yesterday_order_success_data1);
-        echo '<br>';
-        dump($pastsevenday_order_success_data1);
-        echo '<br>';
-        dump($pastthirtyday_order_success_data1);
-        echo '<br>';
-        dump($thismonth_order_success_data1);
-        echo '<br>';
-        dump($yesterday_shoppingcart_total_data);
-        echo '<br>';
-        dump($pastsevenday_shoppingcart_total_data);
-        echo '<br>';
-        dump($pastthirtyday_shoppingcart_total_data);
-        echo '<br>';
-        dump($thismonth_shoppingcart_total_data);
-        echo '<br>';
-        die;
 
         //昨天购物车转化率data
         $yesterday_shoppingcart_conversion_data     = @round(($yesterday_order_success_data1 / $yesterday_shoppingcart_total_data), 4) * 100;
@@ -4000,7 +3972,6 @@ class Crontab extends Backend
         $updateData['thisyear_shoppingcart_newconversion']       = $thisyear_shoppingcart_newconversion_data ?? 0;
         $updateData['lastyear_shoppingcart_newconversion']       = $lastyear_shoppingcart_newconversion_data ?? 0;
         $updateData['total_shoppingcart_newconversion']          = $total_shoppingcart_newconversion_data ?? 0;
-        dump($updateData);die;
         //查找是否存在的记录
         $result = Db::name('operation_analysis')->where(['order_platform' => $platform])->field('id,order_platform')->find();
         if (!$result) {
