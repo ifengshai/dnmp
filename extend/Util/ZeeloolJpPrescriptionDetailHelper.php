@@ -171,7 +171,6 @@ class ZeeloolJpPrescriptionDetailHelper
 			// dump($final_params);      
 
 			$items[$item_key]['coatiing_name'] = $final_params['coatiing_name'];
-			$items[$item_key]['index_type'] = $final_params['index_type'];
 			$items[$item_key]['prescription_type'] = $final_params['prescription_type'];
 
 			$items[$item_key]['frame_price'] = $final_params['frame_price'] ? $final_params['frame_price'] : 0;
