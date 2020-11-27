@@ -278,7 +278,7 @@ class Zeelool extends Model
         return $again_num;
     }
     //获取某一段时间内的复购用户数 new
-    public function get_again_user($createat){
+    public function get_again_user($createat = ''){
         $map_where['created_at'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
         $order_where['created_at'] = ['lt',$createat[0]];
 
