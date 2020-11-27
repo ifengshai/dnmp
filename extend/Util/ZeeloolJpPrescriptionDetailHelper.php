@@ -136,14 +136,6 @@ class ZeeloolJpPrescriptionDetailHelper
 			$final_params['index_price'] = $product_options['info_buyRequest']['tmplens']['index_price'];
 			$final_params['coatiing_price'] = $product_options['info_buyRequest']['tmplens']['coatiing_price'];
 			$final_params['index_color'] = $product_options['info_buyRequest']['tmplens']['index_color'];
-
-			if ($final_params['index_color']) {
-				$items[$item_key]['index_type'] = $final_params['index_type'] . '-' .  $final_params['index_color'];
-			} else {
-				$items[$item_key]['index_type'] = $final_params['index_type'];
-			}
-
-
 			$items[$item_key]['frame_regural_price'] = $final_params['frame_regural_price'] = $product_options['info_buyRequest']['tmplens']['frame_regural_price'];
 			$items[$item_key]['is_special_price'] = $final_params['is_special_price'] = $product_options['info_buyRequest']['tmplens']['is_special_price'];
 			$items[$item_key]['index_price_old'] = $final_params['index_price_old'] = $product_options['info_buyRequest']['tmplens']['index_price_old'];
@@ -159,6 +151,13 @@ class ZeeloolJpPrescriptionDetailHelper
 			$items[$item_key]['index_type'] = $final_params['index_type'] = $product_options['info_buyRequest']['tmplens']['index_type'];
 			$items[$item_key]['coating_id'] = $final_params['coating_id'] = $product_options['info_buyRequest']['tmplens']['coating_id'];
 			$items[$item_key]['coatiing_name'] = $final_params['coatiing_name'] = $product_options['info_buyRequest']['tmplens']['coatiing_name'];
+
+			if ($final_params['index_color']) {
+				$items[$item_key]['index_type'] = $final_params['index_type'] . '-' .  $final_params['index_color'];
+			} else {
+				$items[$item_key]['index_type'] = $final_params['index_type'];
+			}
+			
 			// dump($prescription_params);
 			$prescription_params = explode("&", $prescription_params);
 			$lens_params = array();
