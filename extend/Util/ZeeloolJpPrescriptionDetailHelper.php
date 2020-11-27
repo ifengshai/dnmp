@@ -151,13 +151,6 @@ class ZeeloolJpPrescriptionDetailHelper
 			$items[$item_key]['index_type'] = $final_params['index_type'] = $product_options['info_buyRequest']['tmplens']['index_type'];
 			$items[$item_key]['coating_id'] = $final_params['coating_id'] = $product_options['info_buyRequest']['tmplens']['coating_id'];
 			$items[$item_key]['coatiing_name'] = $final_params['coatiing_name'] = $product_options['info_buyRequest']['tmplens']['coatiing_name'];
-
-			if ($final_params['index_color']) {
-				$items[$item_key]['index_type'] = $final_params['index_type'] . '-' .  $final_params['index_color'];
-			} else {
-				$items[$item_key]['index_type'] = $final_params['index_type'];
-			}
-			
 			// dump($prescription_params);
 			$prescription_params = explode("&", $prescription_params);
 			$lens_params = array();
@@ -237,6 +230,12 @@ class ZeeloolJpPrescriptionDetailHelper
 			//添加上订单来源
 			if (isset($item_value['store_id'])) {
 				$items[$item_key]['store_id'] = $item_value['store_id'];
+			}
+
+			if ($final_params['index_color']) {
+				$items[$item_key]['index_type'] = $final_params['index_type'] . '-' .  $final_params['index_color'];
+			} else {
+				$items[$item_key]['index_type'] = $final_params['index_type'];
 			}
 		}
 
