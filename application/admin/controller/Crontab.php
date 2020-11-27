@@ -3832,7 +3832,9 @@ class Crontab extends Backend
 
         //2020-11-25 更换仪表盘页面新增购物车转化率(%)的计算方法 start
         //昨天支付成功数 从新增购物车中成功支付数
+        $order_where = [];
         $order_where['o.order_type'] = 1;
+        $order_success_where = [];
         $order_success_where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
         $yes_date = date("Y-m-d", strtotime("-1 day"));
         $yestime_where = [];
@@ -3847,9 +3849,11 @@ class Crontab extends Backend
             ->where($order_where)
             ->where($order_success_where)
             ->count();
+
         //过去7天从新增购物车中成功支付数
         $seven_start = date("Y-m-d", strtotime("-7 day"));
         $seven_end = date("Y-m-d 23:59:59", strtotime("-1 day"));
+        $sev_where = [];
         $sev_where['o.created_at'] = $sev_where1['updated_at'] = ['between', [$seven_start, $seven_end]];
         $sev_wheres['p.created_at'] = $sev_where1['updated_at'] = ['between', [$seven_start, $seven_end]];
         $pastsevenday_order_success_data1 = $model->table('sales_flat_order')
@@ -3861,9 +3865,11 @@ class Crontab extends Backend
             ->where($order_where)
             ->where($order_success_where)
             ->count();
+
         //过去30天从新增购物车中成功支付数
         $thirty_start = date("Y-m-d", strtotime("-30 day"));
         $thirty_end = date("Y-m-d 23:59:59", strtotime("-1 day"));
+        $thirty_where = [];
         $thirty_where['o.created_at'] = $thirty_where1['updated_at'] = ['between', [$thirty_start, $thirty_end]];
         $thirty_wheres['p.created_at'] = $thirty_where1['updated_at'] = ['between', [$thirty_start, $thirty_end]];
         $pastthirtyday_order_success_data1 = $model->table('sales_flat_order')
@@ -3878,6 +3884,7 @@ class Crontab extends Backend
         //当月从新增购物车中成功支付数
         $thismonth_start = date('Y-m-01', strtotime($today));
         $thismonth_end =  $today;
+        $thismonth_where = [];
         $thismonth_where['o.created_at'] = ['between', [$thismonth_start, $thismonth_end]];
         $thismonth_wheres['p.created_at'] = ['between', [$thismonth_start, $thismonth_end]];
         $thismonth_where1['updated_at'] = ['between', [$thismonth_start, $thismonth_end]];
@@ -3893,6 +3900,7 @@ class Crontab extends Backend
         //上月从新增购物车中成功支付数
         $lastmonth_start = date('Y-m-01', strtotime("$today -1 month"));
         $lastmonth_end = date('Y-m-t 23:59:59', strtotime("$today -1 month"));
+        $lastmonth_where = [];
         $lastmonth_where['o.created_at'] = $lastmonth_where1['updated_at'] = ['between', [$lastmonth_start, $lastmonth_end]];
         $lastmonth_wheres['p.created_at'] = $lastmonth_where1['updated_at'] = ['between', [$lastmonth_start, $lastmonth_end]];
         $lastmonth_order_success_data1 = $model->table('sales_flat_order')
@@ -3907,6 +3915,7 @@ class Crontab extends Backend
         //今年从新增购物车中成功支付数
         $thisyear_start = date("Y", time()) . "-1" . "-1"; //本年开始
         $thisyear_end = $today;
+        $thisyear_where = [];
         $thisyear_where['o.created_at'] = $thisyear_where1['updated_at'] = ['between', [$thisyear_start, $thisyear_end]];
         $thisyear_wheres['p.created_at'] = $thisyear_where1['updated_at'] = ['between', [$thisyear_start, $thisyear_end]];
         $thisyear_order_success_data1 = $model->table('sales_flat_order')
@@ -3921,6 +3930,7 @@ class Crontab extends Backend
         //上年从新增购物车中成功支付数
         $lastyear_start = date('Y-01-01 00:00:00', strtotime('last year'));
         $lastyear_end = date('Y-12-31 23:59:59', strtotime('last year'));
+        $lastyear_where = [];
         $lastyear_where['o.created_at'] = $lastyear_where1['updated_at'] = ['between', [$lastyear_start, $lastyear_end]];
         $lastyear_wheres['p.created_at'] = $lastyear_where1['updated_at'] = ['between', [$lastyear_start, $lastyear_end]];
         $lastyear_order_success_data1 = $model->table('sales_flat_order')
