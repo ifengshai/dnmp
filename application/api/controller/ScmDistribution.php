@@ -666,10 +666,8 @@ class ScmDistribution extends Scm
         $end_time = $this->request->request('end_time');
         $page = $this->request->request('page');
         $page_size = $this->request->request('page_size');
-
         empty($page) && $this->error(__('Page can not be empty'), [], 403);
         empty($page_size) && $this->error(__('Page size can not be empty'), [], 403);
-
         $where = [
             'a.distribution_status'=>3,
             'b.index_name'=>['neq',''],
@@ -678,7 +676,6 @@ class ScmDistribution extends Scm
         if($start_time && $end_time){
             $where['a.created_at'] = ['between', [strtotime($start_time), strtotime($end_time)]];
         }
-
         $offset = ($page - 1) * $page_size;
         $limit = $page_size;
 
@@ -703,6 +700,7 @@ class ScmDistribution extends Scm
             unset($list_od[$key]['od_sph']);
             unset($list_od[$key]['od_cyl']);
         }
+        
         //os左镜片
         $list_os = $this->_new_order_item_process
             ->alias('a')
@@ -723,18 +721,18 @@ class ScmDistribution extends Scm
             unset($list_os[$key]['os_sph']);
             unset($list_os[$key]['os_cyl']);
         }
+        
         //左右镜片数组取交集求all_count和，再合并
         foreach($list_os as $key=>$value){
             foreach($list_od as $k=>$v){
                 if ($value['light'] == $v['light']){
-                    $list_od[$k['all_count']] = $value['all_count'] + $v['all_count'];
+                    $list_od[$k]['all_count'] = $value['all_count'] + $v['all_count'];
                     unset($list_os[$key]);
                 }
             }
         }
         $list = array_merge($list_od,$list_os);
         $list = array_values($list);
-
         $this->success('', ['list' => $list],200);
     }
 
