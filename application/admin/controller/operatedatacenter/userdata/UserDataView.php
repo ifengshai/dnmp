@@ -68,7 +68,7 @@ class UserDataView extends Backend
             }
         }
         //默认进入页面是z站的数据
-        $arr = Cache::get('Operatedatacenter_userdata' . 1 . md5(serialize('index')));
+        $arr = Cache::get('Operatedatacenter_userdataview' . 1 . md5(serialize('index')));
         if ($arr) {
             $this->view->assign($arr);
         }else{
@@ -80,7 +80,7 @@ class UserDataView extends Backend
             //复购用户数
             $again_user_num = $this->zeeloolOperate->getAgainUser($time_arr, 0);
             $data = compact(  'active_user_num', 'register_user_num', 'again_user_num',  'magentoplatformarr');
-            Cache::set('Operatedatacenter_userdata' . 1 . md5(serialize('index')), $data, 7200);
+            Cache::set('Operatedatacenter_userdataview' . 1 . md5(serialize('index')), $data, 7200);
             $this->view->assign($data);
         }
         return $this->view->fetch();
@@ -104,26 +104,31 @@ class UserDataView extends Backend
             $time_str = $params['time_str'];
             $time_str2 = $params['time_str2'];
 
-            switch ($order_platform) {
-                case 1:
-                    $model = $this->zeeloolOperate;
-                    break;
-                case 2:
-                    $model = $this->vooguemeOperate;
-                    break;
-                case 3:
-                    $model = $this->nihaoOperate;
-                    break;
+            $arr = Cache::get('Operatedatacenter_userdataview' . $order_platform .$time_str.$time_str2. md5(serialize('index')));
+            if ($arr) {
+                $data = $arr;
+            }else{
+                switch ($order_platform) {
+                    case 1:
+                        $model = $this->zeeloolOperate;
+                        break;
+                    case 2:
+                        $model = $this->vooguemeOperate;
+                        break;
+                    case 3:
+                        $model = $this->nihaoOperate;
+                        break;
+                }
+                //活跃用户数
+                $active_user_num = $model->getActiveUser($time_str,$time_str2);
+                //注册用户数
+                $register_user_num = $model->getRegisterUser($time_str,$time_str2);
+                //复购用户数
+                $again_user_num = $model->getAgainUser($time_str,$time_str2);
+
+                $data = compact('active_user_num', 'register_user_num', 'again_user_num');
+                Cache::set('Operatedatacenter_userdataview'  . $order_platform .$time_str.$time_str2. md5(serialize('index')), $data, 7200);
             }
-
-            //活跃用户数
-            $active_user_num = $model->getActiveUser($time_str,$time_str2);
-            //注册用户数
-            $register_user_num = $model->getRegisterUser($time_str,$time_str2);
-            //复购用户数
-            $again_user_num = $model->getAgainUser($time_str,$time_str2);
-
-            $data = compact('active_user_num', 'register_user_num', 'again_user_num');
             $this->success('', '', $data);
         }
     }
@@ -136,32 +141,37 @@ class UserDataView extends Backend
         if ($this->request->isAjax()) {
             $params = $this->request->param();
             $order_platform = $params['order_platform'];
-            switch ($order_platform) {
-                case 1:
-                    $model = $this->zeeloolOperate;
-                    break;
-                case 2:
-                    $model = $this->vooguemeOperate;
-                    break;
-                case 3:
-                    $model = $this->nihaoOperate;
-                    break;
-            }
             $time_str = $params['time_str'];
-
-            if ($order_platform) {
-                $where['site'] = $order_platform;
+            $arr = Cache::get('Operatedatacenter_userdataview' . $order_platform . $time_str.md5(serialize('active_user_trend')));
+            if ($arr) {
+                $date_arr = $arr;
+            }else{
+                switch ($order_platform) {
+                    case 1:
+                        $model = $this->zeeloolOperate;
+                        break;
+                    case 2:
+                        $model = $this->vooguemeOperate;
+                        break;
+                    case 3:
+                        $model = $this->nihaoOperate;
+                        break;
+                }
+                if ($order_platform) {
+                    $where['site'] = $order_platform;
+                }
+                if ($time_str) {
+                    $createat = explode(' ', $time_str);
+                    $where['day_date'] = ['between', [$createat[0], $createat[3]]];
+                } else {
+                    $start = date('Y-m-d', strtotime('-6 day'));
+                    $end = date('Y-m-d');
+                    $where['day_date'] = ['between', [$start, $end]];
+                }
+                $arr = $model->where($where)->column('day_date', 'active_user_num');
+                $date_arr = $arr;
+                Cache::set('Operatedatacenter_userdataview'  . $order_platform .$time_str. md5(serialize('active_user_trend')), $date_arr, 7200);
             }
-            if ($time_str) {
-                $createat = explode(' ', $time_str);
-                $where['day_date'] = ['between', [$createat[0], $createat[3]]];
-            } else {
-                $start = date('Y-m-d', strtotime('-6 day'));
-                $end = date('Y-m-d');
-                $where['day_date'] = ['between', [$start, $end]];
-            }
-            $arr = $model->where($where)->column('day_date', 'active_user_num');
-            $date_arr = $arr;
             $name = '活跃用户数';
 
             $json['xcolumnData'] = array_values($date_arr);
@@ -193,66 +203,76 @@ class UserDataView extends Backend
         if ($this->request->isAjax()) {
             $params = $this->request->param();
             $order_platform = $params['order_platform'] ? $params['order_platform'] : 1;
-            if($order_platform == 2){
-                $order_model = $this->voogueme;
-                $web_model = Db::connect('database.db_voogueme');
-            }elseif($order_platform == 3){
-                $order_model = $this->nihao;
-                $web_model = Db::connect('database.db_nihao');
+            $time_str = $params['time_str'];
+            $arr = Cache::get('Operatedatacenter_userdataview' . $order_platform . $time_str.md5(serialize('new_old_change_line')));
+            if ($arr) {
+                $data = $arr;
             }else{
-                $order_model = $this->zeelool;
-                $web_model = Db::connect('database.db_zeelool');
-            }
-            $web_model->table('customer_entity')->query("set time_zone='+8:00'");
-            if ($params['time_str']) {
-
-                $createat = explode(' ', $params['time_str']);
-                $start = $createat[0];
-                $end = $createat[3];
-            } else{
-                $start = date('Y-m-d', strtotime('-6 day'));
-                $end   = date('Y-m-d');
-            }
-            $time_arr = $this->getDateFromRange($start,$end);
-            $new_arr = array();
-            $active_arr = array();
-            foreach ($time_arr as $val){
-                $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-                $start_time = $val;
-                $end_time = $val.' 23:59:59';
-                $create_where['created_at'] = $update_where['updated_at'] = ['between',[$start_time,$end_time]];
-                //当天注册用户数
-                $register_userids = $web_model->table('customer_entity')->where($create_where)->column('entity_id');
-                $register_num = count($register_userids);
-                //当天注册用户在当天下单的用户数
-                $order_user_count1 = 0;
-                foreach($register_userids as $register_userid){
-                    //判断当前用户在当天是否下单
-                    $order = $order_model->where($create_where)->where($order_where)->where('customer_id',$register_userid)->value('entity_id');
-                    if($order){
-                        $order_user_count1++;
-                    }
+                if($order_platform == 2){
+                    $order_model = $this->voogueme;
+                    $web_model = Db::connect('database.db_voogueme');
+                }elseif($order_platform == 3){
+                    $order_model = $this->nihao;
+                    $web_model = Db::connect('database.db_nihao');
+                }else{
+                    $order_model = $this->zeelool;
+                    $web_model = Db::connect('database.db_zeelool');
                 }
-                $new_arr[] = $register_num ? round($order_user_count1/$register_num*100,0) : 0;
-
-                //当天更新用户数
-                $update_userids = $web_model->table('customer_entity')->where($update_where)->column('entity_id');
-                $update_num = count($update_userids);
-                //当天活跃更新用户数在当天是否下单
-                $order_user_count2 = 0;
-                foreach ($update_userids as $update_userid){
-                    //判断活跃用户在当天下单的用户数
-                    $order = $order_model->where($create_where)->where($order_where)->where('customer_id',$update_userid)->value('entity_id');
-                    if($order){
-                        $order_user_count2++;
-                    }
+                $web_model->table('customer_entity')->query("set time_zone='+8:00'");
+                if ($time_str) {
+                    $createat = explode(' ', $time_str);
+                    $start = $createat[0];
+                    $end = $createat[3];
+                } else{
+                    $start = date('Y-m-d', strtotime('-6 day'));
+                    $end   = date('Y-m-d');
                 }
-                $active_arr[] = $update_num ? round($order_user_count2/$update_num*100,0) : 0;
-            }
+                $time_arr = $this->getDateFromRange($start,$end);
+                $new_arr = array();
+                $active_arr = array();
+                foreach ($time_arr as $val){
+                    $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+                    $start_time = $val;
+                    $end_time = $val.' 23:59:59';
+                    $create_where['created_at'] = $update_where['updated_at'] = ['between',[$start_time,$end_time]];
+                    //当天注册用户数
+                    $register_userids = $web_model->table('customer_entity')->where($create_where)->column('entity_id');
+                    $register_num = count($register_userids);
+                    //当天注册用户在当天下单的用户数
+                    $order_user_count1 = 0;
+                    foreach($register_userids as $register_userid){
+                        //判断当前用户在当天是否下单
+                        $order = $order_model->where($create_where)->where($order_where)->where('customer_id',$register_userid)->value('entity_id');
+                        if($order){
+                            $order_user_count1++;
+                        }
+                    }
+                    $new_arr[] = $register_num ? round($order_user_count1/$register_num*100,0) : 0;
 
-            $arr['xdata'] = $time_arr;
-            $arr['ydata']['one'] = $new_arr ? $new_arr : '无';
-            $arr['ydata']['two'] = $active_arr ? $active_arr : '无';
+                    //当天更新用户数
+                    $update_userids = $web_model->table('customer_entity')->where($update_where)->column('entity_id');
+                    $update_num = count($update_userids);
+                    //当天活跃更新用户数在当天是否下单
+                    $order_user_count2 = 0;
+                    foreach ($update_userids as $update_userid){
+                        //判断活跃用户在当天下单的用户数
+                        $order = $order_model->where($create_where)->where($order_where)->where('customer_id',$update_userid)->value('entity_id');
+                        if($order){
+                            $order_user_count2++;
+                        }
+                    }
+                    $active_arr[] = $update_num ? round($order_user_count2/$update_num*100,0) : 0;
+                }
+                $data = array(
+                    'time'=>$time_arr,
+                    'new'=>$new_arr,
+                    'active'=>$active_arr,
+                );
+                Cache::set('Operatedatacenter_userdataview'  . $order_platform .$time_str. md5(serialize('new_old_change_line')), $data, 7200);
+            }
+            $arr['xdata'] = $data['time'];
+            $arr['ydata']['one'] = $data['new'] ? $data['new'] : '无';
+            $arr['ydata']['two'] = $data['active'] ? $data['active'] : '无';
 
             $json['xColumnName'] = $arr['xdata'];
             $json['columnData'] = [
