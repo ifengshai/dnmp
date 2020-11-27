@@ -111,9 +111,9 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                                 },
                                 formatter: function (param) { //格式化提示信息
                                     if(param.length == 2){
-                                        return param[0].name + '<br/>' + param[0].seriesName + '：' + param[0].value + '<br/>' + param[1].seriesName + '：' + param[1].value;
+                                        return param[0].name + '<br/>' + param[0].seriesName + '：' + param[0].value + '%<br/>' + param[1].seriesName + '：' + param[1].value+'%';
                                     }else{
-                                        return param[0].name + '<br/>' + param[0].seriesName + '：' + param[0].value;
+                                        return param[0].name + '<br/>' + param[0].seriesName + '：' + param[0].value+'%';
                                     }
                                     
                                 }
