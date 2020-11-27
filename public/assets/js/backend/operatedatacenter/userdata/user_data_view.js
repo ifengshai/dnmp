@@ -10,21 +10,21 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
             Controller.api.formatter.user_order_pie();
             order_data_view();
             $("#sku_submit").click(function () {
-                order_data_view();
                 Controller.api.formatter.user_chart();
                 Controller.api.formatter.new_update_change_line();
                 Controller.api.formatter.user_type_pie();
                 Controller.api.formatter.user_order_pie();
+                order_data_view();
             });
             $("#sku_reset").click(function () {
                 $("#order_platform").val(1);
                 $("#time_str").val('');
                 $("#time_str2").val('');
-                order_data_view();
                 Controller.api.formatter.user_chart();
                 Controller.api.formatter.new_update_change_line();
                 Controller.api.formatter.user_type_pie();
                 Controller.api.formatter.user_order_pie();
+                order_data_view();
             });
         },
         add: function () {
