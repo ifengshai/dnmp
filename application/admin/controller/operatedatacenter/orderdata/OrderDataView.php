@@ -85,10 +85,10 @@ class OrderDataView extends Backend
                     break;
             }
 
-            $order_num = $model->getOrderNum(1,$time_str);  //订单数
-            $order_unit_price = $model->getOrderUnitPrice(1,$time_str); //客单价
-            $sales_total_money = $model->getSalesTotalMoney(1,$time_str); //销售额
-            $shipping_total_money = $model->getShippingTotalMoney(1,$time_str);  //邮费
+            $order_num = $model->getOrderNum($time_str,$compare_time_str);  //订单数
+            $order_unit_price = $model->getOrderUnitPrice($time_str,$compare_time_str); //客单价
+            $sales_total_money = $model->getSalesTotalMoney($time_str,$compare_time_str); //销售额
+            $shipping_total_money = $model->getShippingTotalMoney($time_str,$compare_time_str);  //邮费
             $replacement_order_num = $model->getReplacementOrderNum($time_str);  //补发单订单数
             $replacement_order_total = $model->getReplacementOrderTotal($time_str); //补发单销售额
             $online_celebrity_order_num = $model->getOnlineCelebrityOrderNum($time_str); //网红单订单数
