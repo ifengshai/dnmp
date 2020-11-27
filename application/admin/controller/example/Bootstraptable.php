@@ -11,7 +11,7 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use fast\Excel;
 use SchGroup\SeventeenTrack\Connectors\TrackingConnector;
 use think\Cache;
-
+use think\Db;
 use think\Exception;
 
 
@@ -162,87 +162,101 @@ class Bootstraptable extends Backend
         if (!in_array($ext, ['csv', 'xls', 'xlsx'])) {
             $this->error(__('Unknown data format'));
         }
-
-        $data =  Cache::get('data_excel');
-        if (!$data) {
-            if ($ext === 'csv') {
-                $file = fopen($filePath, 'r');
-                $filePath = tempnam(sys_get_temp_dir(), 'import_csv');
-                $fp = fopen($filePath, "w");
-                $n = 0;
-                while ($line = fgets($file)) {
-                    $line = rtrim($line, "\n\r\0");
-                    $encoding = mb_detect_encoding($line, ['utf-8', 'gbk', 'latin1', 'big5']);
-                    if ($encoding != 'utf-8') {
-                        $line = mb_convert_encoding($line, 'utf-8', $encoding);
-                    }
-                    if ($n == 0 || preg_match('/^".*"$/', $line)) {
-                        fwrite($fp, $line . "\n");
-                    } else {
-                        fwrite($fp, '"' . str_replace(['"', ','], ['""', '","'], $line) . "\"\n");
-                    }
-                    $n++;
+        if ($ext === 'csv') {
+            $file = fopen($filePath, 'r');
+            $filePath = tempnam(sys_get_temp_dir(), 'import_csv');
+            $fp = fopen($filePath, "w");
+            $n = 0;
+            while ($line = fgets($file)) {
+                $line = rtrim($line, "\n\r\0");
+                $encoding = mb_detect_encoding($line, ['utf-8', 'gbk', 'latin1', 'big5']);
+                if ($encoding != 'utf-8') {
+                    $line = mb_convert_encoding($line, 'utf-8', $encoding);
                 }
-                fclose($file) || fclose($fp);
-    
-                $reader = new Csv();
-            } elseif ($ext === 'xls') {
-                $reader = new Xls();
-            } else {
-                $reader = new Xlsx();
+                if ($n == 0 || preg_match('/^".*"$/', $line)) {
+                    fwrite($fp, $line . "\n");
+                } else {
+                    fwrite($fp, '"' . str_replace(['"', ','], ['""', '","'], $line) . "\"\n");
+                }
+                $n++;
             }
-    
-            //导入文件首行类型,默认是注释,如果需要使用字段名称请使用name
-            //$importHeadType = isset($this->importHeadType) ? $this->importHeadType : 'comment';
-            //模板文件列名
-            try {
-                if (!$PHPExcel = $reader->load($filePath)) {
-                    $this->error(__('Unknown data format'));
-                }
-                $currentSheet = $PHPExcel->getSheet(0);  //读取文件中的第一个工作表
-                $allColumn = $currentSheet->getHighestDataColumn(); //取得最大的列号
-                $allRow = $currentSheet->getHighestRow(); //取得一共有多少行
-                $maxColumnNumber = Coordinate::columnIndexFromString($allColumn);
-    
-                $fields = [];
-                for ($currentRow = 1; $currentRow <= 1; $currentRow++) {
-                    for ($currentColumn = 1; $currentColumn <= $maxColumnNumber; $currentColumn++) {
-                        $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getValue();
-                        $fields[] = $val;
-                    }
-                }
-    
-    
-                $data = [];
-                for ($currentRow = 2; $currentRow <= $allRow; $currentRow++) {
-                    for ($currentColumn = 1; $currentColumn <= $maxColumnNumber; $currentColumn++) {
-                        $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getValue();
-                        $data[$currentRow - 2][$currentColumn - 1] = is_null($val) ? '' : $val;
-                    }
-                }
-            } catch (Exception $exception) {
-                $this->error($exception->getMessage());
+            fclose($file) || fclose($fp);
+
+            $reader = new Csv();
+        } elseif ($ext === 'xls') {
+            $reader = new Xls();
+        } else {
+            $reader = new Xlsx();
+        }
+
+        //导入文件首行类型,默认是注释,如果需要使用字段名称请使用name
+        //$importHeadType = isset($this->importHeadType) ? $this->importHeadType : 'comment';
+        //模板文件列名
+        try {
+            if (!$PHPExcel = $reader->load($filePath)) {
+                $this->error(__('Unknown data format'));
             }
-    
+            $currentSheet = $PHPExcel->getSheet(0);  //读取文件中的第一个工作表
+            $allColumn = $currentSheet->getHighestDataColumn(); //取得最大的列号
+            $allRow = $currentSheet->getHighestRow(); //取得一共有多少行
+            $maxColumnNumber = Coordinate::columnIndexFromString($allColumn);
+
+            $fields = [];
+            for ($currentRow = 1; $currentRow <= 1; $currentRow++) {
+                for ($currentColumn = 1; $currentColumn <= $maxColumnNumber; $currentColumn++) {
+                    $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getValue();
+                    $fields[] = $val;
+                }
+            }
+
+
+            $list = [];
+            for ($currentRow = 2; $currentRow <= $allRow; $currentRow++) {
+                for ($currentColumn = 1; $currentColumn <= $maxColumnNumber; $currentColumn++) {
+                    $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getValue();
+                    $list[$currentRow - 2][$currentColumn - 1] = is_null($val) ? '' : $val;
+                }
+            }
+        } catch (Exception $exception) {
+            $this->error($exception->getMessage());
         }
-        
-        // Cache::set('data_excel', $data, 86400);
+        $supplier = new \app\admin\model\purchase\Supplier();
+        foreach ($list as $k => $v) {
+            $data = [];
+            if ($v[3] == '手链') {
+                $category_id = 34;
+            } elseif ($v[3] == '耳饰') {
+                $category_id = 35;
+            } elseif ($v[3] == '项链') {
+                $category_id = 39;
+            }
+            $data['sku'] = $v[0];
+            $data['name'] = $v[3];
+            $data['price'] = $v[4];
+            $data['category_id'] = $category_id;
+            $data['item_status'] = 1;
+            //查询供应商
+            $supplier_id =  $supplier->where(['supplier_name' => ['like', "%" . $v[2] . "%"],'status' => 1])->value('id');
+            $data['supplier_id'] = $supplier_id ?: 0;
+            $data['supplier_sku'] = $v[1];
+            $data['create_person'] = '李衡';
+            $data['create_time'] = date("Y-m-d H:i:s", time());
+           
+            $lastInsertId = Db::name('new_product')->insertGetId($data);
 
-        $trackingConnector = new TrackingConnector($this->apiKey);
-
-        foreach ($data as &$value) {
-
-            $trackInfo = $trackingConnector->getTrackInfoMulti([[
-                'number' => $value[0],
-                'carrier' => '03011'
-            ]]);
-            $value[1] = $trackInfo['data']['accepted'][0]['track']['e'];
-            usleep(300000);
+            if ($lastInsertId !== false) {
+                $itemAttribute['item_id'] = $lastInsertId;
+                $itemAttribute['attribute_type'] = 3;
+                Db::name('new_product_attribute')->insert($itemAttribute);
+                //绑定供应商SKU关系
+                $supplier_data['sku'] = $data['sku'];
+                $supplier_data['supplier_sku'] = $v[1];
+                $supplier_data['supplier_id'] = $data['supplier_id'];
+                $supplier_data['createtime'] = date("Y-m-d H:i:s", time());
+                $supplier_data['create_person'] = '李衡';
+                Db::name('supplier_sku')->insert($supplier_data);
+            }
         }
-        unset($value);
-        Cache::set('data_excel_001', serialize($data), 86400);
-        dump(serialize($data));
-        die;
     }
 
     public function derive()

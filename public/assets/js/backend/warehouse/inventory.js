@@ -35,20 +35,20 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable', 'bootstra
                                 return (pageNumber - 1) * pageSize + 1 + index;
                             }, operate: false
                         },
-                        { field: 'inventoryone.id', title: __('Id'), visible: false, operate: false },
-                        { field: 'inventoryone.number', title: __('Number') },
-                        { field: 'inventoryone.num', title: __('盘点数') },
-                        { field: 'inventoryitemtwo.sku', title: __('SKU'),operate:'like',visible: false },
-                        { field: 'inventoryone.createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange' },
-                        { field: 'inventoryone.create_person', title: __('Create_person') },
-                        { field: 'inventoryone.status', title: __('Status'), searchList: { "0": __('待盘点'), "1": __('盘点中'), "2": __('已完成') }, formatter: Table.api.formatter.status },
+                        { field: 'id', title: __('Id'), visible: false, operate: false },
+                        { field: 'number', title: __('Number') },
+                        { field: 'num', title: __('盘点数') },
+                        { field: 'sku', title: __('SKU'),operate:'like',visible: false },
+                        { field: 'createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange' },
+                        { field: 'create_person', title: __('Create_person') },
+                        { field: 'status', title: __('Status'), searchList: { "0": __('待盘点'), "1": __('盘点中'), "2": __('已完成') }, formatter: Table.api.formatter.status },
                         {
-                            field: 'inventoryone.check_status', title: __('审核状态'), custom: { 0: 'success', 1: 'yellow', 2: 'blue', 3: 'danger', 4: 'gray' },
+                            field: 'check_status', title: __('审核状态'), custom: { 0: 'success', 1: 'yellow', 2: 'blue', 3: 'danger', 4: 'gray' },
                             searchList: { 0: '未提交', 1: '待审核', 2: '已审核', 3: '已拒绝', 4: '已取消' },
                             formatter: Table.api.formatter.status
                         },
                         {
-                            field: 'inventoryone.operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
+                            field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
                                 {
                                     name: '开始盘点',
                                     text: '开始盘点',

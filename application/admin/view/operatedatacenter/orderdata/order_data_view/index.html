@@ -53,13 +53,14 @@
     }
     .rate_class{
         font-size: 12px;
+        display: none;
     }
 
     /*第一块*/
     .new-form-group{
         margin-top: 2%;
         float: left;
-        min-width: 35%;
+        min-width: 25%;
         height: 30px;
         line-height: 30px;
     }
@@ -193,6 +194,23 @@
                                     <input type="text" autocomplete="off" class="form-control datetimerange" name="time_str"  id="time_str" value="{$time_str}" data-index="14">
                                 </div>
                             </div>
+                            <div class="form-group new-form-group">
+                                <label class="control-label col-xs-4">对比时间：</label>
+                                <div class="col-xs-8 new-col-xs-8" id="compare_tme" role="form">
+                                    <input type="hidden" class="form-control operate" name="one_time-operate"
+                                           data-name="time_str"
+                                           value="RANGE" readonly="">
+                                    <input type="text" autocomplete="off" class="form-control datetimerange"
+                                           name="time_str"
+                                           id="compare_time_str" value="" data-index="14">
+                                </div>
+                            </div>
+                            <div class="form-group new-form-group">
+                                <div class="col-xs-8 new-col-xs-8">
+                                    <input type="submit" class="btn btn-success" id="sku_submit" value="提交">
+                                    <input type="reset" class="btn btn-default reset" id="sku_reset" value="重置">
+                                </div>
+                            </div>
                         </div>
 
                         <div class="row">
@@ -200,25 +218,33 @@
                                 <div class="btn btn-div">
                                     <span class="extend">
                                         <div class="title">订单数：<span style="color: red;" id="order_num">{$order_num.order_num}</span></div>
-                                        <div class="rate_class">同比：<span id="same_order_num"><img {if $order_num.same_order_num >=0}src="/shangsheng.png"{else/}src="/xiadie.png"{/if}>{$order_num.same_order_num}</span>%  环比：<span id="huan_order_num"><img {if $order_num.huan_order_num >=0}src="/shangsheng.png"{else/}src="/xiadie.png"{/if}>{$order_num.huan_order_num}</span>%</div>
+                                        <div class="rate_class">
+<!--                                            同比：<span id="same_order_num"><img {if $order_num.same_order_num >=0}src="/shangsheng.png"{else/}src="/xiadie.png"{/if}>{$order_num.same_order_num}</span>%  -->
+                                            环比：<span id="huan_order_num"><img {if $order_num.huan_order_num >=0}src="/shangsheng.png"{else/}src="/xiadie.png"{/if}>{$order_num.huan_order_num}</span>%</div>
                                     </span>
                                 </div>
                                 <div class="btn btn-div">
                                     <span class="extend">
                                         <div class="title">客单价：<span style="color: red;" id="order_unit_price">{$order_unit_price.order_unit_price}</span></div>
-                                        <div class="rate_class">同比：<span id="same_order_unit_price"><img {if $order_unit_price.same_order_unit_price >=0}src="/shangsheng.png"{else/}src="/xiadie.png"{/if}>{$order_unit_price.same_order_unit_price}</span>%  环比：<span id="huan_order_unit_price"><img {if $order_unit_price.huan_order_unit_price >=0}src="/shangsheng.png"{else/}src="/xiadie.png"{/if}>{$order_unit_price.huan_order_unit_price}</span>%</div>
+                                        <div class="rate_class">
+<!--                                            同比：<span id="same_order_unit_price"><img {if $order_unit_price.same_order_unit_price >=0}src="/shangsheng.png"{else/}src="/xiadie.png"{/if}>{$order_unit_price.same_order_unit_price}</span>%  -->
+                                            环比：<span id="huan_order_unit_price"><img {if $order_unit_price.huan_order_unit_price >=0}src="/shangsheng.png"{else/}src="/xiadie.png"{/if}>{$order_unit_price.huan_order_unit_price}</span>%</div>
                                     </span>
                                 </div>
                                 <div class="btn btn-div">
                                     <span class="extend">
                                         <div class="title">销售额：<span style="color: red;" id="sales_total_money">{$sales_total_money.sales_total_money}</span></div>
-                                        <div class="rate_class">同比：<span id="same_sales_total_money"><img {if $sales_total_money.same_sales_total_money >=0}src="/shangsheng.png"{else/}src="/xiadie.png"{/if}>{$sales_total_money.same_sales_total_money}</span>%  环比：<span id="huan_sales_total_money"><img {if $sales_total_money.huan_sales_total_money >=0}src="/shangsheng.png"{else/}src="/xiadie.png"{/if}>{$sales_total_money.huan_sales_total_money}</span>%</div>
+                                        <div class="rate_class">
+<!--                                            同比：<span id="same_sales_total_money"><img {if $sales_total_money.same_sales_total_money >=0}src="/shangsheng.png"{else/}src="/xiadie.png"{/if}>{$sales_total_money.same_sales_total_money}</span>%  -->
+                                            环比：<span id="huan_sales_total_money"><img {if $sales_total_money.huan_sales_total_money >=0}src="/shangsheng.png"{else/}src="/xiadie.png"{/if}>{$sales_total_money.huan_sales_total_money}</span>%</div>
                                     </span>
                                 </div>
                                 <div class="btn btn-div">
                                     <span class="extend">
                                         <div class="title">邮费：<span style="color: red;" id="shipping_total_money">{$shipping_total_money.shipping_total_money}</span></div>
-                                        <div class="rate_class">同比：<span id="same_shipping_total_money"><img {if $shipping_total_money.same_shipping_total_money >=0}src="/shangsheng.png"{else/}src="/xiadie.png"{/if}>{$shipping_total_money.same_shipping_total_money}</span>%  环比：<span id="huan_shipping_total_money"><img {if $shipping_total_money.huan_shipping_total_money >=0}src="/shangsheng.png"{else/}src="/xiadie.png"{/if}>{$shipping_total_money.huan_shipping_total_money}</span>%</div>
+                                        <div class="rate_class">
+<!--                                            同比：<span id="same_shipping_total_money"><img {if $shipping_total_money.same_shipping_total_money >=0}src="/shangsheng.png"{else/}src="/xiadie.png"{/if}>{$shipping_total_money.same_shipping_total_money}</span>%  -->
+                                            环比：<span id="huan_shipping_total_money"><img {if $shipping_total_money.huan_shipping_total_money >=0}src="/shangsheng.png"{else/}src="/xiadie.png"{/if}>{$shipping_total_money.huan_shipping_total_money}</span>%</div>
                                     </span>
                                 </div>
                             </div>

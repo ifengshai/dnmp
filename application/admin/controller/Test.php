@@ -35,12 +35,68 @@ class Test extends Backend
         $this->user = new \app\admin\model\Admin();
         $this->ordernodedetail = new \app\admin\model\OrderNodeDetail();
         $this->ordernode = new \app\admin\model\OrderNode();
-
-
-
-
-        
     }
+
+    public function test001()
+    {
+        $track_number = '9400111108296818283602';
+        $order_number = '100171868';
+        //根据物流单号查询发货物流渠道
+        $shipment_data_type = Db::connect('database.db_delivery')->table('ld_deliver_order')->where(['track_number' => $track_number, 'increment_id' => $order_number])->value('agent_way_title');
+
+        dump($shipment_data_type);
+        die;
+    }
+
+
+    public function site_reg()
+    {
+        $this->reg_shipment('database.db_zeelool', 1);
+        $this->reg_shipment('database.db_voogueme', 2);
+        $this->reg_shipment('database.db_nihao', 3);
+        $this->reg_shipment('database.db_meeloog', 4);
+    }
+
+
+    /**
+     * 批量 注册物流
+     * 每天跑一次，查找遗漏注册的物流单号，进行注册操作
+     */
+    public function reg_shipment($site_str, $site_type)
+    {
+        $order_shipment = Db::connect($site_str)
+            ->table('sales_flat_shipment_track')->alias('a')
+            ->join(['sales_flat_order' => 'b'], 'a.order_id=b.entity_id')
+            ->field('a.entity_id,a.order_id,a.track_number,a.title,a.updated_at,a.created_at,b.increment_id')
+            ->where('a.created_at', '>=', '2020-07-31 00:00:00')
+            ->where('a.title', '=', 'noLogisticswaypoolCarriercode')
+            // ->where('a.handle', '=', '0')
+            ->group('a.order_id')
+            ->select();
+        $shipment_reg = [];
+        foreach ($order_shipment as $k => $v) {
+            if ($v['title'] == 'noLogisticswaypoolCarriercode') {
+                $title = 'FedEx';
+            } else {
+                $title = $v['title'];
+            }
+            $title = strtolower(str_replace(' ', '-', $title));
+            $carrier = $this->getCarrier($title);
+            $shipment_reg[$k]['number'] = $v['track_number'];
+            $shipment_reg[$k]['carrier'] = $carrier['carrierId'];
+            $shipment_reg[$k]['order_id'] = $v['order_id'];
+        }
+
+        $order_group = array_chunk($shipment_reg, 40);
+
+        $trackingConnector = new TrackingConnector($this->apiKey);
+        foreach ($order_group as $key => $val) {
+            $trackingConnector->registerMulti($val);
+            usleep(500000);
+        }
+        echo $site_str . ' is ok' . "\n";
+    }
+
 
     /**
      * 重启跟踪2-7状态的物流
@@ -58,7 +114,7 @@ class Test extends Backend
         $trackingConnector = new TrackingConnector($this->apiKey);
         echo count($res);
         foreach ($res as $k => $v) {
-           
+
             $track = $trackingConnector->retrackMulti($v);
             file_put_contents('/www/wwwroot/mojing/runtime/log/test.log', serialize($track) . "\r\n", FILE_APPEND);
             usleep(200000);
@@ -113,7 +169,7 @@ class Test extends Backend
      */
     public function new_track_total()
     {
-//        $order_shipment = Db::name('order_node')->where(['order_node' => 2, 'node_type' => 7, 'create_time' => ['>=', '2020-04-11 10:00:00']])->select();//本地测试数据无发货时间（发货是走发货系统同步的时间，线上有），使用了创建时间
+        //        $order_shipment = Db::name('order_node')->where(['order_node' => 2, 'node_type' => 7, 'create_time' => ['>=', '2020-04-11 10:00:00']])->select();//本地测试数据无发货时间（发货是走发货系统同步的时间，线上有），使用了创建时间
         $order_shipment = Db::name('order_node')->where(['node_type' => 7, 'order_node' => 2, 'delivery_time' => ['>=', '2020-08-30 00:00:00']])->select();
         $order_shipment = collection($order_shipment)->toArray();
 
@@ -133,9 +189,9 @@ class Test extends Backend
                 'carrier' => '03011'*/
                 /* 'number' => '3616952791',//DHL
                 'carrier' => '100001'*/
-                 /*'number' => '74890988318620573173', //Fedex
+                /*'number' => '74890988318620573173', //Fedex
                 'carrier' => '100003' */
-                 /*'number' => '92001902551559000101352584', //usps郭伟峰
+                /*'number' => '92001902551559000101352584', //usps郭伟峰
                 'carrier' => '21051' */
                 /*'number' => 'UF127024493YP', //yanwen
                 'carrier' => '190012'*/
@@ -151,7 +207,6 @@ class Test extends Backend
             if ($trackInfo['code'] == 0 && $trackInfo['data']['accepted']) {
                 $trackdata = $trackInfo['data']['accepted'][0]['track'];
                 $this->track_data($trackdata, $add);
-
             }
             echo 'site:' . $v['site'] . ';key:' . $k . ';order_id' . $v['order_id'] . "\n";
 
@@ -187,7 +242,7 @@ class Test extends Backend
             //获取物流明细表中的描述
             $contents = Db::name('order_node_courier')->where('track_number', $add['track_number'])->column('content');
             foreach ($trackdetail as $k => $v) {
-                if(!in_array($v['z'],$contents)){
+                if (!in_array($v['z'], $contents)) {
                     $add['create_time'] = $v['a'];
                     $add['content'] = $v['z'];
                     $add['courier_status'] = $data['e'];
@@ -225,11 +280,11 @@ class Test extends Backend
                 }
 
                 //结果
-                if($all_num - 1 == $k){
+                if ($all_num - 1 == $k) {
                     if ($data['e'] == 30 || $data['e'] == 35 || $data['e'] == 40 || $data['e'] == 50) {
                         $order_node_date = Db::name('order_node')->where(['track_number' => $add['track_number'], 'shipment_type' => $add['shipment_type']])->find();
 
-                        if (($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 10)||($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 11)) {
+                        if (($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 10) || ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 11)) {
                             $update_order_node['order_node'] = 4;
                             $update_order_node['node_type'] = $data['e'];
                             $update_order_node['update_time'] = $v['a'];
@@ -2720,7 +2775,7 @@ class Test extends Backend
         } elseif (stripos($title, 'eub') !== false) {
             $carrierId = 'eub';
             $title = 'EUB';
-        }  elseif (stripos($title, 'ems') !== false) {
+        } elseif (stripos($title, 'ems') !== false) {
             $carrierId = 'chinaems';
             $title = 'China Ems';
         } elseif (stripos($title, 'dhl') !== false) {
@@ -3090,5 +3145,51 @@ class Test extends Backend
                 $this->orderNodeCourier->where(['order_number' => $v['order_number'], 'site' => $v['site']])->delete();
             }
         }
+    }
+
+
+    public function order_data()
+    {
+        $list = Db::table('fa_order_log')->where(['site' => 5])->order('id desc')->select();
+        $wesee = new \app\admin\model\order\order\Weseeoptical();
+        foreach ($list as $k => $v) {
+            if ($v['type'] == 1) {
+                $data['custom_print_label_new'] = 1;
+                $data['custom_print_label_person_new'] = $v['create_person'];
+                $data['custom_print_label_created_at_new'] = $v['createtime'];
+            } elseif ($v['type'] == 2) {
+                $data['custom_is_match_frame_new'] = 1;
+                $data['custom_match_frame_person_new'] = $v['create_person'];
+                $data['custom_match_frame_created_at_new'] = $v['createtime'];
+            } elseif ($v['type'] == 3) {
+                $data['custom_is_match_lens_new'] = 1;
+                $data['custom_match_lens_created_at_new'] = $v['createtime'];
+                $data['custom_match_lens_person_new'] = $v['create_person'];
+            } elseif ($v['type'] == 4) {
+                $data['custom_is_send_factory_new'] = 1;
+                $data['custom_match_factory_person_new'] = $v['create_person'];
+                $data['custom_match_factory_created_at_new'] = $v['createtime'];
+            } elseif ($v['type'] == 5) {
+                $data['custom_is_delivery_new'] = 1;
+                $data['custom_match_delivery_person_new'] = $v['create_person'];
+                $data['custom_match_delivery_created_at_new'] = $v['createtime'];
+            }
+            if ($data) {
+                $wesee->where(['entity_id' => ['in', $v['order_ids']]])->update($data);
+            }
+            
+        }
+        echo "ok";
+    }
+
+    public function order_data2()
+    {
+        $nihao = new \app\admin\model\order\order\Nihao();
+        $data['custom_print_label_new'] = 1;
+        $data['custom_is_match_frame_new'] = 1;
+        $data['custom_is_match_lens_new'] = 1;
+        $data['custom_is_send_factory_new'] = 1;
+        $data['custom_is_delivery_new'] = 1;
+        $nihao->where(['created_at' => ['<','2020-01-01']])->update($data);
     }
 }

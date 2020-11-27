@@ -128,7 +128,7 @@ class ZeeloolJp extends Backend
                     $list[$k]['task_info'] = 1;
                 }
             }
-
+            
             $result = array("total" => $total, "rows" => $list);
             return json($result);
         }
@@ -154,23 +154,11 @@ class ZeeloolJp extends Backend
                 $list = $this->model
                     ->field($field)
                     ->where($map)
-                    ->find()->toArray();
-                //查询订单是否存在工单
-                $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
-                $swhere = [];
-                $swhere['platform_order'] = ['eq', $list['increment_id']];
-                $swhere['work_platform'] = 11;
-                $swhere['work_status'] = ['not in', [0, 4, 6]];
-                $order_arr = $workorder->where($swhere)->column('platform_order');
-                if (!empty($order_arr)){
-                    $list['task_info'] = 1;
-                }
-
+                    ->find();
                 $result = ['code' => 1, 'data' => $list ?? []];
             } else {
                 $result = array("total" => 0, "rows" => []);
             }
-
             return json($result);
         }
         return $this->view->fetch('_list');
@@ -909,6 +897,11 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             $finalResult[$key]['coatiing_name'] = $tmp_product_options['info_buyRequest']['tmplens']['coatiing_name'];
             $finalResult[$key]['index_type'] = $tmp_product_options['info_buyRequest']['tmplens']['index_type'];
 
+            //镜片颜色   
+            if ($tmp_product_options['info_buyRequest']['tmplens']['index_color']) {
+                $finalResult[$key]['index_type'] = $tmp_product_options['info_buyRequest']['tmplens']['index_type']  . '-' . $tmp_product_options['info_buyRequest']['tmplens']['index_color'];
+            }
+
             $tmp_prescription_params = $tmp_product_options['info_buyRequest']['tmplens']['prescription'];
             if (isset($tmp_prescription_params)) {
                 $tmp_prescription_params = explode("&", $tmp_prescription_params);
@@ -1239,6 +1232,12 @@ EOF;
                 $product_options = unserialize($processing_value['product_options']);
                 $final_print['coatiing_name'] = substr($product_options['info_buyRequest']['tmplens']['coatiing_name'], 0, 60);
                 $final_print['index_type'] = $product_options['info_buyRequest']['tmplens']['index_type'];
+
+                //镜片颜色   
+                $final_print['index_type'] = $product_options['info_buyRequest']['tmplens']['index_type'];
+                if ($product_options['info_buyRequest']['tmplens']['index_color']) {
+                    $final_print['index_type'] = $product_options['info_buyRequest']['tmplens']['index_type']  . '-' . $product_options['info_buyRequest']['tmplens']['index_color'];
+                }
 
                 $prescription_params = $product_options['info_buyRequest']['tmplens']['prescription'];
                 if ($prescription_params) {
