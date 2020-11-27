@@ -295,6 +295,7 @@ class Zeelool extends Model
             ->group('customer_id')
             ->having('count(customer_id)>1')
             ->count('customer_id');
+        dump($again_buy_num1);exit;
         $again_buy_data2 = $order_model
             ->where($map_where)
             ->where($map)
