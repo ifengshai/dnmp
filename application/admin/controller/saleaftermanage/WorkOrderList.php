@@ -1420,9 +1420,9 @@ class WorkOrderList extends Backend
 
             //子订单措施及数据
             if(!empty($row->order_item_numbers)){
-                $order_data = $this->model->getOrderItem($row->platform_order,$row->order_item_numbers,$row->id);
+                $order_data = $this->model->getOrderItem($row->platform_order,$row->order_item_numbers,$row->work_type,$row);
                 unset($order_data['item_order_info']);
-                $this->assignconfig('order_item', $order_data);
+                $this->view->assign('order_item', $order_data);
             }
 
             //工单类型
@@ -1438,7 +1438,7 @@ class WorkOrderList extends Backend
         $order_number = input('order_number');
         $order_item_numbers = input('order_item_numbers');
         if($order_number && $order_item_numbers){
-            $order_item = $this->model->getOrderItem($order_number,$order_item_numbers);
+            $order_item = $this->model->getOrderItem($order_number,$order_item_numbers,$work_type,[]);
             $this->view->assign('order_item', $order_item);
         }
 
@@ -2043,11 +2043,11 @@ class WorkOrderList extends Backend
 
         //子订单措施及数据
         if(!empty($row->order_item_numbers)){
-            $order_data = $this->model->getOrderItem($row->platform_order,$row->order_item_numbers,$row->id);
+            $order_data = $this->model->getOrderItem($row->platform_order,$row->order_item_numbers,$row->work_type,$row);
             $this->assignconfig('item_order_info', $order_data['item_order_info']);
 
             unset($order_data['item_order_info']);
-            $this->assignconfig('order_item', $order_data);
+            $this->view->assign('order_item', $order_data);
         }
 
         //把问题类型传递到js页面
@@ -2392,11 +2392,11 @@ class WorkOrderList extends Backend
 
         //子订单措施及数据
         if(!empty($row->order_item_numbers)){
-            $order_data = $this->model->getOrderItem($row->platform_order,$row->order_item_numbers,$row->id);
+            $order_data = $this->model->getOrderItem($row->platform_order,$row->order_item_numbers,$row->work_type,$row);
             $this->assignconfig('item_order_info', $order_data['item_order_info']);
 
             unset($order_data['item_order_info']);
-            $this->assignconfig('order_item', $order_data);
+            $this->view->assign('order_item', $order_data);
         }
 
         //把问题类型传递到js页面
