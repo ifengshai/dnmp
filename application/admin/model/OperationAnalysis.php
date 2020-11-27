@@ -149,7 +149,7 @@ class OperationAnalysis extends Model
     {
         $cacheData = Cache::get('operationAnalysis_get_today_shoppingcart_total_'.$id);
         if($cacheData){
-           return $cacheData; 
+           // return $cacheData;
         }
         $model = $this->get_model_by_id($id);
         //今日购物车总数sql
@@ -158,7 +158,7 @@ class OperationAnalysis extends Model
         //今日购物车总数
         $today_shoppingcart_total_rs    = $model->query($today_shoppingcart_total_sql);
         $today_shoppingcart_total_data  = $today_shoppingcart_total_rs[0]['counter'];
-        Cache::set('operationAnalysis_get_today_shoppingcart_total_'.$id,$today_shoppingcart_total_data,3600);
+        Cache::set('operationAnalysis_get_today_shoppingcart_total_'.$id,$today_shoppingcart_total_data,360);
         return $today_shoppingcart_total_data;
 
     }
