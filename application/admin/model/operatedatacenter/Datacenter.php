@@ -692,7 +692,7 @@ class Datacenter extends Model
             $again_user_numnihao = $this->nihao->get_again_user($createat);
             //三个站所有的复购用户数
             $arrs['contrast_again_user_num'] = $again_user_numzeelool + $again_user_numvoogueme + $again_user_numnihao;
-            $arrs['contrast_again_user_num'] = $arrs['again_user_num'] == 0 ? '100' : round(($arrs['contrast_again_user_num'] - $arrs['again_user_num']) / $arrs['again_user_num'] * 100, 2) . '%';
+            $arrs['contrast_again_user_num'] = $arrs['again_user_num'] == 0 ? '100' : round(($arrs['contrast_again_user_num'] - $arrs['again_user_num']) / $arrs['again_user_num'] * 100, 2);
         }
         return $arrs;
     }
