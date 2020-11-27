@@ -1115,7 +1115,7 @@ class Crontab extends Backend
                     . "'" . $value['four_id'] . "',"
                     . "'" . $value['four_price'] . "',"
                     . "'" . $value['four_name'] . "',"
-                    
+
                     . "'" . $value['index_price'] . "',"
 
                     . "'" . $value['frame_price'] . "',"
@@ -1914,7 +1914,7 @@ class Crontab extends Backend
             $items[$order_item_key]['index_id'] = $final_params['index_id'] = $product_options['info_buyRequest']['tmplens']['index_id'];
             $items[$order_item_key]['lens'] = $final_params['lens'] = $product_options['info_buyRequest']['tmplens']['lens'];
             $items[$order_item_key]['total'] = $final_params['total'] = $product_options['info_buyRequest']['tmplens']['total'];
-           
+
             $prescription_params = $product_options['info_buyRequest']['tmplens']['prescription'];
             $prescription_params = explode("&", $prescription_params);
             $lens_params = array();
@@ -1966,7 +1966,7 @@ class Crontab extends Backend
                 $items[$order_item_key]['total_add'] = $final_params['os_add'];
             }
 
-            
+
 
             if ($final_params['pdcheck'] == 'on') {
                 $items[$order_item_key]['pd_l'] = $final_params['pd_l'];
@@ -2054,13 +2054,13 @@ class Crontab extends Backend
         if ($items) {
 
             $result = Db::connect('database.db_zeelool_es')->table('sales_flat_order_item_prescription')->insertAll($items);
-    
+
             if ($result) {
                 echo '<br>执行成功';
             } else {
                 echo '<br>执行失败';
             }
-           
+
         } else {
             echo '执行完毕！';
         }
@@ -2211,7 +2211,7 @@ class Crontab extends Backend
             $items[$order_item_key]['index_id'] = $final_params['index_id'] = $product_options['info_buyRequest']['tmplens']['index_id'];
             $items[$order_item_key]['lens'] = $final_params['lens'] = $product_options['info_buyRequest']['tmplens']['lens'];
             $items[$order_item_key]['total'] = $final_params['total'] = $product_options['info_buyRequest']['tmplens']['total'];
-         
+
 
             $prescription_params = $product_options['info_buyRequest']['tmplens']['prescription'];
             $prescription_params = explode("&", $prescription_params);
@@ -2264,7 +2264,7 @@ class Crontab extends Backend
                 $items[$order_item_key]['total_add'] = $final_params['os_add'];
             }
 
-            
+
 
             if ($final_params['pdcheck'] == 'on') {
                 $items[$order_item_key]['pd_l'] = $final_params['pd_l'];
@@ -2349,7 +2349,7 @@ class Crontab extends Backend
             unset($product_options);
         }
 
-       
+
         if ($items) {
             $result = Db::connect('database.db_zeelool_de')->table('sales_flat_order_item_prescription')->insertAll($items);
             if ($result) {
@@ -2357,7 +2357,7 @@ class Crontab extends Backend
             } else {
                 echo '<br>执行失败';
             }
-           
+
         } else {
             echo '执行完毕！';
         }
@@ -2508,7 +2508,7 @@ class Crontab extends Backend
             $items[$order_item_key]['index_id'] = $final_params['index_id'] = $product_options['info_buyRequest']['tmplens']['index_id'];
             $items[$order_item_key]['lens'] = $final_params['lens'] = $product_options['info_buyRequest']['tmplens']['lens'];
             $items[$order_item_key]['total'] = $final_params['total'] = $product_options['info_buyRequest']['tmplens']['total'];
-         
+
 
             $prescription_params = $product_options['info_buyRequest']['tmplens']['prescription'];
             $prescription_params = explode("&", $prescription_params);
@@ -2561,7 +2561,7 @@ class Crontab extends Backend
                 $items[$order_item_key]['total_add'] = $final_params['os_add'];
             }
 
-            
+
 
             if ($final_params['pdcheck'] == 'on') {
                 $items[$order_item_key]['pd_l'] = $final_params['pd_l'];
@@ -2646,7 +2646,7 @@ class Crontab extends Backend
             unset($product_options);
         }
 
-       
+
         if ($items) {
             $result = Db::connect('database.db_zeelool_jp')->table('sales_flat_order_item_prescription')->insertAll($items);
             if ($result) {
@@ -2654,7 +2654,7 @@ class Crontab extends Backend
             } else {
                 echo '<br>执行失败';
             }
-           
+
         } else {
             echo '执行完毕！';
         }
@@ -2859,7 +2859,7 @@ class Crontab extends Backend
         }
         //nihao注册用户数
         $meeloog_register_customer = $meeloog_model->table('customer_entity')->where($date)->count('*');
-        
+
         //zeelool es
         $zeelool_es_count = $zeelool_es_model->table('sales_flat_order')->where($map)->count(1);
         $zeelool_es_total = $zeelool_es_model->table('sales_flat_order')->where($map)->sum('base_grand_total');
@@ -2973,7 +2973,7 @@ class Crontab extends Backend
         $data['nihao_unit_price']                           = $nihao_unit_price;
         $data['meeloog_unit_price']                         = $meeloog_unit_price;
         $data['zeelool_es_unit_price']                      = $zeelool_es_unit_price;
-        $data['zeelool_de_unit_price']                      = $zeelool_de_unit_price;    
+        $data['zeelool_de_unit_price']                      = $zeelool_de_unit_price;
         $data['zeelool_jp_unit_price']                      = $zeelool_jp_unit_price;
         $data['all_unit_price']                             = $data['all_sales_num'] ? @round($data['all_sales_money'] / $data['all_sales_num']*100, 2) : 0;
         $data['zeelool_shoppingcart_total']                 = $zeelool_shoppingcart_total;
@@ -2989,7 +2989,7 @@ class Crontab extends Backend
         $data['nihao_shoppingcart_conversion']              = $nihao_shoppingcart_conversion;
         $data['meeloog_shoppingcart_conversion']            = $meeloog_shoppingcart_conversion;
         $data['zeelool_es_shoppingcart_conversion']         = $zeelool_es_shoppingcart_conversion;
-        $data['zeelool_de_shoppingcart_conversion']         = $zeelool_de_shoppingcart_conversion; 
+        $data['zeelool_de_shoppingcart_conversion']         = $zeelool_de_shoppingcart_conversion;
         $data['zeelool_jp_shoppingcart_conversion']         = $zeelool_jp_shoppingcart_conversion;
         $data['all_shoppingcart_conversion']                = $data['all_shoppingcart_total'] ? @round($data['all_sales_num'] / $data['all_shoppingcart_total']*100, 2) : 0;
         $data['zeelool_register_customer']                  = $zeelool_register_customer;
@@ -3929,6 +3929,7 @@ class Crontab extends Backend
         echo '<br>';
         dump($thismonth_shoppingcart_total_data);
         echo '<br>';
+        die;
 
         //昨天购物车转化率data
         $yesterday_shoppingcart_conversion_data     = @round(($yesterday_order_success_data1 / $yesterday_shoppingcart_total_data), 4) * 100;
