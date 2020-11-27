@@ -283,7 +283,7 @@ class Zeelool extends Model
         $order_where['created_at'] = ['lt',$createat[0]];
 
         $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-        $map['customer_id'] = ['>',0];
+        $map1['customer_id'] = ['>',0];
         $map['order_type'] = 1;
 
         $order_model = new \app\admin\model\order\order\Zeelool();
@@ -292,6 +292,7 @@ class Zeelool extends Model
         $again_buy_num1 = $order_model
             ->where($map_where)
             ->where($map)
+            ->where($map1)
             ->group('customer_id')
             ->having('count(customer_id)>1')
             ->count('customer_id');
@@ -299,6 +300,7 @@ class Zeelool extends Model
         $again_buy_data2 = $order_model
             ->where($map_where)
             ->where($map)
+            ->where($map1)
             ->group('customer_id')
             ->having('count(customer_id)<=1')
             ->column('customer_id');
@@ -306,7 +308,7 @@ class Zeelool extends Model
         foreach ($again_buy_data2 as $v){
             //查询时间段内是否进行购买行为
             $order_where_arr['customer_id'] = $v;
-            $is_buy = $order_model->where($order_where)->where('customer_id',$v)->where($map)->select(false);
+            $is_buy = $order_model->where($order_where)->where($order_where_arr)->where($map)->select(false);
             echo $is_buy;exit;
             $is_buy = $order_model->where($order_where)->where($order_where_arr)->where($map)->value('entity_id');
             if($is_buy){
