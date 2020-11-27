@@ -764,9 +764,9 @@ class Datacenter extends Model
      */
     public function getOrderUnitPrice($time_str = '', $time_str2 = '')
     {
-        $z = $this->zeelool->getOrderUnitPrice(1, $time_str, $time_str2);
-        $v = $this->voogueme->getOrderUnitPrice(1, $time_str, $time_str2);
-        $n = $this->nihao->getOrderUnitPrice(1, $time_str, $time_str2);
+        $z = $this->zeelool->getOrderUnitPrice($time_str, $time_str2);
+        $v = $this->voogueme->getOrderUnitPrice($time_str, $time_str2);
+        $n = $this->nihao->getOrderUnitPrice($time_str, $time_str2);
         $num['order_unit_price'] = round($z['order_unit_price'] + $v['order_unit_price'] + $n['order_unit_price'], 2);
         $num['contrast_order_unit_price'] = round(($z['contrast_order_unit_price'] + $v['contrast_order_unit_price'] + $n['contrast_order_unit_price']) / 3, 2);
         return $num;
@@ -777,9 +777,9 @@ class Datacenter extends Model
      */
     public function getSalesTotalMoney($time_str = '', $time_str2 = '')
     {
-        $z = $this->zeelool->getSalesTotalMoney(1, $time_str, $time_str2);
-        $v = $this->voogueme->getSalesTotalMoney(1, $time_str, $time_str2);
-        $n = $this->nihao->getSalesTotalMoney(1, $time_str, $time_str2);
+        $z = $this->zeelool->getSalesTotalMoney($time_str, $time_str2);
+        $v = $this->voogueme->getSalesTotalMoney($time_str, $time_str2);
+        $n = $this->nihao->getSalesTotalMoney($time_str, $time_str2);
         $num['sales_total_money'] = round($z['sales_total_money'] + $v['sales_total_money'] + $n['sales_total_money'], 2);
         $num['contrast_sales_total_num'] = round(($z['contrast_sales_total_num'] + $v['contrast_sales_total_num'] + $n['contrast_sales_total_num']) / 3, 2);
         return $num;
@@ -790,9 +790,9 @@ class Datacenter extends Model
      * */
     public function getShippingTotalMoney($time_str = '', $time_str2 = '')
     {
-        $z = $this->zeelool->getShippingTotalMoney(1, $time_str, $time_str2);
-        $v = $this->voogueme->getShippingTotalMoney(1, $time_str, $time_str2);
-        $n = $this->nihao->getShippingTotalMoney(1, $time_str, $time_str2);
+        $z = $this->zeelool->getShippingTotalMoney($time_str, $time_str2);
+        $v = $this->voogueme->getShippingTotalMoney($time_str, $time_str2);
+        $n = $this->nihao->getShippingTotalMoney($time_str, $time_str2);
         $num['shipping_total_money'] = round($z['shipping_total_money'] + $v['shipping_total_money'] + $n['shipping_total_money'], 2);
         $num['contrast_shipping_total_money'] = round(($z['contrast_shipping_total_money'] + $v['contrast_shipping_total_money'] + $n['contrast_shipping_total_money']) / 3, 2);
         return $num;
