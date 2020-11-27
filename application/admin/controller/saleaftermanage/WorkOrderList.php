@@ -1542,7 +1542,8 @@ class WorkOrderList extends Backend
         $measure_content = $workOrderConfigValue['step'][$choose_id] ?: '';
 
         //插入措施表
-        $res = $this->step
+        $_work_order_measure = new WorkOrderMeasure();
+        $res = $_work_order_measure
             ->allowField(true)
             ->save([
                 'work_id'=>$work_id,
@@ -1555,7 +1556,7 @@ class WorkOrderList extends Backend
         if (false === $res) return ['result'=>false,'msg'=>'添加措施失败！！'];
 
         //工单措施表自增ID
-        $measure_id = $this->step->id;
+        $measure_id = $_work_order_measure->id;
 
         //循环插入承接人
         $appoint_save = [];
@@ -1597,7 +1598,8 @@ class WorkOrderList extends Backend
         }
 
         //插入承接人表
-        $recept_res = $this->recept->allowField(true)->saveAll($appoint_save);
+        $_work_order_recept = new WorkOrderRecept();
+        $recept_res = $_work_order_recept->allowField(true)->saveAll($appoint_save);
         if (false === $recept_res) {
             return ['result'=>false,'msg'=>'添加承接人失败！！'];
         }
