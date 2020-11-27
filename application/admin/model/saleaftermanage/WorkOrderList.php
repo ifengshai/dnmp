@@ -179,11 +179,12 @@ class WorkOrderList extends Model
      *
      * @param string $increment_id  订单号
      * @param mixed $item_order_number  子订单号
-     * @param int $work_id  工单ID
+     * @param int $work_type  工单类型：1客服 2仓库
+     * @param array $work  工单数据
      * @author lzh
      * @return array
      */
-    public function getOrderItem($increment_id,$item_order_number='',$work_id=0)
+    public function getOrderItem($increment_id,$item_order_number='',$work_type=0,$work=[])
     {
         $order_field = 'id,site,base_grand_total,base_to_order_rate,payment_method,customer_email,customer_firstname,customer_lastname,order_type,mw_rewardpoint_discount,base_currency_code,created_at as payment_time';
 
@@ -197,8 +198,12 @@ class WorkOrderList extends Model
             return [];
         }
 
+        $select_number = [];
         $order_item_where = ['order_id'=>$result['id']];
-        if(!empty($item_order_number)){
+        if(!empty($item_order_number) && 2 == $work_type){
+            if(empty($work)){
+                $select_number = explode(',',$item_order_number);
+            }
             $order_item_where = ['item_order_number'=>['in',$item_order_number]];
         }
         $_new_order_item_process = new NewOrderItemProcess();
@@ -208,18 +213,18 @@ class WorkOrderList extends Model
         ;
 
         //已创建工单获取最新镜架和镜片数据
-        if($work_id){
+        if($work){
             //获取更改镜框sku集
             $_work_order_change_sku = new WorkOrderChangeSku();
             $sku_list = $_work_order_change_sku
-                ->where(['work_id'=>$work_id,'change_type'=>1])
+                ->where(['work_id'=>$work['id'],'change_type'=>1])
                 ->column('change_sku,original_sku','item_order_number')
             ;
 
             //获取更改镜片sku集
             $prescription_field = 'recipe_type as prescription_type,coating_type as coating_name,od_sph,os_sph,od_cyl,os_cyl,od_axis,os_axis,pd_l,pd_r,os_add,od_add,od_pv,os_pv,od_pv_r,os_pv_r,od_bd,os_bd,od_bd_r,os_bd_r';
             $prescription_list = $_work_order_change_sku
-                ->where(['work_id'=>$work_id,'change_type'=>2])
+                ->where(['work_id'=>$work['id'],'change_type'=>2])
                 ->column($prescription_field,'item_order_number')
             ;
             if($prescription_list){
@@ -241,34 +246,37 @@ class WorkOrderList extends Model
             $_work_order_measure = new WorkOrderMeasure();
             $measure_list = $_work_order_measure
                 ->field('measure_choose_id,item_order_number')
-                ->where(['work_id'=>$work_id])
+                ->where(['work_id'=>$work['id']])
                 ->select();
             ;
 
             //获取子订单措施、镜框、镜片数据
-            $item_order_info = [];
-            foreach($order_item_list as $key=>$value){
-                $info = [];
-                $measure_ids = [];
-                foreach($measure_list as $v){
-                    if($v['item_order_number'] == $key){
-                        $measure_ids[] = $v['measure_choose_id'];
+            if($work['order_item_numbers']){
+                $item_order_info = [];
+                $select_number = explode(',',$work['order_item_numbers']);
+                foreach($select_number as $value){
+                    $info = [];
+                    $measure_ids = [];
+                    foreach($measure_list as $v){
+                        if($v['item_order_number'] == $value){
+                            $measure_ids[] = $v['measure_choose_id'];
+                        }
                     }
+                    $info['item_choose'] = $measure_ids;
+                    if(isset($sku_list[$value])){
+                        $info['change_frame'] = $sku_list[$value];
+                    }
+                    if(isset($prescription_list[$value])){
+                        $info['change_lens'] = $prescription_list[$value];
+                    }
+                    $item_order_info[$value] = $info;
                 }
-                $info['item_choose'] = $measure_ids;
-                if(isset($sku_list[$key])){
-                    $info['change_frame'] = $sku_list[$key];
-                }
-                if(isset($prescription_list[$key])){
-                    $info['change_lens'] = $prescription_list[$key];
-                }
-                $item_order_info[$key] = $info;
+                $result['item_order_info'] = $item_order_info;
             }
-
-            $result['item_order_info'] = $item_order_info;
         }
 
-        $result['sku_list'] = $order_item_list;
+        $result['sku_list'] = $order_item_list;//子单号下拉框数据
+        $result['select_number'] = $select_number;//已勾选子单号
         $result['mw_rewardpoint_discount'] = round($result['mw_rewardpoint_discount'],2);
         $result['payment_time'] = date('Y-m-d H:i:s',$result['payment_time']);
 
