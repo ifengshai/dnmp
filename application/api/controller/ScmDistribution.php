@@ -733,6 +733,7 @@ class ScmDistribution extends Scm
             }
         }
         $list = array_merge($list_od,$list_os);
+        $list = array_values($list);
 
         $this->success('', ['list' => $list],200);
     }
@@ -1332,7 +1333,6 @@ class ScmDistribution extends Scm
             !empty($v['combine_time']) && $list[$k]['combine_time'] = date('Y-m-d H:i:s', $v['combine_time']);
         }
 
-        $info['list'] = $list;
         $this->success('', ['list' => $list],200);
     }
 
