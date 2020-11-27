@@ -304,8 +304,15 @@ class Zeelool extends Model
             ->group('customer_id')
             ->having('count(customer_id)<=1')
             ->column('customer_id');
-        $order_where_arr['customer_id'] = ['in',$again_buy_data2];
-        $again_buy_num2 = $order_model->where($order_where)->where($order_where_arr)->where($map)->value('entity_id');
+        $again_buy_num2 = 0;
+        foreach ($again_buy_data2 as $v){
+            //查询时间段内是否进行购买行为
+            $order_where_arr['customer_id'] = $v;
+            $is_buy = $order_model->where($order_where)->where($order_where_arr)->where($map)->value('entity_id');
+            if($is_buy){
+                $again_buy_num2++;
+            }
+        }
 
         $again_buy_num = $again_buy_num1+$again_buy_num2;
         return $again_buy_num;
