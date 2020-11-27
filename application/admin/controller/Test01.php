@@ -236,6 +236,21 @@ class Test01 extends Backend
             ->where($order_where)
             ->where($order_success_where)
             ->count();
+        //过去7天从新增购物车中成功支付数
+        $seven_start = date("Y-m-d", strtotime("-7 day"));
+        $seven_end = date("Y-m-d 23:59:59", strtotime("-1 day"));
+        $sev_where['o.created_at'] = $sev_where1['updated_at'] = ['between', [$seven_start, $seven_end]];
+        $sev_wheres['p.created_at'] = $sev_where1['updated_at'] = ['between', [$seven_start, $seven_end]];
+        $pastsevenday_order_success_data1 = Db::connect('database.db_zeelool')->table('sales_flat_order')
+            ->alias('o')
+            ->join('sales_flat_quote p', 'o.quote_id=p.entity_id')
+            ->where($sev_wheres)
+            ->where('p.base_grand_total','>',0)
+            ->where($sev_where)
+            ->where($order_where)
+            ->where($order_success_where)
+            ->count();
         dump($yesterday_order_success_data1);
+        dump($pastsevenday_order_success_data1);
     }
 }
