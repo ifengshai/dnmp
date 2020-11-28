@@ -320,7 +320,7 @@ class Zeelool extends Model
 
     //获取某一段时间内的复购VIP用户数 new
     public function get_again_user_vip($createat = ''){
-        dump($createat);exit;
+        $createat = explode(' ', $createat);
         $map_where['o.created_at'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
         $order_where['o.created_at'] = ['lt',$createat[0]];
 
@@ -332,7 +332,6 @@ class Zeelool extends Model
         $order_model = new \app\admin\model\order\order\Zeelool();
         //复购用户数
         //查询时间段内的订单 根据customer_id先计算出此事件段内的复购用户数
-        dump($map_where);
         $again_buy_num1 = $order_model->alias('o')
             ->join('customer_entity c','o.customer_id=c.entity_id')
             ->where($map_where)
@@ -340,9 +339,7 @@ class Zeelool extends Model
             ->where($map1)
             ->group('o.customer_id')
             ->having('count(o.customer_id)>1')
-//            ->count('o.customer_id');
-            ->select(false);
-        dump($again_buy_num1);exit;
+            ->count('o.customer_id');
 
         $again_buy_data2 = $order_model->alias('o')
             ->join('customer_entity c','o.customer_id=c.entity_id')
