@@ -815,6 +815,8 @@ class WorkOrderList extends Model
                         'color_name' => $lensCoatName['colorName'] ?? '',
                     ];
 
+                    //TODO::从网站接口获取镜片编码、文案、语种文案
+
                     $data = [
                         'email' => '',
                         'prescription_option' => serialize($prescriptionOption),
