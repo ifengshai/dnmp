@@ -1051,6 +1051,7 @@ class WorkOrderList extends Backend
 
                     //已审单，包含主单取消、子单措施不能创建工单
                     1 == $check_status
+                    &&
                     (
                         in_array(3, $measure_choose_id)
                         ||
