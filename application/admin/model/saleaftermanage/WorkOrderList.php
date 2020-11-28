@@ -1790,13 +1790,13 @@ class WorkOrderList extends Model
         
         $result = collection($result)->toArray();
         if (1 == $measuerInfo) { //更改镜架
-            $info = (new Inventory())->workChangeFrame($work_id, $workOrderList->work_platform, $workOrderList->platform_order, $result, 1);
+            $info = (new Inventory())->workChangeFrame($work_id, $workOrderList->work_platform, $workOrderList->platform_order, $result);
         } elseif (3 == $measuerInfo) { //取消订单
-            $info = (new Inventory())->workCancelOrder($work_id, $workOrderList->work_platform, $workOrderList->platform_order, $result, 2);
+            $info = (new Inventory())->workCancelOrder($work_id, $workOrderList->work_platform, $workOrderList->platform_order, $result);
         } elseif (4 == $measuerInfo) { //赠品
-            $info = (new Inventory())->workPresent($work_id, $workOrderList->work_platform, $workOrderList->platform_order, $result, 3);
+            $info = (new Inventory())->workPresent($work_id, $workOrderList->work_platform, $workOrderList->platform_order, $result, 1);
         } elseif (5 == $measuerInfo) {//补发
-            $info = (new Inventory())->workPresent($work_id, $workOrderList->work_platform, $workOrderList->platform_order, $result, 4);
+            $info = (new Inventory())->workPresent($work_id, $workOrderList->work_platform, $workOrderList->platform_order, $result, 2);
         } else {
             return false;
         }

@@ -1048,7 +1048,15 @@ class WorkOrderList extends Backend
                         ->where('increment_id', $platform_order)
                         ->value('check_status')
                     ;
-                    1 == $check_status && $this->error("已审单，不能创建工单");
+
+                    //已审单，包含主单取消、子单措施不能创建工单
+                    1 == $check_status
+                    (
+                        in_array(3, $measure_choose_id)
+                        ||
+                        !empty($item_order_info)
+                    )
+                    && $this->error("已审单，不能创建工单");
 
                     //校验工单类型
                     if (1 == $work_type) {
@@ -2032,6 +2040,7 @@ class WorkOrderList extends Backend
         $this->view->assign('row', $row);
         $this->assignconfig('work_type', $row->work_type);
         $this->assignconfig('work_status', $row->work_status);
+        $this->assignconfig('create_user_id', $row->create_user_id);
 
         //子订单措施及数据
         if(!empty($row->order_item_numbers)){
