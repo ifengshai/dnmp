@@ -112,7 +112,38 @@ class UserValueRfm extends Backend
         $time_where['created_at'] = ['between', [$start, $end]];
         $where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
         $customer_ids = $web_model->table('customer_entity')->where($time_where)->column('entity_id');
-        $where['customer_id'] = ['in',$customer_ids];
+        //$where['customer_id'] = ['in',$customer_ids];
+
+
+        /*SELECT
+ sum( IF ( total >= 300, 1, 0 ) ) AS a,
+ sum( IF ( total >= 200 AND total < 300, 1, 0 ) ) AS b,
+ sum( IF ( total >= 150 AND total < 200, 1, 0 ) ) AS c,
+ sum( IF ( total >= 80 AND total < 150, 1, 0 ) ) AS d,
+ sum( IF ( total >= 40 AND total < 80, 1, 0 ) ) AS e,
+ sum( IF ( total >= 0 AND total < 40, 1, 0 ) ) AS f
+FROM
+(
+    SELECT
+  sum( base_grand_total ) AS total
+ FROM
+  sales_flat_order as t1
+ WHERE
+  `status` IN ( 'complete' )
+    AND customer_id IN ( SELECT entity_id FROM customer_entity WHERE created_at BETWEEN '2019-12-01' AND '2020-12-01' )
+ GROUP BY
+ customer_id
+ ) t2*/
+        $sql1 = $web_model->table('customer_entity')->where($time_where)->field('entity_id')->buildSql();
+        $arr_where = [];
+        $arr_where[] = ['exp', Db::raw("customer_id in " . $sql1)];
+
+        $sql2 = $order_model->alias('t1')->field('sum( base_grand_total ) AS total')->where($where)->where($arr_where)->group('customer_id')->buildSql();
+
+
+        $order_customerids = $web_model->table([$sql2=>'t2'])->field('sum( IF ( total >= 300, 1, 0 ) ) AS a,sum( IF ( total >= 200 AND total < 300, 1, 0 ) ) AS b,sum( IF ( total >= 150 AND total < 200, 1, 0 ) ) AS c,sum( IF ( total >= 80 AND total < 150, 1, 0 ) ) AS d,sum( IF ( total >= 40 AND total < 80, 1, 0 ) ) AS e,sum( IF ( total >= 0 AND total < 40, 1, 0 ) ) AS f')->select();
+        dump($order_customerids);exit;
+
         switch ($type) {
             case 1:
                 $order_customerids = $order_model->where($where)->group('customer_id')->having('sum(base_grand_total)>=0 and sum(base_grand_total)<40')->column('customer_id');
