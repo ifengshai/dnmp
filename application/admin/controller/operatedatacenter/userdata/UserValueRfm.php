@@ -119,9 +119,8 @@ class UserValueRfm extends Backend
         $time_where['created_at'] = ['between', [$start, $end]];
         $where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
         $customer_ids = $web_model->table('customer_entity')->where($time_where)->column('entity_id');
-        echo 111;exit;
         $where['customer_id'] = ['in',$customer_ids];
-
+        dump($where);exit;
         switch ($type) {
             case 1:
                 $order_customerids = $order_model->where($where)->group('customer_id')->having('sum(base_grand_total)>=0 and sum(base_grand_total)<40')->column('customer_id');
