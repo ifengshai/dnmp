@@ -2,6 +2,9 @@
 
 namespace app\admin\controller\warehouse;
 
+use app\admin\model\itemmanage\Item;
+use app\admin\model\itemmanage\ItemPlatformSku;
+use app\admin\model\order\order\NewOrderItemProcess;
 use app\common\controller\Backend;
 use think\Db;
 use think\Exception;
@@ -1468,7 +1471,7 @@ class Inventory extends Backend
         }
     }
     /*** lsw
-     * 更改镜架逻辑
+     * 更改镜架逻辑-弃用
      * @param id 协同任务ID
      * @param order_platform 订单平台
      * @param increment_id 订单号
@@ -1477,7 +1480,7 @@ class Inventory extends Backend
      * @param change_sku   改变之后的sKu
      * @param change_number 改变之后的sku数量
      */
-    public function workChangeFrame($id, $order_platform, $increment_id, $changeRow, $type)
+    public function workChangeFrameOld($id, $order_platform, $increment_id, $changeRow, $type)
     {
         if (!$id || !$order_platform || !$increment_id || !$changeRow) {
             return false;
@@ -1638,13 +1641,201 @@ class Inventory extends Backend
             }
         }
     }
+
+    /**
+     * 更改镜架-库存处理
+     * @param int $work_id 工单ID
+     * @param int $order_platform 平台类型
+     * @param string $increment_id 订单号
+     * @param array $change_row change_sku表数据
+     * @Author lzh
+     * @return bool
+     */
+    public function workChangeFrame($work_id, $order_platform, $increment_id, $change_row)
+    {
+        if (!$work_id || !$order_platform || !$increment_id || !$change_row) return false;
+
+        $_item = new Item();
+        $_platform_sku = new ItemPlatformSku();
+        $_stock_log = new StockLog();
+        $_new_order_process = new NewOrderItemProcess();
+
+        foreach ($change_row as $v) {
+            //原sku
+            $arr = explode('-', trim($v['original_sku']));
+            $original_sku = 2 < count($arr) ? $arr[0].'-'.$arr[1] : trim($v['original_sku']);
+
+            //新sku
+            $arr = explode('-', trim($v['change_sku']));
+            $change_sku = 2 < count($arr) ? $arr[0].'-'.$arr[1] : trim($v['change_sku']);
+
+            //原sku数量
+            $original_number = $v['original_number'] ?: 1;
+
+            //新sku数量
+            $change_number = $v['change_number'] ?: 1;
+
+            //原sku或新sku不存在则忽略
+            if (!$original_sku || !$change_sku) continue;
+
+            //原sku对应的仓库sku
+            $warehouse_original_sku = $_platform_sku->where(['platform_sku'=>$original_sku,'platform_type'=>$order_platform])->value('sku');
+
+            //新sku对应的仓库sku
+            $warehouse_change_sku = $_platform_sku->where(['platform_sku'=>$change_sku,'platform_type'=>$order_platform])->value('sku');
+
+            //获取子单状态
+            $distribution_status = $_new_order_process->where(['item_order_number'=>$v['item_order_number']])->value('distribution_status');
+
+            //开启事务
+            Db::startTrans();
+            try {
+                //子单状态大于待配货
+                if (2 < $distribution_status) {
+                    //原sku增加可用库存、虚拟仓库存,减少占用库存、配货占用
+                    if ($warehouse_original_sku && $original_number) {
+                        //增加可用库存，减少占用库存、配货占用
+                        $_item
+                            ->where(['sku' => $warehouse_original_sku])
+                            ->inc('available_stock', $original_number)
+                            ->dec('occupy_stock', $original_number)
+                            ->dec('distribution_occupy_stock', $original_number)
+                            ->update();
+
+                        //增加对应站点虚拟库存
+                        $_platform_sku
+                            ->where(['sku' => $warehouse_original_sku, 'platform_type' => $order_platform])
+                            ->setInc('stock', $original_number);
+
+                        //记录库存日志
+                        $_stock_log->setData([
+                            'type'                      => 2,
+                            'two_type'                  => 6,
+                            'sku'                       => $warehouse_original_sku,
+                            'order_number'              => $increment_id,
+                            'public_id'                 => $work_id,
+                            'distribution_stock_change' => -$original_number,
+                            'available_stock_change'    => $original_number,
+                            'occupy_stock_change'       => -$original_number,
+                            'create_person'             => session('admin.nickname'),
+                            'create_time'               => date('Y-m-d H:i:s'),
+                            'remark'                    => '工单更换镜框-订单已配镜架,原SKU增加可用库存,减少配货占用,减少订单占用'
+                        ]);
+                    }
+
+                    //新sku减少可用库存、虚拟仓库存,增加占用库存、配货占用
+                    if ($warehouse_change_sku && $change_number) {
+                        //减少可用库存,增加占用库存、配货占用
+                        $_item
+                            ->where(['sku' => $warehouse_change_sku])
+                            ->dec('available_stock', $change_number)
+                            ->inc('occupy_stock', $change_number)
+                            ->inc('distribution_occupy_stock', $change_number)
+                            ->update();
+
+                        //扣减对应站点虚拟库存
+                        $_platform_sku
+                            ->where(['sku' => $warehouse_change_sku, 'platform_type' => $order_platform])
+                            ->setDec('stock', $change_number);
+
+                        //记录库存日志
+                        $_stock_log->setData([
+                            'type'                      => 2,
+                            'two_type'                  => 6,
+                            'sku'                       => $warehouse_change_sku,
+                            'order_number'              => $increment_id,
+                            'public_id'                 => $work_id,
+                            'distribution_stock_change' => $change_number,
+                            'available_stock_change'    => -$change_number,
+                            'occupy_stock_change'       => $change_number,
+                            'create_person'             => session('admin.nickname'),
+                            'create_time'               => date('Y-m-d H:i:s'),
+                            'remark'                    => '工单更换镜框-订单已配镜架,新SKU减少可用库存,增加配货占用,增加订单占用'
+                        ]);
+                    }
+                } else { //子单状态是未配货
+                    //原sku增加可用库存、虚拟仓库存,减少占用库存
+                    if ($warehouse_original_sku && $original_number) {
+                        //增加可用库存,减少占用库存
+                        $_item
+                            ->where(['sku' => $warehouse_original_sku])
+                            ->inc('available_stock', $original_number)
+                            ->dec('occupy_stock', $original_number)
+                            ->update();
+
+                        //增加对应站点虚拟库存
+                        $_platform_sku
+                            ->where(['sku' => $warehouse_original_sku, 'platform_type' => $order_platform])
+                            ->setInc('stock', $original_number);
+
+                        //记录库存日志
+                        $_stock_log->setData([
+                            'type'                      => 2,
+                            'two_type'                  => 6,
+                            'sku'                       => $warehouse_original_sku,
+                            'order_number'              => $increment_id,
+                            'public_id'                 => $work_id,
+                            'available_stock_change'    => $original_number,
+                            'occupy_stock_change'       => -$original_number,
+                            'create_person'             => session('admin.nickname'),
+                            'create_time'               => date('Y-m-d H:i:s'),
+                            'remark'                    => '工单更换镜框-订单未配镜架,原SKU增加可用库存,减少配货占用,减少订单占用'
+                        ]);
+                    }
+
+                    //新sku减少可用库存、虚拟仓库存,增加占用库存
+                    if ($warehouse_change_sku && $change_number) {
+                        //减少可用库存,增加占用库存
+                        $_item
+                            ->where(['sku' => $warehouse_change_sku])
+                            ->dec('available_stock', $change_number)
+                            ->inc('occupy_stock', $change_number)
+                            ->update();
+
+                        //扣减对应站点虚拟库存
+                        $_platform_sku
+                            ->where(['sku' => $warehouse_change_sku, 'platform_type' => $order_platform])
+                            ->setDec('stock', $change_number);
+
+                        //记录库存日志
+                        $_stock_log->setData([
+                            'type'                      => 2,
+                            'two_type'                  => 6,
+                            'sku'                       => $warehouse_change_sku,
+                            'order_number'              => $increment_id,
+                            'public_id'                 => $work_id,
+                            'available_stock_change'    => -$change_number,
+                            'occupy_stock_change'       => $change_number,
+                            'create_person'             => session('admin.nickname'),
+                            'create_time'               => date('Y-m-d H:i:s'),
+                            'remark'                    => '工单更换镜框-订单未配镜架,新SKU减少可用库存,增加订单占用'
+                        ]);
+                    }
+                }
+
+                //提交
+                Db::commit();
+            } catch (ValidateException $e) {
+                Db::rollback();
+                $this->error($e->getMessage());
+            } catch (PDOException $e) {
+                Db::rollback();
+                $this->error($e->getMessage());
+            } catch (Exception $e) {
+                Db::rollback();
+                $this->error($e->getMessage());
+            }
+        }
+        return true;
+    }
+
     /***lsw
-     * 取消订单的逻辑
+     * 取消订单的逻辑-弃用
      * @param id 协同任务ID
      * @param order_platform 订单平台
      * @param increment_id 订单号
      */
-    public function workCancelOrder($id, $order_platform, $increment_id, $changeRow, $type)
+    public function workCancelOrderOld($id, $order_platform, $increment_id, $changeRow, $type)
     {
         if (!$id || !$order_platform || !$increment_id || !$changeRow) {
             return false;
@@ -1749,13 +1940,124 @@ class Inventory extends Backend
             }
         }
     }
+
+    /**
+     * 取消订单-库存处理
+     * @param int $work_id 工单ID
+     * @param int $order_platform 平台类型
+     * @param string $increment_id 订单号
+     * @param array $change_row change_sku表数据
+     * @Author lzh
+     * @return bool
+     */
+    public function workCancelOrder($work_id, $order_platform, $increment_id, $change_row)
+    {
+        if (!$work_id || !$order_platform || !$increment_id || !$change_row) return false;
+
+        $_item = new Item();
+        $_platform_sku = new ItemPlatformSku();
+        $_stock_log = new StockLog();
+        $_new_order_process = new NewOrderItemProcess();
+
+        foreach ($change_row as $v) {
+            //sku数量
+            $original_number = $v['original_number'] ?: 1;
+
+            //获取sku
+            $arr = explode('-', trim($v['original_sku']));
+            $original_sku = 2 < count($arr) ? $arr[0].'-'.$arr[1] : trim($v['original_sku']);
+
+            if (!$original_sku) continue;
+
+            //仓库sku
+            $warehouse_original_sku = $_platform_sku->where(['platform_sku'=>$original_sku,'platform_type'=>$order_platform])->value('sku');
+
+            //获取子单状态
+            $distribution_status = $_new_order_process->where(['item_order_number'=>$v['item_order_number']])->value('distribution_status');
+
+            //开始事务
+            Db::startTrans();
+            try {
+                //子单状态大于待配货
+                if (2 < $distribution_status) {
+                    //增加可用库存,减少占用库存、配货占用
+                    $_item
+                        ->where(['sku' => $warehouse_original_sku])
+                        ->inc('available_stock', $original_number)
+                        ->dec('occupy_stock', $original_number)
+                        ->dec('distribution_occupy_stock', $original_number)
+                        ->update();
+
+                    //增加对应站点虚拟库存
+                    $_platform_sku
+                        ->where(['sku' => $warehouse_original_sku, 'platform_type' => $order_platform])
+                        ->setInc('stock', $original_number);
+
+                    //记录库存日志
+                    $_stock_log->setData([
+                        'type'                      => 2,
+                        'two_type'                  => 7,
+                        'sku'                       => $warehouse_original_sku,
+                        'order_number'              => $increment_id,
+                        'public_id'                 => $work_id,
+                        'distribution_stock_change' => -$original_number,
+                        'available_stock_change'    => $original_number,
+                        'occupy_stock_change'       => -$original_number,
+                        'create_person'             => session('admin.nickname'),
+                        'create_time'               => date('Y-m-d H:i:s'),
+                        'remark'                    => '工单取消订单-订单已配镜架,SKU增加可用库存,减少配货占用,减少订单占用'
+                    ]);
+                } else {//子单状态是未配货
+                    //增加可用库存,减少占用库存
+                    $_item
+                        ->where(['sku' => $warehouse_original_sku])
+                        ->inc('available_stock', $original_number)
+                        ->dec('occupy_stock', $original_number)
+                        ->update();
+
+                    //增加对应站点虚拟库存
+                    $_platform_sku
+                        ->where(['sku' => $warehouse_original_sku, 'platform_type' => $order_platform])
+                        ->setInc('stock', $original_number);
+
+                    //记录库存日志
+                    $_stock_log->setData([
+                        'type'                      => 2,
+                        'two_type'                  => 6,
+                        'sku'                       => $warehouse_original_sku,
+                        'order_number'              => $increment_id,
+                        'public_id'                 => $work_id,
+                        'available_stock_change'    => $original_number,
+                        'occupy_stock_change'       => -$original_number,
+                        'create_person'             => session('admin.nickname'),
+                        'create_time'               => date('Y-m-d H:i:s'),
+                        'remark'                    => '工单取消订单-订单未配镜架,SKU增加可用库存,减少订单占用'
+                    ]);
+                }
+
+                //提交
+                Db::commit();
+            } catch (ValidateException $e) {
+                Db::rollback();
+                $this->error($e->getMessage());
+            } catch (PDOException $e) {
+                Db::rollback();
+                $this->error($e->getMessage());
+            } catch (Exception $e) {
+                Db::rollback();
+                $this->error($e->getMessage());
+            }
+        }
+        return true;
+    }
+
     /***lsw
-     * 赠品和补发的逻辑逻辑
+     * 赠品和补发的逻辑逻辑-弃用
      * @param id 协同任务ID
      * @param order_platform 订单平台
      * @param increment_id 订单号
      */
-    public function workPresent($id, $order_platform, $increment_id, $changeRow, $type)
+    public function workPresentOld($id, $order_platform, $increment_id, $changeRow, $type)
     {
         if (!$id || !$order_platform || !$increment_id || !$changeRow) {
             return false;
@@ -1825,4 +2127,89 @@ class Inventory extends Backend
             }
         }
     }
+
+    /**
+     * 赠品、补发-库存处理
+     * @param int $work_id 工单ID
+     * @param int $order_platform 平台类型
+     * @param string $increment_id 订单号
+     * @param array $change_row change_sku表数据
+     * @param int $type 类型：1增品 2补发
+     * @Author lzh
+     * @return bool
+     */
+    public function workPresent($work_id, $order_platform, $increment_id, $change_row, $type)
+    {
+        if (!$work_id || !$order_platform || !$increment_id || !$change_row) return false;
+
+        $_item = new Item();
+        $_platform_sku = new ItemPlatformSku();
+        $_stock_log = new StockLog();
+
+        foreach ($change_row as $v) {
+            //获取sku
+            $arr = explode('-', trim($v['original_sku']));
+            $original_sku = 2 < count($arr) ? $arr[0].'-'.$arr[1] : trim($v['original_sku']);
+
+            if(!$original_sku) continue;
+
+            //sku数量
+            $original_number = $v['original_number'];
+
+            //仓库sku
+            $warehouse_original_sku = $_platform_sku->where(['platform_sku'=>$original_sku,'platform_type'=>$order_platform])->value('sku');
+
+            //开启事务
+            Db::startTrans();
+            try {
+                if (1 == $type) { //赠品
+                    //减少可用库存、总库存
+                    $_item
+                        ->where(['sku' => $warehouse_original_sku])
+                        ->dec('available_stock', $original_number)
+                        ->dec('stock', $original_number)
+                        ->update();
+                } else{ //补发
+                    //减少可用库存，增加占用库存
+                    $_item
+                        ->where(['sku' => $warehouse_original_sku])
+                        ->dec('available_stock', $original_number)
+                        ->inc('occupy_stock', $original_number)->update();
+                }
+
+                //扣减对应站点虚拟库存
+                $_platform_sku
+                    ->where(['sku' => $warehouse_original_sku, 'platform_type' => $order_platform])
+                    ->setDec('stock', $original_number);
+
+                //记录库存日志
+                $_stock_log->setData([
+                    'type'                      => 2,
+                    'two_type'                  => 1 == $type ? 9 : 8,
+                    'stock_change'              => 1 == $type ? -$original_number : 0,
+                    'occupy_stock_change'       => 2 == $type ? $original_number : 0,
+                    'sku'                       => $warehouse_original_sku,
+                    'order_number'              => $increment_id,
+                    'public_id'                 => $work_id,
+                    'available_stock_change'    => -$original_number,
+                    'create_person'             => session('admin.nickname'),
+                    'create_time'               => date('Y-m-d H:i:s'),
+                    'remark'                    => '工单补发、赠品-SKU减少可用库存,增加订单占用'
+                ]);
+
+                Db::commit();
+            } catch (ValidateException $e) {
+                Db::rollback();
+                $this->error($e->getMessage());
+            } catch (PDOException $e) {
+                Db::rollback();
+                $this->error($e->getMessage());
+            } catch (Exception $e) {
+                Db::rollback();
+                $this->error($e->getMessage());
+            }
+        }
+        return true;
+    }
+
 }
