@@ -338,7 +338,8 @@ class Zeelool extends Model
             ->where($map1)
             ->group('o.customer_id')
             ->having('count(o.customer_id)>1')
-            ->count('o.customer_id');
+//            ->count('o.customer_id');
+            ->select(false);
         dump($again_buy_num1);exit;
 
         $again_buy_data2 = $order_model->alias('o')
