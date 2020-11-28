@@ -188,9 +188,10 @@ class VooguemePrescriptionDetailHelper{
 			$items[$item_key]['os_axis'] = $final_params['os_axis'];
 			$items[$item_key]['pdcheck'] = $final_params['pdcheck'];
 
+			//V站add网站数据存反
 			if($final_params['os_add'] && $final_params['od_add']){
-				$items[$item_key]['os_add'] = $final_params['os_add'];
-				$items[$item_key]['od_add'] = $final_params['od_add'];
+				$items[$item_key]['os_add'] = $final_params['od_add'];
+				$items[$item_key]['od_add'] = $final_params['os_add'];
 			}else{
 				if ((float) $final_params['os_add'] != 0) {
 					$items[$item_key]['total_add'] = $final_params['os_add'];

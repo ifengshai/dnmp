@@ -188,8 +188,8 @@ class ZeeloolDePrescriptionDetailHelper
 			$items[$item_key]['pdcheck'] = $final_params['pdcheck'];
 
 			if ($final_params['os_add'] && $final_params['od_add']) {
-				$items[$item_key]['os_add'] = $final_params['os_add'];
-				$items[$item_key]['od_add'] = $final_params['od_add'];
+				$items[$item_key]['os_add'] = $final_params['od_add'];
+				$items[$item_key]['od_add'] = $final_params['os_add'];
 			} else {
 				if ((float) $final_params['os_add'] > 0) {
 					$items[$item_key]['total_add'] = $final_params['os_add'];
