@@ -125,6 +125,11 @@ class Distribution extends Backend
             }
            
 
+            if ($filter['increment_id']) {
+                $map['b.increment_id'] = ['like', $filter['increment_id'] . '%'];
+                unset($filter['increment_id']);
+            }
+
             if ($filter['site']) {
                 $map['a.site'] = ['in', $filter['site']];
                 unset($filter['site']);
