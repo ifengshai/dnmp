@@ -1122,8 +1122,8 @@ class Test extends Backend
 
     public function order_data()
     {
-        $list = Db::table('fa_order_log')->where(['site' => 5])->order('id desc')->select();
-        $wesee = new \app\admin\model\order\order\Weseeoptical();
+        $list = Db::table('fa_order_log')->where(['site' => 3])->order('id desc')->select();
+        $wesee = new \app\admin\model\order\order\Nihao();
         foreach ($list as $k => $v) {
             if ($v['type'] == 1) {
                 $data['custom_print_label_new'] = 1;
