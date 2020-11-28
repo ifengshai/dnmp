@@ -1150,7 +1150,6 @@ class Test extends Backend
             if ($data) {
                 $wesee->where(['entity_id' => ['in', $v['order_ids']]])->update($data);
             }
-            
         }
         echo "ok";
     }
@@ -1163,6 +1162,6 @@ class Test extends Backend
         $data['custom_is_match_lens_new'] = 1;
         $data['custom_is_send_factory_new'] = 1;
         $data['custom_is_delivery_new'] = 1;
-        $nihao->where(['created_at' => ['<','2020-01-01']])->update($data);
+        $nihao->where(['created_at' => ['<', '2020-01-01']])->update($data);
     }
 }
