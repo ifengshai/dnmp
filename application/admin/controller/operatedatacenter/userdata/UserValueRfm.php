@@ -117,6 +117,7 @@ class UserValueRfm extends Backend
         $start = date('Y-m-d', strtotime("$today -12 month"));
         $end = date('Y-m-d 23:59:59', strtotime($today));
         $time_where['created_at'] = ['between', [$start, $end]];
+        dump($time_where);exit;
         $where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
         $customer_ids = $web_model->table('customer_entity')->where($time_where)->column('entity_id');
         $where['customer_id'] = ['in',$customer_ids];
