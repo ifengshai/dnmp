@@ -58,13 +58,6 @@ class UserValueRfm extends Backend
                 $count4 = $this->getOrderAmountUserNum($order_platform, 4);
                 $count5 = $this->getOrderAmountUserNum($order_platform, 5);
                 $count6 = $this->getOrderAmountUserNum($order_platform, 6);
-                dump($count1);
-                dump($count2);
-                dump($count3);
-                dump($count4);
-                dump($count5);
-                dump($count6);
-                dump($count);exit;
                 $arr = array(
                     'data'=>array($count1, $count2, $count3, $count4, $count5, $count6),
                     'count'=>$count
@@ -118,12 +111,8 @@ class UserValueRfm extends Backend
         $end = date('Y-m-d 23:59:59', strtotime($today));
         $time_where['created_at'] = ['between', [$start, $end]];
         $where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-        $customer_ids = $web_model->table('customer_entity')->limit(1)->column('entity_id');
-        dump($customer_ids);exit;
         $customer_ids = $web_model->table('customer_entity')->where($time_where)->column('entity_id');
         $where['customer_id'] = ['in',$customer_ids];
-        $order_customerids = $order_model->where($where)->group('customer_id')->having('sum(base_grand_total)>=0 and sum(base_grand_total)<40')->select(false);
-        dump($order_customerids);exit;
         switch ($type) {
             case 1:
                 $order_customerids = $order_model->where($where)->group('customer_id')->having('sum(base_grand_total)>=0 and sum(base_grand_total)<40')->column('customer_id');
