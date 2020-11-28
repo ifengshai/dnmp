@@ -52,12 +52,12 @@ class UserValueRfm extends Backend
             if(!$cache_data){
                 $result = $this->getOrderAmountUserNum($order_platform);
                 $count = $result['count'];
-                $count1 = $result['a'];
-                $count2 = $result['b'];
-                $count3 = $result['c'];
-                $count4 = $result['d'];
-                $count5 = $result['e'];
-                $count6 = $result['f'];
+                $count1 = $result['data'][0]['a'];
+                $count2 = $result['data'][0]['b'];
+                $count3 = $result['data'][0]['c'];
+                $count4 = $result['data'][0]['d'];
+                $count5 = $result['data'][0]['e'];
+                $count6 = $result['data'][0]['f'];
                 $arr = array(
                     'data'=>array($count1, $count2, $count3, $count4, $count5, $count6),
                     'count'=>$count
@@ -93,7 +93,7 @@ class UserValueRfm extends Backend
      * 获取金额分布人数
      * type  1:[0-40)  2:[40-80)  3:[80-150)   4:[150-200)    5:[200-300)   6:[300,10000000)
     */
-    public function getOrderAmountUserNum($order_platform, $type = 0)
+    public function getOrderAmountUserNum($order_platform)
     {
         if($order_platform == 2){
             $web_model = Db::connect('database.db_voogueme');
