@@ -118,6 +118,8 @@ class UserValueRfm extends Backend
         $end = date('Y-m-d 23:59:59', strtotime($today));
         $time_where['created_at'] = ['between', [$start, $end]];
         $where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        $customer_ids = $web_model->table('customer_entity')->limit(1)->column('entity_id');
+        dump($customer_ids);exit;
         $customer_ids = $web_model->table('customer_entity')->where($time_where)->column('entity_id');
         $where['customer_id'] = ['in',$customer_ids];
         $order_customerids = $order_model->where($where)->group('customer_id')->having('sum(base_grand_total)>=0 and sum(base_grand_total)<40')->select(false);
