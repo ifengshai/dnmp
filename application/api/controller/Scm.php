@@ -2,6 +2,7 @@
 
 namespace app\api\controller;
 
+use app\api\controller\ScmDistribution;
 use app\common\controller\Api;
 use app\admin\library\Auth;
 use app\admin\model\warehouse\ProductBarCodeItem;
@@ -33,6 +34,13 @@ class Scm extends Api
      * @var Auth
      */
     protected $auth = null;
+
+    /**
+     * 配货接口类
+     * @var object
+     * @access protected
+     */
+    protected $_distribution = null;
 
     /**
      * PDA菜单
@@ -145,6 +153,11 @@ class Scm extends Api
                     unset($value['menu'][$k]);
                 }
                 unset($value['menu'][$k]['link']);
+                //镜片未分拣数量
+                if('镜片分拣' == $val['name']){
+                    $this->_distribution = new ScmDistribution();
+                    $value['menu'][$k]['count'] = $this->_distribution->no_sorting();
+                }
             }
             if(!empty($value['menu'])){
                 $list[] = $value;
