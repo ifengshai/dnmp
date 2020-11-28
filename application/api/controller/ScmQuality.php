@@ -459,116 +459,115 @@ class ScmQuality extends Scm
         $do_type = $this->request->request('do_type');
         $is_error = $this->request->request('is_error');
         $get_check_id = $this->request->request('check_id');
+        //检测条形码是否已绑定
+        $where['check_id'] = [['>', 0], ['neq', $get_check_id]];
+        foreach ($item_data as $key => $value) {
+            //检测合格条形码
+            $quantity_code = array_column($value['quantity_agg'], 'code');
+            count($value['quantity_agg']) != count(array_unique($quantity_code))
+            &&
+            $this->error(__('合格条形码有重复，请检查'), [], 405);
 
-        if ($get_check_id) {
-            $row = $this->_check->get($get_check_id);
-            empty($row) && $this->error(__('质检单不存在'), [], 403);
-            0 != $row['status'] && $this->error(__('只有新建状态才能编辑'), [], 405);
+            $where['code'] = ['in', $quantity_code];
+            $check_quantity = $this->_product_bar_code_item
+                ->where($where)
+                ->field('code')
+                ->find();
+            if (!empty($check_quantity['code'])) {
+                $this->error(__('合格条形码:' . $check_quantity['code'] . ' 已绑定,请移除'), [], 405);
+                exit;
+            }
 
-            $check_id = $get_check_id;
-            $purchase_id = $row['purchase_id'];
-            $logistics_id = $row['logistics_id'];
+            //检测不合格条形码
+            $unqualified_code = array_column($value['unqualified_agg'], 'code');
+            count($value['unqualified_agg']) != count(array_unique($unqualified_code))
+            &&
+            $this->error(__('不合格条形码有重复，请检查'), [], 405);
 
-            //编辑质检单
-            $check_data = [
-                'is_error' => 1 == $is_error ?: 0,
-                'status' => 1 == $do_type ?: 0
-            ];
-            $result = $row->allowField(true)->save($check_data);
-        } else {
-            $batch_id = $this->request->request('batch_id');
-            $logistics_id = $this->request->request('logistics_id');
-            empty($logistics_id) && $this->error(__('物流单ID不能为空'), [], 403);
+            $where['code'] = ['in', $unqualified_code];
+            $check_unqualified = $this->_product_bar_code_item
+                ->where($where)
+                ->field('code')
+                ->find();
+            if (!empty($check_unqualified['code'])) {
+                $this->error(__('不合格条形码:' . $check_unqualified['code'] . ' 已绑定,请移除'), [], 405);
+                exit;
+            }
 
-            $check_order_number = $this->request->request('check_order_number');
-            empty($check_order_number) && $this->error(__('质检单号不能为空'), [], 403);
+            //检测留样条形码
+            $sample_code = array_column($value['sample_agg'], 'code');
+            count($value['sample_agg']) != count(array_unique($sample_code))
+            &&
+            $this->error(__('不合格条形码有重复，请检查'), [], 405);
 
-            $purchase_id = $this->request->request('purchase_id');
-            empty($purchase_id) && $this->error(__('采购单ID不能为空'), [], 403);
-
-            $supplier_id = $this->request->request('supplier_id');
-            empty($supplier_id) && $this->error(__('供应商ID不能为空'), [], 403);
-
-            $replenish_id = $this->request->request('replenish_id');
-            empty($replenish_id) && $this->error(__('补货单ID不能为空'), [], 403);
-
-            $existence = $this->_check
-                ->where(['logistics_id' => $logistics_id, 'status' => ['<', 3]])
-                ->value('id');
-            !empty($existence) && $this->error(__('质检单已创建，请勿重复操作'), [], 405);
-
-            //创建质检单
-            $check_data = [
-                'check_order_number' => $check_order_number,
-                'purchase_id' => $purchase_id,
-                'supplier_id' => $supplier_id,
-                'batch_id' => $batch_id,
-                'is_error' => 1 == $is_error ?: 0,
-                'status' => 1 == $do_type ?: 0,
-                'logistics_id' => $logistics_id,
-                'replenish_id' => $replenish_id,
-                'create_person' => $this->auth->nickname,
-                'createtime' => date('Y-m-d H:i:s')
-            ];
-            $result = $this->_check->allowField(true)->save($check_data);
-            $check_id = $this->_check->id;
+            $where['code'] = ['in', $sample_code];
+            $check_sample = $this->_product_bar_code_item
+                ->where($where)
+                ->field('code')
+                ->find();
+            if (!empty($check_sample)) {
+                $this->error(__('留样条形码:' . $check_sample['code'] . ' 已绑定,请移除'), [], 405);
+                exit;
+            }
         }
-
-        false === $result && $this->error(__('提交失败'), [], 404);
 
         Db::startTrans();
         try {
-            //检测条形码是否已绑定
-            $where['check_id'] = [['>', 0], ['neq', $check_id]];
-            foreach ($item_data as $key => $value) {
-                //检测合格条形码
-                $quantity_code = array_column($value['quantity_agg'], 'code');
-                count($value['quantity_agg']) != count(array_unique($quantity_code))
-                    &&
-                    $this->error(__('合格条形码有重复，请检查'), [], 405);
+            if ($get_check_id) {
+                $row = $this->_check->get($get_check_id);
+                empty($row) && $this->error(__('质检单不存在'), [], 403);
+                0 != $row['status'] && $this->error(__('只有新建状态才能编辑'), [], 405);
 
-                $where['code'] = ['in', $quantity_code];
-                $check_quantity = $this->_product_bar_code_item
-                    ->where($where)
-                    ->field('code')
-                    ->find();
-                if (!empty($check_quantity['code'])) {
-                    $this->error(__('合格条形码:' . $check_quantity['code'] . ' 已绑定,请移除'), [], 405);
-                    exit;
-                }
+                $check_id = $get_check_id;
+                $purchase_id = $row['purchase_id'];
+                $logistics_id = $row['logistics_id'];
 
-                //检测不合格条形码
-                $unqualified_code = array_column($value['unqualified_agg'], 'code');
-                count($value['unqualified_agg']) != count(array_unique($unqualified_code))
-                    &&
-                    $this->error(__('不合格条形码有重复，请检查'), [], 405);
+                //编辑质检单
+                $check_data = [
+                    'is_error' => 1 == $is_error ?: 0,
+                    'status' => 1 == $do_type ?: 0
+                ];
+                $result = $row->allowField(true)->save($check_data);
+            } else {
+                $batch_id = $this->request->request('batch_id');
+                $logistics_id = $this->request->request('logistics_id');
+                empty($logistics_id) && $this->error(__('物流单ID不能为空'), [], 403);
 
-                $where['code'] = ['in', $unqualified_code];
-                $check_unqualified = $this->_product_bar_code_item
-                    ->where($where)
-                    ->field('code')
-                    ->find();
-                if (!empty($check_unqualified['code'])) {
-                    $this->error(__('不合格条形码:' . $check_unqualified['code'] . ' 已绑定,请移除'), [], 405);
-                    exit;
-                }
+                $check_order_number = $this->request->request('check_order_number');
+                empty($check_order_number) && $this->error(__('质检单号不能为空'), [], 403);
 
-                //检测留样条形码
-                $sample_code = array_column($value['sample_agg'], 'code');
-                count($value['sample_agg']) != count(array_unique($sample_code))
-                    &&
-                    $this->error(__('不合格条形码有重复，请检查'), [], 405);
+                $purchase_id = $this->request->request('purchase_id');
+                empty($purchase_id) && $this->error(__('采购单ID不能为空'), [], 403);
 
-                $where['code'] = ['in', $sample_code];
-                $check_sample = $this->_product_bar_code_item
-                    ->where($where)
-                    ->field('code')
-                    ->find();
-                if (!empty($check_sample)) {
-                    $this->error(__('留样条形码:' . $check_sample['code'] . ' 已绑定,请移除'), [], 405);
-                    exit;
-                }
+                $supplier_id = $this->request->request('supplier_id');
+                empty($supplier_id) && $this->error(__('供应商ID不能为空'), [], 403);
+
+                $replenish_id = $this->request->request('replenish_id');
+                empty($replenish_id) && $this->error(__('补货单ID不能为空'), [], 403);
+
+                $existence = $this->_check
+                    ->where(['logistics_id' => $logistics_id, 'status' => ['<', 3]])
+                    ->value('id');
+                !empty($existence) && $this->error(__('质检单已创建，请勿重复操作'), [], 405);
+
+                //创建质检单
+                $check_data = [
+                    'check_order_number' => $check_order_number,
+                    'purchase_id' => $purchase_id,
+                    'supplier_id' => $supplier_id,
+                    'batch_id' => $batch_id,
+                    'is_error' => 1 == $is_error ?: 0,
+                    'status' => 1 == $do_type ?: 0,
+                    'logistics_id' => $logistics_id,
+                    'replenish_id' => $replenish_id,
+                    'create_person' => $this->auth->nickname,
+                    'createtime' => date('Y-m-d H:i:s')
+                ];
+                $result = $this->_check->allowField(true)->save($check_data);
+                $check_id = $this->_check->id;
             }
+
+            false === $result && $this->error(__('提交失败'), [], 404);
 
             //批量创建或更新质检单商品
             foreach ($item_data as $key => $value) {
