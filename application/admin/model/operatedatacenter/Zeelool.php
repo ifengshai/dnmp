@@ -339,6 +339,7 @@ class Zeelool extends Model
             ->group('o.customer_id')
             ->having('count(o.customer_id)>1')
             ->count('o.customer_id');
+        dump($again_buy_num1);exit;
 
         $again_buy_data2 = $order_model->alias('o')
             ->join('customer_entity c','o.customer_id=c.entity_id')
