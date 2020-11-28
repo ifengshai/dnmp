@@ -2060,7 +2060,6 @@ class Crontab extends Backend
             } else {
                 echo '<br>执行失败';
             }
-
         } else {
             echo '执行完毕！';
         }
@@ -2205,8 +2204,8 @@ class Crontab extends Backend
             $final_params['index_price'] = $product_options['info_buyRequest']['tmplens']['index_price'];
             $final_params['coatiing_price'] = $product_options['info_buyRequest']['tmplens']['coatiing_price'];
 
-            $items[$order_item_key]['frame_regural_price'] = $final_params['frame_regural_price'] = $product_options['info_buyRequest']['tmplens']['frame_regural_price']?: 0;
-            $items[$order_item_key]['is_special_price'] = $final_params['is_special_price'] = $product_options['info_buyRequest']['tmplens']['is_special_price']?: 0;
+            $items[$order_item_key]['frame_regural_price'] = $final_params['frame_regural_price'] = $product_options['info_buyRequest']['tmplens']['frame_regural_price'] ?: 0;
+            $items[$order_item_key]['is_special_price'] = $final_params['is_special_price'] = $product_options['info_buyRequest']['tmplens']['is_special_price'] ?: 0;
             $items[$order_item_key]['index_name'] = $final_params['index_name'] = $product_options['info_buyRequest']['tmplens']['index_name'];
             $items[$order_item_key]['index_id'] = $final_params['index_id'] = $product_options['info_buyRequest']['tmplens']['index_id'];
             $items[$order_item_key]['lens'] = $final_params['lens'] = $product_options['info_buyRequest']['tmplens']['lens'];
@@ -2357,7 +2356,6 @@ class Crontab extends Backend
             } else {
                 echo '<br>执行失败';
             }
-
         } else {
             echo '执行完毕！';
         }
@@ -2502,8 +2500,8 @@ class Crontab extends Backend
             $final_params['index_price'] = $product_options['info_buyRequest']['tmplens']['index_price'];
             $final_params['coatiing_price'] = $product_options['info_buyRequest']['tmplens']['coatiing_price'];
 
-            $items[$order_item_key]['frame_regural_price'] = $final_params['frame_regural_price'] = $product_options['info_buyRequest']['tmplens']['frame_regural_price']?: 0;
-            $items[$order_item_key]['is_special_price'] = $final_params['is_special_price'] = $product_options['info_buyRequest']['tmplens']['is_special_price']?: 0;
+            $items[$order_item_key]['frame_regural_price'] = $final_params['frame_regural_price'] = $product_options['info_buyRequest']['tmplens']['frame_regural_price'] ?: 0;
+            $items[$order_item_key]['is_special_price'] = $final_params['is_special_price'] = $product_options['info_buyRequest']['tmplens']['is_special_price'] ?: 0;
             $items[$order_item_key]['index_name'] = $final_params['index_name'] = $product_options['info_buyRequest']['tmplens']['index_name'];
             $items[$order_item_key]['index_id'] = $final_params['index_id'] = $product_options['info_buyRequest']['tmplens']['index_id'];
             $items[$order_item_key]['lens'] = $final_params['lens'] = $product_options['info_buyRequest']['tmplens']['lens'];
@@ -2654,7 +2652,6 @@ class Crontab extends Backend
             } else {
                 echo '<br>执行失败';
             }
-
         } else {
             echo '执行完毕！';
         }
@@ -2975,7 +2972,7 @@ class Crontab extends Backend
         $data['zeelool_es_unit_price']                      = $zeelool_es_unit_price;
         $data['zeelool_de_unit_price']                      = $zeelool_de_unit_price;
         $data['zeelool_jp_unit_price']                      = $zeelool_jp_unit_price;
-        $data['all_unit_price']                             = $data['all_sales_num'] ? @round($data['all_sales_money'] / $data['all_sales_num']*100, 2) : 0;
+        $data['all_unit_price']                             = $data['all_sales_num'] ? @round($data['all_sales_money'] / $data['all_sales_num'] * 100, 2) : 0;
         $data['zeelool_shoppingcart_total']                 = $zeelool_shoppingcart_total;
         $data['voogueme_shoppingcart_total']                = $voogueme_shoppingcart_total;
         $data['nihao_shoppingcart_total']                   = $nihao_shoppingcart_total;
@@ -2991,7 +2988,7 @@ class Crontab extends Backend
         $data['zeelool_es_shoppingcart_conversion']         = $zeelool_es_shoppingcart_conversion;
         $data['zeelool_de_shoppingcart_conversion']         = $zeelool_de_shoppingcart_conversion;
         $data['zeelool_jp_shoppingcart_conversion']         = $zeelool_jp_shoppingcart_conversion;
-        $data['all_shoppingcart_conversion']                = $data['all_shoppingcart_total'] ? @round($data['all_sales_num'] / $data['all_shoppingcart_total']*100, 2) : 0;
+        $data['all_shoppingcart_conversion']                = $data['all_shoppingcart_total'] ? @round($data['all_sales_num'] / $data['all_shoppingcart_total'] * 100, 2) : 0;
         $data['zeelool_register_customer']                  = $zeelool_register_customer;
         $data['voogueme_register_customer']                 = $voogueme_register_customer;
         $data['nihao_register_customer']                    = $nihao_register_customer;
@@ -3015,7 +3012,7 @@ class Crontab extends Backend
         $data['zeelool_es_shoppingcart_update_conversion']  = $zeelool_es_shoppingcart_update_conversion;
         $data['zeelool_de_shoppingcart_update_conversion']  = $zeelool_de_shoppingcart_update_conversion;
         $data['zeelool_jp_shoppingcart_update_conversion']  = $zeelool_jp_shoppingcart_update_conversion;
-        $data['all_shoppingcart_update_conversion']       = $data['all_shoppingcart_update_total'] ? @round($data['all_sales_num']/$data['all_shoppingcart_update_total']*100, 2) : 0;
+        $data['all_shoppingcart_update_conversion']       = $data['all_shoppingcart_update_total'] ? @round($data['all_sales_num'] / $data['all_shoppingcart_update_total'] * 100, 2) : 0;
         $data['create_date'] = date("Y-m-d", strtotime("-1 day"));
         $data['createtime'] = date("Y-m-d H:i:s");
         Db::name('order_statistics')->insert($data);
@@ -3509,52 +3506,52 @@ class Crontab extends Backend
         //昨天销售额
         $order_where['order_type'] = 1;
         $order_success_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-        $yes_date = date("Y-m-d",strtotime("-1 day"));
+        $yes_date = date("Y-m-d", strtotime("-1 day"));
         $yestime_where = [];
         $yestime_where1 = [];
         $yestime_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $yes_date . "'")];
         $yestime_where1[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '" . $yes_date . "'")];
         $yesterday_sales_money = $model->table('sales_flat_order')->where($yestime_where)->where($order_where)->where($order_success_where)->field('sum(base_grand_total) base_grand_total,count(entity_id) order_num')->find();
-        $yesterday_sales_money_data           = round($yesterday_sales_money['base_grand_total'],2);
+        $yesterday_sales_money_data           = round($yesterday_sales_money['base_grand_total'], 2);
         //过去7天销售额
         $seven_start = date("Y-m-d", strtotime("-7 day"));
-        $seven_end = date("Y-m-d 23:59:59",strtotime("-1 day"));
+        $seven_end = date("Y-m-d 23:59:59", strtotime("-1 day"));
         $sev_where['created_at'] = $sev_where1['updated_at'] = ['between', [$seven_start, $seven_end]];
         $pastsevenday_sales_money = $model->table('sales_flat_order')->where($sev_where)->where($order_where)->where($order_success_where)->field('sum(base_grand_total) base_grand_total,count(entity_id) order_num')->find();
-        $pastsevenday_sales_money_data        = round($pastsevenday_sales_money['base_grand_total'],2);
+        $pastsevenday_sales_money_data        = round($pastsevenday_sales_money['base_grand_total'], 2);
         //过去30天销售额
         $thirty_start = date("Y-m-d", strtotime("-30 day"));
-        $thirty_end = date("Y-m-d 23:59:59",strtotime("-1 day"));
+        $thirty_end = date("Y-m-d 23:59:59", strtotime("-1 day"));
         $thirty_where['created_at'] = $thirty_where1['updated_at'] = ['between', [$thirty_start, $thirty_end]];
         $pastthirtyday_sales_money = $model->table('sales_flat_order')->where($thirty_where)->where($order_where)->where($order_success_where)->field('sum(base_grand_total) base_grand_total,count(entity_id) order_num')->find();
-        $pastthirtyday_sales_money_data       = round($pastthirtyday_sales_money['base_grand_total'],2);
+        $pastthirtyday_sales_money_data       = round($pastthirtyday_sales_money['base_grand_total'], 2);
         //当月销售额
         $thismonth_start = date('Y-m-01', strtotime($today));
         $thismonth_end =  $today;
         $thismonth_where['created_at'] = $thismonth_where1['updated_at'] = ['between', [$thismonth_start, $thismonth_end]];
         $thismonth_sales_money = $model->table('sales_flat_order')->where($thismonth_where)->where($order_where)->where($order_success_where)->field('sum(base_grand_total) base_grand_total,count(entity_id) order_num')->find();
-        $thismonth_sales_money_data           = round($thismonth_sales_money['base_grand_total'],2);
+        $thismonth_sales_money_data           = round($thismonth_sales_money['base_grand_total'], 2);
         //上月销售额
         $lastmonth_start = date('Y-m-01', strtotime("$today -1 month"));
         $lastmonth_end = date('Y-m-t 23:59:59', strtotime("$today -1 month"));
         $lastmonth_where['created_at'] = $lastmonth_where1['updated_at'] = ['between', [$lastmonth_start, $lastmonth_end]];
         $lastmonth_sales_money = $model->table('sales_flat_order')->where($lastmonth_where)->where($order_where)->where($order_success_where)->field('sum(base_grand_total) base_grand_total,count(entity_id) order_num')->find();
-        $lastmonth_sales_money_data           = round($lastmonth_sales_money['base_grand_total'],2);
+        $lastmonth_sales_money_data           = round($lastmonth_sales_money['base_grand_total'], 2);
         //今年销售额
-        $thisyear_start = date("Y",time())."-1"."-1"; //本年开始
+        $thisyear_start = date("Y", time()) . "-1" . "-1"; //本年开始
         $thisyear_end = $today;
         $thisyear_where['created_at'] = $thisyear_where1['updated_at'] = ['between', [$thisyear_start, $thisyear_end]];
         $thisyear_sales_money = $model->table('sales_flat_order')->where($thisyear_where)->where($order_where)->where($order_success_where)->field('sum(base_grand_total) base_grand_total,count(entity_id) order_num')->find();
-        $thisyear_sales_money_data            = round($thisyear_sales_money['base_grand_total'],2);
+        $thisyear_sales_money_data            = round($thisyear_sales_money['base_grand_total'], 2);
         //上年销售额
         $lastyear_start = date('Y-01-01 00:00:00', strtotime('last year'));
         $lastyear_end = date('Y-12-31 23:59:59', strtotime('last year'));
         $lastyear_where['created_at'] = $lastyear_where1['updated_at'] = ['between', [$lastyear_start, $lastyear_end]];
         $lastyear_sales_money = $model->table('sales_flat_order')->where($lastyear_where)->where($order_where)->where($order_success_where)->field('sum(base_grand_total) base_grand_total,count(entity_id) order_num')->find();
-        $lastyear_sales_money_data            = round($lastyear_sales_money['base_grand_total'],2);
+        $lastyear_sales_money_data            = round($lastyear_sales_money['base_grand_total'], 2);
         //总共销售额
         $total_sales_money = $model->table('sales_flat_order')->where($order_where)->where($order_success_where)->field('sum(base_grand_total) base_grand_total,count(entity_id) order_num')->find();
-        $total_sales_money_data               = round($total_sales_money['base_grand_total'],2);
+        $total_sales_money_data               = round($total_sales_money['base_grand_total'], 2);
         //昨天订单数
         $yesterday_order_num_data             = $model->table('sales_flat_order')->where($yestime_where)->where($order_where)->count();
         //过去7天订单数
@@ -3719,8 +3716,9 @@ class Crontab extends Backend
      */
     public function update_ashboard_data_two()
     {
+        ini_set('memory_limit', '512M');
         //求出平台
-        $platform = $this->request->get('platform');
+        $platform = $this->request->get('platform', 1);
         if (!$platform) {
             return false;
         }
@@ -3759,7 +3757,7 @@ class Crontab extends Backend
         //昨天支付成功数
         $order_where['order_type'] = 1;
         $order_success_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-        $yes_date = date("Y-m-d",strtotime("-1 day"));
+        $yes_date = date("Y-m-d", strtotime("-1 day"));
         $yestime_where = [];
         $yestime_where1 = [];
         $yestime_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $yes_date . "'")];
@@ -3767,12 +3765,12 @@ class Crontab extends Backend
         $yesterday_order_success_data = $model->table('sales_flat_order')->where($yestime_where)->where($order_where)->where($order_success_where)->count();
         //过去7天支付成功数
         $seven_start = date("Y-m-d", strtotime("-7 day"));
-        $seven_end = date("Y-m-d 23:59:59",strtotime("-1 day"));
+        $seven_end = date("Y-m-d 23:59:59", strtotime("-1 day"));
         $sev_where['created_at'] = $sev_where1['updated_at'] = ['between', [$seven_start, $seven_end]];
         $pastsevenday_order_success_data = $model->table('sales_flat_order')->where($sev_where)->where($order_where)->where($order_success_where)->count();
         //过去30天支付成功数
         $thirty_start = date("Y-m-d", strtotime("-30 day"));
-        $thirty_end = date("Y-m-d 23:59:59",strtotime("-1 day"));
+        $thirty_end = date("Y-m-d 23:59:59", strtotime("-1 day"));
         $thirty_where['created_at'] = $thirty_where1['updated_at'] = ['between', [$thirty_start, $thirty_end]];
         $pastthirtyday_order_success_data = $model->table('sales_flat_order')->where($thirty_where)->where($order_where)->where($order_success_where)->count();
         //当月支付成功数
@@ -3787,7 +3785,7 @@ class Crontab extends Backend
         $lastmonth_where['created_at'] = $lastmonth_where1['updated_at'] = ['between', [$lastmonth_start, $lastmonth_end]];
         $lastmonth_order_success_data = $model->table('sales_flat_order')->where($lastmonth_where)->where($order_where)->where($order_success_where)->count();
         //今年支付成功数
-        $thisyear_start = date("Y",time())."-1"."-1"; //本年开始
+        $thisyear_start = date("Y", time()) . "-1" . "-1"; //本年开始
         $thisyear_end = $today;
         $thisyear_where['created_at'] = $thisyear_where1['updated_at'] = ['between', [$thisyear_start, $thisyear_end]];
         $thisyear_order_success_data = $model->table('sales_flat_order')->where($thisyear_where)->where($order_where)->where($order_success_where)->count();
@@ -3799,7 +3797,7 @@ class Crontab extends Backend
         //总共支付成功数
         $total_order_success_data = $model->table('sales_flat_order')->where($order_where)->where($order_success_where)->count();
         //昨天购物车总数
-        $quote_where['base_grand_total'] = ['>',0];
+        $quote_where['base_grand_total'] = ['>', 0];
         $yesterday_shoppingcart_total_data = $model->table('sales_flat_quote')->where($yestime_where)->where($quote_where)->count();
         //过去7天购物车总数
         $pastsevenday_shoppingcart_total_data = $model->table('sales_flat_quote')->where($sev_where)->where($quote_where)->count();
@@ -3833,74 +3831,125 @@ class Crontab extends Backend
         $total_shoppingcart_new_data  = $total_shoppingcart_total_data;
 
         //2020-11-25 更换仪表盘页面新增购物车转化率(%)的计算方法 start
-        //昨天购物车总数 的所有ids
-        $quote_where['base_grand_total'] = ['>',0];
-        $yesterday_shoppingcart_total_data1 = $model->table('sales_flat_quote')->where($yestime_where)->where($quote_where)->column('entity_id');
-        //过去7天购物车总数的所有ids
-        $pastsevenday_shoppingcart_total_data1 = $model->table('sales_flat_quote')->where($sev_where)->where($quote_where)->column('entity_id');
-        //过去30天购物车总数的所有ids
-        $pastthirtyday_shoppingcart_total_data1 = $model->table('sales_flat_quote')->where($thirty_where)->where($quote_where)->column('entity_id');
-        //当月购物车总数的所有ids
-        $thismonth_shoppingcart_total_data1 = $model->table('sales_flat_quote')->where($thismonth_where)->where($quote_where)->column('entity_id');
-        //上月购物车总数的所有ids
-        $lastmonth_shoppingcart_total_data1 = $model->table('sales_flat_quote')->where($lastmonth_where)->where($quote_where)->column('entity_id');
-        //今年购物车总数的所有ids
-        $thisyear_shoppingcart_total_data1 = $model->table('sales_flat_quote')->where($thisyear_where)->where($quote_where)->column('entity_id');
-        //上年购物车总数的所有ids
-        $lastyear_shoppingcart_total_data1 = $model->table('sales_flat_quote')->where($lastyear_where)->where($quote_where)->column('entity_id');
-        //总共购物车总数的所有ids
-        $total_shoppingcart_total_data1 = $model->table('sales_flat_quote')->where($quote_where)->column('entity_id');
-
         //昨天支付成功数 从新增购物车中成功支付数
-        $quote_where1['quote_id'] = ['in',$yesterday_shoppingcart_total_data1];
-        $order_where['order_type'] = 1;
-        $order_success_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-        $yes_date = date("Y-m-d",strtotime("-1 day"));
+        $order_where = [];
+        $order_where['o.order_type'] = 1;
+        $order_success_where = [];
+        $order_success_where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        $yes_date = date("Y-m-d", strtotime("-1 day"));
         $yestime_where = [];
-        $yestime_where1 = [];
-        $yestime_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $yes_date . "'")];
-        $yestime_where1[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '" . $yes_date . "'")];
-        $yesterday_order_success_data1 = $model->table('sales_flat_order')->where($quote_where1)->where($yestime_where)->where($order_where)->where($order_success_where)->count();
+        $yestime_where[] = ['exp', Db::raw("DATE_FORMAT(o.created_at, '%Y-%m-%d') = '" . $yes_date . "'")];
+        $yestime_wheres[] = ['exp', Db::raw("DATE_FORMAT(p.created_at, '%Y-%m-%d') = '" . $yes_date . "'")];
+        $yesterday_order_success_data1 = $model->table('sales_flat_order')
+            ->alias('o')
+            ->join('sales_flat_quote p', 'o.quote_id=p.entity_id')
+            ->where($yestime_wheres)
+            ->where('p.base_grand_total','>',0)
+            ->where($yestime_where)
+            ->where($order_where)
+            ->where($order_success_where)
+            ->count();
+
         //过去7天从新增购物车中成功支付数
-        $quote_where2['quote_id'] = ['in',$pastsevenday_shoppingcart_total_data1];
         $seven_start = date("Y-m-d", strtotime("-7 day"));
-        $seven_end = date("Y-m-d 23:59:59",strtotime("-1 day"));
-        $sev_where['created_at'] = $sev_where1['updated_at'] = ['between', [$seven_start, $seven_end]];
-        $pastsevenday_order_success_data1 = $model->table('sales_flat_order')->where($quote_where2)->where($sev_where)->where($order_where)->where($order_success_where)->count();
+        $seven_end = date("Y-m-d 23:59:59", strtotime("-1 day"));
+        $sev_where = [];
+        $sev_where['o.created_at'] = $sev_where1['updated_at'] = ['between', [$seven_start, $seven_end]];
+        $sev_wheres['p.created_at'] = $sev_where1['updated_at'] = ['between', [$seven_start, $seven_end]];
+        $pastsevenday_order_success_data1 = $model->table('sales_flat_order')
+            ->alias('o')
+            ->join('sales_flat_quote p', 'o.quote_id=p.entity_id')
+            ->where($sev_wheres)
+            ->where('p.base_grand_total','>',0)
+            ->where($sev_where)
+            ->where($order_where)
+            ->where($order_success_where)
+            ->count();
+
         //过去30天从新增购物车中成功支付数
-        $quote_where3['quote_id'] = ['in',$pastthirtyday_shoppingcart_total_data1];
         $thirty_start = date("Y-m-d", strtotime("-30 day"));
-        $thirty_end = date("Y-m-d 23:59:59",strtotime("-1 day"));
-        $thirty_where['created_at'] = $thirty_where1['updated_at'] = ['between', [$thirty_start, $thirty_end]];
-        $pastthirtyday_order_success_data1 = $model->table('sales_flat_order')->where($quote_where3)->where($thirty_where)->where($order_where)->where($order_success_where)->count();
+        $thirty_end = date("Y-m-d 23:59:59", strtotime("-1 day"));
+        $thirty_where = [];
+        $thirty_where['o.created_at'] = $thirty_where1['updated_at'] = ['between', [$thirty_start, $thirty_end]];
+        $thirty_wheres['p.created_at'] = $thirty_where1['updated_at'] = ['between', [$thirty_start, $thirty_end]];
+        $pastthirtyday_order_success_data1 = $model->table('sales_flat_order')
+            ->alias('o')
+            ->join('sales_flat_quote p', 'o.quote_id=p.entity_id')
+            ->where($thirty_wheres)
+            ->where('p.base_grand_total','>',0)
+            ->where($thirty_where)
+            ->where($order_where)
+            ->where($order_success_where)
+            ->count();
         //当月从新增购物车中成功支付数
-        $quote_where4['quote_id'] = ['in',$thismonth_shoppingcart_total_data1];
         $thismonth_start = date('Y-m-01', strtotime($today));
         $thismonth_end =  $today;
-        $thismonth_where['created_at'] = ['between', [$thismonth_start, $thismonth_end]];
+        $thismonth_where = [];
+        $thismonth_where['o.created_at'] = ['between', [$thismonth_start, $thismonth_end]];
+        $thismonth_wheres['p.created_at'] = ['between', [$thismonth_start, $thismonth_end]];
         $thismonth_where1['updated_at'] = ['between', [$thismonth_start, $thismonth_end]];
-        $thismonth_order_success_data1 = $model->table('sales_flat_order')->where($quote_where4)->where($thismonth_where)->where($order_where)->where($order_success_where)->count();
+        $thismonth_order_success_data1 = $model->table('sales_flat_order')
+            ->alias('o')
+            ->join('sales_flat_quote p', 'o.quote_id=p.entity_id')
+            ->where($thismonth_wheres)
+            ->where('p.base_grand_total','>',0)
+            ->where($thismonth_where)
+            ->where($order_where)
+            ->where($order_success_where)
+            ->count();
         //上月从新增购物车中成功支付数
-        $quote_where5['quote_id'] = ['in',$lastmonth_shoppingcart_total_data1];
         $lastmonth_start = date('Y-m-01', strtotime("$today -1 month"));
         $lastmonth_end = date('Y-m-t 23:59:59', strtotime("$today -1 month"));
-        $lastmonth_where['created_at'] = $lastmonth_where1['updated_at'] = ['between', [$lastmonth_start, $lastmonth_end]];
-        $lastmonth_order_success_data1 = $model->table('sales_flat_order')->where($quote_where5)->where($lastmonth_where)->where($order_where)->where($order_success_where)->count();
+        $lastmonth_where = [];
+        $lastmonth_where['o.created_at'] = $lastmonth_where1['updated_at'] = ['between', [$lastmonth_start, $lastmonth_end]];
+        $lastmonth_wheres['p.created_at'] = $lastmonth_where1['updated_at'] = ['between', [$lastmonth_start, $lastmonth_end]];
+        $lastmonth_order_success_data1 = $model->table('sales_flat_order')
+            ->alias('o')
+            ->join('sales_flat_quote p', 'o.quote_id=p.entity_id')
+            ->where($lastmonth_wheres)
+            ->where('p.base_grand_total','>',0)
+            ->where($lastmonth_where)
+            ->where($order_where)
+            ->where($order_success_where)
+            ->count();
         //今年从新增购物车中成功支付数
-        $quote_where6['quote_id'] = ['in',$thisyear_shoppingcart_total_data1];
-        $thisyear_start = date("Y",time())."-1"."-1"; //本年开始
+        $thisyear_start = date("Y", time()) . "-1" . "-1"; //本年开始
         $thisyear_end = $today;
-        $thisyear_where['created_at'] = $thisyear_where1['updated_at'] = ['between', [$thisyear_start, $thisyear_end]];
-        $thisyear_order_success_data1 = $model->table('sales_flat_order')->where($quote_where6)->where($thisyear_where)->where($order_where)->where($order_success_where)->count();
+        $thisyear_where = [];
+        $thisyear_where['o.created_at'] = $thisyear_where1['updated_at'] = ['between', [$thisyear_start, $thisyear_end]];
+        $thisyear_wheres['p.created_at'] = $thisyear_where1['updated_at'] = ['between', [$thisyear_start, $thisyear_end]];
+        $thisyear_order_success_data1 = $model->table('sales_flat_order')
+            ->alias('o')
+            ->join('sales_flat_quote p', 'o.quote_id=p.entity_id')
+            ->where($thisyear_wheres)
+            ->where('p.base_grand_total','>',0)
+            ->where($thisyear_where)
+            ->where($order_where)
+            ->where($order_success_where)
+            ->count();
         //上年从新增购物车中成功支付数
-        $quote_where7['quote_id'] = ['in',$lastyear_shoppingcart_total_data1];
         $lastyear_start = date('Y-01-01 00:00:00', strtotime('last year'));
         $lastyear_end = date('Y-12-31 23:59:59', strtotime('last year'));
-        $lastyear_where['created_at'] = $lastyear_where1['updated_at'] = ['between', [$lastyear_start, $lastyear_end]];
-        $lastyear_order_success_data1 = $model->table('sales_flat_order')->where($quote_where7)->where($lastyear_where)->where($order_where)->where($order_success_where)->count();
+        $lastyear_where = [];
+        $lastyear_where['o.created_at'] = $lastyear_where1['updated_at'] = ['between', [$lastyear_start, $lastyear_end]];
+        $lastyear_wheres['p.created_at'] = $lastyear_where1['updated_at'] = ['between', [$lastyear_start, $lastyear_end]];
+        $lastyear_order_success_data1 = $model->table('sales_flat_order')
+            ->alias('o')
+            ->join('sales_flat_quote p', 'o.quote_id=p.entity_id')
+            ->where($lastyear_wheres)
+            ->where('p.base_grand_total','>',0)
+            ->where($lastyear_where)
+            ->where($order_where)
+            ->where($order_success_where)
+            ->count();
         //总共从新增购物车中成功支付数
-        $quote_where8['quote_id'] = ['in',$total_shoppingcart_total_data1];
-        $total_order_success_data1 = $model->table('sales_flat_order')->where($quote_where8)->where($order_where)->where($order_success_where)->count();
+        $total_order_success_data1 = $model->table('sales_flat_order')
+            ->alias('o')
+            ->join('sales_flat_quote p', 'o.quote_id=p.entity_id')
+            ->where('p.base_grand_total','>',0)
+            ->where($order_where)
+            ->where($order_success_where)
+            ->count();
         //2020-11-25 更换仪表盘页面新增购物车转化率(%)的计算方法 end
 
         //昨天购物车转化率data

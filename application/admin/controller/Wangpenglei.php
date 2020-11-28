@@ -336,4 +336,27 @@ class Wangpenglei extends Backend
         }
         return $all_facebook_spend ? round($all_facebook_spend, 2) : 0;
     }
+
+
+    /**
+     * 处理订单日志
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/11/28 15:01:15 
+     * @return void
+     */
+    public function process_order_log()
+    {
+        $order_log = new \app\admin\model\OrderLog();
+        $list = $order_log->where(['site' => 2])->select();
+        foreach($list as $k => $v) {
+            $arr = explode(',',$v['order_ids']);
+            if ($arr[0] < 50000 && $arr[0] > 5000) {
+                $order_log->where(['id' => $v['id']])->update(['site' => 3]);
+            }
+        }
+        echo "ok";
+        
+    }
 }

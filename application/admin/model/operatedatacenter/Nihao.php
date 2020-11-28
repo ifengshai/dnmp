@@ -191,7 +191,7 @@ class Nihao extends Model
         if (!$time_str) {
             $start = date('Y-m-d', strtotime('-6 day'));
             $end   = date('Y-m-d 23:59:59');
-            $time_str = $start .' 00:00:00 - ' .$end.' 00:00:00';
+            $time_str = $start .' 00:00:00 - ' .$end;
         }
         //时间段总和
         $createat = explode(' ', $time_str);
@@ -274,36 +274,36 @@ class Nihao extends Model
     }
     //获取某一段时间内的复购用户数 new
     public function get_again_user($createat){
-        $map_where['o.created_at'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
-        $order_where['o.created_at'] = ['lt',$createat[0]];
+        $map_where['created_at'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
+        $order_where['created_at'] = ['lt',$createat[0]];
 
-        $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-        $map['o.customer_id'] = ['>',0];
-        $map['o.order_type'] = 1;
+        $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        $map['order_type'] = 1;
+        $map1['customer_id'] = ['>',0];
 
         $order_model = new \app\admin\model\order\order\Nihao();
         //复购用户数
         //查询时间段内的订单 根据customer_id先计算出此事件段内的复购用户数
-        $again_buy_num1 = $order_model->alias('o')
-            ->join('sales_flat_order_item i','o.entity_id=i.order_id')
+        $again_buy_num1 = $order_model
             ->where($map_where)
             ->where($map)
+            ->where($map1)
             ->group('customer_id')
             ->having('count(customer_id)>1')
             ->count('customer_id');
-        $again_buy_data2 = $order_model->alias('o')
-            ->join('sales_flat_order_item i','o.entity_id=i.order_id')
+
+        $again_buy_data2 = $order_model
             ->where($map_where)
             ->where($map)
+            ->where($map1)
             ->group('customer_id')
             ->having('count(customer_id)<=1')
-            ->field('customer_id')
-            ->select();
+            ->column('customer_id');
         $again_buy_num2 = 0;
         foreach ($again_buy_data2 as $v){
             //查询时间段内是否进行购买行为
-            $order_where_arr['customer_id'] = $v['customer_id'];
-            $is_buy = $order_model->where($order_where)->where($order_where_arr)->alias('o')->join('sales_flat_order_item i','o.entity_id=i.order_id')->where($map)->value('o.entity_id');
+            $order_where_arr['customer_id'] = $v;
+            $is_buy = $order_model->where($order_where)->where($order_where_arr)->where($map)->value('entity_id');
             if($is_buy){
                 $again_buy_num2++;
             }
@@ -315,48 +315,50 @@ class Nihao extends Model
 
     //获取某一段时间内的复购VIP用户数 new
     public function get_again_user_vip($createat = ''){
-        $web_model = Db::connect('database.db_nihao');
-        $web_model->table('oc_vip_order')->query("set time_zone='+8:00'");
-        $vip_where['order_status'] = 'Success';
-        if(!$createat){
-            $start = date('Y-m-d', strtotime('-6 day'));
-            $end   = date('Y-m-d 23:59:59');
-            $createat = $start .' 00:00:00 - ' .$end.' 00:00:00';
-        }
-        $vip_where['start_time'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
-        $vip_userids = $web_model->table('oc_vip_order')->where($vip_where)->column('customer_id');
+        $createat = explode(' ', $createat);
         $map_where['o.created_at'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
         $order_where['o.created_at'] = ['lt',$createat[0]];
+
         $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-        $map['o.customer_id'] = ['in',$vip_userids];
         $map['o.order_type'] = 1;
-        $order_model = new \app\admin\model\order\order\Zeelool();
+        $map1['o.customer_id'] = ['>',0];
+        $map['c.is_vip'] = 1;
+
+        $order_model = new \app\admin\model\order\order\Nihao();
         //复购用户数
         //查询时间段内的订单 根据customer_id先计算出此事件段内的复购用户数
         $again_buy_num1 = $order_model->alias('o')
-            ->join('sales_flat_order_item i','o.entity_id=i.order_id')
+            ->join('customer_entity c','o.customer_id=c.entity_id')
             ->where($map_where)
             ->where($map)
-            ->group('customer_id')
-            ->having('count(customer_id)>1')
-            ->count('customer_id');
+            ->where($map1)
+            ->group('o.customer_id')
+            ->having('count(o.customer_id)>1')
+            ->count('o.customer_id');
+
         $again_buy_data2 = $order_model->alias('o')
-            ->join('sales_flat_order_item i','o.entity_id=i.order_id')
+            ->join('customer_entity c','o.customer_id=c.entity_id')
             ->where($map_where)
             ->where($map)
+            ->where($map1)
             ->group('customer_id')
             ->having('count(customer_id)<=1')
-            ->field('customer_id')
-            ->select();
+            ->column('customer_id');
         $again_buy_num2 = 0;
         foreach ($again_buy_data2 as $v){
             //查询时间段内是否进行购买行为
-            $order_where_arr['customer_id'] = $v['customer_id'];
-            $is_buy = $order_model->where($order_where)->where($order_where_arr)->alias('o')->join('sales_flat_order_item i','o.entity_id=i.order_id')->where($map)->value('o.entity_id');
+            $order_where_arr['customer_id'] = $v;
+            $is_buy = $order_model->alias('o')
+                ->join('customer_entity c','o.customer_id=c.entity_id')
+                ->where($order_where)
+                ->where($order_where_arr)
+                ->where($map)
+                ->value('o.entity_id');
             if($is_buy){
                 $again_buy_num2++;
             }
         }
+
         $again_buy_num = $again_buy_num1+$again_buy_num2;
         return $again_buy_num;
     }

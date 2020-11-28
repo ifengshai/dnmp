@@ -673,7 +673,7 @@ class ZeeloolJp extends Backend
         if (false !== $result) {
             $params['num'] = count($entity_ids);
             $params['order_ids'] = implode(',', $entity_ids);
-            $params['site'] = 2;
+            $params['site'] = 11;
             (new OrderLog())->setOrderLog($params);
 
             //插入订单节点
@@ -1036,12 +1036,12 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 3), $value['os_axis']);
 
             if (strlen($value['os_add']) > 0 && strlen($value['od_add']) > 0 && (float) $value['od_add'] * 1 != 0 && (float) $value['os_add'] * 1 != 0) {
-                // 双ADD值时，左右眼互换
-                $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['os_add']);
-                $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 3), $value['od_add']);
+                // 日语站add 调整正常
+                $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['od_add']);
+                $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 3), $value['os_add']);
             } else {
                 //数值在上一行合并有效，数值在下一行合并后为空
-                $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['os_add']);
+                $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['os_add'] ?: $value['od_add']);
                 $spreadsheet->getActiveSheet()->mergeCells("I" . ($key * 2 + 2) . ":I" . ($key * 2 + 3));
             }
 
@@ -1273,11 +1273,11 @@ EOF;
                 //处理ADD  当ReadingGlasses时 是 双ADD值
                 if (strlen($final_print['os_add']) > 0 && strlen($final_print['od_add']) > 0 && (float) $final_print['od_add'] * 1 != 0 && (float) $final_print['os_add'] * 1 != 0) {
                     // echo '双ADD值';
-                    $os_add = "<td>" . $final_print['od_add'] . "</td> ";
-                    $od_add = "<td>" . $final_print['os_add'] . "</td> ";
+                    $os_add = "<td>" . $final_print['os_add'] . "</td> ";
+                    $od_add = "<td>" . $final_print['od_add'] . "</td> ";
                 } else {
                     // echo '单ADD值';
-                    $od_add = "<td rowspan='2'>" . $final_print['os_add'] . "</td>";
+                    $od_add = "<td rowspan='2'>" . $final_print['os_add'] ?: $final_print['od_add'] . "</td>";
                     $os_add = "";
                 }
 

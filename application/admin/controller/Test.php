@@ -3147,12 +3147,37 @@ class Test extends Backend
         }
     }
 
+    public function order_data3()
+    {
+        $list = Db::table('fa_order_log')->where(['site' => 3])->order('id desc')->select();
+        $wesee = new \app\admin\model\order\order\Nihao();
+        foreach ($list as $k => $v) {
+            $data['custom_print_label_new'] = 0;
+            $data['custom_print_label_person_new'] = '';
+            $data['custom_print_label_created_at_new'] = '0000-00-00';
+            $data['custom_is_match_frame_new'] = 0;
+            $data['custom_match_frame_person_new'] = '';
+            $data['custom_match_frame_created_at_new'] = '0000-00-00';
+            $data['custom_is_match_lens_new'] = 0;
+            $data['custom_match_lens_created_at_new'] = '0000-00-00';
+            $data['custom_match_lens_person_new'] = '';
+            $data['custom_is_send_factory_new'] = 0;
+            $data['custom_match_factory_person_new'] = '';
+            $data['custom_match_factory_created_at_new'] = '0000-00-00';
+            $data['custom_is_delivery_new'] = 0;
+            $data['custom_match_delivery_person_new'] = '';
+            $data['custom_match_delivery_created_at_new'] = '0000-00-00';
+            $wesee->where(['entity_id' => ['in', $v['order_ids']]])->update($data);
+        }
+    }
 
     public function order_data()
     {
-        $list = Db::table('fa_order_log')->where(['site' => 5])->order('id desc')->select();
-        $wesee = new \app\admin\model\order\order\Weseeoptical();
+        $list = Db::table('fa_order_log')->where(['site' => 3])->order('id desc')->select();
+        $wesee = new \app\admin\model\order\order\Nihao();
+       
         foreach ($list as $k => $v) {
+            $data = [];
             if ($v['type'] == 1) {
                 $data['custom_print_label_new'] = 1;
                 $data['custom_print_label_person_new'] = $v['create_person'];
@@ -3177,7 +3202,6 @@ class Test extends Backend
             if ($data) {
                 $wesee->where(['entity_id' => ['in', $v['order_ids']]])->update($data);
             }
-            
         }
         echo "ok";
     }
@@ -3190,6 +3214,6 @@ class Test extends Backend
         $data['custom_is_match_lens_new'] = 1;
         $data['custom_is_send_factory_new'] = 1;
         $data['custom_is_delivery_new'] = 1;
-        $nihao->where(['created_at' => ['<','2020-01-01']])->update($data);
+        $nihao->where(['created_at' => ['<', '2020-01-01']])->update($data);
     }
 }

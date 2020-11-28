@@ -189,33 +189,68 @@ class Test01 extends Backend
 
     public function test99()
     {
-        $yes_date = date("Y-m-d",strtotime("-1 day"));
-        $yestime_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $yes_date . "'")];
-        $yesterday_shoppingcart_total_data = Db::connect('database.db_zeelool')
-            ->table('sales_flat_quote')
-            ->where($yestime_where)
-            ->where('base_grand_total','>',0)
-            ->count();
-        dump($yesterday_shoppingcart_total_data);
-        $yesterday_shoppingcart_total_data1 = Db::connect('database.db_zeelool')
-            ->table('sales_flat_quote')
-            ->where($yestime_where)
-            ->where('base_grand_total','>',0)
-            ->column('entity_id');
-        dump($yesterday_shoppingcart_total_data1);
-        $quote_where1['quote_id'] = ['in',$yesterday_shoppingcart_total_data1];
-        $order_where['order_type'] = 1;
-        $order_success_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-        $yes_date = date("Y-m-d",strtotime("-1 day"));
+        // $yes_date = date("Y-m-d",strtotime("-1 day"));
+        // $yestime_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $yes_date . "'")];
+        // $yesterday_shoppingcart_total_data = Db::connect('database.db_zeelool')
+        //     ->table('sales_flat_quote')
+        //     ->where($yestime_where)
+        //     ->where('base_grand_total','>',0)
+        //     ->count();
+        // dump($yesterday_shoppingcart_total_data);
+        // $yesterday_shoppingcart_total_data1 = Db::connect('database.db_zeelool')
+        //     ->table('sales_flat_quote')
+        //     ->where($yestime_where)
+        //     ->where('base_grand_total','>',0)
+        //     ->column('entity_id');
+        // // dump($yesterday_shoppingcart_total_data1);
+        // $quote_where1['quote_id'] = ['in',$yesterday_shoppingcart_total_data1];
+        // $order_where['order_type'] = 1;
+        // $order_success_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        // $yes_date = date("Y-m-d",strtotime("-1 day"));
+        // $yestime_where = [];
+        // $yestime_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $yes_date . "'")];
+        // $yesterday_order_success_data1 = Db::connect('database.db_zeelool')
+        //     ->table('sales_flat_order')
+        //     ->where($quote_where1)
+        //     ->where($yestime_where)
+        //     ->where($order_where)
+        //     ->where($order_success_where)
+        //     ->count();
+        // dump($yesterday_order_success_data1);
+        // //昨天购物车转化率data
+        // $yesterday_shoppingcart_conversion_data     = @round(($yesterday_order_success_data1 / $yesterday_shoppingcart_total_data), 4) * 100;
+        // dump($yesterday_shoppingcart_conversion_data);
+
+        $order_where['o.order_type'] = 1;
+        $order_success_where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        $yes_date = date("Y-m-d", strtotime("-1 day"));
         $yestime_where = [];
-        $yestime_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $yes_date . "'")];
-        $yesterday_order_success_data1 = Db::connect('database.db_zeelool')
-            ->table('sales_flat_order')
-            ->where($quote_where1)
+        $yestime_where[] = ['exp', Db::raw("DATE_FORMAT(o.created_at, '%Y-%m-%d') = '" . $yes_date . "'")];
+        $yestime_wheres[] = ['exp', Db::raw("DATE_FORMAT(p.created_at, '%Y-%m-%d') = '" . $yes_date . "'")];
+        $yesterday_order_success_data1 = Db::connect('database.db_zeelool')->table('sales_flat_order')
+            ->alias('o')
+            ->join('sales_flat_quote p', 'o.quote_id=p.entity_id')
+            ->where($yestime_wheres)
+            ->where('p.base_grand_total','>',0)
             ->where($yestime_where)
             ->where($order_where)
             ->where($order_success_where)
             ->count();
+        //过去7天从新增购物车中成功支付数
+        $seven_start = date("Y-m-d", strtotime("-7 day"));
+        $seven_end = date("Y-m-d 23:59:59", strtotime("-1 day"));
+        $sev_where['o.created_at'] = $sev_where1['updated_at'] = ['between', [$seven_start, $seven_end]];
+        $sev_wheres['p.created_at'] = $sev_where1['updated_at'] = ['between', [$seven_start, $seven_end]];
+        $pastsevenday_order_success_data1 = Db::connect('database.db_zeelool')->table('sales_flat_order')
+            ->alias('o')
+            ->join('sales_flat_quote p', 'o.quote_id=p.entity_id')
+            ->where($sev_wheres)
+            ->where('p.base_grand_total','>',0)
+            ->where($sev_where)
+            ->where($order_where)
+            ->where($order_success_where)
+            ->count();
         dump($yesterday_order_success_data1);
+        dump($pastsevenday_order_success_data1);
     }
 }
