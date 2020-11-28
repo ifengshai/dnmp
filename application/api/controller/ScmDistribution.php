@@ -657,7 +657,7 @@ class ScmDistribution extends Scm
      * @参数 string end_time  结束时间
      * @参数 int page  页码
      * @参数 int page_size  每页显示数量
-     * @author lzh
+     * @author wgj
      * @return mixed
      */
     public function sorting()
@@ -687,7 +687,7 @@ class ScmDistribution extends Scm
             ->field('count(*) as all_count,a.order_prescription_type,b.index_name,b.od_sph,b.od_cyl,c.lens_name')
             ->join(['fa_order_item_option' => 'b'], 'a.option_id=b.id')
             ->join(['fa_lens_data' => 'c'], 'b.lens_number=c.lens_number')
-            ->group('a.order_prescription_type,b.lens_number,b.index_name,b.od_sph,b.od_cyl')
+            ->group('a.order_prescription_type,b.lens_number,b.od_sph,b.od_cyl')
             ->limit($offset, $limit)
             ->select();
         $list_od = collection($list_od)->toArray();
@@ -705,10 +705,10 @@ class ScmDistribution extends Scm
         $list_os = $this->_new_order_item_process
             ->alias('a')
             ->where($where)
-            ->field('count(*) as all_count,a.order_prescription_type,b.index_name,b.os_sph,b.os_cyl,c.lens_name')
+            ->field('count(*) as all_count,a.order_prescription_type,b.os_sph,b.os_cyl,c.lens_name')
             ->join(['fa_order_item_option' => 'b'], 'a.option_id=b.id')
             ->join(['fa_lens_data' => 'c'], 'b.lens_number=c.lens_number')
-            ->group('a.order_prescription_type,b.lens_number,b.index_name,b.os_sph,b.os_cyl')
+            ->group('a.order_prescription_type,b.lens_number,b.os_sph,b.os_cyl')
             ->limit($offset, $limit)
             ->select();
         $list_os = collection($list_os)->toArray();
@@ -734,6 +734,31 @@ class ScmDistribution extends Scm
         $list = array_merge($list_od,$list_os);
         $list = array_values($list);
         $this->success('', ['list' => $list],200);
+    }
+
+    /**
+     * 镜片未分拣数量
+     *
+     * @参数 string start_time  开始时间
+     * @参数 string end_time  结束时间
+     * @参数 int page  页码
+     * @参数 int page_size  每页显示数量
+     * @author wgj
+     * @return mixed
+     */
+    public function no_sorting()
+    {
+        $where = [
+            'distribution_status'=>3,
+            'order_prescription_type'=>2,
+        ];
+
+        //未分拣子订单数量
+        $count = $this->_new_order_item_process
+            ->alias('a')
+            ->where($where)
+            ->count();
+        return 2*$count;
     }
 
     /**
