@@ -685,7 +685,7 @@ class ZeeloolJp extends Backend
         if (false !== $result) {
             $params['num'] = count($entity_ids);
             $params['order_ids'] = implode(',', $entity_ids);
-            $params['site'] = 2;
+            $params['site'] = 11;
             (new OrderLog())->setOrderLog($params);
 
             //插入订单节点
