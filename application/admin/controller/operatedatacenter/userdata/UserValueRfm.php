@@ -48,15 +48,23 @@ class UserValueRfm extends Backend
         if ($this->request->isAjax()) {
             $params = $this->request->param();
             $order_platform = $params['order_platform'];
-            $cache_data = Cache::get('Operatedatacenter_userdata'.$order_platform.md5(serialize('ajax_user_order_amount')));
+            $cache_data = Cache::get('Operatedatacenter_userdata1'.$order_platform.md5(serialize('ajax_user_order_amount')));
             if(!$cache_data){
                 $count = $this->getOrderAmountUserNum($order_platform);
+
                 $count1 = $this->getOrderAmountUserNum($order_platform, 1);
                 $count2 = $this->getOrderAmountUserNum($order_platform, 2);
                 $count3 = $this->getOrderAmountUserNum($order_platform, 3);
                 $count4 = $this->getOrderAmountUserNum($order_platform, 4);
                 $count5 = $this->getOrderAmountUserNum($order_platform, 5);
                 $count6 = $this->getOrderAmountUserNum($order_platform, 6);
+                dump($count1);
+                dump($count2);
+                dump($count3);
+                dump($count4);
+                dump($count5);
+                dump($count6);
+                dump($count);exit;
                 $arr = array(
                     'data'=>array($count1, $count2, $count3, $count4, $count5, $count6),
                     'count'=>$count
