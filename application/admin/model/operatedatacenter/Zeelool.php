@@ -349,8 +349,6 @@ class Zeelool extends Model
             ->group('customer_id')
             ->having('count(customer_id)<=1')
             ->column('customer_id');
-        dump($again_buy_num1);
-        dump($again_buy_data2);exit;
         $again_buy_num2 = 0;
         foreach ($again_buy_data2 as $v){
             //查询时间段内是否进行购买行为
@@ -360,7 +358,9 @@ class Zeelool extends Model
                     ->where($order_where)
                     ->where($order_where_arr)
                     ->where($map)
-                    ->value('entity_id');
+//                    ->value('entity_id');
+                    ->select(false);
+            dump($is_buy);exit;
             if($is_buy){
                 $again_buy_num2++;
             }
