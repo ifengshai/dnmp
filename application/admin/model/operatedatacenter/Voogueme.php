@@ -357,7 +357,7 @@ class Voogueme extends Model
                 ->where($order_where)
                 ->where($order_where_arr)
                 ->where($map)
-                ->value('entity_id');
+                ->value('o.entity_id');
             if($is_buy){
                 $again_buy_num2++;
             }
