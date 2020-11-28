@@ -787,6 +787,9 @@ class TrackReg extends Backend
         $vip_where = [];
         $vip_where[] = ['exp', Db::raw("DATE_FORMAT(start_time, '%Y-%m-%d') = '" . $date_time . "'")];
         $vip_where['order_status'] = 'Success';
+        $arr['vip_user_num'] = $zeelool_model->table('oc_vip_order')->where($vip_where)->select();
+        $aa = collection($arr['vip_user_num'])->toArray();
+        dump($aa);exit;
         $arr['vip_user_num'] = $zeelool_model->table('oc_vip_order')->where($vip_where)->count();
         //支付成功的订单数
         $order_where = [];

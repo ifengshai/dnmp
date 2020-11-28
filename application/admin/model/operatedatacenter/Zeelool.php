@@ -193,7 +193,7 @@ class Zeelool extends Model
         if (!$time_str) {
             $start = date('Y-m-d', strtotime('-6 day'));
             $end   = date('Y-m-d 23:59:59');
-            $time_str = $start .' 00:00:00 - ' .$end.' 00:00:00';
+            $time_str = $start .' 00:00:00 - ' .$end;
         }
         //时间段总和
         $createat = explode(' ', $time_str);
