@@ -66,7 +66,7 @@ class Scm extends Api
             'menu'=>[
                 ['name'=>'出库单', 'link'=>'warehouse/outstock', 'href'=>'com.nextmar.mojing.ui.outstock.OutStockActivity'],
                 ['name'=>'入库单', 'link'=>'warehouse/instock', 'href'=>'com.nextmar.mojing.ui.instock.InStockActivity'],
-                ['name'=>'待入库', 'link'=>'warehouse/prestock', 'href'=>'com.nextmar.mojing".ui.prestock.PreStockActivity'],
+                ['name'=>'待入库', 'link'=>'warehouse/prestock', 'href'=>'com.nextmar.mojing.ui.prestock.PreStockActivity'],
                 ['name'=>'盘点', 'link'=>'warehouse/inventory', 'href'=>'com.nextmar.mojing.ui.inventory.InventoryActivity'],
             ],
         ],

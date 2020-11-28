@@ -125,6 +125,11 @@ class Distribution extends Backend
             }
            
 
+            if ($filter['increment_id']) {
+                $map['b.increment_id'] = ['like', $filter['increment_id'] . '%'];
+                unset($filter['increment_id']);
+            }
+
             if ($filter['site']) {
                 $map['a.site'] = ['in', $filter['site']];
                 unset($filter['site']);
@@ -987,7 +992,7 @@ class Distribution extends Backend
 
         //检测配货状态
         $item_list = $this->model
-            ->field('id,site,distribution_status,order_id,option_id')
+            ->field('id,site,distribution_status,order_id,option_id,sku')
             ->where(['id' => ['in', $ids]])
             ->select();
         $order_ids = [];
@@ -1049,14 +1054,15 @@ class Distribution extends Backend
         //获取子订单处方数据
         $_new_order_item_option = new NewOrderItemOption();
         $option_list = $_new_order_item_option
-            ->field('id,is_print_logo,sku,index_name')
+            ->field('id,is_print_logo,index_name')
             ->where(['id' => ['in', array_unique($option_ids)]])
             ->select();
         $option_list = array_column($option_list, NULL, 'id');
 
-        //库存、关系映射表
+        //库存、关系映射、库存日志表
         $_item_platform_sku = new ItemPlatformSku();
         $_item = new Item();
+        $_stock_log = new StockLog();
 
         //状态类型
         $status_arr = [
@@ -1093,6 +1099,28 @@ class Distribution extends Backend
                             }
                         }
                     }
+
+                    //获取true_sku
+                    $true_sku = $_item_platform_sku->getTrueSku($value['sku'], $value['site']);
+
+                    //增加配货占用库存
+                    $_item
+                        ->where(['sku' => $true_sku])
+                        ->setInc('distribution_occupy_stock', 1);
+
+                    //扣库存日志
+                    $stock_data = [
+                        'type'                      => 2,
+                        'two_type'                  => 4,
+                        'sku'                       => $value['sku'],
+                        'public_id'                 => $value['id'],
+                        'stock_change'              => -1,
+                        'available_stock_change'    => -1,
+                        'create_person'             => $admin->nickname,
+                        'create_time'               => date('Y-m-d H:i:s'),
+                        'remark'                    => '配货完成：增加配货占用库存'
+                    ];
+                    $_stock_log->allowField(true)->save($stock_data);
                 } elseif (3 == $check_status) {
                     $save_status = 4;
                 } elseif (4 == $check_status) {
@@ -1109,17 +1137,6 @@ class Distribution extends Backend
                     } else {
                         $save_status = 9;
                     }
-
-                    //获取true_sku
-                    $true_sku = $_item_platform_sku->getTrueSku($option_list[$value['option_id']]['sku'], $value['site']);
-
-                    //扣减订单占用库存、配货占用库存、总库存
-                    $_item
-                        ->where(['sku' => $true_sku])
-                        ->dec('occupy_stock', 1)
-                        ->dec('distribution_occupy_stock', 1)
-                        ->dec('stock', 1)
-                        ->update();
                 }
 
                 //订单主表标记已合单
@@ -1231,11 +1248,6 @@ class Distribution extends Backend
             ->value('a.item_order_number');
         $check_cancel_order && $this->error('子单号：'.$check_cancel_order.' 已取消');
 
-        //库存、关系映射、库存日志表
-        $_item_platform_sku = new ItemPlatformSku();
-        $_item = new Item();
-        $_stock_log = new StockLog();
-
         //状态
         $status_arr = [
             1 => ['status' => 4, 'name' => '质检拒绝：加工调整'],
@@ -1257,40 +1269,6 @@ class Distribution extends Backend
 
             //更新状态
             foreach ($item_list as $value) {
-                //镜片报损扣减可用库存、虚拟仓库存、配货占用库存、总库存
-                if (2 == $reason) {
-                    //获取true_sku
-                    $true_sku = $_item_platform_sku->getTrueSku($value['sku'], $value['site']);
-
-                    //扣减虚拟仓库存
-                    $_item_platform_sku
-                        ->where(['sku' => $true_sku, 'platform_type' => $value['site']])
-                        ->dec('stock', 1)
-                        ->update();
-
-                    //扣减可用库存、配货占用库存、总库存
-                    $_item
-                        ->where(['sku' => $true_sku])
-                        ->dec('available_stock', 1)
-                        ->dec('distribution_occupy_stock', 1)
-                        ->dec('stock', 1)
-                        ->update();
-
-                    //扣库存日志
-                    $stock_data = [
-                        'type'                      => 2,
-                        'two_type'                  => 4,
-                        'sku'                       => $value['sku'],
-                        'public_id'                 => $value['id'],
-                        'stock_change'              => -1,
-                        'available_stock_change'    => -1,
-                        'create_person'             => $admin->nickname,
-                        'create_time'               => date('Y-m-d H:i:s'),
-                        'remark'                    => '成检拒绝：减少总库存,减少可用库存'
-                    ];
-                    $_stock_log->allowField(true)->save($stock_data);
-                }
-
                 //记录日志
                 DistributionLog::record($admin, $value['id'], 6, $status_arr[$reason]['name']);
             }
@@ -1408,9 +1386,11 @@ class Distribution extends Backend
                     ->isUpdate(true, ['id' => $abnormal_info['id']])
                     ->save(['status' => 2, 'do_time' => time(), 'do_person' => $admin->nickname]);
 
-                //镜片报损扣减可用库存、虚拟仓库存、配货占用库存、总库存
+                //配货操作内容
                 $remark = '处理异常：' . $abnormal_arr[$abnormal_info['type']] . ',当前节点：' . $status_arr[$item_info['distribution_status']] . ',返回节点：' . $status_arr[$status];
-                if (3 == $status) {
+
+                //回滚至待配货扣减可用库存、虚拟仓库存、配货占用、总库存
+                if (2 == $status) {
                     //获取true_sku
                     $_item_platform_sku = new ItemPlatformSku();
                     $true_sku = $_item_platform_sku->getTrueSku($item_info['sku'], $item_info['site']);
@@ -1430,8 +1410,11 @@ class Distribution extends Backend
                         ->dec('stock', 1)
                         ->update();
 
-                    //扣库存日志
-                    $stock_data = [
+                    //记录库存日志
+                    $_stock_log = new StockLog();
+                    $_stock_log
+                        ->allowField(true)
+                        ->save([
                         'type'                      => 2,
                         'two_type'                  => 4,
                         'sku'                       => $item_info['sku'],
@@ -1440,12 +1423,10 @@ class Distribution extends Backend
                         'available_stock_change'    => -1,
                         'create_person'             => $admin->nickname,
                         'create_time'               => date('Y-m-d H:i:s'),
-                        'remark'                    => '成检拒绝：减少总库存,减少可用库存'
-                    ];
-                    $_stock_log = new StockLog();
-                    $_stock_log->allowField(true)->save($stock_data);
+                        'remark'                    => '处理异常：回滚至待配货，减少总库存,减少可用库存'
+                    ]);
 
-                    $remark .= ',扣减可用库存、虚拟仓库存、配货占用库存、总库存数量：1';
+                    $remark .= ',扣减可用库存、虚拟仓库存、配货占用库存、总库存';
                 }
 
                 //记录日志

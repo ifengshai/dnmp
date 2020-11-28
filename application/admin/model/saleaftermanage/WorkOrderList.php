@@ -1016,7 +1016,7 @@ class WorkOrderList extends Model
     public function changeFrame($params, $work_id, $measure_choose_id, $measure_id, $item_order_number)
     {
         $work = $this->find($work_id);
-        if ($work && 1 == $measure_choose_id) {
+        if ($work && 19 == $measure_choose_id) {
             $change_frame = $params['item_order_info'][$item_order_number]['change_frame'];
             empty($change_frame) && exception("请完善更改镜框信息！！");
 
@@ -1662,6 +1662,12 @@ class WorkOrderList extends Model
         }elseif(13 == $measure_choose_id){//修改地址
             $this->presentAddress($work, $orderRecept->measure_id);
         }
+
+        //措施不是补发的时候扣减库存，因为补发的时候库存已经扣减过了
+        if (7 != $measure_choose_id){
+            $this->deductionStock($work->id, $orderRecept->measure_id);
+        }
+
         return true;
     }
 
@@ -1783,14 +1789,14 @@ class WorkOrderList extends Model
         }
         
         $result = collection($result)->toArray();
-        if (1 == $measuerInfo) { //更改镜片
-            $info = (new Inventory())->workChangeFrame($work_id, $workOrderList->work_platform, $workOrderList->platform_order, $result, 1);
+        if (1 == $measuerInfo) { //更改镜架
+            $info = (new Inventory())->workChangeFrame($work_id, $workOrderList->work_platform, $workOrderList->platform_order, $result);
         } elseif (3 == $measuerInfo) { //取消订单
-            $info = (new Inventory())->workCancelOrder($work_id, $workOrderList->work_platform, $workOrderList->platform_order, $result, 2);
+            $info = (new Inventory())->workCancelOrder($work_id, $workOrderList->work_platform, $workOrderList->platform_order, $result);
         } elseif (4 == $measuerInfo) { //赠品
-            $info = (new Inventory())->workPresent($work_id, $workOrderList->work_platform, $workOrderList->platform_order, $result, 3);
-        } elseif (5 == $measuerInfo) {
-            $info = (new Inventory())->workPresent($work_id, $workOrderList->work_platform, $workOrderList->platform_order, $result, 4);
+            $info = (new Inventory())->workPresent($work_id, $workOrderList->work_platform, $workOrderList->platform_order, $result, 1);
+        } elseif (5 == $measuerInfo) {//补发
+            $info = (new Inventory())->workPresent($work_id, $workOrderList->work_platform, $workOrderList->platform_order, $result, 2);
         } else {
             return false;
         }
