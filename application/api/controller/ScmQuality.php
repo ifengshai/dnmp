@@ -955,8 +955,8 @@ class ScmQuality extends Scm
             $list[$key]['purchase_number'] = $purchase_number;
             $list[$key]['is_new_product'] = $is_new_product;
             $list[$key]['status'] = 1 == $value['status'] ? '已签收' : '未签收';
-            $list[$key]['show_sign'] = 0 == $value['status'] && 1 == $value['type'] ? 1 : 0;
-            $list[$key]['show_quality'] = 1 == $value['status'] && 1 == $value['type'] ? 1 : 0;
+            $list[$key]['show_sign'] = $value['status'];
+            $list[$key]['show_quality'] = $value['is_check_order'];
         }
 
         $this->success('', ['list' => $list], 200);
