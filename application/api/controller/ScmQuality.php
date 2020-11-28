@@ -625,34 +625,40 @@ class ScmQuality extends Scm
                 ];
 
                 //绑定合格条形码
+                $ok_code_list = [];
+                $no_code_list = [];
+                $sm_code_list = [];
                 if (!empty($value['quantity_agg'])) {
                     foreach ($value['quantity_agg'] as $v) {
                         if ($v['is_new'] == 1) {
                             $code_item['is_quantity'] = 1;
-                            $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => $v['code']])->save($code_item);
+                            $ok_code_list[] = $v['code'];
                         }
                     }
                 }
+                $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => ['in', $ok_code_list]])->save($code_item);
 
                 //绑定不合格条形码
                 if (!empty($value['unqualified_agg'])) {
                     foreach ($value['unqualified_agg'] as $v) {
                         if ($v['is_new'] == 1) {
                             $code_item['is_quantity'] = 2;
-                            $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => $v['code']])->save($code_item);
+                            $no_code_list[] = $v['code'];
                         }
                     }
                 }
+                $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => ['in', $no_code_list]])->save($code_item);
 
                 //绑定留样条形码
                 if (!empty($value['sample_agg'])) {
                     foreach ($value['sample_agg'] as $v) {
                         if ($v['is_new'] == 1) {
                             $code_item['is_sample'] = 1;
-                            $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => $v['code']])->save($code_item);
+                            $sm_code_list[] = $v['code'];
                         }
                     }
                 }
+                $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => ['in', $sm_code_list]])->save($code_item);
             }
 
             Db::commit();
