@@ -506,12 +506,10 @@ class ScmDistribution extends Scm
                 ->isUpdate(true, ['code'=>$barcode])
                 ->save(['item_order_number'=>$item_order_number])
             ;
-            //增加订单占用库存、配货占用库存，扣减总库存
+            //增加配货占用库存
             $this->_item
                 ->where(['sku'=>$true_sku])
-                ->inc('occupy_stock', 1)
                 ->inc('distribution_occupy_stock', 1)
-                ->dec('stock', 1)
                 ->update()
             ;
             //根据处方类型字段order_prescription_type(现货处方镜、定制处方镜)判断是否需要配镜片
@@ -657,7 +655,7 @@ class ScmDistribution extends Scm
      * @参数 string end_time  结束时间
      * @参数 int page  页码
      * @参数 int page_size  每页显示数量
-     * @author lzh
+     * @author wgj
      * @return mixed
      */
     public function sorting()
@@ -687,7 +685,7 @@ class ScmDistribution extends Scm
             ->field('count(*) as all_count,a.order_prescription_type,b.index_name,b.od_sph,b.od_cyl,c.lens_name')
             ->join(['fa_order_item_option' => 'b'], 'a.option_id=b.id')
             ->join(['fa_lens_data' => 'c'], 'b.lens_number=c.lens_number')
-            ->group('a.order_prescription_type,b.lens_number,b.index_name,b.od_sph,b.od_cyl')
+            ->group('a.order_prescription_type,b.lens_number,b.od_sph,b.od_cyl')
             ->limit($offset, $limit)
             ->select();
         $list_od = collection($list_od)->toArray();
@@ -705,10 +703,10 @@ class ScmDistribution extends Scm
         $list_os = $this->_new_order_item_process
             ->alias('a')
             ->where($where)
-            ->field('count(*) as all_count,a.order_prescription_type,b.index_name,b.os_sph,b.os_cyl,c.lens_name')
+            ->field('count(*) as all_count,a.order_prescription_type,b.os_sph,b.os_cyl,c.lens_name')
             ->join(['fa_order_item_option' => 'b'], 'a.option_id=b.id')
             ->join(['fa_lens_data' => 'c'], 'b.lens_number=c.lens_number')
-            ->group('a.order_prescription_type,b.lens_number,b.index_name,b.os_sph,b.os_cyl')
+            ->group('a.order_prescription_type,b.lens_number,b.os_sph,b.os_cyl')
             ->limit($offset, $limit)
             ->select();
         $list_os = collection($list_os)->toArray();
@@ -734,6 +732,31 @@ class ScmDistribution extends Scm
         $list = array_merge($list_od,$list_os);
         $list = array_values($list);
         $this->success('', ['list' => $list],200);
+    }
+
+    /**
+     * 镜片未分拣数量
+     *
+     * @参数 string start_time  开始时间
+     * @参数 string end_time  结束时间
+     * @参数 int page  页码
+     * @参数 int page_size  每页显示数量
+     * @author wgj
+     * @return mixed
+     */
+    public function no_sorting()
+    {
+        $where = [
+            'distribution_status'=>3,
+            'order_prescription_type'=>2,
+        ];
+
+        //未分拣子订单数量
+        $count = $this->_new_order_item_process
+            ->alias('a')
+            ->where($where)
+            ->count();
+        return 2*$count;
     }
 
     /**
@@ -1005,22 +1028,22 @@ class ScmDistribution extends Scm
         }
 
         //未合单，首次扫描
-        $info['item_order_number'] = $item_order_number;
-        $info['sku'] = $item_process_info['sku'];
         if (!$order_process_info['store_house_id']){
             //主单中无库位号，首个子单进入时，分配一个合单库位给PDA，暂不占用根据是否确认放入合单架占用或取消
             $store_house_info = $this->_stock_house->field('id,coding,subarea')->where(['status'=>1,'type'=>2,'occupy'=>0])->find();
-            $info['store_id'] = $store_house_info['id'];
-            $info['coding'] = $store_house_info['coding'];
         } else {
             //主单已绑定合单库位,根据ID查询库位信息
             $store_house_info = $this->_stock_house->field('id,coding,subarea')->where('id',$order_process_info['store_house_id'])->find();
-            $info['store_id'] = $store_house_info['id'];
-            $info['coding'] = $store_house_info['coding'];
         }
-
         $abnormal_list = $this->info($item_order_number,7);
-        $info['abnormal_list'] = $abnormal_list;
+        $info = [];
+        $info = [
+            'item_order_number' => $item_order_number,
+            'sku' => $item_process_info['sku'],
+            'store_id' => $store_house_info['id'],
+            'coding' => $store_house_info['coding'],
+            'abnormal_list' => $abnormal_list
+        ];
 
         $this->success('', ['info' => $info],200);
     }
@@ -1356,6 +1379,7 @@ class ScmDistribution extends Scm
             ->field('a.id,b.combine_status,b.store_house_id')
             ->find();
         empty($order_process_info) && $this->error(__('主订单不存在'), [], 403);
+        empty($order_process_info['combine_status']) && $this->error(__('只有合单完成状态才能取出'), [], 511);
 
         if ($order_process_info['store_house_id'] != 0){
             //有合单库位订单--释放库位占用，解绑合单库位ID
@@ -1438,7 +1462,6 @@ class ScmDistribution extends Scm
         } else {
             $this->error(__('合单库位已经取出了'), [], 511);
         }
-
     }
 
     /**
@@ -1552,11 +1575,22 @@ class ScmDistribution extends Scm
         try {
             $result = $this->_new_order_process->allowField(true)->isUpdate(true, ['order_id' => $order_id])->save($param);
             if (false !== $result){
-                //审单拒绝，回退合单状态
+                //审单通过和拒绝都影响库存，获取true_sku集合
+                $item_info = $this->_new_order_item_process->field('sku,site')->where(['order_id'=>$order_id])->select();
+                $item_info = collection($item_info)->toArray();
+                $true_sku[] = [];
+                foreach($item_info as $key => $value){
+                    $true_sku[] = $sku = $this->_item_platform_sku->getTrueSku($value['sku'], $value['site']);
+                    //判断sku实时库存是否满足
+                    $stock = $this->_item->where(['sku'=>$sku])->value('stock');
+                    empty($stock) && $this->error(__('sku实时库存不足'), [], 403);
+                }
+
                 if (2 == $check_status) {
+                    //审单拒绝，回退合单状态
                     $this->_new_order_process->allowField(true)->isUpdate(true, ['order_id' => $order_id])->save(['combine_status'=>0,'combine_time'=>null]);
                     if (1 == $check_refuse){
-                        //SKU缺失，绑定合单库位，回退子单号为合单中状态
+                        //SKU缺失，绑定合单库位，回退子单号为合单中状态，不影响库存
                         $store_house_id = $this->_stock_house->field('id,coding,subarea')->where(['status'=>1,'type'=>2,'occupy'=>0])->value('id');
                         empty($store_house_id) && $this->error(__('合单库位已用完，请检查合单库位情况'), [], 5000);
                         $this->_new_order_process->allowField(true)->isUpdate(true, ['order_id' => $order_id])->save(['store_house_id'=>$store_house_id]);
@@ -1574,17 +1608,7 @@ class ScmDistribution extends Scm
                         ;
                     }
                 } else {
-                    //审单通过，变更库存，获取true_sku集合
-                    $item_info = $this->_new_order_item_process->field('sku,site')->where(['order_id'=>$order_id])->select();
-                    $item_info = collection($item_info)->toArray();
-                    $true_sku[] = [];
-                    foreach($item_info as $key => $value){
-                        $true_sku[] = $sku = $this->_item_platform_sku->getTrueSku($value['sku'], $value['site']);
-                        //判断sku实时库存是否满足
-                        $stock = $this->_item->where(['sku'=>$sku])->value('stock');
-                        empty($stock) && $this->error(__('sku实时库存不足'), [], 403);
-                    }
-                    //扣减订单占用库存、扣减配货占用库存，扣减总库存
+                    ////审单通过，扣减订单占用库存、扣减配货占用库存，扣减总库存
                     $this->_item
                         ->where(['sku'=>['in',$true_sku]])
                         ->dec('occupy_stock', 1)
