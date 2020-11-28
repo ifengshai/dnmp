@@ -2040,6 +2040,7 @@ class WorkOrderList extends Backend
         $this->view->assign('row', $row);
         $this->assignconfig('work_type', $row->work_type);
         $this->assignconfig('work_status', $row->work_status);
+        $this->assignconfig('create_user_id', $row->create_user_id);
 
         //子订单措施及数据
         if(!empty($row->order_item_numbers)){
