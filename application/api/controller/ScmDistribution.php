@@ -506,12 +506,10 @@ class ScmDistribution extends Scm
                 ->isUpdate(true, ['code'=>$barcode])
                 ->save(['item_order_number'=>$item_order_number])
             ;
-            //增加订单占用库存、配货占用库存，扣减总库存
+            //增加配货占用库存
             $this->_item
                 ->where(['sku'=>$true_sku])
-                ->inc('occupy_stock', 1)
                 ->inc('distribution_occupy_stock', 1)
-                ->dec('stock', 1)
                 ->update()
             ;
             //根据处方类型字段order_prescription_type(现货处方镜、定制处方镜)判断是否需要配镜片
@@ -1577,11 +1575,22 @@ class ScmDistribution extends Scm
         try {
             $result = $this->_new_order_process->allowField(true)->isUpdate(true, ['order_id' => $order_id])->save($param);
             if (false !== $result){
-                //审单拒绝，回退合单状态
+                //审单通过和拒绝都影响库存，获取true_sku集合
+                $item_info = $this->_new_order_item_process->field('sku,site')->where(['order_id'=>$order_id])->select();
+                $item_info = collection($item_info)->toArray();
+                $true_sku[] = [];
+                foreach($item_info as $key => $value){
+                    $true_sku[] = $sku = $this->_item_platform_sku->getTrueSku($value['sku'], $value['site']);
+                    //判断sku实时库存是否满足
+                    $stock = $this->_item->where(['sku'=>$sku])->value('stock');
+                    empty($stock) && $this->error(__('sku实时库存不足'), [], 403);
+                }
+
                 if (2 == $check_status) {
+                    //审单拒绝，回退合单状态
                     $this->_new_order_process->allowField(true)->isUpdate(true, ['order_id' => $order_id])->save(['combine_status'=>0,'combine_time'=>null]);
                     if (1 == $check_refuse){
-                        //SKU缺失，绑定合单库位，回退子单号为合单中状态
+                        //SKU缺失，绑定合单库位，回退子单号为合单中状态，不影响库存
                         $store_house_id = $this->_stock_house->field('id,coding,subarea')->where(['status'=>1,'type'=>2,'occupy'=>0])->value('id');
                         empty($store_house_id) && $this->error(__('合单库位已用完，请检查合单库位情况'), [], 5000);
                         $this->_new_order_process->allowField(true)->isUpdate(true, ['order_id' => $order_id])->save(['store_house_id'=>$store_house_id]);
@@ -1599,17 +1608,7 @@ class ScmDistribution extends Scm
                         ;
                     }
                 } else {
-                    //审单通过，变更库存，获取true_sku集合
-                    $item_info = $this->_new_order_item_process->field('sku,site')->where(['order_id'=>$order_id])->select();
-                    $item_info = collection($item_info)->toArray();
-                    $true_sku[] = [];
-                    foreach($item_info as $key => $value){
-                        $true_sku[] = $sku = $this->_item_platform_sku->getTrueSku($value['sku'], $value['site']);
-                        //判断sku实时库存是否满足
-                        $stock = $this->_item->where(['sku'=>$sku])->value('stock');
-                        empty($stock) && $this->error(__('sku实时库存不足'), [], 403);
-                    }
-                    //扣减订单占用库存、扣减配货占用库存，扣减总库存
+                    ////审单通过，扣减订单占用库存、扣减配货占用库存，扣减总库存
                     $this->_item
                         ->where(['sku'=>['in',$true_sku]])
                         ->dec('occupy_stock', 1)
