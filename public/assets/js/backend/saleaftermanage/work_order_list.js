@@ -1851,7 +1851,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 if(id == 13){
                     changeOrderAddress();
                 }
-            })
+            });
+
+            $("#section_item_content").find("input").attr("disabled","disabled");
 
         },
         //处理任务
@@ -2348,15 +2350,32 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         }
                         //判断赠品信息的状态，如果显示的话把数据带出来，如果隐藏的话则不显示赠品数据 end
                     }
-                    //如果子单号item_order_info存在
+                    //如果子单号item_order_info存在带出子单措施的数据
                         if (Config.item_order_info) {
                             var item_order_info = Config.item_order_info;
                             //生成折叠框
                             itemSelectpicker(2,null,item_order_info);
                             for (var i in item_order_info) {
-                                changeOrder(work_id, 2, i);
+                                if ($.inArray(20,item_order_info[i].item_choose) != -1) {
+                                    $('.item'+i+'_step20-20').show();
+                                    changeOrder(work_id, 2, i);
+                                }
+                                //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
+                                if ($.inArray(19,item_order_info[i].item_choose) != -1) {
+                                    $('.item'+i+'_step19-19').show();
+                                    var Str = "";
+                                    Str += '<tr>';
+                                    Str += '<td><input  class="form-control" name="row[item_order_info]['+ i +'][change_frame][original_sku]"  type="text" value="' + item_order_info[i].change_frame.original_sku + '" readonly style="margin-left:10%;"></td>';
+                                    Str += '<td><input  class="form-control" name="row[item_order_info]['+ i +'][change_frame][original_number]"  type="text" value="1" readonly style="margin-left:10%;"></td>';
+                                    Str += '<td><input  class="form-control" name="row[item_order_info]['+ i +'][change_frame][change_sku]"  type="text" value="' + item_order_info[i].change_frame.change_sku + '" style="margin-left:10%;"></td>';
+                                    Str += '<td><input  class="form-control" name="row[item_order_info]['+ i +'][change_frame][change_number]"  type="text" value="1" readonly style="margin-left:10%;"></td>';
+                                    // Str +='<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a></td>';
+                                    Str += '</tr>';
+                                    $('#change-frame'+ i +' tr:gt(0)').remove();
+                                    $("#change-frame"+ i +" tbody").append(Str);
+                                }
+                                //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
                             }
-                            //changeOrder(work_id, 2, item_order_number);
 
                         }
                     function changeOrder(work_id, change_type, item_order_number = '') {
@@ -2460,7 +2479,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 $('.selectpicker ').selectpicker('refresh');
                                 //Controller.api.bindevent();            
                             } else if (2 == change_type) { //更换镜架信息
-                                $('.item'+item_order_number+'_step20-20').show();
                                 $('#lens_contents'+item_order_number).html(json.lens.html);
                                 $('.selectpicker').selectpicker('refresh');
                             } else if (4 == change_type) {
@@ -3059,7 +3077,6 @@ function itemSelectpicker (type = 1,flag = null,item_order_info = '') {
                 };
             });
         }
-
         if($('#step3').prop('checked')) return false;
         var item_problem_step = Config.workOrderConfigValue.all_problem_item_step;
         var item_order_sku_arr = $('.item_order_selectpicker').val();//子单号
