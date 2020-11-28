@@ -1294,9 +1294,9 @@ class OrderData extends Backend
         $arr['pd'] = $options_params['pd'];
         $arr['pdcheck'] = $options_params['pdcheck'];
         $arr['prismcheck'] = $options_params['prismcheck'];
-        //小语种站左右眼add是反的
-        $arr['os_add'] = $options_params['od_add'];
-        $arr['od_add'] = $options_params['os_add'];
+        //日语站左右眼add恢复正常
+        $arr['os_add'] = $options_params['os_add'];
+        $arr['od_add'] = $options_params['od_add'];
         $arr['od_pv'] = $options_params['od_pv'];
         $arr['os_pv'] = $options_params['os_pv'];
         $arr['od_pv_r'] = $options_params['od_pv_r'];
