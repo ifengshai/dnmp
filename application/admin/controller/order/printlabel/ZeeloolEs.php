@@ -152,10 +152,26 @@ class ZeeloolEs extends Backend
                 $field = 'order_type,custom_order_prescription_type,entity_id,status,base_shipping_amount,increment_id,base_grand_total,
                 total_qty_ordered,custom_is_match_frame_new,custom_is_match_lens_new,
                 custom_is_send_factory_new,custom_is_delivery_new,custom_print_label_new,custom_order_prescription,created_at';
+//                $list = $this->model
+//                    ->field($field)
+//                    ->where($map)
+//                    ->find();
+
                 $list = $this->model
                     ->field($field)
                     ->where($map)
-                    ->find();
+                    ->find()->toArray();
+                //查询订单是否存在工单
+                $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
+                $swhere = [];
+                $swhere['platform_order'] = ['eq', $list['increment_id']];
+                $swhere['work_platform'] = 9;
+                $swhere['work_status'] = ['not in', [0, 4, 6]];
+                $order_arr = $workorder->where($swhere)->column('platform_order');
+                if (!empty($order_arr)){
+                    $list['task_info'] = 1;
+                }
+
                 $result = ['code' => 1, 'data' => $list ?? []];
             } else {
                 $result = array("total" => 0, "rows" => []);
