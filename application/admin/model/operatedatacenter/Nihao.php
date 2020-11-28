@@ -322,7 +322,7 @@ class Nihao extends Model
         $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
         $map['o.order_type'] = 1;
         $map1['o.customer_id'] = ['>',0];
-        $map['c.group_id'] = 4;
+        $map['c.is_vip'] = 1;
 
         $order_model = new \app\admin\model\order\order\Nihao();
         //复购用户数
