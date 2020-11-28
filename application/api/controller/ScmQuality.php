@@ -858,6 +858,8 @@ class ScmQuality extends Scm
             }
 
             Db::commit();
+            
+            $this->success('操作成功', [], 200);
         } catch (ValidateException $e) {
             Db::rollback();
             $this->error($e->getMessage(), [], 406);
@@ -869,7 +871,7 @@ class ScmQuality extends Scm
             $this->error($e->getMessage(), [], 408);
         }
 
-        $this->success('审核成功', [], 200);
+       
     }
 
     /**
