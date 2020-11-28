@@ -806,9 +806,9 @@ class ScmWarehouse extends Scm
                 $where['in_stock_id'] = [['>',0], ['neq',$in_stock_id]];
                 foreach ($item_sku as $key => $value) {
                     $sku_code = array_column($value['sku_agg'],'code');
-                    count($value['sku_agg']) != count(array_unique($sku_code))
-                    &&
-                    $this->error(__('条形码有重复，请检查'), [], 405);
+                    if(empty(count($value['sku_agg']) != count(array_unique($sku_code)))) {
+                        throw new Exception('条形码有重复，请检查');
+                    }
 
                     $where['code'] = ['in',$sku_code];
                     $check_quantity = $this->_product_bar_code_item
@@ -816,15 +816,16 @@ class ScmWarehouse extends Scm
                         ->field('code')
                         ->find();
                     if(!empty($check_quantity['code'])){
-                        $this->error(__('条形码:'.$check_quantity['code'].' 已绑定,请移除'), [], 405);
-                        exit;
+                        throw new Exception('条形码:'.$check_quantity['code'].' 已绑定,请移除');
                     }
                 }
 
                 $_in_stock_info = $this->_in_stock->get($in_stock_id);
-                empty($_in_stock_info) && $this->error(__('入库单不存在'), [], 510);
+                if(empty($_in_stock_info)) {
+                    throw new Exception('入库单不存在');
+                }
                 if ($_in_stock_info['status'] != 0){
-                    $this->error(__('只有新建状态才可以修改'), [], 510);
+                    throw new Exception('只有新建状态才可以修改');
                 }
                 //更新数据组装
                 $_in_stock_data = [
@@ -835,7 +836,9 @@ class ScmWarehouse extends Scm
                 if ($platform_id){
                     //有站点，入库单创建入口
                     $row = $this->_in_stock->get($in_stock_id);
-                    empty($row) && $this->error(__('入库单不存在'), [], 511);
+                    if (empty($row)){
+                        throw new Exception('入库单不存在');
+                    }
 
                     //编辑入库单主表
                     $_in_stock_data['platform_id'] = $platform_id;
@@ -843,9 +846,13 @@ class ScmWarehouse extends Scm
                 } else {
                     //无站点，是质检单入口
                     $check_order_number = $this->request->request("check_order_number");
-                    empty($check_order_number) && $this->error(__('质检单号不能为空'), [], 509);
+                    if (empty($check_order_number)){
+                        throw new Exception('质检单号不能为空');
+                    }
                     $check_id = $this->_check->where(['check_order_number'=>$check_order_number])->value('id');
-                    empty($check_id) && $this->error(__('质检单不存在'), [], 509);
+                    if (empty($check_id)){
+                        throw new Exception('质检单不存在');
+                    }
                     $_in_stock_data['check_id'] = $check_id;
                 }
 
@@ -925,9 +932,13 @@ class ScmWarehouse extends Scm
                 } else {
                     //无站点，是质检单入口
                     $check_order_number = $this->request->request("check_order_number");
-                    empty($check_order_number) && $this->error(__('质检单号不能为空'), [], 509);
+                    if (empty($check_order_number)){
+                        throw new Exception('质检单号不能为空');
+                    }
                     $check_id = $this->_check->where(['check_order_number'=>$check_order_number])->value('id');
-                    empty($check_id) && $this->error(__('质检单不存在'), [], 509);
+                    if (empty($check_id)){
+                        throw new Exception('质检单不存在');
+                    }
                     $params['check_id'] = $check_id;
                     //质检单页面去创建入库单
                     $result = $this->_in_stock->allowField(true)->save($params);
@@ -1534,7 +1545,9 @@ class ScmWarehouse extends Scm
                         $list[$k]['inventory_id'] = $this->_inventory->id;
                         $list[$k]['sku'] = $v['sku'];
                         $item = $this->_item->field('name,stock,available_stock,distribution_occupy_stock')->where('sku',$v['sku'])->find();
-                        empty($item) && $this->error(__($v['sku'].'不存在'), [], 523);
+                        if(empty($item)) {
+                            throw new Exception($v['sku'].'不存在');
+                        }
 
                         $list[$k]['name'] = $item['name'];//商品名
                         $list[$k]['distribution_occupy_stock'] = $item['distribution_occupy_stock'] ?? 0;//配货站用数量
@@ -1855,8 +1868,7 @@ class ScmWarehouse extends Scm
 
                     //修改库存结果为真
                     if ($stock === false) {
-                        $this->error(__('同步库存失败,请检查SKU=>' . $v['sku']), [], 548);
-                        break;
+                        throw new Exception('同步库存失败,请检查SKU=>' . $v['sku']);
                     }
 
                     //插入日志表
@@ -1905,7 +1917,7 @@ class ScmWarehouse extends Scm
                         //批量添加
                         $this->_in_stock_item->allowField(true)->saveAll($instockItemList);
                     } else {
-                        $this->error(__('生成入库记录失败！！数据回滚'), [], 549);
+                        throw new Exception('生成入库记录失败！！数据回滚');
                     }
                 }
 
@@ -1932,7 +1944,7 @@ class ScmWarehouse extends Scm
                         //批量添加
                         $this->_out_stock_item->allowField(true)->saveAll($outstockItemList);
                     } else {
-                        $this->error(__('生成入库记录失败！！数据回滚'), [], 550);
+                        throw new Exception('生成入库记录失败！！数据回滚');
                     }
                 }
             }
