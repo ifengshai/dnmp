@@ -858,6 +858,8 @@ class ScmQuality extends Scm
             }
 
             Db::commit();
+            
+            $this->success('操作成功', [], 200);
         } catch (ValidateException $e) {
             Db::rollback();
             $this->error($e->getMessage(), [], 406);
@@ -869,7 +871,7 @@ class ScmQuality extends Scm
             $this->error($e->getMessage(), [], 408);
         }
 
-        $this->success('审核成功', [], 200);
+       
     }
 
     /**
@@ -939,7 +941,7 @@ class ScmQuality extends Scm
         $list = $this->_logistics_info
             ->where($where)
             ->where('type', 1) //采购单类型
-            ->field('id,logistics_number,sign_number,createtime,sign_time,status,purchase_id,type')
+            ->field('id,logistics_number,sign_number,createtime,sign_time,status,purchase_id,type,is_check_order')
             ->order('createtime', 'desc')
             ->limit($offset, $limit)
             ->select();
@@ -955,8 +957,8 @@ class ScmQuality extends Scm
             $list[$key]['purchase_number'] = $purchase_number;
             $list[$key]['is_new_product'] = $is_new_product;
             $list[$key]['status'] = 1 == $value['status'] ? '已签收' : '未签收';
-            $list[$key]['show_sign'] = 0 == $value['status'] && 1 == $value['type'] ? 1 : 0;
-            $list[$key]['show_quality'] = 1 == $value['status'] && 1 == $value['type'] ? 1 : 0;
+            $list[$key]['show_sign'] = 0 == $value['status']  ? 1 : 0;
+            $list[$key]['show_quality'] = 0 == $value['is_check_order'] ? 1 : 0;
         }
 
         $this->success('', ['list' => $list], 200);
