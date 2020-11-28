@@ -1125,6 +1125,7 @@ class Test extends Backend
         $list = Db::table('fa_order_log')->where(['site' => 3])->order('id desc')->select();
         $wesee = new \app\admin\model\order\order\Nihao();
         foreach ($list as $k => $v) {
+            $data = [];
             if ($v['type'] == 1) {
                 $data['custom_print_label_new'] = 1;
                 $data['custom_print_label_person_new'] = $v['create_person'];
