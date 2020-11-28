@@ -365,7 +365,6 @@ class Zeelool extends Model
         }
 
         $again_buy_num = $again_buy_num1+$again_buy_num2;
-        echo $again_buy_num;exit;
         return $again_buy_num;
     }
 
