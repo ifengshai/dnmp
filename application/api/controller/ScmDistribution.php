@@ -1300,6 +1300,7 @@ class ScmDistribution extends Scm
                 ->where($where)
                 ->join(['fa_order_item_process'=> 'b'],'a.order_id=b.order_id','left')
                 ->field('a.order_id,a.store_house_id,a.combine_time')
+                ->group('a.order_id')
                 ->limit($offset, $limit)
                 ->select();
 
@@ -1323,7 +1324,7 @@ class ScmDistribution extends Scm
                 ->alias('a')
                 ->where($where)
                 ->join(['fa_order_item_process'=> 'b'],'a.order_id=b.order_id','left')
-                ->field('a.store_house_id,b.item_order_number')
+                ->field('b.abnormal_house_id,b.item_order_number')
                 ->limit($offset, $limit)
                 ->select();
         }
