@@ -2566,7 +2566,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         //console.log(lens_type);
                         prescription_div.find('#lens_type').html(lens_type);
                         //if(is_new_version == 0){
-                            prescription_div.find('#color_type').val('');
+                            //prescription_div.find('#color_type').val('');
                         //}
 
                         $('.selectpicker ').selectpicker('refresh');
@@ -2577,7 +2577,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     }
                     );
                 });
-                //根据color_type获取lens_type
+                /*//根据color_type获取lens_type
                 $(document).on('change', 'select[name="row[replacement][color_id][]"],select[name="row[change_lens][color_id][]"],select[name="row[gift][color_id][]"]', function () {
                     var sitetype = $('#work_platform').val();
                     var color_id = $(this).val();
@@ -2607,7 +2607,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         );
                     }
 
-                })
+                })*/
 
                 //省市二级联动
                 $(document).on('change', '#c-country', function () {
