@@ -151,7 +151,13 @@ class ScmDistribution extends Scm
             ->order('occupy', 'desc')
             ->find()
         ;
-        if(!empty($stock_house_info)){
+        if(empty($stock_house_info)){
+            DistributionLog::record($this->auth,$item_process_id,0,'异常暂存架没有空余库位');
+            $this->error(__('异常暂存架没有空余库位'), [], 405);
+        }
+
+        Db::startTrans();
+        try {
             //绑定异常子单号
             $abnormal_data = [
                 'item_process_id' => $item_process_id,
@@ -175,11 +181,22 @@ class ScmDistribution extends Scm
                 ->setInc('occupy', 1)
             ;
 
+            //配货日志
             DistributionLog::record($this->auth,$item_process_id,9,"子单号{$item_order_number}，异常暂存架{$stock_house_info['coding']}库位");
+
+            //提交事务
+            Db::commit();
+
             $this->success(__("请将子单号{$item_order_number}的商品放入异常暂存架{$stock_house_info['coding']}库位"), ['coding' => $stock_house_info['coding']], 200);
-        }else{
-            DistributionLog::record($this->auth,$item_process_id,0,'异常暂存架没有空余库位');
-            $this->error(__('异常暂存架没有空余库位'), [], 405);
+        } catch (ValidateException $e) {
+            Db::rollback();
+            $this->error($e->getMessage(), [], 406);
+        } catch (PDOException $e) {
+            Db::rollback();
+            $this->error($e->getMessage(), [], 407);
+        } catch (Exception $e) {
+            Db::rollback();
+            $this->error($e->getMessage(), [], 408);
         }
     }
 
@@ -347,25 +364,39 @@ class ScmDistribution extends Scm
                         ->find()
                     ;
                     if(!empty($stock_house_info)){
-                        //子订单绑定定制片库位号
-                        $this->_new_order_item_process
-                            ->allowField(true)
-                            ->isUpdate(true, ['item_order_number'=>$item_order_number])
-                            ->save(['temporary_house_id'=>$stock_house_info['id']])
-                        ;
+                        try {
+                            //子订单绑定定制片库位号
+                            $this->_new_order_item_process
+                                ->allowField(true)
+                                ->isUpdate(true, ['item_order_number'=>$item_order_number])
+                                ->save(['temporary_house_id'=>$stock_house_info['id']])
+                            ;
 
-                        //定制片库位号占用数量+1
-                        $this->_stock_house
-                            ->where(['id' => $stock_house_info['id']])
-                            ->setInc('occupy', 1)
-                        ;
-                        $coding = $stock_house_info['coding'];
-                        //定制片提示库位号信息
-                        if($coding){
-                            DistributionLog::record($this->auth,$item_process_info['id'],0,"子单号{$item_order_number}，定制片库位号：{$coding}");
+                            //定制片库位号占用数量+1
+                            $this->_stock_house
+                                ->where(['id' => $stock_house_info['id']])
+                                ->setInc('occupy', 1)
+                            ;
+                            $coding = $stock_house_info['coding'];
 
-                            $second = 0;//是第一次扫描
-                            $msg = "请将子单号{$item_order_number}的商品放入定制片暂存架{$coding}库位";
+                            //定制片提示库位号信息
+                            if($coding){
+                                DistributionLog::record($this->auth,$item_process_info['id'],0,"子单号{$item_order_number}，定制片库位号：{$coding}");
+
+                                $second = 0;//是第一次扫描
+                                $msg = "请将子单号{$item_order_number}的商品放入定制片暂存架{$coding}库位";
+                            }
+
+                            Db::commit();
+                        } catch (ValidateException $e) {
+                            Db::rollback();
+                            $this->error($e->getMessage(), [], 406);
+                        } catch (PDOException $e) {
+                            Db::rollback();
+                            $this->error($e->getMessage(), [], 407);
+                        } catch (Exception $e) {
+                            Db::rollback();
+                            $this->error($e->getMessage(), [], 408);
                         }
                     }else{
                         DistributionLog::record($this->auth,$item_process_info['id'],0,'定制片暂存架没有空余库位');
@@ -492,85 +523,89 @@ class ScmDistribution extends Scm
             ->value('total_qty_ordered')
         ;
 
-        //下一步提示信息及状态
-        if(2 == $check_status){
-            //获取true_sku
-            $true_sku = $this->_item_platform_sku->getTrueSku($item_option_info['sku'], $item_process_info['site']);
-            //判断sku实时库存是否满足
-            $stock = $this->_item->where(['sku'=>$true_sku])->value('stock');
-            empty($stock) && $this->error(__('sku实时库存不足'), [], 403);
-            //配货节点 条形码绑定子单号
-            $barcode = $this->request->request('barcode');
-            $this->_product_bar_code_item
-                ->allowField(true)
-                ->isUpdate(true, ['code'=>$barcode])
-                ->save(['item_order_number'=>$item_order_number])
-            ;
-            //增加配货占用库存
-            $this->_item
-                ->where(['sku'=>$true_sku])
-                ->inc('distribution_occupy_stock', 1)
-                ->update()
-            ;
-            //根据处方类型字段order_prescription_type(现货处方镜、定制处方镜)判断是否需要配镜片
-            if(in_array($item_process_info['order_prescription_type'],[2,3])){
-                $save_status = 3;
-            }else{
+        $res = false;
+        Db::startTrans();
+        try {
+            //下一步提示信息及状态
+            if(2 == $check_status){
+                //配货节点 条形码绑定子单号
+                $barcode = $this->request->request('barcode');
+                $this->_product_bar_code_item
+                    ->allowField(true)
+                    ->isUpdate(true, ['code'=>$barcode])
+                    ->save(['item_order_number'=>$item_order_number])
+                ;
+
+                //获取true_sku
+                $true_sku = $this->_item_platform_sku->getTrueSku($item_option_info['sku'], $item_process_info['site']);
+
+                //增加配货占用库存
+                $this->_item
+                    ->where(['sku'=>$true_sku])
+                    ->inc('distribution_occupy_stock', 1)
+                    ->update()
+                ;
+
+                //根据处方类型字段order_prescription_type(现货处方镜、定制处方镜)判断是否需要配镜片
+                if(in_array($item_process_info['order_prescription_type'],[2,3])){
+                    $save_status = 3;
+                }else{
+                    if($item_option_info['is_print_logo']){
+                        $save_status = 5;
+                    }else{
+                        if($total_qty_ordered > 1){
+                            $save_status = 7;
+                        }else{
+                            $save_status = 9;
+                        }
+                    }
+                }
+            }elseif(3 == $check_status){
+                $save_status = 4;
+            }elseif(4 == $check_status){
                 if($item_option_info['is_print_logo']){
                     $save_status = 5;
                 }else{
-                    if($total_qty_ordered > 1){
-                        $save_status = 7;
-                    }else{
-                        $save_status = 9;
-                    }
+                    $save_status = 6;
+                }
+            }elseif(5 == $check_status){
+                $save_status = 6;
+            }elseif(6 == $check_status){
+                if($total_qty_ordered > 1){
+                    $save_status = 7;
+                }else{
+                    $save_status = 9;
                 }
             }
-        }elseif(3 == $check_status){
-            $save_status = 4;
-        }elseif(4 == $check_status){
-            if($item_option_info['is_print_logo']){
-                $save_status = 5;
-            }else{
-                $save_status = 6;
-            }
-        }elseif(5 == $check_status){
-            $save_status = 6;
-        }elseif(6 == $check_status){
-            if($total_qty_ordered > 1){
-                $save_status = 7;
-            }else{
-                $save_status = 9;
+
+            //订单主表标记已合单
+            if(9 == $save_status){
+                //主订单状态表
+                $this->_new_order_process
+                    ->allowField(true)
+                    ->isUpdate(true, ['order_id'=>$item_process_info['order_id']])
+                    ->save(['combine_status'=>1,'combine_time'=>time()])
+                ;
             }
 
-            //获取true_sku
-            $true_sku = $this->_item_platform_sku->getTrueSku($item_option_info['sku'], $item_process_info['site']);
-
-            //扣减订单占用库存、配货占用库存、总库存
-            $this->_item
-                ->where(['sku'=>$true_sku])
-                ->dec('occupy_stock', 1)
-                ->dec('distribution_occupy_stock', 1)
-                ->dec('stock', 1)
-                ->update()
-            ;
-        }
-
-        //订单主表标记已合单
-        if(9 == $save_status){
-            //主订单状态表
-            $this->_new_order_process
+            $res = $this->_new_order_item_process
                 ->allowField(true)
-                ->isUpdate(true, ['order_id'=>$item_process_info['order_id']])
-                ->save(['combine_status'=>1,'combine_time'=>time()])
+                ->isUpdate(true, ['item_order_number'=>$item_order_number])
+                ->save(['distribution_status'=>$save_status])
             ;
+
+            Db::commit();
+        } catch (ValidateException $e) {
+            Db::rollback();
+            $this->error($e->getMessage(), [], 406);
+        } catch (PDOException $e) {
+            Db::rollback();
+            $this->error($e->getMessage(), [], 407);
+        } catch (Exception $e) {
+            Db::rollback();
+            $this->error($e->getMessage(), [], 408);
         }
 
-        $res = $this->_new_order_item_process
-            ->allowField(true)
-            ->isUpdate(true, ['item_order_number'=>$item_order_number])
-            ->save(['distribution_status'=>$save_status])
-        ;
         if($res){
             //操作成功记录
             DistributionLog::record($this->auth,$item_process_info['id'],$check_status,$status_arr[$check_status].'完成');
@@ -686,7 +721,7 @@ class ScmDistribution extends Scm
             ->join(['fa_order_item_option' => 'b'], 'a.option_id=b.id')
             ->join(['fa_lens_data' => 'c'], 'b.lens_number=c.lens_number')
             ->group('a.order_prescription_type,b.lens_number,b.od_sph,b.od_cyl')
-            ->limit($offset, $limit)
+//            ->limit($offset, $limit)
             ->select();
         $list_od = collection($list_od)->toArray();
         //订单处方分类 0待处理  1 仅镜架 2 现货处方镜 3 定制处方镜 4 其他
@@ -707,7 +742,7 @@ class ScmDistribution extends Scm
             ->join(['fa_order_item_option' => 'b'], 'a.option_id=b.id')
             ->join(['fa_lens_data' => 'c'], 'b.lens_number=c.lens_number')
             ->group('a.order_prescription_type,b.lens_number,b.os_sph,b.os_cyl')
-            ->limit($offset, $limit)
+//            ->limit($offset, $limit)
             ->select();
         $list_os = collection($list_os)->toArray();
         //订单处方分类 0待处理  1 仅镜架 2 现货处方镜 3 定制处方镜 4 其他
@@ -941,33 +976,10 @@ class ScmDistribution extends Scm
                     ->save(['distribution_status'=>$status_arr[$reason]['status']])
                 ;
 
-                //镜片报损扣减可用库存、虚拟仓库存、配货占用库存、总库存
-                if(2 == $reason){
-                    //获取true_sku
-                    $true_sku = $this->_item_platform_sku->getTrueSku($item_process_info['sku'], $item_process_info['site']);
-
-                    //扣减虚拟仓库存
-                    $this->_item_platform_sku
-                        ->where(['sku'=>$true_sku,'platform_type'=>$item_process_info['site']])
-                        ->dec('stock', 1)
-                        ->update()
-                    ;
-
-                    //扣减可用库存、配货占用库存、总库存
-                    $this->_item
-                        ->where(['sku'=>$true_sku])
-                        ->dec('available_stock', 1)
-                        ->dec('distribution_occupy_stock', 1)
-                        ->dec('stock', 1)
-                        ->update()
-                    ;
-                }
-
                 //记录日志
                 DistributionLog::record($this->auth,$item_process_info['id'],6,$status_arr[$reason]['name']);
 
                 Db::commit();
-
                 $this->success('', [], 200);
             } catch (ValidateException $e) {
                 Db::rollback();
@@ -979,8 +991,6 @@ class ScmDistribution extends Scm
                 Db::rollback();
                 $this->error($e->getMessage(), [], 408);
             }
-
-           
         }
     }
 
@@ -1575,17 +1585,8 @@ class ScmDistribution extends Scm
         try {
             $result = $this->_new_order_process->allowField(true)->isUpdate(true, ['order_id' => $order_id])->save($param);
             if (false !== $result){
-                //审单通过和拒绝都影响库存，获取true_sku集合
+                //审单通过和拒绝都影响库存
                 $item_info = $this->_new_order_item_process->field('sku,site')->where(['order_id'=>$order_id])->select();
-                $item_info = collection($item_info)->toArray();
-                $true_sku[] = [];
-                foreach($item_info as $key => $value){
-                    $true_sku[] = $sku = $this->_item_platform_sku->getTrueSku($value['sku'], $value['site']);
-                    //判断sku实时库存是否满足
-                    $stock = $this->_item->where(['sku'=>$sku])->value('stock');
-                    empty($stock) && $this->error(__('sku实时库存不足'), [], 403);
-                }
-
                 if (2 == $check_status) {
                     //审单拒绝，回退合单状态
                     $this->_new_order_process->allowField(true)->isUpdate(true, ['order_id' => $order_id])->save(['combine_status'=>0,'combine_time'=>null]);
@@ -1599,23 +1600,52 @@ class ScmDistribution extends Scm
                     } else {
                         //配错镜框，回退子单为待配货
                         $this->_new_order_item_process->allowField(true)->isUpdate(true, ['order_id' => $order_id])->save(['distribution_status'=>2]);
-                        //扣减订单占用库存、扣减配货占用库存，总库存不变
-                        $this->_item
-                        ->where(['sku'=>['in',$true_sku]])
-                        ->dec('occupy_stock', 1)
-                        ->dec('distribution_occupy_stock', 1)
-                        ->update()
-                        ;
+
+                        //扣减占用库存、配货占用、总库存、虚拟仓库存
+                        foreach($item_info as $key => $value){
+                            //仓库sku
+                            $true_sku = $this->_item_platform_sku->getTrueSku($value['sku'], $value['site']);
+
+                            //检验库存
+                            $stock_arr = $this->_item->where(['sku'=>$true_sku])->filed('stock,occupy_stock,distribution_occupy_stock');
+                            $stock = $this->_item->where(['sku'=>$true_sku,'platform_type'=>$value['site']])->value('stock');
+                            ( in_array(0,$stock_arr) || empty($stock) ) && $this->error(__($value['sku'].':库存不足'), [], 403);
+
+                            //扣减占用库存、配货占用、总库存
+                            $this->_item
+                                ->where(['sku'=>$true_sku])
+                                ->dec('occupy_stock', 1)
+                                ->dec('distribution_occupy_stock', 1)
+                                ->dec('stock', 1)
+                                ->update()
+                            ;
+
+                            //扣减虚拟仓库存
+                            $this->_item_platform_sku
+                                ->where(['sku' => $true_sku, 'platform_type' => $value['site']])
+                                ->dec('stock', 1)
+                                ->update();
+                        }
                     }
                 } else {
-                    ////审单通过，扣减订单占用库存、扣减配货占用库存，扣减总库存
-                    $this->_item
-                        ->where(['sku'=>['in',$true_sku]])
-                        ->dec('occupy_stock', 1)
-                        ->dec('distribution_occupy_stock', 1)
-                        ->dec('stock', 1)
-                        ->update()
-                    ;
+                    //审单通过，扣减占用库存、配货占用、总库存
+                    foreach($item_info as $key => $value){
+                        //仓库sku
+                        $true_sku = $this->_item_platform_sku->getTrueSku($value['sku'], $value['site']);
+
+                        //检验库存
+                        $stock_arr = $this->_item->where(['sku'=>$true_sku])->filed('stock,occupy_stock,distribution_occupy_stock');
+                        in_array(0,$stock_arr) && $this->error(__($value['sku'].':库存不足'), [], 403);
+
+                        //扣减占用库存、配货占用、总库存
+                        $this->_item
+                            ->where(['sku'=>$true_sku])
+                            ->dec('occupy_stock', 1)
+                            ->dec('distribution_occupy_stock', 1)
+                            ->dec('stock', 1)
+                            ->update()
+                        ;
+                    }
                 }
             }
             Db::commit();

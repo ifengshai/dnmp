@@ -1971,8 +1971,8 @@ class WorkOrderList extends Backend
                     $update_res = $row->allowField(true)->save($update_data);
                     if (false === $update_res) throw new Exception('更新失败!!');
 
-                    //删除旧措施
-                    if(2 == $row->work_type){
+                    //客服工单删除旧措施
+                    if(1 == $row->work_type){
                         WorkOrderMeasure::where(['work_id' => $row->id])->delete();
                         WorkOrderRecept::where(['work_id' => $row->id])->delete();
                         WorkOrderChangeSku::where(['work_id' => $row->id])->delete();

@@ -1230,7 +1230,7 @@ class Distribution extends Backend
                     ->save(['distribution_status' => $status, 'abnormal_house_id' => 0]);
 
                 //标记异常状态
-                $_distribution_abnormal
+                $this->_distribution_abnormal
                     ->allowField(true)
                     ->isUpdate(true, ['id' => $abnormal_info['id']])
                     ->save(['status' => 2, 'do_time' => time(), 'do_person' => $admin->nickname]);
