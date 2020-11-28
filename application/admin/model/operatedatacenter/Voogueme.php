@@ -352,7 +352,12 @@ class Voogueme extends Model
         foreach ($again_buy_data2 as $v){
             //查询时间段内是否进行购买行为
             $order_where_arr['customer_id'] = $v;
-            $is_buy = $order_model->where($order_where)->where($order_where_arr)->where($map)->value('entity_id');
+            $is_buy = $order_model->alias('o')
+                ->join('customer_entity c','o.customer_id=c.entity_id')
+                ->where($order_where)
+                ->where($order_where_arr)
+                ->where($map)
+                ->value('entity_id');
             if($is_buy){
                 $again_buy_num2++;
             }
