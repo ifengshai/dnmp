@@ -331,6 +331,7 @@ class Zeelool extends Model
         $order_model = new \app\admin\model\order\order\Zeelool();
         //复购用户数
         //查询时间段内的订单 根据customer_id先计算出此事件段内的复购用户数
+        dump($map_where);
         $again_buy_num1 = $order_model->alias('o')
             ->join('customer_entity c','o.customer_id=c.entity_id')
             ->where($map_where)
