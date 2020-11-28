@@ -2351,33 +2351,37 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         //判断赠品信息的状态，如果显示的话把数据带出来，如果隐藏的话则不显示赠品数据 end
                     }
                     //如果子单号item_order_info存在带出子单措施的数据
-                        if (Config.item_order_info) {
-                            var item_order_info = Config.item_order_info;
-                            //生成折叠框
-                            itemSelectpicker(2,null,item_order_info);
-                            for (var i in item_order_info) {
-                                if ($.inArray(20,item_order_info[i].item_choose) != -1) {
-                                    $('.item'+i+'_step20-20').show();
-                                    changeOrder(work_id, 2, i);
-                                }
-                                //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
-                                if ($.inArray(19,item_order_info[i].item_choose) != -1) {
-                                    $('.item'+i+'_step19-19').show();
-                                    var Str = "";
-                                    Str += '<tr>';
-                                    Str += '<td><input  class="form-control" name="row[item_order_info]['+ i +'][change_frame][original_sku]"  type="text" value="' + item_order_info[i].change_frame.original_sku + '" readonly style="margin-left:10%;"></td>';
-                                    Str += '<td><input  class="form-control" name="row[item_order_info]['+ i +'][change_frame][original_number]"  type="text" value="1" readonly style="margin-left:10%;"></td>';
-                                    Str += '<td><input  class="form-control" name="row[item_order_info]['+ i +'][change_frame][change_sku]"  type="text" value="' + item_order_info[i].change_frame.change_sku + '" style="margin-left:10%;"></td>';
-                                    Str += '<td><input  class="form-control" name="row[item_order_info]['+ i +'][change_frame][change_number]"  type="text" value="1" readonly style="margin-left:10%;"></td>';
-                                    // Str +='<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a></td>';
-                                    Str += '</tr>';
-                                    $('#change-frame'+ i +' tr:gt(0)').remove();
-                                    $("#change-frame"+ i +" tbody").append(Str);
-                                }
-                                //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
+                    if (Config.item_order_info) {
+                        var item_order_info = Config.item_order_info;
+                        //生成折叠框
+                        itemSelectpicker(2,null,item_order_info);
+                        for (var i in item_order_info) {
+                            //承接组
+                            receptValue(i);
+                            //判断更改镜片的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
+                            if ($.inArray(20,item_order_info[i].item_choose) != -1) {
+                                $('.item'+i+'_step20-20').show();
+                                changeOrder(work_id, 2, i);
                             }
-
+                            //判断更改镜片的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
+                            //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
+                            if ($.inArray(19,item_order_info[i].item_choose) != -1) {
+                                $('.item'+i+'_step19-19').show();
+                                var Str = "";
+                                Str += '<tr>';
+                                Str += '<td><input  class="form-control" name="row[item_order_info]['+ i +'][change_frame][original_sku]"  type="text" value="' + item_order_info[i].change_frame.original_sku + '" readonly style="margin-left:10%;"></td>';
+                                Str += '<td><input  class="form-control" name="row[item_order_info]['+ i +'][change_frame][original_number]"  type="text" value="1" readonly style="margin-left:10%;"></td>';
+                                Str += '<td><input  class="form-control" name="row[item_order_info]['+ i +'][change_frame][change_sku]"  type="text" value="' + item_order_info[i].change_frame.change_sku + '" style="margin-left:10%;"></td>';
+                                Str += '<td><input  class="form-control" name="row[item_order_info]['+ i +'][change_frame][change_number]"  type="text" value="1" readonly style="margin-left:10%;"></td>';
+                                // Str +='<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a></td>';
+                                Str += '</tr>';
+                                $('#change-frame'+ i +' tr:gt(0)').remove();
+                                $("#change-frame"+ i +" tbody").append(Str);
+                            }
+                            //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
                         }
+
+                    }
                     function changeOrder(work_id, change_type, item_order_number = '') {
                         var ordertype = $('#work_platform').val();
                         var order_number = $('#c-platform_order').val();
@@ -2493,6 +2497,104 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             console.log(ret);
                             return false;
                         });
+                    }
+
+                    function receptValue(item_order_number = ''){
+                        $('.measure_item'+item_order_number).hide();
+                        var checkID = [];//定义一个空数组
+                        var item_input_content = '';
+                        var is_check = [];
+                        var item_appoint_group = '';
+                        var username = [];
+                        var item_appoint_users = [];
+                        var Str = '';
+                        var work_id = $('#work_id').val();
+                        //判断是否出现没有承接组的情况
+                        var count = 0;
+                        $(".item_step_type"+item_order_number+":checked").each(function (i) {
+                            $(".item_input-hidden"+item_order_number).html('');
+                            checkID[i] = $(this).val();
+                            var id = $(this).val();
+                            var sku = $(this).attr('sku');
+                            //获取承接组
+                            item_appoint_group += $('#item' + item_order_number + '_step' + id + '-appoint_group').val() + ',';
+                            var group_id = $('#item' + item_order_number + '_step' + id + '-appoint_group').val();
+                            var choose_group = Config.workOrderConfigValue.group[group_id];
+                            if(choose_group){
+                                for(var j = 0;j<choose_group.length;j++){
+                                    item_input_content += '<input type="hidden" name="row[item_order_info]['+ item_order_number +'][appoint_group][' + id + '][]" value="' + group_id + '"/>';
+                                    item_input_content += '<input type="hidden" name="row[item_order_info]['+ item_order_number +'][appoint_ids][' + id + '][]" value="' + choose_group[j] + '"/>';
+                                    item_input_content += '<input type="hidden" name="row[item_order_info]['+ item_order_number +'][appoint_users][' + id + '][]" value="' + Config.users[choose_group[j]] + '"/>';                            
+                                }
+                            }else{
+                                count = 1;
+                                item_input_content += '<input type="hidden" name="row[item_order_info]['+ item_order_number +'][appoint_group][' + id + '][]" value="0"/>';
+                                item_input_content += '<input type="hidden" name="row[item_order_info]['+ item_order_number +'][appoint_ids][' + id + '][]" value="' + Config.userid + '"/>';
+                                item_input_content += '<input type="hidden" name="row[item_order_info]['+ item_order_number +'][appoint_users][' + id + '][]" value="' + Config.users[Config.userid] + '"/>';                            
+                            }
+                            //获取是否需要审核
+                            var step_is_check = $('#item_step' + id + '-is_check').val();
+                            is_check.push(step_is_check);
+                            //是否自动审核完成 start
+
+                            var step_is_auto_complete = $('#item' + item_order_number +'_step' + id +'-is_auto_complete').val();
+                            item_input_content +='<input type="hidden" name="row[item_order_info]['+ item_order_number +'][auto_complete][' + id + ']" value="' + step_is_auto_complete + '"/>';
+                            //是否自动审核完成  end
+
+                            //是否为子单取消
+                            if (id == 18) {
+                                item_input_content +='<input type="hidden" name="row[item_order_info]['+ item_order_number +'][cancel_order]" value="' + sku + '"/>';
+                            }
+                        });
+                        //判断如果存在1 则改为需要审核
+                        if ($.inArray("1", is_check) != -1) {
+                            $('#is_check').val(1);
+                        } else {
+                            $('#is_check').val(0);
+                        }
+                        item_input_content += '</div>';
+                        //追加到元素之后
+                        $("#item_input-hidden").append(item_input_content);
+
+                        var arr = array_filter(item_appoint_group.split(','));
+                        //循环根据承接组Key获取对应承接人id
+                        for (var i = 0; i < arr.length - 1; i++) {
+                            //循环根据承接组Key获取对应承接人id
+                            if(Config.workOrderConfigValue.group[arr[i]] !=undefined){
+                                for(var n=0;n<Config.workOrderConfigValue.group[arr[i]].length;n++){
+                                    item_appoint_users.push(Config.workOrderConfigValue.group[arr[i]][n]);
+                                }
+                                
+                            }
+                            
+                        }
+
+                        if(count == 1){
+                            item_appoint_users.push(Config.userid);
+                        }else{
+                             if(item_appoint_users[Config.userid]){
+                                delOne(Config.userid,item_appoint_users);
+                            }                         
+                        }
+                        if(checkID.length>0 && item_appoint_users.length === 0){
+                            if(!item_appoint_users[Config.userid]){
+                                item_appoint_users.push(Config.userid);
+                            }
+                        }else if(checkID.length === 0){
+                            if(item_appoint_users[Config.userid]){
+                                delOne(Config.userid,item_appoint_users);
+                            } 
+                        }
+                        //循环根据承接人id获取对应人名称
+                        item_appoint_users = array_filter(item_appoint_users);
+                        for (var j = 0; j < item_appoint_users.length; j++) {
+                            username.push(Config.users[item_appoint_users[j]]);
+                        }
+
+                        var users = array_filter(username);
+                        $('#recept_person_id_'+item_order_number).html(users.join(','));
+
+                        $('#recept_item_person_id').val(item_appoint_users.join(','));
                     }
                 }
 
