@@ -1356,6 +1356,7 @@ class ScmDistribution extends Scm
             ->field('a.id,b.combine_status,b.store_house_id')
             ->find();
         empty($order_process_info) && $this->error(__('主订单不存在'), [], 403);
+        empty($order_process_info['combine_status']) && $this->error(__('只有合单完成状态才能取出'), [], 511);
 
         if ($order_process_info['store_house_id'] != 0){
             //有合单库位订单--释放库位占用，解绑合单库位ID
@@ -1438,7 +1439,6 @@ class ScmDistribution extends Scm
         } else {
             $this->error(__('合单库位已经取出了'), [], 511);
         }
-
     }
 
     /**
