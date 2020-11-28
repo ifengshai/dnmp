@@ -1005,22 +1005,22 @@ class ScmDistribution extends Scm
         }
 
         //未合单，首次扫描
-        $info['item_order_number'] = $item_order_number;
-        $info['sku'] = $item_process_info['sku'];
         if (!$order_process_info['store_house_id']){
             //主单中无库位号，首个子单进入时，分配一个合单库位给PDA，暂不占用根据是否确认放入合单架占用或取消
             $store_house_info = $this->_stock_house->field('id,coding,subarea')->where(['status'=>1,'type'=>2,'occupy'=>0])->find();
-            $info['store_id'] = $store_house_info['id'];
-            $info['coding'] = $store_house_info['coding'];
         } else {
             //主单已绑定合单库位,根据ID查询库位信息
             $store_house_info = $this->_stock_house->field('id,coding,subarea')->where('id',$order_process_info['store_house_id'])->find();
-            $info['store_id'] = $store_house_info['id'];
-            $info['coding'] = $store_house_info['coding'];
         }
-
         $abnormal_list = $this->info($item_order_number,7);
-        $info['abnormal_list'] = $abnormal_list;
+        $info = [];
+        $info = [
+            'item_order_number' => $item_order_number,
+            'sku' => $item_process_info['sku'],
+            'store_id' => $store_house_info['id'],
+            'coding' => $store_house_info['coding'],
+            'abnormal_list' => $abnormal_list
+        ];
 
         $this->success('', ['info' => $info],200);
     }

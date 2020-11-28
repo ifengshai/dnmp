@@ -234,14 +234,14 @@
                     <td><input class="form-control" name="row[item_order_info][{$item_order_number}][change_lens][od_axis]" type="text"
                                value="{$vo['od_axis']}"></td>
                     <td>
-                        {if condition="isset($vo['od_add'])"}
+                        {if condition="!empty($vo['od_add'])"}
                         <input class="form-control" name="row[item_order_info][{$item_order_number}][change_lens][od_add]" type="text" value="{$vo['od_add']}">
                         {else /}
                         <input class="form-control" name="row[item_order_info][{$item_order_number}][change_lens][od_add]" type="text" value="{$vo['total_add']}">
                         {/if}
                     </td>
                     <td>
-                        {if condition="isset($vo['pd'])"}
+                        {if condition="!empty($vo['pd'])"}
                         <input class="form-control" name="row[item_order_info][{$item_order_number}][change_lens][pd_r]" type="text" value="{$vo['pd']}">
                         {else /}
                         <input class="form-control" name="row[item_order_info][{$item_order_number}][change_lens][pd_r]" type="text" value="{$vo['pd_r']}">
@@ -257,7 +257,7 @@
                     <td><input class="form-control" name="row[item_order_info][{$item_order_number}][change_lens][os_axis]" type="text"
                                value="{$vo['os_axis']}"></td>
                     <td>
-                        {if condition="isset($vo['os_add'])"}
+                        {if condition="!empty($vo['os_add'])"}
                         <input class="form-control" name="row[item_order_info][{$item_order_number}][change_lens][os_add]" type="text" value="{$vo['os_add']}">
                         {else /}
                         <input class="form-control" name="row[item_order_info][{$item_order_number}][change_lens][os_add]" type="text" value="{$vo['os_add']}">
@@ -265,8 +265,8 @@
 
                     </td>
                     <td>
-                        {if condition="isset($vo['pd'])"}
-                        <input class="form-control" name="row[item_order_info][{$item_order_number}][change_lens][pd_l]" type="text" value="">
+                        {if condition="!empty($vo['pd'])"}
+                        <input class="form-control" name="row[item_order_info][{$item_order_number}][change_lens][pd_l]" type="text" value="{$vo['pd']}">
                         {else /}
                         <input class="form-control" name="row[item_order_info][{$item_order_number}][change_lens][pd_l]" type="text" value="{$vo['pd_l']}">
                         {/if}

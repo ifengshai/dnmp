@@ -573,9 +573,9 @@ class ScmQuality extends Scm
             //批量创建或更新质检单商品
             foreach ($item_data as $key => $value) {
                 //错误类型、合格率
-                if ($value['should_arrival_num'] > $value['arrival_num']) {
+                if ($value['should_arrival_num'] > $value['arrivals_num']) {
                     $error_type = 2;
-                } elseif ($value['should_arrival_num'] < $value['arrival_num']) {
+                } elseif ($value['should_arrival_num'] < $value['arrivals_num']) {
                     $error_type = 1;
                 } else {
                     $error_type = 0;
@@ -817,7 +817,7 @@ class ScmQuality extends Scm
                                 'supplier_sku' => $v['supplier_sku'],
                                 'purchase_num' => $v['purchase_num'],
                                 'should_arrival_num' => $v['should_arrival_num'],
-                                'arrival_num' => $v['arrival_num'],
+                                'arrival_num' => $v['arrivals_num'],
                                 'error_type' => $v['error_type'],
                                 'purchase_id' => $row['purchase_id'],
                                 'purchase_price' => $purchase_item_list[$v['sku']] ?? 0
