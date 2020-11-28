@@ -121,6 +121,8 @@ class UserValueRfm extends Backend
 
         $order_customer_count = $web_model->table([$sql2=>'t2'])->field('sum( IF ( total >= 300, 1, 0 ) ) AS f,sum( IF ( total >= 200 AND total < 300, 1, 0 ) ) AS e,sum( IF ( total >= 150 AND total < 200, 1, 0 ) ) AS d,sum( IF ( total >= 80 AND total < 150, 1, 0 ) ) AS c,sum( IF ( total >= 40 AND total < 80, 1, 0 ) ) AS b,sum( IF ( total >= 0 AND total < 40, 1, 0 ) ) AS a')->select();
 
+        $order_customer_count[0]['a'] = $count-$order_customer_count[0]['b']-$order_customer_count[0]['c']-$order_customer_count[0]['d']-$order_customer_count[0]['e']-$order_customer_count[0]['f'];
+
         $arr = array(
             'count'=>$count,
             'data'=>$order_customer_count,
