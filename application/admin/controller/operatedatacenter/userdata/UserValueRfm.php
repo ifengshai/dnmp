@@ -50,14 +50,14 @@ class UserValueRfm extends Backend
             $order_platform = $params['order_platform'];
             $cache_data = Cache::get('Operatedatacenter_userdata1'.$order_platform.md5(serialize('ajax_user_order_amount')));
             if(!$cache_data){
-                $count = $this->getOrderAmountUserNum($order_platform);
-
-                $count1 = $this->getOrderAmountUserNum($order_platform, 1);
-                $count2 = $this->getOrderAmountUserNum($order_platform, 2);
-                $count3 = $this->getOrderAmountUserNum($order_platform, 3);
-                $count4 = $this->getOrderAmountUserNum($order_platform, 4);
-                $count5 = $this->getOrderAmountUserNum($order_platform, 5);
-                $count6 = $this->getOrderAmountUserNum($order_platform, 6);
+                $result = $this->getOrderAmountUserNum($order_platform);
+                $count = $result['count'];
+                $count1 = $result['a'];
+                $count2 = $result['b'];
+                $count3 = $result['c'];
+                $count4 = $result['d'];
+                $count5 = $result['e'];
+                $count6 = $result['f'];
                 $arr = array(
                     'data'=>array($count1, $count2, $count3, $count4, $count5, $count6),
                     'count'=>$count
@@ -111,64 +111,21 @@ class UserValueRfm extends Backend
         $end = date('Y-m-d 23:59:59', strtotime($today));
         $time_where['created_at'] = ['between', [$start, $end]];
         $where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-        $customer_ids = $web_model->table('customer_entity')->where($time_where)->column('entity_id');
-        //$where['customer_id'] = ['in',$customer_ids];
+        $count = $web_model->table('customer_entity')->where($time_where)->count('entity_id');
 
-
-        /*SELECT
- sum( IF ( total >= 300, 1, 0 ) ) AS a,
- sum( IF ( total >= 200 AND total < 300, 1, 0 ) ) AS b,
- sum( IF ( total >= 150 AND total < 200, 1, 0 ) ) AS c,
- sum( IF ( total >= 80 AND total < 150, 1, 0 ) ) AS d,
- sum( IF ( total >= 40 AND total < 80, 1, 0 ) ) AS e,
- sum( IF ( total >= 0 AND total < 40, 1, 0 ) ) AS f
-FROM
-(
-    SELECT
-  sum( base_grand_total ) AS total
- FROM
-  sales_flat_order as t1
- WHERE
-  `status` IN ( 'complete' )
-    AND customer_id IN ( SELECT entity_id FROM customer_entity WHERE created_at BETWEEN '2019-12-01' AND '2020-12-01' )
- GROUP BY
- customer_id
- ) t2*/
         $sql1 = $web_model->table('customer_entity')->where($time_where)->field('entity_id')->buildSql();
         $arr_where = [];
         $arr_where[] = ['exp', Db::raw("customer_id in " . $sql1)];
 
         $sql2 = $order_model->alias('t1')->field('sum( base_grand_total ) AS total')->where($where)->where($arr_where)->group('customer_id')->buildSql();
 
+        $order_customer_count = $web_model->table([$sql2=>'t2'])->field('sum( IF ( total >= 300, 1, 0 ) ) AS f,sum( IF ( total >= 200 AND total < 300, 1, 0 ) ) AS e,sum( IF ( total >= 150 AND total < 200, 1, 0 ) ) AS d,sum( IF ( total >= 80 AND total < 150, 1, 0 ) ) AS c,sum( IF ( total >= 40 AND total < 80, 1, 0 ) ) AS b,sum( IF ( total >= 0 AND total < 40, 1, 0 ) ) AS a')->select();
 
-        $order_customerids = $web_model->table([$sql2=>'t2'])->field('sum( IF ( total >= 300, 1, 0 ) ) AS a,sum( IF ( total >= 200 AND total < 300, 1, 0 ) ) AS b,sum( IF ( total >= 150 AND total < 200, 1, 0 ) ) AS c,sum( IF ( total >= 80 AND total < 150, 1, 0 ) ) AS d,sum( IF ( total >= 40 AND total < 80, 1, 0 ) ) AS e,sum( IF ( total >= 0 AND total < 40, 1, 0 ) ) AS f')->select();
-        dump($order_customerids);exit;
-
-        switch ($type) {
-            case 1:
-                $order_customerids = $order_model->where($where)->group('customer_id')->having('sum(base_grand_total)>=0 and sum(base_grand_total)<40')->column('customer_id');
-                break;
-            case 2:
-                $order_customerids = $order_model->where($where)->group('customer_id')->having('sum(base_grand_total)>=40 and sum(base_grand_total)<80')->column('customer_id');
-                break;
-            case 3:
-                $order_customerids = $order_model->where($where)->group('customer_id')->having('sum(base_grand_total)>=80 and sum(base_grand_total)<150')->column('customer_id');
-                break;
-            case 4:
-                $order_customerids = $order_model->where($where)->group('customer_id')->having('sum(base_grand_total)>=150 and sum(base_grand_total)<200')->column('customer_id');
-                break;
-            case 5:
-                $order_customerids = $order_model->where($where)->group('customer_id')->having('sum(base_grand_total)>=200 and sum(base_grand_total)<300')->column('customer_id');
-                break;
-            case 6:
-                $order_customerids = $order_model->where($where)->group('customer_id')->having('sum(base_grand_total)>=300')->column('customer_id');
-                break;
-            default:
-                $order_customerids = $customer_ids;
-                break;
-        }
-        $count = count($order_customerids);
-        return $count;
+        $arr = array(
+            'count'=>$count,
+            'data'=>$order_customer_count,
+        );
+        return $arr;
     }
     /**
      * 用户总消费次数分布
