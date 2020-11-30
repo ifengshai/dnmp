@@ -1340,15 +1340,13 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
     {
         set_time_limit(0);
         ini_set('memory_limit', '512M');
-
+        $map['sfo.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
         $map['sfo.created_at'] = ['between',['2020-07-01 00:00:00','2020-11-30 23:59:59']];
-        list($where) = $this->buildparams();
         $field = 'sfo.is_new_version,sfo.increment_id,sfoi.product_options,total_qty_ordered as NUM,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.product_id,sfoi.qty_ordered,sfo.created_at';
         $resultList = $this->model->alias('sfo')
             ->join(['sales_flat_order_item' => 'sfoi'], 'sfoi.order_id=sfo.entity_id')
             ->field($field)
             ->where($map)
-            ->where($where)
             ->order('sfoi.order_id desc')
             ->select();
         $resultList = collection($resultList)->toArray();
@@ -1465,10 +1463,6 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
 
         $ItemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
 
-        //查询商品管理SKU对应ID
-        $item = new \app\admin\model\itemmanage\Item;
-        $itemArr = $item->where('is_del', 1)->column('id', 'sku');
-
         foreach ($finalResult as $key => $value) {
             //网站SKU转换仓库SKU
             $sku = $ItemPlatformSku->getTrueSku($value['sku'], 1);
@@ -1503,7 +1497,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
 
             $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 2 + 2), $value['created_at']);
             $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 2 + 2), $value['increment_id']);
-            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 2 + 2), $itemArr[$sku]);
+            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 2 + 2), '');
             $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 2 + 2), $value['sku']);
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 2 + 2), '右眼');
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 2 + 3), '左眼');
@@ -1652,13 +1646,13 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
         }
 
-        //输出名称
-        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
-        //禁止缓存
-        header('Cache-Control: max-age=0');
+        // //输出名称
+        // header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
+        // //禁止缓存
+        // header('Cache-Control: max-age=0');
         $writer = new $class($spreadsheet);
 
-        $writer->save('php://output');
+        $writer->save($_SERVER['DOCUMENT_ROOT']."/uploads/" . $savename .'.'. $format);
     }
 
 
