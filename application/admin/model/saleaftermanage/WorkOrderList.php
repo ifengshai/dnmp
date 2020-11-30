@@ -1100,9 +1100,9 @@ class WorkOrderList extends Model
     {
         $work = $this->find($work_id);
         if ($work && in_array($measure_choose_id,[3,18])) {
+            $_new_order_item_process = new NewOrderItemProcess();
             $orderChangeList = [];
             if (3 == $measure_choose_id) {//主单取消
-                $_new_order_item_process = new NewOrderItemProcess();
                 $item_order_list = $_new_order_item_process
                     ->alias('a')
                     ->field('a.item_order_number,a.sku')
@@ -1140,8 +1140,16 @@ class WorkOrderList extends Model
                     'update_time'=>date('Y-m-d H:i:s')
                 ];
             }
+            empty($orderChangeList) && exception("取消失败：子单号数据不存在");
+
             $cancelOrderRes = (new WorkOrderChangeSku())->saveAll($orderChangeList);
             false === $cancelOrderRes && exception("取消失败！！");
+
+            //标记子单号状态为取消
+            $_new_order_item_process
+                ->allowField(true)
+                ->save(['distribution_status'=>0], ['item_order_number' => ['in',array_column($orderChangeList,'item_order_number')]])
+            ;
 
             //标记措施表更改类型
             WorkOrderMeasure::where(['id' => $measure_id])->update(['sku_change_type' => 3]);
