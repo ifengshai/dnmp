@@ -1346,6 +1346,7 @@ where cped.attribute_id in(146,147) and cped.store_id=0 and cped.entity_id=$prod
             $finalResult[$key]['pd'] = isset($tmp_lens_params['pd']) ? $tmp_lens_params['pd'] : '';
             $finalResult[$key]['third_name'] = $tmp_product_options['info_buyRequest']['tmplens']['third_name'];
         
+            
             //镜片类型拼接颜色字段
             if ($tmp_product_options['info_buyRequest']['tmplens']['color_name']) {
                 $finalResult[$key]['third_name'] .= '-' . $tmp_product_options['info_buyRequest']['tmplens']['color_name'];
