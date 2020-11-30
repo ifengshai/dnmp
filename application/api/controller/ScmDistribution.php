@@ -18,6 +18,7 @@ use app\admin\model\itemmanage\ItemPlatformSku;
 use app\admin\model\itemmanage\Item;
 use app\admin\model\order\order\NewOrderProcess;
 use app\admin\model\warehouse\ProductBarCodeItem;
+use app\admin\model\order\order\LensData;
 
 /**
  * 供应链配货接口类
@@ -102,6 +103,13 @@ class ScmDistribution extends Scm
      */
     protected $_work_order_change_sku = null;
 
+    /**
+     * 镜片模型对象
+     * @var object
+     * @access protected
+     */
+    protected $_lens_data = null;
+
     protected function _initialize()
     {
         parent::_initialize();
@@ -117,6 +125,7 @@ class ScmDistribution extends Scm
         $this->_product_bar_code_item = new ProductBarCodeItem();
         $this->_work_order_measure = new WorkOrderMeasure();
         $this->_work_order_change_sku = new WorkOrderChangeSku();
+        $this->_lens_data = new LensData();
     }
 
     /**
@@ -186,8 +195,6 @@ class ScmDistribution extends Scm
 
             //提交事务
             Db::commit();
-
-            $this->success(__("请将子单号{$item_order_number}的商品放入异常暂存架{$stock_house_info['coding']}库位"), ['coding' => $stock_house_info['coding']], 200);
         } catch (ValidateException $e) {
             Db::rollback();
             $this->error($e->getMessage(), [], 406);
@@ -198,6 +205,8 @@ class ScmDistribution extends Scm
             Db::rollback();
             $this->error($e->getMessage(), [], 408);
         }
+
+        $this->success(__("请将子单号{$item_order_number}的商品放入异常暂存架{$stock_house_info['coding']}库位"), ['coding' => $stock_house_info['coding']], 200);
     }
 
     /**
@@ -289,23 +298,56 @@ class ScmDistribution extends Scm
             }
         }
 
-        //子单是否取消
-        $check_cancel_order = $this->_work_order_change_sku
-            ->alias('a')
-            ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
-            ->where([
-                'a.change_type'=>3,
-                'a.item_order_number'=>$item_order_number,
-                'b.operation_type'=>1
-            ])
-            ->value('a.item_order_number');
-        $check_cancel_order && $this->error(__('子单已取消，无法操作'), [], 405);
-
         //获取子订单处方数据
         $option_info = $this->_new_order_item_option
             ->where('id', $item_process_info['option_id'])
             ->find()
         ;
+
+        //获取更改镜框最新信息
+        $change_sku = $this->_work_order_change_sku
+            ->alias('a')
+            ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
+            ->where([
+                'a.change_type'=>1,
+                'a.item_order_number'=>$item_order_number,
+                'b.operation_type'=>1
+            ])
+            ->order('a.id','desc')
+            ->value('a.change_sku');
+        if($change_sku){
+            $option_info['sku'] = $change_sku;
+        }
+
+        //获取更改镜片最新处方信息
+        $change_lens = $this->_work_order_change_sku
+            ->alias('a')
+            ->field('a.od_sph,a.od_cyl,a.od_axis,a.od_add,a.pd_r,a.od_pv,a.od_bd,a.od_pv_r,a.od_bd_r,a.os_sph,a.os_cyl,a.os_axis,a.os_add,a.pd_l,a.os_pv,a.os_bd,a.os_pv_r,a.os_bd_r,a.lens_number')
+            ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
+            ->where([
+                'a.change_type'=>2,
+                'a.item_order_number'=>$item_order_number,
+                'b.operation_type'=>1
+            ])
+            ->order('a.id','desc')
+            ->find();
+        if($change_lens){
+            if($change_lens['pd_l'] && $change_lens['pd_r']){
+                $change_lens['pd'] = '';
+            }else{
+                $change_lens['pd'] = $change_lens['pd_r'] ?: $change_lens['pd_l'];
+            }
+            $option_info = array_merge($option_info,$change_lens);
+        }
+
+        //获取镜片名称
+        $lens_name = '';
+        if($option_info['lens_number']){
+            //获取镜片编码及名称
+            $lens_list = $this->_lens_data->column('lens_name','lens_number');
+            $lens_name = $lens_list[$option_info['lens_number']];
+        }
+        $option_info['lens_name'] = $lens_name;
 
         //异常原因列表
         $abnormal_arr = [
@@ -504,18 +546,6 @@ class ScmDistribution extends Scm
                 && $this->error(__('有工单未处理，无法操作'), [], 405);
             }
         }
-
-        //子单是否取消
-        $check_cancel_order = $this->_work_order_change_sku
-            ->alias('a')
-            ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
-            ->where([
-                'a.change_type'=>3,
-                'a.item_order_number'=>$item_order_number,
-                'b.operation_type'=>1
-            ])
-            ->value('a.item_order_number');
-        $check_cancel_order && $this->error(__('子单已取消，无法操作'), [], 405);
 
         //获取订单购买总数
         $total_qty_ordered = $this->_new_order
@@ -980,7 +1010,6 @@ class ScmDistribution extends Scm
                 DistributionLog::record($this->auth,$item_process_info['id'],6,$status_arr[$reason]['name']);
 
                 Db::commit();
-                $this->success('', [], 200);
             } catch (ValidateException $e) {
                 Db::rollback();
                 $this->error($e->getMessage(), [], 406);
@@ -991,6 +1020,8 @@ class ScmDistribution extends Scm
                 Db::rollback();
                 $this->error($e->getMessage(), [], 408);
             }
+
+            $this->success('', [], 200);
         }
     }
 
@@ -1011,6 +1042,7 @@ class ScmDistribution extends Scm
             ->field('id,distribution_status,sku,order_id,temporary_house_id,abnormal_house_id')
             ->find();
         empty($item_process_info) && $this->error(__('子订单不存在'), [], 403);
+        !in_array($item_process_info['distribution_status'],[7,8]) && $this->error(__('子订单当前状态不可合单操作'), [], 403);
 
         //获取订单购买总数,商品总数即为子单数量
         $order_process_info = $this->_new_order_process
@@ -1079,6 +1111,7 @@ class ScmDistribution extends Scm
             ->field('id,distribution_status,order_id')
             ->find();
         empty($item_process_info) && $this->error(__('子订单不存在'), [], 403);
+        !in_array($item_process_info['distribution_status'],[7,8]) && $this->error(__('子订单当前状态不可合单操作'), [], 403);
 
         //查询主单数据
         $order_process_info = $this->_new_order
@@ -1115,7 +1148,9 @@ class ScmDistribution extends Scm
             ->where('id', $item_process_info['order_id'])
             ->value('total_qty_ordered')
         ;
-        $count = $this->_new_order_item_process->where(['distribution_status'=>8,'order_id'=>$item_process_info['order_id']])->count();
+        $count = $this->_new_order_item_process
+            ->where(['distribution_status'=>['in',[0,8]],'order_id'=>$item_process_info['order_id']])
+            ->count();
 
         $info['order_id'] = $item_process_info['order_id'];//合单确认放入合单架提交 接口返回自带主订单号
 
@@ -1139,8 +1174,16 @@ class ScmDistribution extends Scm
                 DistributionLog::record($this->auth,$item_process_info['id'],7,'子单号：'.$item_order_number.'作为主单号'.$order_process_info['increment_id'].'的'.$num.'子单合单完成');
                 if (!$next){
                     //最后一个子单且合单完成，更新主单、子单状态为合单完成
-                    $this->_new_order_item_process->allowField(true)->isUpdate(true, ['order_id'=>$item_process_info['order_id']])->save(['distribution_status'=>9]);
-                    $this->_new_order_process->allowField(true)->isUpdate(true, ['order_id'=>$item_process_info['order_id']])->save(['combine_status'=>1,'combine_time'=>time()]);
+                    $this->_new_order_item_process
+                        ->allowField(true)
+                        ->isUpdate(true, ['order_id'=>$item_process_info['order_id'],'distribution_status'=>['neq',0]])
+                        ->save(['distribution_status'=>9])
+                    ;
+                    $this->_new_order_process
+                        ->allowField(true)
+                        ->isUpdate(true, ['order_id'=>$item_process_info['order_id']])
+                        ->save(['combine_status'=>1,'combine_time'=>time()])
+                    ;
                 }
 
                 $this->success('子单号放入合单架成功', ['info'=>$info], 200);
@@ -1180,7 +1223,10 @@ class ScmDistribution extends Scm
         if ($return !== false) {
             if (0 == $next){
                 //只有一个子单且合单完成，更新主单、子单状态为合单完成
-                $this->_new_order_item_process->allowField(true)->isUpdate(true, ['order_id'=>$item_process_info['order_id']])->save(['distribution_status'=>9]);
+                $this->_new_order_item_process
+                    ->allowField(true)
+                    ->isUpdate(true, ['order_id'=>$item_process_info['order_id'],'distribution_status'=>['neq',0]])
+                    ->save(['distribution_status'=>9]);
                 $this->_new_order_process->allowField(true)->isUpdate(true, ['order_id'=>$item_process_info['order_id']])->save(['combine_status'=>1,'combine_time'=>time()]);
                 $this->_stock_house->allowField(true)->isUpdate(true, ['id'=>$store_house_id])->save(['occupy'=>1]);
             }
@@ -1227,7 +1273,7 @@ class ScmDistribution extends Scm
             ->select();
         empty($item_process_info) && $this->error(__('子订单数据异常'), [], 403);
 
-        $distribution_status = [1=>'待打印标签',2=>'待配货',3=>'待配镜片',4=>'待加工',5=>'待印logo',6=>'待成品质检',7=>'待合单',8=>'合单中',9=>'合单完成'];
+        $distribution_status = [0=>'取消',1=>'待打印标签',2=>'待配货',3=>'待配镜片',4=>'待加工',5=>'待印logo',6=>'待成品质检',7=>'待合单',8=>'合单中',9=>'合单完成'];
         foreach($item_process_info as $key => $value){
             $item_process_info[$key]['distribution_status'] = $distribution_status[$value['distribution_status']];//子单合单状态
             $item_process_info[$key]['abnormal_house_id'] = 0 == $value['abnormal_house_id'] ? '正常' : '异常';//异常状态
@@ -1410,7 +1456,10 @@ class ScmDistribution extends Scm
                             $where['order_id'] = $order_process_info['id'];
                             $item_process_info = $this->_new_order_item_process->field('id,item_order_number')->where($where)->select();
                             $ids = array_column($item_process_info,'id');
-                            $return = $this->_new_order_item_process->allowField(true)->isUpdate(true, ['id', 'in', $ids])->save(['distribution_status'=>7]);//回退子订单合单状态至待合单7
+                            $return = $this->_new_order_item_process
+                                ->allowField(true)
+                                ->isUpdate(true, ['id'=>['in', $ids],'distribution_status'=>['neq', 0]])
+                                ->save(['distribution_status'=>7]);//回退子订单合单状态至待合单7
                         }
 
                     }
@@ -1524,7 +1573,7 @@ class ScmDistribution extends Scm
             empty($item_process_info) && $this->error(__('子订单数据异常'), [], 403);
         }
 
-        $distribution_status = [1=>'待打印标签',2=>'待配货',3=>'待配镜片',4=>'待加工',5=>'待印logo',6=>'待成品质检',7=>'待合单',8=>'合单中',9=>'合单完成'];
+        $distribution_status = [0=>'取消',1=>'待打印标签',2=>'待配货',3=>'待配镜片',4=>'待加工',5=>'待印logo',6=>'待成品质检',7=>'待合单',8=>'合单中',9=>'合单完成'];
         foreach($item_process_info as $key => $value){
             $item_process_info[$key]['distribution_status'] = $distribution_status[$value['distribution_status']];//子单合单状态
             $item_process_info[$key]['abnormal_house_id'] = 0 == $value['abnormal_house_id'] ? '正常' : '异常';//异常状态
@@ -1595,11 +1644,17 @@ class ScmDistribution extends Scm
                         $store_house_id = $this->_stock_house->field('id,coding,subarea')->where(['status'=>1,'type'=>2,'occupy'=>0])->value('id');
                         empty($store_house_id) && $this->error(__('合单库位已用完，请检查合单库位情况'), [], 5000);
                         $this->_new_order_process->allowField(true)->isUpdate(true, ['order_id' => $order_id])->save(['store_house_id'=>$store_house_id]);
-                        $this->_new_order_item_process->allowField(true)->isUpdate(true, ['order_id' => $order_id])->save(['distribution_status'=>8]);
+                        $this->_new_order_item_process
+                            ->allowField(true)
+                            ->isUpdate(true, ['order_id' => $order_id,'distribution_status'=>['neq', 0]])
+                            ->save(['distribution_status'=>8]);
                         $this->_stock_house->allowField(true)->isUpdate(true, ['id'=>$store_house_id])->save(['occupy'=>1]);
                     } else {
                         //配错镜框，回退子单为待配货
-                        $this->_new_order_item_process->allowField(true)->isUpdate(true, ['order_id' => $order_id])->save(['distribution_status'=>2]);
+                        $this->_new_order_item_process
+                            ->allowField(true)
+                            ->isUpdate(true, ['order_id' => $order_id,'distribution_status'=>['neq', 0]])
+                            ->save(['distribution_status'=>2]);
 
                         //扣减占用库存、配货占用、总库存、虚拟仓库存
                         foreach($item_info as $key => $value){
