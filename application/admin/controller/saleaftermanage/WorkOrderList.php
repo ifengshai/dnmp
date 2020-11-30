@@ -2114,6 +2114,8 @@ class WorkOrderList extends Backend
             $siteType = input('site_type');
             $work_id = input('work_id');
 
+            $res = [];
+            $lens = [];
             try {
                 //获取网站数据库地址,获取地址信息
                 $res = $this->model->getAddress($incrementId);
@@ -2131,10 +2133,10 @@ class WorkOrderList extends Backend
                     $address['address_type'] = $address['address_id'] == 0 ? 'shipping' : 'billing';
                     $res['address'][$address['address_id']] = $address;
                 }
-                $this->success('操作成功！！', '', ['address' => $res, 'lens' => $lens]);
             } catch (\Exception $e) {
                 $this->error($e->getMessage());
             }
+            $this->success('操作成功！！', '', ['address' => $res, 'lens' => $lens]);
         }
         $this->error('404 not found');
     }
