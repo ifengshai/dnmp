@@ -70,6 +70,7 @@ class Order extends Model
             ->alias('a')
             ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
             ->sum('b.qty_ordered');
+        echo $model->getLastSql();
         return $res;
     }
 }
