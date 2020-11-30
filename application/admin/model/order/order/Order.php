@@ -49,6 +49,12 @@ class Order extends Model
             $model = new \app\admin\model\order\order\Meeloog();
         } elseif ($site == 5) {
             $model = new \app\admin\model\order\order\Weseeoptical();
+        }  elseif ($site == 9) {
+            $model = new \app\admin\model\order\order\ZeeloolEs();
+        }  elseif ($site == 10) {
+            $model = new \app\admin\model\order\order\ZeeloolDe();
+        }  elseif ($site == 11) {
+            $model = new \app\admin\model\order\order\ZeeloolJp();
         } 
 
         if ($sku) {
@@ -57,6 +63,7 @@ class Order extends Model
             $map['sku'] = ['not like', '%Price%'];
         }
         $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
+        dump($where);
         $res = $model
             ->where($map)
             ->where($where)

@@ -32,18 +32,26 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                         downLoadTitle: '图表',
                         type: 'bar',
                         bar: {
-                            legend: {},
-                            tooltip: {},
-                            xAxis: [{type: 'category'},{type: 'category'}],
-                            yAxis: {},
-                            series: [
-                                {type: 'bar'},
-                                {type: 'bar'},
-                                {type: 'bar'},
-                                {type: 'bar'},
-                                {type: 'bar'},
-                                {type: 'bar'},
-                            ]
+                            color: ['#003366', '#006699', '#4cabce'],
+                            tooltip: {
+                                trigger: 'axis',
+                                axisPointer: {
+                                    type: 'shadow'
+                                },
+                                formatter: function (param) {
+                                    return param.data.name + '<br/>库存：' + param.data.value + '<br/> 占比：' + param.percent.toFixed(2) + '%';
+                                }
+                            },
+                            legend: {
+                                top: '2%',
+                                data: ['客单价', '标准差', '中位数']
+                            },
+                            xAxis: {
+                                type: 'category'
+                            },
+                            yAxis: {
+                                type: 'value'
+                            }
                         }
                     };
 
