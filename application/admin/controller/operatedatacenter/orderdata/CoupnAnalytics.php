@@ -104,14 +104,14 @@ class CoupnAnalytics extends Backend
                     ->where($andWhere)
                     ->count();
                 //应用订单数量占比
-                $list[$k]['use_order_num_rate'] = $whole_order != 0 ? round($list[$k]['use_order_num'] / $whole_order, 4) * 100 .'%' : 0;
+                $list[$k]['use_order_num_rate'] = $whole_order != 0 ? round($list[$k]['use_order_num'] / $whole_order, 4) * 100 . '%' : 0;
                 //应用订单金额
                 $list[$k]['use_order_total_price'] = $model->table('sales_flat_order')
                     ->where($map)
                     ->where($andWhere)
                     ->sum('base_grand_total');
                 //应用订单金额占比
-                $list[$k]['use_order_total_price_rate'] = $whole_order_price != 0 ? round($list[$k]['use_order_total_price'] / $whole_order_price, 4) * 100 .'%' : 0;
+                $list[$k]['use_order_total_price_rate'] = $whole_order_price != 0 ? round($list[$k]['use_order_total_price'] / $whole_order_price, 4) * 100 . '%' : 0;
             }
             if (array_filter($list) > 0) {
 
@@ -123,14 +123,12 @@ class CoupnAnalytics extends Backend
                 } elseif ((input('sort') == 'use_order_num') && (input('order') == 'asc')) {
                     $sortField = array_column($list, 'use_order_num');
                     array_multisort($sortField, SORT_ASC, $list);
-                }
-                //订单金额倒叙排列
+                } //订单金额倒叙排列
                 elseif ((input('sort') == 'use_order_total_price') && input('order') == 'desc') {
                     $sortField = array_column($list, 'use_order_total_price');
                     array_multisort($sortField, SORT_DESC, $list);
                     //订单金额正序排列
-                }
-                elseif ((input('sort') == 'use_order_total_price') && (input('order') == 'asc')) {
+                } elseif ((input('sort') == 'use_order_total_price') && (input('order') == 'asc')) {
                     $sortField = array_column($list, 'use_order_total_price');
                     array_multisort($sortField, SORT_ASC, $list);
                 }
@@ -155,14 +153,14 @@ class CoupnAnalytics extends Backend
     }
 
     /**
-     * 优惠券应用订单占比
+     * 优惠券应用订单占比  old
      *
      * Created by Phpstorm.
      * User: jhh
      * Date: 2020/11/24
      * Time: 10:32:4
      */
-    public function user_data_pie()
+    public function user_data_pie1()
     {
         if ($this->request->isAjax()) {
             $params = $this->request->param();
@@ -232,6 +230,124 @@ class CoupnAnalytics extends Backend
                 }
             }
 
+            //根据优惠券所属的分组 计算某个分组的订单的数量
+            $num = ['1' => 0, '2' => 0, '3' => 0, '4' => 0, '5' => 0];
+            foreach ($all_coupon as $k => $v) {
+                $num[$v['channel']] += $arr[$v['rule_id']];
+            }
+
+            $json['column'] = ['网站优惠券', '主页优惠券', '用户优惠券', '渠道优惠券', '客服优惠券', '未使用优惠券',];
+            $json['columnData'] = [
+                [
+                    'name' => '网站优惠券',
+                    'value' => $num[1],
+                ],
+                [
+                    'name' => '主页优惠券',
+                    'value' => $num[2],
+                ],
+                [
+                    'name' => '用户优惠券',
+                    'value' => $num[3],
+                ],
+                [
+                    'name' => '渠道优惠券',
+                    'value' => $num[4],
+                ],
+                [
+                    'name' => '客服优惠券',
+                    'value' => $num[5],
+                ],
+                [
+                    'name' => '未使用优惠券',
+                    'value' => $model->table('sales_flat_order')->where($maps)->count(),
+                ],
+            ];
+            return json(['code' => 1, 'data' => $json]);
+        }
+    }
+
+    public function user_data_pie()
+    {
+        if ($this->request->isAjax()) {
+            $params = $this->request->param();
+            $site = $params['order_platform'] ? $params['order_platform'] : 1;
+            if ($params['time_str']) {
+                $createat = explode(' ', $params['time_str']);
+            } else {
+                $start = date('Y-m-d', strtotime('-6 day'));
+                $end = date('Y-m-d 23:59:59');
+                $seven_days = $start . ' 00:00:00 - ' . $end . ' 00:00:00';
+                $createat = explode(' ', $seven_days);
+            }
+            switch ($site) {
+                case 1:
+                    $model = Db::connect('database.db_zeelool');
+                    $salesrule = Db::connect('database.db_zeelool_online');
+                    break;
+                case 2:
+                    $model = Db::connect('database.db_voogueme');
+                    $salesrule = Db::connect('database.db_voogueme_online');
+                    break;
+                case 3:
+                    $model = Db::connect('database.db_nihao');
+                    $salesrule = Db::connect('database.db_niaho_online');
+                    break;
+            }
+
+            //判断订单的某些条件
+            $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+            $map['created_at'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]]];
+            $map['order_type'] = ['=', 1];
+            //coupon_code不能为空
+            $map['coupon_code'] = ['neq', 'not null'];
+
+            //coupon_code为空 目的是为了查到未使用优惠券的订单的数量
+            $maps = $map;
+            $maps['coupon_code'] = null;
+
+            $tmp_time_start = $createat[0] . ' ' . $createat[1];
+            $tmp_time_end = $createat[3] . ' ' . $createat[4];
+            $model->table('sales_flat_order')->query("set time_zone='+8:00'");
+            $tmpSql = " and sfo.created_at between '$tmp_time_start' and '$tmp_time_end' ";
+            $order_coupon_querySql = "select sfo.coupon_rule_name,sfo.applied_rule_ids,count(*) counter,round(sum(sfo.base_grand_total),2) base_grand_total,round(sum(sfo.base_discount_amount),2) base_discount_amount 
+                                        from sales_flat_order sfo 
+                                        where sfo.`status` 
+                                        in ('processing','free_processing','complete','creditcard_proccessing')
+                                        $tmpSql 
+                                        group by sfo.coupon_rule_name 
+                                        order by counter desc;";
+            $order_coupon_List = $model->query($order_coupon_querySql);
+            //所有的优惠券
+            $all_coupon = $salesrule->table('salesrule')
+                ->where('channel', '>', 0)
+                ->field('name,rule_id,channel')
+                ->select();
+            $arr = [];
+            $total = $order_coupon_List;
+            foreach ($total as $k => $v) {
+                if (empty($v['coupon_rule_name'])){
+                    unset($total[$k]);
+                }else{
+                    $total[$k]['applied_rule_ids'] = explode(',', $total[$k]['applied_rule_ids']);
+                    foreach ($total[$k]['applied_rule_ids'] as $kk => $vv) {
+                        //去除订单中多余的网站的固定优惠规则 只保留使用优惠券的优惠券的id
+                        if ($vv == 56 || $vv == 359) {
+                            unset($total[$k]['applied_rule_ids'][$kk]);
+                        }
+                    }
+                    foreach ($total[$k]['applied_rule_ids'] as $kk => $vv) {
+                        $total[$k]['applied_rule_ids'] = $vv;
+                    }
+                    //某个优惠券所对应的订单的数量
+                    if (!$arr[$total[$k]['applied_rule_ids']]) {
+                        $arr[$total[$k]['applied_rule_ids']] = $total[$k]['counter'];
+                    } else {
+                        $arr[$total[$k]['applied_rule_ids']] += $total[$k]['counter'];
+                    }
+                }
+
+            }
             //根据优惠券所属的分组 计算某个分组的订单的数量
             $num = ['1' => 0, '2' => 0, '3' => 0, '4' => 0, '5' => 0];
             foreach ($all_coupon as $k => $v) {
