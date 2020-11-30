@@ -49,10 +49,12 @@ class OcPrescriptionPic extends Backend
             {
                 return $this->selectpage();
             }
+
             $filter = json_decode($this->request->get('filter'), true);
 
             unset($filter['site']);
             $this->request->get(['filter' => json_encode($filter)]);
+
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                     
@@ -73,12 +75,13 @@ class OcPrescriptionPic extends Backend
                 
             }
             $list = collection($list)->toArray();
+
             foreach ($list as $key=>$item){
 
                 if ($item['status'] ==1){
-                    $list[$key] ='未处理';
+                    $list[$key]['status']='未处理';
                 }else{
-                    $list[$key]['status'] = ['已处理'];
+                    $list[$key]['status']= '已处理';
                 }
             }
             $result = array("total" => $total, "rows" => $list);
