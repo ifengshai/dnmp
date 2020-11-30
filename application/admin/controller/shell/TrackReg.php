@@ -850,6 +850,7 @@ class TrackReg extends Backend
     public function only_ga_data()
     {
         $date_time = date('Y-m-d', strtotime("-1 day"));
+        $date_time = '2020-11-28';
 
         //z站
         $data = Db::name('datacenter_day')->where(['day_date' => $date_time, 'site' => 1])->field('order_num,new_cart_num,update_cart_num')->find();
@@ -964,6 +965,7 @@ class TrackReg extends Backend
         $vip_where['order_status'] = 'Success';
         $arr['vip_user_num'] = $zeelool_model->table('oc_vip_order')->where($vip_where)->count();
         //支付成功的订单数
+        $order_where = [];
         $order_where = [];
         $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
         $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
