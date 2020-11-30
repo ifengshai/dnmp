@@ -153,6 +153,7 @@ class ItWebDemand extends Backend
                 $id = $admin->where($smap)->value('id');
                 //前端负责人id 后端负责人id 测试负责人id
                 $task_map = "FIND_IN_SET({$id},web_designer_user_id)  or FIND_IN_SET({$id},phper_user_id)  or FIND_IN_SET({$id}, test_user_id)";
+
                 unset($filter['task_user_name']);
                 unset($smap['nickname']);
             }
@@ -528,6 +529,7 @@ class ItWebDemand extends Backend
                 ->where($where)
                 ->where($meWhere)
                 ->where($map)
+                ->where($task_map)
                 ->order($sort, $order)
                 ->count();
             if ($val == 'priority'){
@@ -535,6 +537,7 @@ class ItWebDemand extends Backend
                     ->where($where)
                     ->where($meWhere)
                     ->where($map)
+                    ->where($task_map)
                     ->order($val, $order)
                     ->limit($offset, $limit)
                     ->select();
@@ -543,6 +546,7 @@ class ItWebDemand extends Backend
                     ->where($where)
                     ->where($meWhere)
                     ->where($map)
+                    ->where($task_map)
                     ->order($sort, $order)
                     ->limit($offset, $limit)
                     ->select();
