@@ -300,6 +300,7 @@ class TrackReg extends Backend
         $data = collection($data)->toArray();
         if ($data) {
             foreach ($data as $k => $v) {
+                $where = [];
                 $where['a.created_at'] = ['between', [date("Y-m-d 00:00:00", strtotime("-1 day")), date("Y-m-d 23:59:59", strtotime("-1 day"))]];
                 if ($v['platform_sku']) {
                     $params[$k]['sales_num'] = $order->getSkuSalesNum($v['platform_sku'], $where, $v['site']);

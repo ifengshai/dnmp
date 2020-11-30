@@ -83,20 +83,20 @@ class GoodStatus extends Backend
             $json['columnData'] = [
                 [
                     'type' => 'bar',
-                    'barWidth' => '20%',
-                    'data' => [1,2,3],
+                    'barWidth' => '10%',
+                    'data' => [1,2,3,4,5,6,7,8],
                     'name' => '客单价'
                 ],
                 [
                     'type' => 'bar',
-                    'barWidth' => '20%',
-                    'data' => [4,5,6],
+                    'barWidth' => '10%',
+                    'data' => [4,5,6,5,6,7,8,5],
                     'name' => '中位数'
                 ],
                 [
                     'type' => 'bar',
-                    'barWidth' => '20%',
-                    'data' => [7,8,9],
+                    'barWidth' => '10%',
+                    'data' => [4,5,6,5,6,7,8,5],
                     'name' => '标准差'
                 ],
             ];

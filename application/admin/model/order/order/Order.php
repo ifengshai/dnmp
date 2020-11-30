@@ -49,6 +49,12 @@ class Order extends Model
             $model = new \app\admin\model\order\order\Meeloog();
         } elseif ($site == 5) {
             $model = new \app\admin\model\order\order\Weseeoptical();
+        }  elseif ($site == 9) {
+            $model = new \app\admin\model\order\order\ZeeloolEs();
+        }  elseif ($site == 10) {
+            $model = new \app\admin\model\order\order\ZeeloolDe();
+        }  elseif ($site == 11) {
+            $model = new \app\admin\model\order\order\ZeeloolJp();
         } 
 
         if ($sku) {
