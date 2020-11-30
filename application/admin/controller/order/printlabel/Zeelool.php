@@ -1341,78 +1341,6 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         set_time_limit(0);
         ini_set('memory_limit', '512M');
 
-        $ids = input('id_params');
-
-        $filter = json_decode($this->request->get('filter'), true);
-
-        if ($filter['increment_id']) {
-            $map['sfo.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
-        } elseif (!$filter['status'] && !$ids) {
-            $map['status'] = ['in', ['free_processing', 'processing',  'paypal_reversed', 'paypal_canceled_reversal']];
-        }
-        //是否有工单
-        $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
-        if ($filter['is_task'] == 1 || $filter['is_task'] == '0') {
-            $swhere = [];
-            $swhere['work_platform'] = 1;
-            $swhere['work_status'] = ['<>', 0];
-            $order_arr = $workorder->where($swhere)->column('platform_order');
-            if ($filter['is_task'] == 1) {
-                $map['increment_id'] = ['in', $order_arr];
-            } elseif ($filter['is_task'] == '0') {
-                $map['increment_id'] = ['not in', $order_arr];
-            }
-            unset($filter['is_task']);
-            $this->request->get(['filter' => json_encode($filter)]);
-        }
-        //是否有协同任务
-        $infoSynergyTask = new \app\admin\model\infosynergytaskmanage\InfoSynergyTask;
-        if ($filter['task_label'] == 1 || $filter['task_label'] == '0') {
-            $swhere['is_del'] = 1;
-            $swhere['order_platform'] = 1;
-            $swhere['synergy_order_id'] = 2;
-            $order_arr = $infoSynergyTask->where($swhere)->order('create_time desc')->column('synergy_order_number');
-            if ($filter['task_label'] == 1) {
-                $map['sfo.increment_id'] = ['in', $order_arr];
-            } elseif ($filter['task_label'] == '0') {
-                $map['sfo.increment_id'] = ['not in', $order_arr];
-            }
-            unset($filter['task_label']);
-            $this->request->get(['filter' => json_encode($filter)]);
-        }
-
-        //协同任务分类id搜索
-        if ($filter['category_id'] || $filter['c_id']) {
-            $swhere['is_del'] = 1;
-            $swhere['order_platform'] = 1;
-            $swhere['synergy_order_id'] = 2;
-            $swhere['synergy_task_id'] = $filter['category_id'] ?? $filter['c_id'];
-            $order_arr = $infoSynergyTask->where($swhere)->order('create_time desc')->column('synergy_order_number');
-            $map['increment_id'] = ['in', $order_arr];
-            unset($filter['category_id']);
-            unset($filter['c_id']);
-            $this->request->get(['filter' => json_encode($filter)]);
-        }
-
-        //SKU搜索
-        if ($filter['sku']) {
-            $map['sku'] = ['like',  $filter['sku'] . '%'];
-            unset($filter['sku']);
-            $this->request->get(['filter' => json_encode($filter)]);
-        }
-
-
-        if ($ids) {
-            $map['sfo.entity_id'] = ['in', $ids];
-        }
-
-        if ($filter['created_at']) {
-            $created_at = explode(' - ', $filter['created_at']);
-            $map['sfo.created_at'] = ['between', [$created_at[0], $created_at[1]]];
-            unset($filter['created_at']);
-            $this->request->get(['filter' => json_encode($filter)]);
-        }
-
         $map['sfo.created_at'] = ['between',['2020-07-01 00:00:00','2020-11-30 23:59:59']];
         list($where) = $this->buildparams();
         $field = 'sfo.is_new_version,sfo.increment_id,sfoi.product_options,total_qty_ordered as NUM,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.product_id,sfoi.qty_ordered,sfo.created_at';
@@ -1424,8 +1352,6 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             ->order('sfoi.order_id desc')
             ->select();
         $resultList = collection($resultList)->toArray();
-
-        $resultList = $this->qty_order_check($resultList);
 
         $finalResult = array();
         foreach ($resultList as $key => $value) {
