@@ -50,7 +50,7 @@
 
 <div class="all_div">
     {if $row['web_designer_group'] == 2 && $row['test_status'] >= 2}
-        <!--如果测试已经确认，并且不需要前端的话，不显示前端的操作-->
+        <!--如果测试已经确认，并且不需要前端的话，不显示前端大萨达多的操作-->
     {else}
     <form role="form" method="POST" id="form_web_group" data-toggle="validator" action="">
         <input type="hidden" name="row[id]" value="{$row.id}">
@@ -107,7 +107,6 @@
             </div>
             <div class="item_button">
                 {if $row['test_status'] == 1}
-
                         {if $row['develop_finish_status'] ==4 && $row['web_remarks'] neq null}
                             <button type="submit" class="btn btn-sub" disabled style='background-color: grey;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('已拒绝')}</button>
                         {else/}
@@ -119,28 +118,14 @@
                                     <button type="submit" disabled class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('前端确认')}</button>
                                     <button type="submit" disabled class="btn btn-sub-refuse" style='background-color: cadetblue;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('前端拒绝')}</button>
                                 {/if}
-                             {else}
+                            {else}
                                 {if $distribution_status}
                                     <button type="submit" class="btn btn-sub" style='background-color: #555555;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('修改')}</button>
                                 {else}
                                     <button type="submit" disabled class="btn btn-sub" style='background-color: #555555;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('修改')}</button>
                                 {/if}
-
-                        {if $row['web_designer_group'] == 0}
-                            {if $distribution_status}
-                                <button type="submit" class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('前端确认')}</button>
-                                <button type='button' onsubmit='return false';  value="{$row['id']}" data-value="1" class="btn btn-sub-refuse" style='background-color: cadetblue;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('前端拒绝')}</button>
-                            {else}
-                                <button type="submit" disabled class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('前端确认')}</button>
-                                <button type="submit" disabled class="btn btn-sub" style='background-color: cadetblue;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('前端拒绝')}</button>
                             {/if}
-                        {else}
-                            {if $distribution_status}
-                                <button type="submit" class="btn btn-sub" style='background-color: #555555;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('修改')}</button>
-                            {else}
-                                <button type="submit" disabled class="btn btn-sub" style='background-color: #555555;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('修改')}</button>
 
-                            {/if}
                         {/if}
 
                 {else}
