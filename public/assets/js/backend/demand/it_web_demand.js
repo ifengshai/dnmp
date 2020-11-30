@@ -708,6 +708,47 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                 $('#input_' + type).val('2');
                 $("#form_" + type).submit();
             });
+
+            $(document).on('click',".btn-sub-refuse",function (){
+                var status = $(this).data('value')
+                var value_id = $(this).val();
+                var url = "demand/It_web_demand/distriRefuse";
+                if (status ==1){
+                    var remarks = $('#web_remarks').val();
+                }else if(status ==2){
+                    var remarks = $('#phper_remarks').val();
+                }else{
+                    var remarks = $('#app_remarks').val();
+                }
+                if (remarks == ''){
+                    layer.msg('备注内容不能为空');
+                    return  false;
+                }
+                $.ajax({
+                    type: "POST",
+                    url: url,
+                    dataType: "json",
+                    cache: false,
+                    async: false,
+                    data: {
+                        ids: value_id,
+                        status: status,
+                        remarks: remarks,
+                    },
+                    success: function (json) {
+                        layer.msg(json.msg,function () {
+                            window.location.reload()
+                        });
+                    }
+                });
+
+
+
+
+
+
+            })
+
         },
         test_handle: function () {
             Controller.api.bindevent();
@@ -915,7 +956,20 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                 get_test_status: function (value, row, index) {
                     // if (row.status >= 2) {
                     if (row.test_status == 1) {
-                        return '<div><span class="check_test_status status1_color">未确认</span></div>';
+                        if (row.site_type.search('3') !== -1){
+                            if (row.web_designer_group ==0  || row.phper_group ==0 ||  row.app_group ==0 ){
+                                return '<div><span>未确认</span></div>';
+                            }else{
+                                return '<div><span class="check_test_status status1_color">未确认</span></div>';
+                            }
+                        }else{
+                            if (row.web_designer_group ==0  || row.phper_group ==0 ){
+                                return '<div><span>未确认</span></div>';
+                            }else{
+                                return '<div><span class="check_test_status status1_color">未确认</span></div>';
+                            }
+                        }
+
                     } else if (row.test_status == 2) {
                         if (row.test_group == 1) {
                             return '<div><span class="check_test_status status3_color">待测试</span></div>';

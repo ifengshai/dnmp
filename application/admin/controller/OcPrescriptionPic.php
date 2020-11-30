@@ -49,10 +49,12 @@ class OcPrescriptionPic extends Backend
             {
                 return $this->selectpage();
             }
+
             $filter = json_decode($this->request->get('filter'), true);
 
             unset($filter['site']);
             $this->request->get(['filter' => json_encode($filter)]);
+
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                     
@@ -73,14 +75,17 @@ class OcPrescriptionPic extends Backend
                 
             }
             $list = collection($list)->toArray();
+
             foreach ($list as $key=>$item){
 
                 if ($item['status'] ==1){
-                    $list[$key] ='未处理';
+                    $list[$key]['status']='未处理';
                 }else{
-                    $list[$key]['status'] = ['已处理'];
+                    $list[$key]['status']= '已处理';
                 }
+                $list[$key]['created_at'] =date("Y-m-d H:i:s",strtotime($item['created_at'])+28800);;
             }
+
             $result = array("total" => $total, "rows" => $list);
 
             return json($result);
@@ -102,9 +107,14 @@ class OcPrescriptionPic extends Backend
             }
 
         }
+//        https://z.zhaokuangyi.com/media/
+//        /prescription_file/160670203660612.png,/prescription_file/160670203610816.png,/prescription_file/160670203626677.png,/prescription_file/160670203675800.png
         $row = $this->model->where('id',$ids)->find();
-        $row['pic'] =explode(',',$row['pic']);
-
+        $photo_href = $row['pic'] =explode(',',$row['pic']);
+        foreach ($photo_href as $key=>$item){
+            $photo_href[$key]= 'https://z.zhaokuangyi.com/media'.$item;
+        }
+        $row['pic'] = $photo_href;
         $this->assign('row',$row);
         return $this->view->fetch();
     }
