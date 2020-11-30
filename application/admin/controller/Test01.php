@@ -263,7 +263,14 @@ class Test01 extends Backend
         $model = new \app\admin\model\operatedatacenter\Zeelool;
         //获取session
         $ga_result = $model->ga_hour_data($start, $end);
-        dump($ga_result);die;
+        dump($ga_result);
+
+        $now_date = date('Y-m-d');
+        $start = $end = $time_str = $now_date;
+        //获取session
+        $ga_result = $model->ga_hour_data($start, $end);
+        dump($ga_result);
+        die;
 
     }
 }
