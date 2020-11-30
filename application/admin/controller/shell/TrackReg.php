@@ -850,7 +850,6 @@ class TrackReg extends Backend
     public function only_ga_data()
     {
         $date_time = date('Y-m-d', strtotime("-1 day"));
-        $date_time = '2020-11-28';
 
         //z站
         $data = Db::name('datacenter_day')->where(['day_date' => $date_time, 'site' => 1])->field('order_num,new_cart_num,update_cart_num')->find();
