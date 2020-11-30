@@ -30,6 +30,12 @@ class Voogueme extends Backend
      */
     protected $model = null;
 
+    /**
+     * 无需登录的方法,同时也就不需要鉴权了
+     * @var array
+     */
+    protected $noNeedLogin = ['batch_export_xlsz'];
+    
     protected $searchFields = 'entity_id';
 
     public function _initialize()

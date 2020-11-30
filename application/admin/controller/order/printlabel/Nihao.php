@@ -31,6 +31,12 @@ class Nihao extends Backend
 
     protected $searchFields = 'entity_id';
 
+    /**
+     * 无需登录的方法,同时也就不需要鉴权了
+     * @var array
+     */
+    protected $noNeedLogin = ['batch_export_xlsz'];
+
     public function _initialize()
     {
         parent::_initialize();
