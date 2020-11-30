@@ -290,19 +290,17 @@ class TrackReg extends Backend
         $itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku();
         $skuSalesNum = new \app\admin\model\SkuSalesNum();
         $order = new \app\admin\model\order\order\Order();
-        // $list = $itemPlatformSku->field('sku,platform_sku,platform_type as site')->where(['outer_sku_status' => 1])->select();
+        // $list = $itemPlatformSku->field('sku,platform_sku,platform_type as site')->where(['outer_sku_status' => 1, 'site' => ['<>', 8]])->select();
         // $list = collection($list)->toArray();
         // //批量插入当天各站点上架sku
         // $skuSalesNum->saveAll($list);
 
         //查询昨天上架SKU 并统计当天销量
-        $data = $skuSalesNum->whereTime('createtime', 'yesterday')->select();
+        $data = $skuSalesNum->whereTime('createtime', 'yesterday')->where('site<>8')->select();
         $data = collection($data)->toArray();
         if ($data) {
             foreach ($data as $k => $v) {
-
                 if ($v['platform_sku']) {
-                    
                     $params[$k]['sales_num'] = $order->getSkuSalesNum($v['platform_sku'], $v['site']);
                     $params[$k]['id'] = $v['id'];
                 }
@@ -393,7 +391,7 @@ class TrackReg extends Backend
             ->group('sku')
             ->column("sku,sum(replenish_num) as sum");
         if (empty($list)) {
-            echo('暂时没有紧急补货单需要处理');
+            echo ('暂时没有紧急补货单需要处理');
             die;
         }
         //统计各个站计划某个sku计划补货的总数 以及比例 用于回写平台sku映射表中
@@ -497,7 +495,7 @@ class TrackReg extends Backend
             ->column("sku,sum(replenish_num) as sum");
 
         if (empty($list)) {
-            echo('暂时没有紧急补货单需要处理');
+            echo ('暂时没有紧急补货单需要处理');
             die;
         }
 
@@ -1869,9 +1867,9 @@ class TrackReg extends Backend
                 ->field('b.sku,a.base_grand_total,a.created_at')
                 ->count();
             $z_sku_list[$k]['now_pricce'] = Db::connect('database.db_zeelool_online')
-                ->table('catalog_product_index_price')//为了获取现价找的表
+                ->table('catalog_product_index_price') //为了获取现价找的表
                 ->alias('a')
-                ->join(['catalog_product_entity' => 'b'], 'a.entity_id=b.entity_id')//商品主表
+                ->join(['catalog_product_entity' => 'b'], 'a.entity_id=b.entity_id') //商品主表
                 ->where('b.sku', 'like', $v['platform_sku'] . '%')
                 ->value('a.final_price');
             Db::name('datacenter_sku_day')->update($z_sku_list[$k]);
@@ -1896,9 +1894,9 @@ class TrackReg extends Backend
                 ->field('b.sku,a.base_grand_total,a.created_at')
                 ->count();
             $z_sku_list[$k]['now_pricce'] = Db::connect('database.db_voogueme_online')
-                ->table('catalog_product_index_price')//为了获取现价找的表
+                ->table('catalog_product_index_price') //为了获取现价找的表
                 ->alias('a')
-                ->join(['catalog_product_entity' => 'b'], 'a.entity_id=b.entity_id')//商品主表
+                ->join(['catalog_product_entity' => 'b'], 'a.entity_id=b.entity_id') //商品主表
                 ->where('b.sku', 'like', $v['platform_sku'] . '%')
                 ->value('a.final_price');
             Db::name('datacenter_sku_day')->update($z_sku_list[$k]);
@@ -1923,9 +1921,9 @@ class TrackReg extends Backend
                 ->field('b.sku,a.base_grand_total,a.created_at')
                 ->count();
             $z_sku_list[$k]['now_pricce'] = Db::connect('database.db_nihao_online')
-                ->table('catalog_product_index_price')//为了获取现价找的表
+                ->table('catalog_product_index_price') //为了获取现价找的表
                 ->alias('a')
-                ->join(['catalog_product_entity' => 'b'], 'a.entity_id=b.entity_id')//商品主表
+                ->join(['catalog_product_entity' => 'b'], 'a.entity_id=b.entity_id') //商品主表
                 ->where('b.sku', 'like', $v['platform_sku'] . '%')
                 ->value('a.final_price');
             Db::name('datacenter_sku_day')->update($z_sku_list[$k]);
@@ -2224,9 +2222,9 @@ class TrackReg extends Backend
                     ->field('b.sku,a.base_grand_total,a.created_at')
                     ->count();
                 $z_sku_list[$k]['now_pricce'] = Db::connect('database.db_zeelool_online')
-                    ->table('catalog_product_index_price')//为了获取现价找的表
+                    ->table('catalog_product_index_price') //为了获取现价找的表
                     ->alias('a')
-                    ->join(['catalog_product_entity' => 'b'], 'a.entity_id=b.entity_id')//商品主表
+                    ->join(['catalog_product_entity' => 'b'], 'a.entity_id=b.entity_id') //商品主表
                     ->where('b.sku', 'like', $v['platform_sku'] . '%')
                     ->value('a.final_price');
                 Db::name('datacenter_sku_day')->update($z_sku_list[$k]);
@@ -2250,9 +2248,9 @@ class TrackReg extends Backend
                     ->field('b.sku,a.base_grand_total,a.created_at')
                     ->count();
                 $z_sku_list[$k]['now_pricce'] = Db::connect('database.db_voogueme_online')
-                    ->table('catalog_product_index_price')//为了获取现价找的表
+                    ->table('catalog_product_index_price') //为了获取现价找的表
                     ->alias('a')
-                    ->join(['catalog_product_entity' => 'b'], 'a.entity_id=b.entity_id')//商品主表
+                    ->join(['catalog_product_entity' => 'b'], 'a.entity_id=b.entity_id') //商品主表
                     ->where('b.sku', 'like', $v['platform_sku'] . '%')
                     ->value('a.final_price');
                 Db::name('datacenter_sku_day')->update($z_sku_list[$k]);
@@ -2276,9 +2274,9 @@ class TrackReg extends Backend
                     ->field('b.sku,a.base_grand_total,a.created_at')
                     ->count();
                 $z_sku_list[$k]['now_pricce'] = Db::connect('database.db_nihao_online')
-                    ->table('catalog_product_index_price')//为了获取现价找的表
+                    ->table('catalog_product_index_price') //为了获取现价找的表
                     ->alias('a')
-                    ->join(['catalog_product_entity' => 'b'], 'a.entity_id=b.entity_id')//商品主表
+                    ->join(['catalog_product_entity' => 'b'], 'a.entity_id=b.entity_id') //商品主表
                     ->where('b.sku', 'like', $v['platform_sku'] . '%')
                     ->value('a.final_price');
                 Db::name('datacenter_sku_day')->update($z_sku_list[$k]);
@@ -2726,9 +2724,9 @@ class TrackReg extends Backend
                 ->field('b.sku,a.base_grand_total,a.created_at')
                 ->count();
             $z_sku_list[$k]['now_pricce'] = Db::connect('database.db_zeelool_online')
-                ->table('catalog_product_index_price')//为了获取现价找的表
+                ->table('catalog_product_index_price') //为了获取现价找的表
                 ->alias('a')
-                ->join(['catalog_product_entity' => 'b'], 'a.entity_id=b.entity_id')//商品主表
+                ->join(['catalog_product_entity' => 'b'], 'a.entity_id=b.entity_id') //商品主表
                 ->where('b.sku', 'like', $v['platform_sku'] . '%')
                 ->value('a.final_price');
             Db::name('datacenter_sku_day')->update($z_sku_list[$k]);
@@ -2753,9 +2751,9 @@ class TrackReg extends Backend
                 ->field('b.sku,a.base_grand_total,a.created_at')
                 ->count();
             $z_sku_list[$k]['now_pricce'] = Db::connect('database.db_voogueme_online')
-                ->table('catalog_product_index_price')//为了获取现价找的表
+                ->table('catalog_product_index_price') //为了获取现价找的表
                 ->alias('a')
-                ->join(['catalog_product_entity' => 'b'], 'a.entity_id=b.entity_id')//商品主表
+                ->join(['catalog_product_entity' => 'b'], 'a.entity_id=b.entity_id') //商品主表
                 ->where('b.sku', 'like', $v['platform_sku'] . '%')
                 ->value('a.final_price');
             Db::name('datacenter_sku_day')->update($z_sku_list[$k]);
@@ -2780,9 +2778,9 @@ class TrackReg extends Backend
                 ->field('b.sku,a.base_grand_total,a.created_at')
                 ->count();
             $z_sku_list[$k]['now_pricce'] = Db::connect('database.db_nihao_online')
-                ->table('catalog_product_index_price')//为了获取现价找的表
+                ->table('catalog_product_index_price') //为了获取现价找的表
                 ->alias('a')
-                ->join(['catalog_product_entity' => 'b'], 'a.entity_id=b.entity_id')//商品主表
+                ->join(['catalog_product_entity' => 'b'], 'a.entity_id=b.entity_id') //商品主表
                 ->where('b.sku', 'like', $v['platform_sku'] . '%')
                 ->value('a.final_price');
             Db::name('datacenter_sku_day')->update($z_sku_list[$k]);
@@ -2808,9 +2806,9 @@ class TrackReg extends Backend
                 ->field('b.sku,a.base_grand_total,a.created_at')
                 ->count();
             $z_sku_list[$k]['now_pricce'] = Db::connect('database.db_zeelool_online')
-                ->table('catalog_product_index_price')//为了获取现价找的表
+                ->table('catalog_product_index_price') //为了获取现价找的表
                 ->alias('a')
-                ->join(['catalog_product_entity' => 'b'], 'a.entity_id=b.entity_id')//商品主表
+                ->join(['catalog_product_entity' => 'b'], 'a.entity_id=b.entity_id') //商品主表
                 ->where('b.sku', 'like', $v['platform_sku'] . '%')
                 ->value('a.final_price');
             Db::name('datacenter_sku_day')->update($z_sku_list[$k]);
@@ -2835,9 +2833,9 @@ class TrackReg extends Backend
                 ->field('b.sku,a.base_grand_total,a.created_at')
                 ->count();
             $z_sku_list[$k]['now_pricce'] = Db::connect('database.db_voogueme_online')
-                ->table('catalog_product_index_price')//为了获取现价找的表
+                ->table('catalog_product_index_price') //为了获取现价找的表
                 ->alias('a')
-                ->join(['catalog_product_entity' => 'b'], 'a.entity_id=b.entity_id')//商品主表
+                ->join(['catalog_product_entity' => 'b'], 'a.entity_id=b.entity_id') //商品主表
                 ->where('b.sku', 'like', $v['platform_sku'] . '%')
                 ->value('a.final_price');
             Db::name('datacenter_sku_day')->update($z_sku_list[$k]);
@@ -2862,9 +2860,9 @@ class TrackReg extends Backend
                 ->field('b.sku,a.base_grand_total,a.created_at')
                 ->count();
             $z_sku_list[$k]['now_pricce'] = Db::connect('database.db_nihao_online')
-                ->table('catalog_product_index_price')//为了获取现价找的表
+                ->table('catalog_product_index_price') //为了获取现价找的表
                 ->alias('a')
-                ->join(['catalog_product_entity' => 'b'], 'a.entity_id=b.entity_id')//商品主表
+                ->join(['catalog_product_entity' => 'b'], 'a.entity_id=b.entity_id') //商品主表
                 ->where('b.sku', 'like', $v['platform_sku'] . '%')
                 ->value('a.final_price');
             Db::name('datacenter_sku_day')->update($z_sku_list[$k]);
@@ -2890,9 +2888,9 @@ class TrackReg extends Backend
                 ->field('b.sku,a.base_grand_total,a.created_at')
                 ->count();
             $z_sku_list[$k]['now_pricce'] = Db::connect('database.db_zeelool_online')
-                ->table('catalog_product_index_price')//为了获取现价找的表
+                ->table('catalog_product_index_price') //为了获取现价找的表
                 ->alias('a')
-                ->join(['catalog_product_entity' => 'b'], 'a.entity_id=b.entity_id')//商品主表
+                ->join(['catalog_product_entity' => 'b'], 'a.entity_id=b.entity_id') //商品主表
                 ->where('b.sku', 'like', $v['platform_sku'] . '%')
                 ->value('a.final_price');
             Db::name('datacenter_sku_day')->update($z_sku_list[$k]);
@@ -2917,9 +2915,9 @@ class TrackReg extends Backend
                 ->field('b.sku,a.base_grand_total,a.created_at')
                 ->count();
             $z_sku_list[$k]['now_pricce'] = Db::connect('database.db_voogueme_online')
-                ->table('catalog_product_index_price')//为了获取现价找的表
+                ->table('catalog_product_index_price') //为了获取现价找的表
                 ->alias('a')
-                ->join(['catalog_product_entity' => 'b'], 'a.entity_id=b.entity_id')//商品主表
+                ->join(['catalog_product_entity' => 'b'], 'a.entity_id=b.entity_id') //商品主表
                 ->where('b.sku', 'like', $v['platform_sku'] . '%')
                 ->value('a.final_price');
             Db::name('datacenter_sku_day')->update($z_sku_list[$k]);
@@ -2944,9 +2942,9 @@ class TrackReg extends Backend
                 ->field('b.sku,a.base_grand_total,a.created_at')
                 ->count();
             $z_sku_list[$k]['now_pricce'] = Db::connect('database.db_nihao_online')
-                ->table('catalog_product_index_price')//为了获取现价找的表
+                ->table('catalog_product_index_price') //为了获取现价找的表
                 ->alias('a')
-                ->join(['catalog_product_entity' => 'b'], 'a.entity_id=b.entity_id')//商品主表
+                ->join(['catalog_product_entity' => 'b'], 'a.entity_id=b.entity_id') //商品主表
                 ->where('b.sku', 'like', $v['platform_sku'] . '%')
                 ->value('a.final_price');
             Db::name('datacenter_sku_day')->update($z_sku_list[$k]);

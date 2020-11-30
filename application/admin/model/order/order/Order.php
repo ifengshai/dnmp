@@ -58,9 +58,9 @@ class Order extends Model
         } 
 
         if ($sku) {
-            $map['sku'] = $sku;
+            $map['b.sku'] = $sku;
         } else {
-            $map['sku'] = ['not like', '%Price%'];
+            $map['b.sku'] = ['not like', '%Price%'];
         }
         $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
         $map['a.created_at'] = ['between', [date("Y-m-d 00:00:00", strtotime("-1 day")), date("Y-m-d 23:59:59", strtotime("-1 day"))]];
