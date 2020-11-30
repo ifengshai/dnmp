@@ -1311,7 +1311,92 @@ where cped.attribute_id in(146,147) and cped.store_id=0 and cped.entity_id=$prod
         $writer->save('php://output');
     }
 
+    public function batch_export_xlsz()
+    {
+        set_time_limit(0);
+        ini_set('memory_limit', '5024M');
+        $map['sfo.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
+        $map['sfo.created_at'] = ['between', ['2020-07-01 00:00:00', '2020-11-30 23:59:59']];
+        $field = 'sfo.is_new_version,sfo.increment_id,sfoi.product_options,total_qty_ordered as NUM,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.product_id,sfoi.qty_ordered,sfo.created_at';
+        $resultList = $this->model->alias('sfo')
+            ->join(['sales_flat_order_item' => 'sfoi'], 'sfoi.order_id=sfo.entity_id')
+            ->field($field)
+            ->where($map)
+            ->order('sfoi.order_id desc')
+            ->select();
+        $resultList = collection($resultList)->toArray();
 
+        $finalResult = array();
+        foreach ($resultList as $key => $value) {
+            $finalResult[$key]['created_at'] = substr($value['created_at'], 0, 10);
+            $finalResult[$key]['increment_id'] = $value['increment_id'];
+            $finalResult[$key]['sku'] = $value['sku'];
+            $tmp_product_options = unserialize($value['product_options']);
+            $finalResult[$key]['od_sph'] = isset($tmp_lens_params['od_sph']) ? $tmp_lens_params['od_sph'] : '';
+            $finalResult[$key]['os_sph'] = isset($tmp_lens_params['os_sph']) ? $tmp_lens_params['os_sph'] : '';
+
+            $finalResult[$key]['od_cyl'] = isset($tmp_lens_params['od_cyl']) ? $tmp_lens_params['od_cyl'] : '';
+            $finalResult[$key]['os_cyl'] = isset($tmp_lens_params['os_cyl']) ? $tmp_lens_params['os_cyl'] : '';
+            $finalResult[$key]['od_axis'] = isset($tmp_lens_params['od_axis']) ? $tmp_lens_params['od_axis'] : '';
+            $finalResult[$key]['os_axis'] = isset($tmp_lens_params['os_axis']) ? $tmp_lens_params['os_axis'] : '';
+            $finalResult[$key]['od_add'] = isset($tmp_lens_params['od_add']) ? $tmp_lens_params['od_add'] : '';
+            $finalResult[$key]['os_add'] = isset($tmp_lens_params['os_add']) ? $tmp_lens_params['os_add'] : '';
+            $finalResult[$key]['pd_r'] = isset($tmp_lens_params['pd_r']) ? $tmp_lens_params['pd_r'] : '';
+            $finalResult[$key]['pd_l'] = isset($tmp_lens_params['pd_l']) ? $tmp_lens_params['pd_l'] : '';
+            $finalResult[$key]['pd'] = isset($tmp_lens_params['pd']) ? $tmp_lens_params['pd'] : '';
+            $finalResult[$key]['third_name'] = $tmp_product_options['info_buyRequest']['tmplens']['third_name'];
+        
+            //镜片类型拼接颜色字段
+            if ($tmp_product_options['info_buyRequest']['tmplens']['color_name']) {
+                $finalResult[$key]['third_name'] .= '-' . $tmp_product_options['info_buyRequest']['tmplens']['color_name'];
+            }
+
+            //如果为太阳镜 拼接颜色
+            if (@$tmp_product_options['info_buyRequest']['tmplens']['sungless_color_name']) {
+                $finalResult[$key]['index_type'] .= '-' . $tmp_product_options['info_buyRequest']['tmplens']['sungless_color_name'];
+            }
+
+
+            $tmp_bridge = $this->get_frame_lens_width_height_bridge($value['product_id']);
+            $finalResult[$key]['lens_width'] = $tmp_bridge['lens_width'];
+            $finalResult[$key]['lens_height'] = $tmp_bridge['lens_height'];
+            $finalResult[$key]['bridge'] = $tmp_bridge['bridge'];
+            $finalResult[$key]['prescription_type'] = isset($tmp_lens_params['prescription_type']) ? $tmp_lens_params['prescription_type'] : '';
+
+
+            $tmp_prescription_params = $tmp_product_options['info_buyRequest']['tmplens']['prescription'];
+            if (isset($tmp_prescription_params)) {
+                $tmp_prescription_params = explode("&", $tmp_prescription_params);
+                $tmp_lens_params = array();
+                foreach ($tmp_prescription_params as $tmp_key => $tmp_value) {
+                    $arr_value = explode("=", $tmp_value);
+                    if (isset($arr_value[1])) {
+                        $tmp_lens_params[$arr_value[0]] = $arr_value[1];
+                    }
+                }
+            }
+
+            //斜视值
+            if (isset($tmp_lens_params['prismcheck']) && $tmp_lens_params['prismcheck'] == 'on') {
+                $finalResult[$key]['od_bd'] = $tmp_lens_params['od_bd'];
+                $finalResult[$key]['od_pv'] = $tmp_lens_params['od_pv'];
+                $finalResult[$key]['os_pv'] = $tmp_lens_params['os_pv'];
+                $finalResult[$key]['os_bd'] = $tmp_lens_params['os_bd'];
+
+                $finalResult[$key]['od_pv_r'] = $tmp_lens_params['od_pv_r'];
+                $finalResult[$key]['od_bd_r'] = $tmp_lens_params['od_bd_r'];
+                $finalResult[$key]['os_pv_r'] = $tmp_lens_params['os_pv_r'];
+                $finalResult[$key]['os_bd_r'] = $tmp_lens_params['os_bd_r'];
+            }
+        }
+        $headlist = [
+            '日期', '订单号', 'SKU', 'OD_SPH', 'OS_SPH', 'OD_CYL', 'OS_CYL', 'OD_AXI', 'OS_AXI', 'OD_ADD', 'OS_ADD', 'PD_R', 'PD_L', 'PD', '镜片', '镜框宽度', '镜框高度', 'bridge', '处方类型', 'OD_PV', 'OS_PV', 'OD_BD', 'OS_BD', 'OD_PV_R', 'OS_PV_R', 'OD_BD_R', 'OS_BD_R'
+
+        ];
+        $path = "/uploads/";
+        $fileName = 'Nihao站订单打印处方07-01 - 11-30';
+        Excel::writeCsv($finalResult, $headlist, $path . $fileName);
+    }
 
     //批量打印标签
     public function batch_print_label()
@@ -1560,106 +1645,5 @@ EOF;
         }
         array_multisort($arrSort[$field], constant($sort), $array);
         return $array;
-    }
-
-
-
-
-    public function batch_export_xlsz()
-    {
-        set_time_limit(0);
-        ini_set('memory_limit', '5024M');
-        $map['sfo.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
-        $map['sfo.created_at'] = ['between', ['2020-07-01 00:00:00', '2020-11-30 23:59:59']];
-        $field = 'sfo.is_new_version,sfo.increment_id,sfoi.product_options,total_qty_ordered as NUM,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.product_id,sfoi.qty_ordered,sfo.created_at';
-        $resultList = $this->model->alias('sfo')
-            ->join(['sales_flat_order_item' => 'sfoi'], 'sfoi.order_id=sfo.entity_id')
-            ->field($field)
-            ->where($map)
-            ->order('sfoi.order_id desc')
-            ->select();
-        $resultList = collection($resultList)->toArray();
-
-        $finalResult = array();
-        foreach ($resultList as $key => $value) {
-            $finalResult[$key]['created_at'] = substr($value['created_at'], 0, 10);
-            $finalResult[$key]['increment_id'] = $value['increment_id'];
-            $finalResult[$key]['sku'] = $value['sku'];
-            $tmp_product_options = unserialize($value['product_options']);
-            $finalResult[$key]['od_sph'] = isset($tmp_lens_params['od_sph']) ? $tmp_lens_params['od_sph'] : '';
-            $finalResult[$key]['os_sph'] = isset($tmp_lens_params['os_sph']) ? $tmp_lens_params['os_sph'] : '';
-
-            $finalResult[$key]['od_cyl'] = isset($tmp_lens_params['od_cyl']) ? $tmp_lens_params['od_cyl'] : '';
-            $finalResult[$key]['os_cyl'] = isset($tmp_lens_params['os_cyl']) ? $tmp_lens_params['os_cyl'] : '';
-            $finalResult[$key]['od_axis'] = isset($tmp_lens_params['od_axis']) ? $tmp_lens_params['od_axis'] : '';
-            $finalResult[$key]['os_axis'] = isset($tmp_lens_params['os_axis']) ? $tmp_lens_params['os_axis'] : '';
-            $finalResult[$key]['od_add'] = isset($tmp_lens_params['od_add']) ? $tmp_lens_params['od_add'] : '';
-            $finalResult[$key]['os_add'] = isset($tmp_lens_params['os_add']) ? $tmp_lens_params['os_add'] : '';
-            $finalResult[$key]['pd_r'] = isset($tmp_lens_params['pd_r']) ? $tmp_lens_params['pd_r'] : '';
-            $finalResult[$key]['pd_l'] = isset($tmp_lens_params['pd_l']) ? $tmp_lens_params['pd_l'] : '';
-            $finalResult[$key]['pd'] = isset($tmp_lens_params['pd']) ? $tmp_lens_params['pd'] : '';
-
-            //新处方
-            if ($value['is_new_version'] == 1) {
-                //镜片类型
-                $finalResult[$key]['index_type'] = $tmp_product_options['info_buyRequest']['tmplens']['lens_data_name'];
-                //镜片类型拼接颜色字段
-                if ($tmp_product_options['info_buyRequest']['tmplens']['color_id']) {
-                    $finalResult[$key]['index_type'] .= '-' . $tmp_product_options['info_buyRequest']['tmplens']['color_data_name'];
-                }
-            } else {
-
-                $finalResult[$key]['index_type'] = $tmp_product_options['info_buyRequest']['tmplens']['index_type'];
-                //镜片类型拼接颜色字段
-                if ($tmp_product_options['info_buyRequest']['tmplens']['color_name']) {
-                    $finalResult[$key]['index_type'] .= '-' . $tmp_product_options['info_buyRequest']['tmplens']['color_name'];
-                }
-            }
-
-            //如果为太阳镜 拼接颜色
-            if (@$tmp_product_options['info_buyRequest']['tmplens']['sungless_color_name']) {
-                $finalResult[$key]['index_type'] .= '-' . $tmp_product_options['info_buyRequest']['tmplens']['sungless_color_name'];
-            }
-
-
-            $tmp_bridge = $this->get_frame_lens_width_height_bridge($value['product_id']);
-            $finalResult[$key]['lens_width'] = $tmp_bridge['lens_width'];
-            $finalResult[$key]['lens_height'] = $tmp_bridge['lens_height'];
-            $finalResult[$key]['bridge'] = $tmp_bridge['bridge'];
-            $finalResult[$key]['prescription_type'] = isset($tmp_lens_params['prescription_type']) ? $tmp_lens_params['prescription_type'] : '';
-
-
-            $tmp_prescription_params = $tmp_product_options['info_buyRequest']['tmplens']['prescription'];
-            if (isset($tmp_prescription_params)) {
-                $tmp_prescription_params = explode("&", $tmp_prescription_params);
-                $tmp_lens_params = array();
-                foreach ($tmp_prescription_params as $tmp_key => $tmp_value) {
-                    $arr_value = explode("=", $tmp_value);
-                    if (isset($arr_value[1])) {
-                        $tmp_lens_params[$arr_value[0]] = $arr_value[1];
-                    }
-                }
-            }
-
-            //斜视值
-            if (isset($tmp_lens_params['prismcheck']) && $tmp_lens_params['prismcheck'] == 'on') {
-                $finalResult[$key]['od_bd'] = $tmp_lens_params['od_bd'];
-                $finalResult[$key]['od_pv'] = $tmp_lens_params['od_pv'];
-                $finalResult[$key]['os_pv'] = $tmp_lens_params['os_pv'];
-                $finalResult[$key]['os_bd'] = $tmp_lens_params['os_bd'];
-
-                $finalResult[$key]['od_pv_r'] = $tmp_lens_params['od_pv_r'];
-                $finalResult[$key]['od_bd_r'] = $tmp_lens_params['od_bd_r'];
-                $finalResult[$key]['os_pv_r'] = $tmp_lens_params['os_pv_r'];
-                $finalResult[$key]['os_bd_r'] = $tmp_lens_params['os_bd_r'];
-            }
-        }
-        $headlist = [
-            '日期', '订单号', 'SKU', 'OD_SPH', 'OS_SPH', 'OD_CYL', 'OS_CYL', 'OD_AXI', 'OS_AXI', 'OD_ADD', 'OS_ADD', 'PD_R', 'PD_L', 'PD', '镜片', '镜框宽度', '镜框高度', 'bridge', '处方类型', 'OD_PV', 'OS_PV', 'OD_BD', 'OS_BD', 'OD_PV_R', 'OS_PV_R', 'OD_BD_R', 'OS_BD_R'
-
-        ];
-        $path = "/uploads/";
-        $fileName = 'Nihao站订单打印处方07-01 - 11-30';
-        Excel::writeCsv($finalResult, $headlist, $path . $fileName);
     }
 }

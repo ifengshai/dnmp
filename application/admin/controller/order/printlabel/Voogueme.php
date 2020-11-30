@@ -35,7 +35,7 @@ class Voogueme extends Backend
      * @var array
      */
     protected $noNeedLogin = ['batch_export_xlsz'];
-    
+
     protected $searchFields = 'entity_id';
 
     public function _initialize()
@@ -1327,21 +1327,9 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             $finalResult[$key]['pd_l'] = isset($tmp_lens_params['pd_l']) ? $tmp_lens_params['pd_l'] : '';
             $finalResult[$key]['pd'] = isset($tmp_lens_params['pd']) ? $tmp_lens_params['pd'] : '';
 
-            //新处方
-            if ($value['is_new_version'] == 1) {
-                //镜片类型
-                $finalResult[$key]['index_type'] = $tmp_product_options['info_buyRequest']['tmplens']['lens_data_name'];
-                //镜片类型拼接颜色字段
-                if ($tmp_product_options['info_buyRequest']['tmplens']['color_id']) {
-                    $finalResult[$key]['index_type'] .= '-' . $tmp_product_options['info_buyRequest']['tmplens']['color_data_name'];
-                }
-            } else {
-
-                $finalResult[$key]['index_type'] = $tmp_product_options['info_buyRequest']['tmplens']['index_type'];
-                //镜片类型拼接颜色字段
-                if ($tmp_product_options['info_buyRequest']['tmplens']['color_name']) {
-                    $finalResult[$key]['index_type'] .= '-' . $tmp_product_options['info_buyRequest']['tmplens']['color_name'];
-                }
+            //镜片颜色   
+            if ($tmp_product_options['info_buyRequest']['tmplens']['index_color']) {
+                $finalResult[$key]['index_type'] = $tmp_product_options['info_buyRequest']['tmplens']['index_type']  . '-' . $tmp_product_options['info_buyRequest']['tmplens']['index_color'];
             }
 
             //如果为太阳镜 拼接颜色
