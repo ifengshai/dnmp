@@ -43,18 +43,18 @@ class GoodStatus extends Backend
         if ($this->request->isAjax()) {
             $params = $this->request->param();
             $order_platform = $params['order_platform'];
-            $json['xColumnName'] = ['zeelool','voogueme','nihao','wesee','zeelool-de','zeelool-es','zeelool-jp','meeloog'];
+            $json['xColumnName'] = ['zeelool','voogueme','nihao','wesee','meeloog','zeelool-es','zeelool-de','zeelool-jp'];
             $item = new \app\admin\model\itemmanage\Item();
-            // if ($order_platform == 1){
-            //     $skus = $item->getFrameSku();
-            //     $map['sku'] = ['in', $skus];
-            // }elseif ($order_platform == 2){
-            //     $skus = $item->getOrnamentsSku();
-            //     $map['sku'] = ['in', $skus];
-            // }else{
-            //     $map = [];
-            // }
             $map = [];
+            if ($order_platform == 1){
+                $skus = $item->getFrameSku();
+                $map['sku'] = ['in', $skus];
+            }elseif ($order_platform == 2){
+                $skus = $item->getOrnamentsSku();
+                $map['sku'] = ['in', $skus];
+            }else{
+                $map = [];
+            }
             $platform_z_up_num =$this->item_platform->where('platform_type',1)->where($map)->where('outer_sku_status',1)->count();
             $platform_z_down_num =$this->item_platform->where('platform_type',1)->where($map)->where('outer_sku_status',2)->count();
             $platform_z_yushou_num =$this->item_platform->where('platform_type',1)->where($map)->where('presell_status',1)->count();
@@ -84,20 +84,20 @@ class GoodStatus extends Backend
                 [
                     'type' => 'bar',
                     'barWidth' => '10%',
-                    'data' => [1,2,3,4,5,6,7,8],
-                    'name' => '客单价'
+                    'data' => [$platform_z_up_num,$platform_v_up_num,$platform_n_up_num,$platform_w_up_num,$platform_m_up_num,$platform_es_up_num,$platform_de_up_num,$platform_jp_up_num],
+                    'name' => '在售'
                 ],
                 [
                     'type' => 'bar',
                     'barWidth' => '10%',
-                    'data' => [4,5,6,5,6,7,8,5],
-                    'name' => '中位数'
+                    'data' => [$platform_z_yushou_num,$platform_v_yushou_num,$platform_n_yushou_num,$platform_w_yushou_num,$platform_m_yushou_num,$platform_es_yushou_num,$platform_de_yushou_num,$platform_jp_yushou_num],
+                    'name' => '预售'
                 ],
                 [
                     'type' => 'bar',
                     'barWidth' => '10%',
-                    'data' => [4,5,6,5,6,7,8,5],
-                    'name' => '标准差'
+                    'data' => [$platform_z_down_num,$platform_v_down_num,$platform_n_down_num,$platform_w_down_num,$platform_m_down_num,$platform_es_down_num,$platform_de_down_num,$platform_jp_down_num],
+                    'name' => '下架'
                 ],
             ];
             return json(['code' => 1, 'data'=>$json]);
