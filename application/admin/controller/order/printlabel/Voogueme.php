@@ -14,7 +14,7 @@ use Util\SKUHelper;
 use app\admin\model\OrderLog;
 use app\admin\model\WorkChangeSkuLog;
 use app\admin\model\StockLog;
-use fase\Excel;
+use fast\Excel;
 
 /**
  * Sales Flat Order
