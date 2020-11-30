@@ -1609,7 +1609,10 @@ class ScmDistribution extends Scm
                             //检验库存
                             $stock_arr = $this->_item->where(['sku'=>$true_sku])->filed('stock,occupy_stock,distribution_occupy_stock');
                             $stock = $this->_item->where(['sku'=>$true_sku,'platform_type'=>$value['site']])->value('stock');
-                            ( in_array(0,$stock_arr) || empty($stock) ) && $this->error(__($value['sku'].':库存不足'), [], 403);
+                            if ( in_array(0,$stock_arr) || empty($stock)){
+                                DistributionLog::record($this->auth,$item_ids,8,'主单ID'.$row['order_id'].$msg.'失败'.$value['sku'].$msg_info);
+                                throw new Exception($value['sku'].':库存不足');
+                            }
 
                             //扣减占用库存、配货占用、总库存
                             $this->_item
@@ -1635,7 +1638,10 @@ class ScmDistribution extends Scm
 
                         //检验库存
                         $stock_arr = $this->_item->where(['sku'=>$true_sku])->filed('stock,occupy_stock,distribution_occupy_stock');
-                        in_array(0,$stock_arr) && $this->error(__($value['sku'].':库存不足'), [], 403);
+                        if (in_array(0,$stock_arr)){
+                            DistributionLog::record($this->auth,$item_ids,8,'主单ID'.$row['order_id'].$msg.'失败'.$value['sku'].$msg_info);
+                            throw new Exception($value['sku'].':库存不足');
+                        }
 
                         //扣减占用库存、配货占用、总库存
                         $this->_item
