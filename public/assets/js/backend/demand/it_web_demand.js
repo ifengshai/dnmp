@@ -743,9 +743,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                 });
 
 
-
-
-
+                Fast.api.ajax({
+                    url:url,
+                    data:{ids:value_id,status:status,remarks:remarks}
+                }, function(data, ret){
+                    //成功的回调
+                    layer.msg(ret.msg);
+                }, function(data, ret){
+                    //失败的回调
+                    layer.msg(ret.msg);
+                });
 
             })
 
