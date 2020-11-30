@@ -902,6 +902,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
 
                     var sitetype = $('#work_platform').val();
                     $('#c-order_sku').html('');
+                    $('#item_input-hidden').html('');
                     Layer.load();
                     Backend.api.ajax({
                         url: 'saleaftermanage/work_order_list/get_sku_list',
@@ -2351,7 +2352,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         //判断赠品信息的状态，如果显示的话把数据带出来，如果隐藏的话则不显示赠品数据 end
                     }
                     //如果子单号item_order_info存在带出子单措施的数据
-                    if (Config.item_order_info) {
+                    if (Config.item_order_info && 2 != Config.work_type) {
                         var item_order_info = Config.item_order_info;
                         //生成折叠框
                         itemSelectpicker(2,null,item_order_info);
@@ -2778,10 +2779,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
 
                 //下拉框选择子单联动
                 $(document).on('click', '.problem_type', function () {
-                    itemSelectpicker(1,$(this));
+                    if (2 != Config.work_type) {itemSelectpicker(1,$(this));}
+                    
                 });
                 $(document).on('change', '.item_order_selectpicker', function () {
-                    itemSelectpicker(2);
+                    if (2 != Config.work_type) {itemSelectpicker(2);}
                 });
 
                 //子单措施选择联动
