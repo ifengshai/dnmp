@@ -113,6 +113,30 @@ class CoupnAnalytics extends Backend
                 //应用订单金额占比
                 $list[$k]['use_order_total_price_rate'] = $whole_order_price != 0 ? round($list[$k]['use_order_total_price'] / $whole_order_price, 4) * 100 .'%' : 0;
             }
+            if (array_filter($list) > 0) {
+
+                //应用订单数量倒叙排列
+                if ((input('sort') == 'use_order_num') && input('order') == 'desc') {
+                    $sortField = array_column($list, 'use_order_num');
+                    array_multisort($sortField, SORT_DESC, $list);
+                    //应用订单数量正序排列
+                } elseif ((input('sort') == 'use_order_num') && (input('order') == 'asc')) {
+                    $sortField = array_column($list, 'use_order_num');
+                    array_multisort($sortField, SORT_ASC, $list);
+                }
+                //订单金额倒叙排列
+                elseif ((input('sort') == 'use_order_total_price') && input('order') == 'desc') {
+                    $sortField = array_column($list, 'use_order_total_price');
+                    array_multisort($sortField, SORT_DESC, $list);
+                    //订单金额正序排列
+                }
+                elseif ((input('sort') == 'use_order_total_price') && (input('order') == 'asc')) {
+                    $sortField = array_column($list, 'use_order_total_price');
+                    array_multisort($sortField, SORT_ASC, $list);
+                }
+
+            }
+
 
             $result = array("total" => $total, "rows" => $list);
 
