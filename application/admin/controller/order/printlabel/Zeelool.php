@@ -1638,11 +1638,11 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         // if (!$spreadsheet) return false;
         if ($format == 'xls') {
             //输出Excel03版本
-            header('Content-Type:application/vnd.ms-excel');
+            // header('Content-Type:application/vnd.ms-excel');
             $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
         } elseif ($format == 'xlsx') {
             //输出07Excel版本
-            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            // header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
             $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
         }
 
