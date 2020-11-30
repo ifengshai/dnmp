@@ -63,6 +63,7 @@ class Order extends Model
             $map['sku'] = ['not like', '%Price%'];
         }
         $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
+        dump($where);
         $res = $model
             ->where($map)
             ->where($where)
