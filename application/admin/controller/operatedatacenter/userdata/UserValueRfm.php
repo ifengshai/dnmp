@@ -262,13 +262,14 @@ class UserValueRfm extends Backend
             $order_platform = $params['order_platform'];
             $cache_data = Cache::get('Operatedatacenter_userdata1'.$order_platform.md5(serialize('ajax_user_shopping_near_days')));
             if(!$cache_data){
-                $count = $this->getUserNearDays($order_platform);
-                $count1 = $this->getUserNearDays($order_platform, 1);
-                $count2 = $this->getUserNearDays($order_platform, 2);
-                $count3 = $this->getUserNearDays($order_platform, 3);
-                $count4 = $this->getUserNearDays($order_platform, 4);
-                $count5 = $this->getUserNearDays($order_platform, 5);
-                $count6 = $this->getUserNearDays($order_platform, 6);
+                $result = $this->getUserNearDays($order_platform);
+                $count = $result['count'];
+                $count1 = $result['data'][0]['a'];
+                $count2 = $result['data'][0]['b'];
+                $count3 = $result['data'][0]['c'];
+                $count4 = $result['data'][0]['d'];
+                $count5 = $result['data'][0]['e'];
+                $count6 = $result['data'][0]['f'];
                 $arr = array(
                     'data'=>array($count1, $count2, $count3, $count4, $count5, $count6),
                     'count'=>$count
@@ -322,32 +323,22 @@ class UserValueRfm extends Backend
         $end = date('Y-m-d 23:59:59', strtotime($today));
         $time_where['created_at'] = ['between', [$start, $end]];
         $where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-        $customer_ids = $web_model->table('customer_entity')->where($time_where)->column('entity_id');
-        $where['customer_id'] = ['in',$customer_ids];
-        switch ($type) {
-            case 1:
-                $order_customerids = $order_model->where($where)->group('customer_id')->having('to_days(now()) - to_days(max(created_at))>=0 and to_days(now()) - to_days(max(created_at))<14')->column('customer_id');
-                break;
-            case 2:
-                $order_customerids = $order_model->where($where)->group('customer_id')->having('to_days(now()) - to_days(max(created_at))>=14 and to_days(now()) - to_days(max(created_at))<30')->column('customer_id');
-                break;
-            case 3:
-                $order_customerids = $order_model->where($where)->group('customer_id')->having('to_days(now()) - to_days(max(created_at))>=30 and to_days(now()) - to_days(max(created_at))<60')->column('customer_id');
-                break;
-            case 4:
-                $order_customerids = $order_model->where($where)->group('customer_id')->having('to_days(now()) - to_days(max(created_at))>=60 and to_days(now()) - to_days(max(created_at))<90')->column('customer_id');
-                break;
-            case 5:
-                $order_customerids = $order_model->where($where)->group('customer_id')->having('to_days(now()) - to_days(max(created_at))>=90 and to_days(now()) - to_days(max(created_at))<360')->column('customer_id');
-                break;
-            case 6:
-                $order_customerids = $order_model->where($where)->group('customer_id')->having('to_days(now()) - to_days(max(created_at))>=360')->column('customer_id');
-                break;
-            default:
-                $order_customerids = $customer_ids;
-                break;
-        }
-        $count = count($order_customerids);
-        return $count;
+        $count = $web_model->table('customer_entity')->where($time_where)->count();
+
+        $sql1 = $web_model->table('customer_entity')->where($time_where)->field('entity_id')->buildSql();
+        $arr_where = [];
+        $arr_where[] = ['exp', Db::raw("customer_id in " . $sql1)];
+
+        $sql2 = $order_model->alias('t1')->field('to_days(now()) - to_days(max(created_at)) AS total')->where($where)->where($arr_where)->group('customer_id')->buildSql();
+
+        $order_customer_count = $web_model->table([$sql2=>'t2'])->field('sum( IF ( total >= 360, 1, 0 ) ) AS f,sum( IF ( total >= 90 and total<360, 1, 0 ) ) AS e,sum( IF ( total >= 60 and total<90, 1, 0 ) ) AS d,sum( IF ( total >= 30 and total<60, 1, 0 ) ) AS c,sum( IF ( total >= 14 and total<30, 1, 0 ) ) AS b')->select();
+
+        $order_customer_count[0]['a'] = $count-$order_customer_count[0]['b']-$order_customer_count[0]['c']-$order_customer_count[0]['d']-$order_customer_count[0]['e']-$order_customer_count[0]['f'];
+
+        $arr = array(
+            'count'=>$count,
+            'data'=>$order_customer_count,
+        );
+        return $arr;
     }
 }
