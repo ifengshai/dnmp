@@ -257,6 +257,7 @@ class Test01 extends Backend
     public function test100()
     {
         $now_date = date('Y-m-d');
+        $now_date = '2020-11-29';
         $start = $end = $time_str = $now_date;
 
         $model = new \app\admin\model\operatedatacenter\Zeelool;
