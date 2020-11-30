@@ -514,9 +514,59 @@ class Distribution extends Backend
             9 => '合单完成'
         ];
 
-        //TODO::获取更改镜片最新处方信息
+        //获取更改镜框最新信息
+        $change_sku = $this->_work_order_change_sku
+            ->alias('a')
+            ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
+            ->where([
+                'a.change_type'=>1,
+                'a.item_order_number'=>['in',array_column($list,'item_order_number')],
+                'b.operation_type'=>1
+            ])
+            ->order('a.id','desc')
+            ->group('a.item_order_number')
+            ->column('a.change_sku','a.item_order_number')
+        ;
+
+        //获取更改镜片最新处方信息
+        $change_lens = $this->_work_order_change_sku
+            ->alias('a')
+            ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
+            ->where([
+                'a.change_type'=>2,
+                'a.item_order_number'=>['in',array_column($list,'item_order_number')],
+                'b.operation_type'=>1
+            ])
+            ->order('a.id','desc')
+            ->group('a.item_order_number')
+            ->column('a.od_sph,a.od_cyl,a.od_axis,a.od_add,a.pd_r,a.od_pv,a.od_bd,a.od_pv_r,a.od_bd_r,a.os_sph,a.os_cyl,a.os_axis,a.os_add,a.pd_l,a.os_pv,a.os_bd,a.os_pv_r,a.os_bd_r,a.lens_number','a.item_order_number')
+        ;
+        if($change_lens){
+            foreach($change_lens as $key=>$val){
+                if($val['pd_l'] && $val['pd_r']){
+                    $change_lens[$key]['pd'] = '';
+                    $change_lens[$key]['pdcheck'] = 'on';
+                }else{
+                    $change_lens[$key]['pd'] = $val['pd_r'] ?: $val['pd_l'];
+                    $change_lens[$key]['pdcheck'] = '';
+                }
+            }
+        }
+
+        //获取镜片编码及名称
+        $lens_list = $this->_lens_data->column('lens_name','lens_number');
 
         foreach ($list as $key => &$value) {
+            //更改镜框最新sku
+            if($change_sku[$value['item_order_number']]){
+                $value['sku'] = $change_sku[$value['item_order_number']];
+            }
+
+            //更改镜片最新数据
+            if($change_lens[$value['item_order_number']]){
+                $value = array_merge($value,$change_lens[$value['item_order_number']]);
+            }
+
             //网站SKU转换仓库SKU
             $value['prescription_type'] = isset($value['prescription_type']) ? $value['prescription_type'] : '';
             $value['od_sph'] = isset($value['od_sph']) ? urldecode($value['od_sph']) : '';
@@ -565,7 +615,8 @@ class Distribution extends Backend
 
             //查询镜框尺寸
             $tmp_bridge = $this->get_frame_lens_width_height_bridge($value['product_id'], $value['site']);
-            $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 2 + 2), $value['index_name']);
+            $lens_name = $lens_list[$value['lens_number']] ?: '';
+            $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 2 + 2), $lens_name);
             $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 2 + 2), $tmp_bridge['lens_width']);
             $spreadsheet->getActiveSheet()->setCellValue("P" . ($key * 2 + 2), $tmp_bridge['lens_height']);
             $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 2 + 2), $tmp_bridge['bridge']);
@@ -725,7 +776,6 @@ class Distribution extends Backend
         $list = collection($list)->toArray();
         $order_ids = array_column($list, 'order_id');
         $sku_arr = array_column($list, 'sku');
-        $lens_number = array_column($list, 'lens_number');
 
         //查询sku映射表
         $item_res = $this->_item_platform_sku->cache(3600)->where(['platform_sku' => ['in', array_unique($sku_arr)]])->column('sku', 'platform_sku');
@@ -736,12 +786,60 @@ class Distribution extends Backend
         //查询产品货位号
         $cargo_number = $this->_stock_house->alias('a')->where(['status' => 1, 'b.is_del' => 1, 'a.type' => 1])->join(['fa_store_sku' => 'b'], 'a.id=b.store_id')->column('coding', 'sku');
 
-        //根据镜片编码查询仓库镜片名称
-        $index_name = $this->_lens_data->where(['lens_number' => ['in', $lens_number]])->column('lens_name', 'lens_number');
+        //获取更改镜框最新信息
+        $change_sku = $this->_work_order_change_sku
+            ->alias('a')
+            ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
+            ->where([
+                'a.change_type'=>1,
+                'a.item_order_number'=>['in',array_column($list,'item_order_number')],
+                'b.operation_type'=>1
+            ])
+            ->order('a.id','desc')
+            ->group('a.item_order_number')
+            ->column('a.change_sku','a.item_order_number')
+        ;
 
-        //TODO::获取更改镜片最新处方信息
+        //获取更改镜片最新处方信息
+        $change_lens = $this->_work_order_change_sku
+            ->alias('a')
+            ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
+            ->where([
+                'a.change_type'=>2,
+                'a.item_order_number'=>['in',array_column($list,'item_order_number')],
+                'b.operation_type'=>1
+            ])
+            ->order('a.id','desc')
+            ->group('a.item_order_number')
+            ->column('a.od_sph,a.od_cyl,a.od_axis,a.od_add,a.pd_r,a.od_pv,a.od_bd,a.od_pv_r,a.od_bd_r,a.os_sph,a.os_cyl,a.os_axis,a.os_add,a.pd_l,a.os_pv,a.os_bd,a.os_pv_r,a.os_bd_r,a.lens_number','a.item_order_number')
+        ;
+        if($change_lens){
+            foreach($change_lens as $key=>$val){
+                if($val['pd_l'] && $val['pd_r']){
+                    $change_lens[$key]['pd'] = '';
+                    $change_lens[$key]['pdcheck'] = 'on';
+                }else{
+                    $change_lens[$key]['pd'] = $val['pd_r'] ?: $val['pd_l'];
+                    $change_lens[$key]['pdcheck'] = '';
+                }
+            }
+        }
 
+        //获取镜片编码及名称
+        $lens_list = $this->_lens_data->column('lens_name','lens_number');
+
+        $data = [];
         foreach ($list as $k => $v) {
+            //更改镜框最新sku
+            if($change_sku[$v['item_order_number']]){
+                $v['sku'] = $change_sku[$v['item_order_number']];
+            }
+
+            //更改镜片最新数据
+            if($change_lens[$v['item_order_number']]){
+                $v = array_merge($v,$change_lens[$v['item_order_number']]);
+            }
+
             $item_order_number = $v['item_order_number'];
             $fileName = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "distribution" . DS . "new" . DS . "$item_order_number.png";
             $dir = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "distribution" . DS . "new";
@@ -752,29 +850,35 @@ class Distribution extends Backend
 
             //生成条形码
             $this->generate_barcode_new($item_order_number, $fileName);
-            $list[$k]['created_at'] = date('Y-m-d H:i:s', $v['created_at']);
-            $list[$k]['img_url'] = $img_url;
+            $v['created_at'] = date('Y-m-d H:i:s', $v['created_at']);
+            $v['img_url'] = $img_url;
+
             //序号
             $serial = explode('-', $item_order_number);
-            $list[$k]['serial'] = $serial[1];
-            $list[$k]['total_qty_ordered'] = $order_list[$v['order_id']]['total_qty_ordered'];
-            $list[$k]['increment_id'] = $order_list[$v['order_id']]['increment_id'];
+            $v['serial'] = $serial[1];
+            $v['total_qty_ordered'] = $order_list[$v['order_id']]['total_qty_ordered'];
+            $v['increment_id'] = $order_list[$v['order_id']]['increment_id'];
+
             //库位号
-            $list[$k]['coding'] = $cargo_number[$item_res[$v['sku']]];
+            $v['coding'] = $cargo_number[$item_res[$v['sku']]];
 
             //判断双ADD逻辑
             if ($v['os_add'] && $v['od_add'] && (float)$v['os_add'] * 1 != 0 && (float)$v['od_add'] * 1 != 0) {
-                $list[$k]['total_add'] = '';
+                $v['total_add'] = '';
             } else {
                 if ($v['os_add'] && (float)$v['os_add'] * 1 != 0) {
-                    $list[$k]['total_add'] = $v['os_add'];
+                    $v['total_add'] = $v['os_add'];
                 } else {
-                    $list[$k]['total_add'] = $v['od_add'];
+                    $v['total_add'] = $v['od_add'];
                 }
             }
-            $list[$k]['lens_name'] = $index_name[$v['lens_number']];
+
+            //获取镜片名称
+            $v['lens_name'] = $lens_list[$v['lens_number']] ?: '';
+
+            $data[] = $v;
         }
-        $this->assign('list', $list);
+        $this->assign('list', $data);
         $html = $this->view->fetch('print_label');
         echo $html;
     }
