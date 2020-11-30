@@ -1348,7 +1348,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         set_time_limit(0);
         ini_set('memory_limit', '1024M');
         $map['sfo.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
-        $map['sfo.created_at'] = ['between', ['2020-10-01 00:00:00', '2020-11-30 23:59:59']];
+        $map['sfo.created_at'] = ['between', ['2020-11-01 00:00:00', '2020-11-30 23:59:59']];
         $field = 'sfo.is_new_version,sfo.increment_id,sfoi.product_options,total_qty_ordered as NUM,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.product_id,sfoi.qty_ordered,sfo.created_at';
         $resultList = $this->model->alias('sfo')
             ->join(['sales_flat_order_item' => 'sfoi'], 'sfoi.order_id=sfo.entity_id')
@@ -1437,7 +1437,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
 
         ];
         $path = "/uploads/";
-        $fileName = '订单打印处方10-01 - 11-30';
+        $fileName = '订单打印处方11-01 - 11-30';
         Excel::writeCsv($finalResult, $headlist, $path . $fileName);
     }
 
