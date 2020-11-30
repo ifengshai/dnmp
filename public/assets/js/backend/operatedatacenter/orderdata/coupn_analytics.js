@@ -29,7 +29,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                 sortName: 'id',
                 columns: [
                     [
-                        { field: 'rule_id', title: __('序号'),operate: false},
+                        { field: 'rule_id', title: __('优惠券id'),operate: false},
                         { field: 'channel', title: __('优惠卷类型'), custom: { 1: 'danger', 2: 'green' , 3: 'blue', 4: 'yellow', 5: 'pink'}, searchList: { 1:'网站优惠券', 2:'主页优惠券', 3:'用户优惠券', 4:'渠道优惠券',5:'客服优惠券'}, formatter: Table.api.formatter.status },
                         { field: 'name', title: __('优惠卷名称'),operate: 'like'},
                         { field: 'use_order_num', title: __('应用订单数量'),operate: false, sortable: true},
