@@ -37,7 +37,7 @@ class Order extends Model
      * @param [type] $site 站点
      * @return void
      */
-    public function getSkuSalesNum($sku, $where, $site)
+    public function getSkuSalesNum($sku, $site)
     {
         if ($site == 1) {
             $model = $this;
@@ -63,14 +63,12 @@ class Order extends Model
             $map['sku'] = ['not like', '%Price%'];
         }
         $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
-        dump($where);
+        $map['a.created_at'] = ['between', [date("Y-m-d 00:00:00", strtotime("-1 day")), date("Y-m-d 23:59:59", strtotime("-1 day"))]];
         $res = $model
             ->where($map)
-            ->where($where)
             ->alias('a')
             ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
             ->sum('b.qty_ordered');
-        echo $model->getLastSql();
         return $res;
     }
 }
