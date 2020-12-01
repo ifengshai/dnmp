@@ -1348,15 +1348,15 @@ class ScmWarehouse extends Scm
                 }
             }
 
-            $this->commit();
+            Db::commit();
         } catch (ValidateException $e) {
-            $this->_rollback();
+            Db::rollback();
             $this->error($e->getMessage(), [], 4441);
         } catch (PDOException $e) {
-            $this->rollback();
+            Db::rollback();
             $this->error($e->getMessage(), [], 4442);
         } catch (Exception $e) {
-            $this->rollback();
+            Db::rollback();
             $this->error($e->getMessage(), [], 4443);
         }
 
