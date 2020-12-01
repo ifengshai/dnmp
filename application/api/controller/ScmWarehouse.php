@@ -1129,7 +1129,7 @@ class ScmWarehouse extends Scm
      * 入库审核 通过/拒绝--ok
      *
      * @参数 int check_id  入库单ID
-     * @参数 int do_type  1审核通过，2审核拒绝
+     * @参数 int do_type  2审核通过，3审核拒绝
      * @author wgj
      * @return mixed
      */
@@ -1139,14 +1139,14 @@ class ScmWarehouse extends Scm
         empty($in_stock_id) && $this->error(__('入库单ID不能为空'), [], 516);
 
         $do_type = $this->request->request('do_type');
-        empty($do_type) && $this->error(__('审核类型不能为空'), [], 517);
+        !in_array($do_type, [2, 3]) && $this->error(__('审核类型错误'), [], 517);
 
         //检测入库单状态
         $row = $this->_in_stock->get($in_stock_id);
         empty($row) && $this->error(__('入库单不存在'), [], 516);
         1 != $row['status'] && $this->error(__('只有待审核状态才能操作'), [], 518);
 
-        $data['status'] = 1 == $do_type ? 2 : 3;//审核状态，2通过，3拒绝
+        $data['status'] = $do_type;//审核状态，2通过，3拒绝
         if ($data['status'] == 2) {
             $data['check_time'] = date('Y-m-d H:i:s', time());
             $msg = '审核';
