@@ -1348,7 +1348,7 @@ class ScmDistribution extends Scm
         empty($page_size) && $this->error(__('Page size can not be empty'), [], 521);
 
         $where = [];
-        $where['a.combine_status'] = 1;//合单完成状态
+        // $where['a.combine_status'] = 1;//合单完成状态
         $where['a.store_house_id'] = ['>', 0];
         $offset = ($page - 1) * $page_size;
         $limit = $page_size;
