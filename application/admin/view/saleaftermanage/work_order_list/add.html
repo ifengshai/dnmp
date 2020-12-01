@@ -433,7 +433,7 @@
         <div class="form-group-child">
             <label class="control-label col-xs-12 col-sm-2">{:__('platform_order')}：</label>
             <div class="col-xs-12 col-sm-8">
-                <input style="width: 60%;" id="c-platform_order" class="form-control" {:$row['id'] ? 'readonly' : ''} name="row[platform_order]"
+                <input style="width: 60%;" id="c-platform_order" class="form-control" {:$order_item['id'] ? 'readonly' : ''} name="row[platform_order]"
                     type="text" value="{:$row['platform_order'] ? $row['platform_order'] : input('order_number')}">
                 <button type="button" id="platform_order" class="btn btn-success"
                     style="padding: 5px 12px;">载入数据</button>
@@ -449,15 +449,15 @@
                     $sku = [];
                     $sku_value = [];
                     foreach ($order_item['sku_list'] as $key => $value) {
-                        $sku[] = $key.'/'.$value;
+                        $sku[$key.'/'.$value] = $key.'/'.$value;
                     }
-                    foreach ($order_item['select_number'] as $key => $value) {
-                        $kv = $key.'/'.$value;
-                        $kv_arr = array_keys($sku,$kv);
+                    foreach ($sku as $key => $value) {
+                        $kv_arr = array_keys($sku,$value);
                         $sku_value[] = $kv_arr[0];
                     }
                 ?>
                 {:build_select('row[order_sku][]', $sku, $sku_value, ['class'=>'form-control selectpicker item_order_selectpicker','multiple'=>'multiple','disabled'=>'disabled'])}
+                <input type="hidden" id='is_order_item'  value="1" />
                 {else/}
                 {:build_select('row[order_sku][]', [], [], ['class'=>'form-control selectpicker item_order_selectpicker','multiple'=>'multiple','id'=>'c-order_sku','title'=>"请选择"])}
                 {/if}
