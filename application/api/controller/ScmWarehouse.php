@@ -1176,7 +1176,7 @@ class ScmWarehouse extends Scm
         $skus = $this->_item->where(['sku' => ['in', $skus]])->column('sku');
         foreach ($list as $v) {
             if (!in_array($v['sku'], $skus)) {
-                $this->error('此sku:' . $v['sku'] . '不存在！！');
+                $this->error('此sku:' . $v['sku'] . '不存在！！', [], 516);
             }
         }
 
@@ -1234,7 +1234,7 @@ class ScmWarehouse extends Scm
                             $item_platform_sku = $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => 4])->field('platform_type,stock')->find();
                             //sku没有同步meeloog站 无法添加虚拟库存 必须先同步
                             if (empty($item_platform_sku)) {
-                                $this->error('sku：' . $v['sku'] . '没有同步meeloog站，请先同步');
+                                $this->error('sku：' . $v['sku'] . '没有同步meeloog站，请先同步', [], 516);
                             }
                             $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $item_platform_sku['platform_type']])->setInc('stock', $v['in_stock_num']);
                         }
