@@ -14,6 +14,7 @@ use app\admin\model\warehouse\CheckItem;
 use app\admin\model\warehouse\Instock;
 use app\admin\model\warehouse\InstockItem;
 use app\admin\model\warehouse\InstockType;
+use app\admin\model\purchase\PurchaseOrder;
 use app\admin\model\purchase\PurchaseOrderItem;
 use app\admin\model\warehouse\ProductBarCodeItem;
 use app\admin\model\NewProductMapping;
@@ -96,6 +97,13 @@ class ScmWarehouse extends Scm
      * @access protected
      */
     protected $_purchase_order_item = null;
+
+    /**
+     * 采购单商品模型对象
+     * @var object
+     * @access protected
+     */
+    protected $_purchase_order = null;
 
     /**
      * 补货需求清单模型对象
@@ -187,6 +195,7 @@ class ScmWarehouse extends Scm
         $this->_in_stock_item = new InstockItem();
         $this->_in_stock_type = new InstockType();
         $this->_new_product_mapping = new NewProductMapping();
+        $this->_purchase_order = new PurchaseOrder();
         $this->_purchase_order_item = new PurchaseOrderItem();
         $this->_product_bar_code_item = new ProductBarCodeItem();
         $this->_item = new Item();
@@ -1274,11 +1283,12 @@ class ScmWarehouse extends Scm
                     //总库存
                     $item_map['sku'] = $v['sku'];
                     $item_map['is_del'] = 1;
+                    $stock_res = false;
                     if ($v['sku']) {
                         //增加商品表里的商品库存、可用库存、留样库存
                         $stock_res = $this->_item->where($item_map)->inc('stock', $v['in_stock_num'])->inc('available_stock', $v['in_stock_num'])->inc('sample_num', $v['sample_num'])->update();
                         //减少待入库数量
-                        $stock_res1 = $this->_item->where($item_map)->dec('wait_instock_num', $v['in_stock_num'])->update();
+                        $this->_item->where($item_map)->dec('wait_instock_num', $v['in_stock_num'])->update();
                     }
 
                     if ($stock_res === false) {
@@ -1310,7 +1320,7 @@ class ScmWarehouse extends Scm
                         }
                         //修改采购单入库状态
                         $purchase_data['stock_status'] = $stock_status;
-                        $this->_purchase_order_item->where(['id' => $check_res['purchase_id']])->update($purchase_data);
+                        $this->_purchase_order->where(['id' => $check_res['purchase_id']])->update($purchase_data);
                     }
                     //如果为退货单 修改退货单状态为入库
                     if ($check_res['order_return_id']) {
@@ -1338,24 +1348,16 @@ class ScmWarehouse extends Scm
                 }
             }
 
-            $this->_in_stock->commit();
-            $this->_item->commit();
-            $this->_purchase_order_item->commit();
+            $this->commit();
         } catch (ValidateException $e) {
-            $this->_in_stock->rollback();
-            $this->_item->rollback();
-            $this->_purchase_order_item->rollback();
-            $this->error($e->getMessage(), [], 444);
+            $this->_rollback();
+            $this->error($e->getMessage(), [], 4441);
         } catch (PDOException $e) {
-            $this->_in_stock->rollback();
-            $this->_item->rollback();
-            $this->_purchase_order_item->rollback();
-            $this->error($e->getMessage(), [], 444);
+            $this->rollback();
+            $this->error($e->getMessage(), [], 4442);
         } catch (Exception $e) {
-            $this->_in_stock->rollback();
-            $this->_item->rollback();
-            $this->_purchase_order_item->rollback();
-            $this->error($e->getMessage(), [], 444);
+            $this->rollback();
+            $this->error($e->getMessage(), [], 4443);
         }
 
         if ($res !== false) {
