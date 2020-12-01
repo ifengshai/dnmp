@@ -443,8 +443,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 }
                 $order_pay_currency = $('#order_pay_currency').val();
                 if (!$order_pay_currency) {
-                    Toastr.error('请先点击载入数据');
-                    return false;
+                    var is_order_item = $('#is_order_item').val();
+                    if (is_order_item) {
+                        platform_order();
+                    }else{
+                        Toastr.error('请先点击载入数据');
+                        return false;
+                    }
+
                 }
                 //读取是谁添加的配置console.log(Config.work_type);
                 $('.step_type').attr('checked', false);
@@ -848,6 +854,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
 
             //载入数据
             $('#platform_order').click(function () {
+                platform_order();
+            })
+
+            function platform_order(){
                 var incrementId = $('#c-platform_order').val().replace(/^\s+|\s+$/g, "");
                 if (!incrementId) {
                     Toastr.error('订单号不能为空');
@@ -943,8 +953,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         // //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end*/                                   
                     });
                 }
-            })
-
+            }
             //补发点击填充数据
             var lens_click_data;
             var gift_click_data;
