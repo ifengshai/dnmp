@@ -1169,7 +1169,7 @@ class ScmDistribution extends Scm
             //更新子单表
             $result = false;
             $result = $this->_new_order_item_process->allowField(true)->isUpdate(true, ['item_order_number'=>$item_order_number])->save(['distribution_status'=>8]);
-            if ($result != false){
+            if ($result !== false){
                 //操作成功记录
                 DistributionLog::record($this->auth,$item_process_info['id'],7,'子单号：'.$item_order_number.'作为主单号'.$order_process_info['increment_id'].'的'.$num.'子单合单完成');
                 if (!$next){
@@ -1643,6 +1643,10 @@ class ScmDistribution extends Scm
                         //SKU缺失，绑定合单库位，回退子单号为合单中状态，不影响库存
                         $store_house_id = $this->_stock_house->field('id,coding,subarea')->where(['status'=>1,'type'=>2,'occupy'=>0])->value('id');
                         empty($store_house_id) && $this->error(__('合单库位已用完，请检查合单库位情况'), [], 5000);
+                        if (empty($store_house_id)){
+                            DistributionLog::record($this->auth,$item_ids,8,'合单库位已用完，主单ID'.$row['order_id'].$msg.'失败'.$msg_info);
+                            throw new Exception('合单库位已用完，请检查合单库位情况');
+                        }
                         $this->_new_order_process->allowField(true)->isUpdate(true, ['order_id' => $order_id])->save(['store_house_id'=>$store_house_id]);
                         $this->_new_order_item_process
                             ->allowField(true)
