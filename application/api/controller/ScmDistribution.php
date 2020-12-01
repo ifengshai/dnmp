@@ -1169,7 +1169,7 @@ class ScmDistribution extends Scm
             //更新子单表
             $result = false;
             $result = $this->_new_order_item_process->allowField(true)->isUpdate(true, ['item_order_number'=>$item_order_number])->save(['distribution_status'=>8]);
-            if ($result != false){
+            if ($result !== false){
                 //操作成功记录
                 DistributionLog::record($this->auth,$item_process_info['id'],7,'子单号：'.$item_order_number.'作为主单号'.$order_process_info['increment_id'].'的'.$num.'子单合单完成');
                 if (!$next){
