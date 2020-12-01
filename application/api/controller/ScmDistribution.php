@@ -1600,7 +1600,6 @@ class ScmDistribution extends Scm
                     if (1 == $check_refuse){
                         //SKU缺失，绑定合单库位，回退子单号为合单中状态，不影响库存
                         $store_house_id = $this->_stock_house->field('id,coding,subarea')->where(['status'=>1,'type'=>2,'occupy'=>0])->value('id');
-                        empty($store_house_id) && $this->error(__('合单库位已用完，请检查合单库位情况'), [], 5000);
                         if (empty($store_house_id)){
                             DistributionLog::record($this->auth,$item_ids,8,'合单库位已用完，主单ID'.$row['order_id'].$msg.'失败'.$msg_info);
                             throw new Exception('合单库位已用完，请检查合单库位情况');
