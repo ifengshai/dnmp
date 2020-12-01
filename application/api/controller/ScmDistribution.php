@@ -1095,6 +1095,7 @@ class ScmDistribution extends Scm
      * 合单库位预先分配，若被占用则提示被占用并分配新合单库位
      *
      * @参数 string item_order_number  子订单号
+     * @参数 string store_house_id  合单库位ID
      * @author wgj
      * @return mixed
      */
@@ -1164,12 +1165,12 @@ class ScmDistribution extends Scm
             $next = 0;//是否有下一个子单 1有，0没有
         }
         if($order_process_info['store_house_id']){
-            //存在合单库位ID，获取合单库位号存入
+            //存在合单库位ID，获取合单库位号ID存入
             $info['next'] = $next;
             //更新子单表
             $result = false;
             $result = $this->_new_order_item_process->allowField(true)->isUpdate(true, ['item_order_number'=>$item_order_number])->save(['distribution_status'=>8]);
-            if ($result != false){
+            if ($result !== false){
                 //操作成功记录
                 DistributionLog::record($this->auth,$item_process_info['id'],7,'子单号：'.$item_order_number.'作为主单号'.$order_process_info['increment_id'].'的'.$num.'子单合单完成');
                 if (!$next){
@@ -1196,16 +1197,23 @@ class ScmDistribution extends Scm
         }
 
         //首个子单进入合单架START
-        $result = false;
-        $return = false;
+        $result = $return = false;
         Db::startTrans();
         try {
             //更新子单表
             $result = $this->_new_order_item_process->allowField(true)->isUpdate(true, ['item_order_number'=>$item_order_number])->save(['distribution_status'=>8]);
-            if ($result != false){
-                $res = $this->_new_order_process->allowField(true)->isUpdate(true, ['id'=>$item_process_info['order_id']])->save(['store_house_id'=>$store_house_id]);
-                if ($res != false){
+            if ($result !== false){
+                $res = $this->_new_order_process->allowField(true)->isUpdate(true, ['order_id'=>$item_process_info['order_id']])->save(['store_house_id'=>$store_house_id]);
+                if ($res !== false){
                     $return = $this->_stock_house->allowField(true)->isUpdate(true, ['id'=>$store_house_id])->save(['occupy'=>1]);
+                    if (0 == $next){
+                        //只有一个子单且合单完成，更新主单、子单状态为合单完成
+                        $this->_new_order_item_process
+                            ->allowField(true)
+                            ->isUpdate(true, ['order_id'=>$item_process_info['order_id'],'distribution_status'=>['neq',0]])
+                            ->save(['distribution_status'=>9]);
+                        $this->_new_order_process->allowField(true)->isUpdate(true, ['order_id'=>$item_process_info['order_id']])->save(['combine_status'=>1,'combine_time'=>time()]);
+                    }
                 }
             }
 
@@ -1221,15 +1229,6 @@ class ScmDistribution extends Scm
             $this->error($e->getMessage(), [], 444);
         }
         if ($return !== false) {
-            if (0 == $next){
-                //只有一个子单且合单完成，更新主单、子单状态为合单完成
-                $this->_new_order_item_process
-                    ->allowField(true)
-                    ->isUpdate(true, ['order_id'=>$item_process_info['order_id'],'distribution_status'=>['neq',0]])
-                    ->save(['distribution_status'=>9]);
-                $this->_new_order_process->allowField(true)->isUpdate(true, ['order_id'=>$item_process_info['order_id']])->save(['combine_status'=>1,'combine_time'=>time()]);
-                $this->_stock_house->allowField(true)->isUpdate(true, ['id'=>$store_house_id])->save(['occupy'=>1]);
-            }
             $info['next'] = $next;
             //操作成功记录
             DistributionLog::record($this->auth,$item_process_info['id'],7,'子单号：'.$item_order_number.'作为主单号'.$order_process_info['increment_id'].'的'.$num.'子单合单完成');
@@ -1239,7 +1238,7 @@ class ScmDistribution extends Scm
             //操作失败记录
             DistributionLog::record($this->auth,$item_process_info['id'],7,'子单号：'.$item_order_number.'作为主单号'.$order_process_info['increment_id'].'的'.$num.'子单合单失败');
 
-            $this->error(__('No rows were inserted'), [], 511);
+            $this->error(__('子单号放入合单架失败'), [], 511);
         }
         //首个子单进入合单架END
 
