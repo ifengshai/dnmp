@@ -1145,10 +1145,9 @@ class ScmDistribution extends Scm
 
         //主单表有合单库位ID，查询主单商品总数，与子单合单入库计算数量对比
         //获取订单购买总数
-        $total_qty_ordered = $this->_new_order
-            ->where('id', $item_process_info['order_id'])
-            ->value('total_qty_ordered')
-        ;
+        $total_qty_ordered = $this->_new_order_item_process
+            ->where('order_id', $item_process_info['order_id'])
+            ->count();
         $count = $this->_new_order_item_process
             ->where(['distribution_status'=>['in',[0,8]],'order_id'=>$item_process_info['order_id']])
             ->count();
@@ -1206,7 +1205,7 @@ class ScmDistribution extends Scm
                 $res = $this->_new_order_process->allowField(true)->isUpdate(true, ['order_id'=>$item_process_info['order_id']])->save(['store_house_id'=>$store_house_id]);
                 if ($res !== false){
                     $return = $this->_stock_house->allowField(true)->isUpdate(true, ['id'=>$store_house_id])->save(['occupy'=>1]);
-                    if (0 == $next){
+                    if (!$next){
                         //只有一个子单且合单完成，更新主单、子单状态为合单完成
                         $this->_new_order_item_process
                             ->allowField(true)
