@@ -443,8 +443,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 }
                 $order_pay_currency = $('#order_pay_currency').val();
                 if (!$order_pay_currency) {
-                    Toastr.error('请先点击载入数据');
-                    return false;
+                    var is_order_item = $('#is_order_item').val();
+                    if (is_order_item) {
+                        platform_order();
+                    }else{
+                        Toastr.error('请先点击载入数据');
+                        return false;
+                    }
+
                 }
                 //读取是谁添加的配置console.log(Config.work_type);
                 $('.step_type').attr('checked', false);
@@ -848,6 +854,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
 
             //载入数据
             $('#platform_order').click(function () {
+                platform_order();
+            })
+
+            function platform_order(){
                 var incrementId = $('#c-platform_order').val().replace(/^\s+|\s+$/g, "");
                 if (!incrementId) {
                     Toastr.error('订单号不能为空');
@@ -902,6 +912,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
 
                     var sitetype = $('#work_platform').val();
                     $('#c-order_sku').html('');
+                    $('#item_input-hidden').html('');
                     Layer.load();
                     Backend.api.ajax({
                         url: 'saleaftermanage/work_order_list/get_sku_list',
@@ -942,8 +953,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         // //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end*/                                   
                     });
                 }
-            })
-
+            }
             //补发点击填充数据
             var lens_click_data;
             var gift_click_data;
@@ -2351,7 +2361,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         //判断赠品信息的状态，如果显示的话把数据带出来，如果隐藏的话则不显示赠品数据 end
                     }
                     //如果子单号item_order_info存在带出子单措施的数据
-                    if (Config.item_order_info) {
+                    if (Config.item_order_info && 2 != Config.work_type) {
                         var item_order_info = Config.item_order_info;
                         //生成折叠框
                         itemSelectpicker(2,null,item_order_info);
@@ -2778,10 +2788,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
 
                 //下拉框选择子单联动
                 $(document).on('click', '.problem_type', function () {
-                    itemSelectpicker(1,$(this));
+                    if (2 != Config.work_type) {itemSelectpicker(1,$(this));}
+                    
                 });
                 $(document).on('change', '.item_order_selectpicker', function () {
-                    itemSelectpicker(2);
+                    if (2 != Config.work_type) {itemSelectpicker(2);}
                 });
 
                 //子单措施选择联动
