@@ -9,7 +9,7 @@ use app\common\controller\Backend;
  *
  * @icon fa fa-circle-o
  */
-class Item_category_value extends Backend
+class ItemCategoryValue extends Backend
 {
     
     /**

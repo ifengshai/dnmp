@@ -23,6 +23,9 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                     return false;
                 });
             });
+            $(document).on('change', '#order_platform', function () {
+                Controller.api.formatter.line_histogram();
+            });
         },
         api: {
             formatter: {
@@ -32,18 +35,41 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                         downLoadTitle: '图表',
                         type: 'bar',
                         bar: {
-                            legend: {},
-                            tooltip: {},
-                            xAxis: [{type: 'category'},{type: 'category'}],
-                            yAxis: {},
-                            series: [
-                                {type: 'bar'},
-                                {type: 'bar'},
-                                {type: 'bar'},
-                                {type: 'bar'},
-                                {type: 'bar'},
-                                {type: 'bar'},
-                            ]
+                            color: ['#003366', '#006699', '#4cabce'],
+                            // tooltip: {
+                            //     trigger: 'axis',
+                            //     axisPointer: {
+                            //         type: 'shadow'
+                            //     },
+                            //     formatter: function (param) {
+                            //         return param.data.name + '<br/>库存：' + param.data.value + '<br/> 占比：' + param.percent.toFixed(2) + '%';
+                            //     }
+                            // },
+                            tooltip: { //提示框组件。
+                                trigger: 'axis', // 触发类型。可选项item:数据项图形触发，主要在散点图，饼图等无类目轴的图表中使用。axis:坐标轴触发，主要在柱状图，折线图等会使用类目轴的图表中使用。
+                                axisPointer: { //坐标轴指示器配置项。
+                                    type: 'shadow' //指示器类型。可选项'line' 直线指示器。'shadow' 阴影指示器。'cross' 十字准星指示器。其实是种简写，表示启用两个正交的轴的 axisPointer。
+                                },
+                                formatter: function (param) { //格式化提示信息
+                                    if(param.length == 3){
+                                        return param[0].name + '<br/>' + param[0].seriesName + '：' + param[0].value + '<br/>' + param[1].seriesName + '：' + param[1].value + '<br/>' + param[2].seriesName + '：' + param[2].value;
+                                    }else if(param.length == 2){
+                                        return param[0].name + '<br/>' + param[0].seriesName + '：' + param[0].value + '<br/>' + param[1].seriesName + '：' + param[1].value;
+                                    }else{
+                                        return param[0].name + '<br/>' + param[0].seriesName + '：' + param[0].value;
+                                    }
+                                }
+                            },
+                            legend: {
+                                top: '2%',
+                                data: ['在售', '预售', '下架']
+                            },
+                            xAxis: {
+                                type: 'category'
+                            },
+                            yAxis: {
+                                type: 'value'
+                            }
                         }
                     };
 

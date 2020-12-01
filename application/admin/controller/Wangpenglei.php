@@ -350,13 +350,49 @@ class Wangpenglei extends Backend
     {
         $order_log = new \app\admin\model\OrderLog();
         $list = $order_log->where(['site' => 2])->select();
-        foreach($list as $k => $v) {
-            $arr = explode(',',$v['order_ids']);
+        foreach ($list as $k => $v) {
+            $arr = explode(',', $v['order_ids']);
             if ($arr[0] < 50000 && $arr[0] > 5000) {
                 $order_log->where(['id' => $v['id']])->update(['site' => 3]);
             }
         }
         echo "ok";
-        
+    }
+
+
+    /**
+     * 获取前一天有效SKU销量
+     * 记录当天有效SKU
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/07/31 16:52:46 
+     * @return void
+     */
+    public function get_sku_sales_num()
+    {
+        ini_set('memory_limit', '512M');
+        //记录当天上架的SKU 
+        $skuSalesNum = new \app\admin\model\SkuSalesNum();
+        $order = new \app\admin\model\order\order\Order();
+        //查询昨天上架SKU 并统计当天销量
+        $data = $skuSalesNum->where(['createtime' => ['between', ['2020-10-01', '2020-10-31']]])->where('site<>8')->select();
+        $data = collection($data)->toArray();
+        if ($data) {
+            foreach ($data as $k => $v) {
+                if ($v['platform_sku']) {
+                    $map['a.created_at'] = ['between', [date("Y-m-d 00:00:00", strtotime($v['createtime'])), date("Y-m-d 23:59:59", strtotime($v['createtime']))]];
+                    $params[$k]['sales_num'] = $order->getSkuSalesNumTest($v['platform_sku'], $map, $v['site']);
+                    $params[$k]['id'] = $v['id'];
+                }
+                echo $v['id'] . "\n";
+                usleep(100000);
+            }
+            if ($params) {
+                $skuSalesNum->saveAll($params);
+            }
+        }
+
+        echo "ok";
     }
 }

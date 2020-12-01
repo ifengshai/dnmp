@@ -673,7 +673,7 @@ class ZeeloolJp extends Backend
         if (false !== $result) {
             $params['num'] = count($entity_ids);
             $params['order_ids'] = implode(',', $entity_ids);
-            $params['site'] = 11;
+            $params['site'] = 2;
             (new OrderLog())->setOrderLog($params);
 
             //插入订单节点
@@ -897,11 +897,6 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             $finalResult[$key]['coatiing_name'] = $tmp_product_options['info_buyRequest']['tmplens']['coatiing_name'];
             $finalResult[$key]['index_type'] = $tmp_product_options['info_buyRequest']['tmplens']['index_type'];
 
-            //镜片颜色   
-            if ($tmp_product_options['info_buyRequest']['tmplens']['index_color']) {
-                $finalResult[$key]['index_type'] = $tmp_product_options['info_buyRequest']['tmplens']['index_type']  . '-' . $tmp_product_options['info_buyRequest']['tmplens']['index_color'];
-            }
-
             $tmp_prescription_params = $tmp_product_options['info_buyRequest']['tmplens']['prescription'];
             if (isset($tmp_prescription_params)) {
                 $tmp_prescription_params = explode("&", $tmp_prescription_params);
@@ -952,7 +947,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             $finalResult[$key]['lens_height'] = $tmp_bridge['lens_height'];
             $finalResult[$key]['bridge'] = $tmp_bridge['bridge'];
         }
-    
+
         $spreadsheet = new Spreadsheet();
         //常规方式：利用setCellValue()填充数据
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "日期")
@@ -1036,12 +1031,12 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 3), $value['os_axis']);
 
             if (strlen($value['os_add']) > 0 && strlen($value['od_add']) > 0 && (float) $value['od_add'] * 1 != 0 && (float) $value['os_add'] * 1 != 0) {
-                // 日语站add 调整正常
-                $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['od_add']);
-                $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 3), $value['os_add']);
+                // 双ADD值时，左右眼互换
+                $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['os_add']);
+                $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 3), $value['od_add']);
             } else {
                 //数值在上一行合并有效，数值在下一行合并后为空
-                $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['os_add'] ?: $value['od_add']);
+                $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['os_add']);
                 $spreadsheet->getActiveSheet()->mergeCells("I" . ($key * 2 + 2) . ":I" . ($key * 2 + 3));
             }
 
@@ -1134,7 +1129,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         $spreadsheet->getActiveSheet()->getStyle('A1:U' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         $spreadsheet->getActiveSheet()->getStyle('A1:U' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
 
-        //水平垂直居中   
+        //水平垂直居中
         // $objSheet->getDefaultStyle()->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
         // $objSheet->getDefaultStyle()->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_CENTER);
         // //自动换行
@@ -1165,6 +1160,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         $writer = new $class($spreadsheet);
         $writer->save('php://output');
     }
+
 
 
     //批量打印标签
@@ -1233,12 +1229,6 @@ EOF;
                 $final_print['coatiing_name'] = substr($product_options['info_buyRequest']['tmplens']['coatiing_name'], 0, 60);
                 $final_print['index_type'] = $product_options['info_buyRequest']['tmplens']['index_type'];
 
-                //镜片颜色   
-                $final_print['index_type'] = $product_options['info_buyRequest']['tmplens']['index_type'];
-                if ($product_options['info_buyRequest']['tmplens']['index_color']) {
-                    $final_print['index_type'] = $product_options['info_buyRequest']['tmplens']['index_type']  . '-' . $product_options['info_buyRequest']['tmplens']['index_color'];
-                }
-
                 $prescription_params = $product_options['info_buyRequest']['tmplens']['prescription'];
                 if ($prescription_params) {
                     $prescription_params = explode("&", $prescription_params);
@@ -1273,11 +1263,11 @@ EOF;
                 //处理ADD  当ReadingGlasses时 是 双ADD值
                 if (strlen($final_print['os_add']) > 0 && strlen($final_print['od_add']) > 0 && (float) $final_print['od_add'] * 1 != 0 && (float) $final_print['os_add'] * 1 != 0) {
                     // echo '双ADD值';
-                    $os_add = "<td>" . $final_print['os_add'] . "</td> ";
-                    $od_add = "<td>" . $final_print['od_add'] . "</td> ";
+                    $os_add = "<td>" . $final_print['od_add'] . "</td> ";
+                    $od_add = "<td>" . $final_print['os_add'] . "</td> ";
                 } else {
                     // echo '单ADD值';
-                    $od_add = "<td rowspan='2'>" . $final_print['os_add'] ?: $final_print['od_add'] . "</td>";
+                    $od_add = "<td rowspan='2'>" . $final_print['os_add'] . "</td>";
                     $os_add = "";
                 }
 

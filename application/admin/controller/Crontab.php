@@ -2494,7 +2494,7 @@ class Crontab extends Backend
             $product_options = unserialize($order_item_value['product_options']);
 
             $final_params['coatiing_name'] = substr($product_options['info_buyRequest']['tmplens']['coatiing_name'], 0, 100);
-            $final_params['index_type'] = substr($product_options['info_buyRequest']['tmplens']['index_type'], 0, 80);;
+            $final_params['index_type'] = $product_options['info_buyRequest']['tmplens']['index_type'];
 
             $final_params['frame_price'] = $product_options['info_buyRequest']['tmplens']['frame_price'];
             $final_params['index_price'] = $product_options['info_buyRequest']['tmplens']['index_price'];

@@ -231,7 +231,7 @@ class Test01 extends Backend
             ->alias('o')
             ->join('sales_flat_quote p', 'o.quote_id=p.entity_id')
             ->where($yestime_wheres)
-            ->where('p.base_grand_total','>',0)
+            ->where('p.base_grand_total', '>', 0)
             ->where($yestime_where)
             ->where($order_where)
             ->where($order_success_where)
@@ -245,12 +245,32 @@ class Test01 extends Backend
             ->alias('o')
             ->join('sales_flat_quote p', 'o.quote_id=p.entity_id')
             ->where($sev_wheres)
-            ->where('p.base_grand_total','>',0)
+            ->where('p.base_grand_total', '>', 0)
             ->where($sev_where)
             ->where($order_where)
             ->where($order_success_where)
             ->count();
         dump($yesterday_order_success_data1);
         dump($pastsevenday_order_success_data1);
+    }
+
+    public function test100()
+    {
+        $now_date = date('Y-m-d');
+        $now_date = '2020-11-29';
+        $start = $end = $time_str = $now_date;
+
+        $model = new \app\admin\model\operatedatacenter\Zeelool;
+        //获取session
+        $ga_result = $model->ga_hour_data($start, $end);
+        dump($ga_result);
+
+        $now_date = date('Y-m-d');
+        $start = $end = $time_str = $now_date;
+        //获取session
+        $ga_result = $model->ga_hour_data($start, $end);
+        dump($ga_result);
+        die;
+
     }
 }

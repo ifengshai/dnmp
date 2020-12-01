@@ -50,14 +50,14 @@ class UserValueRfm extends Backend
             $order_platform = $params['order_platform'];
             $cache_data = Cache::get('Operatedatacenter_userdata1'.$order_platform.md5(serialize('ajax_user_order_amount')));
             if(!$cache_data){
-                $count = $this->getOrderAmountUserNum($order_platform);
-
-                $count1 = $this->getOrderAmountUserNum($order_platform, 1);
-                $count2 = $this->getOrderAmountUserNum($order_platform, 2);
-                $count3 = $this->getOrderAmountUserNum($order_platform, 3);
-                $count4 = $this->getOrderAmountUserNum($order_platform, 4);
-                $count5 = $this->getOrderAmountUserNum($order_platform, 5);
-                $count6 = $this->getOrderAmountUserNum($order_platform, 6);
+                $result = $this->getOrderAmountUserNum($order_platform);
+                $count = $result['count'];
+                $count1 = $result['data'][0]['a'];
+                $count2 = $result['data'][0]['b'];
+                $count3 = $result['data'][0]['c'];
+                $count4 = $result['data'][0]['d'];
+                $count5 = $result['data'][0]['e'];
+                $count6 = $result['data'][0]['f'];
                 $arr = array(
                     'data'=>array($count1, $count2, $count3, $count4, $count5, $count6),
                     'count'=>$count
@@ -93,7 +93,7 @@ class UserValueRfm extends Backend
      * 获取金额分布人数
      * type  1:[0-40)  2:[40-80)  3:[80-150)   4:[150-200)    5:[200-300)   6:[300,10000000)
     */
-    public function getOrderAmountUserNum($order_platform, $type = 0)
+    public function getOrderAmountUserNum($order_platform)
     {
         if($order_platform == 2){
             $web_model = Db::connect('database.db_voogueme');
@@ -111,33 +111,23 @@ class UserValueRfm extends Backend
         $end = date('Y-m-d 23:59:59', strtotime($today));
         $time_where['created_at'] = ['between', [$start, $end]];
         $where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-        $customer_ids = $web_model->table('customer_entity')->where($time_where)->column('entity_id');
-        $where['customer_id'] = ['in',$customer_ids];
-        switch ($type) {
-            case 1:
-                $order_customerids = $order_model->where($where)->group('customer_id')->having('sum(base_grand_total)>=0 and sum(base_grand_total)<40')->column('customer_id');
-                break;
-            case 2:
-                $order_customerids = $order_model->where($where)->group('customer_id')->having('sum(base_grand_total)>=40 and sum(base_grand_total)<80')->column('customer_id');
-                break;
-            case 3:
-                $order_customerids = $order_model->where($where)->group('customer_id')->having('sum(base_grand_total)>=80 and sum(base_grand_total)<150')->column('customer_id');
-                break;
-            case 4:
-                $order_customerids = $order_model->where($where)->group('customer_id')->having('sum(base_grand_total)>=150 and sum(base_grand_total)<200')->column('customer_id');
-                break;
-            case 5:
-                $order_customerids = $order_model->where($where)->group('customer_id')->having('sum(base_grand_total)>=200 and sum(base_grand_total)<300')->column('customer_id');
-                break;
-            case 6:
-                $order_customerids = $order_model->where($where)->group('customer_id')->having('sum(base_grand_total)>=300')->column('customer_id');
-                break;
-            default:
-                $order_customerids = $customer_ids;
-                break;
-        }
-        $count = count($order_customerids);
-        return $count;
+        $count = $web_model->table('customer_entity')->where($time_where)->count('entity_id');
+
+        $sql1 = $web_model->table('customer_entity')->where($time_where)->field('entity_id')->buildSql();
+        $arr_where = [];
+        $arr_where[] = ['exp', Db::raw("customer_id in " . $sql1)];
+
+        $sql2 = $order_model->alias('t1')->field('sum( base_grand_total ) AS total')->where($where)->where($arr_where)->group('customer_id')->buildSql();
+
+        $order_customer_count = $web_model->table([$sql2=>'t2'])->field('sum( IF ( total >= 300, 1, 0 ) ) AS f,sum( IF ( total >= 200 AND total < 300, 1, 0 ) ) AS e,sum( IF ( total >= 150 AND total < 200, 1, 0 ) ) AS d,sum( IF ( total >= 80 AND total < 150, 1, 0 ) ) AS c,sum( IF ( total >= 40 AND total < 80, 1, 0 ) ) AS b')->select();
+
+        $order_customer_count[0]['a'] = $count-$order_customer_count[0]['b']-$order_customer_count[0]['c']-$order_customer_count[0]['d']-$order_customer_count[0]['e']-$order_customer_count[0]['f'];
+
+        $arr = array(
+            'count'=>$count,
+            'data'=>$order_customer_count,
+        );
+        return $arr;
     }
     /**
      * 用户总消费次数分布
@@ -166,13 +156,14 @@ class UserValueRfm extends Backend
             $order_platform = $params['order_platform'];
             $cache_data = Cache::get('Operatedatacenter_userdata'.$order_platform.md5(serialize('ajax_user_order_num')));
             if(!$cache_data){
-                $count = $this->getOrderNumUserNum($order_platform);
-                $count1 = $this->getOrderNumUserNum($order_platform, 1);
-                $count2 = $this->getOrderNumUserNum($order_platform, 2);
-                $count3 = $this->getOrderNumUserNum($order_platform, 3);
-                $count4 = $this->getOrderNumUserNum($order_platform, 4);
-                $count5 = $this->getOrderNumUserNum($order_platform, 5);
-                $count6 = $this->getOrderNumUserNum($order_platform, 6);
+                $result = $this->getOrderNumUserNum($order_platform);
+                $count = $result['count'];
+                $count1 = $result['data'][0]['a'];
+                $count2 = $result['data'][0]['b'];
+                $count3 = $result['data'][0]['c'];
+                $count4 = $result['data'][0]['d'];
+                $count5 = $result['data'][0]['e'];
+                $count6 = $result['data'][0]['f'];
                 $arr = array(
                     'data'=>array($count1, $count2, $count3, $count4, $count5, $count6),
                     'count'=>$count
@@ -226,33 +217,23 @@ class UserValueRfm extends Backend
         $end = date('Y-m-d 23:59:59', strtotime($today));
         $time_where['created_at'] = ['between', [$start, $end]];
         $where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-        $customer_ids = $web_model->table('customer_entity')->where($time_where)->column('entity_id');
-        $where['customer_id'] = ['in',$customer_ids];
-        switch ($type) {
-            case 1:
-                $order_customerids = $order_model->where($where)->group('customer_id')->having('count(entity_id)=0')->column('customer_id');
-                break;
-            case 2:
-                $order_customerids = $order_model->where($where)->group('customer_id')->having('count(entity_id)=1')->column('customer_id');
-                break;
-            case 3:
-                $order_customerids = $order_model->where($where)->group('customer_id')->having('count(entity_id)=2')->column('customer_id');
-                break;
-            case 4:
-                $order_customerids = $order_model->where($where)->group('customer_id')->having('count(entity_id)=3')->column('customer_id');
-                break;
-            case 5:
-                $order_customerids = $order_model->where($where)->group('customer_id')->having('count(entity_id)=4')->column('customer_id');
-                break;
-            case 6:
-                $order_customerids = $order_model->where($where)->group('customer_id')->having('count(entity_id)>=5')->column('customer_id');
-                break;
-            default:
-                $order_customerids = $customer_ids;
-                break;
-        }
-        $count = count($order_customerids);
-        return $count;
+        $count = $web_model->table('customer_entity')->where($time_where)->count();
+
+        $sql1 = $web_model->table('customer_entity')->where($time_where)->field('entity_id')->buildSql();
+        $arr_where = [];
+        $arr_where[] = ['exp', Db::raw("customer_id in " . $sql1)];
+
+        $sql2 = $order_model->alias('t1')->field('count( customer_id ) AS total')->where($where)->where($arr_where)->group('customer_id')->buildSql();
+
+        $order_customer_count = $web_model->table([$sql2=>'t2'])->field('sum( IF ( total >= 5, 1, 0 ) ) AS f,sum( IF ( total = 4, 1, 0 ) ) AS e,sum( IF ( total = 3, 1, 0 ) ) AS d,sum( IF ( total = 2, 1, 0 ) ) AS c,sum( IF ( total = 1, 1, 0 ) ) AS b')->select();
+
+        $order_customer_count[0]['a'] = $count-$order_customer_count[0]['b']-$order_customer_count[0]['c']-$order_customer_count[0]['d']-$order_customer_count[0]['e']-$order_customer_count[0]['f'];
+
+        $arr = array(
+            'count'=>$count,
+            'data'=>$order_customer_count,
+        );
+        return $arr;
     }
     /**
      * 消费临近天数
@@ -281,13 +262,14 @@ class UserValueRfm extends Backend
             $order_platform = $params['order_platform'];
             $cache_data = Cache::get('Operatedatacenter_userdata1'.$order_platform.md5(serialize('ajax_user_shopping_near_days')));
             if(!$cache_data){
-                $count = $this->getUserNearDays($order_platform);
-                $count1 = $this->getUserNearDays($order_platform, 1);
-                $count2 = $this->getUserNearDays($order_platform, 2);
-                $count3 = $this->getUserNearDays($order_platform, 3);
-                $count4 = $this->getUserNearDays($order_platform, 4);
-                $count5 = $this->getUserNearDays($order_platform, 5);
-                $count6 = $this->getUserNearDays($order_platform, 6);
+                $result = $this->getUserNearDays($order_platform);
+                $count = $result['count'];
+                $count1 = $result['data'][0]['a'];
+                $count2 = $result['data'][0]['b'];
+                $count3 = $result['data'][0]['c'];
+                $count4 = $result['data'][0]['d'];
+                $count5 = $result['data'][0]['e'];
+                $count6 = $result['data'][0]['f'];
                 $arr = array(
                     'data'=>array($count1, $count2, $count3, $count4, $count5, $count6),
                     'count'=>$count
@@ -341,32 +323,21 @@ class UserValueRfm extends Backend
         $end = date('Y-m-d 23:59:59', strtotime($today));
         $time_where['created_at'] = ['between', [$start, $end]];
         $where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-        $customer_ids = $web_model->table('customer_entity')->where($time_where)->column('entity_id');
-        $where['customer_id'] = ['in',$customer_ids];
-        switch ($type) {
-            case 1:
-                $order_customerids = $order_model->where($where)->group('customer_id')->having('to_days(now()) - to_days(max(created_at))>=0 and to_days(now()) - to_days(max(created_at))<14')->column('customer_id');
-                break;
-            case 2:
-                $order_customerids = $order_model->where($where)->group('customer_id')->having('to_days(now()) - to_days(max(created_at))>=14 and to_days(now()) - to_days(max(created_at))<30')->column('customer_id');
-                break;
-            case 3:
-                $order_customerids = $order_model->where($where)->group('customer_id')->having('to_days(now()) - to_days(max(created_at))>=30 and to_days(now()) - to_days(max(created_at))<60')->column('customer_id');
-                break;
-            case 4:
-                $order_customerids = $order_model->where($where)->group('customer_id')->having('to_days(now()) - to_days(max(created_at))>=60 and to_days(now()) - to_days(max(created_at))<90')->column('customer_id');
-                break;
-            case 5:
-                $order_customerids = $order_model->where($where)->group('customer_id')->having('to_days(now()) - to_days(max(created_at))>=90 and to_days(now()) - to_days(max(created_at))<360')->column('customer_id');
-                break;
-            case 6:
-                $order_customerids = $order_model->where($where)->group('customer_id')->having('to_days(now()) - to_days(max(created_at))>=360')->column('customer_id');
-                break;
-            default:
-                $order_customerids = $customer_ids;
-                break;
-        }
-        $count = count($order_customerids);
-        return $count;
+        $count = $web_model->table('customer_entity')->where($time_where)->count();
+
+        $sql1 = $web_model->table('customer_entity')->where($time_where)->field('entity_id')->buildSql();
+        $arr_where = [];
+        $arr_where[] = ['exp', Db::raw("customer_id in " . $sql1)];
+
+        $sql2 = $order_model->alias('t1')->field('to_days(now()) - to_days(max(created_at)) AS total')->where($where)->where($arr_where)->group('customer_id')->buildSql();
+
+        $order_customer_count = $web_model->table([$sql2=>'t2'])->field('sum( IF ( total >= 90 and total<360, 1, 0 ) ) AS e,sum( IF ( total >= 60 and total<90, 1, 0 ) ) AS d,sum( IF ( total >= 30 and total<60, 1, 0 ) ) AS c,sum( IF ( total >= 14 and total<30, 1, 0 ) ) AS b,sum( IF ( total >= 0 and total<14, 1, 0 ) ) AS a')->select();
+
+        $order_customer_count[0]['f'] = $count-$order_customer_count[0]['a']-$order_customer_count[0]['b']-$order_customer_count[0]['c']-$order_customer_count[0]['d']-$order_customer_count[0]['e'];
+        $arr = array(
+            'count'=>$count,
+            'data'=>$order_customer_count,
+        );
+        return $arr;
     }
 }
