@@ -4,9 +4,12 @@ namespace app\admin\controller\saleaftermanage;
 
 use app\admin\model\DistributionAbnormal;
 use app\admin\model\DistributionLog;
+use app\admin\model\order\order\LensData;
+use app\admin\model\order\order\NewOrder;
 use app\admin\model\order\order\NewOrderItemProcess;
 use app\admin\model\order\order\NewOrderProcess;
 use app\admin\model\saleaftermanage\WorkOrderNote;
+use app\admin\model\warehouse\StockHouse;
 use app\common\controller\Backend;
 use think\Cache;
 use think\Db;
@@ -78,6 +81,7 @@ class WorkOrderList extends Backend
         $this->view->assign('country', $country);
         $this->recept = new \app\admin\model\saleaftermanage\WorkOrderRecept;
         $this->item = new \app\admin\model\itemmanage\Item;
+        $this->item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku;
 
         //获取当前登录用户所属主管id
         //$this->assign_user_id = searchForId(session('admin.id'), config('workorder.kefumanage'));
@@ -2755,14 +2759,14 @@ class WorkOrderList extends Backend
     }
 
     /**
-     * 批量打印标签
+     * 批量打印标签-弃用
      *
      * @Description
      * @author wpl
      * @since 2020/04/22 17:23:47 
      * @return void
      */
-    public function batch_print_label()
+    public function batch_print_labelOld()
     {
         ob_start();
         $ids = input('ids');
@@ -2918,6 +2922,152 @@ EOF;
     }
 
     /**
+     * 批量打印标签
+     *
+     * @Description
+     * @author lzh
+     * @since 2020/11/1 10:36:22 
+     * @return void
+     */
+    public function batch_print_label()
+    {
+        //禁用默认模板
+        $this->view->engine->layout(false);
+        ob_start();
+
+        $ids = input('ids');
+        !$ids && $this->error('请选择要打印的数据');
+
+        //获取更改镜框最新信息
+        $change_sku = $this->order_change
+            ->alias('a')
+            ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
+            ->where([
+                'a.change_type'=>1,
+                'a.work_id'=>['in',$ids],
+                'b.operation_type'=>1
+            ])
+            ->order('a.id','desc')
+            ->group('a.item_order_number')
+            ->column('a.change_sku','a.item_order_number')
+        ;
+
+        //获取更改镜片最新处方信息
+        $change_lens = $this->order_change
+            ->alias('a')
+            ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
+            ->where([
+                'a.change_type'=>2,
+                'a.work_id'=>['in',$ids],
+                'b.operation_type'=>1
+            ])
+            ->order('a.id','desc')
+            ->group('a.item_order_number')
+            ->column('a.od_sph,a.od_cyl,a.od_axis,a.od_add,a.pd_r,a.od_pv,a.od_bd,a.od_pv_r,a.od_bd_r,a.os_sph,a.os_cyl,a.os_axis,a.os_add,a.pd_l,a.os_pv,a.os_bd,a.os_pv_r,a.os_bd_r,a.lens_number','a.item_order_number')
+        ;
+        if($change_lens){
+            foreach($change_lens as $key=>$val){
+                if($val['pd_l'] && $val['pd_r']){
+                    $change_lens[$key]['pd'] = '';
+                    $change_lens[$key]['pdcheck'] = 'on';
+                }else{
+                    $change_lens[$key]['pd'] = $val['pd_r'] ?: $val['pd_l'];
+                    $change_lens[$key]['pdcheck'] = '';
+                }
+            }
+        }
+
+        //获取子单号集合
+        $item_order_numbers = array_unique(array_merge(array_keys($change_sku),array_keys($change_lens)));
+        !$item_order_numbers && $this->error('未找到更换镜片或更改镜框的数据');
+
+        //获取子订单列表
+        $_new_order_item_process = new NewOrderItemProcess();
+        $list = $_new_order_item_process
+            ->alias('a')
+            ->field('a.item_order_number,a.order_id,a.created_at,b.os_add,b.od_add,b.pdcheck,b.prismcheck,b.pd_r,b.pd_l,b.pd,b.od_pv,b.os_pv,b.od_bd,b.os_bd,b.od_bd_r,b.os_bd_r,b.od_pv_r,b.os_pv_r,b.index_name,b.coating_name,b.prescription_type,b.sku,b.od_sph,b.od_cyl,b.od_axis,b.os_sph,b.os_cyl,b.os_axis,b.lens_number')
+            ->join(['fa_order_item_option' => 'b'], 'a.option_id=b.id')
+            ->where(['a.item_order_number' => ['in', $item_order_numbers]])
+            ->select();
+        $list = collection($list)->toArray();
+        $order_ids = array_column($list, 'order_id');
+        $sku_arr = array_column($list, 'sku');
+
+        //查询sku映射表
+        $item_res = $this->item_platform_sku->cache(3600)->where(['platform_sku' => ['in', array_unique($sku_arr)]])->column('sku', 'platform_sku');
+
+        //获取订单数据
+        $_new_order = new NewOrder();
+        $order_list = $_new_order->where(['id' => ['in', array_unique($order_ids)]])->column('total_qty_ordered,increment_id', 'id');
+
+        //查询产品货位号
+        $_stock_house = new StockHouse();
+        $cargo_number = $_stock_house
+            ->alias('a')
+            ->where(['status' => 1, 'b.is_del' => 1, 'a.type' => 1])
+            ->join(['fa_store_sku' => 'b'], 'a.id=b.store_id')
+            ->column('coding', 'sku');
+
+        //获取镜片编码及名称
+        $_lens_data = new LensData();
+        $lens_list = $_lens_data->column('lens_name','lens_number');
+
+        $data = [];
+        foreach ($list as $k => $v) {
+            //更改镜框最新sku
+            if($change_sku[$v['item_order_number']]){
+                $v['sku'] = $change_sku[$v['item_order_number']];
+            }
+
+            //更改镜片最新数据
+            if($change_lens[$v['item_order_number']]){
+                $v = array_merge($v,$change_lens[$v['item_order_number']]);
+            }
+
+            $item_order_number = $v['item_order_number'];
+            $fileName = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "distribution" . DS . "new" . DS . "$item_order_number.png";
+            $dir = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "distribution" . DS . "new";
+            if (!file_exists($dir)) {
+                mkdir($dir, 0777, true);
+            }
+            $img_url = "/uploads/printOrder/distribution/new/$item_order_number.png";
+
+            //生成条形码
+            $this->generate_barcode($item_order_number, $fileName);
+            $v['created_at'] = date('Y-m-d H:i:s', $v['created_at']);
+            $v['img_url'] = $img_url;
+
+            //序号
+            $serial = explode('-', $item_order_number);
+            $v['serial'] = $serial[1];
+            $v['total_qty_ordered'] = $order_list[$v['order_id']]['total_qty_ordered'];
+            $v['increment_id'] = $order_list[$v['order_id']]['increment_id'];
+
+            //库位号
+            $v['coding'] = $cargo_number[$item_res[$v['sku']]];
+
+            //判断双ADD逻辑
+            if ($v['os_add'] && $v['od_add'] && (float)$v['os_add'] * 1 != 0 && (float)$v['od_add'] * 1 != 0) {
+                $v['total_add'] = '';
+            } else {
+                if ($v['os_add'] && (float)$v['os_add'] * 1 != 0) {
+                    $v['total_add'] = $v['os_add'];
+                } else {
+                    $v['total_add'] = $v['od_add'];
+                }
+            }
+
+            //获取镜片名称
+            $v['lens_name'] = $lens_list[$v['lens_number']] ?: '';
+
+            $data[] = $v;
+        }
+        $this->assign('list', $data);
+        $html = $this->view->fetch('print_label');
+        echo $html;
+    }
+
+    /**
      * 生成条形码
      */
     protected function generate_barcode($text, $fileName)
@@ -2936,15 +3086,20 @@ EOF;
         //颜色条形码
         $color_black = new \BCGColor(0, 0, 0);
         $color_white = new \BCGColor(255, 255, 255);
+        $label = new \BCGLabel();
+        $label->setPosition(\BCGLabel::POSITION_TOP);
+        $label->setText('');
+        $label->setFont($font);
         $drawException = null;
         try {
             // $code = new \BCGcode39();
             $code = new \BCGcode128();
-            $code->setScale(3);
-            $code->setThickness(25); // 条形码的厚度
+            $code->setScale(4);
+            $code->setThickness(18); // 条形码的厚度
             $code->setForegroundColor($color_black); // 条形码颜色
             $code->setBackgroundColor($color_white); // 空白间隙颜色
-            $code->setFont($font); //设置字体
+            $code->setFont(0); //设置字体
+            $code->addLabel($label); //设置字体
             $code->parse($text); // 条形码需要的数据内容
         } catch (\Exception $exception) {
             $drawException = $exception;

@@ -4,7 +4,6 @@ namespace app\admin\controller\order;
 
 use app\admin\model\DistributionLog;
 use app\admin\model\saleaftermanage\WorkOrderChangeSku;
-use app\admin\model\saleaftermanage\WorkOrderList;
 use app\common\controller\Backend;
 use think\Request;
 use think\exception\PDOException;
@@ -24,7 +23,6 @@ use app\admin\model\order\order\NewOrderProcess;
 use app\admin\model\StockLog;
 use app\admin\model\order\order\LensData;
 use app\admin\model\saleaftermanage\WorkOrderMeasure;
-use app\admin\controller\saleaftermanage;
 
 /**
  * 配货列表
