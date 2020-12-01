@@ -459,7 +459,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 $('#recept_person').val('');//切换问题类型时清空隐藏域承接人
                 $('.measure').hide();
                 $('#recept_group_id').val('');
-                if (2 == Config.work_type) { //如果是仓库人员添加的工单
+                var is_order_item = $('#is_order_item').val();
+                if (2 == Config.work_type || 1 == is_order_item) { //如果是仓库人员添加的工单
                     $('#step_id').hide();
                     $('#recept_person_group').hide();
                     $('#after_user_group').show();
@@ -2788,11 +2789,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
 
                 //下拉框选择子单联动
                 $(document).on('click', '.problem_type', function () {
-                    if (2 != Config.work_type) {itemSelectpicker(1,$(this));}
+                    var is_order_item = $('#is_order_item').val();
+                    if (2 != Config.work_type && 1 != is_order_item) {itemSelectpicker(1,$(this));}
                     
                 });
                 $(document).on('change', '.item_order_selectpicker', function () {
-                    if (2 != Config.work_type) {itemSelectpicker(2);}
+                    var is_order_item = $('#is_order_item').val();
+                    if (2 != Config.work_type && 1 != is_order_item) {itemSelectpicker(2);}
                 });
 
                 //子单措施选择联动
@@ -2849,7 +2852,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
 
                             //是否为子单取消
                             if (id == 18) {
-                                item_input_content +='<input type="hidden" name="row[item_order_info]['+ use_flag +'][cancel_order]" value="' + sku + '"/>';
+                                item_input_content +='<input type="hidden" name="row[item_order_info]['+ use_flag +'][cancel_order][sku]" value="' + sku + '"/>';
                             }
                         });
 

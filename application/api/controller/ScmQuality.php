@@ -955,7 +955,7 @@ class ScmQuality extends Scm
             $is_new_product = 0;
             if ($value['purchase_id']) {
                 $purchase_number = $purchase_list[$value['purchase_id']]['purchase_number'];
-                $is_new_product = 1 == $purchase_list[$value['purchase_id']]['is_new_product'] ?: 0;
+                $is_new_product = 1 == $purchase_list[$value['purchase_id']]['is_new_product'] ? 1 : 0;
             }
             $list[$key]['purchase_number'] = $purchase_number;
             $list[$key]['is_new_product'] = $is_new_product;
