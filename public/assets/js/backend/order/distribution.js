@@ -78,7 +78,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             field: 'total_qty_ordered', title: __('订单副数'), sortable: true, operate: false,
                             formatter: Controller.api.formatter.int_format
                         },
-                        /*{ field: 'is_task', title: __('是否有工单'), visible: false, searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status },
+                        { field: 'is_task', title: __('是否有工单'), visible: false, searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status },
                         {
                             field: 'task_info', title: __('工单'), operate: false,
                             formatter: function (value, row) {
@@ -86,7 +86,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                     return '<a href="' + Config.moduleurl + '/saleaftermanage/work_order_list/index?platform_order=' + row.increment_id + '" class="btn btn-primary btn-xs btn-click btn-dialog" data-table-id="table" target="_blank" data-field-index="11" data-row-index="0" data-button-index="3" title="工单"><i class="fa fa-list"></i> 工单</a>'
                                 }
                             }
-                        },*/
+                        },
                         {
                             field: 'site', title: __('站点'), addClass: 'selectpicker', data: 'multiple',
                             searchList: {

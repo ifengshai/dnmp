@@ -1438,7 +1438,11 @@ class Distribution extends Backend
         $ids = input('id_params/a');//子单ID
         !$ids && $this->error('请选择要创建工单的数据');
         //判断子单是否为同一主单
-        $order_id = $this->model->where(['id' => ['in', $ids]])->column('order_id');
+        $order_id = $this->model
+            ->alias('a')
+            ->join(['fa_order' => 'b'], 'a.order_id=b.id')
+            ->where(['a.id' => ['in', $ids]])
+            ->column('b.increment_id');
         $order_id = array_unique(array_filter($order_id));//数组去空、去重
         !$order_id && $this->error('子单不存在');
         1 < count($order_id) && $this->error('所选子订单的主单不唯一');
