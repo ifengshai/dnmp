@@ -1005,7 +1005,7 @@ class ScmDistribution extends Scm
                     ->isUpdate(true, ['id'=>$item_process_info['id']])
                     ->save(['distribution_status'=>$status_arr[$reason]['status']])
                 ;
-
+                
                 //记录日志
                 DistributionLog::record($this->auth,$item_process_info['id'],6,$status_arr[$reason]['name']);
 
@@ -1020,8 +1020,8 @@ class ScmDistribution extends Scm
                 Db::rollback();
                 $this->error($e->getMessage(), [], 408);
             }
-
-            $this->success('', [], 200);
+            $this->success('操作成功', [], 200);
+            
         }
     }
 
