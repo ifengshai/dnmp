@@ -638,7 +638,7 @@ class WorkOrderList extends Model
             'street'=>$changeAddress['street'],
             'postcode'=>$changeAddress['postcode'],
         );
-        $this->httpRequest($work->platform_type, 'magic/order/editAddress', $postData, 'POST');
+        $this->httpRequest($work->work_platform, 'magic/order/editAddress', $postData, 'POST');
 
         return true;
     }
@@ -816,16 +816,20 @@ class WorkOrderList extends Model
                     ];
 
                     //从网站接口获取镜片编码、文案、语种文案
-                    $postData = [
-                        'sku'=>trim($changeLens['original_sku']),
-                        'prescription_type' => $recipe_type,
-                        'lens_id' => $lensId,
-                        'coating_id' => $coatingId,
-                        'color_id' => $colorId
-                    ];
-                    $lens_info = $this->httpRequest($work->platform_type, 'magic/product/lenInfo', $postData, 'POST');
-                    $lens_number = $lens_info['lens_number'] ?: '';
-                    $web_lens_name = $lens_info['lens_name'] ?: '';
+                    $lens_number = '';
+                    $web_lens_name = '';
+                    if($lensId && $coatingId && $colorId){
+                        $postData = [
+                            'sku'=>trim($changeLens['original_sku']),
+                            'prescription_type' => $recipe_type,
+                            'lens_id' => $lensId,
+                            'coating_id' => $coatingId,
+                            'color_id' => $colorId
+                        ];
+                        $lens_info = $this->httpRequest($work->work_platform, 'magic/product/lenInfo', $postData, 'POST');
+                        $lens_number = $lens_info['lens_number'] ?: '';
+                        $web_lens_name = $lens_info['lens_name'] ?: '';
+                    }
 
                     $data = [
                         'email' => '',
