@@ -319,6 +319,11 @@ class Voogueme extends Model
 
     //获取某一段时间内的复购VIP用户数 new
     public function get_again_user_vip($createat = ''){
+        if(!$createat){
+            $start = date('Y-m-d', strtotime('-6 day'));
+            $end   = date('Y-m-d 23:59:59');
+            $createat = $start .' 00:00:00 - ' .$end;
+        }
         $createat = explode(' ', $createat);
         $map_where['o.created_at'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
         $order_where['o.created_at'] = ['lt',$createat[0]];
