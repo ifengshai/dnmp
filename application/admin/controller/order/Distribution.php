@@ -29,7 +29,7 @@ use app\admin\model\saleaftermanage\WorkOrderMeasure;
  */
 class Distribution extends Backend
 {
-    protected $noNeedRight = ['orderDetail', 'batch_print_label_new', 'batch_export_xls', 'account_order_batch_export_xls'];
+    protected $noNeedRight = ['orderDetail', 'batch_print_label_new', 'batch_export_xls', 'account_order_batch_export_xls', 'add'];
 
     /**
      * 子订单模型对象
