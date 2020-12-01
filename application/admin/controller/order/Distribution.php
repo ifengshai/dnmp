@@ -1371,7 +1371,7 @@ class Distribution extends Backend
                             'available_stock_change' => -1,
                             'create_person' => $admin->nickname,
                             'create_time' => date('Y-m-d H:i:s'),
-                            'remark' => '处理异常：回滚至待配货，减少总库存,减少可用库存'
+                            'remark' => '处理异常：回滚至待配货，减少可用库存、虚拟仓库存、配货占用库存、总库存'
                         ]);
 
                     $remark .= ',扣减可用库存、虚拟仓库存、配货占用库存、总库存';
