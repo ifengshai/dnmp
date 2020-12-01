@@ -547,7 +547,7 @@ class ScmQuality extends Scm
                 empty($supplier_id) && $this->error(__('供应商ID不能为空'), [], 403);
 
                 $replenish_id = $this->request->request('replenish_id');
-                empty($replenish_id) && $this->error(__('补货单ID不能为空'), [], 403);
+                // empty($replenish_id) && $this->error(__('补货单ID不能为空'), [], 403);
 
                 $existence = $this->_check
                     ->where(['logistics_id' => $logistics_id, 'status' => ['<', 3]])
