@@ -300,12 +300,11 @@ class Distribution extends Backend
     {
         $row = $this->model->get($ids);
         !$row && $this->error(__('No Results were found'));
-
         //查询处方详情
-        $result = $this->orderitemoption->get($row['option_id'])->toArray();
+        $result = $this->_new_order_item_option->get($row->option_id);
 
         //根据镜片编码查询仓库镜片名称
-        $result['lens_name'] = $this->_lens_data->where('lens_number', $result['lens_number'])->value('lens_name');
+        $result->lens_name = $this->_lens_data->where('lens_number', $result['lens_number'])->value('lens_name');
         $this->assign('result', $result);
         return $this->view->fetch();
     }
