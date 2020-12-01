@@ -1139,6 +1139,7 @@ class ScmWarehouse extends Scm
         empty($in_stock_id) && $this->error(__('入库单ID不能为空'), [], 516);
 
         $do_type = $this->request->request('do_type');
+        empty($do_type) && $this->error(__('审核类型不能为空'), [], 517);
         !in_array($do_type, [2, 3]) && $this->error(__('审核类型错误'), [], 517);
 
         //检测入库单状态

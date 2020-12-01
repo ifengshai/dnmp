@@ -1283,46 +1283,6 @@ class ScmDistribution extends Scm
     }
 
     /**
-     * 合单--合单完成提交-------修改原型图待定----合单完成（下一步）、失败（展示失败原因）---产品修改ing---可能删除不用，在最后一个子单合单完成时判断更改
-     *
-     * @参数 string order_number  主订单号
-     * @author wgj
-     * @return mixed
-     */
-    public function merge_submit_test()
-    {
-        $order_number = $this->request->request('order_number');
-        empty($order_number) && $this->error(__('订单号不能为空'), [], 403);
-
-        //获取订单购买总数,商品总数即为子单数量
-        $order_process_info = $this->_new_order
-            ->alias('a')
-            ->where('a.increment_id', $order_number)
-            ->join(['fa_order_process'=> 'b'],'a.id=b.order_id','left')
-            ->field('a.id,a.increment_id,b.store_house_id')
-            ->find();
-        empty($order_process_info) && $this->error(__('订单不存在'), [], 403);
-
-        //获取子订单数据----验证子单状态
-        $item_process_info = $this->_new_order_item_process
-            ->where('order_id', $order_process_info['id'])
-            ->field('id,item_order_number,distribution_status,abnormal_house_id')
-            ->select();
-        empty($item_process_info) && $this->error(__('子订单数据异常'), [], 403);
-
-        $item_process_info = $this->_new_order_item_process
-            ->where('order_number', $order_number)
-            ->field('id,distribution_status,order_id')
-            ->select();
-        empty($item_process_info) && $this->error(__('订单数据异常'), [], 403);
-
-        //获取库位信息，判断是否被占用
-        $store_house_info = $this->_stock_house->field('id,coding,subarea,occupy')->where('id',$order_process_info['store_house_id'])->find();//查询合单库位--占用数量
-
-
-    }
-
-    /**
      * 合单待取列表---ok
      *
      * @参数 string query  查询内容
