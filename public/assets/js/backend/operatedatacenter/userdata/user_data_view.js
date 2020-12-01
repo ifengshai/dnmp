@@ -283,6 +283,8 @@ function order_data_view() {
             }
             str1 += active_user_num.contrast_active_user_num+'%</span></div>';   
             $("#contrast_active_user_num").html(str1);               
+        }else{
+            $("#contrast_active_user_num").html(''); 
         }
         var str2 = '';
         if(register_user_num.contrast_register_user_num){
@@ -294,6 +296,8 @@ function order_data_view() {
             }              
             str2 += register_user_num.contrast_register_user_num+'%</span></div>'; 
             $("#contrast_register_user_num").html(str2);           
+        }else{
+            $("#contrast_register_user_num").html('');     
         }
         var str3 = '';
         if(again_user_num.contrast_again_user_num){
@@ -305,6 +309,8 @@ function order_data_view() {
             }              
             str3 += again_user_num.contrast_again_user_num+'%</span></div>'; 
             $("#contrast_again_user_num").html(str3);           
+        }else{
+            $("#contrast_again_user_num").html(''); 
         }
 
         return false;
