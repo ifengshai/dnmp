@@ -300,12 +300,11 @@ class Distribution extends Backend
     {
         $row = $this->model->get($ids);
         !$row && $this->error(__('No Results were found'));
-
         //查询处方详情
-        $result = $this->orderitemoption->get($row['option_id'])->toArray();
+        $result = $this->_new_order_item_option->get($row->option_id);
 
         //根据镜片编码查询仓库镜片名称
-        $result['lens_name'] = $this->_lens_data->where('lens_number', $result['lens_number'])->value('lens_name');
+        $result->lens_name = $this->_lens_data->where('lens_number', $result['lens_number'])->value('lens_name');
         $this->assign('result', $result);
         return $this->view->fetch();
     }
@@ -1438,7 +1437,11 @@ class Distribution extends Backend
         $ids = input('id_params/a');//子单ID
         !$ids && $this->error('请选择要创建工单的数据');
         //判断子单是否为同一主单
-        $order_id = $this->model->where(['id' => ['in', $ids]])->column('order_id');
+        $order_id = $this->model
+            ->alias('a')
+            ->join(['fa_order' => 'b'], 'a.order_id=b.id')
+            ->where(['a.id' => ['in', $ids]])
+            ->column('b.increment_id');
         $order_id = array_unique(array_filter($order_id));//数组去空、去重
         !$order_id && $this->error('子单不存在');
         1 < count($order_id) && $this->error('所选子订单的主单不唯一');
