@@ -768,7 +768,7 @@ class WorkOrderList extends Model
     }
 
     /**
-     * 更改镜片，赠品 - 新
+     * 更改镜片、赠品、补发新增sku表数据 - 新
      *
      * @param array $params 页面传参
      * @param int $work_id 工单ID
@@ -812,10 +812,20 @@ class WorkOrderList extends Model
                         'coating_id' => $coatingId,
                         'coating_name' => $lensCoatName['coatingName'] ?? '',
                         'color_id' => $colorId,
-                        'color_name' => $lensCoatName['colorName'] ?? '',
+                        'color_name' => $lensCoatName['colorName'] ?? ''
                     ];
 
-                    //TODO::从网站接口获取镜片编码、文案、语种文案
+                    //从网站接口获取镜片编码、文案、语种文案
+                    $postData = [
+                        'sku'=>trim($changeLens['original_sku']),
+                        'prescription_type' => $recipe_type,
+                        'lens_id' => $lensId,
+                        'coating_id' => $coatingId,
+                        'color_id' => $colorId
+                    ];
+                    $lens_info = $this->httpRequest($work->platform_type, 'magic/product/lenInfo', $postData, 'POST');
+                    $lens_number = $lens_info['lens_number'] ?: '';
+                    $web_lens_name = $lens_info['lens_name'] ?: '';
 
                     $data = [
                         'email' => '',
@@ -832,6 +842,8 @@ class WorkOrderList extends Model
                         'change_sku' => trim($changeLens['original_sku']),
                         'change_number' => intval($changeLens['original_number']),
                         'recipe_type' => $recipe_type,
+                        'lens_number' => $lens_number,
+                        'web_lens_name' => $web_lens_name,
                         'lens_type' => $lensCoatName['lensName'] ?? '',
                         'coating_type' => $lensCoatName['coatingName'] ?? '',
                         'od_sph' => $changeLens['od_sph'] ?? '',

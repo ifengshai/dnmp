@@ -460,7 +460,11 @@ class ScmQuality extends Scm
         $is_error = $this->request->request('is_error');
         $get_check_id = $this->request->request('check_id');
         //检测条形码是否已绑定
-        $where['check_id'] = [['>', 0], ['neq', $get_check_id]];
+        if ($get_check_id){
+            $where['check_id'] = [['>', 0], ['neq', $get_check_id]];
+        } else {
+            $where['check_id'] = ['>', 0];
+        }
         foreach ($item_data as $key => $value) {
             //检测合格条形码
             $quantity_code = array_column($value['quantity_agg'], 'code');
@@ -957,7 +961,7 @@ class ScmQuality extends Scm
             $list[$key]['is_new_product'] = $is_new_product;
             $list[$key]['status'] = 1 == $value['status'] ? '已签收' : '未签收';
             $list[$key]['show_sign'] = 0 == $value['status']  ? 1 : 0;
-            $list[$key]['show_quality'] = 0 == $value['is_check_order'] ? 1 : 0;
+            $list[$key]['show_quality'] = (0 == $value['is_check_order'] && 1 == $value['status']) ? 1 : 0;
         }
 
         $this->success('', ['list' => $list], 200);
