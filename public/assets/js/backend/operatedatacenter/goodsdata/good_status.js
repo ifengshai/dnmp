@@ -23,6 +23,9 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                     return false;
                 });
             });
+            $(document).on('change', '#order_platform', function () {
+                Controller.api.formatter.line_histogram();
+            });
         },
         api: {
             formatter: {
