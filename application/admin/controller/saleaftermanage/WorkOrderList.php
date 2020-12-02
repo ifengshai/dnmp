@@ -1036,8 +1036,8 @@ class WorkOrderList extends Backend
                 $item_order_info = $params['item_order_info'];//子订单措施
 
                 //校验问题类型、问题描述
-                $problem_type_id = $params['problem_type_id'];
-                !$ids && !$problem_type_id && $this->error("请选择问题类型");
+                $params['problem_type_id'] = $params['problem_type_id'] ?: $params['problem_id'];
+               !$params['problem_type_id'] && $this->error("请选择问题类型");
                 !$params['problem_description'] && $this->error("问题描述不能为空");
                 !$platform_order && $this->error("订单号不能为空");
 
@@ -1365,7 +1365,6 @@ class WorkOrderList extends Backend
                         if (false === $contentResult) throw new Exception("备注添加失败！！");
                     }
 
-                    $params['problem_type_id'] = $params['problem_type_id'] ?: $params['problem_id'];
                     //创建主订单措施、承接人数据
                     if(!empty($measure_choose_id)){
                         foreach ($measure_choose_id as $v) {
@@ -1725,8 +1724,8 @@ class WorkOrderList extends Backend
                 $item_order_info = $params['item_order_info'];//子订单措施
 
                 //校验问题类型、问题描述
-                $problem_type_id = $params['problem_type_id'];
-                !$problem_type_id && $this->error("请选择问题类型");
+                $params['problem_type_id'] = $params['problem_type_id'] ?: $params['problem_id'];
+                !$params['problem_type_id'] && $this->error("请选择问题类型");
                 !$params['problem_description'] && $this->error("问题描述不能为空");
                 !$platform_order && $this->error("订单号不能为空");
 
@@ -1988,7 +1987,6 @@ class WorkOrderList extends Backend
                     $result = $row->allowField(true)->save($params);
                     if (false === $result) throw new Exception("编辑失败！！");
 
-                    $params['problem_type_id'] = $params['problem_type_id'] ?: $params['problem_id'];
                     //创建主订单措施、承接人数据
                     if(!empty($measure_choose_id)){
                         foreach ($measure_choose_id as $v) {
@@ -2058,7 +2056,7 @@ class WorkOrderList extends Backend
         }
 
         //把问题类型传递到js页面
-        !empty($row->problem_type_id) && $this->assignconfig('problem_type_id', $row->problem_type_id);
+        $row->problem_type_id && $this->assignconfig('problem_type_id', $row->problem_type_id);
 
         //工单措施对应的措施配置表ID数组
         $measureList = WorkOrderMeasure::workMeasureList($row->id,1);
@@ -2409,7 +2407,7 @@ class WorkOrderList extends Backend
         }
 
         //把问题类型传递到js页面
-        !empty($row->problem_type_id) && $this->assignconfig('problem_type_id', $row->problem_type_id);
+        $row->problem_type_id && $this->assignconfig('problem_type_id', $row->problem_type_id);
 
         //回复内容
         $workOrderNote = WorkOrderNote::where('work_id', $ids)->select();
