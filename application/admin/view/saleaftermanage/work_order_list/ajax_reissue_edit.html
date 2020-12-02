@@ -194,7 +194,7 @@
         <div class="step1_function2_child">
             <label class="control-label col-xs-12 col-sm-3">prescription_type:</label>
             <div class="col-xs-12 col-sm-8">
-                <select {$operate_type ? 'disabled': '' } class="form-control selectpicker prescription_type" name="row[item_order_info][{$item_order_number}][change_lens][recipe_type]"  title="请选择">
+                <select {$operate_type ? 'disabled': '' } class="form-control selectpicker prescription_type" name="row[item_order_info][{$item_order_number}][change_lens][recipe_type]"  title="请选择" flag ="change_lens_recipe_type">
                     {foreach name="prescription" item="val" key="key"}
                     <option value='{$key}' {$key == $info[$keys]['recipe_type'] ? 'selected' : ''}>{$key}</option>
                     {/foreach}

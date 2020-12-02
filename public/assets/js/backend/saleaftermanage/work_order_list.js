@@ -2663,7 +2663,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     $('.selectpicker ').selectpicker('refresh');
                 });
                 //根据prescription_type获取lens_type
-                $(document).on('change', 'select[name="row[replacement][recipe_type][]"],select[name="row[change_lens][recipe_type][]"],select[name="row[gift][recipe_type][]"]', function () {
+                $(document).on('change', 'select[name="row[replacement][recipe_type][]"],select[name="row[change_lens][recipe_type][]"],select[name="row[gift][recipe_type][]"],select[flag ="change_lens_recipe_type"]', function () {
                     var sitetype = $('#work_platform').val();
                     var prescription_type = $(this).val();
                     //var is_new_version = $('#is_new_version').val();
