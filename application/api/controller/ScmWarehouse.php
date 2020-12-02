@@ -1356,9 +1356,9 @@ class ScmWarehouse extends Scm
         }
 
         if ($res !== false) {
-            $this->success('审核'.$msg.'成功', [],200);
+            $this->success($msg.'成功', [],200);
         } else {
-            $this->error(__('审核'.$msg.'失败'), [], 519);
+            $this->error(__($msg.'失败'), [], 519);
         }
 
     }
