@@ -295,6 +295,15 @@ class WorkOrderList extends Backend
         $receptPersonAllIds = $workOrderConfigValue['all_extend_person'];
         $admins = Admin::where('id', 'in', $receptPersonAllIds)->where('status', 'normal')->field('id,nickname')->select();
         $this->assign('admins', $admins);
+
+        //获取用户ID和所在权限组
+        $admin_id = session('admin.id');
+        $_auth_group_access = new AuthGroupAccess();
+        $user_group_access = $_auth_group_access->where(['uid' => $admin_id])->column('group_id');
+        $warehouse_department_rule = $workOrderConfigValue['warehouse_department_rule'];
+        $is_warehouse = array_intersect($user_group_access, $warehouse_department_rule);
+        $this->assign('is_warehouse', $is_warehouse ? 1 : 0);
+
         $this->assignconfig('platform_order', $platform_order ?: '');
         return $this->view->fetch();
     }
