@@ -225,7 +225,7 @@ class UserDataView extends Backend
                     $end = $createat[3];
                 } else{
                     $start = date('Y-m-d', strtotime('-6 day'));
-                    $end   = date('Y-m-d');
+                    $end   = date('Y-m-d', strtotime('-1 day'));
                 }
                 $time_arr = $this->getDateFromRange($start,$end);
                 $new_arr = array();
@@ -316,7 +316,7 @@ class UserDataView extends Backend
                     $map_where['created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
                 } else{
                     $start = date('Y-m-d', strtotime('-6 day'));
-                    $end   = date('Y-m-d 23:59:59');
+                    $end   = date('Y-m-d 23:59:59', strtotime('-1 day'));
                     $map_where['created_at'] = ['between', [$start,$end]];
                 }
                 if($order_platform == 2){
@@ -381,7 +381,7 @@ class UserDataView extends Backend
                     $map_where['o.created_at'] =$order_where['created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
                 } else{
                     $start = date('Y-m-d', strtotime('-6 day'));
-                    $end   = date('Y-m-d 23:59:59');
+                    $end   = date('Y-m-d 23:59:59', strtotime('-1 day'));
                     $map_where['o.created_at'] = ['between', [$start,$end]];
                 }
                 $map_where['o.status'] = $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
