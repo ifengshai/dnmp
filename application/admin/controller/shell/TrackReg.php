@@ -299,19 +299,19 @@ class TrackReg extends Backend
         $skuSalesNum->saveAll($list);
 
         //查询昨天上架SKU 并统计当天销量
-        $data = $skuSalesNum->whereTime('createtime', 'yesterday')->where('site<>8')->select();
-        $data = collection($data)->toArray();
-        if ($data) {
-            foreach ($data as $k => $v) {
-                if ($v['platform_sku']) {
-                    $params[$k]['sales_num'] = $order->getSkuSalesNum($v['platform_sku'], $v['site']);
-                    $params[$k]['id'] = $v['id'];
-                }
-            }
-            if ($params) {
-                $skuSalesNum->saveAll($params);
-            }
-        }
+        // $data = $skuSalesNum->whereTime('createtime', 'yesterday')->where('site<>8')->select();
+        // $data = collection($data)->toArray();
+        // if ($data) {
+        //     foreach ($data as $k => $v) {
+        //         if ($v['platform_sku']) {
+        //             $params[$k]['sales_num'] = $order->getSkuSalesNum($v['platform_sku'], $v['site']);
+        //             $params[$k]['id'] = $v['id'];
+        //         }
+        //     }
+        //     if ($params) {
+        //         $skuSalesNum->saveAll($params);
+        //     }
+        // }
 
         echo "ok";
     }
