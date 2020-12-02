@@ -112,7 +112,7 @@ class OcPrescriptionPic extends Backend
         $row = $this->model->where('id',$ids)->find();
         $photo_href = $row['pic'] =explode(',',$row['pic']);
         foreach ($photo_href as $key=>$item){
-            $photo_href[$key]= 'https://z.zhaokuangyi.com/media'.$item;
+            $photo_href[$key]= 'https://pc.zeelool.com/media'.$item;
         }
         $row['pic'] = $photo_href;
         $this->assign('row',$row);
