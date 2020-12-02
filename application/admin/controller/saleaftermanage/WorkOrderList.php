@@ -1426,6 +1426,7 @@ class WorkOrderList extends Backend
             //编辑、详情
             $row = $this->model->get($ids);
             $this->assignconfig('ids', $row->id);
+            $this->assignconfig('problem_id', $row->problem_type_id);
             $this->view->assign('row', $row);
 
             //子订单措施及数据
