@@ -14,6 +14,7 @@ use app\admin\model\warehouse\CheckItem;
 use app\admin\model\warehouse\Instock;
 use app\admin\model\warehouse\InstockItem;
 use app\admin\model\warehouse\InstockType;
+use app\admin\model\purchase\PurchaseOrder;
 use app\admin\model\purchase\PurchaseOrderItem;
 use app\admin\model\warehouse\ProductBarCodeItem;
 use app\admin\model\NewProductMapping;
@@ -96,6 +97,13 @@ class ScmWarehouse extends Scm
      * @access protected
      */
     protected $_purchase_order_item = null;
+
+    /**
+     * 采购单商品模型对象
+     * @var object
+     * @access protected
+     */
+    protected $_purchase_order = null;
 
     /**
      * 补货需求清单模型对象
@@ -187,6 +195,7 @@ class ScmWarehouse extends Scm
         $this->_in_stock_item = new InstockItem();
         $this->_in_stock_type = new InstockType();
         $this->_new_product_mapping = new NewProductMapping();
+        $this->_purchase_order = new PurchaseOrder();
         $this->_purchase_order_item = new PurchaseOrderItem();
         $this->_product_bar_code_item = new ProductBarCodeItem();
         $this->_item = new Item();
@@ -1129,7 +1138,7 @@ class ScmWarehouse extends Scm
      * 入库审核 通过/拒绝--ok
      *
      * @参数 int check_id  入库单ID
-     * @参数 int do_type  1审核通过，2审核拒绝
+     * @参数 int do_type  2审核通过，3审核拒绝
      * @author wgj
      * @return mixed
      */
@@ -1140,13 +1149,14 @@ class ScmWarehouse extends Scm
 
         $do_type = $this->request->request('do_type');
         empty($do_type) && $this->error(__('审核类型不能为空'), [], 517);
+        !in_array($do_type, [2, 3]) && $this->error(__('审核类型错误'), [], 517);
 
         //检测入库单状态
         $row = $this->_in_stock->get($in_stock_id);
         empty($row) && $this->error(__('入库单不存在'), [], 516);
         1 != $row['status'] && $this->error(__('只有待审核状态才能操作'), [], 518);
 
-        $data['status'] = 1 == $do_type ? 2 : 3;//审核状态，2通过，3拒绝
+        $data['status'] = $do_type;//审核状态，2通过，3拒绝
         if ($data['status'] == 2) {
             $data['check_time'] = date('Y-m-d H:i:s', time());
             $msg = '审核';
@@ -1166,22 +1176,17 @@ class ScmWarehouse extends Scm
         $skus = $this->_item->where(['sku' => ['in', $skus]])->column('sku');
         foreach ($list as $v) {
             if (!in_array($v['sku'], $skus)) {
-                $this->error('此sku:' . $v['sku'] . '不存在！！');
+                $this->error('此sku:' . $v['sku'] . '不存在！！', [], 516);
             }
         }
 
-        $this->_in_stock->startTrans();
-        $this->_item->startTrans();
-        $this->_purchase_order_item->startTrans();
-
+        $res = false;
+        Db::startTrans();
         try {
             $data['create_person'] = $this->auth->nickname;
             $res = $this->_in_stock->allowField(true)->isUpdate(true, ['id'=>$in_stock_id])->save($data);//审核拒绝更新数据
 
             if ($data['status'] == 2) {
-                /**
-                 * @todo 审核通过增加库存 并添加入库单入库数量
-                 */
                 $error_num = [];
                 foreach ($list as $k => $v) {
 
@@ -1224,7 +1229,7 @@ class ScmWarehouse extends Scm
                             $item_platform_sku = $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => 4])->field('platform_type,stock')->find();
                             //sku没有同步meeloog站 无法添加虚拟库存 必须先同步
                             if (empty($item_platform_sku)) {
-                                $this->error('sku：' . $v['sku'] . '没有同步meeloog站，请先同步');
+                                throw new Exception('sku：' . $v['sku'] . '没有同步meeloog站，请先同步');
                             }
                             $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $item_platform_sku['platform_type']])->setInc('stock', $v['in_stock_num']);
                         }
@@ -1273,11 +1278,12 @@ class ScmWarehouse extends Scm
                     //总库存
                     $item_map['sku'] = $v['sku'];
                     $item_map['is_del'] = 1;
+                    $stock_res = false;
                     if ($v['sku']) {
                         //增加商品表里的商品库存、可用库存、留样库存
                         $stock_res = $this->_item->where($item_map)->inc('stock', $v['in_stock_num'])->inc('available_stock', $v['in_stock_num'])->inc('sample_num', $v['sample_num'])->update();
                         //减少待入库数量
-                        $stock_res1 = $this->_item->where($item_map)->dec('wait_instock_num', $v['in_stock_num'])->update();
+                        $this->_item->where($item_map)->dec('wait_instock_num', $v['in_stock_num'])->update();
                     }
 
                     if ($stock_res === false) {
@@ -1309,7 +1315,7 @@ class ScmWarehouse extends Scm
                         }
                         //修改采购单入库状态
                         $purchase_data['stock_status'] = $stock_status;
-                        $this->_purchase_order_item->where(['id' => $check_res['purchase_id']])->update($purchase_data);
+                        $this->_purchase_order->where(['id' => $check_res['purchase_id']])->update($purchase_data);
                     }
                     //如果为退货单 修改退货单状态为入库
                     if ($check_res['order_return_id']) {
@@ -1333,28 +1339,20 @@ class ScmWarehouse extends Scm
 
                 //有错误 则回滚数据
                 if (count($error_num) > 0) {
-                    $this->error(__('入库失败！！请检查SKU'), [], 444);
+                    throw new Exception('入库失败！！请检查SKU');
                 }
             }
 
-            $this->_in_stock->commit();
-            $this->_item->commit();
-            $this->_purchase_order_item->commit();
+            Db::commit();
         } catch (ValidateException $e) {
-            $this->_in_stock->rollback();
-            $this->_item->rollback();
-            $this->_purchase_order_item->rollback();
-            $this->error($e->getMessage(), [], 444);
+            Db::rollback();
+            $this->error($e->getMessage(), [], 4441);
         } catch (PDOException $e) {
-            $this->_in_stock->rollback();
-            $this->_item->rollback();
-            $this->_purchase_order_item->rollback();
-            $this->error($e->getMessage(), [], 444);
+            Db::rollback();
+            $this->error($e->getMessage(), [], 4442);
         } catch (Exception $e) {
-            $this->_in_stock->rollback();
-            $this->_item->rollback();
-            $this->_purchase_order_item->rollback();
-            $this->error($e->getMessage(), [], 444);
+            Db::rollback();
+            $this->error($e->getMessage(), [], 4443);
         }
 
         if ($res !== false) {

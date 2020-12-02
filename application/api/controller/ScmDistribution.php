@@ -1005,7 +1005,7 @@ class ScmDistribution extends Scm
                     ->isUpdate(true, ['id'=>$item_process_info['id']])
                     ->save(['distribution_status'=>$status_arr[$reason]['status']])
                 ;
-
+                
                 //记录日志
                 DistributionLog::record($this->auth,$item_process_info['id'],6,$status_arr[$reason]['name']);
 
@@ -1020,8 +1020,8 @@ class ScmDistribution extends Scm
                 Db::rollback();
                 $this->error($e->getMessage(), [], 408);
             }
-
-            $this->success('', [], 200);
+            $this->success('操作成功', [], 200);
+            
         }
     }
 
@@ -1145,10 +1145,9 @@ class ScmDistribution extends Scm
 
         //主单表有合单库位ID，查询主单商品总数，与子单合单入库计算数量对比
         //获取订单购买总数
-        $total_qty_ordered = $this->_new_order
-            ->where('id', $item_process_info['order_id'])
-            ->value('total_qty_ordered')
-        ;
+        $total_qty_ordered = $this->_new_order_item_process
+            ->where('order_id', $item_process_info['order_id'])
+            ->count();
         $count = $this->_new_order_item_process
             ->where(['distribution_status'=>['in',[0,8]],'order_id'=>$item_process_info['order_id']])
             ->count();
@@ -1206,7 +1205,7 @@ class ScmDistribution extends Scm
                 $res = $this->_new_order_process->allowField(true)->isUpdate(true, ['order_id'=>$item_process_info['order_id']])->save(['store_house_id'=>$store_house_id]);
                 if ($res !== false){
                     $return = $this->_stock_house->allowField(true)->isUpdate(true, ['id'=>$store_house_id])->save(['occupy'=>1]);
-                    if (0 == $next){
+                    if (!$next){
                         //只有一个子单且合单完成，更新主单、子单状态为合单完成
                         $this->_new_order_item_process
                             ->allowField(true)
@@ -1284,46 +1283,6 @@ class ScmDistribution extends Scm
     }
 
     /**
-     * 合单--合单完成提交-------修改原型图待定----合单完成（下一步）、失败（展示失败原因）---产品修改ing---可能删除不用，在最后一个子单合单完成时判断更改
-     *
-     * @参数 string order_number  主订单号
-     * @author wgj
-     * @return mixed
-     */
-    public function merge_submit_test()
-    {
-        $order_number = $this->request->request('order_number');
-        empty($order_number) && $this->error(__('订单号不能为空'), [], 403);
-
-        //获取订单购买总数,商品总数即为子单数量
-        $order_process_info = $this->_new_order
-            ->alias('a')
-            ->where('a.increment_id', $order_number)
-            ->join(['fa_order_process'=> 'b'],'a.id=b.order_id','left')
-            ->field('a.id,a.increment_id,b.store_house_id')
-            ->find();
-        empty($order_process_info) && $this->error(__('订单不存在'), [], 403);
-
-        //获取子订单数据----验证子单状态
-        $item_process_info = $this->_new_order_item_process
-            ->where('order_id', $order_process_info['id'])
-            ->field('id,item_order_number,distribution_status,abnormal_house_id')
-            ->select();
-        empty($item_process_info) && $this->error(__('子订单数据异常'), [], 403);
-
-        $item_process_info = $this->_new_order_item_process
-            ->where('order_number', $order_number)
-            ->field('id,distribution_status,order_id')
-            ->select();
-        empty($item_process_info) && $this->error(__('订单数据异常'), [], 403);
-
-        //获取库位信息，判断是否被占用
-        $store_house_info = $this->_stock_house->field('id,coding,subarea,occupy')->where('id',$order_process_info['store_house_id'])->find();//查询合单库位--占用数量
-
-
-    }
-
-    /**
      * 合单待取列表---ok
      *
      * @参数 string query  查询内容
@@ -1348,7 +1307,7 @@ class ScmDistribution extends Scm
         empty($page_size) && $this->error(__('Page size can not be empty'), [], 521);
 
         $where = [];
-        $where['a.combine_status'] = 1;//合单完成状态
+        // $where['a.combine_status'] = 1;//合单完成状态
         $where['a.store_house_id'] = ['>', 0];
         $offset = ($page - 1) * $page_size;
         $limit = $page_size;
@@ -1641,7 +1600,6 @@ class ScmDistribution extends Scm
                     if (1 == $check_refuse){
                         //SKU缺失，绑定合单库位，回退子单号为合单中状态，不影响库存
                         $store_house_id = $this->_stock_house->field('id,coding,subarea')->where(['status'=>1,'type'=>2,'occupy'=>0])->value('id');
-                        empty($store_house_id) && $this->error(__('合单库位已用完，请检查合单库位情况'), [], 5000);
                         if (empty($store_house_id)){
                             DistributionLog::record($this->auth,$item_ids,8,'合单库位已用完，主单ID'.$row['order_id'].$msg.'失败'.$msg_info);
                             throw new Exception('合单库位已用完，请检查合单库位情况');
