@@ -48,7 +48,7 @@ class UserValueRfm extends Backend
         if ($this->request->isAjax()) {
             $params = $this->request->param();
             $order_platform = $params['order_platform'];
-            $cache_data = Cache::get('Operatedatacenter_userdata1'.$order_platform.md5(serialize('ajax_user_order_amount')));
+            $cache_data = Cache::get('Operatedatacenter_userdata'.$order_platform.md5(serialize('ajax_user_order_amount')));
             if(!$cache_data){
                 $result = $this->getOrderAmountUserNum($order_platform);
                 $count = $result['count'];
@@ -200,7 +200,7 @@ class UserValueRfm extends Backend
      * 获取购买用户消费次数分布人数
      * type  1:0  2:1  3:2   4:3    5:4  6:5+
     */
-    public function getOrderNumUserNum($order_platform, $type=0)
+    public function getOrderNumUserNum($order_platform)
     {
         if($order_platform == 2){
             $web_model = Db::connect('database.db_voogueme');
@@ -307,7 +307,7 @@ class UserValueRfm extends Backend
      * 获取购买用户消费临近天数分布人数
      * type  1:0-14  2:14-30  3:30-60   4:60-90    5:90-360  6：360+
     */
-    public function getUserNearDays($order_platform, $type=0)
+    public function getUserNearDays($order_platform)
     {
         if($order_platform == 2){
             $web_model = Db::connect('database.db_voogueme');
@@ -332,7 +332,9 @@ class UserValueRfm extends Backend
         $arr_where = [];
         $arr_where[] = ['exp', Db::raw("customer_id in " . $sql1)];
 
-        $sql2 = $order_model->alias('t1')->field('to_days(now()) - to_days(max(created_at)) AS total')->where($where)->where($arr_where)->group('customer_id')->buildSql();
+//        $sql2 = $order_model->alias('t1')->field('to_days(now()) - to_days(max(created_at)) AS total')->where($where)->where($arr_where)->group('customer_id')->buildSql();
+        $sql2 = $order_model->alias('t1')->field('to_days(now()) - to_days(max(created_at)) AS total')->where($where)->where($arr_where)->group('customer_id')->having('total>=0 and total<14')->field('customer_id')->select();
+        dump($sql2);exit;
 
         $order_customer_count = $web_model->table([$sql2=>'t2'])->field('sum( IF ( total >= 90 and total<360, 1, 0 ) ) AS e,sum( IF ( total >= 60 and total<90, 1, 0 ) ) AS d,sum( IF ( total >= 30 and total<60, 1, 0 ) ) AS c,sum( IF ( total >= 14 and total<30, 1, 0 ) ) AS b,sum( IF ( total >= 0 and total<14, 1, 0 ) ) AS a')->select();
 
