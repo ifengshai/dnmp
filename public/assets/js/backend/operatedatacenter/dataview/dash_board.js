@@ -19,6 +19,11 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
             // Controller.api.formatter.user_chart();
             Controller.api.formatter.user_change_chart();
             $("#sku_submit").click(function () {
+                var time_str = $("#time_str").val();
+                if (time_str.length <= 0) {
+                    Layer.alert('请选择时间');
+                    return false;
+                }
                 order_data_view();
                 Controller.api.formatter.line_chart1();
                 // Controller.api.formatter.user_chart();
