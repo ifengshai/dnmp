@@ -165,7 +165,10 @@ class OrderData extends Backend
                                     $params['customer_lastname'] = $v['customer_lastname'];
                                     $params['taxno'] = $v['taxno'];
                                     $params['base_to_order_rate'] = $v['base_to_order_rate'];
+                                    $params['mw_rewardpoint'] = $v['mw_rewardpoint'];
                                     $params['mw_rewardpoint_discount'] = $v['mw_rewardpoint_discount'];
+                                    $params['base_shipping_amount'] = $v['base_shipping_amount'];
+                                    $params['base_shipping_amount'] = $v['base_shipping_amount'];
                                     $params['created_at'] = strtotime($v['created_at']) + 28800;
                                     $params['updated_at'] = strtotime($v['updated_at']) + 28800;
                                     //插入订单主表
@@ -199,6 +202,11 @@ class OrderData extends Backend
                                     $params['customer_firstname'] = $v['customer_firstname'];
                                     $params['customer_lastname'] = $v['customer_lastname'];
                                     $params['taxno'] = $v['taxno'];
+                                    $params['base_to_order_rate'] = $v['base_to_order_rate'];
+                                    $params['mw_rewardpoint'] = $v['mw_rewardpoint'];
+                                    $params['mw_rewardpoint_discount'] = $v['mw_rewardpoint_discount'];
+                                    $params['base_shipping_amount'] = $v['base_shipping_amount'];
+                                    $params['base_shipping_amount'] = $v['base_shipping_amount'];
                                     $params['updated_at'] = strtotime($v['updated_at']) + 28800;
                                     $params['order_prescription_type'] = $v['custom_order_prescription_type'] ?? 0;
 
@@ -212,6 +220,7 @@ class OrderData extends Backend
                                     $params = [];
                                     $params['country_id'] = $v['country_id'];
                                     $params['region'] = $v['region'];
+                                    $params['region'] = $v['region_id'];
                                     $params['city'] = $v['city'];
                                     $params['street'] = $v['street'];
                                     $params['postcode'] = $v['postcode'];
@@ -226,6 +235,7 @@ class OrderData extends Backend
                                 foreach ($payload['data'] as $k => $v) {
                                     $params = [];
                                     $params['payment_method'] = $v['method'];
+                                    $params['last_trans_id'] = $v['last_trans_id'];
                                     $this->order->where(['entity_id' => $v['parent_id'], 'site' => $site])->update($params);
                                 }
                             }
@@ -364,6 +374,9 @@ class OrderData extends Backend
         $arr['frame_price'] = $options['info_buyRequest']['tmplens']['frame_base_price'];
         //镜片价格
         $arr['index_price'] = $options['info_buyRequest']['tmplens']['lens_base_price'];
+        $arr['color_id'] = $options['info_buyRequest']['tmplens']['color_id'];
+        $arr['coating_id'] = $options['info_buyRequest']['tmplens']['coating_id'];
+        $arr['index_id'] = $options['info_buyRequest']['tmplens']['lens_id'];
         //镜框原始价格
         $arr['frame_regural_price'] = $options['info_buyRequest']['tmplens']['frame_regural_price'];
         //镜片颜色
@@ -510,6 +523,11 @@ class OrderData extends Backend
         $arr['total'] = $options['info_buyRequest']['tmplens']['total'] ?? 0;
         //镜片分类
         $arr['goods_type'] = $options['info_buyRequest']['tmplens']['goods_type'] ?? 0;
+
+        $arr['color_id'] = $options['info_buyRequest']['tmplens']['color_id'];
+        $arr['coating_id'] = $options['info_buyRequest']['tmplens']['coating_id'];
+        $arr['index_id'] = $options['info_buyRequest']['tmplens']['index_id'];
+
         //光度参数
         $arr['od_sph'] = $options_params['od_sph'] ?: '';;
         $arr['os_sph'] = $options_params['os_sph'] ?: '';;
@@ -636,6 +654,11 @@ class OrderData extends Backend
         $arr['total'] = $options['info_buyRequest']['tmplens']['total'] ?? 0;
         //镜片分类
         $arr['goods_type'] = $options['info_buyRequest']['tmplens']['goods_type'] ?? 0;
+
+        $arr['color_id'] = $options['info_buyRequest']['tmplens']['color_id'];
+        $arr['coating_id'] = $options['info_buyRequest']['tmplens']['four_id'];
+        $arr['index_id'] = $options['info_buyRequest']['tmplens']['third_id'];
+
         //光度参数
         $arr['od_sph'] = $options_params['od_sph'] ?: '';;
         $arr['os_sph'] = $options_params['os_sph'] ?: '';;
@@ -764,6 +787,11 @@ class OrderData extends Backend
         $arr['total'] = $options['info_buyRequest']['tmplens']['total'] ?? 0;
         //镜片分类
         $arr['goods_type'] = $options['info_buyRequest']['tmplens']['goods_type'] ?? 0;
+
+        $arr['color_id'] = $options['info_buyRequest']['tmplens']['color_id'];
+        $arr['coating_id'] = $options['info_buyRequest']['tmplens']['coating_id'];
+        $arr['index_id'] = $options['info_buyRequest']['tmplens']['index_id'];
+
         //光度参数
         $arr['od_sph'] = $options_params['od_sph'] ?: '';;
         $arr['os_sph'] = $options_params['os_sph'] ?: '';;
@@ -891,6 +919,11 @@ class OrderData extends Backend
         $arr['total'] = $options['info_buyRequest']['tmplens']['total'] ?? 0;
         //镜片分类
         $arr['goods_type'] = $options['info_buyRequest']['tmplens']['goods_type'] ?? 0;
+
+        $arr['color_id'] = $options['info_buyRequest']['tmplens']['color_id'];
+        $arr['coating_id'] = $options['info_buyRequest']['tmplens']['coating_id'];
+        $arr['index_id'] = $options['info_buyRequest']['tmplens']['index_id'];
+
         //光度参数
         $arr['od_sph'] = $options_params['od_sph'] ?: '';;
         $arr['os_sph'] = $options_params['os_sph'] ?: '';;
@@ -1024,6 +1057,11 @@ class OrderData extends Backend
         $arr['total'] = $options['info_buyRequest']['tmplens']['total'] ?? 0;
         //镜片分类
         $arr['goods_type'] = $options['info_buyRequest']['tmplens']['goods_type'] ?? 0;
+
+        $arr['color_id'] = $options['info_buyRequest']['tmplens']['color_id'];
+        $arr['coating_id'] = $options['info_buyRequest']['tmplens']['coating_id'];
+        $arr['index_id'] = $options['info_buyRequest']['tmplens']['index_id'];
+
         //光度参数
         $arr['od_sph'] = $options_params['od_sph'] ?: '';;
         $arr['os_sph'] = $options_params['os_sph'] ?: '';;
@@ -1153,6 +1191,9 @@ class OrderData extends Backend
         $arr['total'] = $options['info_buyRequest']['tmplens']['total'] ?? 0;
         //镜片分类
         $arr['goods_type'] = $options['info_buyRequest']['tmplens']['goods_type'] ?? 0;
+        $arr['color_id'] = $options['info_buyRequest']['tmplens']['color_id'];
+        $arr['coating_id'] = $options['info_buyRequest']['tmplens']['coating_id'];
+        $arr['index_id'] = $options['info_buyRequest']['tmplens']['index_id'];
         //光度参数
         $arr['od_sph'] = $options_params['od_sph'] ?: '';;
         $arr['os_sph'] = $options_params['os_sph'] ?: '';;
@@ -1283,6 +1324,9 @@ class OrderData extends Backend
         $arr['total'] = $options['info_buyRequest']['tmplens']['total'] ?? 0;
         //镜片分类
         $arr['goods_type'] = $options['info_buyRequest']['tmplens']['goods_type'] ?? 0;
+        $arr['color_id'] = $options['info_buyRequest']['tmplens']['color_id'];
+        $arr['coating_id'] = $options['info_buyRequest']['tmplens']['coating_id'];
+        $arr['index_id'] = $options['info_buyRequest']['tmplens']['index_id'];
         //光度参数
         $arr['od_sph'] = $options_params['od_sph'] ?: '';;
         $arr['os_sph'] = $options_params['os_sph'] ?: '';;
