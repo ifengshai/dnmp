@@ -319,7 +319,7 @@ class UserValueRfm extends Backend
             $web_model = Db::connect('database.db_zeelool');
             $order_model = $this->zeelool;
         }
-        $web_model->table('customer_entity')->query("set time_zone='+8:00'");
+        $web_model->query("set time_zone='+8:00'");
         $today = date('Y-m-d');
         $start = date('Y-m-d', strtotime("$today -12 month"));
         $end = date('Y-m-d 23:59:59', strtotime($today));
