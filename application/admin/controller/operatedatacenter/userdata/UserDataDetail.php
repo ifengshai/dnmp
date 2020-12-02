@@ -81,7 +81,6 @@ class UserDataDetail extends Backend
                 ->select();
 
             $list = collection($list)->toArray();
-            dump($list);exit;
             foreach ($list as $key=>$value){
                 $list[$key]['entity_id'] = $value['entity_id'];  //用户id
                 $list[$key]['email'] = $value['email'];          //注册邮箱
@@ -92,9 +91,14 @@ class UserDataDetail extends Backend
                 $list[$key]['order_amount'] = $order_model->where($order_where)->where($order_status_where)->sum('base_grand_total');//总订单金额
                 if($site != 3){
                     $list[$key]['point'] = $web_model->table('mw_reward_point_customer')->where('customer_id',$value['entity_id'])->value('mw_reward_point');  //积分
-                    $recommend_userids = $web_model->table('mw_reward_point_customer')->where('mw_friend_id',$value['entity_id'])->column('customer_id');
+                    $recommend_userids = $web_model->table('mw_reward_point_customer')->where('mw_friend_id',$value['entity_id'])->count();
+
+
                     if($recommend_userids){
-                        $recommend_order_num = $order_model->where($order_status_where)->where('customer_id','in',$recommend_userids)->count();   //推荐订单数
+                        $sql1 = $web_model->table('mw_reward_point_customer')->where('mw_friend_id',$value['entity_id'])->field('entity_id')->buildSql();
+                        $arr_where = [];
+                        $arr_where[] = ['exp', Db::raw("customer_id in " . $sql1)];
+                        $recommend_order_num = $order_model->where($order_status_where)->where($arr_where)->count();   //推荐订单数
                     }else{
                         $recommend_order_num = 0;
                     }
