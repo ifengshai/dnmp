@@ -308,7 +308,7 @@ class UserValueRfm extends Backend
      * type  1:0-14  2:14-30  3:30-60   4:60-90    5:90-360  6：360+
     */
     public function getUserNearDays($order_platform)
-    {echo 111;exit;
+    {
         if($order_platform == 2){
             $web_model = Db::connect('database.db_voogueme');
             $order_model = $this->voogueme;
