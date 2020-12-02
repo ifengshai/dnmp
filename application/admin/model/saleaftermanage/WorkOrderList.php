@@ -1161,12 +1161,6 @@ class WorkOrderList extends Model
             $cancelOrderRes = (new WorkOrderChangeSku())->saveAll($orderChangeList);
             false === $cancelOrderRes && exception("取消失败！！");
 
-            //标记子单号状态为取消
-            $_new_order_item_process
-                ->allowField(true)
-                ->save(['distribution_status'=>0], ['item_order_number' => ['in',array_column($orderChangeList,'item_order_number')]])
-            ;
-
             //标记措施表更改类型
             WorkOrderMeasure::where(['id' => $measure_id])->update(['sku_change_type' => 3]);
         }
@@ -1640,6 +1634,7 @@ class WorkOrderList extends Model
     public function handle_abnormal($work){
         //检测是否有标记异常
         $_distribution_abnormal = new DistributionAbnormal();
+        $_new_order_item_process = new NewOrderItemProcess();
         $item_process_ids = $_distribution_abnormal
             ->where(['work_id' => $work->id, 'status' => 1])
             ->column('item_process_id')
@@ -1652,7 +1647,7 @@ class WorkOrderList extends Model
             ;
 
             //解绑子订单的异常库位ID
-            (new NewOrderItemProcess)
+            $_new_order_item_process
                 ->allowField(true)
                 ->save(['abnormal_house_id' => 0],['id' => ['in',$item_process_ids]])
             ;
@@ -1660,6 +1655,35 @@ class WorkOrderList extends Model
             //配货操作日志
             DistributionLog::record((object)session('admin'),$item_process_ids,10,"工单处理完成，异常标记为已处理");
         }
+
+        //获取取消子单号合集
+        $cancel_order_number = (new WorkOrderChangeSku)
+            ->alias('a')
+            ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
+            ->where([
+                'a.change_type'=>3,
+                'a.work_id'=>$work->id,
+                'b.operation_type'=>1
+            ])
+            ->column('a.item_order_number')
+        ;
+        if($cancel_order_number){
+            $item_process_ids = $_distribution_abnormal
+                ->where(['item_order_number' => ['in',$cancel_order_number]])
+                ->column('item_process_id')
+            ;
+            if($item_process_ids){
+                //标记子单号状态为取消
+                $_new_order_item_process
+                    ->allowField(true)
+                    ->save(['distribution_status'=>0], ['id' => ['in',$item_process_ids]])
+                ;
+
+                //配货操作日志
+                DistributionLog::record((object)session('admin'),$item_process_ids,10,"工单处理完成，子单取消");
+            }
+        }
+
         return true;
     }
 
