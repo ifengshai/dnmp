@@ -1662,7 +1662,7 @@ class OrderData extends Backend
      */
     protected function order_data($site)
     {
-        $list = $this->order->where('region_id is null and site = ' . $site)->limit(3000)->select();
+        $list = $this->order->where('base_shipping_amount is null and site = ' . $site)->limit(3000)->select();
         $list = collection($list)->toArray();
         $entity_id = array_column($list, 'entity_id');
         if ($site == 1) {
@@ -1854,7 +1854,7 @@ class OrderData extends Backend
             $params = [];
             foreach ($list as $k => $v) {
                 $params[$k]['id'] = $v['id'];
-                $params[$k]['payment_method'] = $res[$v['entity_id']];
+                $params[$k]['last_trans_id'] = $res[$v['entity_id']];
             }
             $this->order->saveAll($params);
             echo $site . 'ok';
