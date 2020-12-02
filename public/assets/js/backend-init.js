@@ -12,6 +12,9 @@ define(['backend'], function (Backend) {
                 },
             }
         });
+
+
+        
         $('body').on('click', '[data-tips-image]', function () {
             var img = new Image();
             var imgWidth = this.getAttribute('data-width') || '480px';
