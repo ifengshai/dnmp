@@ -157,59 +157,37 @@ class Distribution extends Backend
                 $map['a.abnormal_house_id'] = 0;
             }
 
-            $filter = json_decode($this->request->get('filter'), true);//处理异常选项
-            $tmp_item_process_id = [];
-            //创建过工单且未处理的子单号集合
-            $work_order_where['a.operation_type'] = 7;//fa_work_order_measure子单工单：0未处理
-            $work_order_where['b.work_status'] = [['>', 0], ['<', 6]];//fa_work_order_list主工单状态
-            $item_process_number = $this->_work_order_measure
-                ->alias('a')
-                ->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')
-                ->where($work_order_where)
-                ->column('a.item_order_number');
+            //处理异常选项
+            $filter = json_decode($this->request->get('filter'), true);
 
+            //查询子单ID合集
+            $item_process_ids = [];
             if ($filter['abnormal'] || $filter['stock_house_num']) {
                 //筛选异常
                 if ($filter['abnormal']) {
                     $abnormal_where['type'] = ['in', $filter['abnormal']];
+                    //跟单获取未处理异常
                     if (8 == $label) {
                         $abnormal_where['status'] = 1;
                     }
-                    $item_process_id = $this->_distribution_abnormal
+                    $item_process_ids = $this->_distribution_abnormal
                         ->where($abnormal_where)
                         ->column('item_process_id');
-
-                    if (8 == $label) {
-                        $tmp_item_process_id = $item_process_id;
-                    } else {
-                        $map['a.id'] = ['in', $item_process_id];
-                    }
                 }
 
                 //筛选库位号
                 if ($filter['stock_house_num']) {
-                    $stock_house_where['coding'] = ['like', $filter['stock_house_num'] . '%'];
-                    if (8 == $label) {
-                        $stock_house_where['type'] = ['>', 2];
-                    } else {
-                        $stock_house_where['type'] = 2;
-                    }
                     $stock_house_id = $this->_stock_house
-                        ->where($stock_house_where)
+                        ->where([
+                            'coding'=>['like', $filter['stock_house_num'] . '%'],
+                            'type'=>8 == $label ? 4 : 2//2合单库位  4异常库位
+                        ])
                         ->column('id');
                     $map['a.temporary_house_id|a.abnormal_house_id|c.store_house_id'] = ['in', $stock_house_id];
                 }
                 unset($filter['abnormal']);
                 unset($filter['stock_house_num']);
             }
-            //-------------------跟单数据不全，配货列表--跟单列表展示注释释放----------------------//
-
-            if (8 == $label) {
-                //查询有未处理工单的子单，异常表中存在有工单异常数据，后续要去重
-                $item_process_id_work = $this->model->where(['item_order_number' => ['in', array_unique($item_process_number)]])->column('id');
-                $map['a.id'] = ['in', array_merge($tmp_item_process_id, $item_process_id_work)];
-            }
-
 
             if ($filter['increment_id']) {
                 $map['b.increment_id'] = ['like', $filter['increment_id'] . '%'];
@@ -224,8 +202,32 @@ class Distribution extends Backend
             if (!$filter) {
                 $map['a.created_at'] = ['between', [strtotime('-3 month'), time()]];
             }
-
             $this->request->get(['filter' => json_encode($filter)]);
+
+            //跟单
+            $item_order_numbers = [];
+            if (8 == $label) {
+                //子单工单未处理
+                $item_order_numbers = $this->_work_order_change_sku
+                    ->alias('a')
+                    ->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')
+                    ->where([
+                        'a.change_type'=>['in',[1,2,3]],//1更改镜架  2更改镜片 3取消订单
+                        'b.work_status'=>['in',[1,2,3,5]]//工单未处理
+                    ])
+                    ->order('a.id','desc')
+                    ->group('a.item_order_number')
+                    ->column('a.item_order_number')
+                ;
+                if($item_order_numbers){
+                    $item_process_id_work = $this->model->where(['item_order_number' => ['in', $item_order_numbers]])->column('id');
+                    $item_process_ids = array_unique(array_merge($item_process_ids,$item_process_id_work));
+                }
+            }
+
+            if($item_process_ids){
+                $map['a.id'] = ['in', $item_process_ids];
+            }
 
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
 
@@ -240,7 +242,7 @@ class Distribution extends Backend
 
             $list = $this->model
                 ->alias('a')
-                ->field('a.id,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.total_qty_ordered,b.site,b.order_type,b.status,a.distribution_status,a.temporary_house_id,a.abnormal_house_id,order_type,a.created_at,c.store_house_id')
+                ->field('a.id,a.order_id,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.total_qty_ordered,b.site,b.order_type,b.status,a.distribution_status,a.temporary_house_id,a.abnormal_house_id,order_type,a.created_at,c.store_house_id')
                 ->join(['fa_order' => 'b'], 'a.order_id=b.id')
                 ->join(['fa_order_process' => 'c'], 'a.order_id=c.order_id')
                 ->where($where)
@@ -250,28 +252,64 @@ class Distribution extends Backend
                 ->select();
             $list = collection($list)->toArray();
 
+            //库位号列表
             $stock_house_data = $this->_stock_house
                 ->where(['status' => 1, 'type' => ['>', 1], 'occupy' => ['>', 0]])
                 ->column('coding', 'id');
 
+            if($list){
+                //获取主单号
+                $increment_ids = $this->_new_order
+                    ->where(['id'=>['in',array_column($list,'order_id')]])
+                    ->column('increment_id');
+
+                //检测是否有工单
+                $check_work_order = $this->_work_order_measure
+                    ->alias('a')
+                    ->field('a.item_order_number,a.measure_choose_id,b.platform_order')
+                    ->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')
+                    ->where([
+                        'b.platform_order'=>$increment_ids
+                    ])
+                    ->select();
+            }
+
             foreach ($list as $key => $value) {
                 if (!empty($value['temporary_house_id'])) {
-                    $stock_house_num = $stock_house_data[$value['temporary_house_id']];
+                    $stock_house_num = $stock_house_data[$value['temporary_house_id']];//定制片库位号
                 } elseif (!empty($value['temporary_house_id'])) {
-                    $stock_house_num = $stock_house_data[$value['abnormal_house_id']];
+                    $stock_house_num = $stock_house_data[$value['abnormal_house_id']];//异常库位号
                 } elseif (!empty($value['store_house_id'])) {
-                    $stock_house_num = $stock_house_data[$value['store_house_id']];
+                    $stock_house_num = $stock_house_data[$value['store_house_id']];//合单库位号
                 }
-                //处理异常按钮显示 创建工单且未处理 或 跟单且未处理异常 handle_abnormal 1显示 0不显示
-                $handle_abnormal = 0;
-                if (8 == $label) {
-                    if ($value['abnormal_house_id'] > 0 || in_array($value['abnormal_house_id'], $item_process_number))
-                        //处理异常按钮显示
-                        $handle_abnormal = 1;
-                }
-                $list[$key]['handle_abnormal'] = $handle_abnormal;
+
                 $list[$key]['stock_house_num'] = $stock_house_num ?? '-';
                 $list[$key]['created_at'] = date('Y-m-d H:i:s', $value['created_at']);
+
+                //跟单：异常未处理且未创建工单的显示处理异常按钮
+                if (8 == $label && $value['abnormal_house_id'] > 0 && !in_array($value['item_order_number'], $item_order_numbers)){
+                    $handle_abnormal = 1;
+                }else{
+                    $handle_abnormal = 0;
+                }
+                $list[$key]['handle_abnormal'] = $handle_abnormal;
+
+                //判断是否显示工单按钮
+                $task_info = 0;
+                if(!empty($check_work_order)){
+                    foreach($check_work_order as $v){
+                        if($v['platform_order'] == $value['increment_id']){
+                            if(
+                                !in_array($v['measure_choose_id'],[18,19,20])//主单措施
+                                ||
+                                $v['item_order_number'] == $value['item_order_number']//子单措施
+                            ){
+                                $task_info = 1;
+                            }
+                        }
+                    }
+                }
+                $list[$key]['task_info'] = $task_info;
             }
 
             $result = array("total" => $total, "rows" => $list);
