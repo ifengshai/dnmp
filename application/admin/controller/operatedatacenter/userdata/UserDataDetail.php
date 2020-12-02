@@ -81,6 +81,7 @@ class UserDataDetail extends Backend
                 ->select();
 
             $list = collection($list)->toArray();
+            dump($list);exit;
             foreach ($list as $key=>$value){
                 $list[$key]['entity_id'] = $value['entity_id'];  //用户id
                 $list[$key]['email'] = $value['email'];          //注册邮箱
