@@ -43,7 +43,7 @@
                     <select id="color_type" class="form-control selectpicker" name="row[replacement][color_id][]"  title="请选择">
                         <option value="0">请选择</option>
                             {foreach name="colorList" item="val"}
-                            <option value='{$val["id"]}'>{$val["name"]}</option>
+                            <option value='{$val["lens_id"]}'>{$val["lens_data_name"]}</option>
                             {/foreach}
                     </select>
                 </div>
@@ -63,7 +63,7 @@
                             name="row[replacement][coating_type][]"  title="请选择">
                         <option value="0">请选择</option>
                             {foreach name="coating_type" item="val"}
-                            <option value='{$val["id"]}'>{$val["name"]}</option>
+                            <option value='{$val["coating_id"]}'>{$val["coating_name"]}</option>
                             {/foreach}
                     </select>
                 </div>
@@ -169,7 +169,7 @@
         <div class="step1_function2_child">
             <label class="control-label col-xs-12 col-sm-3">prescription_type:</label>
             <div class="col-xs-12 col-sm-8">
-                <select class="form-control selectpicker prescription_type" name="row[item_order_info][{$item_order_number}][change_lens][recipe_type]"  title="请选择">
+                <select class="form-control selectpicker prescription_type" name="row[item_order_info][{$item_order_number}][change_lens][recipe_type]"  title="请选择" flag ="change_lens_recipe_type">
                     {foreach name="prescription" item="val" key="key"}
                     <option value='{$key}' {$key == $vo['prescription_type'] ? 'selected' : ''}>{$key}</option>
                     {/foreach}
@@ -346,7 +346,7 @@
                     <select id="color_type" class="form-control selectpicker" name="row[gift][color_id][]"  title="请选择">
                         <option value="0">请选择</option>
                         {foreach name="colorList" item="val"}
-                        <option value='{$val["id"]}'>{$val["name"]}</option>
+                        <option value='{$val["lens_id"]}'>{$val["lens_data_name"]}</option>
                         {/foreach}
                     </select>
                 </div>
@@ -366,7 +366,7 @@
                             name="row[gift][coating_type][]"  title="请选择">
                         <option value="0">请选择</option>
                         {foreach name="coating_type" item="val"}
-                        <option value='{$val["id"]}'>{$val["name"]}</option>
+                        <option value='{$val["coating_id"]}'>{$val["coating_name"]}</option>
                         {/foreach}
                     </select>
                 </div>

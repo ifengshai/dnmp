@@ -1080,12 +1080,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     }
                     //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end*/
                     //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
-                    if (!$('.step3').is(':hidden') && value == 3) {
+                    if (value == 3 && check == true) {
                         Layer.load();
                         $('#c-order_sku').val('');
-                        $('#section_item_content').html('');
+                        $('#section_item_content').hide();
                         $('.selectpicker ').selectpicker('refresh');
                         Layer.closeAll();
+                    }else if(value == 3 && check != true){
+                        $('#section_item_content').show()
                     }
                 }
 
@@ -1310,13 +1312,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     cancelOrder(1, work_id);
                 }*/
                 //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
-                //判断更换处方的状态，如果显示的话把数据带出来，如果隐藏则不显示镜架数据 start
+                /*//判断更换处方的状态，如果显示的话把数据带出来，如果隐藏则不显示镜架数据 start
                 if (!$('.step12-12').is(':hidden')) {
                     if(!checkIDss.includes(15)){
                         changeOrder(work_id, 2);
                     }
                 }
-                //判断更换处方的状态，如果显示的话把数据带出来，如果隐藏则不显示镜架数据 end
+                //判断更换处方的状态，如果显示的话把数据带出来，如果隐藏则不显示镜架数据 end*/
                 //判断补发订单的状态，如果显示的话把数据带出来，如果隐藏则不显示补发数据 start
                 if (!$('.step7').is(':hidden')) {
                     changeOrder(work_id, 5);
@@ -1326,6 +1328,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 if (!$('.step6').is(':hidden')) {
                     changeOrder(work_id, 4);
                 }
+
+                //生成已选中子单折叠框
+                itemSelectpicker(2);
             }
 
             
@@ -1993,8 +1998,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     $('.status').val(1);
                 })
 
-                //提交审核按钮
+                //提交按钮
                 $('.btn-status').click(function () {
+                    if ($('#section_item_content').is(':hidden')) {
+                        $('#section_item_content').html('');
+                        $('#item_input-hidden').html('');
+                    }
                     $('.status').val(2);
                 })
 
@@ -2362,7 +2371,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         //判断赠品信息的状态，如果显示的话把数据带出来，如果隐藏的话则不显示赠品数据 end
                     }
                     //如果子单号item_order_info存在带出子单措施的数据
-                    if (Config.item_order_info && 2 != Config.work_type) {
+                    if (Config.item_order_info) {
                         var item_order_info = Config.item_order_info;
                         //生成折叠框
                         itemSelectpicker(2,null,item_order_info);
@@ -2654,7 +2663,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     $('.selectpicker ').selectpicker('refresh');
                 });
                 //根据prescription_type获取lens_type
-                $(document).on('change', 'select[name="row[replacement][recipe_type][]"],select[name="row[change_lens][recipe_type][]"],select[name="row[gift][recipe_type][]"]', function () {
+                $(document).on('change', 'select[name="row[replacement][recipe_type][]"],select[name="row[change_lens][recipe_type][]"],select[name="row[gift][recipe_type][]"],select[flag ="change_lens_recipe_type"]', function () {
                     var sitetype = $('#work_platform').val();
                     var prescription_type = $(this).val();
                     //var is_new_version = $('#is_new_version').val();
@@ -3182,6 +3191,7 @@ function changeOrderAddress(){
 }
 //子单折叠框生成
 function itemSelectpicker (type = 1,flag = null,item_order_info = '') {
+        if($('#step3').prop('checked')) return false;
         $('#z-order_sku').html('');
         $('#section_item_content').html('');
         var problem_id = '';
@@ -3194,7 +3204,7 @@ function itemSelectpicker (type = 1,flag = null,item_order_info = '') {
                 };
             });
         }
-        if($('#step3').prop('checked')) return false;
+        if(!problem_id) return false;
         var item_problem_step = Config.workOrderConfigValue.all_problem_item_step;
         var item_order_sku_arr = $('.item_order_selectpicker').val();//子单号
         if(item_order_sku_arr && problem_id != '' && item_problem_step[problem_id]) {
