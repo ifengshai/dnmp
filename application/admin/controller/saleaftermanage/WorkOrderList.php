@@ -1318,7 +1318,7 @@ class WorkOrderList extends Backend
                         $params['create_user_id'] = $admin_id;
                         $params['create_time'] = date('Y-m-d H:i:s');
                         $params['order_sku'] = $params['order_sku'] ? implode(',', $params['order_sku']) : '';
-                        $params['order_item_numbers'] = $item_order_info ? implode(',', array_keys($item_order_info)) : '';
+//                        $params['order_item_numbers'] = $item_order_info ? implode(',', array_keys($item_order_info)) : '';
                         $params['assign_user_id'] = $params['assign_user_id'] ?: 0;
                         $params['customer_group'] = $this->customer_group;
 
