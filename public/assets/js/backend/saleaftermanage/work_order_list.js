@@ -1080,12 +1080,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     }
                     //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end*/
                     //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
-                    if (!$('.step3').is(':hidden') && value == 3) {
+                    if (value == 3 && check == true) {
                         Layer.load();
                         $('#c-order_sku').val('');
-                        $('#section_item_content').html('');
+                        $('#section_item_content').hide();
                         $('.selectpicker ').selectpicker('refresh');
                         Layer.closeAll();
+                    }else if(value == 3 && check != true){
+                        $('#section_item_content').show()
                     }
                 }
 
@@ -1996,8 +1998,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     $('.status').val(1);
                 })
 
-                //提交审核按钮
+                //提交按钮
                 $('.btn-status').click(function () {
+                    if ($('#section_item_content').is(':hidden')) {
+                        $('#section_item_content').html('');
+                        $('#item_input-hidden').html('');
+                    }
                     $('.status').val(2);
                 })
 
@@ -2365,7 +2371,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         //判断赠品信息的状态，如果显示的话把数据带出来，如果隐藏的话则不显示赠品数据 end
                     }
                     //如果子单号item_order_info存在带出子单措施的数据
-                    if (Config.item_order_info && 2 != Config.work_type) {
+                    if (Config.item_order_info) {
                         var item_order_info = Config.item_order_info;
                         //生成折叠框
                         itemSelectpicker(2,null,item_order_info);
