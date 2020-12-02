@@ -292,26 +292,23 @@ class TrackReg extends Backend
         $order = new \app\admin\model\order\order\Order();
         $list = $itemPlatformSku->field('sku,platform_sku,platform_type as site')->where(['outer_sku_status' => 1, 'platform_type' => ['<>', 8]])->select();
         $list = collection($list)->toArray();
-        foreach($list as &$v) {
-            $v['createtime'] = date('Y-m-d H:i:s',strtotime('-2 day'));
-        }
         //批量插入当天各站点上架sku
         $skuSalesNum->saveAll($list);
 
         //查询昨天上架SKU 并统计当天销量
-        // $data = $skuSalesNum->whereTime('createtime', 'yesterday')->where('site<>8')->select();
-        // $data = collection($data)->toArray();
-        // if ($data) {
-        //     foreach ($data as $k => $v) {
-        //         if ($v['platform_sku']) {
-        //             $params[$k]['sales_num'] = $order->getSkuSalesNum($v['platform_sku'], $v['site']);
-        //             $params[$k]['id'] = $v['id'];
-        //         }
-        //     }
-        //     if ($params) {
-        //         $skuSalesNum->saveAll($params);
-        //     }
-        // }
+        $data = $skuSalesNum->whereTime('createtime', 'yesterday')->where('site<>8')->select();
+        $data = collection($data)->toArray();
+        if ($data) {
+            foreach ($data as $k => $v) {
+                if ($v['platform_sku']) {
+                    $params[$k]['sales_num'] = $order->getSkuSalesNum($v['platform_sku'], $v['site']);
+                    $params[$k]['id'] = $v['id'];
+                }
+            }
+            if ($params) {
+                $skuSalesNum->saveAll($params);
+            }
+        }
 
         echo "ok";
     }
