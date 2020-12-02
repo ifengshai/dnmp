@@ -262,7 +262,7 @@ class UserValueRfm extends Backend
         if ($this->request->isAjax()) {
             $params = $this->request->param();
             $order_platform = $params['order_platform'];
-            $cache_data = Cache::get('Operatedatacenter_userdata1'.$order_platform.md5(serialize('ajax_user_shopping_near_days')));
+            $cache_data = Cache::get('Operatedatacenter_userdata2'.$order_platform.md5(serialize('ajax_user_shopping_near_days')));
             if(!$cache_data){
                 $result = $this->getUserNearDays($order_platform);
                 $count = $result['count'];
@@ -333,7 +333,7 @@ class UserValueRfm extends Backend
         $arr_where[] = ['exp', Db::raw("customer_id in " . $sql1)];
 
 //        $sql2 = $order_model->alias('t1')->field('to_days(now()) - to_days(max(created_at)) AS total')->where($where)->where($arr_where)->group('customer_id')->buildSql();
-        $sql2 = $order_model->alias('t1')->field('to_days(now()) - to_days(max(created_at)) AS total')->where($where)->where($arr_where)->group('customer_id')->having('total>=0 and total<14')->field('customer_id,total')->select();
+        $sql2 = $order_model->alias('t1')->field('to_days(now()) - to_days(max(created_at)) AS total')->where($where)->where($arr_where)->group('customer_id')->having('total>=0 and total<14')->field('customer_id')->select();
         dump($sql2);exit;
 
         $order_customer_count = $web_model->table([$sql2=>'t2'])->field('sum( IF ( total >= 90 and total<360, 1, 0 ) ) AS e,sum( IF ( total >= 60 and total<90, 1, 0 ) ) AS d,sum( IF ( total >= 30 and total<60, 1, 0 ) ) AS c,sum( IF ( total >= 14 and total<30, 1, 0 ) ) AS b,sum( IF ( total >= 0 and total<14, 1, 0 ) ) AS a')->select();
