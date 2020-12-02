@@ -1519,14 +1519,13 @@ class OrderData extends Backend
      */
     public function process_order_data_temp()
     {
-        $this->zeelool_old_order(3);
-        $this->zeelool_old_order(5);
+        $this->zeelool_old_order(1);
+        // $this->zeelool_old_order(5);
     }
     protected function zeelool_old_order($site)
     {
-      if ($site == 3) {
-            $id = $this->order->where('site=' . $site . ' and entity_id < 47304')->max('entity_id');
-            $list = $this->nihao->where(['entity_id' => ['between', [$id, 47304]]])->limit(3000)->select();
+      if ($site == 1) {
+            $list = $this->zeelool->where(['entity_id' => 557772])->select();
         } elseif ($site == 5) {
             $id = $this->order->where('site=' . $site . ' and entity_id < 1375')->max('entity_id');
             $list = $this->wesee->where(['entity_id' => ['between', [$id, 1375]]])->limit(3000)->select();
@@ -1564,6 +1563,8 @@ class OrderData extends Backend
             $params['taxno'] = $v['taxno'];
             $params['base_to_order_rate'] = $v['base_to_order_rate'];
             $params['mw_rewardpoint_discount'] = $v['mw_rewardpoint_discount'];
+            $params['mw_rewardpoint'] = $v['mw_rewardpoint'];
+            $params['base_shipping_amount'] = $v['base_shipping_amount'];
             $params['created_at'] = strtotime($v['created_at']) + 28800;
             $params['updated_at'] = strtotime($v['updated_at']) + 28800;
             //插入订单主表
@@ -1642,16 +1643,16 @@ class OrderData extends Backend
      */
     public function order_item_data_shell()
     {
-        $this->order_item_shell(3);
-        $this->order_item_shell(5);
+        $this->order_item_shell(1);
+        // $this->order_item_shell(5);
       
     }
 
     protected function order_item_shell($site)
     {
         if ($site == 1) {
-            $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 929673')->max('item_id');
-            $list = Db::connect('database.db_zeelool')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 929673]]])->limit(3000)->select();
+            // $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 929673')->max('item_id');
+            $list = Db::connect('database.db_zeelool')->table('sales_flat_order_item')->where(['item_id' => 975454])->limit(3000)->select();
         } elseif ($site == 2) {
             $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 515947')->max('item_id');
             $list = Db::connect('database.db_voogueme')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 515947]]])->limit(3000)->select();
