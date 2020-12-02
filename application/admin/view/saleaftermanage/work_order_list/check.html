@@ -374,7 +374,23 @@
         <div class="form-group-child">
             <label class="control-label col-xs-12 col-sm-2">{:__('order_sku')}：</label>
             <div class="col-xs-12 col-sm-8">
-                {:build_select('row[order_sku][]', $skus, $row.order_sku,['class'=>'form-control selectpicker','multiple'=>'multiple','disabled' => 'disabled'])}
+                <?php
+                    $sku = [];
+                    $sku_selected = [];
+                    if($order_item['sku_list']){
+                        foreach ($order_item['sku_list'] as $key => $value) {
+                            $sku[$key.'/'.$value] = $key.'/'.$value;
+                        }
+                    }
+                    if($order_item['select_number']){
+                        foreach ($order_item['select_number'] as $key => $value) {
+                            $kv = $value.'/'.$order_item['sku_list'][$value];
+                            $kv_arr = array_keys($sku,$kv);
+                            $sku_selected[] = $kv_arr[0];
+                        }
+                    }
+                ?>
+                {:build_select('row[order_sku][]', $sku, $sku_selected,['class'=>'form-control selectpicker item_order_selectpicker','multiple'=>'multiple','disabled' => 'disabled'])}
             </div>
         </div>
 
