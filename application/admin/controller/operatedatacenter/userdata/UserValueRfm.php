@@ -322,7 +322,10 @@ class UserValueRfm extends Backend
         $web_model->table('customer_entity')->query("set time_zone='+8:00'");
         $today = date('Y-m-d');
         $start = date('Y-m-d', strtotime("$today -14 day"));
-        $end = date('Y-m-d 23:59:59', strtotime($today));
+//        $end = date('Y-m-d 23:59:59', strtotime($today));
+        $end = date('2020-11-25 23:59:59', strtotime($today));
+        /*dump($start);
+        dump($end);exit;*/
         $time_where['created_at'] = ['between', [$start, $end]];
         $where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
         $where['order_type'] = 1;
