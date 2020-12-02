@@ -272,7 +272,7 @@ class Distribution extends Backend
                     ->field('a.item_order_number,a.measure_choose_id,b.platform_order')
                     ->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')
                     ->where([
-                        'b.platform_order'=>$increment_ids
+                        'b.platform_order'=>['in',$increment_ids]
                     ])
                     ->select();
             }
