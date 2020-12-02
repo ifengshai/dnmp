@@ -232,6 +232,7 @@ class UserDataView extends Backend
                 $active_arr = array();
                 foreach ($time_arr as $val){
                     $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+                    $order_where['order_type'] = 1;
                     $start_time = $val;
                     $end_time = $val.' 23:59:59';
                     $create_where['created_at'] = $update_where['updated_at'] = ['between',[$start_time,$end_time]];

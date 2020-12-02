@@ -114,6 +114,7 @@ class UserDataViewVip extends Backend
                 }
                 $order_where['customer_id'] = $value['customer_id'];
                 $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+                $order_where['order_type'] = 1;
                 $order_time_where['created_at'] = ['between',[$value['start_time'],$value['end_time']]];
                 $list[$key]['vip_order_num'] = $order_model->where($order_where)->where($order_time_where)->count();  //VIP期间支付订单数
                 $list[$key]['vip_order_amount'] = $order_model->where($order_where)->where($order_time_where)->sum('base_grand_total');//VIP期间支付金额
@@ -245,6 +246,7 @@ class UserDataViewVip extends Backend
                 //VIP期间支付订单数
                 $order_where['customer_id'] = $val['customer_id'];
                 $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+                $order_where['order_type'] = 1;
                 $order_time_where['created_at'] = ['between',[$val['start_time'],$val['end_time']]];
                 $tmpRow['vip_order_num'] = $order_model->where($order_where)->where($order_time_where)->count();
                 $tmpRow['vip_order_amount'] = $order_model->where($order_where)->where($order_time_where)->sum('base_grand_total');//VIP期间支付金额
