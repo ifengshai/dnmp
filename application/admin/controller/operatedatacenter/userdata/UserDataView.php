@@ -385,6 +385,7 @@ class UserDataView extends Backend
                     $map_where['o.created_at'] = ['between', [$start,$end]];
                 }
                 $map_where['o.status'] = $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+                $map_where['o.order_type'] = $order_where['order_type'] = 1;
                 if($order_platform == 2){
                     $model = $this->voogueme;
                 }elseif($order_platform == 3){
