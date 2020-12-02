@@ -69,7 +69,9 @@ class UserDataDetail extends Backend
                 ->table('customer_entity')
                 ->where($where)
                 ->where($map)
-                ->count();
+//                ->count();
+                ->select(false);
+            echo $total;exit;
             $list = $web_model
                 ->table('customer_entity')
                 ->where($where)
