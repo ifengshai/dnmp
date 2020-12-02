@@ -110,7 +110,7 @@ class UserDataViewVip extends Backend
                 if($now_time>$end_time){
                     $list[$key]['rest_days'] = 0;
                 }else{
-                    $list[$key]['rest_days'] = 1 + ceil(($end_time-$now_time)/60/60/24);
+                    $list[$key]['rest_days'] = ceil(($end_time-$now_time)/60/60/24);
                 }
                 $order_where['customer_id'] = $value['customer_id'];
                 $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
@@ -241,7 +241,7 @@ class UserDataViewVip extends Backend
                 if($now_time>$end_time){
                     $tmpRow['rest_days'] = 0;
                 }else{
-                    $tmpRow['rest_days'] = 1 + ceil(($end_time-$now_time)/60/60/24);
+                    $tmpRow['rest_days'] = ceil(($end_time-$now_time)/60/60/24);
                 }
                 //VIP期间支付订单数
                 $order_where['customer_id'] = $val['customer_id'];
