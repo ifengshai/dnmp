@@ -262,8 +262,8 @@ class UserValueRfm extends Backend
         if ($this->request->isAjax()) {
             $params = $this->request->param();
             $order_platform = $params['order_platform'];
-            $cache_data = Cache::get('Operatedatacenter_userdata2'.$order_platform.md5(serialize('ajax_user_shopping_near_days')));
-            if(!$cache_data){
+            $cache_data = Cache::get('Operatedatacenter_userdata'.$order_platform.md5(serialize('ajax_user_shopping_near_days')));
+            if(1){
                 $result = $this->getUserNearDays($order_platform);
                 $count = $result['count'];
                 $count1 = $result['data'][0]['a'];
@@ -319,10 +319,13 @@ class UserValueRfm extends Backend
             $web_model = Db::connect('database.db_zeelool');
             $order_model = $this->zeelool;
         }
-        $web_model->table('customer_entity')->query("set time_zone='+8:00'");
+        $web_model->query("set time_zone='+8:00'");
         $today = date('Y-m-d');
-        $start = date('Y-m-d', strtotime("$today -7 day"));
-        $end = date('Y-m-d 23:59:59', strtotime($today));
+        $start = date('Y-m-d', strtotime("$today -13 day"));
+//        $end = date('Y-m-d 23:59:59', strtotime($today));
+        $end = date('2020-11-19 23:59:59', strtotime($today));
+        /*dump($start);
+        dump($end);exit;*/
         $time_where['created_at'] = ['between', [$start, $end]];
         $where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
         $where['order_type'] = 1;
@@ -333,9 +336,6 @@ class UserValueRfm extends Backend
         $arr_where[] = ['exp', Db::raw("customer_id in " . $sql1)];
 
         $sql2 = $order_model->alias('t1')->field('to_days(now()) - to_days(max(created_at)) AS total')->where($where)->where($arr_where)->group('customer_id')->buildSql();
-        //$sql2 = $order_model->alias('t1')->field('to_days(now()) - to_days(max(created_at)) AS total')->where($where)->where($arr_where)->group('customer_id')->having('total>=0 and total<14')->field('customer_id')->select();
-
-        //dump(collection($sql2)->toArray());exit;
 
         $order_customer_count = $web_model->table([$sql2=>'t2'])->field('sum( IF ( total >= 90 and total<360, 1, 0 ) ) AS e,sum( IF ( total >= 60 and total<90, 1, 0 ) ) AS d,sum( IF ( total >= 30 and total<60, 1, 0 ) ) AS c,sum( IF ( total >= 14 and total<30, 1, 0 ) ) AS b,sum( IF ( total >= 0 and total<14, 1, 0 ) ) AS a')->select();
 
