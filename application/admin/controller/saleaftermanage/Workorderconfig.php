@@ -451,9 +451,19 @@ class Workorderconfig extends Backend
         //所有工单类型措施关系表
         $all_problem_step = (new WorkOrderProblemStep)->where($where)->select();
         //所有主单工单类型措施关系表
-        $all_problem_main_step = (new WorkOrderProblemStep)->where(['is_del' => 1, 'is_item_order' => 0])->select();
+        $all_problem_main_step = (new WorkOrderProblemStep)
+            ->alias('a')
+            ->field('a.*')
+            ->where(['a.is_del' => 1, 'a.is_item_order' => 0,'b.is_del' => 1])
+            ->join(['fa_work_order_step_type' => 'b'], 'a.step_id=b.id')
+            ->select();
         //所有子单工单类型措施关系表
-        $all_problem_item_step = (new WorkOrderProblemStep)->where(['is_del' => 1, 'is_item_order' => 1])->select();
+        $all_problem_item_step = (new WorkOrderProblemStep)
+            ->alias('a')
+            ->field('a.*')
+            ->where(['a.is_del' => 1, 'a.is_item_order' => 1,'b.is_del' => 1])
+            ->join(['fa_work_order_step_type' => 'b'], 'a.step_id=b.id')
+            ->select();
         //所有工单规则审核表
         $all_check_rule   = (new WorkOrderCheckRule)->where($where)->order('weight desc')->select();
         //客服部门角色组ID
