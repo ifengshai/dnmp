@@ -161,8 +161,7 @@ class GoodStatus extends Backend
             $params = $this->request->param();
             $platform_a = $params['platform_a'];
             $platform_b = $params['platform_b'];
-            //镜框数量
-            $platform_a_num =$this->item_platform->where('platform_type',$platform_a)->count();
+
             $item = new \app\admin\model\itemmanage\Item();
             //获取仓库镜架SKU
             $skus = $item->getFrameSku();
@@ -173,6 +172,9 @@ class GoodStatus extends Backend
                 ->group('sku')
                 ->having('count(platform_type)>1')
                 ->count();
+            //镜框数量
+            $platform_a_num =$this->item_platform->where('platform_type',$platform_a)->where($map)->count();
+            // dump($platform_a_num);
             $again_rate = round($again_num/$platform_a_num * 100,2).'%';
 
             $data = compact('again_num','again_rate');
