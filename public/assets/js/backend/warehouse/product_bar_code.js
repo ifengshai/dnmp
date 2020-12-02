@@ -35,6 +35,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                         },
                         { field: 'create_person', title: __('创建人') },
                         { field: 'create_time', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange' },
+                        { field: 'check_time', title: __('入库时间'), operate: 'RANGE', addclass: 'datetimerange' },
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate,
                             buttons: [
@@ -109,7 +110,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                         { field: 'sku', title: __('Sku'), operate: 'LIKE' },
                         { field: 'purchase_number', title: __('采购单号'), operate: 'LIKE' },
                         { field: 'create_person', title: __('创建人') },
-                        { field: 'create_time', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange' }
+                        { field: 'create_time', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange' },
+                        { field: 'check_time', title: __('入库时间'), operate: 'RANGE', addclass: 'datetimerange' }
                     ]
                 ]
             });

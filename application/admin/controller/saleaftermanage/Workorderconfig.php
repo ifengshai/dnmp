@@ -431,10 +431,10 @@ class Workorderconfig extends Backend
      */
     public function getConfigInfo()
     {
-        /*$arrConfig = Cache::get('Workorderconfig_getConfigInfo');
+        $arrConfig = Cache::get('Workorderconfig_getConfigInfo');
         if ($arrConfig) {
             return $arrConfig;
-        }*/
+        }
         //所有问题类型
         $where['is_del'] = 1;
         $all_problem_type = $this->model->where($where)->select();
@@ -640,7 +640,7 @@ class Workorderconfig extends Backend
         $arr['customer_manager']              = $customer_manager_id;
         $arr['all_extend_person']             = $all_extend_person;
         $arr['all_extend_group']              = $all_extend_group;
-        Cache::set('Workorderconfig_getConfigInfo', $arr);
+        Cache::set('Workorderconfig_getConfigInfo', $arr, 3600 * 24);
         return $arr;
     }
     /**
