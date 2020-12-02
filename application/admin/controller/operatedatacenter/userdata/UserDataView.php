@@ -382,7 +382,7 @@ class UserDataView extends Backend
                 } else{
                     $start = date('Y-m-d', strtotime('-6 day'));
                     $end   = date('Y-m-d 23:59:59', strtotime('-1 day'));
-                    $map_where['o.created_at'] = ['between', [$start,$end]];
+                    $map_where['o.created_at'] = $order_where['created_at'] = ['between', [$start,$end]];
                 }
                 $map_where['o.status'] = $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
                 $map_where['o.order_type'] = $order_where['order_type'] = 1;
