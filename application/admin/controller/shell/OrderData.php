@@ -1642,14 +1642,14 @@ class OrderData extends Backend
     public function order_data_shell()
     {
         
-        $this->order_address_data(1);
-        $this->order_address_data(2);
-        $this->order_address_data(3);
-        $this->order_address_data(4);
-        $this->order_address_data(5);
-        $this->order_address_data(9);
-        $this->order_address_data(10);
-        $this->order_address_data(11);
+        $this->order_data(1);
+        $this->order_data(2);
+        $this->order_data(3);
+        $this->order_data(4);
+        $this->order_data(5);
+        $this->order_data(9);
+        $this->order_data(10);
+        $this->order_data(11);
     }
 
     /**
