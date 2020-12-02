@@ -435,13 +435,38 @@ class Test4 extends Controller
         $model->table('customer_entity')->query("set time_zone='+8:00'");
         $date_time = Db::name('datacenter_day')->where('site', 1)->field('id,day_date,sessions,order_num,new_cart_num,update_cart_num')->order('id asc')->select();
         foreach ($date_time as $val) {
-            $arr = [];
-            $order_where = [];
-            $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $val['day_date'] . "'")];
-            $arr['sum_order_num'] = $model->table('sales_flat_order')->where($order_where)->where('order_type', 1)->count();
-            $customer_where = [];
-            $customer_where[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '" . $val['day_date'] . "'")];
-            $arr['login_user_num'] = $model->table('customer_entity')->where($customer_where)->count();
+            $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+            $order_where['order_type'] = 1;
+
+            $create_where = $update_where = [];
+            $create_where[] = $update_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $val['day_date'] . "'")];
+            //当天注册用户数
+            $register_userids = $model->table('customer_entity')->where($create_where)->column('entity_id');
+            $register_num = count($register_userids);
+            //当天注册用户在当天下单的用户数
+            $order_user_count1 = 0;
+            foreach($register_userids as $register_userid){
+                //判断当前用户在当天是否下单
+                $order = $model->table('sales_flat_order')->where($create_where)->where($order_where)->where('customer_id',$register_userid)->value('entity_id');
+                if($order){
+                    $order_user_count1++;
+                }
+            }
+            $arr['create_user_change_rate'] = $register_num ? round($order_user_count1/$register_num*100,2) : 0;
+
+            //当天更新用户数
+            $update_userids = $model->table('customer_entity')->where($update_where)->column('entity_id');
+            $update_num = count($update_userids);
+            //当天活跃更新用户数在当天是否下单
+            $order_user_count2 = 0;
+            foreach ($update_userids as $update_userid){
+                //判断活跃用户在当天下单的用户数
+                $order = $model->table('sales_flat_order')->where($create_where)->where($order_where)->where('customer_id',$update_userid)->value('entity_id');
+                if($order){
+                    $order_user_count2++;
+                }
+            }
+            $arr['update_user_change_rate'] = $update_num ? round($order_user_count2/$update_num*100,0) : 0;
             //更新数据
             Db::name('datacenter_day')->where('id', $val['id'])->update($arr);
             echo $val['day_date'] . "\n";
@@ -456,13 +481,38 @@ class Test4 extends Controller
         $model->table('customer_entity')->query("set time_zone='+8:00'");
         $date_time = Db::name('datacenter_day')->where('site', 2)->field('id,day_date,sessions,order_num,new_cart_num,update_cart_num')->order('id asc')->select();
         foreach ($date_time as $val) {
-            $arr = [];
-            $order_where = [];
-            $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $val['day_date'] . "'")];
-            $arr['sum_order_num'] = $model->table('sales_flat_order')->where($order_where)->where('order_type', 1)->count();
-            $customer_where = [];
-            $customer_where[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '" . $val['day_date'] . "'")];
-            $arr['login_user_num'] = $model->table('customer_entity')->where($customer_where)->count();
+            $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+            $order_where['order_type'] = 1;
+
+            $create_where = $update_where = [];
+            $create_where[] = $update_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $val['day_date'] . "'")];
+            //当天注册用户数
+            $register_userids = $model->table('customer_entity')->where($create_where)->column('entity_id');
+            $register_num = count($register_userids);
+            //当天注册用户在当天下单的用户数
+            $order_user_count1 = 0;
+            foreach($register_userids as $register_userid){
+                //判断当前用户在当天是否下单
+                $order = $model->table('sales_flat_order')->where($create_where)->where($order_where)->where('customer_id',$register_userid)->value('entity_id');
+                if($order){
+                    $order_user_count1++;
+                }
+            }
+            $arr['create_user_change_rate'] = $register_num ? round($order_user_count1/$register_num*100,2) : 0;
+
+            //当天更新用户数
+            $update_userids = $model->table('customer_entity')->where($update_where)->column('entity_id');
+            $update_num = count($update_userids);
+            //当天活跃更新用户数在当天是否下单
+            $order_user_count2 = 0;
+            foreach ($update_userids as $update_userid){
+                //判断活跃用户在当天下单的用户数
+                $order = $model->table('sales_flat_order')->where($create_where)->where($order_where)->where('customer_id',$update_userid)->value('entity_id');
+                if($order){
+                    $order_user_count2++;
+                }
+            }
+            $arr['update_user_change_rate'] = $update_num ? round($order_user_count2/$update_num*100,0) : 0;
 
             //更新数据
             Db::name('datacenter_day')->where('id', $val['id'])->update($arr);
@@ -478,13 +528,38 @@ class Test4 extends Controller
         $model->table('customer_entity')->query("set time_zone='+8:00'");
         $date_time = Db::name('datacenter_day')->where('site', 3)->field('id,day_date,sessions,order_num,new_cart_num,update_cart_num')->order('id asc')->select();
         foreach ($date_time as $val) {
-            $arr = [];
-            $order_where = [];
-            $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $val['day_date'] . "'")];
-            $arr['sum_order_num'] = $model->table('sales_flat_order')->where($order_where)->where('order_type', 1)->count();
-            $customer_where = [];
-            $customer_where[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '" . $val['day_date'] . "'")];
-            $arr['login_user_num'] = $model->table('customer_entity')->where($customer_where)->count();
+            $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+            $order_where['order_type'] = 1;
+
+            $create_where = $update_where = [];
+            $create_where[] = $update_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $val['day_date'] . "'")];
+            //当天注册用户数
+            $register_userids = $model->table('customer_entity')->where($create_where)->column('entity_id');
+            $register_num = count($register_userids);
+            //当天注册用户在当天下单的用户数
+            $order_user_count1 = 0;
+            foreach($register_userids as $register_userid){
+                //判断当前用户在当天是否下单
+                $order = $model->table('sales_flat_order')->where($create_where)->where($order_where)->where('customer_id',$register_userid)->value('entity_id');
+                if($order){
+                    $order_user_count1++;
+                }
+            }
+            $arr['create_user_change_rate'] = $register_num ? round($order_user_count1/$register_num*100,2) : 0;
+
+            //当天更新用户数
+            $update_userids = $model->table('customer_entity')->where($update_where)->column('entity_id');
+            $update_num = count($update_userids);
+            //当天活跃更新用户数在当天是否下单
+            $order_user_count2 = 0;
+            foreach ($update_userids as $update_userid){
+                //判断活跃用户在当天下单的用户数
+                $order = $model->table('sales_flat_order')->where($create_where)->where($order_where)->where('customer_id',$update_userid)->value('entity_id');
+                if($order){
+                    $order_user_count2++;
+                }
+            }
+            $arr['update_user_change_rate'] = $update_num ? round($order_user_count2/$update_num*100,0) : 0;
             //更新数据
             Db::name('datacenter_day')->where('id', $val['id'])->update($arr);
             echo $val['day_date'] . "\n";
