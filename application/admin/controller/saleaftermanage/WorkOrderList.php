@@ -1037,7 +1037,7 @@ class WorkOrderList extends Backend
 
                 //校验问题类型、问题描述
                 $problem_type_id = $params['problem_type_id'];
-                !$problem_type_id && $this->error("请选择问题类型");
+                !$ids && !$problem_type_id && $this->error("请选择问题类型");
                 !$params['problem_description'] && $this->error("问题描述不能为空");
                 !$platform_order && $this->error("订单号不能为空");
 
