@@ -69,9 +69,8 @@ class UserDataDetail extends Backend
                 ->table('customer_entity')
                 ->where($where)
                 ->where($map)
-//                ->count();
-                ->select(false);
-            echo $total;exit;
+                ->count();
+
             $list = $web_model
                 ->table('customer_entity')
                 ->where($where)
@@ -79,7 +78,8 @@ class UserDataDetail extends Backend
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->field('entity_id,created_at,email')
-                ->select();
+                ->select(false);
+            echo $list;exit;
             $list = collection($list)->toArray();
             foreach ($list as $key=>$value){
                 $list[$key]['entity_id'] = $value['entity_id'];  //用户id
