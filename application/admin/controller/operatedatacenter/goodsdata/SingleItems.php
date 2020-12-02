@@ -185,7 +185,7 @@ class SingleItems extends Backend
                 ->where('sku', 'like', $sku . '%')
                 ->where('created_at', 'between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]])
                 ->sum('qty_ordered');//sku总副数
-            $avg_order_glass = $total == 0 ? 0 : round($whole_glass / $total, 0);
+            $avg_order_glass = $total == 0 ? 0 : round($whole_glass / $total, 2);
 
             if ($order_platform != 3) {
                 //付费镜片订单数
