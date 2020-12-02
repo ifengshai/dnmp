@@ -331,7 +331,7 @@ class UserValueRfm extends Backend
         $arr_where = [];
         $arr_where[] = ['exp', Db::raw("customer_id in " . $sql1)];
 
-        $sql2 = $web_model->table('sales_flat_order')->alias('t1')->field('to_days(now()) - to_days(max(created_at)) AS total')->where($where)->where($arr_where)->group('customer_id')->buildSql();
+        $sql2 = $web_model->table('sales_flat_order')->alias('t1')->field('to_days(now()) - to_days(max(updated_at)) AS total')->where($where)->where($arr_where)->group('customer_id')->buildSql();
 
         $order_customer_count = $web_model->table([$sql2=>'t2'])->field('sum( IF ( total >= 90 and total<360, 1, 0 ) ) AS e,sum( IF ( total >= 60 and total<90, 1, 0 ) ) AS d,sum( IF ( total >= 30 and total<60, 1, 0 ) ) AS c,sum( IF ( total >= 14 and total<30, 1, 0 ) ) AS b,sum( IF ( total >= 0 and total<14, 1, 0 ) ) AS a')->select();
 
