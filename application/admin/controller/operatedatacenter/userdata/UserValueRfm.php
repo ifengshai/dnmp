@@ -321,7 +321,7 @@ class UserValueRfm extends Backend
         }
         $web_model->table('customer_entity')->query("set time_zone='+8:00'");
         $today = date('Y-m-d');
-        $start = date('Y-m-d', strtotime("$today -12 month"));
+        $start = date('Y-m-d', strtotime("$today -1 month"));
         $end = date('Y-m-d 23:59:59', strtotime($today));
         $time_where['created_at'] = ['between', [$start, $end]];
         $where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
