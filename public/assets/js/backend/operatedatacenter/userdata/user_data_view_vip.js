@@ -111,7 +111,6 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                     if ($(".datetimerange", form).size() > 0) {
                         require(['bootstrap-daterangepicker'], function () {
                             var ranges = {};
-                            ranges[__('Today')] = [Moment().startOf('day'), Moment().endOf('day')];
                             ranges[__('Yesterday')] = [Moment().subtract(1, 'days').startOf('day'), Moment().subtract(1, 'days').endOf('day')];
                             ranges[__('Last 7 Days')] = [Moment().subtract(6, 'days').startOf('day'), Moment().endOf('day')];
                             ranges[__('Last 30 Days')] = [Moment().subtract(29, 'days').startOf('day'), Moment().endOf('day')];
