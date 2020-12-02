@@ -43,7 +43,7 @@
                     <select id="color_type" class="form-control selectpicker" name="row[replacement][color_id][]"  title="请选择">
                         <option value="0">请选择</option>
                             {foreach name="colorList" item="val"}
-                            <option value='{$val["id"]}'>{$val["name"]}</option>
+                            <option value='{$val["lens_id"]}'>{$val["lens_data_name"]}</option>
                             {/foreach}
                     </select>
                 </div>
@@ -63,7 +63,7 @@
                             name="row[replacement][coating_type][]"  title="请选择">
                         <option value="0">请选择</option>
                             {foreach name="coating_type" item="val"}
-                            <option value='{$val["id"]}'>{$val["name"]}</option>
+                            <option value='{$val["coating_id"]}'>{$val["coating_name"]}</option>
                             {/foreach}
                     </select>
                 </div>
@@ -346,7 +346,7 @@
                     <select id="color_type" class="form-control selectpicker" name="row[gift][color_id][]"  title="请选择">
                         <option value="0">请选择</option>
                         {foreach name="colorList" item="val"}
-                        <option value='{$val["id"]}'>{$val["name"]}</option>
+                        <option value='{$val["lens_id"]}'>{$val["lens_data_name"]}</option>
                         {/foreach}
                     </select>
                 </div>
@@ -366,7 +366,7 @@
                             name="row[gift][coating_type][]"  title="请选择">
                         <option value="0">请选择</option>
                         {foreach name="coating_type" item="val"}
-                        <option value='{$val["id"]}'>{$val["name"]}</option>
+                        <option value='{$val["coating_id"]}'>{$val["coating_name"]}</option>
                         {/foreach}
                     </select>
                 </div>
