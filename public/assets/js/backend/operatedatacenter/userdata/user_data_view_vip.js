@@ -150,6 +150,8 @@ function order_data_view() {
             }
             str1 += vip_num.contrast_vip_user_num+'%</span></div>';   
             $("#contrast_active_user_num").html(str1);               
+        }else{
+            $("#contrast_active_user_num").html(''); 
         }
         var str2 = '';
         if(again_user_num.contrast_again_user_num){
@@ -161,6 +163,8 @@ function order_data_view() {
             }              
             str2 += again_user_num.contrast_again_user_num+'%</span></div>'; 
             $("#contrast_again_user_num").html(str2);           
+        }else{
+            $("#contrast_again_user_num").html('');    
         }
 
         return false;
