@@ -455,9 +455,17 @@
                         $kv_arr = array_keys($sku,$value);
                         $sku_value[] = $kv_arr[0];
                     }
+                    $order_item_numbers = '';
+                    $item_arr_value = [];
+                    foreach ($sku_value as $key => $value) {
+                        $item_arr = explode('/', $value);
+                        $item_arr_value[] = $item_arr[0];
+                    }
+                    $order_item_numbers = implode(',', $item_arr_value);
                 ?>
-                {:build_select('row[order_sku][]', $sku, $sku_value, ['class'=>'form-control selectpicker item_order_selectpicker','multiple'=>'multiple','disabled'=>'disabled'])}
+                {:build_select('row[order_sku]', $sku, $sku_value, ['class'=>'form-control selectpicker item_order_selectpicker','multiple'=>'multiple','disabled'=>'disabled'])}
                 <input type="hidden" id='is_order_item'  value="1" />
+                <input type="hidden" id='order_item_numbers' name="row[order_item_numbers]"  value="{:$order_item_numbers}" />
                 {else/}
                 {:build_select('row[order_sku][]', [], [], ['class'=>'form-control selectpicker item_order_selectpicker','multiple'=>'multiple','id'=>'c-order_sku','title'=>"请选择"])}
                 {/if}

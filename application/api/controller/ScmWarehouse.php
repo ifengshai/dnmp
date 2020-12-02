@@ -1180,18 +1180,13 @@ class ScmWarehouse extends Scm
             }
         }
 
-        $this->_in_stock->startTrans();
-        $this->_item->startTrans();
-        $this->_purchase_order_item->startTrans();
-
+        $res = false;
+        Db::startTrans();
         try {
             $data['create_person'] = $this->auth->nickname;
             $res = $this->_in_stock->allowField(true)->isUpdate(true, ['id'=>$in_stock_id])->save($data);//审核拒绝更新数据
 
             if ($data['status'] == 2) {
-                /**
-                 * @todo 审核通过增加库存 并添加入库单入库数量
-                 */
                 $error_num = [];
                 foreach ($list as $k => $v) {
 
@@ -1234,7 +1229,7 @@ class ScmWarehouse extends Scm
                             $item_platform_sku = $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => 4])->field('platform_type,stock')->find();
                             //sku没有同步meeloog站 无法添加虚拟库存 必须先同步
                             if (empty($item_platform_sku)) {
-                                $this->error('sku：' . $v['sku'] . '没有同步meeloog站，请先同步', [], 516);
+                                throw new Exception('sku：' . $v['sku'] . '没有同步meeloog站，请先同步');
                             }
                             $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $item_platform_sku['platform_type']])->setInc('stock', $v['in_stock_num']);
                         }
@@ -1344,7 +1339,7 @@ class ScmWarehouse extends Scm
 
                 //有错误 则回滚数据
                 if (count($error_num) > 0) {
-                    $this->error(__('入库失败！！请检查SKU'), [], 444);
+                    throw new Exception('入库失败！！请检查SKU');
                 }
             }
 
@@ -1361,9 +1356,9 @@ class ScmWarehouse extends Scm
         }
 
         if ($res !== false) {
-            $this->success('审核'.$msg.'成功', [],200);
+            $this->success($msg.'成功', [],200);
         } else {
-            $this->error(__('审核'.$msg.'失败'), [], 519);
+            $this->error(__($msg.'失败'), [], 519);
         }
 
     }
