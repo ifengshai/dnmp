@@ -319,13 +319,9 @@ class UserValueRfm extends Backend
             $web_model = Db::connect('database.db_zeelool');
             $order_model = $this->zeelool;
         }
-        $web_model->query("set time_zone='+8:00'");
         $today = date('Y-m-d');
-        $start = date('Y-m-d', strtotime("$today -13 day"));
-//        $end = date('Y-m-d 23:59:59', strtotime($today));
-        $end = date('2020-11-19 23:59:59', strtotime($today));
-        /*dump($start);
-        dump($end);exit;*/
+        $start = date('Y-m-d', strtotime("$today -12 month")-8*3600);
+        $end = date('Y-m-d 23:59:59', strtotime($today)-8*3600);
         $time_where['created_at'] = ['between', [$start, $end]];
         $where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
         $where['order_type'] = 1;
