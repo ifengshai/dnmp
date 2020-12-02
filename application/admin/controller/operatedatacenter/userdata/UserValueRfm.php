@@ -263,7 +263,7 @@ class UserValueRfm extends Backend
             $params = $this->request->param();
             $order_platform = $params['order_platform'];
             $cache_data = Cache::get('Operatedatacenter_userdata'.$order_platform.md5(serialize('ajax_user_shopping_near_days')));
-            if(1){
+            if(!$cache_data){
                 $result = $this->getUserNearDays($order_platform);
                 $count = $result['count'];
                 $count1 = $result['data'][0]['a'];
@@ -311,13 +311,10 @@ class UserValueRfm extends Backend
     {
         if($order_platform == 2){
             $web_model = Db::connect('database.db_voogueme');
-            $order_model = $this->voogueme;
         }elseif($order_platform == 3){
             $web_model = Db::connect('database.db_nihao');
-            $order_model = $this->nihao;
         }else{
             $web_model = Db::connect('database.db_zeelool');
-            $order_model = $this->zeelool;
         }
         $today = date('Y-m-d');
         $start = date('Y-m-d', strtotime("$today -12 month")-8*3600);
