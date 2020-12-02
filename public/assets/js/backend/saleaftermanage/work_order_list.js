@@ -2787,12 +2787,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     }
                 });
 
-                //下拉框选择子单联动
+                //问题类型子单措施联动
                 $(document).on('click', '.problem_type', function () {
                     var is_order_item = $('#is_order_item').val();
                     if (2 != Config.work_type && 1 != is_order_item) {itemSelectpicker(1,$(this));}
                     
                 });
+                //下拉框选择子单联动
                 $(document).on('change', '.item_order_selectpicker', function () {
                     var is_order_item = $('#is_order_item').val();
                     if (2 != Config.work_type && 1 != is_order_item) {itemSelectpicker(2);}
