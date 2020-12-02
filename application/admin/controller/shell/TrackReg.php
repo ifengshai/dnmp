@@ -293,7 +293,7 @@ class TrackReg extends Backend
         $list = $itemPlatformSku->field('sku,platform_sku,platform_type as site')->where(['outer_sku_status' => 1, 'platform_type' => ['<>', 8]])->select();
         $list = collection($list)->toArray();
         foreach($list as &$v) {
-            $v['createtime'] = date('Y-m-d H:i:s',strtotime('-1 day'));
+            $v['createtime'] = date('Y-m-d H:i:s',strtotime('-2 day'));
         }
         //批量插入当天各站点上架sku
         $skuSalesNum->saveAll($list);
