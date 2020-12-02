@@ -287,6 +287,15 @@
                                 <option value="6">Android</option>
                             </select>
                         </div>
+                        <div >
+                            <label style="text-align: right;">有无退款:</label>
+                            <select id="is_refund" class="form-control" name="is_refund">
+                                <option value="0" selected>请选择</option>
+                                <option value="1">有</option>
+                                <option value="2">无</option>
+
+                            </select>
+                        </div>
                         <div>
                             <input type="button" class="btn btn-success" value="提交">
                             <input type="button" class="btn btn-default reset" value="重置" >
@@ -377,6 +386,14 @@
                             <li data-name="payment_method">
                                 <input type="checkbox">
                                 <span>支付方式</span>
+                            </li>
+                            <li data-name="order_type">
+                                <input type="checkbox">
+                                <span>订单类型</span>
+                            </li>
+                            <li data-name="coupon_rule_name">
+                                <input type="checkbox">
+                                <span>优惠券名称</span>
                             </li>
                         </ul>
                     </li>
