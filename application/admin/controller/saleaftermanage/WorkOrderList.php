@@ -1318,7 +1318,7 @@ class WorkOrderList extends Backend
                         $params['create_user_id'] = $admin_id;
                         $params['create_time'] = date('Y-m-d H:i:s');
                         $params['order_sku'] = $params['order_sku'] ? implode(',', $params['order_sku']) : '';
-                        $params['order_item_numbers'] = $item_order_info ? implode(',', array_keys($item_order_info)) : '';
+//                        $params['order_item_numbers'] = $item_order_info ? implode(',', array_keys($item_order_info)) : '';
                         $params['assign_user_id'] = $params['assign_user_id'] ?: 0;
                         $params['customer_group'] = $this->customer_group;
 
@@ -1426,6 +1426,7 @@ class WorkOrderList extends Backend
             //编辑、详情
             $row = $this->model->get($ids);
             $this->assignconfig('ids', $row->id);
+            $this->assignconfig('problem_id', $row->problem_type_id);
             $this->view->assign('row', $row);
 
             //子订单措施及数据
