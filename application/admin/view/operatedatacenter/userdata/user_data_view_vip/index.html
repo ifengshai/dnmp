@@ -49,6 +49,7 @@
     .title {
         font-size: 20px;
         color: rgb(127, 127, 127);
+        font-weight: 700;
     }
 
     .rate_class {
@@ -60,6 +61,7 @@
     {:build_heading()}
     <div class="panel-body">
         <div class="tab-pane fade active in" id="one">
+            <div class="title">总VIP会员数：<span style="color: red;" id="sum_vip_num">{$sum_vip_num}</span></div>
             <div class="new-background">
                 <form id="form" action="{:url('/admin/order/printlabel/zeelool/index')}">
                 <div class="row">
@@ -122,11 +124,6 @@
                                     <span id="contrast_again_user_num">
 
                                     </span>
-                                </span>
-                        </div>
-                        <div class="btn btn-div">
-                                <span class="extend">
-                                    <div class="title">总VIP会员数：<div style="color: red;" id="sum_vip_num">{$sum_vip_num}</div></div>
                                 </span>
                         </div>
                     </div>
