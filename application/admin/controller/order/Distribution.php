@@ -162,30 +162,33 @@ class Distribution extends Backend
 
             //查询子单ID合集
             $item_process_ids = [];
-            if ($filter['abnormal'] || $filter['stock_house_num']) {
-                //筛选异常
+
+            //跟单或筛选异常
+            if ($filter['abnormal'] || 8 == $label) {
+                //异常类型
                 if ($filter['abnormal']) {
                     $abnormal_where['type'] = ['in', $filter['abnormal']];
-                    //跟单获取未处理异常
-                    if (8 == $label) {
-                        $abnormal_where['status'] = 1;
-                    }
-                    $item_process_ids = $this->_distribution_abnormal
-                        ->where($abnormal_where)
-                        ->column('item_process_id');
+                    unset($filter['abnormal']);
                 }
 
-                //筛选库位号
-                if ($filter['stock_house_num']) {
-                    $stock_house_id = $this->_stock_house
-                        ->where([
-                            'coding'=>['like', $filter['stock_house_num'] . '%'],
-                            'type'=>8 == $label ? 4 : 2//2合单库位  4异常库位
-                        ])
-                        ->column('id');
-                    $map['a.temporary_house_id|a.abnormal_house_id|c.store_house_id'] = ['in', $stock_house_id];
+                //获取未处理异常
+                if (8 == $label) {
+                    $abnormal_where['status'] = 1;
                 }
-                unset($filter['abnormal']);
+                $item_process_ids = $this->_distribution_abnormal
+                    ->where($abnormal_where)
+                    ->column('item_process_id');
+            }
+
+            //筛选库位号
+            if ($filter['stock_house_num']) {
+                $stock_house_id = $this->_stock_house
+                    ->where([
+                        'coding'=>['like', $filter['stock_house_num'] . '%'],
+                        'type'=>8 == $label ? 4 : 2//2合单库位  4异常库位
+                    ])
+                    ->column('id');
+                $map['a.temporary_house_id|a.abnormal_house_id|c.store_house_id'] = ['in', $stock_house_id];
                 unset($filter['stock_house_num']);
             }
 
