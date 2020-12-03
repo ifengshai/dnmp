@@ -280,7 +280,7 @@ class Test01 extends Backend
         $item_platform_sku = new ItemPlatformSku();
         $item_skuy = $item_platform_sku->where('id','>',0)->where('platform_type',1)->column('grade','sku');
         foreach ($item_skuy as $k=>$v){
-            $update = Db::name('datacenter_sku_day')->where('day_date','2020-12-02')->where('site',1)->where('sku',$k)->update('grade',$v);
+            $update = Db::name('datacenter_sku_day')->where('day_date','2020-12-02')->where('site',1)->where('sku',$k)->update(['goods_grade'=>$v]);
         }
 
     }
