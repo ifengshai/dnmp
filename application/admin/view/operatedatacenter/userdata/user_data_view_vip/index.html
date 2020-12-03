@@ -49,6 +49,7 @@
     .title {
         font-size: 20px;
         color: rgb(127, 127, 127);
+        font-weight: 700;
     }
 
     .rate_class {
@@ -60,7 +61,9 @@
     {:build_heading()}
     <div class="panel-body">
         <div class="tab-pane fade active in" id="one">
+            <div class="title">总VIP会员数：<span style="color: red;" id="sum_vip_num">{$sum_vip_num}</span></div>
             <div class="new-background">
+                <form id="form" action="{:url('/admin/order/printlabel/zeelool/index')}">
                 <div class="row">
                     <div class="form-group new-form-group">
                         <label class="control-label col-xs-4">平台：</label>
@@ -96,12 +99,13 @@
                     </div>
                     <div class="form-group new-form-group">
                         <div class="col-xs-6 new-col-xs-6">
-                            <input type="submit" class="btn btn-success" id="sku_submit" value="提交">
-                            <input type="reset" class="btn btn-default reset" id="sku_reset" value="重置">
+                            <input type="button" class="btn btn-success" id="sku_submit" value="提交">
+                            <input type="button" class="btn btn-default reset" id="sku_reset" value="重置">
                         </div>
                     </div>
 
                 </div>
+                </form>
                 <div class="row">
                     <div class="margin-div" style="text-align: center;margin: 0 0 20px 0;">
                         <div class="btn btn-div">
@@ -120,11 +124,6 @@
                                     <span id="contrast_again_user_num">
 
                                     </span>
-                                </span>
-                        </div>
-                        <div class="btn btn-div">
-                                <span class="extend">
-                                    <div class="title">总VIP会员数：<div style="color: red;" id="sum_vip_num">{$sum_vip_num}</div></div>
                                 </span>
                         </div>
                     </div>

@@ -45,7 +45,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                             }, operate: false
                         },
                         { field: 'id', title: __('Id'), operate: false, visible: false },
-                        { field: 'sku', title: __('Sku'), operate: 'like' },
+                        { field: 'sku', title: __('Sku'), operate: 'IN' },
                         { field: 'category_name', title: __('分类名称'), operate: false },
                         {
                             field: 'category_id', title: __('Category_id'),
@@ -212,7 +212,31 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                 //     }
                 // );
             });
+            //商品批量审核通过
+            $(document).on('click', '.btn-passAudits', function () {
+                var ids = Table.api.selectedids(table);
 
+                if (ids.length == 0){
+                    layer.msg('请选择指定商品')
+                    return  false;
+                }
+
+                Backend.api.open('new_product/passaudits/ids/' + ids , __('同步商品'), { area: ['35%', '35%'] });
+                // Backend.api.open('new_product/passAudit/ids/' + $(this).data('id') + '/sku/' + $(this).data('sku'), __('同步商品'), { area: ['35%', '35%'] });
+
+                // Layer.confirm(
+                //     __('确定要审核通过吗'),
+                //     function (index) {
+                //         Backend.api.ajax({
+                //             url: "new_product/passAudit",
+                //             data: { ids: ids }
+                //         }, function (data, ret) {
+                //             table.bootstrapTable('refresh');
+                //             Layer.close(index);
+                //         });
+                //     }
+                // );
+            });
             //商品审核拒绝
             $(document).on('click', '.btn-auditRefused', function () {
                 var ids = Table.api.selectedids(table);
@@ -282,7 +306,20 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                 }
 
             });
+            $('.btn-selected').click(function () {
+                var davalue = $(".btn-selected").attr("data-value");
+                if (davalue ==1){
+                    $("input[type='checkbox']").prop('checked',true);
+                    $(".btn-selected").attr("data-value",2);
+                }else{
+                    $("input[type='checkbox']").prop('checked',false);
+                    $(".btn-selected").attr("data-value",1);
+                }
+            })
+
+
         },
+
         add: function () {
             Controller.api.bindevent();
             $(document).on('click', '.btn-ok', function () {
@@ -372,6 +409,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
         passaudit: function () {
             Controller.api.bindevent();
         },
+        passaudits:function (){
+            Controller.api.bindevent();
+        },
+
+
         replenishescalationlist: function () {
             // 初始化表格参数配置
             Table.api.init({

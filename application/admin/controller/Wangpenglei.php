@@ -376,7 +376,7 @@ class Wangpenglei extends Backend
         $skuSalesNum = new \app\admin\model\SkuSalesNum();
         $order = new \app\admin\model\order\order\Order();
         //查询昨天上架SKU 并统计当天销量
-        $data = $skuSalesNum->where(['createtime' => ['between', ['2020-10-01', '2020-10-31']]])->where('site<>8')->select();
+        $data = $skuSalesNum->where(['createtime' => ['between', ['2020-12-01', '2020-12-02']]])->where('site<>8')->select();
         $data = collection($data)->toArray();
         if ($data) {
             foreach ($data as $k => $v) {

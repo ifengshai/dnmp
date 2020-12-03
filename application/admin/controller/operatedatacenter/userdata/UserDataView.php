@@ -225,13 +225,14 @@ class UserDataView extends Backend
                     $end = $createat[3];
                 } else{
                     $start = date('Y-m-d', strtotime('-6 day'));
-                    $end   = date('Y-m-d');
+                    $end   = date('Y-m-d', strtotime('-1 day'));
                 }
                 $time_arr = $this->getDateFromRange($start,$end);
                 $new_arr = array();
                 $active_arr = array();
                 foreach ($time_arr as $val){
                     $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+                    $order_where['order_type'] = 1;
                     $start_time = $val;
                     $end_time = $val.' 23:59:59';
                     $create_where['created_at'] = $update_where['updated_at'] = ['between',[$start_time,$end_time]];
@@ -316,7 +317,7 @@ class UserDataView extends Backend
                     $map_where['created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
                 } else{
                     $start = date('Y-m-d', strtotime('-6 day'));
-                    $end   = date('Y-m-d 23:59:59');
+                    $end   = date('Y-m-d 23:59:59', strtotime('-1 day'));
                     $map_where['created_at'] = ['between', [$start,$end]];
                 }
                 if($order_platform == 2){
@@ -381,10 +382,11 @@ class UserDataView extends Backend
                     $map_where['o.created_at'] =$order_where['created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
                 } else{
                     $start = date('Y-m-d', strtotime('-6 day'));
-                    $end   = date('Y-m-d 23:59:59');
-                    $map_where['o.created_at'] = ['between', [$start,$end]];
+                    $end   = date('Y-m-d 23:59:59', strtotime('-1 day'));
+                    $map_where['o.created_at'] = $order_where['created_at'] = ['between', [$start,$end]];
                 }
                 $map_where['o.status'] = $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+                $map_where['o.order_type'] = $order_where['order_type'] = 1;
                 if($order_platform == 2){
                     $model = $this->voogueme;
                 }elseif($order_platform == 3){

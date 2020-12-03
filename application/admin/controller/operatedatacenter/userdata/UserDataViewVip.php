@@ -110,10 +110,11 @@ class UserDataViewVip extends Backend
                 if($now_time>$end_time){
                     $list[$key]['rest_days'] = 0;
                 }else{
-                    $list[$key]['rest_days'] = 1 + ceil(($end_time-$now_time)/60/60/24);
+                    $list[$key]['rest_days'] = ceil(($end_time-$now_time)/60/60/24);
                 }
                 $order_where['customer_id'] = $value['customer_id'];
                 $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+                $order_where['order_type'] = 1;
                 $order_time_where['created_at'] = ['between',[$value['start_time'],$value['end_time']]];
                 $list[$key]['vip_order_num'] = $order_model->where($order_where)->where($order_time_where)->count();  //VIP期间支付订单数
                 $list[$key]['vip_order_amount'] = $order_model->where($order_where)->where($order_time_where)->sum('base_grand_total');//VIP期间支付金额
@@ -240,11 +241,12 @@ class UserDataViewVip extends Backend
                 if($now_time>$end_time){
                     $tmpRow['rest_days'] = 0;
                 }else{
-                    $tmpRow['rest_days'] = 1 + ceil(($end_time-$now_time)/60/60/24);
+                    $tmpRow['rest_days'] = ceil(($end_time-$now_time)/60/60/24);
                 }
                 //VIP期间支付订单数
                 $order_where['customer_id'] = $val['customer_id'];
                 $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+                $order_where['order_type'] = 1;
                 $order_time_where['created_at'] = ['between',[$val['start_time'],$val['end_time']]];
                 $tmpRow['vip_order_num'] = $order_model->where($order_where)->where($order_time_where)->count();
                 $tmpRow['vip_order_amount'] = $order_model->where($order_where)->where($order_time_where)->sum('base_grand_total');//VIP期间支付金额

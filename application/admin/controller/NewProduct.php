@@ -75,12 +75,22 @@ class NewProduct extends Backend
         //设置过滤方法
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
+
             //如果发送的来源是Selectpage，则转发到Selectpage
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
             //如果切换站点清除默认值
             $filter = json_decode($this->request->get('filter'), true);
+
+            if (!empty($filter['sku'])){
+                if (preg_match("/\s/", $filter['sku'])){
+                    $map['sku'] = ['in', preg_split("/\s+/", $filter['sku'])];
+                    unset($filter['sku']);
+                    $this->request->get(['filter' => json_encode($filter)]);
+                }
+            }
+
             //可用库存搜索
             if ($filter['available_stock']) {
                 $item = new \app\admin\model\itemmanage\Item();
@@ -122,6 +132,7 @@ class NewProduct extends Backend
             // }
 
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+
             $total = $this->model
                 ->with(['supplier', 'newproductattribute'])
                 ->where($where)
@@ -844,12 +855,10 @@ class NewProduct extends Backend
             if (!$row) {
                 $this->error('未查询到数据');
             }
-
             $row = $row->toArray();
             if ($row['item_status'] != 1 && $row['item_status'] != 2) {
                 $this->error('此状态不能同步');
             }
-
             $map['id'] = $ids;
             $map['item_status'] = 1;
             $data['item_status'] = 2;
@@ -898,6 +907,87 @@ class NewProduct extends Backend
 
         $this->assign('platformarr', $magentoplatformarr);
         return $this->fetch('check');
+    }
+
+    /**
+     * 批量审核通过
+     */
+
+    public function passaudits(){
+        $ids  = input('param.ids');
+
+        if ($this->request->isAjax()) {
+
+            $site = input('site');
+            //查询所选择的数据
+            $where['new_product.id'] =   ['in',$ids];
+            $row = $this->model->where($where)->with(['newproductattribute'])->select();
+
+            if (!$row) {
+                $this->error('未查询到数据');
+            }
+            $row = collection($row)->toArray();
+            foreach ($row  as $key=>$item){
+                if ($item['item_status'] !=1 && $item['item_status'] !=2){
+                    $this->error($item['sku'].'数据状态不能同步');
+                }
+                $map['id'] = $item['id'];
+                $map['item_status'] = 1;
+                $data['item_status'] = 2;
+                $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+                if ($res !== false) {
+                    $params = $item;
+                    $params['create_person'] = session('admin.nickname');
+                    $params['create_time'] = date('Y-m-d H:i:s', time());
+                    $params['item_status'] = 1;
+                    unset($params['id']);
+                    unset($params['newproductattribute']);
+                    //查询商品表SKU是否存在
+                    $t_where['sku'] = $params['sku'];
+                    $t_where['is_del'] = 1;
+                    $count = $this->item->where($t_where)->count();
+                    //此SKU已存在 跳过
+                    if ($count < 1) {
+                        //添加商品主表信息
+                        $this->item->allowField(true)->save($params);
+                        $attributeParams = $item['newproductattribute'];
+                        unset($attributeParams['id']);
+                        unset($attributeParams['frame_images']);
+                        unset($attributeParams['frame_color']);
+                        $attributeParams['item_id'] = $this->item->id;
+                        //添加商品属性表信息
+                        $this->itemAttribute->allowField(true)->save($attributeParams);
+                    }
+
+                    //添加对应平台映射关系
+                    $skuParams['site'] = $site;
+                    $skuParams['sku'] = $params['sku'];
+                    $skuParams['frame_is_rimless'] = $item['frame_is_rimless'];
+                    $skuParams['name'] = $item['name'];
+                    $skuParams['category_id'] = $item['category_id'];
+
+                    $result = (new \app\admin\model\itemmanage\ItemPlatformSku())->addPlatformSku($skuParams);
+
+                } else {
+                    $this->error('审核失败');
+                }
+            }
+            $this->success('审核成功');
+
+        }else{
+            if ($ids)
+            $where['id'] = ['in',$ids];
+            $find = $this->model->where($where)->field('sku')->select();
+            $sku = implode(',',array_column($find,'sku'));
+            //查询对应平台
+            $magentoplatformarr = $this->magentoplatformarr;
+            $magentoplatformarr = array_column($this->magentoplatform->getAuthSite(), 'name', 'id');
+
+            $this->assign('platformarr', $magentoplatformarr);
+            $this->assign('sku', $sku);
+            $this->assign('ids', $ids);
+            return $this->fetch('checkall');
+        }
     }
 
     /***

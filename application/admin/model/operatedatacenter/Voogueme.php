@@ -145,7 +145,7 @@ class Voogueme extends Model
         if (!$time_str) {
             $start = date('Y-m-d', strtotime('-6 day'));
             $end   = date('Y-m-d 23:59:59');
-            $time_str = $start .' 00:00:00 - ' .$end.' 00:00:00';
+            $time_str = $start .' 00:00:00 - ' .$end;
         }
         //时间段总和
         $createat = explode(' ', $time_str);
@@ -223,6 +223,11 @@ class Voogueme extends Model
      */
     public function getAgainUser($time_str = '', $time_str2 = '')
     {
+        if (!$time_str) {
+            $start = date('Y-m-d', strtotime('-6 day'));
+            $end   = date('Y-m-d 23:59:59');
+            $time_str = $start .' 00:00:00 - ' .$end;
+        }
         $createat = explode(' ', $time_str);
         $again_num = $this->get_again_user($createat);
         $arrs['again_user_num'] = $again_num;
@@ -319,6 +324,11 @@ class Voogueme extends Model
 
     //获取某一段时间内的复购VIP用户数 new
     public function get_again_user_vip($createat = ''){
+        if(!$createat){
+            $start = date('Y-m-d', strtotime('-6 day'));
+            $end   = date('Y-m-d 23:59:59');
+            $createat = $start .' 00:00:00 - ' .$end;
+        }
         $createat = explode(' ', $createat);
         $map_where['o.created_at'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
         $order_where['o.created_at'] = ['lt',$createat[0]];

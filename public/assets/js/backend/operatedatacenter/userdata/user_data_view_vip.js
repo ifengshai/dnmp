@@ -23,12 +23,46 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                     return false;
                 }
                 order_data_view();
+                var params = table.bootstrapTable('getOptions')
+                params.queryParams = function(params) {
+         
+                    //定义参数
+                    var filter = {};
+                    //遍历form 组装json
+                    $.each($("#form").serializeArray(), function(i, field) {
+                        filter[field.name] = field.value;
+                    });
+         
+                    //参数转为json字符串
+                    params.filter = JSON.stringify(filter)
+                    console.info(params);
+                    return params;
+                }
+
+                table.bootstrapTable('refresh',params);
             });
             $("#sku_reset").click(function () {
                 $("#order_platform").val(1);
                 $("#time_str").val('');
                 $("#time_str2").val('');
                 order_data_view();
+                var params = table.bootstrapTable('getOptions')
+                params.queryParams = function(params) {
+         
+                    //定义参数
+                    var filter = {};
+                    //遍历form 组装json
+                    $.each($("#form").serializeArray(), function(i, field) {
+                        filter[field.name] = field.value;
+                    });
+         
+                    //参数转为json字符串
+                    params.filter = JSON.stringify(filter)
+                    console.info(params);
+                    return params;
+                }
+
+                table.bootstrapTable('refresh',params);
             });
             $("#export").click(function(){
                 var order_platform = $('#order_platform').val();
@@ -40,7 +74,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
             table.bootstrapTable({
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
                 pk: 'id',
-                sortName: 'id',
+                sortName: 'start_time',
                 search: false,//通用搜索
                 commonSearch: false,
                 showToggle: false,
@@ -150,6 +184,8 @@ function order_data_view() {
             }
             str1 += vip_num.contrast_vip_user_num+'%</span></div>';   
             $("#contrast_active_user_num").html(str1);               
+        }else{
+            $("#contrast_active_user_num").html(''); 
         }
         var str2 = '';
         if(again_user_num.contrast_again_user_num){
@@ -161,6 +197,8 @@ function order_data_view() {
             }              
             str2 += again_user_num.contrast_again_user_num+'%</span></div>'; 
             $("#contrast_again_user_num").html(str2);           
+        }else{
+            $("#contrast_again_user_num").html('');    
         }
 
         return false;

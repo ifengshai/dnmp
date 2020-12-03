@@ -5,6 +5,7 @@ namespace app\admin\controller\demand;
 use app\api\controller\Ding;
 use app\common\controller\Backend;
 use app\common\model\Auth;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use think\Db;
 use think\Request;
 use app\admin\model\AuthGroup;
@@ -262,7 +263,6 @@ class ItWebDemand extends Backend
             $this->request->get(['filter' => json_encode($filter)]);
 
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-
             $total = $this->model
                 ->where($where)
                 ->where($meWhere)
@@ -376,6 +376,223 @@ class ItWebDemand extends Backend
         return $this->view->fetch();
     }
 
+    public function batch_export_xls(){
+        $where['is_del'] =['eq',1];
+        $where['demand_type'] =['eq',1];
+        $where['create_time'] = ['between',['2020-11-01 00:00:00','2020-11-30 23:59:59']];
+//        $field = 'id,site,entry_user_id,type,functional_module,title,create_time,pm_audit_status_time,web_designer_user_id,app_user_id,phper_user_id,node_time
+//        develop_finish_time,web_designer_complexity,web_designer_group,web_remarks,pm_audit_status,pm_confirm_time,copy_to_user_id';
+        $list = $this->model
+            ->where($where)
+            ->order('id desc')
+//            ->field($field)
+            ->limit(10)
+            ->select();
+        $list = collection($list)->toArray();
+        foreach ($list as $k => $v) {
+            $user_detail = $this->auth->getUserInfo($list[$k]['entry_user_id']);
+            $web_designer_user_id = $this->auth->getUserInfo($list[$k]['web_designer_user_id']);
+            $copy_to_user_id = $this->auth->getUserInfo($list[$k]['copy_to_user_id']);
+            $list[$k]['entry_user_name'] = $user_detail['nickname']; //取提出人
+            $list[$k]['web_designer_user_id'] = $web_designer_user_id['nickname']; //取提出人
+            $list[$k]['copy_to_user_id'] = $copy_to_user_id['nickname']; //取提出人
+            //站点
+            if ($v['site'] ==1){
+                $list[$k]['site'] = 'zeelool';
+            }elseif ($v['site'] ==2){
+                $list[$k]['site'] = 'voogueme';
+            }elseif ($v['site'] ==3){
+                $list[$k]['site'] = 'nihao';
+            }elseif ($v['site'] ==4){
+                $list[$k]['site'] = 'meeloog';
+            }elseif ($v['site'] ==5){
+                $list[$k]['site'] = 'wesee';
+            }elseif ($v['site'] ==6){
+                $list[$k]['site'] = 'rufoo';
+            }elseif ($v['site'] ==7){
+                $list[$k]['site'] = 'toloog';
+            }else{
+                $list[$k]['site'] = 'other';
+            }
+
+            //任务类型
+            if ($v['site_type'] ==1){
+                $list[$k]['site_type'] = 'bug';
+            }elseif($v['site_type']==2){
+                $list[$k]['site_type'] = '维护';
+            }elseif($v['site_type']==3){
+                $list[$k]['site_type'] = '优化';
+            }elseif($v['site_type']==4){
+                $list[$k]['site_type'] = '新功能';
+            }else{
+                $list[$k]['site_type'] = '开发';
+            }
+            //功能模块
+            if ($v['functional_module'] ==1){
+                $list[$k]['functional_module'] = '购物车';
+            }elseif ($v['functional_module'] ==2){
+                $list[$k]['functional_module'] = '个人中心';
+            }elseif ($v['functional_module'] ==3){
+                $list[$k]['functional_module'] = '列表页';
+            }elseif ($v['functional_module'] ==4){
+                $list[$k]['functional_module'] = '详情页';
+            }elseif ($v['functional_module'] ==5){
+                $list[$k]['functional_module'] = '首页';
+            }elseif ($v['functional_module'] ==6){
+                $list[$k]['functional_module'] = '优惠券';
+            }elseif ($v['functional_module'] ==7){
+                $list[$k]['functional_module'] = '支付页';
+            }elseif ($v['functional_module'] ==8){
+                $list[$k]['functional_module'] = 'magento后台';
+            }else{
+                $list[$k]['functional_module'] = '活动页';
+            }
+            //难易程度
+            if ($v['web_designer_complexity'] ==1){
+                $list[$k]['web_designer_complexity'] = '简单';
+            }elseif ($v['web_designer_complexity'] ==2){
+                $list[$k]['web_designer_complexity'] = '中等';
+            }else{
+                $list[$k]['web_designer_complexity'] = '复杂';
+            }
+            //是否需要前端
+            if ($v['web_designer_group'] ==1){
+                $list[$k]['web_designer_group'] = '未确认';
+            }elseif ($v['web_designer_group'] ==2){
+                $list[$k]['web_designer_group'] = '需要';
+            }else{
+                $list[$k]['web_designer_group'] = '不需要';
+            }
+            if ($v['test_group'] ==1){
+                $list[$k]['test_group'] = '未确认';
+            }elseif ($v['test_group'] ==2){
+                $list[$k]['test_group'] = '需要';
+            }else{
+                $list[$k]['test_group'] = '不需要';
+            }
+
+            //是否超时
+            if ($v['end_time'] < $v['node_time']){
+                $list[$k]['overtime'] ='是';
+            }else{
+                $list[$k]['overtime'] ='否';
+            }
+            //是否拒绝
+            if ($v['web_remarks'] !== null){
+                $list[$k]['web_remarks'] ='是';
+            }else{
+                $list[$k]['web_remarks'] ='否';
+            }
+
+            if ($v['pm_audit_status'] !== 3){
+                $list[$k]['pm_audit_status'] ='否';
+            }else{
+                $list[$k]['pm_audit_status'] ='是';
+            }
+        }
+            //从数据库查询需要的数据
+            $spreadsheet = new Spreadsheet();
+
+            //常规方式：利用setCellValue()填充数据
+            $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "需求ID")
+                ->setCellValue("B1", "站点")
+                ->setCellValue("C1", "提出人");
+            $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "任务类型")
+                ->setCellValue("E1", "功能模块")
+                ->setCellValue("F1", "标题")
+                ->setCellValue("G1", "创建时间")
+                ->setCellValue("H1", "产品审核通过时间")
+                ->setCellValue("I1", "开发责任人")
+                ->setCellValue("J1", "计划完成时间")
+                ->setCellValue("K1", "实际开发完成时间")
+                ->setCellValue("L1", "需求上线时间")
+                ->setCellValue("M1", "前端预期难易度")
+                ->setCellValue("N1", "是否存在二次修改需求")
+                ->setCellValue("O1", "是否需要前端")
+                ->setCellValue("P1", "是否需要测试")
+                ->setCellValue("Q1", "是否超时")
+                ->setCellValue("R1", "是否拒绝")
+                ->setCellValue("S1", "是否存在过pending");
+            foreach ($list as $key => $value) {
+                $spreadsheet->getActiveSheet()->setCellValueExplicit("A" . ($key * 1 + 2), $value['id'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+                $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['site']);
+                $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['entry_user_name']);
+                $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['site_type']);
+                $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['functional_module']);
+                $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['title']);
+                $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['create_time']);
+                $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['pm_confirm_time']);
+                $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), $value['copy_to_user_id']);
+                $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 1 + 2), $value['node_time']);
+                $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 1 + 2), $value['develop_finish_time']);
+                //测试确认时间
+                $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 1 + 2), $value['test_confirm_time']);
+                $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 1 + 2), $value['web_designer_complexity']);
+
+                $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 1 + 2), '否');
+
+                $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 1 + 2), $value['web_designer_group']);
+                $spreadsheet->getActiveSheet()->setCellValue("P" . ($key * 1 + 2), $value['test_group']);
+                $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 1 + 2), $value['overtime']);
+                $spreadsheet->getActiveSheet()->setCellValue("R" . ($key * 1 + 2), $value['web_remarks']);
+                $spreadsheet->getActiveSheet()->setCellValue("S" . ($key * 1 + 2), $value['pm_audit_status']);
+
+            }
+
+            //设置宽度
+            $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(20);
+            $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(20);
+            $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(20);
+            $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(20);
+            $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(20);
+            $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(40);
+            $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(20);
+            $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(20);
+            $spreadsheet->getActiveSheet()->getColumnDimension('J')->setWidth(20);
+            $spreadsheet->getActiveSheet()->getColumnDimension('L')->setWidth(20);
+
+
+            //设置边框
+            $border = [
+                'borders' => [
+                    'allBorders' => [
+                        'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
+                        'color' => ['argb' => 'FF000000'], // 设置border颜色
+                    ],
+                ],
+            ];
+
+            $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+
+
+            $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
+            $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
+
+            $spreadsheet->getActiveSheet()->getStyle('A1:S' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            $spreadsheet->setActiveSheetIndex(0);
+
+            $format = 'xlsx';
+            $savename = '十一月份网站需求' . date("YmdHis", time());;
+
+            if ($format == 'xls') {
+                //输出Excel03版本
+                header('Content-Type:application/vnd.ms-excel');
+                $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
+            } elseif ($format == 'xlsx') {
+                //输出07Excel版本
+                header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+                $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
+            }
+
+            //输出名称
+            header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
+            //禁止缓存
+            header('Cache-Control: max-age=0');
+            $writer = new $class($spreadsheet);
+
+            $writer->save('php://output');
+
+        }
 
 
     /**

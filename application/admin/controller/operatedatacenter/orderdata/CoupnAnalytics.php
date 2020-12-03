@@ -386,12 +386,12 @@ class CoupnAnalytics extends Backend
     }
 
     /**
-     * 处方类型占比饼图
+     * 优惠券金额占比
      *
-     * @Description
-     * @author wpl
-     * @since 2020/10/14 15:02:23 
-     * @return void
+     * Created by Phpstorm.
+     * User: jhh
+     * Date: 2020/12/2
+     * Time: 9:53:36
      */
     public function lens_data_pie()
     {
@@ -473,23 +473,23 @@ class CoupnAnalytics extends Backend
             $json['columnData'] = [
                 [
                     'name' => '网站优惠券',
-                    'value' => $num[1],
+                    'value' => round($num[1],2),
                 ],
                 [
                     'name' => '主页优惠券',
-                    'value' => $num[2],
+                    'value' => round($num[2],2),
                 ],
                 [
                     'name' => '用户优惠券',
-                    'value' => $num[3],
+                    'value' => round($num[3],2),
                 ],
                 [
                     'name' => '渠道优惠券',
-                    'value' => $num[4],
+                    'value' => round($num[4],2),
                 ],
                 [
                     'name' => '客服优惠券',
-                    'value' => $num[5],
+                    'value' => round($num[5],2),
                 ],
                 [
                     'name' => '未使用优惠券',
