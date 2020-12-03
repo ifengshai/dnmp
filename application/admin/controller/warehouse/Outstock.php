@@ -102,8 +102,11 @@ class Outstock extends Backend
     {
         set_time_limit(0);
         ini_set('memory_limit', '512M');
+
         $ids = input('id_params');
-        $item_map['out_stock_id'] = ['in', $ids];
+        if (!empty($ids)){
+            $item_map['s.out_stock_id'] = ['in', $ids];
+        }
         $list = $this->model
             ->alias('o')
             ->join(['fa_out_stock_item' => 's'], 'o.id = s.out_stock_id')

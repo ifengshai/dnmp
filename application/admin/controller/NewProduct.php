@@ -855,12 +855,10 @@ class NewProduct extends Backend
             if (!$row) {
                 $this->error('未查询到数据');
             }
-
             $row = $row->toArray();
             if ($row['item_status'] != 1 && $row['item_status'] != 2) {
                 $this->error('此状态不能同步');
             }
-
             $map['id'] = $ids;
             $map['item_status'] = 1;
             $data['item_status'] = 2;
