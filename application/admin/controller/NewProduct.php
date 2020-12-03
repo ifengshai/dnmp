@@ -3,6 +3,7 @@
 namespace app\admin\controller;
 
 use app\common\controller\Backend;
+use think\Log;
 use think\Request;
 use think\Db;
 use think\Exception;
@@ -927,14 +928,18 @@ class NewProduct extends Backend
                 $this->error('未查询到数据');
             }
             $row = collection($row)->toArray();
+
+            $test = array();
             foreach ($row  as $key=>$item){
                 if ($item['item_status'] !=1 && $item['item_status'] !=2){
                     $this->error($item['sku'].'数据状态不能同步');
                 }
+                $test[$key] =$item['id'];
+
                 $map['id'] = $item['id'];
                 $map['item_status'] = 1;
                 $data['item_status'] = 2;
-                $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+                $res = $this->model->where($map)->update($data);
                 if ($res !== false) {
                     $params = $item;
                     $params['create_person'] = session('admin.nickname');
@@ -965,9 +970,7 @@ class NewProduct extends Backend
                     $skuParams['frame_is_rimless'] = $item['frame_is_rimless'];
                     $skuParams['name'] = $item['name'];
                     $skuParams['category_id'] = $item['category_id'];
-
                     $result = (new \app\admin\model\itemmanage\ItemPlatformSku())->addPlatformSku($skuParams);
-
                 } else {
                     $this->error('审核失败');
                 }
