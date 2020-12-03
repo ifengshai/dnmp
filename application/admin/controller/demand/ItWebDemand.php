@@ -483,7 +483,7 @@ class ItWebDemand extends Backend
                 $list[$k]['web_remarks'] ='否';
             }
 
-            if ($v['pm_audit_status'] !== 3){
+            if ($v['pm_audit_status'] !== 2){
                 $list[$k]['pm_audit_status'] ='否';
             }else{
                 $list[$k]['pm_audit_status'] ='是';
