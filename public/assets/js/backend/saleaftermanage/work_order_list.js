@@ -2563,7 +2563,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
 
                             //是否为子单取消
                             if (id == 18) {
-                                item_input_content +='<input type="hidden" name="row[item_order_info]['+ item_order_number +'][cancel_order]" value="' + sku + '"/>';
+                                item_input_content +='<input type="hidden" name="row[item_order_info]['+ item_order_number +'][cancel_order][sku]" value="' + sku + '"/>';
                             }
                         });
                         //判断如果存在1 则改为需要审核
