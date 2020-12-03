@@ -468,6 +468,7 @@
                 <input type="hidden" id='order_item_numbers' name="row[order_item_numbers]"  value="{:$order_item_numbers}" />
                 {else/}
                 {:build_select('row[order_sku][]', [], [], ['class'=>'form-control selectpicker item_order_selectpicker','multiple'=>'multiple','id'=>'c-order_sku','title'=>"请选择"])}
+                <input type="hidden" id='order_item_numbers' name="row[order_item_numbers]"/>
                 {/if}
             </div>
         </div>
