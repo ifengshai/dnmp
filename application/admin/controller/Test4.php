@@ -467,7 +467,7 @@ class Test4 extends Controller
                     $order_user_count2++;
                 }
             }
-            $arr['update_user_change_rate'] = $update_num ? round($order_user_count2/$update_num*100,0) : 0;
+            $arr['update_user_change_rate'] = $update_num ? round($order_user_count2/$update_num*100,2) : 0;
             //更新数据
             Db::name('datacenter_day')->where('id', $val['id'])->update($arr);
             echo $val['day_date'] . "\n";
@@ -514,7 +514,7 @@ class Test4 extends Controller
                     $order_user_count2++;
                 }
             }
-            $arr['update_user_change_rate'] = $update_num ? round($order_user_count2/$update_num*100,0) : 0;
+            $arr['update_user_change_rate'] = $update_num ? round($order_user_count2/$update_num*100,2) : 0;
 
             //更新数据
             Db::name('datacenter_day')->where('id', $val['id'])->update($arr);
@@ -562,7 +562,7 @@ class Test4 extends Controller
                     $order_user_count2++;
                 }
             }
-            $arr['update_user_change_rate'] = $update_num ? round($order_user_count2/$update_num*100,0) : 0;
+            $arr['update_user_change_rate'] = $update_num ? round($order_user_count2/$update_num*100,2) : 0;
             //更新数据
             Db::name('datacenter_day')->where('id', $val['id'])->update($arr);
             echo $val['day_date'] . "\n";
