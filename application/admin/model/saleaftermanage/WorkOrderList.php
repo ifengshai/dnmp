@@ -5,6 +5,7 @@ namespace app\admin\model\saleaftermanage;
 use app\admin\model\Admin;
 use app\admin\model\DistributionAbnormal;
 use app\admin\model\DistributionLog;
+use app\admin\model\warehouse\StockHouse;
 use think\Cache;
 use think\Db;
 use think\Exception;
@@ -1635,6 +1636,7 @@ class WorkOrderList extends Model
         //检测是否有标记异常
         $_distribution_abnormal = new DistributionAbnormal();
         $_new_order_item_process = new NewOrderItemProcess();
+        $_stock_house = new StockHouse();
         $item_process_ids = $_distribution_abnormal
             ->where(['work_id' => $work->id, 'status' => 1])
             ->column('item_process_id')
@@ -1645,6 +1647,21 @@ class WorkOrderList extends Model
                 ->allowField(true)
                 ->save(['status' => 2, 'do_time' => time(), 'do_person' => session('admin.nickname')],['work_id' => $work->id, 'status' => 1])
             ;
+
+            //获取异常库位id集
+            $abnormal_house_ids = $_new_order_item_process
+                ->where(['id' => ['in',$item_process_ids]])
+                ->column('abnormal_house_id')
+            ;
+            if($abnormal_house_ids){
+                //异常库位号占用数量减1
+                foreach($abnormal_house_ids as $v){
+                    $_stock_house
+                        ->where(['id' => $v])
+                        ->setDec('occupy', 1)
+                    ;
+                }
+            }
 
             //解绑子订单的异常库位ID
             $_new_order_item_process
