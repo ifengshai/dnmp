@@ -287,4 +287,15 @@ class Test01 extends Backend
         }
 
     }
+
+    public function test102()
+    {
+        $data_center_sku_day = Db::name('datacenter_sku_day')->where('day_date','2020-11-11')->field('sku,site,now_pricce')->select();
+        foreach ($data_center_sku_day as $k=>$v){
+            $update = Db::name('datacenter_sku_day')->where('day_date','2020-11-12')->where('sku',$v['sku'])->where('site',$v['site'])->update(['now_pricce'=>$v['now_price']]);
+            if ($update){
+                echo $v['sku'];
+            }
+        }
+    }
 }
