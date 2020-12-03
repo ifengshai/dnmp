@@ -1095,6 +1095,9 @@ class WorkOrderList extends Backend
                     empty($measure_choose_id) && empty($item_order_info) && $this->error("请选择实施措施");
                 }
 
+                //主单和子单全部的措施id
+                $all_choose_ids = [];
+
                 //检测主订单措施
                 if(!empty($measure_choose_id)){
                     /**
@@ -1105,6 +1108,8 @@ class WorkOrderList extends Backend
                      * 4、优惠券等于100% 经理审核  50%主管审核 固定额度无需审核
                      * 5、运营客服组的优惠券都由客服经理审核
                      */
+
+                    $all_choose_ids = $measure_choose_id;
 
                     //校验退款、vip退款
                     if(array_intersect([2, 15], $measure_choose_id)){
@@ -1221,60 +1226,6 @@ class WorkOrderList extends Backend
                     }else{
                         unset($params['refund_logistics_num']);
                     }
-
-                    /**获取审核人 start*/
-                    $check_person_weight = $workOrderConfigValue['check_person_weight'];//审核人列表
-                    $check_group_weight = $workOrderConfigValue['check_group_weight'];//审核组列表
-                    $all_group = $workOrderConfigValue['group'];//所有的成员组
-
-                    //核算审核组
-                    if (!empty($check_group_weight)) {
-                        foreach ($check_group_weight as $gv) {
-                            //获取当前组下的所有成员
-                            $subordinate = (new AuthGroup)->getAllNextGroup($gv['work_create_person_id']);
-                            if ($subordinate) {
-                                array_push($subordinate, $gv['work_create_person_id']);
-                                foreach ($subordinate as $av) {
-                                    if (is_array($all_group[$av])) {
-                                        foreach ($all_group[$av] as $vk) {
-                                            $all_person[] = $vk;
-                                        }
-                                    }
-                                }
-                            } else {
-                                $all_person = $all_group[$gv['work_create_person_id']];
-                            }
-                            if (!empty($all_person)) {
-                                //如果符合创建组
-                                if (in_array($admin_id, array_unique($all_person))) {
-                                    if(!$this->weight_currency($gv,$measure_choose_id,$params)){
-                                        $params['is_check'] = 1;
-                                        $params['assign_user_id'] = $all_group[$gv['check_group_id']][0];
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    //核算审核人
-                    if (!empty($check_person_weight)) {
-                        foreach ($check_person_weight as $wkv) {
-                            if ($admin_id == $wkv['work_create_person_id']) {
-                                if(!$this->weight_currency($wkv,$measure_choose_id,$params)){
-                                    $params['is_check'] = 1;
-                                    $params['assign_user_id'] = $all_group[$wkv['check_group_id']][0];
-                                    break;
-                                }
-                            }
-                        }
-                    }
-
-                    //没有审核人则不需要审核
-                    if (!$params['assign_user_id']) {
-                        $params['is_check'] = 0;
-                    }
-                    /**获取审核人 end*/
                 }
 
                 //检测子订单措施
@@ -1284,6 +1235,7 @@ class WorkOrderList extends Backend
                     foreach ($item_order_info as $key=>&$item){
                         $item['item_choose'] = array_unique(array_filter($item['item_choose']));
                         empty($item['item_choose']) && $this->error("请选择子订单：{$key} 的实施措施");
+                        $all_choose_ids = array_unique(array_merge($all_choose_ids,$item['item_choose']));
 
                         //更改镜框校验库存
                         if(in_array(19, $item['item_choose'])){
@@ -1294,6 +1246,60 @@ class WorkOrderList extends Backend
                     }
                     unset($item);
                 }
+
+                /**获取审核人 start*/
+                $check_person_weight = $workOrderConfigValue['check_person_weight'];//审核人列表
+                $check_group_weight = $workOrderConfigValue['check_group_weight'];//审核组列表
+                $all_group = $workOrderConfigValue['group'];//所有的成员组
+
+                //核算审核组
+                if (!empty($check_group_weight)) {
+                    foreach ($check_group_weight as $gv) {
+                        //获取当前组下的所有成员
+                        $subordinate = (new AuthGroup)->getAllNextGroup($gv['work_create_person_id']);
+                        if ($subordinate) {
+                            array_push($subordinate, $gv['work_create_person_id']);
+                            foreach ($subordinate as $av) {
+                                if (is_array($all_group[$av])) {
+                                    foreach ($all_group[$av] as $vk) {
+                                        $all_person[] = $vk;
+                                    }
+                                }
+                            }
+                        } else {
+                            $all_person = $all_group[$gv['work_create_person_id']];
+                        }
+                        if (!empty($all_person)) {
+                            //如果符合创建组
+                            if (in_array($admin_id, array_unique($all_person))) {
+                                if(!$this->weight_currency($gv,$all_choose_ids,$params)){
+                                    $params['is_check'] = 1;
+                                    $params['assign_user_id'] = $all_group[$gv['check_group_id']][0];
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                //核算审核人
+                if (!empty($check_person_weight)) {
+                    foreach ($check_person_weight as $wkv) {
+                        if ($admin_id == $wkv['work_create_person_id']) {
+                            if(!$this->weight_currency($wkv,$all_choose_ids,$params)){
+                                $params['is_check'] = 1;
+                                $params['assign_user_id'] = $all_group[$wkv['check_group_id']][0];
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                //没有审核人则不需要审核
+                if (!$params['assign_user_id']) {
+                    $params['is_check'] = 0;
+                }
+                /**获取审核人 end*/
 
                 //点击提交按钮
                 if (2 == $params['work_status']) {
@@ -1753,6 +1759,9 @@ class WorkOrderList extends Backend
                     $params['problem_type_content'] = $workOrderConfigValue['warehouse_problem_type'][$params['problem_type_id']];
                 }
 
+                //主单和子单全部的措施id
+                $all_choose_ids = [];
+
                 //检测主订单措施
                 if(!empty($measure_choose_id)){
                     /**
@@ -1763,6 +1772,8 @@ class WorkOrderList extends Backend
                      * 4、优惠券等于100% 经理审核  50%主管审核 固定额度无需审核
                      * 5、运营客服组的优惠券都由客服经理审核
                      */
+
+                    $all_choose_ids = $measure_choose_id;
 
                     //校验退款、vip退款
                     if(array_intersect([2, 15], $measure_choose_id)){
@@ -1880,60 +1891,6 @@ class WorkOrderList extends Backend
                     }else{
                         unset($params['refund_logistics_num']);
                     }
-
-                    /**获取审核人 start*/
-                    $check_person_weight = $workOrderConfigValue['check_person_weight'];//审核人列表
-                    $check_group_weight = $workOrderConfigValue['check_group_weight'];//审核组列表
-                    $all_group = $workOrderConfigValue['group'];//所有的成员组
-
-                    //核算审核组
-                    if (!empty($check_group_weight)) {
-                        foreach ($check_group_weight as $gv) {
-                            //获取当前组下的所有成员
-                            $subordinate = (new AuthGroup)->getAllNextGroup($gv['work_create_person_id']);
-                            if ($subordinate) {
-                                array_push($subordinate, $gv['work_create_person_id']);
-                                foreach ($subordinate as $av) {
-                                    if (is_array($all_group[$av])) {
-                                        foreach ($all_group[$av] as $vk) {
-                                            $all_person[] = $vk;
-                                        }
-                                    }
-                                }
-                            } else {
-                                $all_person = $all_group[$gv['work_create_person_id']];
-                            }
-                            if (!empty($all_person)) {
-                                //如果符合创建组
-                                if (in_array($admin_id, array_unique($all_person))) {
-                                    if(!$this->weight_currency($gv,$measure_choose_id,$params)){
-                                        $params['is_check'] = 1;
-                                        $params['assign_user_id'] = $all_group[$gv['check_group_id']][0];
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    //核算审核人
-                    if (!empty($check_person_weight)) {
-                        foreach ($check_person_weight as $wkv) {
-                            if ($admin_id == $wkv['work_create_person_id']) {
-                                if(!$this->weight_currency($wkv,$measure_choose_id,$params)){
-                                    $params['is_check'] = 1;
-                                    $params['assign_user_id'] = $all_group[$wkv['check_group_id']][0];
-                                    break;
-                                }
-                            }
-                        }
-                    }
-
-                    //没有审核人则不需要审核
-                    if (!$params['assign_user_id']) {
-                        $params['is_check'] = 0;
-                    }
-                    /**获取审核人 end*/
                 }
 
                 //检测子订单措施
@@ -1943,6 +1900,7 @@ class WorkOrderList extends Backend
                     foreach ($item_order_info as $key=>&$item){
                         $item['item_choose'] = array_unique(array_filter($item['item_choose']));
                         empty($item['item_choose']) && $this->error("请选择子订单：{$key} 的实施措施");
+                        $all_choose_ids = array_unique(array_merge($all_choose_ids,$item['item_choose']));
 
                         //更改镜框校验库存
                         if(in_array(19, $item['item_choose'])){
@@ -1953,6 +1911,60 @@ class WorkOrderList extends Backend
                     }
                     unset($item);
                 }
+
+                /**获取审核人 start*/
+                $check_person_weight = $workOrderConfigValue['check_person_weight'];//审核人列表
+                $check_group_weight = $workOrderConfigValue['check_group_weight'];//审核组列表
+                $all_group = $workOrderConfigValue['group'];//所有的成员组
+
+                //核算审核组
+                if (!empty($check_group_weight)) {
+                    foreach ($check_group_weight as $gv) {
+                        //获取当前组下的所有成员
+                        $subordinate = (new AuthGroup)->getAllNextGroup($gv['work_create_person_id']);
+                        if ($subordinate) {
+                            array_push($subordinate, $gv['work_create_person_id']);
+                            foreach ($subordinate as $av) {
+                                if (is_array($all_group[$av])) {
+                                    foreach ($all_group[$av] as $vk) {
+                                        $all_person[] = $vk;
+                                    }
+                                }
+                            }
+                        } else {
+                            $all_person = $all_group[$gv['work_create_person_id']];
+                        }
+                        if (!empty($all_person)) {
+                            //如果符合创建组
+                            if (in_array($admin_id, array_unique($all_person))) {
+                                if(!$this->weight_currency($gv,$all_choose_ids,$params)){
+                                    $params['is_check'] = 1;
+                                    $params['assign_user_id'] = $all_group[$gv['check_group_id']][0];
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                //核算审核人
+                if (!empty($check_person_weight)) {
+                    foreach ($check_person_weight as $wkv) {
+                        if ($admin_id == $wkv['work_create_person_id']) {
+                            if(!$this->weight_currency($wkv,$all_choose_ids,$params)){
+                                $params['is_check'] = 1;
+                                $params['assign_user_id'] = $all_group[$wkv['check_group_id']][0];
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                //没有审核人则不需要审核
+                if (!$params['assign_user_id']) {
+                    $params['is_check'] = 0;
+                }
+                /**获取审核人 end*/
 
                 //点击提交按钮
                 if (2 == $params['work_status']) {
