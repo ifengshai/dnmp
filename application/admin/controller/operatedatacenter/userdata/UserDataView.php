@@ -209,10 +209,13 @@ class UserDataView extends Backend
                 $data = $arr;
             }else{
                 if($order_platform == 2){
+                    $where['site'] = 2;
                     $model = $this->vooguemeOperate;
                 }elseif($order_platform == 3){
+                    $where['site'] = 3;
                     $model = $this->nihaoOperate;
                 }else{
+                    $where['site'] = 1;
                     $model = $this->zeeloolOperate;
                 }
                 if ($time_str) {
