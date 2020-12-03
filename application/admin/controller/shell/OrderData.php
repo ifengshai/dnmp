@@ -1853,7 +1853,7 @@ class OrderData extends Backend
             $params = [];
             foreach ($list as $k => $v) {
                 $params[$k]['id'] = $v['id'];
-                $params[$k]['last_trans_id'] = $res[$v['entity_id']];
+                $params[$k]['last_trans_id'] = $res[$v['entity_id']] ?: 0;
             }
             $this->order->saveAll($params);
             echo $site . 'ok';
