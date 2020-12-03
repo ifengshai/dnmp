@@ -2371,7 +2371,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         //判断赠品信息的状态，如果显示的话把数据带出来，如果隐藏的话则不显示赠品数据 end
                     }
                     //如果子单号item_order_info存在带出子单措施的数据
-                    if (Config.item_order_info) {
+                    if (Config.item_order_info && !(Config.work_type == 2 && Config.work_status == 1)) {
                         var item_order_info = Config.item_order_info;
                         //生成折叠框
                         itemSelectpicker(2,null,item_order_info);
@@ -3218,6 +3218,7 @@ function itemSelectpicker (type = 1,flag = null,item_order_info = '') {
             //根据下拉选择生成子订单列表
             var step_item = Config.workOrderConfigValue.step;
             var item_checkbox = '';
+            var order_item_numbers = item_order_sku.join(',');
 
             $('#div_item_content').show();
             var ihtml = '';
@@ -3254,5 +3255,6 @@ function itemSelectpicker (type = 1,flag = null,item_order_info = '') {
                 ihtml += '</div>';
             }
             $('#section_item_content').append(ihtml);
+            $('#order_item_numbers').val(order_item_numbers);
         }       
 }
