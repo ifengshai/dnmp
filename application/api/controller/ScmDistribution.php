@@ -302,8 +302,8 @@ class ScmDistribution extends Scm
         $option_info = $this->_new_order_item_option
             ->where('id', $item_process_info['option_id'])
             ->find()
-            ->toArray()
         ;
+        if($option_info) $option_info = $option_info->toArray();
 
         //获取更改镜框最新信息
         $change_sku = $this->_work_order_change_sku
@@ -332,9 +332,9 @@ class ScmDistribution extends Scm
             ])
             ->order('a.id','desc')
             ->find()
-            ->toArray()
         ;
         if($change_lens){
+            $change_lens = $change_lens->toArray();
             if($change_lens['pd_l'] && $change_lens['pd_r']){
                 $change_lens['pd'] = '';
             }else{
@@ -1615,8 +1615,8 @@ class ScmDistribution extends Scm
                                 ->where(['sku'=>$true_sku])
                                 ->field('stock,occupy_stock,distribution_occupy_stock')
                                 ->find()
-                                ->toArray()
                             ;
+                            $stock_arr = $stock_arr ? $stock_arr->toArray() : [];
                             $stock = $this->_item->where(['sku'=>$true_sku])->value('stock');
                             if ( in_array(0,$stock_arr) || empty($stock)){
                                 throw new Exception($value['sku'].':库存不足');
