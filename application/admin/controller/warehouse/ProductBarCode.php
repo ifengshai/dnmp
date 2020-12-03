@@ -2,6 +2,7 @@
 
 namespace app\admin\controller\warehouse;
 
+use app\admin\model\warehouse\Instock;
 use app\common\controller\Backend;
 use think\Db;
 use think\Exception;
@@ -302,7 +303,9 @@ EOF;
                 ->column('purchase_number','id');
 
             foreach ($list as $k=>$val){
+                $in_stock_time = (new Instock())->where('id', $val['in_stock_id'])->value('check_time');
                 $list[$k]['purchase_number'] = $purchase_list[$val['purchase_id']];
+                $list[$k]['check_time'] = $in_stock_time;
             }
 
             $result = array("total" => $total, "rows" => $list);
