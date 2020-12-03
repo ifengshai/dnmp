@@ -303,6 +303,7 @@ class ScmDistribution extends Scm
             ->where('id', $item_process_info['option_id'])
             ->find()
         ;
+        $option_info = collection($option_info)->toArray();
 
         //获取更改镜框最新信息
         $change_sku = $this->_work_order_change_sku
@@ -331,6 +332,7 @@ class ScmDistribution extends Scm
             ])
             ->order('a.id','desc')
             ->find();
+        $change_lens = collection($change_lens)->toArray();
         if($change_lens){
             if($change_lens['pd_l'] && $change_lens['pd_r']){
                 $change_lens['pd'] = '';
@@ -1051,34 +1053,27 @@ class ScmDistribution extends Scm
             ->find();
 
         //第二次扫描提示语
-        if ($item_process_info['distribution_status'] == 8){
-            //判断子订单类型，是否为异常库位、暂存库为、正常库位
-            if ($item_process_info['abnormal_house_id']){
-                //有异常库位ID
-                $store_house_info = $this->_stock_house->field('id,coding,subarea')->where('id',$item_process_info['abnormal_house_id'])->find();
-                $this->error(__('请将子单号'.$item_order_number.'的商品放入'.$store_house_info['coding'].'异常库位'), [], 403);
-            } elseif ($item_process_info['temporary_house_id']){
-                //有暂存库位ID
-                $store_house_info = $this->_stock_house->field('id,coding,subarea')->where('id',$item_process_info['temporary_house_id'])->find();
-                $this->error(__('请将子单号'.$item_order_number.'的商品放入'.$store_house_info['coding'].'暂存库位'), [], 403);
-            }elseif ($order_process_info['store_house_id']){
+        if (7 < $item_process_info['distribution_status']){
+            if ($order_process_info['store_house_id']){
                 //有主单合单库位
                 $store_house_info = $this->_stock_house->field('id,coding,subarea')->where('id',$order_process_info['store_house_id'])->find();
                 $this->error(__('请将子单号'.$item_order_number.'的商品放入合单架'.$store_house_info['coding'].'合单库位'), [], 403);
+            } else {
+//                $this->_new_order_item_process->allowField(true)->isUpdate(true, ['item_order_number'=>$item_order_number])->save(['distribution_status'=>7]);
+                $this->error(__('数据异常，合单失败'), [], 403);
             }
-
         }
 
         //未合单，首次扫描
         if (!$order_process_info['store_house_id']){
             //主单中无库位号，首个子单进入时，分配一个合单库位给PDA，暂不占用根据是否确认放入合单架占用或取消
             $store_house_info = $this->_stock_house->field('id,coding,subarea')->where(['status'=>1,'type'=>2,'occupy'=>0])->find();
+            empty($store_house_info) && $this->error(__('合单失败，合单库位已用完，请添加后再操作'), [], 403);
         } else {
             //主单已绑定合单库位,根据ID查询库位信息
             $store_house_info = $this->_stock_house->field('id,coding,subarea')->where('id',$order_process_info['store_house_id'])->find();
         }
         $abnormal_list = $this->info($item_order_number,7);
-        $info = [];
         $info = [
             'item_order_number' => $item_order_number,
             'sku' => $item_process_info['sku'],
@@ -1302,72 +1297,66 @@ class ScmDistribution extends Scm
         $end_time = $this->request->request('end_time');
         $page = $this->request->request('page');
         $page_size = $this->request->request('page_size');
-
         empty($page) && $this->error(__('Page can not be empty'), [], 520);
         empty($page_size) && $this->error(__('Page size can not be empty'), [], 521);
-
-        $where = [];
-        // $where['a.combine_status'] = 1;//合单完成状态
-        $where['a.store_house_id'] = ['>', 0];
         $offset = ($page - 1) * $page_size;
         $limit = $page_size;
 
-        if ($type == 1){
+        if (1 == $type){
+            $where = [];
+            $where['combine_status'] = 1;//合单完成状态
+            $where['store_house_id'] = ['>', 0];
             //合单待取出列表，主单为合单完成状态且子单都已合单
             if($query){
                 //线上不允许跨库联合查询，拆分，由于字段值明显差异，可以分别模糊匹配
-                $store_house_id_item = $this->_stock_house->field('id')->where(['coding'=> ['like', '%' . $query . '%']])->select();
-                $store_house_id_item = collection($store_house_id_item)->toArray();
-                $store_house_ids = array_column($store_house_id_item, 'id');
-                if($store_house_ids) {
-                    $where['a.store_house_id'] = ['in', $store_house_ids];
+                $store_house_id_store = $this->_stock_house->where(['coding'=> ['like', '%' . $query . '%']])->column('id');
+                $order_id = $this->_new_order_item_process->where(['sku'=> ['like', '%' . $query . '%']])->column('order_id');
+                $order_id = array_unique($order_id);
+                $store_house_id_sku = [];
+                if($order_id) {
+                    $store_house_id_sku = $this->_new_order_process->where(['order_id'=> ['in', $order_id]])->column('store_house_id');
                 }
-                $sku_item = $this->_new_order_item_process->field('id')->where(['sku'=> ['like', '%' . $query . '%']])->select();
-                $sku_item = collection($sku_item)->toArray();
-                $sku = array_column($sku_item, 'id');
-                if($sku) $where['b.sku'] = ['in', $sku];
-
+                $store_house_ids = array_merge(array_filter($store_house_id_store), array_filter($store_house_id_sku));
+                if($store_house_ids) $where['store_house_id'] = ['in', $store_house_ids];
             }
             if($start_time && $end_time){
-                $where['a.combine_time'] = ['between', [strtotime($start_time), strtotime($end_time)]];
+                $where['combine_time'] = ['between', [strtotime($start_time), strtotime($end_time)]];
             }
-
             $list = $this->_new_order_process
-                ->alias('a')
                 ->where($where)
-                ->join(['fa_order_item_process'=> 'b'],'a.order_id=b.order_id','left')
-                ->field('a.order_id,a.store_house_id,a.combine_time')
-                ->group('a.order_id')
+                ->field('order_id,store_house_id,combine_time')
+                ->group('order_id')
                 ->limit($offset, $limit)
                 ->select();
-
+            foreach (array_filter($list) as $k => $v) {
+                $list[$k]['coding'] = $this->_stock_house->where('id',$v['store_house_id'])->value('coding');
+                !empty($v['combine_time']) && $list[$k]['combine_time'] = date('Y-m-d H:i:s', $v['combine_time']);
+            }
         } else {
+            $where = [];
+            $where['abnormal_house_id'] = ['>',0];
             //异常待处理列表
             if($query){
                 //线上不允许跨库联合查询，拆分，由于字段值明显差异，可以分别模糊匹配
-                $store_house_id_item = $this->_stock_house->field('id')->where(['coding'=> ['like', '%' . $query . '%']])->select();
-                $store_house_id_item = collection($store_house_id_item)->toArray();
-                $store_house_ids = array_column($store_house_id_item, 'id');
-                if($store_house_ids) $where['a.store_house_id'] = ['in', $store_house_ids];
-
-                $item_order_number_item = $this->_new_order_item_process->field('item_order_number')->where(['item_order_number'=> ['like', '%' . $query . '%']])->select();
-                $item_order_number_item = collection($item_order_number_item)->toArray();
-                $item_order_number = array_column($item_order_number_item, 'item_order_number');
-                if($item_order_number) $where['b.item_order_number'] = ['in', $item_order_number];
+                $store_house_ids = $this->_stock_house->where(['coding'=> ['like', '%' . $query . '%']])->column('id');
+                $item_order_number_store = [];
+                if($store_house_ids) {
+                    $item_order_number_store = $this->_new_order_item_process->where(['abnormal_house_id'=>['in', $store_house_ids]])->column('item_order_number');
+                }
+                $item_order_number_item = $this->_new_order_item_process->where(['item_order_number'=> ['like', '%' . $query . '%']])->column('item_order_number');
+                $item_order_number = array_merge($item_order_number_item, $item_order_number_store);
+                if($item_order_number) $where['item_order_number'] = ['in', $item_order_number];
 
             }
-            $where['b.abnormal_house_id'] = ['>',0];
-            $list = $this->_new_order_process
-                ->alias('a')
+            $list = $this->_new_order_item_process
                 ->where($where)
-                ->join(['fa_order_item_process'=> 'b'],'a.order_id=b.order_id','left')
-                ->field('b.abnormal_house_id,b.item_order_number')
+                ->field('abnormal_house_id,item_order_number')
                 ->limit($offset, $limit)
                 ->select();
-        }
-        foreach (array_filter($list) as $k => $v) {
-            $list[$k]['coding'] = $this->_stock_house->where('id',$v['store_house_id'])->value('coding');
-            !empty($v['combine_time']) && $list[$k]['combine_time'] = date('Y-m-d H:i:s', $v['combine_time']);
+            foreach (array_filter($list) as $k => $v) {
+                $list[$k]['coding'] = $this->_stock_house->where('id',$v['abnormal_house_id'])->value('coding');
+                !empty($v['combine_time']) && $list[$k]['combine_time'] = date('Y-m-d H:i:s', $v['combine_time']);
+            }
         }
 
         $this->success('', ['list' => $list],200);
@@ -1601,7 +1590,6 @@ class ScmDistribution extends Scm
                         //SKU缺失，绑定合单库位，回退子单号为合单中状态，不影响库存
                         $store_house_id = $this->_stock_house->field('id,coding,subarea')->where(['status'=>1,'type'=>2,'occupy'=>0])->value('id');
                         if (empty($store_house_id)){
-                            DistributionLog::record($this->auth,$item_ids,8,'合单库位已用完，主单ID'.$row['order_id'].$msg.'失败'.$msg_info);
                             throw new Exception('合单库位已用完，请检查合单库位情况');
                         }
                         $this->_new_order_process->allowField(true)->isUpdate(true, ['order_id' => $order_id])->save(['store_house_id'=>$store_house_id]);
@@ -1623,10 +1611,10 @@ class ScmDistribution extends Scm
                             $true_sku = $this->_item_platform_sku->getTrueSku($value['sku'], $value['site']);
 
                             //检验库存
-                            $stock_arr = $this->_item->where(['sku'=>$true_sku])->filed('stock,occupy_stock,distribution_occupy_stock');
-                            $stock = $this->_item->where(['sku'=>$true_sku,'platform_type'=>$value['site']])->value('stock');
+                            $stock_arr = $this->_item->where(['sku'=>$true_sku])->field('stock,occupy_stock,distribution_occupy_stock')->find();;
+                            $stock_arr = collection($stock_arr)->toArray();
+                            $stock = $this->_item->where(['sku'=>$true_sku])->value('stock');
                             if ( in_array(0,$stock_arr) || empty($stock)){
-                                DistributionLog::record($this->auth,$item_ids,8,'主单ID'.$row['order_id'].$msg.'失败'.$value['sku'].$msg_info);
                                 throw new Exception($value['sku'].':库存不足');
                             }
 
@@ -1655,7 +1643,6 @@ class ScmDistribution extends Scm
                         //检验库存
                         $stock_arr = $this->_item->where(['sku'=>$true_sku])->filed('stock,occupy_stock,distribution_occupy_stock');
                         if (in_array(0,$stock_arr)){
-                            DistributionLog::record($this->auth,$item_ids,8,'主单ID'.$row['order_id'].$msg.'失败'.$value['sku'].$msg_info);
                             throw new Exception($value['sku'].':库存不足');
                         }
 
@@ -1679,11 +1666,8 @@ class ScmDistribution extends Scm
             $this->error($e->getMessage(), [], 407);
         } catch (Exception $e) {
             Db::rollback();
+            DistributionLog::record($this->auth,$item_ids,8,$e->getMessage().'主单ID'.$row['order_id'].$msg.'失败'.$msg_info);
             $this->error($e->getMessage(), [], 408);
-        }
-        if (false === $result) {
-            DistributionLog::record($this->auth,$item_ids,8,'主单ID'.$row['order_id'].$msg.'失败'.$msg_info);
-            $this->error(__($msg.'失败'), [], 404);
         }
 
         DistributionLog::record($this->auth,$item_ids,8,'主单ID'.$row['order_id'].$msg.'成功'.$msg_info);
