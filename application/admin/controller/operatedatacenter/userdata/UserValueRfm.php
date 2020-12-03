@@ -262,7 +262,7 @@ class UserValueRfm extends Backend
         if ($this->request->isAjax()) {
             $params = $this->request->param();
             $order_platform = $params['order_platform'];
-            $cache_data = Cache::get('Operatedatacenter_userdata2'.$order_platform.md5(serialize('ajax_user_shopping_near_days')));
+            $cache_data = Cache::get('Operatedatacenter_userdata'.$order_platform.md5(serialize('ajax_user_shopping_near_days')));
             if(!$cache_data){
                 $result = $this->getUserNearDays($order_platform);
                 $count = $result['count'];
