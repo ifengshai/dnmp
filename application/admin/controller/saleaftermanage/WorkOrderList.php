@@ -1281,7 +1281,8 @@ class WorkOrderList extends Backend
                 if($item_order_info){
                     $item_order_info = array_filter($item_order_info);
                     1 > count($item_order_info) && $this->error("子订单号错误");
-                    foreach ($item_order_info as $key=>$item){
+                    foreach ($item_order_info as $key=>&$item){
+                        $item['item_choose'] = array_unique(array_filter($item['item_choose']));
                         empty($item['item_choose']) && $this->error("请选择子订单：{$key} 的实施措施");
 
                         //更改镜框校验库存
@@ -1291,6 +1292,7 @@ class WorkOrderList extends Backend
                             !$back_data['result'] && $this->error($back_data['msg']);
                         }
                     }
+                    unset($item);
                 }
 
                 //点击提交按钮
@@ -1938,7 +1940,8 @@ class WorkOrderList extends Backend
                 if($item_order_info){
                     $item_order_info = array_filter($item_order_info);
                     1 > count($item_order_info) && $this->error("子订单号错误");
-                    foreach ($item_order_info as $key=>$item){
+                    foreach ($item_order_info as $key=>&$item){
+                        $item['item_choose'] = array_unique(array_filter($item['item_choose']));
                         empty($item['item_choose']) && $this->error("请选择子订单：{$key} 的实施措施");
 
                         //更改镜框校验库存
@@ -1948,6 +1951,7 @@ class WorkOrderList extends Backend
                             !$back_data['result'] && $this->error($back_data['msg']);
                         }
                     }
+                    unset($item);
                 }
 
                 //点击提交按钮
