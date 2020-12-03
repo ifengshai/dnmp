@@ -303,7 +303,7 @@ class ScmDistribution extends Scm
             ->where('id', $item_process_info['option_id'])
             ->find()
         ;
-        $option_info = collection($option_info)->toArray();
+        if ($option_info) $option_info = collection($option_info)->toArray();
 
         //获取更改镜框最新信息
         $change_sku = $this->_work_order_change_sku
@@ -332,8 +332,8 @@ class ScmDistribution extends Scm
             ])
             ->order('a.id','desc')
             ->find();
-        $change_lens = collection($change_lens)->toArray();
         if($change_lens){
+            $change_lens = collection($change_lens)->toArray();
             if($change_lens['pd_l'] && $change_lens['pd_r']){
                 $change_lens['pd'] = '';
             }else{
@@ -1355,7 +1355,6 @@ class ScmDistribution extends Scm
                 ->select();
             foreach (array_filter($list) as $k => $v) {
                 $list[$k]['coding'] = $this->_stock_house->where('id',$v['abnormal_house_id'])->value('coding');
-                !empty($v['combine_time']) && $list[$k]['combine_time'] = date('Y-m-d H:i:s', $v['combine_time']);
             }
         }
 
