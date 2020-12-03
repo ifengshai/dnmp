@@ -277,18 +277,11 @@ class Test01 extends Backend
 
     public function test101()
     {
-        $data_center_day_sku = Db::name('datacenter_sku_day')->where('day_date','2020-12-02')->where('site',1)->field('sku,day_date')->select();
-        $data_center_day_sku = Db::name('datacenter_sku_day')->where('day_date','2020-11-03')->where('site',1)->field('sku,day_date,id')->select();
         $item_platform_sku = new ItemPlatformSku();
         $item_skuy = $item_platform_sku->where('id','>',0)->where('platform_type',1)->column('grade','sku');
-        $arr = [];
-        foreach ($data_center_day_sku as $k=>$v){
-            $arr[$k]['id'] = $v['id'];
-            $arr[$k]['sku'] = $v['sku'];
-            $arr[$k]['grade'] = $item_skuy[$v['sku']];
+        foreach ($item_skuy as $k=>$v){
+            $update = Db::name('datacenter_sku_day')->where('day_date','2020-12-02')->where('site',1)->where('sku',$k)->update('grade',$v);
         }
-        // $res = Db::name('datacenter_sku_day')->saveAll($arr);
-        // dump($res);
-        dump($arr);die;
+
     }
 }
