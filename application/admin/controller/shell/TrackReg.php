@@ -839,6 +839,35 @@ class TrackReg extends Backend
         // $arr['cart_num'] = $zeelool_data->google_target1(1, $date_time);
         // //交易次数
         // $arr['complete_num'] = $zeelool_data->google_target_end(1, $date_time);
+        //当天创建的用户当天产生订单的转化率
+        $status_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        $status_where['order_type'] = 1;
+        //当天注册用户数
+        $register_userids = $zeelool_model->table('customer_entity')->where($cart_where1)->column('entity_id');
+        $register_num = count($register_userids);
+        //当天注册用户在当天下单的用户数
+        $order_user_count1 = 0;
+        foreach($register_userids as $register_userid){
+            //判断当前用户在当天是否下单
+            $order = $zeelool_model->table('sales_flat_order')->where($cart_where1)->where($status_where)->where('customer_id',$register_userid)->value('entity_id');
+            if($order){
+                $order_user_count1++;
+            }
+        }
+        $arr['create_user_change_rate'] = $register_num ? round($order_user_count1/$register_num*100,2) : 0;
+        //当天更新用户当天产生订单的转化率
+        $update_userids = $zeelool_model->table('customer_entity')->where($cart_where2)->column('entity_id');
+        $update_num = count($update_userids);
+        //当天活跃更新用户数在当天是否下单
+        $order_user_count2 = 0;
+        foreach ($update_userids as $update_userid){
+            //判断活跃用户在当天下单的用户数
+            $order = $zeelool_model->table('sales_flat_order')->where($cart_where2)->where($status_where)->where('customer_id',$update_userid)->value('entity_id');
+            if($order){
+                $order_user_count2++;
+            }
+        }
+        $arr['update_user_change_rate'] = $update_num ? round($order_user_count2/$update_num*100,0) : 0;
         Db::name('datacenter_day')->insert($arr);
         echo $date_time . "\n";
         echo date("Y-m-d H:i:s") . "\n";
@@ -1014,6 +1043,35 @@ class TrackReg extends Backend
         // $arr['cart_num'] = $zeelool_data->google_target2(2, $date_time);
         // //交易次数
         // $arr['complete_num'] = $zeelool_data->google_target_end(2, $date_time);
+        //当天创建的用户当天产生订单的转化率
+        $status_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        $status_where['order_type'] = 1;
+        //当天注册用户数
+        $register_userids = $zeelool_model->table('customer_entity')->where($cart_where1)->column('entity_id');
+        $register_num = count($register_userids);
+        //当天注册用户在当天下单的用户数
+        $order_user_count1 = 0;
+        foreach($register_userids as $register_userid){
+            //判断当前用户在当天是否下单
+            $order = $zeelool_model->table('sales_flat_order')->where($cart_where1)->where($status_where)->where('customer_id',$register_userid)->value('entity_id');
+            if($order){
+                $order_user_count1++;
+            }
+        }
+        $arr['create_user_change_rate'] = $register_num ? round($order_user_count1/$register_num*100,2) : 0;
+        //当天更新用户当天产生订单的转化率
+        $update_userids = $zeelool_model->table('customer_entity')->where($cart_where2)->column('entity_id');
+        $update_num = count($update_userids);
+        //当天活跃更新用户数在当天是否下单
+        $order_user_count2 = 0;
+        foreach ($update_userids as $update_userid){
+            //判断活跃用户在当天下单的用户数
+            $order = $zeelool_model->table('sales_flat_order')->where($cart_where2)->where($status_where)->where('customer_id',$update_userid)->value('entity_id');
+            if($order){
+                $order_user_count2++;
+            }
+        }
+        $arr['update_user_change_rate'] = $update_num ? round($order_user_count2/$update_num*100,0) : 0;
         //插入数据
         Db::name('datacenter_day')->insert($arr);
         echo $date_time . "\n";
@@ -1106,6 +1164,35 @@ class TrackReg extends Backend
         // $arr['cart_num'] = $zeelool_data->google_target1(3, $date_time);
         //交易次数
         // $arr['complete_num'] = $zeelool_data->google_target_end(3, $date_time);
+        //当天创建的用户当天产生订单的转化率
+        $status_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        $status_where['order_type'] = 1;
+        //当天注册用户数
+        $register_userids = $zeelool_model->table('customer_entity')->where($cart_where1)->column('entity_id');
+        $register_num = count($register_userids);
+        //当天注册用户在当天下单的用户数
+        $order_user_count1 = 0;
+        foreach($register_userids as $register_userid){
+            //判断当前用户在当天是否下单
+            $order = $zeelool_model->table('sales_flat_order')->where($cart_where1)->where($status_where)->where('customer_id',$register_userid)->value('entity_id');
+            if($order){
+                $order_user_count1++;
+            }
+        }
+        $arr['create_user_change_rate'] = $register_num ? round($order_user_count1/$register_num*100,2) : 0;
+        //当天更新用户当天产生订单的转化率
+        $update_userids = $zeelool_model->table('customer_entity')->where($cart_where2)->column('entity_id');
+        $update_num = count($update_userids);
+        //当天活跃更新用户数在当天是否下单
+        $order_user_count2 = 0;
+        foreach ($update_userids as $update_userid){
+            //判断活跃用户在当天下单的用户数
+            $order = $zeelool_model->table('sales_flat_order')->where($cart_where2)->where($status_where)->where('customer_id',$update_userid)->value('entity_id');
+            if($order){
+                $order_user_count2++;
+            }
+        }
+        $arr['update_user_change_rate'] = $update_num ? round($order_user_count2/$update_num*100,0) : 0;
         //插入数据
         Db::name('datacenter_day')->insert($arr);
         echo $date_time . "\n";
