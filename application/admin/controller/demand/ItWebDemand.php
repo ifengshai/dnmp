@@ -472,9 +472,9 @@ class ItWebDemand extends Backend
 
             //是否超时
             if ($v['end_time'] < $v['node_time']){
-                $list[$k]['overtime'] ='是';
-            }else{
                 $list[$k]['overtime'] ='否';
+            }else{
+                $list[$k]['overtime'] ='是';
             }
             //是否拒绝
             if ($v['web_remarks'] !== null){
