@@ -1524,7 +1524,7 @@ class OrderData extends Backend
     }
     protected function zeelool_old_order($site)
     {
-      if ($site == 1) {
+        if ($site == 1) {
             $list = $this->zeelool->where(['entity_id' => 557772])->select();
         } elseif ($site == 5) {
             $id = $this->order->where('site=' . $site . ' and entity_id < 1375')->max('entity_id');
@@ -1584,7 +1584,7 @@ class OrderData extends Backend
 
     public function order_address_data_shell()
     {
-        
+
         $this->order_address_data(1);
         $this->order_address_data(2);
         $this->order_address_data(3);
@@ -1641,7 +1641,7 @@ class OrderData extends Backend
 
     public function order_data_shell()
     {
-        
+
         $this->order_data(1);
         $this->order_data(2);
         $this->order_data(3);
@@ -1713,7 +1713,7 @@ class OrderData extends Backend
     {
         $this->order_item_shell(1);
         // $this->order_item_shell(5);
-      
+
     }
 
     protected function order_item_shell($site)
@@ -1817,7 +1817,6 @@ class OrderData extends Backend
         $this->order_payment_data(9);
         $this->order_payment_data(10);
         $this->order_payment_data(11);
-       
     }
 
     /**
@@ -1854,12 +1853,11 @@ class OrderData extends Backend
             $params = [];
             foreach ($list as $k => $v) {
                 $params[$k]['id'] = $v['id'];
-                $params[$k]['last_trans_id'] = $res[$v['entity_id']];
+                $params[$k]['last_trans_id'] = $res[$v['entity_id']] ?: 0;
             }
             $this->order->saveAll($params);
             echo $site . 'ok';
         }
-       
     }
 
 
@@ -1905,6 +1903,83 @@ class OrderData extends Backend
         echo 'ok';
     }
 
+    /**
+     * 临时处理订单子表数据
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/11/12 16:47:50 
+     * @return void
+     */
+    public function order_item_shell_temp()
+    {
+        $this->order_item_data_shell_temp(1);
+        $this->order_item_data_shell_temp(2);
+        $this->order_item_data_shell_temp(3);
+        $this->order_item_data_shell_temp(4);
+        $this->order_item_data_shell_temp(5);
+        $this->order_item_data_shell_temp(9);
+        $this->order_item_data_shell_temp(10);
+        $this->order_item_data_shell_temp(11);
+        // $this->order_item_shell(5);
 
+    }
 
+    protected function order_item_data_shell_temp($site)
+    {
+        $list = $this->orderitemoption->where('site=' . $site . ' and index_id is null')->limit(2000)->select();
+        $list = collection($list)->toArray();
+        $item_ids = array_column($list, 'item_id');
+
+        if ($site == 1) {
+            $item_data = Db::connect('database.db_zeelool')->table('sales_flat_order_item')->where(['item_id' => ['in', $item_ids]])->column('product_options', 'item_id');
+        } elseif ($site == 2) {
+            $item_data = Db::connect('database.db_voogueme')->table('sales_flat_order_item')->where(['item_id' => ['in', $item_ids]])->column('product_options', 'item_id');
+        } elseif ($site == 3) {
+            $item_data = Db::connect('database.db_nihao')->table('sales_flat_order_item')->where(['item_id' => ['in', $item_ids]])->column('product_options', 'item_id');
+        } elseif ($site == 4) {
+            $item_data = Db::connect('database.db_meeloog')->table('sales_flat_order_item')->where(['item_id' => ['in', $item_ids]])->column('product_options', 'item_id');
+        } elseif ($site == 5) {
+            $item_data = Db::connect('database.db_weseeoptical')->table('sales_flat_order_item')->where(['item_id' => ['in', $item_ids]])->column('product_options', 'item_id');
+        } elseif ($site == 9) {
+            $item_data = Db::connect('database.db_zeelool_es')->table('sales_flat_order_item')->where(['item_id' => ['in', $item_ids]])->column('product_options', 'item_id');
+        } elseif ($site == 10) {
+            $item_data = Db::connect('database.db_zeelool_de')->table('sales_flat_order_item')->where(['item_id' => ['in', $item_ids]])->column('product_options', 'item_id');
+        } elseif ($site == 11) {
+            $item_data = Db::connect('database.db_zeelool_jp')->table('sales_flat_order_item')->where(['item_id' => ['in', $item_ids]])->column('product_options', 'item_id');
+        }
+        $option_params = [];
+        foreach ($list as $k => $v) {
+            $options = [];
+            //处方解析 不同站不同字段
+            if ($site == 1) {
+                $options =  $this->zeelool_prescription_analysis($item_data[$v['item_id']]);
+            } elseif ($site == 2) {
+                $options =  $this->voogueme_prescription_analysis($item_data[$v['item_id']]);
+            } elseif ($site == 3) {
+                $options =  $this->nihao_prescription_analysis($item_data[$v['item_id']]);
+            } elseif ($site == 4) {
+                $options =  $this->meeloog_prescription_analysis($item_data[$v['item_id']]);
+            } elseif ($site == 5) {
+                $options =  $this->wesee_prescription_analysis($item_data[$v['item_id']]);
+            } elseif ($site == 9) {
+                $options =  $this->zeelool_es_prescription_analysis($item_data[$v['item_id']]);
+            } elseif ($site == 10) {
+                $options =  $this->zeelool_de_prescription_analysis($item_data[$v['item_id']]);
+            } elseif ($site == 11) {
+                $options =  $this->zeelool_jp_prescription_analysis($item_data[$v['item_id']]);
+            }
+
+            $option_params[$k]['color_id'] = $options['color_id'];
+            $option_params[$k]['coating_id'] = $options['coating_id'];
+            $option_params[$k]['index_id'] = $options['index_id'] ?: 0;
+            $option_params[$k]['id'] = $v['id'];
+            
+            echo $v['item_id'] . "\n";
+            usleep(10000);
+        }
+
+        $this->orderitemoption->saveAll($option_params);
+        echo "ok";
+    }
 }
