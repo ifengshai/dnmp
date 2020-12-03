@@ -1972,7 +1972,7 @@ class OrderData extends Backend
 
             $option_params[$k]['color_id'] = $options['color_id'];
             $option_params[$k]['coating_id'] = $options['coating_id'];
-            $option_params[$k]['index_id'] = $options['index_id'];
+            $option_params[$k]['index_id'] = $options['index_id'] ?: 0;
             $option_params[$k]['id'] = $v['id'];
             
             echo $v['item_id'] . "\n";
