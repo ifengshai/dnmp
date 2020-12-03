@@ -1355,7 +1355,6 @@ class ScmDistribution extends Scm
                 ->select();
             foreach (array_filter($list) as $k => $v) {
                 $list[$k]['coding'] = $this->_stock_house->where('id',$v['abnormal_house_id'])->value('coding');
-                !empty($v['combine_time']) && $list[$k]['combine_time'] = date('Y-m-d H:i:s', $v['combine_time']);
             }
         }
 
