@@ -55,7 +55,6 @@ class GoodStatus extends Backend
             }else{
                 $map = [];
             }
-            $map = [];
             $platform_z_up_num =$this->item_platform->where('platform_type',1)->where($map)->where('outer_sku_status',1)->count();
             $platform_z_down_num =$this->item_platform->where('platform_type',1)->where($map)->where('outer_sku_status',2)->count();
             $platform_z_yushou_num =$this->item_platform->where('platform_type',1)->where($map)->where('presell_status',1)->count();
