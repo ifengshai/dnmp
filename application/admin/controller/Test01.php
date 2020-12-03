@@ -2,6 +2,7 @@
 
 namespace app\admin\controller;
 
+use app\admin\model\itemmanage\ItemPlatformSku;
 use app\common\controller\Backend;
 use think\Db;
 
@@ -272,5 +273,22 @@ class Test01 extends Backend
         dump($ga_result);
         die;
 
+    }
+
+    public function test101()
+    {
+        $data_center_day_sku = Db::name('datacenter_sku_day')->where('day_date','2020-12-02')->where('site',1)->field('sku,day_date')->select();
+        $data_center_day_sku = Db::name('datacenter_sku_day')->where('day_date','2020-11-03')->where('site',1)->field('sku,day_date,id')->select();
+        $item_platform_sku = new ItemPlatformSku();
+        $item_skuy = $item_platform_sku->where('id','>',0)->where('platform_type',1)->column('grade','sku');
+        $arr = [];
+        foreach ($data_center_day_sku as $k=>$v){
+            $arr[$k]['id'] = $v['id'];
+            $arr[$k]['sku'] = $v['sku'];
+            $arr[$k]['grade'] = $item_skuy[$v['sku']];
+        }
+        // $res = Db::name('datacenter_sku_day')->saveAll($arr);
+        // dump($res);
+        dump($arr);die;
     }
 }

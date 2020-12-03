@@ -43,7 +43,7 @@ class GoodStatus extends Backend
         if ($this->request->isAjax()) {
             $params = $this->request->param();
             $order_platform = $params['order_platform'];
-            $json['xColumnName'] = ['zeelool','voogueme','nihao','wesee','meeloog','zeelool-es','zeelool-de','zeelool-jp'];
+            $json['xColumnName'] = ['zeelool','voogueme','nihao','meeloog','wesee','zeelool-es','zeelool-de','zeelool-jp'];
             $item = new \app\admin\model\itemmanage\Item();
             $map = [];
             if ($order_platform == 1){
@@ -55,6 +55,7 @@ class GoodStatus extends Backend
             }else{
                 $map = [];
             }
+            $map = [];
             $platform_z_up_num =$this->item_platform->where('platform_type',1)->where($map)->where('outer_sku_status',1)->count();
             $platform_z_down_num =$this->item_platform->where('platform_type',1)->where($map)->where('outer_sku_status',2)->count();
             $platform_z_yushou_num =$this->item_platform->where('platform_type',1)->where($map)->where('presell_status',1)->count();
