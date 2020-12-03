@@ -1946,7 +1946,7 @@ class OrderData extends Backend
         } elseif ($site == 10) {
             $item_data = Db::connect('database.db_zeelool_de')->table('sales_flat_order_item')->where(['item_id' => ['in', $item_ids]])->column('product_options', 'item_id');
         } elseif ($site == 11) {
-            $item_data = Db::connect('database.zeelool_jp')->table('sales_flat_order_item')->where(['item_id' => ['in', $item_ids]])->column('product_options', 'item_id');
+            $item_data = Db::connect('database.db_zeelool_jp')->table('sales_flat_order_item')->where(['item_id' => ['in', $item_ids]])->column('product_options', 'item_id');
         }
         $option_params = [];
         foreach ($list as $k => $v) {
