@@ -43,7 +43,7 @@ class GoodStatus extends Backend
         if ($this->request->isAjax()) {
             $params = $this->request->param();
             $order_platform = $params['order_platform'];
-            $json['xColumnName'] = ['zeelool','voogueme','nihao','wesee','meeloog','zeelool-es','zeelool-de','zeelool-jp'];
+            $json['xColumnName'] = ['zeelool','voogueme','nihao','meeloog','wesee','zeelool-es','zeelool-de','zeelool-jp'];
             $item = new \app\admin\model\itemmanage\Item();
             $map = [];
             if ($order_platform == 1){
