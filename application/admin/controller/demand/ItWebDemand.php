@@ -386,7 +386,6 @@ class ItWebDemand extends Backend
             ->where($where)
             ->order('id desc')
 //            ->field($field)
-            ->limit(10)
             ->select();
         $list = collection($list)->toArray();
         foreach ($list as $k => $v) {
