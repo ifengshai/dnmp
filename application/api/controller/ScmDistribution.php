@@ -304,6 +304,8 @@ class ScmDistribution extends Scm
             ->find()
         ;
         if ($option_info) $option_info = collection($option_info)->toArray();
+        print_r($option_info);
+        print_r('----------');
 
         //获取更改镜框最新信息
         $change_sku = $this->_work_order_change_sku
@@ -316,6 +318,8 @@ class ScmDistribution extends Scm
             ])
             ->order('a.id','desc')
             ->value('a.change_sku');
+        print_r($change_sku);
+        print_r('----------');
         if($change_sku){
             $option_info['sku'] = $change_sku;
         }
@@ -332,6 +336,8 @@ class ScmDistribution extends Scm
             ])
             ->order('a.id','desc')
             ->find();
+        print_r($change_lens);
+        print_r('----------');
         if($change_lens){
             $change_lens = collection($change_lens)->toArray();
             if($change_lens['pd_l'] && $change_lens['pd_r']){
@@ -341,6 +347,8 @@ class ScmDistribution extends Scm
             }
             $option_info = array_merge($option_info,$change_lens);
         }
+        print_r($option_info);
+        exit;
 
         //获取镜片名称
         $lens_name = '';
