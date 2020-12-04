@@ -429,7 +429,8 @@ class ScmWarehouse extends Scm
 
         false === $result && $this->error(__('提交失败'), [], 404);
 
-        Db::startTrans();
+        $this->_out_stock_item->startTrans();
+        $this->_product_bar_code_item->startTrans();
         try {
             count($item_data) != count(array_unique(array_column($item_data,'sku'))) && $this->error(__('sku重复，请检查'), [], 405);
 
@@ -459,11 +460,9 @@ class ScmWarehouse extends Scm
                     ->field('code')
                     ->find();
                 if(!empty($check_quantity['code'])){
-                    $this->error(__('条形码:'.$check_quantity['code'].' 已绑定,请移除'), [], 405);
-                    exit;
+                    throw new Exception('条形码:'.$check_quantity['code'].' 已绑定,请移除');
                 }
             }
-
             //批量创建或更新出库单商品
             foreach ($item_data as $key => $value) {
                 $item_save = [
@@ -472,7 +471,6 @@ class ScmWarehouse extends Scm
                 if($get_out_stock_id){//更新
                     $where = ['sku' => $value['sku'],'out_stock_id' => $out_stock_id];
                     $this->_out_stock_item->allowField(true)->isUpdate(true, $where)->save($item_save);
-
                     //出库单移除条形码
                     if(!empty($value['remove_agg'])){
                         $code_clear = [
@@ -491,16 +489,19 @@ class ScmWarehouse extends Scm
                     $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => $v['code']])->save(['out_stock_id'=>$out_stock_id]);
                 }
             }
-
-            Db::commit();
+            $this->_out_stock_item->commit();
+            $this->_product_bar_code_item->commit();
         } catch (ValidateException $e) {
-            Db::rollback();
+            $this->_out_stock_item->rollback();
+            $this->_product_bar_code_item->rollback();
             $this->error($e->getMessage(), [], 406);
         } catch (PDOException $e) {
-            Db::rollback();
+            $this->_out_stock_item->rollback();
+            $this->_product_bar_code_item->rollback();
             $this->error($e->getMessage(), [], 407);
         } catch (Exception $e) {
-            Db::rollback();
+            $this->_out_stock_item->rollback();
+            $this->_product_bar_code_item->rollback();
             $this->error($e->getMessage(), [], 408);
         }
 
@@ -528,7 +529,10 @@ class ScmWarehouse extends Scm
         $row = $this->_out_stock->get($out_stock_id);
         1 != $row['status'] && $this->error(__('只有待审核状态才能审核'), [], 405);
 
-        Db::startTrans();
+        $this->_item->startTrans();
+        $this->_stock_log->startTrans();
+        $this->_item_platform_sku->startTrans();
+        $this->_product_bar_code_item->startTrans();
         try {
             //审核通过扣减库存
             if ($do_type == 2) {
@@ -581,16 +585,27 @@ class ScmWarehouse extends Scm
                 ];
                 $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['out_stock_id' => $out_stock_id])->save($code_clear);
             }
-
-            Db::commit();
+            $this->_item->commit();
+            $this->_stock_log->commit();
+            $this->_item_platform_sku->commit();
+            $this->_product_bar_code_item->commit();
         } catch (ValidateException $e) {
-            Db::rollback();
+            $this->_item->rollback();
+            $this->_stock_log->rollback();
+            $this->_item_platform_sku->rollback();
+            $this->_product_bar_code_item->rollback();
             $this->error($e->getMessage(), [], 406);
         } catch (PDOException $e) {
-            Db::rollback();
+            $this->_item->rollback();
+            $this->_stock_log->rollback();
+            $this->_item_platform_sku->rollback();
+            $this->_product_bar_code_item->rollback();
             $this->error($e->getMessage(), [], 407);
         } catch (Exception $e) {
-            Db::rollback();
+            $this->_item->rollback();
+            $this->_stock_log->rollback();
+            $this->_item_platform_sku->rollback();
+            $this->_product_bar_code_item->rollback();
             $this->error($e->getMessage(), [], 408);
         }
 
