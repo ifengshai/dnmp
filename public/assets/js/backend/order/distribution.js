@@ -179,8 +179,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function (row) {
-                                        console.log(1111);
-                                        console.log(row);
                                         //返回true时按钮显示,返回false隐藏
                                         if(row.handle_abnormal > 0){
                                             return true;
@@ -299,35 +297,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
             //配货完成、配镜片完成、加工完成、印logo完成
             $('.btn-set-status').click(function () {
                 var ids = Table.api.selectedids(table);
+                var status = $(this).data('status');
+                var content = 6 == status ? '确定要通过这%s条子订单吗?' : '确定要修改这%s条记录配货状态吗?';
                 Layer.confirm(
-                    __('确定要修改这%s条记录配货状态吗?', ids.length),
+                    __(content, ids.length),
                     { icon: 3, title: __('Warning'), shadeClose: true },
                     function (index) {
                         Layer.close(index);
                         Backend.api.ajax({
                             url: Config.moduleurl + '/order/distribution/set_status',
-                            data: { id_params: ids, status: $(this).data('status') },
-                            type: 'post'
-                        }, function (data, ret) {
-                            if (data == 'success') {
-                                table.bootstrapTable('refresh');
-                            }
-                        });
-                    }
-                );
-            });
-
-            //成检通过
-            $('.btn-finish-adopt').click(function () {
-                var ids = Table.api.selectedids(table);
-                Layer.confirm(
-                    __('确定要通过这%s条子订单吗?', ids.length),
-                    { icon: 3, title: __('Warning'), shadeClose: true },
-                    function (index) {
-                        Layer.close(index);
-                        Backend.api.ajax({
-                            url: Config.moduleurl + '/order/distribution/set_status',
-                            data: { id_params: ids, status: $(this).data('status') },
+                            data: { id_params: ids, status: status },
                             type: 'post'
                         }, function (data, ret) {
                             if (data == 'success') {
@@ -388,8 +367,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             type: 'post'
                         }, function (data, ret) {
                             if (data.url) {
-                                window.location.href = data.url;//跳转添加工单页面
-                                // table.bootstrapTable('refresh');
+                                //跳转添加工单页面
+                                Fast.api.open(data.url, __('创建工单'), {
+                                    area: ["100%", "100%"],
+                                    end: function () {
+                                        table.bootstrapTable('refresh');
+                                    }
+                                });
                             }
                         });
                     }
