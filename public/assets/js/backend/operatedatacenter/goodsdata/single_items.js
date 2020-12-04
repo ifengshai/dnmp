@@ -159,7 +159,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                                     type: 'value',
                                     name: '现价',
                                     axisLabel: {
-                                        formatter: '{value} ¥'
+                                        formatter: '{value} $'
                                     }
                                 }
                             ],

@@ -96,6 +96,25 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                                     return param.data.name + '<br/>数量：' + param.data.value;
                                 }
                             },
+                            title:{
+                                subtext:'个数',
+                                left:"center",
+                                top:"40%",
+                                subtextStyle:{
+                                    textAlign:"center",
+                                    fill:"#333",
+                                    fontSize:16,
+                                    fontWeight:700
+                                },
+                                textStyle:{
+                                    color:"#27D9C8",
+                                    fontSize:32,
+                                    align:"center"
+                                }
+                            },
+                            series:[{
+                                radius: ['50%', '70%'],
+                            }]
                         }
                     };
 

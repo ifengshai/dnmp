@@ -25,33 +25,7 @@ class UserDataView extends Backend
         $this->datacenterday = new \app\admin\model\operatedatacenter\Datacenter;
         $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform;
     }
-
-    /**
-     *  获取指定日期段内每一天的日期
-     * @param Date $startdate 开始日期
-     * @param Date $enddate 结束日期
-     * @return Array
-     *
-     * Created by Phpstorm.
-     * User: jhh
-     * Date: 2020/10/13
-     * Time: 16:06:51
-     */
-    function getDateFromRange($startdate, $enddate)
-    {
-        $stimestamp = strtotime($startdate);
-        $etimestamp = strtotime($enddate);
-        // 计算日期段内有多少天
-        $days = ($etimestamp - $stimestamp) / 86400 + 1;
-        // 保存每天日期
-        $date = array();
-        for ($i = 0; $i < $days; $i++) {
-            $date[] = date('Y-m-d', $stimestamp + (86400 * $i));
-        }
-        return $date;
-    }
-
-
+    
     /**
      * Created by Phpstorm.
      * User: jhh
@@ -209,16 +183,15 @@ class UserDataView extends Backend
                 $data = $arr;
             }else{
                 if($order_platform == 2){
-                    $order_model = $this->voogueme;
-                    $web_model = Db::connect('database.db_voogueme');
+                    $where['site'] = 2;
+                    $model = $this->vooguemeOperate;
                 }elseif($order_platform == 3){
-                    $order_model = $this->nihao;
-                    $web_model = Db::connect('database.db_nihao');
+                    $where['site'] = 3;
+                    $model = $this->nihaoOperate;
                 }else{
-                    $order_model = $this->zeelool;
-                    $web_model = Db::connect('database.db_zeelool');
+                    $where['site'] = 1;
+                    $model = $this->zeeloolOperate;
                 }
-                $web_model->table('customer_entity')->query("set time_zone='+8:00'");
                 if ($time_str) {
                     $createat = explode(' ', $time_str);
                     $start = $createat[0];
@@ -227,47 +200,14 @@ class UserDataView extends Backend
                     $start = date('Y-m-d', strtotime('-6 day'));
                     $end   = date('Y-m-d', strtotime('-1 day'));
                 }
-                $time_arr = $this->getDateFromRange($start,$end);
-                $new_arr = array();
-                $active_arr = array();
-                foreach ($time_arr as $val){
-                    $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-                    $order_where['order_type'] = 1;
-                    $start_time = $val;
-                    $end_time = $val.' 23:59:59';
-                    $create_where['created_at'] = $update_where['updated_at'] = ['between',[$start_time,$end_time]];
-                    //当天注册用户数
-                    $register_userids = $web_model->table('customer_entity')->where($create_where)->column('entity_id');
-                    $register_num = count($register_userids);
-                    //当天注册用户在当天下单的用户数
-                    $order_user_count1 = 0;
-                    foreach($register_userids as $register_userid){
-                        //判断当前用户在当天是否下单
-                        $order = $order_model->where($create_where)->where($order_where)->where('customer_id',$register_userid)->value('entity_id');
-                        if($order){
-                            $order_user_count1++;
-                        }
-                    }
-                    $new_arr[] = $register_num ? round($order_user_count1/$register_num*100,0) : 0;
+                $where['day_date'] = ['between', [$start, $end]];
 
-                    //当天更新用户数
-                    $update_userids = $web_model->table('customer_entity')->where($update_where)->column('entity_id');
-                    $update_num = count($update_userids);
-                    //当天活跃更新用户数在当天是否下单
-                    $order_user_count2 = 0;
-                    foreach ($update_userids as $update_userid){
-                        //判断活跃用户在当天下单的用户数
-                        $order = $order_model->where($create_where)->where($order_where)->where('customer_id',$update_userid)->value('entity_id');
-                        if($order){
-                            $order_user_count2++;
-                        }
-                    }
-                    $active_arr[] = $update_num ? round($order_user_count2/$update_num*100,0) : 0;
-                }
+                $new_arr = $model->where($where)->column('day_date', 'create_user_change_rate');
+                $active_arr = $model->where($where)->column('day_date', 'update_user_change_rate');
                 $data = array(
-                    'time'=>$time_arr,
-                    'new'=>$new_arr,
-                    'active'=>$active_arr,
+                    'time'=>array_values($new_arr),
+                    'new'=>array_keys($new_arr),
+                    'active'=>array_keys($active_arr),
                 );
                 Cache::set('Operatedatacenter_userdataview'  . $order_platform .$time_str. md5(serialize('new_old_change_line')), $data, 7200);
             }

@@ -66,7 +66,7 @@ class CoupnAnalytics extends Backend
                     break;
                 case 3:
                     $model = Db::connect('database.db_nihao');
-                    $salesrule = Db::connect('database.db_niaho_online');
+                    $salesrule = Db::connect('database.db_nihao_online');
                     break;
             }
             $model->table('sales_flat_order')->query("set time_zone='+8:00'");
@@ -273,6 +273,7 @@ class CoupnAnalytics extends Backend
             $params = $this->request->param();
             $site = $params['order_platform'] ? $params['order_platform'] : 1;
             if ($params['time_str']) {
+                $seven_days = $params['time_str'];
                 $createat = explode(' ', $params['time_str']);
             } else {
                 $start = date('Y-m-d', strtotime('-6 day'));
@@ -284,14 +285,17 @@ class CoupnAnalytics extends Backend
                 case 1:
                     $model = Db::connect('database.db_zeelool');
                     $salesrule = Db::connect('database.db_zeelool_online');
+                    $plat = new \app\admin\model\operatedatacenter\Zeelool;
                     break;
                 case 2:
                     $model = Db::connect('database.db_voogueme');
                     $salesrule = Db::connect('database.db_voogueme_online');
+                    $plat = new \app\admin\model\operatedatacenter\Voogueme();
                     break;
                 case 3:
                     $model = Db::connect('database.db_nihao');
-                    $salesrule = Db::connect('database.db_niaho_online');
+                    $salesrule = Db::connect('database.db_nihao_online');
+                    $plat = new \app\admin\model\operatedatacenter\Nihao();
                     break;
             }
 
@@ -381,6 +385,8 @@ class CoupnAnalytics extends Backend
                     'value' => $model->table('sales_flat_order')->where($maps)->count(),
                 ],
             ];
+
+            $json['total'] =($plat->getOrderNum($seven_days,''))['order_num'];
             return json(['code' => 1, 'data' => $json]);
         }
     }
@@ -398,6 +404,7 @@ class CoupnAnalytics extends Backend
         if ($this->request->isAjax()) {
             $params = $this->request->param();
             if ($params['time_str']) {
+                $seven_days = $params['time_str'];
                 $createat = explode(' ', $params['time_str']);
             } else {
                 $start = date('Y-m-d', strtotime('-6 day'));
@@ -410,14 +417,17 @@ class CoupnAnalytics extends Backend
                 case 1:
                     $model = Db::connect('database.db_zeelool');
                     $salesrule = Db::connect('database.db_zeelool_online');
+                    $plat = new \app\admin\model\operatedatacenter\Zeelool;
                     break;
                 case 2:
                     $model = Db::connect('database.db_voogueme');
                     $salesrule = Db::connect('database.db_voogueme_online');
+                    $plat = new \app\admin\model\operatedatacenter\Voogueme;
                     break;
                 case 3:
                     $model = Db::connect('database.db_nihao');
-                    $salesrule = Db::connect('database.db_niaho_online');
+                    $salesrule = Db::connect('database.db_nihao_online');
+                    $plat = new \app\admin\model\operatedatacenter\Nihao();
                     break;
             }
             $model->table('sales_flat_order')->query("set time_zone='+8:00'");
@@ -496,6 +506,7 @@ class CoupnAnalytics extends Backend
                     'value' => $model->table('sales_flat_order')->where($maps)->sum('base_grand_total'),
                 ],
             ];
+            $json['total'] =($plat->getSalesTotalMoney($seven_days,''))['sales_total_money'];
             return json(['code' => 1, 'data' => $json]);
         }
     }

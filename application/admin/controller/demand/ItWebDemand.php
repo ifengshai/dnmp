@@ -386,7 +386,6 @@ class ItWebDemand extends Backend
             ->where($where)
             ->order('id desc')
 //            ->field($field)
-            ->limit(10)
             ->select();
         $list = collection($list)->toArray();
         foreach ($list as $k => $v) {
@@ -456,16 +455,16 @@ class ItWebDemand extends Backend
                 $list[$k]['web_designer_complexity'] = '复杂';
             }
             //是否需要前端
-            if ($v['web_designer_group'] ==1){
+            if ($v['web_designer_group'] ==0){
                 $list[$k]['web_designer_group'] = '未确认';
-            }elseif ($v['web_designer_group'] ==2){
+            }elseif ($v['web_designer_group'] ==1){
                 $list[$k]['web_designer_group'] = '需要';
             }else{
                 $list[$k]['web_designer_group'] = '不需要';
             }
-            if ($v['test_group'] ==1){
+            if ($v['test_group'] ==0){
                 $list[$k]['test_group'] = '未确认';
-            }elseif ($v['test_group'] ==2){
+            }elseif ($v['test_group'] ==1){
                 $list[$k]['test_group'] = '需要';
             }else{
                 $list[$k]['test_group'] = '不需要';
@@ -484,7 +483,7 @@ class ItWebDemand extends Backend
                 $list[$k]['web_remarks'] ='否';
             }
 
-            if ($v['pm_audit_status'] !== 3){
+            if ($v['pm_audit_status'] !== 2){
                 $list[$k]['pm_audit_status'] ='否';
             }else{
                 $list[$k]['pm_audit_status'] ='是';

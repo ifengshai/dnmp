@@ -28,9 +28,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 showExport: false,
                 columns: [
                     [
-                        {field: 'entity_id', title: __('用户ID'),visible: true,operate:false},
-                        {field: 'email', title: __('注册邮箱'),visible: true,operate:false},
-                        {field: 'created_at', title: __('注册时间'),visible: true,operate:false},
+                        {field: 'entity_id', title: __('用户ID'),visible: true,operate:false,sortable: true},
+                        {field: 'email', title: __('注册邮箱'),visible: true,operate:false,sortable: true},
+                        {field: 'created_at', title: __('注册时间'),visible: true,operate:false,sortable: true},
                         {field: 'order_num', title: __('总支付订单数'),visible: false,operate:false},
                         {field: 'order_amount', title: __('总订单金额'),visible: false,operate:false},
                         {field: 'point',title: __('积分余额'),visible: false,operate:false},
