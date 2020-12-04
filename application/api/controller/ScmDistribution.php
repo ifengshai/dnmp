@@ -1054,7 +1054,7 @@ class ScmDistribution extends Scm
         $total_qty_ordered = $this->_new_order_item_process
             ->where('order_id', $item_process_info['order_id'])
             ->count();
-        if (1 == $total_qty_ordered) $this->error(__('订单数量为1，不需要合单'), [], 403);
+        if (1 == $total_qty_ordered) $this->error(__("订单中只包含一个商品，不需要合单\n需要将子订单放至审单处"), [], 403);
 
         $order_process_info = $this->_new_order_process
             ->where('order_id', $item_process_info['order_id'])
@@ -1069,7 +1069,7 @@ class ScmDistribution extends Scm
                 $this->error(__('请将子单号'.$item_order_number.'的商品放入合单架'.$store_house_info['coding'].'合单库位'), [], 403);
             } else {
 //                $this->_new_order_item_process->allowField(true)->isUpdate(true, ['item_order_number'=>$item_order_number])->save(['distribution_status'=>7]);
-                $this->error(__('数据异常，合单失败'), [], 403);
+                $this->error(__('合单失败，主单未分配合单库位'), [], 403);
             }
         }
 
