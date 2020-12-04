@@ -4,6 +4,7 @@ namespace app\admin\controller\order;
 
 use app\admin\model\DistributionLog;
 use app\admin\model\saleaftermanage\WorkOrderChangeSku;
+use app\admin\model\saleaftermanage\WorkOrderList;
 use app\common\controller\Backend;
 use think\Request;
 use think\exception\PDOException;
@@ -102,6 +103,13 @@ class Distribution extends Backend
     protected $_lens_data = null;
 
     /**
+     * 工单模型对象
+     * @var object
+     * @access protected
+     */
+    protected $_work_order_list = null;
+
+    /**
      * 工单措施模型对象
      * @var object
      * @access protected
@@ -128,6 +136,7 @@ class Distribution extends Backend
         $this->_item_platform_sku = new ItemPlatformSku();
         $this->_item = new Item();
         $this->_stock_log = new StockLog();
+        $this->_work_order_list = new WorkOrderList();
         $this->_work_order_measure = new WorkOrderMeasure();
         $this->_work_order_change_sku = new WorkOrderChangeSku();
     }
@@ -260,11 +269,16 @@ class Distribution extends Backend
                 ->where(['status' => 1, 'type' => ['>', 1], 'occupy' => ['>', 0]])
                 ->column('coding', 'id');
 
+            //获取异常数据
+            $abnormal_data = $this->_distribution_abnormal
+                ->where(['item_process_id'=>['in',array_column($list,'id')],'status'=>1])
+                ->column('work_id','item_process_id');
+
             foreach ($list as $key => $value) {
                 $stock_house_num = '';
                 if (!empty($value['temporary_house_id'])) {
                     $stock_house_num = $stock_house_data[$value['temporary_house_id']];//定制片库位号
-                } elseif (!empty($value['temporary_house_id'])) {
+                } elseif (!empty($value['abnormal_house_id'])) {
                     $stock_house_num = $stock_house_data[$value['abnormal_house_id']];//异常库位号
                 } elseif (!empty($value['store_house_id'])) {
                     $stock_house_num = $stock_house_data[$value['store_house_id']];//合单库位号
@@ -274,7 +288,8 @@ class Distribution extends Backend
                 $list[$key]['created_at'] = date('Y-m-d H:i:s', $value['created_at']);
 
                 //跟单：异常未处理且未创建工单的显示处理异常按钮
-                if (8 == $label && $value['abnormal_house_id'] > 0 && !in_array($value['item_order_number'], $item_order_numbers)){
+                $work_id = $abnormal_data[$value['id']]['work_id'] ?? 0;
+                if (8 == $label && 0 < $value['abnormal_house_id'] && 0 == $work_id){
                     $handle_abnormal = 1;
                 }else{
                     $handle_abnormal = 0;
@@ -1484,27 +1499,29 @@ class Distribution extends Backend
     {
         $ids = input('id_params/a');//子单ID
         !$ids && $this->error('请选择要创建工单的数据');
+
+        //获取子单号
+        $item_process_numbers = $this->model->where(['id' => ['in', $ids]])->column('item_order_number');
+        !$item_process_numbers && $this->error('子单不存在');
+
         //判断子单是否为同一主单
         $order_id = $this->model
             ->alias('a')
             ->join(['fa_order' => 'b'], 'a.order_id=b.id')
             ->where(['a.id' => ['in', $ids]])
             ->column('b.increment_id');
+        !$order_id && $this->error('订单不存在');
         $order_id = array_unique(array_filter($order_id));//数组去空、去重
-        !$order_id && $this->error('子单不存在');
         1 < count($order_id) && $this->error('所选子订单的主单不唯一');
 
-        $item_process_numbers = $this->model->where(['id' => ['in', $ids]])->column('item_order_number');
-        $item_process_numbers = array_filter($item_process_numbers);
-        $work_order_where['a.operation_type'] = 0;//fa_work_order_measure子单工单：0未处理
-        $work_order_where['a.item_order_number'] = ['in', $item_process_numbers];//fa_work_order_measure子单订单号
-        $work_order_where['b.work_status'] = ['not in', [0, 6, 7]];//fa_work_order_list主工单状态：0取消 6 已处理 7 取消
-        $item_process_number_no = $this->_work_order_measure
-            ->alias('a')
-            ->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')
-            ->where($work_order_where)
-            ->column('item_order_number');
-        $item_process_number_no && $this->error('以下子单号有未完成工单不可创建工单' . implode('', $item_process_number_no));
+        //检测是否有未处理工单
+        $check_work_order = $this->_work_order_list
+            ->where([
+                'work_status'=>['in',[1,2,3,5]],
+                'platform_order'=>$order_id[0]
+            ])
+            ->value('id');
+//        $check_work_order && $this->error('当前订单有未完成工单，不可创建工单');
 
         //调用创建工单接口
         //saleaftermanage/work_order_list/add?order_number=123&order_item_numbers=35456,23465,1111
