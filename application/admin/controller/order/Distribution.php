@@ -735,7 +735,7 @@ class Distribution extends Backend
         0 < $count && $this->error('存在非当前节点的子订单');
 
         //标记打印状态
-        Db::startTrans();
+        $this->model->startTrans();
         try {
             //标记状态
             $this->model
@@ -747,12 +747,12 @@ class Distribution extends Backend
             $admin = (object)session('admin');
             DistributionLog::record($admin, $ids, 1, '标记打印完成');
 
-            Db::commit();
+            $this->model->commit();
         } catch (PDOException $e) {
-            Db::rollback();
+            $this->model->rollback();
             $this->error($e->getMessage());
         } catch (Exception $e) {
-            Db::rollback();
+            $this->model->rollback();
             $this->error($e->getMessage());
         }
         $this->success('标记成功!', '', 'success', 200);
@@ -1045,7 +1045,10 @@ class Distribution extends Backend
         //操作人信息
         $admin = (object)session('admin');
 
-        Db::startTrans();
+        $this->_item->startTrans();
+        $this->_stock_log->startTrans();
+        $this->_new_order_process->startTrans();
+        $this->model->startTrans();
         try {
             //更新状态
             foreach ($item_list as $value) {
@@ -1121,12 +1124,21 @@ class Distribution extends Backend
                 DistributionLog::record($admin, $value['id'], $check_status, $status_arr[$check_status] . '完成');
             }
 
-            Db::commit();
+            $this->_item->commit();
+            $this->_stock_log->commit();
+            $this->_new_order_process->commit();
+            $this->model->commit();
         } catch (PDOException $e) {
-            Db::rollback();
+            $this->_item->rollback();
+            $this->_stock_log->rollback();
+            $this->_new_order_process->rollback();
+            $this->model->rollback();
             $this->error($e->getMessage());
         } catch (Exception $e) {
-            Db::rollback();
+            $this->_item->rollback();
+            $this->_stock_log->rollback();
+            $this->_new_order_process->rollback();
+            $this->model->rollback();
             $this->error($e->getMessage());
         }
 
@@ -1219,7 +1231,7 @@ class Distribution extends Backend
         //操作人信息
         $admin = (object)session('admin');
 
-        Db::startTrans();
+        $this->model->startTrans();
         try {
             //子订单状态回滚
             $this->model
@@ -1233,12 +1245,12 @@ class Distribution extends Backend
                 DistributionLog::record($admin, $value['id'], 6, $status_arr[$reason]['name']);
             }
 
-            Db::commit();
+            $this->model->commit();
         } catch (PDOException $e) {
-            Db::rollback();
+            $this->model->rollback();
             $this->error($e->getMessage());
         } catch (Exception $e) {
-            Db::rollback();
+            $this->model->rollback();
             $this->error($e->getMessage());
         }
         $this->success('操作成功!', '', 'success', 200);
@@ -1331,7 +1343,11 @@ class Distribution extends Backend
             //检测状态
             !in_array($item_info['distribution_status'], $check_status) && $this->error('当前子订单不可返回至此节点');
 
-            Db::startTrans();
+            $this->model->startTrans();
+            $this->_distribution_abnormal->startTrans();
+            $this->_item_platform_sku->startTrans();
+            $this->_item->startTrans();
+            $this->_stock_log->startTrans();
             try {
                 //子订单状态回滚
                 $this->model
@@ -1388,15 +1404,28 @@ class Distribution extends Backend
                 //记录日志
                 DistributionLog::record($admin, $ids, 10, $remark);
 
-                Db::commit();
-                $this->success('处理成功!', '', 'success', 200);
+                $this->model->commit();
+                $this->_distribution_abnormal->commit();
+                $this->_item_platform_sku->commit();
+                $this->_item->commit();
+                $this->_stock_log->commit();
             } catch (PDOException $e) {
-                Db::rollback();
+                $this->model->rollback();
+                $this->_distribution_abnormal->rollback();
+                $this->_item_platform_sku->rollback();
+                $this->_item->rollback();
+                $this->_stock_log->rollback();
                 $this->error($e->getMessage());
             } catch (Exception $e) {
-                Db::rollback();
+                $this->model->rollback();
+                $this->_distribution_abnormal->rollback();
+                $this->_item_platform_sku->rollback();
+                $this->_item->rollback();
+                $this->_stock_log->rollback();
                 $this->error($e->getMessage());
             }
+
+            $this->success('处理成功!', '', 'success', 200);
         }
 
         $this->view->assign("status_arr", $status_arr);

@@ -8,6 +8,7 @@ use app\admin\model\DistributionLog;
 use app\admin\model\warehouse\StockHouse;
 use think\Cache;
 use think\Db;
+use think\exception\PDOException;
 use think\Exception;
 use think\Model;
 use think\View;
@@ -573,13 +574,20 @@ class WorkOrderList extends Model
         $work = $this->find($work_id);
         //修改地址
         if ($work && 13 == $measure_choose_id) {
-            Db::startTrans();
+            //子单sku变动表
+            $_work_order_change_sku = new WorkOrderChangeSku();
+
+            //措施表
+            $_work_order_measure = new WorkOrderMeasure();
+
+            $_work_order_change_sku->startTrans();
+            $_work_order_measure->startTrans();
             try {
                 if (!$params['modify_address']['country_id']) {
                     exception('国家不能为空');
                 }
                 //查询是否有该地址
-                $is_exist = WorkOrderChangeSku::where(['work_id' => $work_id])->value('id');
+                $is_exist = $_work_order_change_sku->where(['work_id' => $work_id])->value('id');
                 if(!$is_exist){
                     $data = [
                         'work_id' => $work_id,
@@ -595,17 +603,20 @@ class WorkOrderList extends Model
                     $data['email'] = $params['modify_address']['email'];
  
                     $data['userinfo_option'] = serialize($params['modify_address']);
-                    WorkOrderChangeSku::create($data);
-                    WorkOrderMeasure::where(['id' => $measure_id])->update(['sku_change_type' => 6]);
+                    $_work_order_change_sku->create($data);
+                    $_work_order_measure->where(['id' => $measure_id])->update(['sku_change_type' => 6]);
                 }else{
                     //更新
                     $data['email'] = $params['modify_address']['email'];
                     $data['userinfo_option'] = serialize($params['modify_address']);
-                    WorkOrderChangeSku::where(['work_id' => $work_id])->update($data);
+                    $_work_order_change_sku->where(['work_id' => $work_id])->update($data);
                 }
-                Db::commit();
+
+                $_work_order_change_sku->commit();
+                $_work_order_measure->commit();
             } catch (\Exception $e) {
-                Db::rollback();
+                $_work_order_change_sku->rollback();
+                $_work_order_measure->rollback();
                 exception($e->getMessage());
             }
         } 
@@ -783,7 +794,14 @@ class WorkOrderList extends Model
     {
         $work = $this->find($work_id);
         if ($work && in_array($measure_choose_id,[6,7,20])) {
-            Db::startTrans();
+            //措施表
+            $_work_order_measure = new WorkOrderMeasure();
+
+            //子单sku变动表
+            $_work_order_change_sku = new WorkOrderChangeSku();
+
+            $_work_order_measure->startTrans();
+            $_work_order_change_sku->startTrans();
             try {
                 $platform_type = $params['work_platform'];
                 $platform_order = $params['platform_order'];
@@ -876,10 +894,10 @@ class WorkOrderList extends Model
                     ];
 
                     //新增sku变动数据
-                    WorkOrderChangeSku::create($data);
+                    $_work_order_change_sku->create($data);
 
                     //标记措施表更改类型
-                    WorkOrderMeasure::where(['id' => $measure_id])->update(['sku_change_type' => $change_type]);
+                    $_work_order_measure->where(['id' => $measure_id])->update(['sku_change_type' => $change_type]);
                 }else{
                     if (6 == $measure_choose_id) { //赠品
                         $changeLens = $params['gift'];
@@ -958,16 +976,18 @@ class WorkOrderList extends Model
                         ];
 
                         //新增sku变动数据
-                        WorkOrderChangeSku::create($data);
+                        $_work_order_change_sku->create($data);
 
                         //标记措施表更改类型
-                        WorkOrderMeasure::where(['id' => $measure_id])->update(['sku_change_type' => $change_type]);
+                        $_work_order_measure->where(['id' => $measure_id])->update(['sku_change_type' => $change_type]);
                     }
                 }
 
-                Db::commit();
+                $_work_order_measure->commit();
+                $_work_order_change_sku->commit();
             } catch (\Exception $e) {
-                Db::rollback();
+                $_work_order_measure->rollback();
+                $_work_order_change_sku->rollback();
                 exception($e->getMessage());
             }
         }
@@ -1500,7 +1520,11 @@ class WorkOrderList extends Model
         //判断是否已审核
         if ($work->check_time) return true;
 
-        Db::startTrans();
+        //工单备注表
+        $_work_order_remark = new WorkOrderRemark();
+
+        $work->startTrans();
+        $_work_order_remark->startTrans();
         try {
             $time = date('Y-m-d H:i:s');
             $admin_id = session('admin.id');
@@ -1537,7 +1561,7 @@ class WorkOrderList extends Model
                         $work->complete_time = $time;
 
                         //检测是否标记异常，有则修改为已处理
-                        $this->handle_abnormal($work);
+                        if(!$this->handle_abnormal($work)) throw new Exception("工单处理：配货异常处理失败");
                     } elseif ($key > 0 && $count > $key) {
                         //部分处理
                         $work_status = 5;
@@ -1557,7 +1581,7 @@ class WorkOrderList extends Model
                         'create_person' => session('admin.nickname'),
                         'create_time' => $time
                     ];
-                    WorkOrderRemark::create($remarkData);
+                    $_work_order_remark->create($remarkData);
                 }
             }else{
                 //需要审核
@@ -1592,7 +1616,7 @@ class WorkOrderList extends Model
                             $work->complete_time = $time;
 
                             //检测是否标记异常，有则修改为已处理
-                            $this->handle_abnormal($work);
+                            if(!$this->handle_abnormal($work)) throw new Exception("工单处理：配货异常处理失败");
                         } elseif ($key > 0  && $count > $key) {
                             //部分处理
                             $work_status = 5;
@@ -1613,15 +1637,17 @@ class WorkOrderList extends Model
                         'create_person' => session('admin.nickname'),
                         'create_time' => $time
                     ];
-                    WorkOrderRemark::create($remarkData);
+                    $_work_order_remark->create($remarkData);
                     //通知
                     //Ding::cc_ding(explode(',', $work->recept_person_id), '', '工单ID：' . $work->id . '😎😎😎😎有新工单需要你处理😎😎😎😎', '有新工单需要你处理');
                 }
             }
 
-            Db::commit();
+            $work->commit();
+            $_work_order_remark->commit();
         } catch (Exception $e) {
-            Db::rollback();
+            $work->rollback();
+            $_work_order_remark->rollback();
             exception($e->getMessage());
         }
     }
@@ -1641,64 +1667,84 @@ class WorkOrderList extends Model
             ->where(['work_id' => $work->id, 'status' => 1])
             ->column('item_process_id')
         ;
-        if($item_process_ids){
-            //异常标记为已处理
-            $_distribution_abnormal
-                ->allowField(true)
-                ->save(['status' => 2, 'do_time' => time(), 'do_person' => session('admin.nickname')],['work_id' => $work->id, 'status' => 1])
-            ;
 
-            //获取异常库位id集
-            $abnormal_house_ids = $_new_order_item_process
-                ->where(['id' => ['in',$item_process_ids]])
-                ->column('abnormal_house_id')
-            ;
-            if($abnormal_house_ids){
-                //异常库位号占用数量减1
-                foreach($abnormal_house_ids as $v){
-                    $_stock_house
-                        ->where(['id' => $v])
-                        ->setDec('occupy', 1)
-                    ;
-                }
-            }
-
-            //解绑子订单的异常库位ID
-            $_new_order_item_process
-                ->allowField(true)
-                ->save(['abnormal_house_id' => 0],['id' => ['in',$item_process_ids]])
-            ;
-
-            //配货操作日志
-            DistributionLog::record((object)session('admin'),$item_process_ids,10,"工单处理完成，异常标记为已处理");
-        }
-
-        //获取取消子单号合集
-        $cancel_order_number = (new WorkOrderChangeSku)
-            ->alias('a')
-            ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
-            ->where([
-                'a.change_type'=>3,
-                'a.work_id'=>$work->id,
-                'b.operation_type'=>1
-            ])
-            ->column('a.item_order_number')
-        ;
-        if($cancel_order_number){
-            $item_process_ids = $_distribution_abnormal
-                ->where(['item_order_number' => ['in',$cancel_order_number]])
-                ->column('item_process_id')
-            ;
+        $_distribution_abnormal->startTrans();
+        $_stock_house->startTrans();
+        $_new_order_item_process->startTrans();
+        try {
             if($item_process_ids){
-                //标记子单号状态为取消
+                //异常标记为已处理
+                $_distribution_abnormal
+                    ->allowField(true)
+                    ->save(['status' => 2, 'do_time' => time(), 'do_person' => session('admin.nickname')],['work_id' => $work->id, 'status' => 1])
+                ;
+
+                //获取异常库位id集
+                $abnormal_house_ids = $_new_order_item_process
+                    ->where(['id' => ['in',$item_process_ids]])
+                    ->column('abnormal_house_id')
+                ;
+                if($abnormal_house_ids){
+                    //异常库位号占用数量减1
+                    foreach($abnormal_house_ids as $v){
+                        $_stock_house
+                            ->where(['id' => $v])
+                            ->setDec('occupy', 1)
+                        ;
+                    }
+                }
+
+                //解绑子订单的异常库位ID
                 $_new_order_item_process
                     ->allowField(true)
-                    ->save(['distribution_status'=>0], ['id' => ['in',$item_process_ids]])
+                    ->save(['abnormal_house_id' => 0],['id' => ['in',$item_process_ids]])
                 ;
 
                 //配货操作日志
-                DistributionLog::record((object)session('admin'),$item_process_ids,10,"工单处理完成，子单取消");
+                DistributionLog::record((object)session('admin'),$item_process_ids,10,"工单处理完成，异常标记为已处理");
             }
+
+            //获取取消子单号合集
+            $cancel_order_number = (new WorkOrderChangeSku)
+                ->alias('a')
+                ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
+                ->where([
+                    'a.change_type'=>3,
+                    'a.work_id'=>$work->id,
+                    'b.operation_type'=>1
+                ])
+                ->column('a.item_order_number')
+            ;
+            if($cancel_order_number){
+                $item_process_ids = $_distribution_abnormal
+                    ->where(['item_order_number' => ['in',$cancel_order_number]])
+                    ->column('item_process_id')
+                ;
+                if($item_process_ids){
+                    //标记子单号状态为取消
+                    $_new_order_item_process
+                        ->allowField(true)
+                        ->save(['distribution_status'=>0], ['id' => ['in',$item_process_ids]])
+                    ;
+
+                    //配货操作日志
+                    DistributionLog::record((object)session('admin'),$item_process_ids,10,"工单处理完成，子单取消");
+                }
+            }
+
+            $_distribution_abnormal->commit();
+            $_stock_house->commit();
+            $_new_order_item_process->commit();
+        } catch (PDOException $e) {
+            $_distribution_abnormal->rollback();
+            $_stock_house->rollback();
+            $_new_order_item_process->rollback();
+            return false;
+        } catch (Exception $e) {
+            $_distribution_abnormal->rollback();
+            $_stock_house->rollback();
+            $_new_order_item_process->rollback();
+            return false;
         }
 
         return true;
@@ -1754,88 +1800,107 @@ class WorkOrderList extends Model
     public function handleRecept($id, $work_id, $measure_id, $recept_group_id, $success, $process_note,$is_auto_complete)
     {
         $work = self::find($work_id);
-        Db::startTrans();
+
+        //承接人表
+        $_work_order_recept = new WorkOrderRecept();
+
+        //措施表
+        $_work_order_measure = new WorkOrderMeasure();
+
+        $_work_order_recept->startTrans();
+        $_work_order_measure->startTrans();
+        $this->startTrans();
         try {
-        //更新本条工单数据承接人状态
-        $data = [
-            'recept_status'=> 1 == $success ? 1 : 2,
-            'note'=> $process_note,
-            'finish_time'=> date('Y-m-d H:i:s')
-        ];
-        $resultInfo = WorkOrderRecept::where(['id' => $id])->update($data);
+            //更新本条工单数据承接人状态
+            $data = [
+                'recept_status'=> 1 == $success ? 1 : 2,
+                'note'=> $process_note,
+                'finish_time'=> date('Y-m-d H:i:s')
+            ];
+            $resultInfo = $_work_order_recept->where(['id' => $id])->update($data);
 
-        //删除同样的承接组数据
-        $where = [
-            'work_id'=>$work_id,
-            'measure_id'=>$measure_id,
-            'recept_group_id'=>$recept_group_id,
-            'recept_status'=>0,
-        ];
-        WorkOrderRecept::where($where)->delete();
+            //删除同样的承接组数据
+            $where = [
+                'work_id'=>$work_id,
+                'measure_id'=>$measure_id,
+                'recept_group_id'=>$recept_group_id,
+                'recept_status'=>0,
+            ];
+            $_work_order_recept->where($where)->delete();
 
-        //如果是处理失败的状态
-        $dataMeasure = [
-            'operation_type'=>1 == $data['recept_status'] ? 1 : 2,
-            'operation_time'=>date('Y-m-d H:i:s')
-        ];
-        WorkOrderMeasure::where(['id' => $measure_id])->update($dataMeasure);
+            //如果是处理失败的状态
+            $dataMeasure = [
+                'operation_type'=>1 == $data['recept_status'] ? 1 : 2,
+                'operation_time'=>date('Y-m-d H:i:s')
+            ];
+            $_work_order_recept->where(['id' => $measure_id])->update($dataMeasure);
 
-        //求出承接措施是否完成
-        $whereMeasure = [
-            'work_id'=>$work_id,
-            'recept_status'=>0
-        ];
-        $resultRecept = WorkOrderRecept::where($whereMeasure)->count();
+            //求出承接措施是否完成
+            $whereMeasure = [
+                'work_id'=>$work_id,
+                'recept_status'=>0
+            ];
+            $resultRecept = $_work_order_recept->where($whereMeasure)->count();
 
-        //表明整个措施已经完成
-        if (0 == $resultRecept) {
-            //求出整个工单的措施状态
-            $whereWork['work_id'] = $work_id;
-            $whereWork['operation_type'] = ['eq', 0];
-            $resultMeasure = WorkOrderMeasure::where($whereWork)->count();
-            if (0 == $resultMeasure) {
-                $dataWorkOrder['work_status'] = 6;
-                $dataWorkOrder['complete_time'] = date('Y-m-d H:i:s');
+            //表明整个措施已经完成
+            if (0 == $resultRecept) {
+                //求出整个工单的措施状态
+                $whereWork['work_id'] = $work_id;
+                $whereWork['operation_type'] = ['eq', 0];
+                $resultMeasure = $_work_order_measure->where($whereWork)->count();
+                if (0 == $resultMeasure) {
+                    $dataWorkOrder['work_status'] = 6;
+                    $dataWorkOrder['complete_time'] = date('Y-m-d H:i:s');
 
-                //检测是否标记异常，有则修改为已处理
-                $this->handle_abnormal($work);
+                    //检测是否标记异常，有则修改为已处理
+                    if(!$this->handle_abnormal($work)) throw new Exception("工单处理：配货异常处理失败");
 
-                //通知
-                //Ding::cc_ding(explode(',', $work->create_user_id), '', '工单ID：' . $work->id . '😎😎😎😎工单已处理完成😎😎😎😎',  '😎😎😎😎工单已处理完成😎😎😎😎');
-            } else {
+                    //通知
+                    //Ding::cc_ding(explode(',', $work->create_user_id), '', '工单ID：' . $work->id . '😎😎😎😎工单已处理完成😎😎😎😎',  '😎😎😎😎工单已处理完成😎😎😎😎');
+                } else {
+                    $dataWorkOrder['work_status'] = 5;
+                }
+            }else{
                 $dataWorkOrder['work_status'] = 5;
             }
-        }else{
-            $dataWorkOrder['work_status'] = 5;
-        }
-        WorkOrderList::where(['id' => $work_id])->update($dataWorkOrder);
+            $this->where(['id' => $work_id])->update($dataWorkOrder);
 
-        $measure_choose_id = WorkOrderMeasure::where('id',$measure_id)->value('measure_choose_id');
-        //不是自动处理完成
-        if(1 != $is_auto_complete){
-            //补发
-            if(7 == $measure_choose_id){
-                $this->createOrder($work->work_platform, $work->id);
-            }elseif(9 == $measure_choose_id){//发送优惠券
-                $this->presentCoupon($work->id);
-            }elseif(10 == $measure_choose_id){//赠送积分
-                $this->presentIntegral($work->id);
-            }elseif(13 == $measure_choose_id){//修改地址
-                $this->presentAddress($work, $measure_id);
+            $measure_choose_id = $_work_order_measure->where('id',$measure_id)->value('measure_choose_id');
+            //不是自动处理完成
+            if(1 != $is_auto_complete){
+                //补发
+                if(7 == $measure_choose_id){
+                    $this->createOrder($work->work_platform, $work->id);
+                }elseif(9 == $measure_choose_id){//发送优惠券
+                    $this->presentCoupon($work->id);
+                }elseif(10 == $measure_choose_id){//赠送积分
+                    $this->presentIntegral($work->id);
+                }elseif(13 == $measure_choose_id){//修改地址
+                    $this->presentAddress($work, $measure_id);
+                }
             }
-        }
 
-        //措施不是补发的时候扣减库存，是补发的时候不扣减库存，因为补发的时候库存已经扣减过了
-        if ($resultInfo && 1 == $data['recept_status'] && 7 != $measure_choose_id){
-            $this->deductionStock($work_id, $measure_id);
+            //措施不是补发的时候扣减库存，是补发的时候不扣减库存，因为补发的时候库存已经扣减过了
+            if ($resultInfo && 1 == $data['recept_status'] && 7 != $measure_choose_id){
+                $this->deductionStock($work_id, $measure_id);
+            }
+
+            $_work_order_recept->commit();
+            $_work_order_measure->commit();
+            $this->commit();
+        } catch (PDOException $e) {
+            $_work_order_recept->rollback();
+            $_work_order_measure->rollback();
+            $this->rollback();
+            exception($e->getMessage());
+        }catch (Exception $e) {
+            $_work_order_recept->rollback();
+            $_work_order_measure->rollback();
+            $this->rollback();
+            exception($e->getMessage());
         }
-        Db::commit();
-    } catch (Exception $e) {
-        Db::rollback();
-        exception($e->getMessage());
+        return true;
     }
-    return true;
-  }
     //扣减库存逻辑
     public function deductionStock($work_id, $measure_id)
     {
