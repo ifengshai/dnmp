@@ -1573,8 +1573,8 @@ class OrderData extends Backend
             $params['customer_lastname'] = $v['customer_lastname'];
             $params['taxno'] = $v['taxno'];
             $params['base_to_order_rate'] = $v['base_to_order_rate'];
-            $params['mw_rewardpoint_discount'] = $v['mw_rewardpoint_discount'];
-            $params['mw_rewardpoint'] = $v['mw_rewardpoint'];
+            $params['mw_rewardpoint_discount'] = $v['mw_rewardpoint_discount'] ?? 0;
+            $params['mw_rewardpoint'] = $v['mw_rewardpoint'] ?? 0;
             $params['base_shipping_amount'] = $v['base_shipping_amount'];
             $params['created_at'] = strtotime($v['created_at']) + 28800;
             $params['updated_at'] = strtotime($v['updated_at']) + 28800;
