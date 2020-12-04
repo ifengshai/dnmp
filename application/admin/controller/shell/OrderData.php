@@ -1520,24 +1520,35 @@ class OrderData extends Backend
     public function process_order_data_temp()
     {
         $this->zeelool_old_order(1);
+        $this->zeelool_old_order(2);
+        $this->zeelool_old_order(3);
+        $this->zeelool_old_order(9);
+        $this->zeelool_old_order(10);
+        $this->zeelool_old_order(11);
         // $this->zeelool_old_order(5);
     }
     protected function zeelool_old_order($site)
     {
         if ($site == 1) {
-            $list = $this->zeelool->where(['entity_id' => 557772])->select();
-        } elseif ($site == 5) {
-            $id = $this->order->where('site=' . $site . ' and entity_id < 1375')->max('entity_id');
-            $list = $this->wesee->where(['entity_id' => ['between', [$id, 1375]]])->limit(3000)->select();
+            $list = $this->zeelool->where(['customer_email' => ['in', ['zz2@gmail.com', 'v@qq.com', '12345@qq.com', '528062805@qq.com', '363901041@qq.com']], 'status' => 'processing'])->limit(100)->select();
+        } elseif ($site == 2) {
+            $list = $this->voogueme->where(['customer_email' => ['in', ['zz2@gmail.com', 'v@qq.com', '12345@qq.com', '528062805@qq.com', '363901041@qq.com']], 'status' => 'processing'])->limit(100)->select();
+        } elseif ($site == 3) {
+            $list = $this->nihao->where(['customer_email' => ['in', ['zz2@gmail.com', 'v@qq.com', '12345@qq.com', '528062805@qq.com', '363901041@qq.com']], 'status' => 'processing'])->limit(100)->select();
+        } elseif ($site == 9) {
+            $list = $this->zeelool_es->where(['customer_email' => ['in', ['zz2@gmail.com', 'v@qq.com', '12345@qq.com', '528062805@qq.com', '363901041@qq.com']], 'status' => 'processing'])->limit(100)->select();
+        } elseif ($site == 10) {
+            $list = $this->zeelool_de->where(['customer_email' => ['in', ['zz2@gmail.com', 'v@qq.com', '12345@qq.com', '528062805@qq.com', '363901041@qq.com']], 'status' => 'processing'])->limit(100)->select();
+        } elseif ($site == 11) {
+            $list = $this->zeelool_jp->where(['customer_email' => ['in', ['zz2@gmail.com', 'v@qq.com', '12345@qq.com', '528062805@qq.com', '363901041@qq.com']], 'status' => 'processing'])->limit(100)->select();
         }
-
         $list = collection($list)->toArray();
 
         $order_params = [];
         foreach ($list as $k => $v) {
             $count = $this->order->where('site=' . $site . ' and entity_id=' . $v['entity_id'])->count();
             if ($count > 0) {
-                continue;
+                $this->order->where('site=' . $site . ' and entity_id=' . $v['entity_id'])->delete();
             }
             $params = [];
             $params['entity_id'] = $v['entity_id'];
@@ -1573,6 +1584,198 @@ class OrderData extends Backend
             $order_params[$k]['order_id'] = $order_id;
             $order_params[$k]['entity_id'] = $v['entity_id'];
             $order_params[$k]['increment_id'] = $v['increment_id'];
+
+            //删除子订单表
+            $this->orderitemoption->where('site=' . $site . ' and magento_order_id=' . $v['entity_id'])->delete();
+            $this->orderitemprocess->where('site=' . $site . ' and magento_order_id=' . $v['entity_id'])->delete();
+
+            //处方解析 不同站不同字段
+            if ($site == 1) {
+                $res =  Db::connect('database.db_zeelool')->table('sales_flat_order_item')->where(['order_id' => $v['entity_id']])->select();
+                foreach ($res as $key => $val) {
+                    $options = [];
+                    $options =  $this->zeelool_prescription_analysis($val['product_options']);
+                    $options['item_id'] = $val['item_id'];
+                    $options['site'] = $site;
+                    $options['magento_order_id'] = $val['order_id'];
+                    $options['sku'] = $val['sku'];
+                    $options['qty'] = $val['qty_ordered'];
+                    $options['base_row_total'] = $val['base_row_total'];
+                    $options['product_id'] = $val['product_id'];
+                    $order_prescription_type = $options['order_prescription_type'];
+                    unset($options['order_prescription_type']);
+                    if ($options) {
+                        $options_id = $this->orderitemoption->insertGetId($options);
+                        $data = []; //子订单表数据
+                        for ($i = 0; $i < $val['qty_ordered']; $i++) {
+                            $data[$i]['item_id'] = $val['item_id'];
+                            $data[$i]['magento_order_id'] = $val['order_id'];
+                            $data[$i]['site'] = $site;
+                            $data[$i]['option_id'] = $options_id;
+                            $data[$i]['sku'] = $val['sku'];
+                            $data[$i]['order_prescription_type'] = $order_prescription_type;
+                            $data[$i]['created_at'] = strtotime($val['created_at']) + 28800;
+                            $data[$i]['updated_at'] = strtotime($val['updated_at']) + 28800;
+                        }
+                        $this->orderitemprocess->insertAll($data);
+                    }
+                }
+            } elseif ($site == 2) {
+                $res =  Db::connect('database.db_voogueme')->table('sales_flat_order_item')->where(['order_id' => $v['entity_id']])->select();
+                foreach ($res as $key => $val) {
+                    $options = [];
+                    $options =  $this->voogueme_prescription_analysis($val['product_options']);
+                    $options['item_id'] = $val['item_id'];
+                    $options['site'] = $site;
+                    $options['magento_order_id'] = $val['order_id'];
+                    $options['sku'] = $val['sku'];
+                    $options['qty'] = $val['qty_ordered'];
+                    $options['base_row_total'] = $val['base_row_total'];
+                    $options['product_id'] = $val['product_id'];
+                    $order_prescription_type = $options['order_prescription_type'];
+                    unset($options['order_prescription_type']);
+                    if ($options) {
+                        $options_id = $this->orderitemoption->insertGetId($options);
+                        $data = []; //子订单表数据
+                        for ($i = 0; $i < $val['qty_ordered']; $i++) {
+                            $data[$i]['item_id'] = $val['item_id'];
+                            $data[$i]['magento_order_id'] = $val['order_id'];
+                            $data[$i]['site'] = $site;
+                            $data[$i]['option_id'] = $options_id;
+                            $data[$i]['sku'] = $val['sku'];
+                            $data[$i]['order_prescription_type'] = $order_prescription_type;
+                            $data[$i]['created_at'] = strtotime($val['created_at']) + 28800;
+                            $data[$i]['updated_at'] = strtotime($val['updated_at']) + 28800;
+                        }
+                        $this->orderitemprocess->insertAll($data);
+                    }
+                }
+
+            } elseif ($site == 3) {
+
+                $res =  Db::connect('database.db_nihao')->table('sales_flat_order_item')->where(['order_id' => $v['entity_id']])->select();
+                foreach ($res as $key => $val) {
+                    $options = [];
+                    $options =  $this->nihao_prescription_analysis($val['product_options']);
+                    $options['item_id'] = $val['item_id'];
+                    $options['site'] = $site;
+                    $options['magento_order_id'] = $val['order_id'];
+                    $options['sku'] = $val['sku'];
+                    $options['qty'] = $val['qty_ordered'];
+                    $options['base_row_total'] = $val['base_row_total'];
+                    $options['product_id'] = $val['product_id'];
+                    $order_prescription_type = $options['order_prescription_type'];
+                    unset($options['order_prescription_type']);
+                    if ($options) {
+                        $options_id = $this->orderitemoption->insertGetId($options);
+                        $data = []; //子订单表数据
+                        for ($i = 0; $i < $val['qty_ordered']; $i++) {
+                            $data[$i]['item_id'] = $val['item_id'];
+                            $data[$i]['magento_order_id'] = $val['order_id'];
+                            $data[$i]['site'] = $site;
+                            $data[$i]['option_id'] = $options_id;
+                            $data[$i]['sku'] = $val['sku'];
+                            $data[$i]['order_prescription_type'] = $order_prescription_type;
+                            $data[$i]['created_at'] = strtotime($val['created_at']) + 28800;
+                            $data[$i]['updated_at'] = strtotime($val['updated_at']) + 28800;
+                        }
+                        $this->orderitemprocess->insertAll($data);
+                    }
+                }
+
+            } elseif ($site == 9) {
+
+                $res =  Db::connect('database.db_zeelool_es')->table('sales_flat_order_item')->where(['order_id' => $v['entity_id']])->select();
+                foreach ($res as $key => $val) {
+                    $options = [];
+                    $options =  $this->zeelool_es_prescription_analysis($val['product_options']);
+                    $options['item_id'] = $val['item_id'];
+                    $options['site'] = $site;
+                    $options['magento_order_id'] = $val['order_id'];
+                    $options['sku'] = $val['sku'];
+                    $options['qty'] = $val['qty_ordered'];
+                    $options['base_row_total'] = $val['base_row_total'];
+                    $options['product_id'] = $val['product_id'];
+                    $order_prescription_type = $options['order_prescription_type'];
+                    unset($options['order_prescription_type']);
+                    if ($options) {
+                        $options_id = $this->orderitemoption->insertGetId($options);
+                        $data = []; //子订单表数据
+                        for ($i = 0; $i < $val['qty_ordered']; $i++) {
+                            $data[$i]['item_id'] = $val['item_id'];
+                            $data[$i]['magento_order_id'] = $val['order_id'];
+                            $data[$i]['site'] = $site;
+                            $data[$i]['option_id'] = $options_id;
+                            $data[$i]['sku'] = $val['sku'];
+                            $data[$i]['order_prescription_type'] = $order_prescription_type;
+                            $data[$i]['created_at'] = strtotime($val['created_at']) + 28800;
+                            $data[$i]['updated_at'] = strtotime($val['updated_at']) + 28800;
+                        }
+                        $this->orderitemprocess->insertAll($data);
+                    }
+                }
+            } elseif ($site == 10) {
+               
+                $res =  Db::connect('database.db_zeelool_de')->table('sales_flat_order_item')->where(['order_id' => $v['entity_id']])->select();
+                foreach ($res as $key => $val) {
+                    $options = [];
+                    $options =  $this->zeelool_de_prescription_analysis($val['product_options']);
+                    $options['item_id'] = $val['item_id'];
+                    $options['site'] = $site;
+                    $options['magento_order_id'] = $val['order_id'];
+                    $options['sku'] = $val['sku'];
+                    $options['qty'] = $val['qty_ordered'];
+                    $options['base_row_total'] = $val['base_row_total'];
+                    $options['product_id'] = $val['product_id'];
+                    $order_prescription_type = $options['order_prescription_type'];
+                    unset($options['order_prescription_type']);
+                    if ($options) {
+                        $options_id = $this->orderitemoption->insertGetId($options);
+                        $data = []; //子订单表数据
+                        for ($i = 0; $i < $val['qty_ordered']; $i++) {
+                            $data[$i]['item_id'] = $val['item_id'];
+                            $data[$i]['magento_order_id'] = $val['order_id'];
+                            $data[$i]['site'] = $site;
+                            $data[$i]['option_id'] = $options_id;
+                            $data[$i]['sku'] = $val['sku'];
+                            $data[$i]['order_prescription_type'] = $order_prescription_type;
+                            $data[$i]['created_at'] = strtotime($val['created_at']) + 28800;
+                            $data[$i]['updated_at'] = strtotime($val['updated_at']) + 28800;
+                        }
+                        $this->orderitemprocess->insertAll($data);
+                    }
+                }
+            } elseif ($site == 11) {
+                $res =  Db::connect('database.db_zeelool_jp')->table('sales_flat_order_item')->where(['order_id' => $v['entity_id']])->select();
+                foreach ($res as $key => $val) {
+                    $options = [];
+                    $options =  $this->zeelool_jp_prescription_analysis($val['product_options']);
+                    $options['item_id'] = $val['item_id'];
+                    $options['site'] = $site;
+                    $options['magento_order_id'] = $val['order_id'];
+                    $options['sku'] = $val['sku'];
+                    $options['qty'] = $val['qty_ordered'];
+                    $options['base_row_total'] = $val['base_row_total'];
+                    $options['product_id'] = $val['product_id'];
+                    $order_prescription_type = $options['order_prescription_type'];
+                    unset($options['order_prescription_type']);
+                    if ($options) {
+                        $options_id = $this->orderitemoption->insertGetId($options);
+                        $data = []; //子订单表数据
+                        for ($i = 0; $i < $val['qty_ordered']; $i++) {
+                            $data[$i]['item_id'] = $val['item_id'];
+                            $data[$i]['magento_order_id'] = $val['order_id'];
+                            $data[$i]['site'] = $site;
+                            $data[$i]['option_id'] = $options_id;
+                            $data[$i]['sku'] = $val['sku'];
+                            $data[$i]['order_prescription_type'] = $order_prescription_type;
+                            $data[$i]['created_at'] = strtotime($val['created_at']) + 28800;
+                            $data[$i]['updated_at'] = strtotime($val['updated_at']) + 28800;
+                        }
+                        $this->orderitemprocess->insertAll($data);
+                    }
+                }
+            }
 
             echo $v['entity_id'] . "\n";
             usleep(10000);
@@ -1974,7 +2177,7 @@ class OrderData extends Backend
             $option_params[$k]['coating_id'] = $options['coating_id'];
             $option_params[$k]['index_id'] = $options['index_id'] ?: 0;
             $option_params[$k]['id'] = $v['id'];
-            
+
             echo $v['item_id'] . "\n";
             usleep(10000);
         }
