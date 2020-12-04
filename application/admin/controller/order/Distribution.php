@@ -984,7 +984,12 @@ class Distribution extends Backend
         }
 
         //查询订单号
-        $increment_ids = $this->_new_order->where(['id' => ['in', array_unique($order_ids)]])->column('increment_id');
+        $order_ids = array_unique($order_ids);
+        $increment_ids = $this->_new_order
+            ->where(['id' => ['in', $order_ids],'status' => 'processing'])
+            ->column('increment_id')
+        ;
+        count($order_ids) != count($increment_ids) && $this->error('当前订单状态不可操作');
 
         //检测是否有工单未处理
         $check_work_order = $this->_work_order_measure
@@ -1184,7 +1189,12 @@ class Distribution extends Backend
         }
 
         //查询订单号
-        $increment_ids = $this->_new_order->where(['id' => ['in', array_unique($order_ids)]])->column('increment_id');
+        $order_ids = array_unique($order_ids);
+        $increment_ids = $this->_new_order
+            ->where(['id' => ['in', $order_ids],'status' => 'processing'])
+            ->column('increment_id')
+        ;
+        count($order_ids) != count($increment_ids) && $this->error('当前订单状态不可操作');
 
         //检测是否有工单未处理
         $check_work_order = $this->_work_order_measure
