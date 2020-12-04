@@ -1193,7 +1193,9 @@ class ScmDistribution extends Scm
 
         //首个子单进入合单架START
         $result = $return = false;
-        Db::startTrans();
+        $this->_stock_house->startTrans();
+        $this->_new_order_process->startTrans();
+        $this->_new_order_item_process->startTrans();
         try {
             //更新子单表
             $result = $this->_new_order_item_process->allowField(true)->isUpdate(true, ['item_order_number'=>$item_order_number])->save(['distribution_status'=>8]);
@@ -1211,16 +1213,13 @@ class ScmDistribution extends Scm
                     }
                 }
             }
-
-            Db::commit();
-        } catch (ValidateException $e) {
-            Db::rollback();
-            $this->error($e->getMessage(), [], 444);
-        } catch (PDOException $e) {
-            Db::rollback();
-            $this->error($e->getMessage(), [], 444);
+            $this->_stock_house->commit();
+            $this->_new_order_process->commit();
+            $this->_new_order_item_process->commit();
         } catch (Exception $e) {
-            Db::rollback();
+            $this->_stock_house->rollback();
+            $this->_new_order_process->rollback();
+            $this->_new_order_item_process->rollback();
             $this->error($e->getMessage(), [], 444);
         }
         if ($return !== false) {
@@ -1577,7 +1576,10 @@ class ScmDistribution extends Scm
         0 != $row['check_status'] && $this->success(__($msg.'成功'), [], 200);
 
         $result = false;
-        Db::startTrans();
+        $this->_item->startTrans();
+        $this->_stock_house->startTrans();
+        $this->_new_order_process->startTrans();
+        $this->_new_order_item_process->startTrans();
         try {
             $result = $this->_new_order_process->allowField(true)->isUpdate(true, ['order_id' => $order_id])->save($param);
             if (false !== $result){
@@ -1661,15 +1663,15 @@ class ScmDistribution extends Scm
                     }
                 }
             }
-            Db::commit();
-        } catch (ValidateException $e) {
-            Db::rollback();
-            $this->error($e->getMessage(), [], 406);
-        } catch (PDOException $e) {
-            Db::rollback();
-            $this->error($e->getMessage(), [], 407);
+            $this->_item->commit();
+            $this->_stock_house->commit();
+            $this->_new_order_process->commit();
+            $this->_new_order_item_process->commit();
         } catch (Exception $e) {
-            Db::rollback();
+            $this->_item->rollback();
+            $this->_stock_house->rollback();
+            $this->_new_order_process->rollback();
+            $this->_new_order_item_process->rollback();
             DistributionLog::record($this->auth,$item_ids,8,$e->getMessage().'主单ID'.$row['order_id'].$msg.'失败'.$msg_info);
             $this->error($e->getMessage(), [], 408);
         }

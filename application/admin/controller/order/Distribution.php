@@ -278,6 +278,7 @@ class Distribution extends Backend
             }
 
             foreach ($list as $key => $value) {
+                $stock_house_num = '';
                 if (!empty($value['temporary_house_id'])) {
                     $stock_house_num = $stock_house_data[$value['temporary_house_id']];//定制片库位号
                 } elseif (!empty($value['temporary_house_id'])) {
