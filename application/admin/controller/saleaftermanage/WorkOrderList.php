@@ -1317,7 +1317,15 @@ class WorkOrderList extends Backend
                 }
                 $params['recept_person_id'] = $params['recept_person_id'] ?: $admin_id;
 
-                Db::startTrans();
+                //配货异常表
+                $_distribution_abnormal = new DistributionAbnormal();
+
+                if (!empty($row)) {
+                    $row->startTrans();
+                }
+                $this->model->startTrans();
+                $this->work_order_note->startTrans();
+                $_distribution_abnormal->startTrans();
                 try {
                     //跟单处理
                     if (!empty($row)) {
@@ -1353,7 +1361,6 @@ class WorkOrderList extends Backend
                             ;
 
                             //绑定异常数据
-                            $_distribution_abnormal = new DistributionAbnormal();
                             $abnormal_count = $_distribution_abnormal
                                 ->where(['item_process_id' => ['in',$item_process_ids],'status'=>1])
                                 ->count()
@@ -1419,15 +1426,35 @@ class WorkOrderList extends Backend
                     //非草稿状态进入审核阶段
                     1 != $params['work_status'] && $this->model->checkWork($work_id);
 
-                    Db::commit();
+                    if (!empty($row)) {
+                        $row->commit();
+                    }
+                    $this->model->commit();
+                    $this->work_order_note->commit();
+                    $_distribution_abnormal->commit();
                 } catch (ValidateException $e) {
-                    Db::rollback();
+                    if (!empty($row)) {
+                        $row->rollback();
+                    }
+                    $this->model->rollback();
+                    $this->work_order_note->rollback();
+                    $_distribution_abnormal->rollback();
                     $this->error($e->getMessage());
                 } catch (PDOException $e) {
-                    Db::rollback();
+                    if (!empty($row)) {
+                        $row->rollback();
+                    }
+                    $this->model->rollback();
+                    $this->work_order_note->rollback();
+                    $_distribution_abnormal->rollback();
                     $this->error($e->getMessage());
                 } catch (Exception $e) {
-                    Db::rollback();
+                    if (!empty($row)) {
+                        $row->rollback();
+                    }
+                    $this->model->rollback();
+                    $this->work_order_note->rollback();
+                    $_distribution_abnormal->rollback();
                     $this->error($e->getMessage());
                 }
                 $this->success();
@@ -1571,66 +1598,85 @@ class WorkOrderList extends Backend
         //措施内容
         $measure_content = $workOrderConfigValue['step'][$choose_id] ?: '';
 
-        //插入措施表
+        //措施表
         $_work_order_measure = new WorkOrderMeasure();
-        $res = $_work_order_measure
-            ->allowField(true)
-            ->save([
-                'work_id'=>$work_id,
-                'measure_choose_id'=>$choose_id,
-                'measure_content'=>$measure_content,
-                'item_order_number'=>$item_order_number,
-                'create_time'=>date('Y-m-d H:i:s')
-            ])
-        ;
-        if (false === $res) return ['result'=>false,'msg'=>'添加措施失败！！'];
 
-        //工单措施表自增ID
-        $measure_id = $_work_order_measure->id;
+        //承接人表
+        $_work_order_recept = new WorkOrderRecept();
 
-        //循环插入承接人
-        $appoint_save = [];
-        if (is_array($appoint_ids) && !empty($appoint_ids)) {
-            foreach ($appoint_ids as $key => $val) {
-                if ($appoint_users[$key] == 'undefined') {
-                    continue;
+        $_work_order_measure->startTrans();
+        $_work_order_recept->startTrans();
+        try {
+            //插入措施表
+            $res = $_work_order_measure
+                ->allowField(true)
+                ->save([
+                    'work_id'=>$work_id,
+                    'measure_choose_id'=>$choose_id,
+                    'measure_content'=>$measure_content,
+                    'item_order_number'=>$item_order_number,
+                    'create_time'=>date('Y-m-d H:i:s')
+                ])
+            ;
+            if (false === $res) throw new Exception("添加措施失败！！");
+
+            //工单措施表自增ID
+            $measure_id = $_work_order_measure->id;
+
+            //循环插入承接人
+            $appoint_save = [];
+            if (is_array($appoint_ids) && !empty($appoint_ids)) {
+                foreach ($appoint_ids as $key => $val) {
+                    if ($appoint_users[$key] == 'undefined') {
+                        continue;
+                    }
+                    //如果没有承接人 默认为创建人
+                    if ($val == 'undefined') {
+                        $recept_group_id = $assign_user_id;
+                        $recept_person_id = $admin_id;
+                        $recept_person = $nickname;
+                    } else {
+                        $recept_group_id = $appoint_group[$key];
+                        $recept_person_id = $val;
+                        $recept_person = $appoint_users[$key];
+                    }
+                    $appoint_save[] = [
+                        'work_id'=>$work_id,
+                        'measure_id'=>$measure_id,
+                        'is_auto_complete'=>$auto_complete,
+                        'recept_group_id'=>$recept_group_id,
+                        'recept_person_id'=>$recept_person_id,
+                        'recept_person'=>$recept_person,
+                        'create_time'=>date('Y-m-d H:i:s')
+                    ];
                 }
-                //如果没有承接人 默认为创建人
-                if ($val == 'undefined') {
-                    $recept_group_id = $assign_user_id;
-                    $recept_person_id = $admin_id;
-                    $recept_person = $nickname;
-                } else {
-                    $recept_group_id = $appoint_group[$key];
-                    $recept_person_id = $val;
-                    $recept_person = $appoint_users[$key];
-                }
+            } else {
                 $appoint_save[] = [
                     'work_id'=>$work_id,
                     'measure_id'=>$measure_id,
                     'is_auto_complete'=>$auto_complete,
-                    'recept_group_id'=>$recept_group_id,
-                    'recept_person_id'=>$recept_person_id,
-                    'recept_person'=>$recept_person,
+                    'recept_group_id'=>0,
+                    'recept_person_id'=>$admin_id,
+                    'recept_person'=>$nickname,
                     'create_time'=>date('Y-m-d H:i:s')
                 ];
             }
-        } else {
-            $appoint_save[] = [
-                'work_id'=>$work_id,
-                'measure_id'=>$measure_id,
-                'is_auto_complete'=>$auto_complete,
-                'recept_group_id'=>0,
-                'recept_person_id'=>$admin_id,
-                'recept_person'=>$nickname,
-                'create_time'=>date('Y-m-d H:i:s')
-            ];
-        }
 
-        //插入承接人表
-        $_work_order_recept = new WorkOrderRecept();
-        $recept_res = $_work_order_recept->allowField(true)->saveAll($appoint_save);
-        if (false === $recept_res) return ['result'=>false,'msg'=>'添加承接人失败！！'];
+            //插入承接人表
+            $recept_res = $_work_order_recept->allowField(true)->saveAll($appoint_save);
+            if (false === $recept_res) throw new Exception("添加承接人失败！！");
+
+            $_work_order_measure->commit();
+            $_work_order_recept->commit();
+        } catch (PDOException $e) {
+            $_work_order_measure->rollback();
+            $_work_order_recept->rollback();
+            return ['result'=>false,'msg'=>$e->getMessage()];
+        } catch (Exception $e) {
+            $_work_order_measure->rollback();
+            $_work_order_recept->rollback();
+            return ['result'=>false,'msg'=>$e->getMessage()];
+        }
 
         //更改镜片、赠品、补发
         if(in_array($choose_id,[6,7,20])){
@@ -1982,7 +2028,19 @@ class WorkOrderList extends Backend
                 }
                 $params['recept_person_id'] = $params['recept_person_id'] ?: $admin_id;
 
-                Db::startTrans();
+                //措施表
+                $_work_order_measure = new WorkOrderMeasure();
+
+                //承接人表
+                $_work_order_recept = new WorkOrderRecept();
+
+                //子单sku变动表
+                $_work_order_change_sku = new WorkOrderChangeSku();
+
+                $row->startTrans();
+                $_work_order_measure->startTrans();
+                $_work_order_recept->startTrans();
+                $_work_order_change_sku->startTrans();
                 try {
                     //更新之前清除部分字段
                     $update_data = [
@@ -2003,9 +2061,9 @@ class WorkOrderList extends Backend
 
                     //客服工单删除旧措施
                     if(1 == $row->work_type){
-                        WorkOrderMeasure::where(['work_id' => $row->id])->delete();
-                        WorkOrderRecept::where(['work_id' => $row->id])->delete();
-                        WorkOrderChangeSku::where(['work_id' => $row->id])->delete();
+                        $_work_order_measure->where(['work_id' => $row->id])->delete();
+                        $_work_order_recept->where(['work_id' => $row->id])->delete();
+                        $_work_order_change_sku->where(['work_id' => $row->id])->delete();
                     }
 
                     //更新工单
@@ -2049,15 +2107,27 @@ class WorkOrderList extends Backend
                     //非草稿状态进入审核阶段
                     1 != $params['work_status'] && $this->model->checkWork($row->id);
 
-                    Db::commit();
+                    $row->commit();
+                    $_work_order_measure->commit();
+                    $_work_order_recept->commit();
+                    $_work_order_change_sku->commit();
                 } catch (ValidateException $e) {
-                    Db::rollback();
+                    $row->rollback();
+                    $_work_order_measure->rollback();
+                    $_work_order_recept->rollback();
+                    $_work_order_change_sku->rollback();
                     $this->error($e->getMessage());
                 } catch (PDOException $e) {
-                    Db::rollback();
+                    $row->rollback();
+                    $_work_order_measure->rollback();
+                    $_work_order_recept->rollback();
+                    $_work_order_change_sku->rollback();
                     $this->error($e->getMessage());
                 } catch (Exception $e) {
-                    Db::rollback();
+                    $row->rollback();
+                    $_work_order_measure->rollback();
+                    $_work_order_recept->rollback();
+                    $_work_order_change_sku->rollback();
                     $this->error($e->getMessage());
                 }
                 $this->success();
