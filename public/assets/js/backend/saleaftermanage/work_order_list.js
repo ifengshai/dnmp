@@ -1093,6 +1093,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     }else if(value == 3 && check != true){
                         $('#c-order_sku').attr("disabled",false);
                         $('.selectpicker ').selectpicker('refresh');
+                        var section_item_content_html = $('#section_item_content').html();
+                        if (!section_item_content_html) {itemSelectpicker(2);}
                         $('#section_item_content').show();
                     }
                     //判断是否取消主订单，若取消将子单号下拉框锁住，取消选中将解开 end
@@ -1652,6 +1654,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     }else if($(this).val() == 3 && $(this).prop('checked') != true){
                         $('#c-order_sku').attr("disabled",false);
                         $('.selectpicker ').selectpicker('refresh');
+                        var section_item_content_html = $('#section_item_content').html();
+                        if (!section_item_content_html) {itemSelectpicker(2);}
                         $('#section_item_content').show();
                     }
                     //判断是否取消主订单，若取消将子单号下拉框锁住，取消选中将解开 end                
@@ -2025,8 +2029,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 //提交按钮
                 $('.btn-status').click(function () {
                     if ($('#section_item_content').is(':hidden')) {
+                        $('#order_item_numbers').attr('disabled',true);
                         $('#section_item_content').html('');
                         $('#item_input-hidden').html('');
+                    }else{
+                        $('#order_item_numbers').attr('disabled',false);
                     }
                     $('.status').val(2);
                 })
