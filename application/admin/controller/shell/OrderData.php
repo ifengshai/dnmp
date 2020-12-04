@@ -1661,7 +1661,7 @@ class OrderData extends Backend
                     $options['sku'] = $val['sku'];
                     $options['qty'] = $val['qty_ordered'];
                     $options['base_row_total'] = $val['base_row_total'];
-                    $options['product_id'] = $val['product_id'];
+                    // $options['product_id'] = $val['product_id'];
                     $order_prescription_type = $options['order_prescription_type'];
                     unset($options['order_prescription_type']);
                     if ($options) {
