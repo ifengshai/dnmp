@@ -557,6 +557,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end*/
                     $('#c-order_sku').attr("disabled",false);
                     $('.selectpicker ').selectpicker('refresh');
+                    var is_order_item = $('#is_order_item').val();
+                    if (2 != Config.work_type && 1 != is_order_item) {itemSelectpicker(1,$(this));}
                 }
             })
 
@@ -1479,6 +1481,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end */
                     $('#c-order_sku').attr("disabled",false);
                     $('.selectpicker ').selectpicker('refresh');
+                    var is_order_item = $('#is_order_item').val();
+                    if (2 != Config.work_type && 1 != is_order_item) {itemSelectpicker(1,$(this));}
                 }
             })
             //根据措施类型显示隐藏
@@ -2816,12 +2820,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     }
                 });
 
-                //问题类型子单措施联动
+                /*//问题类型子单措施联动
                 $(document).on('click', '.problem_type', function () {
                     var is_order_item = $('#is_order_item').val();
                     if (2 != Config.work_type && 1 != is_order_item) {itemSelectpicker(1,$(this));}
                     
-                });
+                });*/
                 //下拉框选择子单联动
                 $(document).on('change', '.item_order_selectpicker', function () {
                     var is_order_item = $('#is_order_item').val();
