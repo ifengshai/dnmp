@@ -165,7 +165,8 @@ class ScmDistribution extends Scm
             $this->error(__('异常暂存架没有空余库位'), [], 405);
         }
 
-        Db::startTrans();
+        $this->_distribution_abnormal->startTrans();
+        $this->_new_order_item_process->startTrans();
         try {
             //绑定异常子单号
             $abnormal_data = [
@@ -194,15 +195,19 @@ class ScmDistribution extends Scm
             DistributionLog::record($this->auth,$item_process_id,9,"子单号{$item_order_number}，异常暂存架{$stock_house_info['coding']}库位");
 
             //提交事务
-            Db::commit();
+            $this->_distribution_abnormal->commit();
+            $this->_new_order_item_process->commit();
         } catch (ValidateException $e) {
-            Db::rollback();
+            $this->_distribution_abnormal->rollback();
+            $this->_new_order_item_process->rollback();
             $this->error($e->getMessage(), [], 406);
         } catch (PDOException $e) {
-            Db::rollback();
+            $this->_distribution_abnormal->rollback();
+            $this->_new_order_item_process->rollback();
             $this->error($e->getMessage(), [], 407);
         } catch (Exception $e) {
-            Db::rollback();
+            $this->_distribution_abnormal->rollback();
+            $this->_new_order_item_process->rollback();
             $this->error($e->getMessage(), [], 408);
         }
 
@@ -560,7 +565,10 @@ class ScmDistribution extends Scm
         ;
 
         $res = false;
-        Db::startTrans();
+        $this->_item->startTrans();
+        $this->_new_order_process->startTrans();
+        $this->_new_order_item_process->startTrans();
+        $this->_product_bar_code_item->startTrans();
         try {
             //下一步提示信息及状态
             if(2 == $check_status){
@@ -631,14 +639,27 @@ class ScmDistribution extends Scm
             ;
 
             Db::commit();
+            $this->_item->commit();
+            $this->_new_order_process->commit();
+            $this->_new_order_item_process->commit();
+            $this->_product_bar_code_item->commit();
         } catch (ValidateException $e) {
-            Db::rollback();
+            $this->_item->rollback();
+            $this->_new_order_process->rollback();
+            $this->_new_order_item_process->rollback();
+            $this->_product_bar_code_item->rollback();
             $this->error($e->getMessage(), [], 406);
         } catch (PDOException $e) {
-            Db::rollback();
+            $this->_item->rollback();
+            $this->_new_order_process->rollback();
+            $this->_new_order_item_process->rollback();
+            $this->_product_bar_code_item->rollback();
             $this->error($e->getMessage(), [], 407);
         } catch (Exception $e) {
-            Db::rollback();
+            $this->_item->rollback();
+            $this->_new_order_process->rollback();
+            $this->_new_order_item_process->rollback();
+            $this->_product_bar_code_item->rollback();
             $this->error($e->getMessage(), [], 408);
         }
 
@@ -1003,7 +1024,7 @@ class ScmDistribution extends Scm
                 4=>['status'=>5,'name'=>'质检拒绝：logo调整']
             ];
 
-            Db::startTrans();
+            $this->_new_order_item_process->startTrans();
             try {
                 //子订单状态回退
                 $this->_new_order_item_process
@@ -1015,15 +1036,15 @@ class ScmDistribution extends Scm
                 //记录日志
                 DistributionLog::record($this->auth,$item_process_info['id'],6,$status_arr[$reason]['name']);
 
-                Db::commit();
+                $this->_new_order_item_process->commit();
             } catch (ValidateException $e) {
-                Db::rollback();
+                $this->_new_order_item_process->rollback();
                 $this->error($e->getMessage(), [], 406);
             } catch (PDOException $e) {
-                Db::rollback();
+                $this->_new_order_item_process->rollback();
                 $this->error($e->getMessage(), [], 407);
             } catch (Exception $e) {
-                Db::rollback();
+                $this->_new_order_item_process->rollback();
                 $this->error($e->getMessage(), [], 408);
             }
             $this->success('操作成功', [], 200);
@@ -1216,6 +1237,16 @@ class ScmDistribution extends Scm
             $this->_stock_house->commit();
             $this->_new_order_process->commit();
             $this->_new_order_item_process->commit();
+        } catch (ValidateException $e) {
+            $this->_stock_house->rollback();
+            $this->_new_order_process->rollback();
+            $this->_new_order_item_process->rollback();
+            $this->error($e->getMessage(), [], 406);
+        } catch (PDOException $e) {
+            $this->_stock_house->rollback();
+            $this->_new_order_process->rollback();
+            $this->_new_order_item_process->rollback();
+            $this->error($e->getMessage(), [], 407);
         } catch (Exception $e) {
             $this->_stock_house->rollback();
             $this->_new_order_process->rollback();
@@ -1388,7 +1419,9 @@ class ScmDistribution extends Scm
             //有合单库位订单--释放库位占用，解绑合单库位ID
             $return = false;
             $res = false;
-            Db::startTrans();
+            $this->_stock_house->startTrans();
+            $this->_new_order_process->startTrans();
+            $this->_new_order_item_process->startTrans();
             try {
                 //更新订单业务处理表，解绑库位号
                 $result = $this->_new_order_process->allowField(true)->isUpdate(true, ['order_id'=>$order_process_info['id']])->save(['store_house_id'=>0]);
@@ -1412,15 +1445,23 @@ class ScmDistribution extends Scm
                     }
                 }
 
-                Db::commit();
+                $this->_stock_house->commit();
+                $this->_new_order_process->commit();
+                $this->_new_order_item_process->commit();
             } catch (ValidateException $e) {
-                Db::rollback();
+                $this->_stock_house->rollback();
+                $this->_new_order_process->rollback();
+                $this->_new_order_item_process->rollback();
                 $this->error($e->getMessage(), [], 444);
             } catch (PDOException $e) {
-                Db::rollback();
+                $this->_stock_house->rollback();
+                $this->_new_order_process->rollback();
+                $this->_new_order_item_process->rollback();
                 $this->error($e->getMessage(), [], 444);
             } catch (Exception $e) {
-                Db::rollback();
+                $this->_stock_house->rollback();
+                $this->_new_order_process->rollback();
+                $this->_new_order_item_process->rollback();
                 $this->error($e->getMessage(), [], 444);
             }
             if ($order_process_info['combine_status'] == 1){
@@ -1550,7 +1591,6 @@ class ScmDistribution extends Scm
         $param = [];
         $param['check_status'] = $check_status;
         $param['check_time'] = time();
-        $msg = '审单通过';
         $msg_info = '';
         if ($check_status == 2) {
             $check_refuse = $this->request->request('check_refuse');//check_refuse   1SKU缺失  2 配错镜框
@@ -1569,12 +1609,22 @@ class ScmDistribution extends Scm
                     break;
             }
             $msg = '审单拒绝';
+        } else {
+            $msg = '审单通过';
         }
 
         //检测订单审单状态
         $row = $this->_new_order_process->where(['order_id'=>$order_id])->find();
         $item_ids = $this->_new_order_item_process->where(['order_id'=>$order_id])->column('id');
-        0 != $row['check_status'] && $this->success(__($msg.'成功'), [], 200);
+//        0 != $row['check_status'] && $this->success(__($msg.'成功'), [], 200);
+        if (0 != $row['check_status']){
+            if (1 == $row['check_status']){
+                $message = '审单已通过，请勿重复操作！';
+            } else {
+                $message = '审单已拒绝，请勿重复操作！';
+            }
+            $this->success(__($message), [], 200);
+        }
 
         $result = false;
         $this->_item->startTrans();
@@ -1668,6 +1718,18 @@ class ScmDistribution extends Scm
             $this->_stock_house->commit();
             $this->_new_order_process->commit();
             $this->_new_order_item_process->commit();
+        } catch (ValidateException $e) {
+            $this->_item->rollback();
+            $this->_stock_house->rollback();
+            $this->_new_order_process->rollback();
+            $this->_new_order_item_process->rollback();
+            $this->error($e->getMessage(), [], 406);
+        } catch (PDOException $e) {
+            $this->_item->rollback();
+            $this->_stock_house->rollback();
+            $this->_new_order_process->rollback();
+            $this->_new_order_item_process->rollback();
+            $this->error($e->getMessage(), [], 407);
         } catch (Exception $e) {
             $this->_item->rollback();
             $this->_stock_house->rollback();
