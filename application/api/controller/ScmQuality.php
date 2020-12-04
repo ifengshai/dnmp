@@ -515,7 +515,9 @@ class ScmQuality extends Scm
             }
         }
 
-        Db::startTrans();
+        $this->_check->startTrans();
+        $this->_check_item->startTrans();
+        $this->_product_bar_code_item->startTrans();
         try {
             if ($get_check_id) {
                 $row = $this->_check->get($get_check_id);
@@ -664,15 +666,23 @@ class ScmQuality extends Scm
                 $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => ['in', $sm_code_list]])->save($code_item);
             }
 
-            Db::commit();
+            $this->_check->commit();
+            $this->_check_item->commit();
+            $this->_product_bar_code_item->commit();
         } catch (ValidateException $e) {
-            Db::rollback();
+            $this->_check->rollback();
+            $this->_check_item->rollback();
+            $this->_product_bar_code_item->rollback();
             $this->error($e->getMessage(), [], 406);
         } catch (PDOException $e) {
-            Db::rollback();
+            $this->_check->rollback();
+            $this->_check_item->rollback();
+            $this->_product_bar_code_item->rollback();
             $this->error($e->getMessage(), [], 407);
         } catch (Exception $e) {
-            Db::rollback();
+            $this->_check->rollback();
+            $this->_check_item->rollback();
+            $this->_product_bar_code_item->rollback();
             $this->error($e->getMessage(), [], 408);
         }
 
@@ -695,7 +705,9 @@ class ScmQuality extends Scm
         $row = $this->_check->get($check_id);
         0 != $row['status'] && $this->error(__('只有新建状态才能取消'), [], 405);
 
-        Db::startTrans();
+        $res = false;
+        $this->_check->startTrans();
+        $this->_product_bar_code_item->startTrans();
         try {
             //移除质检单条形码绑定关系
             $code_clear = [
@@ -707,19 +719,23 @@ class ScmQuality extends Scm
             $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['check_id' => $check_id])->save($code_clear);
 
             $res = $this->_check->allowField(true)->isUpdate(true, ['id' => $check_id])->save(['status' => 4]);
-            $res ? $this->success('取消成功', [], 200) : $this->error(__('取消失败'), [], 404);
 
-            Db::commit();
+            $this->_check->commit();
+            $this->_product_bar_code_item->commit();
         } catch (ValidateException $e) {
-            Db::rollback();
+            $this->_check->rollback();
+            $this->_product_bar_code_item->rollback();
             $this->error($e->getMessage(), [], 406);
         } catch (PDOException $e) {
-            Db::rollback();
+            $this->_check->rollback();
+            $this->_product_bar_code_item->rollback();
             $this->error($e->getMessage(), [], 407);
         } catch (Exception $e) {
-            Db::rollback();
+            $this->_check->rollback();
+            $this->_product_bar_code_item->rollback();
             $this->error($e->getMessage(), [], 408);
         }
+        $res ? $this->success('取消成功', [], 200) : $this->error(__('取消失败'), [], 404);
     }
 
     /**
@@ -746,7 +762,13 @@ class ScmQuality extends Scm
         $res = $this->_check->allowField(true)->isUpdate(true, ['id' => $check_id])->save(['status' => $do_type, 'examine_time' => date('Y-m-d H:i:s')]);
         false === $res && $this->error(__('审核失败'), [], 404);
 
-        Db::startTrans();
+        $this->_purchase_order->startTrans();
+        $this->_logistics_info->startTrans();
+        $this->_purchase_abnormal->startTrans();
+        $this->_sample_work_order->startTrans();
+        $this->_product_bar_code_item->startTrans();
+        $this->_purchase_abnormal_item->startTrans();
+        $this->_sample_work_order_item->startTrans();
         try {
             //审核通过关联操作
             if ($do_type == 2) {
@@ -860,21 +882,44 @@ class ScmQuality extends Scm
                 $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['check_id' => $check_id])->save($code_clear);
             }
 
-            Db::commit();
+            $this->_purchase_order->commit();
+            $this->_logistics_info->commit();
+            $this->_purchase_abnormal->commit();
+            $this->_sample_work_order->commit();
+            $this->_product_bar_code_item->commit();
+            $this->_purchase_abnormal_item->commit();
+            $this->_sample_work_order_item->commit();
             
             $this->success('操作成功', [], 200);
         } catch (ValidateException $e) {
-            Db::rollback();
+            $this->_purchase_order->rollback();
+            $this->_logistics_info->rollback();
+            $this->_purchase_abnormal->rollback();
+            $this->_sample_work_order->rollback();
+            $this->_product_bar_code_item->rollback();
+            $this->_purchase_abnormal_item->rollback();
+            $this->_sample_work_order_item->rollback();
             $this->error($e->getMessage(), [], 406);
         } catch (PDOException $e) {
-            Db::rollback();
+            $this->_purchase_order->rollback();
+            $this->_logistics_info->rollback();
+            $this->_purchase_abnormal->rollback();
+            $this->_sample_work_order->rollback();
+            $this->_product_bar_code_item->rollback();
+            $this->_purchase_abnormal_item->rollback();
+            $this->_sample_work_order_item->rollback();
             $this->error($e->getMessage(), [], 407);
         } catch (Exception $e) {
-            Db::rollback();
+            $this->_purchase_order->rollback();
+            $this->_logistics_info->rollback();
+            $this->_purchase_abnormal->rollback();
+            $this->_sample_work_order->rollback();
+            $this->_product_bar_code_item->rollback();
+            $this->_purchase_abnormal_item->rollback();
+            $this->_sample_work_order_item->rollback();
             $this->error($e->getMessage(), [], 408);
         }
 
-       
     }
 
     /**
@@ -987,7 +1032,10 @@ class ScmQuality extends Scm
         (0 != $row['status'] || 1 != $row['type']) && $this->error(__('只有未签收状态才能操作'), [], 405);
 
         //签收关联操作
-        Db::startTrans();
+        $this->_item->startTrans();
+        $this->_logistics_info->startTrans();
+        $this->_purchase_order->startTrans();
+        $this->_item_platform_sku->startTrans();
         try {
             $logistics_save = [
                 'sign_person' => $this->auth->nickname,
@@ -1094,15 +1142,27 @@ class ScmQuality extends Scm
                 }
             }
 
-            Db::commit();
+            $this->_item->commit();
+            $this->_logistics_info->commit();
+            $this->_purchase_order->commit();
+            $this->_item_platform_sku->commit();
         } catch (ValidateException $e) {
-            Db::rollback();
+            $this->_item->rollback();
+            $this->_logistics_info->rollback();
+            $this->_purchase_order->rollback();
+            $this->_item_platform_sku->rollback();
             $this->error($e->getMessage(), [], 406);
         } catch (PDOException $e) {
-            Db::rollback();
+            $this->_item->rollback();
+            $this->_logistics_info->rollback();
+            $this->_purchase_order->rollback();
+            $this->_item_platform_sku->rollback();
             $this->error($e->getMessage(), [], 407);
         } catch (Exception $e) {
-            Db::rollback();
+            $this->_item->rollback();
+            $this->_logistics_info->rollback();
+            $this->_purchase_order->rollback();
+            $this->_item_platform_sku->rollback();
             $this->error($e->getMessage(), [], 408);
         }
 

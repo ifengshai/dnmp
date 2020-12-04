@@ -822,7 +822,9 @@ class ScmWarehouse extends Scm
         $in_stock_id = $this->request->request("in_stock_id");//入库单ID，
         $platform_id = $this->request->request("platform_id");//站点，判断是否是新创建入库 还是 质检单入库
         $result = false;
-        Db::startTrans();
+        $this->_in_stock->startTrans();
+        $this->_in_stock_item->startTrans();
+        $this->_product_bar_code_item->startTrans();
         try {
             if ($in_stock_id) {
                 //有入库单ID，编辑
@@ -994,15 +996,23 @@ class ScmWarehouse extends Scm
                 }
 
             }
-            Db::commit();
+            $this->_in_stock->commit();
+            $this->_in_stock_item->commit();
+            $this->_product_bar_code_item->commit();
         } catch (ValidateException $e) {
-            Db::rollback();
+            $this->_in_stock->rollback();
+            $this->_in_stock_item->rollback();
+            $this->_product_bar_code_item->rollback();
             $this->error($e->getMessage(), [], 444);
         } catch (PDOException $e) {
-            Db::rollback();
+            $this->_in_stock->rollback();
+            $this->_in_stock_item->rollback();
+            $this->_product_bar_code_item->rollback();
             $this->error($e->getMessage(), [], 444);
         } catch (Exception $e) {
-            Db::rollback();
+            $this->_in_stock->rollback();
+            $this->_in_stock_item->rollback();
+            $this->_product_bar_code_item->rollback();
             $this->error($e->getMessage(), [], 444);
         }
 
@@ -1196,7 +1206,13 @@ class ScmWarehouse extends Scm
         }
 
         $res = false;
-        Db::startTrans();
+        $this->_item->startTrans();
+        $this->_in_stock->startTrans();
+        $this->_allocated->startTrans();
+        $this->_order_return->startTrans();
+        $this->_purchase_order->startTrans();
+        $this->_item_platform_sku->startTrans();
+        $this->_purchase_order_item->startTrans();
         try {
             $data['create_person'] = $this->auth->nickname;
             $res = $this->_in_stock->allowField(true)->isUpdate(true, ['id'=>$in_stock_id])->save($data);//审核拒绝更新数据
@@ -1358,15 +1374,39 @@ class ScmWarehouse extends Scm
                 }
             }
 
-            Db::commit();
+            $this->_item->commit();
+            $this->_in_stock->commit();
+            $this->_allocated->commit();
+            $this->_order_return->commit();
+            $this->_purchase_order->commit();
+            $this->_item_platform_sku->commit();
+            $this->_purchase_order_item->commit();
         } catch (ValidateException $e) {
-            Db::rollback();
+            $this->_item->rollback();
+            $this->_in_stock->rollback();
+            $this->_allocated->rollback();
+            $this->_order_return->rollback();
+            $this->_purchase_order->rollback();
+            $this->_item_platform_sku->rollback();
+            $this->_purchase_order_item->rollback();
             $this->error($e->getMessage(), [], 4441);
         } catch (PDOException $e) {
-            Db::rollback();
+            $this->_item->rollback();
+            $this->_in_stock->rollback();
+            $this->_allocated->rollback();
+            $this->_order_return->rollback();
+            $this->_purchase_order->rollback();
+            $this->_item_platform_sku->rollback();
+            $this->_purchase_order_item->rollback();
             $this->error($e->getMessage(), [], 4442);
         } catch (Exception $e) {
-            Db::rollback();
+            $this->_item->rollback();
+            $this->_in_stock->rollback();
+            $this->_allocated->rollback();
+            $this->_order_return->rollback();
+            $this->_purchase_order->rollback();
+            $this->_item_platform_sku->rollback();
+            $this->_purchase_order_item->rollback();
             $this->error($e->getMessage(), [], 4443);
         }
 
@@ -1542,8 +1582,27 @@ class ScmWarehouse extends Scm
             }
             if($no_sku) $this->error(__('SKU：'.implode(',',$no_sku).'不存在'), [], 523);
 
+            $list = [];
+            foreach ($item_sku as $k => $v) {
+                $list[$k]['inventory_id'] = $this->_inventory->id;
+                $list[$k]['sku'] = $v['sku'];
+                $item = $this->_item->field('name,stock,available_stock,distribution_occupy_stock')->where('sku',$v['sku'])->find();
+                if(empty($item)) {
+                    $this->error(__($v['sku'].'不存在'), [], 525);
+                }
+
+                $list[$k]['name'] = $item['name'];//商品名
+                $list[$k]['distribution_occupy_stock'] = $item['distribution_occupy_stock'] ?? 0;//配货站用数量
+                $real_time_qty = ($item['stock'] * 1 - $item['distribution_occupy_stock'] * 1);//实时库存
+                $list[$k]['real_time_qty'] = $real_time_qty ?? 0;
+                $list[$k]['available_stock'] = $item['available_stock'] ?? 0;//可用库存
+//                        $list[$k]['inventory_qty'] = $v['inventory_qty'] ?? 0;//盘点数量
+//                        $list[$k]['error_qty'] = $v['error_qty'] ?? 0;//误差数量
+                $list[$k]['remark'] = $v['remark'];//备注
+            }
             $result = false;
-            Db::startTrans();
+            $this->_inventory->startTrans();
+            $this->_inventory_item->startTrans();
             try {
                 //保存--创建盘点单
                 $arr = [];
@@ -1551,39 +1610,24 @@ class ScmWarehouse extends Scm
                 $arr['create_person'] = $this->auth->nickname;
                 $arr['createtime'] = date('Y-m-d H:i:s', time());
                 $result = $this->_inventory->allowField(true)->save($arr);
-
                 if ($result) {
-                    $list = [];
-                    foreach ($item_sku as $k => $v) {
-                        $list[$k]['inventory_id'] = $this->_inventory->id;
-                        $list[$k]['sku'] = $v['sku'];
-                        $item = $this->_item->field('name,stock,available_stock,distribution_occupy_stock')->where('sku',$v['sku'])->find();
-                        if(empty($item)) {
-                            throw new Exception($v['sku'].'不存在');
-                        }
-
-                        $list[$k]['name'] = $item['name'];//商品名
-                        $list[$k]['distribution_occupy_stock'] = $item['distribution_occupy_stock'] ?? 0;//配货站用数量
-                        $real_time_qty = ($item['stock'] * 1 - $item['distribution_occupy_stock'] * 1);//实时库存
-                        $list[$k]['real_time_qty'] = $real_time_qty ?? 0;
-                        $list[$k]['available_stock'] = $item['available_stock'] ?? 0;//可用库存
-//                        $list[$k]['inventory_qty'] = $v['inventory_qty'] ?? 0;//盘点数量
-//                        $list[$k]['error_qty'] = $v['error_qty'] ?? 0;//误差数量
-                        $list[$k]['remark'] = $v['remark'];//备注
-                    }
                     //添加明细表数据
                     $result = $this->_inventory_item->allowField(true)->saveAll($list);
                 }
 
-                Db::commit();
+                $this->_inventory->commit();
+                $this->_inventory_item->commit();
             } catch (ValidateException $e) {
-                Db::rollback();
+                $this->_inventory->rollback();
+                $this->_inventory_item->rollback();
                 $this->error($e->getMessage(), [], 444);
             } catch (PDOException $e) {
-                Db::rollback();
+                $this->_inventory->rollback();
+                $this->_inventory_item->rollback();
                 $this->error($e->getMessage(), [], 444);
             } catch (Exception $e) {
-                Db::rollback();
+                $this->_inventory->rollback();
+                $this->_inventory_item->rollback();
                 $this->error($e->getMessage(), [], 444);
             }
             if ($result !== false) {
@@ -1727,7 +1771,8 @@ class ScmWarehouse extends Scm
         //保存不需要编辑盘点单
         //编辑盘点单明细item
         $result = false;
-        Db::startTrans();
+        $this->_inventory_item->startTrans();
+        $this->_product_bar_code_item->startTrans();
         try {
             //更新数据
             //提交盘点单状态为已完成，保存盘点单状态为盘点中
@@ -1740,14 +1785,12 @@ class ScmWarehouse extends Scm
                     $save_data['error_qty'] = $v['error_qty'] ?? 0;//误差数量
                     $save_data['remark'] = $v['remark'];//备注
                     $this->_inventory_item->where(['inventory_id' => $inventory_id,'sku' => $v['sku']])->update($save_data);
-
                     //盘点单绑定条形码数组组装
                     foreach($v['sku_agg'] as $k_code => $v_code){
                         if (!empty($v_code['code'])){
                             $where_code[] = $v_code['code'];
                         }
                     }
-
                     //盘点单移除条形码
                     if(!empty($value['remove_agg'])){
                         $code_clear = [
@@ -1755,21 +1798,23 @@ class ScmWarehouse extends Scm
                         ];
                         $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => ['in',$value['remove_agg']]])->save($code_clear);
                     }
-
                 }
                 //盘点单绑定条形码执行
                 $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => ['in', $where_code]])->save(['inventory_id'=>$inventory_id]);
             }
-
-            Db::commit();
+            $this->_inventory_item->commit();
+            $this->_product_bar_code_item->commit();
         } catch (ValidateException $e) {
-            Db::rollback();
+            $this->_inventory_item->rollback();
+            $this->_product_bar_code_item->rollback();
             $this->error($e->getMessage(), [], 444);
         } catch (PDOException $e) {
-            Db::rollback();
+            $this->_inventory_item->rollback();
+            $this->_product_bar_code_item->rollback();
             $this->error($e->getMessage(), [], 444);
         } catch (Exception $e) {
-            Db::rollback();
+            $this->_inventory_item->rollback();
+            $this->_product_bar_code_item->rollback();
             $this->error($e->getMessage(), [], 444);
         }
 
@@ -1803,15 +1848,21 @@ class ScmWarehouse extends Scm
         $data['check_person'] = $this->auth->nickname;
 
         $msg = '';
-        if ($do_type == 2){
-            $data['check_status'] = 4;
+        if (2 == $do_type){
+            $data['check_status'] = 3;
             $this->_inventory->allowField(true)->save($data, ['id' => $inventory_id]);
             $msg = '操作成功';
+        } else {
+            $data['check_status'] = 2;
         }
 
-        $data['check_status'] = 2;
-        //回滚
-        Db::startTrans();
+        $this->_item->startTrans();
+        $this->_in_stock->startTrans();
+        $this->_out_stock->startTrans();
+        $this->_inventory->startTrans();
+        $this->_in_stock_item->startTrans();
+        $this->_out_stock_item->startTrans();
+        $this->_item_platform_sku->startTrans();
         try {
             $res = $this->_inventory->allowField(true)->isUpdate(true, ['id'=>$inventory_id])->save($data);
             //审核通过 生成入库单 并同步库存
@@ -1826,19 +1877,15 @@ class ScmWarehouse extends Scm
                     if ($v['error_qty'] == 0) {
                         continue;
                     }
-                    //同步对应SKU库存
-                    //更新商品表商品总库存
-                    //总库存
+                    //同步对应SKU库存 更新商品表商品总库存 总库存
                     $item_map['sku'] = $v['sku'];
                     $item_map['is_del'] = 1;
                     if ($v['sku']) {
                         $stock = $this->_item->where($item_map)->inc('stock', $v['error_qty'])->inc('available_stock', $v['error_qty'])->update();
-
                         //盘点的时候盘盈入库 盘亏出库 的同时要对虚拟库存进行一定的操作
                         //查出映射表中此sku对应的所有平台sku 并根据库存数量进行排序（用于遍历数据的时候首先分配到那个站点）
                         $item_platform_sku = $this->_item_platform_sku->where('sku',$v['sku'])->order('stock asc')->field('platform_type,stock')->select();
                         $all_num = count($item_platform_sku);
-                        // $whole_num = $this->_item_platform_sku->where('sku',$v['sku'])->sum('stock');
                         $whole_num = $this->_item_platform_sku
                             ->where('sku',$v['sku'])
                             ->field('stock')
@@ -1865,7 +1912,6 @@ class ScmWarehouse extends Scm
                             }
                         }else{
                             foreach ($item_platform_sku as $key => $val) {
-                                // dump($item_platform_sku);die;
                                 //最后一个站点 剩余数量分给最后一个站
                                 if (($all_num - $key) == 1) {
                                     $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->inc('stock', $stock_num)->update();
@@ -1961,16 +2007,40 @@ class ScmWarehouse extends Scm
                     }
                 }
             }
-            Db::commit();
+            $this->_item->commit();
+            $this->_in_stock->commit();
+            $this->_out_stock->commit();
+            $this->_inventory->commit();
+            $this->_in_stock_item->commit();
+            $this->_out_stock_item->commit();
+            $this->_item_platform_sku->commit();
         } catch (ValidateException $e) {
-            Db::rollback();
-            $this->error($e->getMessage(), [], 444);
+            $this->_item->rollback();
+            $this->_in_stock->rollback();
+            $this->_out_stock->rollback();
+            $this->_inventory->rollback();
+            $this->_in_stock_item->rollback();
+            $this->_out_stock_item->rollback();
+            $this->_item_platform_sku->rollback();
+            $this->error($e->getMessage(), [], 443);
         } catch (PDOException $e) {
-            Db::rollback();
-            $this->error($e->getMessage(), [], 444);
+            $this->_item->rollback();
+            $this->_in_stock->rollback();
+            $this->_out_stock->rollback();
+            $this->_inventory->rollback();
+            $this->_in_stock_item->rollback();
+            $this->_out_stock_item->rollback();
+            $this->_item_platform_sku->rollback();
+            $this->error($e->getMessage(), [], 442);
         } catch (Exception $e) {
-            Db::rollback();
-            $this->error($e->getMessage(), [], 444);
+            $this->_item->rollback();
+            $this->_in_stock->rollback();
+            $this->_out_stock->rollback();
+            $this->_inventory->rollback();
+            $this->_in_stock_item->rollback();
+            $this->_out_stock_item->rollback();
+            $this->_item_platform_sku->rollback();
+            $this->error($e->getMessage(), [], 441);
         }
         if ($res){
             $msg = '审核成功';
