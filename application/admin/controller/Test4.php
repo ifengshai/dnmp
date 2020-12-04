@@ -439,7 +439,8 @@ class Test4 extends Controller
             $order_where['order_type'] = 1;
 
             $create_where = $update_where = [];
-            $create_where[] = $update_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $val['day_date'] . "'")];
+            $create_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $val['day_date'] . "'")];
+            $update_where[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '" . $val['day_date'] . "'")];
             //当天注册用户数
             $register_userids = $model->table('customer_entity')->where($create_where)->column('entity_id');
             $register_num = count($register_userids);
@@ -466,7 +467,7 @@ class Test4 extends Controller
                     $order_user_count2++;
                 }
             }
-            $arr['update_user_change_rate'] = $update_num ? round($order_user_count2/$update_num*100,0) : 0;
+            $arr['update_user_change_rate'] = $update_num ? round($order_user_count2/$update_num*100,2) : 0;
             //更新数据
             Db::name('datacenter_day')->where('id', $val['id'])->update($arr);
             echo $val['day_date'] . "\n";
@@ -485,7 +486,8 @@ class Test4 extends Controller
             $order_where['order_type'] = 1;
 
             $create_where = $update_where = [];
-            $create_where[] = $update_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $val['day_date'] . "'")];
+            $create_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $val['day_date'] . "'")];
+            $update_where[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '" . $val['day_date'] . "'")];
             //当天注册用户数
             $register_userids = $model->table('customer_entity')->where($create_where)->column('entity_id');
             $register_num = count($register_userids);
@@ -512,7 +514,7 @@ class Test4 extends Controller
                     $order_user_count2++;
                 }
             }
-            $arr['update_user_change_rate'] = $update_num ? round($order_user_count2/$update_num*100,0) : 0;
+            $arr['update_user_change_rate'] = $update_num ? round($order_user_count2/$update_num*100,2) : 0;
 
             //更新数据
             Db::name('datacenter_day')->where('id', $val['id'])->update($arr);
@@ -532,7 +534,8 @@ class Test4 extends Controller
             $order_where['order_type'] = 1;
 
             $create_where = $update_where = [];
-            $create_where[] = $update_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $val['day_date'] . "'")];
+            $create_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $val['day_date'] . "'")];
+            $update_where[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '" . $val['day_date'] . "'")];
             //当天注册用户数
             $register_userids = $model->table('customer_entity')->where($create_where)->column('entity_id');
             $register_num = count($register_userids);
@@ -559,7 +562,7 @@ class Test4 extends Controller
                     $order_user_count2++;
                 }
             }
-            $arr['update_user_change_rate'] = $update_num ? round($order_user_count2/$update_num*100,0) : 0;
+            $arr['update_user_change_rate'] = $update_num ? round($order_user_count2/$update_num*100,2) : 0;
             //更新数据
             Db::name('datacenter_day')->where('id', $val['id'])->update($arr);
             echo $val['day_date'] . "\n";

@@ -125,6 +125,13 @@ require(['form', 'upload'], function (Form, Upload) {
                                         $(that).summernote("insertImage", url, 'filename');
                                     });
                                 }
+                            },
+                            onPaste: function (ne) {
+                                var bufferText = ((ne.originalEvent || ne).clipboardData || window.clipboardData).getData('Text/plain');
+                                //    ne.preventDefault();  
+                                ne.preventDefault ? ne.preventDefault() : (ne.returnValue = false);
+                                // Firefox fix
+                                document.execCommand("insertText", false, bufferText);
                             }
                         }
                     });

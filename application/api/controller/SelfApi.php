@@ -622,7 +622,7 @@ class SelfApi extends Api
     {
         if ($this->request->isPost()) {
             $site = $this->request->request('site'); //站点
-            $sku = $this->request->request('sku'); //true_sku
+            $sku = $this->request->request('sku'); //platform_sku
             $status = $this->request->request('status'); //status 1上架 2下架
             if (!$sku) {
                 $this->error(__('缺少SKU参数'), [], 400);
@@ -645,7 +645,7 @@ class SelfApi extends Api
             if (false !== $res) {
                 //如果是上架 则查询此sku是否存在当天有效sku表里
                 if ($status == 1) {
-                    $count = Db::name('sku_sales_num')->where(['sku' => $sku, 'site' => $site, 'createtime' => ['between', [date('Y-m-d 00:00:00'), date('Y-m-d 23:59:59')]]])->count();
+                    $count = Db::name('sku_sales_num')->where(['platform_sku' => $sku, 'site' => $site, 'createtime' => ['between', [date('Y-m-d 00:00:00'), date('Y-m-d 23:59:59')]]])->count();
                     //如果不存在则插入此sku
                     if ($count < 1) {
                         $data['sku'] = $list['sku'];

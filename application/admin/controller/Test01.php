@@ -2,6 +2,7 @@
 
 namespace app\admin\controller;
 
+use app\admin\model\itemmanage\ItemPlatformSku;
 use app\common\controller\Backend;
 use think\Db;
 
@@ -272,5 +273,29 @@ class Test01 extends Backend
         dump($ga_result);
         die;
 
+    }
+
+    public function test101()
+    {
+        $item_platform_sku = new ItemPlatformSku();
+        $item_skuy = $item_platform_sku->where('id','>',0)->where('platform_type',1)->column('grade','sku');
+        foreach ($item_skuy as $k=>$v){
+            $update = Db::name('datacenter_sku_day')->where('day_date','2020-12-02')->where('site',1)->where('sku',$k)->update(['goods_grade'=>$v]);
+            if ($update){
+                echo $k;
+            }
+        }
+
+    }
+
+    public function test102()
+    {
+        $data_center_sku_day = Db::name('datacenter_sku_day')->where('day_date','2020-11-11')->field('sku,site,now_pricce')->select();
+        foreach ($data_center_sku_day as $k=>$v){
+            $update = Db::name('datacenter_sku_day')->where('day_date','2020-11-12')->where('sku',$v['sku'])->where('site',$v['site'])->update(['now_pricce'=>$v['now_pricce']]);
+            if ($update){
+                echo $v['sku'];
+            }
+        }
     }
 }

@@ -99,6 +99,25 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                                     return param.data.name + '<br/>数量：' + param.data.value + '<br/> 占比：' + param.percent.toFixed(2) + '%';
                                 }
                             },
+                            title:{
+                                subtext:'总订单数',
+                                left:"center",
+                                top:"40%",
+                                subtextStyle:{
+                                    textAlign:"center",
+                                    fill:"#333",
+                                    fontSize:16,
+                                    fontWeight:700
+                                },
+                                textStyle:{
+                                    color:"#27D9C8",
+                                    fontSize:32,
+                                    align:"center"
+                                }
+                            },
+                            series:[{
+                                radius: ['50%', '70%'],
+                            }]
                         }
                     };
 
@@ -126,6 +145,25 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                                     return param.data.name + '<br/>金额：' + param.data.value + '<br/> 占比：' + param.percent.toFixed(2) + '%';
                                 }
                             },
+                            title:{
+                                subtext:'总订单金额',
+                                left:"center",
+                                top:"40%",
+                                subtextStyle:{
+                                    textAlign:"center",
+                                    fill:"#333",
+                                    fontSize:16,
+                                    fontWeight:700
+                                },
+                                textStyle:{
+                                    color:"#27D9C8",
+                                    fontSize:32,
+                                    align:"center"
+                                }
+                            },
+                            series:[{
+                                radius: ['50%', '70%'],
+                            }]
                         }
                     };
 
