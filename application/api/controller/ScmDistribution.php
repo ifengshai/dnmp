@@ -418,6 +418,8 @@ class ScmDistribution extends Scm
                         ->find()
                     ;
                     if(!empty($stock_house_info)){
+                        $this->_stock_house->startTrans();
+                        $this->_new_order_item_process->startTrans();
                         try {
                             //子订单绑定定制片库位号
                             $this->_new_order_item_process
@@ -441,15 +443,19 @@ class ScmDistribution extends Scm
                                 $msg = "请将子单号{$item_order_number}的商品放入定制片暂存架{$coding}库位";
                             }
 
-                            Db::commit();
+                            $this->_stock_house->commit();
+                            $this->_new_order_item_process->commit();
                         } catch (ValidateException $e) {
-                            Db::rollback();
+                            $this->_stock_house->rollback();
+                            $this->_new_order_item_process->rollback();
                             $this->error($e->getMessage(), [], 406);
                         } catch (PDOException $e) {
-                            Db::rollback();
+                            $this->_stock_house->rollback();
+                            $this->_new_order_item_process->rollback();
                             $this->error($e->getMessage(), [], 407);
                         } catch (Exception $e) {
-                            Db::rollback();
+                            $this->_stock_house->rollback();
+                            $this->_new_order_item_process->rollback();
                             $this->error($e->getMessage(), [], 408);
                         }
                     }else{
@@ -638,7 +644,6 @@ class ScmDistribution extends Scm
                 ->save(['distribution_status'=>$save_status])
             ;
 
-            Db::commit();
             $this->_item->commit();
             $this->_new_order_process->commit();
             $this->_new_order_item_process->commit();
