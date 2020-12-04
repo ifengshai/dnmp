@@ -1833,7 +1833,7 @@ class WorkOrderList extends Model
                 'operation_type'=>1 == $data['recept_status'] ? 1 : 2,
                 'operation_time'=>date('Y-m-d H:i:s')
             ];
-            $_work_order_recept->where(['id' => $measure_id])->update($dataMeasure);
+            $_work_order_measure->where(['id' => $measure_id])->update($dataMeasure);
 
             //求出承接措施是否完成
             $whereMeasure = [
