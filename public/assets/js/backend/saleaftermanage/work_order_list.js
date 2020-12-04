@@ -555,6 +555,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         cancelOrder();
                     }
                     //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end*/
+                    $('#c-order_sku').attr("disabled",false);
+                    $('.selectpicker ').selectpicker('refresh');
                 }
             })
 
@@ -1079,16 +1081,19 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         changeFrame();
                     }
                     //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end*/
-                    //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
+                    //判断是否取消主订单，若取消将子单号下拉框锁住，取消选中将解开 start
                     if (value == 3 && check == true) {
                         Layer.load();
-                        $('#c-order_sku').val('');
+                        $('#c-order_sku').attr("disabled",true);
                         $('#section_item_content').hide();
                         $('.selectpicker ').selectpicker('refresh');
                         Layer.closeAll();
                     }else if(value == 3 && check != true){
-                        $('#section_item_content').show()
+                        $('#c-order_sku').attr("disabled",false);
+                        $('.selectpicker ').selectpicker('refresh');
+                        $('#section_item_content').show();
                     }
+                    //判断是否取消主订单，若取消将子单号下拉框锁住，取消选中将解开 end
                 }
 
             });
@@ -1471,7 +1476,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     if (!$('.step3').is(':hidden')) {
                         cancelOrder();
                     }
-                    //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end */                  
+                    //判断取消订单的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end */
+                    $('#c-order_sku').attr("disabled",false);
+                    $('.selectpicker ').selectpicker('refresh');
                 }
             })
             //根据措施类型显示隐藏
@@ -1630,7 +1637,20 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     // if (!$('.step6').is(':hidden')) {
                     //     changeOrder(work_id, 4);
                     // }
-                    //判断赠品信息的状态，如果显示的话把数据带出来，如果隐藏的话则不显示赠品数据 end                    
+                    //判断赠品信息的状态，如果显示的话把数据带出来，如果隐藏的话则不显示赠品数据 end
+                    //判断是否取消主订单，若取消将子单号下拉框锁住，取消选中将解开 start
+                    if ($(this).val() == 3 && $(this).prop('checked') == true) {
+                        Layer.load();
+                        $('#c-order_sku').attr("disabled",true);
+                        $('#section_item_content').hide();
+                        $('.selectpicker ').selectpicker('refresh');
+                        Layer.closeAll();
+                    }else if($(this).val() == 3 && $(this).prop('checked') != true){
+                        $('#c-order_sku').attr("disabled",false);
+                        $('.selectpicker ').selectpicker('refresh');
+                        $('#section_item_content').show();
+                    }
+                    //判断是否取消主订单，若取消将子单号下拉框锁住，取消选中将解开 end                
                 }
             });
             var lens_click_data_add_edit;
@@ -3193,6 +3213,7 @@ function changeOrderAddress(){
 function itemSelectpicker (type = 1,flag = null,item_order_info = '') {
         if($('#step3').prop('checked')) return false;
         $('#z-order_sku').html('');
+        $('#section_item_content').show('');
         $('#section_item_content').html('');
         var problem_id = '';
         if (type == 1) {

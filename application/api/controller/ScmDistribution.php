@@ -273,7 +273,12 @@ class ScmDistribution extends Scm
         $abnormal_id && $this->error(__('有异常待处理，无法操作'), [], 405);
 
         //查询订单号
-        $increment_id = $this->_new_order->where(['id'=>$item_process_info['order_id']])->value('increment_id');
+        $order_info = $this->_new_order
+            ->field('increment_id,status')
+            ->where(['id'=>$item_process_info['order_id']])
+            ->find()
+        ;
+        'processing' != $order_info['status'] && $this->error(__('当前订单状态不可操作'), [], 405);
 
         //检测是否有工单未处理
         $check_work_order = $this->_work_order_measure
@@ -282,7 +287,7 @@ class ScmDistribution extends Scm
             ->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')
             ->where([
                 'a.operation_type'=>0,
-                'b.platform_order'=>$increment_id,
+                'b.platform_order'=>$order_info['increment_id'],
                 'b.work_status'=>['in',[1,2,3,5]]
             ])
             ->select();
