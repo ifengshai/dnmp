@@ -260,23 +260,6 @@ class Distribution extends Backend
                 ->where(['status' => 1, 'type' => ['>', 1], 'occupy' => ['>', 0]])
                 ->column('coding', 'id');
 
-            if($list){
-                //获取主单号
-                $increment_ids = $this->_new_order
-                    ->where(['id'=>['in',array_column($list,'order_id')]])
-                    ->column('increment_id');
-
-                //检测是否有工单
-                $check_work_order = $this->_work_order_measure
-                    ->alias('a')
-                    ->field('a.item_order_number,a.measure_choose_id,b.platform_order')
-                    ->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')
-                    ->where([
-                        'b.platform_order'=>['in',$increment_ids]
-                    ])
-                    ->select();
-            }
-
             foreach ($list as $key => $value) {
                 if (!empty($value['temporary_house_id'])) {
                     $stock_house_num = $stock_house_data[$value['temporary_house_id']];//定制片库位号
@@ -298,21 +281,7 @@ class Distribution extends Backend
                 $list[$key]['handle_abnormal'] = $handle_abnormal;
 
                 //判断是否显示工单按钮
-                $task_info = 0;
-                if(!empty($check_work_order)){
-                    foreach($check_work_order as $v){
-                        if($v['platform_order'] == $value['increment_id']){
-                            if(
-                                !in_array($v['measure_choose_id'],[18,19,20])//主单措施
-                                ||
-                                $v['item_order_number'] == $value['item_order_number']//子单措施
-                            ){
-                                $task_info = 1;
-                            }
-                        }
-                    }
-                }
-                $list[$key]['task_info'] = $task_info;
+                $list[$key]['task_info'] = in_array($value['item_order_number'],$item_order_numbers) ? 1 : 0;
             }
 
             $result = array("total" => $total, "rows" => $list);
@@ -1029,11 +998,10 @@ class Distribution extends Backend
             ->select();
         if ($check_work_order) {
             foreach ($check_work_order as $val) {
-                //子单措施:更改镜框-18、更改镜片-19、取消-20
                 (
-                    !in_array($val['measure_choose_id'], [18, 19, 20]) //主单措施未处理
+                    3 == $val['measure_choose_id']//主单取消措施未处理
                     ||
-                    in_array($val['item_order_number'], $item_order_numbers) //子单措施未处理
+                    in_array($val['item_order_number'], $item_order_numbers)//子单措施未处理:更改镜框18、更改镜片19、取消20
                 )
                 && $this->error('子单号：' . $val['item_order_number'] . '有工单未处理');
             }
@@ -1218,11 +1186,10 @@ class Distribution extends Backend
             ->select();
         if ($check_work_order) {
             foreach ($check_work_order as $val) {
-                //子单措施:更改镜框-18、更改镜片-19、取消-20
                 (
-                    !in_array($val['measure_choose_id'], [18, 19, 20]) //主单措施未处理
+                    3 == $val['measure_choose_id']//主单取消措施未处理
                     ||
-                    in_array($val['item_order_number'], $item_order_numbers) //子单措施未处理
+                    in_array($val['item_order_number'], $item_order_numbers)//子单措施未处理:更改镜框18、更改镜片19、取消20
                 )
                 && $this->error('子单号：' . $val['item_order_number'] . '有工单未处理');
             }
@@ -1498,12 +1465,6 @@ class Distribution extends Backend
             ->where($work_order_where)
             ->column('item_order_number');
         $item_process_number_no && $this->error('以下子单号有未完成工单不可创建工单' . implode('', $item_process_number_no));
-
-        //检测异常状态
-        $abnormal_count = $this->_distribution_abnormal
-            ->where(['item_process_id' => ['in', $ids], 'status' => 1])
-            ->count();
-        0 < $abnormal_count && $this->error('有异常待处理的子订单');
 
         //调用创建工单接口
         //saleaftermanage/work_order_list/add?order_number=123&order_item_numbers=35456,23465,1111

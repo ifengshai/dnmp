@@ -288,11 +288,10 @@ class ScmDistribution extends Scm
             ->select();
         if($check_work_order){
             foreach ($check_work_order as $val){
-                //子单措施:更改镜框-18、更改镜片-19、取消-20
                 (
-                    !in_array($val['measure_choose_id'],[18,19,20])//主单措施未处理
+                    3 == $val['measure_choose_id']//主单取消措施未处理
                     ||
-                    $val['item_order_number'] == $item_order_number//子单措施未处理
+                    $val['item_order_number'] == $item_order_number//子单措施未处理:更改镜框18、更改镜片19、取消20
                 )
                 && $this->error(__('有工单未处理，无法操作'), [], 405);
             }
@@ -540,11 +539,10 @@ class ScmDistribution extends Scm
             ->select();
         if($check_work_order){
             foreach ($check_work_order as $val){
-                //子单措施:更改镜框-18、更改镜片-19、取消-20
                 (
-                    !in_array($val['measure_choose_id'],[18,19,20])//主单措施未处理
+                    3 == $val['measure_choose_id']//主单取消措施未处理
                     ||
-                    $val['item_order_number'] == $item_order_number//子单措施未处理
+                    $val['item_order_number'] == $item_order_number//子单措施未处理:更改镜框18、更改镜片19、取消20
                 )
                 && $this->error(__('有工单未处理，无法操作'), [], 405);
             }
