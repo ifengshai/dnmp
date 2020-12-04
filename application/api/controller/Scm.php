@@ -2,7 +2,6 @@
 
 namespace app\api\controller;
 
-use app\api\controller\ScmDistribution;
 use app\common\controller\Api;
 use app\admin\library\Auth;
 use app\admin\model\warehouse\ProductBarCodeItem;
