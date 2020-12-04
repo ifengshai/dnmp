@@ -260,23 +260,6 @@ class Distribution extends Backend
                 ->where(['status' => 1, 'type' => ['>', 1], 'occupy' => ['>', 0]])
                 ->column('coding', 'id');
 
-            if($list){
-                //获取主单号
-                $increment_ids = $this->_new_order
-                    ->where(['id'=>['in',array_column($list,'order_id')]])
-                    ->column('increment_id');
-
-                //检测是否有工单
-                $check_work_order = $this->_work_order_measure
-                    ->alias('a')
-                    ->field('a.item_order_number,a.measure_choose_id,b.platform_order')
-                    ->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')
-                    ->where([
-                        'b.platform_order'=>['in',$increment_ids]
-                    ])
-                    ->select();
-            }
-
             foreach ($list as $key => $value) {
                 $stock_house_num = '';
                 if (!empty($value['temporary_house_id'])) {
@@ -299,21 +282,7 @@ class Distribution extends Backend
                 $list[$key]['handle_abnormal'] = $handle_abnormal;
 
                 //判断是否显示工单按钮
-                $task_info = 0;
-                if(!empty($check_work_order)){
-                    foreach($check_work_order as $v){
-                        if($v['platform_order'] == $value['increment_id']){
-                            if(
-                                !in_array($v['measure_choose_id'],[18,19,20])//主单措施
-                                ||
-                                $v['item_order_number'] == $value['item_order_number']//子单措施
-                            ){
-                                $task_info = 1;
-                            }
-                        }
-                    }
-                }
-                $list[$key]['task_info'] = $task_info;
+                $list[$key]['task_info'] = in_array($value['item_order_number'],$item_order_numbers) ? 1 : 0;
             }
 
             $result = array("total" => $total, "rows" => $list);
@@ -766,7 +735,7 @@ class Distribution extends Backend
         0 < $count && $this->error('存在非当前节点的子订单');
 
         //标记打印状态
-        Db::startTrans();
+        $this->model->startTrans();
         try {
             //标记状态
             $this->model
@@ -778,12 +747,12 @@ class Distribution extends Backend
             $admin = (object)session('admin');
             DistributionLog::record($admin, $ids, 1, '标记打印完成');
 
-            Db::commit();
+            $this->model->commit();
         } catch (PDOException $e) {
-            Db::rollback();
+            $this->model->rollback();
             $this->error($e->getMessage());
         } catch (Exception $e) {
-            Db::rollback();
+            $this->model->rollback();
             $this->error($e->getMessage());
         }
         $this->success('标记成功!', '', 'success', 200);
@@ -1015,7 +984,12 @@ class Distribution extends Backend
         }
 
         //查询订单号
-        $increment_ids = $this->_new_order->where(['id' => ['in', array_unique($order_ids)]])->column('increment_id');
+        $order_ids = array_unique($order_ids);
+        $increment_ids = $this->_new_order
+            ->where(['id' => ['in', $order_ids],'status' => 'processing'])
+            ->column('increment_id')
+        ;
+        count($order_ids) != count($increment_ids) && $this->error('当前订单状态不可操作');
 
         //检测是否有工单未处理
         $check_work_order = $this->_work_order_measure
@@ -1030,11 +1004,10 @@ class Distribution extends Backend
             ->select();
         if ($check_work_order) {
             foreach ($check_work_order as $val) {
-                //子单措施:更改镜框-18、更改镜片-19、取消-20
                 (
-                    !in_array($val['measure_choose_id'], [18, 19, 20]) //主单措施未处理
+                    3 == $val['measure_choose_id']//主单取消措施未处理
                     ||
-                    in_array($val['item_order_number'], $item_order_numbers) //子单措施未处理
+                    in_array($val['item_order_number'], $item_order_numbers)//子单措施未处理:更改镜框18、更改镜片19、取消20
                 )
                 && $this->error('子单号：' . $val['item_order_number'] . '有工单未处理');
             }
@@ -1077,7 +1050,10 @@ class Distribution extends Backend
         //操作人信息
         $admin = (object)session('admin');
 
-        Db::startTrans();
+        $this->_item->startTrans();
+        $this->_stock_log->startTrans();
+        $this->_new_order_process->startTrans();
+        $this->model->startTrans();
         try {
             //更新状态
             foreach ($item_list as $value) {
@@ -1153,12 +1129,21 @@ class Distribution extends Backend
                 DistributionLog::record($admin, $value['id'], $check_status, $status_arr[$check_status] . '完成');
             }
 
-            Db::commit();
+            $this->_item->commit();
+            $this->_stock_log->commit();
+            $this->_new_order_process->commit();
+            $this->model->commit();
         } catch (PDOException $e) {
-            Db::rollback();
+            $this->_item->rollback();
+            $this->_stock_log->rollback();
+            $this->_new_order_process->rollback();
+            $this->model->rollback();
             $this->error($e->getMessage());
         } catch (Exception $e) {
-            Db::rollback();
+            $this->_item->rollback();
+            $this->_stock_log->rollback();
+            $this->_new_order_process->rollback();
+            $this->model->rollback();
             $this->error($e->getMessage());
         }
 
@@ -1204,7 +1189,12 @@ class Distribution extends Backend
         }
 
         //查询订单号
-        $increment_ids = $this->_new_order->where(['id' => ['in', array_unique($order_ids)]])->column('increment_id');
+        $order_ids = array_unique($order_ids);
+        $increment_ids = $this->_new_order
+            ->where(['id' => ['in', $order_ids],'status' => 'processing'])
+            ->column('increment_id')
+        ;
+        count($order_ids) != count($increment_ids) && $this->error('当前订单状态不可操作');
 
         //检测是否有工单未处理
         $check_work_order = $this->_work_order_measure
@@ -1219,11 +1209,10 @@ class Distribution extends Backend
             ->select();
         if ($check_work_order) {
             foreach ($check_work_order as $val) {
-                //子单措施:更改镜框-18、更改镜片-19、取消-20
                 (
-                    !in_array($val['measure_choose_id'], [18, 19, 20]) //主单措施未处理
+                    3 == $val['measure_choose_id']//主单取消措施未处理
                     ||
-                    in_array($val['item_order_number'], $item_order_numbers) //子单措施未处理
+                    in_array($val['item_order_number'], $item_order_numbers)//子单措施未处理:更改镜框18、更改镜片19、取消20
                 )
                 && $this->error('子单号：' . $val['item_order_number'] . '有工单未处理');
             }
@@ -1252,7 +1241,7 @@ class Distribution extends Backend
         //操作人信息
         $admin = (object)session('admin');
 
-        Db::startTrans();
+        $this->model->startTrans();
         try {
             //子订单状态回滚
             $this->model
@@ -1266,12 +1255,12 @@ class Distribution extends Backend
                 DistributionLog::record($admin, $value['id'], 6, $status_arr[$reason]['name']);
             }
 
-            Db::commit();
+            $this->model->commit();
         } catch (PDOException $e) {
-            Db::rollback();
+            $this->model->rollback();
             $this->error($e->getMessage());
         } catch (Exception $e) {
-            Db::rollback();
+            $this->model->rollback();
             $this->error($e->getMessage());
         }
         $this->success('操作成功!', '', 'success', 200);
@@ -1364,7 +1353,11 @@ class Distribution extends Backend
             //检测状态
             !in_array($item_info['distribution_status'], $check_status) && $this->error('当前子订单不可返回至此节点');
 
-            Db::startTrans();
+            $this->model->startTrans();
+            $this->_distribution_abnormal->startTrans();
+            $this->_item_platform_sku->startTrans();
+            $this->_item->startTrans();
+            $this->_stock_log->startTrans();
             try {
                 //子订单状态回滚
                 $this->model
@@ -1421,15 +1414,28 @@ class Distribution extends Backend
                 //记录日志
                 DistributionLog::record($admin, $ids, 10, $remark);
 
-                Db::commit();
-                $this->success('处理成功!', '', 'success', 200);
+                $this->model->commit();
+                $this->_distribution_abnormal->commit();
+                $this->_item_platform_sku->commit();
+                $this->_item->commit();
+                $this->_stock_log->commit();
             } catch (PDOException $e) {
-                Db::rollback();
+                $this->model->rollback();
+                $this->_distribution_abnormal->rollback();
+                $this->_item_platform_sku->rollback();
+                $this->_item->rollback();
+                $this->_stock_log->rollback();
                 $this->error($e->getMessage());
             } catch (Exception $e) {
-                Db::rollback();
+                $this->model->rollback();
+                $this->_distribution_abnormal->rollback();
+                $this->_item_platform_sku->rollback();
+                $this->_item->rollback();
+                $this->_stock_log->rollback();
                 $this->error($e->getMessage());
             }
+
+            $this->success('处理成功!', '', 'success', 200);
         }
 
         $this->view->assign("status_arr", $status_arr);
@@ -1499,12 +1505,6 @@ class Distribution extends Backend
             ->where($work_order_where)
             ->column('item_order_number');
         $item_process_number_no && $this->error('以下子单号有未完成工单不可创建工单' . implode('', $item_process_number_no));
-
-        //检测异常状态
-        $abnormal_count = $this->_distribution_abnormal
-            ->where(['item_process_id' => ['in', $ids], 'status' => 1])
-            ->count();
-        0 < $abnormal_count && $this->error('有异常待处理的子订单');
 
         //调用创建工单接口
         //saleaftermanage/work_order_list/add?order_number=123&order_item_numbers=35456,23465,1111

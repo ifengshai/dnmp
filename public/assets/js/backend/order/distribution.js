@@ -10,6 +10,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
         if(0 == value){
             $('select[name="abnormal"]').parents('.form-group').show();
             $('.btn-batch-export-xls').removeClass('hide');
+            $('.btn-batch-printed').removeClass('hide');
         }else if(1 == value){
             $('.btn-batch-printed').removeClass('hide');
             $('.btn-tag-printed').removeClass('hide');
