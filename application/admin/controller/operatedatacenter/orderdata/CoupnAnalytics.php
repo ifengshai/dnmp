@@ -66,7 +66,7 @@ class CoupnAnalytics extends Backend
                     break;
                 case 3:
                     $model = Db::connect('database.db_nihao');
-                    $salesrule = Db::connect('database.db_niaho_online');
+                    $salesrule = Db::connect('database.db_nihao_online');
                     break;
             }
             $model->table('sales_flat_order')->query("set time_zone='+8:00'");
