@@ -143,6 +143,7 @@ class GoodStatus extends Backend
                     'value' => $platform_b_num,
                 ],
             ];
+            $json['total'] = $platform_a_num+$platform_b_num;
             return json(['code' => 1, 'data' => $json]);
         }
     }
