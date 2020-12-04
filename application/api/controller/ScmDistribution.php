@@ -1047,7 +1047,12 @@ class ScmDistribution extends Scm
         empty($item_process_info) && $this->error(__('子订单不存在'), [], 403);
         !in_array($item_process_info['distribution_status'],[7,8]) && $this->error(__('子订单当前状态不可合单操作'), [], 403);
 
-        //获取订单购买总数,商品总数即为子单数量
+        //获取订单购买总数
+        $total_qty_ordered = $this->_new_order_item_process
+            ->where('order_id', $item_process_info['order_id'])
+            ->count();
+        if (1 == $total_qty_ordered) $this->error(__('订单数量为1，不需要合单'), [], 403);
+
         $order_process_info = $this->_new_order_process
             ->where('order_id', $item_process_info['order_id'])
             ->field('order_id,store_house_id')
@@ -1203,14 +1208,6 @@ class ScmDistribution extends Scm
                 $res = $this->_new_order_process->allowField(true)->isUpdate(true, ['order_id'=>$item_process_info['order_id']])->save(['store_house_id'=>$store_house_id]);
                 if ($res !== false){
                     $return = $this->_stock_house->allowField(true)->isUpdate(true, ['id'=>$store_house_id])->save(['occupy'=>1]);
-                    if (!$next){
-                        //只有一个子单且合单完成，更新主单、子单状态为合单完成
-                        $this->_new_order_item_process
-                            ->allowField(true)
-                            ->isUpdate(true, ['order_id'=>$item_process_info['order_id'],'distribution_status'=>['neq',0]])
-                            ->save(['distribution_status'=>9]);
-                        $this->_new_order_process->allowField(true)->isUpdate(true, ['order_id'=>$item_process_info['order_id']])->save(['combine_status'=>1,'combine_time'=>time()]);
-                    }
                 }
             }
             $this->_stock_house->commit();
@@ -1310,14 +1307,15 @@ class ScmDistribution extends Scm
             if($query){
                 //线上不允许跨库联合查询，拆分，由于字段值明显差异，可以分别模糊匹配
                 $store_house_id_store = $this->_stock_house->where(['coding'=> ['like', '%' . $query . '%']])->column('id');
-                $order_id = $this->_new_order_item_process->where(['sku'=> ['like', '%' . $query . '%']])->column('order_id');
+               /* $order_id = $this->_new_order_item_process->where(['sku'=> ['like', '%' . $query . '%']])->column('order_id');
                 $order_id = array_unique($order_id);
                 $store_house_id_sku = [];
                 if($order_id) {
                     $store_house_id_sku = $this->_new_order_process->where(['order_id'=> ['in', $order_id]])->column('store_house_id');
                 }
                 $store_house_ids = array_merge(array_filter($store_house_id_store), array_filter($store_house_id_sku));
-                if($store_house_ids) $where['store_house_id'] = ['in', $store_house_ids];
+                if($store_house_ids) $where['store_house_id'] = ['in', $store_house_ids];*/
+                if($store_house_id_store) $where['store_house_id'] = ['in', $store_house_id_store];
             }
             if($start_time && $end_time){
                 $where['combine_time'] = ['between', [strtotime($start_time), strtotime($end_time)]];
@@ -1647,7 +1645,7 @@ class ScmDistribution extends Scm
                         $true_sku = $this->_item_platform_sku->getTrueSku($value['sku'], $value['site']);
 
                         //检验库存
-                        $stock_arr = $this->_item->where(['sku'=>$true_sku])->filed('stock,occupy_stock,distribution_occupy_stock');
+                        $stock_arr = $this->_item->where(['sku'=>$true_sku])->field('stock,occupy_stock,distribution_occupy_stock');
                         if (in_array(0,$stock_arr)){
                             throw new Exception($value['sku'].':库存不足');
                         }
