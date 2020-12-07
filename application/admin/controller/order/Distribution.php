@@ -1099,6 +1099,12 @@ class Distribution extends Backend
                     //获取true_sku
                     $true_sku = $this->_item_platform_sku->getTrueSku($value['sku'], $value['site']);
 
+                    /*//检验库存
+                    $stock = $this->_item_platform_sku->where($value['sku'], $value['site'])->value('stock');
+                    if (1 > $stock) {
+                        throw new Exception($value['sku'].':库存不足');
+                    }*/
+
                     //增加配货占用库存
                     $this->_item
                         ->where(['sku' => $true_sku])
