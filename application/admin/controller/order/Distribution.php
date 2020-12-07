@@ -1324,7 +1324,7 @@ class Distribution extends Backend
             6 => '待成品质检'
         ];
 
-        /*switch ($item_info['distribution_status']) {
+        switch ($item_info['distribution_status']) {
             case $item_info['distribution_status']<4:
                 unset($status_arr);
                 $status_arr = [];
@@ -1348,7 +1348,7 @@ class Distribution extends Backend
                 unset($status_arr[4]);
                 unset($status_arr[5]);
                 break;
-        }*/
+        }
 
         //异常原因列表
         $abnormal_arr = [
