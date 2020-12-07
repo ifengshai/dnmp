@@ -1316,6 +1316,32 @@ class Distribution extends Backend
             6 => '待成品质检'
         ];
 
+        /*switch ($item_info['distribution_status']) {
+            case $item_info['distribution_status']<4:
+                unset($status_arr);
+                $status_arr = [];
+                break;
+            case 4:
+                unset($status_arr[4]);
+                unset($status_arr[5]);
+                unset($status_arr[6]);
+                break;
+            case 5:
+                unset($status_arr[5]);
+                unset($status_arr[6]);
+                break;
+            case 6:
+                unset($status_arr[6]);
+                break;
+            case 7:
+                unset($status_arr[1]);
+                unset($status_arr[2]);
+                unset($status_arr[3]);
+                unset($status_arr[4]);
+                unset($status_arr[5]);
+                break;
+        }*/
+
         //异常原因列表
         $abnormal_arr = [
             1 => '配货缺货',
