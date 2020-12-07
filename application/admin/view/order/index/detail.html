@@ -426,12 +426,13 @@
                                             <td>{:$sku['od_sph'] ?? ''}</td>
                                             <td>{:$sku['od_cyl'] ?? ''}</td>
                                             <td>{:$sku['od_axis'] ?? ''}</td>
-                                            {if $sku['total_add']}
+                                            <td>{:$sku['os_add']}</td>
+                                            <!--{if $sku['total_add']}
                                             <td rowspan="2">{:$sku['total_add'] ?? ''}</td>
                                             {else/}
 
                                             <td>{:$sku['os_add']}</td>
-                                            {/if}
+                                            {/if}-->
                                             {if $sku['pdcheck'] == 'on'}
                                             <td>{:$sku['pd_r'] ?? ''}</td>
                                             {else/}
