@@ -1716,7 +1716,7 @@ class WorkOrderList extends Model
                 ->column('a.item_order_number')
             ;
             if($cancel_order_number){
-                $item_process_ids = $_distribution_abnormal
+                $item_process_ids = $_new_order_item_process
                     ->where(['item_order_number' => ['in',$cancel_order_number]])
                     ->column('item_process_id')
                 ;
@@ -1727,7 +1727,7 @@ class WorkOrderList extends Model
                         ->save(['distribution_status'=>0], ['id' => ['in',$item_process_ids]])
                     ;
 
-                    //配货操作1706559日志
+                    //配货操作日志
                     DistributionLog::record((object)session('admin'),$item_process_ids,10,"工单处理完成，子单取消");
                 }
             }
