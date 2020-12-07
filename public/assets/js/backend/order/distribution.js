@@ -130,6 +130,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                         {
                             field: 'distribution_status', title: __('子单号状态'), addClass: 'selectpicker', data: 'multiple',
                             searchList: {
+                                0: __('取消'),
                                 1: __('待打印标签'),
                                 2: __('待配货'),
                                 3: __('待配镜片'),

@@ -1561,7 +1561,8 @@ class WorkOrderList extends Model
                         $work->complete_time = $time;
 
                         //检测是否标记异常，有则修改为已处理
-                        if(!$this->handle_abnormal($work)) throw new Exception("工单处理：配货异常处理失败");
+                        $res = $this->handle_abnormal($work);
+                        if(!$res['result']) throw new Exception($res['msg']);
                     } elseif ($key > 0 && $count > $key) {
                         //部分处理
                         $work_status = 5;
@@ -1616,7 +1617,8 @@ class WorkOrderList extends Model
                             $work->complete_time = $time;
 
                             //检测是否标记异常，有则修改为已处理
-                            if(!$this->handle_abnormal($work)) throw new Exception("工单处理：配货异常处理失败");
+                            $res = $this->handle_abnormal($work);
+                            if(!$res['result']) throw new Exception($res['msg']);
                         } elseif ($key > 0  && $count > $key) {
                             //部分处理
                             $work_status = 5;
@@ -1656,7 +1658,7 @@ class WorkOrderList extends Model
      * 工单绑定有异常则修改为已处理
      * @param object $work 工单表数据
      * @author lzh
-     * @return bool
+     * @return array
      */
     public function handle_abnormal($work){
         //检测是否有标记异常
@@ -1686,12 +1688,10 @@ class WorkOrderList extends Model
                 ;
                 if($abnormal_house_ids){
                     //异常库位号占用数量减1
-                    foreach($abnormal_house_ids as $v){
-                        $_stock_house
-                            ->where(['id' => $v])
-                            ->setDec('occupy', 1)
-                        ;
-                    }
+                    $_stock_house
+                        ->where(['id' => ['in',$abnormal_house_ids]])
+                        ->setDec('occupy', 1)
+                    ;
                 }
 
                 //解绑子订单的异常库位ID
@@ -1716,9 +1716,9 @@ class WorkOrderList extends Model
                 ->column('a.item_order_number')
             ;
             if($cancel_order_number){
-                $item_process_ids = $_distribution_abnormal
+                $item_process_ids = $_new_order_item_process
                     ->where(['item_order_number' => ['in',$cancel_order_number]])
-                    ->column('item_process_id')
+                    ->column('id')
                 ;
                 if($item_process_ids){
                     //标记子单号状态为取消
@@ -1739,15 +1739,15 @@ class WorkOrderList extends Model
             $_distribution_abnormal->rollback();
             $_stock_house->rollback();
             $_new_order_item_process->rollback();
-            return false;
+            return ['result'=>false,'msg'=>$e->getMessage()];
         } catch (Exception $e) {
             $_distribution_abnormal->rollback();
             $_stock_house->rollback();
             $_new_order_item_process->rollback();
-            return false;
+            return ['result'=>false,'msg'=>$e->getMessage()];
         }
 
-        return true;
+        return ['result'=>true,'msg'=>''];
     }
 
     /**
@@ -1853,7 +1853,8 @@ class WorkOrderList extends Model
                     $dataWorkOrder['complete_time'] = date('Y-m-d H:i:s');
 
                     //检测是否标记异常，有则修改为已处理
-                    if(!$this->handle_abnormal($work)) throw new Exception("工单处理：配货异常处理失败");
+                    $res = $this->handle_abnormal($work);
+                    if(!$res['result']) throw new Exception($res['msg']);
 
                     //通知
                     //Ding::cc_ding(explode(',', $work->create_user_id), '', '工单ID：' . $work->id . '😎😎😎😎工单已处理完成😎😎😎😎',  '😎😎😎😎工单已处理完成😎😎😎😎');
@@ -1915,7 +1916,7 @@ class WorkOrderList extends Model
         }
         $whereMeasure['work_id'] = $work_id;
         $whereMeasure['change_type'] = $measuerInfo;
-        $result = WorkOrderChangeSku::where($whereMeasure)->field('id,increment_id,platform_type,change_type,original_sku,original_number,change_sku,change_number')->select();
+        $result = WorkOrderChangeSku::where($whereMeasure)->field('id,increment_id,platform_type,change_type,original_sku,original_number,change_sku,change_number,item_order_number')->select();
         if (!$result) {
             return false;
         }
