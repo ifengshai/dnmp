@@ -224,11 +224,12 @@ class ScmDistribution extends Scm
     public function fuzzy_search()
     {
         $query = $this->request->request('query');
+        $status = $this->request->request('status');
         empty($query) && $this->error(__('搜索内容不能为空'), [], 403);
 
         //获取子订单数据
         $list = $this->_new_order_item_process
-            ->where(['item_order_number'=>['like',"%{$query}%"]])
+            ->where(['item_order_number'=>['like',"%{$query}%"], 'distribution_status'=>$status])
             ->field('item_order_number,sku')
             ->order('created_at','desc')
             ->limit(0,100)

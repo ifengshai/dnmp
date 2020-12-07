@@ -1182,7 +1182,7 @@ class ScmWarehouse extends Scm
         1 != $row['status'] && $this->error(__('只有待审核状态才能操作'), [], 518);
 
         $data['status'] = $do_type;//审核状态，2通过，3拒绝
-        if ($data['status'] == 2) {
+        if (2 == $data['status']) {
             $data['check_time'] = date('Y-m-d H:i:s', time());
             $msg = '审核';
         } else {
