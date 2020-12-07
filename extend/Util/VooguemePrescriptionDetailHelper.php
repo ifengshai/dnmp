@@ -188,14 +188,14 @@ class VooguemePrescriptionDetailHelper{
 
 			//V站add网站数据存反
 			if($final_params['os_add'] && $final_params['od_add']){
-				$items[$item_key]['os_add'] = $final_params['od_add'];
-				$items[$item_key]['od_add'] = $final_params['os_add'];
+				$items[$item_key]['os_add'] = urldecode($final_params['od_add']);
+				$items[$item_key]['od_add'] = urldecode($final_params['os_add']);
 			}else{
 				if ($final_params['os_add'] != '') {
-					$items[$item_key]['total_add'] = $final_params['os_add'];
+					$items[$item_key]['total_add'] = urldecode($final_params['os_add']);
 				}
 				if ($final_params['od_add'] != '') {
-					$items[$item_key]['total_add'] = $final_params['od_add'];
+					$items[$item_key]['total_add'] = urldecode($final_params['od_add']);
 				}
 			}
 
