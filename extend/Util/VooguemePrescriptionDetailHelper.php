@@ -64,9 +64,6 @@ class VooguemePrescriptionDetailHelper{
 			left join sales_flat_order sfo on sfoi.order_id=sfo.entity_id 
 			where sfo.entity_id in($entity_id)";
 			$item_list = Db::connect('database.db_voogueme')->query($querySql);
-            if($entity_id == 296197){
-                dump($item_list);exit;
-            }
 			// 如果为空，则直接返回false
 			if(empty($item_list)){
 				return false;				
@@ -157,9 +154,15 @@ class VooguemePrescriptionDetailHelper{
 				$arr_value = explode("=", $value);
 				$lens_params[$arr_value[0]] = $arr_value[1];
 			}
+            if($item_value['increment_id'] == 130078672){
+                dump($lens_params);
+            }
             // dump($lens_params);
 			$final_params = array_merge($lens_params, $final_params);
-          	// dump($final_params);      
+          	// dump($final_params);
+            if($item_value['increment_id'] == 130078672){
+                dump($final_params);exit;
+            }
 
 			$items[$item_key]['coatiing_name'] = $final_params['coatiing_name'];
 
