@@ -1690,6 +1690,7 @@ class Inventory extends Backend
             //开启事务
             Db::startTrans();
             try {
+                $stock_data = [];
                 //子单状态大于待配货
                 if (2 < $distribution_status) {
                     //原sku增加可用库存、虚拟仓库存,减少占用库存、配货占用
@@ -1708,7 +1709,7 @@ class Inventory extends Backend
                             ->setInc('stock', $original_number);
 
                         //记录库存日志
-                        $_stock_log->setData([
+                        $stock_data[] = [
                             'type'                      => 2,
                             'two_type'                  => 6,
                             'sku'                       => $warehouse_original_sku,
@@ -1720,7 +1721,7 @@ class Inventory extends Backend
                             'create_person'             => session('admin.nickname'),
                             'create_time'               => date('Y-m-d H:i:s'),
                             'remark'                    => '工单更换镜框-订单已配镜架,原SKU增加可用库存,减少配货占用,减少订单占用'
-                        ]);
+                        ];
                     }
 
                     //新sku减少可用库存、虚拟仓库存,增加占用库存、配货占用
@@ -1739,7 +1740,7 @@ class Inventory extends Backend
                             ->setDec('stock', $change_number);
 
                         //记录库存日志
-                        $_stock_log->setData([
+                        $stock_data[] = [
                             'type'                      => 2,
                             'two_type'                  => 6,
                             'sku'                       => $warehouse_change_sku,
@@ -1751,7 +1752,7 @@ class Inventory extends Backend
                             'create_person'             => session('admin.nickname'),
                             'create_time'               => date('Y-m-d H:i:s'),
                             'remark'                    => '工单更换镜框-订单已配镜架,新SKU减少可用库存,增加配货占用,增加订单占用'
-                        ]);
+                        ];
                     }
                 } else { //子单状态是未配货
                     //原sku增加可用库存、虚拟仓库存,减少占用库存
@@ -1769,7 +1770,7 @@ class Inventory extends Backend
                             ->setInc('stock', $original_number);
 
                         //记录库存日志
-                        $_stock_log->setData([
+                        $stock_data[] = [
                             'type'                      => 2,
                             'two_type'                  => 6,
                             'sku'                       => $warehouse_original_sku,
@@ -1780,7 +1781,7 @@ class Inventory extends Backend
                             'create_person'             => session('admin.nickname'),
                             'create_time'               => date('Y-m-d H:i:s'),
                             'remark'                    => '工单更换镜框-订单未配镜架,原SKU增加可用库存,减少配货占用,减少订单占用'
-                        ]);
+                        ];
                     }
 
                     //新sku减少可用库存、虚拟仓库存,增加占用库存
@@ -1798,7 +1799,7 @@ class Inventory extends Backend
                             ->setDec('stock', $change_number);
 
                         //记录库存日志
-                        $_stock_log->setData([
+                        $stock_data[] = [
                             'type'                      => 2,
                             'two_type'                  => 6,
                             'sku'                       => $warehouse_change_sku,
@@ -1809,8 +1810,12 @@ class Inventory extends Backend
                             'create_person'             => session('admin.nickname'),
                             'create_time'               => date('Y-m-d H:i:s'),
                             'remark'                    => '工单更换镜框-订单未配镜架,新SKU减少可用库存,增加订单占用'
-                        ]);
+                        ];
                     }
+                }
+
+                if($stock_data){
+                    $_stock_log->allowField(true)->saveAll($stock_data);
                 }
 
                 //提交
