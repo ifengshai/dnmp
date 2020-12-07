@@ -83,7 +83,6 @@ class NewProduct extends Backend
             }
             //如果切换站点清除默认值
             $filter = json_decode($this->request->get('filter'), true);
-
             if (!empty($filter['sku'])){
                 if (preg_match("/\s/", $filter['sku'])){
                     $map['sku'] = ['in', preg_split("/\s+/", $filter['sku'])];
@@ -91,7 +90,6 @@ class NewProduct extends Backend
                     $this->request->get(['filter' => json_encode($filter)]);
                 }
             }
-
             //可用库存搜索
             if ($filter['available_stock']) {
                 $item = new \app\admin\model\itemmanage\Item();

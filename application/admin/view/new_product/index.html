@@ -6,7 +6,6 @@
             <div class="tab-pane fade active in" id="one">
                 <div class="widget-body no-padding">
                     <div id="toolbar" class="toolbar">
-
                         {:build_toolbar('refresh')}
                         <a href="javascript:;" data-area='["100%","100%"]' class="btn btn-success btn-add {:$auth->check('new_product/add')?'':'hide'}" title="{:__('Add')}" ><i class="fa fa-plus"></i> {:__('新增')}</a>
 
@@ -16,10 +15,7 @@
                          <a href="javascript:;" data-area='["100%","100%"]' class="btn btn-success btn-edit btn-disabled disabled {:$auth->check('new_product/edit')?'':'hide'}" title="{:__('Edit')}" ><i class="fa fa-pencil"></i> {:__('Edit')}</a>
                          <a class="btn btn-info btn-selected"  data-value="1" href="javascript:;"><i class="fa fa-leaf"></i> 全选</a>
                         <a href="javascript:;"  class="btn btn-success btn-passAudits  {:$auth->check('new_product/passaudits')?'':'hide'}" title="{:__('选品通过')}" ><i class="fa fa-leaf"></i> {:__('同步商品')}</a>
-
                     </div>
-
-
                     <table id="table" class="table table-striped table-hover" width="100%">
 
                     </table>
