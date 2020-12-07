@@ -222,20 +222,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                 }
 
                 Backend.api.open('new_product/passaudits/ids/' + ids , __('同步商品'), { area: ['35%', '35%'] });
-                // Backend.api.open('new_product/passAudit/ids/' + $(this).data('id') + '/sku/' + $(this).data('sku'), __('同步商品'), { area: ['35%', '35%'] });
-
-                // Layer.confirm(
-                //     __('确定要审核通过吗'),
-                //     function (index) {
-                //         Backend.api.ajax({
-                //             url: "new_product/passAudit",
-                //             data: { ids: ids }
-                //         }, function (data, ret) {
-                //             table.bootstrapTable('refresh');
-                //             Layer.close(index);
-                //         });
-                //     }
-                // );
             });
             //商品审核拒绝
             $(document).on('click', '.btn-auditRefused', function () {
