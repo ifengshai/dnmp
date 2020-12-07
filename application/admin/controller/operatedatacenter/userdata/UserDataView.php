@@ -209,6 +209,7 @@ class UserDataView extends Backend
                     'new'=>array_keys($new_arr),
                     'active'=>array_keys($active_arr),
                 );
+                dump($data);exit;
                 Cache::set('Operatedatacenter_userdataview'  . $order_platform .$time_str. md5(serialize('new_old_change_line')), $data, 7200);
             }
             $arr['xdata'] = $data['time'];
