@@ -1718,7 +1718,7 @@ class WorkOrderList extends Model
             if($cancel_order_number){
                 $item_process_ids = $_new_order_item_process
                     ->where(['item_order_number' => ['in',$cancel_order_number]])
-                    ->column('item_process_id')
+                    ->column('id')
                 ;
                 if($item_process_ids){
                     //标记子单号状态为取消
