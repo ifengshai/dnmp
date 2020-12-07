@@ -117,7 +117,7 @@ class UserDataView extends Backend
             $order_platform = $params['order_platform'];
             $time_str = $params['time_str'];
             $arr = Cache::get('Operatedatacenter_userdataview' . $order_platform . $time_str.md5(serialize('active_user_trend')));
-            if (!$arr) {
+            if ($arr) {
                 $date_arr = $arr;
             }else{
                 switch ($order_platform) {
