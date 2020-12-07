@@ -201,8 +201,8 @@ class VooguemePrescriptionDetailHelper{
                 if($item_value['increment_id'] == 130078672){
                     dump($final_params);
                     dump(1111111);
-                    dump($final_params['od_add']);
-                    dump((float)$final_params['od_add']);
+                    dump($final_params['os_add']);
+                    dump((float)$final_params['os_add']);
                     dump($items);
                     dump(222222222);
                 }
