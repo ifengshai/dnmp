@@ -1915,7 +1915,7 @@ class WorkOrderList extends Model
         }
         $whereMeasure['work_id'] = $work_id;
         $whereMeasure['change_type'] = $measuerInfo;
-        $result = WorkOrderChangeSku::where($whereMeasure)->field('id,increment_id,platform_type,change_type,original_sku,original_number,change_sku,change_number')->select();
+        $result = WorkOrderChangeSku::where($whereMeasure)->field('id,increment_id,platform_type,change_type,original_sku,original_number,change_sku,change_number,item_order_number')->select();
         if (!$result) {
             return false;
         }
