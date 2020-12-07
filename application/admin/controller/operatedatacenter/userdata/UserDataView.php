@@ -142,20 +142,20 @@ class UserDataView extends Backend
                     $end = date('Y-m-d');
                     $where['day_date'] = ['between', [$start, $end]];
                 }
-                $arr = $model->where($where)->column('day_date', 'active_user_num');
+                $arr = $model->where($where)->column('active_user_num','day_date');
                 $date_arr = $arr;
                 Cache::set('Operatedatacenter_userdataview'  . $order_platform .$time_str. md5(serialize('active_user_trend')), $date_arr, 7200);
             }
             $name = '活跃用户数';
-
-            $json['xcolumnData'] = array_values($date_arr);
+            
+            $json['xcolumnData'] = array_keys($date_arr);
             $json['column'] = [$name];
             $json['columnData'] = [
                 [
                     'name' => $name,
                     'type' => 'line',
                     'smooth' => true,
-                    'data' => array_keys($date_arr)
+                    'data' => array_values($date_arr)
                 ],
 
             ];
