@@ -162,8 +162,6 @@ class UserDataView extends Backend
             return json(['code' => 1, 'data' => $json]);
         }
     }
-
-
     /**
      * 新老用户购买转化对比
      *
