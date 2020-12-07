@@ -993,7 +993,7 @@ class Distribution extends Backend
 
         //检测配货状态
         $item_list = $this->model
-            ->field('id,site,distribution_status,order_id,option_id,sku')
+            ->field('id,site,distribution_status,order_id,option_id,sku,item_order_number')
             ->where(['id' => ['in', $ids]])
             ->select();
         $order_ids = [];
