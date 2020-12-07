@@ -288,7 +288,7 @@ class Distribution extends Backend
                 $list[$key]['created_at'] = date('Y-m-d H:i:s', $value['created_at']);
 
                 //跟单：异常未处理且未创建工单的显示处理异常按钮
-                $work_id = $abnormal_data[$value['id']]['work_id'] ?? 0;
+                $work_id = $abnormal_data[$value['id']] ?? 0;
                 if (8 == $label && 0 < $value['abnormal_house_id'] && 0 == $work_id){
                     $handle_abnormal = 1;
                 }else{
