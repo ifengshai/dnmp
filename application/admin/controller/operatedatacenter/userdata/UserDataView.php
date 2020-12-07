@@ -179,7 +179,7 @@ class UserDataView extends Backend
             $order_platform = $params['order_platform'] ? $params['order_platform'] : 1;
             $time_str = $params['time_str'];
             $arr = Cache::get('Operatedatacenter_userdataview' . $order_platform . $time_str.md5(serialize('new_old_change_line')));
-            if (!$arr) {
+            if ($arr) {
                 $data = $arr;
             }else{
                 if($order_platform == 2){
