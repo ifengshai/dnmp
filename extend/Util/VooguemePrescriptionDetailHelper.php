@@ -190,11 +190,6 @@ class VooguemePrescriptionDetailHelper{
 			if($final_params['os_add'] && $final_params['od_add']){
 				$items[$item_key]['os_add'] = $final_params['od_add'];
 				$items[$item_key]['od_add'] = $final_params['os_add'];
-                if($item_value['increment_id'] == 130078672){
-                    dump(88888);
-                    dump($items);
-                    dump(44444);
-                }
 			}else{
 				if ($final_params['os_add'] != 0) {
 					$items[$item_key]['total_add'] = $final_params['os_add'];
@@ -204,6 +199,7 @@ class VooguemePrescriptionDetailHelper{
 					$items[$item_key]['total_add'] = $final_params['od_add'];
 				}
                 if($item_value['increment_id'] == 130078672){
+                    dump($final_params);
                     dump(1111111);
                     dump($final_params['od_add']);
                     dump((float)$final_params['od_add']);
