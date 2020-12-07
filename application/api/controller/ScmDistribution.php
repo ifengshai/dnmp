@@ -1704,6 +1704,7 @@ class ScmDistribution extends Scm
 
                         //检验库存
                         $stock_arr = $this->_item->where(['sku'=>$true_sku])->field('stock,occupy_stock,distribution_occupy_stock');
+                        $stock_arr = $stock_arr->toArray();
                         if (in_array(0,$stock_arr)){
                             throw new Exception($value['sku'].':库存不足');
                         }
