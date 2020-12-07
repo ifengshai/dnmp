@@ -191,11 +191,11 @@ class VooguemePrescriptionDetailHelper{
 				$items[$item_key]['os_add'] = $final_params['od_add'];
 				$items[$item_key]['od_add'] = $final_params['os_add'];
 			}else{
-				if ($final_params['os_add'] != 0) {
+				if ($final_params['os_add'] != '') {
 					$items[$item_key]['total_add'] = $final_params['os_add'];
 				}
 
-				if ($final_params['od_add'] != 0) {
+				if ($final_params['od_add'] != '') {
 					$items[$item_key]['total_add'] = $final_params['od_add'];
 				}
                 if($item_value['increment_id'] == 130078672){
