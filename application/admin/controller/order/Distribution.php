@@ -30,7 +30,15 @@ use app\admin\model\saleaftermanage\WorkOrderMeasure;
  */
 class Distribution extends Backend
 {
-    protected $noNeedRight = ['orderDetail', 'batch_print_label_new', 'batch_export_xls', 'account_order_batch_export_xls', 'add'];
+    protected $noNeedRight = [
+        'orderDetail',
+        'batch_print_label_new',
+        'batch_export_xls',
+        'account_order_batch_export_xls',
+        'add',
+        'detail',
+        'operation_log'
+    ];
 
     /**
      * 子订单模型对象
@@ -288,7 +296,7 @@ class Distribution extends Backend
                 $list[$key]['created_at'] = date('Y-m-d H:i:s', $value['created_at']);
 
                 //跟单：异常未处理且未创建工单的显示处理异常按钮
-                $work_id = $abnormal_data[$value['id']]['work_id'] ?? 0;
+                $work_id = $abnormal_data[$value['id']] ?? 0;
                 if (8 == $label && 0 < $value['abnormal_house_id'] && 0 == $work_id){
                     $handle_abnormal = 1;
                 }else{
@@ -985,7 +993,7 @@ class Distribution extends Backend
 
         //检测配货状态
         $item_list = $this->model
-            ->field('id,site,distribution_status,order_id,option_id,sku')
+            ->field('id,site,distribution_status,order_id,option_id,sku,item_order_number')
             ->where(['id' => ['in', $ids]])
             ->select();
         $order_ids = [];
@@ -1521,7 +1529,7 @@ class Distribution extends Backend
                 'platform_order'=>$order_id[0]
             ])
             ->value('id');
-//        $check_work_order && $this->error('当前订单有未完成工单，不可创建工单');
+        $check_work_order && $this->error('当前订单有未完成工单，不可创建工单');
 
         //调用创建工单接口
         //saleaftermanage/work_order_list/add?order_number=123&order_item_numbers=35456,23465,1111
