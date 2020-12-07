@@ -154,16 +154,9 @@ class VooguemePrescriptionDetailHelper{
 				$arr_value = explode("=", $value);
 				$lens_params[$arr_value[0]] = $arr_value[1];
 			}
-            if($item_value['increment_id'] == 130078672){
-                dump($lens_params);
-            }
             // dump($lens_params);
 			$final_params = array_merge($lens_params, $final_params);
           	// dump($final_params);
-            if($item_value['increment_id'] == 130078672){
-                dump($final_params);exit;
-            }
-
 			$items[$item_key]['coatiing_name'] = $final_params['coatiing_name'];
 
 			if ($final_params['index_color']) {
@@ -197,6 +190,11 @@ class VooguemePrescriptionDetailHelper{
 			if($final_params['os_add'] && $final_params['od_add']){
 				$items[$item_key]['os_add'] = $final_params['od_add'];
 				$items[$item_key]['od_add'] = $final_params['os_add'];
+                if($item_value['increment_id'] == 130078672){
+                    dump(88888);
+                    dump($items);
+                    dump(44444);
+                }
 			}else{
 				if ((float) $final_params['os_add'] != 0) {
 					$items[$item_key]['total_add'] = $final_params['os_add'];
@@ -205,9 +203,16 @@ class VooguemePrescriptionDetailHelper{
 				if ((float) $final_params['od_add'] != 0) {
 					$items[$item_key]['total_add'] = $final_params['od_add'];
 				}
+                if($item_value['increment_id'] == 130078672){
+                    dump(1111111);
+                    dump($items);
+                    dump(222222222);
+                }
 				
 			}
-
+            if($item_value['increment_id'] == 130078672){
+                dump($items);exit;
+            }
 			if($final_params['pdcheck'] =='on'){
 				$items[$item_key]['pd_l'] = $final_params['pd_l'];
 				$items[$item_key]['pd_r'] = $final_params['pd_r'];
