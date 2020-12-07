@@ -2158,9 +2158,6 @@ class Inventory extends Backend
 
             //仓库sku
             $warehouse_original_sku = $_platform_sku->where(['platform_sku'=>$original_sku,'platform_type'=>$order_platform])->value('sku');
-            print_r($warehouse_original_sku);
-            print_r('-------------');
-            exit;
 
             //开启事务
             Db::startTrans();
@@ -2203,13 +2200,13 @@ class Inventory extends Backend
                 Db::commit();
             } catch (ValidateException $e) {
                 Db::rollback();
-                $this->error($e->getMessage().'------');
+                $this->error($e->getMessage());
             } catch (PDOException $e) {
                 Db::rollback();
-                $this->error($e->getMessage().'=========');
+                $this->error($e->getMessage());
             } catch (Exception $e) {
                 Db::rollback();
-                $this->error($e->getMessage().'22222222');
+                $this->error($e->getMessage());
             }
         }
         return true;

@@ -1586,11 +1586,13 @@ class WorkOrderList extends Model
             }else{
                 //需要审核
                 if (!empty($params)) {
+                    print_R('aaaaaaaaaaa');
                     $work->operation_user_id = $admin_id;
                     $work->check_note = $params['check_note'];
                     $work->check_time = $time;
                     $key = 0;
                     foreach ($orderRecepts as $orderRecept) {
+                        print_R('bbbbbbbbbbb');
                         //查找措施的id
                         $measure_choose_id = WorkOrderMeasure::where('id', $orderRecept->measure_id)->value('measure_choose_id');
 
@@ -1600,12 +1602,13 @@ class WorkOrderList extends Model
                         }else{
                             //点击审核成功并且审核后自动完成，直接处理优惠券、补价、积分等流程
                             if (1 == $orderRecept->is_auto_complete && 1 == $params['success']) {
+                                print_R('ccccccccccccc');
                                 $this->follow_up($orderRecept,$measure_choose_id,$work);
                                 $key++;
                             }
                         }
                     }
-
+                    exit;
                     //审核拒绝
                     if ($params['success'] == 2) {
                         $work_status = 4;
