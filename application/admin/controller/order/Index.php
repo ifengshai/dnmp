@@ -215,9 +215,6 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
             $goods = ZeeloolPrescriptionDetailHelper::get_list_by_entity_ids($ids);
         } elseif ($label == 2) {
             $goods = VooguemePrescriptionDetailHelper::get_list_by_entity_ids($ids);
-            if($ids == 296197){
-                dump($goods);exit;
-            }
         } elseif ($label == 3) {
             $goods = NihaoPrescriptionDetailHelper::get_list_by_entity_ids($ids);
         } elseif ($label == 4) {

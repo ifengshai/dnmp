@@ -64,7 +64,9 @@ class VooguemePrescriptionDetailHelper{
 			left join sales_flat_order sfo on sfoi.order_id=sfo.entity_id 
 			where sfo.entity_id in($entity_id)";
 			$item_list = Db::connect('database.db_voogueme')->query($querySql);
-
+            if($entity_id == 296197){
+                dump($item_list);exit;
+            }
 			// 如果为空，则直接返回false
 			if(empty($item_list)){
 				return false;				
