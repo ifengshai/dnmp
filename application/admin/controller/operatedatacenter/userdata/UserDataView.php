@@ -202,14 +202,13 @@ class UserDataView extends Backend
                 }
                 $where['day_date'] = ['between', [$start, $end]];
 
-                $new_arr = $model->where($where)->column('day_date', 'create_user_change_rate');
-                $active_arr = $model->where($where)->column('day_date', 'update_user_change_rate');
+                $new_arr = $model->where($where)->column('create_user_change_rate','day_date');
+                $active_arr = $model->where($where)->column( 'update_user_change_rate','day_date');
                 $data = array(
-                    'time'=>array_values($new_arr),
-                    'new'=>array_keys($new_arr),
-                    'active'=>array_keys($active_arr),
+                    'time'=>array_keys($new_arr),
+                    'new'=>array_values($new_arr),
+                    'active'=>array_values($active_arr),
                 );
-                dump($data);exit;
                 Cache::set('Operatedatacenter_userdataview'  . $order_platform .$time_str. md5(serialize('new_old_change_line')), $data, 7200);
             }
             $arr['xdata'] = $data['time'];
