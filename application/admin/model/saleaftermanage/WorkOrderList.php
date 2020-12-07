@@ -1357,7 +1357,7 @@ class WorkOrderList extends Model
                     //补发扣库存
                     $this->deductionStock($work_id, $measure_id);
                 } catch (Exception $e) {
-                    exception($e->getMessage().'----------');
+                    exception($e->getMessage());
                 }
             }
         }
