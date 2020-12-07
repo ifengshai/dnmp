@@ -1259,7 +1259,6 @@ class WorkOrderList extends Model
      */
     public function createOrder($siteType, $work_id)
     {
-        print_r('eeeeee');exit;
         $changeSkuList = WorkOrderChangeSku::where(['work_id' => $work_id, 'change_type' => 5])->select();
         //如果存在补发单的措施
         if ($changeSkuList) {
@@ -1358,7 +1357,7 @@ class WorkOrderList extends Model
                     //补发扣库存
                     $this->deductionStock($work_id, $measure_id);
                 } catch (Exception $e) {
-                    exception($e->getMessage());
+                    exception($e->getMessage().'----------');
                 }
             }
         }
