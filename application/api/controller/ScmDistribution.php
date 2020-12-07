@@ -1703,9 +1703,14 @@ class ScmDistribution extends Scm
                         $true_sku = $this->_item_platform_sku->getTrueSku($value['sku'], $value['site']);
 
                         //检验库存
-                        $stock_arr = $this->_item->where(['sku'=>$true_sku])->field('stock,occupy_stock,distribution_occupy_stock');
-                        $stock_arr = $stock_arr->toArray();
-                        if (in_array(0,$stock_arr)){
+                        $stock_arr = $this->_item
+                            ->where(['sku'=>$true_sku])
+                            ->field('stock,occupy_stock,distribution_occupy_stock')
+                            ->find()
+                        ;
+                        $stock_arr = $stock_arr ? $stock_arr->toArray() : [];
+                        $stock = $this->_item->where(['sku'=>$true_sku])->value('stock');
+                        if ( in_array(0,$stock_arr) || empty($stock)){
                             throw new Exception($value['sku'].':库存不足');
                         }
 
