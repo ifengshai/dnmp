@@ -2200,13 +2200,13 @@ class Inventory extends Backend
                 Db::commit();
             } catch (ValidateException $e) {
                 Db::rollback();
-                $this->error($e->getMessage());
+                $this->error($e->getMessage().'------');
             } catch (PDOException $e) {
                 Db::rollback();
-                $this->error($e->getMessage());
+                $this->error($e->getMessage().'=========');
             } catch (Exception $e) {
                 Db::rollback();
-                $this->error($e->getMessage());
+                $this->error($e->getMessage().'22222222');
             }
         }
         return true;
