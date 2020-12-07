@@ -2158,6 +2158,9 @@ class Inventory extends Backend
 
             //仓库sku
             $warehouse_original_sku = $_platform_sku->where(['platform_sku'=>$original_sku,'platform_type'=>$order_platform])->value('sku');
+            print_r($warehouse_original_sku);
+            print_r('-------------');
+            exit;
 
             //开启事务
             Db::startTrans();
