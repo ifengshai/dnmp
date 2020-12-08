@@ -163,8 +163,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             }
                         },
                         { field: 'stock_house_num', title: __('库位号'), operate: 'LIKE' },
-                        { field: 'a.created_at', title: __('创建时间'),sortable: true, operate: 'RANGE', addclass: 'datetimerange'  },
-                        // { field: 'a.created_at', title: __('创建时间'),sortable: true, operate: false},
+                        { field: 'a.created_at', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange',visible:false  },
+                        { field: 'created_at', title: __('创建时间'), operate: false},
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate,
                             buttons: [
