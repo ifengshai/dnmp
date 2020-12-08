@@ -1643,7 +1643,7 @@ class WorkOrderList extends Backend
                     $appoint_save[] = [
                         'work_id'=>$work_id,
                         'measure_id'=>$measure_id,
-                        'is_auto_complete'=>$auto_complete,
+                        'is_auto_complete'=>$auto_complete ?: 0,
                         'recept_group_id'=>$recept_group_id,
                         'recept_person_id'=>$recept_person_id,
                         'recept_person'=>$recept_person,
@@ -1654,7 +1654,7 @@ class WorkOrderList extends Backend
                 $appoint_save[] = [
                     'work_id'=>$work_id,
                     'measure_id'=>$measure_id,
-                    'is_auto_complete'=>$auto_complete,
+                    'is_auto_complete'=>$auto_complete ?: 0,
                     'recept_group_id'=>0,
                     'recept_person_id'=>$admin_id,
                     'recept_person'=>$nickname,
@@ -2378,7 +2378,7 @@ class WorkOrderList extends Backend
     }
 
     /**
-     * 获取已经添加工单中的订单信息
+     * 获取已经添加工单中的订单信息-弃用
      *
      * @Description
      * @author lsw
@@ -2620,14 +2620,9 @@ class WorkOrderList extends Backend
             !$work_id && $this->error('工单不存在，请重新选择', '', 'error', 0);
 
             //获取工单sku相关变动数据
-            $result = WorkOrderChangeSku::getOrderChangeSku($work_id, $order_type, $order_number, $change_type);
+            $result = WorkOrderChangeSku::getOrderChangeSku($work_id, $order_type, $order_number, $change_type, $item_order_number);
             if ($result) {
                 $result = collection($result)->toArray();
-                if(!empty($result['pd_l']) && !empty($result['pd_l'])){
-                    $result['pd'] = '';
-                }else{
-                    $result['pd'] = $result['pd_l'] ?: $result['pd_r'];
-                }
 
                 foreach ($result as $key => $val) {
                     $result[$key]['prescription_options'] = unserialize($val['prescription_option']);
