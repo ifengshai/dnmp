@@ -2193,7 +2193,7 @@ class WorkOrderList extends Backend
         $order_number = request()->post('order_number');
         empty($order_number) && $this->error('订单号不能为空');
 
-        $result = $this->model->getOrderItem($order_number);
+        $result = $this->model->getOrderItem($order_number, '', 0, [], 1);
         empty($result) && $this->error('未获取到数据');
         empty($result['sku_list']) && $this->error('未获取到子单数据');
 
