@@ -2475,6 +2475,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         var work_id = $('#work_id').val();
                         //判断是否出现没有承接组的情况
                         var count = 0;
+                        item_input_content += '<div class="item_input-hidden'+item_order_number+'">';
                         $(".item_step_type"+item_order_number+":checked").each(function (i) {
                             $(".item_input-hidden"+item_order_number).html('');
                             checkID[i] = $(this).val();
@@ -2761,6 +2762,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     } else {
                         var use_flag = $(this).attr('flag');
                         $('.measure_item'+use_flag).hide();
+                        $("#item_input-hidden").html("");
                         var checkID = [];//定义一个空数组
                         var item_input_content = '';
                         var is_check = [];
@@ -2776,7 +2778,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         //选中的问题类型
                         item_input_content += '<div class="item_input-hidden'+use_flag+'">';
                         $(".item_step_type"+use_flag+":checked").each(function (i) {
-                            $(".item_input-hidden"+use_flag).html('');
                             checkID[i] = $(this).val();
                             var id = $(this).val();
                             //获取承接组
@@ -3137,8 +3138,9 @@ function changeOrderAddress(){
 function itemSelectpicker (type = 1,flag = null,item_order_info = '') {
         if($('#step3').prop('checked')) return false;
         $('#z-order_sku').html('');
-        $('#section_item_content').show('');
+        $('#section_item_content').show();
         $('#section_item_content').html('');
+        $("#item_input-hidden").html("");
         var problem_id = '';
         if (type == 1) {
             problem_id = flag.val();
@@ -3168,7 +3170,6 @@ function itemSelectpicker (type = 1,flag = null,item_order_info = '') {
             $('#div_item_content').show();
             var ihtml = '';
             for (var i in item_order_sku) {
-                var item_measure = "";
                 ihtml += '<div class="box" style="margin-top: 50px;">';
                 ihtml += '<div class="box-header with-border">';
                 ihtml += '<h3 class="box-title">子订单措施：'+item_order_sku[i]+'</h3>';
