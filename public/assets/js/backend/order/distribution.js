@@ -61,7 +61,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
             table.bootstrapTable({
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
                 pk: 'id',
-                sortName: 'a.id',
+                sortName: 'a.created_at',
                 sortOrder: 'desc',
                 columns: [
                     [
