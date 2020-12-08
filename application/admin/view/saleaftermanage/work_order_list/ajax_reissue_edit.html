@@ -286,10 +286,10 @@
                         {/if}
                     </td>
                     <td>
-                        {if condition="!empty($info[$keys]['pd'])"}
-                        <input {$operate_type ? 'disabled': '' } class="form-control" name="row[item_order_info][{$item_order_number}][change_lens][pd_r]" type="text" value="{$info[$keys]['pd']}">
-                        {else /}
+                        {if condition="!empty($info[$keys]['pd_l']) && !empty($info[$keys]['pd_r'])"}
                         <input {$operate_type ? 'disabled': '' } class="form-control" name="row[item_order_info][{$item_order_number}][change_lens][pd_r]" type="text" value="{$info[$keys]['pd_r']}">
+                        {else /}
+                        <input {$operate_type ? 'disabled': '' } class="form-control" name="row[item_order_info][{$item_order_number}][change_lens][pd_r]" type="text" value="{$info[$keys]['pd']}">
                         {/if}
                     </td>
                 </tr>
@@ -310,10 +310,10 @@
 
                     </td>
                     <td>
-                        {if condition="!empty($info[$keys]['pd'])"}
-                        <input {$operate_type ? 'disabled': '' } class="form-control" name="row[item_order_info][{$item_order_number}][change_lens][pd_l]" type="text" value="{$info[$keys]['pd']}">
-                        {else /}
+                        {if condition="!empty($info[$keys]['pd_l']) && !empty($info[$keys]['pd_r'])"}
                         <input {$operate_type ? 'disabled': '' } class="form-control" name="row[item_order_info][{$item_order_number}][change_lens][pd_l]" type="text" value="{$info[$keys]['pd_l']}">
+                        {else /}
+                        <input {$operate_type ? 'disabled': '' } class="form-control" name="row[item_order_info][{$item_order_number}][change_lens][pd_l]" type="text" value="">
                         {/if}
                     </td>
                 </tr>
