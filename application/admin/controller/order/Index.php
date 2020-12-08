@@ -126,7 +126,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                 ->order($sort, $order)
                 ->count();
 
-            $list = $model->alias('a')->field('a.entity_id,increment_id,b.country_id,customer_firstname,customer_email,status,base_grand_total,base_shipping_amount,custom_order_prescription_type,order_type,a.created_at,a.shipping_description')
+            $list = $model->alias('a')->field('a.entity_id,increment_id,b.country_id,customer_firstname,customer_email,status,base_grand_total,base_shipping_amount,custom_order_prescription_type,order_type,a.created_at,a.shipping_description,a.shipping_method')
                 ->join(['sales_flat_order_address' => 'b'], 'a.entity_id=b.parent_id')
                 ->where($where)
                 ->where($map)
@@ -152,7 +152,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                 'Business express(7-12 business days)'
             ];
             foreach ($list as &$v) {
-                if (in_array($v['shipping_description'], $arr)) {
+                if ($v['shipping_method'] == 'tablerate_bestway') {
                     $v['label'] = 1;
                 } else {
                     $v['label'] = 0;
