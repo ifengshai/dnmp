@@ -224,16 +224,17 @@ class Scm extends Api
                 //校验菜单展示权限
                 if (!$this->auth->check($val['link'])) {
                     unset($value['menu'][$k]);
-                }
-                unset($value['menu'][$k]['link']);
+                }else{
+                    unset($value['menu'][$k]['link']);
 
-                //图片链接
-                $value['menu'][$k]['icon'] = $val['icon'] ? $this->request->domain().$val['icon'] : '';
+                    //图片链接
+                    $value['menu'][$k]['icon'] = $val['icon'] ? $this->request->domain().$val['icon'] : '';
 
-                //镜片未分拣数量
-                if ('镜片分拣' == $val['name']) {
-                    $this->_distribution = new ScmDistribution();
-                    $value['menu'][$k]['count'] = $this->_distribution->no_sorting();
+                    //镜片未分拣数量
+                    if ('镜片分拣' == $val['name']) {
+                        $this->_distribution = new ScmDistribution();
+                        $value['menu'][$k]['count'] = $this->_distribution->no_sorting();
+                    }
                 }
             }
             if (!empty($value['menu'])) {
