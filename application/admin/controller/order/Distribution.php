@@ -1632,4 +1632,17 @@ class Distribution extends Backend
         $this->success('跳转!', '', ['url' => $url], 200);
     }
 
+    /**
+     * 配货旧数据处理
+     *
+     * @Description
+     * @author lzh
+     * @since 2020/12/8 10:54:39
+     * @return mixed
+     */
+    function legacy_data(){
+
+
+    }
+
 }

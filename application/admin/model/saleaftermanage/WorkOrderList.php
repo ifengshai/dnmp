@@ -183,10 +183,11 @@ class WorkOrderList extends Model
      * @param mixed $item_order_number  子订单号
      * @param int $work_type  工单类型：1客服 2仓库
      * @param array $work  工单数据
+     * @param int $do_type  操作类型：0其他 1载入数据
      * @author lzh
      * @return array
      */
-    public function getOrderItem($increment_id,$item_order_number='',$work_type=0,$work=[])
+    public function getOrderItem($increment_id, $item_order_number='', $work_type=0, $work=[], $do_type=0)
     {
         $order_field = 'id,site,base_grand_total,base_to_order_rate,payment_method,customer_email,customer_firstname,customer_lastname,order_type,mw_rewardpoint_discount,base_currency_code,created_at as payment_time';
 
@@ -201,12 +202,15 @@ class WorkOrderList extends Model
         }
 
         $select_number = [];
-        $order_item_where = ['order_id'=>$result['id']];
+        $order_item_where[] = ['order_id'=>$result['id']];
         if(!empty($item_order_number) && 2 == $work_type){
             if(empty($work)){
                 $select_number = explode(',',$item_order_number);
             }
-            $order_item_where = ['item_order_number'=>['in',$item_order_number]];
+            $order_item_where[] = ['item_order_number'=>['in',$item_order_number]];
+        }
+        if(1 == $do_type){
+            $order_item_where[] = ['distribution_status'=>['>',0]];
         }
         $_new_order_item_process = new NewOrderItemProcess();
         $order_item_list = $_new_order_item_process
@@ -1137,30 +1141,32 @@ class WorkOrderList extends Model
     {
         $work = $this->find($work_id);
         if ($work && in_array($measure_choose_id,[3,18])) {
-            $_new_order_item_process = new NewOrderItemProcess();
             $orderChangeList = [];
             if (3 == $measure_choose_id) {//主单取消
+                $_new_order_item_process = new NewOrderItemProcess();
                 $item_order_list = $_new_order_item_process
                     ->alias('a')
                     ->field('a.item_order_number,a.sku')
                     ->join(['fa_order' => 'b'], 'a.order_id=b.id')
-                    ->where(['b.increment_id'=>$params['platform_order']])
+                    ->where(['a.distribution_status'=>['>',0],'b.increment_id'=>$params['platform_order']])
                     ->select()
                 ;
-                foreach ($item_order_list as $v) {
-                    $orderChangeList[] = [
-                        'work_id'=>$work_id,
-                        'increment_id'=>$params['platform_order'],
-                        'platform_type'=>$params['work_platform'],
-                        'item_order_number'=>$v['item_order_number'],
-                        'original_sku'=>$v['sku'],
-                        'original_number'=>1,
-                        'change_type'=>3,
-                        'measure_id'=>$measure_id,
-                        'create_person'=>session('admin.nickname'),
-                        'create_time'=>date('Y-m-d H:i:s'),
-                        'update_time'=>date('Y-m-d H:i:s')
-                    ];
+                if($item_order_list){
+                    foreach ($item_order_list as $v) {
+                        $orderChangeList[] = [
+                            'work_id'=>$work_id,
+                            'increment_id'=>$params['platform_order'],
+                            'platform_type'=>$params['work_platform'],
+                            'item_order_number'=>$v['item_order_number'],
+                            'original_sku'=>$v['sku'],
+                            'original_number'=>1,
+                            'change_type'=>3,
+                            'measure_id'=>$measure_id,
+                            'create_person'=>session('admin.nickname'),
+                            'create_time'=>date('Y-m-d H:i:s'),
+                            'update_time'=>date('Y-m-d H:i:s')
+                        ];
+                    }
                 }
             }else{//子单取消
                 $orderChangeList[] = [
