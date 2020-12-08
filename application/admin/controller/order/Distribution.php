@@ -282,6 +282,20 @@ class Distribution extends Backend
                 ->where(['item_process_id'=>['in',array_column($list,'id')],'status'=>1])
                 ->column('work_id','item_process_id');
 
+            //获取工单更改镜框最新信息
+            $change_sku = $this->_work_order_change_sku
+                ->alias('a')
+                ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
+                ->where([
+                    'a.change_type'=>1,
+                    'a.item_order_number'=>['in',array_column($list,'item_order_number')],
+                    'b.operation_type'=>1
+                ])
+                ->order('a.id','desc')
+                ->group('a.item_order_number')
+                ->column('a.change_sku','a.item_order_number')
+            ;
+
             foreach ($list as $key => $value) {
                 $stock_house_num = '';
                 if (!empty($value['temporary_house_id'])) {
@@ -306,6 +320,10 @@ class Distribution extends Backend
 
                 //判断是否显示工单按钮
                 $list[$key]['task_info'] = in_array($value['item_order_number'],$item_order_numbers) ? 1 : 0;
+
+                if($change_sku[$value['item_order_number']]){
+                    $list[$key]['sku'] = $change_sku[$value['item_order_number']];
+                }
             }
 
             $result = array("total" => $total, "rows" => $list);
@@ -334,11 +352,57 @@ class Distribution extends Backend
     {
         $row = $this->model->get($ids);
         !$row && $this->error(__('No Results were found'));
-        //查询处方详情
-        $result = $this->_new_order_item_option->get($row->option_id);
 
-        //根据镜片编码查询仓库镜片名称
-        $result->lens_name = $this->_lens_data->where('lens_number', $result['lens_number'])->value('lens_name');
+        //查询处方详情
+        $result = $this->_new_order_item_option->get($row->option_id)->toArray();
+
+        //获取更改镜框最新信息
+        $change_sku = $this->_work_order_change_sku
+            ->alias('a')
+            ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
+            ->where([
+                'a.change_type'=>1,
+                'a.item_order_number'=>$row->item_order_number,
+                'b.operation_type'=>1
+            ])
+            ->order('a.id','desc')
+            ->value('a.change_sku')
+        ;
+        if($change_sku){
+            $result['sku'] = $change_sku;
+        }
+
+        //获取更改镜片最新处方信息
+        $change_lens = $this->_work_order_change_sku
+            ->alias('a')
+            ->field('a.od_sph,a.od_cyl,a.od_axis,a.od_add,a.pd_r,a.od_pv,a.od_bd,a.od_pv_r,a.od_bd_r,a.os_sph,a.os_cyl,a.os_axis,a.os_add,a.pd_l,a.os_pv,a.os_bd,a.os_pv_r,a.os_bd_r,a.lens_number,a.recipe_type as prescription_type')
+            ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
+            ->where([
+                'a.change_type'=>2,
+                'a.item_order_number'=>$row->item_order_number,
+                'b.operation_type'=>1
+            ])
+            ->order('a.id','desc')
+            ->find()
+        ;
+        if($change_lens){
+            $change_lens = $change_lens->toArray();
+            if($change_lens['pd_l'] && $change_lens['pd_r']){
+                $change_lens['pd'] = '';
+            }else{
+                $change_lens['pd'] = $change_lens['pd_r'] ?: $change_lens['pd_l'];
+            }
+            $result = array_merge($result,$change_lens);
+        }
+
+        //获取镜片名称
+        $lens_name = '';
+        if($result['lens_number']){
+            //获取镜片编码及名称
+            $lens_name = $this->_lens_data->where('lens_number',$result['lens_number'])->value('lens_name');
+        }
+        $result['lens_name'] = $lens_name;
+
         $this->assign('result', $result);
         return $this->view->fetch();
     }
@@ -1099,6 +1163,12 @@ class Distribution extends Backend
                     //获取true_sku
                     $true_sku = $this->_item_platform_sku->getTrueSku($value['sku'], $value['site']);
 
+                    /*//检验库存
+                    $stock = $this->_item_platform_sku->where($value['sku'], $value['site'])->value('stock');
+                    if (1 > $stock) {
+                        throw new Exception($value['sku'].':库存不足');
+                    }*/
+
                     //增加配货占用库存
                     $this->_item
                         ->where(['sku' => $true_sku])
@@ -1323,6 +1393,32 @@ class Distribution extends Backend
             5 => '待印logo',
             6 => '待成品质检'
         ];
+
+        switch ($item_info['distribution_status']) {
+            case $item_info['distribution_status']<4:
+                unset($status_arr);
+                $status_arr = [];
+                break;
+            case 4:
+                unset($status_arr[4]);
+                unset($status_arr[5]);
+                unset($status_arr[6]);
+                break;
+            case 5:
+                unset($status_arr[5]);
+                unset($status_arr[6]);
+                break;
+            case 6:
+                unset($status_arr[6]);
+                break;
+            case 7:
+                unset($status_arr[1]);
+                unset($status_arr[2]);
+                unset($status_arr[3]);
+                unset($status_arr[4]);
+                unset($status_arr[5]);
+                break;
+        }
 
         //异常原因列表
         $abnormal_arr = [
