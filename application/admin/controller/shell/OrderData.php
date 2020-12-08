@@ -1546,10 +1546,9 @@ class OrderData extends Backend
 
         $order_params = [];
         foreach ($list as $k => $v) {
-            $count = $this->order->where('site=' . $site . ' and entity_id=' . $v['entity_id'])->count();
-            if ($count > 0) {
-                $this->order->where('site=' . $site . ' and entity_id=' . $v['entity_id'])->delete();
-            }
+            $order_id = $this->order->where('site=' . $site . ' and increment_id=' . $v['increment_id'])->value('id');
+            $this->order->where('site=' . $site . ' and increment_id=' . $v['increment_id'])->delete();
+            $this->orderprocess->where('site=' . $site . ' and increment_id=' . $v['increment_id'])->delete();
             $params = [];
             $params['entity_id'] = $v['entity_id'];
             $params['site'] = $site;
@@ -1584,8 +1583,8 @@ class OrderData extends Backend
             $order_params[$k]['increment_id'] = $v['increment_id'];
 
             //删除子订单表
-            $this->orderitemoption->where('site=' . $site . ' and magento_order_id=' . $v['entity_id'])->delete();
-            $this->orderitemprocess->where('site=' . $site . ' and magento_order_id=' . $v['entity_id'])->delete();
+            $this->orderitemoption->where('site=' . $site . ' and order_id=' . $order_id)->delete();
+            $this->orderitemprocess->where('site=' . $site . ' and order_id=' . $order_id)->delete();
 
             //处方解析 不同站不同字段
             if ($site == 1) {
