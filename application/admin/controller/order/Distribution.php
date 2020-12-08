@@ -298,12 +298,12 @@ class Distribution extends Backend
 
             foreach ($list as $key => $value) {
                 $stock_house_num = '';
-                if (!empty($value['store_house_id'])) {
-                    $stock_house_num = $stock_house_data[$value['store_house_id']];//合单库位号
+                if (!empty($value['temporary_house_id'])) {
+                    $stock_house_num = $stock_house_data[$value['temporary_house_id']];//定制片库位号
                 } elseif (!empty($value['abnormal_house_id'])) {
                     $stock_house_num = $stock_house_data[$value['abnormal_house_id']];//异常库位号
-                } elseif (!empty($value['temporary_house_id'])) {
-                    $stock_house_num = $stock_house_data[$value['temporary_house_id']];//定制片库位号
+                } elseif (!empty($value['store_house_id'])) {
+                    $stock_house_num = $stock_house_data[$value['store_house_id']];//合单库位号
                 }
 
                 $list[$key]['stock_house_num'] = $stock_house_num ?? '-';
