@@ -2195,6 +2195,7 @@ class WorkOrderList extends Backend
 
         $result = $this->model->getOrderItem($order_number);
         empty($result) && $this->error('未获取到数据');
+        empty($result['sku_list']) && $this->error('未获取到子单数据');
 
         $this->success('', '', $result, 0);
     }
@@ -2622,6 +2623,11 @@ class WorkOrderList extends Backend
             $result = WorkOrderChangeSku::getOrderChangeSku($work_id, $order_type, $order_number, $change_type);
             if ($result) {
                 $result = collection($result)->toArray();
+                if(!empty($result['pd_l']) && !empty($result['pd_l'])){
+                    $result['pd'] = '';
+                }else{
+                    $result['pd'] = $result['pd_l'] ?: $result['pd_r'];
+                }
 
                 foreach ($result as $key => $val) {
                     $result[$key]['prescription_options'] = unserialize($val['prescription_option']);

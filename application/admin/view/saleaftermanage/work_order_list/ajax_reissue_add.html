@@ -241,10 +241,10 @@
                         {/if}
                     </td>
                     <td>
-                        {if condition="!empty($vo['pd'])"}
-                        <input class="form-control" name="row[item_order_info][{$item_order_number}][change_lens][pd_r]" type="text" value="{$vo['pd']}">
-                        {else /}
+                        {if condition="!empty($vo['pd_l']) && !empty($vo['pd_r'])"}
                         <input class="form-control" name="row[item_order_info][{$item_order_number}][change_lens][pd_r]" type="text" value="{$vo['pd_r']}">
+                        {else /}
+                        <input class="form-control" name="row[item_order_info][{$item_order_number}][change_lens][pd_r]" type="text" value="{$vo['pd']}">
                         {/if}
                     </td>
                 </tr>
@@ -265,10 +265,10 @@
 
                     </td>
                     <td>
-                        {if condition="!empty($vo['pd'])"}
-                        <input class="form-control" name="row[item_order_info][{$item_order_number}][change_lens][pd_l]" type="text" value="{$vo['pd']}">
-                        {else /}
+                        {if condition="!empty($vo['pd_l']) && !empty($vo['pd_r'])"}
                         <input class="form-control" name="row[item_order_info][{$item_order_number}][change_lens][pd_l]" type="text" value="{$vo['pd_l']}">
+                        {else /}
+                        <input class="form-control" name="row[item_order_info][{$item_order_number}][change_lens][pd_l]" type="text" value="">
                         {/if}
                     </td>
                 </tr>
