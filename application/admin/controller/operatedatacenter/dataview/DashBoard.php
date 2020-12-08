@@ -59,7 +59,7 @@ class DashBoard extends Backend
     {
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getNewAuthSite();
-        dump(collection($magentoplatformarr)->toArray());
+        // dump(collection($magentoplatformarr)->toArray());
         foreach ($magentoplatformarr as $key => $val) {
             if (!in_array($val, ['zeelool', 'voogueme', 'nihao', '全部'])) {
                 unset($magentoplatformarr[$key]);
@@ -69,9 +69,10 @@ class DashBoard extends Backend
                 $magentoplatformarr[4] = '全部';
             }
         }
-        dump(collection($magentoplatformarr)->toArray());
+        // dump(collection($magentoplatformarr)->toArray());
         //默认进入页面是z站的数据
-        $arr = Cache::get('Operatedatacenter_dataviews' . 1 . md5(serialize('index')));
+        // $arr = Cache::get('Operatedatacenter_dataviews' . 1 . md5(serialize('index')));
+        $arr = [];
         if ($arr) {
             $this->view->assign($arr);
         } else {
