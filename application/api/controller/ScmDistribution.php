@@ -181,7 +181,7 @@ class ScmDistribution extends Scm
             //子订单绑定异常库位号
             $this->_new_order_item_process
                 ->allowField(true)
-                ->isUpdate(true, ['item_order_number'=>$item_order_number])
+                ->isUpdate(true, ['item_order_number'=>$item_order_number, 'temporary_house_id'=>0, 'customize_status'=>0])
                 ->save(['abnormal_house_id'=>$stock_house_info['id']])
             ;
 
@@ -495,7 +495,7 @@ class ScmDistribution extends Scm
 
         //获取子订单数据
         $item_process_info = $this->_new_order_item_process
-            ->field('id,distribution_status,order_prescription_type,option_id,order_id,site')
+            ->field('id,distribution_status,order_prescription_type,option_id,order_id,site,customize_status')
             ->where('item_order_number', $item_order_number)
             ->find()
         ;
@@ -520,6 +520,10 @@ class ScmDistribution extends Scm
         if(empty($item_process_info)){
             DistributionLog::record($this->auth,$item_process_info['id'],0,$status_arr[$check_status].'：子订单不存在');
             $this->error(__('子订单不存在'), [], 403);
+        }
+        //扫码配镜片，定制片 先取出 暂存库位才可操作
+        if(3 == $check_status && 3 == $item_process_info['order_prescription_type'] && 2 != $item_process_info['customize_status']){
+            $this->error(__('请先将定制片从暂存库位取出'), [], 405);
         }
 
         //操作失败记录
@@ -898,7 +902,7 @@ class ScmDistribution extends Scm
         $result = $this->_new_order_item_process
             ->allowField(true)
             ->isUpdate(true, ['item_order_number'=>$item_order_number])
-            ->save(['temporary_house_id'=>0])
+            ->save(['temporary_house_id'=>0,'customize_status'=>2])
         ;
 
         $res = false;
@@ -911,9 +915,10 @@ class ScmDistribution extends Scm
             DistributionLog::record($this->auth,$item_process_info['id'],0,"子单号{$item_order_number}，释放定制片库位号：{$coding}");
         }
 
-        if ($res){
-            $this->success("子单号{$item_order_number}的商品从定制片暂存架{$coding}库位取出成功", [],200);
+        if (false === $res) {
+            $this->error(__("取出失败"), [], 403);
         }
+        $this->success("子单号{$item_order_number}的商品从定制片暂存架{$coding}库位取出成功", [],200);
     }
 
     /**
@@ -1069,6 +1074,7 @@ class ScmDistribution extends Scm
         $item_order_number = $this->request->request('item_order_number');
         empty($item_order_number) && $this->error(__('子订单号不能为空'), [], 403);
 
+        $abnormal_list = $this->info($item_order_number,7);
         //获取子订单数据
         $item_process_info = $this->_new_order_item_process
             ->where('item_order_number', $item_order_number)
@@ -1109,7 +1115,6 @@ class ScmDistribution extends Scm
             //主单已绑定合单库位,根据ID查询库位信息
             $store_house_info = $this->_stock_house->field('id,coding,subarea')->where('id',$order_process_info['store_house_id'])->find();
         }
-        $abnormal_list = $this->info($item_order_number,7);
         $info = [
             'item_order_number' => $item_order_number,
             'sku' => $item_process_info['sku'],
