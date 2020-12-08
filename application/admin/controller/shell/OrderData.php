@@ -1519,7 +1519,7 @@ class OrderData extends Backend
      */
     public function process_order_data_temp()
     {
-        $this->zeelool_old_order(1);
+        // $this->zeelool_old_order(1);
         $this->zeelool_old_order(2);
         $this->zeelool_old_order(3);
         // $this->zeelool_old_order(9);
@@ -1547,8 +1547,14 @@ class OrderData extends Backend
         $order_params = [];
         foreach ($list as $k => $v) {
             $order_ids = $this->order->where('site=' . $site . ' and increment_id=' . $v['increment_id'])->value('id');
-            $this->order->where('site=' . $site . ' and increment_id=' . $v['increment_id'])->delete();
-            $this->orderprocess->where('site=' . $site . ' and increment_id=' . $v['increment_id'])->delete();
+            if ($order_ids) {
+                $this->order->where('site=' . $site . ' and increment_id=' . $v['increment_id'])->delete();
+                $this->orderprocess->where('site=' . $site . ' and increment_id=' . $v['increment_id'])->delete();
+                //删除子订单表
+                $this->orderitemoption->where('site=' . $site . ' and order_id=' . $order_ids)->delete();
+                $this->orderitemprocess->where('site=' . $site . ' and order_id=' . $order_ids)->delete();
+            }
+
             $params = [];
             $params['entity_id'] = $v['entity_id'];
             $params['site'] = $site;
@@ -1582,9 +1588,7 @@ class OrderData extends Backend
             $order_params[$k]['entity_id'] = $v['entity_id'];
             $order_params[$k]['increment_id'] = $v['increment_id'];
 
-            //删除子订单表
-            $this->orderitemoption->where('site=' . $site . ' and order_id=' . $order_ids)->delete();
-            $this->orderitemprocess->where('site=' . $site . ' and order_id=' . $order_ids)->delete();
+
 
             //处方解析 不同站不同字段
             if ($site == 1) {
@@ -1647,7 +1651,6 @@ class OrderData extends Backend
                         $this->orderitemprocess->insertAll($data);
                     }
                 }
-
             } elseif ($site == 3) {
 
                 $res =  Db::connect('database.db_nihao')->table('sales_flat_order_item')->where(['order_id' => $v['entity_id']])->select();
@@ -1679,7 +1682,6 @@ class OrderData extends Backend
                         $this->orderitemprocess->insertAll($data);
                     }
                 }
-
             } elseif ($site == 9) {
 
                 $res =  Db::connect('database.db_zeelool_es')->table('sales_flat_order_item')->where(['order_id' => $v['entity_id']])->select();
@@ -1712,7 +1714,7 @@ class OrderData extends Backend
                     }
                 }
             } elseif ($site == 10) {
-               
+
                 $res =  Db::connect('database.db_zeelool_de')->table('sales_flat_order_item')->where(['order_id' => $v['entity_id']])->select();
                 foreach ($res as $key => $val) {
                     $options = [];
