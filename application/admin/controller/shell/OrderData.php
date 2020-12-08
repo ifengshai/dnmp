@@ -1522,9 +1522,9 @@ class OrderData extends Backend
         $this->zeelool_old_order(1);
         $this->zeelool_old_order(2);
         $this->zeelool_old_order(3);
-        $this->zeelool_old_order(9);
-        $this->zeelool_old_order(10);
-        $this->zeelool_old_order(11);
+        // $this->zeelool_old_order(9);
+        // $this->zeelool_old_order(10);
+        // $this->zeelool_old_order(11);
         // $this->zeelool_old_order(5);
     }
     protected function zeelool_old_order($site)
@@ -1546,7 +1546,7 @@ class OrderData extends Backend
 
         $order_params = [];
         foreach ($list as $k => $v) {
-            $order_id = $this->order->where('site=' . $site . ' and increment_id=' . $v['increment_id'])->value('id');
+            $order_ids = $this->order->where('site=' . $site . ' and increment_id=' . $v['increment_id'])->value('id');
             $this->order->where('site=' . $site . ' and increment_id=' . $v['increment_id'])->delete();
             $this->orderprocess->where('site=' . $site . ' and increment_id=' . $v['increment_id'])->delete();
             $params = [];
@@ -1583,8 +1583,8 @@ class OrderData extends Backend
             $order_params[$k]['increment_id'] = $v['increment_id'];
 
             //删除子订单表
-            $this->orderitemoption->where('site=' . $site . ' and order_id=' . $order_id)->delete();
-            $this->orderitemprocess->where('site=' . $site . ' and order_id=' . $order_id)->delete();
+            $this->orderitemoption->where('site=' . $site . ' and order_id=' . $order_ids)->delete();
+            $this->orderitemprocess->where('site=' . $site . ' and order_id=' . $order_ids)->delete();
 
             //处方解析 不同站不同字段
             if ($site == 1) {
