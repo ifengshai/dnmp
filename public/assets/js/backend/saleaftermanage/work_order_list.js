@@ -2509,8 +2509,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
 
                             //是否为子单取消
                             if (id == 18) {
-                                cancelorder_html = '<input type="hidden" name="row[item_order_info]['+ item_order_number +'][cancel_order][sku]" value="' + sku + '"/>';
-                                $("#cancelorder_input-hidden").html(cancelorder_html);
+                                cancelorder_html += '<input type="hidden" name="row[item_order_info]['+ item_order_number +'][cancel_order][sku]" value="' + sku + '"/>';
                             }
                         });
                         //判断如果存在1 则改为需要审核
@@ -2522,6 +2521,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         item_input_content += '</div>';
                         //追加到元素之后
                         $("#item_input-hidden").append(item_input_content);
+                        $("#cancelorder_input-hidden").append(cancelorder_html);
                         
 
                         var arr = array_filter(item_appoint_group.split(','));
@@ -2811,8 +2811,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
 
                             //是否为子单取消
                             if (id == 18) {
-                                cancelorder_html = '<input type="hidden" name="row[item_order_info]['+ use_flag +'][cancel_order][sku]" value="' + sku + '"/>';
-                                $("#cancelorder_input-hidden").html(cancelorder_html);
+                                cancelorder_html += '<input type="hidden" name="row[item_order_info]['+ use_flag +'][cancel_order][sku]" value="' + sku + '"/>';
                             }
                         });
 
@@ -2825,6 +2824,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         item_input_content += '</div>';
                         //追加到元素之后
                         $("#item_input-hidden").append(item_input_content);
+                        $("#cancelorder_input-hidden").append(cancelorder_html);
                         //一般措施
                         for (var m = 0; m < checkID.length; m++) {
                             /*var node = $('.item' + use_flag + '_step' + checkID[m]);
@@ -3146,6 +3146,7 @@ function itemSelectpicker (type = 1,flag = null,item_order_info = '') {
         $('#section_item_content').show();
         $('#section_item_content').html('');
         $("#item_input-hidden").html("");
+        $("#cancelorder_input-hidden").html("");
         var problem_id = '';
         if (type == 1) {
             problem_id = flag.val();
