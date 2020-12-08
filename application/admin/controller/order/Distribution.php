@@ -1648,6 +1648,26 @@ class Distribution extends Backend
      */
     function legacy_data(){
 
+        $site_arr = [
+            'zeelool' => new \app\admin\model\order\printlabel\Zeelool,
+
+        ];
+
+        foreach($site_arr as $item){
+            //已完成配货
+            $field = 'order_type,custom_order_prescription_type,entity_id,status,base_shipping_amount,increment_id,base_grand_total,
+                     total_qty_ordered,custom_is_match_frame_new,custom_is_match_lens_new,
+                     custom_is_send_factory_new,custom_is_delivery_new,custom_print_label_new,custom_order_prescription,created_at';
+            $list = $this->model
+                ->field($field)
+                ->where($map)
+                ->where($where)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();
+
+            //fa_order_process表：check_status、check_time、combine_status、combine_time
+        }
 
     }
 
