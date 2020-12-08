@@ -1627,14 +1627,8 @@ class ScmDistribution extends Scm
         //检测订单审单状态
         $row = $this->_new_order_process->where(['order_id'=>$order_id])->find();
         $item_ids = $this->_new_order_item_process->where(['order_id'=>$order_id])->column('id');
-//        0 != $row['check_status'] && $this->success(__($msg.'成功'), [], 200);
-        if (0 != $row['check_status']){
-            if (1 == $row['check_status']){
-                $message = '审单已通过，请勿重复操作！';
-            } else {
-                $message = '审单已拒绝，请勿重复操作！';
-            }
-            $this->success(__($message), [], 200);
+        if (1 == $row['check_status']){
+            $this->success('审单已通过，请勿重复操作！', [], 200);
         }
 
         $result = false;
@@ -1651,17 +1645,11 @@ class ScmDistribution extends Scm
                     //审单拒绝，回退合单状态
                     $this->_new_order_process->allowField(true)->isUpdate(true, ['order_id' => $order_id])->save(['combine_status'=>0,'combine_time'=>null]);
                     if (1 == $check_refuse){
-                        //SKU缺失，绑定合单库位，回退子单号为合单中状态，不影响库存
-                        $store_house_id = $this->_stock_house->field('id,coding,subarea')->where(['status'=>1,'type'=>2,'occupy'=>0])->value('id');
-                        if (empty($store_house_id)){
-                            throw new Exception('合单库位已用完，请检查合单库位情况');
-                        }
-                        $this->_new_order_process->allowField(true)->isUpdate(true, ['order_id' => $order_id])->save(['store_house_id'=>$store_house_id]);
+                        //SKU缺失，回退子单号为待合单中状态，不影响库存
                         $this->_new_order_item_process
                             ->allowField(true)
                             ->isUpdate(true, ['order_id' => $order_id,'distribution_status'=>['neq', 0]])
-                            ->save(['distribution_status'=>8]);
-                        $this->_stock_house->allowField(true)->isUpdate(true, ['id'=>$store_house_id])->save(['occupy'=>1]);
+                            ->save(['distribution_status'=>7]);
                     } else {
                         //配错镜框，回退子单为待配货
                         $this->_new_order_item_process

@@ -298,12 +298,12 @@ class Distribution extends Backend
 
             foreach ($list as $key => $value) {
                 $stock_house_num = '';
-                if (!empty($value['store_house_id'])) {
-                    $stock_house_num = $stock_house_data[$value['store_house_id']];//合单库位号
+                if (!empty($value['temporary_house_id'])) {
+                    $stock_house_num = $stock_house_data[$value['temporary_house_id']];//定制片库位号
                 } elseif (!empty($value['abnormal_house_id'])) {
                     $stock_house_num = $stock_house_data[$value['abnormal_house_id']];//异常库位号
-                } elseif (!empty($value['temporary_house_id'])) {
-                    $stock_house_num = $stock_house_data[$value['temporary_house_id']];//定制片库位号
+                } elseif (!empty($value['store_house_id'])) {
+                    $stock_house_num = $stock_house_data[$value['store_house_id']];//合单库位号
                 }
 
                 $list[$key]['stock_house_num'] = $stock_house_num ?? '-';
@@ -1648,17 +1648,30 @@ class Distribution extends Backend
      */
     function legacy_data(){
 
+        //站点列表
         $site_arr = [
-            'zeelool' => new \app\admin\model\order\printlabel\Zeelool,
+            1=>[
+                'name'=>'zeelool',
+                'obj' => new \app\admin\model\order\printlabel\Zeelool,
+            ]
 
         ];
 
-        foreach($site_arr as $item){
-            //已完成配货
+        $this->model = new NewOrderItemProcess();
+        $this->_lens_data = new LensData();
+        $this->_stock_house = new StockHouse();
+        $this->_distribution_abnormal = new DistributionAbnormal();
+        $this->_new_order_item_option = new NewOrderItemOption();
+        $this->_new_order = new NewOrder();
+        $this->_new_order_process = new NewOrderProcess();
+
+        foreach($site_arr as $key=>$item){
+            echo $item['name']." Start\n";
+            //获取已质检旧数据
             $field = 'order_type,custom_order_prescription_type,entity_id,status,base_shipping_amount,increment_id,base_grand_total,
                      total_qty_ordered,custom_is_match_frame_new,custom_is_match_lens_new,
                      custom_is_send_factory_new,custom_is_delivery_new,custom_print_label_new,custom_order_prescription,created_at';
-            $list = $this->model
+            $list = $item['obj']
                 ->field($field)
                 ->where($map)
                 ->where($where)
@@ -1666,7 +1679,26 @@ class Distribution extends Backend
                 ->limit($offset, $limit)
                 ->select();
 
-            //fa_order_process表：check_status、check_time、combine_status、combine_time
+            $count = count($list);
+            $handle = 0;
+            if($list){
+                foreach ($list as $value){
+                    //fa_order_process表：check_status、check_time、combine_status、combine_time
+                    $do_time = strtotime($value['custom_match_delivery_created_at_new']) + 28800;
+                    $this->_new_order_process
+                        ->allowField(true)
+                        ->save(
+                            ['check_status' => 1, 'check_time' => $do_time,'combine_status' => 1, 'combine_time' => $do_time],
+                            ['increment_id' => $value['increment_id'], 'site' => $key]
+                        );
+                }
+            }
+
+
+
+            //fa_order_item_process表：distribution_status、check_time
+
+            echo $item['name']."：已质检-{$count}，已处理-{$handle} End\n";
         }
 
     }
