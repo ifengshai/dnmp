@@ -202,15 +202,15 @@ class WorkOrderList extends Model
         }
 
         $select_number = [];
-        $order_item_where = ['order_id'=>$result['id']];
+        $order_item_where['order_id'] = $result['id'];
         if(!empty($item_order_number) && 2 == $work_type){
             if(empty($work)){
                 $select_number = explode(',',$item_order_number);
             }
-            $order_item_where = ['item_order_number'=>['in',$item_order_number]];
+            $order_item_where['item_order_number'] = ['in',$item_order_number];
         }
         if(1 == $do_type){
-            $order_item_where = ['distribution_status'=>['>',0]];
+            $order_item_where['distribution_status'] = ['>',0];
         }
         $_new_order_item_process = new NewOrderItemProcess();
         $order_item_list = $_new_order_item_process
