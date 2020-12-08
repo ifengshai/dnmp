@@ -299,55 +299,5 @@ class Test01 extends Backend
         }
     }
 
-    public function test103()
-    {
-        $date_time = date('Y-m-d', strtotime("-1 day"));
 
-        //v站
-        $data = Db::name('datacenter_day')->where(['day_date' => $date_time, 'site' => 2])->field('order_num,new_cart_num,update_cart_num')->find();
-        //活跃用户数
-        $arr['active_user_num'] = $this->google_active_user(2, $date_time);
-        //会话
-        $arr['sessions'] = $this->google_session(2, $date_time);
-        //会话转化率
-        $arr['session_rate'] = $arr['sessions'] != 0 ? round($data['order_num'] / $arr['sessions'] * 100, 2) : 0;
-        //新增加购率
-        $arr['add_cart_rate'] = $arr['sessions'] ? round($data['new_cart_num'] / $arr['sessions'] * 100, 2) : 0;
-        //更新加购率
-        $arr['update_add_cart_rate'] = $arr['sessions'] ? round($data['update_cart_num'] / $arr['sessions'] * 100, 2) : 0;
-        $zeelool_data = new \app\admin\model\operatedatacenter\Zeelool();
-        //着陆页数据
-        $arr['landing_num'] = $zeelool_data->google_landing(2, $date_time);
-        //产品详情页
-        $arr['detail_num'] = $zeelool_data->google_target20(2, $date_time);
-        //加购
-        $arr['cart_num'] = $zeelool_data->google_target2(2, $date_time);
-        //交易次数
-        $arr['complete_num'] = $zeelool_data->google_target_end(2, $date_time);
-        $update = Db::name('datacenter_day')->where(['day_date' => $date_time, 'site' => 2])->update($arr);
-
-        //nihao站
-        $data = Db::name('datacenter_day')->where(['day_date' => $date_time, 'site' => 3])->field('order_num,new_cart_num,update_cart_num')->find();
-        //活跃用户数
-        $arr['active_user_num'] = $this->google_active_user(3, $date_time);
-        //会话
-        $arr['sessions'] = $this->google_session(3, $date_time);
-        //会话转化率
-        $arr['session_rate'] = $arr['sessions'] != 0 ? round($data['order_num'] / $arr['sessions'] * 100, 2) : 0;
-        //新增加购率
-        $arr['add_cart_rate'] = $arr['sessions'] ? round($data['new_cart_num'] / $arr['sessions'] * 100, 2) : 0;
-        //更新加购率
-        $arr['update_add_cart_rate'] = $arr['sessions'] ? round($data['update_cart_num'] / $arr['sessions'] * 100, 2) : 0;
-        $zeelool_data = new \app\admin\model\operatedatacenter\Zeelool();
-        //着陆页数据
-        $arr['landing_num'] = $zeelool_data->google_landing(3, $date_time);
-        //产品详情页
-        $arr['detail_num'] = $zeelool_data->google_target13(3, $date_time);
-        //加购
-        $arr['cart_num'] = $zeelool_data->google_target1(3, $date_time);
-        //交易次数
-        $arr['complete_num'] = $zeelool_data->google_target_end(3, $date_time);
-        $update = Db::name('datacenter_day')->where(['day_date' => $date_time, 'site' => 3])->update($arr);
-        usleep(100000);
-    }
 }
