@@ -1530,17 +1530,17 @@ class OrderData extends Backend
     protected function zeelool_old_order($site)
     {
         if ($site == 1) {
-            $list = $this->zeelool->where(['customer_email' => ['in', ['zz2@gmail.com', 'v@qq.com', '12345@qq.com', '528062805@qq.com', '363901041@qq.com']], 'status' => 'processing'])->order('entity_id desc')->limit(100)->select();
+            $list = $this->zeelool->where(['status' => 'processing'])->order('entity_id desc')->limit(100)->select();
         } elseif ($site == 2) {
-            $list = $this->voogueme->where(['customer_email' => ['in', ['zz2@gmail.com', 'v@qq.com', '12345@qq.com', '528062805@qq.com', '363901041@qq.com']], 'status' => 'processing'])->order('entity_id desc')->limit(100)->select();
+            $list = $this->voogueme->where(['status' => 'processing'])->order('entity_id desc')->limit(100)->select();
         } elseif ($site == 3) {
-            $list = $this->nihao->where(['customer_email' => ['in', ['zz2@gmail.com', 'v@qq.com', '12345@qq.com', '528062805@qq.com', '363901041@qq.com']], 'status' => 'processing'])->order('entity_id desc')->limit(100)->select();
+            $list = $this->nihao->where(['status' => 'processing'])->order('entity_id desc')->limit(100)->select();
         } elseif ($site == 9) {
-            $list = $this->zeelool_es->where(['customer_email' => ['in', ['zz2@gmail.com', 'v@qq.com', '12345@qq.com', '528062805@qq.com', '363901041@qq.com']], 'status' => 'processing'])->order('entity_id desc')->limit(100)->select();
+            $list = $this->zeelool_es->where(['status' => 'processing'])->order('entity_id desc')->limit(100)->select();
         } elseif ($site == 10) {
-            $list = $this->zeelool_de->where(['customer_email' => ['in', ['zz2@gmail.com', 'v@qq.com', '12345@qq.com', '528062805@qq.com', '363901041@qq.com']], 'status' => 'processing'])->order('entity_id desc')->limit(100)->select();
+            $list = $this->zeelool_de->where(['status' => 'processing'])->order('entity_id desc')->limit(100)->select();
         } elseif ($site == 11) {
-            $list = $this->zeelool_jp->where(['customer_email' => ['in', ['zz2@gmail.com', 'v@qq.com', '12345@qq.com', '528062805@qq.com', '363901041@qq.com']], 'status' => 'processing'])->order('entity_id desc')->limit(100)->select();
+            $list = $this->zeelool_jp->where(['status' => 'processing'])->order('entity_id desc')->limit(100)->select();
         }
         $list = collection($list)->toArray();
 
