@@ -64,7 +64,6 @@ class VooguemePrescriptionDetailHelper{
 			left join sales_flat_order sfo on sfoi.order_id=sfo.entity_id 
 			where sfo.entity_id in($entity_id)";
 			$item_list = Db::connect('database.db_voogueme')->query($querySql);
-
 			// 如果为空，则直接返回false
 			if(empty($item_list)){
 				return false;				
@@ -157,8 +156,7 @@ class VooguemePrescriptionDetailHelper{
 			}
             // dump($lens_params);
 			$final_params = array_merge($lens_params, $final_params);
-          	// dump($final_params);      
-
+          	// dump($final_params);
 			$items[$item_key]['coatiing_name'] = $final_params['coatiing_name'];
 
 			if ($final_params['index_color']) {
@@ -190,17 +188,15 @@ class VooguemePrescriptionDetailHelper{
 
 			//V站add网站数据存反
 			if($final_params['os_add'] && $final_params['od_add']){
-				$items[$item_key]['os_add'] = $final_params['od_add'];
-				$items[$item_key]['od_add'] = $final_params['os_add'];
+				$items[$item_key]['os_add'] = urldecode($final_params['od_add']);
+				$items[$item_key]['od_add'] = urldecode($final_params['os_add']);
 			}else{
-				if ((float) $final_params['os_add'] != 0) {
-					$items[$item_key]['total_add'] = $final_params['os_add'];
+				if ($final_params['os_add'] != '') {
+					$items[$item_key]['total_add'] = urldecode($final_params['os_add']);
 				}
-
-				if ((float) $final_params['od_add'] != 0) {
-					$items[$item_key]['total_add'] = $final_params['od_add'];
+				if ($final_params['od_add'] != '') {
+					$items[$item_key]['total_add'] = urldecode($final_params['od_add']);
 				}
-				
 			}
 
 			if($final_params['pdcheck'] =='on'){

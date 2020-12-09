@@ -105,10 +105,7 @@ class OcPrescriptionPic extends Backend
             }else{
                 $this->error('操作失败');
             }
-
         }
-//        https://z.zhaokuangyi.com/media/
-//        /prescription_file/160670203660612.png,/prescription_file/160670203610816.png,/prescription_file/160670203626677.png,/prescription_file/160670203675800.png
         $row = $this->model->where('id',$ids)->find();
         $photo_href = $row['pic'] =explode(',',$row['pic']);
         foreach ($photo_href as $key=>$item){

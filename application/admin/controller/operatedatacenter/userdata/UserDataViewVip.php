@@ -24,7 +24,6 @@ class UserDataViewVip extends Backend
         $this->datacenterday = new \app\admin\model\operatedatacenter\Datacenter();
         $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform();
     }
-
     /**
      * Created by Phpstorm.
      * User: jhh

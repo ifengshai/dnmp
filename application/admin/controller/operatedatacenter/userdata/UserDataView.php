@@ -142,28 +142,26 @@ class UserDataView extends Backend
                     $end = date('Y-m-d');
                     $where['day_date'] = ['between', [$start, $end]];
                 }
-                $arr = $model->where($where)->column('day_date', 'active_user_num');
+                $arr = $model->where($where)->column('active_user_num','day_date');
                 $date_arr = $arr;
                 Cache::set('Operatedatacenter_userdataview'  . $order_platform .$time_str. md5(serialize('active_user_trend')), $date_arr, 7200);
             }
             $name = '活跃用户数';
-
-            $json['xcolumnData'] = array_values($date_arr);
+            
+            $json['xcolumnData'] = array_keys($date_arr);
             $json['column'] = [$name];
             $json['columnData'] = [
                 [
                     'name' => $name,
                     'type' => 'line',
                     'smooth' => true,
-                    'data' => array_keys($date_arr)
+                    'data' => array_values($date_arr)
                 ],
 
             ];
             return json(['code' => 1, 'data' => $json]);
         }
     }
-
-
     /**
      * 新老用户购买转化对比
      *
@@ -202,12 +200,12 @@ class UserDataView extends Backend
                 }
                 $where['day_date'] = ['between', [$start, $end]];
 
-                $new_arr = $model->where($where)->column('day_date', 'create_user_change_rate');
-                $active_arr = $model->where($where)->column('day_date', 'update_user_change_rate');
+                $new_arr = $model->where($where)->column('create_user_change_rate','day_date');
+                $active_arr = $model->where($where)->column( 'update_user_change_rate','day_date');
                 $data = array(
-                    'time'=>array_values($new_arr),
-                    'new'=>array_keys($new_arr),
-                    'active'=>array_keys($active_arr),
+                    'time'=>array_keys($new_arr),
+                    'new'=>array_values($new_arr),
+                    'active'=>array_values($active_arr),
                 );
                 Cache::set('Operatedatacenter_userdataview'  . $order_platform .$time_str. md5(serialize('new_old_change_line')), $data, 7200);
             }
