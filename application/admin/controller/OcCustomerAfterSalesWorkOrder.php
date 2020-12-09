@@ -50,9 +50,12 @@ class OcCustomerAfterSalesWorkOrder extends Backend
             {
                 return $this->selectpage();
             }
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-            $total = $this->model
 
+            $filter = json_decode($this->request->get('filter'), true);
+            unset($filter['site']);
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+
+            $total = $this->model
                     ->where($where)
                     ->order($sort, $order)
                     ->count();
@@ -87,8 +90,10 @@ class OcCustomerAfterSalesWorkOrder extends Backend
                     $list[$key]['status'] = 'Submitted';
                 }elseif ($item['status'] ==2){
                     $list[$key]['status'] = 'Processing';
-                }else{
+                }elseif($item['status'] ==3){
                     $list[$key]['status'] = 'Completed';
+                }else{
+                    $list[$key]['status'] = '待处理';
                 }
 
                 $swhere['platform_order'] = $item['increment_id'];

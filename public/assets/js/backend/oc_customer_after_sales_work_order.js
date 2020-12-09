@@ -34,12 +34,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                 return 1 + index;
                             }, operate: false
                         },
-                        {field: 'id', title: __('Id')},
-                        {field: 'site', title: __('站点')},
+                        // {field: 'id', title: __('Id')},
+                        // {
+                        //     field: 'site',
+                        //     title: __('站点'),
+                        //     searchList: { 1: 'zeelool', 2: 'voogueme'}
+                        // },
                         {field: 'increment_id', title: __('订单号')},
                         {field: 'email', title: __('Email')},
-
-                        {field: 'order_type', title: __('Order_type')},
                         {
                             field: 'order_type',
                             title: __('Order_type'),
@@ -47,9 +49,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             formatter: Table.api.formatter.status,
                             visible: false
                         },
-                        {field: 'problem_type', title: __('Problem_type')},
-                        {field: 'status', title: __('状态')},
-                        {field: 'handler_name', title: __('Handler_name')},
+                        {field: 'problem_type', title: __('Problem_type'),operate:false},
+                        {field: 'status', title: __('处理状态'), searchList: { 1: 'Submitted', 2: 'Processing', 3: 'Completed'},},
+                        {field: 'handler_name', title: __('Handler_name'),operate:'LIKE'},
                         {
                             field: 'task_info', title: __('工单'), operate: false, formatter: function (value, row) {
                                 if (value) {
@@ -58,8 +60,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             }
                         },
 
-                        {field: 'created_at', title: __('Created_at')},
-                        {field: 'completed_at', title: __('Completed_at')},
+                        {field: 'created_at', title: __('Created_at'),operate: 'RANGE', sortable: true, addclass: 'datetimerange'},
+                        {field: 'completed_at', title: __('Completed_at'),operate: 'RANGE', sortable: true, addclass: 'datetimerange'},
 
                         {
                             field: 'operate', width: "240px", title: __('操作'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate,
