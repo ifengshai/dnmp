@@ -556,7 +556,7 @@ class Instock extends Backend
                         $stock_all_num = array_sum(array_column($item_platform_sku, 'stock'));
                         if ($stock_all_num == 0) {
                             $rate_rate = 1/$all_num;
-                            foreach ($item_platform_sku as $key => $val) {
+                            foreach ($item_platform_sku as $key => $val) { 
                                 //最后一个站点 剩余数量分给最后一个站
                                 if (($all_num - $key) == 1) {
                                     $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setInc('stock', $stock_num);
