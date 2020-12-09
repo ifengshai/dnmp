@@ -1968,6 +1968,9 @@ class WorkOrderList extends Backend
                     }
                 }
 
+                //子单sku变动表
+                $_work_order_change_sku = new WorkOrderChangeSku();
+
                 //检测子订单措施
                 if($item_order_info){
                     $item_order_info = array_filter($item_order_info);
@@ -1977,8 +1980,36 @@ class WorkOrderList extends Backend
                         empty($item['item_choose']) && $this->error("请选择子订单：{$key} 的实施措施");
                         $all_choose_ids = array_unique(array_merge($all_choose_ids,$item['item_choose']));
 
-                        //更改镜框校验库存
-                        if(in_array(19, $item['item_choose'])){
+                        //获取子单之前处理成功的措施类型
+                        $change_type = $_work_order_change_sku
+                            ->alias('a')
+                            ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
+                            ->where([
+                                'a.item_order_number'=>$key,
+                                'b.operation_type'=>1
+                            ])
+                            ->order('a.id','desc')
+                            ->group('a.item_order_number')
+                            ->column('a.change_type')
+                        ;
+
+                        //子单取消
+                        if(in_array(18, $item['item_choose'])){
+                            //检测之前是否处理过子单措施
+                            array_intersect([1, 2, 3], $change_type) && $this->error("子订单：{$key} 措施已处理，不能取消");
+                        }elseif(in_array(19, $item['item_choose'])){//更改镜框
+                            //检测之前是否处理过更改镜框措施
+                            in_array(1, $change_type) && $this->error("子订单：{$key} 措施已处理，不能重复创建");
+
+                            //更改镜框校验库存
+                            !$item['change_frame']['change_sku'] && $this->error("子订单：{$key} 的新sku不能为空");
+                            $back_data = $this->skuIsStock([$item['change_frame']['change_sku']], $params['work_platform'], [1]);
+                            !$back_data['result'] && $this->error($back_data['msg']);
+                        }elseif(in_array(20, $item['item_choose'])){//更改镜片
+                            //检测之前是否处理过更改镜片措施
+                            in_array(2, $change_type) && $this->error("子订单：{$key} 措施已处理，不能重复创建");
+
+                            //更改镜框校验库存
                             !$item['change_frame']['change_sku'] && $this->error("子订单：{$key} 的新sku不能为空");
                             $back_data = $this->skuIsStock([$item['change_frame']['change_sku']], $params['work_platform'], [1]);
                             !$back_data['result'] && $this->error($back_data['msg']);
@@ -2062,9 +2093,6 @@ class WorkOrderList extends Backend
 
                 //承接人表
                 $_work_order_recept = new WorkOrderRecept();
-
-                //子单sku变动表
-                $_work_order_change_sku = new WorkOrderChangeSku();
 
                 $row->startTrans();
                 $_work_order_measure->startTrans();

@@ -1641,7 +1641,7 @@ class Inventory extends Backend
         $_item = new Item();
         $_platform_sku = new ItemPlatformSku();
         $_stock_log = new StockLog();
-        $_new_order_process = new NewOrderItemProcess();
+        $_new_order_item_process = new NewOrderItemProcess();
 
         foreach ($change_row as $v) {
             //原sku
@@ -1668,7 +1668,7 @@ class Inventory extends Backend
             $warehouse_change_sku = $_platform_sku->where(['platform_sku'=>$change_sku,'platform_type'=>$order_platform])->value('sku');
 
             //获取子单状态
-            $distribution_status = $_new_order_process->where(['item_order_number'=>$v['item_order_number']])->value('distribution_status');
+            $distribution_status = $_new_order_item_process->where(['item_order_number'=>$v['item_order_number']])->value('distribution_status');
 
             //开启事务
             Db::startTrans();
@@ -1945,7 +1945,7 @@ class Inventory extends Backend
         $_item = new Item();
         $_platform_sku = new ItemPlatformSku();
         $_stock_log = new StockLog();
-        $_new_order_process = new NewOrderItemProcess();
+        $_new_order_item_process = new NewOrderItemProcess();
 
         foreach ($change_row as $v) {
             //sku数量
@@ -1961,7 +1961,7 @@ class Inventory extends Backend
             $warehouse_original_sku = $_platform_sku->where(['platform_sku'=>$original_sku,'platform_type'=>$order_platform])->value('sku');
 
             //获取子单状态
-            $distribution_status = $_new_order_process->where(['item_order_number'=>$v['item_order_number']])->value('distribution_status');
+            $distribution_status = $_new_order_item_process->where(['item_order_number'=>$v['item_order_number']])->value('distribution_status');
 
             //开始事务
             Db::startTrans();
