@@ -2765,7 +2765,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     } else {
                         var use_flag = $(this).attr('flag');
                         $('.measure_item'+use_flag).hide();
-                        $("#item_input-hidden").html("");
+                        $(".item_input-hidden"+use_flag).html("");
                         var checkID = [];//定义一个空数组
                         var item_input_content = '';
                         var is_check = [];
