@@ -26,6 +26,18 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                 Controller.api.formatter.user_order_pie();
                 order_data_view();
             });
+            $("#change_on_off").click(function () {
+                var obj_class = $(this).attr('class');
+                if(obj_class == 'fa fa-toggle-off'){
+                    $(this).removeClass('fa-toggle-off');
+                    $(this).addClass('fa-toggle-on');
+                    $(".question").css('display','block');
+                }else{
+                    $(this).removeClass('fa-toggle-on');
+                    $(this).addClass('fa-toggle-off');
+                    $(".question").css('display','none');
+                }
+            });
         },
         add: function () {
             Controller.api.bindevent();

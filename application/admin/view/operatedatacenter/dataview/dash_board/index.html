@@ -185,10 +185,13 @@
     table.height-table td {
         height: 76.5px;
     }
-
-</style>
-
-<style type="text/css">
+    .wenhao {
+        width: 20px;
+        float: right;
+    }
+    .question{
+        display: none;
+    }
     table.altrowstable {
         margin: 0 auto;
         width: 100%;
@@ -290,11 +293,14 @@
     <div class="panel-body">
         <div id="myTabContent" class="tab-content">
             <div class="tab-pane fade active in" id="one">
-
                 <div class="widget-body no-padding">
                     <div class="new-background">
                         <div class="row">
-
+                         <span style="float:right;margin-right: 30px;">
+                            <i class="fa fa-toggle-off" id="change_on_off" style="font-size:25px;color:#15A589"></i>
+                        </span>
+                        </div>
+                        <div class="row">
                             <div class="form-group new-form-group">
                                 <label class="control-label col-xs-4">平台：</label>
                                 <div class="col-xs-8 new-col-xs-8">
@@ -338,13 +344,15 @@
                                     <input type="reset" class="btn btn-default reset" id="sku_reset" value="重置">
                                 </div>
                             </div>
-
                         </div>
 
 
                         <div class="row">
                             <div class="margin-div" style="text-align: center">
                                 <div class="btn btn-div">
+                                    <span class="question" tabindex="0" data-bs-toggle="tooltip" title="新增VIP会员数">
+                                        <img src="/wenhao.jpg" alt="" class="wenhao">
+                                    </span>
                                 <span class="extend">
                                     <div class="title">活跃用户数：<span style="color: red;" id="active_user_num">{$active_user_num.active_user_num}</span></div>
                                     <div class="rate_class">
@@ -370,6 +378,9 @@
                                 </span>
                                 </div>
                                 <div class="btn btn-div">
+                                    <span class="question" tabindex="0" data-bs-toggle="tooltip" title="新增VIP会员数">
+                                        <img src="/wenhao.jpg" alt="" class="wenhao">
+                                    </span>
                                 <span class="extend">
                                     <div class="title">注册用户数：<span style="color: red;" id="register_user_num">{$register_user_num.register_user_num}</span></div>
                                     <div class="rate_class">
@@ -394,6 +405,9 @@
                                 </span>
                                 </div>
                                 <div class="btn btn-div">
+                                    <span class="question" tabindex="0" data-bs-toggle="tooltip" title="新增VIP会员数">
+                                        <img src="/wenhao.jpg" alt="" class="wenhao">
+                                    </span>
                                 <span class="extend">
                                     <div class="title">复购用户数：<span style="color: red;" id="again_user_num">{$again_user_num.again_user_num}</span></div>
                                     <div class="rate_class">
@@ -416,6 +430,9 @@
                                 </span>
                                 </div>
                                 <div class="btn btn-div">
+                                    <span class="question" tabindex="0" data-bs-toggle="tooltip" title="新增VIP会员数">
+                                        <img src="/wenhao.jpg" alt="" class="wenhao">
+                                    </span>
                                 <span class="extend">
                                     <div class="title">VIP用户数：<span style="color: red;" id="vip_user_num">{$vip_user_num.vip_user_num}</span></div>
                                     <div class="rate_class">
@@ -438,6 +455,9 @@
                                 </div>
                                 <br>
                                 <div class="btn btn-div">
+                                    <span class="question" tabindex="0" data-bs-toggle="tooltip" title="新增VIP会员数">
+                                        <img src="/wenhao.jpg" alt="" class="wenhao">
+                                    </span>
                                 <span class="extend">
                                     <div class="title">订单数：<span style="color: red;" id="order_num">{$order_num.order_num}</span></div>
                                     <div class="rate_class">
@@ -461,6 +481,9 @@
                                 </span>
                                 </div>
                                 <div class="btn btn-div">
+                                    <span class="question" tabindex="0" data-bs-toggle="tooltip" title="新增VIP会员数">
+                                        <img src="/wenhao.jpg" alt="" class="wenhao">
+                                    </span>
                                 <span class="extend">
                                     <div class="title">客单价：<span style="color: red;" id="order_unit_price">
 
@@ -485,6 +508,9 @@
                                 </span>
                                 </div>
                                 <div class="btn btn-div">
+                                    <span class="question" tabindex="0" data-bs-toggle="tooltip" title="新增VIP会员数">
+                                        <img src="/wenhao.jpg" alt="" class="wenhao">
+                                    </span>
                                 <span class="extend">
                                     <div class="title">销售额：<span style="color: red;" id="sales_total_money">{$sales_total_money.sales_total_money}</span></div>
                                     <div class="rate_class">
@@ -506,6 +532,9 @@
                                 </span>
                                 </div>
                                 <div class="btn btn-div">
+                                    <span class="question" tabindex="0" data-bs-toggle="tooltip" title="新增VIP会员数">
+                                        <img src="/wenhao.jpg" alt="" class="wenhao">
+                                    </span>
                                 <span class="extend">
                                     <div class="title">邮费：<span style="color: red;" id="shipping_total_money">{$shipping_total_money.shipping_total_money}</span></div>
                                     <div class="rate_class">
