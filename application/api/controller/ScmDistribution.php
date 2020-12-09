@@ -522,7 +522,7 @@ class ScmDistribution extends Scm
             $this->error(__('子订单不存在'), [], 403);
         }
         //扫码配镜片，定制片 先取出 暂存库位才可操作
-        if(3 == $check_status && 3 == $item_process_info['order_prescription_type'] && 2 != $item_process_info['customize_status']){
+        if(3 == $check_status && 3 == $item_process_info['order_prescription_type'] && 1 == $item_process_info['customize_status']){
             $this->error(__('请先将定制片从暂存库位取出'), [], 405);
         }
 

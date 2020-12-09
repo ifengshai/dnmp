@@ -939,7 +939,7 @@ class ScmQuality extends Scm
     public function logistics_list()
     {
         $logistics_number = $this->request->request('logistics_number');
-        $sign_number = $this->request->request('sign_number');
+//        $sign_number = $this->request->request('sign_number');
         $status = $this->request->request('status');
         $is_new_product = $this->request->request('is_new_product');
         $start_time = $this->request->request('start_time');
@@ -954,9 +954,9 @@ class ScmQuality extends Scm
         if ($logistics_number) {
             $where['logistics_number'] = ['like', '%' . $logistics_number . '%'];
         }
-        if ($sign_number) {
-            $where['sign_number'] = ['like', '%' . $sign_number . '%'];
-        }
+//        if ($sign_number) {
+//            $where['sign_number'] = ['like', '%' . $sign_number . '%'];
+//        }
         if (isset($status)) {
             $where['status'] = $status;
         }
