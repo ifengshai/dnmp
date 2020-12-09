@@ -1601,9 +1601,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 var order_pay_currency = $('#order_pay_currency').val();
                                 //修改地址
                                 var address = '';
-                                for (var i = 0; i < data.address.length; i++) {
-                                    if (i == 0) {
-                                        address += '<option value="' + i + '" selected>' + data.address[i].address_type + '</option>';
+                                /*for (var i = 0; i < data.address.length; i++) {
+                                    if (i == 0) {*/
+                                        address += '<option value = "0" selected>shipping</option>';
                                         //补发地址自动填充第一个
                                         $('#c-firstname').val(data.address[i].firstname);
                                         $('#c-lastname').val(data.address[i].lastname);
@@ -1625,11 +1625,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                         $('#c-street').val(data.address[i].street);
                                         $('#c-postcode').val(data.address[i].postcode);
                                         $('#c-currency_code').val(order_pay_currency);
-                                    } else {
+                                    /*} else {
                                         address += '<option value="' + i + '">' + data.address[i].address_type + '</option>';
                                     }
 
-                                }
+                                }*/
                                 $('#address_select').html(address);
                                 //选择地址切换地址
                                 $('#address_select').change(function () {
