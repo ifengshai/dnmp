@@ -1390,12 +1390,13 @@ class ScmDistribution extends Scm
                     $order_id_store = $this->_new_order_process->where(['store_house_id'=>['in', $store_house_ids]])->column('order_id');
                     $item_order_number_store = $this->_new_order_item_process->where(['order_id'=>['in', $order_id_store]])->column('item_order_number');
                 }
-                $item_order_number_item = $this->_new_order_item_process->where(['item_order_number'=> ['like', '%' . $query . '%']])->column('item_order_number');
+                $item_order_number_item = $this->_new_order_item_process->where(['item_order_number'=> ['like', $query . '%']])->column('item_order_number');
                 $item_order_number = array_merge($item_order_number_item, $item_order_number_store);
                 if($item_order_number) $where['a.item_order_number'] = ['in', $item_order_number];
 
             }
             $list = $this->_new_order_item_process
+                ->alias('a')
                 ->where($where)
                 ->join(['fa_order_process'=> 'b'],'a.order_id=b.order_id','left')
                 ->field('b.store_house_id,a.item_order_number')
