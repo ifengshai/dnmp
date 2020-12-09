@@ -841,7 +841,7 @@ class WorkOrderList extends Model
                     //从网站接口获取镜片编码、文案、语种文案
                     $lens_number = '';
                     $web_lens_name = '';
-                    if($lensId && $coatingId && $colorId){
+                    if($lensId){
                         $postData = [
                             'sku'=>trim($changeLens['original_sku']),
                             'prescription_type' => $recipe_type,
