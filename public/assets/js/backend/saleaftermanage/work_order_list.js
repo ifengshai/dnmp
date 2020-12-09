@@ -3089,35 +3089,35 @@ function changeOrderAddress(){
             var order_pay_currency = $('#order_pay_currency').val();
             //修改地址
             var address1 = '';
-            for (var i = 0; i < data.address.length; i++) {
-                var address_id= data.address[i].address_id ? data.address[i].address_id : 0;
-                if(i == address_id){
-                    address1 += '<option value="' + i + '" selected>' + data.address[i].address_type + '</option>';
+            /*for (var i = 0; i < data.address.length; i++) {*/
+                /*var address_id= data.address.address_id ? data.address.address_id : 0;
+                if(i == address_id){*/
+                    address1 += '<option value="0" selected>shipping</option>';
                     //补发地址自动填充第一个
-                    $('#c-firstname1').val(data.address[i].firstname);
-                    $('#c-lastname1').val(data.address[i].lastname);
-                    var email = data.address[i].email;
+                    $('#c-firstname1').val(data.address.firstname);
+                    $('#c-lastname1').val(data.address.lastname);
+                    var email = data.address.email;
                     if (email == null) {
                         email = $('#customer_email1').val();
                     }
                     $('#c-email1').val(email);
-                    $('#c-telephone1').val(data.address[i].telephone);
-                    $('#c-country1').val(data.address[i].country_id);
+                    $('#c-telephone1').val(data.address.telephone);
+                    $('#c-country1').val(data.address.country_id);
                     $('#c-country1').change();
-                    if(data.address[i].region_id == '8888' || !data.address[i].region_id){
+                    if(data.address.region_id == '8888' || !data.address.region_id){
                         $('#c-region2').val(0);
                     }else{
-                        $('#c-region2').val(data.address[i].region_id);
+                        $('#c-region2').val(data.address.region_id);
                     }
-                    $('#c-region12').val(data.address[i].region);
-                    $('#c-city1').val(data.address[i].city);
-                    $('#c-street1').val(data.address[i].street);
-                    $('#c-postcode1').val(data.address[i].postcode);
+                    $('#c-region12').val(data.address.region);
+                    $('#c-city1').val(data.address.city);
+                    $('#c-street1').val(data.address.street);
+                    $('#c-postcode1').val(data.address.postcode);
                     $('#c-currency_code1').val(order_pay_currency);
-                }else{
-                    address1 += '<option value="' + i + '">' + data.address[i].address_type + '</option>';
-                }
-            }
+                /*}else{
+                    address1 += '<option value="' + i + '">' + data.address.address_type + '</option>';
+                }*/
+            /*}*/
             $('#address_select1').html(address1);
             //选择地址切换地址
             $('#address_select1').change(function () {
