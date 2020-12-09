@@ -96,12 +96,7 @@ class Scm extends Api
                     'name' => '合单待取',
                     'link' => 'distribution/waitmerge',
                     'icon' => '/assets/img/distribution/hedandaiqu.png',
-                    'href' => 'com.nextmar.mojing.ui.merge.OrderMergeCompletedActivity'],
-                [
-                    'name' => '设置',
-                    'link' => 'distribution/audit',
-                    'icon' => '',
-                    'href' => 'com.nextmar.mojing.ui.setting.SettingActivity'
+                    'href' => 'com.nextmar.mojing.ui.merge.OrderMergeCompletedActivity'
                 ]
             ],
         ],
@@ -223,10 +218,9 @@ class Scm extends Api
             foreach ($value['menu'] as $k => $val) {
                 //校验菜单展示权限
                 if (!$this->auth->check($val['link'])) {
+                    //当前用户无此菜单权限
                     unset($value['menu'][$k]);
                 }else{
-                    unset($value['menu'][$k]['link']);
-
                     //图片链接
                     $value['menu'][$k]['icon'] = $val['icon'] ? $this->request->domain().$val['icon'] : '';
 
@@ -235,6 +229,9 @@ class Scm extends Api
                         $this->_distribution = new ScmDistribution();
                         $value['menu'][$k]['count'] = $this->_distribution->no_sorting();
                     }
+
+                    //移除权限链接
+                    unset($value['menu'][$k]['link']);
                 }
             }
             if (!empty($value['menu'])) {
