@@ -74,10 +74,10 @@
                 <td>ADD</td>
                 <td>PD</td>
                 {if $v['prismcheck'] == 'on'}
-                <td>Prism(out/in)</td>
-                <td>Direc(out/in)</td>
-                <td>Prism(up/down)</td>
-                <td>Direc(up/down)</td>
+                <td>Prism</td>
+                <td>Direc</td>
+                <td>Prism</td>
+                <td>Direc</td>
                 {else/}
                 <td colspan='4' rowspan="3">
                     {$v.lens_name}
@@ -130,10 +130,11 @@
                 <td colspan='10' style=' text-align:center'>
                     {if $v['prismcheck'] == 'on'}
                         {$v.lens_name}
+                        <br>
                     {else}
                         {$v.prescription_type}
+                        <br>
                     {/if}
-                    <br>
                         {$v.index_name}
                 </td>
             </tr>

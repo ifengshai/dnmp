@@ -1601,9 +1601,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 var order_pay_currency = $('#order_pay_currency').val();
                                 //修改地址
                                 var address = '';
-                                for (var i = 0; i < data.address.length; i++) {
-                                    if (i == 0) {
-                                        address += '<option value="' + i + '" selected>' + data.address[i].address_type + '</option>';
+                                /*for (var i = 0; i < data.address.length; i++) {
+                                    if (i == 0) {*/
+                                        address += '<option value = "0" selected>shipping</option>';
                                         //补发地址自动填充第一个
                                         $('#c-firstname').val(data.address[i].firstname);
                                         $('#c-lastname').val(data.address[i].lastname);
@@ -1625,11 +1625,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                         $('#c-street').val(data.address[i].street);
                                         $('#c-postcode').val(data.address[i].postcode);
                                         $('#c-currency_code').val(order_pay_currency);
-                                    } else {
+                                    /*} else {
                                         address += '<option value="' + i + '">' + data.address[i].address_type + '</option>';
                                     }
 
-                                }
+                                }*/
                                 $('#address_select').html(address);
                                 //选择地址切换地址
                                 $('#address_select').change(function () {
@@ -2469,6 +2469,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         var item_input_content = '';
                         var is_check = [];
                         var item_appoint_group = '';
+                        var cancelorder_html = '';
                         var username = [];
                         var item_appoint_users = [];
                         var Str = '';
@@ -2508,7 +2509,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
 
                             //是否为子单取消
                             if (id == 18) {
-                                item_input_content +='<input type="hidden" name="row[item_order_info]['+ item_order_number +'][cancel_order][sku]" value="' + sku + '"/>';
+                                cancelorder_html += '<input type="hidden" name="row[item_order_info]['+ item_order_number +'][cancel_order][sku]" value="' + sku + '"/>';
                             }
                         });
                         //判断如果存在1 则改为需要审核
@@ -2520,6 +2521,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         item_input_content += '</div>';
                         //追加到元素之后
                         $("#item_input-hidden").append(item_input_content);
+                        $("#cancelorder_input-hidden").append(cancelorder_html);
+                        
 
                         var arr = array_filter(item_appoint_group.split(','));
                         //循环根据承接组Key获取对应承接人id
@@ -2762,11 +2765,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     } else {
                         var use_flag = $(this).attr('flag');
                         $('.measure_item'+use_flag).hide();
-                        $("#item_input-hidden").html("");
+                        $(".item_input-hidden"+use_flag).html("");
                         var checkID = [];//定义一个空数组
                         var item_input_content = '';
                         var is_check = [];
                         var item_appoint_group = '';
+                        var cancelorder_html = '';
                         var username = [];
                         var item_appoint_users = [];
                         var use_flag = $(this).attr('flag');
@@ -2807,7 +2811,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
 
                             //是否为子单取消
                             if (id == 18) {
-                                item_input_content +='<input type="hidden" name="row[item_order_info]['+ use_flag +'][cancel_order][sku]" value="' + sku + '"/>';
+                                cancelorder_html += '<input type="hidden" name="row[item_order_info]['+ use_flag +'][cancel_order][sku]" value="' + sku + '"/>';
                             }
                         });
 
@@ -2820,6 +2824,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         item_input_content += '</div>';
                         //追加到元素之后
                         $("#item_input-hidden").append(item_input_content);
+                        $("#cancelorder_input-hidden").append(cancelorder_html);
                         //一般措施
                         for (var m = 0; m < checkID.length; m++) {
                             /*var node = $('.item' + use_flag + '_step' + checkID[m]);
@@ -3084,35 +3089,35 @@ function changeOrderAddress(){
             var order_pay_currency = $('#order_pay_currency').val();
             //修改地址
             var address1 = '';
-            for (var i = 0; i < data.address.length; i++) {
-                var address_id= data.address[i].address_id ? data.address[i].address_id : 0;
-                if(i == address_id){
-                    address1 += '<option value="' + i + '" selected>' + data.address[i].address_type + '</option>';
+            /*for (var i = 0; i < data.address.length; i++) {*/
+                /*var address_id= data.address.address_id ? data.address.address_id : 0;
+                if(i == address_id){*/
+                    address1 += '<option value="0" selected>shipping</option>';
                     //补发地址自动填充第一个
-                    $('#c-firstname1').val(data.address[i].firstname);
-                    $('#c-lastname1').val(data.address[i].lastname);
-                    var email = data.address[i].email;
+                    $('#c-firstname1').val(data.address.firstname);
+                    $('#c-lastname1').val(data.address.lastname);
+                    var email = data.address.email;
                     if (email == null) {
                         email = $('#customer_email1').val();
                     }
                     $('#c-email1').val(email);
-                    $('#c-telephone1').val(data.address[i].telephone);
-                    $('#c-country1').val(data.address[i].country_id);
+                    $('#c-telephone1').val(data.address.telephone);
+                    $('#c-country1').val(data.address.country_id);
                     $('#c-country1').change();
-                    if(data.address[i].region_id == '8888' || !data.address[i].region_id){
+                    if(data.address.region_id == '8888' || !data.address.region_id){
                         $('#c-region2').val(0);
                     }else{
-                        $('#c-region2').val(data.address[i].region_id);
+                        $('#c-region2').val(data.address.region_id);
                     }
-                    $('#c-region12').val(data.address[i].region);
-                    $('#c-city1').val(data.address[i].city);
-                    $('#c-street1').val(data.address[i].street);
-                    $('#c-postcode1').val(data.address[i].postcode);
+                    $('#c-region12').val(data.address.region);
+                    $('#c-city1').val(data.address.city);
+                    $('#c-street1').val(data.address.street);
+                    $('#c-postcode1').val(data.address.postcode);
                     $('#c-currency_code1').val(order_pay_currency);
-                }else{
-                    address1 += '<option value="' + i + '">' + data.address[i].address_type + '</option>';
-                }
-            }
+                /*}else{
+                    address1 += '<option value="' + i + '">' + data.address.address_type + '</option>';
+                }*/
+            /*}*/
             $('#address_select1').html(address1);
             //选择地址切换地址
             $('#address_select1').change(function () {
@@ -3141,6 +3146,7 @@ function itemSelectpicker (type = 1,flag = null,item_order_info = '') {
         $('#section_item_content').show();
         $('#section_item_content').html('');
         $("#item_input-hidden").html("");
+        $("#cancelorder_input-hidden").html("");
         var problem_id = '';
         if (type == 1) {
             problem_id = flag.val();
