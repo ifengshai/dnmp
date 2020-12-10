@@ -181,7 +181,7 @@ class ScmDistribution extends Scm
             //子订单绑定异常库位号
             $this->_new_order_item_process
                 ->allowField(true)
-                ->isUpdate(true, ['item_order_number'=>$item_order_number, 'temporary_house_id'=>0, 'customize_status'=>0])
+                ->isUpdate(true, ['item_order_number'=>$item_order_number])
                 ->save(['abnormal_house_id'=>$stock_house_info['id']])
             ;
 
@@ -255,7 +255,7 @@ class ScmDistribution extends Scm
         //获取子订单数据
         $item_process_info = $this->_new_order_item_process
             ->where('item_order_number', $item_order_number)
-            ->field('id,option_id,distribution_status,temporary_house_id,order_prescription_type,order_id')
+            ->field('id,option_id,distribution_status,temporary_house_id,order_prescription_type,order_id,customize_status')
             ->find()
         ;
         empty($item_process_info) && $this->error(__('子订单不存在'), [], 403);
@@ -409,8 +409,8 @@ class ScmDistribution extends Scm
                 $second = 1;//是第二次扫描
                 $msg = "请将子单号{$item_order_number}的商品从定制片暂存架{$coding}库位取出";
             }else{
-                //判断是否定制片
-                if(3 == $item_process_info['order_prescription_type']){
+                //判断是否定制片且未处理状态
+                if(0 == $item_process_info['customize_status'] && 3 == $item_process_info['order_prescription_type']){
                     //暂存自动分配库位
                     $stock_house_info = $this->_stock_house
                         ->field('id,coding')
@@ -426,7 +426,7 @@ class ScmDistribution extends Scm
                             $this->_new_order_item_process
                                 ->allowField(true)
                                 ->isUpdate(true, ['item_order_number'=>$item_order_number])
-                                ->save(['temporary_house_id'=>$stock_house_info['id']])
+                                ->save(['temporary_house_id'=>$stock_house_info['id'],'customize_status'=>1])
                             ;
 
                             //定制片库位号占用数量+1
