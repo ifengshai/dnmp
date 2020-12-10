@@ -848,8 +848,8 @@ EOF;
 
         //SKU搜索
         if ($filter['created_at']) {
-            $arr = explode(' ',$filter['created_at']);
-            $map['sfo.created_at'] = ['between', [$arr[0] . ' ' . $arr[1],$arr[3] . ' ' . $arr[4]]];
+            $arr = explode(' ', $filter['created_at']);
+            $map['sfo.created_at'] = ['between', [$arr[0] . ' ' . $arr[1], $arr[3] . ' ' . $arr[4]]];
             unset($filter['created_at']);
             $this->request->get(['filter' => json_encode($filter)]);
         }
@@ -876,15 +876,27 @@ EOF;
             ->select();
         $resultList = collection($resultList)->toArray();
 
+        $entity_ids = array_column($resultList, 'entity_id');
+        $address = $model->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_ids]])->column('country_id,shipping_method', 'parent_id');
+
+        $payment = $model->table('sales_flat_order_payment')->where(['parent_id' => ['in', $entity_ids]])->column('method', 'parent_id');
+
+
         foreach ($resultList as $key => $value) {
-            $finalResult[$key]['country_id'] = $model->table('sales_flat_order_address')->where(array('parent_id' => $value['entity_id']))->value('country_id');
-            $finalResult[$key]['method'] = $model->table('sales_flat_order_payment')->where(array('parent_id' => $value['entity_id']))->value('method');
+
+            $finalResult[$key]['country_id'] = $address[$value['entity_id']]['country_id'];
+                $finalResult[$key]['method'] = $payment[$value['entity_id']];
             $finalResult[$key]['increment_id'] = $value['increment_id'];
             $finalResult[$key]['sku'] = $value['sku'];
             $finalResult[$key]['created_at'] = substr($value['created_at'], 0, 10);
             $finalResult[$key]['base_grand_total'] = $value['base_grand_total'];
             $finalResult[$key]['base_shipping_amount'] = $value['base_shipping_amount'];
-            $finalResult[$key]['label'] = $value['label'];
+
+            if ($address[$value['entity_id']]['shipping_method'] == 'tablerate_bestway') {
+                $finalResult[$key]['label'] = 1;
+            } else {
+                $finalResult[$key]['label'] = 0;
+            }
             $finalResult[$key]['customer_email'] = $value['customer_email'];
             $finalResult[$key]['status'] = $value['status'];
             $finalResult[$key]['total_qty_ordered'] = $value['total_qty_ordered'];
@@ -911,6 +923,13 @@ EOF;
                     if ($tmp_product_options['info_buyRequest']['tmplens']['color_name']) {
                         $finalResult[$key]['index_type'] .= '-' . $tmp_product_options['info_buyRequest']['tmplens']['color_name'];
                     }
+                }
+            } elseif ($label == 3) {
+                $finalResult[$key]['coatiing_name'] = $tmp_product_options['info_buyRequest']['tmplens']['four_name'];
+                $finalResult[$key]['index_type'] = $tmp_product_options['info_buyRequest']['tmplens']['third_name'];
+                //镜片类型拼接颜色字段
+                if ($tmp_product_options['info_buyRequest']['tmplens']['color_name']) {
+                    $finalResult[$key]['index_type'] .= '-' . $tmp_product_options['info_buyRequest']['tmplens']['color_name'];
                 }
             } else {
                 $finalResult[$key]['coatiing_name'] = $tmp_product_options['info_buyRequest']['tmplens']['coatiing_name'];
@@ -1137,21 +1156,21 @@ EOF;
         }
 
         //设置宽度
-        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(30);
-        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(40);
-        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(30);
-        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(20);
-        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(15);
         $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(15);
         $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(15);
-        $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(15);
-        $spreadsheet->getActiveSheet()->getColumnDimension('I')->setWidth(30);
-        $spreadsheet->getActiveSheet()->getColumnDimension('K')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('I')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('K')->setWidth(10);
         $spreadsheet->getActiveSheet()->getColumnDimension('S')->setWidth(30);
         $spreadsheet->getActiveSheet()->getColumnDimension('AB')->setWidth(30);
-        $spreadsheet->getActiveSheet()->getColumnDimension('AD')->setWidth(30);
-        $spreadsheet->getActiveSheet()->getColumnDimension('AE')->setWidth(30);
-        $spreadsheet->getActiveSheet()->getColumnDimension('AF')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AD')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AE')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AF')->setWidth(15);
 
 
         //设置边框
