@@ -299,5 +299,12 @@ class Test01 extends Backend
         }
     }
 
+    public function test200()
+    {
+        $yes_date = date("Y-m-d",strtotime("-1 day"));
+        $yestime_where1[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '" . $yes_date . "'")];
+        dump(Db::connect('database.db_zeelool')->table('customer_entity')->where($yestime_where1)->count());
+        dump(Db::connect('database.db_zeelool')->getLastSql());
+    }
 
 }
