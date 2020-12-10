@@ -33,7 +33,7 @@ class OcCustomerAfterSalesWorkOrder extends Backend
      * 需要将application/admin/library/traits/Backend.php中对应的方法复制到当前控制器,然后进行修改
      */
 
-
+    
     
 
     /**
@@ -186,6 +186,8 @@ class OcCustomerAfterSalesWorkOrder extends Backend
             $data['email_message'][$key]['nickname'] = $item['nickname'];
             $data['email_message'][$key]['create_time'] = $item['create_time'];
             $data['email_message'][$key]['update_time'] = $item['update_time'];
+
+
         }
         $this->assign('row',$data);
         return $this->view->fetch();
