@@ -2405,7 +2405,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     /*for (var i = 0; i < data.address.length; i++) {
                                         if (i == 0) {*/
                                             address += '<option value="0" selected>shipping</option>';
-                                            //补发地址自动填充第 一个
+                                            //补发地址自动填充第一个
                                             $('#c-firstname').val(data.address.firstname);
                                             $('#c-lastname').val(data.address.lastname);
                                             $('#c-email').val(data.address.email);
