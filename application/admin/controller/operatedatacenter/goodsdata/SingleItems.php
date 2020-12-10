@@ -228,6 +228,8 @@ class SingleItems extends Backend
                 ->where('b.created_at', 'between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]])
                 ->alias('a')
                 ->join(['sales_flat_order' => 'b'], 'a.order_id=b.entity_id')
+                ->where('b.order_type', '=', 1)
+                ->where('b.status', 'in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal'])
                 ->field('order_id,sum(qty_ordered) as all_qty_ordered')
                 ->group('a.order_id')
                 ->select();
