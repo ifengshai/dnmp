@@ -305,6 +305,13 @@ class Test01 extends Backend
         $yestime_where1[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '" . $yes_date . "'")];
         dump(Db::connect('database.db_zeelool')->table('customer_entity')->where($yestime_where1)->count());
         dump(Db::connect('database.db_zeelool')->getLastSql());
+
+        $seven_start = date("Y-m-d", strtotime("-7 day"));
+        $seven_end = date("Y-m-d 23:59:59", strtotime("-1 day"));
+        $sev_where1['updated_at'] = ['between', [$seven_start, $seven_end]];
+        dump(Db::connect('database.db_zeelool')->table('customer_entity')->where($sev_where1)->count());
+        dump(Db::connect('database.db_zeelool')->getLastSql());
+
     }
 
 }
