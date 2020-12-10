@@ -345,6 +345,14 @@ class Test01 extends Backend
             ->where('b.index_price', '=', 0)
             ->group('order_id')
             ->count();
+        $only_one_glass_order_list = $model->table('sales_flat_order')
+            ->where($map)
+            ->alias('a')
+            ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
+            ->group('order_id')
+            ->field('entity_id,sku,a.created_at,a.order_type,a.status,order_id,sum(qty_ordered) as all_qty_ordered')
+            ->select();
+        dump($only_one_glass_order_list);
         dump($total);
         dump($nopay_jingpian_glass);
         dump($model->getLastSql());
