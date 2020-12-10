@@ -314,4 +314,24 @@ class Test01 extends Backend
 
     }
 
+    public function test201()
+    {
+
+        $model = Db::connect('database.db_zeelool');
+        $createat = '2020-12-09 00:00:00 - 2020-12-09 23:59:59';
+        $sku = 'ZVFP102705-04';
+        $nopay_jingpian_glass = $model
+            ->table('sales_flat_order')
+            ->alias('a')
+            ->join(['sales_flat_order_item_prescription' => 'b'], 'a.entity_id=b.order_id')
+            ->where('a.created_at', 'between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]])
+            ->where('sku', 'like', $sku . '%')
+            ->where('b.coatiing_price', '=', 0)
+            ->where('b.index_price', '=', 0)
+            ->group('order_id')
+            ->count();
+        dump($nopay_jingpian_glass);
+        dump($model->getLastSql());
+    }
+
 }
