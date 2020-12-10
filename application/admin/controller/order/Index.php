@@ -877,22 +877,22 @@ EOF;
         $resultList = collection($resultList)->toArray();
 
         $entity_ids = array_column($resultList, 'entity_id');
-        $address = $model->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_ids]])->column('country_id,shipping_method', 'parent_id');
+        $address = $model->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_ids]])->column('country_id', 'parent_id');
 
         $payment = $model->table('sales_flat_order_payment')->where(['parent_id' => ['in', $entity_ids]])->column('method', 'parent_id');
 
 
         foreach ($resultList as $key => $value) {
 
-            $finalResult[$key]['country_id'] = $address[$value['entity_id']]['country_id'];
-                $finalResult[$key]['method'] = $payment[$value['entity_id']];
+            $finalResult[$key]['country_id'] = $address[$value['entity_id']];
+            $finalResult[$key]['method'] = $payment[$value['entity_id']];
             $finalResult[$key]['increment_id'] = $value['increment_id'];
             $finalResult[$key]['sku'] = $value['sku'];
             $finalResult[$key]['created_at'] = substr($value['created_at'], 0, 10);
             $finalResult[$key]['base_grand_total'] = $value['base_grand_total'];
             $finalResult[$key]['base_shipping_amount'] = $value['base_shipping_amount'];
 
-            if ($address[$value['entity_id']]['shipping_method'] == 'tablerate_bestway') {
+            if ($value['shipping_method'] == 'tablerate_bestway') {
                 $finalResult[$key]['label'] = 1;
             } else {
                 $finalResult[$key]['label'] = 0;
