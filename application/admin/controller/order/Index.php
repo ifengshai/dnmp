@@ -122,7 +122,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                 'Business express(7-12 business days)'
             ];
             foreach ($list as &$v) {
-                if (in_array($v['shipping_title'], $arr)) {
+                if (in_array($v['shipping_title'], $arr)) { 
                     $v['label'] = 1;
                 } else {
                     $v['label'] = 0;
