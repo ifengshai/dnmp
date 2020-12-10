@@ -498,7 +498,9 @@ class Instock extends Backend
                  */
                 $error_num = [];
                 foreach ($list as $k => $v) {
-
+                    $item_map['sku'] = $v['sku'];
+                    $item_map['is_del'] = 1;
+                    $sku_item = $item->where($item_map)->field('stock,available_stock,sample_num,wait_instock_num,occupy_stock,distribution_occupy_stock')->find();
                     //审核通过对虚拟库存的操作
                     //审核通过时按照补货需求比例 划分各站虚拟库存 如果未关联补货需求单则按照当前各站虚拟库存数量实时计算各站比例（弃用）
                     //采购过来的 有采购单的 1、有补货需求单的直接按比例分配 2、没有补货需求单的都给m站
@@ -521,7 +523,39 @@ class Instock extends Backend
                                     $platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->setInc('stock', $stock_num);
                                     //入库的时候减少待入库数量
                                     $platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->setDec('wait_instock_num', $stock_num);
-
+                                    //当前sku映射关系详情
+                                    $sku_platform = $platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->find();
+                                    //插入日志表
+                                    (new StockLog())->setData([
+                                        'type' => 2,
+                                        'site' => $val['website_type'],
+                                        'modular' => 10,
+                                        'change_type' => 16,
+                                        'sku' => $v['sku'],
+                                        'order_number' => $v['in_stock_number'],
+                                        'source' => 1,
+                                        'stock_before' => $sku_item['stock'],
+                                        'stock_change' => $v['in_stock_num'],
+                                        'available_stock_before' => $sku_item['available_stock'],
+                                        'available_stock_change' => $v['in_stock_num'],
+                                        'fictitious_before' => $sku_platform['stock'],
+                                        'fictitious_change' =>$stock_num,
+                                        'occupy_stock_before' => $sku_item['occupy_stock'],
+                                        'occupy_stock_change' => 0,
+                                        'distribution_stock_before' => $sku_item['distribution_occupy_stock'],
+                                        'distribution_stock_change' => 0,
+                                        'presell_num_before' =>$sku_platform['presell_num'],
+                                        'presell_num_change' => 0,
+                                        'sample_num_before' => $sku_item['sample_num'],
+                                        'sample_num_change' => $v['sample_num'],
+                                        'on_way_stock_before' => $sku_platform['plat_on_way_stock'],
+                                        'on_way_stock_change' =>0,
+                                        'wait_instock_num_before' => $sku_platform['wait_instock_num'],
+                                        'wait_instock_num_change' => -$stock_num,
+                                        'create_person' => session('admin.nickname'),
+                                        'create_time' => date('Y-m-d H:i:s'),
+                                        'number_type' => 3,
+                                    ]);
                                 } else {
                                     $num = round($v['in_stock_num'] * $val['rate']);
                                     $stock_num -= $num;
@@ -529,22 +563,119 @@ class Instock extends Backend
                                     $platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->setInc('stock', $num);
                                     //入库的时候减少待入库数量
                                     $platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->setDec('wait_instock_num', $num);
+                                    $sku_platform = $platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->find();
+                                    //插入日志表
+                                    (new StockLog())->setData([
+                                        'type' => 2,
+                                        'site' => $val['website_type'],
+                                        'modular' => 10,
+                                        'change_type' => 16,
+                                        'sku' => $v['sku'],
+                                        'order_number' => $v['in_stock_number'],
+                                        'source' => 1,
+                                        'stock_before' => $sku_item['stock'],
+                                        'stock_change' => $v['in_stock_num'],
+                                        'available_stock_before' => $sku_item['available_stock'],
+                                        'available_stock_change' => $v['in_stock_num'],
+                                        'fictitious_before' => $sku_platform['stock'],
+                                        'fictitious_change' =>$num,
+                                        'occupy_stock_before' => $sku_item['occupy_stock'],
+                                        'occupy_stock_change' => 0,
+                                        'distribution_stock_before' => $sku_item['distribution_occupy_stock'],
+                                        'distribution_stock_change' => 0,
+                                        'presell_num_before' =>$sku_platform['presell_num'],
+                                        'presell_num_change' => 0,
+                                        'sample_num_before' => $sku_item['sample_num'],
+                                        'sample_num_change' => $v['sample_num'],
+                                        'on_way_stock_before' => $sku_platform['plat_on_way_stock'],
+                                        'on_way_stock_change' =>0,
+                                        'wait_instock_num_before' => $sku_platform['wait_instock_num'],
+                                        'wait_instock_num_change' => -$num,
+                                        'create_person' => session('admin.nickname'),
+                                        'create_time' => date('Y-m-d H:i:s'),
+                                        'number_type' => 3,
+                                    ]);
                                 }
                             }
                         } else {
                             //记录没有采购比例直接入库的sku
                             $allocated->allowField(true)->save(['sku' => $v['sku'], 'change_num' => $v['in_stock_num'], 'create_time' => date('Y-m-d H:i:s')]);
 
-                            $item_platform_sku = $platform->where(['sku' => $v['sku'], 'platform_type' => 4])->field('platform_type,stock')->find();
+                            $item_platform_sku = $platform->where(['sku' => $v['sku'], 'platform_type' => 4])->find();
                             //sku没有同步meeloog站 无法添加虚拟库存 必须先同步
                             if (empty($item_platform_sku)) {
                                 $this->error('sku：' . $v['sku'] . '没有同步meeloog站，请先同步');
                             }
                             $platform->where(['sku' => $v['sku'], 'platform_type' => $item_platform_sku['platform_type']])->setInc('stock', $v['in_stock_num']);
+                            //入库的时候减少待入库数量
+                            $platform->where(['sku' => $v['sku'], 'platform_type' => 4])->setDec('wait_instock_num', $v['in_stock_num']);
+                            //插入日志表
+                            (new StockLog())->setData([
+                                'type' => 2,
+                                'site' => 4,
+                                'modular' => 10,
+                                'change_type' => 17,
+                                'sku' => $v['sku'],
+                                'order_number' => $v['in_stock_number'],
+                                'source' => 1,
+                                'stock_before' => $sku_item['stock'],
+                                'stock_change' => $v['in_stock_num'],
+                                'available_stock_before' => $sku_item['available_stock'],
+                                'available_stock_change' => $v['in_stock_num'],
+                                'fictitious_before' => $item_platform_sku['stock'],
+                                'fictitious_change' =>$v['in_stock_num'],
+                                'occupy_stock_before' => $sku_item['occupy_stock'],
+                                'occupy_stock_change' => 0,
+                                'distribution_stock_before' => $sku_item['distribution_occupy_stock'],
+                                'distribution_stock_change' => 0,
+                                'presell_num_before' =>$item_platform_sku['presell_num'],
+                                'presell_num_change' => 0,
+                                'sample_num_before' => $sku_item['sample_num'],
+                                'sample_num_change' => $v['sample_num'],
+                                'on_way_stock_before' => $item_platform_sku['plat_on_way_stock'],
+                                'on_way_stock_change' =>0,
+                                'wait_instock_num_before' => $item_platform_sku['wait_instock_num'],
+                                'wait_instock_num_change' => -$v['in_stock_num'],
+                                'create_person' => session('admin.nickname'),
+                                'create_time' => date('Y-m-d H:i:s'),
+                                'number_type' => 3,
+                            ]);
                         }
                     } //不是采购过来的 如果有站点id 说明是指定增加此平台sku
                     elseif ($v['platform_id']) {
+                        $item_platform_sku = $platform->where(['sku' => $v['sku'], 'platform_type' => $v['platform_id']])->find();
                         $platform->where(['sku' => $v['sku'], 'platform_type' => $v['platform_id']])->setInc('stock', $v['in_stock_num']);
+                        $platform->where(['sku' => $v['sku'], 'platform_type' => $v['platform_id']])->setDec('wait_instock_num', $v['in_stock_num']);
+                        (new StockLog())->setData([
+                            'type' => 2,
+                            'site' => $v['platform_id'],
+                            'modular' => 11,
+                            'change_type' => 18,
+                            'sku' => $v['sku'],
+                            'order_number' => $v['in_stock_number'],
+                            'source' => 1,
+                            'stock_before' => $sku_item['stock'],
+                            'stock_change' => $v['in_stock_num'],
+                            'available_stock_before' => $sku_item['available_stock'],
+                            'available_stock_change' => $v['in_stock_num'],
+                            'fictitious_before' => $item_platform_sku['stock'],
+                            'fictitious_change' =>$v['in_stock_num'],
+                            'occupy_stock_before' => $sku_item['occupy_stock'],
+                            'occupy_stock_change' => 0,
+                            'distribution_stock_before' => $sku_item['distribution_occupy_stock'],
+                            'distribution_stock_change' => 0,
+                            'presell_num_before' =>$item_platform_sku['presell_num'],
+                            'presell_num_change' => 0,
+                            'sample_num_before' => $sku_item['sample_num'],
+                            'sample_num_change' => $v['sample_num'],
+                            'on_way_stock_before' => $item_platform_sku['plat_on_way_stock'],
+                            'on_way_stock_change' =>0,
+                            'wait_instock_num_before' => $item_platform_sku['wait_instock_num'],
+                            'wait_instock_num_change' => -$v['in_stock_num'],
+                            'create_person' => session('admin.nickname'),
+                            'create_time' => date('Y-m-d H:i:s'),
+                            'number_type' => 3,
+                        ]);
                     } //没有采购单也没有站点id 说明是盘点过来的
                     else {
                         //根据当前sku 和当前 各站的虚拟库存进行分配
@@ -560,10 +691,72 @@ class Instock extends Backend
                                 //最后一个站点 剩余数量分给最后一个站
                                 if (($all_num - $key) == 1) {
                                     $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setInc('stock', $stock_num);
+                                    //插入日志表
+                                    (new StockLog())->setData([
+                                        'type' => 2,
+                                        'site' => $val['platform_type'],
+                                        'modular' => 12,
+                                        'change_type' => 20,
+                                        'sku' => $v['sku'],
+                                        'order_number' => $v['in_stock_number'],
+                                        'source' => 1,
+                                        'stock_before' => $sku_item['stock'],
+                                        'stock_change' => $stock_num,
+                                        'available_stock_before' => $sku_item['available_stock'],
+                                        'available_stock_change' => $v['in_stock_num'],
+                                        'fictitious_before' => $item_platform_sku['stock'],
+                                        'fictitious_change' =>$v['in_stock_num'],
+                                        'occupy_stock_before' => $sku_item['occupy_stock'],
+                                        'occupy_stock_change' => 0,
+                                        'distribution_stock_before' => $sku_item['distribution_occupy_stock'],
+                                        'distribution_stock_change' => 0,
+                                        'presell_num_before' =>$item_platform_sku['presell_num'],
+                                        'presell_num_change' => 0,
+                                        'sample_num_before' => $sku_item['sample_num'],
+                                        'sample_num_change' => $v['sample_num'],
+                                        'on_way_stock_before' => $item_platform_sku['plat_on_way_stock'],
+                                        'on_way_stock_change' =>0,
+                                        'wait_instock_num_before' => $item_platform_sku['wait_instock_num'],
+                                        'wait_instock_num_change' => -$v['in_stock_num'],
+                                        'create_person' => session('admin.nickname'),
+                                        'create_time' => date('Y-m-d H:i:s'),
+                                        'number_type' => 3,
+                                    ]);
                                 } else {
                                     $num = round($v['in_stock_num'] * $rate_rate);
                                     $stock_num -= $num;
                                     $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setInc('stock', $num);
+                                    //插入日志表
+                                    (new StockLog())->setData([
+                                        'type' => 2,
+                                        'site' => $val['platform_type'],
+                                        'modular' => 12,
+                                        'change_type' => 20,
+                                        'sku' => $v['sku'],
+                                        'order_number' => $v['in_stock_number'],
+                                        'source' => 1,
+                                        'stock_before' => $sku_item['stock'],
+                                        'stock_change' => $v['in_stock_num'],
+                                        'available_stock_before' => $sku_item['available_stock'],
+                                        'available_stock_change' => $v['in_stock_num'],
+                                        'fictitious_before' => $item_platform_sku['stock'],
+                                        'fictitious_change' =>$v['in_stock_num'],
+                                        'occupy_stock_before' => $sku_item['occupy_stock'],
+                                        'occupy_stock_change' => 0,
+                                        'distribution_stock_before' => $sku_item['distribution_occupy_stock'],
+                                        'distribution_stock_change' => 0,
+                                        'presell_num_before' =>$item_platform_sku['presell_num'],
+                                        'presell_num_change' => 0,
+                                        'sample_num_before' => $sku_item['sample_num'],
+                                        'sample_num_change' => $v['sample_num'],
+                                        'on_way_stock_before' => $item_platform_sku['plat_on_way_stock'],
+                                        'on_way_stock_change' =>0,
+                                        'wait_instock_num_before' => $item_platform_sku['wait_instock_num'],
+                                        'wait_instock_num_change' => -$v['in_stock_num'],
+                                        'create_person' => session('admin.nickname'),
+                                        'create_time' => date('Y-m-d H:i:s'),
+                                        'number_type' => 3,
+                                    ]);
                                 }
                             }
                         } else {
@@ -574,10 +767,72 @@ class Instock extends Backend
                                 //最后一个站点 剩余数量分给最后一个站
                                 if (($all_num - $key) == 1) {
                                     $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setInc('stock', $stock_num);
+                                    //插入日志表
+                                    (new StockLog())->setData([
+                                        'type' => 2,
+                                        'site' => $val['platform_type'],
+                                        'modular' => 12,
+                                        'change_type' => 20,
+                                        'sku' => $v['sku'],
+                                        'order_number' => $v['in_stock_number'],
+                                        'source' => 1,
+                                        'stock_before' => $sku_item['stock'],
+                                        'stock_change' => $v['in_stock_num'],
+                                        'available_stock_before' => $sku_item['available_stock'],
+                                        'available_stock_change' => $v['in_stock_num'],
+                                        'fictitious_before' => $item_platform_sku['stock'],
+                                        'fictitious_change' =>$v['in_stock_num'],
+                                        'occupy_stock_before' => $sku_item['occupy_stock'],
+                                        'occupy_stock_change' => 0,
+                                        'distribution_stock_before' => $sku_item['distribution_occupy_stock'],
+                                        'distribution_stock_change' => 0,
+                                        'presell_num_before' =>$item_platform_sku['presell_num'],
+                                        'presell_num_change' => 0,
+                                        'sample_num_before' => $sku_item['sample_num'],
+                                        'sample_num_change' => $v['sample_num'],
+                                        'on_way_stock_before' => $item_platform_sku['plat_on_way_stock'],
+                                        'on_way_stock_change' =>0,
+                                        'wait_instock_num_before' => $item_platform_sku['wait_instock_num'],
+                                        'wait_instock_num_change' => -$v['in_stock_num'],
+                                        'create_person' => session('admin.nickname'),
+                                        'create_time' => date('Y-m-d H:i:s'),
+                                        'number_type' => 3,
+                                    ]);
                                 } else {
                                     $num = round($v['in_stock_num'] * $val['stock'] / $whole_num);
                                     $stock_num -= $num;
                                     $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setInc('stock', $num);
+                                    //插入日志表
+                                    (new StockLog())->setData([
+                                        'type' => 2,
+                                        'site' => $val['platform_type'],
+                                        'modular' => 12,
+                                        'change_type' => 20,
+                                        'sku' => $v['sku'],
+                                        'order_number' => $v['in_stock_number'],
+                                        'source' => 1,
+                                        'stock_before' => $sku_item['stock'],
+                                        'stock_change' => $v['in_stock_num'],
+                                        'available_stock_before' => $sku_item['available_stock'],
+                                        'available_stock_change' => $v['in_stock_num'],
+                                        'fictitious_before' => $item_platform_sku['stock'],
+                                        'fictitious_change' =>$v['in_stock_num'],
+                                        'occupy_stock_before' => $sku_item['occupy_stock'],
+                                        'occupy_stock_change' => 0,
+                                        'distribution_stock_before' => $sku_item['distribution_occupy_stock'],
+                                        'distribution_stock_change' => 0,
+                                        'presell_num_before' =>$item_platform_sku['presell_num'],
+                                        'presell_num_change' => 0,
+                                        'sample_num_before' => $sku_item['sample_num'],
+                                        'sample_num_change' => $v['sample_num'],
+                                        'on_way_stock_before' => $item_platform_sku['plat_on_way_stock'],
+                                        'on_way_stock_change' =>0,
+                                        'wait_instock_num_before' => $item_platform_sku['wait_instock_num'],
+                                        'wait_instock_num_change' => -$v['in_stock_num'],
+                                        'create_person' => session('admin.nickname'),
+                                        'create_time' => date('Y-m-d H:i:s'),
+                                        'number_type' => 3,
+                                    ]);
                                 }
                             }
                         }
@@ -660,9 +915,6 @@ class Instock extends Backend
 
                     //更新商品表商品总库存
                     //总库存
-                    $item_map['sku'] = $v['sku'];
-                    $item_map['is_del'] = 1;
-                    $sku_item = $item->where($item_map)->field('stock,available_stock,sample_num,wait_instock_num')->find();
                     if ($v['sku']) {
                         //增加商品表里的商品库存、可用库存、留样库存
                         $stock_res = $item->where($item_map)->inc('stock', $v['in_stock_num'])->inc('available_stock', $v['in_stock_num'])->inc('sample_num', $v['sample_num'])->update();
@@ -767,6 +1019,8 @@ class Instock extends Backend
                         'wait_instock_num_change' => $v['sample_num'],
                         'create_person' => session('admin.nickname'),
                         'create_time' => date('Y-m-d H:i:s'),
+                        //'关联单号类型：1订单号 2子订单号 3入库单 4出库单 5盘点单 6调拨单'
+                        'number_type' => date('Y-m-d H:i:s'),
                     ]);
                     //插入日志表
                     (new StockLog())->setData([
