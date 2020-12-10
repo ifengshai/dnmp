@@ -366,7 +366,7 @@ class Test01 extends Backend
         $map['sku'] = ['in', ['VHP0189-01']];
         $model = Db::connect('database.db_zeelool');
         $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
-        $res = $model
+        $res = $model->table('sales_flat_order')
             ->where($map)
             ->alias('a')
             ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
