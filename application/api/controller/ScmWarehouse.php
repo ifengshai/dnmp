@@ -823,6 +823,8 @@ class ScmWarehouse extends Scm
         $in_stock_id = $this->request->request("in_stock_id");//入库单ID，
         $platform_id = $this->request->request("platform_id");//站点，判断是否是新创建入库 还是 质检单入库
         $result = false;
+
+        $this->_check->startTrans();
         $this->_in_stock->startTrans();
         $this->_in_stock_item->startTrans();
         $this->_product_bar_code_item->startTrans();
@@ -876,7 +878,7 @@ class ScmWarehouse extends Scm
                     if (empty($check_order_number)){
                         throw new Exception('质检单号不能为空');
                     }
-                    $check_info = $this->_check->where(['check_order_number'=>$check_order_number])->field('id,purchase_id,replenish_id');
+                    $check_info = $this->_check->where(['check_order_number'=>$check_order_number])->field('id,purchase_id,replenish_id')->find();
                     if (empty($check_info)){
                         throw new Exception('质检单不存在');
                     }
@@ -964,11 +966,7 @@ class ScmWarehouse extends Scm
                     if (empty($check_order_number)){
                         throw new Exception('质检单号不能为空');
                     }
-                    $check_id = $this->_check->where(['check_order_number'=>$check_order_number])->value('id');
-                    if (empty($check_id)){
-                        throw new Exception('质检单不存在');
-                    }
-                    $check_info = $this->_check->where(['check_order_number'=>$check_order_number])->field('id,purchase_id,replenish_id');
+                    $check_info = $this->_check->where(['check_order_number'=>$check_order_number])->field('id,purchase_id,replenish_id')->find();
                     if (empty($check_info)){
                         throw new Exception('质检单不存在');
                     }
@@ -1002,20 +1000,24 @@ class ScmWarehouse extends Scm
                 }
 
             }
+            $this->_check->commit();
             $this->_in_stock->commit();
             $this->_in_stock_item->commit();
             $this->_product_bar_code_item->commit();
         } catch (ValidateException $e) {
+            $this->_check->rollback();
             $this->_in_stock->rollback();
             $this->_in_stock_item->rollback();
             $this->_product_bar_code_item->rollback();
             $this->error($e->getMessage(), [], 444);
         } catch (PDOException $e) {
+            $this->_check->rollback();
             $this->_in_stock->rollback();
             $this->_in_stock_item->rollback();
             $this->_product_bar_code_item->rollback();
             $this->error($e->getMessage(), [], 444);
         } catch (Exception $e) {
+            $this->_check->rollback();
             $this->_in_stock->rollback();
             $this->_in_stock_item->rollback();
             $this->_product_bar_code_item->rollback();
