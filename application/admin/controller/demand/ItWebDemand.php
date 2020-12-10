@@ -395,6 +395,49 @@ class ItWebDemand extends Backend
             $list[$k]['entry_user_name'] = $user_detail['nickname']; //取提出人
             $list[$k]['web_designer_user_id'] = $web_designer_user_id['nickname']; //取提出人
             $list[$k]['copy_to_user_id'] = $copy_to_user_id['nickname']; //取提出人
+            //获取各组负责人
+            $list[$k]['web_designer_user_name'] = '';
+            if ($v['web_designer_user_id']) {
+                //获取php组长&组员
+                $web_userid_arr = explode(',', $v['web_designer_user_id']);
+                $web_users = Db::name("admin")
+                    ->whereIn("id", $web_userid_arr)
+                    ->column('nickname', 'id');
+                if (!empty($web_users)){
+                    $list[$k]['web_designer_user_name'] = implode(',',$web_users);
+                }else{
+                    $list[$k]['web_designer_user_name'] = $web_users;
+                }
+
+            }
+
+            $list[$k]['php_user_name'] = '';
+            if ($v['phper_user_id']) {
+                //获取php组长&组员
+                $php_userid_arr = explode(',', $v['phper_user_id']);
+                $php_users = Db::name("admin")
+                    ->whereIn("id", $php_userid_arr)
+                    ->column('nickname', 'id');
+                if (!empty($php_users)){
+                    $list[$k]['php_user_name'] = implode(',',$php_users);
+                }else{
+                    $list[$k]['php_user_name'] = $php_users;
+                }
+            }
+
+            $list[$k]['app_user_name'] = '';
+            if ($v['app_user_id']) {
+                //获取php组长&组员
+                $app_userid_arr = explode(',', $v['app_user_id']);
+                $app_users = Db::name("admin")
+                    ->whereIn("id", $app_userid_arr)
+                    ->column('nickname', 'id');
+                if (!empty($app_users)){
+                    $list[$k]['app_user_name'] = implode(',',$app_users);
+                }else{
+                    $list[$k]['app_user_name'] = $app_users;
+                }
+            }
             //站点
             if ($v['site'] ==1){
                 $list[$k]['site'] = 'zeelool';
@@ -410,10 +453,21 @@ class ItWebDemand extends Backend
                 $list[$k]['site'] = 'rufoo';
             }elseif ($v['site'] ==7){
                 $list[$k]['site'] = 'toloog';
-            }else{
+            }elseif ($v['site'] ==8){
                 $list[$k]['site'] = 'other';
             }
-
+            elseif ($v['site'] ==9){
+                $list[$k]['site'] = 'ZeeloolEs';
+            }
+            elseif ($v['site'] ==10){
+                $list[$k]['site'] = 'ZeeloolDe';
+            }
+            elseif ($v['site'] ==11){
+                $list[$k]['site'] = 'ZeeloolJp';
+            }else{
+                $list[$k]['site'] = 'voogmechic';
+            }
+//
             //任务类型
             if ($v['site_type'] ==1){
                 $list[$k]['site_type'] = 'bug';
@@ -489,6 +543,8 @@ class ItWebDemand extends Backend
                 $list[$k]['pm_audit_status'] ='是';
             }
         }
+
+
             //从数据库查询需要的数据
             $spreadsheet = new Spreadsheet();
 
@@ -511,7 +567,10 @@ class ItWebDemand extends Backend
                 ->setCellValue("P1", "是否需要测试")
                 ->setCellValue("Q1", "是否超时")
                 ->setCellValue("R1", "是否拒绝")
-                ->setCellValue("S1", "是否存在过pending");
+                ->setCellValue("S1", "是否存在过pending")
+                ->setCellValue("T1", "前端负责人")
+                ->setCellValue("U1", "后端负责人")
+                ->setCellValue("V1", "APP负责人");
             foreach ($list as $key => $value) {
                 $spreadsheet->getActiveSheet()->setCellValueExplicit("A" . ($key * 1 + 2), $value['id'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
                 $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['site']);
@@ -535,6 +594,9 @@ class ItWebDemand extends Backend
                 $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 1 + 2), $value['overtime']);
                 $spreadsheet->getActiveSheet()->setCellValue("R" . ($key * 1 + 2), $value['web_remarks']);
                 $spreadsheet->getActiveSheet()->setCellValue("S" . ($key * 1 + 2), $value['pm_audit_status']);
+                $spreadsheet->getActiveSheet()->setCellValue("T" . ($key * 1 + 2), $value['web_designer_user_name']);
+                $spreadsheet->getActiveSheet()->setCellValue("U" . ($key * 1 + 2), $value['php_user_name']);
+                $spreadsheet->getActiveSheet()->setCellValue("V" . ($key * 1 + 2), $value['app_user_name']);
 
             }
 
@@ -567,7 +629,7 @@ class ItWebDemand extends Backend
             $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
             $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
 
-            $spreadsheet->getActiveSheet()->getStyle('A1:S' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            $spreadsheet->getActiveSheet()->getStyle('A1:V' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
             $spreadsheet->setActiveSheetIndex(0);
 
             $format = 'xlsx';
