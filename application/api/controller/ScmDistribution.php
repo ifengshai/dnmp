@@ -1387,13 +1387,15 @@ class ScmDistribution extends Scm
                 $store_house_ids = $this->_stock_house->where(['type'=>2, 'coding'=> ['like', '%' . $query . '%']])->column('id');
                 $item_order_number_store = [];
                 if($store_house_ids) {
-                    $order_id_store = $this->_new_order_process->where(['store_house_id'=>['in', $store_house_ids]])->column('order_id');
-                    $item_order_number_store = $this->_new_order_item_process->where(['order_id'=>['in', $order_id_store]])->column('item_order_number');
+                    $item_order_number_store = $this->_new_order_item_process
+                        ->where(['abnormal_house_id'=>['in', $store_house_ids]])
+                        ->column('id');
                 }
-                $item_order_number_item = $this->_new_order_item_process->where(['item_order_number'=> ['like', $query . '%']])->column('item_order_number');
-                $item_order_number = array_merge($item_order_number_item, $item_order_number_store);
-                if($item_order_number) $where['a.item_order_number'] = ['in', $item_order_number];
-
+                $item_ids = $this->_new_order_item_process
+                    ->where(['item_order_number'=> ['like', $query . '%']])
+                    ->column('id');
+                $item_ids = array_merge($item_ids, $item_order_number_store);
+                if($item_ids) $where['a.id'] = ['in', $item_ids];
             }
             $list = $this->_new_order_item_process
                 ->alias('a')
