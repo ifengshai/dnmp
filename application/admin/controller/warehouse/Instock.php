@@ -556,7 +556,7 @@ class Instock extends Backend
                         $stock_all_num = array_sum(array_column($item_platform_sku, 'stock'));
                         if ($stock_all_num == 0) {
                             $rate_rate = 1/$all_num;
-                            foreach ($item_platform_sku as $key => $val) { 
+                            foreach ($item_platform_sku as $key => $val) {
                                 //最后一个站点 剩余数量分给最后一个站
                                 if (($all_num - $key) == 1) {
                                     $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setInc('stock', $stock_num);
@@ -662,6 +662,7 @@ class Instock extends Backend
                     //总库存
                     $item_map['sku'] = $v['sku'];
                     $item_map['is_del'] = 1;
+                    $sku_item = $item->where($item_map)->field('stock,available_stock,sample_num,wait_instock_num')->find();
                     if ($v['sku']) {
                         //增加商品表里的商品库存、可用库存、留样库存
                         $stock_res = $item->where($item_map)->inc('stock', $v['in_stock_num'])->inc('available_stock', $v['in_stock_num'])->inc('sample_num', $v['sample_num'])->update();
@@ -708,6 +709,96 @@ class Instock extends Backend
                         $orderReturn->where(['id' => $check_res['order_return_id']])->update(['in_stock_status' => 1]);
                     }
 
+                    //插入日志表
+                    (new StockLog())->setData([
+                        //'大站点类型：1网站 2魔晶',
+                        'type' => 2,
+                        //'站点类型：1Zeelool  2Voogueme 3Nihao 4Meeloog 5Wesee 8Amazon 9Zeelool_es 10Zeelool_de 11Zeelool_jp'
+                        'site' => 2,
+                        //'模块：1普通订单 2配货 3质检 4审单 5异常处理 6更改镜架 7取消订单 8补发 9赠品 10采购入库 11出入库 12盘点 13调拨'
+                        'modular' => 2,
+                        //'变动类型：1非预售下单 2预售下单-虚拟仓>0 3预售下单-虚拟仓<0 4配货 5质检拒绝-镜架报损 6审单-成功 7审单-配错镜框
+                        // 8加工异常打回待配货 9印logo异常打回待配货 10更改镜架-配镜架前 11更改镜架-配镜架后 12取消订单-配镜架前 13取消订单-配镜架后
+                        // 14补发 15赠品 16采购-有比例入库 17采购-没有比例入库 18手动入库 19手动出库 20盘盈入库 21盘亏出库 22调拨 23调拨 24库存调拨'
+                        'change_type' => 2,
+                        // '关联sku'
+                        'sku' => $v['sku'],
+                        //'关联订单号或子单号'
+                        'order_number' => $v['sku'],
+                        //'关联变化的ID'
+                        'public_id' => $v['in_stock_id'],
+                        //'操作端：1PC端 2PDA'
+                        'source' => 1,
+                        //'总库存变动前'
+                        'stock_before' => 1,
+                        //'总库存变化量：正数为加，负数为减'
+                        'stock_change' => $v['in_stock_num'],
+                        //'可用库存变动前'
+                        'available_stock_before' => $v['in_stock_num'],
+                        //'可用库存变化量：正数为加，负数为减'
+                        'available_stock_change' => $v['in_stock_num'],
+                        // '虚拟仓库存变动前'
+                        'fictitious_before' => $v['sample_num'],
+                        // '虚拟仓库存变化量：正数为加，负数为减'
+                        'fictitious_change' => $v['sample_num'],
+                        //'订单占用变动前'
+                        'occupy_stock_before' => $v['sample_num'],
+                        //'订单占用变化量：正数为加，负数为减'
+                        'occupy_stock_change' => $v['sample_num'],
+                        //'配货占用变动前'
+                        'distribution_stock_before' => $v['sample_num'],
+                        //'配货占用变化量：正数为加，负数为减
+                        'distribution_stock_change' => $v['sample_num'],
+                        //'预售变动前'
+                        'presell_num_before' => $v['sample_num'],
+                        //'预售变化量：正数为加，负数为减'
+                        'presell_num_change' => $v['sample_num'],
+                        //'留样库存变动前'
+                        'sample_num_before' => $v['sample_num'],
+                        //'留样库存变化量：正数为加，负数为减'
+                        'sample_num_change' => $v['sample_num'],
+                        //'在途库存变动前'
+                        'on_way_stock_before' => $v['sample_num'],
+                        //'在途库存变化量：正数为加，负数为减'
+                        'on_way_stock_change' => $v['sample_num'],
+                        //'待入库变动前'
+                        'wait_instock_num_before' => $v['sample_num'],
+                        //'待入库变化量：正数为加，负数为减'
+                        'wait_instock_num_change' => $v['sample_num'],
+                        'create_person' => session('admin.nickname'),
+                        'create_time' => date('Y-m-d H:i:s'),
+                    ]);
+                    //插入日志表
+                    (new StockLog())->setData([
+                        'type' => 2,
+                        'site' => 2,
+                        'modular' => 2,
+                        'change_type' => 2,
+                        'sku' => $v['sku'],
+                        'order_number' => $v['sku'],
+                        'public_id' => $v['in_stock_id'],
+                        'source' => 1,
+                        'stock_before' => 1,
+                        'stock_change' => $v['in_stock_num'],
+                        'available_stock_before' => $v['in_stock_num'],
+                        'available_stock_change' => $v['in_stock_num'],
+                        'fictitious_before' => $v['sample_num'],
+                        'fictitious_change' => $v['sample_num'],
+                        'occupy_stock_before' => $v['sample_num'],
+                        'occupy_stock_change' => $v['sample_num'],
+                        'distribution_stock_before' => $v['sample_num'],
+                        'distribution_stock_change' => $v['sample_num'],
+                        'presell_num_before' => $v['sample_num'],
+                        'presell_num_change' => $v['sample_num'],
+                        'sample_num_before' => $v['sample_num'],
+                        'sample_num_change' => $v['sample_num'],
+                        'on_way_stock_before' => $v['sample_num'],
+                        'on_way_stock_change' => $v['sample_num'],
+                        'wait_instock_num_before' => $v['sample_num'],
+                        'wait_instock_num_change' => $v['sample_num'],
+                        'create_person' => session('admin.nickname'),
+                        'create_time' => date('Y-m-d H:i:s'),
+                    ]);
 
                     //插入日志表
                     (new StockLog())->setData([
