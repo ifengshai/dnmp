@@ -207,7 +207,9 @@ class SingleItems extends Backend
                     ->join(['sales_flat_order_item_prescription' => 'b'], 'a.entity_id=b.order_id')
                     ->where('a.created_at', 'between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]])
                     ->where('sku', 'like', $sku . '%')
+                    ->where('a.order_type', '=', 1)
                     ->where('b.coatiing_price', '=', 0)
+                    ->where('a.status', 'in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal'])
                     ->where('b.index_price', '=', 0)
                     ->group('order_id')
                     ->count();
