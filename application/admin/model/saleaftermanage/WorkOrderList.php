@@ -841,7 +841,7 @@ class WorkOrderList extends Model
                     //从网站接口获取镜片编码、文案、语种文案
                     $lens_number = '';
                     $web_lens_name = '';
-                    if($lensId && $coatingId && $colorId){
+                    if($lensId){
                         $postData = [
                             'sku'=>trim($changeLens['original_sku']),
                             'prescription_type' => $recipe_type,
@@ -1825,6 +1825,26 @@ class WorkOrderList extends Model
             ];
             $resultInfo = $_work_order_recept->where(['id' => $id])->update($data);
 
+            $measure_choose_id = $_work_order_measure->where('id',$measure_id)->value('measure_choose_id');
+            //不是自动处理完成
+            if(1 != $is_auto_complete){
+                //补发
+                if(7 == $measure_choose_id){
+                    $this->createOrder($work->work_platform, $work->id);
+                }elseif(9 == $measure_choose_id){//发送优惠券
+                    $this->presentCoupon($work->id);
+                }elseif(10 == $measure_choose_id){//赠送积分
+                    $this->presentIntegral($work->id);
+                }elseif(13 == $measure_choose_id){//修改地址
+                    $this->presentAddress($work, $measure_id);
+                }
+            }
+
+            //措施不是补发的时候扣减库存，是补发的时候不扣减库存，因为补发的时候库存已经扣减过了
+            if ($resultInfo && 1 == $data['recept_status'] && 7 != $measure_choose_id){
+                $this->deductionStock($work_id, $measure_id);
+            }
+
             //删除同样的承接组数据
             $where = [
                 'work_id'=>$work_id,
@@ -1872,26 +1892,6 @@ class WorkOrderList extends Model
             }
             $this->where(['id' => $work_id])->update($dataWorkOrder);
 
-            $measure_choose_id = $_work_order_measure->where('id',$measure_id)->value('measure_choose_id');
-            //不是自动处理完成
-            if(1 != $is_auto_complete){
-                //补发
-                if(7 == $measure_choose_id){
-                    $this->createOrder($work->work_platform, $work->id);
-                }elseif(9 == $measure_choose_id){//发送优惠券
-                    $this->presentCoupon($work->id);
-                }elseif(10 == $measure_choose_id){//赠送积分
-                    $this->presentIntegral($work->id);
-                }elseif(13 == $measure_choose_id){//修改地址
-                    $this->presentAddress($work, $measure_id);
-                }
-            }
-
-            //措施不是补发的时候扣减库存，是补发的时候不扣减库存，因为补发的时候库存已经扣减过了
-            if ($resultInfo && 1 == $data['recept_status'] && 7 != $measure_choose_id){
-                $this->deductionStock($work_id, $measure_id);
-            }
-
             $_work_order_recept->commit();
             $_work_order_measure->commit();
             $this->commit();
@@ -1921,6 +1921,7 @@ class WorkOrderList extends Model
             return false;
         }
         $whereMeasure['work_id'] = $work_id;
+        $whereMeasure['measure_id'] = $measure_id;
         $whereMeasure['change_type'] = $measuerInfo;
         $result = WorkOrderChangeSku::where($whereMeasure)->field('id,increment_id,platform_type,change_type,original_sku,original_number,change_sku,change_number,item_order_number')->select();
         if (!$result) {

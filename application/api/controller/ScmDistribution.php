@@ -522,7 +522,7 @@ class ScmDistribution extends Scm
             $this->error(__('子订单不存在'), [], 403);
         }
         //扫码配镜片，定制片 先取出 暂存库位才可操作
-        if(3 == $check_status && 3 == $item_process_info['order_prescription_type'] && 2 != $item_process_info['customize_status']){
+        if(3 == $check_status && 3 == $item_process_info['order_prescription_type'] && 1 == $item_process_info['customize_status']){
             $this->error(__('请先将定制片从暂存库位取出'), [], 405);
         }
 
@@ -1390,12 +1390,13 @@ class ScmDistribution extends Scm
                     $order_id_store = $this->_new_order_process->where(['store_house_id'=>['in', $store_house_ids]])->column('order_id');
                     $item_order_number_store = $this->_new_order_item_process->where(['order_id'=>['in', $order_id_store]])->column('item_order_number');
                 }
-                $item_order_number_item = $this->_new_order_item_process->where(['item_order_number'=> ['like', '%' . $query . '%']])->column('item_order_number');
+                $item_order_number_item = $this->_new_order_item_process->where(['item_order_number'=> ['like', $query . '%']])->column('item_order_number');
                 $item_order_number = array_merge($item_order_number_item, $item_order_number_store);
                 if($item_order_number) $where['a.item_order_number'] = ['in', $item_order_number];
 
             }
             $list = $this->_new_order_item_process
+                ->alias('a')
                 ->where($where)
                 ->join(['fa_order_process'=> 'b'],'a.order_id=b.order_id','left')
                 ->field('b.store_house_id,a.item_order_number')
