@@ -330,6 +330,8 @@ class Test01 extends Backend
             ->where('b.index_price', '=', 0)
             ->group('order_id')
             ->count();
+        dump($nopay_jingpian_glass);
+        dump($model->getLastSql());
     }
 
 }
