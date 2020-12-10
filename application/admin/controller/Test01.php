@@ -358,6 +358,7 @@ class Test01 extends Backend
         dump($model->getLastSql());
     }
 
+    //商品转化率的销售副数 销量统计的销量
     public function test300()
     {
         $createat = '2020-12-09 00:00:00 - 2020-12-09 23:59:59';
@@ -373,14 +374,15 @@ class Test01 extends Backend
             ->group('sku')
             ->order('num desc')
             ->column('round(sum(b.qty_ordered)) as num', 'trim(sku)');
-
+        dump($model->getLastSql());
         $data = '2020-12-09';
         $time_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $data . "'")];
-        $z_sku_list= Db::connect('database.db_zeelool')
+        $z_sku_list= $model
             ->table('sales_flat_order_item')
             ->where('sku', 'like', 'VHP0189-01' . '%')
             ->where($time_where1)
             ->sum('qty_ordered');
+        dump($model->getLastSql());
         dump($res);
         dump($z_sku_list);
     }
