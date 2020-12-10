@@ -358,4 +358,31 @@ class Test01 extends Backend
         dump($model->getLastSql());
     }
 
+    public function test300()
+    {
+        $createat = '2020-12-09 00:00:00 - 2020-12-09 23:59:59';
+        $createat = explode(' ',$createat);
+        $map['a.created_at'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3]  . ' ' . $createat[4]]];
+        $map['sku'] = ['in', ['VHP0189-01']];
+        $model = Db::connect('database.db_zeelool');
+        $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
+        $res = $model
+            ->where($map)
+            ->alias('a')
+            ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
+            ->group('sku')
+            ->order('num desc')
+            ->column('round(sum(b.qty_ordered)) as num', 'trim(sku)');
+
+        $data = '2020-12-09';
+        $time_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $data . "'")];
+        $z_sku_list= Db::connect('database.db_zeelool')
+            ->table('sales_flat_order_item')
+            ->where('sku', 'like', 'VHP0189-01' . '%')
+            ->where($time_where1)
+            ->sum('qty_ordered');
+        dump($res);
+        dump($z_sku_list);
+    }
+
 }
