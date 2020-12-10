@@ -1253,6 +1253,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
         },
         edit: function () {
             if (!$('.item_order_selectpicker').val()) {platform_order();}
+            if(Config.work_type == 2 && Config.work_status == 1){$('#c-order_sku').attr("disabled",true);}
             Controller.api.bindevent();
             //进入页面展示按钮下的数据
             $("input[name='row[measure_choose_id][]']:checked").each(function (i) {
