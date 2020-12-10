@@ -24,22 +24,22 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                 columns: [
                     [
                         { checkbox: true },
-                        { field: 'id', title: __('记录标识'), operate: false },
-                        { field: 'increment_id', title: __('订单号'), operate: 'like' },
-                        { field: 'label', title: __('是否为商业快递'), custom: { 1: 'danger', 0: 'gray' }, searchList: { 1: '是', 0: '否' }, operate: false, formatter: Table.api.formatter.status },
-                        { field: 'country_id', title: __('国家'), operate: 'like' },
-                        { field: 'customer_firstname', title: __('客户名称'), operate: 'like' },
-                        { field: 'customer_email', title: __('邮箱'), operate: 'like' },
-                        { field: 'status', title: __('状态'), addClass: 'selectpicker', data: 'multiple', operate: 'IN', searchList: { "processing": __('processing'), 'complete': 'complete', 'creditcard_failed': 'creditcard_failed', 'creditcard_pending': 'creditcard_pending', 'holded': 'holded', 'payment_review': 'payment_review', 'paypal_canceled_reversal': 'paypal_canceled_reversal', 'paypal_reversed': 'paypal_reversed', 'pending': 'pending', 'canceled': 'canceled', 'closed': 'closed', "free_processing": __('free_processing') } },
-                        { field: 'base_grand_total', title: __('订单金额'), operate: false, formatter: Controller.api.formatter.float_format },
+                        { field: 'id', title: __('记录标识'), operate: false }, 
+                        { field: 'increment_id', title: __('订单号'), operate: 'like' }, 
+                        { field: 'label', title: __('是否为商业快递'), custom: { 1: 'danger', 0: 'gray' }, searchList: { 1: '是', 0: '否' }, operate: false, formatter: Table.api.formatter.status }, 
+                        { field: 'country_id', title: __('国家'), operate: 'like' }, 
+                        { field: 'customer_firstname', title: __('客户名称'), operate: 'like' }, 
+                        { field: 'customer_email', title: __('邮箱'), operate: 'like' }, 
+                        { field: 'status', title: __('状态'), addClass: 'selectpicker', data: 'multiple', operate: 'IN', searchList: { "processing": __('processing'), 'complete': 'complete', 'creditcard_failed': 'creditcard_failed', 'creditcard_pending': 'creditcard_pending', 'holded': 'holded', 'payment_review': 'payment_review', 'paypal_canceled_reversal': 'paypal_canceled_reversal', 'paypal_reversed': 'paypal_reversed', 'pending': 'pending', 'canceled': 'canceled', 'closed': 'closed', "free_processing": __('free_processing') } }, 
+                        { field: 'base_grand_total', title: __('订单金额'), operate: false, formatter: Controller.api.formatter.float_format }, 
                         // { field: 'base_shipping_amount', title: __('邮费'), operate: false, formatter: Controller.api.formatter.float_format },
                        
-                        { field: 'order_type', title: __('订单类型'), custom: { 1: 'blue', 2: 'blue', 3: 'blue', 4: 'blue', 5: 'blue', 6: 'blue' }, searchList: { 1: '普通订单', 2: '批发单', 3: '网红单', 4: '补发单', 5: '补差价', 6: '一件代发' }, formatter: Table.api.formatter.status },
+                        { field: 'order_type', title: __('订单类型'), custom: { 1: 'blue', 2: 'blue', 3: 'blue', 4: 'blue', 5: 'blue', 6: 'blue' }, searchList: { 1: '普通订单', 2: '批发单', 3: '网红单', 4: '补发单', 5: '补差价', 6: '一件代发' }, formatter: Table.api.formatter.status }, 
                         // { field: 'sku', title: __('SKU'), operate: 'like', visible: false },
-                        { field: 'created_at', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange',visible:false },
-                        { field: 'created_at', title: __('创建时间'), operate: false},
+                        { field: 'created_at', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange',visible:false }, 
+                        { field: 'created_at', title: __('创建时间'), operate: false}, 
                         {
-                            field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
+                            field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [ 
                                 {
                                     name: 'detail',
                                     text: '详情',
@@ -84,7 +84,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                 };
                 table.bootstrapTable('refresh', {});
                 return false;
-            });
+            }); 
 
             
             // 为表格绑定事件
