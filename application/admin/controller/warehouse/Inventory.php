@@ -2150,6 +2150,20 @@ class Inventory extends Backend
             //开启事务
             Db::startTrans();
             try {
+                //获取当前可用库存、总库存
+                $item_before = $_item
+                    ->field('available_stock,occupy_stock,stock')
+                    ->where(['sku' => $warehouse_original_sku])
+                    ->find()
+                ;
+
+                //获取当前对应站点虚拟库存
+                $platform_before = $_platform_sku
+                    ->field('stock')
+                    ->where(['sku' => $warehouse_original_sku, 'platform_type' => $order_platform])
+                    ->find()
+                ;
+
                 if (1 == $type) { //赠品
                     //减少可用库存、总库存
                     $_item
@@ -2173,16 +2187,23 @@ class Inventory extends Backend
                 //记录库存日志
                 $_stock_log->setData([
                     'type'                      => 2,
-                    'two_type'                  => 1 == $type ? 9 : 8,
-                    'stock_change'              => 1 == $type ? -$original_number : 0,
-                    'occupy_stock_change'       => 2 == $type ? $original_number : 0,
+                    'site'                      => $order_platform,
+                    'modular'                   => 1 == $type ? 9 : 8,
+                    'change_type'               => 1 == $type ? 15 : 14,
                     'sku'                       => $warehouse_original_sku,
                     'order_number'              => $increment_id,
                     'public_id'                 => $work_id,
+                    'source'                    => 1,
+                    'available_stock_before'    => $item_before['available_stock'],
                     'available_stock_change'    => -$original_number,
+                    'stock_before'              => 1 == $type ? $item_before['stock'] : 0,
+                    'stock_change'              => 1 == $type ? -$original_number : 0,
+                    'occupy_stock_before'       => 2 == $type ? $item_before['occupy_stock'] : 0,
+                    'occupy_stock_change'       => 2 == $type ? $original_number : 0,
+                    'fictitious_before'         => $platform_before['stock'],
+                    'fictitious_change'         => -$original_number,
                     'create_person'             => session('admin.nickname'),
-                    'create_time'               => date('Y-m-d H:i:s'),
-                    'remark'                    => '工单补发、赠品-SKU减少可用库存,增加订单占用'
+                    'create_time'               => time()
                 ]);
 
                 Db::commit();
