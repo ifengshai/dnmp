@@ -322,6 +322,17 @@ class Test01 extends Backend
         $createat = '2020-12-09 00:00:00 - 2020-12-09 23:59:59';
         $createat = explode(' ', $createat);
         $sku = 'ZVFP102705-04';
+        $map['sku'] = ['like', $sku . '%'];
+        $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        $map['a.created_at'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]]];
+        $map['a.order_type'] = ['=', 1];
+        $total = $model->table('sales_flat_order')
+            ->where($map)
+            ->alias('a')
+            ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
+            ->group('order_id')
+            ->field('entity_id,sku,a.created_at,a.order_type,a.status')
+            ->count();
         $nopay_jingpian_glass = $model
             ->table('sales_flat_order')
             ->alias('a')
@@ -332,6 +343,7 @@ class Test01 extends Backend
             ->where('b.index_price', '=', 0)
             ->group('order_id')
             ->count();
+        dump($total);
         dump($nopay_jingpian_glass);
         dump($model->getLastSql());
     }
