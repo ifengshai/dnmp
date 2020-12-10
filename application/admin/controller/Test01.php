@@ -318,7 +318,9 @@ class Test01 extends Backend
     {
 
         $model = Db::connect('database.db_zeelool');
+
         $createat = '2020-12-09 00:00:00 - 2020-12-09 23:59:59';
+        $createat = explode(' ', $createat);
         $sku = 'ZVFP102705-04';
         $nopay_jingpian_glass = $model
             ->table('sales_flat_order')
