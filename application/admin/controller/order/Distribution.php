@@ -270,6 +270,7 @@ class Distribution extends Backend
                 ->order('$sort, $order')
                 ->limit($offset, $limit)
                 ->select();
+
             $list = collection($list)->toArray();
 
             //库位号列表
