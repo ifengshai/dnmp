@@ -389,8 +389,10 @@ class Distribution extends Backend
             $change_lens = $change_lens->toArray();
             if($change_lens['pd_l'] && $change_lens['pd_r']){
                 $change_lens['pd'] = '';
+                $change_lens['pdcheck'] = '';
             }else{
                 $change_lens['pd'] = $change_lens['pd_r'] ?: $change_lens['pd_l'];
+                $change_lens['pdcheck'] = 'on';
             }
             $result = array_merge($result,$change_lens);
         }
