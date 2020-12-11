@@ -151,7 +151,7 @@ class OcCustomerAfterSalesWorkOrder extends Backend
         $row  = \app\common\model\OcCustomerAfterSalesWorkOrder::get($ids)->toArray();
         $photo_href  =explode(',',$row['images']);
         foreach ($photo_href as $key=>$item){
-            $photo_href[$key]= 'https://pc.zeelool.com/media'.$item;
+            $photo_href[$key]= config('zeelool_url').'media/'.$item;
         }
         $row['images'] = $photo_href;
         $email = Db::table('fa_zendesk')
@@ -174,7 +174,7 @@ class OcCustomerAfterSalesWorkOrder extends Backend
 
         }
         $row['email_message'] = $email;
-        
+
 
         $this->assign('row',$row);
         return $this->view->fetch();
