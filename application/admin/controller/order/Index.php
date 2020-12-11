@@ -112,39 +112,52 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                     $smap['status'] = ['in', $filter['status']];
                 }
                 $ids = $model->getOrderId($smap);
-                $map['a.entity_id'] = ['in', $ids];
+                $map['entity_id'] = ['in', $ids];
                 unset($filter['sku']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
 
+
+            //国家搜索
+            if ($filter['country_id']) {
+                $amap['country_id'] = $filter['country_id'];
+                $amap['address_type'] = 'shipping';
+                $ids = Db::connect($db)->table('sales_flat_order_address')->where($amap)->column('parent_id');
+                $map['entity_id'] = ['in', $ids];
+                unset($filter['country_id']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
+
+
             if (!$filter) {
-                $map['a.created_at'] = ['between', ['2020-01-01', date('Y-m-d H:i:s')]];
+                $map['created_at'] = ['between', ['2020-01-01', date('Y-m-d H:i:s')]];
             }
 
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
 
-            $map['b.address_type'] = 'shipping';
-            $total = $model->alias('a')->join(['sales_flat_order_address' => 'b'], 'a.entity_id=b.parent_id')
+            $total = $model
                 ->where($where)
                 ->where($map)
                 ->count();
 
-            $list = $model->alias('a')->field('a.entity_id,increment_id,b.country_id,customer_firstname,customer_email,status,base_grand_total,base_shipping_amount,custom_order_prescription_type,order_type,a.created_at,a.shipping_description,a.shipping_method')
-                ->join(['sales_flat_order_address' => 'b'], 'a.entity_id=b.parent_id')
+            $list = $model->field('entity_id,increment_id,customer_firstname,customer_email,status,base_grand_total,base_shipping_amount,custom_order_prescription_type,order_type,created_at,shipping_description,shipping_method')
                 ->where($where)
                 ->where($map)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
-            
-            $list = collection($list)->toArray();
 
+            $list = collection($list)->toArray();
+            //查询国家
+            $entity_ids = array_column($list, 'entity_id');
+            $address = Db::connect($db)->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_ids], 'address_type' => 'shipping'])->column('country_id', 'parent_id');
             foreach ($list as &$v) {
                 if ($v['shipping_method'] == 'tablerate_bestway') {
                     $v['label'] = 1;
                 } else {
                     $v['label'] = 0;
                 }
+                $v['country_id'] = $address[$v['entity_id']];
             }
             unset($v);
 
