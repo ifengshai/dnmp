@@ -150,10 +150,13 @@ class OcCustomerAfterSalesWorkOrder extends Backend
         }
         $row  = \app\common\model\OcCustomerAfterSalesWorkOrder::get($ids)->toArray();
         $photo_href  =explode(',',$row['images']);
+        dump($photo_href);
         foreach ($photo_href as $key=>$item){
             $photo_href[$key]= config('zeelool_url').'media/'.$item;
         }
+        dump($photo_href);
         $row['images'] = $photo_href;
+        dump($row);die();
         $email = Db::table('fa_zendesk')
             ->alias('ze')
             ->join("fa_admin ad",'ze.due_id = ad.id','left')
