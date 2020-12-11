@@ -257,7 +257,7 @@ class Distribution extends Backend
                 ->join(['fa_order_process' => 'c'], 'a.order_id=c.order_id')
                 ->where($where)
                 ->where($map)
-                ->order('$sort, $order')
+                ->order($sort, $order)
                 ->count();
 
             $list = $this->model
@@ -267,9 +267,10 @@ class Distribution extends Backend
                 ->join(['fa_order_process' => 'c'], 'a.order_id=c.order_id')
                 ->where($where)
                 ->where($map)
-                ->order('$sort, $order')
-                ->limit($offset, $limit)
+                ->order($sort,$order)
+                ->limit($offset,$limit)
                 ->select();
+
             $list = collection($list)->toArray();
 
             //库位号列表
