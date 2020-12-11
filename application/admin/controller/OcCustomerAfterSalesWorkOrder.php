@@ -148,12 +148,38 @@ class OcCustomerAfterSalesWorkOrder extends Backend
                 $this->error('操作失败');
             }
         }
-        $row = Db::connect('database.db_zeelool')->table('oc_customer_after_sales_work_order oc')
-            ->join("mojing.fa_zendesk ze",'ze.email = oc.email','left')
-            ->join("mojing.fa_admin ad",'ze.due_id = ad.id','left')
-            ->field('oc.*,ze.id as ze_id,ze.ticket_id,ze.subject,ze.to_email,ze.due_id,ze.create_time,ze.update_time,ze.status as ze_status,ad.nickname')
-            ->where('oc.id',$ids)
-            ->select();
+        $row  = \app\common\model\OcCustomerAfterSalesWorkOrder::get($ids);
+        $email = Db::table('fa_zendesk')
+            ->alias('ze')
+            ->join("fa_admin ad",'ze.due_id = ad.id','left')
+            ->field('ze.id as ze_id,ze.ticket_id,ze.subject,ze.to_email,ze.due_id,ze.create_time,ze.update_time,ze.status as ze_status,ad.nickname')
+            ->where('email',$row->email)->select();
+        foreach ($email as $key=>$item){
+
+            if ($item['ze_status'] == 1){
+                $email[$key]['ze_status'] = 'new';
+            }elseif ($item['ze_status'] ==2){
+                $email[$key]['ze_status'] = 'open';
+            }elseif ($item['ze_status'] ==3){
+                $email[$key]['ze_status'] = 'pending';
+            }elseif ($item['ze_status'] ==4){
+                $email[$key]['ze_status'] = 'solved';
+            }else{
+                $email[$key]['ze_status'] = 'other';
+            }
+
+        }
+        $row['email_message'] = $email;
+        dump($row);die();
+//        $row = Db::connect('database.db_zeelool')->table('oc_customer_after_sales_work_order oc')
+////            ->join("mojing.fa_zendesk ze",'ze.email = oc.email','left')
+////            ->join("mojing.fa_admin ad",'ze.due_id = ad.id','left')
+////            ->field('oc.*,ze.id as ze_id,ze.ticket_id,ze.subject,ze.to_email,ze.due_id,ze.create_time,ze.update_time,ze.status as ze_status,ad.nickname')
+//            ->where('oc.id',$ids)
+//            ->select();
+//
+//        $email =
+
 
         foreach ($row as $key=>$item){
             $data['id'] = $item['id'];
