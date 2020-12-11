@@ -841,7 +841,7 @@ class WorkOrderList extends Model
                     //从网站接口获取镜片编码、文案、语种文案
                     $lens_number = '';
                     $web_lens_name = '';
-                    if($lensId && $coatingId && $colorId){
+                    if($lensId){
                         $postData = [
                             'sku'=>trim($changeLens['original_sku']),
                             'prescription_type' => $recipe_type,
@@ -1921,6 +1921,7 @@ class WorkOrderList extends Model
             return false;
         }
         $whereMeasure['work_id'] = $work_id;
+        $whereMeasure['measure_id'] = $measure_id;
         $whereMeasure['change_type'] = $measuerInfo;
         $result = WorkOrderChangeSku::where($whereMeasure)->field('id,increment_id,platform_type,change_type,original_sku,original_number,change_sku,change_number,item_order_number')->select();
         if (!$result) {

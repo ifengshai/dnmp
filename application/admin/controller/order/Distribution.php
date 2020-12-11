@@ -388,8 +388,10 @@ class Distribution extends Backend
             $change_lens = $change_lens->toArray();
             if($change_lens['pd_l'] && $change_lens['pd_r']){
                 $change_lens['pd'] = '';
+                $change_lens['pdcheck'] = '';
             }else{
                 $change_lens['pd'] = $change_lens['pd_r'] ?: $change_lens['pd_l'];
+                $change_lens['pdcheck'] = 'on';
             }
             $result = array_merge($result,$change_lens);
         }
@@ -1478,12 +1480,23 @@ class Distribution extends Backend
             $this->_stock_log->startTrans();
             try {
                 //子订单状态回滚
+                $save_data = [
+                    'distribution_status' => $status,//配货状态
+                    'abnormal_house_id' => 0//异常库位ID
+                ];
+
+                //如果回退到待加工步骤之前，清空定制片库位ID及定制片处理状态
+                if(4 > $status){
+                    $save_data['temporary_house_id'] = 0;
+                    $save_data['customize_status'] = 0;
+                }
+
                 $this->model
                     ->allowField(true)
                     ->isUpdate(true, ['id' => $ids])
-                    ->save(['distribution_status' => $status, 'abnormal_house_id' => 0]);
+                    ->save($save_data);
 
-                //标记异常状态
+                //标记处理异常状态及时间
                 $this->_distribution_abnormal
                     ->allowField(true)
                     ->isUpdate(true, ['id' => $abnormal_info['id']])
