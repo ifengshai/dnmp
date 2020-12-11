@@ -982,7 +982,7 @@ class ScmWarehouse extends Scm
                         $data = [];
                         foreach (array_filter($item_sku) as $k => $v) {
                             $data[$k]['sku'] = $v['sku'];
-                            $data[$k]['sku'] = $purchase_id;//采购单id
+                            $data[$k]['purchase_id'] = $purchase_id;//采购单id
                             $data[$k]['in_stock_num'] = $v['in_stock_num'];//入库数量
                             $data[$k]['in_stock_id'] = $this->_in_stock->id;
                             //入库单绑定条形码数组组装
