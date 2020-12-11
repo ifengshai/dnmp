@@ -169,7 +169,7 @@ class OcCustomerAfterSalesWorkOrder extends Backend
 
         }
         $row['email_message'] = $email;
-        dump($row);die();
+     
 //        $row = Db::connect('database.db_zeelool')->table('oc_customer_after_sales_work_order oc')
 ////            ->join("mojing.fa_zendesk ze",'ze.email = oc.email','left')
 ////            ->join("mojing.fa_admin ad",'ze.due_id = ad.id','left')
@@ -214,7 +214,7 @@ class OcCustomerAfterSalesWorkOrder extends Backend
 
 
         }
-        $this->assign('row',$data);
+        $this->assign('row',$row);
         return $this->view->fetch();
     }
 
