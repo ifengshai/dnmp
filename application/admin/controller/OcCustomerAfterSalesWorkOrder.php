@@ -148,12 +148,17 @@ class OcCustomerAfterSalesWorkOrder extends Backend
                 $this->error('操作失败');
             }
         }
-        $row  = \app\common\model\OcCustomerAfterSalesWorkOrder::get($ids);
+        $row  = \app\common\model\OcCustomerAfterSalesWorkOrder::get($ids)->toArray();
+        $photo_href  =explode(',',$row['images']);
+        foreach ($photo_href as $key=>$item){
+            $photo_href[$key]= 'https://pc.zeelool.com/media'.$item;
+        }
+        $row['images'] = $photo_href;
         $email = Db::table('fa_zendesk')
             ->alias('ze')
             ->join("fa_admin ad",'ze.due_id = ad.id','left')
             ->field('ze.id as ze_id,ze.ticket_id,ze.subject,ze.to_email,ze.due_id,ze.create_time,ze.update_time,ze.status as ze_status,ad.nickname')
-            ->where('ze.email',$row->email)->select();
+            ->where('ze.email',$row['email'])->select();
         foreach ($email as $key=>$item){
             if ($item['ze_status'] == 1){
                 $email[$key]['ze_status'] = 'new';
@@ -169,7 +174,7 @@ class OcCustomerAfterSalesWorkOrder extends Backend
 
         }
         $row['email_message'] = $email;
-     
+
 //        $row = Db::connect('database.db_zeelool')->table('oc_customer_after_sales_work_order oc')
 ////            ->join("mojing.fa_zendesk ze",'ze.email = oc.email','left')
 ////            ->join("mojing.fa_admin ad",'ze.due_id = ad.id','left')
