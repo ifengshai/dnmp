@@ -1437,11 +1437,7 @@ class ScmDistribution extends Scm
                     ->where(['item_order_number'=> ['like', $query . '%']])
                     ->column('id');
                 $item_ids = array_merge($item_ids, $item_order_number_store);
-                if($item_ids){
-                    $where['a.id'] = ['in', $item_ids];
-                } else{
-                    $where['a.id'] = -1;
-                }
+                if($item_ids) $where['a.id'] = ['in', $item_ids];
             }
             $list = $this->_new_order_item_process
                 ->alias('a')
