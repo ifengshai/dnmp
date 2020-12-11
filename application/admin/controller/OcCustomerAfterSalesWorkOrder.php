@@ -148,9 +148,9 @@ class OcCustomerAfterSalesWorkOrder extends Backend
                 $this->error('操作失败');
             }
         }
-        $row = Db::table('zeelool_test.oc_customer_after_sales_work_order oc')
-            ->join("fa_zendesk ze",'ze.email = oc.email','left')
-            ->join("fa_admin ad",'ze.due_id = ad.id','left')
+        $row = Db::table('db_zeelool.oc_customer_after_sales_work_order oc')
+            ->join("database.fa_zendesk ze",'ze.email = oc.email','left')
+            ->join("database.fa_admin ad",'ze.due_id = ad.id','left')
             ->field('oc.*,ze.id as ze_id,ze.ticket_id,ze.subject,ze.to_email,ze.due_id,ze.create_time,ze.update_time,ze.status as ze_status,ad.nickname')
             ->where('oc.id',$ids)
             ->select();
