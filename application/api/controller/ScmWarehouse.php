@@ -721,7 +721,7 @@ class ScmWarehouse extends Scm
 
         $where = [];
         if($query){
-            $where['a.in_stock_number|c.check_order_number|b.sku|a.create_person|c.create_person'] = ['like', '%' . $query . '%'];
+            $where['a.in_stock_number|b.check_order_number|c.sku|a.create_person|b.create_person'] = ['like', '%' . $query . '%'];
         }
         if(isset($status)){
             $where['a.status'] = $status;
@@ -739,6 +739,7 @@ class ScmWarehouse extends Scm
             ->where($where)
             ->field('a.id,a.check_id,a.in_stock_number,b.check_order_number,a.createtime,a.status')
             ->join(['fa_check_order' => 'b'], 'a.check_id=b.id','left')
+            ->join(['fa_check_order_item' => 'c'], 'a.check_id=c.check_id','left')
             ->group('a.id')
             ->order('a.createtime', 'desc')
             ->limit($offset, $limit)
@@ -822,6 +823,8 @@ class ScmWarehouse extends Scm
         $in_stock_id = $this->request->request("in_stock_id");//入库单ID，
         $platform_id = $this->request->request("platform_id");//站点，判断是否是新创建入库 还是 质检单入库
         $result = false;
+
+        $this->_check->startTrans();
         $this->_in_stock->startTrans();
         $this->_in_stock_item->startTrans();
         $this->_product_bar_code_item->startTrans();
@@ -868,29 +871,31 @@ class ScmWarehouse extends Scm
 
                     //编辑入库单主表
                     $_in_stock_data['platform_id'] = $platform_id;
-
+                    $purchase_id = 0;//无采购单id
                 } else {
                     //无站点，是质检单入口
                     $check_order_number = $this->request->request("check_order_number");
                     if (empty($check_order_number)){
                         throw new Exception('质检单号不能为空');
                     }
-                    $check_id = $this->_check->where(['check_order_number'=>$check_order_number])->value('id');
-                    if (empty($check_id)){
+                    $check_info = $this->_check->where(['check_order_number'=>$check_order_number])->field('id,purchase_id,replenish_id')->find();
+                    if (empty($check_info)){
                         throw new Exception('质检单不存在');
                     }
-                    $_in_stock_data['check_id'] = $check_id;
+                    $_in_stock_data['check_id'] = $check_info['id'];
+                    $_in_stock_data['replenish_id'] = $check_info['replenish_id'];//补货单ID
+                    $purchase_id = $check_info['purchase_id'];//有采购单id
                 }
 
                 //更新数据
                 $result = $this->_in_stock->allowField(true)->save($_in_stock_data, ['id' => $in_stock_id]);
                 //添加入库商品信息
                 if ($result !== false) {
-                    $item_save = [];
                     $where_code = [];
                     foreach (array_filter($item_sku) as $k => $v) {
+                        $item_save = [];
+                        $item_save[$k]['purchase_id'] = $purchase_id;//采购单id
                         $item_save[$k]['in_stock_num'] = $v['in_stock_num'];//入库数量
-
                         //修改入库单子表
                         $where = ['sku' => $v['sku'],'in_stock_id' => $in_stock_id];
                         $this->_in_stock_item->allowField(true)->isUpdate(true, $where)->save($item_save);
@@ -901,7 +906,6 @@ class ScmWarehouse extends Scm
                                 $where_code[] = $v_code['code'];
                             }
                         }
-
                         //入库单移除条形码
                         if(!empty($value['remove_agg'])){
                             $code_clear = [
@@ -955,38 +959,38 @@ class ScmWarehouse extends Scm
                         //批量添加
                         $this->_in_stock_item->allowField(true)->saveAll($data);
                     }
+//                    $purchase_id = 0;//无采购单id
                 } else {
                     //无站点，是质检单入口
                     $check_order_number = $this->request->request("check_order_number");
                     if (empty($check_order_number)){
                         throw new Exception('质检单号不能为空');
                     }
-                    $check_id = $this->_check->where(['check_order_number'=>$check_order_number])->value('id');
-                    if (empty($check_id)){
+                    $check_info = $this->_check->where(['check_order_number'=>$check_order_number])->field('id,purchase_id,replenish_id')->find();
+                    if (empty($check_info)){
                         throw new Exception('质检单不存在');
                     }
-                    $params['check_id'] = $check_id;
+                    $params['check_id'] = $check_info['id'];
+                    $params['replenish_id'] = $check_info['replenish_id'];//补货单ID
+                    $purchase_id = $check_info['purchase_id'];//有采购单id
                     //质检单页面去创建入库单
                     $result = $this->_in_stock->allowField(true)->save($params);
-
                     //添加入库信息
                     if ($result !== false) {
                         //更改质检单为已创建入库单
                         $this->_check->allowField(true)->save(['is_stock' => 1], ['id' => $params['check_id']]);
                         $data = [];
-
                         foreach (array_filter($item_sku) as $k => $v) {
                             $data[$k]['sku'] = $v['sku'];
+                            $data[$k]['purchase_id'] = $purchase_id;//采购单id
                             $data[$k]['in_stock_num'] = $v['in_stock_num'];//入库数量
                             $data[$k]['in_stock_id'] = $this->_in_stock->id;
-
                             //入库单绑定条形码数组组装
                             foreach($v['sku_agg'] as $k_code => $v_code){
                                 if (!empty($v_code['code'])){
                                     $where_code[] = $v_code['code'];
                                 }
                             }
-
                         }
                         //入库单绑定条形码执行
                         $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => ['in', $where_code]])->save(['in_stock_id'=>$this->_in_stock->id]);
@@ -996,20 +1000,24 @@ class ScmWarehouse extends Scm
                 }
 
             }
+            $this->_check->commit();
             $this->_in_stock->commit();
             $this->_in_stock_item->commit();
             $this->_product_bar_code_item->commit();
         } catch (ValidateException $e) {
+            $this->_check->rollback();
             $this->_in_stock->rollback();
             $this->_in_stock_item->rollback();
             $this->_product_bar_code_item->rollback();
             $this->error($e->getMessage(), [], 444);
         } catch (PDOException $e) {
+            $this->_check->rollback();
             $this->_in_stock->rollback();
             $this->_in_stock_item->rollback();
             $this->_product_bar_code_item->rollback();
             $this->error($e->getMessage(), [], 444);
         } catch (Exception $e) {
+            $this->_check->rollback();
             $this->_in_stock->rollback();
             $this->_in_stock_item->rollback();
             $this->_product_bar_code_item->rollback();
@@ -1215,7 +1223,7 @@ class ScmWarehouse extends Scm
         $this->_purchase_order_item->startTrans();
         try {
             $data['create_person'] = $this->auth->nickname;
-            $res = $this->_in_stock->allowField(true)->isUpdate(true, ['id'=>$in_stock_id])->save($data);//审核拒绝更新数据
+            $res = $this->_in_stock->allowField(true)->isUpdate(true, ['id'=>$in_stock_id])->save($data);//审核拒绝不更新数据
 
             if ($data['status'] == 2) {
                 $error_num = [];

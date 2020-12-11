@@ -1253,6 +1253,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
         },
         edit: function () {
             if (!$('.item_order_selectpicker').val()) {platform_order();}
+            if(Config.work_type == 2 && Config.work_status == 1){$('#c-order_sku').attr("disabled",true);}
             Controller.api.bindevent();
             //进入页面展示按钮下的数据
             $("input[name='row[measure_choose_id][]']:checked").each(function (i) {
@@ -1601,35 +1602,35 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 var order_pay_currency = $('#order_pay_currency').val();
                                 //修改地址
                                 var address = '';
-                                for (var i = 0; i < data.address.length; i++) {
-                                    if (i == 0) {
-                                        address += '<option value="' + i + '" selected>' + data.address[i].address_type + '</option>';
+                                /*for (var i = 0; i < data.address.length; i++) {
+                                    if (i == 0) {*/
+                                        address += '<option value = "0" selected>shipping</option>';
                                         //补发地址自动填充第一个
-                                        $('#c-firstname').val(data.address[i].firstname);
-                                        $('#c-lastname').val(data.address[i].lastname);
-                                        var email = data.address[i].email;
+                                        $('#c-firstname').val(data.address.firstname);
+                                        $('#c-lastname').val(data.address.lastname);
+                                        var email = data.address.email;
                                         if (email == null) {
                                             email = $('#customer_email').val();
                                         }
                                         $('#c-email').val(email);
-                                        $('#c-telephone').val(data.address[i].telephone);
-                                        $('#c-country').val(data.address[i].country_id);
+                                        $('#c-telephone').val(data.address.telephone);
+                                        $('#c-country').val(data.address.country_id);
                                         $('#c-country').change();
-                                        if(data.address[i].region_id == '8888' || !data.address[i].region_id){
+                                        if(data.address.region_id == '8888' || !data.address.region_id){
                                             $('#c-region').val(0);
                                         }else{
-                                            $('#c-region').val(data.address[i].region_id);
+                                            $('#c-region').val(data.address.region_id);
                                         }
-                                        $('#c-region1').val(data.address[i].region);
-                                        $('#c-city').val(data.address[i].city);
-                                        $('#c-street').val(data.address[i].street);
-                                        $('#c-postcode').val(data.address[i].postcode);
+                                        $('#c-region1').val(data.address.region);
+                                        $('#c-city').val(data.address.city);
+                                        $('#c-street').val(data.address.street);
+                                        $('#c-postcode').val(data.address.postcode);
                                         $('#c-currency_code').val(order_pay_currency);
-                                    } else {
+                                    /*} else {
                                         address += '<option value="' + i + '">' + data.address[i].address_type + '</option>';
                                     }
 
-                                }
+                                }*/
                                 $('#address_select').html(address);
                                 //选择地址切换地址
                                 $('#address_select').change(function () {
@@ -2393,35 +2394,35 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     $('#c-postcode').val(real_address.postcode);
                                     $('#c-currency_code').val(order_pay_currency);
                                     $('#shipping_type').val(real_address.shipping_type);
-                                    for (var i = 0; i < data.address.length; i++) {
-                                        if (i == real_address.address_type) {
-                                            address += '<option value="' + i + '" selected>' + data.address[i].address_type + '</option>';
-                                        } else {
+                                    /*for (var i = 0; i < data.address.length; i++) {
+                                        if (i == real_address.address_type) {*/
+                                            address += '<option value="0" selected>shipping</option>';
+                                        /*} else {
                                             address += '<option value="' + i + '">' + data.address[i].address_type + '</option>';
                                         }
-                                    }
+                                    }*/
                                 } else {
-                                    for (var i = 0; i < data.address.length; i++) {
-                                        if (i == 0) {
-                                            address += '<option value="' + i + '" selected>' + data.address[i].address_type + '</option>';
+                                    /*for (var i = 0; i < data.address.length; i++) {
+                                        if (i == 0) {*/
+                                            address += '<option value="0" selected>shipping</option>';
                                             //补发地址自动填充第一个
-                                            $('#c-firstname').val(data.address[i].firstname);
-                                            $('#c-lastname').val(data.address[i].lastname);
-                                            $('#c-email').val(data.address[i].email);
-                                            $('#c-telephone').val(data.address[i].telephone);
-                                            $('#c-country').val(data.address[i].country_id);
+                                            $('#c-firstname').val(data.address.firstname);
+                                            $('#c-lastname').val(data.address.lastname);
+                                            $('#c-email').val(data.address.email);
+                                            $('#c-telephone').val(data.address.telephone);
+                                            $('#c-country').val(data.address.country_id);
                                             $('#c-country').change();
-                                            $('#c-region').val(data.address[i].region_id);
-                                            $('#c-region1').val(data.address[i].region);
-                                            $('#c-city').val(data.address[i].city);
-                                            $('#c-street').val(data.address[i].street);
-                                            $('#c-postcode').val(data.address[i].postcode);
+                                            $('#c-region').val(data.address.region_id);
+                                            $('#c-region1').val(data.address.region);
+                                            $('#c-city').val(data.address.city);
+                                            $('#c-street').val(data.address.street);
+                                            $('#c-postcode').val(data.address.postcode);
                                             $('#c-currency_code').val(order_pay_currency);
-                                        } else {
+                                        /*} else {
                                             address += '<option value="' + i + '">' + data.address[i].address_type + '</option>';
                                         }
 
-                                    }
+                                    }*/
                                 }
                                 $('#address_select').html(address);
                                 //选择地址切换地址
@@ -3089,35 +3090,35 @@ function changeOrderAddress(){
             var order_pay_currency = $('#order_pay_currency').val();
             //修改地址
             var address1 = '';
-            for (var i = 0; i < data.address.length; i++) {
-                var address_id= data.address[i].address_id ? data.address[i].address_id : 0;
-                if(i == address_id){
-                    address1 += '<option value="' + i + '" selected>' + data.address[i].address_type + '</option>';
+            /*for (var i = 0; i < data.address.length; i++) {*/
+                /*var address_id= data.address.address_id ? data.address.address_id : 0;
+                if(i == address_id){*/
+                    address1 += '<option value="0" selected>shipping</option>';
                     //补发地址自动填充第一个
-                    $('#c-firstname1').val(data.address[i].firstname);
-                    $('#c-lastname1').val(data.address[i].lastname);
-                    var email = data.address[i].email;
+                    $('#c-firstname1').val(data.address.firstname);
+                    $('#c-lastname1').val(data.address.lastname);
+                    var email = data.address.email;
                     if (email == null) {
                         email = $('#customer_email1').val();
                     }
                     $('#c-email1').val(email);
-                    $('#c-telephone1').val(data.address[i].telephone);
-                    $('#c-country1').val(data.address[i].country_id);
+                    $('#c-telephone1').val(data.address.telephone);
+                    $('#c-country1').val(data.address.country_id);
                     $('#c-country1').change();
-                    if(data.address[i].region_id == '8888' || !data.address[i].region_id){
+                    if(data.address.region_id == '8888' || !data.address.region_id){
                         $('#c-region2').val(0);
                     }else{
-                        $('#c-region2').val(data.address[i].region_id);
+                        $('#c-region2').val(data.address.region_id);
                     }
-                    $('#c-region12').val(data.address[i].region);
-                    $('#c-city1').val(data.address[i].city);
-                    $('#c-street1').val(data.address[i].street);
-                    $('#c-postcode1').val(data.address[i].postcode);
+                    $('#c-region12').val(data.address.region);
+                    $('#c-city1').val(data.address.city);
+                    $('#c-street1').val(data.address.street);
+                    $('#c-postcode1').val(data.address.postcode);
                     $('#c-currency_code1').val(order_pay_currency);
-                }else{
-                    address1 += '<option value="' + i + '">' + data.address[i].address_type + '</option>';
-                }
-            }
+                /*}else{
+                    address1 += '<option value="' + i + '">' + data.address.address_type + '</option>';
+                }*/
+            /*}*/
             $('#address_select1').html(address1);
             //选择地址切换地址
             $('#address_select1').change(function () {

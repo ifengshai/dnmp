@@ -1237,11 +1237,35 @@ class WorkOrderList extends Backend
                         empty($item['item_choose']) && $this->error("请选择子订单：{$key} 的实施措施");
                         $all_choose_ids = array_unique(array_merge($all_choose_ids,$item['item_choose']));
 
-                        //更改镜框校验库存
-                        if(in_array(19, $item['item_choose'])){
+                        //获取子单之前处理成功的措施类型
+                        $_work_order_change_sku = new WorkOrderChangeSku();
+                        $change_type = $_work_order_change_sku
+                            ->alias('a')
+                            ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
+                            ->where([
+                                'a.item_order_number'=>$key,
+                                'b.operation_type'=>1
+                            ])
+                            ->order('a.id','desc')
+                            ->group('a.item_order_number')
+                            ->column('a.change_type')
+                        ;
+
+                        //子单取消
+                        if(in_array(18, $item['item_choose'])){
+                            //检测之前是否处理过子单措施
+                            array_intersect([1, 2, 3], $change_type) && $this->error("子订单：{$key} 措施已处理，不能取消");
+                        }elseif(in_array(19, $item['item_choose'])){//更改镜框
+                            //检测之前是否处理过更改镜框措施
+                            in_array(1, $change_type) && $this->error("子订单：{$key} 措施已处理，不能重复创建");
+
+                            //更改镜框校验库存
                             !$item['change_frame']['change_sku'] && $this->error("子订单：{$key} 的新sku不能为空");
                             $back_data = $this->skuIsStock([$item['change_frame']['change_sku']], $params['work_platform'], [1]);
                             !$back_data['result'] && $this->error($back_data['msg']);
+                        }elseif(in_array(20, $item['item_choose'])){//更改镜片
+                            //检测之前是否处理过更改镜片措施
+                            in_array(2, $change_type) && $this->error("子订单：{$key} 措施已处理，不能重复创建");
                         }
                     }
                     unset($item);
@@ -1939,6 +1963,9 @@ class WorkOrderList extends Backend
                     }
                 }
 
+                //子单sku变动表
+                $_work_order_change_sku = new WorkOrderChangeSku();
+
                 //检测子订单措施
                 if($item_order_info){
                     $item_order_info = array_filter($item_order_info);
@@ -1948,11 +1975,34 @@ class WorkOrderList extends Backend
                         empty($item['item_choose']) && $this->error("请选择子订单：{$key} 的实施措施");
                         $all_choose_ids = array_unique(array_merge($all_choose_ids,$item['item_choose']));
 
-                        //更改镜框校验库存
-                        if(in_array(19, $item['item_choose'])){
+                        //获取子单之前处理成功的措施类型
+                        $change_type = $_work_order_change_sku
+                            ->alias('a')
+                            ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
+                            ->where([
+                                'a.item_order_number'=>$key,
+                                'b.operation_type'=>1
+                            ])
+                            ->order('a.id','desc')
+                            ->group('a.item_order_number')
+                            ->column('a.change_type')
+                        ;
+
+                        //子单取消
+                        if(in_array(18, $item['item_choose'])){
+                            //检测之前是否处理过子单措施
+                            array_intersect([1, 2, 3], $change_type) && $this->error("子订单：{$key} 措施已处理，不能取消");
+                        }elseif(in_array(19, $item['item_choose'])){//更改镜框
+                            //检测之前是否处理过更改镜框措施
+                            in_array(1, $change_type) && $this->error("子订单：{$key} 措施已处理，不能重复创建");
+
+                            //更改镜框校验库存
                             !$item['change_frame']['change_sku'] && $this->error("子订单：{$key} 的新sku不能为空");
                             $back_data = $this->skuIsStock([$item['change_frame']['change_sku']], $params['work_platform'], [1]);
                             !$back_data['result'] && $this->error($back_data['msg']);
+                        }elseif(in_array(20, $item['item_choose'])){//更改镜片
+                            //检测之前是否处理过更改镜片措施
+                            in_array(2, $change_type) && $this->error("子订单：{$key} 措施已处理，不能重复创建");
                         }
                     }
                     unset($item);
@@ -2034,9 +2084,6 @@ class WorkOrderList extends Backend
                 //承接人表
                 $_work_order_recept = new WorkOrderRecept();
 
-                //子单sku变动表
-                $_work_order_change_sku = new WorkOrderChangeSku();
-
                 $row->startTrans();
                 $_work_order_measure->startTrans();
                 $_work_order_recept->startTrans();
@@ -2059,12 +2106,10 @@ class WorkOrderList extends Backend
                     $update_res = $row->allowField(true)->save($update_data);
                     if (false === $update_res) throw new Exception('更新失败!!');
 
-                    //客服工单删除旧措施
-                    if(1 == $row->work_type){
-                        $_work_order_measure->where(['work_id' => $row->id])->delete();
-                        $_work_order_recept->where(['work_id' => $row->id])->delete();
-                        $_work_order_change_sku->where(['work_id' => $row->id])->delete();
-                    }
+                    //清除措施表、承接表、sku变动表
+                    $_work_order_measure->where(['work_id' => $row->id])->delete();
+                    $_work_order_recept->where(['work_id' => $row->id])->delete();
+                    $_work_order_change_sku->where(['work_id' => $row->id])->delete();
 
                     //更新工单
                     $result = $row->allowField(true)->save($params);
@@ -2230,7 +2275,7 @@ class WorkOrderList extends Backend
                     $address = Db::name('work_order_change_sku')->where('work_id', $work_id)->value('userinfo_option');
                     $address = unserialize($address);
                     $address['address_type'] = $address['address_id'] == 0 ? 'shipping' : 'billing';
-                    $res['address'][$address['address_id']] = $address;
+                    $res['address'] = $address;
                 }
             } catch (\Exception $e) {
                 $this->error($e->getMessage());

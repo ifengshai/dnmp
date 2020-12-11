@@ -1479,12 +1479,23 @@ class Distribution extends Backend
             $this->_stock_log->startTrans();
             try {
                 //子订单状态回滚
+                $save_data = [
+                    'distribution_status' => $status,//配货状态
+                    'abnormal_house_id' => 0//异常库位ID
+                ];
+
+                //如果回退到待加工步骤之前，清空定制片库位ID及定制片处理状态
+                if(4 > $status){
+                    $save_data['temporary_house_id'] = 0;
+                    $save_data['customize_status'] = 0;
+                }
+
                 $this->model
                     ->allowField(true)
                     ->isUpdate(true, ['id' => $ids])
-                    ->save(['distribution_status' => $status, 'abnormal_house_id' => 0]);
+                    ->save($save_data);
 
-                //标记异常状态
+                //标记处理异常状态及时间
                 $this->_distribution_abnormal
                     ->allowField(true)
                     ->isUpdate(true, ['id' => $abnormal_info['id']])
@@ -1647,56 +1658,82 @@ class Distribution extends Backend
      * @return mixed
      */
     function legacy_data(){
-
         //站点列表
         $site_arr = [
             1=>[
                 'name'=>'zeelool',
                 'obj' => new \app\admin\model\order\printlabel\Zeelool,
+            ],
+            2=>[
+                'name'=>'voogueme',
+                'obj' => new \app\admin\model\order\printlabel\Voogueme,
+            ],
+            3=>[
+                'name'=>'nihao',
+                'obj' => new \app\admin\model\order\printlabel\Nihao,
+            ],
+            4=>[
+                'name'=>'weseeoptical',
+                'obj' => new \app\admin\model\order\printlabel\Weseeoptical,
+            ],
+            5=>[
+                'name'=>'meeloog',
+                'obj' => new \app\admin\model\order\printlabel\Meeloog,
+            ],
+            9=>[
+                'name'=>'zeelool_es',
+                'obj' => new \app\admin\model\order\printlabel\ZeeloolEs,
+            ],
+            10=>[
+                'name'=>'zeelool_de',
+                'obj' => new \app\admin\model\order\printlabel\ZeeloolDe,
+            ],
+            11=>[
+                'name'=>'zeelool_jp',
+                'obj' => new \app\admin\model\order\printlabel\ZeeloolJp,
             ]
-
         ];
-
-        $this->model = new NewOrderItemProcess();
-        $this->_lens_data = new LensData();
-        $this->_stock_house = new StockHouse();
-        $this->_distribution_abnormal = new DistributionAbnormal();
-        $this->_new_order_item_option = new NewOrderItemOption();
-        $this->_new_order = new NewOrder();
-        $this->_new_order_process = new NewOrderProcess();
 
         foreach($site_arr as $key=>$item){
             echo $item['name']." Start\n";
             //获取已质检旧数据
-            $field = 'order_type,custom_order_prescription_type,entity_id,status,base_shipping_amount,increment_id,base_grand_total,
-                     total_qty_ordered,custom_is_match_frame_new,custom_is_match_lens_new,
-                     custom_is_send_factory_new,custom_is_delivery_new,custom_print_label_new,custom_order_prescription,created_at';
             $list = $item['obj']
-                ->field($field)
-                ->where($map)
-                ->where($where)
-                ->order($sort, $order)
-                ->limit($offset, $limit)
+                ->field('entity_id,increment_id,custom_match_delivery_created_at_new')
+                ->where([
+                    'custom_is_delivery_new'=>1,
+                    'custom_match_delivery_created_at_new'=>['between', ['2018-01-01', '2020-10-01']]
+                ])
                 ->select();
 
             $count = count($list);
             $handle = 0;
             if($list){
                 foreach ($list as $value){
-                    //fa_order_process表：check_status、check_time、combine_status、combine_time
-                    $do_time = strtotime($value['custom_match_delivery_created_at_new']) + 28800;
-                    $this->_new_order_process
-                        ->allowField(true)
-                        ->save(
-                            ['check_status' => 1, 'check_time' => $do_time,'combine_status' => 1, 'combine_time' => $do_time],
-                            ['increment_id' => $value['increment_id'], 'site' => $key]
-                        );
+                    try {
+                        //fa_order_process表：check_status、check_time、combine_status、combine_time
+                        $do_time = strtotime($value['custom_match_delivery_created_at_new']) + 28800;
+                        $this->_new_order_process
+                            ->allowField(true)
+                            ->save(
+                                ['check_status' => 1, 'check_time' => $do_time,'combine_status' => 1, 'combine_time' => $do_time],
+                                ['entity_id' => $value['entity_id'], 'site' => $key]
+                            );
+
+                        //fa_order_item_process表：distribution_status
+                        $this->model
+                            ->allowField(true)
+                            ->save(
+                                ['distribution_status' => 1],
+                                ['entity_id' => $value['entity_id'], 'site' => $key]
+                            );
+                        $handle += 1;
+                    } catch (PDOException $e) {
+                        echo $item['name'].'-'.$value['increment_id'].'：'.$e->getMessage()."\n";
+                    } catch (Exception $e) {
+                        echo $item['name'].'-'.$value['increment_id'].'：'.$e->getMessage()."\n";
+                    }
                 }
             }
-
-
-
-            //fa_order_item_process表：distribution_status、check_time
 
             echo $item['name']."：已质检-{$count}，已处理-{$handle} End\n";
         }
