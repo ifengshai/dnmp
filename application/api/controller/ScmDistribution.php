@@ -1405,7 +1405,11 @@ class ScmDistribution extends Scm
                 }
                 $store_house_ids = array_merge(array_filter($store_house_id_store), array_filter($store_house_id_sku));
                 if($store_house_ids) $where['store_house_id'] = ['in', $store_house_ids];*/
-                if($store_house_id_store) $where['store_house_id'] = ['in', $store_house_id_store];
+                if($store_house_id_store){
+                    $where['store_house_id'] = ['in', $store_house_id_store];
+                } else{
+                    $where['store_house_id'] = -1;
+                }
             }
             if($start_time && $end_time){
                 $where['combine_time'] = ['between', [strtotime($start_time), strtotime($end_time)]];
@@ -1437,7 +1441,11 @@ class ScmDistribution extends Scm
                     ->where(['item_order_number'=> ['like', $query . '%']])
                     ->column('id');
                 $item_ids = array_merge($item_ids, $item_order_number_store);
-                if($item_ids) $where['a.id'] = ['in', $item_ids];
+                if($item_ids){
+                    $where['a.id'] = ['in', $item_ids];
+                } else{
+                    $where['a.id'] = -1;
+                }
             }
             $list = $this->_new_order_item_process
                 ->alias('a')
