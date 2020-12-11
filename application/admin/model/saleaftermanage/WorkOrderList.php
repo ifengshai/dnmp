@@ -591,10 +591,12 @@ class WorkOrderList extends Model
                     exception('国家不能为空');
                 }
                 //查询是否有该地址
-                $is_exist = $_work_order_change_sku->where(['work_id' => $work_id])->value('id');
+                $is_exist = $_work_order_change_sku->where(['measure_id' => $measure_id])->value('id');
                 if(!$is_exist){
                     $data = [
                         'work_id' => $work_id,
+                        'email' => $params['modify_address']['email'],
+                        'userinfo_option' => serialize($params['modify_address']),
                         'increment_id' => $params['platform_order'],
                         'platform_type' => $params['work_platform'],
                         'change_type' => 6,
@@ -603,11 +605,8 @@ class WorkOrderList extends Model
                         'update_time' => date('Y-m-d H:i:s'),
                         'create_time' => date('Y-m-d H:i:s')
                     ];
-                    //修改地址
-                    $data['email'] = $params['modify_address']['email'];
- 
-                    $data['userinfo_option'] = serialize($params['modify_address']);
                     $_work_order_change_sku->create($data);
+
                     $_work_order_measure->where(['id' => $measure_id])->update(['sku_change_type' => 6]);
                 }else{
                     //更新
@@ -1921,6 +1920,7 @@ class WorkOrderList extends Model
             return false;
         }
         $whereMeasure['work_id'] = $work_id;
+        $whereMeasure['measure_id'] = $measure_id;
         $whereMeasure['change_type'] = $measuerInfo;
         $result = WorkOrderChangeSku::where($whereMeasure)->field('id,increment_id,platform_type,change_type,original_sku,original_number,change_sku,change_number,item_order_number')->select();
         if (!$result) {

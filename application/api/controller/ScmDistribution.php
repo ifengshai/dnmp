@@ -181,7 +181,7 @@ class ScmDistribution extends Scm
             //子订单绑定异常库位号
             $this->_new_order_item_process
                 ->allowField(true)
-                ->isUpdate(true, ['item_order_number'=>$item_order_number, 'temporary_house_id'=>0, 'customize_status'=>0])
+                ->isUpdate(true, ['item_order_number'=>$item_order_number])
                 ->save(['abnormal_house_id'=>$stock_house_info['id']])
             ;
 
@@ -255,7 +255,7 @@ class ScmDistribution extends Scm
         //获取子订单数据
         $item_process_info = $this->_new_order_item_process
             ->where('item_order_number', $item_order_number)
-            ->field('id,option_id,distribution_status,temporary_house_id,order_prescription_type,order_id')
+            ->field('id,option_id,distribution_status,temporary_house_id,order_prescription_type,order_id,customize_status')
             ->find()
         ;
         empty($item_process_info) && $this->error(__('子订单不存在'), [], 403);
@@ -409,8 +409,8 @@ class ScmDistribution extends Scm
                 $second = 1;//是第二次扫描
                 $msg = "请将子单号{$item_order_number}的商品从定制片暂存架{$coding}库位取出";
             }else{
-                //判断是否定制片
-                if(3 == $item_process_info['order_prescription_type']){
+                //判断是否定制片且未处理状态
+                if(0 == $item_process_info['customize_status'] && 3 == $item_process_info['order_prescription_type']){
                     //暂存自动分配库位
                     $stock_house_info = $this->_stock_house
                         ->field('id,coding')
@@ -426,7 +426,7 @@ class ScmDistribution extends Scm
                             $this->_new_order_item_process
                                 ->allowField(true)
                                 ->isUpdate(true, ['item_order_number'=>$item_order_number])
-                                ->save(['temporary_house_id'=>$stock_house_info['id']])
+                                ->save(['temporary_house_id'=>$stock_house_info['id'],'customize_status'=>1])
                             ;
 
                             //定制片库位号占用数量+1
@@ -1077,7 +1077,6 @@ class ScmDistribution extends Scm
         $item_order_number = $this->request->request('item_order_number');
         empty($item_order_number) && $this->error(__('子订单号不能为空'), [], 403);
 
-        $abnormal_list = $this->info($item_order_number,7);
         //获取子订单数据
         $item_process_info = $this->_new_order_item_process
             ->where('item_order_number', $item_order_number)
@@ -1085,6 +1084,43 @@ class ScmDistribution extends Scm
             ->find();
         empty($item_process_info) && $this->error(__('子订单不存在'), [], 403);
         !in_array($item_process_info['distribution_status'],[7,8]) && $this->error(__('子订单当前状态不可合单操作'), [], 403);
+
+        //判断异常状态
+        $abnormal_id = $this->_distribution_abnormal
+            ->where(['item_process_id'=>$item_process_info['id'],'status'=>1])
+            ->value('id')
+        ;
+        $abnormal_id && $this->error(__('有异常待处理，无法操作'), [], 405);
+
+        //查询订单号
+        $order_info = $this->_new_order
+            ->field('increment_id,status')
+            ->where(['id'=>$item_process_info['order_id']])
+            ->find()
+        ;
+        'processing' != $order_info['status'] && $this->error(__('当前订单状态不可操作'), [], 405);
+
+        //检测是否有工单未处理
+        $check_work_order = $this->_work_order_measure
+            ->alias('a')
+            ->field('a.item_order_number,a.measure_choose_id')
+            ->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')
+            ->where([
+                'a.operation_type'=>0,
+                'b.platform_order'=>$order_info['increment_id'],
+                'b.work_status'=>['in',[1,2,3,5]]
+            ])
+            ->select();
+        if($check_work_order){
+            foreach ($check_work_order as $val){
+                (
+                    3 == $val['measure_choose_id']//主单取消措施未处理
+                    ||
+                    $val['item_order_number'] == $item_order_number//子单措施未处理:更改镜框18、更改镜片19、取消20
+                )
+                && $this->error(__('有工单未处理，无法操作'), [], 405);
+            }
+        }
 
         //获取订单购买总数
         $total_qty_ordered = $this->_new_order_item_process
@@ -1118,6 +1154,12 @@ class ScmDistribution extends Scm
             //主单已绑定合单库位,根据ID查询库位信息
             $store_house_info = $this->_stock_house->field('id,coding,subarea')->where('id',$order_process_info['store_house_id'])->find();
         }
+
+        //异常原因列表
+        $abnormal_list = [
+            ['id'=>12,'name'=>'缺货']
+        ];
+
         $info = [
             'item_order_number' => $item_order_number,
             'sku' => $item_process_info['sku'],
@@ -1363,7 +1405,11 @@ class ScmDistribution extends Scm
                 }
                 $store_house_ids = array_merge(array_filter($store_house_id_store), array_filter($store_house_id_sku));
                 if($store_house_ids) $where['store_house_id'] = ['in', $store_house_ids];*/
-                if($store_house_id_store) $where['store_house_id'] = ['in', $store_house_id_store];
+                if($store_house_id_store){
+                    $where['store_house_id'] = ['in', $store_house_id_store];
+                } else{
+                    $where['store_house_id'] = -1;
+                }
             }
             if($start_time && $end_time){
                 $where['combine_time'] = ['between', [strtotime($start_time), strtotime($end_time)]];
@@ -1387,13 +1433,19 @@ class ScmDistribution extends Scm
                 $store_house_ids = $this->_stock_house->where(['type'=>2, 'coding'=> ['like', '%' . $query . '%']])->column('id');
                 $item_order_number_store = [];
                 if($store_house_ids) {
-                    $order_id_store = $this->_new_order_process->where(['store_house_id'=>['in', $store_house_ids]])->column('order_id');
-                    $item_order_number_store = $this->_new_order_item_process->where(['order_id'=>['in', $order_id_store]])->column('item_order_number');
+                    $item_order_number_store = $this->_new_order_item_process
+                        ->where(['abnormal_house_id'=>['in', $store_house_ids]])
+                        ->column('id');
                 }
-                $item_order_number_item = $this->_new_order_item_process->where(['item_order_number'=> ['like', $query . '%']])->column('item_order_number');
-                $item_order_number = array_merge($item_order_number_item, $item_order_number_store);
-                if($item_order_number) $where['a.item_order_number'] = ['in', $item_order_number];
-
+                $item_ids = $this->_new_order_item_process
+                    ->where(['item_order_number'=> ['like', $query . '%']])
+                    ->column('id');
+                $item_ids = array_merge($item_ids, $item_order_number_store);
+                if($item_ids){
+                    $where['a.id'] = ['in', $item_ids];
+                } else{
+                    $where['a.id'] = -1;
+                }
             }
             $list = $this->_new_order_item_process
                 ->alias('a')
