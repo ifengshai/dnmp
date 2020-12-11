@@ -1246,8 +1246,6 @@ class WorkOrderList extends Backend
                                 'a.item_order_number'=>$key,
                                 'b.operation_type'=>1
                             ])
-                            ->order('a.id','desc')
-                            ->group('a.item_order_number')
                             ->column('a.change_type')
                         ;
 
