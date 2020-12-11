@@ -256,7 +256,7 @@ class Distribution extends Backend
                 ->join(['fa_order_process' => 'c'], 'a.order_id=c.order_id')
                 ->where($where)
                 ->where($map)
-                ->order('b.created_at desc')
+                ->order('$sort, $order')
                 ->count();
 
             $list = $this->model
@@ -266,7 +266,7 @@ class Distribution extends Backend
                 ->join(['fa_order_process' => 'c'], 'a.order_id=c.order_id')
                 ->where($where)
                 ->where($map)
-                ->order('b.created_at desc')
+                ->order('$sort, $order')
                 ->limit($offset, $limit)
                 ->select();
             $list = collection($list)->toArray();
