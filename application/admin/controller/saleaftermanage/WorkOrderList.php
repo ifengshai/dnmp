@@ -1248,6 +1248,10 @@ class WorkOrderList extends Backend
                             ])
                             ->column('a.change_type')
                         ;
+                        print_r($item['item_choose']);
+                        print_r('-------------');
+                        print_r($change_type);
+                        exit;
 
                         //子单取消
                         if(in_array(18, $item['item_choose'])){
