@@ -174,51 +174,8 @@ class OcCustomerAfterSalesWorkOrder extends Backend
 
         }
         $row['email_message'] = $email;
+        
 
-//        $row = Db::connect('database.db_zeelool')->table('oc_customer_after_sales_work_order oc')
-////            ->join("mojing.fa_zendesk ze",'ze.email = oc.email','left')
-////            ->join("mojing.fa_admin ad",'ze.due_id = ad.id','left')
-////            ->field('oc.*,ze.id as ze_id,ze.ticket_id,ze.subject,ze.to_email,ze.due_id,ze.create_time,ze.update_time,ze.status as ze_status,ad.nickname')
-//            ->where('oc.id',$ids)
-//            ->select();
-//
-//        $email =
-
-
-        foreach ($row as $key=>$item){
-            $data['id'] = $item['id'];
-            $data['email'] = $item['email'];
-            $data['status'] = $item['status'];
-            $data['increment_id'] = $item['increment_id'];
-            $data['customer_id'] = $item['customer_id'];
-            $data['problem_type'] = $item['problem_type'];
-            $data['concrete_problem'] = $item['concrete_problem'];
-            $data['order_type'] = $item['order_type'];
-            $data['good_skus'] = $item['good_skus'];
-            $data['images'] = explode(',',$item['images']);
-            $data['description'] = $item['description'];
-
-            if ($item['ze_status'] == 1){
-                $data['email_message'][$key]['ze_status'] = 'new';
-            }elseif ($item['ze_status'] ==2){
-                $data['email_message'][$key]['ze_status'] = 'open';
-            }elseif ($item['ze_status'] ==3){
-                $data['email_message'][$key]['ze_status'] = 'pending';
-            }elseif ($item['ze_status'] ==4){
-                $data['email_message'][$key]['ze_status'] = 'solved';
-            }else{
-                $data['email_message'][$key]['ze_status'] = 'other';
-            }
-            $data['email_message'][$key]['ze_id'] = $item['ze_id'];
-            $data['email_message'][$key]['ticket_id'] = $item['ticket_id'];
-            $data['email_message'][$key]['subject'] = $item['subject'];
-            $data['email_message'][$key]['to_email'] = $item['to_email'];
-            $data['email_message'][$key]['nickname'] = $item['nickname'];
-            $data['email_message'][$key]['create_time'] = $item['create_time'];
-            $data['email_message'][$key]['update_time'] = $item['update_time'];
-
-
-        }
         $this->assign('row',$row);
         return $this->view->fetch();
     }
