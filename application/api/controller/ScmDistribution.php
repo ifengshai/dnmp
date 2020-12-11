@@ -1077,7 +1077,6 @@ class ScmDistribution extends Scm
         $item_order_number = $this->request->request('item_order_number');
         empty($item_order_number) && $this->error(__('子订单号不能为空'), [], 403);
 
-        $abnormal_list = $this->info($item_order_number,7);
         //获取子订单数据
         $item_process_info = $this->_new_order_item_process
             ->where('item_order_number', $item_order_number)
@@ -1085,6 +1084,43 @@ class ScmDistribution extends Scm
             ->find();
         empty($item_process_info) && $this->error(__('子订单不存在'), [], 403);
         !in_array($item_process_info['distribution_status'],[7,8]) && $this->error(__('子订单当前状态不可合单操作'), [], 403);
+
+        //判断异常状态
+        $abnormal_id = $this->_distribution_abnormal
+            ->where(['item_process_id'=>$item_process_info['id'],'status'=>1])
+            ->value('id')
+        ;
+        $abnormal_id && $this->error(__('有异常待处理，无法操作'), [], 405);
+
+        //查询订单号
+        $order_info = $this->_new_order
+            ->field('increment_id,status')
+            ->where(['id'=>$item_process_info['order_id']])
+            ->find()
+        ;
+        'processing' != $order_info['status'] && $this->error(__('当前订单状态不可操作'), [], 405);
+
+        //检测是否有工单未处理
+        $check_work_order = $this->_work_order_measure
+            ->alias('a')
+            ->field('a.item_order_number,a.measure_choose_id')
+            ->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')
+            ->where([
+                'a.operation_type'=>0,
+                'b.platform_order'=>$order_info['increment_id'],
+                'b.work_status'=>['in',[1,2,3,5]]
+            ])
+            ->select();
+        if($check_work_order){
+            foreach ($check_work_order as $val){
+                (
+                    3 == $val['measure_choose_id']//主单取消措施未处理
+                    ||
+                    $val['item_order_number'] == $item_order_number//子单措施未处理:更改镜框18、更改镜片19、取消20
+                )
+                && $this->error(__('有工单未处理，无法操作'), [], 405);
+            }
+        }
 
         //获取订单购买总数
         $total_qty_ordered = $this->_new_order_item_process
@@ -1118,6 +1154,12 @@ class ScmDistribution extends Scm
             //主单已绑定合单库位,根据ID查询库位信息
             $store_house_info = $this->_stock_house->field('id,coding,subarea')->where('id',$order_process_info['store_house_id'])->find();
         }
+
+        //异常原因列表
+        $abnormal_list = [
+            ['id'=>12,'name'=>'缺货']
+        ];
+
         $info = [
             'item_order_number' => $item_order_number,
             'sku' => $item_process_info['sku'],
