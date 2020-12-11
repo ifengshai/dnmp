@@ -1427,25 +1427,21 @@ class ScmDistribution extends Scm
             if($query){
                 //线上不允许跨库联合查询，拆分，由于字段值明显差异，可以分别模糊匹配
                 $store_house_ids = $this->_stock_house->where(['type'=>2, 'coding'=> ['like', '%' . $query . '%']])->column('id');
-                print_r($store_house_ids);
-                print_r('-----');
                 $item_order_number_store = [];
                 if($store_house_ids) {
                     $item_order_number_store = $this->_new_order_item_process
                         ->where(['abnormal_house_id'=>['in', $store_house_ids]])
                         ->column('id');
                 }
-                print_r($item_order_number_store);
-                print_r('-----');
                 $item_ids = $this->_new_order_item_process
-                    ->where(['item_order_number'=> ['like', '%' . $query . '%']])
+                    ->where(['item_order_number'=> ['like', $query . '%']])
                     ->column('id');
-                print_r($item_ids);
-                print_r('-----');
                 $item_ids = array_merge($item_ids, $item_order_number_store);
-                print_r($item_ids);
-                exit;
-                if($item_ids) $where['a.id'] = ['in', $item_ids];
+                if($item_ids){
+                    $where['a.id'] = ['in', $item_ids];
+                } else{
+                    $where['a.id'] = -1;
+                }
             }
             $list = $this->_new_order_item_process
                 ->alias('a')
