@@ -2270,7 +2270,7 @@ class WorkOrderList extends Backend
 
                 //判断是否是新建状态
                 $work_status = $this->model->where('id', $work_id)->value('work_status');
-                if (1 == $work_status) {
+                if (0 < $work_status) {
                     //获取魔晶数据库中地址
                     $address = Db::name('work_order_change_sku')->where('work_id', $work_id)->value('userinfo_option');
                     $address = unserialize($address);
