@@ -122,12 +122,11 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
             if ($filter['country_id']) {
                 $amap['country_id'] = $filter['country_id'];
                 $amap['address_type'] = 'shipping';
-                $ids = Db::connect($db)->table('sales_flat_order_address')->where($amap)->column('parent_id');
-                $map['entity_id'] = ['in', $ids];
+                $sql = Db::connect($db)->table('sales_flat_order_address')->where($amap)->field('parent_id')->buildSql();;
+                $map[] = ['exp', Db::raw("entity_id in " . $sql)];
                 unset($filter['country_id']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
-
 
             if (!$filter) {
                 $map['created_at'] = ['between', ['2020-01-01', date('Y-m-d H:i:s')]];
@@ -146,7 +145,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
-
+           
             $list = collection($list)->toArray();
             //查询国家
             $entity_ids = array_column($list, 'entity_id');
