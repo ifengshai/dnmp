@@ -187,6 +187,7 @@ class Distribution extends Backend
                     $abnormal_where['type'] = ['in', $filter['abnormal']];
                     unset($filter['abnormal']);
                 }
+                
                 //获取未处理异常
                 if (8 == $label) {
                     $abnormal_where['status'] = 1;
