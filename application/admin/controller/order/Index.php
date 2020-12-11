@@ -127,7 +127,6 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
             $total = $model->alias('a')->join(['sales_flat_order_address' => 'b'], 'a.entity_id=b.parent_id')
                 ->where($where)
                 ->where($map)
-                ->order($sort, $order)
                 ->count();
 
             $list = $model->alias('a')->field('a.entity_id,increment_id,b.country_id,customer_firstname,customer_email,status,base_grand_total,base_shipping_amount,custom_order_prescription_type,order_type,a.created_at,a.shipping_description,a.shipping_method')
@@ -137,24 +136,9 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
-
+            
             $list = collection($list)->toArray();
 
-            $arr = [
-                'Business express(4-7 business days)',
-                'Expedited',
-                'Business express(7-14 Days)',
-                'Business express(7-12 Days)',
-                'Business express',
-                'Business express (7-12 days)',
-                'Business express(7-12 days)',
-                'Express Shipping (3-5 Days)',
-                'Express Shipping (5-8Days)',
-                'Express Shipping (3-5 Business Days)',
-                'Express Shipping (5-8 Business Days)',
-                'Business Express(7-12 Days)',
-                'Business express(7-12 business days)'
-            ];
             foreach ($list as &$v) {
                 if ($v['shipping_method'] == 'tablerate_bestway') {
                     $v['label'] = 1;
