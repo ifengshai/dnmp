@@ -3780,6 +3780,7 @@ EOF;
             $csv[$key]['payment_time'] = $value['payment_time'];
             $csv[$key]['replacement_order'] = $value['replacement_order'];
 
+            echo $key . "\n";
         }
 
 
