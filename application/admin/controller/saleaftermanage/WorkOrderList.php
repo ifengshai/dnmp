@@ -3576,7 +3576,6 @@ EOF;
 
         $list = $this->model
             ->where($map)
-            ->limit(20)
             ->select();
         $list = collection($list)->toArray();
 
