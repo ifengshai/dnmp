@@ -669,12 +669,13 @@ class ScmWarehouse extends Scm
         if($query){
             $where['a.check_order_number|b.sku|c.logistics_number'] = ['like', '%' . $query . '%'];
         }
-        if(isset($status)){
-            $where['a.status'] = $status;
-        }
+        
         if($start_time && $end_time){
             $where['a.createtime'] = ['between', [$start_time, $end_time]];
         }
+
+        //已审核通过
+        $where['a.status'] = 2;
 
         $offset = ($page - 1) * $page_size;
         $limit = $page_size;
