@@ -681,7 +681,39 @@ class Inventory extends Backend
                     $item_map['sku'] = $v['sku'];
                     $item_map['is_del'] = 1;
                     if ($v['sku']) {
+                        $sku_item = $item->where($item_map)->find();
                         $stock = $item->where($item_map)->inc('stock', $v['error_qty'])->inc('available_stock', $v['error_qty'])->update();
+                        //插入日志表
+                        (new StockLog())->setData([
+                            'type' => 2,
+                            'site' => 0,
+                            'modular' => 12,
+                            'change_type' => $v['error_qty'] > 0 ? 20 : 21,
+                            'sku' => $v['sku'],
+                            'order_number' => $v['inventory_id'],
+                            'source' => 1,
+                            'stock_before' => $sku_item['stock'],
+                            'stock_change' => $v['error_qty'],
+                            'available_stock_before' => $sku_item['available_stock'],
+                            'available_stock_change' => $v['error_qty'],
+                            'fictitious_before' => 0,
+                            'fictitious_change' => 0,
+                            'occupy_stock_before' => $sku_item['occupy_stock'],
+                            'occupy_stock_change' => 0,
+                            'distribution_stock_before' => $sku_item['distribution_occupy_stock'],
+                            'distribution_stock_change' => 0,
+                            'presell_num_before' => $sku_item['presell_num'],
+                            'presell_num_change' => 0,
+                            'sample_num_before' => $sku_item['sample_num'],
+                            'sample_num_change' => 0,
+                            'on_way_stock_before' => $sku_item['on_way_stock'],
+                            'on_way_stock_change' => 0,
+                            'wait_instock_num_before' => $sku_item['wait_instock_num'],
+                            'wait_instock_num_change' => 0,
+                            'create_person' => session('admin.nickname'),
+                            'create_time' => time(),
+                            'number_type' => 5,
+                        ]);
 
 
                         //盘点的时候盘盈入库 盘亏出库 的同时要对虚拟库存进行一定的操作
@@ -704,16 +736,80 @@ class Inventory extends Backend
                         //计算当前sku的总虚拟库存 如果总的为0 表示当前所有平台的此sku都为0 此时入库的话按照平均规则分配 例如五个站都有此品 那么比例就是20%
                         $stock_all_num = array_sum(array_column($item_platform_sku, 'stock'));
                         
-                        if ($stock_all_num == 0 || $stock_all_num < 0) {
+                        if ($stock_all_num <= 0) {
                             $rate_rate = 1 / $all_num;
                             foreach ($item_platform_sku as $key => $val) {
                                 //最后一个站点 剩余数量分给最后一个站
                                 if (($all_num - $key) == 1) {
+                                    $item_platform_sku_detail = $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->find();
                                     $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->inc('stock', $stock_num)->update();
+                                    //插入日志表
+                                    (new StockLog())->setData([
+                                        'type' => 2,
+                                        'site' => $val['platform_type'],
+                                        'modular' => 12,
+                                        'change_type' => $v['error_qty'] > 0 ? 20 : 21,
+                                        'sku' => $v['sku'],
+                                        'order_number' => $v['inventory_id'],
+                                        'source' => 1,
+                                        'stock_before' => $sku_item['stock'],
+                                        'stock_change' => 0,
+                                        'available_stock_before' => $sku_item['available_stock'],
+                                        'available_stock_change' => 0,
+                                        'fictitious_before' => $item_platform_sku_detail['stock'],
+                                        'fictitious_change' => $stock_num,
+                                        'occupy_stock_before' => $sku_item['occupy_stock'],
+                                        'occupy_stock_change' => 0,
+                                        'distribution_stock_before' => $sku_item['distribution_occupy_stock'],
+                                        'distribution_stock_change' => 0,
+                                        'presell_num_before' => $sku_item['presell_num'],
+                                        'presell_num_change' => 0,
+                                        'sample_num_before' => $sku_item['sample_num'],
+                                        'sample_num_change' => 0,
+                                        'on_way_stock_before' => $sku_item['on_way_stock'],
+                                        'on_way_stock_change' => 0,
+                                        'wait_instock_num_before' => $sku_item['wait_instock_num'],
+                                        'wait_instock_num_change' => 0,
+                                        'create_person' => session('admin.nickname'),
+                                        'create_time' => time(),
+                                        'number_type' => 5,
+                                    ]);
                                 } else {
                                     $num = round($v['error_qty'] * $rate_rate);
                                     $stock_num -= $num;
+                                    $item_platform_sku_detail = $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->find();
                                     $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->inc('stock', $num)->update();
+                                    //插入日志表
+                                    (new StockLog())->setData([
+                                        'type' => 2,
+                                        'site' => $val['platform_type'],
+                                        'modular' => 12,
+                                        'change_type' => $v['error_qty'] > 0 ? 20 : 21,
+                                        'sku' => $v['sku'],
+                                        'order_number' => $v['inventory_id'],
+                                        'source' => 1,
+                                        'stock_before' => $sku_item['stock'],
+                                        'stock_change' => 0,
+                                        'available_stock_before' => $sku_item['available_stock'],
+                                        'available_stock_change' => 0,
+                                        'fictitious_before' => $item_platform_sku_detail['stock'],
+                                        'fictitious_change' => $num,
+                                        'occupy_stock_before' => $sku_item['occupy_stock'],
+                                        'occupy_stock_change' => 0,
+                                        'distribution_stock_before' => $sku_item['distribution_occupy_stock'],
+                                        'distribution_stock_change' => 0,
+                                        'presell_num_before' => $sku_item['presell_num'],
+                                        'presell_num_change' => 0,
+                                        'sample_num_before' => $sku_item['sample_num'],
+                                        'sample_num_change' => 0,
+                                        'on_way_stock_before' => $sku_item['on_way_stock'],
+                                        'on_way_stock_change' => 0,
+                                        'wait_instock_num_before' => $sku_item['wait_instock_num'],
+                                        'wait_instock_num_change' => 0,
+                                        'create_person' => session('admin.nickname'),
+                                        'create_time' => time(),
+                                        'number_type' => 5,
+                                    ]);
                                 }
                             }
                         } else {
@@ -721,11 +817,75 @@ class Inventory extends Backend
                                 // dump($item_platform_sku);die;
                                 //最后一个站点 剩余数量分给最后一个站
                                 if (($all_num - $key) == 1) {
+                                    $item_platform_sku_detail = $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->find();
                                     $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->inc('stock', $stock_num)->update();
+                                    //插入日志表
+                                    (new StockLog())->setData([
+                                        'type' => 2,
+                                        'site' => $val['platform_type'],
+                                        'modular' => 12,
+                                        'change_type' => $v['error_qty'] > 0 ? 20 : 21,
+                                        'sku' => $v['sku'],
+                                        'order_number' => $v['inventory_id'],
+                                        'source' => 1,
+                                        'stock_before' => $sku_item['stock'],
+                                        'stock_change' => 0,
+                                        'available_stock_before' => $sku_item['available_stock'],
+                                        'available_stock_change' => 0,
+                                        'fictitious_before' => $item_platform_sku_detail['stock'],
+                                        'fictitious_change' => $stock_num,
+                                        'occupy_stock_before' => $sku_item['occupy_stock'],
+                                        'occupy_stock_change' => 0,
+                                        'distribution_stock_before' => $sku_item['distribution_occupy_stock'],
+                                        'distribution_stock_change' => 0,
+                                        'presell_num_before' => $sku_item['presell_num'],
+                                        'presell_num_change' => 0,
+                                        'sample_num_before' => $sku_item['sample_num'],
+                                        'sample_num_change' => 0,
+                                        'on_way_stock_before' => $sku_item['on_way_stock'],
+                                        'on_way_stock_change' => 0,
+                                        'wait_instock_num_before' => $sku_item['wait_instock_num'],
+                                        'wait_instock_num_change' => 0,
+                                        'create_person' => session('admin.nickname'),
+                                        'create_time' => time(),
+                                        'number_type' => 5,
+                                    ]);
                                 } else {
                                     $num = round($v['error_qty'] * abs($val['stock']) / $num_num);
                                     $stock_num -= $num;
+                                    $item_platform_sku_detail = $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->find();
                                     $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->inc('stock', $num)->update();
+                                    //插入日志表
+                                    (new StockLog())->setData([
+                                        'type' => 2,
+                                        'site' => $val['platform_type'],
+                                        'modular' => 12,
+                                        'change_type' => $v['error_qty'] > 0 ? 20 : 21,
+                                        'sku' => $v['sku'],
+                                        'order_number' => $v['inventory_id'],
+                                        'source' => 1,
+                                        'stock_before' => $sku_item['stock'],
+                                        'stock_change' => 0,
+                                        'available_stock_before' => $sku_item['available_stock'],
+                                        'available_stock_change' => 0,
+                                        'fictitious_before' => $item_platform_sku_detail['stock'],
+                                        'fictitious_change' => $num,
+                                        'occupy_stock_before' => $sku_item['occupy_stock'],
+                                        'occupy_stock_change' => 0,
+                                        'distribution_stock_before' => $sku_item['distribution_occupy_stock'],
+                                        'distribution_stock_change' => 0,
+                                        'presell_num_before' => $sku_item['presell_num'],
+                                        'presell_num_change' => 0,
+                                        'sample_num_before' => $sku_item['sample_num'],
+                                        'sample_num_change' => 0,
+                                        'on_way_stock_before' => $sku_item['on_way_stock'],
+                                        'on_way_stock_change' => 0,
+                                        'wait_instock_num_before' => $sku_item['wait_instock_num'],
+                                        'wait_instock_num_change' => 0,
+                                        'create_person' => session('admin.nickname'),
+                                        'create_time' => time(),
+                                        'number_type' => 5,
+                                    ]);
                                 }
                             }
                         }
@@ -737,18 +897,18 @@ class Inventory extends Backend
                         break;
                     }
 
-                    //插入日志表
-                    (new StockLog())->setData([
-                        'type'                      => 2,
-                        'two_type'                  => 5,
-                        'sku'                       => $v['sku'],
-                        'public_id'                 => $v['inventory_id'],
-                        'stock_change'              => $v['error_qty'],
-                        'available_stock_change'    => $v['error_qty'],
-                        'create_person'             => session('admin.nickname'),
-                        'create_time'               => date('Y-m-d H:i:s'),
-                        'remark'                    => '出库单减少总库存,减少可用库存'
-                    ]);
+                    // //插入日志表
+                    // (new StockLog())->setData([
+                    //     'type' => 2,
+                    //     'two_type' => 5,
+                    //     'sku' => $v['sku'],
+                    //     'public_id' => $v['inventory_id'],
+                    //     'stock_change' => $v['error_qty'],
+                    //     'available_stock_change' => $v['error_qty'],
+                    //     'create_person' => session('admin.nickname'),
+                    //     'create_time' => date('Y-m-d H:i:s'),
+                    //     'remark' => '出库单减少总库存,减少可用库存'
+                    // ]);
 
                     if ($v['error_qty'] > 0) {
                         //生成入库单
@@ -923,9 +1083,9 @@ class Inventory extends Backend
      * 批量导出xls
      *
      * @Description
-     * @author wpl
-     * @since 2020/02/28 14:45:39
      * @return void
+     * @since 2020/02/28 14:45:39
+     * @author wpl
      */
     public function batch_export_xls()
     {
@@ -966,7 +1126,7 @@ class Inventory extends Backend
             'borders' => [
                 'allBorders' => [
                     'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
-                    'color'       => ['argb' => 'FF000000'], // 设置border颜色
+                    'color' => ['argb' => 'FF000000'], // 设置border颜色
                 ],
             ],
         ];
@@ -1215,7 +1375,7 @@ class Inventory extends Backend
         // $outstock = new \app\admin\model\warehouse\Outstock;
         // $outstockItem = new \app\admin\model\warehouse\OutStockItem;
         $taskChangeSku = new \app\admin\model\infosynergytaskmanage\InfoSynergyTaskChangeSku;
-        $platformSku   = new \app\admin\model\itemmanage\ItemPlatformSku;
+        $platformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $changeRow = $taskChangeSku->where(['tid' => $id])->field('original_sku,original_number,change_sku,change_number')->select();
         if (!$changeRow) { //如果不存在改变的sku
             return false;
@@ -1237,13 +1397,13 @@ class Inventory extends Backend
         }
         foreach ($changeRow as $v) {
             //原先sku
-            $original_sku    = $v['original_sku'];
+            $original_sku = $v['original_sku'];
             //原先sku数量
             $original_number = $v['original_number'];
             //改变之后的sku
-            $change_sku      = $v['change_sku'];
+            $change_sku = $v['change_sku'];
             //改变之后的sku数量
-            $change_number   = $v['change_number'];
+            $change_number = $v['change_number'];
             //判断条件 如果原始的数量和变更之后的数量都不存在，则忽略
             if ((!$original_number) && (!$change_number)) {
                 continue;
@@ -1264,7 +1424,7 @@ class Inventory extends Backend
                 //更改sales_flat_order_item表中的sku字段
                 if ($original_sku && $original_number) { //如果存在原始sku和原始的数量
                     $whereChange['order_id'] = $order['entity_id'];
-                    $whereChange['sku']      = $original_sku;
+                    $whereChange['sku'] = $original_sku;
                     $changeData['is_change_frame'] = 2;
                     $updateInfo = Db::connect($db)->table('sales_flat_order_item')->where($whereChange)->update($changeData);
                     if (false != $updateInfo) {
@@ -1365,6 +1525,7 @@ class Inventory extends Backend
             }
         }
     }
+
     /***
      * 取消订单的逻辑
      * @param id 协同任务ID
@@ -1380,7 +1541,7 @@ class Inventory extends Backend
         // $instock = new \app\admin\model\warehouse\Instock;
         // $instockItem = new \app\admin\model\warehouse\InstockItem;
         $taskChangeSku = new \app\admin\model\infosynergytaskmanage\InfoSynergyTaskChangeSku;
-        $platformSku   = new \app\admin\model\itemmanage\ItemPlatformSku;
+        $platformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $changeRow = $taskChangeSku->where(['tid' => $id])->field('original_sku,original_number')->select();
         if (!$changeRow) { //如果不存在改变的sku
             return false;
@@ -1402,7 +1563,7 @@ class Inventory extends Backend
         }
         foreach ($changeRow as $v) {
             //原先sku
-            $original_sku    = $v['original_sku'];
+            $original_sku = $v['original_sku'];
             //原先sku数量
             $original_number = $v['original_number'];
             //原先sku对应的仓库sku
@@ -1419,7 +1580,7 @@ class Inventory extends Backend
             try {
                 //更改sales_flat_order_item表中的sku字段
                 $whereChange['order_id'] = $order['entity_id'];
-                $whereChange['sku']      = $original_sku;
+                $whereChange['sku'] = $original_sku;
                 $changeData['is_change_frame'] = 3;
                 $updateInfo = Db::connect($db)->table('sales_flat_order_item')->where($whereChange)->update($changeData);
                 if (false != $updateInfo) {
@@ -1470,6 +1631,7 @@ class Inventory extends Backend
             }
         }
     }
+
     /*** lsw
      * 更改镜架逻辑-弃用
      * @param id 协同任务ID
@@ -1486,7 +1648,7 @@ class Inventory extends Backend
             return false;
         }
         $item = new \app\admin\model\itemmanage\Item;
-        $platformSku   = new \app\admin\model\itemmanage\ItemPlatformSku;
+        $platformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
         if (1 == $order_platform) {
             $db = 'database.db_zeelool';
         } elseif (2 == $order_platform) {
@@ -1504,13 +1666,13 @@ class Inventory extends Backend
         }
         foreach ($changeRow as $v) {
             //原先sku
-            $original_sku    = trim($v['original_sku']);
+            $original_sku = trim($v['original_sku']);
             //原先sku数量
             $original_number = $v['original_number'];
             //改变之后的sku
-            $change_sku      = trim($v['change_sku']);
+            $change_sku = trim($v['change_sku']);
             //改变之后的sku数量
-            $change_number   = $v['change_number'];
+            $change_number = $v['change_number'];
             //判断条件 如果原始的数量和变更之后的数量都不存在，则忽略
             if ((!$original_number) && (!$change_number)) {
                 continue;
@@ -1531,7 +1693,7 @@ class Inventory extends Backend
                 //更改sales_flat_order_item表中的sku字段
                 if ($original_sku && $original_number) {     //如果存在原始sku和原始的数量
                     $whereChange['order_id'] = $order['entity_id'];
-                    $whereChange['sku']      = $original_sku;
+                    $whereChange['sku'] = $original_sku;
                     $changeData['is_change_frame'] = 2;
                     $updateInfo = Db::connect($db)->table('sales_flat_order_item')->where($whereChange)->update($changeData);
                     if (false !== $updateInfo) {
@@ -1546,17 +1708,17 @@ class Inventory extends Backend
 
                                 //插入日志表
                                 (new StockLog())->setData([
-                                    'type'                      => 2,
-                                    'two_type'                  => 6,
-                                    'sku'                       => $warehouse_original_sku,
-                                    'order_number'              => $increment_id,
-                                    'public_id'                 => $id,
+                                    'type' => 2,
+                                    'two_type' => 6,
+                                    'sku' => $warehouse_original_sku,
+                                    'order_number' => $increment_id,
+                                    'public_id' => $id,
                                     'distribution_stock_change' => -$original_number,
-                                    'available_stock_change'    => $original_number,
-                                    'occupy_stock_change'       => -$original_number,
-                                    'create_person'             => session('admin.nickname'),
-                                    'create_time'               => date('Y-m-d H:i:s'),
-                                    'remark'                    => '工单更换镜框-订单已配镜架,原SKU增加可用库存,减少配货占用,减少订单占用'
+                                    'available_stock_change' => $original_number,
+                                    'occupy_stock_change' => -$original_number,
+                                    'create_person' => session('admin.nickname'),
+                                    'create_time' => date('Y-m-d H:i:s'),
+                                    'remark' => '工单更换镜框-订单已配镜架,原SKU增加可用库存,减少配货占用,减少订单占用'
                                 ]);
                             }
                             //更新之后的sku减少可用库存,增加占用库存
@@ -1569,17 +1731,17 @@ class Inventory extends Backend
 
                                 //插入日志表
                                 (new StockLog())->setData([
-                                    'type'                      => 2,
-                                    'two_type'                  => 6,
-                                    'sku'                       => $warehouse_change_sku,
-                                    'order_number'              => $increment_id,
-                                    'public_id'                 => $id,
+                                    'type' => 2,
+                                    'two_type' => 6,
+                                    'sku' => $warehouse_change_sku,
+                                    'order_number' => $increment_id,
+                                    'public_id' => $id,
                                     'distribution_stock_change' => $change_number,
-                                    'available_stock_change'    => -$change_number,
-                                    'occupy_stock_change'       => $change_number,
-                                    'create_person'             => session('admin.nickname'),
-                                    'create_time'               => date('Y-m-d H:i:s'),
-                                    'remark'                    => '工单更换镜框-订单已配镜架,新SKU减少可用库存,增加配货占用,增加订单占用'
+                                    'available_stock_change' => -$change_number,
+                                    'occupy_stock_change' => $change_number,
+                                    'create_person' => session('admin.nickname'),
+                                    'create_time' => date('Y-m-d H:i:s'),
+                                    'remark' => '工单更换镜框-订单已配镜架,新SKU减少可用库存,增加配货占用,增加订单占用'
                                 ]);
                             }
                         } else { //否则走原先的流程
@@ -1592,16 +1754,16 @@ class Inventory extends Backend
 
                                 //插入日志表
                                 (new StockLog())->setData([
-                                    'type'                      => 2,
-                                    'two_type'                  => 6,
-                                    'sku'                       => $warehouse_original_sku,
-                                    'order_number'              => $increment_id,
-                                    'public_id'                 => $id,
-                                    'available_stock_change'    => $original_number,
-                                    'occupy_stock_change'       => -$original_number,
-                                    'create_person'             => session('admin.nickname'),
-                                    'create_time'               => date('Y-m-d H:i:s'),
-                                    'remark'                    => '工单更换镜框-订单未配镜架,原SKU增加可用库存,减少配货占用,减少订单占用'
+                                    'type' => 2,
+                                    'two_type' => 6,
+                                    'sku' => $warehouse_original_sku,
+                                    'order_number' => $increment_id,
+                                    'public_id' => $id,
+                                    'available_stock_change' => $original_number,
+                                    'occupy_stock_change' => -$original_number,
+                                    'create_person' => session('admin.nickname'),
+                                    'create_time' => date('Y-m-d H:i:s'),
+                                    'remark' => '工单更换镜框-订单未配镜架,原SKU增加可用库存,减少配货占用,减少订单占用'
                                 ]);
                             }
                             //更新之后的sku减少可用库存,增加占用库存
@@ -1613,16 +1775,16 @@ class Inventory extends Backend
 
                                 //插入日志表
                                 (new StockLog())->setData([
-                                    'type'                      => 2,
-                                    'two_type'                  => 6,
-                                    'sku'                       => $warehouse_change_sku,
-                                    'order_number'              => $increment_id,
-                                    'public_id'                 => $id,
-                                    'available_stock_change'    => -$change_number,
-                                    'occupy_stock_change'       => $change_number,
-                                    'create_person'             => session('admin.nickname'),
-                                    'create_time'               => date('Y-m-d H:i:s'),
-                                    'remark'                    => '工单更换镜框-订单未配镜架,新SKU减少可用库存,增加订单占用'
+                                    'type' => 2,
+                                    'two_type' => 6,
+                                    'sku' => $warehouse_change_sku,
+                                    'order_number' => $increment_id,
+                                    'public_id' => $id,
+                                    'available_stock_change' => -$change_number,
+                                    'occupy_stock_change' => $change_number,
+                                    'create_person' => session('admin.nickname'),
+                                    'create_time' => date('Y-m-d H:i:s'),
+                                    'remark' => '工单更换镜框-订单未配镜架,新SKU减少可用库存,增加订单占用'
                                 ]);
                             }
                         }
@@ -1663,11 +1825,11 @@ class Inventory extends Backend
         foreach ($change_row as $v) {
             //原sku
             $arr = explode('-', trim($v['original_sku']));
-            $original_sku = 2 < count($arr) ? $arr[0].'-'.$arr[1] : trim($v['original_sku']);
+            $original_sku = 2 < count($arr) ? $arr[0] . '-' . $arr[1] : trim($v['original_sku']);
 
             //新sku
             $arr = explode('-', trim($v['change_sku']));
-            $change_sku = 2 < count($arr) ? $arr[0].'-'.$arr[1] : trim($v['change_sku']);
+            $change_sku = 2 < count($arr) ? $arr[0] . '-' . $arr[1] : trim($v['change_sku']);
 
             //原sku数量
             $original_number = $v['original_number'] ?: 1;
@@ -1678,17 +1840,45 @@ class Inventory extends Backend
             //原sku或新sku不存在则忽略
             if (!$original_sku || !$change_sku) continue;
 
-            //原sku对应的仓库sku
-            $warehouse_original_sku = $_platform_sku->where(['platform_sku'=>$original_sku,'platform_type'=>$order_platform])->value('sku');
+            //原sku对应的仓库sku、库存
+            $warehouse_original_info = $_platform_sku
+                ->field('sku,stock')
+                ->where(['platform_sku'=>$original_sku,'platform_type'=>$order_platform])
+                ->find()
+            ;
+            $warehouse_original_sku = $warehouse_original_info['sku'];
 
-            //新sku对应的仓库sku
-            $warehouse_change_sku = $_platform_sku->where(['platform_sku'=>$change_sku,'platform_type'=>$order_platform])->value('sku');
+            //新sku对应的仓库sku、库存
+            $warehouse_change_info = $_platform_sku
+                ->field('sku,stock')
+                ->where(['platform_sku'=>$change_sku,'platform_type'=>$order_platform])
+                ->find()
+            ;
+            $warehouse_change_sku = $warehouse_change_info['sku'];
+
+            //原sku商品表相关库存
+            $original_item_info = $_item
+                ->field('occupy_stock,available_stock,distribution_occupy_stock')
+                ->where(['sku'=>$warehouse_original_sku])
+                ->find()
+            ;
+
+            //新sku商品表相关库存
+            $change_item_info = $_item
+                ->field('occupy_stock,available_stock,distribution_occupy_stock')
+                ->where(['sku'=>$warehouse_change_sku])
+                ->find()
+            ;
+
 
             //获取子单状态
-            $distribution_status = $_new_order_item_process->where(['item_order_number'=>$v['item_order_number']])->value('distribution_status');
+            $distribution_status = $_new_order_item_process->where(['item_order_number' => $v['item_order_number']])->value('distribution_status');
 
             //开启事务
-            Db::startTrans();
+            $_item->startTrans();
+            $_platform_sku->startTrans();
+            $_stock_log->startTrans();
+
             try {
                 $stock_data = [];
                 //子单状态大于待配货
@@ -1711,16 +1901,24 @@ class Inventory extends Backend
                         //记录库存日志
                         $stock_data[] = [
                             'type'                      => 2,
-                            'two_type'                  => 6,
+                            'site'                      => $order_platform,
+                            'modular'                   => 6,
+                            'change_type'               => 11,
+                            'source'                    => 1,
                             'sku'                       => $warehouse_original_sku,
-                            'order_number'              => $increment_id,
+                            'number_type'               => 2,
+                            'order_number'              => $v['item_order_number'],
                             'public_id'                 => $work_id,
-                            'distribution_stock_change' => -$original_number,
+                            'available_stock_before'    => $original_item_info['available_stock'],
                             'available_stock_change'    => $original_number,
+                            'occupy_stock_before'       => $original_item_info['occupy_stock'],
                             'occupy_stock_change'       => -$original_number,
+                            'distribution_stock_before' => $original_item_info['distribution_occupy_stock'],
+                            'distribution_stock_change' => -$original_number,
+                            'fictitious_before'         => $warehouse_original_info['stock'],
+                            'fictitious_change'         => $original_number,
                             'create_person'             => session('admin.nickname'),
-                            'create_time'               => date('Y-m-d H:i:s'),
-                            'remark'                    => '工单更换镜框-订单已配镜架,原SKU增加可用库存,减少配货占用,减少订单占用'
+                            'create_time'               => time()
                         ];
                     }
 
@@ -1742,16 +1940,24 @@ class Inventory extends Backend
                         //记录库存日志
                         $stock_data[] = [
                             'type'                      => 2,
-                            'two_type'                  => 6,
+                            'site'                      => $order_platform,
+                            'modular'                   => 6,
+                            'change_type'               => 11,
+                            'source'                    => 1,
                             'sku'                       => $warehouse_change_sku,
-                            'order_number'              => $increment_id,
+                            'number_type'               => 2,
+                            'order_number'              => $v['item_order_number'],
                             'public_id'                 => $work_id,
-                            'distribution_stock_change' => $change_number,
+                            'available_stock_before'    => $change_item_info['available_stock'],
                             'available_stock_change'    => -$change_number,
+                            'occupy_stock_before'       => $change_item_info['occupy_stock'],
                             'occupy_stock_change'       => $change_number,
+                            'distribution_stock_before' => $change_item_info['distribution_occupy_stock'],
+                            'distribution_stock_change' => $change_number,
+                            'fictitious_before'         => $warehouse_change_info['stock'],
+                            'fictitious_change'         => -$change_number,
                             'create_person'             => session('admin.nickname'),
-                            'create_time'               => date('Y-m-d H:i:s'),
-                            'remark'                    => '工单更换镜框-订单已配镜架,新SKU减少可用库存,增加配货占用,增加订单占用'
+                            'create_time'               => time()
                         ];
                     }
                 } else { //子单状态是未配货
@@ -1772,15 +1978,22 @@ class Inventory extends Backend
                         //记录库存日志
                         $stock_data[] = [
                             'type'                      => 2,
-                            'two_type'                  => 6,
+                            'site'                      => $order_platform,
+                            'modular'                   => 6,
+                            'change_type'               => 10,
+                            'source'                    => 1,
                             'sku'                       => $warehouse_original_sku,
-                            'order_number'              => $increment_id,
+                            'number_type'               => 2,
+                            'order_number'              => $v['item_order_number'],
                             'public_id'                 => $work_id,
+                            'available_stock_before'    => $original_item_info['available_stock'],
                             'available_stock_change'    => $original_number,
+                            'occupy_stock_before'       => $original_item_info['occupy_stock'],
                             'occupy_stock_change'       => -$original_number,
+                            'fictitious_before'         => $warehouse_original_info['stock'],
+                            'fictitious_change'         => $original_number,
                             'create_person'             => session('admin.nickname'),
-                            'create_time'               => date('Y-m-d H:i:s'),
-                            'remark'                    => '工单更换镜框-订单未配镜架,原SKU增加可用库存,减少配货占用,减少订单占用'
+                            'create_time'               => time()
                         ];
                     }
 
@@ -1801,33 +2014,48 @@ class Inventory extends Backend
                         //记录库存日志
                         $stock_data[] = [
                             'type'                      => 2,
-                            'two_type'                  => 6,
+                            'site'                      => $order_platform,
+                            'modular'                   => 6,
+                            'change_type'               => 10,
+                            'source'                    => 1,
                             'sku'                       => $warehouse_change_sku,
-                            'order_number'              => $increment_id,
+                            'number_type'               => 2,
+                            'order_number'              => $v['item_order_number'],
                             'public_id'                 => $work_id,
+                            'available_stock_before'    => $change_item_info['available_stock'],
                             'available_stock_change'    => -$change_number,
+                            'occupy_stock_before'       => $change_item_info['occupy_stock'],
                             'occupy_stock_change'       => $change_number,
+                            'fictitious_before'         => $warehouse_change_info['stock'],
+                            'fictitious_change'         => -$change_number,
                             'create_person'             => session('admin.nickname'),
-                            'create_time'               => date('Y-m-d H:i:s'),
-                            'remark'                    => '工单更换镜框-订单未配镜架,新SKU减少可用库存,增加订单占用'
+                            'create_time'               => time()
                         ];
                     }
                 }
 
-                if($stock_data){
+                if ($stock_data) {
                     $_stock_log->allowField(true)->saveAll($stock_data);
                 }
 
                 //提交
-                Db::commit();
+                $_item->commit();
+                $_platform_sku->commit();
+                $_stock_log->commit();
             } catch (ValidateException $e) {
-                Db::rollback();
+                $_item->rollback();
+                $_platform_sku->rollback();
+                $_stock_log->rollback();
                 $this->error($e->getMessage());
             } catch (PDOException $e) {
-                Db::rollback();
+                $_item->rollback();
+                $_platform_sku->rollback();
+                $_stock_log->rollback();
                 $this->error($e->getMessage());
             } catch (Exception $e) {
-                Db::rollback();
+                $_item->rollback();
+                $_platform_sku->rollback();
+                $_stock_log->rollback();
                 $this->error($e->getMessage());
             }
         }
@@ -1846,7 +2074,7 @@ class Inventory extends Backend
             return false;
         }
         $item = new \app\admin\model\itemmanage\Item;
-        $platformSku   = new \app\admin\model\itemmanage\ItemPlatformSku;
+        $platformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
         if (1 == $order_platform) {
             $db = 'database.db_zeelool';
         } elseif (2 == $order_platform) {
@@ -1864,7 +2092,7 @@ class Inventory extends Backend
         }
         foreach ($changeRow as $v) {
             //原先sku
-            $original_sku    = trim($v['original_sku']);
+            $original_sku = trim($v['original_sku']);
             //原先sku数量
             $original_number = $v['original_number'];
             //原先sku对应的仓库sku
@@ -1881,7 +2109,7 @@ class Inventory extends Backend
             try {
                 //更改sales_flat_order_item表中的sku字段
                 $whereChange['order_id'] = $order['entity_id'];
-                $whereChange['sku']      = $original_sku;
+                $whereChange['sku'] = $original_sku;
                 $changeData['is_change_frame'] = 3;
                 $updateInfo = Db::connect($db)->table('sales_flat_order_item')->where($whereChange)->update($changeData);
                 if (false !== $updateInfo) {
@@ -1896,17 +2124,17 @@ class Inventory extends Backend
                         if (false !== $res) {
                             //插入日志表
                             (new StockLog())->setData([
-                                'type'                      => 2,
-                                'two_type'                  => 7,
-                                'sku'                       => $warehouse_original_sku,
-                                'order_number'              => $increment_id,
-                                'public_id'                 => $id,
+                                'type' => 2,
+                                'two_type' => 7,
+                                'sku' => $warehouse_original_sku,
+                                'order_number' => $increment_id,
+                                'public_id' => $id,
                                 'distribution_stock_change' => -$original_number,
-                                'available_stock_change'    => $original_number,
-                                'occupy_stock_change'       => -$original_number,
-                                'create_person'             => session('admin.nickname'),
-                                'create_time'               => date('Y-m-d H:i:s'),
-                                'remark'                    => '工单取消订单-订单已配镜架,SKU增加可用库存,减少配货占用,减少订单占用'
+                                'available_stock_change' => $original_number,
+                                'occupy_stock_change' => -$original_number,
+                                'create_person' => session('admin.nickname'),
+                                'create_time' => date('Y-m-d H:i:s'),
+                                'remark' => '工单取消订单-订单已配镜架,SKU增加可用库存,减少配货占用,减少订单占用'
                             ]);
                         }
                     } else {
@@ -1918,16 +2146,16 @@ class Inventory extends Backend
                         if (false !== $res) {
                             //插入日志表
                             (new StockLog())->setData([
-                                'type'                      => 2,
-                                'two_type'                  => 6,
-                                'sku'                       => $warehouse_original_sku,
-                                'order_number'              => $increment_id,
-                                'public_id'                 => $id,
-                                'available_stock_change'    => $original_number,
-                                'occupy_stock_change'       => -$original_number,
-                                'create_person'             => session('admin.nickname'),
-                                'create_time'               => date('Y-m-d H:i:s'),
-                                'remark'                    => '工单取消订单-订单未配镜架,SKU增加可用库存,减少订单占用'
+                                'type' => 2,
+                                'two_type' => 6,
+                                'sku' => $warehouse_original_sku,
+                                'order_number' => $increment_id,
+                                'public_id' => $id,
+                                'available_stock_change' => $original_number,
+                                'occupy_stock_change' => -$original_number,
+                                'create_person' => session('admin.nickname'),
+                                'create_time' => date('Y-m-d H:i:s'),
+                                'remark' => '工单取消订单-订单未配镜架,SKU增加可用库存,减少订单占用'
                             ]);
                         }
                     }
@@ -1970,18 +2198,33 @@ class Inventory extends Backend
 
             //获取sku
             $arr = explode('-', trim($v['original_sku']));
-            $original_sku = 2 < count($arr) ? $arr[0].'-'.$arr[1] : trim($v['original_sku']);
+            $original_sku = 2 < count($arr) ? $arr[0] . '-' . $arr[1] : trim($v['original_sku']);
 
             if (!$original_sku) continue;
 
-            //仓库sku
-            $warehouse_original_sku = $_platform_sku->where(['platform_sku'=>$original_sku,'platform_type'=>$order_platform])->value('sku');
+            //仓库sku、库存
+            $warehouse_original_info = $_platform_sku
+                ->field('sku,stock')
+                ->where(['platform_sku'=>$original_sku,'platform_type'=>$order_platform])
+                ->find()
+            ;
+            $warehouse_original_sku = $warehouse_original_info['sku'];
+
+            //商品表相关库存
+            $original_item_info = $_item
+                ->field('occupy_stock,available_stock,distribution_occupy_stock')
+                ->where(['sku'=>$warehouse_original_sku])
+                ->find()
+            ;
+
 
             //获取子单状态
-            $distribution_status = $_new_order_item_process->where(['item_order_number'=>$v['item_order_number']])->value('distribution_status');
+            $distribution_status = $_new_order_item_process->where(['item_order_number' => $v['item_order_number']])->value('distribution_status');
 
             //开始事务
-            Db::startTrans();
+            $_item->startTrans();
+            $_platform_sku->startTrans();
+            $_stock_log->startTrans();
             try {
                 //子单状态大于待配货
                 if (2 < $distribution_status) {
@@ -2001,16 +2244,24 @@ class Inventory extends Backend
                     //记录库存日志
                     $_stock_log->setData([
                         'type'                      => 2,
-                        'two_type'                  => 7,
+                        'site'                      => $order_platform,
+                        'modular'                   => 7,
+                        'change_type'               => 13,
+                        'source'                    => 1,
                         'sku'                       => $warehouse_original_sku,
-                        'order_number'              => $increment_id,
+                        'number_type'               => 2,
+                        'order_number'              => $v['item_order_number'],
                         'public_id'                 => $work_id,
-                        'distribution_stock_change' => -$original_number,
+                        'available_stock_before'    => $original_item_info['available_stock'],
                         'available_stock_change'    => $original_number,
+                        'occupy_stock_before'       => $original_item_info['occupy_stock'],
                         'occupy_stock_change'       => -$original_number,
+                        'distribution_stock_before' => $original_item_info['distribution_occupy_stock'],
+                        'distribution_stock_change' => -$original_number,
+                        'fictitious_before'         => $warehouse_original_info['stock'],
+                        'fictitious_change'         => $original_number,
                         'create_person'             => session('admin.nickname'),
-                        'create_time'               => date('Y-m-d H:i:s'),
-                        'remark'                    => '工单取消订单-订单已配镜架,SKU增加可用库存,减少配货占用,减少订单占用'
+                        'create_time'               => time()
                     ]);
                 } else {//子单状态是未配货
                     //增加可用库存,减少占用库存
@@ -2028,28 +2279,43 @@ class Inventory extends Backend
                     //记录库存日志
                     $_stock_log->setData([
                         'type'                      => 2,
-                        'two_type'                  => 6,
+                        'site'                      => $order_platform,
+                        'modular'                   => 7,
+                        'change_type'               => 12,
+                        'source'                    => 1,
                         'sku'                       => $warehouse_original_sku,
-                        'order_number'              => $increment_id,
+                        'number_type'               => 2,
+                        'order_number'              => $v['item_order_number'],
                         'public_id'                 => $work_id,
+                        'available_stock_before'    => $original_item_info['available_stock'],
                         'available_stock_change'    => $original_number,
+                        'occupy_stock_before'       => $original_item_info['occupy_stock'],
                         'occupy_stock_change'       => -$original_number,
+                        'fictitious_before'         => $warehouse_original_info['stock'],
+                        'fictitious_change'         => $original_number,
                         'create_person'             => session('admin.nickname'),
-                        'create_time'               => date('Y-m-d H:i:s'),
-                        'remark'                    => '工单取消订单-订单未配镜架,SKU增加可用库存,减少订单占用'
+                        'create_time'               => time()
                     ]);
                 }
 
                 //提交
-                Db::commit();
+                $_item->commit();
+                $_platform_sku->commit();
+                $_stock_log->commit();
             } catch (ValidateException $e) {
-                Db::rollback();
+                $_item->rollback();
+                $_platform_sku->rollback();
+                $_stock_log->rollback();
                 $this->error($e->getMessage());
             } catch (PDOException $e) {
-                Db::rollback();
+                $_item->rollback();
+                $_platform_sku->rollback();
+                $_stock_log->rollback();
                 $this->error($e->getMessage());
             } catch (Exception $e) {
-                Db::rollback();
+                $_item->rollback();
+                $_platform_sku->rollback();
+                $_stock_log->rollback();
                 $this->error($e->getMessage());
             }
         }
@@ -2068,7 +2334,7 @@ class Inventory extends Backend
             return false;
         }
         $item = new \app\admin\model\itemmanage\Item;
-        $platformSku   = new \app\admin\model\itemmanage\ItemPlatformSku;
+        $platformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
         foreach ($changeRow as $v) {
             $arr = explode('-', $v['original_sku']);
             if (!empty($arr[1])) {
@@ -2100,18 +2366,18 @@ class Inventory extends Backend
                 
                 if (false !== $res) {
                     $data = [
-                        'type'                      => 2,
-                        'two_type'                  => $two_type ?: 0,
-                        'sku'                       => $warehouse_original_sku,
-                        'order_number'              => $increment_id,
-                        'public_id'                 => $id,
-                        'available_stock_change'    => -$original_number,
-                        'create_person'             => session('admin.nickname'),
-                        'create_time'               => date('Y-m-d H:i:s'),
-                        'remark'                    => '工单补发、赠品-SKU减少可用库存,增加订单占用'
+                        'type' => 2,
+                        'two_type' => $two_type ?: 0,
+                        'sku' => $warehouse_original_sku,
+                        'order_number' => $increment_id,
+                        'public_id' => $id,
+                        'available_stock_change' => -$original_number,
+                        'create_person' => session('admin.nickname'),
+                        'create_time' => date('Y-m-d H:i:s'),
+                        'remark' => '工单补发、赠品-SKU减少可用库存,增加订单占用'
                     ];
                     if ($type == 3) {
-                        $data['stock_change']        = -$original_number;
+                        $data['stock_change'] = -$original_number;
                     } elseif ($type == 4) {
                         $data['occupy_stock_change'] = $original_number;
                     }
@@ -2154,18 +2420,32 @@ class Inventory extends Backend
         foreach ($change_row as $v) {
             //获取sku
             $arr = explode('-', trim($v['original_sku']));
-            $original_sku = 2 < count($arr) ? $arr[0].'-'.$arr[1] : trim($v['original_sku']);
+            $original_sku = 2 < count($arr) ? $arr[0] . '-' . $arr[1] : trim($v['original_sku']);
 
-            if(!$original_sku) continue;
+            if (!$original_sku) continue;
 
             //sku数量
             $original_number = $v['original_number'];
 
-            //仓库sku
-            $warehouse_original_sku = $_platform_sku->where(['platform_sku'=>$original_sku,'platform_type'=>$order_platform])->value('sku');
+            //仓库sku、库存
+            $warehouse_original_info = $_platform_sku
+                ->field('sku,stock')
+                ->where(['platform_sku'=>$original_sku, 'platform_type' => $order_platform])
+                ->find()
+            ;
+            $warehouse_original_sku = $warehouse_original_info['sku'];
+
+            //获取当前可用库存、总库存
+            $item_before = $_item
+                ->field('available_stock,occupy_stock,stock')
+                ->where(['sku' => $warehouse_original_sku])
+                ->find()
+            ;
 
             //开启事务
-            Db::startTrans();
+            $_item->startTrans();
+            $_platform_sku->startTrans();
+            $_stock_log->startTrans();
             try {
                 if (1 == $type) { //赠品
                     //减少可用库存、总库存
@@ -2174,7 +2454,7 @@ class Inventory extends Backend
                         ->dec('available_stock', $original_number)
                         ->dec('stock', $original_number)
                         ->update();
-                } else{ //补发
+                } else { //补发
                     //减少可用库存，增加占用库存
                     $_item
                         ->where(['sku' => $warehouse_original_sku])
@@ -2190,27 +2470,43 @@ class Inventory extends Backend
                 //记录库存日志
                 $_stock_log->setData([
                     'type'                      => 2,
-                    'two_type'                  => 1 == $type ? 9 : 8,
-                    'stock_change'              => 1 == $type ? -$original_number : 0,
-                    'occupy_stock_change'       => 2 == $type ? $original_number : 0,
+                    'site'                      => $order_platform,
+                    'modular'                   => 1 == $type ? 9 : 8,
+                    'change_type'               => 1 == $type ? 15 : 14,
+                    'source'                    => 1,
                     'sku'                       => $warehouse_original_sku,
+                    'number_type'              => 1,
                     'order_number'              => $increment_id,
                     'public_id'                 => $work_id,
+                    'available_stock_before'    => $item_before['available_stock'],
                     'available_stock_change'    => -$original_number,
+                    'stock_before'              => 1 == $type ? $item_before['stock'] : 0,
+                    'stock_change'              => 1 == $type ? -$original_number : 0,
+                    'occupy_stock_before'       => 2 == $type ? $item_before['occupy_stock'] : 0,
+                    'occupy_stock_change'       => 2 == $type ? $original_number : 0,
+                    'fictitious_before'         => $warehouse_original_info['stock'],
+                    'fictitious_change'         => -$original_number,
                     'create_person'             => session('admin.nickname'),
-                    'create_time'               => date('Y-m-d H:i:s'),
-                    'remark'                    => '工单补发、赠品-SKU减少可用库存,增加订单占用'
+                    'create_time'               => time()
                 ]);
 
-                Db::commit();
+                $_item->commit();
+                $_platform_sku->commit();
+                $_stock_log->commit();
             } catch (ValidateException $e) {
-                Db::rollback();
+                $_item->rollback();
+                $_platform_sku->rollback();
+                $_stock_log->rollback();
                 $this->error($e->getMessage());
             } catch (PDOException $e) {
-                Db::rollback();
+                $_item->rollback();
+                $_platform_sku->rollback();
+                $_stock_log->rollback();
                 $this->error($e->getMessage());
             } catch (Exception $e) {
-                Db::rollback();
+                $_item->rollback();
+                $_platform_sku->rollback();
+                $_stock_log->rollback();
                 $this->error($e->getMessage());
             }
         }

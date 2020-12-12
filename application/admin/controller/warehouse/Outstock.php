@@ -526,51 +526,74 @@ class Outstock extends Backend
                     //总库存
                     $item = new \app\admin\model\itemmanage\Item;
                     $item_map['sku'] = $v['sku'];
-                    $item->where($item_map)->dec('stock', $v['out_stock_num'])->dec('available_stock', $v['out_stock_num'])->update();
+                    $sku_item = $item->where($item_map)->find();
+                    $item_platform_sku = $platform->where(['sku' => $v['sku'], 'platform_type' => $v['platform_id']])->find();
 
+                    $item->where($item_map)->dec('stock', $v['out_stock_num'])->dec('available_stock', $v['out_stock_num'])->update();
                     //直接扣减此平台sku的库存
                     $platform->where(['sku' => $v['sku'], 'platform_type' => $v['platform_id']])->dec('stock', $v['out_stock_num'])->update();
-
-                    $stock_data[] = [
-                        'type'                      => 2,
-                        'two_type'                  => 4,
-                        'sku'                       => $v['sku'],
-                        'public_id'                 => $v['out_stock_id'],
-                        'stock_change'              => -$v['out_stock_num'],
-                        'available_stock_change'    => -$v['out_stock_num'],
-                        'create_person'             => session('admin.nickname'),
-                        'create_time'               => date('Y-m-d H:i:s'),
-                        'remark'                    => '出库单减少总库存,减少可用库存'
-                    ];
-
-                    // //同事配镜 厂家质量问题 带回办公室 扣减库存最大的那个站
-                    // if (in_array($v['type_id'], [3, 5, 9,23])) {
-                    //     $item_platform_sku = $platform->where('sku', $v['sku'])->order('stock desc')->field('platform_type,stock')->find();
-                    //     $platform->where(['sku' => $v['sku'], 'platform_type' => $item_platform_sku['platform_type']])->dec('stock', $v['out_stock_num'])->update();
-                    // }else{
-                    //     //盘点的时候盘盈入库 盘亏出库 的同时要对虚拟库存进行一定的操作
-                    //     //查出映射表中此sku对应的所有平台sku 并根据库存数量进行排序（用于遍历数据的时候首先分配到那个站点）
-                    //     $item_platform_sku = $platform->where('sku',$v['sku'])->order('stock asc')->field('platform_type,stock')->select();
-                    //     $all_num = count($item_platform_sku);
-                    //     $whole_num = $platform->where('sku',$v['sku'])->sum('stock');
-                    //     //盘盈或者盘亏的数量 根据此数量对平台sku虚拟库存进行操作
-                    //     $stock_num = $v['out_stock_num'];
-                    //     foreach ($item_platform_sku as $key => $val) {
-                    //         //最后一个站点 剩余数量分给最后一个站
-                    //         if (($all_num - $key) == 1) {
-                    //             $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->dec('stock', $stock_num)->update();
-                    //         } else {
-                    //             $num = round($v['out_stock_num'] * $val['stock']/$whole_num);
-                    //             $stock_num -= $num;
-                    //             $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->dec('stock', $num)->update();
-                    //         }
-                    //     }
-                    // }
+                    //插入日志表
+                    (new StockLog())->setData([
+                        //'大站点类型：1网站 2魔晶',
+                        'type' => 2,
+                        //'站点类型：1Zeelool  2Voogueme 3Nihao 4Meeloog 5Wesee 8Amazon 9Zeelool_es 10Zeelool_de 11Zeelool_jp'
+                        'site' => $v['platform_id'],
+                        //'模块：1普通订单 2配货 3质检 4审单 5异常处理 6更改镜架 7取消订单 8补发 9赠品 10采购入库 11出入库 12盘点 13调拨'
+                        'modular' => 11,
+                        //'变动类型：1非预售下单 2预售下单-虚拟仓>0 3预售下单-虚拟仓<0 4配货 5质检拒绝-镜架报损 6审单-成功 7审单-配错镜框
+                        // 8加工异常打回待配货 9印logo异常打回待配货 10更改镜架-配镜架前 11更改镜架-配镜架后 12取消订单-配镜架前 13取消订单-配镜架后
+                        // 14补发 15赠品 16采购-有比例入库 17采购-没有比例入库 18手动入库 19手动出库 20盘盈入库 21盘亏出库 22调拨 23调拨 24库存调拨'
+                        'change_type' => 19,
+                        // '关联sku'
+                        'sku' => $v['sku'],
+                        //'关联订单号或子单号'
+                        'order_number' => $v['out_stock_number'],
+                        //'关联变化的ID'
+                        'public_id' => 0,
+                        //'操作端：1PC端 2PDA'
+                        'source' => 1,
+                        //'总库存变动前'
+                        'stock_before' => $sku_item['stock'],
+                        //'总库存变化量：正数为加，负数为减'
+                        'stock_change' => -$v['out_stock_num'],
+                        //'可用库存变动前'
+                        'available_stock_before' => $sku_item['available_stock'],
+                        //'可用库存变化量：正数为加，负数为减'
+                        'available_stock_change' => -$v['out_stock_num'],
+                        // '虚拟仓库存变动前'
+                        'fictitious_before' => $item_platform_sku['stock'],
+                        // '虚拟仓库存变化量：正数为加，负数为减'
+                        'fictitious_change' => -$v['out_stock_num'],
+                        //'订单占用变动前'
+                        'occupy_stock_before' => $sku_item['occupy_stock'],
+                        //'订单占用变化量：正数为加，负数为减'
+                        'occupy_stock_change' => 0,
+                        //'配货占用变动前'
+                        'distribution_stock_before' => $sku_item['distribution_occupy_stock'],
+                        //'配货占用变化量：正数为加，负数为减
+                        'distribution_stock_change' => 0,
+                        //'预售变动前'
+                        'presell_num_before' => $sku_item['presell_num'],
+                        //'预售变化量：正数为加，负数为减'
+                        'presell_num_change' =>0,
+                        //'留样库存变动前'
+                        'sample_num_before' => $sku_item['sample_num'],
+                        //'留样库存变化量：正数为加，负数为减'
+                        'sample_num_change' => 0,
+                        //'在途库存变动前'
+                        'on_way_stock_before' => $sku_item['on_way_stock'],
+                        //'在途库存变化量：正数为加，负数为减'
+                        'on_way_stock_change' => 0,
+                        //'待入库变动前'
+                        'wait_instock_num_before' => $sku_item['wait_instock_num'],
+                        //'待入库变化量：正数为加，负数为减'
+                        'wait_instock_num_change' => 0,
+                        'create_person' => session('admin.nickname'),
+                        'create_time' => date('Y-m-d H:i:s'),
+                        //'关联单号类型：1订单号 2子订单号 3入库单 4出库单 5盘点单 6调拨单'
+                        'number_type' => 4,
+                    ]);
                 }
-
-                //库存变动日志
-                (new StockLog())->allowField(true)->saveAll($stock_data);
-
                 //先入先出逻辑
 //                $this->item->setPurchaseOrder($list);
             }
