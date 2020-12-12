@@ -653,8 +653,6 @@ class ScmWarehouse extends Scm
     public function no_in_stock_list()
     {
         $query = $this->request->request('query');
-        //待入库列表状态筛选去掉
-        // $status = $this->request->request('status');
         $start_time = $this->request->request('start_time');
         $end_time = $this->request->request('end_time');
         $page = $this->request->request('page');
@@ -664,17 +662,14 @@ class ScmWarehouse extends Scm
         empty($page_size) && $this->error(__('Page size can not be empty'), [], 407);
 
         $where = [];
-        $where['a.is_stock'] = 0;//质检单待入库状态为0
+        $where['a.is_stock'] = 0;//质检单待入库 状态为0
+        $where['a.status'] = 2;//质检单待入库 状态为2 已审核
         if($query){
             $where['a.check_order_number|b.sku|c.logistics_number'] = ['like', '%' . $query . '%'];
         }
-        
         if($start_time && $end_time){
             $where['a.createtime'] = ['between', [$start_time, $end_time]];
         }
-
-        //已审核通过
-        $where['a.status'] = 2;
 
         $offset = ($page - 1) * $page_size;
         $limit = $page_size;
