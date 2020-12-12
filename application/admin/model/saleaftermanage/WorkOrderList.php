@@ -1615,6 +1615,51 @@ class WorkOrderList extends Model
                     //审核拒绝
                     if ($params['success'] == 2) {
                         $work_status = 4;
+
+                        //配货异常表
+                        $_distribution_abnormal = new DistributionAbnormal();
+
+                        //获取工单关联未处理异常数据
+                        $item_process_ids = $_distribution_abnormal
+                            ->where(['work_id' => $work->id, 'status' => 1])
+                            ->column('item_process_id')
+                        ;
+                        if($item_process_ids){
+                            //异常标记为已处理
+                            $_distribution_abnormal
+                                ->allowField(true)
+                                ->save(
+                                    ['status' => 2, 'do_time' => time(), 'do_person' => session('admin.nickname')],
+                                    ['work_id' => $work->id, 'status' => 1]
+                                );
+
+                            //获取异常库位id集
+                            $_new_order_item_process = new NewOrderItemProcess();
+                            $abnormal_house_ids = $_new_order_item_process
+                                ->field('abnormal_house_id')
+                                ->where(['id' => ['in',$item_process_ids]])
+                                ->select()
+                            ;
+                            if($abnormal_house_ids){
+                                //异常库位号占用数量减1
+                                $_stock_house = new StockHouse();
+                                foreach($abnormal_house_ids as $v){
+                                    $_stock_house
+                                        ->where(['id' => $v['abnormal_house_id']])
+                                        ->setDec('occupy', 1)
+                                    ;
+                                }
+                            }
+
+                            //解绑子订单的异常库位ID
+                            $_new_order_item_process
+                                ->allowField(true)
+                                ->save(['abnormal_house_id' => 0],['id' => ['in',$item_process_ids]])
+                            ;
+
+                            //配货操作日志
+                            DistributionLog::record((object)session('admin'),$item_process_ids,10,"工单审核拒绝，异常标记为已处理");
+                        }
                     }else{//审核成功
                         if ($count == $key) {
                             //处理完成
@@ -1688,15 +1733,19 @@ class WorkOrderList extends Model
 
                 //获取异常库位id集
                 $abnormal_house_ids = $_new_order_item_process
+                    ->field('abnormal_house_id')
                     ->where(['id' => ['in',$item_process_ids]])
-                    ->column('abnormal_house_id')
+                    ->select()
                 ;
                 if($abnormal_house_ids){
                     //异常库位号占用数量减1
-                    $_stock_house
-                        ->where(['id' => ['in',$abnormal_house_ids]])
-                        ->setDec('occupy', 1)
-                    ;
+                    $_stock_house = new StockHouse();
+                    foreach($abnormal_house_ids as $v){
+                        $_stock_house
+                            ->where(['id' => $v['abnormal_house_id']])
+                            ->setDec('occupy', 1)
+                        ;
+                    }
                 }
 
                 //解绑子订单的异常库位ID

@@ -333,7 +333,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     text: __('取消'),
                                     title: __('取消'),
                                     classname: 'btn btn-xs btn-danger btn-ajax',
-                                    url: 'saleaftermanage/work_order_list/setStatus/work_status/2',
+                                    url: 'saleaftermanage/work_order_list/setStatus',
                                     extend: 'data-area = \'["100%","100%"]\'',
                                     confirm: '确定要取消吗',
                                     success: function (data, ret) {
