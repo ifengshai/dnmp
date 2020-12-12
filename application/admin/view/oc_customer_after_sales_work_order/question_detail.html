@@ -104,12 +104,17 @@
     </div>
 
     <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('图片列表')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            {volist name="row['images']" id="vo"}
-            <img src="{$vo}" data-tips-image  alt="" style="width: 15%;height: 90px">
-            {/volist}
+
+        {if condition="$row['images'] !== null"}
+        <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2">{:__('图片列表11')}:</label>
+            <div class="col-xs-12 col-sm-8">
+                {volist name="row['images']" id="vo"}
+                <img src="{$vo}" data-tips-image  alt="" style="width: 15%;height: 90px">
+                {/volist}
+            </div>
         </div>
+        {/if}
     </div>
 
     <div class='caigou ajax-add'>
