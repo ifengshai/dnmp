@@ -1,29 +1,6 @@
 <style>
-    .list-div {
-        border-width: 1px;
-        border-style: solid;
-        border-color: rgba(188, 188, 188, 1);
-        border-radius: 6px;
-        padding: 10px;
-        width: 100%;
-        height: 400px;
-        margin-bottom: 10px;
-    }
-
-    .caigou {
-        width: 45%;
-        margin-bottom: 10px;
-        float: left;
-    }
-
-    #caigou-table {
-        width: 100%;
-        height: 130px;
-        border-width: 1px;
-        border-style: solid;
-        border-color: rgba(188, 188, 188, 1);
-        border-radius: 6px;
-        text-align: center;
+    body {
+       overflow: auto;
     }
 
     #caigou-table tr {
@@ -193,10 +170,10 @@
                                     <td>{:$result['od_sph'] ?? ''}</td>
                                     <td>{:$result['od_cyl'] ?? ''}</td>
                                     <td>{:$result['od_axis'] ?? ''}</td>
-                                    {if $result['os_add'] && $result['od_add'] && (float) $result['os_add'] * 1 != 0 && (float) $result['od_add'] * 1 != 0}
-                                    <td>{:$result['os_add'] ?? ''}</td>
+                                    {if $result['os_add'] && $result['od_add']}
+                                    <td>{:$result['od_add'] ?? ''}</td>
                                     {else/}
-                                    <td rowspan="2">{:$result['os_add'] ?? $result['od_add']}</td>
+                                    <td rowspan="2">{:$result['os_add'] ?: $result['od_add']}</td>
                                     {/if}
                                     {if $result['pdcheck'] == 'on'}
                                     <td rowspan="2">{:$result['pd'] ?? ''}</td>
@@ -209,8 +186,8 @@
                                     <td>{:$result['os_sph'] ?? ''}</td>
                                     <td>{:$result['os_cyl'] ?? ''}</td>
                                     <td>{:$result['os_axis'] ?? ''}</td>
-                                    {if $result['os_add'] && $result['od_add'] && (float) $result['os_add'] * 1 != 0 && (float) $result['od_add'] * 1 != 0}
-                                    <td>{:$result['od_add'] ?? ''}</td>
+                                    {if $result['os_add'] && $result['od_add']}
+                                    <td>{:$result['os_add'] ?? ''}</td>
                                     {/if}
                                     {if $result['pdcheck'] != 'on'}
                                     <td>{:$result['pd_l'] ?? ''}</td>

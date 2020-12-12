@@ -333,7 +333,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     text: __('取消'),
                                     title: __('取消'),
                                     classname: 'btn btn-xs btn-danger btn-ajax',
-                                    url: 'saleaftermanage/work_order_list/setStatus/work_status/2',
+                                    url: 'saleaftermanage/work_order_list/setStatus',
                                     extend: 'data-area = \'["100%","100%"]\'',
                                     confirm: '确定要取消吗',
                                     success: function (data, ret) {
@@ -883,6 +883,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             data: {
                                 increment_id: increment_id,
                                 site_type: site_type,
+                                measure_choose_id: '7',
+                                work_id: ''
                                 //is_new_version: is_new_version
                             }
                         }, function (json, ret) {
@@ -1575,6 +1577,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 if ($("body").find('input[name="row[replacement][original_sku][]"]').length <= 0 || $("body").find('input[name="row[gift][original_sku][]"]').length <= 0) {
                     is_add = 1;
                     var value = $(this).val();
+                    var work_id = $('#work_id').val();
+                    var is_order_item = $('#is_order_item').val();
+                    if ($('.status').val() == 1 && 1 == is_order_item) {work_id = '';}
                     var check = $(this).prop('checked');
                     var increment_id = $('#c-platform_order').val();
                     //var is_new_version = $('#is_new_version').val();
@@ -1588,6 +1593,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 data: {
                                     increment_id: increment_id,
                                     site_type: site_type,
+                                    measure_choose_id: '7'
                                     //is_new_version: is_new_version
                                 }
                             }, function (json, ret) {
@@ -3067,6 +3073,8 @@ function changeOrderAddress(){
     $("#user_address").show();
     var incrementId = $('#c-platform_order').val();
     var work_id = $('#work_id').val();
+    var is_order_item = $('#is_order_item').val();
+    if ($('.status').val() == 1 && 1 == is_order_item) {work_id = '';}
     if (!incrementId) {
         Toastr.error('订单号不能为空');
         return false;
@@ -3080,6 +3088,7 @@ function changeOrderAddress(){
                 increment_id: incrementId,
                 site_type: site_type,
                 work_id: work_id,
+                measure_choose_id: '13'
             }
         }, function (json, ret) {
             if (json.code == 0) {

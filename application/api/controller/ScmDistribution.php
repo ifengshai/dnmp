@@ -578,9 +578,14 @@ class ScmDistribution extends Scm
         }
 
         //获取订单购买总数
-        $total_qty_ordered = $this->_new_order
-            ->where('id', $item_process_info['order_id'])
-            ->value('total_qty_ordered')
+        // $total_qty_ordered = $this->_new_order
+        //     ->where('id', $item_process_info['order_id'])
+        //     ->value('total_qty_ordered')
+        // ;
+
+        $total_qty_ordered = $this->_new_order_item_process
+            ->where('order_id', $item_process_info['order_id'])
+            ->count()
         ;
 
         $res = false;

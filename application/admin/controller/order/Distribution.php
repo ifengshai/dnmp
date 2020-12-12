@@ -199,10 +199,17 @@ class Distribution extends Backend
 
             //筛选库位号
             if ($filter['stock_house_num']) {
+                if(8 == $label){//跟单
+                    $house_type = 4;
+                }elseif(3 == $label){//待配镜片-定制片
+                    $house_type = 3;
+                }else{//合单
+                    $house_type = 2;
+                }
                 $stock_house_id = $this->_stock_house
                     ->where([
-                        'coding' => ['like', $filter['stock_house_num'] . '%'],
-                        'type' => 8 == $label ? 4 : 2//2合单库位  4异常库位
+                        'coding'=>['like', $filter['stock_house_num'] . '%'],
+                        'type'=>$house_type
                     ])
                     ->column('id');
                 $map['a.temporary_house_id|a.abnormal_house_id|c.store_house_id'] = ['in', $stock_house_id];
@@ -296,16 +303,16 @@ class Distribution extends Backend
                 ->column('a.change_sku', 'a.item_order_number');
 
             foreach ($list as $key => $value) {
-                $stock_house_num = '';
-                if (!empty($value['temporary_house_id'])) {
+                $stock_house_num = '-';
+                if (!empty($value['temporary_house_id']) && 3 == $label) {
                     $stock_house_num = $stock_house_data[$value['temporary_house_id']];//定制片库位号
-                } elseif (!empty($value['abnormal_house_id'])) {
+                } elseif (!empty($value['abnormal_house_id']) && 8 == $label) {
                     $stock_house_num = $stock_house_data[$value['abnormal_house_id']];//异常库位号
-                } elseif (!empty($value['store_house_id'])) {
+                } elseif (!empty($value['store_house_id']) && 7 == $label) {
                     $stock_house_num = $stock_house_data[$value['store_house_id']];//合单库位号
                 }
 
-                $list[$key]['stock_house_num'] = $stock_house_num ?? '-';
+                $list[$key]['stock_house_num'] = $stock_house_num;
                 $list[$key]['created_at'] = date('Y-m-d H:i:s', $value['created_at']);
 
                 //跟单：异常未处理且未创建工单的显示处理异常按钮
@@ -384,6 +391,8 @@ class Distribution extends Backend
             ->find();
         if ($change_lens) {
             $change_lens = $change_lens->toArray();
+
+            //处理pd值
             if ($change_lens['pd_l'] && $change_lens['pd_r']) {
                 $change_lens['pd'] = '';
                 $change_lens['pdcheck'] = '';
@@ -391,6 +400,14 @@ class Distribution extends Backend
                 $change_lens['pd'] = $change_lens['pd_r'] ?: $change_lens['pd_l'];
                 $change_lens['pdcheck'] = 'on';
             }
+
+            //处理斜视值
+            if ($change_lens['od_pv'] || $change_lens['os_pv']) {
+                $change_lens['prismcheck'] = 'on';
+            } else {
+                $change_lens['pdcheck'] = '';
+            }
+
             $result = array_merge($result, $change_lens);
         }
 
