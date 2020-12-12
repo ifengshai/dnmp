@@ -327,7 +327,7 @@ class WorkOrderList extends Backend
                         throw new Exception("订单号不能为空");
                     }
                     if(!$params['order_sku'][0]){
-                        dump($params['order_sku']);exit;
+                        dump($params);exit;
                         throw new Exception("SKU不能为空");
                     }
 
