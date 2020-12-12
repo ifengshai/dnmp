@@ -305,16 +305,16 @@ class Distribution extends Backend
             ;
 
             foreach ($list as $key => $value) {
-                $stock_house_num = '';
+                $stock_house_num = '-';
                 if (!empty($value['temporary_house_id']) && 3 == $label) {
                     $stock_house_num = $stock_house_data[$value['temporary_house_id']];//定制片库位号
                 } elseif (!empty($value['abnormal_house_id']) && 8 == $label) {
                     $stock_house_num = $stock_house_data[$value['abnormal_house_id']];//异常库位号
-                } elseif (!empty($value['store_house_id'])) {
+                } elseif (!empty($value['store_house_id']) && 7 == $label) {
                     $stock_house_num = $stock_house_data[$value['store_house_id']];//合单库位号
                 }
 
-                $list[$key]['stock_house_num'] = $stock_house_num ?? '-';
+                $list[$key]['stock_house_num'] = $stock_house_num;
                 $list[$key]['created_at'] = date('Y-m-d H:i:s', $value['created_at']);
 
                 //跟单：异常未处理且未创建工单的显示处理异常按钮
