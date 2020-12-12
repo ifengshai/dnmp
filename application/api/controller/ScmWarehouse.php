@@ -653,7 +653,8 @@ class ScmWarehouse extends Scm
     public function no_in_stock_list()
     {
         $query = $this->request->request('query');
-        $status = $this->request->request('status');
+        //待入库列表状态筛选去掉
+        // $status = $this->request->request('status');
         $start_time = $this->request->request('start_time');
         $end_time = $this->request->request('end_time');
         $page = $this->request->request('page');
