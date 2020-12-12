@@ -557,7 +557,7 @@ class Instock extends Backend
                                         'wait_instock_num_before' => $sku_platform['wait_instock_num'],
                                         'wait_instock_num_change' => -$stock_num,
                                         'create_person' => session('admin.nickname'),
-                                        'create_time' => date('Y-m-d H:i:s'),
+                                        'create_time' => time(),
                                         'number_type' => 3,
                                     ]);
                                 } else {
@@ -596,7 +596,7 @@ class Instock extends Backend
                                         'wait_instock_num_before' => $sku_platform['wait_instock_num'],
                                         'wait_instock_num_change' => -$num,
                                         'create_person' => session('admin.nickname'),
-                                        'create_time' => date('Y-m-d H:i:s'),
+                                        'create_time' => time(),
                                         'number_type' => 3,
                                     ]);
                                 }
@@ -643,7 +643,7 @@ class Instock extends Backend
                                 'wait_instock_num_before' => $item_platform_sku['wait_instock_num'],
                                 'wait_instock_num_change' => -$v['in_stock_num'],
                                 'create_person' => session('admin.nickname'),
-                                'create_time' => date('Y-m-d H:i:s'),
+                                'create_time' => time(),
                                 'number_type' => 3,
                             ]);
                         }
@@ -655,7 +655,6 @@ class Instock extends Backend
                         $is_purchase = 11;
                         $item_platform_sku = $platform->where(['sku' => $v['sku'], 'platform_type' => $v['platform_id']])->find();
                         $platform->where(['sku' => $v['sku'], 'platform_type' => $v['platform_id']])->setInc('stock', $v['in_stock_num']);
-                        $platform->where(['sku' => $v['sku'], 'platform_type' => $v['platform_id']])->setDec('wait_instock_num', $v['in_stock_num']);
                         (new StockLog())->setData([
                             'type' => 2,
                             'site' => $v['platform_id'],
@@ -681,9 +680,9 @@ class Instock extends Backend
                             'on_way_stock_before' => $item_platform_sku['plat_on_way_stock'],
                             'on_way_stock_change' =>0,
                             'wait_instock_num_before' => $item_platform_sku['wait_instock_num'],
-                            'wait_instock_num_change' => -$v['in_stock_num'],
+                            'wait_instock_num_change' => 0,
                             'create_person' => session('admin.nickname'),
-                            'create_time' => date('Y-m-d H:i:s'),
+                            'create_time' => time(),
                             'number_type' => 3,
                         ]);
                     } //没有采购单也没有站点id 说明是盘点过来的
@@ -706,7 +705,6 @@ class Instock extends Backend
                                 //最后一个站点 剩余数量分给最后一个站
                                 if (($all_num - $key) == 1) {
                                     $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setInc('stock', $stock_num);
-                                    $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setDec('wait_instock_num', $stock_num);
                                     //插入日志表
                                     (new StockLog())->setData([
                                         'type' => 2,
@@ -733,16 +731,15 @@ class Instock extends Backend
                                         'on_way_stock_before' => $item_platform_sku_detail['plat_on_way_stock'],
                                         'on_way_stock_change' =>0,
                                         'wait_instock_num_before' => $item_platform_sku_detail['wait_instock_num'],
-                                        'wait_instock_num_change' => -$v['in_stock_num'],
+                                        'wait_instock_num_change' => 0,
                                         'create_person' => session('admin.nickname'),
-                                        'create_time' => date('Y-m-d H:i:s'),
+                                        'create_time' => time(),
                                         'number_type' => 3,
                                     ]);
                                 } else {
                                     $num = round($v['in_stock_num'] * $rate_rate);
                                     $stock_num -= $num;
                                     $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setInc('stock', $num);
-                                    $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setDec('wait_instock_num', $num);
                                     //插入日志表
                                     (new StockLog())->setData([
                                         'type' => 2,
@@ -769,9 +766,9 @@ class Instock extends Backend
                                         'on_way_stock_before' => $item_platform_sku_detail['plat_on_way_stock'],
                                         'on_way_stock_change' =>0,
                                         'wait_instock_num_before' => $item_platform_sku_detail['wait_instock_num'],
-                                        'wait_instock_num_change' => -$num,
+                                        'wait_instock_num_change' => 0,
                                         'create_person' => session('admin.nickname'),
-                                        'create_time' => date('Y-m-d H:i:s'),
+                                        'create_time' => time(),
                                         'number_type' => 3,
                                     ]);
                                 }
@@ -785,7 +782,6 @@ class Instock extends Backend
                                 //最后一个站点 剩余数量分给最后一个站
                                 if (($all_num - $key) == 1) {
                                     $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setInc('stock', $stock_num);
-                                    $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setDec('wait_instock_num', $stock_num);
                                     //插入日志表
                                     (new StockLog())->setData([
                                         'type' => 2,
@@ -812,16 +808,15 @@ class Instock extends Backend
                                         'on_way_stock_before' => $item_platform_sku_detail['plat_on_way_stock'],
                                         'on_way_stock_change' =>0,
                                         'wait_instock_num_before' => $item_platform_sku_detail['wait_instock_num'],
-                                        'wait_instock_num_change' => -$stock_num,
+                                        'wait_instock_num_change' => 0,
                                         'create_person' => session('admin.nickname'),
-                                        'create_time' => date('Y-m-d H:i:s'),
+                                        'create_time' => time(),
                                         'number_type' => 3,
                                     ]);
                                 } else {
                                     $num = round($v['in_stock_num'] * $val['stock'] / $whole_num);
                                     $stock_num -= $num;
                                     $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setInc('stock', $num);
-                                    $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setDec('wait_instock_num', $num);
                                     //插入日志表
                                     (new StockLog())->setData([
                                         'type' => 2,
@@ -848,9 +843,9 @@ class Instock extends Backend
                                         'on_way_stock_before' => $item_platform_sku_detail['plat_on_way_stock'],
                                         'on_way_stock_change' =>0,
                                         'wait_instock_num_before' => $item_platform_sku_detail['wait_instock_num'],
-                                        'wait_instock_num_change' => -$num,
+                                        'wait_instock_num_change' => 0,
                                         'create_person' => session('admin.nickname'),
-                                        'create_time' => date('Y-m-d H:i:s'),
+                                        'create_time' => time(),
                                         'number_type' => 3,
                                     ]);
                                 }
@@ -894,7 +889,7 @@ class Instock extends Backend
                             'wait_instock_num_before' => $sku_item['wait_instock_num'],
                             'wait_instock_num_change' => -$v['in_stock_num'],
                             'create_person' => session('admin.nickname'),
-                            'create_time' => date('Y-m-d H:i:s'),
+                            'create_time' => time(),
                             'number_type' => 3,
                         ]);
                     }
