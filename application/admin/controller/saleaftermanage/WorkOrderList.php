@@ -2255,6 +2255,7 @@ class WorkOrderList extends Backend
             $incrementId = input('increment_id');
             $siteType = input('site_type');
             $work_id = input('work_id');
+            $measure_choose_id = input('measure_choose_id');
 
             $res = [];
             $lens = [];
@@ -2266,14 +2267,21 @@ class WorkOrderList extends Backend
                 //请求接口获取lens_type，coating_type，prescription_type等信息
                 $lens = $this->model->getReissueLens($siteType, $res['showPrescriptions'], 1);
 
-                //判断是否是新建状态
-                $work_status = $this->model->where('id', $work_id)->value('work_status');
-                if (0 < $work_status) {
-                    //获取魔晶数据库中地址
-                    $address = Db::name('work_order_change_sku')->where('work_id', $work_id)->value('userinfo_option');
-                    $address = unserialize($address);
-                    $address['address_type'] = $address['address_id'] == 0 ? 'shipping' : 'billing';
-                    $res['address'] = $address;
+                //判断是否是新建或跟单处理
+                if($work_id && $measure_choose_id){
+                    $work_status = $this->model->where('id', $work_id)->value('work_status');
+                    if (0 < $work_status) {
+                        //获取魔晶数据库中地址
+                        $_work_order_change_sku = new WorkOrderChangeSku();
+                        $address = $_work_order_change_sku
+                            ->alias('a')
+                            ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
+                            ->where(['a.work_id'=>$work_id,'b.measure_choose_id'=>$measure_choose_id])
+                            ->value('a.userinfo_option');
+                        $address = unserialize($address);
+                        $address['address_type'] = $address['address_id'] == 0 ? 'shipping' : 'billing';
+                        $res['address'] = $address;
+                    }
                 }
             } catch (\Exception $e) {
                 $this->error($e->getMessage());
