@@ -550,7 +550,7 @@ class WorkOrderList extends Model
             if ($method == 'GET') {
                 $response = $client->request('GET', $url, array('query' => $params));
             } else {
-                print_r($params);
+                print_r(json_encode($params));
                 print_r('-------');
                 $response = $client->request('POST', $url, array('form_params' => $params));
             }
