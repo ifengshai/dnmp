@@ -2382,7 +2382,7 @@ class WorkOrderList extends Backend
                 Cache::set($key, $data, 3600 * 24);
             }
             $lensType = $data['lens_list'][$prescriptionType] ?: [];
-            $lensType ? $this->success('操作成功！！', '', $lensType) : $this->error('未获取到数据！！');
+            $this->success('操作成功！！', '', $lensType);
         }else{
             $this->error('404 not found');
         }
