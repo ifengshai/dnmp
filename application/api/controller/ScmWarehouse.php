@@ -1412,7 +1412,7 @@ class ScmWarehouse extends Scm
                             //记录没有采购比例直接入库的sku
                             $this->_allocated->allowField(true)->save(['sku' => $v['sku'], 'change_num' => $v['in_stock_num'], 'create_time' => date('Y-m-d H:i:s')]);
 
-                            $item_platform_sku = $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => 4])->field('platform_type,stock')->find();
+                            $item_platform_sku = $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => 4])->find();
                             //sku没有同步meeloog站 无法添加虚拟库存 必须先同步
                             if (empty($item_platform_sku)) {
                                 throw new Exception('sku：' . $v['sku'] . '没有同步meeloog站，请先同步');
@@ -1497,7 +1497,7 @@ class ScmWarehouse extends Scm
                         //盘点
                         $is_purchase = 12;
                         //根据当前sku 和当前 各站的虚拟库存进行分配
-                        $item_platform_sku = $this->_item_platform_sku->where('sku', $v['sku'])->order('stock asc')->field('platform_type,stock')->select();
+                        $item_platform_sku = $this->_item_platform_sku->where('sku', $v['sku'])->order('stock asc')->select();
                         $all_num = count($item_platform_sku);
 
                         $stock_num = $v['in_stock_num'];
