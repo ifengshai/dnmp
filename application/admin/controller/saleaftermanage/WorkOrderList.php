@@ -326,11 +326,11 @@ class WorkOrderList extends Backend
                     if (!$params['platform_order']) {
                         throw new Exception("订单号不能为空");
                     }
-                    if(!$params['order_sku'][0]){
-                        dump($params);exit;
-                        throw new Exception("SKU不能为空");
+                    if($params['work_type'] == 1 && $params['work_status'] == 2){
+                        if(!$params['order_sku'][0]){
+                            throw new Exception("SKU不能为空");
+                        }
                     }
-
                     if (!$params['order_pay_currency']) {
                         throw new Exception("请先点击载入数据");
                     }
