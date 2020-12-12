@@ -123,10 +123,31 @@ class OcCustomerAfterSalesWorkOrder extends Backend
 
             $where['id'] = $params['ids'];
             $save_question = $this->model->isUpdate(true, $where)->save(['status'=>$params['pm_audit_status'],'completed_at'=>date('Y-m-d H:i:s',time()),'handler_name'=>$this->auth->nickname]);
-           if ($save_question){
-               $this->success('操作成功');
-           }
-
+            if ($save_question){
+                //如果更新成功  提交接口
+                $url  = 'https://z.zhaokuangyi.com/magic/customer/updateTicket';
+                $value['ticket_id'] = $params['ids'];
+                $value['status'] = $params['pm_audit_status'];
+                $curl = curl_init();
+                curl_setopt($curl, CURLOPT_URL, $url);
+                curl_setopt($curl, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']); //在HTTP请求中包含一个"User-Agent: "头的字符串。
+                curl_setopt($curl, CURLOPT_HEADER, 0); //启用时会将头文件的信息作为数据流输出。
+                curl_setopt($curl, CURLOPT_POST, true); //发送一个常规的Post请求
+                curl_setopt($curl, CURLOPT_POSTFIELDS, $value);//Post提交的数据包
+                curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1); //启用时会将服务器服务器返回的"Location: "放在header中递归的返回给服务器，使用CURLOPT_MAXREDIRS可以限定递归返回的数量。
+                curl_setopt($curl, CURLOPT_RETURNTRANSFER, true); //文件流形式
+                curl_setopt($curl, CURLOPT_TIMEOUT, 20); //设置cURL允许执行的最长秒数。
+                $content =json_decode(curl_exec($curl),true);
+                curl_close($curl);
+                if ($content['code'] ==200){
+                    $this->success('操作成功');
+                }else{
+                    $this->error('工单信息更新失败');
+                }
+            }else{
+                $this->error('操作失败');
+            }
+            $this->success('操作成功');
         }
         $row  = \app\common\model\OcCustomerAfterSalesWorkOrder::get($ids)->toArray();
         $photo_href  =explode('|',$row['images']);
