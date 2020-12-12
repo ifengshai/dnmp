@@ -611,7 +611,7 @@ class ScmWarehouse extends Scm
                         'wait_instock_num_before' => $sku_item['wait_instock_num'],
                         //'待入库变化量：正数为加，负数为减'
                         'wait_instock_num_change' => 0,
-                        'create_person' => session('admin.nickname'),
+                        'create_person' => $this->auth->nickname,
                         'create_time' => time(),
                         //'关联单号类型：1订单号 2子订单号 3入库单 4出库单 5盘点单 6调拨单'
                         'number_type' => 4,
@@ -643,7 +643,7 @@ class ScmWarehouse extends Scm
                         'on_way_stock_change' => 0,
                         'wait_instock_num_before' => $sku_item['wait_instock_num'],
                         'wait_instock_num_change' => 0,
-                        'create_person' => session('admin.nickname'),
+                        'create_person' => $this->auth->nickname,
                         'create_time' => time(),
                         'number_type' => 4,
                     ];
@@ -1356,7 +1356,7 @@ class ScmWarehouse extends Scm
                                         'on_way_stock_change' => 0,
                                         'wait_instock_num_before' => $sku_platform['wait_instock_num'],
                                         'wait_instock_num_change' => -$stock_num,
-                                        'create_person' => session('admin.nickname'),
+                                        'create_person' => $this->auth->nickname,
                                         'create_time' => time(),
                                         'number_type' => 3,
                                     ]);
@@ -1396,7 +1396,7 @@ class ScmWarehouse extends Scm
                                         'on_way_stock_change' => 0,
                                         'wait_instock_num_before' => $sku_platform['wait_instock_num'],
                                         'wait_instock_num_change' => -$num,
-                                        'create_person' => session('admin.nickname'),
+                                        'create_person' => $this->auth->nickname,
                                         'create_time' => time(),
                                         'number_type' => 3,
                                     ]);
@@ -1443,7 +1443,7 @@ class ScmWarehouse extends Scm
                                 'on_way_stock_change' => 0,
                                 'wait_instock_num_before' => $item_platform_sku['wait_instock_num'],
                                 'wait_instock_num_change' => -$v['in_stock_num'],
-                                'create_person' => session('admin.nickname'),
+                                'create_person' => $this->auth->nickname,
                                 'create_time' => time(),
                                 'number_type' => 3,
                             ]);
@@ -1482,7 +1482,7 @@ class ScmWarehouse extends Scm
                             'on_way_stock_change' => 0,
                             'wait_instock_num_before' => $item_platform_sku['wait_instock_num'],
                             'wait_instock_num_change' => 0,
-                            'create_person' => session('admin.nickname'),
+                            'create_person' => $this->auth->nickname,
                             'create_time' => time(),
                             'number_type' => 3,
                         ]);
@@ -1533,7 +1533,7 @@ class ScmWarehouse extends Scm
                                         'on_way_stock_change' => 0,
                                         'wait_instock_num_before' => $item_platform_sku_detail['wait_instock_num'],
                                         'wait_instock_num_change' => 0,
-                                        'create_person' => session('admin.nickname'),
+                                        'create_person' => $this->auth->nickname,
                                         'create_time' => time(),
                                         'number_type' => 3,
                                     ]);
@@ -1568,7 +1568,7 @@ class ScmWarehouse extends Scm
                                         'on_way_stock_change' => 0,
                                         'wait_instock_num_before' => $item_platform_sku_detail['wait_instock_num'],
                                         'wait_instock_num_change' => 0,
-                                        'create_person' => session('admin.nickname'),
+                                        'create_person' => $this->auth->nickname,
                                         'create_time' => time(),
                                         'number_type' => 3,
                                     ]);
@@ -1610,7 +1610,7 @@ class ScmWarehouse extends Scm
                                         'on_way_stock_change' => 0,
                                         'wait_instock_num_before' => $item_platform_sku_detail['wait_instock_num'],
                                         'wait_instock_num_change' => 0,
-                                        'create_person' => session('admin.nickname'),
+                                        'create_person' => $this->auth->nickname,
                                         'create_time' => time(),
                                         'number_type' => 3,
                                     ]);
@@ -1645,7 +1645,7 @@ class ScmWarehouse extends Scm
                                         'on_way_stock_change' => 0,
                                         'wait_instock_num_before' => $item_platform_sku_detail['wait_instock_num'],
                                         'wait_instock_num_change' => 0,
-                                        'create_person' => session('admin.nickname'),
+                                        'create_person' => $this->auth->nickname,
                                         'create_time' => time(),
                                         'number_type' => 3,
                                     ]);
@@ -1691,7 +1691,7 @@ class ScmWarehouse extends Scm
                             'on_way_stock_change' => 0,
                             'wait_instock_num_before' => $sku_item['wait_instock_num'],
                             'wait_instock_num_change' => -$v['in_stock_num'],
-                            'create_person' => session('admin.nickname'),
+                            'create_person' => $this->auth->nickname,
                             'create_time' => time(),
                             'number_type' => 3,
                         ]);
@@ -2276,7 +2276,7 @@ class ScmWarehouse extends Scm
                             'on_way_stock_change' => 0,
                             'wait_instock_num_before' => $sku_item['wait_instock_num'],
                             'wait_instock_num_change' => 0,
-                            'create_person' => session('admin.nickname'),
+                            'create_person' => $this->auth->nickname,
                             'create_time' => time(),
                             'number_type' => 5,
                         ]);
@@ -2330,7 +2330,7 @@ class ScmWarehouse extends Scm
                                         'on_way_stock_change' => 0,
                                         'wait_instock_num_before' => $sku_item['wait_instock_num'],
                                         'wait_instock_num_change' => 0,
-                                        'create_person' => session('admin.nickname'),
+                                        'create_person' => $this->auth->nickname,
                                         'create_time' => time(),
                                         'number_type' => 5,
                                     ]);
@@ -2366,7 +2366,7 @@ class ScmWarehouse extends Scm
                                         'on_way_stock_change' => 0,
                                         'wait_instock_num_before' => $sku_item['wait_instock_num'],
                                         'wait_instock_num_change' => 0,
-                                        'create_person' => session('admin.nickname'),
+                                        'create_person' => $this->auth->nickname,
                                         'create_time' => time(),
                                         'number_type' => 5,
                                     ]);
@@ -2405,7 +2405,7 @@ class ScmWarehouse extends Scm
                                         'on_way_stock_change' => 0,
                                         'wait_instock_num_before' => $sku_item['wait_instock_num'],
                                         'wait_instock_num_change' => 0,
-                                        'create_person' => session('admin.nickname'),
+                                        'create_person' => $this->auth->nickname,
                                         'create_time' => time(),
                                         'number_type' => 5,
                                     ]);
@@ -2441,7 +2441,7 @@ class ScmWarehouse extends Scm
                                         'on_way_stock_change' => 0,
                                         'wait_instock_num_before' => $sku_item['wait_instock_num'],
                                         'wait_instock_num_change' => 0,
-                                        'create_person' => session('admin.nickname'),
+                                        'create_person' => $this->auth->nickname,
                                         'create_time' => time(),
                                         'number_type' => 5,
                                     ]);
