@@ -187,7 +187,7 @@ class Distribution extends Backend
                     $abnormal_where['type'] = ['in', $filter['abnormal']];
                     unset($filter['abnormal']);
                 }
-
+                
                 //获取未处理异常
                 if (8 == $label) {
                     $abnormal_where['status'] = 1;
@@ -267,9 +267,10 @@ class Distribution extends Backend
                 ->join(['fa_order_process' => 'c'], 'a.order_id=c.order_id')
                 ->where($where)
                 ->where($map)
-                ->order($sort, $order)
-                ->limit($offset, $limit)
+                ->order($sort,$order)
+                ->limit($offset,$limit)
                 ->select();
+
             $list = collection($list)->toArray();
 
             //库位号列表
@@ -389,8 +390,10 @@ class Distribution extends Backend
             $change_lens = $change_lens->toArray();
             if($change_lens['pd_l'] && $change_lens['pd_r']){
                 $change_lens['pd'] = '';
+                $change_lens['pdcheck'] = '';
             }else{
                 $change_lens['pd'] = $change_lens['pd_r'] ?: $change_lens['pd_l'];
+                $change_lens['pdcheck'] = 'on';
             }
             $result = array_merge($result,$change_lens);
         }
