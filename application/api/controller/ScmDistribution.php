@@ -1537,7 +1537,8 @@ class ScmDistribution extends Scm
             }
         } else {
             $where['a.distribution_status'] = 7;//待合单状态
-            $where['a.abnormal_house_id'] = ['>',0];
+            $where['a.abnormal_house_id'] = ['>',0];//异常未处理
+            $where['b.store_house_id'] = ['>',0];//有合单库位
             //异常待处理列表
             if($query){
                 //线上不允许跨库联合查询，拆分，由于字段值明显差异，可以分别模糊匹配
@@ -1562,7 +1563,7 @@ class ScmDistribution extends Scm
                 ->alias('a')
                 ->where($where)
                 ->join(['fa_order_process'=> 'b'],'a.order_id=b.order_id','left')
-                ->field('b.store_house_id,a.item_order_number')
+                ->field('b.store_house_id,b.increment_id,b.order_id')
                 ->group('a.item_order_number')
                 ->limit($offset, $limit)
                 ->select();
@@ -1694,44 +1695,19 @@ class ScmDistribution extends Scm
      */
     public function merge_out_detail()
     {
-        $type = $this->request->request("type") ?? 1;
-        $item_order_number = $this->request->request('item_order_number');
         $order_id = $this->request->request('order_id');
+        empty($order_id) && $this->error(__('主订单ID不能为空'), [], 403);
 
-        if ($type == 1){
-            empty($order_id) && $this->error(__('主订单ID不能为空'), [], 403);
-            $order_number = $this->_new_order->where(['id' => $order_id])->value('increment_id');
-            empty($order_number) && $this->error(__('主订单不存在'), [], 403);
-            $order_process_info = $this->_new_order
-                ->alias('a')
-                ->where('a.id', $order_id)
-                ->join(['fa_order_process'=> 'b'],'a.id=b.order_id','left')
-                ->field('a.id,a.increment_id,b.store_house_id')
-                ->find();
+        $order_number = $this->_new_order->where(['id' => $order_id])->value('increment_id');
+        empty($order_number) && $this->error(__('主订单不存在'), [], 403);
+        $info['order_number'] = $order_number;
 
-            //获取子订单数据
-            $item_process_info = $this->_new_order_item_process
-                ->where('order_id', $order_process_info['id'])
-                ->field('id,item_order_number,distribution_status,abnormal_house_id')
-                ->select();
-            empty($item_process_info) && $this->error(__('子订单数据异常'), [], 403);
-            $info['order_number'] = $order_number;
-
-        } else {
-            empty($item_order_number) && $this->error(__('子订单号不能为空'), [], 403);
-            //子单号获取主单号
-            $order_id = $this->_new_order_item_process->where(['item_order_number' => $item_order_number])->value('order_id');
-            $order_number = $this->_new_order->where(['id' => $order_id])->value('increment_id');
-            empty($order_number) && $this->error(__('子订单数据异常'), [], 403);
-            $info['order_number'] = $order_number;
-
-            //获取子订单数据
-            $item_process_info = $this->_new_order_item_process
-                ->where('order_id', $order_id)
-                ->field('id,item_order_number,distribution_status,abnormal_house_id')
-                ->select();
-            empty($item_process_info) && $this->error(__('子订单数据异常'), [], 403);
-        }
+        //获取子订单数据
+        $item_process_info = $this->_new_order_item_process
+            ->where('order_id', $order_id)
+            ->field('id,item_order_number,distribution_status,abnormal_house_id')
+            ->select();
+        empty($item_process_info) && $this->error(__('子订单数据不存在'), [], 403);
 
         $distribution_status = [0=>'取消',1=>'待打印标签',2=>'待配货',3=>'待配镜片',4=>'待加工',5=>'待印logo',6=>'待成品质检',7=>'待合单',8=>'合单中',9=>'合单完成'];
         foreach($item_process_info as $key => $value){
@@ -1741,7 +1717,6 @@ class ScmDistribution extends Scm
 
         $info['list'] = $item_process_info;
         $this->success('', ['info'=>$info], 200);
-
     }
 
     /**
