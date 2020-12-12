@@ -543,7 +543,7 @@ class OrderReturn extends Backend
         $ids  = input('param.ids');
         if (!empty($ids)){
 //            $row = \app\common\model\OcCustomerAfterSalesWorkOrder::get($ids)->toArray();
-            $row  = \app\common\model\OcCustomerAfterSalesWorkOrder::get($ids)->field('increment_id,email')->toArray();
+            $row  = \app\common\model\OcCustomerAfterSalesWorkOrder::get($ids)->toArray();
             Log::write("1111111111111111");
             Log::write($row);
             Log::write($ids);
