@@ -1366,37 +1366,45 @@ class WorkOrderList extends Backend
                         $params['create_user_id'] = $admin_id;
                         $params['create_time'] = date('Y-m-d H:i:s');
                         $params['order_sku'] = $params['order_sku'] ? implode(',', $params['order_sku']) : '';
-//                        $params['order_item_numbers'] = $item_order_info ? implode(',', array_keys($item_order_info)) : '';
                         $params['assign_user_id'] = $params['assign_user_id'] ?: 0;
                         $params['customer_group'] = $this->customer_group;
 
                         $result = $this->model->allowField(true)->save($params);
                         if (false === $result) throw new Exception("添加失败！！");
                         $work_id = $this->model->id;
+                    }
 
-                        //仓库工单判断未处理异常，有则绑定异常
-                        if($params['order_item_numbers']){
-                            //获取子订单主键ID集合
-                            $_new_order_item_process = new NewOrderItemProcess();
-                            $item_process_ids = $_new_order_item_process
-                                ->where(['item_order_number'=>['in',$params['order_item_numbers']]])
-                                ->column('id')
+                    //仓库工单判断未处理异常，有则绑定异常
+                    if($params['order_item_numbers'] || in_array(3,$measure_choose_id)){
+                        //获取子订单主键ID集合
+                        $_new_order_item_process = new NewOrderItemProcess();
+
+                        //主单取消：绑定该订单下所有子单异常
+                        if(in_array(3,$measure_choose_id)){
+                            $item_process_where['b.increment_id'] = $platform_order;
+                        }else{
+                            $item_process_where['a.item_order_number'] = ['in',$params['order_item_numbers']];
+                        }
+                        $item_process_ids = $_new_order_item_process
+                            ->alias('a')
+                            ->join(['fa_order' => 'b'], 'a.order_id=b.id')
+                            ->where($item_process_where)
+                            ->column('a.id')
+                        ;
+
+                        //绑定异常数据
+                        $abnormal_count = $_distribution_abnormal
+                            ->where(['item_process_id' => ['in',$item_process_ids],'status'=>1])
+                            ->count()
+                        ;
+                        if($abnormal_count){
+                            $_distribution_abnormal
+                                ->allowField(true)
+                                ->save(['work_id'=>$work_id], ['item_process_id' => ['in',$item_process_ids],'status'=>1])
                             ;
 
-                            //绑定异常数据
-                            $abnormal_count = $_distribution_abnormal
-                                ->where(['item_process_id' => ['in',$item_process_ids],'status'=>1])
-                                ->count()
-                            ;
-                            if($abnormal_count){
-                                $_distribution_abnormal
-                                    ->allowField(true)
-                                    ->save(['work_id'=>$work_id], ['item_process_id' => ['in',$item_process_ids],'status'=>1])
-                                ;
-
-                                //配货操作日志
-                                DistributionLog::record((object)session('admin'),$item_process_ids,0,"创建工单绑定异常");
-                            }
+                            //配货操作日志
+                            DistributionLog::record((object)session('admin'),$item_process_ids,0,"创建工单绑定异常");
                         }
                     }
 
@@ -2256,6 +2264,7 @@ class WorkOrderList extends Backend
             $incrementId = input('increment_id');
             $siteType = input('site_type');
             $work_id = input('work_id');
+            $measure_choose_id = input('measure_choose_id');
 
             $res = [];
             $lens = [];
@@ -2267,14 +2276,21 @@ class WorkOrderList extends Backend
                 //请求接口获取lens_type，coating_type，prescription_type等信息
                 $lens = $this->model->getReissueLens($siteType, $res['showPrescriptions'], 1);
 
-                //判断是否是新建状态
-                $work_status = $this->model->where('id', $work_id)->value('work_status');
-                if (0 < $work_status) {
-                    //获取魔晶数据库中地址
-                    $address = Db::name('work_order_change_sku')->where('work_id', $work_id)->value('userinfo_option');
-                    $address = unserialize($address);
-                    $address['address_type'] = $address['address_id'] == 0 ? 'shipping' : 'billing';
-                    $res['address'] = $address;
+                //判断是否是新建或跟单处理
+                if($work_id && $measure_choose_id){
+                    $work_status = $this->model->where('id', $work_id)->value('work_status');
+                    if (0 < $work_status) {
+                        //获取魔晶数据库中地址
+                        $_work_order_change_sku = new WorkOrderChangeSku();
+                        $address = $_work_order_change_sku
+                            ->alias('a')
+                            ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
+                            ->where(['a.work_id'=>$work_id,'b.measure_choose_id'=>$measure_choose_id])
+                            ->value('a.userinfo_option');
+                        $address = unserialize($address);
+                        $address['address_type'] = $address['address_id'] == 0 ? 'shipping' : 'billing';
+                        $res['address'] = $address;
+                    }
                 }
             } catch (\Exception $e) {
                 $this->error($e->getMessage());
@@ -2725,7 +2741,7 @@ class WorkOrderList extends Backend
     }
 
     /**
-     * 修改工单状态
+     * 工单取消
      *
      * @Description
      * @author wpl
@@ -2744,6 +2760,52 @@ class WorkOrderList extends Backend
             $params['cancel_time'] = date('Y-m-d H:i:s');
             $params['cancel_person'] = session('admin.nickname');
             $result = $row->allowField(true)->save($params);
+
+            //配货异常表
+            $_distribution_abnormal = new DistributionAbnormal();
+
+            //获取工单关联未处理异常数据
+            $item_process_ids = $_distribution_abnormal
+                ->where(['work_id' => $row->id, 'status' => 1])
+                ->column('item_process_id')
+            ;
+            if($item_process_ids){
+                //异常标记为已处理
+                $_distribution_abnormal
+                    ->allowField(true)
+                    ->save(
+                        ['status' => 2, 'do_time' => time(), 'do_person' => session('admin.nickname')],
+                        ['work_id' => $row->id, 'status' => 1]
+                    );
+
+                //获取异常库位id集
+                $_new_order_item_process = new NewOrderItemProcess();
+                $abnormal_house_ids = $_new_order_item_process
+                    ->field('abnormal_house_id')
+                    ->where(['id' => ['in',$item_process_ids]])
+                    ->select()
+                ;
+                if($abnormal_house_ids){
+                    //异常库位号占用数量减1
+                    $_stock_house = new StockHouse();
+                    foreach($abnormal_house_ids as $v){
+                        $_stock_house
+                            ->where(['id' => $v['abnormal_house_id']])
+                            ->setDec('occupy', 1)
+                        ;
+                    }
+                }
+
+                //解绑子订单的异常库位ID
+                $_new_order_item_process
+                    ->allowField(true)
+                    ->save(['abnormal_house_id' => 0],['id' => ['in',$item_process_ids]])
+                ;
+
+                //配货操作日志
+                DistributionLog::record((object)session('admin'),$item_process_ids,10,"工单取消，异常标记为已处理");
+            }
+
             if (false !== $result) {
                 $this->success('操作成功！！');
             } else {
