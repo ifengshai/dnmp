@@ -18,6 +18,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
             $('.btn-batch-printed').removeClass('hide');
             $('.btn-product').removeClass('hide');
         }else if(3 == value){
+            $('select[name="abnormal"]').parents('.form-group').show();
+            $('#stock_house_num').parents('.form-group').show();
             $('.btn-batch-printed').removeClass('hide');
             $('.btn-lens').removeClass('hide');
         }else if(4 == value){

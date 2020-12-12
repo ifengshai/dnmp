@@ -199,10 +199,17 @@ class Distribution extends Backend
 
             //筛选库位号
             if ($filter['stock_house_num']) {
+                if(8 == $label){//跟单
+                    $house_type = 4;
+                }elseif(3 == $label){//待配镜片-定制片
+                    $house_type = 3;
+                }else{//合单
+                    $house_type = 2;
+                }
                 $stock_house_id = $this->_stock_house
                     ->where([
                         'coding'=>['like', $filter['stock_house_num'] . '%'],
-                        'type'=>8 == $label ? 4 : 2//2合单库位  4异常库位
+                        'type'=>$house_type
                     ])
                     ->column('id');
                 $map['a.temporary_house_id|a.abnormal_house_id|c.store_house_id'] = ['in', $stock_house_id];
@@ -299,9 +306,9 @@ class Distribution extends Backend
 
             foreach ($list as $key => $value) {
                 $stock_house_num = '';
-                if (!empty($value['temporary_house_id'])) {
+                if (!empty($value['temporary_house_id']) && 3 == $label) {
                     $stock_house_num = $stock_house_data[$value['temporary_house_id']];//定制片库位号
-                } elseif (!empty($value['abnormal_house_id'])) {
+                } elseif (!empty($value['abnormal_house_id']) && 8 == $label) {
                     $stock_house_num = $stock_house_data[$value['abnormal_house_id']];//异常库位号
                 } elseif (!empty($value['store_house_id'])) {
                     $stock_house_num = $stock_house_data[$value['store_house_id']];//合单库位号
