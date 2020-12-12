@@ -554,6 +554,12 @@ class WorkOrderList extends Model
             //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$body,FILE_APPEND);
             $stringBody = (string) $body;
             $res = json_decode($stringBody, true);
+            print_r($params);
+            print_r('------');
+            print_r($url);
+            print_r('------');
+            print_r($res);
+            exit;
             //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$stringBody,FILE_APPEND);
             if ($res === null) {
                 exception('网络异常');
