@@ -554,11 +554,18 @@ class WorkOrderList extends Model
             //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$body,FILE_APPEND);
             $stringBody = (string) $body;
             $res = json_decode($stringBody, true);
+
+            $content = $response->getBody()->getContents();
+// 下面加这一行
+            $response->getBody()->rewind();
+
             print_r($params);
             print_r('------');
             print_r($url);
             print_r('------');
             print_r($res);
+            print_r('------');
+            print_r($content);
             exit;
             //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$stringBody,FILE_APPEND);
             if ($res === null) {
