@@ -1578,7 +1578,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     is_add = 1;
                     var value = $(this).val();
                     var work_id = $('#work_id').val();
-                    if ($('.status').val() == 1) {work_id = '';}
+                    var is_order_item = $('#is_order_item').val();
+                    if ($('.status').val() == 1 && 1 == is_order_item) {work_id = '';}
                     var check = $(this).prop('checked');
                     var increment_id = $('#c-platform_order').val();
                     //var is_new_version = $('#is_new_version').val();
@@ -3072,7 +3073,8 @@ function changeOrderAddress(){
     $("#user_address").show();
     var incrementId = $('#c-platform_order').val();
     var work_id = $('#work_id').val();
-    if ($('.status').val() == 1) {work_id = '';}
+    var is_order_item = $('#is_order_item').val();
+    if ($('.status').val() == 1 && 1 == is_order_item) {work_id = '';}
     if (!incrementId) {
         Toastr.error('订单号不能为空');
         return false;
