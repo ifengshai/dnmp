@@ -2751,6 +2751,52 @@ class WorkOrderList extends Backend
             $params['cancel_time'] = date('Y-m-d H:i:s');
             $params['cancel_person'] = session('admin.nickname');
             $result = $row->allowField(true)->save($params);
+
+            //配货异常表
+            $_distribution_abnormal = new DistributionAbnormal();
+
+            //获取工单关联未处理异常数据
+            $item_process_ids = $_distribution_abnormal
+                ->where(['work_id' => $row->id, 'status' => 1])
+                ->column('item_process_id')
+            ;
+            if($item_process_ids){
+                //异常标记为已处理
+                $_distribution_abnormal
+                    ->allowField(true)
+                    ->save(
+                        ['status' => 2, 'do_time' => time(), 'do_person' => session('admin.nickname')],
+                        ['work_id' => $row->id, 'status' => 1]
+                    );
+
+                //获取异常库位id集
+                $_new_order_item_process = new NewOrderItemProcess();
+                $abnormal_house_ids = $_new_order_item_process
+                    ->field('abnormal_house_id')
+                    ->where(['id' => ['in',$item_process_ids]])
+                    ->select()
+                ;
+                if($abnormal_house_ids){
+                    //异常库位号占用数量减1
+                    $_stock_house = new StockHouse();
+                    foreach($abnormal_house_ids as $v){
+                        $_stock_house
+                            ->where(['id' => $v['abnormal_house_id']])
+                            ->setDec('occupy', 1)
+                        ;
+                    }
+                }
+
+                //解绑子订单的异常库位ID
+                $_new_order_item_process
+                    ->allowField(true)
+                    ->save(['abnormal_house_id' => 0],['id' => ['in',$item_process_ids]])
+                ;
+
+                //配货操作日志
+                DistributionLog::record((object)session('admin'),$item_process_ids,10,"工单取消，异常标记为已处理");
+            }
+
             if (false !== $result) {
                 $this->success('操作成功！！');
             } else {
