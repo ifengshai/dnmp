@@ -316,7 +316,6 @@ class WorkOrderList extends Backend
                         $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.add' : $name) : $this->modelValidate;
                         $this->model->validateFailException(true)->validate($validate);
                     }
-
                     if (!$ids) {
                         //限制不能存在两个相同的未完成的工单
                         $count = $this->model->where(['platform_order' => $params['platform_order'], 'work_status' => ['in', [1, 2, 3, 5]]])->count();
@@ -324,13 +323,14 @@ class WorkOrderList extends Backend
                             throw new Exception("此订单存在未处理完成的工单");
                         }
                     }
-
                     if (!$params['platform_order']) {
                         throw new Exception("订单号不能为空");
                     }
                     if(!$params['order_sku'][0]){
+                        dump($params['order_sku']);exit;
                         throw new Exception("SKU不能为空");
                     }
+
                     if (!$params['order_pay_currency']) {
                         throw new Exception("请先点击载入数据");
                     }
