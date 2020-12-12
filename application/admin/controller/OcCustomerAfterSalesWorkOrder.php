@@ -150,11 +150,17 @@ class OcCustomerAfterSalesWorkOrder extends Backend
             $this->success('操作成功');
         }
         $row  = \app\common\model\OcCustomerAfterSalesWorkOrder::get($ids)->toArray();
-        $photo_href  =explode('|',$row['images']);
-      
-        foreach ($photo_href as $key=>$item){
-            $photo_href[$key]= config('url.zeelool_url').'media/'.$item;
+        if (!empty($row['images'])){
+            $photo_href  =explode('|',$row['images']);
+            foreach ($photo_href as $key=>$item){
+                $photo_href[$key]= config('url.zeelool_url').'media/'.$item;
+            }
+        }else{
+            $photo_href = null;
         }
+
+      
+
         if ($row['order_type'] ==1){
             $row['order_type'] = '普通订单';
         }elseif ($row['order_type'] ==2){
