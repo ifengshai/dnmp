@@ -289,12 +289,10 @@ class ScmWarehouse extends Scm
         $out_stock_id = $this->request->request('out_stock_id');
         if($out_stock_id){
             $info = $this->_out_stock
-                ->field('out_stock_number,type_id,platform_id,status')
+                ->field('out_stock_number,type_id,platform_id')
                 ->where('id', $out_stock_id)
                 ->find()
             ;
-            0 != $info['status'] && $this->error(__('只有新建状态才能编辑'), [], 405);
-            unset($info['status']);
 
             //获取出库单商品数据
             $item_data = $this->_out_stock_item
@@ -655,7 +653,8 @@ class ScmWarehouse extends Scm
     public function no_in_stock_list()
     {
         $query = $this->request->request('query');
-        $status = $this->request->request('status');
+        //待入库列表状态筛选去掉
+        // $status = $this->request->request('status');
         $start_time = $this->request->request('start_time');
         $end_time = $this->request->request('end_time');
         $page = $this->request->request('page');
@@ -669,12 +668,13 @@ class ScmWarehouse extends Scm
         if($query){
             $where['a.check_order_number|b.sku|c.logistics_number'] = ['like', '%' . $query . '%'];
         }
-        if(isset($status)){
-            $where['a.status'] = $status;
-        }
+        
         if($start_time && $end_time){
             $where['a.createtime'] = ['between', [$start_time, $end_time]];
         }
+
+        //已审核通过
+        $where['a.status'] = 2;
 
         $offset = ($page - 1) * $page_size;
         $limit = $page_size;
@@ -1104,9 +1104,6 @@ class ScmWarehouse extends Scm
         //获取入库单数据
         $_in_stock_info = $this->_in_stock->get($in_stock_id);
         empty($_in_stock_info) && $this->error(__('入库单不存在'), [], 515);
-        if ($_in_stock_info['status'] > 1){
-            $this->error(__('入库单状态不可以修改'), [], 510);
-        }
         $item_list = $this->_in_stock_item
             ->where(['in_stock_id'=>$in_stock_id])
             ->field('sku,in_stock_num')
@@ -1662,9 +1659,6 @@ class ScmWarehouse extends Scm
         //获取盘点单数据
         $_inventory_info = $this->_inventory->get($inventory_id);
         empty($_inventory_info) && $this->error(__('盘点单不存在'), [], 531);
-        if ($_inventory_info['status'] > 1) {
-            $this->error(__('此状态不能编辑'), [], 512);
-        }
 //        $inventory_item_info = $_inventory_item->field('id,sku,inventory_qty,error_qty,real_time_qty,available_stock,distribution_occupy_stock')->where(['inventory_id'=>$inventory_id])->select();
         $item = $this->_inventory_item->field('sku')->where(['inventory_id'=>$inventory_id])->select();
         $item = collection($item)->toArray();
