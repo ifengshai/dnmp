@@ -543,11 +543,12 @@ class OrderReturn extends Backend
         $ids  = input('param.ids');
         if (!empty($ids)){
 //            $row = \app\common\model\OcCustomerAfterSalesWorkOrder::get($ids)->toArray();
-            $row  = \app\common\model\OcCustomerAfterSalesWorkOrder::get($ids)->toArray();
-            Log::write("1111111111111111");
-            Log::write($row);
-            Log::write($ids);
-            $this->view->assign("customer_email", $row['email']);
+            $row  = \app\common\model\OcCustomerAfterSalesWorkOrder::get($ids);
+            if (!empty($row)){
+                $row->toArray();
+                $this->view->assign("customer_email", $row['email']);
+            }
+
         }else{
             $row = null;
             $this->view->assign("customer_email", $customer_email);
