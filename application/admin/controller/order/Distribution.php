@@ -391,6 +391,8 @@ class Distribution extends Backend
             ->find();
         if ($change_lens) {
             $change_lens = $change_lens->toArray();
+
+            //处理pd值
             if ($change_lens['pd_l'] && $change_lens['pd_r']) {
                 $change_lens['pd'] = '';
                 $change_lens['pdcheck'] = '';
@@ -398,6 +400,14 @@ class Distribution extends Backend
                 $change_lens['pd'] = $change_lens['pd_r'] ?: $change_lens['pd_l'];
                 $change_lens['pdcheck'] = 'on';
             }
+
+            //处理斜视值
+            if ($change_lens['od_pv'] || $change_lens['os_pv']) {
+                $change_lens['prismcheck'] = 'on';
+            } else {
+                $change_lens['pdcheck'] = '';
+            }
+
             $result = array_merge($result, $change_lens);
         }
 
