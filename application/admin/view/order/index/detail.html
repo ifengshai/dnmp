@@ -258,7 +258,7 @@
                     <td>{$v.sku}</td>
                     <td>{:round($v['qty_ordered'])}</td>
                     <td>{$v.options.0.value}</td>
-                    {if $label== 1 || $label == 2}
+                    {if $label != 3}
                     <td>{$v.coatiing_name}</td>
                     <td>{$v.coatiing_price}</td>
                     <td>{$v.index_type}</td>
@@ -303,7 +303,7 @@
                 <tr>
                     <td>{$row.increment_id} </td>
                     <td>{$row.order_currency_code} </td>
-                    <td>{:round(($row['base_total_paid'] + $row['base_total_due'])*$row['base_to_order_rate'],3)}</td>
+                    <td>{$row.base_grand_total|sprintf='%.2f',###}</td>
                     <td>{$row.base_grand_total|sprintf='%.2f',###} </td>
                     <td>{$row.mw_rewardpoint} </td>
                     <td>{$row.mw_rewardpoint_discount_show|sprintf='%.2f',###} </td>

@@ -112,51 +112,51 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                     $smap['status'] = ['in', $filter['status']];
                 }
                 $ids = $model->getOrderId($smap);
-                $map['a.entity_id'] = ['in', $ids];
+                $map['entity_id'] = ['in', $ids];
                 unset($filter['sku']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
 
+
+            //国家搜索
+            if ($filter['country_id']) {
+                $amap['country_id'] = $filter['country_id'];
+                $amap['address_type'] = 'shipping';
+                $sql = Db::connect($db)->table('sales_flat_order_address')->where($amap)->field('parent_id')->buildSql();;
+                $map[] = ['exp', Db::raw("entity_id in " . $sql)];
+                unset($filter['country_id']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
+
+            if (!$filter) {
+                $map['created_at'] = ['between', ['2020-01-01', date('Y-m-d H:i:s')]];
+            }
+
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
 
-            $map['b.address_type'] = 'shipping';
-            $total = $model->alias('a')->join(['sales_flat_order_address' => 'b'], 'a.entity_id=b.parent_id')
+            $total = $model
                 ->where($where)
                 ->where($map)
-                ->order($sort, $order)
                 ->count();
 
-            $list = $model->alias('a')->field('a.entity_id,increment_id,b.country_id,customer_firstname,customer_email,status,base_grand_total,base_shipping_amount,custom_order_prescription_type,order_type,a.created_at,a.shipping_description')
-                ->join(['sales_flat_order_address' => 'b'], 'a.entity_id=b.parent_id')
+            $list = $model->field('entity_id,increment_id,customer_firstname,customer_email,status,base_grand_total,base_shipping_amount,custom_order_prescription_type,order_type,created_at,shipping_description,shipping_method')
                 ->where($where)
                 ->where($map)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
-
+           
             $list = collection($list)->toArray();
-
-            $arr = [
-                'Business express(4-7 business days)',
-                'Expedited',
-                'Business express(7-14 Days)',
-                'Business express(7-12 Days)',
-                'Business express',
-                'Business express (7-12 days)',
-                'Business express(7-12 days)',
-                'Express Shipping (3-5 Days)',
-                'Express Shipping (5-8Days)',
-                'Express Shipping (3-5 Business Days)',
-                'Express Shipping (5-8 Business Days)',
-                'Business Express(7-12 Days)',
-                'Business express(7-12 business days)'
-            ];
+            //查询国家
+            $entity_ids = array_column($list, 'entity_id');
+            $address = Db::connect($db)->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_ids], 'address_type' => 'shipping'])->column('country_id', 'parent_id');
             foreach ($list as &$v) {
-                if (in_array($v['shipping_description'], $arr)) {
+                if ($v['shipping_method'] == 'tablerate_bestway') {
                     $v['label'] = 1;
                 } else {
                     $v['label'] = 0;
                 }
+                $v['country_id'] = $address[$v['entity_id']];
             }
             unset($v);
 
@@ -337,26 +337,26 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
 
             $addWhere = '1=1';
             if ($rep != '{}') {
-//                 $whereArr = json_decode($rep,true);
-//                 if(!array_key_exists('created_at',$whereArr)){
-//                     $addWhere  .= " AND DATE_SUB(CURDATE(), INTERVAL 7 DAY) <= date(created_at)";
-//                 }
-            }else {
+                //                 $whereArr = json_decode($rep,true);
+                //                 if(!array_key_exists('created_at',$whereArr)){
+                //                     $addWhere  .= " AND DATE_SUB(CURDATE(), INTERVAL 7 DAY) <= date(created_at)";
+                //                 }
+            } else {
                 $addWhere  .= " AND DATE_SUB(CURDATE(), INTERVAL 7 DAY) <= date(created_at)";
             }
 
             //根据传的标签切换对应站点数据库
             $label = $this->request->get('label', 1);
-            $where_order['replenish_money'] =['gt',0];
+            $where_order['replenish_money'] = ['gt', 0];
             if ($label == 1) {
                 $model = $this->zeelool;
-                $where_order['work_platform'] = ['eq',1];
+                $where_order['work_platform'] = ['eq', 1];
             } elseif ($label == 2) {
                 $model = $this->voogueme;
-                $where_order['work_platform'] = ['eq',2];
+                $where_order['work_platform'] = ['eq', 2];
             } elseif ($label == 3) {
                 $model = $this->nihao;
-                $where_order['work_platform'] = ['eq',3];
+                $where_order['work_platform'] = ['eq', 3];
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $model
@@ -365,25 +365,25 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                 ->count();
             $list = $model
                 ->where($where)
-//                ->field('increment_id,customer_firstname,customer_email,status,base_grand_total,base_shipping_amount,custom_order_prescription_type,order_type,created_at,base_total_paid,base_total_due')
+                //                ->field('increment_id,customer_firstname,customer_email,status,base_grand_total,base_shipping_amount,custom_order_prescription_type,order_type,created_at,base_total_paid,base_total_due')
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
             $totalId = $model
                 ->where($where)
                 ->where($addWhere)
-                ->whereNotIn('order_type',['3','4'])
+                ->whereNotIn('order_type', ['3', '4'])
                 ->column('entity_id');
 
             $thisPageId = $model
                 ->where($where)
                 ->order($sort, $order)
-                ->whereNotIn('order_type',['3','4'])
+                ->whereNotIn('order_type', ['3', '4'])
                 ->limit($offset, $limit)
                 ->column('entity_id');
 
             $costInfo = $model->getOrderCostInfo($totalId, $thisPageId);
-         
+
             $list = collection($list)->toArray();
 
             foreach ($list as $k => $v) {
@@ -430,18 +430,17 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                 }
                 //查询工单里是否有补差价记录
                 $mojing = Db::connect('mysql://fanzhigang:3QGz60R2E!@aVOXP@54.189.215.133:3306/mojing#utf8');
-                $where_order['platform_order'] = ['eq',$v['increment_id']];
+                $where_order['platform_order'] = ['eq', $v['increment_id']];
                 $work_order_list = $mojing->table('fa_work_order_list')->where($where_order)->field('replenish_money')->select();
-                if (!empty($work_order_list)){
-                    $work_order_list = array_column($work_order_list,'replenish_money');
-                    $difference_log = implode(',',$work_order_list);
+                if (!empty($work_order_list)) {
+                    $work_order_list = array_column($work_order_list, 'replenish_money');
+                    $difference_log = implode(',', $work_order_list);
                 }
-                if ($v['fill_post'] == null){
+                if ($v['fill_post'] == null) {
                     $list[$k]['fill_post'] = '-';
-                }else{
-                    $list[$k]['fill_post'] = $v['fill_post'].'-'.$difference_log;
+                } else {
+                    $list[$k]['fill_post'] = $v['fill_post'] . '-' . $difference_log;
                 }
-
             }
             $result = array(
                 "total"             =>  $total,
@@ -821,6 +820,9 @@ EOF;
             case 10:
                 $model = $this->zeelool_de;
                 break;
+            case 11:
+                $model = $this->zeelool_jp;
+                break;
             default:
                 return false;
                 break;
@@ -844,19 +846,22 @@ EOF;
             $this->request->get(['filter' => json_encode($filter)]);
         }
 
+        //SKU搜索
+        if ($filter['created_at']) {
+            $arr = explode(' ', $filter['created_at']);
+            $map['sfo.created_at'] = ['between', [$arr[0] . ' ' . $arr[1], $arr[3] . ' ' . $arr[4]]];
+            unset($filter['created_at']);
+            $this->request->get(['filter' => json_encode($filter)]);
+        }
+
+
         list($where) = $this->buildparams();
 
-//        $list = $model
-////          ->field('increment_id,customer_firstname,customer_email,status,base_grand_total,base_shipping_amount,custom_order_prescription_type,order_type,created_at')
-//            ->where($where)
-//            ->where($map)
-//            ->select();
-//        $list = collection($list)->toArray();
-        if ($label ==1){
+        if ($label == 1) {
             $field = 'sfo.entity_id,sfo.increment_id,sfo.customer_firstname,sfo.customer_email,sfo.status,sfo.base_grand_total,sfo.base_shipping_amount,
         sfo.custom_order_prescription_type,sfo.order_type,sfo.created_at,sfo.is_new_version,sfo.global_currency_code,
         sfoi.product_options,sfo.total_qty_ordered as NUM,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.product_id,sfoi.qty_ordered';
-        }else{
+        } else {
             $field = 'sfo.entity_id,sfo.increment_id,sfo.customer_firstname,sfo.customer_email,sfo.status,sfo.base_grand_total,sfo.base_shipping_amount,
         sfo.custom_order_prescription_type,sfo.order_type,sfo.created_at,sfo.global_currency_code,
         sfoi.product_options,sfo.total_qty_ordered as NUM,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.product_id,sfoi.qty_ordered';
@@ -871,15 +876,27 @@ EOF;
             ->select();
         $resultList = collection($resultList)->toArray();
 
-        foreach ($resultList as $key=>$value){
-            $finalResult[$key]['country_id'] = $model->table('sales_flat_order_address')->where(array('parent_id'=>$value['entity_id']))->value('country_id');
-            $finalResult[$key]['method'] = $model->table('sales_flat_order_payment')->where(array('parent_id'=>$value['entity_id']))->value('method');
+        $entity_ids = array_column($resultList, 'entity_id');
+        $address = $model->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_ids]])->column('country_id', 'parent_id');
+
+        $payment = $model->table('sales_flat_order_payment')->where(['parent_id' => ['in', $entity_ids]])->column('method', 'parent_id');
+
+
+        foreach ($resultList as $key => $value) {
+
+            $finalResult[$key]['country_id'] = $address[$value['entity_id']];
+            $finalResult[$key]['method'] = $payment[$value['entity_id']];
             $finalResult[$key]['increment_id'] = $value['increment_id'];
             $finalResult[$key]['sku'] = $value['sku'];
             $finalResult[$key]['created_at'] = substr($value['created_at'], 0, 10);
             $finalResult[$key]['base_grand_total'] = $value['base_grand_total'];
             $finalResult[$key]['base_shipping_amount'] = $value['base_shipping_amount'];
-            $finalResult[$key]['label'] = $value['label'];
+
+            if ($value['shipping_method'] == 'tablerate_bestway') {
+                $finalResult[$key]['label'] = 1;
+            } else {
+                $finalResult[$key]['label'] = 0;
+            }
             $finalResult[$key]['customer_email'] = $value['customer_email'];
             $finalResult[$key]['status'] = $value['status'];
             $finalResult[$key]['total_qty_ordered'] = $value['total_qty_ordered'];
@@ -888,8 +905,8 @@ EOF;
             $finalResult[$key]['global_currency_code'] = $value['global_currency_code'];
             $finalResult[$key]['NUM'] = $value['NUM'];
             $tmp_product_options = unserialize($value['product_options']);
-           //新处方
-            if ($label ==1){
+            //新处方
+            if ($label == 1) {
                 if ($value['is_new_version'] == 1) {
                     //镀膜
                     $finalResult[$key]['coatiing_name'] = $tmp_product_options['info_buyRequest']['tmplens']['coating_name'];
@@ -907,7 +924,14 @@ EOF;
                         $finalResult[$key]['index_type'] .= '-' . $tmp_product_options['info_buyRequest']['tmplens']['color_name'];
                     }
                 }
-            }else{
+            } elseif ($label == 3) {
+                $finalResult[$key]['coatiing_name'] = $tmp_product_options['info_buyRequest']['tmplens']['four_name'];
+                $finalResult[$key]['index_type'] = $tmp_product_options['info_buyRequest']['tmplens']['third_name'];
+                //镜片类型拼接颜色字段
+                if ($tmp_product_options['info_buyRequest']['tmplens']['color_name']) {
+                    $finalResult[$key]['index_type'] .= '-' . $tmp_product_options['info_buyRequest']['tmplens']['color_name'];
+                }
+            } else {
                 $finalResult[$key]['coatiing_name'] = $tmp_product_options['info_buyRequest']['tmplens']['coatiing_name'];
                 $finalResult[$key]['index_type'] = $tmp_product_options['info_buyRequest']['tmplens']['index_type'];
                 //镜片类型拼接颜色字段
@@ -1013,7 +1037,7 @@ EOF;
                 $custom_order_prescription_type = '镜架+定制';
             } elseif ($value['custom_order_prescription_type'] == 6) {
                 $custom_order_prescription_type = '现片+定制片';
-            }else{
+            } else {
                 $custom_order_prescription_type = '获取中';
             }
 
@@ -1030,31 +1054,31 @@ EOF;
             } elseif ($value['order_type'] == 6) {
                 $order_type = '一件代发';
             }
-            if ($value['label']  ==1){
+            if ($value['label']  == 1) {
                 $label = '是';
-            }else{
+            } else {
                 $label = '否';
             }
 
-            $spreadsheet->getActiveSheet()->setCellValueExplicit("A" . ($key * 2 + 2), $value['entity_id'],\PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);//记录标识
-            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 2 + 2), $value['increment_id']);//订单编号
-            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 2 + 2), $order_type);//订单类型
+            $spreadsheet->getActiveSheet()->setCellValueExplicit("A" . ($key * 2 + 2), $value['entity_id'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING); //记录标识
+            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 2 + 2), $value['increment_id']); //订单编号
+            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 2 + 2), $order_type); //订单类型
             $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 2 + 2), $value['base_grand_total']); //订单金额
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 2 + 2), $value['base_shipping_amount']); //邮费
             $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 2), $label); //是否为商业快递
             $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 2 + 2), $value['country_id']); //国家
             $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 2 + 2), $value['customer_email']); //邮箱
-            $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['status']);//订单状态
-            $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 2 + 2), $value['NUM']);//SKU数量
-            $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 2 + 2), $value['sku']);//SKU
-            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 2 + 2), '右眼');//眼球
-            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 2 + 3), '左眼');//眼球
-            $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 2 + 2),(float) $value['od_sph'] > 0 ? ' +' . number_format($value['od_sph'] * 1, 2) : ' ' . $value['od_sph']);//SPH
-            $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 2 + 3),(float) $value['os_sph'] > 0 ? ' +' . number_format($value['os_sph'] * 1, 2) : ' ' . $value['os_sph']);//SPH
-            $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 2 + 2), (float) $value['od_cyl'] > 0 ? ' +' . number_format($value['od_cyl'] * 1, 2) : ' ' . $value['od_cyl']);//CYL
-            $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 2 + 3), (float) $value['os_cyl'] > 0 ? ' +' . number_format($value['os_cyl'] * 1, 2) : ' ' . $value['os_cyl']);//CYL
-            $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 2 + 2), $value['od_axis']);//AXI
-            $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 2 + 3), $value['os_axis']);//AXI
+            $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 2 + 2), $value['status']); //订单状态
+            $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 2 + 2), $value['NUM']); //SKU数量
+            $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 2 + 2), $value['sku']); //SKU
+            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 2 + 2), '右眼'); //眼球
+            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 2 + 3), '左眼'); //眼球
+            $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 2 + 2), (float) $value['od_sph'] > 0 ? ' +' . number_format($value['od_sph'] * 1, 2) : ' ' . $value['od_sph']); //SPH
+            $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 2 + 3), (float) $value['os_sph'] > 0 ? ' +' . number_format($value['os_sph'] * 1, 2) : ' ' . $value['os_sph']); //SPH
+            $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 2 + 2), (float) $value['od_cyl'] > 0 ? ' +' . number_format($value['od_cyl'] * 1, 2) : ' ' . $value['od_cyl']); //CYL
+            $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 2 + 3), (float) $value['os_cyl'] > 0 ? ' +' . number_format($value['os_cyl'] * 1, 2) : ' ' . $value['os_cyl']); //CYL
+            $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 2 + 2), $value['od_axis']); //AXI
+            $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 2 + 3), $value['os_axis']); //AXI
             $value['os_add'] = urldecode($value['os_add']);
             $value['od_add'] = urldecode($value['od_add']);
             if ($value['os_add'] && $value['os_add'] && (float) ($value['os_add']) * 1 != 0 && (float) ($value['od_add']) * 1 != 0) {
@@ -1087,24 +1111,24 @@ EOF;
                 $spreadsheet->getActiveSheet()->mergeCells("R" . ($key * 2 + 2) . ":R" . ($key * 2 + 3));
             }
 
-            $spreadsheet->getActiveSheet()->setCellValue("S" . ($key * 2 + 2), $value['index_type']);//镜片
-            $spreadsheet->getActiveSheet()->setCellValue("T" . ($key * 2 + 2), $value['lens_width']);//镜框宽度
-            $spreadsheet->getActiveSheet()->setCellValue("U" . ($key * 2 + 2), $value['lens_height']);//镜框高度
-            $spreadsheet->getActiveSheet()->setCellValue("V" . ($key * 2 + 2), $value['bridge']);//bridge
-            $spreadsheet->getActiveSheet()->setCellValue("W" . ($key * 2 + 2), $custom_order_prescription_type);//处方类型
-            $spreadsheet->getActiveSheet()->setCellValue("X" . ($key * 2 + 2), isset($value['od_pv']) ? $value['od_pv'] : '');//Prism
+            $spreadsheet->getActiveSheet()->setCellValue("S" . ($key * 2 + 2), $value['index_type']); //镜片
+            $spreadsheet->getActiveSheet()->setCellValue("T" . ($key * 2 + 2), $value['lens_width']); //镜框宽度
+            $spreadsheet->getActiveSheet()->setCellValue("U" . ($key * 2 + 2), $value['lens_height']); //镜框高度
+            $spreadsheet->getActiveSheet()->setCellValue("V" . ($key * 2 + 2), $value['bridge']); //bridge
+            $spreadsheet->getActiveSheet()->setCellValue("W" . ($key * 2 + 2), $custom_order_prescription_type); //处方类型
+            $spreadsheet->getActiveSheet()->setCellValue("X" . ($key * 2 + 2), isset($value['od_pv']) ? $value['od_pv'] : ''); //Prism
             $spreadsheet->getActiveSheet()->setCellValue("X" . ($key * 2 + 3), isset($value['os_pv']) ? $value['os_pv'] : '');
-            $spreadsheet->getActiveSheet()->setCellValue("Y" . ($key * 2 + 2), isset($value['od_bd']) ? $value['od_bd'] : '');//Direct
+            $spreadsheet->getActiveSheet()->setCellValue("Y" . ($key * 2 + 2), isset($value['od_bd']) ? $value['od_bd'] : ''); //Direct
             $spreadsheet->getActiveSheet()->setCellValue("Y" . ($key * 2 + 3), isset($value['os_bd']) ? $value['os_bd'] : '');
-            $spreadsheet->getActiveSheet()->setCellValue("Z" . ($key * 2 + 2), isset($value['od_pv_r']) ? $value['od_pv_r'] : '');//Prism
+            $spreadsheet->getActiveSheet()->setCellValue("Z" . ($key * 2 + 2), isset($value['od_pv_r']) ? $value['od_pv_r'] : ''); //Prism
             $spreadsheet->getActiveSheet()->setCellValue("Z" . ($key * 2 + 3), isset($value['os_pv_r']) ? $value['os_pv_r'] : '');
-            $spreadsheet->getActiveSheet()->setCellValue("AA" . ($key * 2 + 2), isset($value['od_bd_r']) ? $value['od_bd_r'] : '');//Direct
+            $spreadsheet->getActiveSheet()->setCellValue("AA" . ($key * 2 + 2), isset($value['od_bd_r']) ? $value['od_bd_r'] : ''); //Direct
             $spreadsheet->getActiveSheet()->setCellValue("AA" . ($key * 2 + 3), isset($value['os_bd_r']) ? $value['os_bd_r'] : '');
-            $spreadsheet->getActiveSheet()->setCellValue("AB" . ($key * 2 + 2), $value['method']);//支付方式
-            $spreadsheet->getActiveSheet()->setCellValue("AC" . ($key * 2 + 2), $value['global_currency_code']);//原币种
-            $spreadsheet->getActiveSheet()->setCellValue("AD" . ($key * 2 + 2), $value['base_grand_total']);//原支付金额
-            $spreadsheet->getActiveSheet()->setCellValue("AE" . ($key * 2 + 2), $value['created_at']);//订单支付时间
-            $spreadsheet->getActiveSheet()->setCellValue("AF" . ($key * 2 + 2), $value['created_at']);//订单创建时间
+            $spreadsheet->getActiveSheet()->setCellValue("AB" . ($key * 2 + 2), $value['method']); //支付方式
+            $spreadsheet->getActiveSheet()->setCellValue("AC" . ($key * 2 + 2), $value['global_currency_code']); //原币种
+            $spreadsheet->getActiveSheet()->setCellValue("AD" . ($key * 2 + 2), $value['base_grand_total']); //原支付金额
+            $spreadsheet->getActiveSheet()->setCellValue("AE" . ($key * 2 + 2), $value['created_at']); //订单支付时间
+            $spreadsheet->getActiveSheet()->setCellValue("AF" . ($key * 2 + 2), $value['created_at']); //订单创建时间
             //合并单元格
             $spreadsheet->getActiveSheet()->mergeCells("A" . ($key * 2 + 2) . ":A" . ($key * 2 + 3));
             $spreadsheet->getActiveSheet()->mergeCells("B" . ($key * 2 + 2) . ":B" . ($key * 2 + 3));
@@ -1129,25 +1153,24 @@ EOF;
             $spreadsheet->getActiveSheet()->mergeCells("AD" . ($key * 2 + 2) . ":AD" . ($key * 2 + 3));
             $spreadsheet->getActiveSheet()->mergeCells("AE" . ($key * 2 + 2) . ":AE" . ($key * 2 + 3));
             $spreadsheet->getActiveSheet()->mergeCells("AF" . ($key * 2 + 2) . ":AF" . ($key * 2 + 3));
-
         }
 
         //设置宽度
-        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(30);
-        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(40);
-        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(30);
-        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(20);
-        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(15);
         $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(15);
         $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(15);
-        $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(15);
-        $spreadsheet->getActiveSheet()->getColumnDimension('I')->setWidth(30);
-        $spreadsheet->getActiveSheet()->getColumnDimension('K')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('I')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('K')->setWidth(10);
         $spreadsheet->getActiveSheet()->getColumnDimension('S')->setWidth(30);
         $spreadsheet->getActiveSheet()->getColumnDimension('AB')->setWidth(30);
-        $spreadsheet->getActiveSheet()->getColumnDimension('AD')->setWidth(30);
-        $spreadsheet->getActiveSheet()->getColumnDimension('AE')->setWidth(30);
-        $spreadsheet->getActiveSheet()->getColumnDimension('AF')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AD')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AE')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AF')->setWidth(15);
 
 
         //设置边框

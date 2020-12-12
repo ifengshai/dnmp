@@ -395,4 +395,30 @@ class Wangpenglei extends Backend
 
         echo "ok";
     }
+
+    /**
+     * 处理订单节点数据
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/12/09 16:24:45 
+     * @return void
+     */
+    public function process_order_node()
+    {
+        $this->ordernode = new \app\admin\model\OrderNode();
+        $this->ordernodedetail = new \app\admin\model\OrderNodeDetail();
+        $list = $this->ordernode->where(['shipment_data_type' => '郭伟峰-广州美国专线'])->select();
+        $params = [];
+        foreach($list as $k => $v) {
+            $create_time = $this->ordernodedetail->where(['order_number' => $v['order_number'],'site' => $v['site'],'order_node' => 2,'node_type' => 7])->order('id asc')->value('create_time');
+            $params[$k]['delivery_time'] = $create_time;
+            $params[$k]['id'] = $v['id'];
+            echo $k . "\n";
+        }
+        $this->ordernode->saveAll($params);
+        echo "ok";
+
+    }
+
 }
