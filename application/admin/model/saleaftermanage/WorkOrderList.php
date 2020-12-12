@@ -545,15 +545,23 @@ class WorkOrderList extends Model
         $client = new Client(['verify' => false]);
         //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',json_encode($params),FILE_APPEND);
         try {
+            print_r($url);
+            print_r('-------');
             if ($method == 'GET') {
                 $response = $client->request('GET', $url, array('query' => $params));
             } else {
+                print_r($params);
+                print_r('-------');
                 $response = $client->request('POST', $url, array('form_params' => $params));
             }
             $body = $response->getBody();
+            print_r($body);
+            print_r('-------');
             //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$body,FILE_APPEND);
             $stringBody = (string) $body;
             $res = json_decode($stringBody, true);
+            print_r($res);
+            exit;
             //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$stringBody,FILE_APPEND);
             if ($res === null) {
                 exception('网络异常');
