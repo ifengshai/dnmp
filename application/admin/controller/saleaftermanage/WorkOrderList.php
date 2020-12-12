@@ -41,7 +41,7 @@ use app\admin\model\AuthGroup;
  */
 class WorkOrderList extends Backend
 {
-    protected $noNeedRight = ['getMeasureContent','batch_export_xls_bak', 'getProblemTypeContent', 'batch_export_xls','getDocumentaryRule'];
+    protected $noNeedRight = ['getMeasureContent','batch_export_xls_bak','batch_export_xls_array', 'getProblemTypeContent', 'batch_export_xls','getDocumentaryRule'];
     protected $noNeedLogin = ['batch_export_xls_array'];
     /**
      * WorkOrderList模型对象
