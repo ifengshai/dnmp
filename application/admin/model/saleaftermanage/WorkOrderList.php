@@ -1666,6 +1666,8 @@ class WorkOrderList extends Model
      * @return array
      */
     public function handle_abnormal($work){
+
+        
         //检测是否有标记异常
         $_distribution_abnormal = new DistributionAbnormal();
         $_new_order_item_process = new NewOrderItemProcess();
