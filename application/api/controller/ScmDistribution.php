@@ -4,7 +4,7 @@ namespace app\api\controller;
 
 use app\admin\model\saleaftermanage\WorkOrderChangeSku;
 use app\admin\model\saleaftermanage\WorkOrderMeasure;
-use think\Db;
+use app\admin\model\StockLog;
 use think\Exception;
 use think\exception\PDOException;
 use think\exception\ValidateException;
@@ -75,6 +75,13 @@ class ScmDistribution extends Scm
      * @access protected
      */
     protected $_item = null;
+
+    /**
+     * 库存日志模型对象
+     * @var object
+     * @access protected
+     */
+    protected $_stock_log = null;
     /**
      * 商品条形码模型对象
      * @var object
@@ -121,6 +128,7 @@ class ScmDistribution extends Scm
         $this->_new_order = new NewOrder();
         $this->_item_platform_sku = new ItemPlatformSku();
         $this->_item = new Item();
+        $this->_stock_log = new StockLog();
         $this->_new_order_process = new NewOrderProcess();
         $this->_product_bar_code_item = new ProductBarCodeItem();
         $this->_work_order_measure = new WorkOrderMeasure();
@@ -577,6 +585,7 @@ class ScmDistribution extends Scm
 
         $res = false;
         $this->_item->startTrans();
+        $this->_stock_log->startTrans();
         $this->_new_order_process->startTrans();
         $this->_new_order_item_process->startTrans();
         $this->_product_bar_code_item->startTrans();
@@ -594,12 +603,35 @@ class ScmDistribution extends Scm
                 //获取true_sku
                 $true_sku = $this->_item_platform_sku->getTrueSku($item_option_info['sku'], $item_process_info['site']);
 
+                //获取配货占用库存
+                $item_before = $this->_item
+                    ->field('distribution_occupy_stock')
+                    ->where(['sku' => $true_sku])
+                    ->find()
+                ;
+
                 //增加配货占用库存
                 $this->_item
                     ->where(['sku'=>$true_sku])
                     ->inc('distribution_occupy_stock', 1)
                     ->update()
                 ;
+
+                //记录库存日志
+                $this->_stock_log->setData([
+                    'type'                      => 2,
+                    'site'                      => $item_process_info['site'],
+                    'modular'                   => 2,
+                    'change_type'               => 4,
+                    'source'                    => 2,
+                    'sku'                       => $true_sku,
+                    'number_type'               => 2,
+                    'order_number'              => $item_order_number,
+                    'distribution_stock_before' => $item_before['distribution_occupy_stock'],
+                    'distribution_stock_change' => -1,
+                    'create_person'             => $this->auth->nickname,
+                    'create_time'               => time()
+                ]);
 
                 //根据处方类型字段order_prescription_type(现货处方镜、定制处方镜)判断是否需要配镜片
                 if(in_array($item_process_info['order_prescription_type'],[2,3])){
@@ -650,23 +682,27 @@ class ScmDistribution extends Scm
             ;
 
             $this->_item->commit();
+            $this->_stock_log->commit();
             $this->_new_order_process->commit();
             $this->_new_order_item_process->commit();
             $this->_product_bar_code_item->commit();
         } catch (ValidateException $e) {
             $this->_item->rollback();
+            $this->_stock_log->rollback();
             $this->_new_order_process->rollback();
             $this->_new_order_item_process->rollback();
             $this->_product_bar_code_item->rollback();
             $this->error($e->getMessage(), [], 406);
         } catch (PDOException $e) {
             $this->_item->rollback();
+            $this->_stock_log->rollback();
             $this->_new_order_process->rollback();
             $this->_new_order_item_process->rollback();
             $this->_product_bar_code_item->rollback();
             $this->error($e->getMessage(), [], 407);
         } catch (Exception $e) {
             $this->_item->rollback();
+            $this->_stock_log->rollback();
             $this->_new_order_process->rollback();
             $this->_new_order_item_process->rollback();
             $this->_product_bar_code_item->rollback();
@@ -1039,6 +1075,9 @@ class ScmDistribution extends Scm
             ];
 
             $this->_new_order_item_process->startTrans();
+            $this->_item->startTrans();
+            $this->_item_platform_sku->startTrans();
+            $this->_stock_log->startTrans();
             try {
                 //子订单状态回退
                 $this->_new_order_item_process
@@ -1046,19 +1085,86 @@ class ScmDistribution extends Scm
                     ->isUpdate(true, ['id'=>$item_process_info['id']])
                     ->save(['distribution_status'=>$status_arr[$reason]['status']])
                 ;
+
+                //质检拒绝：镜架报损，扣减可用库存、配货占用、总库存、虚拟仓库存
+                if(2 == $reason){
+                    //仓库sku、库存
+                    $platform_info = $this->_item_platform_sku
+                        ->field('sku,stock')
+                        ->where(['platform_sku'=>$item_process_info['sku'], 'platform_type' => $item_process_info['site']])
+                        ->find()
+                    ;
+                    $true_sku = $platform_info['sku'];
+
+                    //检验库存
+                    $stock_arr = $this->_item
+                        ->where(['sku'=>$true_sku])
+                        ->field('stock,occupy_stock,distribution_occupy_stock')
+                        ->find()
+                    ;
+
+                    //扣减可用库存、配货占用、总库存
+                    $this->_item
+                        ->where(['sku'=>$true_sku])
+                        ->dec('available_stock', 1)
+                        ->dec('distribution_occupy_stock', 1)
+                        ->dec('stock', 1)
+                        ->update()
+                    ;
+
+                    //扣减虚拟仓库存
+                    $this->_item_platform_sku
+                        ->where(['sku' => $true_sku, 'platform_type' => $item_process_info['site']])
+                        ->dec('stock', 1)
+                        ->update();
+
+                    //记录库存日志
+                    $this->_stock_log->setData([
+                        'type'                      => 2,
+                        'site'                      => $item_process_info['site'],
+                        'modular'                   => 3,
+                        'change_type'               => 5,
+                        'source'                    => 2,
+                        'sku'                       => $true_sku,
+                        'number_type'               => 2,
+                        'order_number'              => $item_order_number,
+                        'available_stock_before'    => $stock_arr['occupy_stock'],
+                        'available_stock_change'    => -1,
+                        'distribution_stock_before' => $stock_arr['distribution_occupy_stock'],
+                        'distribution_stock_change' => -1,
+                        'stock_before'              => $stock_arr['stock'],
+                        'stock_change'              => -1,
+                        'fictitious_before'         => $platform_info['stock'],
+                        'fictitious_change'         => -1,
+                        'create_person'             => $this->auth->nickname,
+                        'create_time'               => time()
+                    ]);
+                }
                 
                 //记录日志
                 DistributionLog::record($this->auth,$item_process_info['id'],6,$status_arr[$reason]['name']);
 
                 $this->_new_order_item_process->commit();
+                $this->_item->commit();
+                $this->_item_platform_sku->commit();
+                $this->_stock_log->commit();
             } catch (ValidateException $e) {
                 $this->_new_order_item_process->rollback();
+                $this->_item->rollback();
+                $this->_item_platform_sku->rollback();
+                $this->_stock_log->rollback();
                 $this->error($e->getMessage(), [], 406);
             } catch (PDOException $e) {
                 $this->_new_order_item_process->rollback();
+                $this->_item->rollback();
+                $this->_item_platform_sku->rollback();
+                $this->_stock_log->rollback();
                 $this->error($e->getMessage(), [], 407);
             } catch (Exception $e) {
                 $this->_new_order_item_process->rollback();
+                $this->_item->rollback();
+                $this->_item_platform_sku->rollback();
+                $this->_stock_log->rollback();
                 $this->error($e->getMessage(), [], 408);
             }
             $this->success('操作成功', [], 200);
@@ -1681,8 +1787,9 @@ class ScmDistribution extends Scm
             $this->success('审单已通过，请勿重复操作！', [], 200);
         }
 
-        $result = false;
         $this->_item->startTrans();
+        $this->_item_platform_sku->startTrans();
+        $this->_stock_log->startTrans();
         $this->_stock_house->startTrans();
         $this->_new_order_process->startTrans();
         $this->_new_order_item_process->startTrans();
@@ -1690,7 +1797,10 @@ class ScmDistribution extends Scm
             $result = $this->_new_order_process->allowField(true)->isUpdate(true, ['order_id' => $order_id])->save($param);
             if (false !== $result){
                 //审单通过和拒绝都影响库存
-                $item_info = $this->_new_order_item_process->field('sku,site')->where(['order_id'=>$order_id])->select();
+                $item_info = $this->_new_order_item_process
+                    ->field('sku,site,item_order_number')
+                    ->where(['order_id'=>$order_id])
+                    ->select();
                 if (2 == $check_status) {
                     //审单拒绝，回退合单状态
                     $this->_new_order_process->allowField(true)->isUpdate(true, ['order_id' => $order_id])->save(['combine_status'=>0,'combine_time'=>null]);
@@ -1709,8 +1819,13 @@ class ScmDistribution extends Scm
 
                         //扣减占用库存、配货占用、总库存、虚拟仓库存
                         foreach($item_info as $key => $value){
-                            //仓库sku
-                            $true_sku = $this->_item_platform_sku->getTrueSku($value['sku'], $value['site']);
+                            //仓库sku、库存
+                            $platform_info = $this->_item_platform_sku
+                                ->field('sku,stock')
+                                ->where(['platform_sku'=>$value['sku'], 'platform_type' => $value['site']])
+                                ->find()
+                            ;
+                            $true_sku = $platform_info['sku'];
 
                             //检验库存
                             $stock_arr = $this->_item
@@ -1718,16 +1833,11 @@ class ScmDistribution extends Scm
                                 ->field('stock,occupy_stock,distribution_occupy_stock')
                                 ->find()
                             ;
-                            $stock_arr = $stock_arr ? $stock_arr->toArray() : [];
-                            $stock = $this->_item->where(['sku'=>$true_sku])->value('stock');
-                            if ( in_array(0,$stock_arr) || empty($stock)){
-                                throw new Exception($value['sku'].':库存不足');
-                            }
 
-                            //扣减占用库存、配货占用、总库存
+                            //扣减可用库存、配货占用、总库存
                             $this->_item
                                 ->where(['sku'=>$true_sku])
-                                ->dec('occupy_stock', 1)
+                                ->dec('available_stock', 1)
                                 ->dec('distribution_occupy_stock', 1)
                                 ->dec('stock', 1)
                                 ->update()
@@ -1738,6 +1848,28 @@ class ScmDistribution extends Scm
                                 ->where(['sku' => $true_sku, 'platform_type' => $value['site']])
                                 ->dec('stock', 1)
                                 ->update();
+
+                            //记录库存日志
+                            $this->_stock_log->setData([
+                                'type'                      => 2,
+                                'site'                      => $value['site'],
+                                'modular'                   => 4,
+                                'change_type'               => 7,
+                                'source'                    => 2,
+                                'sku'                       => $true_sku,
+                                'number_type'               => 2,
+                                'order_number'              => $value['item_order_number'],
+                                'available_stock_before'       => $stock_arr['occupy_stock'],
+                                'available_stock_change'       => -1,
+                                'distribution_stock_before' => $stock_arr['distribution_occupy_stock'],
+                                'distribution_stock_change' => -1,
+                                'stock_before'              => $stock_arr['stock'],
+                                'stock_change'              => -1,
+                                'fictitious_before'         => $platform_info['stock'],
+                                'fictitious_change'          => -1,
+                                'create_person'             => $this->auth->nickname,
+                                'create_time'               => time()
+                            ]);
                         }
                     }
                 } else {
@@ -1766,27 +1898,55 @@ class ScmDistribution extends Scm
                             ->dec('stock', 1)
                             ->update()
                         ;
+
+                        //记录库存日志
+                        $this->_stock_log->setData([
+                            'type'                      => 2,
+                            'site'                      => $value['site'],
+                            'modular'                   => 4,
+                            'change_type'               => 6,
+                            'source'                    => 2,
+                            'sku'                       => $true_sku,
+                            'number_type'               => 2,
+                            'order_number'              => $value['item_order_number'],
+                            'occupy_stock_before'       => $stock_arr['occupy_stock'],
+                            'occupy_stock_change'       => -1,
+                            'distribution_stock_before' => $stock_arr['distribution_occupy_stock'],
+                            'distribution_stock_change' => -1,
+                            'stock_before'              => $stock_arr['stock'],
+                            'stock_change'              => -1,
+                            'create_person'             => $this->auth->nickname,
+                            'create_time'               => time()
+                        ]);
                     }
                 }
             }
             $this->_item->commit();
+            $this->_item_platform_sku->commit();
+            $this->_stock_log->commit();
             $this->_stock_house->commit();
             $this->_new_order_process->commit();
             $this->_new_order_item_process->commit();
         } catch (ValidateException $e) {
             $this->_item->rollback();
+            $this->_item_platform_sku->rollback();
+            $this->_stock_log->rollback();
             $this->_stock_house->rollback();
             $this->_new_order_process->rollback();
             $this->_new_order_item_process->rollback();
             $this->error($e->getMessage(), [], 406);
         } catch (PDOException $e) {
             $this->_item->rollback();
+            $this->_item_platform_sku->rollback();
+            $this->_stock_log->rollback();
             $this->_stock_house->rollback();
             $this->_new_order_process->rollback();
             $this->_new_order_item_process->rollback();
             $this->error($e->getMessage(), [], 407);
         } catch (Exception $e) {
             $this->_item->rollback();
+            $this->_item_platform_sku->rollback();
+            $this->_stock_log->rollback();
             $this->_stock_house->rollback();
             $this->_new_order_process->rollback();
             $this->_new_order_item_process->rollback();

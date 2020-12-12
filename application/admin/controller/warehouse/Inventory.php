@@ -1738,7 +1738,7 @@ class Inventory extends Backend
                             'fictitious_before'         => $warehouse_original_info['stock'],
                             'fictitious_change'         => $original_number,
                             'create_person'             => session('admin.nickname'),
-                            'create_time'               => date('Y-m-d H:i:s')
+                            'create_time'               => time()
                         ];
                     }
 
@@ -1777,7 +1777,7 @@ class Inventory extends Backend
                             'fictitious_before'         => $warehouse_change_info['stock'],
                             'fictitious_change'         => -$change_number,
                             'create_person'             => session('admin.nickname'),
-                            'create_time'               => date('Y-m-d H:i:s')
+                            'create_time'               => time()
                         ];
                     }
                 } else { //子单状态是未配货
@@ -1813,7 +1813,7 @@ class Inventory extends Backend
                             'fictitious_before'         => $warehouse_original_info['stock'],
                             'fictitious_change'         => $original_number,
                             'create_person'             => session('admin.nickname'),
-                            'create_time'               => date('Y-m-d H:i:s')
+                            'create_time'               => time()
                         ];
                     }
 
@@ -1849,7 +1849,7 @@ class Inventory extends Backend
                             'fictitious_before'         => $warehouse_change_info['stock'],
                             'fictitious_change'         => -$change_number,
                             'create_person'             => session('admin.nickname'),
-                            'create_time'               => date('Y-m-d H:i:s')
+                            'create_time'               => time()
                         ];
                     }
                 }
@@ -2080,7 +2080,7 @@ class Inventory extends Backend
                         'fictitious_before'         => $warehouse_original_info['stock'],
                         'fictitious_change'         => $original_number,
                         'create_person'             => session('admin.nickname'),
-                        'create_time'               => date('Y-m-d H:i:s')
+                        'create_time'               => time()
                     ]);
                 } else {//子单状态是未配货
                     //增加可用库存,减少占用库存
@@ -2113,7 +2113,7 @@ class Inventory extends Backend
                         'fictitious_before'         => $warehouse_original_info['stock'],
                         'fictitious_change'         => $original_number,
                         'create_person'             => session('admin.nickname'),
-                        'create_time'               => date('Y-m-d H:i:s')
+                        'create_time'               => time()
                     ]);
                 }
 
@@ -2246,28 +2246,26 @@ class Inventory extends Backend
             //sku数量
             $original_number = $v['original_number'];
 
-            //仓库sku
-            $warehouse_original_sku = $_platform_sku->where(['platform_sku'=>$original_sku,'platform_type'=>$order_platform])->value('sku');
+            //仓库sku、库存
+            $warehouse_original_info = $_platform_sku
+                ->field('sku,stock')
+                ->where(['platform_sku'=>$original_sku, 'platform_type' => $order_platform])
+                ->find()
+            ;
+            $warehouse_original_sku = $warehouse_original_info['sku'];
+
+            //获取当前可用库存、总库存
+            $item_before = $_item
+                ->field('available_stock,occupy_stock,stock')
+                ->where(['sku' => $warehouse_original_sku])
+                ->find()
+            ;
 
             //开启事务
             $_item->startTrans();
             $_platform_sku->startTrans();
             $_stock_log->startTrans();
             try {
-                //获取当前可用库存、总库存
-                $item_before = $_item
-                    ->field('available_stock,occupy_stock,stock')
-                    ->where(['sku' => $warehouse_original_sku])
-                    ->find()
-                ;
-
-                //获取当前对应站点虚拟库存
-                $platform_before = $_platform_sku
-                    ->field('stock')
-                    ->where(['sku' => $warehouse_original_sku, 'platform_type' => $order_platform])
-                    ->find()
-                ;
-
                 if (1 == $type) { //赠品
                     //减少可用库存、总库存
                     $_item
@@ -2305,10 +2303,10 @@ class Inventory extends Backend
                     'stock_change'              => 1 == $type ? -$original_number : 0,
                     'occupy_stock_before'       => 2 == $type ? $item_before['occupy_stock'] : 0,
                     'occupy_stock_change'       => 2 == $type ? $original_number : 0,
-                    'fictitious_before'         => $platform_before['stock'],
+                    'fictitious_before'         => $warehouse_original_info['stock'],
                     'fictitious_change'         => -$original_number,
                     'create_person'             => session('admin.nickname'),
-                    'create_time'               => date('Y-m-d H:i:s')
+                    'create_time'               => time()
                 ]);
 
                 $_item->commit();
