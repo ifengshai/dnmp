@@ -102,15 +102,17 @@
             <textarea id="c-problem_desc" class="form-control editor" rows="5" name="row[description]" cols="50" disabled readonly>{$row['description']}</textarea>
         </div>
     </div>
-
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('图片列表')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            {volist name="row['images']" id="vo"}
-            <img src="{$vo}" data-tips-image  alt="" style="width: 15%;height: 90px">
-            {/volist}
+    {if condition="$row['images'] !== null"}
+        <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2">{:__('图片列表')}:</label>
+            <div class="col-xs-12 col-sm-8">
+                {volist name="row['images']" id="vo"}
+                <img src="{$vo}" data-tips-image  alt="" style="width: 15%;height: 90px">
+                {/volist}
+            </div>
         </div>
-    </div>
+    {/if}
+
 
     <div class='caigou ajax-add'>
         <p style="font-size: 16px;text-align: center;"><b>客户邮件记录</b></p>
