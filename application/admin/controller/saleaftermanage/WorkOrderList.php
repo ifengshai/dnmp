@@ -42,6 +42,7 @@ use app\admin\model\AuthGroup;
 class WorkOrderList extends Backend
 {
     protected $noNeedRight = ['getMeasureContent', 'getProblemTypeContent', 'batch_export_xls','getDocumentaryRule'];
+    protected $noNeedLogin = ['batch_export_xls_array'];
     /**
      * WorkOrderList模型对象
      * @var \app\admin\model\saleaftermanage\WorkOrderList
@@ -3577,6 +3578,7 @@ EOF;
 
         $list = $this->model
             ->where($map)
+            ->limit(150)
             ->select();
         $list = collection($list)->toArray();
 
