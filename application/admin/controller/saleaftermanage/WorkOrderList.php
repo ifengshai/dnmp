@@ -42,13 +42,12 @@ use app\admin\model\AuthGroup;
 class WorkOrderList extends Backend
 {
     protected $noNeedRight = ['getMeasureContent','batch_export_xls_bak', 'getProblemTypeContent', 'batch_export_xls','getDocumentaryRule'];
-    protected $noNeedLogin = ['batch_export_xls_array'];
     /**
      * WorkOrderList模型对象
      * @var \app\admin\model\saleaftermanage\WorkOrderList
      */
     protected $model = null;
-
+    protected $noNeedLogin = ['batch_export_xls_array'];
     public function _initialize()
     {
         parent::_initialize();
@@ -3617,11 +3616,6 @@ EOF;
         $customer_problem_classify = $workOrderConfigValue['customer_problem_classify'];
 
 
-
-
-
-
-
         foreach ($list as $key => $value) {
             if ($value['after_user_id']) {
                 $value['after_user_id'] = $users[$value['after_user_id']];
@@ -3740,9 +3734,6 @@ EOF;
             $csv[$key]['integral'] = $value['integral'];
             $csv[$key]['refund_logistics_num'] = $value['refund_logistics_num'];
             $csv[$key]['refund_money'] = $value['refund_money'];
-
-
-
 
             //退款百分比
             if((0<$value['base_grand_total']) && (is_numeric($value['refund_money']))){
