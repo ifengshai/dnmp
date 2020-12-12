@@ -154,7 +154,15 @@ class OcCustomerAfterSalesWorkOrder extends Backend
         foreach ($photo_href as $key=>$item){
             $photo_href[$key]= config('url.zeelool_url').'media/'.$item;
         }
-
+        if ($row['order_type'] ==1){
+            $row['order_type'] = '普通订单';
+        }elseif ($row['order_type'] ==2){
+            $row['order_type'] = '批发';
+        }elseif($row['order_type'] ==3){
+            $row['order_type'] = '网红';
+        }else{
+            $row['order_type'] = '补发';
+        }
         $row['images'] = $photo_href;
 
         $email = Db::table('fa_zendesk')
@@ -177,8 +185,6 @@ class OcCustomerAfterSalesWorkOrder extends Backend
 
         }
         $row['email_message'] = $email;
-
-
         $this->assign('row',$row);
         return $this->view->fetch();
     }
