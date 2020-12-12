@@ -1,7 +1,7 @@
 define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump-to', 'template'], function ($, undefined, Backend, Table, Form, Template) {
     function viewTable(table,value){
         //隐藏、显示列
-        -1 != $.inArray(value,[7,8]) ? table.bootstrapTable('showColumn','stock_house_num') : table.bootstrapTable('hideColumn','stock_house_num');
+        -1 != $.inArray(value,[3,7,8]) ? table.bootstrapTable('showColumn','stock_house_num') : table.bootstrapTable('hideColumn','stock_house_num');
 
         //隐藏、显示搜索及按钮
         $('#stock_house_num').parents('.form-group').hide();
@@ -18,6 +18,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
             $('.btn-batch-printed').removeClass('hide');
             $('.btn-product').removeClass('hide');
         }else if(3 == value){
+            $('#stock_house_num').parents('.form-group').show();
             $('.btn-batch-printed').removeClass('hide');
             $('.btn-lens').removeClass('hide');
         }else if(4 == value){
