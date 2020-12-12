@@ -2226,6 +2226,7 @@ class ScmWarehouse extends Scm
         $this->_in_stock->startTrans();
         $this->_out_stock->startTrans();
         $this->_inventory->startTrans();
+        $this->_stock_log->startTrans();
         $this->_in_stock_item->startTrans();
         $this->_out_stock_item->startTrans();
         $this->_item_platform_sku->startTrans();
@@ -2456,19 +2457,6 @@ class ScmWarehouse extends Scm
                         throw new Exception('同步库存失败,请检查SKU=>' . $v['sku']);
                     }
 
-                    //插入日志表
-                    // $this->_stock_log->setData([
-                    //     'type'                      => 2,
-                    //     'two_type'                  => 5,
-                    //     'sku'                       => $v['sku'],
-                    //     'public_id'                 => $v['inventory_id'],
-                    //     'stock_change'              => $v['error_qty'],
-                    //     'available_stock_change'    => $v['error_qty'],
-                    //     'create_person'             => $this->auth->nickname,
-                    //     'create_time'               => date('Y-m-d H:i:s'),
-                    //     'remark'                    => '出库单减少总库存,减少可用库存'
-                    // ]);
-
                     if ($v['error_qty'] > 0) {
                         //生成入库单
                         $info[$k]['sku'] = $v['sku'];
@@ -2537,6 +2525,7 @@ class ScmWarehouse extends Scm
             $this->_in_stock->commit();
             $this->_out_stock->commit();
             $this->_inventory->commit();
+            $this->_stock_log->commit();
             $this->_in_stock_item->commit();
             $this->_out_stock_item->commit();
             $this->_item_platform_sku->commit();
@@ -2545,6 +2534,7 @@ class ScmWarehouse extends Scm
             $this->_in_stock->rollback();
             $this->_out_stock->rollback();
             $this->_inventory->rollback();
+            $this->_stock_log->rollback();
             $this->_in_stock_item->rollback();
             $this->_out_stock_item->rollback();
             $this->_item_platform_sku->rollback();
@@ -2554,6 +2544,7 @@ class ScmWarehouse extends Scm
             $this->_in_stock->rollback();
             $this->_out_stock->rollback();
             $this->_inventory->rollback();
+            $this->_stock_log->rollback();
             $this->_in_stock_item->rollback();
             $this->_out_stock_item->rollback();
             $this->_item_platform_sku->rollback();
@@ -2563,6 +2554,7 @@ class ScmWarehouse extends Scm
             $this->_in_stock->rollback();
             $this->_out_stock->rollback();
             $this->_inventory->rollback();
+            $this->_stock_log->rollback();
             $this->_in_stock_item->rollback();
             $this->_out_stock_item->rollback();
             $this->_item_platform_sku->rollback();
