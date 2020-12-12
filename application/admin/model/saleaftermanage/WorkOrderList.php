@@ -548,7 +548,7 @@ class WorkOrderList extends Model
             if ($method == 'GET') {
                 $response = $client->request('GET', $url, array('query' => $params));
             } else {
-                $response = $client->request('POST', $url, array('form_params' => $params));
+                $response = $client->request('POST', $url, array('form_params' => []));
             }
             $body = $response->getBody();
             //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$body,FILE_APPEND);
