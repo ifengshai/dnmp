@@ -140,12 +140,12 @@
    
                                 <tr>
                                     <td>镜片类型：</td>
-                                    <td>{$result['lens_name'] ?? $result['index_name']}</td>
+                                    <td>{:$result['lens_name'] ?: $result['index_name']}</td>
                                 </tr>
-                                <!--<tr>
+                                <tr>
                                     <td>镀膜类型：</td>
                                     <td>{$result['coating_name']}</td>
-                                </tr>-->
+                                </tr>
                                
                             </tbody>
                         </table>
