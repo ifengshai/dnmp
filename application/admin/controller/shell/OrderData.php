@@ -366,6 +366,10 @@ class OrderData extends Backend
         $arr['total'] = $options['info_buyRequest']['tmplens']['total'] ?? 0;
         //镜片分类
         $arr['goods_type'] = $options['info_buyRequest']['tmplens']['goods_type'] ?? 0;
+
+        //镜片编码
+        $arr['lens_number'] = $options['info_buyRequest']['tmplens']['lens_number'] ?? 0;
+
         //光度参数
         $arr['od_sph'] = $options_params['od_sph'] ?: '';;
         $arr['os_sph'] = $options_params['os_sph'] ?: '';;
@@ -500,6 +504,8 @@ class OrderData extends Backend
         $arr['total'] = $options['info_buyRequest']['tmplens']['total'] ?? 0;
         //镜片分类
         $arr['goods_type'] = $options['info_buyRequest']['tmplens']['goods_type'] ?? 0;
+        //镜片编码
+        $arr['lens_number'] = $options['info_buyRequest']['tmplens']['lens_number'] ?? 0;
         //光度参数
         $arr['od_sph'] = $options_params['od_sph'] ?: '';;
         $arr['os_sph'] = $options_params['os_sph'] ?: '';;
@@ -626,6 +632,10 @@ class OrderData extends Backend
         $arr['total'] = $options['info_buyRequest']['tmplens']['total'] ?? 0;
         //镜片分类
         $arr['goods_type'] = $options['info_buyRequest']['tmplens']['goods_type'] ?? 0;
+
+        //镜片编码
+        $arr['lens_number'] = $options['info_buyRequest']['tmplens']['lens_number'] ?? 0;
+
         //光度参数
         $arr['od_sph'] = $options_params['od_sph'] ?: '';;
         $arr['os_sph'] = $options_params['os_sph'] ?: '';;
@@ -754,6 +764,9 @@ class OrderData extends Backend
         $arr['total'] = $options['info_buyRequest']['tmplens']['total'] ?? 0;
         //镜片分类
         $arr['goods_type'] = $options['info_buyRequest']['tmplens']['goods_type'] ?? 0;
+
+        //镜片编码
+        $arr['lens_number'] = $options['info_buyRequest']['tmplens']['lens_number'] ?? 0;
         //光度参数
         $arr['od_sph'] = $options_params['od_sph'] ?: '';;
         $arr['os_sph'] = $options_params['os_sph'] ?: '';;
@@ -881,6 +894,9 @@ class OrderData extends Backend
         $arr['total'] = $options['info_buyRequest']['tmplens']['total'] ?? 0;
         //镜片分类
         $arr['goods_type'] = $options['info_buyRequest']['tmplens']['goods_type'] ?? 0;
+
+        //镜片编码
+        $arr['lens_number'] = $options['info_buyRequest']['tmplens']['lens_number'] ?? 0;
         //光度参数
         $arr['od_sph'] = $options_params['od_sph'] ?: '';;
         $arr['os_sph'] = $options_params['os_sph'] ?: '';;
@@ -1016,6 +1032,10 @@ class OrderData extends Backend
         $arr['total'] = $options['info_buyRequest']['tmplens']['total'] ?? 0;
         //镜片分类
         $arr['goods_type'] = $options['info_buyRequest']['tmplens']['goods_type'] ?? 0;
+
+        //镜片编码
+        $arr['lens_number'] = $options['info_buyRequest']['tmplens']['lens_number'] ?? 0;
+
         //光度参数
         $arr['od_sph'] = $options_params['od_sph'] ?: '';;
         $arr['os_sph'] = $options_params['os_sph'] ?: '';;
@@ -1145,6 +1165,10 @@ class OrderData extends Backend
         $arr['total'] = $options['info_buyRequest']['tmplens']['total'] ?? 0;
         //镜片分类
         $arr['goods_type'] = $options['info_buyRequest']['tmplens']['goods_type'] ?? 0;
+
+        //镜片编码
+        $arr['lens_number'] = $options['info_buyRequest']['tmplens']['lens_number'] ?? 0;
+
         //光度参数
         $arr['od_sph'] = $options_params['od_sph'] ?: '';;
         $arr['os_sph'] = $options_params['os_sph'] ?: '';;
@@ -1275,6 +1299,10 @@ class OrderData extends Backend
         $arr['total'] = $options['info_buyRequest']['tmplens']['total'] ?? 0;
         //镜片分类
         $arr['goods_type'] = $options['info_buyRequest']['tmplens']['goods_type'] ?? 0;
+
+        //镜片编码
+        $arr['lens_number'] = $options['info_buyRequest']['tmplens']['lens_number'] ?? 0;
+        
         //光度参数
         $arr['od_sph'] = $options_params['od_sph'] ?: '';;
         $arr['os_sph'] = $options_params['os_sph'] ?: '';;
