@@ -37,10 +37,12 @@ class ThirdApi extends Api
         $verify_sign = hash("sha256", $verify_sign);
         // if($verify_sign == $track_arr['sign']){
         //妥投给maagento接口
+
         if ($track_arr['data']['track']['e'] ==40){
-            $url =  config('url.zeelool_url').'magic/order/updateOrderStatus';
-            $value = array();
-            $this->post_json_data($url,$value);
+            $order_node = Db::name('order_node')->field('site,order_id,order_number,shipment_type,shipment_data_type')->where('track_number', $track_arr['data']['number'])->find();
+            $url = config('url.zeelool_url').'magic/order/updateOrderStatus';
+            $value['increment_id']  = $order_node['order_number'];
+            $this->request_post($url,$value);
         }
         if ($track_arr['event'] != 'TRACKING_STOPPED') {
             // file_put_contents('/www/wwwroot/mojing/runtime/log/track.txt',$track_info."\r\n",FILE_APPEND);
