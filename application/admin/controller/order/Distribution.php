@@ -1448,7 +1448,7 @@ class Distribution extends Backend
     {
         //检测配货状态
         $item_info = $this->model
-            ->field('id,site,sku,distribution_status,abnormal_house_id')
+            ->field('id,site,sku,distribution_status,abnormal_house_id,item_order_number')
             ->where(['id' => $ids])
             ->find();
         empty($item_info) && $this->error('子订单不存在');
