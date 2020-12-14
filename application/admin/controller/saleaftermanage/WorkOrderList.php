@@ -3576,6 +3576,7 @@ EOF;
 
         $list = $this->model
             ->where($map)
+            ->limit(5000)
             ->select();
         $list = collection($list)->toArray();
 
