@@ -577,16 +577,10 @@ class ScmDistribution extends Scm
             }
         }
 
-        //获取订单购买总数
-        // $total_qty_ordered = $this->_new_order
-        //     ->where('id', $item_process_info['order_id'])
-        //     ->value('total_qty_ordered')
-        // ;
-
+        //获取订单购买总数，计算过滤掉取消状态的子单
         $total_qty_ordered = $this->_new_order_item_process
-            ->where('order_id', $item_process_info['order_id'])
-            ->count()
-        ;
+            ->where(['order_id'=> $item_process_info['order_id'], 'distribution_status'=>0])
+            ->count();
 
         $res = false;
         $this->_item->startTrans();
@@ -1336,9 +1330,9 @@ class ScmDistribution extends Scm
         }
 
         //主单表有合单库位ID，查询主单商品总数，与子单合单入库计算数量对比
-        //获取订单购买总数
+        //获取订单购买总数，计算过滤掉取消状态的子单
         $total_qty_ordered = $this->_new_order_item_process
-            ->where('order_id', $item_process_info['order_id'])
+            ->where(['order_id'=> $item_process_info['order_id'], 'distribution_status'=>0])
             ->count();
         $count = $this->_new_order_item_process
             ->where(['distribution_status'=>['in',[0,8]],'order_id'=>$item_process_info['order_id']])
@@ -1734,6 +1728,8 @@ class ScmDistribution extends Scm
         empty($order_id) && $this->error(__('主订单ID不能为空'), [], 403);
         $check_status = $this->request->request('check_status');
         empty($check_status) && $this->error(__('审单类型不能为空'), [], 403);
+        $create_person = $this->request->request('create_person');
+        empty($create_person) && $this->error(__('审单操作人不能为空'), [], 403);
         !in_array($check_status, [1, 2]) && $this->error(__('审单类型错误'), [], 403);
         $param = [];
         $param['check_status'] = $check_status;
@@ -1849,7 +1845,7 @@ class ScmDistribution extends Scm
                                 'stock_change'              => -1,
                                 'fictitious_before'         => $platform_info['stock'],
                                 'fictitious_change'          => -1,
-                                'create_person'             => $this->auth->nickname,
+                                'create_person'             => $create_person,
                                 'create_time'               => time()
                             ]);
                         }
@@ -1897,7 +1893,7 @@ class ScmDistribution extends Scm
                             'distribution_stock_change' => -1,
                             'stock_before'              => $stock_arr['stock'],
                             'stock_change'              => -1,
-                            'create_person'             => $this->auth->nickname,
+                            'create_person'             => $create_person,
                             'create_time'               => time()
                         ]);
                     }
