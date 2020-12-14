@@ -300,16 +300,27 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                 }
 
             });
-            $("#change_value").change(function () {
-                var opt = $("#change_value").val();
-                if (opt == 1) {
-                    $("input[type='checkbox']").prop('checked', true);
-                    $(".btn-selected").attr("data-value", 2);
-                } else {
-                    $("input[type='checkbox']").prop('checked', false);
-                    $(".btn-selected").attr("data-value", 1);
-                }
+            $('#checkd').click(function() {
+                    var isChecked = $('#checkd').is(':checked');
+                    if (isChecked == true){
+                        $("input[type='checkbox']").prop('checked', true);
+                        $(".btn-selected").attr("data-value", 2);
+                    }else{
+                        $("input[type='checkbox']").prop('checked', false);
+                        $(".btn-selected").attr("data-value", 1);
+                    }
+
             });
+            // $("#change_value").change(function () {
+            //     var opt = $("#change_value").val();
+            //     if (opt == 1) {
+            //         $("input[type='checkbox']").prop('checked', true);
+            //         $(".btn-selected").attr("data-value", 2);
+            //     } else {
+            //         $("input[type='checkbox']").prop('checked', false);
+            //         $(".btn-selected").attr("data-value", 1);
+            //     }
+            // });
         },
 
         add: function () {

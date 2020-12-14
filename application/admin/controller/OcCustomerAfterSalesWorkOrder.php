@@ -160,10 +160,27 @@ class OcCustomerAfterSalesWorkOrder extends Backend
             $data['increment_id'] = $item['increment_id'];
             $data['customer_id'] = $item['customer_id'];
             $data['problem_type'] = $item['problem_type'];
+
+
             $data['concrete_problem'] = $item['concrete_problem'];
             $data['order_type'] = $item['order_type'];
+//            { 1: '普通订单', 2: '批发', 3: '网红',4:'补发'},
+            if ($item['order_type'] ==1){
+                $data['order_type'] = '普通订单';
+            }elseif ($data['order_type'] ==2){
+                $data['order_type'] = '批发';
+            }elseif($data['order_type'] ==3){
+                $data['order_type'] = '网红';
+            }else{
+                $data['order_type'] = '补发';
+            }
             $data['good_skus'] = $item['good_skus'];
-            $data['images'] = explode(',',$item['images']);
+            if (!empty($item['images'])){
+                $data['images'] = explode(',',$item['images']);
+            }else{
+                $data['images'] = null;
+            }
+
             $data['description'] = $item['description'];
 
             if ($item['ze_status'] == 1){
@@ -184,9 +201,9 @@ class OcCustomerAfterSalesWorkOrder extends Backend
             $data['email_message'][$key]['nickname'] = $item['nickname'];
             $data['email_message'][$key]['create_time'] = $item['create_time'];
             $data['email_message'][$key]['update_time'] = $item['update_time'];
-
-
         }
+
+       
         $this->assign('row',$data);
         return $this->view->fetch();
     }
