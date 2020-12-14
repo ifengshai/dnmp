@@ -181,7 +181,7 @@ class OrderData extends Backend
                                     $params['customer_lastname'] = $v['customer_lastname'];
                                     $params['taxno'] = $v['taxno'];
                                     $params['base_to_order_rate'] = $v['base_to_order_rate'];
-                                    $params['mw_rewardpoint'] = $v['mw_rewardpoint'];
+                                    // $params['mw_rewardpoint'] = $v['mw_rewardpoint'];
                                     $params['mw_rewardpoint_discount'] = $v['mw_rewardpoint_discount'];
                                     $params['base_shipping_amount'] = $v['base_shipping_amount'];
                                     $params['created_at'] = strtotime($v['created_at']) + 28800;
@@ -218,7 +218,7 @@ class OrderData extends Backend
                                     $params['customer_lastname'] = $v['customer_lastname'];
                                     $params['taxno'] = $v['taxno'];
                                     $params['base_to_order_rate'] = $v['base_to_order_rate'];
-                                    $params['mw_rewardpoint'] = $v['mw_rewardpoint'];
+                                    // $params['mw_rewardpoint'] = $v['mw_rewardpoint'];
                                     $params['mw_rewardpoint_discount'] = $v['mw_rewardpoint_discount'];
                                     $params['base_shipping_amount'] = $v['base_shipping_amount'];
                                     $params['base_shipping_amount'] = $v['base_shipping_amount'];
