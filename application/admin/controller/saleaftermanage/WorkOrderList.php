@@ -1033,12 +1033,6 @@ class WorkOrderList extends Backend
                     $this->model->validateFailException(true)->validate($validate);
                 }
 
-                //工单是否存在
-                if($ids){
-                    $row = $this->model->get($ids);
-                    !$row && $this->error(__('No Results were found'));
-                }
-
                 $platform_order = trim($params['platform_order']);//订单号
                 $measure_choose_id = $params['measure_choose_id'] ? array_unique(array_filter($params['measure_choose_id'])) : [];//措施ID数组
                 $work_type = $params['work_type'];//工单类型：1客服 2仓库
@@ -1093,6 +1087,13 @@ class WorkOrderList extends Backend
                 }else{
                     //校验工单措施
                     empty($measure_choose_id) && empty($item_order_info) && $this->error("请选择实施措施");
+
+                    //工单是否存在
+                    $row = $this->model->get($ids);
+                    !$row && $this->error(__('No Results were found'));
+
+                    //跟单人ID
+                    $params['after_user_id'] = $admin_id;
                 }
 
                 //主单和子单全部的措施id
