@@ -110,22 +110,23 @@ class OrderData extends Backend
                         $key = $message->key;
                         //根据kafka中不同key，调用对应方法传递处理数据
                         //对该条message进行处理，比如用户数据同步， 记录日志。
+                        dump($payload);
                         if ($payload) {
                             //根据库名判断站点
                             switch ($payload['database']) {
-                                case 'zeelool':
+                                case 'zeelool_test':
                                     $site = 1;
                                     break;
-                                case 'voogueme':
+                                case 'vuetest_voogueme':
                                     $site = 2;
                                     break;
-                                case 'nihao':
+                                case 'nihao_test':
                                     $site = 3;
                                     break;
                                 case 'meeloog':
                                     $site = 4;
                                     break;
-                                case 'wesee':
+                                case 'wesee_test':
                                     $site = 5;
                                     break;
                                 case 'zeelool_es':
