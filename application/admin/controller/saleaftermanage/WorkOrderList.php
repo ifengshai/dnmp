@@ -1319,6 +1319,13 @@ class WorkOrderList extends Backend
                     }
                 }
 
+                if('360000212' == $platform_order){
+                    print_r($params['is_check']);
+                    print_r('------------');
+                    print_r($params['assign_user_id']);
+                    exit;
+                }
+
                 //没有审核人则不需要审核
                 if (!$params['assign_user_id']) {
                     $params['is_check'] = 0;
