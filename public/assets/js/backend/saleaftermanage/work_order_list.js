@@ -347,6 +347,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                         } else {
                                             return false;
                                         }
+                                        return true;
                                     }
                                 }
                             ],
