@@ -3576,7 +3576,7 @@ EOF;
 
         $list = $this->model
             ->where($map)
-            ->limit(10000)
+            ->limit(5000)
             ->order('id desc')
             ->select();
         $list = collection($list)->toArray();
