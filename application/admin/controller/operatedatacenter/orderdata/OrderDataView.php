@@ -29,13 +29,13 @@ class OrderDataView extends Backend
     public function index()
     {
         //订单数
-        $order_num = $this->zeeloolOperate->getOrderNum(1);
+        $order_num = $this->zeeloolOperate->getOrderNum();
         //客单价
-        $order_unit_price = $this->zeeloolOperate->getOrderUnitPrice(1);
+        $order_unit_price = $this->zeeloolOperate->getOrderUnitPrice();
         //销售额
-        $sales_total_money = $this->zeeloolOperate->getSalesTotalMoney(1);
+        $sales_total_money = $this->zeeloolOperate->getSalesTotalMoney();
         //邮费
-        $shipping_total_money = $this->zeeloolOperate->getShippingTotalMoney(1);
+        $shipping_total_money = $this->zeeloolOperate->getShippingTotalMoney();
         //补发单订单数
         $replacement_order_num = $this->zeeloolOperate->getReplacementOrderNum();
         //补发单销售额

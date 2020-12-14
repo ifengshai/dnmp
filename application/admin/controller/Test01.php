@@ -298,4 +298,93 @@ class Test01 extends Backend
             }
         }
     }
+
+    public function test200()
+    {
+        $yes_date = date("Y-m-d",strtotime("-1 day"));
+        $yestime_where1[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '" . $yes_date . "'")];
+        dump(Db::connect('database.db_zeelool')->table('customer_entity')->where($yestime_where1)->count());
+        dump(Db::connect('database.db_zeelool')->getLastSql());
+
+        $seven_start = date("Y-m-d", strtotime("-7 day"));
+        $seven_end = date("Y-m-d 23:59:59", strtotime("-1 day"));
+        $sev_where1['updated_at'] = ['between', [$seven_start, $seven_end]];
+        dump(Db::connect('database.db_zeelool')->table('customer_entity')->where($sev_where1)->count());
+        dump(Db::connect('database.db_zeelool')->getLastSql());
+
+    }
+
+    public function test201()
+    {
+
+        $model = Db::connect('database.db_zeelool');
+
+        $createat = '2020-12-09 00:00:00 - 2020-12-09 23:59:59';
+        $createat = explode(' ', $createat);
+        $sku = 'ZVFP102705-04';
+        $map['sku'] = ['like', $sku . '%'];
+        $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        $map['a.created_at'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]]];
+        $map['a.order_type'] = ['=', 1];
+        $total = $model->table('sales_flat_order')
+            ->where($map)
+            ->alias('a')
+            ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
+            ->group('order_id')
+            ->field('entity_id,sku,a.created_at,a.order_type,a.status')
+            ->count();
+        $nopay_jingpian_glass = $model
+            ->table('sales_flat_order')
+            ->alias('a')
+            ->join(['sales_flat_order_item_prescription' => 'b'], 'a.entity_id=b.order_id')
+            ->where('a.created_at', 'between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]])
+            ->where('sku', 'like', $sku . '%')
+            ->where('a.order_type', '=', 1)
+            ->where('b.coatiing_price', '=', 0)
+            ->where('a.status', 'in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal'])
+            ->where('b.index_price', '=', 0)
+            ->group('order_id')
+            ->count();
+        $only_one_glass_order_list = $model->table('sales_flat_order')
+            ->where($map)
+            ->alias('a')
+            ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
+            ->group('order_id')
+            ->field('entity_id,sku,a.created_at,a.order_type,a.status,order_id,sum(qty_ordered) as all_qty_ordered')
+            ->select();
+        dump($only_one_glass_order_list);
+        dump($total);
+        dump($nopay_jingpian_glass);
+        dump($model->getLastSql());
+    }
+
+    //商品转化率的销售副数 销量统计的销量
+    public function test300()
+    {
+        $createat = '2020-12-09 00:00:00 - 2020-12-09 23:59:59';
+        $createat = explode(' ',$createat);
+        $map['a.created_at'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3]  . ' ' . $createat[4]]];
+        $map['sku'] = ['in', ['VHP0189-01']];
+        $model = Db::connect('database.db_zeelool');
+        $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
+        $res = $model->table('sales_flat_order')
+            ->where($map)
+            ->alias('a')
+            ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
+            ->group('sku')
+            ->order('num desc')
+            ->column('round(sum(b.qty_ordered)) as num', 'trim(sku)');
+        dump($model->getLastSql());
+        $data = '2020-12-09';
+        $time_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $data . "'")];
+        $z_sku_list= $model
+            ->table('sales_flat_order_item')
+            ->where('sku', 'like', 'VHP0189-01' . '%')
+            ->where($time_where1)
+            ->sum('qty_ordered');
+        dump($model->getLastSql());
+        dump($res);
+        dump($z_sku_list);
+    }
+
 }

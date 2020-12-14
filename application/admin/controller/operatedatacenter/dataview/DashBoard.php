@@ -71,7 +71,8 @@ class DashBoard extends Backend
         }
         // dump(collection($magentoplatformarr)->toArray());
         //默认进入页面是z站的数据
-        $arr = Cache::get('Operatedatacenter_dataviews' . 1 . md5(serialize('index')));
+        // $arr = Cache::get('Operatedatacenter_dataviews' . 1 . md5(serialize('index')));
+        $arr = [];
         if ($arr) {
             $this->view->assign($arr);
         } else {
