@@ -42,7 +42,7 @@ class ThirdApi extends Api
         //妥投给maagento接口
         if ($track_arr['data']['track']['e'] ==40){
             $order_node = Db::name('order_node')->field('site,order_id,order_number,shipment_type,shipment_data_type')->where('track_number', $track_arr['data']['number'])->find();
-            $url = C('url.zeelool_url').'magic/order/updateOrderStatus';
+            $url = config('url.zeelool_url').'magic/order/updateOrderStatus';
             $value['increment_id']  = $order_node['order_number'];
             $this->request_post($url,$value);
         }
