@@ -110,7 +110,6 @@ class OrderData extends Backend
                         $key = $message->key;
                         //根据kafka中不同key，调用对应方法传递处理数据
                         //对该条message进行处理，比如用户数据同步， 记录日志。
-                        dump($payload);
                         if ($payload) {
                             //根据库名判断站点
                             switch ($payload['database']) {
@@ -146,11 +145,15 @@ class OrderData extends Backend
 
                                     $order_ids = $this->order->where('site=' . $site . ' and increment_id=' . $v['increment_id'])->value('id');
                                     $order_ids2 = $this->order->where('site=' . $site . ' and entity_id=' . $v['entity_id'])->value('id');
-                                    if ($order_ids) {
+                                    if ($order_ids || $order_ids2) {
                                         $this->order->where('site=' . $site . ' and increment_id=' . $v['increment_id'])->delete();
                                         $this->order->where('site=' . $site . ' and entity_id=' . $v['entity_id'])->delete();
+                                        $this->order->where('id=' . $order_ids)->delete();
+                                        $this->order->where('id=' . $order_ids2)->delete();
                                         $this->orderprocess->where('site=' . $site . ' and increment_id=' . $v['increment_id'])->delete();
                                         $this->orderprocess->where('site=' . $site . ' and entity_id=' . $v['entity_id'])->delete();
+                                        $this->orderprocess->where('id=' . $order_ids)->delete();
+                                        $this->orderprocess->where('id=' . $order_ids2)->delete();
                                         //删除子订单表
                                         $this->orderitemoption->where('site=' . $site . ' and order_id=' . $order_ids)->delete();
                                         $this->orderitemprocess->where('site=' . $site . ' and order_id=' . $order_ids)->delete();
@@ -186,7 +189,6 @@ class OrderData extends Backend
                                     $params['base_shipping_amount'] = $v['base_shipping_amount'];
                                     $params['created_at'] = strtotime($v['created_at']) + 28800;
                                     $params['updated_at'] = strtotime($v['updated_at']) + 28800;
-                                    dump($params);
                                     //插入订单主表
                                     $order_id = $this->order->insertGetId($params);
                                     $order_params[$k]['site'] = $site;
@@ -224,7 +226,7 @@ class OrderData extends Backend
                                     $params['base_shipping_amount'] = $v['base_shipping_amount'];
                                     $params['base_shipping_amount'] = $v['base_shipping_amount'];
                                     $params['updated_at'] = strtotime($v['updated_at']) + 28800;
-                                   
+
                                     $this->order->where(['entity_id' => $v['entity_id'], 'site' => $site])->update($params);
                                 }
                             }
