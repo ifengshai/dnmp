@@ -3576,7 +3576,7 @@ EOF;
 
         $list = $this->model
             ->where($map)
-            ->limit(5000)
+            ->limit(7000)
             ->order('id desc')
             ->select();
         $list = collection($list)->toArray();
@@ -3654,6 +3654,7 @@ EOF;
                     $work_platform = 'zeelool';
                     break;
             }
+            $csv[$key]['id'] = $value['id'];
             $csv[$key]['work_platform'] = $work_platform;
             $csv[$key]['work_type'] =$value['work_type'] == 1 ? '客服工单' : '仓库工单';
             $csv[$key]['platform_order'] =$value['platform_order'];
@@ -3778,7 +3779,7 @@ EOF;
 
 
         $headlist = [
-            '工单平台', '工单类型', '平台订单号', '客户邮箱', '订单金额', '订单支付的货币类型', '订单的支付方式',
+            'ID','工单平台', '工单类型', '平台订单号', '客户邮箱', '订单金额', '订单支付的货币类型', '订单的支付方式',
             '订单中的sku', '对应商品sku', '工单状态','问题大分类',
             '问题类型', '工单问题描述', '工单图片', '工单创建人', '工单是否需要审核',
             '工单是否需要审核', '实际审核人', '审核人备注', '新建状态时间', '开始走流程时间',
@@ -3789,7 +3790,7 @@ EOF;
 
         ];
         $path = "/uploads/";
-        $fileName = '工单数据 - 12-12';
+        $fileName = '工单数据 - 12-14';
         Excel::writeCsv($csv, $headlist, $path . $fileName);
     }
 
