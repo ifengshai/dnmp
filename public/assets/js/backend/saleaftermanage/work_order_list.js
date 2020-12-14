@@ -342,12 +342,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     callback: function (data) {
                                     },
                                     visible: function (row) {
-                                        /*if (row.work_status == 1 && row.create_user_id == Config.userid) {
+                                        if (row.work_status == 1 && row.create_user_id == Config.userid) {
                                             return true;
                                         } else {
                                             return false;
-                                        }*/
-                                        return true;
+                                        }
                                     }
                                 }
                             ],
