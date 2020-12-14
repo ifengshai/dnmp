@@ -33,8 +33,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {
                             field:'site',
                             title:__('站点类型'),
-                            searchList: { 1: 'zeelool', 2: 'Voogueme', 3: 'Nihao', 4: 'Meeloog', 5: 'Wesee' , 8: 'Amazon', 9: 'Zeelool_es', 10: 'Zeelool_de', 11: 'Zeelool_jp'},
-                            custom: { 1: 'yellow', 2: 'blue', 3: 'success', 4: 'red', 5: 'danger', 8: 'green', 9: 'brown', 10: 'gray', 11: 'purple'},
+                            searchList: { 0: '全部',1: 'zeelool', 2: 'Voogueme', 3: 'Nihao', 4: 'Meeloog', 5: 'Wesee' , 8: 'Amazon', 9: 'Zeelool_es', 10: 'Zeelool_de', 11: 'Zeelool_jp'},
+                            custom: { 0: 'scarlet',1: 'yellow', 2: 'blue', 3: 'success', 4: 'red', 5: 'danger', 8: 'green', 9: 'brown', 10: 'gray', 11: 'purple'},
                             formatter: Table.api.formatter.status
                         },
                         {
