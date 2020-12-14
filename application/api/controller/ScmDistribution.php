@@ -1787,7 +1787,9 @@ class ScmDistribution extends Scm
 
         //检测订单审单状态
         $row = $this->_new_order_process->where(['order_id'=>$order_id])->find();
+        empty($row) && $this->error(__('主订单数据不存在'), [], 403);
         $item_ids = $this->_new_order_item_process->where(['order_id'=>$order_id])->column('id');
+        empty($item_ids) && $this->error(__('子订单数据不存在'), [], 403);
         if (1 == $row['check_status']){
             $this->success('审单已通过，请勿重复操作！', [], 200);
         }
