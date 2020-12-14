@@ -487,6 +487,7 @@ class Instock extends Backend
         $allocated = new \app\admin\model\itemmanage\GoodsStockAllocated;
         $purchase->startTrans();
         $this->purchase->startTrans();
+        (new StockLog())->startTrans();
 
         try {
             $data['create_person'] = session('admin.nickname');
@@ -944,23 +945,27 @@ class Instock extends Backend
             $item->commit();
             $purchase->commit();
             $this->purchase->commit();
+            (new StockLog())->commit();
         } catch (ValidateException $e) {
             $this->model->rollback();
             $item->rollback();
             $purchase->rollback();
             $this->purchase->rollback();
+            (new StockLog())->rollback();
             $this->error($e->getMessage());
         } catch (PDOException $e) {
             $this->model->rollback();
             $item->rollback();
             $purchase->rollback();
             $this->purchase->rollback();
+            (new StockLog())->rollback();
             $this->error($e->getMessage());
         } catch (Exception $e) {
             $this->model->rollback();
             $item->rollback();
             $purchase->rollback();
             $this->purchase->rollback();
+            (new StockLog())->rollback();
             $this->error($e->getMessage());
         }
         if ($res !== false) {
