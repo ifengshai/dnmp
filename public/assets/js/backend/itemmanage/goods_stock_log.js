@@ -66,7 +66,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             field:'source',
                             title:__('操作端'),
                             searchList: { 1: 'PC端', 2: 'PDA'},
-                            custom: { 1: 'yellow', 2: 'blue'},
+                            custom: { 1: 'red', 2: 'blue'},
                             formatter: Table.api.formatter.status
                         },
                         {field: 'stock_before', title: __('总库存变动前'), operate:false},

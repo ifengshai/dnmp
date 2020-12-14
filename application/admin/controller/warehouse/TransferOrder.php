@@ -386,7 +386,10 @@ class TransferOrder extends Backend
                 $this->error('只有待审核状态才能操作！！');
             }
         }
+        $item_platform = new \app\admin\model\itemmanage\ItemPlatformSku();
         $status = input('status');
+        (new StockLog())->startTrans();
+        $item_platform->startTrans();
         $data['status'] = $status;
         Db::startTrans();
         try {
@@ -396,7 +399,7 @@ class TransferOrder extends Backend
             }
             //审核通过
             if ($status == 2) {
-                $item_platform = new \app\admin\model\itemmanage\ItemPlatformSku();
+
                 //审核通过冲减各站虚拟仓库存
                 $where['transfer_order_id'] = ['in', $ids];
                 $list = $this->transferOrderItem->alias('a')->field('a.*,b.call_out_site,b.call_in_site,b.transfer_order_number')->join(['fa_transfer_order' => 'b'], 'a.transfer_order_id=b.id')->where($where)->select();
@@ -410,7 +413,7 @@ class TransferOrder extends Backend
                     if ($v['num'] > $stock) {
                         throw new Exception('id:' . $v['id'] . '|' . $v['sku'] . ':' . '虚拟仓库存不足');
                     }
-                    //减少虚拟库存
+                    //减少调出仓虚拟库存
                     $item_platform->where(['sku' => $v['sku'], 'platform_type' => $v['call_out_site']])->setDec('stock', $v['num']);
                     //插入日志表
                     (new StockLog())->setData([
@@ -469,12 +472,13 @@ class TransferOrder extends Backend
                         //'待入库变化量：正数为加，负数为减'
                         'wait_instock_num_change' => 0,
                         'create_person' => session('admin.nickname'),
-                        'create_time' => date('Y-m-d H:i:s'),
+                        'create_time' => time(),
                         //'关联单号类型：1订单号 2子订单号 3入库单 4出库单 5盘点单 6调拨单'
                         'number_type' => 6,
                     ]);
+
                     $stock_in = $item_platform->where(['sku' => $v['sku'], 'platform_type' => $v['call_in_site']])->value('stock');
-                    //增加虚拟库存
+                    //增加调入仓虚拟库存
                     $item_platform->where(['sku' => $v['sku'], 'platform_type' => $v['call_in_site']])->setInc('stock', $v['num']);
                     //插入日志表
                     (new StockLog())->setData([
@@ -533,21 +537,31 @@ class TransferOrder extends Backend
                         //'待入库变化量：正数为加，负数为减'
                         'wait_instock_num_change' => 0,
                         'create_person' => session('admin.nickname'),
-                        'create_time' => date('Y-m-d H:i:s'),
+                        'create_time' => time(),
                         //'关联单号类型：1订单号 2子订单号 3入库单 4出库单 5盘点单 6调拨单'
                         'number_type' => 6,
                     ]);
+
+                    // throw new Exception("操作失败！！");
                 }
             }
             Db::commit();
+            (new StockLog())->commit();
+            $item_platform->commit();
         } catch (ValidateException $e) {
             Db::rollback();
+            (new StockLog())->rollback();
+            $item_platform->rollback();
             $this->error($e->getMessage());
         } catch (PDOException $e) {
             Db::rollback();
+            (new StockLog())->rollback();
+            $item_platform->rollback();
             $this->error($e->getMessage());
         } catch (Exception $e) {
             Db::rollback();
+            (new StockLog())->rollback();
+            $item_platform->rollback();
             $this->error($e->getMessage());
         }
         $this->success();
