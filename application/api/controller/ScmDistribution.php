@@ -577,16 +577,10 @@ class ScmDistribution extends Scm
             }
         }
 
-        //获取订单购买总数
-        // $total_qty_ordered = $this->_new_order
-        //     ->where('id', $item_process_info['order_id'])
-        //     ->value('total_qty_ordered')
-        // ;
-
+        //获取订单购买总数，计算过滤掉取消状态的子单
         $total_qty_ordered = $this->_new_order_item_process
-            ->where('order_id', $item_process_info['order_id'])
-            ->count()
-        ;
+            ->where(['order_id'=> $item_process_info['order_id'], 'distribution_status'=>0])
+            ->count();
 
         $res = false;
         $this->_item->startTrans();
@@ -1336,9 +1330,9 @@ class ScmDistribution extends Scm
         }
 
         //主单表有合单库位ID，查询主单商品总数，与子单合单入库计算数量对比
-        //获取订单购买总数
+        //获取订单购买总数，计算过滤掉取消状态的子单
         $total_qty_ordered = $this->_new_order_item_process
-            ->where('order_id', $item_process_info['order_id'])
+            ->where(['order_id'=> $item_process_info['order_id'], 'distribution_status'=>0])
             ->count();
         $count = $this->_new_order_item_process
             ->where(['distribution_status'=>['in',[0,8]],'order_id'=>$item_process_info['order_id']])
