@@ -406,56 +406,9 @@ class OrderData extends Backend
          * 4、当cyl<=-4或cyl>=4 或 sph < -8或 sph>8
          */
 
-        if ($arr['index_name'] == '' || $arr['index_name'] == 'Plastic Lenses' ||  $arr['index_name'] == 'Frame Only') {
-            $arr['order_prescription_type'] = 1;
-        }
-
-        if ($arr['prescription_type'] == 'Progressive') {
-            $arr['is_custom_lens'] = 1;
-        }
-
-
-        if (strpos($arr['index_name'], 'Polarized') !== false) {
-            $arr['is_custom_lens'] = 1;
-        }
-
-        if (strpos($arr['index_name'], 'Lens with Color Tint') !== false) {
-            $arr['is_custom_lens'] = 1;
-        }
-
-        //染色
-        if (strpos($arr['index_name'], 'Tinted') !== false) {
-            $arr['is_custom_lens'] = 1;
-        }
-
-        if (strpos($arr['index_name'], 'Color Tint') !== false) {
-            $arr['is_custom_lens'] = 1;
-        }
-
-        if ((float) urldecode($arr['od_cyl']) * 1 <= -4 || (float) urldecode($arr['od_cyl']) * 1 >= 4) {
-            $arr['is_custom_lens'] = 1;
-        }
-
-        if ((float) urldecode($arr['os_cyl']) * 1 <= -4 || (float) urldecode($arr['os_cyl']) * 1 >= 4) {
-            $arr['is_custom_lens'] = 1;
-        }
-        if ((float) urldecode($arr['od_sph']) * 1 < -8 || (float) urldecode($arr['od_sph']) * 1 > 8) {
-            $arr['is_custom_lens'] = 1;
-        }
-
-        if ((float) urldecode($arr['os_sph']) * 1 < -8 || (float) urldecode($arr['os_sph']) * 1 > 8) {
-            $arr['is_custom_lens'] = 1;
-        }
-
-        //定制处方镜
-        if ($arr['is_custom_lens'] == 1) {
-            $arr['order_prescription_type'] = 3;
-        }
-
-        //默认如果不是仅镜架 或定制片 则为现货处方镜
-        if ($arr['order_prescription_type'] != 1 && $arr['order_prescription_type'] != 3) {
-            $arr['order_prescription_type'] = 2;
-        }
+        //判断加工类型
+        $result = $this->set_processing_type($arr);
+        $arr = array_merge($arr, $result);
         return $arr;
     }
 
@@ -537,56 +490,9 @@ class OrderData extends Backend
          * 4、当cyl<=-4或cyl>=4 或 sph < -8或 sph>8
          */
 
-        if ($arr['index_name'] == '' || $arr['index_name'] == 'FRAME ONLY (Plastic Lenses)' ||  $arr['index_name'] == 'Frame Only') {
-            $arr['order_prescription_type'] = 1;
-        }
-
-        if ($arr['prescription_type'] == 'Progressive') {
-            $arr['is_custom_lens'] = 1;
-        }
-
-
-        if (strpos($arr['index_name'], 'Polarized') !== false) {
-            $arr['is_custom_lens'] = 1;
-        }
-
-        if (strpos($arr['index_name'], 'Lens with Color Tint') !== false) {
-            $arr['is_custom_lens'] = 1;
-        }
-
-        //染色
-        if (strpos($arr['index_name'], 'Tinted') !== false) {
-            $arr['is_custom_lens'] = 1;
-        }
-
-        if (strpos($arr['index_name'], 'Color Tint') !== false) {
-            $arr['is_custom_lens'] = 1;
-        }
-
-        if ((float) urldecode($arr['od_cyl']) * 1 <= -4 || (float) urldecode($arr['od_cyl']) * 1 >= 4) {
-            $arr['is_custom_lens'] = 1;
-        }
-
-        if ((float) urldecode($arr['os_cyl']) * 1 <= -4 || (float) urldecode($arr['os_cyl']) * 1 >= 4) {
-            $arr['is_custom_lens'] = 1;
-        }
-        if ((float) urldecode($arr['od_sph']) * 1 < -8 || (float) urldecode($arr['od_sph']) * 1 > 8) {
-            $arr['is_custom_lens'] = 1;
-        }
-
-        if ((float) urldecode($arr['os_sph']) * 1 < -8 || (float) urldecode($arr['os_sph']) * 1 > 8) {
-            $arr['is_custom_lens'] = 1;
-        }
-
-        //定制处方镜
-        if ($arr['is_custom_lens'] == 1) {
-            $arr['order_prescription_type'] = 3;
-        }
-
-        //默认如果不是仅镜架 或定制片 则为现货处方镜
-        if ($arr['order_prescription_type'] != 1 && $arr['order_prescription_type'] != 3) {
-            $arr['order_prescription_type'] = 2;
-        }
+        //判断加工类型
+        $result = $this->set_processing_type($arr);
+        $arr = array_merge($arr, $result);
 
         return $arr;
     }
@@ -665,57 +571,9 @@ class OrderData extends Backend
          * 3、染色镜 镜片类型包含Lens with Color Tint 或 Tinted 或 Color Tint
          * 4、当cyl<=-4或cyl>=4 或 sph < -8或 sph>8
          */
-
-        if ($arr['index_name'] == '' || $arr['index_name'] == 'Plastic Lenses' ||  $arr['index_name'] == 'FRAME ONLY') {
-            $arr['order_prescription_type'] = 1;
-        }
-
-        if ($arr['prescription_type'] == 'Progressive') {
-            $arr['is_custom_lens'] = 1;
-        }
-
-
-        if (strpos($arr['index_name'], 'Polarized') !== false) {
-            $arr['is_custom_lens'] = 1;
-        }
-
-        if (strpos($arr['index_name'], 'Lens with Color Tint') !== false) {
-            $arr['is_custom_lens'] = 1;
-        }
-
-        //染色
-        if (strpos($arr['index_name'], 'Tinted') !== false) {
-            $arr['is_custom_lens'] = 1;
-        }
-
-        if (strpos($arr['index_name'], 'Color Tint') !== false) {
-            $arr['is_custom_lens'] = 1;
-        }
-
-        if ((float) urldecode($arr['od_cyl']) * 1 <= -4 || (float) urldecode($arr['od_cyl']) * 1 >= 4) {
-            $arr['is_custom_lens'] = 1;
-        }
-
-        if ((float) urldecode($arr['os_cyl']) * 1 <= -4 || (float) urldecode($arr['os_cyl']) * 1 >= 4) {
-            $arr['is_custom_lens'] = 1;
-        }
-        if ((float) urldecode($arr['od_sph']) * 1 < -8 || (float) urldecode($arr['od_sph']) * 1 > 8) {
-            $arr['is_custom_lens'] = 1;
-        }
-
-        if ((float) urldecode($arr['os_sph']) * 1 < -8 || (float) urldecode($arr['os_sph']) * 1 > 8) {
-            $arr['is_custom_lens'] = 1;
-        }
-
-        //定制处方镜
-        if ($arr['is_custom_lens'] == 1) {
-            $arr['order_prescription_type'] = 3;
-        }
-
-        //默认如果不是仅镜架 或定制片 则为现货处方镜
-        if ($arr['order_prescription_type'] != 1 && $arr['order_prescription_type'] != 3) {
-            $arr['order_prescription_type'] = 2;
-        }
+        //判断加工类型
+        $result = $this->set_processing_type($arr);
+        $arr = array_merge($arr, $result);
 
         return $arr;
     }
@@ -796,57 +654,9 @@ class OrderData extends Backend
          * 3、染色镜 镜片类型包含Lens with Color Tint 或 Tinted 或 Color Tint
          * 4、当cyl<=-4或cyl>=4 或 sph < -8或 sph>8
          */
-
-        if ($arr['index_name'] == '' || $arr['index_name'] == 'Plastic Lenses' ||  $arr['index_name'] == 'FRAME ONLY' || $arr['index_name'] == 'FRAME ONLY (Plastic lenses)') {
-            $arr['order_prescription_type'] = 1;
-        }
-
-        if ($arr['prescription_type'] == 'Progressive') {
-            $arr['is_custom_lens'] = 1;
-        }
-
-
-        if (strpos($arr['index_name'], 'Polarized') !== false) {
-            $arr['is_custom_lens'] = 1;
-        }
-
-        if (strpos($arr['index_name'], 'Lens with Color Tint') !== false) {
-            $arr['is_custom_lens'] = 1;
-        }
-
-        //染色
-        if (strpos($arr['index_name'], 'Tinted') !== false) {
-            $arr['is_custom_lens'] = 1;
-        }
-
-        if (strpos($arr['index_name'], 'Color Tint') !== false) {
-            $arr['is_custom_lens'] = 1;
-        }
-
-        if ((float) urldecode($arr['od_cyl']) * 1 <= -4 || (float) urldecode($arr['od_cyl']) * 1 >= 4) {
-            $arr['is_custom_lens'] = 1;
-        }
-
-        if ((float) urldecode($arr['os_cyl']) * 1 <= -4 || (float) urldecode($arr['os_cyl']) * 1 >= 4) {
-            $arr['is_custom_lens'] = 1;
-        }
-        if ((float) urldecode($arr['od_sph']) * 1 < -8 || (float) urldecode($arr['od_sph']) * 1 > 8) {
-            $arr['is_custom_lens'] = 1;
-        }
-
-        if ((float) urldecode($arr['os_sph']) * 1 < -8 || (float) urldecode($arr['os_sph']) * 1 > 8) {
-            $arr['is_custom_lens'] = 1;
-        }
-
-        //定制处方镜
-        if ($arr['is_custom_lens'] == 1) {
-            $arr['order_prescription_type'] = 3;
-        }
-
-        //默认如果不是仅镜架 或定制片 则为现货处方镜
-        if ($arr['order_prescription_type'] != 1 && $arr['order_prescription_type'] != 3) {
-            $arr['order_prescription_type'] = 2;
-        }
+        //判断加工类型
+        $result = $this->set_processing_type($arr);
+        $arr = array_merge($arr, $result);
         return $arr;
     }
 
@@ -933,56 +743,9 @@ class OrderData extends Backend
          * 4、当cyl<=-4或cyl>=4 或 sph < -8或 sph>8
          */
 
-        if (($arr['index_name'] == '' || !$arr['index_name']) && !$options['info_buyRequest']['tmplens']['degrees']) {
-            $arr['order_prescription_type'] = 1;
-        }
-
-        if ($arr['prescription_type'] == 'Progressive') {
-            $arr['is_custom_lens'] = 1;
-        }
-
-
-        if (strpos($arr['index_name'], 'Polarized') !== false) {
-            $arr['is_custom_lens'] = 1;
-        }
-
-        if (strpos($arr['index_name'], 'Lens with Color Tint') !== false) {
-            $arr['is_custom_lens'] = 1;
-        }
-
-        //染色
-        if (strpos($arr['index_name'], 'Tinted') !== false) {
-            $arr['is_custom_lens'] = 1;
-        }
-
-        if (strpos($arr['index_name'], 'Color Tint') !== false) {
-            $arr['is_custom_lens'] = 1;
-        }
-
-        if ((float) urldecode($arr['od_cyl']) * 1 <= -4 || (float) urldecode($arr['od_cyl']) * 1 >= 4) {
-            $arr['is_custom_lens'] = 1;
-        }
-
-        if ((float) urldecode($arr['os_cyl']) * 1 <= -4 || (float) urldecode($arr['os_cyl']) * 1 >= 4) {
-            $arr['is_custom_lens'] = 1;
-        }
-        if ((float) urldecode($arr['od_sph']) * 1 < -8 || (float) urldecode($arr['od_sph']) * 1 > 8) {
-            $arr['is_custom_lens'] = 1;
-        }
-
-        if ((float) urldecode($arr['os_sph']) * 1 < -8 || (float) urldecode($arr['os_sph']) * 1 > 8) {
-            $arr['is_custom_lens'] = 1;
-        }
-
-        //定制处方镜
-        if ($arr['is_custom_lens'] == 1) {
-            $arr['order_prescription_type'] = 3;
-        }
-
-        //默认如果不是仅镜架 或定制片 则为现货处方镜
-        if ($arr['order_prescription_type'] != 1 && $arr['order_prescription_type'] != 3) {
-            $arr['order_prescription_type'] = 2;
-        }
+        //判断加工类型
+        $result = $this->set_processing_type($arr);
+        $arr = array_merge($arr, $result);
         return $arr;
     }
 
@@ -1066,58 +829,9 @@ class OrderData extends Backend
          * 3、染色镜 镜片类型包含Lens with Color Tint 或 Tinted 或 Color Tint
          * 4、当cyl<=-4或cyl>=4 或 sph < -8或 sph>8
          */
-
-        if ($arr['index_name'] == '' || $arr['index_name'] == 'Lentes Plásticas' || $arr['index_name'] == 'SOLO MONTURA' ||  $arr['index_name'] == 'SÓLO MONTURA') {
-            $arr['order_prescription_type'] = 1;
-        }
-
-        if ($arr['prescription_type'] == 'Progresivo') {
-            $arr['is_custom_lens'] = 1;
-        }
-
-
-        if (strpos($arr['index_name'], 'Polarizado') !== false) {
-            $arr['is_custom_lens'] = 1;
-        }
-
-        if (strpos($arr['index_name'], 'Lens with Color Tint') !== false) {
-            $arr['is_custom_lens'] = 1;
-        }
-
-        //染色
-        if (strpos($arr['index_name'], 'Tinted') !== false) {
-            $arr['is_custom_lens'] = 1;
-        }
-
-        if (strpos($arr['index_name'], 'Tinte de color') !== false) {
-            $arr['is_custom_lens'] = 1;
-        }
-
-        if ((float) urldecode($arr['od_cyl']) * 1 <= -4 || (float) urldecode($arr['od_cyl']) * 1 >= 4) {
-            $arr['is_custom_lens'] = 1;
-        }
-
-        if ((float) urldecode($arr['os_cyl']) * 1 <= -4 || (float) urldecode($arr['os_cyl']) * 1 >= 4) {
-            $arr['is_custom_lens'] = 1;
-        }
-        if ((float) urldecode($arr['od_sph']) * 1 < -8 || (float) urldecode($arr['od_sph']) * 1 > 8) {
-            $arr['is_custom_lens'] = 1;
-        }
-
-        if ((float) urldecode($arr['os_sph']) * 1 < -8 || (float) urldecode($arr['os_sph']) * 1 > 8) {
-            $arr['is_custom_lens'] = 1;
-        }
-
-        //定制处方镜
-        if ($arr['is_custom_lens'] == 1) {
-            $arr['order_prescription_type'] = 3;
-        }
-
-        //默认如果不是仅镜架 或定制片 则为现货处方镜
-        if ($arr['order_prescription_type'] != 1 && $arr['order_prescription_type'] != 3) {
-            $arr['order_prescription_type'] = 2;
-        }
-
+        //判断加工类型
+        $result = $this->set_processing_type($arr);
+        $arr = array_merge($arr, $result);
         return $arr;
     }
 
@@ -1302,7 +1016,7 @@ class OrderData extends Backend
 
         //镜片编码
         $arr['lens_number'] = $options['info_buyRequest']['tmplens']['lens_number'] ?? 0;
-        
+
         //光度参数
         $arr['od_sph'] = $options_params['od_sph'] ?: '';;
         $arr['os_sph'] = $options_params['os_sph'] ?: '';;
@@ -1326,6 +1040,17 @@ class OrderData extends Backend
         $arr['od_bd_r'] = $options_params['od_bd_r'];
         $arr['os_bd_r'] = $options_params['os_bd_r'];
 
+        //判断加工类型
+        $result = $this->set_processing_type($arr);
+        $arr = array_merge($arr, $result);
+        return $arr;
+    }
+
+    /**
+     * 判断定制现片逻辑
+     */
+    protected function set_processing_type($params = [])
+    {
         /**
          * 判断定制现片逻辑
          * 1、渐进镜 Progressive
@@ -1333,48 +1058,132 @@ class OrderData extends Backend
          * 3、染色镜 镜片类型包含Lens with Color Tint 或 Tinted 或 Color Tint
          * 4、当cyl<=-4或cyl>=4 或 sph < -8或 sph>8
          */
+        $lens_number = config('LENS_NUMBER');
+        if (in_array($params['lens_number'], $lens_number)) {
+            $arr['order_prescription_type'] = 3;
+            $arr['is_custom_lens'] = 1;
+        }
 
-        if ($arr['index_name'] == '' || $arr['index_name'] == 'プラスチックレンズ' || $arr['index_name'] == 'フレームのみ') {
+        if ($params['lens_number'] == '10000000') {
             $arr['order_prescription_type'] = 1;
         }
 
-        if ($arr['prescription_type'] == '累進レンズ') {
-            $arr['is_custom_lens'] = 1;
+        if ($params['lens_number'] == '23100000' || $params['lens_number'] == '23100001') {
+            /**
+             * 1.61非球面绿膜 定制片
+             * SPH:0.00～-8.00 CYL:-4.25～-6.00
+             */
+            if ((((float) urldecode($arr['od_sph']) >= -8 && (float) urldecode($arr['od_sph']) < 0) || ((float) urldecode($arr['os_sph']) >= -8 && (float) urldecode($arr['os_sph']) < 0)) && (((float) urldecode($arr['od_cyl']) >= -6 && (float) urldecode($arr['od_cyl']) <= -4.25) || ((float) urldecode($arr['os_cyl']) >= -6 && (float) urldecode($arr['os_cyl']) <= -4.25))) {
+                $arr['is_custom_lens'] = 1;
+                $arr['order_prescription_type'] = 3;
+            }
+        }
+
+        if ($params['lens_number'] == '24100000' || $params['lens_number'] == '24200000') {
+            /**
+             * 1.67非球面绿膜 现片
+             * SPH:-3.00～-12.00 CYL:0.00～-2.00（不含-0.25）
+             */
+            if ((((float) urldecode($arr['od_sph']) >= -12 && (float) urldecode($arr['od_sph']) <= -3) || ((float) urldecode($arr['os_sph']) >= -12 && (float) urldecode($arr['os_sph']) <= -3)) && (((float) urldecode($arr['od_cyl']) >= -2 && (float) urldecode($arr['od_cyl']) < 0 && (float) urldecode($arr['od_cyl']) != -0.25) || ((float) urldecode($arr['os_cyl']) >= -2 && (float) urldecode($arr['os_cyl']) <= 0 && (float) urldecode($arr['od_cyl']) != -0.25))) {
+                $arr['order_prescription_type'] = 2;
+            } else {
+                $arr['is_custom_lens'] = 1;
+                $arr['order_prescription_type'] = 3;
+            }
+        }
+
+        if ($params['lens_number'] == '25100000') {
+            /**
+             * 1.71非球面绿膜 现片
+             * SPH:0.00～-15.00 CYL:0.00～-2.00（不含-0.25）
+             */
+            if ((((float) urldecode($arr['od_sph']) >= -15 && (float) urldecode($arr['od_sph']) < 0) || ((float) urldecode($arr['os_sph']) >= -15 && (float) urldecode($arr['os_sph']) < 0)) && (((float) urldecode($arr['od_cyl']) >= -2 && (float) urldecode($arr['od_cyl']) < 0 && (float) urldecode($arr['od_cyl']) != -0.25) || ((float) urldecode($arr['os_cyl']) >= -2 && (float) urldecode($arr['os_cyl']) < 0 && (float) urldecode($arr['od_cyl']) != -0.25))) {
+                $arr['order_prescription_type'] = 2;
+            } else {
+                $arr['is_custom_lens'] = 1;
+                $arr['order_prescription_type'] = 3;
+            }
+        }
+
+        if ($params['lens_number'] == '26100000') {
+            /**
+             * 1.74非球面绿膜 现片
+             * SPH:-3.00～-13.00 CYL:0.00～-2.00（不含-0.25）
+             */
+            if ((((float) urldecode($arr['od_sph']) >= -13 && (float) urldecode($arr['od_sph']) <= -3) || ((float) urldecode($arr['os_sph']) >= -13 && (float) urldecode($arr['os_sph']) <= -3)) && (((float) urldecode($arr['od_cyl']) >= -2 && (float) urldecode($arr['od_cyl']) < 0 && (float) urldecode($arr['od_cyl']) != -0.25) || ((float) urldecode($arr['os_cyl']) >= -2 && (float) urldecode($arr['os_cyl']) < 0 && (float) urldecode($arr['od_cyl']) != -0.25))) {
+                $arr['order_prescription_type'] = 2;
+            } else {
+                $arr['is_custom_lens'] = 1;
+                $arr['order_prescription_type'] = 3;
+            }
+        }
+
+        if ($params['lens_number'] == '23200000' || $params['lens_number'] == '23200001') {
+            /**
+             * 1.61防蓝光 现片
+             * SPH:0.00～-8.00 CYL:0.00～-2.00
+             * SPH:0.00～-8.00 CYL:-2.25～-4.00
+             */
+            if ((((float) urldecode($arr['od_sph']) >= -8 && (float) urldecode($arr['od_sph']) < 0) || ((float) urldecode($arr['os_sph']) >= -8 && (float) urldecode($arr['os_sph']) < 0)) && (((float) urldecode($arr['od_cyl']) >= -4 && (float) urldecode($arr['od_cyl']) < 0) || ((float) urldecode($arr['os_cyl']) >= -4 && (float) urldecode($arr['os_cyl']) < 0))) {
+                $arr['order_prescription_type'] = 2;
+            } else {
+                $arr['is_custom_lens'] = 1;
+                $arr['order_prescription_type'] = 3;
+            }
+        }
+
+        if ($params['lens_number'] == '25200000' || $params['lens_number'] == '25302000' || $params['lens_number'] == '25303000') {
+            /**
+             * 1.57变色 现片 1.71变色灰
+             * SPH:0.00～-3.00 CYL:0.00～-2.00
+             */
+            if ((((float) urldecode($arr['od_sph']) >= -12 && (float) urldecode($arr['od_sph']) < 0) || ((float) urldecode($arr['os_sph']) >= -12 && (float) urldecode($arr['os_sph']) < 0)) && (((float) urldecode($arr['od_cyl']) >= -2 && (float) urldecode($arr['od_cyl']) < 0 && (float) urldecode($arr['od_cyl']) != -0.25) || ((float) urldecode($arr['os_cyl']) >= -2 && (float) urldecode($arr['os_cyl']) < 0 && (float) urldecode($arr['od_cyl']) != -0.25))) {
+                $arr['order_prescription_type'] = 2;
+            } else {
+                $arr['is_custom_lens'] = 1;
+                $arr['order_prescription_type'] = 3;
+            }
+        }
+
+        if ($params['lens_number'] == '23302000' || $params['lens_number'] == '22306000' || $params['lens_number'] == '22305000') {
+            /**
+             * 1.71防蓝光 现片
+             * SPH:0.00～-12.00 CYL:0.00～-2.00（不含-0.25）
+             */
+            if ((((float) urldecode($arr['od_sph']) >= -3 && (float) urldecode($arr['od_sph']) < 0) || ((float) urldecode($arr['os_sph']) >= -3 && (float) urldecode($arr['os_sph']) < 0)) && (((float) urldecode($arr['od_cyl']) >= -2 && (float) urldecode($arr['od_cyl']) < 0) || ((float) urldecode($arr['os_cyl']) >= -2 && (float) urldecode($arr['os_cyl']) < 0))) {
+                $arr['order_prescription_type'] = 2;
+            } else {
+                $arr['is_custom_lens'] = 1;
+                $arr['order_prescription_type'] = 3;
+            }
         }
 
 
-        if (strpos($arr['index_name'], '偏光レンズ') !== false) {
-            $arr['is_custom_lens'] = 1;
+        if ($params['lens_number'] == '23302000' || $params['lens_number'] == '23303000' || $params['lens_number'] == '23302001' || $params['lens_number'] == '23303001') {
+            /**
+             * 1.61变色灰 现片
+             * SPH:0.00～-8.00 CYL:0.00～-2.00
+             */
+            if ((((float) urldecode($arr['od_sph']) >= -8 && (float) urldecode($arr['od_sph']) < 0) || ((float) urldecode($arr['os_sph']) >= -8 && (float) urldecode($arr['os_sph']) < 0)) && (((float) urldecode($arr['od_cyl']) >= -2 && (float) urldecode($arr['od_cyl']) < 0) || ((float) urldecode($arr['os_cyl']) >= -2 && (float) urldecode($arr['os_cyl']) < 0))) {
+                $arr['order_prescription_type'] = 2;
+            } else {
+                $arr['is_custom_lens'] = 1;
+                $arr['order_prescription_type'] = 3;
+            }
         }
 
-        if (strpos($arr['index_name'], 'Lens with Color Tint') !== false) {
-            $arr['is_custom_lens'] = 1;
+        if ($params['lens_number'] == '23304000' || $params['lens_number'] == '23306000' || $params['lens_number'] == '23305000') {
+            /**
+             * 1.61变色蓝 现片
+             * SPH:0.00～-8.00 CYL:0.00～-2.00
+             */
+            if ((((float) urldecode($arr['od_sph']) >= -8 && (float) urldecode($arr['od_sph']) < 0) || ((float) urldecode($arr['os_sph']) >= -8 && (float) urldecode($arr['os_sph']) < 0)) && (((float) urldecode($arr['od_cyl']) >= -2 && (float) urldecode($arr['od_cyl']) <= 0.5) || ((float) urldecode($arr['os_cyl']) >= -2 && (float) urldecode($arr['os_cyl']) <= 0.5))) {
+                $arr['order_prescription_type'] = 2;
+            } else {
+                $arr['is_custom_lens'] = 1;
+                $arr['order_prescription_type'] = 3;
+            }
         }
-
-        //染色
-        if (strpos($arr['index_name'], '色付き') !== false) {
-            $arr['is_custom_lens'] = 1;
-        }
-
-        if (strpos($arr['index_name'], '色合い') !== false) {
-            $arr['is_custom_lens'] = 1;
-        }
-
-        if ((float) urldecode($arr['od_cyl']) * 1 <= -4 || (float) urldecode($arr['od_cyl']) * 1 >= 4) {
-            $arr['is_custom_lens'] = 1;
-        }
-
-        if ((float) urldecode($arr['os_cyl']) * 1 <= -4 || (float) urldecode($arr['os_cyl']) * 1 >= 4) {
-            $arr['is_custom_lens'] = 1;
-        }
-        if ((float) urldecode($arr['od_sph']) * 1 < -8 || (float) urldecode($arr['od_sph']) * 1 > 8) {
-            $arr['is_custom_lens'] = 1;
-        }
-
-        if ((float) urldecode($arr['os_sph']) * 1 < -8 || (float) urldecode($arr['os_sph']) * 1 > 8) {
-            $arr['is_custom_lens'] = 1;
-        }
-
         //定制处方镜
         if ($arr['is_custom_lens'] == 1) {
             $arr['order_prescription_type'] = 3;
@@ -1384,8 +1193,11 @@ class OrderData extends Backend
         if ($arr['order_prescription_type'] != 1 && $arr['order_prescription_type'] != 3) {
             $arr['order_prescription_type'] = 2;
         }
+
         return $arr;
     }
+
+
 
     /**
      * 批量生成子订单表子单号
