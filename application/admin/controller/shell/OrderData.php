@@ -1935,7 +1935,7 @@ class OrderData extends Backend
 
     protected function order_item_data_shell_temp($site)
     {
-        $list = $this->orderitemoption->where('site=' . $site . ' and index_id is null')->limit(2000)->select();
+        $list = $this->orderitemoption->where('site=' . $site . ' and LENGTH(trim(os_axis))=0')->limit(2000)->select();
         $list = collection($list)->toArray();
         $item_ids = array_column($list, 'item_id');
 
@@ -1977,10 +1977,7 @@ class OrderData extends Backend
             } elseif ($site == 11) {
                 $options =  $this->zeelool_jp_prescription_analysis($item_data[$v['item_id']]);
             }
-
-            $option_params[$k]['color_id'] = $options['color_id'];
-            $option_params[$k]['coating_id'] = $options['coating_id'];
-            $option_params[$k]['index_id'] = $options['index_id'] ?: 0;
+            $option_params[$k]['os_axis'] = $options['os_axis'] ?: 'None';
             $option_params[$k]['id'] = $v['id'];
             
             echo $v['item_id'] . "\n";
