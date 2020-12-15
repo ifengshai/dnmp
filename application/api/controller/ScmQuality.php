@@ -849,8 +849,8 @@ class ScmQuality extends Scm
                         $purchase_item_list = $this->_purchase_order_item
                             ->field('sku,purchase_price')
                             ->where(['purchase_id' => $row['purchase_id']])
-                            ->select();
-                        $purchase_item_list = array_column($purchase_item_list, NULL, 'sku');
+                            ->column('purchase_price','sku');
+//                        $purchase_item_list = array_column($purchase_item_list, NULL, 'sku');
 
                         //获取采购单商品数据
                         $abnormal_item_save = [];
