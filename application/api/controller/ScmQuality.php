@@ -826,7 +826,7 @@ class ScmQuality extends Scm
                     }
                     $this->_sample_work_order_item->allowField(true)->saveAll($work_order_item_data);
                 }
-                if($check_id == 16971){print_r('hhhhhhhhhhh');exit;}
+                if($check_id == 16971){print_r('hhhhhhhhhhh');}
 
                 //检测批次或采购单是否全部质检完成
                 $where = ['purchase_id' => $row['purchase_id'], 'is_check_order' => 0];
