@@ -202,13 +202,13 @@ class TrackReg extends Backend
                 $url = config('url.meeloog_url');
                 break;
             case 9:
-                $url = config('url.zeelool_es_url');
+                $url = config('url.zeelooles_url');
                 break;
             case 10:
-                $url = config('url.zeelool_de_url');
+                $url = config('url.zeeloolde_url');
                 break;
             case 11:
-                $url = config('url.zeelool_jp_url');
+                $url = config('url.zeelooljp_url');
                 break;
             default:
                 return false;
