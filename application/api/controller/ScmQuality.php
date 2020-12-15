@@ -870,7 +870,7 @@ class ScmQuality extends Scm
                                 $is_error = 1;
                             }
                         }
-                        if($check_id == 16971){print_r('lllllllll');exit;}
+                        if($check_id == 16971){print_r('lllllllll');}
                         //新增收货异常主表数据
                         $abnormal_save = [
                             'error_number' => 'YC' . date('YmdHis') . rand(100, 999) . rand(100, 999),
