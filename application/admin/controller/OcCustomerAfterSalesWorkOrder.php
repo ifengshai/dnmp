@@ -7,13 +7,13 @@ use Think\Db;
 use think\Request;
 
 /**
- * 
+ *
  *
  * @icon fa fa-circle-o
  */
 class OcCustomerAfterSalesWorkOrder extends Backend
 {
-    
+
     /**
      * OcCustomerAfterSalesWorkOrder模型对象
      * @var \app\common\model\OcCustomerAfterSalesWorkOrder
@@ -26,15 +26,15 @@ class OcCustomerAfterSalesWorkOrder extends Backend
         $this->model = new \app\common\model\OcCustomerAfterSalesWorkOrder;
 
     }
-    
+
     /**
      * 默认生成的控制器所继承的父类中有index/add/edit/del/multi五个基础方法、destroy/restore/recyclebin三个回收站方法
      * 因此在当前控制器中可不用编写增删改查的代码,除非需要自己控制这部分逻辑
      * 需要将application/admin/library/traits/Backend.php中对应的方法复制到当前控制器,然后进行修改
      */
 
-    
-    
+
+
 
     /**
      * 查看
@@ -58,20 +58,20 @@ class OcCustomerAfterSalesWorkOrder extends Backend
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
 
             $total = $this->model
-                    ->where($where)
-                    ->order($sort, $order)
-                    ->count();
+                ->where($where)
+                ->order($sort, $order)
+                ->count();
 
             $list = $this->model
-                    
-                    ->where($where)
-                    ->order($sort, $order)
-                    ->limit($offset, $limit)
-                    ->select();
+
+                ->where($where)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();
 
             foreach ($list as $row) {
                 $row->visible(['id','email','increment_id','order_type','problem_type','concrete_problem','status','created_at','completed_at','handler_name']);
-                
+
             }
             $list = collection($list)->toArray();
             //查询订单是否存在工单
@@ -162,9 +162,6 @@ class OcCustomerAfterSalesWorkOrder extends Backend
         }else{
             $photo_href = null;
         }
-
-      
-
         if ($row['order_type'] ==1){
             $row['order_type'] = '普通订单';
         }elseif ($row['order_type'] ==2){
