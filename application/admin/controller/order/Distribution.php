@@ -395,10 +395,10 @@ class Distribution extends Backend
             //处理pd值
             if ($change_lens['pd_l'] && $change_lens['pd_r']) {
                 $change_lens['pd'] = '';
-                $change_lens['pdcheck'] = '';
+                $change_lens['pdcheck'] = 'on';
             } else {
                 $change_lens['pd'] = $change_lens['pd_r'] ?: $change_lens['pd_l'];
-                $change_lens['pdcheck'] = 'on';
+                $change_lens['pdcheck'] = '';
             }
 
             //处理斜视值
