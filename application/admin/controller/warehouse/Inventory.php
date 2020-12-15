@@ -661,6 +661,8 @@ class Inventory extends Backend
         $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
         //回滚
         Db::startTrans();
+        $item->startTrans();
+        $platform->startTrans();
         try {
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
             //审核通过 生成入库单 并同步库存
@@ -696,20 +698,6 @@ class Inventory extends Backend
                             'stock_change' => $v['error_qty'],
                             'available_stock_before' => $sku_item['available_stock'],
                             'available_stock_change' => $v['error_qty'],
-                            'fictitious_before' => 0,
-                            'fictitious_change' => 0,
-                            'occupy_stock_before' => $sku_item['occupy_stock'],
-                            'occupy_stock_change' => 0,
-                            'distribution_stock_before' => $sku_item['distribution_occupy_stock'],
-                            'distribution_stock_change' => 0,
-                            'presell_num_before' => $sku_item['presell_num'],
-                            'presell_num_change' => 0,
-                            'sample_num_before' => $sku_item['sample_num'],
-                            'sample_num_change' => 0,
-                            'on_way_stock_before' => $sku_item['on_way_stock'],
-                            'on_way_stock_change' => 0,
-                            'wait_instock_num_before' => $sku_item['wait_instock_num'],
-                            'wait_instock_num_change' => 0,
                             'create_person' => session('admin.nickname'),
                             'create_time' => time(),
                             'number_type' => 5,
@@ -752,24 +740,8 @@ class Inventory extends Backend
                                         'sku' => $v['sku'],
                                         'order_number' => $v['inventory_id'],
                                         'source' => 1,
-                                        'stock_before' => $sku_item['stock'],
-                                        'stock_change' => 0,
-                                        'available_stock_before' => $sku_item['available_stock'],
-                                        'available_stock_change' => 0,
                                         'fictitious_before' => $item_platform_sku_detail['stock'],
                                         'fictitious_change' => $stock_num,
-                                        'occupy_stock_before' => $sku_item['occupy_stock'],
-                                        'occupy_stock_change' => 0,
-                                        'distribution_stock_before' => $sku_item['distribution_occupy_stock'],
-                                        'distribution_stock_change' => 0,
-                                        'presell_num_before' => $sku_item['presell_num'],
-                                        'presell_num_change' => 0,
-                                        'sample_num_before' => $sku_item['sample_num'],
-                                        'sample_num_change' => 0,
-                                        'on_way_stock_before' => $sku_item['on_way_stock'],
-                                        'on_way_stock_change' => 0,
-                                        'wait_instock_num_before' => $sku_item['wait_instock_num'],
-                                        'wait_instock_num_change' => 0,
                                         'create_person' => session('admin.nickname'),
                                         'create_time' => time(),
                                         'number_type' => 5,
@@ -788,24 +760,8 @@ class Inventory extends Backend
                                         'sku' => $v['sku'],
                                         'order_number' => $v['inventory_id'],
                                         'source' => 1,
-                                        'stock_before' => $sku_item['stock'],
-                                        'stock_change' => 0,
-                                        'available_stock_before' => $sku_item['available_stock'],
-                                        'available_stock_change' => 0,
                                         'fictitious_before' => $item_platform_sku_detail['stock'],
                                         'fictitious_change' => $num,
-                                        'occupy_stock_before' => $sku_item['occupy_stock'],
-                                        'occupy_stock_change' => 0,
-                                        'distribution_stock_before' => $sku_item['distribution_occupy_stock'],
-                                        'distribution_stock_change' => 0,
-                                        'presell_num_before' => $sku_item['presell_num'],
-                                        'presell_num_change' => 0,
-                                        'sample_num_before' => $sku_item['sample_num'],
-                                        'sample_num_change' => 0,
-                                        'on_way_stock_before' => $sku_item['on_way_stock'],
-                                        'on_way_stock_change' => 0,
-                                        'wait_instock_num_before' => $sku_item['wait_instock_num'],
-                                        'wait_instock_num_change' => 0,
                                         'create_person' => session('admin.nickname'),
                                         'create_time' => time(),
                                         'number_type' => 5,
@@ -828,24 +784,8 @@ class Inventory extends Backend
                                         'sku' => $v['sku'],
                                         'order_number' => $v['inventory_id'],
                                         'source' => 1,
-                                        'stock_before' => $sku_item['stock'],
-                                        'stock_change' => 0,
-                                        'available_stock_before' => $sku_item['available_stock'],
-                                        'available_stock_change' => 0,
                                         'fictitious_before' => $item_platform_sku_detail['stock'],
                                         'fictitious_change' => $stock_num,
-                                        'occupy_stock_before' => $sku_item['occupy_stock'],
-                                        'occupy_stock_change' => 0,
-                                        'distribution_stock_before' => $sku_item['distribution_occupy_stock'],
-                                        'distribution_stock_change' => 0,
-                                        'presell_num_before' => $sku_item['presell_num'],
-                                        'presell_num_change' => 0,
-                                        'sample_num_before' => $sku_item['sample_num'],
-                                        'sample_num_change' => 0,
-                                        'on_way_stock_before' => $sku_item['on_way_stock'],
-                                        'on_way_stock_change' => 0,
-                                        'wait_instock_num_before' => $sku_item['wait_instock_num'],
-                                        'wait_instock_num_change' => 0,
                                         'create_person' => session('admin.nickname'),
                                         'create_time' => time(),
                                         'number_type' => 5,
@@ -864,24 +804,8 @@ class Inventory extends Backend
                                         'sku' => $v['sku'],
                                         'order_number' => $v['inventory_id'],
                                         'source' => 1,
-                                        'stock_before' => $sku_item['stock'],
-                                        'stock_change' => 0,
-                                        'available_stock_before' => $sku_item['available_stock'],
-                                        'available_stock_change' => 0,
                                         'fictitious_before' => $item_platform_sku_detail['stock'],
                                         'fictitious_change' => $num,
-                                        'occupy_stock_before' => $sku_item['occupy_stock'],
-                                        'occupy_stock_change' => 0,
-                                        'distribution_stock_before' => $sku_item['distribution_occupy_stock'],
-                                        'distribution_stock_change' => 0,
-                                        'presell_num_before' => $sku_item['presell_num'],
-                                        'presell_num_change' => 0,
-                                        'sample_num_before' => $sku_item['sample_num'],
-                                        'sample_num_change' => 0,
-                                        'on_way_stock_before' => $sku_item['on_way_stock'],
-                                        'on_way_stock_change' => 0,
-                                        'wait_instock_num_before' => $sku_item['wait_instock_num'],
-                                        'wait_instock_num_change' => 0,
                                         'create_person' => session('admin.nickname'),
                                         'create_time' => time(),
                                         'number_type' => 5,
@@ -975,14 +899,22 @@ class Inventory extends Backend
                 }
             }
             Db::commit();
+            $platform->commit();
+            $item->commit();
         } catch (ValidateException $e) {
             Db::rollback();
+            $platform->rollback();
+            $item->rollback();
             $this->error($e->getMessage());
         } catch (PDOException $e) {
             Db::rollback();
+            $platform->rollback();
+            $item->rollback();
             $this->error($e->getMessage());
         } catch (Exception $e) {
             Db::rollback();
+            $platform->rollback();
+            $item->rollback();
             $this->error($e->getMessage());
         }
 

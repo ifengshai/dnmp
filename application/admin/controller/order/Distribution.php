@@ -405,7 +405,7 @@ class Distribution extends Backend
             if ($change_lens['od_pv'] || $change_lens['os_pv']) {
                 $change_lens['prismcheck'] = 'on';
             } else {
-                $change_lens['pdcheck'] = '';
+                $change_lens['prismcheck'] = '';
             }
 
             $result = array_merge($result, $change_lens);
