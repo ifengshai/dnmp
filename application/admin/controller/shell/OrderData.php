@@ -140,6 +140,8 @@ class OrderData extends Backend
                             }
                             //主表
                             if ($payload['type'] == 'INSERT' && $payload['table'] == 'sales_flat_order') {
+
+                                dump($payload['data']);
                                 $params = [];
                                 $order_params = [];
                                 foreach ($payload['data'] as $k => $v) {
