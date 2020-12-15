@@ -1674,13 +1674,13 @@ class ScmDistribution extends Scm
                 if ($return !== false) {
                     //操作成功记录，批量日志插入
                     foreach($item_process_info as $key => $value){
-                        DistributionLog::record($this->auth,$value['id'],7,'子单号：'.$value['item_order_number'].'，从异常暂存架'.$store_house_coding.'异常库位取出完成');
+                        DistributionLog::record($this->auth,$value['id'],7,'子单号：'.$value['item_order_number'].'，从合单架'.$store_house_coding.'合单库位取出完成');
                     }
                     $this->success('异常取出成功', [], 200);
                 } else {
                     //操作失败记录，批量日志插入
                     foreach($item_process_info as $key => $value){
-                        DistributionLog::record($this->auth,$value['id'],7,'子单号：'.$value['item_order_number'].'，从异常暂存架'.$store_house_coding.'异常库位取出失败');
+                        DistributionLog::record($this->auth,$value['id'],7,'子单号：'.$value['item_order_number'].'，从合单架'.$store_house_coding.'合单库位取出失败');
                     }
                     $this->error(__('No rows were inserted'), [], 511);
                 }
