@@ -761,11 +761,11 @@ class ScmQuality extends Scm
 
             1 != $row['status'] && $this->error(__('只有待审核状态才能审核'), [], 405);
         }
-     
+
 
         $this->_check->startTrans();
         $this->_purchase_order->startTrans();
-        $this->_logistics_info->startTrans();
+//        $this->_logistics_info->startTrans();
         $this->_purchase_abnormal->startTrans();
         $this->_sample_work_order->startTrans();
         $this->_product_bar_code_item->startTrans();
@@ -789,7 +789,9 @@ class ScmQuality extends Scm
                     if($check_id == 16971){print_r('eeeeeeeee--'.$row['purchase_id'].'----'.$count);}
                     //修改采购单质检状态
                     $saaa = $this->_purchase_order->allowField(true)->isUpdate(true, ['id' => $row['purchase_id']])->save(['check_status' => $count > 0 ? 1 : 2]);
+
                     if($check_id == 16971){
+                        var_dump($saaa);
                         if($saaa){
                             print_r('rrrrr');
                         }else{
