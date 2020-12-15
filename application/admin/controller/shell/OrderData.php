@@ -179,8 +179,8 @@ class OrderData extends Backend
                                     $params['customer_firstname'] = $v['customer_firstname'];
                                     $params['customer_lastname'] = $v['customer_lastname'];
                                     $params['taxno'] = $v['taxno'];
-                                    $params['created_at'] = strtotime($v['created_at']);
-                                    $params['updated_at'] = strtotime($v['updated_at']);
+                                    $params['created_at'] = strtotime($v['created_at']) + 28800;
+                                    $params['updated_at'] = strtotime($v['updated_at']) + 28800;
                                     //插入订单主表
                                     $order_id = $this->order->insertGetId($params);
                                     $order_params[$k]['site'] = $site;
@@ -210,7 +210,7 @@ class OrderData extends Backend
                                     $params['customer_firstname'] = $v['customer_firstname'];
                                     $params['customer_lastname'] = $v['customer_lastname'];
                                     $params['taxno'] = $v['taxno'];
-                                    $params['updated_at'] = strtotime($v['updated_at']);
+                                    $params['updated_at'] = strtotime($v['updated_at']) + 28800;
                                    
                                     $this->order->where(['entity_id' => $v['entity_id'], 'site' => $site])->update($params);
                                 }
@@ -226,7 +226,7 @@ class OrderData extends Backend
                                     $params['street'] = $v['street'];
                                     $params['postcode'] = $v['postcode'];
                                     $params['telephone'] = $v['telephone'];
-                                    $params['updated_at'] = strtotime($v['updated_at']);
+                                    $params['updated_at'] = strtotime($v['updated_at'])+ 28800;
                                     $this->order->where(['entity_id' => $v['parent_id'], 'site' => $site])->update($params);
                                 }
                             }
@@ -274,8 +274,8 @@ class OrderData extends Backend
                                             $data[$i]['option_id'] = $options_id;
                                             $data[$i]['sku'] = $v['sku'];
                                             $data[$i]['order_prescription_type'] = $order_prescription_type;
-                                            $data[$i]['created_at'] = strtotime($v['created_at']);
-                                            $data[$i]['updated_at'] = strtotime($v['updated_at']);
+                                            $data[$i]['created_at'] = strtotime($v['created_at']) + 28800;
+                                            $data[$i]['updated_at'] = strtotime($v['updated_at']) + 28800;
                                         }
                                         $this->orderitemprocess->insertAll($data);
                                     }
