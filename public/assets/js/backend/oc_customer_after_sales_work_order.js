@@ -34,7 +34,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                 return 1 + index;
                             }, operate: false
                         },
-                        // {field: 'id', title: __('Id')},
+                        {field: 'id', title: __('ID')},
                         // {
                         //     field: 'site',
                         //     title: __('站点'),

@@ -6,17 +6,18 @@
             <div class="tab-pane fade active in" id="one">
                 <div class="widget-body no-padding">
                     <div id="toolbar" class="toolbar">
+                        <input type="checkbox" style="width: 27px;height: 16px" id="checkd">
                         {:build_toolbar('refresh')}
-                        <select name="" id="change_value" style="height: 34px;padding: 6px 26px;
-                                font-size: 12px;
-                                line-height: 1.42857143;
-                                color: #555555;
-                                background-color: #fff;
-                                border: 1.6px solid #ccc;">
-                            <option value="">请选择</option>
-                            <option value="1">全选</option>
-                            <option value="2">非全选</option>
-                        </select>
+<!--                        <select name="" id="change_value" style="height: 34px;padding: 6px 26px;-->
+<!--                                font-size: 12px;-->
+<!--                                line-height: 1.42857143;-->
+<!--                                color: #555555;-->
+<!--                                background-color: #fff;-->
+<!--                                border: 1.6px solid #ccc;">-->
+<!--                            <option value="">请选择</option>-->
+<!--                            <option value="1">全选</option>-->
+<!--                            <option value="2">非全选</option>-->
+<!--                        </select>-->
                         <a href="javascript:;" data-area='["100%","100%"]' class="btn btn-success btn-add {:$auth->check('new_product/add')?'':'hide'}" title="{:__('Add')}" ><i class="fa fa-plus"></i> {:__('新增')}</a>
 
                         <a href="javascript:;"
