@@ -27,12 +27,12 @@ class TrackReg extends Backend
 
     public function site_reg()
     {
-        $this->reg_shipment('database.db_zeelool', 1);
-        $this->reg_shipment('database.db_voogueme', 2);
-        $this->reg_shipment('database.db_nihao', 3);
-        $this->reg_shipment('database.db_meeloog', 4);
-        $this->reg_shipment('database.db_zeelool_es', 9);
-        $this->reg_shipment('database.db_zeelool_de', 10);
+        // $this->reg_shipment('database.db_zeelool', 1);
+        // $this->reg_shipment('database.db_voogueme', 2);
+        // $this->reg_shipment('database.db_nihao', 3);
+        // $this->reg_shipment('database.db_meeloog', 4);
+        // $this->reg_shipment('database.db_zeelool_es', 9);
+        // $this->reg_shipment('database.db_zeelool_de', 10);
         $this->reg_shipment('database.db_zeelool_jp', 11);
     }
 
@@ -47,7 +47,8 @@ class TrackReg extends Backend
             ->join(['sales_flat_order' => 'b'], 'a.order_id=b.entity_id')
             ->field('a.entity_id,a.order_id,a.track_number,a.title,a.updated_at,a.created_at,b.increment_id')
             ->where('a.created_at', '>=', '2020-03-31 00:00:00')
-            ->where('a.handle', '=', '0')
+            ->where('a.handle', '=', '1')
+            ->where('a.title', '=', 'COD')
             ->group('a.order_id')
             ->select();
         foreach ($order_shipment as $k => $v) {
@@ -137,7 +138,7 @@ class TrackReg extends Backend
      * @param $title
      * @return mixed|string
      */
-    public function getCarrier($title)
+    protected function getCarrier($title)
     {
         $carrierId = '';
         if (stripos($title, 'post') !== false) {
@@ -161,16 +162,24 @@ class TrackReg extends Backend
         } elseif (stripos($title, 'cpc') !== false) {
             $carrierId = 'cpc';
             $title = 'Canada Post';
+        } elseif (stripos($title, 'sua') !== false) {
+            $carrierId = 'sua';
+            $title = 'SUA';
+        } elseif (stripos($title, 'cod') !== false) {
+            $carrierId = 'cod';
+            $title = 'COD';
         }
+
         $carrier = [
             'dhl' => '100001',
             'chinapost' => '03011',
             'chinaems' => '03013',
-            'cpc' => '03041',
+            'cpc' =>  '03041',
             'fedex' => '100003',
             'usps' => '21051',
             'yanwen' => '190012',
-            'eub' => '03011',
+            'sua' => '190111',
+            'cod' => '100040'
         ];
         if ($carrierId) {
             return ['title' => $title, 'carrierId' => $carrier[$carrierId]];
