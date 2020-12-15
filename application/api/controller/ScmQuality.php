@@ -770,7 +770,7 @@ class ScmQuality extends Scm
         $this->_product_bar_code_item->startTrans();
         $this->_purchase_abnormal_item->startTrans();
         $this->_sample_work_order_item->startTrans();
-        if($check_id == 16971){print_r('gggggg');}
+        if($check_id == 16971){print_r('gggggg');exit;}
         try {
             $res = $this->_check->allowField(true)->isUpdate(true, ['id' => $check_id])->save(['status' => $do_type, 'examine_time' => date('Y-m-d H:i:s')]);
             if(false === $res) throw new Exception('审核失败');
