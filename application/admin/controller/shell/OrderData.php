@@ -150,9 +150,8 @@ class OrderData extends Backend
                                     $order_ids2 = $this->order->where('site=' . $site . ' and entity_id=' . $v['entity_id'])->value('id');
                                     if ($order_ids) {
                                         $this->order->where('site=' . $site . ' and increment_id=' . $v['increment_id'])->delete();
-                                        $this->order->where('site=' . $site . ' and entity_id=' . $v['entity_id'])->delete();
                                         $this->orderprocess->where('site=' . $site . ' and increment_id=' . $v['increment_id'])->delete();
-                                        $this->orderprocess->where('site=' . $site . ' and entity_id=' . $v['entity_id'])->delete();
+                                        
                                         //删除子订单表
                                         $this->orderitemoption->where('site=' . $site . ' and order_id=' . $order_ids)->delete();
                                         $this->orderitemprocess->where('site=' . $site . ' and order_id=' . $order_ids)->delete();
@@ -160,11 +159,12 @@ class OrderData extends Backend
                                     }
 
                                     if ($order_ids2) {
+                                        $this->orderprocess->where('site=' . $site . ' and entity_id=' . $v['entity_id'])->delete();
+                                        $this->order->where('site=' . $site . ' and entity_id=' . $v['entity_id'])->delete();
                                         $this->orderitemoption->where('site=' . $site . ' and order_id=' . $order_ids2)->delete();
                                         $this->orderitemprocess->where('site=' . $site . ' and order_id=' . $order_ids2)->delete();
                                     }
 
-                                    echo 111;
                                     $params['entity_id'] = $v['entity_id'];
                                     $params['site'] = $site;
                                     $params['increment_id'] = $v['increment_id'];
@@ -189,7 +189,6 @@ class OrderData extends Backend
                                     $params['created_at'] = strtotime($v['created_at']) + 28800;
                                     $params['updated_at'] = strtotime($v['updated_at']) + 28800;
                                     //插入订单主表
-                                    dump($params);
                                     $order_id = $this->order->insertGetId($params);
                                     $order_params[$k]['site'] = $site;
                                     $order_params[$k]['order_id'] = $order_id;
