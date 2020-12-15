@@ -829,10 +829,8 @@ class ScmQuality extends Scm
                     if ($check_item_list) {
                         //获取采购价格
                         $purchase_item_list = $this->_purchase_order_item
-                            ->field('sku,purchase_price')
                             ->where(['purchase_id' => $row['purchase_id']])
-                            ->select();
-                        $purchase_item_list = array_column($purchase_item_list, NULL, 'sku');
+                            ->column('purchase_price','sku');
 
                         //获取采购单商品数据
                         $abnormal_item_save = [];
@@ -970,9 +968,7 @@ class ScmQuality extends Scm
         //获取采购单数据
         $purchase_list = $this->_purchase_order
             ->where(['purchase_status' => ['in', [6, 7, 9, 10]]])
-            ->field('id,purchase_number,is_new_product')
-            ->select();
-        $purchase_list = array_column($purchase_list, NULL, 'id');
+            ->column('purchase_number,is_new_product','id');
 
         //拼接采购单条件
         if (isset($is_new_product)) {
