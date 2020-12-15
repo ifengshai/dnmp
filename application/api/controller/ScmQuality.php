@@ -750,8 +750,9 @@ class ScmQuality extends Scm
     {
         $check_id = $this->request->request('check_id');
         empty($check_id) && $this->error(__('质检单ID不能为空'), [], 403);
+
         $do_type = $this->request->request('do_type');
-        $row = $this->_check->get($check_id);
+
         if($check_id != 16971){
 
             empty($do_type) && $this->error(__('审核类型不能为空'), [], 403);
@@ -786,23 +787,13 @@ class ScmQuality extends Scm
                     if($check_id == 16971){print_r('ddddddddd');}
                     //查询质检信息
                     $count = $this->_logistics_info->where(['purchase_id' => $row['purchase_id'], 'is_check_order' => 0])->count();
-                    if($check_id == 16971){print_r('eeeeeeeee--'.$row['purchase_id'].'----'.$count);}
+                    if($check_id == 16971){print_r('eeeeeeeee');}
                     //修改采购单质检状态
-                    $saaa = $this->_purchase_order->allowField(true)->isUpdate(true, ['id' => $row['purchase_id']])->save(['check_status' => $count > 0 ? 1 : 2]);
-
-                    if($check_id == 16971){
-                        var_dump($saaa);
-                        if($saaa){
-                            print_r('rrrrr');
-                        }else{
-                            print_r('tttttttttt');
-                        }
-                    }
+                    $this->_purchase_order->allowField(true)->isUpdate(true, ['id' => $row['purchase_id']])->save(['check_status' => $count > 0 ? 1 : 2]);
                 }
-                if($check_id == 16971){print_r('ffffffffffffff');}
+                if($check_id == 16971){print_r('ffffffffffffff');exit;}
                 //查询质检单明细表有样品的数据
                 $list = $this->_check_item->where(['check_id' => $check_id, 'sample_num' => ['>', 0]])->select();
-                if($check_id == 16971){print_r('gggggggg');}
                 if ($list) {
                     //生成样品入库主表数据
                     $work_order_data = [
@@ -826,7 +817,6 @@ class ScmQuality extends Scm
                     }
                     $this->_sample_work_order_item->allowField(true)->saveAll($work_order_item_data);
                 }
-                if($check_id == 16971){print_r('hhhhhhhhhhh');}
 
                 //检测批次或采购单是否全部质检完成
                 $where = ['purchase_id' => $row['purchase_id'], 'is_check_order' => 0];
@@ -834,10 +824,9 @@ class ScmQuality extends Scm
                     $where['batch_id'] = $row['batch_id'];
                 }
                 $count = $this->_logistics_info->where($where)->count();
-                if($check_id == 16971){print_r('iiiiiiiiii');}
+
                 //检测是否有异常单
                 if ($count <= 0) {
-
                     $check_item_list = $this->_check
                         ->alias('a')
                         ->join(['fa_check_order_item' => 'b'], 'a.id=b.check_id')
@@ -849,8 +838,8 @@ class ScmQuality extends Scm
                         $purchase_item_list = $this->_purchase_order_item
                             ->field('sku,purchase_price')
                             ->where(['purchase_id' => $row['purchase_id']])
-                            ->column('purchase_price','sku');
-//                        $purchase_item_list = array_column($purchase_item_list, NULL, 'sku');
+                            ->select();
+                        $purchase_item_list = array_column($purchase_item_list, NULL, 'sku');
 
                         //获取采购单商品数据
                         $abnormal_item_save = [];
@@ -870,7 +859,7 @@ class ScmQuality extends Scm
                                 $is_error = 1;
                             }
                         }
-                        if($check_id == 16971){print_r('lllllllll');}
+
                         //新增收货异常主表数据
                         $abnormal_save = [
                             'error_number' => 'YC' . date('YmdHis') . rand(100, 999) . rand(100, 999),
@@ -881,20 +870,16 @@ class ScmQuality extends Scm
                             'is_error' => $is_error
                         ];
                         $this->_purchase_abnormal->allowField(true)->save($abnormal_save);
-                        if($check_id == 16971){print_r('wwwwwwww');}
+
                         //新增收货异常子表数据
                         array_walk($abnormal_item_save, function (&$value, $k, $p) {
                             $value = array_merge($value, $p);
                         }, ['abnormal_id' => $this->_purchase_abnormal->id]);
-                        if($check_id == 16971){print_r($abnormal_item_save);exit;}
+
                         $this->_purchase_abnormal_item->allowField(true)->saveAll($abnormal_item_save);
-                        if($check_id == 16971){print_r('qqqqqqqqqqq');exit;}
                     }
-                    if($check_id == 16971){print_r('jjjjjj');}
                 }
-                if($check_id == 16971){print_r('kkkkkkkkkkk');}
             } else { //审核拒绝关联操作
-                if($check_id == 16971){print_r('mmmmmmmmm');exit;}
                 //移除质检单条形码绑定关系
                 $code_clear = [
                     'sku' => '',
@@ -903,9 +888,8 @@ class ScmQuality extends Scm
                     'check_id' => 0
                 ];
                 $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['check_id' => $check_id])->save($code_clear);
-                if($check_id == 16971){print_r('nnnnnnnn');}
             }
-            if($check_id == 16971){print_r('oooooooooo');}
+
             $this->_check->commit();
             $this->_purchase_order->commit();
             $this->_logistics_info->commit();
