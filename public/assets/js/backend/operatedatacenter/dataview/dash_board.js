@@ -54,18 +54,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
             //     Controller.api.formatter.user_chart();
             //     Controller.api.formatter.user_change_chart();
             // });
-            $("#change_on_off").click(function () {
-                var obj_class = $(this).attr('class');
-                if(obj_class == 'fa fa-toggle-off'){
-                    $(this).removeClass('fa-toggle-off');
-                    $(this).addClass('fa-toggle-on');
-                    $(".question").css('display','block');
-                }else{
-                    $(this).removeClass('fa-toggle-on');
-                    $(this).addClass('fa-toggle-off');
-                    $(".question").css('display','none');
-                }
-            });
+            
             var table = $("#table");
 
             // 初始化表格
