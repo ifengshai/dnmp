@@ -886,7 +886,7 @@ class ScmQuality extends Scm
                         array_walk($abnormal_item_save, function (&$value, $k, $p) {
                             $value = array_merge($value, $p);
                         }, ['abnormal_id' => $this->_purchase_abnormal->id]);
-
+                        if($check_id == 16971){print_r($abnormal_item_save);exit;}
                         $this->_purchase_abnormal_item->allowField(true)->saveAll($abnormal_item_save);
                         if($check_id == 16971){print_r('qqqqqqqqqqq');exit;}
                     }
