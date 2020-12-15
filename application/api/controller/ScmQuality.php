@@ -342,7 +342,7 @@ class ScmQuality extends Scm
         //获取质检单商品数据
         $item_list = $this->_check_item
             ->where(['check_id' => $check_id])
-            ->field('sku,supplier_sku,arrivals_num,quantity_num,unqualified_num,sample_num,should_arrival_num')
+            ->field('sku,supplier_sku,arrivals_num,quantity_num,unqualified_num,sample_num,should_arrival_num,remark')
             ->select();
         $item_list = collection($item_list)->toArray();
 
