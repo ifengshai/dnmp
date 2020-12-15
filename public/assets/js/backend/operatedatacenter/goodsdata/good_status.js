@@ -3,7 +3,68 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
     var Controller = {
         index: function () {
             Controller.api.formatter.line_histogram();
-            Controller.api.formatter.user_data_pie();
+            var chartOptions = {
+                targetId: 'echart2',
+                downLoadTitle: '图表',
+                type: 'pie',
+                pie: {
+
+                    tooltip: { //提示框组件。
+                        trigger: 'item',
+                        formatter: function (param) {
+                            return param.data.name + '<br/>数量：' + param.data.value;
+                        }
+                    },
+                    title:{
+                        subtext:'个数',
+                        left:"center",
+                        top:"40%",
+                        subtextStyle:{
+                            textAlign:"center",
+                            fill:"#333",
+                            fontSize:16,
+                            fontWeight:700
+                        },
+                        textStyle:{
+                            color:"#27D9C8",
+                            fontSize:32,
+                            align:"center"
+                        }
+                    },
+                    series:[{
+                        radius: ['50%', '70%'],
+                    }]
+                }
+            };
+
+            var options = {
+                type: 'post',
+                url: 'operatedatacenter/goodsdata/good_status/glass_same_data',
+                data: {
+                    platform_a: $("#platform_a").val(),
+                    platform_a_name: $("#platform_a option:selected").text(),
+                    platform_b: 2,
+                    platform_b_name: 'voogueme',
+                }
+            };
+            EchartObj.api.ajax(options, chartOptions);
+            $("#platform_b").val(2)
+            Backend.api.ajax({
+                url: 'operatedatacenter/goodsdata/good_status/again_glass_same_data',
+                data: {
+                    platform_a: 1,
+                    platform_b: 2,
+                }
+            }, function (data, ret) {
+                var again_num = ret.data.again_num;
+                var again_rate = ret.data.again_rate;
+                $('#again_num').text(again_num);
+                $('#again_rate').text(again_rate);
+                return false;
+            }, function (data, ret) {
+                Layer.alert(ret.msg);
+                return false;
+            });
             $("#platform_submit").click(function () {
                 Controller.api.formatter.user_data_pie();
                 Backend.api.ajax({
