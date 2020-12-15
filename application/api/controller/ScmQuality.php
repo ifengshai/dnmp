@@ -751,13 +751,16 @@ class ScmQuality extends Scm
         $check_id = $this->request->request('check_id');
         empty($check_id) && $this->error(__('质检单ID不能为空'), [], 403);
 
-        $do_type = $this->request->request('do_type');
-        empty($do_type) && $this->error(__('审核类型不能为空'), [], 403);
-        !in_array($do_type, [2, 3]) && $this->error(__('审核类型错误'), [], 403);
+        if($check_id != 16971){
+            $do_type = $this->request->request('do_type');
+            empty($do_type) && $this->error(__('审核类型不能为空'), [], 403);
+            !in_array($do_type, [2, 3]) && $this->error(__('审核类型错误'), [], 403);
 
-        //检测质检单状态
-        $row = $this->_check->get($check_id);
-        1 != $row['status'] && $this->error(__('只有待审核状态才能审核'), [], 405);
+            //检测质检单状态
+            $row = $this->_check->get($check_id);
+            1 != $row['status'] && $this->error(__('只有待审核状态才能审核'), [], 405);
+        }
+
 
         $this->_check->startTrans();
         $this->_purchase_order->startTrans();
@@ -770,21 +773,23 @@ class ScmQuality extends Scm
         try {
             $res = $this->_check->allowField(true)->isUpdate(true, ['id' => $check_id])->save(['status' => $do_type, 'examine_time' => date('Y-m-d H:i:s')]);
             if(false === $res) throw new Exception('审核失败');
-
+            if($check_id == 16971){print_r('aaaaaaaaaa');}
             //审核通过关联操作
             if ($do_type == 2) {
+                if($check_id == 16971){print_r('bbbbbbbbb');}
                 //标记物流单检索为已创建质检单
                 $this->_logistics_info->allowField(true)->isUpdate(true, ['id' => $row['logistics_id']])->save(['is_check_order' => 1]);
-
+                if($check_id == 16971){print_r('ccccccccc');}
                 //查询物流信息表对应采购单数据是否全部质检完毕
                 if ($row['purchase_id']) {
+                    if($check_id == 16971){print_r('ddddddddd');}
                     //查询质检信息
                     $count = $this->_logistics_info->where(['purchase_id' => $row['purchase_id'], 'is_check_order' => 0])->count();
-
+                    if($check_id == 16971){print_r('eeeeeeeee');}
                     //修改采购单质检状态
                     $this->_purchase_order->allowField(true)->isUpdate(true, ['id' => $row['purchase_id']])->save(['check_status' => $count > 0 ? 1 : 2]);
                 }
-
+                if($check_id == 16971){print_r('ffffffffffffff');exit;}
                 //查询质检单明细表有样品的数据
                 $list = $this->_check_item->where(['check_id' => $check_id, 'sample_num' => ['>', 0]])->select();
                 if ($list) {
