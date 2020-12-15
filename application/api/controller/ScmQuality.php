@@ -761,7 +761,12 @@ class ScmQuality extends Scm
 
             1 != $row['status'] && $this->error(__('只有待审核状态才能审核'), [], 405);
         }
-
+        if($check_id == 16971){
+            $count = 0;
+            $this->_purchase_order->allowField(true)->isUpdate(true, ['id' => 10870])->save(['check_status' => $count > 0 ? 1 : 2]);
+            print_R('qqqqqqqqqq');
+            exit;
+        }
 
         $this->_check->startTrans();
         $this->_purchase_order->startTrans();
