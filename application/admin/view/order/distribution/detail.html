@@ -176,9 +176,9 @@
                                     <td rowspan="2">{:$result['os_add'] ?: $result['od_add']}</td>
                                     {/if}
                                     {if $result['pdcheck'] == 'on'}
-                                    <td rowspan="2">{:$result['pd'] ?? ''}</td>
-                                    {else/}
                                     <td>{:$result['pd_r'] ?? ''}</td>
+                                    {else/}
+                                    <td rowspan="2">{:$result['pd'] ?? ''}</td>
                                     {/if}
                                 </tr>
                                 <tr>
@@ -189,7 +189,7 @@
                                     {if $result['os_add'] && $result['od_add']}
                                     <td>{:$result['os_add'] ?? ''}</td>
                                     {/if}
-                                    {if $result['pdcheck'] != 'on'}
+                                    {if $result['pdcheck'] == 'on'}
                                     <td>{:$result['pd_l'] ?? ''}</td>
                                     {/if}                                    
                                 </tr>
