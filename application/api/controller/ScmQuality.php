@@ -837,7 +837,7 @@ class ScmQuality extends Scm
                 if($check_id == 16971){print_r('iiiiiiiiii');}
                 //检测是否有异常单
                 if ($count <= 0) {
-                    if($check_id == 16971){print_r('lllllllll');}
+                    if($check_id == 16971){print_r('lllllllll');exit;}
                     $check_item_list = $this->_check
                         ->alias('a')
                         ->join(['fa_check_order_item' => 'b'], 'a.id=b.check_id')
@@ -889,7 +889,7 @@ class ScmQuality extends Scm
 
                         $this->_purchase_abnormal_item->allowField(true)->saveAll($abnormal_item_save);
                     }
-                    if($check_id == 16971){print_r('jjjjjj');exit;}
+                    if($check_id == 16971){print_r('jjjjjj');}
                 }
                 if($check_id == 16971){print_r('kkkkkkkkkkk');}
             } else { //审核拒绝关联操作
