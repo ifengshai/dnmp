@@ -1352,7 +1352,7 @@ class ScmWarehouse extends Scm
                                         'change_type' => 16,
                                         'sku' => $v['sku'],
                                         'order_number' => $v['in_stock_number'],
-                                        'source' => 1,
+                                        'source' => 2,
                                         'stock_before' => $sku_item['stock'],
                                         'stock_change' => 0,
                                         'available_stock_before' => $sku_item['available_stock'],
@@ -1392,7 +1392,7 @@ class ScmWarehouse extends Scm
                                         'change_type' => 16,
                                         'sku' => $v['sku'],
                                         'order_number' => $v['in_stock_number'],
-                                        'source' => 1,
+                                        'source' => 2,
                                         'stock_before' => $sku_item['stock'],
                                         'stock_change' => 0,
                                         'available_stock_before' => $sku_item['available_stock'],
@@ -1420,17 +1420,22 @@ class ScmWarehouse extends Scm
                         } else {
                             //采购没有比例入库
                             $change_type = 17;
+
                             //记录没有采购比例直接入库的sku
-                            $this->_allocated->allowField(true)->save(['sku' => $v['sku'], 'change_num' => $v['in_stock_num'], 'create_time' => date('Y-m-d H:i:s')]);
+                            $this->_allocated
+                                ->allowField(true)
+                                ->save(['sku' => $v['sku'], 'change_num' => $v['in_stock_num'], 'create_time' => date('Y-m-d H:i:s')]);
 
                             $item_platform_sku = $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => 4])->find();
                             //sku没有同步meeloog站 无法添加虚拟库存 必须先同步
                             if (empty($item_platform_sku)) {
                                 throw new Exception('sku：' . $v['sku'] . '没有同步meeloog站，请先同步');
                             }
-                            $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $item_platform_sku['platform_type']])->setInc('stock', $v['in_stock_num']);
+                            $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => 4])->setInc('stock', $v['in_stock_num']);
+
                             //入库的时候减少待入库数量
                             $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => 4])->setDec('wait_instock_num', $v['in_stock_num']);
+
                             //插入日志表
                             $this->_stock_log->setData([
                                 'type' => 2,
@@ -1439,7 +1444,7 @@ class ScmWarehouse extends Scm
                                 'change_type' => 17,
                                 'sku' => $v['sku'],
                                 'order_number' => $v['in_stock_number'],
-                                'source' => 1,
+                                'source' => 2,
                                 'stock_before' => $sku_item['stock'],
                                 'stock_change' => 0,
                                 'available_stock_before' => $sku_item['available_stock'],
@@ -1478,7 +1483,7 @@ class ScmWarehouse extends Scm
                             'change_type' => 18,
                             'sku' => $v['sku'],
                             'order_number' => $v['in_stock_number'],
-                            'source' => 1,
+                            'source' => 2,
                             'stock_before' => $sku_item['stock'],
                             'stock_change' => 0,
                             'available_stock_before' => $sku_item['available_stock'],
@@ -1529,7 +1534,7 @@ class ScmWarehouse extends Scm
                                         'change_type' => 20,
                                         'sku' => $v['sku'],
                                         'order_number' => $v['in_stock_number'],
-                                        'source' => 1,
+                                        'source' => 2,
                                         'stock_before' => $sku_item['stock'],
                                         'stock_change' => 0,
                                         'available_stock_before' => $sku_item['available_stock'],
@@ -1564,7 +1569,7 @@ class ScmWarehouse extends Scm
                                         'change_type' => 20,
                                         'sku' => $v['sku'],
                                         'order_number' => $v['in_stock_number'],
-                                        'source' => 1,
+                                        'source' => 2,
                                         'stock_before' => $sku_item['stock'],
                                         'stock_change' => 0,
                                         'available_stock_before' => $sku_item['available_stock'],
@@ -1606,7 +1611,7 @@ class ScmWarehouse extends Scm
                                         'change_type' => 20,
                                         'sku' => $v['sku'],
                                         'order_number' => $v['in_stock_number'],
-                                        'source' => 1,
+                                        'source' => 2,
                                         'stock_before' => $sku_item['stock'],
                                         'stock_change' => 0,
                                         'available_stock_before' => $sku_item['available_stock'],
@@ -1641,7 +1646,7 @@ class ScmWarehouse extends Scm
                                         'change_type' => 20,
                                         'sku' => $v['sku'],
                                         'order_number' => $v['in_stock_number'],
-                                        'source' => 1,
+                                        'source' => 2,
                                         'stock_before' => $sku_item['stock'],
                                         'stock_change' => 0,
                                         'available_stock_before' => $sku_item['available_stock'],
@@ -1677,8 +1682,12 @@ class ScmWarehouse extends Scm
                     if ($v['sku']) {
                         //增加商品表里的商品库存、可用库存、留样库存
                         $stock_res = $this->_item->where($item_map)->inc('stock', $v['in_stock_num'])->inc('available_stock', $v['in_stock_num'])->inc('sample_num', $v['sample_num'])->update();
-                        //减少待入库数量
-                        $this->_item->where($item_map)->dec('wait_instock_num', $v['in_stock_num'])->update();
+
+                        //有采购单减少待入库数量
+                        if ($v['purchase_id']) {
+                            $this->_item->where($item_map)->dec('wait_instock_num', $v['in_stock_num'])->update();
+                        }
+
                         //插入日志表
                         $this->_stock_log->setData([
                             'type' => 2,
@@ -1687,7 +1696,7 @@ class ScmWarehouse extends Scm
                             'change_type' => $change_type,
                             'sku' => $v['sku'],
                             'order_number' => $v['in_stock_number'],
-                            'source' => 1,
+                            'source' => 2,
                             'stock_before' => $sku_item['stock'],
                             'stock_change' => $v['in_stock_num'],
                             'available_stock_before' => $sku_item['available_stock'],
@@ -2273,7 +2282,7 @@ class ScmWarehouse extends Scm
                             'change_type' => $v['error_qty'] > 0 ? 20 : 21,
                             'sku' => $v['sku'],
                             'order_number' => $v['inventory_id'],
-                            'source' => 1,
+                            'source' => 2,
                             'stock_before' => $sku_item['stock'],
                             'stock_change' => $v['error_qty'],
                             'available_stock_before' => $sku_item['available_stock'],
@@ -2327,7 +2336,7 @@ class ScmWarehouse extends Scm
                                         'change_type' => $v['error_qty'] > 0 ? 20 : 21,
                                         'sku' => $v['sku'],
                                         'order_number' => $v['inventory_id'],
-                                        'source' => 1,
+                                        'source' => 2,
                                         'stock_before' => $sku_item['stock'],
                                         'stock_change' => 0,
                                         'available_stock_before' => $sku_item['available_stock'],
@@ -2363,7 +2372,7 @@ class ScmWarehouse extends Scm
                                         'change_type' => $v['error_qty'] > 0 ? 20 : 21,
                                         'sku' => $v['sku'],
                                         'order_number' => $v['inventory_id'],
-                                        'source' => 1,
+                                        'source' => 2,
                                         'stock_before' => $sku_item['stock'],
                                         'stock_change' => 0,
                                         'available_stock_before' => $sku_item['available_stock'],
@@ -2402,7 +2411,7 @@ class ScmWarehouse extends Scm
                                         'change_type' => $v['error_qty'] > 0 ? 20 : 21,
                                         'sku' => $v['sku'],
                                         'order_number' => $v['inventory_id'],
-                                        'source' => 1,
+                                        'source' => 2,
                                         'stock_before' => $sku_item['stock'],
                                         'stock_change' => 0,
                                         'available_stock_before' => $sku_item['available_stock'],
@@ -2438,7 +2447,7 @@ class ScmWarehouse extends Scm
                                         'change_type' => $v['error_qty'] > 0 ? 20 : 21,
                                         'sku' => $v['sku'],
                                         'order_number' => $v['inventory_id'],
-                                        'source' => 1,
+                                        'source' => 2,
                                         'stock_before' => $sku_item['stock'],
                                         'stock_change' => 0,
                                         'available_stock_before' => $sku_item['available_stock'],
