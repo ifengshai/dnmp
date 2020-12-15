@@ -151,13 +151,15 @@
 
         </div>
     </div>
+    {if condition="$type eq 0"}
     <div class="form-group layer-footer">
         <label class="control-label col-xs-12 col-sm-2"></label>
         <div class="col-xs-12 col-sm-8">
-            <button type="submit" value="Submitted" {if condition="$row['status'] eq 1"}disabled{/if} class="btn btn-sub" style='background-color: dimgrey;width: 120px;color: white;font-size: 14px;font-weight: 700;'>{:__('Submitted')}</button>
-            <button type="submit" value="Processing" {if condition="$row['status'] eq 2"}disabled{/if} class="btn btn-sub" style='background-color: dodgerblue;width: 120px;color: white;font-size: 14px;font-weight: 700;'>{:__('Processing')}</button>
+<!--            <button type="submit" value="Submitted" {if condition="$row['status'] eq 1"}disabled{/if} class="btn btn-sub" style='background-color: dimgrey;width: 120px;color: white;font-size: 14px;font-weight: 700;'>{:__('Submitted')}</button>-->
+<!--            <button type="submit" value="Processing" {if condition="$row['status'] eq 2"}disabled{/if} class="btn btn-sub" style='background-color: dodgerblue;width: 120px;color: white;font-size: 14px;font-weight: 700;'>{:__('Processing')}</button>-->
             <button type="submit" value="Completed"  {if condition="$row['status'] eq 3"}disabled{/if} class="btn btn-sub" style='background-color:indianred ;width: 120px;color: white;font-size: 14px;font-weight: 700;'>{:__('Completed ')}</button>
         </div>
     </div>
+    {/if}
 </form>
 
