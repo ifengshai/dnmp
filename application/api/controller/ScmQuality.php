@@ -771,7 +771,7 @@ class ScmQuality extends Scm
         $this->_purchase_abnormal_item->startTrans();
         $this->_sample_work_order_item->startTrans();
         try {
-//            $res = $this->_check->allowField(true)->isUpdate(true, ['id' => $check_id])->save(['status' => $do_type, 'examine_time' => date('Y-m-d H:i:s')]);
+            $res = $this->_check->allowField(true)->isUpdate(true, ['id' => $check_id])->save(['status' => 2, 'examine_time' => date('Y-m-d H:i:s')]);
 //            if(false === $res) throw new Exception('审核失败');
             if($check_id == 16971){print_r('aaaaaaaaaa');exit;}
             //审核通过关联操作
