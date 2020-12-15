@@ -148,7 +148,7 @@ class OrderData extends Backend
                                    
                                     $order_ids = $this->order->where('site=' . $site . ' and increment_id=' . $v['increment_id'])->value('id');
                                     $order_ids2 = $this->order->where('site=' . $site . ' and entity_id=' . $v['entity_id'])->value('id');
-                                    if ($order_ids || $order_ids2) {
+                                    if ($order_ids) {
                                         $this->order->where('site=' . $site . ' and increment_id=' . $v['increment_id'])->delete();
                                         $this->order->where('site=' . $site . ' and entity_id=' . $v['entity_id'])->delete();
                                         $this->orderprocess->where('site=' . $site . ' and increment_id=' . $v['increment_id'])->delete();
@@ -156,10 +156,15 @@ class OrderData extends Backend
                                         //删除子订单表
                                         $this->orderitemoption->where('site=' . $site . ' and order_id=' . $order_ids)->delete();
                                         $this->orderitemprocess->where('site=' . $site . ' and order_id=' . $order_ids)->delete();
+                                       
+                                    }
+
+                                    if ($order_ids2) {
                                         $this->orderitemoption->where('site=' . $site . ' and order_id=' . $order_ids2)->delete();
                                         $this->orderitemprocess->where('site=' . $site . ' and order_id=' . $order_ids2)->delete();
                                     }
 
+                                    echo 111;
                                     $params['entity_id'] = $v['entity_id'];
                                     $params['site'] = $site;
                                     $params['increment_id'] = $v['increment_id'];
