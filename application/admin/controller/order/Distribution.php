@@ -231,24 +231,22 @@ class Distribution extends Backend
             }
             $this->request->get(['filter' => json_encode($filter)]);
 
+            //子单工单未处理
+            $item_order_numbers = $this->_work_order_change_sku
+                ->alias('a')
+                ->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')
+                ->where([
+                    'a.change_type' => ['in', [1, 2, 3]],//1更改镜架  2更改镜片 3取消订单
+                    'b.work_status' => ['in', [1, 2, 3, 5]]//工单未处理
+                ])
+                ->order('a.id', 'desc')
+                ->group('a.item_order_number')
+                ->column('a.item_order_number');
+
             //跟单
-            $item_order_numbers = [];
-            if (8 == $label) {
-                //子单工单未处理
-                $item_order_numbers = $this->_work_order_change_sku
-                    ->alias('a')
-                    ->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')
-                    ->where([
-                        'a.change_type' => ['in', [1, 2, 3]],//1更改镜架  2更改镜片 3取消订单
-                        'b.work_status' => ['in', [1, 2, 3, 5]]//工单未处理
-                    ])
-                    ->order('a.id', 'desc')
-                    ->group('a.item_order_number')
-                    ->column('a.item_order_number');
-                if ($item_order_numbers) {
-                    $item_process_id_work = $this->model->where(['item_order_number' => ['in', $item_order_numbers]])->column('id');
-                    $item_process_ids = array_unique(array_merge($item_process_ids, $item_process_id_work));
-                }
+            if (8 == $label && $item_order_numbers) {
+                $item_process_id_work = $this->model->where(['item_order_number' => ['in', $item_order_numbers]])->column('id');
+                $item_process_ids = array_unique(array_merge($item_process_ids, $item_process_id_work));
             }
 
             if ($item_process_ids) {
