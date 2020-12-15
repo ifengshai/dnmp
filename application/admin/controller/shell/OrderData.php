@@ -1267,7 +1267,7 @@ class OrderData extends Backend
         $list = collection($list)->toArray();
         $params = [];
         foreach ($list as $k => $v) {
-            $qty = $this->orderitemoption->where(['magento_order_id' => $v['entity_id']])->sum('qty');
+            $qty = $this->orderitemoption->where(['magento_order_id' => $v['entity_id'],'site' => $v['site']])->sum('qty');
             $params[$k]['total_qty_ordered'] = $qty;
             $params[$k]['id'] = $v['id'];
             echo $k . "\n";
