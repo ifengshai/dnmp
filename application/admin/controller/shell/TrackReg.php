@@ -31,6 +31,9 @@ class TrackReg extends Backend
         $this->reg_shipment('database.db_voogueme', 2);
         $this->reg_shipment('database.db_nihao', 3);
         $this->reg_shipment('database.db_meeloog', 4);
+        $this->reg_shipment('database.db_zeelool_es', 9);
+        $this->reg_shipment('database.db_zeelool_de', 10);
+        $this->reg_shipment('database.db_zeelool_jp', 11);
     }
 
     /**
@@ -50,7 +53,7 @@ class TrackReg extends Backend
         foreach ($order_shipment as $k => $v) {
             $title = strtolower(str_replace(' ', '-', $v['title']));
             //根据物流单号查询发货物流渠道
-            $shipment_data_type = Db::connect('database.db_delivery')->table('ld_deliver_order')->where(['track_number' => $v['track_number'], 'increment_id' => $v['increment_id']])->value('agent_way_title');
+            // $shipment_data_type = Db::connect('database.db_delivery')->table('ld_deliver_order')->where(['track_number' => $v['track_number'], 'increment_id' => $v['increment_id']])->value('agent_way_title');
 
             $carrier = $this->getCarrier($title);
             $shipment_reg[$k]['number'] = $v['track_number'];
@@ -58,29 +61,29 @@ class TrackReg extends Backend
             $shipment_reg[$k]['order_id'] = $v['order_id'];
 
 
-            $list[$k]['order_node'] = 2;
-            $list[$k]['node_type'] = 7; //出库
-            $list[$k]['create_time'] = $v['created_at'];
-            $list[$k]['site'] = $site_type;
-            $list[$k]['order_id'] = $v['order_id'];
-            $list[$k]['order_number'] = $v['increment_id'];
-            $list[$k]['shipment_type'] = $v['title'];
-            $list[$k]['shipment_data_type'] = $shipment_data_type;
-            $list[$k]['track_number'] = $v['track_number'];
-            $list[$k]['content'] = 'Leave warehouse, Waiting for being picked up.';
+            // $list[$k]['order_node'] = 2;
+            // $list[$k]['node_type'] = 7; //出库
+            // $list[$k]['create_time'] = $v['created_at'];
+            // $list[$k]['site'] = $site_type;
+            // $list[$k]['order_id'] = $v['order_id'];
+            // $list[$k]['order_number'] = $v['increment_id'];
+            // $list[$k]['shipment_type'] = $v['title'];
+            // $list[$k]['shipment_data_type'] = $shipment_data_type;
+            // $list[$k]['track_number'] = $v['track_number'];
+            // $list[$k]['content'] = 'Leave warehouse, Waiting for being picked up.';
 
-            $data['order_node'] = 2;
-            $data['node_type'] = 7;
-            $data['update_time'] = $v['created_at'];
-            $data['shipment_type'] = $v['title'];
-            $data['shipment_data_type'] = $shipment_data_type;
-            $data['track_number'] = $v['track_number'];
-            $data['delivery_time'] = $v['created_at'];
-            Db::name('order_node')->where(['order_id' => $v['order_id'], 'site' => $site_type])->update($data);
+            // $data['order_node'] = 2;
+            // $data['node_type'] = 7;
+            // $data['update_time'] = $v['created_at'];
+            // $data['shipment_type'] = $v['title'];
+            // $data['shipment_data_type'] = $shipment_data_type;
+            // $data['track_number'] = $v['track_number'];
+            // $data['delivery_time'] = $v['created_at'];
+            // Db::name('order_node')->where(['order_id' => $v['order_id'], 'site' => $site_type])->update($data);
         }
-        if ($list) {
-            $this->ordernodedetail->saveAll($list);
-        }
+        // if ($list) {
+        //     $this->ordernodedetail->saveAll($list);
+        // }
 
         $order_group = array_chunk($shipment_reg, 40);
 
