@@ -944,6 +944,7 @@ class ScmWarehouse extends Scm
                     //编辑入库单主表
                     $_in_stock_data['platform_id'] = $platform_id;
                     $purchase_id = 0;//无采购单id
+                    $check_data = [];//质检单子表数据
                 } else {
                     //无站点，是质检单入口
                     $check_order_number = $this->request->request("check_order_number");
@@ -957,19 +958,19 @@ class ScmWarehouse extends Scm
                     $_in_stock_data['check_id'] = $check_info['id'];
                     $_in_stock_data['replenish_id'] = $check_info['replenish_id'];//补货单ID
                     $purchase_id = $check_info['purchase_id'];//有采购单id
+
+                    //获取质检单子表数据
+                    $check_data = $this->_check_item
+                        ->where('check_id', $_in_stock_info['check_id'])
+                        ->column('sample_num', 'sku');
                 }
 
                 //更新数据
                 $result = $this->_in_stock->allowField(true)->save($_in_stock_data, ['id' => $in_stock_id]);
+
                 //添加入库商品信息
                 if ($result !== false) {
                     $where_code = [];
-
-                    //获取质检单留样数量
-                    $check_data = $this->_check_item
-                        ->where('check_id', $_in_stock_info['check_id'])
-                        ->column('sample_num', 'sku');
-
                     foreach (array_filter($item_sku) as $k => $v) {
                         $item_save['purchase_id'] = $purchase_id;//采购单id
                         $item_save['in_stock_num'] = $v['in_stock_num'];//入库数量
@@ -995,7 +996,6 @@ class ScmWarehouse extends Scm
                     //入库单绑定条形码执行
                     $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => ['in', $where_code]])->save(['in_stock_id' => $in_stock_id]);
                 }
-
             } else {
                 //无入库单ID，新建入库单
                 //组装新增数据
@@ -1048,6 +1048,12 @@ class ScmWarehouse extends Scm
                     if (empty($check_info)) {
                         throw new Exception('质检单不存在');
                     }
+
+                    //获取质检单子表数据
+                    $check_data = $this->_check_item
+                        ->where('check_id', $check_info['id'])
+                        ->column('sample_num', 'sku');
+
                     $params['check_id'] = $check_info['id'];
                     $params['replenish_id'] = $check_info['replenish_id'];//补货单ID
                     $purchase_id = $check_info['purchase_id'];//有采购单id
@@ -1062,7 +1068,9 @@ class ScmWarehouse extends Scm
                             $data[$k]['sku'] = $v['sku'];
                             $data[$k]['purchase_id'] = $purchase_id;//采购单id
                             $data[$k]['in_stock_num'] = $v['in_stock_num'];//入库数量
-                            $data[$k]['in_stock_id'] = $this->_in_stock->id;
+                            $data[$k]['in_stock_id'] = $this->_in_stock->id;//入库单ID
+                            $data[$k]['sample_num'] = $check_data[$v['sku']] ?: 0;//留样数量
+
                             //入库单绑定条形码数组组装
                             foreach ($v['sku_agg'] as $k_code => $v_code) {
                                 if (!empty($v_code['code'])) {
