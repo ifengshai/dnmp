@@ -184,6 +184,7 @@ class OrderData extends Backend
                                     $params['created_at'] = strtotime($v['created_at']) + 28800;
                                     $params['updated_at'] = strtotime($v['updated_at']) + 28800;
                                     //插入订单主表
+                                    dump($params);
                                     $order_id = $this->order->insertGetId($params);
                                     $order_params[$k]['site'] = $site;
                                     $order_params[$k]['order_id'] = $order_id;
