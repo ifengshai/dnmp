@@ -86,6 +86,8 @@ class TrackReg extends Backend
         // }
         if($shipment_reg) {
             $order_group = array_chunk($shipment_reg, 40);
+        } else {
+            return true;
         }
         
         $trackingConnector = new TrackingConnector($this->apiKey);
