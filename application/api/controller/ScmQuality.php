@@ -761,12 +761,7 @@ class ScmQuality extends Scm
 
             1 != $row['status'] && $this->error(__('只有待审核状态才能审核'), [], 405);
         }
-        if($check_id == 16971){
-            $count = 0;
-            $this->_purchase_order->allowField(true)->isUpdate(true, ['id' => 10870])->save(['check_status' => $count > 0 ? 1 : 2]);
-            print_R('qqqqqqqqqq');
-            exit;
-        }
+     
 
         $this->_check->startTrans();
         $this->_purchase_order->startTrans();
@@ -793,7 +788,14 @@ class ScmQuality extends Scm
                     $count = $this->_logistics_info->where(['purchase_id' => $row['purchase_id'], 'is_check_order' => 0])->count();
                     if($check_id == 16971){print_r('eeeeeeeee--'.$row['purchase_id'].'----'.$count);}
                     //修改采购单质检状态
-                    $this->_purchase_order->allowField(true)->isUpdate(true, ['id' => $row['purchase_id']])->save(['check_status' => $count > 0 ? 1 : 2]);
+                    $saaa = $this->_purchase_order->allowField(true)->isUpdate(true, ['id' => $row['purchase_id']])->save(['check_status' => $count > 0 ? 1 : 2]);
+                    if($check_id == 16971){
+                        if($saaa){
+                            print_r('rrrrr');
+                        }else{
+                            print_r('tttttttttt');
+                        }
+                    }
                 }
                 if($check_id == 16971){print_r('ffffffffffffff');exit;}
                 //查询质检单明细表有样品的数据
