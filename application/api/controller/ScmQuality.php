@@ -887,7 +887,7 @@ class ScmQuality extends Scm
                 ];
                 $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['check_id' => $check_id])->save($code_clear);
             }
-
+            if($check_id == 16971){print_r('hhhhhhhhhhh');exit;}
             $this->_check->commit();
             $this->_purchase_order->commit();
             $this->_logistics_info->commit();
