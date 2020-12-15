@@ -143,6 +143,21 @@ class OrderData extends Backend
                                 $params = [];
                                 $order_params = [];
                                 foreach ($payload['data'] as $k => $v) {
+                                   
+                                    $order_ids = $this->order->where('site=' . $site . ' and increment_id=' . $v['increment_id'])->value('id');
+                                    $order_ids2 = $this->order->where('site=' . $site . ' and entity_id=' . $v['entity_id'])->value('id');
+                                    if ($order_ids) {
+                                        $this->order->where('site=' . $site . ' and increment_id=' . $v['increment_id'])->delete();
+                                        $this->order->where('site=' . $site . ' and entity_id=' . $v['entity_id'])->delete();
+                                        $this->orderprocess->where('site=' . $site . ' and increment_id=' . $v['increment_id'])->delete();
+                                        $this->orderprocess->where('site=' . $site . ' and entity_id=' . $v['entity_id'])->delete();
+                                        //删除子订单表
+                                        $this->orderitemoption->where('site=' . $site . ' and order_id=' . $order_ids)->delete();
+                                        $this->orderitemprocess->where('site=' . $site . ' and order_id=' . $order_ids)->delete();
+                                        $this->orderitemoption->where('site=' . $site . ' and order_id=' . $order_ids2)->delete();
+                                        $this->orderitemprocess->where('site=' . $site . ' and order_id=' . $order_ids2)->delete();
+                                    }
+
                                     $params['entity_id'] = $v['entity_id'];
                                     $params['site'] = $site;
                                     $params['increment_id'] = $v['increment_id'];
@@ -375,6 +390,7 @@ class OrderData extends Backend
         $arr['od_cyl'] = $options_params['od_cyl'] ?: '';;
         $arr['os_cyl'] = $options_params['os_cyl'] ?: '';;
         $arr['od_axis'] = $options_params['od_axis'];
+        $arr['os_axis'] = $options_params['os_axis'];
         $arr['pd_l'] = $options_params['pd_l'];
         $arr['pd_r'] = $options_params['pd_r'];
         $arr['pd'] = $options_params['pd'];
@@ -464,6 +480,7 @@ class OrderData extends Backend
         $arr['od_cyl'] = $options_params['od_cyl'] ?: '';;
         $arr['os_cyl'] = $options_params['os_cyl'] ?: '';;
         $arr['od_axis'] = $options_params['od_axis'];
+        $arr['os_axis'] = $options_params['os_axis'];
         $arr['pd_l'] = $options_params['pd_l'];
         $arr['pd_r'] = $options_params['pd_r'];
         $arr['pd'] = $options_params['pd'];
@@ -547,6 +564,7 @@ class OrderData extends Backend
         $arr['od_cyl'] = $options_params['od_cyl'] ?: '';;
         $arr['os_cyl'] = $options_params['os_cyl'] ?: '';;
         $arr['od_axis'] = $options_params['od_axis'];
+        $arr['os_axis'] = $options_params['os_axis'];
         $arr['pd_l'] = $options_params['pd_l'];
         $arr['pd_r'] = $options_params['pd_r'];
         $arr['pd'] = $options_params['pd'];
@@ -630,6 +648,7 @@ class OrderData extends Backend
         $arr['od_cyl'] = $options_params['od_cyl'] ?: '';;
         $arr['os_cyl'] = $options_params['os_cyl'] ?: '';;
         $arr['od_axis'] = $options_params['od_axis'];
+        $arr['os_axis'] = $options_params['os_axis'];
         $arr['pd_l'] = $options_params['pd_l'];
         $arr['pd_r'] = $options_params['pd_r'];
         $arr['pd'] = $options_params['pd'];
@@ -712,6 +731,7 @@ class OrderData extends Backend
         $arr['od_cyl'] = $options_params['od_cyl'] ?: '';;
         $arr['os_cyl'] = $options_params['os_cyl'] ?: '';;
         $arr['od_axis'] = $options_params['od_axis'];
+        $arr['os_axis'] = $options_params['os_axis'];
         $arr['pd_l'] = $options_params['pd_l'];
         $arr['pd_r'] = $options_params['pd_r'];
         $arr['pd'] = $options_params['pd'];
@@ -804,6 +824,7 @@ class OrderData extends Backend
         $arr['od_cyl'] = $options_params['od_cyl'] ?: '';;
         $arr['os_cyl'] = $options_params['os_cyl'] ?: '';;
         $arr['od_axis'] = $options_params['od_axis'];
+        $arr['os_axis'] = $options_params['os_axis'];
         $arr['pd_l'] = $options_params['pd_l'];
         $arr['pd_r'] = $options_params['pd_r'];
         $arr['pd'] = $options_params['pd'];
@@ -888,6 +909,7 @@ class OrderData extends Backend
         $arr['od_cyl'] = $options_params['od_cyl'] ?: '';;
         $arr['os_cyl'] = $options_params['os_cyl'] ?: '';;
         $arr['od_axis'] = $options_params['od_axis'];
+        $arr['os_axis'] = $options_params['os_axis'];
         $arr['pd_l'] = $options_params['pd_l'];
         $arr['pd_r'] = $options_params['pd_r'];
         $arr['pd'] = $options_params['pd'];
@@ -974,6 +996,7 @@ class OrderData extends Backend
         $arr['od_cyl'] = $options_params['od_cyl'] ?: '';;
         $arr['os_cyl'] = $options_params['os_cyl'] ?: '';;
         $arr['od_axis'] = $options_params['od_axis'];
+        $arr['os_axis'] = $options_params['os_axis'];
         $arr['pd_l'] = $options_params['pd_l'];
         $arr['pd_r'] = $options_params['pd_r'];
         $arr['pd'] = $options_params['pd'];
