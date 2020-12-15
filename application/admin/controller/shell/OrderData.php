@@ -1015,7 +1015,8 @@ class OrderData extends Backend
             $arr['is_custom_lens'] = 1;
         }
 
-        if ($params['lens_number'] == '10000000') {
+        //仅镜框
+        if ($params['lens_number'] == '10000000' || !$params['lens_number']) {
             $arr['order_prescription_type'] = 1;
         }
 
