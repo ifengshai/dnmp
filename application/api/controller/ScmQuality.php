@@ -881,13 +881,14 @@ class ScmQuality extends Scm
                             'is_error' => $is_error
                         ];
                         $this->_purchase_abnormal->allowField(true)->save($abnormal_save);
-                        if($check_id == 16971){print_r('wwwwwwww');exit;}
+                        if($check_id == 16971){print_r('wwwwwwww');}
                         //新增收货异常子表数据
                         array_walk($abnormal_item_save, function (&$value, $k, $p) {
                             $value = array_merge($value, $p);
                         }, ['abnormal_id' => $this->_purchase_abnormal->id]);
 
                         $this->_purchase_abnormal_item->allowField(true)->saveAll($abnormal_item_save);
+                        if($check_id == 16971){print_r('qqqqqqqqqqq');exit;}
                     }
                     if($check_id == 16971){print_r('jjjjjj');}
                 }
