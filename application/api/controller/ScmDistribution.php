@@ -353,11 +353,23 @@ class ScmDistribution extends Scm
         ;
         if($change_lens){
             $change_lens = $change_lens->toArray();
+
+            //处理双pd
             if($change_lens['pd_l'] && $change_lens['pd_r']){
+                $change_lens['pdcheck'] = 'on';
                 $change_lens['pd'] = '';
             }else{
+                $change_lens['pdcheck'] = '';
                 $change_lens['pd'] = $change_lens['pd_r'] ?: $change_lens['pd_l'];
             }
+
+            //处理斜视值
+            if ($change_lens['od_pv'] || $change_lens['os_pv']) {
+                $change_lens['prismcheck'] = 'on';
+            } else {
+                $change_lens['prismcheck'] = '';
+            }
+
             $option_info = array_merge($option_info,$change_lens);
         }
 
@@ -627,7 +639,7 @@ class ScmDistribution extends Scm
                     'number_type'               => 2,
                     'order_number'              => $item_order_number,
                     'distribution_stock_before' => $item_before['distribution_occupy_stock'],
-                    'distribution_stock_change' => -1,
+                    'distribution_stock_change' => 1,
                     'create_person'             => $this->auth->nickname,
                     'create_time'               => time()
                 ]);
