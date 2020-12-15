@@ -737,7 +737,7 @@ class ScmQuality extends Scm
         }
         $res ? $this->success('取消成功', [], 200) : $this->error(__('取消失败'), [], 404);
     }
-
+    
     /**
      * 审核质检
      *
@@ -752,12 +752,12 @@ class ScmQuality extends Scm
         empty($check_id) && $this->error(__('质检单ID不能为空'), [], 403);
 
         $do_type = $this->request->request('do_type');
-//        empty($do_type) && $this->error(__('审核类型不能为空'), [], 403);
-//        !in_array($do_type, [2, 3]) && $this->error(__('审核类型错误'), [], 403);
+        empty($do_type) && $this->error(__('审核类型不能为空'), [], 403);
+        !in_array($do_type, [2, 3]) && $this->error(__('审核类型错误'), [], 403);
 
         //检测质检单状态
         $row = $this->_check->get($check_id);
-//        1 != $row['status'] && $this->error(__('只有待审核状态才能审核'), [], 405);
+        1 != $row['status'] && $this->error(__('只有待审核状态才能审核'), [], 405);
 
         $this->_check->startTrans();
         $this->_purchase_order->startTrans();
@@ -880,7 +880,7 @@ class ScmQuality extends Scm
                 ];
                 $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['check_id' => $check_id])->save($code_clear);
             }
-            if($check_id == 16971){print_r('bbbbbbbbb');exit;}
+
             $this->_check->commit();
             $this->_purchase_order->commit();
             $this->_logistics_info->commit();
