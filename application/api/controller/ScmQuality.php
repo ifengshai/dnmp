@@ -786,7 +786,7 @@ class ScmQuality extends Scm
                     if($check_id == 16971){print_r('ddddddddd');}
                     //查询质检信息
                     $count = $this->_logistics_info->where(['purchase_id' => $row['purchase_id'], 'is_check_order' => 0])->count();
-                    if($check_id == 16971){print_r('eeeeeeeee');}
+                    if($check_id == 16971){print_r('eeeeeeeee--'.$row['purchase_id'].'----'.$count);}
                     //修改采购单质检状态
                     $this->_purchase_order->allowField(true)->isUpdate(true, ['id' => $row['purchase_id']])->save(['check_status' => $count > 0 ? 1 : 2]);
                 }
