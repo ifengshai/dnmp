@@ -293,6 +293,7 @@ class OrderReturn extends Backend
      */
     public function search(Request $request)
     {
+
         $order_platform = intval(input('order_platform', 1));
         $customer_email = input('email', '');
         if ($request->isPost()) {
@@ -323,8 +324,20 @@ class OrderReturn extends Backend
             if ($customer_name) {
                 $customer_name = explode(' ', $customer_name);
             }
+            //如果邮箱不为空,查询该邮箱下的所有邮件信息
+            if (!empty($customer_email)){
+                $email_select = Db::table('fa_zendesk ze')
+                    ->join("mojing.fa_admin ad",'ze.due_id = ad.id','left')
+                    ->field('ze.id as ze_id,ze.ticket_id,ze.subject,ze.to_email,ze.due_id,ze.create_time,ze.update_time,ze.status as ze_status,ad.nickname')
+                    ->where('ze.email',$customer_email)
+                    ->select();
+                $this->assign('email_select',$email_select);
+            }
+
             //求出用户的所有订单信息
             $customer = (new SaleAfterTask())->getCustomerEmail($order_platform, $increment_id, $customer_name, $customer_phone, $track_number, $transaction_id, $customer_email);
+
+
             if (!$customer) {
                 return json(['code' => 0,'msg' => '找不到订单信息，请重新尝试']);
                 // $this->error('找不到订单信息，请重新尝试', 'saleaftermanage/order_return/search?ref=addtabs');
@@ -513,6 +526,8 @@ class OrderReturn extends Backend
             $html = $this->view->fetch('test');
             return json(['code' => 1,'data' => $html]);
         }
+
+
         // $serviceArr = config('search.platform');
         // $sessionId  = session('admin.id');
         // foreach ($serviceArr as $key => $kv) {
@@ -524,8 +539,17 @@ class OrderReturn extends Backend
         // if ($default) {
         //     $this->view->assign("default", $default);
         // }
+        $ids  = input('param.ids');
+        if (!empty($ids)){
+//            $row = \app\common\model\OcCustomerAfterSalesWorkOrder::get($ids)->field('increment_id,email')->find()->toArray();
+            $row =   Db::table('zeelool.oc_customer_after_sales_work_order oc')->where('id',$ids)->find();
+            $this->view->assign("customer_email", $row['email']);
+        }else{
+            $row = null;
+            $this->view->assign("customer_email", $customer_email);
+        }
         $this->view->assign("order_platform", $order_platform);
-        $this->view->assign("customer_email", $customer_email);
+        $this->view->assign("increment_id", $row['increment_id']);
         $this->view->assign("orderPlatformList", (new MagentoPlatform())->getOrderPlatformList());
         return $this->view->fetch();
     }

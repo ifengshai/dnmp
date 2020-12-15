@@ -2,6 +2,7 @@
 
 namespace app\admin\controller;
 
+use app\admin\model\itemmanage\ItemPlatformSku;
 use app\common\controller\Backend;
 use think\Db;
 
@@ -186,4 +187,204 @@ class Test01 extends Backend
         }
         echo "ok";
     }
+
+    public function test99()
+    {
+        // $yes_date = date("Y-m-d",strtotime("-1 day"));
+        // $yestime_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $yes_date . "'")];
+        // $yesterday_shoppingcart_total_data = Db::connect('database.db_zeelool')
+        //     ->table('sales_flat_quote')
+        //     ->where($yestime_where)
+        //     ->where('base_grand_total','>',0)
+        //     ->count();
+        // dump($yesterday_shoppingcart_total_data);
+        // $yesterday_shoppingcart_total_data1 = Db::connect('database.db_zeelool')
+        //     ->table('sales_flat_quote')
+        //     ->where($yestime_where)
+        //     ->where('base_grand_total','>',0)
+        //     ->column('entity_id');
+        // // dump($yesterday_shoppingcart_total_data1);
+        // $quote_where1['quote_id'] = ['in',$yesterday_shoppingcart_total_data1];
+        // $order_where['order_type'] = 1;
+        // $order_success_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        // $yes_date = date("Y-m-d",strtotime("-1 day"));
+        // $yestime_where = [];
+        // $yestime_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $yes_date . "'")];
+        // $yesterday_order_success_data1 = Db::connect('database.db_zeelool')
+        //     ->table('sales_flat_order')
+        //     ->where($quote_where1)
+        //     ->where($yestime_where)
+        //     ->where($order_where)
+        //     ->where($order_success_where)
+        //     ->count();
+        // dump($yesterday_order_success_data1);
+        // //昨天购物车转化率data
+        // $yesterday_shoppingcart_conversion_data     = @round(($yesterday_order_success_data1 / $yesterday_shoppingcart_total_data), 4) * 100;
+        // dump($yesterday_shoppingcart_conversion_data);
+
+        $order_where['o.order_type'] = 1;
+        $order_success_where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        $yes_date = date("Y-m-d", strtotime("-1 day"));
+        $yestime_where = [];
+        $yestime_where[] = ['exp', Db::raw("DATE_FORMAT(o.created_at, '%Y-%m-%d') = '" . $yes_date . "'")];
+        $yestime_wheres[] = ['exp', Db::raw("DATE_FORMAT(p.created_at, '%Y-%m-%d') = '" . $yes_date . "'")];
+        $yesterday_order_success_data1 = Db::connect('database.db_zeelool')->table('sales_flat_order')
+            ->alias('o')
+            ->join('sales_flat_quote p', 'o.quote_id=p.entity_id')
+            ->where($yestime_wheres)
+            ->where('p.base_grand_total', '>', 0)
+            ->where($yestime_where)
+            ->where($order_where)
+            ->where($order_success_where)
+            ->count();
+        //过去7天从新增购物车中成功支付数
+        $seven_start = date("Y-m-d", strtotime("-7 day"));
+        $seven_end = date("Y-m-d 23:59:59", strtotime("-1 day"));
+        $sev_where['o.created_at'] = $sev_where1['updated_at'] = ['between', [$seven_start, $seven_end]];
+        $sev_wheres['p.created_at'] = $sev_where1['updated_at'] = ['between', [$seven_start, $seven_end]];
+        $pastsevenday_order_success_data1 = Db::connect('database.db_zeelool')->table('sales_flat_order')
+            ->alias('o')
+            ->join('sales_flat_quote p', 'o.quote_id=p.entity_id')
+            ->where($sev_wheres)
+            ->where('p.base_grand_total', '>', 0)
+            ->where($sev_where)
+            ->where($order_where)
+            ->where($order_success_where)
+            ->count();
+        dump($yesterday_order_success_data1);
+        dump($pastsevenday_order_success_data1);
+    }
+
+    public function test100()
+    {
+        $now_date = date('Y-m-d');
+        $now_date = '2020-11-29';
+        $start = $end = $time_str = $now_date;
+
+        $model = new \app\admin\model\operatedatacenter\Zeelool;
+        //获取session
+        $ga_result = $model->ga_hour_data($start, $end);
+        dump($ga_result);
+
+        $now_date = date('Y-m-d');
+        $start = $end = $time_str = $now_date;
+        //获取session
+        $ga_result = $model->ga_hour_data($start, $end);
+        dump($ga_result);
+        die;
+
+    }
+
+    public function test101()
+    {
+        $item_platform_sku = new ItemPlatformSku();
+        $item_skuy = $item_platform_sku->where('id','>',0)->where('platform_type',1)->column('grade','sku');
+        foreach ($item_skuy as $k=>$v){
+            $update = Db::name('datacenter_sku_day')->where('day_date','2020-12-02')->where('site',1)->where('sku',$k)->update(['goods_grade'=>$v]);
+            if ($update){
+                echo $k;
+            }
+        }
+
+    }
+
+    public function test102()
+    {
+        $data_center_sku_day = Db::name('datacenter_sku_day')->where('day_date','2020-11-11')->field('sku,site,now_pricce')->select();
+        foreach ($data_center_sku_day as $k=>$v){
+            $update = Db::name('datacenter_sku_day')->where('day_date','2020-11-12')->where('sku',$v['sku'])->where('site',$v['site'])->update(['now_pricce'=>$v['now_pricce']]);
+            if ($update){
+                echo $v['sku'];
+            }
+        }
+    }
+
+    public function test200()
+    {
+        $yes_date = date("Y-m-d",strtotime("-1 day"));
+        $yestime_where1[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '" . $yes_date . "'")];
+        dump(Db::connect('database.db_zeelool')->table('customer_entity')->where($yestime_where1)->count());
+        dump(Db::connect('database.db_zeelool')->getLastSql());
+
+        $seven_start = date("Y-m-d", strtotime("-7 day"));
+        $seven_end = date("Y-m-d 23:59:59", strtotime("-1 day"));
+        $sev_where1['updated_at'] = ['between', [$seven_start, $seven_end]];
+        dump(Db::connect('database.db_zeelool')->table('customer_entity')->where($sev_where1)->count());
+        dump(Db::connect('database.db_zeelool')->getLastSql());
+
+    }
+
+    public function test201()
+    {
+
+        $model = Db::connect('database.db_zeelool');
+
+        $createat = '2020-12-09 00:00:00 - 2020-12-09 23:59:59';
+        $createat = explode(' ', $createat);
+        $sku = 'ZVFP102705-04';
+        $map['sku'] = ['like', $sku . '%'];
+        $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        $map['a.created_at'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]]];
+        $map['a.order_type'] = ['=', 1];
+        $total = $model->table('sales_flat_order')
+            ->where($map)
+            ->alias('a')
+            ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
+            ->group('order_id')
+            ->field('entity_id,sku,a.created_at,a.order_type,a.status')
+            ->count();
+        $nopay_jingpian_glass = $model
+            ->table('sales_flat_order')
+            ->alias('a')
+            ->join(['sales_flat_order_item_prescription' => 'b'], 'a.entity_id=b.order_id')
+            ->where('a.created_at', 'between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]])
+            ->where('sku', 'like', $sku . '%')
+            ->where('a.order_type', '=', 1)
+            ->where('b.coatiing_price', '=', 0)
+            ->where('a.status', 'in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal'])
+            ->where('b.index_price', '=', 0)
+            ->group('order_id')
+            ->count();
+        $only_one_glass_order_list = $model->table('sales_flat_order')
+            ->where($map)
+            ->alias('a')
+            ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
+            ->group('order_id')
+            ->field('entity_id,sku,a.created_at,a.order_type,a.status,order_id,sum(qty_ordered) as all_qty_ordered')
+            ->select();
+        dump($only_one_glass_order_list);
+        dump($total);
+        dump($nopay_jingpian_glass);
+        dump($model->getLastSql());
+    }
+
+    //商品转化率的销售副数 销量统计的销量
+    public function test300()
+    {
+        $createat = '2020-12-09 00:00:00 - 2020-12-09 23:59:59';
+        $createat = explode(' ',$createat);
+        $map['a.created_at'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3]  . ' ' . $createat[4]]];
+        $map['sku'] = ['in', ['VHP0189-01']];
+        $model = Db::connect('database.db_zeelool');
+        $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
+        $res = $model->table('sales_flat_order')
+            ->where($map)
+            ->alias('a')
+            ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
+            ->group('sku')
+            ->order('num desc')
+            ->column('round(sum(b.qty_ordered)) as num', 'trim(sku)');
+        dump($model->getLastSql());
+        $data = '2020-12-09';
+        $time_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $data . "'")];
+        $z_sku_list= $model
+            ->table('sales_flat_order_item')
+            ->where('sku', 'like', 'VHP0189-01' . '%')
+            ->where($time_where1)
+            ->sum('qty_ordered');
+        dump($model->getLastSql());
+        dump($res);
+        dump($z_sku_list);
+    }
+
 }

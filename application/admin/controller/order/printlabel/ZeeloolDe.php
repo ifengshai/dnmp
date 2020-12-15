@@ -148,6 +148,7 @@ class ZeeloolDe extends Backend
         if ($this->request->isAjax()) {
             //订单号
             $increment_id = $this->request->post('increment_id');
+
             if ($increment_id) {
                 $map['increment_id'] = $increment_id;
                 $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
@@ -158,6 +159,20 @@ class ZeeloolDe extends Backend
                     ->field($field)
                     ->where($map)
                     ->find();
+                $list = $this->model
+                    ->field($field)
+                    ->where($map)
+                    ->find()->toArray();
+                //查询订单是否存在工单
+                $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
+                $swhere = [];
+                $swhere['platform_order'] = ['eq', $list['increment_id']];
+                $swhere['work_platform'] = 10;
+                $swhere['work_status'] = ['not in', [0, 4, 6]];
+                $order_arr = $workorder->where($swhere)->column('platform_order');
+                if (!empty($order_arr)){
+                    $list['task_info'] = 1;
+                }
                 $result = ['code' => 1, 'data' => $list ?? []];
             } else {
                 $result = array("total" => 0, "rows" => []);
@@ -676,7 +691,7 @@ class ZeeloolDe extends Backend
         if (false !== $result) {
             $params['num'] = count($entity_ids);
             $params['order_ids'] = implode(',', $entity_ids);
-            $params['site'] = 2;
+            $params['site'] = 10;
             (new OrderLog())->setOrderLog($params);
 
             //插入订单节点

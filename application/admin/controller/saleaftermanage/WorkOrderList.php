@@ -4,6 +4,7 @@ namespace app\admin\controller\saleaftermanage;
 
 use app\admin\model\saleaftermanage\WorkOrderNote;
 use app\common\controller\Backend;
+use fast\Excel;
 use think\Cache;
 use think\Db;
 use think\Exception;
@@ -40,13 +41,13 @@ use app\admin\model\AuthGroup;
  */
 class WorkOrderList extends Backend
 {
-    protected $noNeedRight = ['getMeasureContent', 'getProblemTypeContent', 'batch_export_xls','getDocumentaryRule'];
+    protected $noNeedRight = ['getMeasureContent','batch_export_xls_bak', 'getProblemTypeContent', 'batch_export_xls','getDocumentaryRule'];
     /**
      * WorkOrderList模型对象
      * @var \app\admin\model\saleaftermanage\WorkOrderList
      */
     protected $model = null;
-
+    protected $noNeedLogin = ['batch_export_xls_array'];
     public function _initialize()
     {
         parent::_initialize();
@@ -316,7 +317,6 @@ class WorkOrderList extends Backend
                         $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.add' : $name) : $this->modelValidate;
                         $this->model->validateFailException(true)->validate($validate);
                     }
-
                     if (!$ids) {
                         //限制不能存在两个相同的未完成的工单
                         $count = $this->model->where(['platform_order' => $params['platform_order'], 'work_status' => ['in', [1, 2, 3, 5]]])->count();
@@ -324,11 +324,14 @@ class WorkOrderList extends Backend
                             throw new Exception("此订单存在未处理完成的工单");
                         }
                     }
-
                     if (!$params['platform_order']) {
                         throw new Exception("订单号不能为空");
                     }
-
+                    if($params['work_type'] == 1 && $params['work_status'] == 2){
+                        if(!$params['order_sku'][0]){
+                            throw new Exception("SKU不能为空");
+                        }
+                    }
                     if (!$params['order_pay_currency']) {
                         throw new Exception("请先点击载入数据");
                     }
@@ -3313,7 +3316,9 @@ EOF;
             ->setCellValue("AH1", "措施")
             ->setCellValue("AI1", "措施详情")
             ->setCellValue("AJ1", "承接详情")
-            ->setCellValue("AK1", "工单回复备注");
+            ->setCellValue("AK1", "工单回复备注")
+            ->setCellValue("AP1", "订单支付时间")
+            ->setCellValue("AQ1", "补发订单号");
         $spreadsheet->setActiveSheetIndex(0)->setTitle('工单数据');
         foreach ($list as $key => $value) {
             if ($value['after_user_id']) {
@@ -3455,6 +3460,7 @@ EOF;
             } else {
                 $spreadsheet->getActiveSheet()->setCellValue("AJ" . ($key * 1 + 2), '');
             }
+
             //回复
             if ($noteInfo && array_key_exists($value['id'], $noteInfo)) {
                 $value['note'] = $noteInfo[$value['id']];
@@ -3462,6 +3468,8 @@ EOF;
             } else {
                 $spreadsheet->getActiveSheet()->setCellValue("AO" . ($key * 1 + 2), '');
             }
+            $spreadsheet->getActiveSheet()->setCellValue("AP" . ($key * 1 + 2), $value['payment_time']);
+            $spreadsheet->getActiveSheet()->setCellValue("AQ" . ($key * 1 + 2), $value['replacement_order']);
         }
 
         //设置宽度
@@ -3507,6 +3515,8 @@ EOF;
         $spreadsheet->getActiveSheet()->getColumnDimension('AM')->setWidth(200);
         $spreadsheet->getActiveSheet()->getColumnDimension('AN')->setWidth(200);
         $spreadsheet->getActiveSheet()->getColumnDimension('AO')->setWidth(200);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AP')->setWidth(400);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AQ')->setWidth(400);
         //设置边框
         $border = [
             'borders' => [
@@ -3556,7 +3566,234 @@ EOF;
         $writer->setPreCalculateFormulas(false);
         $writer->save('php://output');
     }
+    public function batch_export_xls_array()
+    {
 
+        set_time_limit(0);
+        ini_set('memory_limit', '1024M');
+
+        $map['work_platform'] =2;
+        $map['id'] =['lt',28216];
+
+        $list = $this->model
+            ->where($map)
+            ->limit(7000)
+            ->order('id desc')
+            ->select();
+        $list = collection($list)->toArray();
+
+        //查询用户id对应姓名
+        $admin = new \app\admin\model\Admin();
+        $users = $admin->where('status', 'normal')->column('nickname', 'id');
+        $arr = [];
+        foreach ($list as $vals) {
+            $arr[] = $vals['id'];
+        }
+        //求出所有的措施
+        $info = $this->step->fetchMeasureRecord($arr);
+        if ($info) {
+            $info = collection($info)->toArray();
+        } else {
+            $info = [];
+        }
+        //求出所有的承接详情
+        $this->recept = new \app\admin\model\saleaftermanage\WorkOrderRecept;
+        $receptInfo = $this->recept->fetchReceptRecord($arr);
+        if ($receptInfo) {
+            $receptInfo = collection($receptInfo)->toArray();
+        } else {
+            $receptInfo = [];
+        }
+        //求出所有的回复
+        $noteInfo = $this->work_order_note->fetchNoteRecord($arr);
+        if ($noteInfo) {
+            $noteInfo = collection($noteInfo)->toArray();
+        } else {
+            $noteInfo = [];
+        }
+        //根据平台sku求出商品sku
+        $itemPlatFormSku = new \app\admin\model\itemmanage\ItemPlatformSku();
+        //求出配置里面信息
+        $workOrderConfigValue = $this->workOrderConfigValue;
+        //求出配置里面的大分类信息
+        $customer_problem_classify = $workOrderConfigValue['customer_problem_classify'];
+
+
+        foreach ($list as $key => $value) {
+            if ($value['after_user_id']) {
+                $value['after_user_id'] = $users[$value['after_user_id']];
+            }
+            if ($value['assign_user_id']) {
+                $value['assign_user_id'] = $users[$value['assign_user_id']];
+            }
+            if ($value['operation_user_id']) {
+                $value['operation_user_id'] = $users[$value['operation_user_id']];
+            }
+            switch ($value['work_platform']) {
+                case 2:
+                    $work_platform = 'voogueme';
+                    break;
+                case 3:
+                    $work_platform = 'nihao';
+                    break;
+                case 4:
+                    $work_platform = 'meeloog';
+                    break;
+                case 5:
+                    $work_platform = 'wesee';
+                    break;
+                case 9:
+                    $work_platform = 'zeelool_es';
+                    break;
+                case 10:
+                    $work_platform = 'zeelool_de';
+                    break;
+                case 11:
+                    $work_platform = 'zeelool_jp';
+                    break;
+                default:
+                    $work_platform = 'zeelool';
+                    break;
+            }
+            $csv[$key]['id'] = $value['id'];
+            $csv[$key]['work_platform'] = $work_platform;
+            $csv[$key]['work_type'] =$value['work_type'] == 1 ? '客服工单' : '仓库工单';
+            $csv[$key]['platform_order'] =$value['platform_order'];
+            $csv[$key]['email'] =$value['email'];
+            $csv[$key]['base_grand_total'] =$value['base_grand_total'];
+            $csv[$key]['order_pay_currency'] =$value['order_pay_currency'];
+            $csv[$key]['order_pay_method'] =$value['order_pay_method'];
+            $csv[$key]['order_sku'] =$value['order_sku'];
+
+            //求出对应商品的sku
+            if($value['order_sku']){
+                $order_arr_sku = explode(',',$value['order_sku']);
+                if(is_array($order_arr_sku)){
+                    $true_sku = [];
+                    foreach($order_arr_sku as $t_sku){
+                        $true_sku[] = $aa = $itemPlatFormSku->getTrueSku($t_sku,$value['work_platform']);
+                    }
+                    $true_sku_string = implode(',',$true_sku);
+                    $csv[$key]['true_sku_string'] =$true_sku_string;
+                }else{
+                    $csv[$key]['true_sku_string'] ='暂无';
+                }
+            }else{
+                $csv[$key]['true_sku_string'] ='暂无';
+            }
+
+
+            switch ($value['work_status']) {
+                case 1:
+                    $value['work_status'] = '新建';
+                    break;
+                case 2:
+                    $value['work_status'] = '待审核';
+                    break;
+                case 3:
+                    $value['work_status'] = '待处理';
+                    break;
+                case 4:
+                    $value['work_status'] = '审核拒绝';
+                    break;
+                case 5:
+                    $value['work_status'] = '部分处理';
+                    break;
+                case 0:
+                    $value['work_status'] = '已取消';
+                    break;
+                default:
+                    $value['work_status'] = '已处理';
+                    break;
+            }
+            $csv[$key]['work_status'] =$value['work_status'];
+
+            //对应的问题类型大的分类
+            $one_category = '';
+            foreach($customer_problem_classify as $problem  => $classify){
+                if(in_array($value['problem_type_id'],$classify)){
+                    $one_category = $problem;
+                    break;
+                }
+            }
+            $csv[$key]['one_category'] =$one_category;
+            $csv[$key]['problem_type_content'] = $value['problem_type_content'];
+            $csv[$key]['problem_description'] = $value['problem_description'];
+            $csv[$key]['work_picture'] = $value['work_picture'];
+            $csv[$key]['create_user_name'] = $value['create_user_name'];
+            $csv[$key]['is_after_deal_with'] =$value['is_after_deal_with'] == 1 ? '是' : '否';
+            $csv[$key]['assign_user_id'] = $value['assign_user_id'];
+            $csv[$key]['operation_user_id'] = $value['operation_user_id'];
+            $csv[$key]['check_note'] = $value['check_note'];
+            $csv[$key]['create_time'] = $value['create_time'];
+            $csv[$key]['submit_time'] = $value['submit_time'];
+            $csv[$key]['check_time'] = $value['check_time'];
+            $csv[$key]['after_deal_with_time'] = $value['after_deal_with_time'];
+            $csv[$key]['complete_time'] = $value['complete_time'];
+            $csv[$key]['replenish_money'] = $value['replenish_money'];
+            $csv[$key]['replenish_increment_id'] = $value['replenish_increment_id'];
+            $csv[$key]['coupon_id'] = $value['coupon_id'];
+            $csv[$key]['coupon_describe'] = $value['coupon_describe'];
+            $csv[$key]['coupon_str'] = $value['coupon_str'];
+            $csv[$key]['integral'] = $value['integral'];
+            $csv[$key]['refund_logistics_num'] = $value['refund_logistics_num'];
+            $csv[$key]['refund_money'] = $value['refund_money'];
+
+            //退款百分比
+            if((0<$value['base_grand_total']) && (is_numeric($value['refund_money']))){
+                $csv[$key]['refund_money_base_grand_total'] =  round($value['refund_money']/$value['base_grand_total'],2);
+
+            }else{
+                $csv[$key]['refund_money_base_grand_total'] =  '';
+            }
+            //措施
+            if ($info['step'] && array_key_exists($value['id'], $info['step'])) {
+                $csv[$key]['step_id'] =  $info['step'][$value['id']];
+            } else {
+                $csv[$key]['step_id'] =  '';
+
+            }
+            //措施详情
+            if ($info['detail'] && array_key_exists($value['id'], $info['detail'])) {
+                $csv[$key]['detail'] =   $info['detail'][$value['id']];
+            } else {
+                $csv[$key]['detail'] =  '';
+            }
+            //承接
+            if ($receptInfo && array_key_exists($value['id'], $receptInfo)) {
+                $csv[$key]['result'] =  $receptInfo[$value['id']];
+            } else {
+                $csv[$key]['result'] =  '';
+            }
+
+            //回复
+            if ($noteInfo && array_key_exists($value['id'], $noteInfo)) {
+                $csv[$key]['note'] =  $noteInfo[$value['id']];
+            } else {
+                $csv[$key]['note'] = '';
+            }
+            $csv[$key]['payment_time'] = $value['payment_time'];
+            $csv[$key]['replacement_order'] = $value['replacement_order'];
+
+            echo $key . "\n";
+        }
+
+
+        $headlist = [
+            'ID','工单平台', '工单类型', '平台订单号', '客户邮箱', '订单金额', '订单支付的货币类型', '订单的支付方式',
+            '订单中的sku', '对应商品sku', '工单状态','问题大分类',
+            '问题类型', '工单问题描述', '工单图片', '工单创建人', '工单是否需要审核',
+            '工单是否需要审核', '实际审核人', '审核人备注', '新建状态时间', '开始走流程时间',
+            '工单审核时间', '经手人处理时间', '工单完成时间', '补差价的金额', '补差价的订单号',
+            '优惠券类型', '优惠券描述', '优惠券', '积分', '退回物流单号',
+            '退款金额', '退款百分比', '措施', '措施详情', '承接详情',
+            '工单回复备注', '订单支付时间', '补发订单号'
+
+        ];
+        $path = "/uploads/";
+        $fileName = '工单数据 - 12-14';
+        Excel::writeCsv($csv, $headlist, $path . $fileName);
+    }
 
     /**
      * 导出工单

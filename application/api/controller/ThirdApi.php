@@ -36,6 +36,14 @@ class ThirdApi extends Api
         $verify_sign = $track_arr['event'] . '/' . json_encode($track_arr['data']) . '/' . $this->apiKey;
         $verify_sign = hash("sha256", $verify_sign);
         // if($verify_sign == $track_arr['sign']){
+        //妥投给maagento接口
+
+        if ($track_arr['data']['track']['e'] ==40){
+            $order_node = Db::name('order_node')->field('site,order_id,order_number,shipment_type,shipment_data_type')->where('track_number', $track_arr['data']['number'])->find();
+            $url = config('url.zeelool_url').'magic/order/updateOrderStatus';
+            $value['increment_id']  = $order_node['order_number'];
+            $this->request_post($url,$value);
+        }
         if ($track_arr['event'] != 'TRACKING_STOPPED') {
             // file_put_contents('/www/wwwroot/mojing/runtime/log/track.txt',$track_info."\r\n",FILE_APPEND);
             $order_node = Db::name('order_node')->field('site,order_id,order_number,shipment_type,shipment_data_type')->where('track_number', $track_arr['data']['number'])->find();
@@ -51,6 +59,11 @@ class ThirdApi extends Api
         }
         // }
     }
+
+
+
+
+
 
     /**
      * @author wgj
@@ -874,4 +887,24 @@ class ThirdApi extends Api
         }
         return ['title' => $title, 'carrierId' => $carrierId];
     }
+
+
+
+    public function post_json_data($url, $data_string) {
+         $ch = curl_init();
+         curl_setopt($ch, CURLOPT_POST, 1);
+         curl_setopt($ch, CURLOPT_URL, $url);
+         curl_setopt($ch, CURLOPT_POSTFIELDS, $data_string);
+         curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+                             'Content-Type: application/json; charset=utf-8',
+                 'Content-Length: ' . strlen($data_string))
+         );
+         ob_start();
+          //执行命令
+         curl_exec($ch);
+         $return_content = ob_get_contents();
+         ob_end_clean();
+         $return_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+         return array('code'=>$return_code, 'result'=>$return_content);
+     }
 }

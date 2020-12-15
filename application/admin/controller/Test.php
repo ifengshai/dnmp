@@ -42,9 +42,10 @@ class Test extends Backend
         $track_number = '9400111108296818283602';
         $order_number = '100171868';
         //根据物流单号查询发货物流渠道
-        $shipment_data_type = Db::connect('database.db_delivery')->table('ld_deliver_order')->where(['track_number' => $track_number,'increment_id' => $order_number])->value('agent_way_title');
+        $shipment_data_type = Db::connect('database.db_delivery')->table('ld_deliver_order')->where(['track_number' => $track_number, 'increment_id' => $order_number])->value('agent_way_title');
 
-        dump($shipment_data_type);die;
+        dump($shipment_data_type);
+        die;
     }
 
 
@@ -96,7 +97,7 @@ class Test extends Backend
         echo $site_str . ' is ok' . "\n";
     }
 
-    
+
     /**
      * 重启跟踪2-7状态的物流
      *
@@ -1116,5 +1117,75 @@ class Test extends Backend
                 $this->orderNodeCourier->where(['order_number' => $v['order_number'], 'site' => $v['site']])->delete();
             }
         }
+    }
+
+    public function order_data3()
+    {
+        $list = Db::table('fa_order_log')->where(['site' => 3])->order('id desc')->select();
+        $wesee = new \app\admin\model\order\order\Nihao();
+        foreach ($list as $k => $v) {
+            $data['custom_print_label_new'] = 0;
+            $data['custom_print_label_person_new'] = '';
+            $data['custom_print_label_created_at_new'] = '0000-00-00';
+            $data['custom_is_match_frame_new'] = 0;
+            $data['custom_match_frame_person_new'] = '';
+            $data['custom_match_frame_created_at_new'] = '0000-00-00';
+            $data['custom_is_match_lens_new'] = 0;
+            $data['custom_match_lens_created_at_new'] = '0000-00-00';
+            $data['custom_match_lens_person_new'] = '';
+            $data['custom_is_send_factory_new'] = 0;
+            $data['custom_match_factory_person_new'] = '';
+            $data['custom_match_factory_created_at_new'] = '0000-00-00';
+            $data['custom_is_delivery_new'] = 0;
+            $data['custom_match_delivery_person_new'] = '';
+            $data['custom_match_delivery_created_at_new'] = '0000-00-00';
+            $wesee->where(['entity_id' => ['in', $v['order_ids']]])->update($data);
+        }
+    }
+
+    public function order_data()
+    {
+        $list = Db::table('fa_order_log')->where(['site' => 3])->order('id desc')->select();
+        $wesee = new \app\admin\model\order\order\Nihao();
+       
+        foreach ($list as $k => $v) {
+            $data = [];
+            if ($v['type'] == 1) {
+                $data['custom_print_label_new'] = 1;
+                $data['custom_print_label_person_new'] = $v['create_person'];
+                $data['custom_print_label_created_at_new'] = $v['createtime'];
+            } elseif ($v['type'] == 2) {
+                $data['custom_is_match_frame_new'] = 1;
+                $data['custom_match_frame_person_new'] = $v['create_person'];
+                $data['custom_match_frame_created_at_new'] = $v['createtime'];
+            } elseif ($v['type'] == 3) {
+                $data['custom_is_match_lens_new'] = 1;
+                $data['custom_match_lens_created_at_new'] = $v['createtime'];
+                $data['custom_match_lens_person_new'] = $v['create_person'];
+            } elseif ($v['type'] == 4) {
+                $data['custom_is_send_factory_new'] = 1;
+                $data['custom_match_factory_person_new'] = $v['create_person'];
+                $data['custom_match_factory_created_at_new'] = $v['createtime'];
+            } elseif ($v['type'] == 5) {
+                $data['custom_is_delivery_new'] = 1;
+                $data['custom_match_delivery_person_new'] = $v['create_person'];
+                $data['custom_match_delivery_created_at_new'] = $v['createtime'];
+            }
+            if ($data) {
+                $wesee->where(['entity_id' => ['in', $v['order_ids']]])->update($data);
+            }
+        }
+        echo "ok";
+    }
+
+    public function order_data2()
+    {
+        $nihao = new \app\admin\model\order\order\Nihao();
+        $data['custom_print_label_new'] = 1;
+        $data['custom_is_match_frame_new'] = 1;
+        $data['custom_is_match_lens_new'] = 1;
+        $data['custom_is_send_factory_new'] = 1;
+        $data['custom_is_delivery_new'] = 1;
+        $nihao->where(['created_at' => ['<', '2020-01-01']])->update($data);
     }
 }

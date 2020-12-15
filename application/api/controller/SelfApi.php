@@ -310,7 +310,14 @@ class SelfApi extends Api
         } elseif (stripos($title, 'cpc') !== false) {
             $carrierId = 'cpc';
             $title = 'Canada Post';
+        } elseif (stripos($title, 'sua') !== false) {
+            $carrierId = 'sua';
+            $title = 'SUA';
+        } elseif (stripos($title, 'cod') !== false) {
+            $carrierId = 'cod';
+            $title = 'COD';
         }
+
         $carrier = [
             'dhl' => '100001',
             'chinapost' => '03011',
@@ -318,7 +325,9 @@ class SelfApi extends Api
             'cpc' =>  '03041',
             'fedex' => '100003',
             'usps' => '21051',
-            'yanwen' => '190012'
+            'yanwen' => '190012',
+            'sua' => '190111',
+            'cod' => '100040'
         ];
         if ($carrierId) {
             return ['title' => $title, 'carrierId' => $carrier[$carrierId]];
@@ -622,7 +631,7 @@ class SelfApi extends Api
     {
         if ($this->request->isPost()) {
             $site = $this->request->request('site'); //站点
-            $sku = $this->request->request('sku'); //true_sku
+            $sku = $this->request->request('sku'); //platform_sku
             $status = $this->request->request('status'); //status 1上架 2下架
             if (!$sku) {
                 $this->error(__('缺少SKU参数'), [], 400);
@@ -645,7 +654,7 @@ class SelfApi extends Api
             if (false !== $res) {
                 //如果是上架 则查询此sku是否存在当天有效sku表里
                 if ($status == 1) {
-                    $count = Db::name('sku_sales_num')->where(['sku' => $sku, 'site' => $site, 'createtime' => ['between', [date('Y-m-d 00:00:00'), date('Y-m-d 23:59:59')]]])->count();
+                    $count = Db::name('sku_sales_num')->where(['platform_sku' => $sku, 'site' => $site, 'createtime' => ['between', [date('Y-m-d 00:00:00'), date('Y-m-d 23:59:59')]]])->count();
                     //如果不存在则插入此sku
                     if ($count < 1) {
                         $data['sku'] = $list['sku'];

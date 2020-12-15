@@ -1,0 +1,163 @@
+<style>
+    .caigou {
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        padding: 10px;
+        width: 70%;
+        margin-left: 10%;
+        margin-bottom: 10px;
+    }
+
+    .caigou #caigou-table {
+        width: 100%;
+        height: 130px;
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        text-align: center;
+    }
+
+    .caigou #caigou-table tr {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        line-height: 50px;
+    }
+
+    .caigou #caigou-table tr th {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        text-align: center;
+        font-size: 14px;
+    }
+
+    .caigou #caigou-table tr td {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+    }
+
+    .caigou #caigou-table tr td input {
+
+        width: 250px;
+    }
+</style>
+
+<form  class="form-horizontal" role="form" data-toggle="validator" method="POST" id="demand_edit" action="">
+    <input type="hidden" name="row[pm_audit_status]" id="pm_audit_status" value="" ><!--审核状态-->
+    <input  type="hidden" id="ids" name="row[ids]" value="{$row['id']}"/>
+    <div class="form-group ajax-add">
+        <label class="control-label col-xs-12 col-sm-2">{:__('订单号')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-frame_bridge" data-rule="required" class="form-control" name="row[increment_id]" type="number" value="{$row['increment_id']}" disabled>
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('邮箱')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-mirror_width" data-rule="required" class="form-control" name="row[email]" type="text" value="{$row['email']}" disabled>
+        </div>
+    </div>
+    <div class="form-group ajax-add">
+        <label class="control-label col-xs-12 col-sm-2">{:__('站点')}:</label>
+        <div class="col-xs-12 col-sm-3">
+
+            <input id="c-frame_height" data-rule="required" class="form-control" name="row[site]" type="text" value="zeelool" disabled>
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('订单类型')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-frame_width" data-rule="required" class="form-control"  name="row[order_type]" type="text" value="{$row['order_type']}" disabled>
+        </div>
+
+    </div>
+    <div class="form-group ajax-add">
+        <label class="control-label col-xs-12 col-sm-2">{:__('问题类型')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-frame_length" data-rule="required" class="form-control" name="row[problem_type]" type="text" value="{$row['problem_type']}" disabled>
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('详细问题')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-frame_temple_lengths" data-rule="required" class="form-control"  name="row[concrete_problem]" type="text" value="{$row['concrete_problem']}" disabled>
+        </div>
+    </div>
+    <div class="form-group ajax-add">
+
+        <label class="control-label col-xs-12 col-sm-2">{:__('SKU')}:</label>
+        <div class="col-xs-12 col-sm-3" style="width: 66.49%">
+            <input id="c-frame_temple_length"  width="100%" data-rule="required" class="form-control"  name="row[good_skus]" type="text" value="{$row['good_skus']}">
+        </div>
+    </div>
+
+    <div class="form-group ajax-add">
+        <label class="control-label col-xs-12 col-sm-2">{:__('问题描述')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <textarea id="c-problem_desc" class="form-control editor" rows="5" name="row[description]" cols="50" disabled readonly>{$row['description']}</textarea>
+        </div>
+    </div>
+
+    <div class="form-group">
+
+        {if condition="$row['images'] !== null"}
+        <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2">{:__('图片列表11')}:</label>
+            <div class="col-xs-12 col-sm-8">
+                {volist name="row['images']" id="vo"}
+                <img src="{$vo}" data-tips-image  alt="" style="width: 15%;height: 90px">
+                {/volist}
+            </div>
+        </div>
+        {/if}
+    </div>
+
+    <div class='caigou ajax-add'>
+        <p style="font-size: 16px;text-align: center;"><b>客户邮件记录</b></p>
+        <div style="margin-bottom:20px;">
+            <!--            <div id="toolbar" class="toolbar">-->
+            <!--                <a href="javascript:;" class="btn btn-success btn-add" title="增加"><i class="fa fa-plus"></i> 增加</a>-->
+            <!--            </div>-->
+            <table id="caigou-table">
+                <tr>
+                    <th style="width: 50px">ID</th>
+                    <th style="width: 50px"> Ticket ID</th>
+                    <th style="width: 200px">主题</th>
+                    <th style="width: 50px">状态</th>
+                    <th style="width: 50px">承接人</th>
+                    <th style="width: 50px">处理人</th>
+                    <th style="width: 100px">添加时间</th>
+                    <th style="width: 100px">更新时间</th>
+                </tr>
+                {volist name="$row['email_message']" id="vo"}
+                <tr>
+                    <td>{$vo.ze_id}</td>
+                    <td><a href="{:url('zendesk/zendesk/edit?ids='.$vo['ze_id'])}" target="_blank" >{$vo.ticket_id}</a></td>
+                    <td>{$vo.subject}</td>
+                    <td>{$vo.ze_status}</td>
+                    <td>{$vo.to_email}</td>
+                    <td>{$vo.nickname}</td>
+                    <td>{$vo.create_time}</td>
+                    <td>{$vo.update_time}</td>
+                </tr>
+                {/volist}
+
+            </table>
+
+        </div>
+    </div>
+    <div class="form-group layer-footer">
+        <label class="control-label col-xs-12 col-sm-2"></label>
+        <div class="col-xs-12 col-sm-8">
+            <button type="submit" value="Submitted" {if condition="$row['status'] eq 1"}disabled{/if} class="btn btn-sub" style='background-color: dimgrey;width: 120px;color: white;font-size: 14px;font-weight: 700;'>{:__('Submitted')}</button>
+            <button type="submit" value="Processing" {if condition="$row['status'] eq 2"}disabled{/if} class="btn btn-sub" style='background-color: dodgerblue;width: 120px;color: white;font-size: 14px;font-weight: 700;'>{:__('Processing')}</button>
+            <button type="submit" value="Completed"  {if condition="$row['status'] eq 3"}disabled{/if} class="btn btn-sub" style='background-color:indianred ;width: 120px;color: white;font-size: 14px;font-weight: 700;'>{:__('Completed ')}</button>
+        </div>
+    </div>
+</form>
+

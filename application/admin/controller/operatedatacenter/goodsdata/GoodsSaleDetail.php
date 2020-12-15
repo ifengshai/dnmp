@@ -170,6 +170,7 @@ class GoodsSaleDetail extends Backend
         $model->table('sales_flat_order_item')->query("set time_zone='+8:00'");
         $where = " status in ('processing','complete','creditcard_proccessing','free_processing')";
         $whereItem = " o.status in ('processing','complete','creditcard_proccessing','free_processing')";
+        $whereItem = " o.status in ('free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal')";
 
 
         //求出眼镜所有sku

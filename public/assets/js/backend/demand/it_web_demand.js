@@ -78,7 +78,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                             {
                                 field: 'site',
                                 title: __('项目'),
-                                searchList: { 1: 'Zeelool', 2: 'Voogueme', 3: 'Nihao', 4: 'Meeloog', 5: 'Wesee', 6: 'Rufoo', 7: 'Toloog', 8: 'Other', 9: 'ZeeloolEs', 10: 'ZeeloolDe', 11: 'ZeeloolJp' },
+                                searchList: { 1: 'Zeelool', 2: 'Voogueme', 3: 'Nihao', 4: 'Meeloog', 5: 'Wesee', 6: 'Rufoo', 7: 'Toloog', 8: 'Other', 9: 'ZeeloolEs', 10: 'ZeeloolDe', 11: 'ZeeloolJp' ,12:'voogmechic'},
                                 custom: { 1: 'black', 2: 'black', 3: 'black', 4: 'black', 5: 'black', 6: 'black', 7: 'black', 8: 'black', 9: 'black', 10: 'black', 11: 'black' },
                                 formatter: Table.api.formatter.status
                             },
@@ -89,6 +89,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                                 title: __('任务类型'),
                                 searchList: { 1: 'Bug', 2: '维护', 3: '优化', 4: '新功能', 5: '开发' },
                                 custom: { 1: 'red', 2: 'blue', 3: 'blue', 4: 'blue', 5: 'green' },
+                                formatter: Table.api.formatter.status
+                            },
+                            {
+                                field: 'functional_module',
+                                title: __('功能模块'),
+                                searchList: { 1: '购物车', 2: '个人中心', 3: '列表页', 4: '详情页', 5: '首页', 6: '优惠券', 7: '支付页', 8: 'magento后台',9:'活动页',10:'其他' },
                                 formatter: Table.api.formatter.status
                             },
                             {
@@ -331,31 +337,34 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                                 field: 'priority',
                                 title: __('优先级'),
                                 searchList: { '': '-', 1: '低', 2: '低+', 3: '中', 4: '中+', 5: '高',6:'高+' },
-                                custom: { 1: 'red', 2: 'blue', 3: 'blue', 4: 'blue', 5: 'green' },
+                                custom: { 1: 'green', 2: 'blue', 3: 'black', 4: 'yellow', 5: 'red' },
                                 formatter: Table.api.formatter.status
                             },
                             {
                                 field: 'degree_of_urgency',
                                 title: __('重要程度'),
-                                searchList: { 1: 'S0', 2: 'S1', 3: 'S2', 4: 'S3' },
+                                searchList: { 1: 'S0:不重要', 2: 'S1：不太重要', 3: 'S2：一般', 4: 'S3：比较重要',5:'非常重要' },
+                                custom: { 1: 'green', 2: 'black', 3: 'black', 4: 'yellow', 5: 'red' },
                                 formatter: Table.api.formatter.status
                             },
                             {
                                 field: 'importance',
                                 title: __('紧急程度'),
-                                searchList: { 1: 'P1', 2: 'P2', 3: 'P3' },
+                                searchList: { 1: 'P0：不紧急', 2: 'P1：正常', 3: 'P2：比较紧急', 4: 'P3：非常紧急' },
+                                custom: { 1: 'green', 2: 'blue', 3: 'black', 4: 'red' },
                                 formatter: Table.api.formatter.status
                             },
                             {
                                 field: 'development_difficulty',
                                 title: __('开发难度'),
-                                searchList: { 1: 'D1', 2: 'D2', 3: 'D3' },
+                                searchList: { 1: 'D1：简单', 2: 'D2：中等', 3: 'D3：复杂' },
+                                custom: { 1: 'green', 2: 'black', 3: 'red' },
                                 formatter: Table.api.formatter.status
                             },
                             {
                                 field: 'site',
                                 title: __('项目'),
-                                searchList: { 1: 'Zeelool', 2: 'Voogueme', 3: 'Nihao', 4: 'Meeloog', 5: 'Wesee', 6: 'Rufoo', 7: 'Toloog', 8: 'Other', 9: 'ZeeloolEs', 10: 'ZeeloolDe', 11: 'ZeeloolJp' },
+                                searchList: { 1: 'Zeelool', 2: 'Voogueme', 3: 'Nihao', 4: 'Meeloog', 5: 'Wesee', 6: 'Rufoo', 7: 'Toloog', 8: 'Other', 9: 'ZeeloolEs', 10: 'ZeeloolDe', 11: 'ZeeloolJp',12:'voogmechic' },
                                 custom: { 1: 'black', 2: 'black', 3: 'black', 4: 'black', 5: 'black', 6: 'black', 7: 'black', 8: 'black', 9: 'black', 10: 'black', 11: 'black' },
                                 formatter: Table.api.formatter.status
                             },
@@ -657,13 +666,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
             });
 
         },
-
-
-
-
-
-
-
         distribution: function () {
             Controller.api.bindevent();
 
@@ -706,6 +708,54 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                 $('#input_' + type).val('2');
                 $("#form_" + type).submit();
             });
+
+            $(document).on('click',".btn-sub-refuse",function (){
+                var status = $(this).data('value')
+                var value_id = $(this).val();
+                var url = "demand/It_web_demand/distriRefuse";
+                if (status ==1){
+                    var remarks = $('#web_remarks').val();
+                }else if(status ==2){
+                    var remarks = $('#phper_remarks').val();
+                }else{
+                    var remarks = $('#app_remarks').val();
+                }
+                if (remarks == ''){
+                    layer.msg('备注内容不能为空');
+                    return  false;
+                }
+                $.ajax({
+                    type: "POST",
+                    url: url,
+                    dataType: "json",
+                    cache: false,
+                    async: false,
+                    data: {
+                        ids: value_id,
+                        status: status,
+                        remarks: remarks,
+                    },
+                    success: function (json) {
+                        layer.msg(json.msg,function () {
+                            window.location.reload()
+                        });
+                    }
+                });
+
+
+                Fast.api.ajax({
+                    url:url,
+                    data:{ids:value_id,status:status,remarks:remarks}
+                }, function(data, ret){
+                    //成功的回调
+                    layer.msg(ret.msg);
+                }, function(data, ret){
+                    //失败的回调
+                    layer.msg(ret.msg);
+                });
+
+            })
+
         },
         test_handle: function () {
             Controller.api.bindevent();
@@ -888,7 +938,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                 get_develop_status: function (value, row, index) {
                     // if (row.status >= 2) {
                     if (row.develop_finish_status == 1) {
-                        return '<div><span class="check_develop_status status1_color">未响应</span></div>';
+                        if (row.status ==1){
+                            return '<div><span>未响应</span></div>';
+                        }else{
+                            return '<div><span class="check_develop_status status1_color">未响应</span></div>';
+                        }
+
                     } else if (row.develop_finish_status == 2) {
                         return '<div><span class="check_develop_status status1_color">开发中</span></div>';
                     } else if (row.develop_finish_status == 3) {
@@ -908,7 +963,20 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                 get_test_status: function (value, row, index) {
                     // if (row.status >= 2) {
                     if (row.test_status == 1) {
-                        return '<div><span class="check_test_status status1_color">未确认</span></div>';
+                        if (row.site_type.search('3') !== -1){
+                            if (row.web_designer_group ==0  || row.phper_group ==0 ||  row.app_group ==0 ){
+                                return '<div><span>未确认</span></div>';
+                            }else{
+                                return '<div><span class="check_test_status status1_color">未确认</span></div>';
+                            }
+                        }else{
+                            if (row.web_designer_group ==0  || row.phper_group ==0 ){
+                                return '<div><span>未确认</span></div>';
+                            }else{
+                                return '<div><span class="check_test_status status1_color">未确认</span></div>';
+                            }
+                        }
+
                     } else if (row.test_status == 2) {
                         if (row.test_group == 1) {
                             return '<div><span class="check_test_status status3_color">待测试</span></div>';
@@ -1060,7 +1128,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                             Backend.api.ajax({
                                 url: 'demand/it_web_demand/add/is_user_confirm/1/ids/' + row.id,
                             }, function (data, ret) {
-                                $("#table").bootstrapTable('refresh');
+                                $("#table1").bootstrapTable('refresh');
                                 Layer.closeAll();
                             }, function (data, ret) {
                                 //失败的回调

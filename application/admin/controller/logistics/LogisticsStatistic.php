@@ -45,8 +45,8 @@ class LogisticsStatistic extends Backend
                 $timeOne = explode(' ', $params['time']);
                 $map['delivery_time'] = ['between', [$timeOne[0] . ' ' . $timeOne[1], $timeOne[3] . ' ' . $timeOne[4]]];
             } else {
-                $BeginDate = date('Y-m-01 H:i:s', strtotime(date("Y-m-d")));
-                $map['delivery_time'] = ['between', [$BeginDate, date('Y-m-d H:i:s', strtotime("$BeginDate +1 month -1 day"))]];
+                //默认最近30天
+                $map['delivery_time'] = ['between', [date('Y-m-d H:i:s', strtotime("-30 day")), date('Y-m-d H:i:s', time())]];
             }
             $site = $params['platform'] ?: 10;
             if ($site == 10) {
@@ -66,13 +66,13 @@ class LogisticsStatistic extends Backend
                 //妥投订单数
                 foreach ($column as $k => $v) {
                     $columnData[$k]['value'] = $deliverd_order_num[$v];
-                    if ('USPS_1' == $v) {
-                        $v = '郭伟峰';
-                    } elseif ('USPS_2' == $v) {
-                        $v = '加诺';
-                    } elseif ('USPS_3' == $v) {
-                        $v = '杜明明';
-                    }
+                    // if ('USPS_1' == $v) {
+                    //     $v = '郭伟峰';
+                    // } elseif ('USPS_2' == $v) {
+                    //     $v = '加诺';
+                    // } elseif ('USPS_3' == $v) {
+                    //     $v = '杜明明';
+                    // }
                     $columnData[$k]['name'] = $v;
                 }
                 $json['column'] = $column;
@@ -105,8 +105,8 @@ class LogisticsStatistic extends Backend
             $time = explode(' ', $params['time']);
             $map['delivery_time'] = ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
         } else {
-            $BeginDate = date('Y-m-01 H:i:s', strtotime(date("Y-m-d")));
-            $map['delivery_time'] = ['between', [$BeginDate, date('Y-m-d H:i:s', strtotime("$BeginDate +1 month -1 day"))]];
+            //默认最近30天
+            $map['delivery_time'] = ['between', [date('Y-m-d H:i:s', strtotime("-30 day")), date('Y-m-d H:i:s', time())]];
         }
         $site = $params['platform'] ?: 10;
         $result = $this->logistics_data($site, $map);

@@ -56,32 +56,45 @@ class Inventory extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
+
+            //自定义sku搜索
+            $filter = json_decode($this->request->get('filter'), true);
+            if ($filter['sku']) {
+                $smap['sku'] = ['like', '%' . $filter['sku'] . '%'];
+                $ids = $this->item->where($smap)->column('inventory_id');
+                $map['id'] = ['in', $ids];
+                unset($filter['sku']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
+
+
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-            $total = $this->model
-                ->with(['Inventoryone', 'Inventoryitemtwo'])
+            $total = $this->model->alias('inventory')
+                // ->with(['Inventoryitemtwo'])
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->count();
 
-            $list = $this->model
-                ->with(['Inventoryone', 'Inventoryitemtwo'])
+            $list = $this->model->alias('inventory')
+                // ->with(['Inventoryitemtwo'])
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
 
             $list = collection($list)->toArray();
-
             foreach ($list as &$v) {
-                $map['inventory_id'] = $v['inventoryone']['id'];
+                $item_map['inventory_id'] = $v['id'];
                 //查询总数量
-                $allCount = $this->item->where($map)->count();
+                $allCount = $this->item->where($item_map)->count();
                 $smap['is_add'] = 1;
-                $smap['inventory_id'] = $v['inventoryone']['id'];
+                $smap['inventory_id'] = $v['id'];
                 //查询盘点数量
                 $count = $this->item->where($smap)->count();
                 $count = $count ?? '0';
-                $v['inventoryone.num'] = $count . '/' . $allCount;
+                $v['num'] = $count . '/' . $allCount;
             }
             unset($v);
             $result = array("total" => $total, "rows" => $list);
@@ -670,14 +683,15 @@ class Inventory extends Backend
 
                         //盘点的时候盘盈入库 盘亏出库 的同时要对虚拟库存进行一定的操作
                         //查出映射表中此sku对应的所有平台sku 并根据库存数量进行排序（用于遍历数据的时候首先分配到那个站点）
-                        $item_platform_sku = $platform->where('sku',$v['sku'])->order('stock asc')->field('platform_type,stock')->select();
+                        $item_platform_sku = $platform->where('sku', $v['sku'])->order('stock asc')->field('platform_type,stock')->select();
                         $all_num = count($item_platform_sku);
                         // $whole_num = $platform->where('sku',$v['sku'])->sum('stock');
                         $whole_num = $platform
-                            ->where('sku',$v['sku'])
+                            ->where('sku', $v['sku'])
                             ->field('stock')
                             ->select();
-                        foreach ($whole_num as $kk =>$vv){
+                        $num_num = 0;
+                        foreach ($whole_num as $kk => $vv) {
                             $num_num += abs($vv['stock']);
                         }
                         // dump($num_num);
@@ -686,8 +700,9 @@ class Inventory extends Backend
                         $stock_num = $v['error_qty'];
                         //计算当前sku的总虚拟库存 如果总的为0 表示当前所有平台的此sku都为0 此时入库的话按照平均规则分配 例如五个站都有此品 那么比例就是20%
                         $stock_all_num = array_sum(array_column($item_platform_sku, 'stock'));
-                        if ($stock_all_num == 0) {
-                            $rate_rate = 1/$all_num;
+                        
+                        if ($stock_all_num == 0 || $stock_all_num < 0) {
+                            $rate_rate = 1 / $all_num;
                             foreach ($item_platform_sku as $key => $val) {
                                 //最后一个站点 剩余数量分给最后一个站
                                 if (($all_num - $key) == 1) {
@@ -698,20 +713,19 @@ class Inventory extends Backend
                                     $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->inc('stock', $num)->update();
                                 }
                             }
-                        }else{
+                        } else {
                             foreach ($item_platform_sku as $key => $val) {
                                 // dump($item_platform_sku);die;
                                 //最后一个站点 剩余数量分给最后一个站
                                 if (($all_num - $key) == 1) {
                                     $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->inc('stock', $stock_num)->update();
                                 } else {
-                                    $num = round($v['error_qty'] * abs($val['stock'])/$num_num);
+                                    $num = round($v['error_qty'] * abs($val['stock']) / $num_num);
                                     $stock_num -= $num;
                                     $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->inc('stock', $num)->update();
                                 }
                             }
                         }
-
                     }
 
                     //修改库存结果为真
@@ -1070,9 +1084,9 @@ class Inventory extends Backend
         $params = [];
         foreach ($data as $k => $v) {
             $params[$k]['sku'] = $v[0];
-            $params[$k]['stock'] = $list[$v[0]]['stock'];
-            $params[$k]['available_stock'] = $list[$v[0]]['available_stock'];
-            $params[$k]['distribution_occupy_stock'] = $list[$v[0]]['distribution_occupy_stock'];
+            $params[$k]['stock'] = $list[$v[0]]['stock'] ?: 0;
+            $params[$k]['available_stock'] = $list[$v[0]]['available_stock'] ?: 0;
+            $params[$k]['distribution_occupy_stock'] = $list[$v[0]]['distribution_occupy_stock'] ?: 0;
         }
         if ($params) {
             $this->model->saveAll($params);
@@ -1750,9 +1764,9 @@ class Inventory extends Backend
         $platformSku   = new \app\admin\model\itemmanage\ItemPlatformSku;
         foreach ($changeRow as $v) {
             $arr = explode('-', $v['original_sku']);
-            if(!empty($arr[1])){
+            if (!empty($arr[1])) {
                 $original_sku = $arr[0] . '-' . $arr[1];
-            }else{
+            } else {
                 $original_sku = trim($v['original_sku']);
             }
             //原先sku
@@ -1789,9 +1803,9 @@ class Inventory extends Backend
                         'create_time'               => date('Y-m-d H:i:s'),
                         'remark'                    => '工单补发、赠品-SKU减少可用库存,增加订单占用'
                     ];
-                    if($type == 3){
+                    if ($type == 3) {
                         $data['stock_change']        = -$original_number;
-                    }elseif ($type == 4){
+                    } elseif ($type == 4) {
                         $data['occupy_stock_change'] = $original_number;
                     }
                     //插入日志表

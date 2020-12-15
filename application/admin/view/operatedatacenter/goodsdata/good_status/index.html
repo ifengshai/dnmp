@@ -1,0 +1,81 @@
+<style>
+    .chart_father{
+        background-color: rgba(255, 255, 255, 1);
+        margin: 20px 40px 20px 40px;
+    }
+    .chart{
+        height:475px;
+        width:100%;
+        margin: 10px 0px 10px 0px;
+    }
+    .charts{
+        height:500px;
+        width:25%;
+        margin: 10px 0px 10px 0px;
+        float: left;
+    }
+    #again_num{
+       color: red;
+        font-size: 5rem;
+        margin-top: 60px;
+    }
+    #again_rate{
+        color: red;
+        font-size: 5rem;
+        margin-top: 60px;
+    }
+</style>
+<div class="panel panel-default panel-intro">
+    {:build_heading()}
+
+    <div class="panel-body">
+        <div class="form-group">
+            <label class="control-label col-xs-4" style="font-size: 2rem;"><i class="fa fa-search-plus"></i>  商品状态分析</label>
+            <select id="order_platform" data-rule="required" name="order_platform">
+                <option value="1">镜框</option>
+                <option value="2">饰品</option>
+                <option value="3">All</option>
+            </select>
+        </div>
+        <div class="row" class="chart_father">
+            <div id="echart3" class="chart"></div>
+        </div>
+        <hr>
+        <div class="form-group">
+            <label class="control-label col-xs-4" style="font-size: 2rem;"><i class="fa fa-pie-chart"></i>  各站点镜框产品重复比例及数量统计</label>
+            <p style="display: inline-block;font-size: 2rem;margin-left: 21rem;">站点A</p>
+            <select id="platform_a" data-rule="required" name="order_platform">
+                <option value="1">zeelool</option>
+                <option value="2">voogueme</option>
+                <option value="3">nihao</option>
+                <option value="4">meeloog</option>
+                <option value="5">wesee</option>
+                <option value="9">zeelool_es</option>
+                <option value="10">zeelool_de</option>
+                <option value="11">zeelool_jp</option>
+            </select>
+            <p style="display: inline-block;font-size: 2rem;">/站点B</p>
+            <select id="platform_b" data-rule="required" name="order_platform">
+                <option value="1">zeelool</option>
+                <option value="2">voogueme</option>
+                <option value="3">nihao</option>
+                <option value="4">meeloog</option>
+                <option value="5">wesee</option>
+                <option value="9">zeelool_es</option>
+                <option value="10">zeelool_de</option>
+                <option value="11">zeelool_jp</option>
+            </select>
+            <button class="btn btn-success" id="platform_submit">提交</button>
+        </div>
+        <div class="row" class="chart_father">
+            <div id="echart2" class="charts" style="width: 50%"></div>
+            <div class="charts">
+                <p style="display: inline-block;font-size: 5rem;margin-top: 100px;" >重复数量<p id="again_num">0</p></p>
+            </div>
+            <div class="charts">
+                <p style="display: inline-block;font-size: 5rem;margin-top: 100px;" >重复占比<p id="again_rate">0%</p></p>
+            </div>
+        </div>
+    </div>
+
+</div>

@@ -96,10 +96,38 @@ class TimeData extends Backend
             $order_time['o.status'] = ['in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
             $order_time['o.order_type'] = 1;
             //订单数据
-            $order_resultList = $web_model->table('sales_flat_order')->alias('o')->where($time_where)->where($order_time)->field('DATE_FORMAT(o.created_at,"%H") hour_created_at ,count(*) order_counter,round(sum(o.base_grand_total),2) hour_grand_total')->group("DATE_FORMAT(o.created_at,'%H')")->select();
+            $order_resultList = $web_model->table('sales_flat_order')
+                ->alias('o')
+                ->where($time_where)
+                ->where($order_time)
+                ->field('DATE_FORMAT(o.created_at,"%H") hour_created_at ,count(*) order_counter,round(sum(o.base_grand_total),2) hour_grand_total')
+                ->group("DATE_FORMAT(o.created_at,'%H')")->select();
+
+
+            //这段时间内的所有的新增购物车的ids 2020-11-25 start
+            $quote_ids = $web_model->table('sales_flat_quote')
+                ->where($time_where)
+                ->where('base_grand_total','>',0)
+                ->column('entity_id');
+            $order_resultList1 = $web_model->table('sales_flat_order')
+                ->alias('o')
+                ->where($time_where)
+                ->where($order_time)
+                ->where('quote_id','in',$quote_ids)
+                ->field('DATE_FORMAT(o.created_at,"%H") hour_created_at ,count(*) order_counter')
+                ->group("DATE_FORMAT(o.created_at,'%H')")
+                ->select();
+            //end
 
             //销售量
-            $orderitem_resultlist = $web_model->table('sales_flat_order_item')->alias('i')->join('sales_flat_order o','i.order_id=o.entity_id')->where($itemtime_where)->where($order_time)->field('DATE_FORMAT(i.created_at,"%H") hour_created_at ,sum(i.qty_ordered) orderitem_counter')->group("DATE_FORMAT(i.created_at,'%H')")->select();
+            $orderitem_resultlist = $web_model->table('sales_flat_order_item')
+                ->alias('i')
+                ->join('sales_flat_order o','i.order_id=o.entity_id')
+                ->where($itemtime_where)
+                ->where($order_time)
+                ->field('DATE_FORMAT(i.created_at,"%H") hour_created_at ,sum(i.qty_ordered) orderitem_counter')
+                ->group("DATE_FORMAT(i.created_at,'%H')")
+                ->select();
 
             //购物车数量
             $quote_where['base_grand_total'] = ['>',0];
@@ -142,27 +170,38 @@ class TimeData extends Backend
                 }
             }
             foreach ($finalList as $final_key => $final_value) {
+                foreach ($order_resultList1 as $order_key => $order_value) {
+                    if ((int)$final_value['hour'] == (int)$order_value['hour_created_at']) {
+                        $finalList[$final_key]['order_counter1'] = $order_value['order_counter'] ? $order_value['order_counter'] : 0;
+                    }
+                }
+            }
+            foreach ($finalList as $final_key => $final_value) {
                 foreach ($quote_resultList as $quote_key => $quote_value) {
                     if ((int)$final_value['hour'] == (int)$quote_value['hour_created_at']) {
                         $finalList[$final_key]['quote_counter'] = $quote_value['quote_counter'];
                     }
                 }
             }
+
             $total_array = array();
             foreach ($finalList as $key => $value) {
                 $total_array['sessions'] += $value['sessions'];
                 $total_array['hour_grand_total'] += $value['hour_grand_total'];
                 $total_array['order_counter'] += $value['order_counter'];
+                $total_array['order_counter1'] += $value['order_counter1'];
                 $total_array['orderitem_counter'] += $value['orderitem_counter'];
                 $total_array['quote_counter'] += $value['quote_counter'];
                 //会话转化率 订单/sessions
                 $finalList[$key]['order_sessions_conversion'] = $finalList[$key]['sessions'] ? round($finalList[$key]['order_counter'] / $finalList[$key]['sessions'] * 100, 2).'%' : 0;
-                $finalList[$key]['order_quote_conversion'] = $finalList[$key]['quote_counter'] ? round($finalList[$key]['order_counter'] / $finalList[$key]['quote_counter'] * 100, 2).'%' : 0;
+                $finalList[$key]['order_quote_conversion'] = $finalList[$key]['quote_counter'] ? round($finalList[$key]['order_counter1'] / $finalList[$key]['quote_counter'] * 100, 2).'%' : 0;
                 $finalList[$key]['quote_sessions_conversion'] = $finalList[$key]['sessions'] ? round($finalList[$key]['quote_counter'] / $finalList[$key]['sessions'] * 100, 2).'%' : 0;
                 $finalList[$key]['grand_total_order_conversion'] = $finalList[$key]['order_counter'] ? round($finalList[$key]['hour_grand_total'] / $finalList[$key]['order_counter'], 2) : 0;
             }
+            // dump($finalList);
+            // dump($total_array);die;
             $total_array['order_sessions_conversion'] = $total_array['sessions'] ? round($total_array['order_counter'] / $total_array['sessions'] * 100, 2) . "%" : 0;
-            $total_array['order_quote_conversion'] = $total_array['quote_counter'] ? round($total_array['order_counter'] / $total_array['quote_counter'] * 100, 2) . "%" : 0;
+            $total_array['order_quote_conversion'] = $total_array['quote_counter'] ? round($total_array['order_counter1'] / $total_array['quote_counter'] * 100, 2) . "%" : 0;
             $total_array['quote_sessions_conversion'] = $total_array['sessions'] ? round($total_array['quote_counter'] / $total_array['sessions'] * 100, 2) . "%" : 0;
             $total_array['grand_total_order_conversion'] = $total_array['order_counter'] ? round($total_array['hour_grand_total'] / $total_array['order_counter'], 2) : 0;
 
