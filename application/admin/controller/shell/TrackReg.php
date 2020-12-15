@@ -84,9 +84,10 @@ class TrackReg extends Backend
         // if ($list) {
         //     $this->ordernodedetail->saveAll($list);
         // }
-
-        $order_group = array_chunk($shipment_reg, 40);
-
+        if($shipment_reg) {
+            $order_group = array_chunk($shipment_reg, 40);
+        }
+        
         $trackingConnector = new TrackingConnector($this->apiKey);
         $order_ids = array();
         foreach ($order_group as $key => $val) {
