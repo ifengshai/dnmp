@@ -394,6 +394,7 @@ class OrderData extends Backend
         $arr['od_cyl'] = $options_params['od_cyl'] ?: '';;
         $arr['os_cyl'] = $options_params['os_cyl'] ?: '';;
         $arr['od_axis'] = $options_params['od_axis'];
+        $arr['os_axis'] = $options_params['os_axis'];
         $arr['pd_l'] = $options_params['pd_l'];
         $arr['pd_r'] = $options_params['pd_r'];
         $arr['pd'] = $options_params['pd'];
@@ -528,11 +529,12 @@ class OrderData extends Backend
         $arr['index_id'] = $options['info_buyRequest']['tmplens']['index_id'];
 
         //光度参数
-        $arr['od_sph'] = $options_params['od_sph'] ?: '';;
-        $arr['os_sph'] = $options_params['os_sph'] ?: '';;
-        $arr['od_cyl'] = $options_params['od_cyl'] ?: '';;
-        $arr['os_cyl'] = $options_params['os_cyl'] ?: '';;
+        $arr['od_sph'] = $options_params['od_sph'] ?: '';
+        $arr['os_sph'] = $options_params['os_sph'] ?: '';
+        $arr['od_cyl'] = $options_params['od_cyl'] ?: '';
+        $arr['os_cyl'] = $options_params['os_cyl'] ?: '';
         $arr['od_axis'] = $options_params['od_axis'];
+        $arr['os_axis'] = $options_params['os_axis'];
         $arr['pd_l'] = $options_params['pd_l'];
         $arr['pd_r'] = $options_params['pd_r'];
         $arr['pd'] = $options_params['pd'];
@@ -664,6 +666,7 @@ class OrderData extends Backend
         $arr['od_cyl'] = $options_params['od_cyl'] ?: '';;
         $arr['os_cyl'] = $options_params['os_cyl'] ?: '';;
         $arr['od_axis'] = $options_params['od_axis'];
+        $arr['os_axis'] = $options_params['os_axis'];
         $arr['pd_l'] = $options_params['pd_l'];
         $arr['pd_r'] = $options_params['pd_r'];
         $arr['pd'] = $options_params['pd'];
@@ -797,6 +800,7 @@ class OrderData extends Backend
         $arr['od_cyl'] = $options_params['od_cyl'] ?: '';;
         $arr['os_cyl'] = $options_params['os_cyl'] ?: '';;
         $arr['od_axis'] = $options_params['od_axis'];
+        $arr['os_axis'] = $options_params['os_axis'];
         $arr['pd_l'] = $options_params['pd_l'];
         $arr['pd_r'] = $options_params['pd_r'];
         $arr['pd'] = $options_params['pd'];
@@ -929,6 +933,7 @@ class OrderData extends Backend
         $arr['od_cyl'] = $options_params['od_cyl'] ?: '';;
         $arr['os_cyl'] = $options_params['os_cyl'] ?: '';;
         $arr['od_axis'] = $options_params['od_axis'];
+        $arr['os_axis'] = $options_params['os_axis'];
         $arr['pd_l'] = $options_params['pd_l'];
         $arr['pd_r'] = $options_params['pd_r'];
         $arr['pd'] = $options_params['pd'];
@@ -1067,6 +1072,7 @@ class OrderData extends Backend
         $arr['od_cyl'] = $options_params['od_cyl'] ?: '';;
         $arr['os_cyl'] = $options_params['os_cyl'] ?: '';;
         $arr['od_axis'] = $options_params['od_axis'];
+        $arr['os_axis'] = $options_params['os_axis'];
         $arr['pd_l'] = $options_params['pd_l'];
         $arr['pd_r'] = $options_params['pd_r'];
         $arr['pd'] = $options_params['pd'];
@@ -1199,6 +1205,7 @@ class OrderData extends Backend
         $arr['od_cyl'] = $options_params['od_cyl'] ?: '';;
         $arr['os_cyl'] = $options_params['os_cyl'] ?: '';;
         $arr['od_axis'] = $options_params['od_axis'];
+        $arr['os_axis'] = $options_params['os_axis'];
         $arr['pd_l'] = $options_params['pd_l'];
         $arr['pd_r'] = $options_params['pd_r'];
         $arr['pd'] = $options_params['pd'];
@@ -1332,6 +1339,7 @@ class OrderData extends Backend
         $arr['od_cyl'] = $options_params['od_cyl'] ?: '';;
         $arr['os_cyl'] = $options_params['os_cyl'] ?: '';;
         $arr['od_axis'] = $options_params['od_axis'];
+        $arr['os_axis'] = $options_params['os_axis'];
         $arr['pd_l'] = $options_params['pd_l'];
         $arr['pd_r'] = $options_params['pd_r'];
         $arr['pd'] = $options_params['pd'];
