@@ -194,7 +194,7 @@ class OcCustomerAfterSalesWorkOrder extends Backend
         }
         $row['email_message'] = $email;
         if ($row['status'] ==1){
-            \db('oc_customer_after_sales_work_order')->where('id',$ids)->update(['status'=>2]);
+            Db::connect('database.db_zeelool')->table('oc_customer_after_sales_work_order')->where('id',$ids)->update(['status'=>2]);
             $url  = config('url.zeelool_url').'magic/customer/updateTicket';
             $value['ticket_id'] = $ids;
             $value['status'] = 2;
