@@ -616,7 +616,8 @@ class Instock extends Backend
                             }
                             $platform->where(['sku' => $v['sku'], 'platform_type' => $item_platform_sku['platform_type']])->setInc('stock', $v['in_stock_num']);
                             //入库的时候减少待入库数量
-                            // $platform->where(['sku' => $v['sku'], 'platform_type' => 4])->setDec('wait_instock_num', $v['in_stock_num']);
+                             $platform->where(['sku' => $v['sku'], 'platform_type' => 4])->setDec('wait_instock_num', $v['in_stock_num']);
+
                             //插入日志表
                             (new StockLog())->setData([
                                 'type' => 2,
@@ -855,12 +856,12 @@ class Instock extends Backend
                         }
                     }
 
-
                     //更新商品表商品总库存
                     //总库存
                     if ($v['sku']) {
                         //增加商品表里的商品库存、可用库存、留样库存
                         $stock_res = $item->where($item_map)->inc('stock', $v['in_stock_num'])->inc('available_stock', $v['in_stock_num'])->inc('sample_num', $v['sample_num'])->update();
+
                         //减少待入库数量
                         if ($sku_item['wait_instock_num'] >= $v['in_stock_num']) {
                             $item->where($item_map)->dec('wait_instock_num', $v['in_stock_num'])->update();
