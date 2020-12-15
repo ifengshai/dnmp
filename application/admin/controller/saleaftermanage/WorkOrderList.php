@@ -3573,7 +3573,7 @@ EOF;
         ini_set('memory_limit', '1024M');
 
         $map['work_platform'] =2;
-//        $map['id'] =['lt',6558];
+        $map['id'] =['lt',28216];
 
         $list = $this->model
             ->where($map)
