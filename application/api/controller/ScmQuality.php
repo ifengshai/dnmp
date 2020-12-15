@@ -837,7 +837,7 @@ class ScmQuality extends Scm
                 if($check_id == 16971){print_r('iiiiiiiiii');}
                 //检测是否有异常单
                 if ($count <= 0) {
-                    if($check_id == 16971){print_r('lllllllll');exit;}
+
                     $check_item_list = $this->_check
                         ->alias('a')
                         ->join(['fa_check_order_item' => 'b'], 'a.id=b.check_id')
@@ -870,7 +870,7 @@ class ScmQuality extends Scm
                                 $is_error = 1;
                             }
                         }
-
+                        if($check_id == 16971){print_r('lllllllll');exit;}
                         //新增收货异常主表数据
                         $abnormal_save = [
                             'error_number' => 'YC' . date('YmdHis') . rand(100, 999) . rand(100, 999),
@@ -881,7 +881,7 @@ class ScmQuality extends Scm
                             'is_error' => $is_error
                         ];
                         $this->_purchase_abnormal->allowField(true)->save($abnormal_save);
-
+                        if($check_id == 16971){print_r('wwwwwwww');exit;}
                         //新增收货异常子表数据
                         array_walk($abnormal_item_save, function (&$value, $k, $p) {
                             $value = array_merge($value, $p);
