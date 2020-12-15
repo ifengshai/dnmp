@@ -802,6 +802,7 @@ class ScmQuality extends Scm
                 if($check_id == 16971){print_r('ffffffffffffff');}
                 //查询质检单明细表有样品的数据
                 $list = $this->_check_item->where(['check_id' => $check_id, 'sample_num' => ['>', 0]])->select();
+                if($check_id == 16971){print_r('gggggggg');}
                 if ($list) {
                     //生成样品入库主表数据
                     $work_order_data = [
@@ -825,6 +826,7 @@ class ScmQuality extends Scm
                     }
                     $this->_sample_work_order_item->allowField(true)->saveAll($work_order_item_data);
                 }
+                if($check_id == 16971){print_r('hhhhhhhhhhh');exit;}
 
                 //检测批次或采购单是否全部质检完成
                 $where = ['purchase_id' => $row['purchase_id'], 'is_check_order' => 0];
@@ -832,9 +834,10 @@ class ScmQuality extends Scm
                     $where['batch_id'] = $row['batch_id'];
                 }
                 $count = $this->_logistics_info->where($where)->count();
-
+                if($check_id == 16971){print_r('iiiiiiiiii');}
                 //检测是否有异常单
                 if ($count <= 0) {
+                    if($check_id == 16971){print_r('lllllllll');}
                     $check_item_list = $this->_check
                         ->alias('a')
                         ->join(['fa_check_order_item' => 'b'], 'a.id=b.check_id')
@@ -886,8 +889,11 @@ class ScmQuality extends Scm
 
                         $this->_purchase_abnormal_item->allowField(true)->saveAll($abnormal_item_save);
                     }
+                    if($check_id == 16971){print_r('jjjjjj');}
                 }
+                if($check_id == 16971){print_r('kkkkkkkkkkk');}
             } else { //审核拒绝关联操作
+                if($check_id == 16971){print_r('mmmmmmmmm');}
                 //移除质检单条形码绑定关系
                 $code_clear = [
                     'sku' => '',
@@ -896,8 +902,9 @@ class ScmQuality extends Scm
                     'check_id' => 0
                 ];
                 $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['check_id' => $check_id])->save($code_clear);
+                if($check_id == 16971){print_r('nnnnnnnn');}
             }
-
+            if($check_id == 16971){print_r('oooooooooo');}
             $this->_check->commit();
             $this->_purchase_order->commit();
             $this->_logistics_info->commit();
