@@ -461,30 +461,6 @@ class Outstock extends Backend
                             'fictitious_before' => $item_platform_sku['stock'],
                             // '虚拟仓库存变化量：正数为加，负数为减'
                             'fictitious_change' => -$v['out_stock_num'],
-                            //'订单占用变动前'
-                            'occupy_stock_before' => $sku_item['occupy_stock'],
-                            //'订单占用变化量：正数为加，负数为减'
-                            'occupy_stock_change' => 0,
-                            //'配货占用变动前'
-                            'distribution_stock_before' => $sku_item['distribution_occupy_stock'],
-                            //'配货占用变化量：正数为加，负数为减
-                            'distribution_stock_change' => 0,
-                            //'预售变动前'
-                            'presell_num_before' => $sku_item['presell_num'],
-                            //'预售变化量：正数为加，负数为减'
-                            'presell_num_change' => 0,
-                            //'留样库存变动前'
-                            'sample_num_before' => $sku_item['sample_num'],
-                            //'留样库存变化量：正数为加，负数为减'
-                            'sample_num_change' => 0,
-                            //'在途库存变动前'
-                            'on_way_stock_before' => $sku_item['on_way_stock'],
-                            //'在途库存变化量：正数为加，负数为减'
-                            'on_way_stock_change' => 0,
-                            //'待入库变动前'
-                            'wait_instock_num_before' => $sku_item['wait_instock_num'],
-                            //'待入库变化量：正数为加，负数为减'
-                            'wait_instock_num_change' => 0,
                             'create_person' => session('admin.nickname'),
                             'create_time' => time(),
                             //'关联单号类型：1订单号 2子订单号 3入库单 4出库单 5盘点单 6调拨单'

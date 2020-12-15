@@ -56,6 +56,40 @@ class GoodsStockLog extends Backend
                 ->select();
 
             $list = collection($list)->toArray();
+            foreach ($list as $k=>$v){
+                if ($v['stock_change'] == 0 && $v['stock_before'] == 0){
+                    $list[$k]['stock_change'] = '-';
+                    $list[$k]['stock_before'] = '-';
+                }
+                if ($v['available_stock_before'] == 0 && $v['available_stock_change'] == 0){
+                    $list[$k]['available_stock_before'] = '-';
+                    $list[$k]['available_stock_change'] = '-';
+                }
+                if ($v['fictitious_before'] == 0 && $v['fictitious_change'] == 0){
+                    $list[$k]['fictitious_before'] = '-';
+                    $list[$k]['fictitious_change'] = '-';
+                }
+                if ($v['occupy_stock_before'] == 0 && $v['occupy_stock_change'] == 0){
+                    $list[$k]['occupy_stock_before'] = '-';
+                    $list[$k]['occupy_stock_change'] = '-';
+                }
+                if ($v['distribution_stock_before'] == 0 && $v['distribution_stock_change'] == 0){
+                    $list[$k]['distribution_stock_before'] = '-';
+                    $list[$k]['distribution_stock_change'] = '-';
+                }
+                if ($v['presell_num_before'] == 0 && $v['presell_num_change'] == 0){
+                    $list[$k]['presell_num_before'] = '-';
+                    $list[$k]['presell_num_change'] = '-';
+                }
+                if ($v['on_way_stock_before'] == 0 && $v['on_way_stock_change'] == 0){
+                    $list[$k]['on_way_stock_before'] = '-';
+                    $list[$k]['on_way_stock_change'] = '-';
+                }
+                if ($v['wait_instock_num_before'] == 0 && $v['wait_instock_num_change'] == 0){
+                    $list[$k]['wait_instock_num_before'] = '-';
+                    $list[$k]['wait_instock_num_change'] = '-';
+                }
+            }
             $result = array("total" => $total, "rows" => $list);
 
             return json($result);
