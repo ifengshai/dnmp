@@ -964,10 +964,16 @@ class ScmWarehouse extends Scm
                 //添加入库商品信息
                 if ($result !== false) {
                     $where_code = [];
+
+                    //获取质检单留样数量
+                    $check_data = $this->_check_item
+                        ->where('check_id', $_in_stock_info['check_id'])
+                        ->column('sample_num', 'sku');
+
                     foreach (array_filter($item_sku) as $k => $v) {
-                        $item_save = [];
-                        $item_save[$k]['purchase_id'] = $purchase_id;//采购单id
-                        $item_save[$k]['in_stock_num'] = $v['in_stock_num'];//入库数量
+                        $item_save['purchase_id'] = $purchase_id;//采购单id
+                        $item_save['in_stock_num'] = $v['in_stock_num'];//入库数量
+                        $item_save['sample_num'] = $check_data[$v['sku']] ?: 0;//留样数量
                         //修改入库单子表
                         $where = ['sku' => $v['sku'], 'in_stock_id' => $in_stock_id];
                         $this->_in_stock_item->allowField(true)->isUpdate(true, $where)->save($item_save);
