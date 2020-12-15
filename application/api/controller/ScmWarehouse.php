@@ -973,7 +973,7 @@ class ScmWarehouse extends Scm
                     foreach (array_filter($item_sku) as $k => $v) {
                         $item_save['purchase_id'] = $purchase_id;//采购单id
                         $item_save['in_stock_num'] = $v['in_stock_num'];//入库数量
-                        $item_save['sample_num'] = $check_data[$v['sku']]['sample_num'] ?: 0;//留样数量
+                        $item_save['sample_num'] = $check_data[$v['sku']] ?: 0;//留样数量
                         //修改入库单子表
                         $where = ['sku' => $v['sku'], 'in_stock_id' => $in_stock_id];
                         $this->_in_stock_item->allowField(true)->isUpdate(true, $where)->save($item_save);
