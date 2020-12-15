@@ -765,7 +765,7 @@ class ScmQuality extends Scm
 
         $this->_check->startTrans();
         $this->_purchase_order->startTrans();
-//        $this->_logistics_info->startTrans();
+        $this->_logistics_info->startTrans();
         $this->_purchase_abnormal->startTrans();
         $this->_sample_work_order->startTrans();
         $this->_product_bar_code_item->startTrans();
@@ -799,7 +799,7 @@ class ScmQuality extends Scm
                         }
                     }
                 }
-                if($check_id == 16971){print_r('ffffffffffffff');exit;}
+                if($check_id == 16971){print_r('ffffffffffffff');}
                 //查询质检单明细表有样品的数据
                 $list = $this->_check_item->where(['check_id' => $check_id, 'sample_num' => ['>', 0]])->select();
                 if ($list) {
