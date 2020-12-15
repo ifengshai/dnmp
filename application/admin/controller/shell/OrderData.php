@@ -196,8 +196,7 @@ class OrderData extends Backend
                                     $params['customer_lastname'] = $v['customer_lastname'];
                                     $params['taxno'] = $v['taxno'];
                                     $params['updated_at'] = strtotime($v['updated_at']);
-                                    $params['order_prescription_type'] = $v['custom_order_prescription_type'] ?? 0;
-
+                                   
                                     $this->order->where(['entity_id' => $v['entity_id'], 'site' => $site])->update($params);
                                 }
                             }
@@ -913,57 +912,9 @@ class OrderData extends Backend
          * 3、染色镜 镜片类型包含Lens with Color Tint 或 Tinted 或 Color Tint
          * 4、当cyl<=-4或cyl>=4 或 sph < -8或 sph>8
          */
-
-        if ($arr['index_name'] == '' || $arr['index_name'] == 'Kunststoffgläser' || $arr['index_name'] == 'NUR RAHMEN') {
-            $arr['order_prescription_type'] = 1;
-        }
-
-        if ($arr['prescription_type'] == 'Gleitsicht') {
-            $arr['is_custom_lens'] = 1;
-        }
-
-
-        if (strpos($arr['index_name'], 'Polarisierend') !== false) {
-            $arr['is_custom_lens'] = 1;
-        }
-
-        if (strpos($arr['index_name'], 'Lens with Color Tint') !== false) {
-            $arr['is_custom_lens'] = 1;
-        }
-
-        //染色
-        if (strpos($arr['index_name'], 'Tinted') !== false) {
-            $arr['is_custom_lens'] = 1;
-        }
-
-        if (strpos($arr['index_name'], 'Farbtönung') !== false) {
-            $arr['is_custom_lens'] = 1;
-        }
-
-        if ((float) urldecode($arr['od_cyl']) * 1 <= -4 || (float) urldecode($arr['od_cyl']) * 1 >= 4) {
-            $arr['is_custom_lens'] = 1;
-        }
-
-        if ((float) urldecode($arr['os_cyl']) * 1 <= -4 || (float) urldecode($arr['os_cyl']) * 1 >= 4) {
-            $arr['is_custom_lens'] = 1;
-        }
-        if ((float) urldecode($arr['od_sph']) * 1 < -8 || (float) urldecode($arr['od_sph']) * 1 > 8) {
-            $arr['is_custom_lens'] = 1;
-        }
-
-        if ((float) urldecode($arr['os_sph']) * 1 < -8 || (float) urldecode($arr['os_sph']) * 1 > 8) {
-            $arr['is_custom_lens'] = 1;
-        }
-
-        //定制处方镜
-        if ($arr['is_custom_lens'] == 1) {
-            $arr['order_prescription_type'] = 3;
-        }
-
-        //默认如果不是仅镜架 或定制片 则为现货处方镜
-        if ($arr['order_prescription_type'] != 1 && $arr['order_prescription_type'] != 3) {
-            $arr['order_prescription_type'] = 2;
-        }
+        //判断加工类型
+        $result = $this->set_processing_type($arr);
+        $arr = array_merge($arr, $result);
 
         return $arr;
     }
