@@ -889,11 +889,11 @@ class ScmQuality extends Scm
 
                         $this->_purchase_abnormal_item->allowField(true)->saveAll($abnormal_item_save);
                     }
-                    if($check_id == 16971){print_r('jjjjjj');}
+                    if($check_id == 16971){print_r('jjjjjj');exit;}
                 }
                 if($check_id == 16971){print_r('kkkkkkkkkkk');}
             } else { //审核拒绝关联操作
-                if($check_id == 16971){print_r('mmmmmmmmm');}
+                if($check_id == 16971){print_r('mmmmmmmmm');exit;}
                 //移除质检单条形码绑定关系
                 $code_clear = [
                     'sku' => '',
