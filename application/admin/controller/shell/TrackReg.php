@@ -84,29 +84,27 @@ class TrackReg extends Backend
         // if ($list) {
         //     $this->ordernodedetail->saveAll($list);
         // }
-        if($shipment_reg) {
+        if ($shipment_reg) {
             $order_group = array_chunk($shipment_reg, 40);
-        } else {
-            return true;
-        }
-        
-        $trackingConnector = new TrackingConnector($this->apiKey);
-        $order_ids = array();
-        foreach ($order_group as $key => $val) {
-            $aa = $trackingConnector->registerMulti($val);
-
-            //请求接口更改物流表状态
-            $order_ids = implode(',', array_column($val, 'order_id'));
-            $params['ids'] = $order_ids;
-            $params['site'] = $site_type;
-            $res = $this->setLogisticsStatus($params);
-            if ($res->status !== 200) {
-                echo $site_str . '更新失败:' . $order_ids . "\n";
-            }
+            $trackingConnector = new TrackingConnector($this->apiKey);
             $order_ids = array();
+            foreach ($order_group as $key => $val) {
+                $aa = $trackingConnector->registerMulti($val);
 
-            usleep(500000);
+                //请求接口更改物流表状态
+                $order_ids = implode(',', array_column($val, 'order_id'));
+                $params['ids'] = $order_ids;
+                $params['site'] = $site_type;
+                $res = $this->setLogisticsStatus($params);
+                if ($res->status !== 200) {
+                    echo $site_str . '更新失败:' . $order_ids . "\n";
+                }
+                $order_ids = array();
+
+                usleep(500000);
+            }
         }
+
         echo $site_str . ' is ok' . "\n";
     }
 
@@ -853,27 +851,27 @@ class TrackReg extends Backend
         $register_num = count($register_userids);
         //当天注册用户在当天下单的用户数
         $order_user_count1 = 0;
-        foreach($register_userids as $register_userid){
+        foreach ($register_userids as $register_userid) {
             //判断当前用户在当天是否下单
-            $order = $zeelool_model->table('sales_flat_order')->where($cart_where1)->where($status_where)->where('customer_id',$register_userid)->value('entity_id');
-            if($order){
+            $order = $zeelool_model->table('sales_flat_order')->where($cart_where1)->where($status_where)->where('customer_id', $register_userid)->value('entity_id');
+            if ($order) {
                 $order_user_count1++;
             }
         }
-        $arr['create_user_change_rate'] = $register_num ? round($order_user_count1/$register_num*100,2) : 0;
+        $arr['create_user_change_rate'] = $register_num ? round($order_user_count1 / $register_num * 100, 2) : 0;
         //当天更新用户当天产生订单的转化率
         $update_userids = $zeelool_model->table('customer_entity')->where($cart_where2)->column('entity_id');
         $update_num = count($update_userids);
         //当天活跃更新用户数在当天是否下单
         $order_user_count2 = 0;
-        foreach ($update_userids as $update_userid){
+        foreach ($update_userids as $update_userid) {
             //判断活跃用户在当天下单的用户数
-            $order = $zeelool_model->table('sales_flat_order')->where($cart_where2)->where($status_where)->where('customer_id',$update_userid)->value('entity_id');
-            if($order){
+            $order = $zeelool_model->table('sales_flat_order')->where($cart_where2)->where($status_where)->where('customer_id', $update_userid)->value('entity_id');
+            if ($order) {
                 $order_user_count2++;
             }
         }
-        $arr['update_user_change_rate'] = $update_num ? round($order_user_count2/$update_num*100,0) : 0;
+        $arr['update_user_change_rate'] = $update_num ? round($order_user_count2 / $update_num * 100, 0) : 0;
         Db::name('datacenter_day')->insert($arr);
         echo $date_time . "\n";
         echo date("Y-m-d H:i:s") . "\n";
@@ -1108,27 +1106,27 @@ class TrackReg extends Backend
         $register_num = count($register_userids);
         //当天注册用户在当天下单的用户数
         $order_user_count1 = 0;
-        foreach($register_userids as $register_userid){
+        foreach ($register_userids as $register_userid) {
             //判断当前用户在当天是否下单
-            $order = $zeelool_model->table('sales_flat_order')->where($cart_where1)->where($status_where)->where('customer_id',$register_userid)->value('entity_id');
-            if($order){
+            $order = $zeelool_model->table('sales_flat_order')->where($cart_where1)->where($status_where)->where('customer_id', $register_userid)->value('entity_id');
+            if ($order) {
                 $order_user_count1++;
             }
         }
-        $arr['create_user_change_rate'] = $register_num ? round($order_user_count1/$register_num*100,2) : 0;
+        $arr['create_user_change_rate'] = $register_num ? round($order_user_count1 / $register_num * 100, 2) : 0;
         //当天更新用户当天产生订单的转化率
         $update_userids = $zeelool_model->table('customer_entity')->where($cart_where2)->column('entity_id');
         $update_num = count($update_userids);
         //当天活跃更新用户数在当天是否下单
         $order_user_count2 = 0;
-        foreach ($update_userids as $update_userid){
+        foreach ($update_userids as $update_userid) {
             //判断活跃用户在当天下单的用户数
-            $order = $zeelool_model->table('sales_flat_order')->where($cart_where2)->where($status_where)->where('customer_id',$update_userid)->value('entity_id');
-            if($order){
+            $order = $zeelool_model->table('sales_flat_order')->where($cart_where2)->where($status_where)->where('customer_id', $update_userid)->value('entity_id');
+            if ($order) {
                 $order_user_count2++;
             }
         }
-        $arr['update_user_change_rate'] = $update_num ? round($order_user_count2/$update_num*100,0) : 0;
+        $arr['update_user_change_rate'] = $update_num ? round($order_user_count2 / $update_num * 100, 0) : 0;
         //插入数据
         Db::name('datacenter_day')->insert($arr);
         echo $date_time . "\n";
@@ -1229,27 +1227,27 @@ class TrackReg extends Backend
         $register_num = count($register_userids);
         //当天注册用户在当天下单的用户数
         $order_user_count1 = 0;
-        foreach($register_userids as $register_userid){
+        foreach ($register_userids as $register_userid) {
             //判断当前用户在当天是否下单
-            $order = $zeelool_model->table('sales_flat_order')->where($cart_where1)->where($status_where)->where('customer_id',$register_userid)->value('entity_id');
-            if($order){
+            $order = $zeelool_model->table('sales_flat_order')->where($cart_where1)->where($status_where)->where('customer_id', $register_userid)->value('entity_id');
+            if ($order) {
                 $order_user_count1++;
             }
         }
-        $arr['create_user_change_rate'] = $register_num ? round($order_user_count1/$register_num*100,2) : 0;
+        $arr['create_user_change_rate'] = $register_num ? round($order_user_count1 / $register_num * 100, 2) : 0;
         //当天更新用户当天产生订单的转化率
         $update_userids = $zeelool_model->table('customer_entity')->where($cart_where2)->column('entity_id');
         $update_num = count($update_userids);
         //当天活跃更新用户数在当天是否下单
         $order_user_count2 = 0;
-        foreach ($update_userids as $update_userid){
+        foreach ($update_userids as $update_userid) {
             //判断活跃用户在当天下单的用户数
-            $order = $zeelool_model->table('sales_flat_order')->where($cart_where2)->where($status_where)->where('customer_id',$update_userid)->value('entity_id');
-            if($order){
+            $order = $zeelool_model->table('sales_flat_order')->where($cart_where2)->where($status_where)->where('customer_id', $update_userid)->value('entity_id');
+            if ($order) {
                 $order_user_count2++;
             }
         }
-        $arr['update_user_change_rate'] = $update_num ? round($order_user_count2/$update_num*100,0) : 0;
+        $arr['update_user_change_rate'] = $update_num ? round($order_user_count2 / $update_num * 100, 0) : 0;
         //插入数据
         Db::name('datacenter_day')->insert($arr);
         echo $date_time . "\n";
