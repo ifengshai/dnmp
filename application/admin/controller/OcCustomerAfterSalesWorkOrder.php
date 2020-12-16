@@ -115,7 +115,7 @@ class OcCustomerAfterSalesWorkOrder extends Backend
                 }else{
                     $list[$key]['status'] = '待处理';
                 }
-
+                $list[$key]['created_at'] =date("Y-m-d H:i:s",strtotime($item['created_at'])+28800);;
                 $swhere['platform_order'] = $item['increment_id'];
                 $swhere['work_platform'] = 1;
                 $swhere['work_status'] = ['not in', [0, 4, 6]];
