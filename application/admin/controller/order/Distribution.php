@@ -1796,7 +1796,13 @@ class Distribution extends Backend
             echo $item['name'] . " Start\n";
             //获取已质检旧数据
             $list = $item['obj']
-                ->field('entity_id,increment_id,custom_match_delivery_created_at_new')
+                ->field('entity_id,increment_id,
+                custom_print_label_created_at_new,custom_print_label_person_new,
+                custom_match_frame_created_at_new,custom_match_frame_person_new,
+                custom_match_lens_created_at_new,custom_match_lens_person_new,
+                custom_match_factory_created_at_new,custom_match_factory_person_new,
+                custom_match_delivery_created_at_new,custom_match_delivery_person_new
+               ')
                 ->where([
                     'custom_is_delivery_new' => 1,
                     'custom_match_delivery_created_at_new' => ['between', ['2018-01-01', '2020-10-01']]
@@ -1808,7 +1814,7 @@ class Distribution extends Backend
             if ($list) {
                 foreach ($list as $value) {
                     try {
-                        //fa_order_process表：check_status、check_time、combine_status、combine_time
+                        //主单业务表：fa_order_process：check_status=审单状态、check_time=审单时间、combine_status=合单状态、combine_time=合单状态
                         $do_time = strtotime($value['custom_match_delivery_created_at_new']) + 28800;
                         $this->_new_order_process
                             ->allowField(true)
@@ -1817,13 +1823,90 @@ class Distribution extends Backend
                                 ['entity_id' => $value['entity_id'], 'site' => $key]
                             );
 
-                        //fa_order_item_process表：distribution_status
+                        //子单表：fa_order_item_process：distribution_status=配货状态
                         $this->model
                             ->allowField(true)
                             ->save(
                                 ['distribution_status' => 1],
                                 ['entity_id' => $value['entity_id'], 'site' => $key]
                             );
+                        $item_process_id = $this->model->id;
+
+                        /**配货日志 Start*/
+                        //打印标签
+                        if($value['custom_print_label_created_at_new']){
+                            DistributionLog::record(
+                                (object)['nickname'=>$value['custom_print_label_person_new']], //操作人
+                                $item_process_id, //子单ID
+                                1, //操作类型
+                                '标记打印完成',//备注
+                                strtotime($value['custom_print_label_created_at_new'])//操作时间
+                            );
+                        }
+
+                        //配货
+                        if($value['custom_match_frame_created_at_new']){
+                            DistributionLog::record(
+                                (object)['nickname'=>$value['custom_match_frame_person_new']], //操作人
+                                $item_process_id, //子单ID
+                                2, //操作类型
+                                '配货完成',//备注
+                                strtotime($value['custom_match_frame_created_at_new'])//操作时间
+                            );
+                        }
+
+                        //配镜片
+                        if($value['custom_match_lens_created_at_new']){
+                            DistributionLog::record(
+                                (object)['nickname'=>$value['custom_match_lens_person_new']], //操作人
+                                $item_process_id, //子单ID
+                                3, //操作类型
+                                '配镜片完成',//备注
+                                strtotime($value['custom_match_lens_created_at_new'])//操作时间
+                            );
+                        }
+
+                        //加工
+                        if($value['custom_match_factory_created_at_new']){
+                            DistributionLog::record(
+                                (object)['nickname'=>$value['custom_match_factory_person_new']], //操作人
+                                $item_process_id, //子单ID
+                                4, //操作类型
+                                '加工完成',//备注
+                                strtotime($value['custom_match_factory_created_at_new'])//操作时间
+                            );
+
+                            //成品质检
+                            DistributionLog::record(
+                                (object)['nickname'=>$value['custom_match_factory_person_new']], //操作人
+                                $item_process_id, //子单ID
+                                6, //操作类型
+                                '成品质检完成',//备注
+                                strtotime($value['custom_match_factory_created_at_new'])//操作时间
+                            );
+                        }
+
+                        //合单
+                        if($value['custom_match_delivery_created_at_new']){
+                            DistributionLog::record(
+                                (object)['nickname'=>$value['custom_match_delivery_person_new']], //操作人
+                                $item_process_id, //子单ID
+                                7, //操作类型
+                                '合单完成',//备注
+                                strtotime($value['custom_match_delivery_created_at_new'])//操作时间
+                            );
+
+                            //审单
+                            DistributionLog::record(
+                                (object)['nickname'=>$value['custom_match_delivery_person_new']], //操作人
+                                $item_process_id, //子单ID
+                                8, //操作类型
+                                '审单完成',//备注
+                                strtotime($value['custom_match_delivery_created_at_new'])//操作时间
+                            );
+                        }
+                        /**配货日志 End*/
+
                         $handle += 1;
                     } catch (PDOException $e) {
                         echo $item['name'] . '-' . $value['increment_id'] . '：' . $e->getMessage() . "\n";
