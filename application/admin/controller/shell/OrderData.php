@@ -149,7 +149,8 @@ class OrderData extends Backend
                                     $params['status'] = $v['status'] ?: '';
                                     $params['store_id'] = $v['store_id'];
                                     $params['base_grand_total'] = $v['base_grand_total'];
-                                    $params['total_item_count'] = $v['total_qty_ordered'];
+                                    $params['total_item_count'] = $v['total_item_count'];
+                                    $params['total_qty_ordered'] = $v['total_qty_ordered'];
                                     $params['order_type'] = $v['order_type'];
                                     $params['base_currency_code'] = $v['base_currency_code'];
                                     $params['shipping_method'] = $v['shipping_method'];
