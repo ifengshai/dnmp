@@ -42,7 +42,7 @@ class ThirdApi extends Api
             $order_node = Db::name('order_node')->field('site,order_id,order_number,shipment_type,shipment_data_type')->where('track_number', $track_arr['data']['number'])->find();
             $url = config('url.zeelool_url').'magic/order/updateOrderStatus';
             $value['increment_id']  = $order_node['order_number'];
-            $this->request_post($url,$value);
+            $this->post_json_data($url,$value);
         }
         if ($track_arr['event'] != 'TRACKING_STOPPED') {
             // file_put_contents('/www/wwwroot/mojing/runtime/log/track.txt',$track_info."\r\n",FILE_APPEND);
