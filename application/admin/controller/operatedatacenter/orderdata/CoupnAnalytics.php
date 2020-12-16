@@ -24,6 +24,7 @@ class CoupnAnalytics extends Backend
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
             $filter = json_decode($this->request->get('filter'), true);
+            // dump($filter);
             //如果发送的来源是Selectpage，则转发到Selectpage
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
@@ -60,7 +61,7 @@ class CoupnAnalytics extends Backend
                 $map1 = [];
             }
             if ($filter['name']) {
-                $map2['name'] = ['like',$filter['name']];
+                $map2['name'] = ['like','%'.$filter['name'].'%'];
             } else {
                 $map2 = [];
             }
@@ -85,16 +86,22 @@ class CoupnAnalytics extends Backend
             $total = $salesrule->table('salesrule')
                 ->where('channel', '>', 0)
                 ->field('name,rule_id,channel')
-                ->where($where)
+                // ->where($where)
+                ->where($map1)
+                ->where($map2)
                 ->count();
             //所有的优惠券
             $list = $salesrule->table('salesrule')
                 ->where('channel', '>', 0)
                 ->field('name,rule_id,channel')
-                ->where($where)
+                // ->where($where)
+                ->where($map1)
+                ->where($map2)
                 ->limit($offset, $limit)
                 ->select();
             $list = collection($list)->toArray();
+            // dump($offset);
+            // dump($limit);
             // dump($list);die;
             //判断订单的某些条件
             $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
