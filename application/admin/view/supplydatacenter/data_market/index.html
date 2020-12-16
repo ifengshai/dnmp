@@ -20,6 +20,22 @@
         margin-left: 30px;
         width: 15%;
     }
+    .btn-div1 {
+        line-height: 50px;
+        background: inherit;
+        background-color: rgba(255, 255, 255, 1);
+        border: none;
+        border-radius: 4px;
+        box-shadow: 0px 0px 7px rgba(0, 0, 0, 0.349019607843137);
+        border-width: 0px;
+        font-family: 'Arial Negreta', 'Arial';
+        font-weight: 700;
+        font-style: normal;
+        margin-right: 30px;
+        margin-left: 30px;
+        margin-top: 20px;
+        width: 25%;
+    }
     .title{
         font-size: 18px;
         color: rgb(127, 127, 127);
@@ -148,6 +164,20 @@
         margin-right: -155px;
         margin-top: -7px;
     }
+    .wrap{
+        margin:30px auto;
+        position: relative;
+        min-height: 300px;
+    }
+    .hLeft{
+        position: absolute;
+        left:0;
+        top:0;
+        width:50%;
+    }
+    .hRight{
+        margin-left:50%;
+    }
 </style>
 
 <div class="panel panel-default panel-intro">
@@ -177,22 +207,22 @@
                     <div class="margin-div" style="text-align: center">
                         <div class="btn btn-div">
                             <span class="extend">
-                                <div class="title">库存总数量（个）<br/><span style="color: red;" id="order_num">000</span></div>
+                                <div class="title">库存总数量（个）<br/><span style="color: red;">{$stock_overview.stock_num}</span></div>
                             </span>
                         </div>
                         <div class="btn btn-div">
                             <span class="extend">
-                                <div class="title">在途库存数量（个）<br/><span style="color: red;" id="order_unit_price">0000000</span></div>
+                                <div class="title">在途库存数量（个）<br/><span style="color: red;">{$stock_overview.onway_stock_num}</span></div>
                             </span>
                         </div>
                         <div class="btn btn-div">
                             <span class="extend">
-                                <div class="title">待入库数量（个）<br/><span style="color: red;" id="sales_total_money">00000</span></div>
+                                <div class="title">待入库数量（个）<br/><span style="color: red;">{$stock_overview.wait_stock_num}</span></div>
                             </span>
                         </div>
                         <div class="btn btn-div">
                             <span class="extend">
-                                <div class="title">库存单价（￥）<br/><span style="color: red;" id="shipping_total_money">111111</span></div>
+                                <div class="title">库存单价（￥）<br/><span style="color: red;">{$stock_overview.stock_price}</span></div>
                             </span>
                         </div>
                     </div>
@@ -201,22 +231,22 @@
                     <div class="margin-div" style="text-align: center">
                         <div class="btn btn-div">
                             <span class="extend">
-                                <div class="title">库存总金额（￥）<br/><span style="color: red;" id="order_num">000</span></div>
+                                <div class="title">库存总金额（￥）<br/><span style="color: red;">{$stock_overview.stock_amount}</span></div>
                             </span>
                         </div>
                         <div class="btn btn-div">
                             <span class="extend">
-                                <div class="title">在途库存金额（￥）<br/><span style="color: red;" id="order_unit_price">0000000</span></div>
+                                <div class="title">在途库存金额（￥）<br/><span style="color: red;">{$stock_overview.onway_stock_amount}</span></div>
                             </span>
                         </div>
                         <div class="btn btn-div">
                             <span class="extend">
-                                <div class="title">待入库金额（￥）<br/><span style="color: red;" id="sales_total_money">00000</span></div>
+                                <div class="title">待入库金额（￥）<br/><span style="color: red;">{$stock_overview.wait_stock_amount}</span></div>
                             </span>
                         </div>
                         <div class="btn btn-div">
                             <span class="extend">
-                                <div class="title">在途库存单价（￥）<br/><span style="color: red;" id="shipping_total_money">0</span></div>
+                                <div class="title">在途库存单价（￥）<br/><span style="color: red;">{$stock_overview.onway_stock_price}</span></div>
                             </span>
                         </div>
                     </div>
@@ -436,51 +466,50 @@
                             <div class="form-group" style="float:left;width: 100%;" >
 
                                 <label class="control-label col-xs-6">采购概况</label>
-                                <label class="control-label col-xs-6"></label>
+                                <label class="control-label col-xs-6">666</label>
 
                             </div>
-
-                            <table class="new-altrowstable" style="margin-left: 1%;">
-
-                                <div class="row">
-                                    <div class="margin-div" style="text-align: center">
-                                        <div class="btn btn-div">
+                            <div class="wrap">
+                                <div class="hLeft">
+                                    <div class="row">
+                                        <div class="margin-div" style="text-align: center">
+                                            <div class="btn btn-div1">
                                             <span class="extend">
-                                                <div class="title">库存总数量（个）<br/><span style="color: red;" id="order_num">000</span></div>
+                                                <div class="title">采购总数<br/><span style="color: red;" id="order_num">000</span></div>
                                             </span>
-                                        </div>
-                                        <div class="btn btn-div">
+                                            </div>
+                                            <div class="btn btn-div1">
                                             <span class="extend">
-                                                <div class="title">在途库存数量（个）<br/><span style="color: red;" id="order_unit_price">0000000</span></div>
+                                                <div class="title">采购总金额（￥）<br/><span style="color: red;" id="order_unit_price">0000000</span></div>
                                             </span>
-                                        </div>
-                                        <div class="btn btn-div">
+                                            </div>
+                                            <div class="btn btn-div1">
                                             <span class="extend">
-                                                <div class="title">待入库数量（个）<br/><span style="color: red;" id="sales_total_money">00000</span></div>
+                                                <div class="title">采购总SKU数<br/><span style="color: red;" id="sales_total_money">00000</span></div>
                                             </span>
-                                        </div>
-                                        <br>
-                                        <div class="btn btn-div">
+                                            </div>
+                                            <div class="btn btn-div1">
                                             <span class="extend">
-                                                <div class="title">库存单价（￥）<br/><span style="color: red;" id="shipping_total_money">111111</span></div>
+                                                <div class="title">采购批次到货延时率<br/><span style="color: red;" id="shipping_total_money">111111</span></div>
                                             </span>
-                                        </div>
-                                        <div class="btn btn-div">
+                                            </div>
+                                            <div class="btn btn-div1">
                                             <span class="extend">
-                                                <div class="title">库存总数量（个）<br/><span style="color: red;" id="order_num">000</span></div>
+                                                <div class="title">采购批次到货合格率<br/><span style="color: red;" id="order_num">000</span></div>
                                             </span>
-                                        </div>
-                                        <div class="btn btn-div">
+                                            </div>
+                                            <div class="btn btn-div1">
                                             <span class="extend">
-                                                <div class="title">在途库存数量（个）<br/><span style="color: red;" id="order_unit_price">0000000</span></div>
+                                                <div class="title">采购单价（￥）<br/><span style="color: red;" id="order_unit_price">0000000</span></div>
                                             </span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </table>
-                            <table class="new-altrowstable height-table" style="margin-left: 2%">
-                                1111
-                            </table>
+                                <div class="hRight">
+                                    <div id="echart1" style="height:300px;margin: 10px 0px 10px 0px;"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
