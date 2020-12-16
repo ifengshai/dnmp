@@ -378,7 +378,7 @@ class Distribution extends Backend
         //获取更改镜片最新处方信息
         $change_lens = $this->_work_order_change_sku
             ->alias('a')
-            ->field('a.od_sph,a.od_cyl,a.od_axis,a.od_add,a.pd_r,a.od_pv,a.od_bd,a.od_pv_r,a.od_bd_r,a.os_sph,a.os_cyl,a.os_axis,a.os_add,a.pd_l,a.os_pv,a.os_bd,a.os_pv_r,a.os_bd_r,a.lens_number,a.recipe_type as prescription_type')
+            ->field('a.od_sph,a.od_cyl,a.od_axis,a.od_add,a.pd_r,a.od_pv,a.od_bd,a.od_pv_r,a.od_bd_r,a.os_sph,a.os_cyl,a.os_axis,a.os_add,a.pd_l,a.os_pv,a.os_bd,a.os_pv_r,a.os_bd_r,a.lens_number,a.recipe_type as prescription_type,prescription_option')
             ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
             ->where([
                 'a.change_type' => 2,
@@ -405,6 +405,11 @@ class Distribution extends Backend
             } else {
                 $change_lens['prismcheck'] = '';
             }
+
+            //处理镀膜
+            $prescription_option = unserialize($change_lens['prescription_option']);
+            $change_lens['coating_name'] = $prescription_option['coating_name'] ?: '';
+            unset($change_lens['prescription_option']);
 
             $result = array_merge($result, $change_lens);
         }

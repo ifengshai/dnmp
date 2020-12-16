@@ -1217,7 +1217,9 @@ class WorkOrderList extends Model
         //返回lensName
         $lens = $prescription[$prescription_type] ?? [];       
         $lensName = $coatingName = $colorName = $lensType = '';
-        if (!$color_id) {
+
+        //lensName
+        if ($lens_id) {
             foreach ($lens as $len) {
                 if ($len['lens_id'] == $lens_id) {
                     $lensName = $len['lens_data_name'];
@@ -1225,29 +1227,25 @@ class WorkOrderList extends Model
                     break;
                 }
             }
-        } else {
-            //colorName
-            foreach ($colorList as $key => $val) {
-                if ($val['id'] == $color_id) {
-                    $colorName = $val['name'];
-                    break;
-                }
-            }
+        }
 
-            //lensName
-            foreach ($lens as $val) {
-                if ($val['lens_id'] == $lens_id) {
-                    $lensName = $val['lens_data_name'] . "({$colorName})";
-                    $lensType = $val['lens_data_index'];
+        //colorName
+        if ($color_id) {
+            foreach ($colorList as $val) {
+                if ($val['lens_id'] == $color_id) {
+                    $colorName = $val['lens_data_name'];
                     break;
                 }
             }
         }
 
-        foreach ($coatingLists as $coatingList) {
-            if ($coatingList['id'] == $coating_id) {
-                $coatingName = $coatingList['name'];
-                break;
+        //coatingName
+        if ($coating_id) {
+            foreach ($coatingLists as $coatingList) {
+                if ($coatingList['coating_id'] == $coating_id) {
+                    $coatingName = $coatingList['coating_name'];
+                    break;
+                }
             }
         }
 
