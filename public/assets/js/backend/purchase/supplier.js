@@ -40,9 +40,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'fast', 'bootstrap-ta
                         {field: 'linkphone', title: __('Linkphone'), operate: 'like'},
                         {
                             field: 'supplier_type',
-                            title: __('Supplier_type'),
+                            title: __('主营类目'),
                             searchList: {1: '镜片', 2: '镜架', 3: '眼镜盒', 4: '镜布'},
                             formatter: Controller.api.formatter.supplier_type
+                        },
+                        {
+                            field: 'supplier_type_pattern',
+                            title: __('供应商类型'),
+                            searchList: {1: '工厂', 2: '贸易'},
+                            formatter: Controller.api.formatter.supplier_type_pattern
                         },
                         {field: 'create_person', title: __('Create_person')},
                         {field: 'createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange'},
@@ -143,8 +149,18 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'fast', 'bootstrap-ta
                         str = '镜布';
                     }
                     return str;
+                },
+                supplier_type_pattern: function (value, row, index) {
+                    var str = '';
+                    if (value == 1) {
+                        str = '工厂';
+                    } else if (value == 2) {
+                        str = '贸易';
+                    }
+                    return str;
                 }
             },
+
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
             }
