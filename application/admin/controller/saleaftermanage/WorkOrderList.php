@@ -2526,6 +2526,12 @@ class WorkOrderList extends Backend
      */
     public function detail($ids = null)
     {
+        if($ids == 29489){
+            $aaa = 'a:8:{s:17:"prescription_type";s:12:"SingleVision";s:7:"lens_id";s:14:"refractive_135";s:9:"lens_name";s:25:"1.71 Photochromic - Amber";s:9:"lens_type";s:4:"1.71";s:10:"coating_id";s:9:"coating_2";s:12:"coating_name";s:0:"";s:8:"color_id";s:0:"";s:10:"color_name";s:0:"";}';
+            $aaa = unserialize($aaa);
+            $lensCoatName = $this->model->getLensCoatingName(2, $aaa['lens_id'], $aaa['coating_id'], $aaa['color_id'], $aaa['prescription_type']);
+            print_R($lensCoatName);exit;
+        }
         //获取工单配置信息
         $workOrderConfigValue = $this->workOrderConfigValue;
 
