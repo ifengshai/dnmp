@@ -24,7 +24,6 @@ class CoupnAnalytics extends Backend
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
             $filter = json_decode($this->request->get('filter'), true);
-            // dump($filter);
             //如果发送的来源是Selectpage，则转发到Selectpage
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
@@ -54,6 +53,16 @@ class CoupnAnalytics extends Backend
                 $this->request->get(['filter' => json_encode($filter)]);
             } else {
                 $site = 1;
+            }
+            if ($filter['channel']) {
+                $map1['channel'] = ['=',$filter['channel']];
+            } else {
+                $map1 = [];
+            }
+            if ($filter['name']) {
+                $map2['name'] = ['like',$filter['name']];
+            } else {
+                $map2 = [];
             }
             switch ($site) {
                 case 1:

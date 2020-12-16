@@ -5,7 +5,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
             Controller.api.bindevent();
             // 初始化表格参数配置
             Table.api.init({
-                commonSearch: true,
+                commonSearch: false,
                 search: false,
                 showExport: true,
                 showColumns: false,
@@ -64,7 +64,23 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
             Table.api.bindevent(table);
 
             $("#sku_submit").click(function(){
+                var params = table.bootstrapTable('getOptions')
+                params.queryParams = function(params) {
 
+                    //定义参数
+                    var filter = {};
+                    //遍历form 组装json
+                    $.each($("#form").serializeArray(), function(i, field) {
+                        filter[field.name] = field.value;
+                    });
+                    filter['channel'] = $("#channel").val();
+                    filter['name'] = $("#name").val();
+                    //参数转为json字符串
+                    params.filter = JSON.stringify(filter)
+                    return params;
+                }
+
+                table.bootstrapTable('refresh',params);
                 Controller.api.formatter.user_data_pie();
                 Controller.api.formatter.lens_data_pie();
 
