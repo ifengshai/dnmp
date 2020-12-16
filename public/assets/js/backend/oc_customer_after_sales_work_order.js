@@ -73,8 +73,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             buttons: [
                                 {
                                     name: 'detail',
-                                    text: '问题详情',
-                                    title: __('问题详情'),
+                                    text: '处理',
+                                    title: __('处理'),
                                     extend: 'data-area = \'["80%","80%"]\'',
                                     classname: 'btn btn-xs btn-primary btn-dialog',
                                     icon: 'fa fa-list',
