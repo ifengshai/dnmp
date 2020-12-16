@@ -188,7 +188,8 @@ class OrderData extends Backend
                                 foreach ($payload['data'] as $k => $v) {
                                     $params = [];
                                     $params['base_grand_total'] = $v['base_grand_total'];
-                                    $params['total_item_count'] = $v['total_qty_ordered'];
+                                    $params['total_item_count'] = $v['total_item_count'];
+                                    $params['total_qty_ordered'] = $v['total_qty_ordered'];
                                     $params['increment_id'] = $v['increment_id'];
                                     $params['order_type'] = $v['order_type'];
                                     if ($v['status']) {
