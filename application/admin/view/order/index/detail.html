@@ -367,6 +367,7 @@
                     <tbody>
 
                         {foreach $goods as $key=>$sku}
+                        <input type="hidden" name="item_id" value="{$sku.item_id}">
                         <tr>
                             <td>
                                 <table class="altrowstable" style="margin:0 auto;margin:30px;width:90%;">
