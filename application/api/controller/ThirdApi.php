@@ -4,6 +4,7 @@ namespace app\api\controller;
 
 use app\common\controller\Api;
 use think\Db;
+use Think\Log;
 
 
 /**
@@ -42,7 +43,7 @@ class ThirdApi extends Api
             $order_node = Db::name('order_node')->field('site,order_id,order_number,shipment_type,shipment_data_type')->where('track_number', $track_arr['data']['number'])->find();
             $url = config('url.zeelool_url').'magic/order/updateOrderStatus';
             $value['increment_id']  = $order_node['order_number'];
-            $this->request_post($url,$value);
+            $this->post_json_data($url,$value);
         }
         if ($track_arr['event'] != 'TRACKING_STOPPED') {
             // file_put_contents('/www/wwwroot/mojing/runtime/log/track.txt',$track_info."\r\n",FILE_APPEND);
@@ -59,7 +60,13 @@ class ThirdApi extends Api
         }
         // }
     }
-
+    public function test(){
+        $url = config('url.zeelool_url').'magic/order/updateOrderStatus';
+        $value['increment_id']  = '100154077';
+        $a  = $this->post_json_data($url,$value);
+        Log::write("输出接口返回信息");
+        Log::write($a);
+    }
 
 
 
