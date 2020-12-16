@@ -121,7 +121,7 @@ class OcCustomerAfterSalesWorkOrder extends Backend
                 $swhere['work_status'] = ['not in', [0, 4, 6]];
 
                 $count = $workorder->where($swhere)->count();
-               
+
                 if ($count>0){
                     $list[$key]['task_info'] = 1;
                 }
