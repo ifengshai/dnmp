@@ -356,11 +356,17 @@
                         border-style: solid;
                         border-color: #a9c6c9;
                     }
+                    .inputs{
+                        background-color:transparent;
+                        border:0;
+                        width: 90px
+                    }
                 </style>
                 {if $label != 3}
                 <table class="altrowstable" style="border:#0f0 solid 1px;margin:0px auto;margin-bottom:10px;width:90%;">
                     <tbody>
-                        {foreach $goods as $sku}
+
+                        {foreach $goods as $key=>$sku}
                         <tr>
                             <td>
                                 <table class="altrowstable" style="margin:0 auto;margin:30px;width:90%;">
@@ -422,41 +428,53 @@
                                             <td>Base Direction</td>
                                         </tr>
                                         <tr>
-                                            <td>Right(OD)</td>
-                                            <td>{:$sku['od_sph'] ?? ''}</td>
-                                            <td>{:$sku['od_cyl'] ?? ''}</td>
-                                            <td>{:$sku['od_axis'] ?? ''}</td>
+                                            <td >Right(OD)</td>
+                                            <td >
+                                                <input type="text" class="inputs" value="{:$sku['od_sph'] ?? ''}" name="od['od_sph'][{$key}][]">
+                                            </td>
+                                            <td><input type="text" class="inputs" value="{:$sku['od_cyl'] ?? ''}" name="od['od_cyl'][key][]"></td>
+                                            <td><input type="text" class="inputs" value="{:$sku['od_axis'] ?? ''}" name="od['od_axis'][$key][]"></td>
                                             {if $sku['total_add']}
-                                            <td rowspan="2">{:$sku['total_add'] ?? ''}</td>
+                                            <td rowspan="2"><input type="text" class="inputs" value="{:$sku['total_add'] ?? ''}" name="od['total_add'][]"></td>
                                             {else/}
 
-                                            <td>{:$sku['os_add']}</td>
+                                            <td><input type="text" class="inputs" value="{:$sku['os_add']}" name="od['os_add'][]"></td>
                                             {/if}
                                             {if $sku['pdcheck'] == 'on'}
-                                            <td>{:$sku['pd_r'] ?? ''}</td>
+                                            <td><input type="text" class="inputs" value="{:$sku['pd_r'] ?? ''}" name="od['pd_r'][]"></td>
                                             {else/}
-                                            <td rowspan="2">{:$sku['pd'] ?? ''}</td>
+                                            <td rowspan="2"><input type="text" class="inputs" value="{:$sku['pd'] ?? ''}" name="od['pd'][]"></td>
                                             {/if}
-                                            <td>{:$sku['od_pv'] ?? ''}</td>
-                                            <td>{:$sku['od_bd'] ?? ''}</td>
-                                            <td>{:$sku['od_pv_r'] ?? ''}</td>
-                                            <td>{:$sku['od_bd_r'] ?? ''}</td>
+                                            <td><input type="text" class="inputs" value="{:$sku['od_pv'] ?? ''}" name="od['od_pv'][]"></td>
+                                            <td><input type="text" class="inputs" value="{:$sku['od_bd'] ?? ''}" name="od['od_bd'][]"></td>
+                                            <td><input type="text" class="inputs" value="{:$sku['od_pv_r'] ?? ''}" name="od['od_pv_r'][]"></td>
+                                            <td><input type="text" class="inputs" value="{:$sku['od_bd_r'] ?? ''}" name="od['od_bd_r'][]"></td>
                                         </tr>
                                         <tr>
                                             <td>Left(OS)</td>
-                                            <td>{:$sku['os_sph'] ?? ''}</td>
-                                            <td>{:$sku['os_cyl'] ?? ''}</td>
-                                            <td>{:$sku['os_axis'] ?? ''}</td>
+                                            <td> <input type="text" class="inputs" value="{:$sku['os_sph'] ?? ''}" name="od['os_sph'][]"></td>
+                                            <td>
+                                                <input type="text" class="inputs" value="{:$sku['os_cyl'] ?? ''}" name="od['os_cyl'][]">
+
+                                            </td>
+                                            <td>
+                                                <input type="text" class="inputs" value="{:$sku['os_axis'] ?? ''}" name="od['os_axis'][]"></td>
                                             {if !$sku['total_add']}
-                                            <td>{:$sku['od_add']}</td>
+                                            <td>
+                                                <input type="text" class="inputs" value="{:$sku['od_add']}" name="od['od_add'][]"> </td>
                                             {/if}
                                             {if $sku['pdcheck'] == 'on'}
-                                            <td>{:$sku['pd_l'] ?? ''}</td>
+                                            <td>
+                                                <input type="text" class="inputs" value="{:$sku['pd_l'] ?? ''}" name="od['pd_l'][]"></td>
                                             {/if}
-                                            <td>{:$sku['os_pv'] ?? ''}</td>
-                                            <td>{:$sku['os_bd'] ?? ''}</td>
-                                            <td>{:$sku['os_pv_r'] ?? ''}</td>
-                                            <td>{:$sku['os_bd_r'] ?? ''}</td>
+                                            <td>
+                                                <input type="text" class="inputs" value="{:$sku['os_pv'] ?? ''}" name="od['os_pv'][]"></td>
+                                            <td>
+                                                <input type="text" class="inputs" value="{:$sku['os_bd'] ?? ''}" name="od['os_bd'][]"></td>
+                                            <td>
+                                                <input type="text" class="inputs" value="{:$sku['os_pv_r'] ?? ''}" name="od['os_pv_r'][]"></td>
+                                            <td>
+                                                <input type="text" class="inputs" value="{:$sku['os_bd_r'] ?? ''}" name="od['os_bd_r'][]"></td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -577,7 +595,14 @@
                     </tbody>
                 </table>
                 {/if}
+
+                <div class="col-xs-12 col-sm-8">
+                    <button type="submit" value="Processing" class="btn btn-sub" style='background-color: dodgerblue;width: 120px;color: white;font-size: 14px;font-weight: 700;float: right'>{:__('提交')}</button>
+                </div>
             </div>
+
+
+
         </form>
     </div>
 

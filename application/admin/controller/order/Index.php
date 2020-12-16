@@ -174,6 +174,9 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
      */
     public function detail($ids = null)
     {
+        if ($_POST){
+          $data  = input('param.');
+        }
         $ids = $ids ?? $this->request->get('id');
         //根据传的标签切换对应站点数据库
         $label = $this->request->get('label', 1);
@@ -197,6 +200,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
 
         //查询订单详情
         $row = $model->where('entity_id', '=', $ids)->find();
+
         if (!$row) {
             $this->error(__('No Results were found'));
         }
