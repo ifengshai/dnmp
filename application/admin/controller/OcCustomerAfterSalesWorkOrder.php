@@ -143,12 +143,11 @@ class OcCustomerAfterSalesWorkOrder extends Backend
     public function question_detail($ids = null){
         if ($_POST){
             $params = $this->request->post("row/a");
-
             $where['id'] = $params['ids'];
             $save_question = $this->model->isUpdate(true, $where)->save(['status'=>$params['pm_audit_status'],'completed_at'=>date('Y-m-d H:i:s',time()),'handler_name'=>$this->auth->nickname]);
             if ($save_question){
                 //如果更新成功  提交接口
-                $url  =  config('url.zeelool_url').'/magic/customer/updateTicket';
+                $url  =  config('url.zeelool_url').'magic/customer/updateTicket';
                 $value['ticket_id'] = $params['ids'];
                 $value['status'] = $params['pm_audit_status'];
                 $curl = curl_init();
