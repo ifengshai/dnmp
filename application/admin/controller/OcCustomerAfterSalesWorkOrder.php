@@ -4,6 +4,7 @@ namespace app\admin\controller;
 
 use app\common\controller\Backend;
 use Think\Db;
+use Think\Log;
 use think\Request;
 
 /**
@@ -161,6 +162,8 @@ class OcCustomerAfterSalesWorkOrder extends Backend
                 curl_setopt($curl, CURLOPT_TIMEOUT, 20); //设置cURL允许执行的最长秒数。
                 $content =json_decode(curl_exec($curl),true);
                 curl_close($curl);
+                Log::write("输出工单信息更新情况");
+                Log::write($content);
                 if ($content['code'] ==200){
                     $this->success('操作成功');
                 }else{
