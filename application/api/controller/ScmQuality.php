@@ -525,6 +525,7 @@ class ScmQuality extends Scm
                 0 != $row['status'] && $this->error(__('只有新建状态才能编辑'), [], 405);
 
                 $check_id = $get_check_id;
+                $batch_id = $row['batch_id'];
                 $purchase_id = $row['purchase_id'];
                 $logistics_id = $row['logistics_id'];
 
@@ -605,6 +606,7 @@ class ScmQuality extends Scm
                         $code_clear = [
                             'sku' => '',
                             'purchase_id' => 0,
+                            'batch_id' => 0,
                             'logistics_id' => 0,
                             'check_id' => 0
                         ];
@@ -623,6 +625,7 @@ class ScmQuality extends Scm
                 $code_item = [
                     'purchase_id' => $purchase_id,
                     'sku' => $value['sku'],
+                    'batch_id' => $batch_id,
                     'logistics_id' => $logistics_id,
                     'check_id' => $check_id,
                     'create_person' => $this->auth->nickname,
@@ -713,6 +716,7 @@ class ScmQuality extends Scm
             $code_clear = [
                 'sku' => '',
                 'purchase_id' => 0,
+                'batch_id' => 0,
                 'logistics_id' => 0,
                 'check_id' => 0
             ];
@@ -875,6 +879,7 @@ class ScmQuality extends Scm
                 $code_clear = [
                     'sku' => '',
                     'purchase_id' => 0,
+                    'batch_id' => 0,
                     'logistics_id' => 0,
                     'check_id' => 0
                 ];

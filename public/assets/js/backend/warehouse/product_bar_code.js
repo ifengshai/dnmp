@@ -109,6 +109,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                         { field: 'code', title: __('商品条形码编号'), operate: 'LIKE' },
                         { field: 'sku', title: __('Sku'), operate: 'LIKE' },
                         { field: 'purchase_number', title: __('采购单号'), operate: 'LIKE' },
+                        { field: 'batch_id', title: __('批次ID') },
                         { field: 'create_person', title: __('创建人') },
                         { field: 'create_time', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange' },
                         { field: 'check_time', title: __('入库时间'), operate: 'RANGE', addclass: 'datetimerange' }
