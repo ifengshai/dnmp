@@ -1823,91 +1823,97 @@ class Distribution extends Backend
                                 ['entity_id' => $value['entity_id'], 'site' => $key]
                             );
 
-                        //子单表：fa_order_item_process：distribution_status=配货状态
-                        $this->model
-                            ->allowField(true)
-                            ->save(
-                                ['distribution_status' => 1],
-                                ['entity_id' => $value['entity_id'], 'site' => $key]
-                            );
-                        $item_process_id = $this->model->id;
+                        //获取子单表id集
+                        $item_process_ids = $this->model->where(['entity_id' => $value['entity_id'], 'site' => $key])->column('id');
+                        if($item_process_ids){
+                            //子单表：fa_order_item_process：distribution_status=配货状态
+                            $this->model
+                                ->allowField(true)
+                                ->save(
+                                    ['distribution_status' => 1],
+                                    ['id' => ['in',$item_process_ids]]
+                                );
 
-                        /**配货日志 Start*/
-                        //打印标签
-                        if($value['custom_print_label_created_at_new']){
-                            DistributionLog::record(
-                                (object)['nickname'=>$value['custom_print_label_person_new']], //操作人
-                                $item_process_id, //子单ID
-                                1, //操作类型
-                                '标记打印完成',//备注
-                                strtotime($value['custom_print_label_created_at_new'])//操作时间
-                            );
+                            /**配货日志 Start*/
+                            //打印标签
+                            if($value['custom_print_label_created_at_new']){
+                                DistributionLog::record(
+                                    (object)['nickname'=>$value['custom_print_label_person_new']], //操作人
+                                    $item_process_ids, //子单ID
+                                    1, //操作类型
+                                    '标记打印完成',//备注
+                                    strtotime($value['custom_print_label_created_at_new'])//操作时间
+                                );
+                            }
+
+                            //配货
+                            if($value['custom_match_frame_created_at_new']){
+                                DistributionLog::record(
+                                    (object)['nickname'=>$value['custom_match_frame_person_new']], //操作人
+                                    $item_process_ids, //子单ID
+                                    2, //操作类型
+                                    '配货完成',//备注
+                                    strtotime($value['custom_match_frame_created_at_new'])//操作时间
+                                );
+                            }
+
+                            //配镜片
+                            if($value['custom_match_lens_created_at_new']){
+                                DistributionLog::record(
+                                    (object)['nickname'=>$value['custom_match_lens_person_new']], //操作人
+                                    $item_process_ids, //子单ID
+                                    3, //操作类型
+                                    '配镜片完成',//备注
+                                    strtotime($value['custom_match_lens_created_at_new'])//操作时间
+                                );
+                            }
+
+                            //加工
+                            if($value['custom_match_factory_created_at_new']){
+                                DistributionLog::record(
+                                    (object)['nickname'=>$value['custom_match_factory_person_new']], //操作人
+                                    $item_process_ids, //子单ID
+                                    4, //操作类型
+                                    '加工完成',//备注
+                                    strtotime($value['custom_match_factory_created_at_new'])//操作时间
+                                );
+
+                                //成品质检
+                                DistributionLog::record(
+                                    (object)['nickname'=>$value['custom_match_factory_person_new']], //操作人
+                                    $item_process_ids, //子单ID
+                                    6, //操作类型
+                                    '成品质检完成',//备注
+                                    strtotime($value['custom_match_factory_created_at_new'])//操作时间
+                                );
+                            }
+
+                            //合单
+                            if($value['custom_match_delivery_created_at_new']){
+                                DistributionLog::record(
+                                    (object)['nickname'=>$value['custom_match_delivery_person_new']], //操作人
+                                    $item_process_ids, //子单ID
+                                    7, //操作类型
+                                    '合单完成',//备注
+                                    strtotime($value['custom_match_delivery_created_at_new'])//操作时间
+                                );
+
+                                //审单
+                                DistributionLog::record(
+                                    (object)['nickname'=>$value['custom_match_delivery_person_new']], //操作人
+                                    $item_process_ids, //子单ID
+                                    8, //操作类型
+                                    '审单完成',//备注
+                                    strtotime($value['custom_match_delivery_created_at_new'])//操作时间
+                                );
+                            }
+                            /**配货日志 End*/
+
+                            $handle += 1;
+                        }else{
+                            echo $item['name'] . '-' . $value['increment_id'] . '：未获取到子单数据' . "\n";
                         }
 
-                        //配货
-                        if($value['custom_match_frame_created_at_new']){
-                            DistributionLog::record(
-                                (object)['nickname'=>$value['custom_match_frame_person_new']], //操作人
-                                $item_process_id, //子单ID
-                                2, //操作类型
-                                '配货完成',//备注
-                                strtotime($value['custom_match_frame_created_at_new'])//操作时间
-                            );
-                        }
-
-                        //配镜片
-                        if($value['custom_match_lens_created_at_new']){
-                            DistributionLog::record(
-                                (object)['nickname'=>$value['custom_match_lens_person_new']], //操作人
-                                $item_process_id, //子单ID
-                                3, //操作类型
-                                '配镜片完成',//备注
-                                strtotime($value['custom_match_lens_created_at_new'])//操作时间
-                            );
-                        }
-
-                        //加工
-                        if($value['custom_match_factory_created_at_new']){
-                            DistributionLog::record(
-                                (object)['nickname'=>$value['custom_match_factory_person_new']], //操作人
-                                $item_process_id, //子单ID
-                                4, //操作类型
-                                '加工完成',//备注
-                                strtotime($value['custom_match_factory_created_at_new'])//操作时间
-                            );
-
-                            //成品质检
-                            DistributionLog::record(
-                                (object)['nickname'=>$value['custom_match_factory_person_new']], //操作人
-                                $item_process_id, //子单ID
-                                6, //操作类型
-                                '成品质检完成',//备注
-                                strtotime($value['custom_match_factory_created_at_new'])//操作时间
-                            );
-                        }
-
-                        //合单
-                        if($value['custom_match_delivery_created_at_new']){
-                            DistributionLog::record(
-                                (object)['nickname'=>$value['custom_match_delivery_person_new']], //操作人
-                                $item_process_id, //子单ID
-                                7, //操作类型
-                                '合单完成',//备注
-                                strtotime($value['custom_match_delivery_created_at_new'])//操作时间
-                            );
-
-                            //审单
-                            DistributionLog::record(
-                                (object)['nickname'=>$value['custom_match_delivery_person_new']], //操作人
-                                $item_process_id, //子单ID
-                                8, //操作类型
-                                '审单完成',//备注
-                                strtotime($value['custom_match_delivery_created_at_new'])//操作时间
-                            );
-                        }
-                        /**配货日志 End*/
-
-                        $handle += 1;
                     } catch (PDOException $e) {
                         echo $item['name'] . '-' . $value['increment_id'] . '：' . $e->getMessage() . "\n";
                     } catch (Exception $e) {
