@@ -1675,9 +1675,12 @@ class PurchaseOrder extends Backend
             if (!$row) {
                 $this->error('导入失败！！,1688单号' . $v[0] . '未查询到记录');
             }
+            if ($row->purchase_status  != 2) {
+                $this->error('导入失败！！,1688单号' . $v[0] . '订单状态必须是已审核');
+            }
             //拆分物流单号和物流公司
             $logistics_data = explode(':', $v[1]);
-            $result = $this->model->where(['1688_number' => $v[0]])->update(['purchase_status' => 6,'logistics_number' => $logistics_data[1], 'logistics_company_name' => $logistics_data[0],'logistics_company_no' => $logistics_data[0]]);
+            $result = $this->model->where(['1688_number' => $v[0]])->update(['purchase_status' => 6, 'logistics_number' => $logistics_data[1], 'logistics_company_name' => $logistics_data[0], 'logistics_company_no' => $logistics_data[0], 'is_add_logistics' => 1]);
 
             $list = [];
             $list['order_number'] = $row->purchase_number;
@@ -1912,7 +1915,7 @@ class PurchaseOrder extends Backend
 
         list($where) = $this->buildparams();
         $list = $this->model->alias('purchase_order')
-            ->field('receiving_time,purchase_number,purchase_name,supplier_name,sku,supplier_sku,is_new_product,is_sample,product_total,purchase_freight,purchase_num,purchase_price,purchase_remark,b.purchase_total,purchase_order.create_person,purchase_order.createtime,arrival_time,receiving_time')
+            ->field('receiving_time,purchase_number,purchase_name,supplier_name,sku,supplier_sku,is_new_product,is_sample,product_total,purchase_freight,purchase_num,purchase_price,purchase_remark,b.purchase_total,purchase_order.create_person,purchase_order.createtime,arrival_time,receiving_time,1688_number')
             ->join(['fa_purchase_order_item' => 'b'], 'b.purchase_id=purchase_order.id')
             ->join(['fa_supplier' => 'c'], 'c.id=purchase_order.supplier_id')
             ->where($where)
@@ -1949,6 +1952,7 @@ class PurchaseOrder extends Backend
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("O1", "是否新品采购");
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("P1", "是否留样采购");
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("Q1", "总计");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("R1", "1688单号");
 
         foreach ($list as $key => $value) {
             $spreadsheet->getActiveSheet()->setCellValueExplicit("A" . ($key * 1 + 2), $value['purchase_number'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
@@ -1978,6 +1982,7 @@ class PurchaseOrder extends Backend
             $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 1 + 2), $is_new_product);
             $spreadsheet->getActiveSheet()->setCellValue("P" . ($key * 1 + 2), $is_sample);
             $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 1 + 2), $value['purchase_total']);
+            $spreadsheet->getActiveSheet()->setCellValueExplicit("R" . ($key * 1 + 2), $value['1688_number'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
         }
 
         //设置宽度
@@ -1998,6 +2003,7 @@ class PurchaseOrder extends Backend
         $spreadsheet->getActiveSheet()->getColumnDimension('O')->setWidth(30);
         $spreadsheet->getActiveSheet()->getColumnDimension('P')->setWidth(30);
         $spreadsheet->getActiveSheet()->getColumnDimension('Q')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('R')->setWidth(30);
 
         //设置边框
         $border = [
@@ -2015,7 +2021,7 @@ class PurchaseOrder extends Backend
         $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
         $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
 
-        $spreadsheet->getActiveSheet()->getStyle('A1:P' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle('A1:R' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         $spreadsheet->setActiveSheetIndex(0);
 
         $format = 'xlsx';

@@ -51,6 +51,7 @@ class Inventory extends Backend
      */
     public function index()
     {
+        $this->relationSearch = true;
         //设置过滤方法
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
@@ -58,23 +59,39 @@ class Inventory extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
+
+            //自定义sku搜索
+            $filter = json_decode($this->request->get('filter'), true);
+            if ($filter['sku']) {
+                $smap['sku'] = ['like', '%' . $filter['sku'] . '%'];
+                $ids = $this->item->where($smap)->column('inventory_id');
+                $map['id'] = ['in', $ids];
+                unset($filter['sku']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
+
+
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-            $total = $this->model
+            $total = $this->model->alias('inventory')
+                // ->with(['Inventoryitemtwo'])
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->count();
 
-            $list = $this->model
+            $list = $this->model->alias('inventory')
+                // ->with(['Inventoryitemtwo'])
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
 
             $list = collection($list)->toArray();
             foreach ($list as &$v) {
-                $map['inventory_id'] = $v['id'];
+                $item_map['inventory_id'] = $v['id'];
                 //查询总数量
-                $allCount = $this->item->where($map)->count();
+                $allCount = $this->item->where($item_map)->count();
                 $smap['is_add'] = 1;
                 $smap['inventory_id'] = $v['id'];
                 //查询盘点数量
@@ -84,7 +101,6 @@ class Inventory extends Backend
             }
             unset($v);
             $result = array("total" => $total, "rows" => $list);
-
             return json($result);
         }
         return $this->view->fetch();
@@ -697,6 +713,7 @@ class Inventory extends Backend
                             ->where('sku', $v['sku'])
                             ->field('stock')
                             ->select();
+                        $num_num = 0;
                         foreach ($whole_num as $kk => $vv) {
                             $num_num += abs($vv['stock']);
                         }
@@ -706,7 +723,8 @@ class Inventory extends Backend
                         $stock_num = $v['error_qty'];
                         //计算当前sku的总虚拟库存 如果总的为0 表示当前所有平台的此sku都为0 此时入库的话按照平均规则分配 例如五个站都有此品 那么比例就是20%
                         $stock_all_num = array_sum(array_column($item_platform_sku, 'stock'));
-                        if ($stock_all_num == 0) {
+
+                        if ($stock_all_num == 0 || $stock_all_num < 0) {
                             $rate_rate = 1 / $all_num;
                             foreach ($item_platform_sku as $key => $val) {
                                 //最后一个站点 剩余数量分给最后一个站
@@ -795,7 +813,6 @@ class Inventory extends Backend
                                 }
                             }
                         }
-
                     }
 
                     //修改库存结果为真
@@ -1162,9 +1179,9 @@ class Inventory extends Backend
         $params = [];
         foreach ($data as $k => $v) {
             $params[$k]['sku'] = $v[0];
-            $params[$k]['stock'] = $list[$v[0]]['stock'];
-            $params[$k]['available_stock'] = $list[$v[0]]['available_stock'];
-            $params[$k]['distribution_occupy_stock'] = $list[$v[0]]['distribution_occupy_stock'];
+            $params[$k]['stock'] = $list[$v[0]]['stock'] ?: 0;
+            $params[$k]['available_stock'] = $list[$v[0]]['available_stock'] ?: 0;
+            $params[$k]['distribution_occupy_stock'] = $list[$v[0]]['distribution_occupy_stock'] ?: 0;
         }
         if ($params) {
             $this->model->saveAll($params);

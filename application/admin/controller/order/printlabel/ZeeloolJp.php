@@ -68,9 +68,24 @@ class ZeeloolJp extends Backend
             $filter = json_decode($this->request->get('filter'), true);
 
             if ($filter['increment_id']) {
-                // $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
+                 $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
             } elseif (!$filter['status']) {
                 $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal']];
+            }
+            //是否有工单
+            $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
+            if ($filter['is_task'] == 1 || $filter['is_task'] == '0') {
+                $swhere = [];
+                $swhere['work_platform'] = 11;
+                $swhere['work_status'] = ['not in', [0, 4, 6]];
+                $order_arr = $workorder->where($swhere)->column('platform_order');
+                if ($filter['is_task'] == 1) {
+                    $map['increment_id'] = ['in', $order_arr];
+                } elseif ($filter['is_task'] == '0') {
+                    $map['increment_id'] = ['not in', $order_arr];
+                }
+                unset($filter['is_task']);
+                $this->request->get(['filter' => json_encode($filter)]);
             }
 
             //SKU搜索
@@ -99,9 +114,21 @@ class ZeeloolJp extends Backend
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
-
             $list = collection($list)->toArray();
-            
+            //查询订单是否存在工单
+            $swhere = [];
+            $increment_ids = array_column($list, 'increment_id');
+            $swhere['platform_order'] = ['in', $increment_ids];
+            $swhere['work_platform'] = 11;
+            $swhere['work_status'] = ['not in', [0, 4, 6]];
+            $order_arr = $workorder->where($swhere)->column('platform_order');
+
+            foreach ($list as $k => $v) {
+                if (in_array($v['increment_id'], $order_arr)) {
+                    $list[$k]['task_info'] = 1;
+                }
+            }
+
             $result = array("total" => $total, "rows" => $list);
             return json($result);
         }
@@ -127,11 +154,23 @@ class ZeeloolJp extends Backend
                 $list = $this->model
                     ->field($field)
                     ->where($map)
-                    ->find();
+                    ->find()->toArray();
+                //查询订单是否存在工单
+                $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
+                $swhere = [];
+                $swhere['platform_order'] = ['eq', $list['increment_id']];
+                $swhere['work_platform'] = 11;
+                $swhere['work_status'] = ['not in', [0, 4, 6]];
+                $order_arr = $workorder->where($swhere)->column('platform_order');
+                if (!empty($order_arr)){
+                    $list['task_info'] = 1;
+                }
+
                 $result = ['code' => 1, 'data' => $list ?? []];
             } else {
                 $result = array("total" => 0, "rows" => []);
             }
+
             return json($result);
         }
         return $this->view->fetch('_list');
@@ -920,7 +959,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
             $finalResult[$key]['lens_height'] = $tmp_bridge['lens_height'];
             $finalResult[$key]['bridge'] = $tmp_bridge['bridge'];
         }
-    
+
         $spreadsheet = new Spreadsheet();
         //常规方式：利用setCellValue()填充数据
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "日期")
@@ -1102,7 +1141,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         $spreadsheet->getActiveSheet()->getStyle('A1:U' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         $spreadsheet->getActiveSheet()->getStyle('A1:U' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
 
-        //水平垂直居中   
+        //水平垂直居中
         // $objSheet->getDefaultStyle()->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
         // $objSheet->getDefaultStyle()->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_CENTER);
         // //自动换行
@@ -1133,6 +1172,7 @@ where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$
         $writer = new $class($spreadsheet);
         $writer->save('php://output');
     }
+
 
 
     //批量打印标签

@@ -339,7 +339,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
             })
 
 
-            
+
             // // 导入按钮事件
             // Upload.api.plupload($('.btn-import'), function (data, ret) {
             //     Fast.api.ajax({
@@ -958,6 +958,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                         {field: 'purchaseorder.create_person', title: __('采购创建人'), operate: 'like'},
                         {field: 'supplier.supplier_name', title: __('供应商'), operate: 'like'},
                         {
+                            field: 'supplier.supplier_type_pattern',
+                            title: __('供应商类型'),
+                            searchList: {1: '工厂', 2: '贸易'},
+                            formatter: Controller.api.formatter.supplier_type_pattern
+                        },
+                        {
                             field: 'remark',
                             title: __('质检备注'),
                             formatter: Controller.api.formatter.getClear,
@@ -1058,7 +1064,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
 
             });
 
-            //批量导出xls 
+            //批量导出xls
             $('.btn-batch-export-xls').click(function () {
                 var ids = Table.api.selectedids(table);
                 if (ids.length > 0) {
@@ -1246,7 +1252,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
 
             },
             formatter: {
-
+                supplier_type_pattern: function (value, row, index) {
+                    var str = '';
+                    if (value == 1) {
+                        str = '工厂';
+                    } else if (value == 2) {
+                        str = '贸易';
+                    }
+                    return str;
+                },
                 getClear: function (value) {
                     if (value == null || value == undefined) {
                         return '';

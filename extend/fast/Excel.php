@@ -217,4 +217,99 @@ class Excel
             return false;
         }
     }
+
+
+    /**
+     * 数据转csv格式的excle
+     * @param  array $data 需要转的数组
+     * @param  string $header 要生成的excel表头
+     * @param  string $filename 生成的excel文件名
+     *      示例数组：
+     * $data = array(
+     * '1,2,3,4,5',
+     * '6,7,8,9,0',
+     * '1,3,5,6,7'
+     * );
+     * $header='用户名,密码,头像,性别,手机号';
+     */
+    public static function create_csv($data, $header = null, $filename = 'simple.csv')
+    {
+        // 如果手动设置表头；则放在第一行
+        if (!is_null($header)) {
+            array_unshift($data, $header);
+        }
+        // 防止没有添加文件后缀
+        $filename = str_replace('.csv', '', $filename) . '.csv';
+        ob_clean();
+        Header("Content-type:  application/octet-stream ");
+        Header("Accept-Ranges:  bytes ");
+        Header("Content-Disposition:  attachment;  filename=" . $filename);
+        foreach ($data as $k => $v) {
+            // 如果是二维数组；转成一维
+            if (is_array($v)) {
+                $v = implode(',', $v);
+            }
+            // 解决导出的数字会显示成科学计数法的问题
+            $v = preg_replace('/\s*/', '', $v);
+            // 替换掉换行
+            $v = str_replace(',', "\t,", $v);
+            // 转成gbk以兼容office乱码的问题
+            echo iconv('UTF-8', 'GB18030', $v) . "\t\r\n";
+        }
+    }
+
+     /**
+     * 导出CSV
+     * @param  array $data [description]
+     * @param  array $headlist [description]
+     * @param  [type] $fileName [description]
+     * @return [type]           [description]
+     */
+    public static function writeCsv($data = array(), $headlist = array(), $fileName, $export = false)
+    {
+        if ($export) {
+            header('Content-Type: application/vnd.ms-excel');
+            header('Content-Disposition: attachment;filename="' . $fileName . '.csv"');
+            header('Cache-Control: max-age=0');
+
+            //打开PHP文件句柄,php://output 表示直接输出到浏览器
+            $fp = fopen('php://output', 'a');
+        } else {
+            $fp = fopen('.' . $fileName . '.csv', 'a');
+        }
+        //输出Excel列名信息
+        foreach ($headlist as $key => $value) {
+            //CSV的Excel支持GBK编码，一定要转换，否则乱码
+            $headlist[$key] = iconv('utf-8', 'gbk', $value);
+        }
+        //将数据通过fputcsv写到文件句柄
+        fputcsv($fp, $headlist);
+
+        //计数器
+        $num = 0;
+
+        //每隔$limit行，刷新一下输出buffer，不要太大，也不要太小
+        $limit = 100000;
+
+        //逐行取出数据，不浪费内存
+        $count = count($data); //print_r($data);die;
+        for ($i = 0; $i < $count; $i++) {
+            $num++;
+            //刷新一下输出buffer，防止由于数据过多造成问题
+            if ($limit == $num) {
+                ob_flush();
+                flush();
+                $num = 0;
+            }
+
+            $row = $data[$i];
+            foreach ($row as $key => $value) {
+                $row[$key] = iconv('utf-8', 'gbk', $value);
+            }
+            fputcsv($fp, $row);
+        }
+        if (!$export) {
+            return $fileName . '.csv';
+        }
+    }
 }

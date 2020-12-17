@@ -71,10 +71,11 @@ class DashBoard extends Backend
         }
         // dump(collection($magentoplatformarr)->toArray());
         //默认进入页面是z站的数据
-        $arr = Cache::get('Operatedatacenter_dataviews' . 1 . md5(serialize('index')));
+        // $arr = Cache::get('Operatedatacenter_dataviews' . 1 . md5(serialize('index')));
+        $arr = [];
         if ($arr) {
             $this->view->assign($arr);
-        }else{
+        } else {
             // 活跃用户数
             $active_user_num = $this->zeeloolOperate->getActiveUser();
             //注册用户数
@@ -117,6 +118,7 @@ class DashBoard extends Backend
             $now_day = date('Y-m-d') . ' ' . '00:00:00' . ' - ' . date('Y-m-d');
             //时间
             $time_str = $params['time_str'] ? $params['time_str'] : $now_day;
+            $compare_time_str = $params['compare_time_str'] ? $params['compare_time_str'] : '';
 
             switch ($order_platform) {
                 case 1:
@@ -135,25 +137,44 @@ class DashBoard extends Backend
             $arr = Cache::get('Operatedatacenter_dataviews' . $order_platform . md5(serialize($time_str)));
             if ($arr) {
                 // Cache::rm('Operatedatacenter_dataview' . $order_platform . md5(serialize($time_str)));
-                $this->success('', '', $arr);
+                // $this->success('', '', $arr);
             }
+            // dump($time_str);
+            // dump($compare_time_str);
             //活跃用户数
-            $active_user_num = $model->getActiveUser(1, $time_str);
+            $active_user_num = $model->getActiveUser($time_str, $compare_time_str);
+
             //注册用户数
-            $register_user_num = $model->getRegisterUser(1, $time_str);
+            $register_user_num = $model->getRegisterUser($time_str, $compare_time_str);
+
             //复购用户数
-            $again_user_num = $model->getAgainUser($time_str, 1);
+            $again_user_num = $model->getAgainUser($time_str, $compare_time_str);
+
             // $again_user_num = 0;
             //vip用户数
-            $vip_user_num = $model->getVipUser(1, $time_str);
+            $vip_user_num = $model->getVipUser($time_str, $compare_time_str);
+
             //订单数
-            $order_num = $model->getOrderNum(1, $time_str);
-            //客单价
-            $order_unit_price = $model->getOrderUnitPrice(1, $time_str);
+            $order_num = $model->getOrderNum($time_str, $compare_time_str);
+
+
             //销售额
-            $sales_total_money = $model->getSalesTotalMoney(1, $time_str);
+            $sales_total_money = $model->getSalesTotalMoney($time_str, $compare_time_str);
+
             //邮费
-            $shipping_total_money = $model->getShippingTotalMoney(1, $time_str);
+            $shipping_total_money = $model->getShippingTotalMoney($time_str, $compare_time_str);
+
+            //客单价
+            $order_unit_price = $model->getOrderUnitPrice($time_str, $compare_time_str);
+
+            // dump($active_user_num);
+            // dump($register_user_num);
+            // dump($again_user_num);
+            // dump($vip_user_num);
+            // dump($order_num);
+            // dump($sales_total_money);
+            // dump($shipping_total_money);
+            // dump($order_unit_price);
 
             $data = compact('order_num', 'order_unit_price', 'sales_total_money', 'shipping_total_money', 'active_user_num', 'register_user_num', 'again_user_num', 'vip_user_num');
             Cache::set('Operatedatacenter_dataviews' . $order_platform . md5(serialize($time_str)), $data, 7200);
@@ -163,7 +184,7 @@ class DashBoard extends Backend
     }
 
     /*
-     * 活跃用户折线图
+     * 活跃用户折线图 弃用
      */
     public function active_user_trend()
     {
@@ -246,7 +267,7 @@ class DashBoard extends Backend
     }
 
     /*
-     * 订单趋势折线图
+     * 订单趋势折线图 弃用
      */
     public function order_trend()
     {
@@ -321,13 +342,13 @@ class DashBoard extends Backend
                     }
                 }
                 $date_arr = $arr;
-                $name = '订单数';
+                // $name = '订单数';
 
                 $json['xcolumnData'] = array_keys($date_arr);
-                $json['column'] = [$name];
+                // $json['column'] = [$name];
                 $json['columnData'] = [
                     [
-                        'name' => $name,
+                        'name' => '订单数',
                         'type' => 'line',
                         'smooth' => true,
                         'data' => array_values($date_arr)
@@ -336,6 +357,123 @@ class DashBoard extends Backend
                 ];
             }
 
+            return json(['code' => 1, 'data' => $json]);
+        }
+    }
+
+    //活跃用户和订单趋势合二为一的折线图
+    public function order_trend_active_user_trend()
+    {
+        if ($this->request->isAjax()) {
+            $params = $this->request->param();
+            $order_platform = $params['order_platform'];
+            switch ($order_platform) {
+                case 1:
+                    $model = new \app\admin\model\operatedatacenter\Zeelool;
+                    break;
+                case 2:
+                    $model = new \app\admin\model\operatedatacenter\Voogueme();
+                    break;
+                case 3:
+                    $model = new \app\admin\model\operatedatacenter\Nihao();
+                    break;
+                case 4:
+                    $model = new \app\admin\model\operatedatacenter\Datacenter();
+                    break;
+            }
+            $time_str = $params['time_str'];
+
+            if ($order_platform) {
+                $where['site'] = $order_platform;
+            }
+            if ($time_str) {
+                $createat = explode(' ', $time_str);
+                $where['day_date'] = ['between', [$createat[0], $createat[3]]];
+            } else {
+                $start = date('Y-m-d', strtotime('-6 day'));
+                $end = date('Y-m-d 23:59:59');
+                $where['day_date'] = ['between', [$start, $end]];
+            }
+            if ($order_platform == 4) {
+                unset($where['site']);
+                $sales_total = $model->where($where)->column('day_date', 'active_user_num');
+                $arr = array();
+                foreach ($sales_total as $k => $v) {
+                    if ($arr[$v]) {
+                        $arr[$v] += $k;
+                    } else {
+                        $arr[$v] = $k;
+                    }
+                }
+                $date_arr = $arr;
+
+                $sales_total1 = Db::name('datacenter_day')->where($where)->order('day_date', 'asc')->field('day_date,order_num')->select();
+                $arr1 = array();
+                foreach ($sales_total1 as $k => $v) {
+                    if ($arr1[$v['day_date']]) {
+                        $arr1[$v['day_date']] += $v['order_num'];
+                    } else {
+                        $arr1[$v['day_date']] = $v['order_num'];
+                    }
+                }
+                $date_arr1 = $arr1;
+
+
+                // $json['xcolumnData'] = array_keys($date_arr);
+                $json['xColumnName'] = ['2020-07-01', '2020-07-02', '2020-07-03', '2020-07-04', '2020-07-05', '2020-07-06', '2020-07-07', '2020-07-08'];
+                $json['xColumnName'] = array_keys($date_arr);
+                $json['columnData'] = [
+                    [
+                        'type' => 'line',
+                        // 'data' => [10, 26, 45, 40, 40, 65, 73, 80],
+                        'data' => array_values($date_arr),
+                        'name' => '活跃用户数',
+                        'yAxisIndex' => 0,
+                        'smooth' => true //平滑曲线
+                    ],
+                    [
+                        'type' => 'line',
+                        'data' => array_values($date_arr1),
+                        // 'data' => [10, 26, 45, 40, 40, 65, 73, 80],
+                        'name' => '订单数',
+                        'yAxisIndex' => 1,
+                        'smooth' => true //平滑曲线
+                    ],
+
+                ];
+
+            } else {
+                $arr = $model->where($where)->column('day_date', 'active_user_num');
+                $date_arr = $arr;
+                // dump($arr);die;
+
+                $arr1 = $model->where($where)->column('day_date', 'order_num');
+                $date_arr1 = $arr1;
+
+                // $json['xcolumnData'] = array_values($date_arr);
+                $json['xColumnName'] = ['2020-07-01', '2020-07-02', '2020-07-03', '2020-07-04', '2020-07-05', '2020-07-06', '2020-07-07', '2020-07-08'];
+                $json['xColumnName'] = array_values($date_arr);
+
+                $json['columnData'] = [
+                    [
+                        'type' => 'line',
+                        // 'data' => [10, 26, 45, 40, 40, 65, 73, 80],
+                        'data' => array_keys($date_arr),
+                        'name' => '活跃用户数',
+                        'yAxisIndex' => 0,
+                        'smooth' => true //平滑曲线
+                    ],
+                    [
+                        'type' => 'line',
+                        'data' => array_keys($date_arr1),
+                        // 'data' => [11, 22, 33, 66, 77, 99, 73, 80],
+                        'name' => '订单数',
+                        'yAxisIndex' => 1,
+                        'smooth' => true //平滑曲线
+                    ],
+
+                ];
+            }
             return json(['code' => 1, 'data' => $json]);
         }
     }

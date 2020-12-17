@@ -38,6 +38,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable', 'bootstra
                         { field: 'id', title: __('Id'), visible: false, operate: false },
                         { field: 'number', title: __('Number') },
                         { field: 'num', title: __('盘点数') },
+                        { field: 'sku', title: __('SKU'),operate:'like',visible: false },
                         { field: 'createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange' },
                         { field: 'create_person', title: __('Create_person') },
                         { field: 'status', title: __('Status'), searchList: { "0": __('待盘点'), "1": __('盘点中'), "2": __('已完成') }, formatter: Table.api.formatter.status },

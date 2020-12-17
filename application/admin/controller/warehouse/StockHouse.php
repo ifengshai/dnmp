@@ -3,6 +3,10 @@
 namespace app\admin\controller\warehouse;
 
 use app\common\controller\Backend;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\Reader\Csv;
+use PhpOffice\PhpSpreadsheet\Reader\Xls;
+use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use think\Db;
 use think\Exception;
 use think\exception\PDOException;

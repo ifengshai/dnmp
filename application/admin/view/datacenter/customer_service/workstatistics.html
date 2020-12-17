@@ -85,7 +85,7 @@ table.altrowstable tr:nth-child(even){
     }
     .btn-div {
         font-size: 14px;
-        line-height: 50px;
+        line-height: 20px;
         background: inherit;
         background-color: rgba(255, 255, 255, 1);
         border: none;
@@ -96,7 +96,7 @@ table.altrowstable tr:nth-child(even){
         font-weight: 700;
         font-style: normal;
         margin-right: 20px;
-        width: 180px;
+        width: 7.5%;
     }   
 </style>
 <div class="panel panel-default panel-intro">
@@ -171,105 +171,194 @@ table.altrowstable tr:nth-child(even){
                             {if $customer_type111 eq 0 }
                             <div class="btn btn-div">
                                 <span class="extend">
-                                    工单完成总量：<span style="color: red;" id="totalPayInfo">{$all_work_list_num}</span>
-                                </span>
-                            </div>
-                            <div class="btn btn-div" style="width: 20%;">
-                                <span class="extend">
-                                    订单总金额（<i class="fa fa-dollar"></i>）：<span style="color: red;" id="totalPayInfo">{$all_work_list_base_grand_total}</span>
+                                    <p>工单创建量</p>
+                                    <span style="color: red;" id="totalPayInfo">{$all_work_list_creat_num}</span>
                                 </span>
                             </div>
                             <div class="btn btn-div">
                                 <span class="extend">
-                                    补发单数：<span style="color: red;" id="totalPayInfo">{$all_work_list_replacement_counter}</span>
+                                    <p> 工单完成量</p>
+                                   <span style="color: red;" id="totalPayInfo"> {if $all_work_list_num eq null}0 {else/}{$all_work_list_num}{/if}</span>
+                                </span>
+                            </div>
+                            <div class="btn btn-div" >
+                                <span class="extend">
+                                    <p>订单总金额（<i class="fa fa-dollar"></i>）</p>
+                                    <span style="color: red;" id="totalPayInfo">  {if $all_work_list_base_grand_total eq null}0 {else/}{$all_work_list_base_grand_total}{/if}</span>
                                 </span>
                             </div>
                             <div class="btn btn-div">
+                                <p>补发单数</p>
                                 <span class="extend">
-                                    退款单数：<span style="color: red;" id="totalPayInfo">{$all_work_list_refund_num}</span>
+                                    <span style="color: red;" id="totalPayInfo">
+                                    {if $all_work_list_replacement_counter eq null}0 {else/}{$all_work_list_replacement_counter}{/if}
+                                    </span>
+                                </span>
+                            </div>
+                            <div class="btn btn-div">
+                                <p>补发订单比</p>
+                                <span class="extend">
+                                    <span style="color: red;" id="totalPayInfo">{$all_work_list_replacement_counter_proportion}</span>
+                                </span>
+                            </div>
+                            <div class="btn btn-div">
+                                <p>优惠券发放量</p>
+                                <span class="extend">
+                                    <span style="color: red;" id="totalPayInfo">
+                                     {if $all_work_list_coupon_str eq null}0 {else/}{$all_work_list_coupon_str}{/if}
+                                    </span>
+                                </span>
+                            </div>
+                            <div class="btn btn-div">
+                                <p>优惠券发放比</p>
+                                <span class="extend">
+                                    <span style="color: red;" id="totalPayInfo">{$all_work_list_coupon_str_proportion}</span>
+                                </span>
+                            </div>
+                            <div class="btn btn-div">
+                                <p>退款单数</p>
+                                <span class="extend">
+                                    <span style="color: red;" id="totalPayInfo">
+                                        {if $all_work_list_refund_num eq null}0 {else/}{$all_work_list_refund_num}{/if}
+                                       </span>
                                 </span>
                             </div>
                             {if $workOrderNum gt 0 }
-                            <div class="btn btn-div">
+                            <div class="btn btn-div" >
+                                <p>退款订单比</p>
                                 <span class="extend">
-                                    退款订单比：<span style="color: red;" id="totalPayInfo">{$all_work_list_refund_rate}</span>
+                                    <span style="color: red;" id="totalPayInfo">{$all_work_list_refund_rate}</span>
                                 </span>
                             </div>
                             {else/}
-                            <div class="btn btn-div">
+                            <div class="btn btn-div" >
+                                <p>退款订单比</p>
                                 <span class="extend">
-                                    退款订单比：<span style="color: red;" id="totalPayInfo">0</span>
+                                    <span style="color: red;" id="totalPayInfo">0</span>
                                 </span>
                             </div>
                             {/if}
-                            <div class="btn btn-div">
+                            <div class="btn btn-div" >
+                                <p>退款金额（<i class="fa fa-dollar"></i>）</p>
                                 <span class="extend">
-                                    退款金额（<i class="fa fa-dollar"></i>）：<span style="color: red;" id="totalPayInfo">{$all_work_list_refund_money}</span>
+                                    <span style="color: red;" id="totalPayInfo">
+                                    {if $all_work_list_refund_money eq null}0 {else/}{$all_work_list_refund_money}{/if}
+                                    </span>
                                 </span>
                             </div>
                             {if $totalOrderMoney gt 0 }
-                            <div class="btn btn-div">
+                            <div class="btn btn-div" >
+                                <p>退款金额比（<i class="fa fa-dollar"></i>）</p>
                                 <span class="extend">
-                                    退款金额比（<i class="fa fa-dollar"></i>）：<span style="color: red;" id="totalPayInfo">{$all_work_list_refund_money_rate}</span>
+                                    <span style="color: red;" id="totalPayInfo">{$all_work_list_refund_money_rate}</span>
                                 </span>
                             </div>
                             {else/}
-                            <div class="btn btn-div">
+                            <div class="btn btn-div" >
+                                <p>退款金额比（<i class="fa fa-dollar"></i>）</p>
                                 <span class="extend">
-                                    退款金额比（<i class="fa fa-dollar"></i>）：<span style="color: red;" id="totalPayInfo">0</span>
+                                    <span style="color: red;" id="totalPayInfo">0</span>
                                 </span>
                             </div>
                             {/if}
                             {/if}
                             {if $customer_type111 neq 0 }
                             <div class="btn btn-div">
+                                <p>工单创建量</p>
                                 <span class="extend">
-                                    工单完成量：<span style="color: red;" id="totalPayInfo">{$workOrderNum}</span>
-                                </span>
-                            </div>
-                            <div class="btn btn-div" style="width: 20%;">
-                                <span class="extend">
-                                    订单总金额（<i class="fa fa-dollar"></i>）：<span style="color: red;" id="totalPayInfo">{$totalOrderMoney}</span>
-                                </span>
-                            </div>
-                            <div class="btn btn-div">
-                                <span class="extend">
-                                    补发单数：<span style="color: red;" id="totalPayInfo">{$replacementNum}</span>
+                                    <span style="color: red;" id="totalPayInfo">
+                                    {if $all_work_list_creat_num eq null}0 {else/}{$all_work_list_creat_num}{/if}
+                                    </span>
                                 </span>
                             </div>
                             <div class="btn btn-div">
+                                <p>工单完成量</p>
                                 <span class="extend">
-                                    退款单数：<span style="color: red;" id="totalPayInfo">{$refundMoneyNum}</span>
+                                    <span style="color: red;" id="totalPayInfo">
+                                    {if $all_work_list_num eq null}0 {else/}{$all_work_list_num}{/if}</span>
+                                </span>
+                            </div>
+                            <div class="btn btn-div">
+                                <p>订单总金额（<i class="fa fa-dollar"></i>）</p>
+                                <span class="extend">
+                                    <span style="color: red;" id="totalPayInfo">
+                                    {if $all_work_list_base_grand_total eq null}0 {else/}{$all_work_list_base_grand_total}{/if}
+                                    </span>
+                                </span>
+                            </div>
+
+
+                            <div class="btn btn-div">
+                                <p>补发单数</p>
+                                <span class="extend">
+                                    <span style="color: red;" id="totalPayInfo">
+                                        {if $all_work_list_replacement_counter eq null}0 {else/}{$all_work_list_replacement_counter}{/if}
+                                      </span>
+                                </span>
+                            </div>
+                            <div class="btn btn-div">
+                                <p>补发订单比</p>
+                                <span class="extend">
+                                    <span style="color: red;" id="totalPayInfo">{$all_work_list_replacement_counter_proportion}</span>
+                                </span>
+                            </div>
+                            <div class="btn btn-div">
+                                <p>优惠券发放量</p>
+                                <span class="extend">
+                                    <span style="color: red;" id="totalPayInfo">
+                                    {if $all_work_list_coupon_str eq null}0 {else/}{$all_work_list_coupon_str}{/if}
+                                    </span>
+                                </span>
+                            </div>
+                            <div class="btn btn-div">
+                                <p>优惠券发放比</p>
+                                <span class="extend">
+                                    <span style="color: red;" id="totalPayInfo">{$all_work_list_coupon_str_proportion}</span>
+                                </span>
+                            </div>
+                            <div class="btn btn-div">
+                                <p>退款单数</p>
+                                <span class="extend">
+                                    <span style="color: red;" id="totalPayInfo">
+                                    {if $all_work_list_refund_num eq null}0 {else/}{$all_work_list_refund_num}{/if}
+                                    </span>
                                 </span>
                             </div>
                             {if $workOrderNum gt 0 }
                             <div class="btn btn-div">
+                                <p>退款订单比</p>
                                 <span class="extend">
-                                    退款订单比：<span style="color: red;" id="totalPayInfo">{:round($refundMoneyNum/$workOrderNum*100,2)}%</span>
+                                    <span style="color: red;" id="totalPayInfo">{$all_work_list_refund_rate}</span>
                                 </span>
                             </div>
                             {else/}
                             <div class="btn btn-div">
+                                <p>退款订单比</p>
                                 <span class="extend">
-                                    退款订单比：<span style="color: red;" id="totalPayInfo">0</span>
+                                    <span style="color: red;" id="totalPayInfo">0</span>
                                 </span>
                             </div>
                             {/if}
                             <div class="btn btn-div">
+                                <p>退款金额（<i class="fa fa-dollar"></i>）</p>
                                 <span class="extend">
-                                    退款金额（<i class="fa fa-dollar"></i>）：<span style="color: red;" id="totalPayInfo">{$refundMoney}</span>
+                                    <span style="color: red;" id="totalPayInfo">
+                                    {if $all_work_list_refund_money eq null}0 {else/}{$all_work_list_refund_money}{/if}
+                                    </span>
                                 </span>
                             </div>
                             {if $totalOrderMoney gt 0 }
                             <div class="btn btn-div">
+                                <p>退款金额比（<i class="fa fa-dollar"></i>）</p>
                                 <span class="extend">
-                                    退款金额比（<i class="fa fa-dollar"></i>）：<span style="color: red;" id="totalPayInfo">{:round($refundMoney/$totalOrderMoney*100,2)}%</span>
+                                    <span style="color: red;" id="totalPayInfo">{$all_work_list_refund_money_rate}</span>
                                 </span>
                             </div>
                             {else/}
                             <div class="btn btn-div">
+                                <p>退款金额比（<i class="fa fa-dollar"></i>）</p>
                                 <span class="extend">
-                                    退款金额比（<i class="fa fa-dollar"></i>）：<span style="color: red;" id="totalPayInfo">0</span>
+                                    <span style="color: red;" id="totalPayInfo">0</span>
                                 </span>
                             </div>
                             {/if}
@@ -367,25 +456,25 @@ table.altrowstable tr:nth-child(even){
                         {if !empty($start) && !empty($end)}
                         <td id='today_order_num'           style="text-align: center; vertical-align: middle;">{$start} - {$end}</td>
                         {/if}
-                        <td id='today_order_success'       style="text-align: center; vertical-align: middle;">{$notCustomer.create_counter}</td>
-                        <td id='today_order_success'       style="text-align: center; vertical-align: middle;">{$notCustomer.conuter}</td>
-                        <td id='today_unit_price'          style="text-align: center; vertical-align: middle;">{:round($notCustomer.base_grand_total,2)}</td>
-                        <td id='today_shoppingcart_total'  style="text-align: center; vertical-align: middle;">{$notCustomer.replacement_counter}</td>
-                        {if $notCustomer.conuter gt 0}
-                        <td id='today_shoppingcart_conversion' style="text-align: center; vertical-align: middle;">{:round($notCustomer.replacement_counter/$notCustomer.conuter*100,2)}</td>
+                        <td id='today_order_success'       style="text-align: center; vertical-align: middle;">{$notCustomer.0.create_counter}</td>
+                        <td id='today_order_success'       style="text-align: center; vertical-align: middle;">{$notCustomer.0.counter}</td>
+                        <td id='today_unit_price'          style="text-align: center; vertical-align: middle;">{:round($notCustomer.0.base_grand_total,2)}</td>
+                        <td id='today_shoppingcart_total'  style="text-align: center; vertical-align: middle;">{$notCustomer.0.replacement_counter}</td>
+                        {if $notCustomer.0.conuter gt 0}
+                        <td id='today_shoppingcart_conversion' style="text-align: center; vertical-align: middle;">{:round($notCustomer.0.replacement_counter/$notCustomer.0.conuter*100,2)}</td>
                         {else/}
                         <td id='today_shoppingcart_conversion' style="text-align: center; vertical-align: middle;">0</td>
                         {/if}
                         <td id='today_shoppingcart_conversion' style="text-align: center; vertical-align: middle;">-</td>
-                        <td id='today_shoppingcart_new'        style="text-align: center; vertical-align: middle;">{$notCustomer.refund_num}</td>
-                        {if $notCustomer.conuter gt 0}
-                        <td id='today_shoppingcart_newconversion' style="text-align: center; vertical-align: middle;">{:round($notCustomer.refund_num/$notCustomer.conuter*100,2)}</td>
+                        <td id='today_shoppingcart_new'        style="text-align: center; vertical-align: middle;">{$notCustomer.0.refund_num}</td>
+                        {if $notCustomer.0.conuter gt 0}
+                        <td id='today_shoppingcart_newconversion' style="text-align: center; vertical-align: middle;">{:round($notCustomer.0.refund_num/$notCustomer.0.conuter*100,2)}</td>
                         {else/}
                         <td id='today_shoppingcart_newconversion' style="text-align: center; vertical-align: middle;">0</td>
                         {/if}
-                        <td id='today_register_customer'     style="text-align: center; vertical-align: middle;">{$notCustomer.refund_money}</td>
-                        {if $notCustomer.base_grand_total gt 0}
-                        <td id='today_sign_customer' style="text-align: center; vertical-align: middle;">{:round($notCustomer.refund_money/$notCustomer.base_grand_total*100,2)}</td>
+                        <td id='today_register_customer'     style="text-align: center; vertical-align: middle;">{$notCustomer.0.refund_money}</td>
+                        {if $notCustomer.0.base_grand_total gt 0}
+                        <td id='today_sign_customer' style="text-align: center; vertical-align: middle;">{:round($notCustomer.0.refund_money/$notCustomer.0.base_grand_total*100,2)}</td>
                         {else/}
                         <td id='today_sign_customer' style="text-align: center; vertical-align: middle;">0</td>
                         {/if}

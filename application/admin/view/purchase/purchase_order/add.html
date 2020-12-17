@@ -208,9 +208,9 @@
     <div class='caigou' style="width: 80%;margin-left: 10%;">
         <p style="font-size: 16px;text-align: center;"><b>商品信息</b></p>
         <div style="margin-bottom: 20px;">
-            <div id="toolbar" class="toolbar">
-                <a href="javascript:;" class="btn btn-success btn-add" title="增加"><i class="fa fa-plus"></i> 增加</a>
-            </div>
+<!--            <div id="toolbar" class="toolbar">-->
+<!--                <a href="javascript:;" class="btn btn-success btn-add" title="增加"><i class="fa fa-plus"></i> 增加</a>-->
+<!--            </div>-->
             <table id="caigou-table" class="purchase-table">
                 <tr>
                     <th>SKU</td>
@@ -219,7 +219,7 @@
                     <th>采购数量（个）</td>
                     <th>采购单价（元）</td>
                     <th>总价（元）</td>
-                    <th>操作</td>
+<!--                    <th>操作</td>-->
                 </tr>
                 {if $list}
                 {foreach $list as $v}
@@ -240,8 +240,8 @@
                             type="text"></td>
                     <td><input id="c-purchase_remark" class="form-control goods_total" readonly name="purchase_total[]"
                             type="text"></td>
-                    <td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>
-                            删除</a></td>
+<!--                    <td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>-->
+<!--                            删除</a></td>-->
                 </tr>
                 {/foreach}
                 
@@ -260,8 +260,8 @@
                             type="text"></td>
                     <td><input id="c-purchase_remark" class="form-control goods_total" readonly name="purchase_total[]"
                             type="text"></td>
-                    <td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>
-                            删除</a></td>
+<!--                    <td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>-->
+<!--                            删除</a></td>-->
                 </tr>
                 {/if}
             </table>

@@ -149,7 +149,7 @@ class OperationAnalysis extends Model
     {
         $cacheData = Cache::get('operationAnalysis_get_today_shoppingcart_total_'.$id);
         if($cacheData){
-           return $cacheData; 
+           // return $cacheData;
         }
         $model = $this->get_model_by_id($id);
         //今日购物车总数sql
@@ -158,7 +158,7 @@ class OperationAnalysis extends Model
         //今日购物车总数
         $today_shoppingcart_total_rs    = $model->query($today_shoppingcart_total_sql);
         $today_shoppingcart_total_data  = $today_shoppingcart_total_rs[0]['counter'];
-        Cache::set('operationAnalysis_get_today_shoppingcart_total_'.$id,$today_shoppingcart_total_data,3600);
+        Cache::set('operationAnalysis_get_today_shoppingcart_total_'.$id,$today_shoppingcart_total_data,360);
         return $today_shoppingcart_total_data;
 
     }
@@ -250,6 +250,7 @@ class OperationAnalysis extends Model
         $today_sales_money_data                 = $this->get_today_sales_money($id);
         $today_order_num_data                   = $this->get_today_order_num($id);
         $today_order_success_data               = $this->get_today_order_success($id);
+        //新增购物车数
         $today_shoppingcart_total_data          = $this->get_today_shoppingcart_total($id);
         $today_shoppingcart_new_data            = $this->get_today_shoppingcart_new($id);
         $today_register_customer_data           = $this->get_today_register_customer($id);
@@ -259,8 +260,23 @@ class OperationAnalysis extends Model
         }else{
             $today_unit_price_data = 0;
         }
+        //新增购物车传化率 2020-11-25要改成 新增购物车产生的订单/新增的购物车数量 现在的计算方法是 订单支付成功数/新增购物车的数量
         if(false != $today_shoppingcart_total_data){
-            $today_shoppingcart_conversion_data     = round(($today_order_success_data/$today_shoppingcart_total_data),4)*100;
+            //今日所有购物车的ids
+            $today_shoppingcart_total_sql = "SELECT entity_id from sales_flat_quote where base_grand_total>0 AND TO_DAYS(created_at) = TO_DAYS(NOW())";
+            $model->table('sales_flat_quote')->query("set time_zone='+8:00'");
+            $today_shoppingcart_total_ids  = $model->query($today_shoppingcart_total_sql);
+            $today_shoppingcart_total_ids = implode(',',array_column($today_shoppingcart_total_ids,'entity_id'));
+
+            //今天新增购物车产生的订单
+            $order_status = $this->order_status;
+            $today_order_success_sql = "SELECT count(*) counter FROM sales_flat_order WHERE TO_DAYS(created_at) = TO_DAYS(NOW()) $order_status and quote_id in ({$today_shoppingcart_total_ids})";
+            $model->table('sales_flat_order')->query("set time_zone='+8:00'");
+            $today_order_success_rs = $model->query($today_order_success_sql);
+            $today_order_success_data_cart = $today_order_success_rs[0]['counter'];
+
+            // $today_shoppingcart_conversion_data     = round(($today_order_success_data/$today_shoppingcart_total_data),4)*100;
+            $today_shoppingcart_conversion_data     = round(($today_order_success_data_cart/$today_shoppingcart_total_data),4)*100;
         }else{
             $today_shoppingcart_conversion_data = 0;
         }

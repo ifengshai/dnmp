@@ -1079,6 +1079,7 @@ class Instock extends Backend
         }
 
         list($where) = $this->buildparams();
+
         $list = $this->model->alias('a')
             ->field('in_stock_number,sku,in_stock_num,createtime,create_person')
             ->join(['fa_in_stock_item' => 'b'], 'b.in_stock_id=a.id')
