@@ -5,6 +5,7 @@ namespace app\admin\model\saleaftermanage;
 use app\admin\model\Admin;
 use app\admin\model\DistributionAbnormal;
 use app\admin\model\DistributionLog;
+use app\admin\model\order\order\NewOrderProcess;
 use app\admin\model\warehouse\StockHouse;
 use think\Cache;
 use think\Db;
@@ -1711,6 +1712,7 @@ class WorkOrderList extends Model
     public function handle_abnormal($work){
         //检测是否有标记异常
         $_distribution_abnormal = new DistributionAbnormal();
+        $_new_order_process = new NewOrderProcess();
         $_new_order_item_process = new NewOrderItemProcess();
         $_stock_house = new StockHouse();
         $item_process_ids = $_distribution_abnormal
@@ -1721,6 +1723,7 @@ class WorkOrderList extends Model
         $_distribution_abnormal->startTrans();
         $_stock_house->startTrans();
         $_new_order_item_process->startTrans();
+        $_new_order_process->startTrans();
         try {
             if($item_process_ids){
                 //异常标记为已处理
@@ -1768,11 +1771,44 @@ class WorkOrderList extends Model
                 ->column('a.item_order_number')
             ;
             if($cancel_order_number){
-                $item_process_ids = $_new_order_item_process
+                $item_process_list = $_new_order_item_process
+                    ->field('id,order_id,distribution_status')
                     ->where(['item_order_number' => ['in',$cancel_order_number]])
-                    ->column('id')
+                    ->select()
                 ;
-                if($item_process_ids){
+                $item_process_list = collection($item_process_list)->toArray();
+                if($item_process_list){
+                    $order_id = array_column($item_process_list,'order_id')[0];//订单ID
+                    $item_process_ids = array_column($item_process_list,'id');//子单ID
+
+                    //获取本次取消子单中状态为合单中的数量
+                    $combine_list = array_filter(array_column($item_process_list,'distribution_status'), function ($v) {
+                        if (8 == $v) {
+                            return $v;
+                        }
+                    });
+                    $combine_count = count($combine_list);
+                    if($combine_count){
+                        //获取库位ID
+                        $store_house_id = $_new_order_process->where(['order_id'=>$order_id])->value('store_house_id');
+                        if($store_house_id){
+                            //获取整单合单中状态的子单数量
+                            $check_count = $_new_order_item_process
+                                ->where(['order_id'=>$order_id,'distribution_status' => 8])
+                                ->count()
+                            ;
+
+                            //如果整单都没有合单中的子单，则释放合单库位
+                            if(($check_count - $combine_count) < 1){
+                                //释放合单库位ID
+                                $_new_order_process->allowField(true)->isUpdate(true, ['order_id'=>$order_id])->save(['store_house_id'=>0]);
+
+                                //释放合单库位占用数量
+                                $_stock_house->allowField(true)->isUpdate(true, ['id'=>$store_house_id])->save(['occupy'=>0]);
+                            }
+                        }
+                    }
+
                     //标记子单号状态为取消
                     $_new_order_item_process
                         ->allowField(true)
@@ -1786,15 +1822,18 @@ class WorkOrderList extends Model
 
             $_distribution_abnormal->commit();
             $_stock_house->commit();
+            $_new_order_process->commit();
             $_new_order_item_process->commit();
         } catch (PDOException $e) {
             $_distribution_abnormal->rollback();
             $_stock_house->rollback();
+            $_new_order_process->rollback();
             $_new_order_item_process->rollback();
             return ['result'=>false,'msg'=>$e->getMessage()];
         } catch (Exception $e) {
             $_distribution_abnormal->rollback();
             $_stock_house->rollback();
+            $_new_order_process->rollback();
             $_new_order_item_process->rollback();
             return ['result'=>false,'msg'=>$e->getMessage()];
         }

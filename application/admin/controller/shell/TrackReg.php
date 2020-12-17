@@ -31,6 +31,9 @@ class TrackReg extends Backend
         $this->reg_shipment('database.db_voogueme', 2);
         $this->reg_shipment('database.db_nihao', 3);
         $this->reg_shipment('database.db_meeloog', 4);
+        $this->reg_shipment('database.db_zeelool_es', 9);
+        $this->reg_shipment('database.db_zeelool_de', 10);
+        $this->reg_shipment('database.db_zeelool_jp', 11);
     }
 
     /**
@@ -50,7 +53,7 @@ class TrackReg extends Backend
         foreach ($order_shipment as $k => $v) {
             $title = strtolower(str_replace(' ', '-', $v['title']));
             //根据物流单号查询发货物流渠道
-            $shipment_data_type = Db::connect('database.db_delivery')->table('ld_deliver_order')->where(['track_number' => $v['track_number'], 'increment_id' => $v['increment_id']])->value('agent_way_title');
+            // $shipment_data_type = Db::connect('database.db_delivery')->table('ld_deliver_order')->where(['track_number' => $v['track_number'], 'increment_id' => $v['increment_id']])->value('agent_way_title');
 
             $carrier = $this->getCarrier($title);
             $shipment_reg[$k]['number'] = $v['track_number'];
@@ -58,49 +61,50 @@ class TrackReg extends Backend
             $shipment_reg[$k]['order_id'] = $v['order_id'];
 
 
-            $list[$k]['order_node'] = 2;
-            $list[$k]['node_type'] = 7; //出库
-            $list[$k]['create_time'] = $v['created_at'];
-            $list[$k]['site'] = $site_type;
-            $list[$k]['order_id'] = $v['order_id'];
-            $list[$k]['order_number'] = $v['increment_id'];
-            $list[$k]['shipment_type'] = $v['title'];
-            $list[$k]['shipment_data_type'] = $shipment_data_type;
-            $list[$k]['track_number'] = $v['track_number'];
-            $list[$k]['content'] = 'Leave warehouse, Waiting for being picked up.';
+            // $list[$k]['order_node'] = 2;
+            // $list[$k]['node_type'] = 7; //出库
+            // $list[$k]['create_time'] = $v['created_at'];
+            // $list[$k]['site'] = $site_type;
+            // $list[$k]['order_id'] = $v['order_id'];
+            // $list[$k]['order_number'] = $v['increment_id'];
+            // $list[$k]['shipment_type'] = $v['title'];
+            // $list[$k]['shipment_data_type'] = $shipment_data_type;
+            // $list[$k]['track_number'] = $v['track_number'];
+            // $list[$k]['content'] = 'Leave warehouse, Waiting for being picked up.';
 
-            $data['order_node'] = 2;
-            $data['node_type'] = 7;
-            $data['update_time'] = $v['created_at'];
-            $data['shipment_type'] = $v['title'];
-            $data['shipment_data_type'] = $shipment_data_type;
-            $data['track_number'] = $v['track_number'];
-            $data['delivery_time'] = $v['created_at'];
-            Db::name('order_node')->where(['order_id' => $v['order_id'], 'site' => $site_type])->update($data);
+            // $data['order_node'] = 2;
+            // $data['node_type'] = 7;
+            // $data['update_time'] = $v['created_at'];
+            // $data['shipment_type'] = $v['title'];
+            // $data['shipment_data_type'] = $shipment_data_type;
+            // $data['track_number'] = $v['track_number'];
+            // $data['delivery_time'] = $v['created_at'];
+            // Db::name('order_node')->where(['order_id' => $v['order_id'], 'site' => $site_type])->update($data);
         }
-        if ($list) {
-            $this->ordernodedetail->saveAll($list);
-        }
-
-        $order_group = array_chunk($shipment_reg, 40);
-
-        $trackingConnector = new TrackingConnector($this->apiKey);
-        $order_ids = array();
-        foreach ($order_group as $key => $val) {
-            $aa = $trackingConnector->registerMulti($val);
-
-            //请求接口更改物流表状态
-            $order_ids = implode(',', array_column($val, 'order_id'));
-            $params['ids'] = $order_ids;
-            $params['site'] = $site_type;
-            $res = $this->setLogisticsStatus($params);
-            if ($res->status !== 200) {
-                echo $site_str . '更新失败:' . $order_ids . "\n";
-            }
+        // if ($list) {
+        //     $this->ordernodedetail->saveAll($list);
+        // }
+        if ($shipment_reg) {
+            $order_group = array_chunk($shipment_reg, 40);
+            $trackingConnector = new TrackingConnector($this->apiKey);
             $order_ids = array();
+            foreach ($order_group as $key => $val) {
+                $aa = $trackingConnector->registerMulti($val);
 
-            usleep(500000);
+                //请求接口更改物流表状态
+                $order_ids = implode(',', array_column($val, 'order_id'));
+                $params['ids'] = $order_ids;
+                $params['site'] = $site_type;
+                $res = $this->setLogisticsStatus($params);
+                if ($res->status !== 200) {
+                    echo $site_str . '更新失败:' . $order_ids . "\n";
+                }
+                $order_ids = array();
+
+                usleep(500000);
+            }
         }
+
         echo $site_str . ' is ok' . "\n";
     }
 
@@ -133,7 +137,7 @@ class TrackReg extends Backend
      * @param $title
      * @return mixed|string
      */
-    public function getCarrier($title)
+    protected function getCarrier($title)
     {
         $carrierId = '';
         if (stripos($title, 'post') !== false) {
@@ -157,16 +161,24 @@ class TrackReg extends Backend
         } elseif (stripos($title, 'cpc') !== false) {
             $carrierId = 'cpc';
             $title = 'Canada Post';
+        } elseif (stripos($title, 'sua') !== false) {
+            $carrierId = 'sua';
+            $title = 'SUA';
+        } elseif (stripos($title, 'cod') !== false) {
+            $carrierId = 'cod';
+            $title = 'COD';
         }
+
         $carrier = [
             'dhl' => '100001',
             'chinapost' => '03011',
             'chinaems' => '03013',
-            'cpc' => '03041',
+            'cpc' =>  '03041',
             'fedex' => '100003',
             'usps' => '21051',
             'yanwen' => '190012',
-            'eub' => '03011',
+            'sua' => '190111',
+            'cod' => '100040'
         ];
         if ($carrierId) {
             return ['title' => $title, 'carrierId' => $carrier[$carrierId]];
@@ -196,6 +208,15 @@ class TrackReg extends Backend
                 break;
             case 4:
                 $url = config('url.meeloog_url');
+                break;
+            case 9:
+                $url = config('url.zeelooles_url');
+                break;
+            case 10:
+                $url = config('url.zeeloolde_url');
+                break;
+            case 11:
+                $url = config('url.zeelooljp_url');
                 break;
             default:
                 return false;
@@ -790,7 +811,7 @@ class TrackReg extends Backend
         //支付成功的订单数
         $order_where = [];
         $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
-        $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
         $arr['order_num'] = $this->zeelool->where($order_where)->where('order_type', 1)->count();
         //销售额
         $arr['sales_total_money'] = $this->zeelool->where($order_where)->where('order_type', 1)->sum('base_grand_total');
@@ -831,43 +852,35 @@ class TrackReg extends Backend
         $arr['cart_rate'] = $arr['new_cart_num'] ? round($arr['order_num'] / $arr['new_cart_num'] * 100, 2) : 0;
         //更新购物车转化率
         $arr['update_cart_cart'] = $arr['update_cart_num'] ? round($arr['order_num'] / $arr['update_cart_num'] * 100, 2) : 0;
-        // //着陆页数据
-        // $arr['landing_num'] = $zeelool_data->google_landing(1, $date_time);
-        // //产品详情页
-        // $arr['detail_num'] = $zeelool_data->google_target13(1, $date_time);
-        // //加购
-        // $arr['cart_num'] = $zeelool_data->google_target1(1, $date_time);
-        // //交易次数
-        // $arr['complete_num'] = $zeelool_data->google_target_end(1, $date_time);
         //当天创建的用户当天产生订单的转化率
-        $status_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        $status_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
         $status_where['order_type'] = 1;
         //当天注册用户数
         $register_userids = $zeelool_model->table('customer_entity')->where($cart_where1)->column('entity_id');
         $register_num = count($register_userids);
         //当天注册用户在当天下单的用户数
         $order_user_count1 = 0;
-        foreach($register_userids as $register_userid){
+        foreach ($register_userids as $register_userid) {
             //判断当前用户在当天是否下单
-            $order = $zeelool_model->table('sales_flat_order')->where($cart_where1)->where($status_where)->where('customer_id',$register_userid)->value('entity_id');
-            if($order){
+            $order = $zeelool_model->table('sales_flat_order')->where($cart_where1)->where($status_where)->where('customer_id', $register_userid)->value('entity_id');
+            if ($order) {
                 $order_user_count1++;
             }
         }
-        $arr['create_user_change_rate'] = $register_num ? round($order_user_count1/$register_num*100,2) : 0;
+        $arr['create_user_change_rate'] = $register_num ? round($order_user_count1 / $register_num * 100, 2) : 0;
         //当天更新用户当天产生订单的转化率
         $update_userids = $zeelool_model->table('customer_entity')->where($cart_where2)->column('entity_id');
         $update_num = count($update_userids);
         //当天活跃更新用户数在当天是否下单
         $order_user_count2 = 0;
-        foreach ($update_userids as $update_userid){
+        foreach ($update_userids as $update_userid) {
             //判断活跃用户在当天下单的用户数
-            $order = $zeelool_model->table('sales_flat_order')->where($cart_where2)->where($status_where)->where('customer_id',$update_userid)->value('entity_id');
-            if($order){
+            $order = $zeelool_model->table('sales_flat_order')->where($cart_where2)->where($status_where)->where('customer_id', $update_userid)->value('entity_id');
+            if ($order) {
                 $order_user_count2++;
             }
         }
-        $arr['update_user_change_rate'] = $update_num ? round($order_user_count2/$update_num*100,0) : 0;
+        $arr['update_user_change_rate'] = $update_num ? round($order_user_count2 / $update_num * 100, 0) : 0;
         Db::name('datacenter_day')->insert($arr);
         echo $date_time . "\n";
         echo date("Y-m-d H:i:s") . "\n";
@@ -1046,7 +1059,7 @@ class TrackReg extends Backend
         $order_where = [];
         $order_where = [];
         $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
-        $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
         $arr['order_num'] = $this->zeelool->where($order_where)->where('order_type', 1)->count();
         //销售额
         $arr['sales_total_money'] = $this->zeelool->where($order_where)->where('order_type', 1)->sum('base_grand_total');
@@ -1086,43 +1099,35 @@ class TrackReg extends Backend
         $arr['cart_rate'] = $arr['new_cart_num'] ? round($arr['order_num'] / $arr['new_cart_num'] * 100, 2) : 0;
         //更新购物车转化率
         $arr['update_cart_cart'] = $arr['update_cart_num'] ? round($arr['order_num'] / $arr['update_cart_num'] * 100, 2) : 0;
-        //着陆页数据
-        // $arr['landing_num'] = $zeelool_data->google_landing(2, $date_time);
-        // //产品详情页
-        // $arr['detail_num'] = $zeelool_data->google_target20(2, $date_time);
-        // //加购
-        // $arr['cart_num'] = $zeelool_data->google_target2(2, $date_time);
-        // //交易次数
-        // $arr['complete_num'] = $zeelool_data->google_target_end(2, $date_time);
         //当天创建的用户当天产生订单的转化率
-        $status_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        $status_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
         $status_where['order_type'] = 1;
         //当天注册用户数
         $register_userids = $zeelool_model->table('customer_entity')->where($cart_where1)->column('entity_id');
         $register_num = count($register_userids);
         //当天注册用户在当天下单的用户数
         $order_user_count1 = 0;
-        foreach($register_userids as $register_userid){
+        foreach ($register_userids as $register_userid) {
             //判断当前用户在当天是否下单
-            $order = $zeelool_model->table('sales_flat_order')->where($cart_where1)->where($status_where)->where('customer_id',$register_userid)->value('entity_id');
-            if($order){
+            $order = $zeelool_model->table('sales_flat_order')->where($cart_where1)->where($status_where)->where('customer_id', $register_userid)->value('entity_id');
+            if ($order) {
                 $order_user_count1++;
             }
         }
-        $arr['create_user_change_rate'] = $register_num ? round($order_user_count1/$register_num*100,2) : 0;
+        $arr['create_user_change_rate'] = $register_num ? round($order_user_count1 / $register_num * 100, 2) : 0;
         //当天更新用户当天产生订单的转化率
         $update_userids = $zeelool_model->table('customer_entity')->where($cart_where2)->column('entity_id');
         $update_num = count($update_userids);
         //当天活跃更新用户数在当天是否下单
         $order_user_count2 = 0;
-        foreach ($update_userids as $update_userid){
+        foreach ($update_userids as $update_userid) {
             //判断活跃用户在当天下单的用户数
-            $order = $zeelool_model->table('sales_flat_order')->where($cart_where2)->where($status_where)->where('customer_id',$update_userid)->value('entity_id');
-            if($order){
+            $order = $zeelool_model->table('sales_flat_order')->where($cart_where2)->where($status_where)->where('customer_id', $update_userid)->value('entity_id');
+            if ($order) {
                 $order_user_count2++;
             }
         }
-        $arr['update_user_change_rate'] = $update_num ? round($order_user_count2/$update_num*100,0) : 0;
+        $arr['update_user_change_rate'] = $update_num ? round($order_user_count2 / $update_num * 100, 0) : 0;
         //插入数据
         Db::name('datacenter_day')->insert($arr);
         echo $date_time . "\n";
@@ -1166,7 +1171,7 @@ class TrackReg extends Backend
         //支付成功的订单数
         $order_where = [];
         $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
-        $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
         $arr['order_num'] = $this->zeelool->where($order_where)->where('order_type', 1)->count();
         //销售额
         $arr['sales_total_money'] = $this->zeelool->where($order_where)->where('order_type', 1)->sum('base_grand_total');
@@ -1223,27 +1228,27 @@ class TrackReg extends Backend
         $register_num = count($register_userids);
         //当天注册用户在当天下单的用户数
         $order_user_count1 = 0;
-        foreach($register_userids as $register_userid){
+        foreach ($register_userids as $register_userid) {
             //判断当前用户在当天是否下单
-            $order = $zeelool_model->table('sales_flat_order')->where($cart_where1)->where($status_where)->where('customer_id',$register_userid)->value('entity_id');
-            if($order){
+            $order = $zeelool_model->table('sales_flat_order')->where($cart_where1)->where($status_where)->where('customer_id', $register_userid)->value('entity_id');
+            if ($order) {
                 $order_user_count1++;
             }
         }
-        $arr['create_user_change_rate'] = $register_num ? round($order_user_count1/$register_num*100,2) : 0;
+        $arr['create_user_change_rate'] = $register_num ? round($order_user_count1 / $register_num * 100, 2) : 0;
         //当天更新用户当天产生订单的转化率
         $update_userids = $zeelool_model->table('customer_entity')->where($cart_where2)->column('entity_id');
         $update_num = count($update_userids);
         //当天活跃更新用户数在当天是否下单
         $order_user_count2 = 0;
-        foreach ($update_userids as $update_userid){
+        foreach ($update_userids as $update_userid) {
             //判断活跃用户在当天下单的用户数
-            $order = $zeelool_model->table('sales_flat_order')->where($cart_where2)->where($status_where)->where('customer_id',$update_userid)->value('entity_id');
-            if($order){
+            $order = $zeelool_model->table('sales_flat_order')->where($cart_where2)->where($status_where)->where('customer_id', $update_userid)->value('entity_id');
+            if ($order) {
                 $order_user_count2++;
             }
         }
-        $arr['update_user_change_rate'] = $update_num ? round($order_user_count2/$update_num*100,0) : 0;
+        $arr['update_user_change_rate'] = $update_num ? round($order_user_count2 / $update_num * 100, 0) : 0;
         //插入数据
         Db::name('datacenter_day')->insert($arr);
         echo $date_time . "\n";
@@ -1348,7 +1353,7 @@ class TrackReg extends Backend
         $model->table('sales_flat_order_item')->query("set time_zone='+8:00'");
         $model->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
         //$whereItem = " o.status in ('processing','complete','creditcard_proccessing','free_processing')";
-        $whereItem = " o.status in ('free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal')";
+        $whereItem = " o.status in ('free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered')";
         //某个品类眼镜的销售副数
         $frame_sales_num = $model->table('sales_flat_order_item m')
             ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
@@ -1652,7 +1657,7 @@ class TrackReg extends Backend
         //订单数
         $order_where = [];
         $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
-        $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
         $arr['order_num'] = $this->zeelool->where($order_where)->where('order_type', 1)->count();
         //销售额
         $arr['sales_total_money'] = $this->zeelool->where($order_where)->where('order_type', 1)->sum('base_grand_total');
@@ -1819,7 +1824,7 @@ class TrackReg extends Backend
         $z_sku_list = Db::name('datacenter_sku_day')->where(['day_date' => $data, 'site' => 1])->select();
         foreach ($z_sku_list as $k => $v) {
             $map['sku'] = ['like', $v['platform_sku'] . '%'];
-            $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+            $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
             $map['a.order_type'] = ['=', 1];
             $time_where[] = ['exp', Db::raw("DATE_FORMAT(a.created_at, '%Y-%m-%d') = '" . $data . "'")];
             //某个sku当天的订单数
@@ -1838,7 +1843,7 @@ class TrackReg extends Backend
                 ->where('sku', 'like', $v['platform_sku'] . '%')
                 ->where($time_where1)
                 ->sum('qty_ordered');
-            $whereItem = " o.status in ('free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal')";
+            $whereItem = " o.status in ('free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered')";
             $whereItem1 = " o.order_type = 1";
             $itemMap[] = ['exp', Db::raw("DATE_FORMAT(m.created_at, '%Y-%m-%d') = '" . $data . "'")];
             //求出眼镜的销售额 base_price  base_discount_amount
@@ -1876,7 +1881,7 @@ class TrackReg extends Backend
         $z_sku_list = Db::name('datacenter_sku_day')->where(['day_date' => $data, 'site' => 2])->select();
         foreach ($z_sku_list as $k => $v) {
             $map['sku'] = ['like', $v['platform_sku'] . '%'];
-            $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+            $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
             $map['a.order_type'] = ['=', 1];
             $time_where[] = ['exp', Db::raw("DATE_FORMAT(a.created_at, '%Y-%m-%d') = '" . $data . "'")];
             //某个sku当天的订单数
@@ -1895,7 +1900,7 @@ class TrackReg extends Backend
                 ->where('sku', 'like', $v['platform_sku'] . '%')
                 ->where($time_where1)
                 ->sum('qty_ordered');
-            $whereItem = " o.status in ('free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal')";
+            $whereItem = " o.status in ('free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered')";
             $whereItem1 = " o.order_type = 1";
             $itemMap[] = ['exp', Db::raw("DATE_FORMAT(m.created_at, '%Y-%m-%d') = '" . $data . "'")];
             //求出眼镜的销售额 base_price  base_discount_amount
@@ -1933,7 +1938,7 @@ class TrackReg extends Backend
         $z_sku_list = Db::name('datacenter_sku_day')->where(['day_date' => $data, 'site' => 3])->select();
         foreach ($z_sku_list as $k => $v) {
             $map['sku'] = ['like', $v['platform_sku'] . '%'];
-            $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+            $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
             $map['a.order_type'] = ['=', 1];
             $time_where[] = ['exp', Db::raw("DATE_FORMAT(a.created_at, '%Y-%m-%d') = '" . $data . "'")];
             //某个sku当天的订单数
@@ -1952,7 +1957,7 @@ class TrackReg extends Backend
                 ->where('sku', 'like', $v['platform_sku'] . '%')
                 ->where($time_where1)
                 ->sum('qty_ordered');
-            $whereItem = " o.status in ('free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal')";
+            $whereItem = " o.status in ('free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered')";
             $whereItem1 = " o.order_type = 1";
             $itemMap[] = ['exp', Db::raw("DATE_FORMAT(m.created_at, '%Y-%m-%d') = '" . $data . "'")];
             //求出眼镜的销售额 base_price  base_discount_amount
@@ -2177,7 +2182,7 @@ class TrackReg extends Backend
             $z_sku_list = Db::name('datacenter_sku_day')->where(['day_date' => $data, 'site' => 1])->select();
             foreach ($z_sku_list as $k => $v) {
                 $map['sku'] = ['like', $v['platform_sku'] . '%'];
-                $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+                $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
                 $map['a.order_type'] = ['=', 1];
                 $time_where[] = ['exp', Db::raw("DATE_FORMAT(a.created_at, '%Y-%m-%d') = '" . $data . "'")];
                 //某个sku当天的订单数
@@ -2196,7 +2201,7 @@ class TrackReg extends Backend
                     ->where('sku', 'like', $v['platform_sku'] . '%')
                     ->where($time_where1)
                     ->sum('qty_ordered');
-                $whereItem = " o.status in ('free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal')";
+                $whereItem = " o.status in ('free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered')";
                 $whereItem1 = " o.order_type = 1";
                 $itemMap[] = ['exp', Db::raw("DATE_FORMAT(m.created_at, '%Y-%m-%d') = '" . $data . "'")];
                 //求出眼镜的销售额 base_price  base_discount_amount
@@ -2233,7 +2238,7 @@ class TrackReg extends Backend
             $z_sku_list = Db::name('datacenter_sku_day')->where(['day_date' => $data, 'site' => 2])->select();
             foreach ($z_sku_list as $k => $v) {
                 $map['sku'] = ['like', $v['platform_sku'] . '%'];
-                $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+                $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
                 $map['a.order_type'] = ['=', 1];
                 $time_where[] = ['exp', Db::raw("DATE_FORMAT(a.created_at, '%Y-%m-%d') = '" . $data . "'")];
                 //某个sku当天的订单数
@@ -2252,7 +2257,7 @@ class TrackReg extends Backend
                     ->where('sku', 'like', $v['platform_sku'] . '%')
                     ->where($time_where1)
                     ->sum('qty_ordered');
-                $whereItem = " o.status in ('free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal')";
+                $whereItem = " o.status in ('free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered')";
                 $whereItem1 = " o.order_type = 1";
                 $itemMap[] = ['exp', Db::raw("DATE_FORMAT(m.created_at, '%Y-%m-%d') = '" . $data . "'")];
                 //求出眼镜的销售额 base_price  base_discount_amount
@@ -2289,7 +2294,7 @@ class TrackReg extends Backend
             $z_sku_list = Db::name('datacenter_sku_day')->where(['day_date' => $data, 'site' => 3])->select();
             foreach ($z_sku_list as $k => $v) {
                 $map['sku'] = ['like', $v['platform_sku'] . '%'];
-                $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+                $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
                 $map['a.order_type'] = ['=', 1];
                 $time_where[] = ['exp', Db::raw("DATE_FORMAT(a.created_at, '%Y-%m-%d') = '" . $data . "'")];
                 //某个sku当天的订单数
@@ -2308,7 +2313,7 @@ class TrackReg extends Backend
                     ->where('sku', 'like', $v['platform_sku'] . '%')
                     ->where($time_where1)
                     ->sum('qty_ordered');
-                $whereItem = " o.status in ('free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal')";
+                $whereItem = " o.status in ('free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered')";
                 $whereItem1 = " o.order_type = 1";
                 $itemMap[] = ['exp', Db::raw("DATE_FORMAT(m.created_at, '%Y-%m-%d') = '" . $data . "'")];
                 //求出眼镜的销售额 base_price  base_discount_amount
@@ -2491,7 +2496,7 @@ class TrackReg extends Backend
         $z_sku_list = Db::name('datacenter_sku_day')->where(['day_date' => $data, 'site' => 2])->select();
         foreach ($z_sku_list as $k => $v) {
             $map['sku'] = ['like', $v['platform_sku'] . '%'];
-            $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+            $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
             $map['a.order_type'] = ['=', 1];
             $time_where[] = ['exp', Db::raw("DATE_FORMAT(a.created_at, '%Y-%m-%d') = '" . $data . "'")];
             //某个sku当天的订单数
@@ -2510,7 +2515,7 @@ class TrackReg extends Backend
                 ->where('sku', 'like', $v['platform_sku'] . '%')
                 ->where($time_where1)
                 ->sum('qty_ordered');
-            $whereItem = " o.status in ('free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal')";
+            $whereItem = " o.status in ('free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered')";
             $whereItem1 = " o.order_type = 1";
             $itemMap[] = ['exp', Db::raw("DATE_FORMAT(m.created_at, '%Y-%m-%d') = '" . $data . "'")];
             //求出眼镜的销售额 base_price  base_discount_amount
@@ -2548,7 +2553,7 @@ class TrackReg extends Backend
         $z_sku_list = Db::name('datacenter_sku_day')->where(['day_date' => $data, 'site' => 3])->select();
         foreach ($z_sku_list as $k => $v) {
             $map['sku'] = ['like', $v['platform_sku'] . '%'];
-            $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+            $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
             $map['a.order_type'] = ['=', 1];
             $time_where[] = ['exp', Db::raw("DATE_FORMAT(a.created_at, '%Y-%m-%d') = '" . $data . "'")];
             //某个sku当天的订单数
@@ -2567,7 +2572,7 @@ class TrackReg extends Backend
                 ->where('sku', 'like', $v['platform_sku'] . '%')
                 ->where($time_where1)
                 ->sum('qty_ordered');
-            $whereItem = " o.status in ('free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal')";
+            $whereItem = " o.status in ('free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered')";
             $whereItem1 = " o.order_type = 1";
             $itemMap[] = ['exp', Db::raw("DATE_FORMAT(m.created_at, '%Y-%m-%d') = '" . $data . "'")];
             //求出眼镜的销售额 base_price  base_discount_amount
@@ -2609,7 +2614,7 @@ class TrackReg extends Backend
         $z_sku_list = Db::name('datacenter_sku_day')->where(['day_date' => $data, 'site' => 1])->select();
         foreach ($z_sku_list as $k => $v) {
             $map['sku'] = ['like', $v['platform_sku'] . '%'];
-            $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+            $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
             $map['a.order_type'] = ['=', 1];
             $time_where[] = ['exp', Db::raw("DATE_FORMAT(a.created_at, '%Y-%m-%d') = '" . $data . "'")];
             //某个sku当天的订单数
@@ -2628,7 +2633,7 @@ class TrackReg extends Backend
                 ->where('sku', 'like', $v['platform_sku'] . '%')
                 ->where($time_where1)
                 ->sum('qty_ordered');
-            $whereItem = " o.status in ('free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal')";
+            $whereItem = " o.status in ('free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered')";
             $whereItem1 = " o.order_type = 1";
             $itemMap[] = ['exp', Db::raw("DATE_FORMAT(m.created_at, '%Y-%m-%d') = '" . $data . "'")];
             //求出眼镜的销售额 base_price  base_discount_amount
@@ -2672,7 +2677,7 @@ class TrackReg extends Backend
         $z_sku_list = Db::name('datacenter_sku_day')->where(['day_date' => $data, 'site' => 2])->select();
         foreach ($z_sku_list as $k => $v) {
             $map['sku'] = ['like', $v['platform_sku'] . '%'];
-            $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+            $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
             $map['a.order_type'] = ['=', 1];
             $time_where[] = ['exp', Db::raw("DATE_FORMAT(a.created_at, '%Y-%m-%d') = '" . $data . "'")];
             //某个sku当天的订单数
@@ -2691,7 +2696,7 @@ class TrackReg extends Backend
                 ->where('sku', 'like', $v['platform_sku'] . '%')
                 ->where($time_where1)
                 ->sum('qty_ordered');
-            $whereItem = " o.status in ('free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal')";
+            $whereItem = " o.status in ('free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered')";
             $whereItem1 = " o.order_type = 1";
             $itemMap[] = ['exp', Db::raw("DATE_FORMAT(m.created_at, '%Y-%m-%d') = '" . $data . "'")];
             //求出眼镜的销售额 base_price  base_discount_amount
@@ -2729,7 +2734,7 @@ class TrackReg extends Backend
         $z_sku_list = Db::name('datacenter_sku_day')->where(['day_date' => $data, 'site' => 3])->select();
         foreach ($z_sku_list as $k => $v) {
             $map['sku'] = ['like', $v['platform_sku'] . '%'];
-            $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+            $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
             $map['a.order_type'] = ['=', 1];
             $time_where[] = ['exp', Db::raw("DATE_FORMAT(a.created_at, '%Y-%m-%d') = '" . $data . "'")];
             //某个sku当天的订单数
@@ -2748,7 +2753,7 @@ class TrackReg extends Backend
                 ->where('sku', 'like', $v['platform_sku'] . '%')
                 ->where($time_where1)
                 ->sum('qty_ordered');
-            $whereItem = " o.status in ('free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal')";
+            $whereItem = " o.status in ('free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered')";
             $whereItem1 = " o.order_type = 1";
             $itemMap[] = ['exp', Db::raw("DATE_FORMAT(m.created_at, '%Y-%m-%d') = '" . $data . "'")];
             //求出眼镜的销售额 base_price  base_discount_amount
@@ -2790,7 +2795,7 @@ class TrackReg extends Backend
         $z_sku_list = Db::name('datacenter_sku_day')->where(['day_date' => $data, 'site' => 1])->select();
         foreach ($z_sku_list as $k => $v) {
             $map['sku'] = ['like', $v['platform_sku'] . '%'];
-            $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+            $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
             $map['a.order_type'] = ['=', 1];
             $time_where[] = ['exp', Db::raw("DATE_FORMAT(a.created_at, '%Y-%m-%d') = '" . $data . "'")];
             //某个sku当天的订单数
@@ -2809,7 +2814,7 @@ class TrackReg extends Backend
                 ->where('sku', 'like', $v['platform_sku'] . '%')
                 ->where($time_where1)
                 ->sum('qty_ordered');
-            $whereItem = " o.status in ('free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal')";
+            $whereItem = " o.status in ('free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered')";
             $whereItem1 = " o.order_type = 1";
             $itemMap[] = ['exp', Db::raw("DATE_FORMAT(m.created_at, '%Y-%m-%d') = '" . $data . "'")];
             //求出眼镜的销售额 base_price  base_discount_amount
@@ -3112,7 +3117,7 @@ class TrackReg extends Backend
             //获取这个sku所有的订单情况
             $sku_order_data = Db::connect('database.db_zeelool')->table('sales_flat_order')
                 ->where('c.sku', 'like', $v['platform_sku'] . '%')
-                ->where('a.status', 'in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete'])
+                ->where('a.status', 'in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete','delivered'])
                 ->where('a.order_type', '=', 1)
                 ->where($itemMap)
                 ->alias('a')
@@ -3138,7 +3143,7 @@ class TrackReg extends Backend
             //获取这个sku所有的订单情况
             $sku_order_data = Db::connect('database.db_voogueme')->table('sales_flat_order')
                 ->where('c.sku', 'like', $v['platform_sku'] . '%')
-                ->where('a.status', 'in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete'])
+                ->where('a.status', 'in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete','delivered'])
                 ->where('a.order_type', '=', 1)
                 ->where($itemMap)
                 ->alias('a')
@@ -3164,7 +3169,7 @@ class TrackReg extends Backend
             //获取这个sku所有的订单情况
             $sku_order_data = Db::connect('database.db_voogueme')->table('sales_flat_order')
                 ->where('c.sku', 'like', $v['platform_sku'] . '%')
-                ->where('a.status', 'in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete'])
+                ->where('a.status', 'in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete','delivered'])
                 ->where('a.order_type', '=', 1)
                 ->where($itemMap)
                 ->alias('a')

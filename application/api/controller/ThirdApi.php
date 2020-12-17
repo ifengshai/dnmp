@@ -55,8 +55,6 @@ class ThirdApi extends Api
             curl_setopt($curl, CURLOPT_TIMEOUT, 20); //设置cURL允许执行的最长秒数。
             $content =json_decode(curl_exec($curl),true);
             curl_close($curl);
-            Log::write("输出接口返回信息");
-            Log::write($content);
         }
         if ($track_arr['event'] != 'TRACKING_STOPPED') {
             // file_put_contents('/www/wwwroot/mojing/runtime/log/track.txt',$track_info."\r\n",FILE_APPEND);

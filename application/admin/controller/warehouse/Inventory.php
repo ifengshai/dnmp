@@ -723,8 +723,8 @@ class Inventory extends Backend
                         $stock_num = $v['error_qty'];
                         //计算当前sku的总虚拟库存 如果总的为0 表示当前所有平台的此sku都为0 此时入库的话按照平均规则分配 例如五个站都有此品 那么比例就是20%
                         $stock_all_num = array_sum(array_column($item_platform_sku, 'stock'));
-                        
-                        if ($stock_all_num <= 0) {
+
+                        if ($stock_all_num == 0 || $stock_all_num < 0) {
                             $rate_rate = 1 / $all_num;
                             foreach ($item_platform_sku as $key => $val) {
                                 //最后一个站点 剩余数量分给最后一个站
@@ -2298,7 +2298,7 @@ class Inventory extends Backend
 
                 //追加对应站点虚拟库存
                 $platformSku->where(['sku' => $warehouse_original_sku, 'platform_type' => $order_platform])->setDec('stock', $original_number);
-                
+
                 if (false !== $res) {
                     $data = [
                         'type' => 2,
