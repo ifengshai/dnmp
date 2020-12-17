@@ -212,7 +212,7 @@ class Distribution extends Backend
                         'type'=>$house_type
                     ])
                     ->column('id');
-                $map['a.temporary_house_id|a.abnormal_house_id|c.store_house_id'] = ['in', $stock_house_id];
+                $map['a.temporary_house_id|a.abnormal_house_id|c.store_house_id'] = ['in', $stock_house_id ?: [-1]];
                 unset($filter['stock_house_num']);
             }
 
