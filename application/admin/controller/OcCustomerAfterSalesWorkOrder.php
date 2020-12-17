@@ -164,6 +164,8 @@ class OcCustomerAfterSalesWorkOrder extends Backend
                 curl_close($curl);
                 Log::write("输出工单信息更新情况");
                 Log::write($content);
+                Log::write("输出请求url");
+                Log::write($url);
                 if ($content['code'] ==200){
                     $this->success('操作成功');
                 }else{
