@@ -54,17 +54,35 @@ class OcCustomerAfterSalesWorkOrder extends Backend
             }
 
             $filter = json_decode($this->request->get('filter'), true);
+
+            //是否有工单
+            $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
+            if ($filter['is_task'] == 1 || $filter['is_task'] == '0') {
+                $swhere = [];
+                $swhere['work_platform'] = 1;
+                $swhere['work_status'] = ['not in', [0, 4, 6]];
+                $order_arr = $workorder->where($swhere)->column('platform_order');
+                if ($filter['is_task'] == 1) {
+                    $map['increment_id'] = ['in', $order_arr];
+                } elseif ($filter['is_task'] == '0') {
+                    $map['increment_id'] = ['not in', $order_arr];
+                }
+                unset($filter['is_task']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
             unset($filter['site']);
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
 
             $total = $this->model
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
 
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
@@ -97,12 +115,14 @@ class OcCustomerAfterSalesWorkOrder extends Backend
                 }else{
                     $list[$key]['status'] = '待处理';
                 }
-
+                $list[$key]['created_at'] =date("Y-m-d H:i:s",strtotime($item['created_at'])+14400);;
                 $swhere['platform_order'] = $item['increment_id'];
                 $swhere['work_platform'] = 1;
                 $swhere['work_status'] = ['not in', [0, 4, 6]];
+
                 $count = $workorder->where($swhere)->count();
-                if ($count>1){
+
+                if ($count>0){
                     $list[$key]['task_info'] = 1;
                 }
             }
@@ -193,7 +213,8 @@ class OcCustomerAfterSalesWorkOrder extends Backend
 
         }
         $row['email_message'] = $email;
-        if ($row['status'] ==1){
+
+        if ($row['status'] ==1 && $type ==0){
             Db::connect('database.db_zeelool')->table('oc_customer_after_sales_work_order')->where('id',$ids)->update(['status'=>2]);
             $url  = config('url.zeelool_url').'magic/customer/updateTicket';
             $value['ticket_id'] = $ids;

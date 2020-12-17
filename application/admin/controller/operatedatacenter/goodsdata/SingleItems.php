@@ -12,8 +12,12 @@ use think\Request;
 class SingleItems extends Backend
 {
     /**
-     * 单品查询
+     * 单品查询某个sku的订单列表
      *
+     * Created by Phpstorm.
+     * User: jhh
+     * Date: 2020/12/17
+     * Time: 13:43:45
      */
     public function index()
     {
@@ -46,8 +50,6 @@ class SingleItems extends Backend
 
             if ($filter['sku']) {
                 $map['p.sku'] = $filter['sku'];
-                // $mapss['sku'] = ['like',$filter['sku'].'%'];
-                $sku = $filter['sku'];
                 unset($filter['sku']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
@@ -58,13 +60,10 @@ class SingleItems extends Backend
             } else {
                 $site = 1;
             }
-            $field = 'p.id,o.increment_id,o.created_at,o.customer_email,p.prescription_type,p.coatiing_name,p.frame_price,p.index_price';
             if ($site == 2) {
                 $order_model = Db::connect('database.db_voogueme');
-
             } elseif ($site == 3) {
                 $order_model = Db::connect('database.db_nihao');
-                $field = 'p.id,o.increment_id,o.created_at,o.customer_email,p.prescription_type,p.frame_price,p.index_price';
             } else {
                 $order_model = Db::connect('database.db_zeelool');
             }
@@ -72,31 +71,12 @@ class SingleItems extends Backend
             $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
             $map['o.order_type'] = 1;
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-            $total = $order_model->table('sales_flat_order_item_prescription')
-                ->alias('p')
-                ->join('sales_flat_order o', 'p.order_id=o.entity_id')
-                ->field($field)
-                ->where($where)
-                ->where($map)
-                ->order($sort, $order)
-                ->count();
-
-            $list = $order_model->table('sales_flat_order_item_prescription')
-                ->alias('p')
-                ->join('sales_flat_order o', 'p.order_id=o.entity_id')
-                ->field($field)
-                ->where($where)
-                ->where($map)
-                ->order($sort, $order)
-                ->limit($offset, $limit)
-                ->select();
             $total = $order_model
                 ->table('sales_flat_order')
                 ->where($map)
                 ->alias('o')
                 ->join(['sales_flat_order_item' => 'p'], 'o.entity_id=p.order_id')
                 ->group('o.entity_id')
-                // ->order($order)
                 ->count();
             $list = $order_model
                 ->table('sales_flat_order')
@@ -104,7 +84,6 @@ class SingleItems extends Backend
                 ->alias('o')
                 ->join(['sales_flat_order_item' => 'p'], 'o.entity_id=p.order_id')
                 ->group('o.entity_id')
-                // ->order($order)
                 ->order('o.created_at','desc')
                 ->limit($offset, $limit)
                 ->select();
@@ -125,11 +104,18 @@ class SingleItems extends Backend
         return $this->view->fetch();
     }
 
+    /**
+     * 中间表格sku的订单各项指标
+     *
+     * Created by Phpstorm.
+     * User: jhh
+     * Date: 2020/12/17
+     * Time: 13:44:18
+     */
     public function ajax_top_data()
     {
         if ($this->request->isAjax()) {
             $params = $this->request->param();
-            // dump($params);
             //站点
             $order_platform = $params['order_platform'] ? $params['order_platform'] : 1;
             //时间
@@ -138,23 +124,20 @@ class SingleItems extends Backend
             $same_where['day_date'] = ['between', [$createat[0], $createat[3]]];
             $same_where['site'] = ['=', $order_platform];
             $sku = input('sku');
-            // dump($sku);
             $item_platform = new ItemPlatformSku();
             $sku = $item_platform->where('sku', $sku)->where('platform_sku', $order_platform)->value('platform_sku') ? $item_platform->where('sku', $sku)->where('platform_sku', $order_platform)->value('platform_sku') : $sku;
-            // dump($sku);
-            // $sku = 'FP08';
             switch ($order_platform) {
                 case 1:
-                    $order_model = $this->zeelool;
                     $model = Db::connect('database.db_zeelool');
+                    $coatiing_price['b.coatiing_price'] = ['=',0];
                     break;
                 case 2:
-                    $order_model = $this->voogueme;
                     $model = Db::connect('database.db_voogueme');
+                    $coatiing_price['b.coatiing_price'] = ['=',0];
                     break;
                 case 3:
-                    $order_model = $this->nihao;
                     $model = Db::connect('database.db_nihao');
+                    $coatiing_price =[];
                     break;
             }
             $model->table('sales_flat_order')->query("set time_zone='+8:00'");
@@ -175,10 +158,8 @@ class SingleItems extends Backend
 
             //整站订单量
             $whole_platform_order_num = Db::name('datacenter_day')->where($same_where)->sum('order_num');
-
             //订单占比
             $order_rate = $whole_platform_order_num == 0 ? 0 : round($total / $whole_platform_order_num * 100, 2) . '%';
-
             //平均订单副数
             $whole_glass = $model
                 ->table('sales_flat_order_item')
@@ -186,7 +167,6 @@ class SingleItems extends Backend
                 ->where('created_at', 'between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]])
                 ->sum('qty_ordered');//sku总副数
             $avg_order_glass = $total == 0 ? 0 : round($whole_glass / $total, 2);
-
             if ($order_platform != 3) {
                 //付费镜片订单数
                 $nopay_jingpian_glass = $model
@@ -196,7 +176,7 @@ class SingleItems extends Backend
                     ->where('a.created_at', 'between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]])
                     ->where('sku', 'like', $sku . '%')
                     ->where('a.order_type', '=', 1)
-                    ->where('b.coatiing_price', '=', 0)
+                    ->where($coatiing_price)
                     ->where('a.status', 'in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal'])
                     ->where('b.index_price', '=', 0)
                     ->group('order_id')
@@ -210,17 +190,16 @@ class SingleItems extends Backend
                     ->where('a.created_at', 'between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]])
                     ->where('sku', 'like', $sku . '%')
                     ->where('a.order_type', '=', 1)
-                    ->where('b.coatiing_price', '=', 0)
+                    // ->where('b.coatiing_price', '=', 0)
+                    ->where($coatiing_price)
                     ->where('a.status', 'in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal'])
                     ->where('b.index_price', '=', 0)
                     ->group('order_id')
                     ->count();
             }
             $pay_jingpian_glass = $total - $nopay_jingpian_glass;
-
             //付费镜片订单数占比
             $pay_jingpian_glass_rate = $total == 0 ? 0 : round($pay_jingpian_glass / $total * 100, 2) . '%';
-
             //只买一副的订单
             $only_one_glass_order_list = $model
                 ->table('sales_flat_order_item')
@@ -249,7 +228,6 @@ class SingleItems extends Backend
             }
             //只买一副的订单占比
             $only_one_glass_rate = $total == 0 ? 0 : round($only_one_glass_num / $total * 100, 2) . '%';
-
             //订单总金额
             $whole_price = $model
                 ->table('sales_flat_order')
@@ -259,7 +237,6 @@ class SingleItems extends Backend
                 ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
                 ->field('base_grand_total')
                 ->sum('base_grand_total');
-
             //订单客单价
             $every_price = $total == 0 ? 0 : round($whole_price / $total, 2);
             //关联购买
@@ -293,12 +270,12 @@ class SingleItems extends Backend
     }
 
     /**
-     * 商品销量/现价
+     * 商品销量/现价折线图
      *
-     * @Description
-     * @author wpl
-     * @since 2020/10/14 15:02:23 
-     * @return void
+     * Created by Phpstorm.
+     * User: jhh
+     * Date: 2020/12/17
+     * Time: 13:45:00
      */
     public function sku_sales_data_line()
     {
@@ -312,8 +289,6 @@ class SingleItems extends Backend
             $same_where['platform_sku'] = ['like', $sku . '%'];
             $recent_day_num = Db::name('datacenter_sku_day')->where($same_where)->order('day_date', 'asc')->column('glass_num', 'day_date');
             $recent_day_now = Db::name('datacenter_sku_day')->where($same_where)->order('day_date', 'asc')->column('now_pricce', 'day_date');
-
-
             $json['xColumnName'] = array_keys($recent_day_num);
             $json['columnData'] = [
                 [
@@ -332,53 +307,53 @@ class SingleItems extends Backend
                 ],
 
             ];
-
             return json(['code' => 1, 'data' => $json]);
         }
     }
 
     /**
-     * 最近30天销量
+     * 最近30天销量柱状图
      *
-     * @Description
-     * @author wpl
-     * @since 2020/10/14 15:02:23 
-     * @return void
+     * Created by Phpstorm.
+     * User: jhh
+     * Date: 2020/12/17
+     * Time: 13:45:24
      */
     public function sku_sales_data_bar()
     {
         if ($this->request->isAjax()) {
             $sku = input('sku');
             $site = input('order_platform');
-            // dump($sku);
-            // dump($site);
             $end = date('Y-m-d');
             $start = date('Y-m-d', strtotime("-30 days", strtotime($end)));
-
             $same_where['day_date'] = ['between', [$start, $end]];
             $same_where['site'] = ['=', $site];
             $same_where['platform_sku'] = ['like', $sku . '%'];
             $recent_30_day = Db::name('datacenter_sku_day')->where($same_where)->order('day_date', 'asc')->column('glass_num', 'day_date');
             $json['xColumnName'] = array_keys($recent_30_day);
-
             $json['columnData'] = [
                 'type' => 'bar',
                 'data' => array_values($recent_30_day),
                 'name' => '销量'
             ];
-
             return json(['code' => 1, 'data' => $json]);
         }
     }
 
-    //导出关联购买数据
+    /**
+     * 导出关联购买数据
+     *
+     * Created by Phpstorm.
+     * User: jhh
+     * Date: 2020/12/17
+     * Time: 13:45:51
+     */
     public function export(){
         set_time_limit(0);
         ini_set('memory_limit', '512M');
         $order_platform = input('order_platform');
         $time_str = input('time_str');
         $sku = input('sku');
-
         if ($time_str) {
             $createat = explode(' ', $time_str);
         }
@@ -421,7 +396,6 @@ class SingleItems extends Backend
                 }
             }
         }
-        // dump($array_sku);die;
         //从数据库查询需要的数据
         $spreadsheet = new Spreadsheet();
         $spreadsheet->setActiveSheetIndex(0);
@@ -430,8 +404,6 @@ class SingleItems extends Backend
         //设置宽度
         $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(60);
         $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(12);
-
-
         $spreadsheet->setActiveSheetIndex(0)->setTitle('SKU明细');
         $spreadsheet->setActiveSheetIndex(0);
         $num = 0;
@@ -452,13 +424,10 @@ class SingleItems extends Backend
         $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
         $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
         $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
-
         $spreadsheet->getActiveSheet()->getStyle('A1:Q' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-
         $spreadsheet->setActiveSheetIndex(0);
         $format = 'xlsx';
         $savename = 'sku:'.$sku .' '. $createat[0] .'至'.$createat[3] .'关联购买情况';
-
         if ($format == 'xls') {
             //输出Excel03版本
             header('Content-Type:application/vnd.ms-excel');
