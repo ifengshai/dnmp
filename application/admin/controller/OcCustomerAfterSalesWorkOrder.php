@@ -125,6 +125,8 @@ class OcCustomerAfterSalesWorkOrder extends Backend
                 if ($count>0){
                     $list[$key]['task_info'] = 1;
                     $list[$key]['is_task'] = 1;
+                }else{
+                    $list[$key]['is_task'] = 0;
                 }
             }
             $result = array("total" => $total, "rows" => $list);
