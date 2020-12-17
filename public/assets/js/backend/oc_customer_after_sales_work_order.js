@@ -149,6 +149,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 gettitle: function (value) {
                     return '<a class="btn-gettitle" style="color: #333333!important;">' + value + '</a>';
                 },
+                status: function (value, row, index) {
+                    var str = '';
+                    if (value == 1) {
+                        str = '有';
+                    }  else {
+                        str = '无';
+                    }
+                    return str;
+                },
             },
             events: {
                 //点击标题，弹出窗口
