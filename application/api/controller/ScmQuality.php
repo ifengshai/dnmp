@@ -617,7 +617,7 @@ class ScmQuality extends Scm
                     $item_save['purchase_id']  = $purchase_id;
                     $item_save['purchase_num'] = $value['purchase_num'];
                     $item_save['should_arrival_num'] = $value['should_arrival_num'];
-                    $this->_check_item->allowField(true)->save($item_save);
+                    $this->_check_item->allowField(true)->isUpdate(false)->data($item_save)->save();
                 }
 
                 $code_item = [

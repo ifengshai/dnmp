@@ -1352,7 +1352,9 @@ class ScmWarehouse extends Scm
                             //记录没有采购比例直接入库的sku
                             $this->_allocated
                                 ->allowField(true)
-                                ->save(['sku' => $v['sku'], 'change_num' => $v['in_stock_num'], 'create_time' => date('Y-m-d H:i:s')]);
+                                ->isUpdate(false)
+                                ->data(['sku' => $v['sku'], 'change_num' => $v['in_stock_num'], 'create_time' => date('Y-m-d H:i:s')])
+                                ->save();
 
                             $item_platform_sku = $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => 4])->find();
                             //sku没有同步meeloog站 无法添加虚拟库存 必须先同步
