@@ -153,7 +153,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 });
             })
 
-            //批量导出xls 
+            //批量导出xls
             $('.btn-batch-export-xls').click(function () {
                 var ids = Table.api.selectedids(table);
                 if (ids.length > 0) {

@@ -339,7 +339,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
             })
 
 
-            
+
             // // 导入按钮事件
             // Upload.api.plupload($('.btn-import'), function (data, ret) {
             //     Fast.api.ajax({
@@ -1064,7 +1064,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
 
             });
 
-            //批量导出xls 
+            //批量导出xls
             $('.btn-batch-export-xls').click(function () {
                 var ids = Table.api.selectedids(table);
                 if (ids.length > 0) {
