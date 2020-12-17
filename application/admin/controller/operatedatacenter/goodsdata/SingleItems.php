@@ -147,14 +147,17 @@ class SingleItems extends Backend
                 case 1:
                     $order_model = $this->zeelool;
                     $model = Db::connect('database.db_zeelool');
+                    $coatiing_price['b.coatiing_price'] = ['=',0];
                     break;
                 case 2:
                     $order_model = $this->voogueme;
                     $model = Db::connect('database.db_voogueme');
+                    $coatiing_price['b.coatiing_price'] = ['=',0];
                     break;
                 case 3:
                     $order_model = $this->nihao;
                     $model = Db::connect('database.db_nihao');
+                    $coatiing_price =[];
                     break;
             }
             $model->table('sales_flat_order')->query("set time_zone='+8:00'");
@@ -196,7 +199,7 @@ class SingleItems extends Backend
                     ->where('a.created_at', 'between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]])
                     ->where('sku', 'like', $sku . '%')
                     ->where('a.order_type', '=', 1)
-                    ->where('b.coatiing_price', '=', 0)
+                    ->where($coatiing_price)
                     ->where('a.status', 'in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal'])
                     ->where('b.index_price', '=', 0)
                     ->group('order_id')
@@ -210,7 +213,8 @@ class SingleItems extends Backend
                     ->where('a.created_at', 'between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]])
                     ->where('sku', 'like', $sku . '%')
                     ->where('a.order_type', '=', 1)
-                    ->where('b.coatiing_price', '=', 0)
+                    // ->where('b.coatiing_price', '=', 0)
+                    ->where($coatiing_price)
                     ->where('a.status', 'in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal'])
                     ->where('b.index_price', '=', 0)
                     ->group('order_id')
