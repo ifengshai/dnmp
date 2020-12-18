@@ -85,12 +85,7 @@ class OcPrescriptionPic extends Backend
 //                    ->order($sort, $order)
                     ->limit($offset, $limit)
                     ->select();
-            $list = collection($list)->toArray();
-            foreach ($list as $row) {
-
-                $row->visible(['id','email','query','status','handler_name','created_at','completion_time','remarks']);
-                
-            }
+         
             $list = collection($list)->toArray();
 
             foreach ($list as $key=>$item){
