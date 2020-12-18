@@ -106,10 +106,10 @@ class OcPrescriptionPic extends Backend
         $site = input('param.site');
         if ($site ==1){
             $model = Db::connect('database.db_zeelool');
-            $url =config('url.zeelool_url').'/media';
+            $url =config('url.zeelool_url');
         }else{
             $model = Db::connect('database.db_voogueme');
-            $url =config('url.voogueme_url').'/media';
+            $url =config('url.voogueme_url');
         }
         $row =$model->table('oc_prescription_pic')->where('id',$ids)->find();
         $photo_href = $row['pic'] =explode(',',$row['pic']);
@@ -120,7 +120,7 @@ class OcPrescriptionPic extends Backend
         $this->assign('row',$row);
         $this->assign('zhandian',$site);
 
-        
+
         return $this->view->fetch();
     }
 }
