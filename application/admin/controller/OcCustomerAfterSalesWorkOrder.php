@@ -42,8 +42,11 @@ class OcCustomerAfterSalesWorkOrder extends Backend
      */
     public function index()
     {
+        $label = $this->request->get('site', 1);
+        dump($label);die();
         //当前是否为关联查询
         $this->relationSearch = false;
+
         //设置过滤方法
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax())
@@ -55,6 +58,20 @@ class OcCustomerAfterSalesWorkOrder extends Backend
             }
 
             $filter = json_decode($this->request->get('filter'), true);
+
+            switch ($label) {
+                case 1:
+                    $db = 'database.db_zeelool';
+                    $this->model = $this->zeelool;
+                    break;
+                case 2:
+                    $db = 'database.db_voogueme';
+                    $this->model = $this->voogueme;
+                    break;
+                default:
+                    return false;
+                    break;
+            }
 
             //是否有工单
             $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
@@ -73,6 +90,9 @@ class OcCustomerAfterSalesWorkOrder extends Backend
             }
             unset($filter['site']);
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+
+
+
 
             $total = $this->model
                 ->where($where)
