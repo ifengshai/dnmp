@@ -52,9 +52,36 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
-                                        return true;
+                                        if (row.status == 'Pending'){
+                                            return false;
+                                        }else{
+                                            return  true;
+                                        }
+                                    }
+                                },
+
+                                {
+                                    name: 'detail',
+                                    text: '编辑',
+                                    title: __('Detail'),
+                                    classname: 'btn btn-xs  btn-primary  btn-dialog',
+                                    icon: 'fa fa-list',
+                                    url: 'order/index/detail?label=' + Config.label,
+                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        if (row.status == 'Pending'){
+                                            return true;
+                                        }else{
+                                            return  false;
+                                        }
+                                        //返回true时按钮显示,返回false隐藏
+
                                     }
                                 }
+
 
                             ], formatter: Table.api.formatter.operate
                         }

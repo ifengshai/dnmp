@@ -952,14 +952,14 @@ class NewProduct extends Backend
                     //此SKU已存在 跳过
                     if ($count < 1) {
                         //添加商品主表信息
-                        $this->item->allowField(true)->save($params);
+                        $this->item->insert($params);
                         $attributeParams = $item['newproductattribute'];
                         unset($attributeParams['id']);
                         unset($attributeParams['frame_images']);
                         unset($attributeParams['frame_color']);
                         $attributeParams['item_id'] = $this->item->id;
                         //添加商品属性表信息
-                        $this->itemAttribute->allowField(true)->save($attributeParams);
+                        $this->itemAttribute->insert($attributeParams);
                     }
 
                     //添加对应平台映射关系

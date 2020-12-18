@@ -330,6 +330,9 @@ class WorkOrderList extends Backend
                     if (!$params['platform_order']) {
                         throw new Exception("订单号不能为空");
                     }
+                    if (empty($params['order_sku']['0'])){
+                        throw new Exception("请选择SKU");
+                    }
 
                     if (!$params['order_pay_currency']) {
                         throw new Exception("请先点击载入数据");

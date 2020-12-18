@@ -176,6 +176,129 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
     {
         if ($_POST){
           $data  = input('param.');
+          $value['order_id'] = $data['ids'];
+          $count = count($data['item_id']);
+         for ($i= 0;$i<$count;$i++) {
+             $value['order_items'][$i]['order_item_id'] = $data['item_id'][$i];
+             $value['order_items'][$i]['od_sph'] = $data['od_sph'][$i];
+             $value['order_items'][$i]['od_cyl'] = $data['od_cyl'][$i];
+             $value['order_items'][$i]['od_axis'] = $data['od_axis'][$i];
+             $value['order_items'][$i]['os_sph']= $data['os_sph'][$i];
+             $value['order_items'][$i]['os_cyl'] = $data['os_cyl'][$i];
+             $value['order_items'][$i]['os_axis'] = $data['os_axis'][$i];
+             $value['order_items'][$i]['pd_r'] = $data['pd_r'][$i];
+             $value['order_items'][$i]['pd_l'] = $data['pd_l'][$i];
+             $value['order_items'][$i]['od_pv'] = $data['od_pv'][$i];
+             $value['order_items'][$i]['os_pv'] = $data['os_pv'][$i];
+             $value['order_items'][$i]['od_bd'] = $data['od_bd'][$i];
+             $value['order_items'][$i]['os_bd'] = $data['os_bd'][$i];
+             $value['order_items'][$i]['od_pv_r'] = $data['od_pv_r'][$i];
+             $value['order_items'][$i]['os_pv_r'] = $data['os_pv_r'][$i];
+             $value['order_items'][$i]['od_bd_r'] = $data['od_bd_r'][$i];
+             $value['order_items'][$i]['os_bd_r'] = $data['os_bd_r'][$i];
+             $value['order_items'][$i]['os_add'] = $data['os_add'][$i];
+             $value['order_items'][$i]['od_add'] = $data['od_add'][$i];
+             if ($data['od_pv'][$i] !== null && $data['od_pv_r'][$i] !==null && $data['os_pv'][$i] !== null && $data['os_pv_r'][$i]){
+                 $value['order_items'][$i]['prismcheck'] = 'on';
+             }else{
+                 $value['order_items'][$i]['prismcheck'] = '';
+             }
+         }
+        //请求接口
+            $url = config('url.zeelool_url').'magic/order/prescriptionPicCheck';
+            $values = $value;
+            $curl = curl_init();
+            curl_setopt($curl, CURLOPT_URL, $url);
+            curl_setopt($curl, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
+            curl_setopt($curl, CURLOPT_HEADER, 0);
+            curl_setopt($curl, CURLOPT_POST, true);
+            curl_setopt($curl, CURLOPT_POSTFIELDS, $values);
+            curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($curl, CURLOPT_TIMEOUT, 20);
+            $content =json_decode(curl_exec($curl),true);
+            curl_close($curl);
+            if ($content['status'] == 200){
+                $this->success('操作成功');
+            }else{
+                $this->erroe('操作失败,原因:'.$content['msg']);
+            }
+
+//          for ($i= 0;$i<$count;$i++){
+//             $value[$i]['item_id'] = $data['item_id'][$i];
+//             //获取序列化信息
+//              if ($data['label'] == 1) {
+//                  $info[$i]= unserialize(ZeeloolPrescriptionDetailHelper::get_list_product_options($data['item_id'][$i]));
+//              } elseif ($data['label'] == 2) {
+//                  $info[$i]= unserialize(VooguemePrescriptionDetailHelper::get_list_product_options($data['item_id'][$i]));
+//              } elseif ($data['label'] == 3) {
+//                  $info[$i]= unserialize(NihaoPrescriptionDetailHelper::get_list_product_options($data['item_id'][$i]));
+//              } elseif ($data['label'] == 4) {
+//                  $info[$i]= unserialize(WeseeopticalPrescriptionDetailHelper::get_list_product_options($data['item_id'][$i]));
+//              } elseif ($data['label'] == 5) {
+//                  $info[$i]= unserialize(MeeloogPrescriptionDetailHelper::get_list_product_options($data['item_id'][$i]));
+//              } elseif ($data['label'] == 9) {
+//                  $info[$i]= unserialize(ZeeloolEsPrescriptionDetailHelper::get_list_product_options($data['item_id'][$i]));
+//              } elseif ($data['label'] == 10) {
+//                  $info[$i]= unserialize(ZeeloolDePrescriptionDetailHelper::get_list_product_options($data['item_id'][$i]));
+//              } elseif ($data['label'] == 11) {
+//                  $info[$i]= unserialize(ZeeloolJpPrescriptionDetailHelper::get_list_product_options($data['item_id'][$i]));
+//              }
+////             $info[$i]= unserialize(ZeeloolPrescriptionDetailHelper::get_list_product_options($data['item_id'][$i]));
+//             $prescription =  explode('&',$info[$i]['info_buyRequest']['tmplens']['prescription']);
+//             $prescription[0] = $prescription[0];
+//             $prescription[1] = "od_sph=".$data['od_sph'][$i];
+//             $prescription[2] = "od_cyl=". $data['od_cyl'][$i];
+//             $prescription[3] = "od_axis=".$data['od_axis'][$i];
+//             $prescription[4] = "os_sph=". $data['os_sph'][$i];
+//             $prescription[5] = "os_cyl=".$data['os_cyl'][$i];
+//             $prescription[6] = "os_axis=".$data['os_axis'][$i];
+//             $prescription[7] = $prescription[7];
+//             $prescription[8] = "pd_r=";
+//             $prescription[9] = "pd_l=";
+//             $prescription[10] = "pd=".$data['pd'][$i];
+//             $prescription[11] = "os_add=".$data['os_add'][$i];;
+//             $prescription[12] ="od_add=". $data['od_add'][$i];
+//             if ($data['od_pv'][$i] !== null && $data['od_pv_r'][$i] !==null && $data['os_pv'][$i] !== null && $data['os_pv_r'][$i]){
+//                 $prescription[13] ="prismcheck=on";
+//             }else{
+//                 $prescription[13] ="prismcheck=";
+//             }
+//             $prescription[14] = "od_pv=".$data['od_pv'][$i];
+//             $prescription[15] = "od_bd=".$data['od_bd'][$i];
+//             $prescription[16] = "od_pv_r=". $data['od_pv_r'][$i];
+//             $prescription[17] = "od_bd_r=".$data['od_bd_r'][$i];
+//             $prescription[18] = "os_pv=".$data['os_pv'][$i];
+//             $prescription[19] = "os_bd=".$data['os_bd'][$i];
+//             $prescription[20] = "os_pv_r=".$data['os_pv_r'][$i];
+//             $prescription[21] = "os_bd_r=". $data['os_bd_r'][$i];
+//             $prescription[22] = "save=";
+//             $info[$i]['info_buyRequest']['tmplens']['prescription'] =implode('&',$prescription);
+//             //更新对应数据信息
+//             $save_value['product_options'] = serialize($info[$i]);
+//
+//              if ($data['label'] == 1) {
+//                  $change_value = ZeeloolPrescriptionDetailHelper::save_list_product_options($data['item_id'][$i],$save_value);
+//              } elseif ($data['label'] == 2) {
+//                  $change_value = VooguemePrescriptionDetailHelper::save_list_product_options($data['item_id'][$i],$save_value);
+//              } elseif ($data['label'] == 3) {
+//                  $change_value = NihaoPrescriptionDetailHelper::save_list_product_options($data['item_id'][$i],$save_value);
+//              } elseif ($data['label'] == 4) {
+//                  $change_value = WeseeopticalPrescriptionDetailHelper::save_list_product_options($data['item_id'][$i],$save_value);
+//              } elseif ($data['label'] == 5) {
+//                  $change_value = MeeloogPrescriptionDetailHelper::save_list_product_options($data['item_id'][$i],$save_value);
+//              } elseif ($data['label'] == 9) {
+//                  $change_value = ZeeloolEsPrescriptionDetailHelper::save_list_product_options($data['item_id'][$i],$save_value);
+//              } elseif ($data['label'] == 10) {
+//                  $change_value = ZeeloolDePrescriptionDetailHelper::save_list_product_options($data['item_id'][$i],$save_value);
+//              } elseif ($data['label'] == 11) {
+//                  $change_value = ZeeloolJpPrescriptionDetailHelper::save_list_product_options($data['item_id'][$i],$save_value);
+//              }
+//
+//             $change_value = ZeeloolPrescriptionDetailHelper::save_list_product_options($data['item_id'][$i],$save_value);
+//             dump($change_value);die();
+//          }
+
         }
         $ids = $ids ?? $this->request->get('id');
         //根据传的标签切换对应站点数据库
@@ -241,6 +364,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
         $this->view->assign("address", $address);
         $this->view->assign("goods", $goods);
         $this->view->assign("pay", $pay);
+        $this->view->assign("label", $label);
         return $this->view->fetch();
     }
 
