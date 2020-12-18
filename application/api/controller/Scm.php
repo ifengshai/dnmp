@@ -195,10 +195,12 @@ class Scm extends Api
     {
         $pda_version = model('Config')->get(['name' => 'pda_version']);
         $pda_download = model('Config')->get(['name' => 'pda_download']);
+        $pda_md5 = model('Config')->get(['name' => 'pda_md5']);
 
         $data = [
             'version' => $pda_version['value'],
-            'download' => $this->request->domain() . $pda_download['value']
+            'download' => $this->request->domain() . $pda_download['value'],
+            'pda_md5' => $pda_md5
         ];
 
         $this->success('', $data, 200);
