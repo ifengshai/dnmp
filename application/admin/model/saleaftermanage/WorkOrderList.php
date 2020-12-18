@@ -514,7 +514,7 @@ class WorkOrderList extends Model
     {
         switch ($siteType) {
             case -1://发货系统
-                $url = config('url.delivery_url');
+                $url = config('url.api_delivery_url');
                 break;
             case 1:
                 $url = config('url.zeelool_url');
