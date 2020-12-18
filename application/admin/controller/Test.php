@@ -1200,9 +1200,35 @@ class Test extends Backend
      */
     public function process_sku_number()
     {
-        $list = Db::name('zzzz_temp')->limit(10000)->select();
+        $instock = new \app\admin\model\warehouse\Instock();
+        $list = $instock->alias('a')->where(['status' => 2])->field('a.id,a.check_id,b.purchase_id,b.sku,b.in_stock_num')->join(['fa_in_stock_item' => 'b'],'a.id=b.in_stock_id')->order('a.createtime desc')->select();
         foreach($list as $k => $v) {
+            //查询对应质检单
+            $check = Db::name('check_order')->where(['id' => $v['check_id']])->find();
+            if ($v['in_stock_num'] < 0) {
+                continue;
+            }
+            $res = Db::name('zzzz_temp')->where(['is_process' => 1,'sku' => $v['sku']])->limit($v['in_stock_num'])->select();
+            if (!$res) {
+               continue; 
+            } 
+            foreach($res as $key => $val) {
+                $where['code'] = $val['product_number'];
+                $params['sku'] = $val['sku'];
+                $params['in_stock_id'] = $v['id'];
+                $params['purchase_id'] = $v['purchase_id'];
+                $params['check_id'] = $v['check_id'];
+                $params['is_quantity'] = 1;
+                $params['batch_id'] = $check['batch_id'];
+                $params['logistics_id'] = $check['logistics_id'];
+                Db::name('product_barcode_item')->where($where)->update($params);
+
+                Db::name('zzzz_temp')->where(['id' => $val['id']])->update(['is_process' => 1]);
+            }
+            echo $k . "\n";
             
         }
+        echo 'ok';
     }
+
 }
