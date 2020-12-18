@@ -158,6 +158,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                 } else {
                     $v['label'] = 0;
                 }
+                $v['site'] = $label;
             }
             unset($v);
 
