@@ -19,7 +19,7 @@ use think\exception\ValidateException;
  */
 class StockHouse extends Backend
 {
-    
+
     /**
      * StockHouse模型对象
      * @var \app\admin\model\warehouse\StockHouse
@@ -32,14 +32,14 @@ class StockHouse extends Backend
         $this->model = new \app\admin\model\warehouse\StockHouse;
 
     }
-    
+
     /**
      * 默认生成的控制器所继承的父类中有index/add/edit/del/multi五个基础方法、destroy/restore/recyclebin三个回收站方法
      * 因此在当前控制器中可不用编写增删改查的代码,除非需要自己控制这部分逻辑
      * 需要将application/admin/library/traits/Backend.php中对应的方法复制到当前控制器,然后进行修改
      */
-    
-     /**
+
+    /**
      * 添加
      */
     public function add()
@@ -93,6 +93,12 @@ class StockHouse extends Backend
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
+        $arr = [];
+        $kuweihao = $this->shelf_number1();
+        foreach ($kuweihao as $k=>$v){
+            $arr[$v] = $v;
+        }
+        $this->assign('shelf_number',$arr);
         return $this->view->fetch();
     }
 
@@ -121,7 +127,7 @@ class StockHouse extends Backend
                 $map['coding'] = $params['coding'];
                 $map['id'] = ['<>', $row->id];
                 $count = $this->model->where($map)->count();
-                if ($count > 　0) {
+                if ($count > 0) {
                     $this->error('已存在此编码！！');
                 }
 
@@ -156,6 +162,12 @@ class StockHouse extends Backend
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
+        $arr = [];
+        $kuweihao = $this->shelf_number1();
+        foreach ($kuweihao as $k=>$v){
+            $arr[$v] = $v;
+        }
+        $this->assign('shelf_number',$arr);
         $this->view->assign("row", $row);
         return $this->view->fetch();
     }
@@ -227,7 +239,7 @@ class StockHouse extends Backend
         //导入文件首行类型,默认是注释,如果需要使用字段名称请使用name
         //$importHeadType = isset($this->importHeadType) ? $this->importHeadType : 'comment';
         //模板文件列名
-//        $listName = ['折射率', '镜片类型', 'SPH', 'CYL', '库存数量', '镜片价格'];
+        //        $listName = ['折射率', '镜片类型', 'SPH', 'CYL', '库存数量', '镜片价格'];
         try {
             if (!$PHPExcel = $reader->load($filePath)) {
                 $this->error(__('Unknown data format'));
@@ -245,9 +257,9 @@ class StockHouse extends Backend
                 }
             }
             //模板文件不正确
-//            if ($listName !== $fields) {
-//                throw new Exception("模板文件不正确！！");
-//            }
+            //            if ($listName !== $fields) {
+            //                throw new Exception("模板文件不正确！！");
+            //            }
 
             $data = [];
             for ($currentRow = 2; $currentRow <= $allRow; $currentRow++) {
@@ -263,7 +275,7 @@ class StockHouse extends Backend
             $this->error('未导入任何数据！！');
         }
         //检测库存编码是否有重复
-        $list = array_column($data,'0');
+        $list = array_column($data, '0');
         if (count($list) != count(array_unique($list))) {
             $this->error('库存编码有重复！！请仔细核对库存编码');
         }
@@ -271,11 +283,11 @@ class StockHouse extends Backend
         //批量添加产品
         foreach ($data as $k => $v) {
             //检测库存编码是否已入库
-            $findDetection  = $this->model->where('coding',$v[0])->find();
-            if ($findDetection){
-                $result = $this->model->save(['coding'=>$v[0],'library_name'=>$v[1],'remark'=>$v[2],'create_person'=>$this->auth->username,'createtime'=>date('y-m-d h:i:s',time())],['id'=>$findDetection['id']]);
-            }else{
-                $result = $this->model->insert(['coding'=>$v[0],'library_name'=>$v[1],'remark'=>$v[2],'createtime'=>date('y-m-d h:i:s',time()),'create_person'=>$this->auth->username]);
+            $findDetection = $this->model->where('coding', $v[0])->find();
+            if ($findDetection) {
+                $result = $this->model->save(['coding' => $v[0], 'library_name' => $v[1], 'remark' => $v[2], 'create_person' => $this->auth->username, 'createtime' => date('y-m-d h:i:s', time())], ['id' => $findDetection['id']]);
+            } else {
+                $result = $this->model->insert(['coding' => $v[0], 'library_name' => $v[1], 'remark' => $v[2], 'createtime' => date('y-m-d h:i:s', time()), 'create_person' => $this->auth->username]);
             }
         }
         if ($result) {
@@ -295,4 +307,22 @@ class StockHouse extends Backend
         return $repeat_arr;
     }
 
+    //跑老的库位编码添加货架号字段
+    public function shelf_number()
+    {
+        $shelf_number = $this->model->where('status', 1)->field('id,coding')->select();
+        $shelf_number = collection($shelf_number)->toArray();
+        foreach ($shelf_number as $k => $v) {
+            $shelf_number[$k]['shelf_number'] = preg_replace("/\\d+/", '', (explode('-', $v['coding']))[0]);
+            unset($shelf_number[$k]['coding']);
+        }
+        $this->model->isUpdate()->saveAll($shelf_number);
     }
+
+    public function shelf_number1()
+    {
+        $data = (new \app\admin\model\warehouse\StockHouse())->get_shelf_number();
+        return $data;
+    }
+
+}
