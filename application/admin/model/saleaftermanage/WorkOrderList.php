@@ -513,6 +513,9 @@ class WorkOrderList extends Model
     public function httpRequest($siteType, $pathinfo, $params = [], $method = 'GET')
     {
         switch ($siteType) {
+            case -1://发货系统
+                $url = config('url.delivery_url');
+                break;
             case 1:
                 $url = config('url.zeelool_url');
                 break;
@@ -559,9 +562,12 @@ class WorkOrderList extends Model
             if ($res === null) {
                 exception('网络异常');
             }
-            if ($res['status'] == 200) {
+
+            $status = -1 == $siteType ? $res['code'] : $res['status'];
+            if (200 == $status) {
                 return $res['data'];
             }
+
             exception($res['msg']);
         } catch (Exception $e) {
             exception($e->getMessage());
@@ -639,6 +645,7 @@ class WorkOrderList extends Model
         $user_info_option = WorkOrderChangeSku::where(['measure_id' => $measure_id,'change_type' => 6])->value('userinfo_option');
         if(!$user_info_option) return false;
 
+        //通知网站
         $changeAddress = unserialize($user_info_option);
         $postData = array(
             'increment_id'=>$work->platform_order,
@@ -655,6 +662,16 @@ class WorkOrderList extends Model
             'postcode'=>$changeAddress['postcode'],
         );
         $this->httpRequest($work->work_platform, 'magic/order/editAddress', $postData, 'POST');
+
+        //通知发货系统
+        $shipData = [
+            'site'=>$work->work_platform,
+            'increment_id'=>$work->platform_order,
+            'operate_user'=>session('admin.nickname'),
+            'describe'=>'售后工单：修改地址',
+            'work_order_id'=>$work->id
+        ];
+        $this->httpRequest(-1, 'index.php/admin/SelfApi/up_address_ship', $shipData, 'POST');
 
         return true;
     }
