@@ -269,36 +269,36 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
     public function detail($ids = null)
     {
         if ($_POST){
-          $data  = input('param.');
-          $value['order_id'] = $data['ids'];
-          $count = count($data['item_id']);
-         for ($i= 0;$i<$count;$i++) {
-             $value['order_items'][$i]['order_item_id'] = $data['item_id'][$i];
-             $value['order_items'][$i]['od_sph'] = $data['od_sph'][$i];
-             $value['order_items'][$i]['od_cyl'] = $data['od_cyl'][$i];
-             $value['order_items'][$i]['od_axis'] = $data['od_axis'][$i];
-             $value['order_items'][$i]['os_sph']= $data['os_sph'][$i];
-             $value['order_items'][$i]['os_cyl'] = $data['os_cyl'][$i];
-             $value['order_items'][$i]['os_axis'] = $data['os_axis'][$i];
-             $value['order_items'][$i]['pd_r'] = $data['pd_r'][$i];
-             $value['order_items'][$i]['pd_l'] = $data['pd_l'][$i];
-             $value['order_items'][$i]['od_pv'] = $data['od_pv'][$i];
-             $value['order_items'][$i]['os_pv'] = $data['os_pv'][$i];
-             $value['order_items'][$i]['od_bd'] = $data['od_bd'][$i];
-             $value['order_items'][$i]['os_bd'] = $data['os_bd'][$i];
-             $value['order_items'][$i]['od_pv_r'] = $data['od_pv_r'][$i];
-             $value['order_items'][$i]['os_pv_r'] = $data['os_pv_r'][$i];
-             $value['order_items'][$i]['od_bd_r'] = $data['od_bd_r'][$i];
-             $value['order_items'][$i]['os_bd_r'] = $data['os_bd_r'][$i];
-             $value['order_items'][$i]['os_add'] = $data['os_add'][$i];
-             $value['order_items'][$i]['od_add'] = $data['od_add'][$i];
-             if ($data['od_pv'][$i] !== null && $data['od_pv_r'][$i] !==null && $data['os_pv'][$i] !== null && $data['os_pv_r'][$i]){
-                 $value['order_items'][$i]['prismcheck'] = 'on';
-             }else{
-                 $value['order_items'][$i]['prismcheck'] = '';
-             }
-         }
-        //请求接口
+            $data  = input('param.');
+            $value['order_id'] = $data['ids'];
+            $count = count($data['item_id']);
+            for ($i= 0;$i<$count;$i++) {
+                $value['order_items'][$i]['order_item_id'] = $data['item_id'][$i];
+                $value['order_items'][$i]['od_sph'] = $data['od_sph'][$i];
+                $value['order_items'][$i]['od_cyl'] = $data['od_cyl'][$i];
+                $value['order_items'][$i]['od_axis'] = $data['od_axis'][$i];
+                $value['order_items'][$i]['os_sph']= $data['os_sph'][$i];
+                $value['order_items'][$i]['os_cyl'] = $data['os_cyl'][$i];
+                $value['order_items'][$i]['os_axis'] = $data['os_axis'][$i];
+                $value['order_items'][$i]['pd_r'] = $data['pd_r'][$i];
+                $value['order_items'][$i]['pd_l'] = $data['pd_l'][$i];
+                $value['order_items'][$i]['od_pv'] = $data['od_pv'][$i];
+                $value['order_items'][$i]['os_pv'] = $data['os_pv'][$i];
+                $value['order_items'][$i]['od_bd'] = $data['od_bd'][$i];
+                $value['order_items'][$i]['os_bd'] = $data['os_bd'][$i];
+                $value['order_items'][$i]['od_pv_r'] = $data['od_pv_r'][$i];
+                $value['order_items'][$i]['os_pv_r'] = $data['os_pv_r'][$i];
+                $value['order_items'][$i]['od_bd_r'] = $data['od_bd_r'][$i];
+                $value['order_items'][$i]['os_bd_r'] = $data['os_bd_r'][$i];
+                $value['order_items'][$i]['os_add'] = $data['os_add'][$i];
+                $value['order_items'][$i]['od_add'] = $data['od_add'][$i];
+                if ($data['od_pv'][$i] !== null && $data['od_pv_r'][$i] !==null && $data['os_pv'][$i] !== null && $data['os_pv_r'][$i]){
+                    $value['order_items'][$i]['prismcheck'] = 'on';
+                }else{
+                    $value['order_items'][$i]['prismcheck'] = '';
+                }
+            }
+            //请求接口
             $url = config('url.zeelool_url').'magic/order/prescriptionPicCheck';
             $values = $value;
             $curl = curl_init();
@@ -510,7 +510,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                 ->column('entity_id');
 
             $costInfo = $model->getOrderCostInfo($totalId, $thisPageId);
-         
+
             $list = collection($list)->toArray();
 
             foreach ($list as $k => $v) {
@@ -867,7 +867,7 @@ EOF;
      *
      * @Description
      * @author wpl
-     * @since 2020/02/28 14:45:39 
+     * @since 2020/02/28 14:45:39
      * @return void
      */
     public function batch_export_xls()
