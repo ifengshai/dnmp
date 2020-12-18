@@ -89,8 +89,14 @@ class OcPrescriptionPic extends Backend
  * */
     public function question_message($ids = null){
         if ($this->request->isPost()){
+
             $params = $this->request->post("row/a");
-            $updata_queertion = $this->model->where('id',$params['id'])->update(['status'=>2,'handler_name'=>$this->auth->nickname,'completion_time'=>date('Y-m-d H:i:s',time()),'remarks'=>$params['remarks']]);
+            if ($params['site'] ==1){
+                $model = Db::connect('database.db_zeelool');
+            }else{
+                $model = Db::connect('database.db_voogueme');
+            }
+            $updata_queertion =$model->table('oc_prescription_pic')->where('id',$params['id'])->update(['status'=>2,'handler_name'=>$this->auth->nickname,'completion_time'=>date('Y-m-d H:i:s',time()),'remarks'=>$params['remarks']]);
             if ($updata_queertion){
                 $this->success('操作成功','oc_prescription_pic/index');
             }else{
@@ -112,6 +118,7 @@ class OcPrescriptionPic extends Backend
         }
         $row['pic'] = $photo_href;
         $this->assign('row',$row);
+        $this->assign('site',$site);
         return $this->view->fetch();
     }
 }
