@@ -97,12 +97,18 @@ class OcPrescriptionPic extends Backend
                 $this->error('操作失败');
             }
         }
-        $a = input('param.');
-        dump($a);die();
-        $row = $this->model->where('id',$ids)->find();
+        $site = input('param.site');
+        if ($site ==1){
+            $model = Db::connect('database.db_zeelool');
+            $url =config('url.zeelool_url').'/media';
+        }else{
+            $model = Db::connect('database.db_voogueme');
+            $url =config('url.new_voogueme_url').'/media';
+        }
+        $row = $model->where('id',$ids)->find();
         $photo_href = $row['pic'] =explode(',',$row['pic']);
         foreach ($photo_href as $key=>$item){
-            $photo_href[$key]= 'https://pc.zeelool.com/media'.$item;
+            $photo_href[$key]= $url.$item;
         }
         $row['pic'] = $photo_href;
         $this->assign('row',$row);
