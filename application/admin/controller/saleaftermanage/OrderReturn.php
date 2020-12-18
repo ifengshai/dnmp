@@ -14,7 +14,6 @@ use app\admin\model\saleaftermanage\SaleAfterIssue;
 use app\admin\model\saleaftermanage\SaleAfterTask;
 use app\admin\model\saleaftermanage\OrderReturnItem;
 use app\admin\model\saleaftermanage\OrderReturnRemark;
-use Think\Log;
 use think\Request;
 use fast\Trackingmore;
 use think\Exception;
@@ -332,6 +331,8 @@ class OrderReturn extends Backend
                     ->field('ze.id as ze_id,ze.ticket_id,ze.subject,ze.to_email,ze.due_id,ze.create_time,ze.update_time,ze.status as ze_status,ad.nickname')
                     ->where('ze.email',$customer_email)
                     ->select();
+
+                
                 $this->assign('email_select',$email_select);
             }
 
@@ -524,7 +525,7 @@ class OrderReturn extends Backend
             //上传订单平台
             $this->view->assign('order_platform', $order_platform);
             $this->view->engine->layout(false);
-            $html = $this->view->fetch('item');
+            $html = $this->view->fetch('test');
             return json(['code' => 1,'data' => $html]);
         }
 
@@ -542,16 +543,9 @@ class OrderReturn extends Backend
         // }
         $ids  = input('param.ids');
         if (!empty($ids)){
-//            $row = \app\common\model\OcCustomerAfterSalesWorkOrder::get($ids)->toArray();
-            $row  = \app\common\model\OcCustomerAfterSalesWorkOrder::get($ids);
-            Log::write("邮箱数据");
-            Log::write($row);
-
-            if (!empty($row)){
-                $row->toArray();
-                $this->view->assign("customer_email", $row['email']);
-            }
-
+//            $row = \app\common\model\OcCustomerAfterSalesWorkOrder::get($ids)->field('increment_id,email')->find()->toArray();
+            $row =   Db::table('zeelool.oc_customer_after_sales_work_order oc')->where('id',$ids)->find();
+            $this->view->assign("customer_email", $row['email']);
         }else{
             $row = null;
             $this->view->assign("customer_email", $customer_email);
