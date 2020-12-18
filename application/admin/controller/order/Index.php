@@ -209,9 +209,6 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
             //请求接口
             $url = config('url.esz_url').'magic/order/prescriptionPicCheck';
             $values = $value;
-            Log::write("接口请求");
-            Log::write($url);
-            Log::write($values);
             $curl = curl_init();
             curl_setopt($curl, CURLOPT_URL, $url);
             curl_setopt($curl, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
@@ -224,7 +221,6 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
             $content =json_decode(curl_exec($curl),true);
             curl_close($curl);
             Log::write($content);
-            dump($content);die();
             if ($content['status'] == 200){
                 $this->success('操作成功');
             }else{
