@@ -27,7 +27,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {
                             field: 'site',
                             title: __('站点'),
-                            searchList: { 1: '全部', 2: 'Z站', 3: 'V站'},
+                            searchList: { 1: 'Z站', 2: 'V站'},
                             custom: { 1: 'black', 2: 'black', 3: 'black', 4: 'black', 5: 'black', 6: 'black', 7: 'black', 8: 'black', 9: 'black', 10: 'black', 11: 'black' },
                             formatter: Table.api.formatter.status,
                             visible: false

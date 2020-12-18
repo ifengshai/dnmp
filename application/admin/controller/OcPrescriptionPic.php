@@ -6,13 +6,13 @@ use app\common\controller\Backend;
 use Think\Db;
 
 /**
- * 
+ *
  *
  * @icon fa fa-circle-o
  */
 class OcPrescriptionPic extends Backend
 {
-    
+
     /**
      * OcPrescriptionPic模型对象
      * @var \app\admin\model\OcPrescriptionPic
@@ -23,15 +23,17 @@ class OcPrescriptionPic extends Backend
     {
         parent::_initialize();
         $this->model = new \app\admin\model\OcPrescriptionPic;
+        $this->zeelool = new \app\admin\model\order\order\Zeelool;
+        $this->voogueme = new \app\admin\model\order\order\Voogueme;
 
     }
-    
+
     /**
      * 默认生成的控制器所继承的父类中有index/add/edit/del/multi五个基础方法、destroy/restore/recyclebin三个回收站方法
      * 因此在当前控制器中可不用编写增删改查的代码,除非需要自己控制这部分逻辑
      * 需要将application/admin/library/traits/Backend.php中对应的方法复制到当前控制器,然后进行修改
      */
-    
+
 
     /**
      * 查看
@@ -51,30 +53,19 @@ class OcPrescriptionPic extends Backend
             }
 
             $filter = json_decode($this->request->get('filter'), true);
-
+            $site = $filter['site'] ? $filter['site'] :1;
+            if ($site ==1){
+                $model = Db::connect('database.db_zeelool');
+            }else{
+                $model = Db::connect('database.db_voogueme');
+            }
             unset($filter['site']);
             $this->request->get(['filter' => json_encode($filter)]);
 
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-            $total = $this->model
-                    
-                    ->where($where)
-                    ->order($sort, $order)
-                    ->count();
 
-            $list = $this->model
-                    
-                    ->where($where)
-                    ->order($sort, $order)
-                    ->limit($offset, $limit)
-                    ->select();
-
-            foreach ($list as $row) {
-
-                $row->visible(['id','email','query','status','handler_name','created_at','completion_time','remarks']);
-                
-            }
-            $list = collection($list)->toArray();
+            $total = $model->table('oc_prescription_pic')->where($where)->count();
+            $list = $model->table('oc_prescription_pic')->where($where)->select();
 
             foreach ($list as $key=>$item){
 
@@ -87,7 +78,6 @@ class OcPrescriptionPic extends Backend
             }
 
             $result = array("total" => $total, "rows" => $list);
-
             return json($result);
         }
         return $this->view->fetch();
