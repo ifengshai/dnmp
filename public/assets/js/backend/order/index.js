@@ -53,9 +53,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
                                         if (row.status !== 'pending' && row.site ==9  ){
-                                            return false;
-                                        }else{
                                             return  true;
+                                        }else{
+                                            return  false;
                                         }
                                     }
                                 },

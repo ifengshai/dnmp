@@ -362,7 +362,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
         } elseif ($label == 11) {
             $goods = ZeeloolJpPrescriptionDetailHelper::get_list_by_entity_ids($ids);
         }
-
+        dump($goods);die();
         //获取支付信息
         $pay = $this->zeelool->getPayDetail($label, $ids);
 
