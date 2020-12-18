@@ -711,7 +711,7 @@
                     </tbody>
                 </table>
                 {/if}
-                {if condition="$row['status'] eq 'pending' "}
+                {if condition="$row['status'] eq 'pending'  && $label ==9"}
                 <div class="col-xs-12 col-sm-8">
                     <button type="submit" value="Processing" class="btn btn-sub" style='background-color: dodgerblue;width: 120px;color: white;font-size: 14px;font-weight: 700;float: right'>{:__('提交')}</button>
                 </div>
