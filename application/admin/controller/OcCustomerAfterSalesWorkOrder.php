@@ -61,7 +61,7 @@ class OcCustomerAfterSalesWorkOrder extends Backend
 
             $filter = json_decode($this->request->get('filter'), true);
 
-            $site = $filter['site'];
+            $site = $filter['site']?$filter['site']:1;
             switch ($site ==1) {
                 case 1:
                     $db = 'database.db_zeelool';
