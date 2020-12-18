@@ -43,7 +43,7 @@ class OcCustomerAfterSalesWorkOrder extends Backend
     public function index()
     {
         $label = $this->request->get('site', 1);
-        dump($label);die();
+        
         //当前是否为关联查询
         $this->relationSearch = false;
 
