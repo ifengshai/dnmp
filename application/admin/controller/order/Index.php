@@ -206,7 +206,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                 }
             }
             //请求接口
-            $url = config('url.zeelool_url').'magic/order/prescriptionPicCheck';
+            $url = config('url.esz_url').'magic/order/prescriptionPicCheck';
             $values = $value;
             Log::write("接口请求");
             Log::write($url);
