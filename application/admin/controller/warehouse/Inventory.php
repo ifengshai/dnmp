@@ -1754,65 +1754,64 @@ class Inventory extends Backend
         $_stock_log = new StockLog();
         $_new_order_item_process = new NewOrderItemProcess();
 
-        foreach ($change_row as $v) {
-            //原sku
-            $arr = explode('-', trim($v['original_sku']));
-            $original_sku = 2 < count($arr) ? $arr[0] . '-' . $arr[1] : trim($v['original_sku']);
+        //开启事务
+        $_item->startTrans();
+        $_platform_sku->startTrans();
+        $_stock_log->startTrans();
+        $_new_order_item_process->startTrans();
+        try {
+            $stock_data = [];
+            foreach ($change_row as $v) {
+                //原sku
+                $arr = explode('-', trim($v['original_sku']));
+                $original_sku = 2 < count($arr) ? $arr[0] . '-' . $arr[1] : trim($v['original_sku']);
 
-            //新sku
-            $arr = explode('-', trim($v['change_sku']));
-            $change_sku = 2 < count($arr) ? $arr[0] . '-' . $arr[1] : trim($v['change_sku']);
+                //新sku
+                $arr = explode('-', trim($v['change_sku']));
+                $change_sku = 2 < count($arr) ? $arr[0] . '-' . $arr[1] : trim($v['change_sku']);
 
-            //原sku数量
-            $original_number = $v['original_number'] ?: 1;
+                //原sku数量
+                $original_number = $v['original_number'] ?: 1;
 
-            //新sku数量
-            $change_number = $v['change_number'] ?: 1;
+                //新sku数量
+                $change_number = $v['change_number'] ?: 1;
 
-            //原sku或新sku不存在则忽略
-            if (!$original_sku || !$change_sku) continue;
+                //原sku或新sku不存在则忽略
+                if (!$original_sku || !$change_sku) continue;
 
-            //原sku对应的仓库sku、库存
-            $warehouse_original_info = $_platform_sku
-                ->field('sku,stock')
-                ->where(['platform_sku'=>$original_sku,'platform_type'=>$order_platform])
-                ->find()
-            ;
-            $warehouse_original_sku = $warehouse_original_info['sku'];
+                //原sku对应的仓库sku、库存
+                $warehouse_original_info = $_platform_sku
+                    ->field('sku,stock')
+                    ->where(['platform_sku'=>$original_sku,'platform_type'=>$order_platform])
+                    ->find()
+                ;
+                $warehouse_original_sku = $warehouse_original_info['sku'];
 
-            //新sku对应的仓库sku、库存
-            $warehouse_change_info = $_platform_sku
-                ->field('sku,stock')
-                ->where(['platform_sku'=>$change_sku,'platform_type'=>$order_platform])
-                ->find()
-            ;
-            $warehouse_change_sku = $warehouse_change_info['sku'];
+                //新sku对应的仓库sku、库存
+                $warehouse_change_info = $_platform_sku
+                    ->field('sku,stock')
+                    ->where(['platform_sku'=>$change_sku,'platform_type'=>$order_platform])
+                    ->find()
+                ;
+                $warehouse_change_sku = $warehouse_change_info['sku'];
 
-            //原sku商品表相关库存
-            $original_item_info = $_item
-                ->field('occupy_stock,available_stock,distribution_occupy_stock')
-                ->where(['sku'=>$warehouse_original_sku])
-                ->find()
-            ;
+                //原sku商品表相关库存
+                $original_item_info = $_item
+                    ->field('occupy_stock,available_stock,distribution_occupy_stock')
+                    ->where(['sku'=>$warehouse_original_sku])
+                    ->find()
+                ;
 
-            //新sku商品表相关库存
-            $change_item_info = $_item
-                ->field('occupy_stock,available_stock,distribution_occupy_stock')
-                ->where(['sku'=>$warehouse_change_sku])
-                ->find()
-            ;
+                //新sku商品表相关库存
+                $change_item_info = $_item
+                    ->field('occupy_stock,available_stock,distribution_occupy_stock')
+                    ->where(['sku'=>$warehouse_change_sku])
+                    ->find()
+                ;
 
+                //获取子单状态
+                $distribution_status = $_new_order_item_process->where(['item_order_number' => $v['item_order_number']])->value('distribution_status');
 
-            //获取子单状态
-            $distribution_status = $_new_order_item_process->where(['item_order_number' => $v['item_order_number']])->value('distribution_status');
-
-            //开启事务
-            $_item->startTrans();
-            $_platform_sku->startTrans();
-            $_stock_log->startTrans();
-
-            try {
-                $stock_data = [];
                 //子单状态大于待配货
                 if (2 < $distribution_status) {
                     //原sku增加可用库存、虚拟仓库存,减少占用库存、配货占用
@@ -1854,14 +1853,13 @@ class Inventory extends Backend
                         ];
                     }
 
-                    //新sku减少可用库存、虚拟仓库存,增加占用库存、配货占用
+                    //新sku减少可用库存、虚拟仓库存,增加占用库存
                     if ($warehouse_change_sku && $change_number) {
                         //减少可用库存,增加占用库存、配货占用
                         $_item
                             ->where(['sku' => $warehouse_change_sku])
                             ->dec('available_stock', $change_number)
                             ->inc('occupy_stock', $change_number)
-                            ->inc('distribution_occupy_stock', $change_number)
                             ->update();
 
                         //扣减对应站点虚拟库存
@@ -1884,14 +1882,18 @@ class Inventory extends Backend
                             'available_stock_change'    => -$change_number,
                             'occupy_stock_before'       => $change_item_info['occupy_stock'],
                             'occupy_stock_change'       => $change_number,
-                            'distribution_stock_before' => $change_item_info['distribution_occupy_stock'],
-                            'distribution_stock_change' => $change_number,
                             'fictitious_before'         => $warehouse_change_info['stock'],
                             'fictitious_change'         => -$change_number,
                             'create_person'             => session('admin.nickname'),
                             'create_time'               => time()
                         ];
                     }
+
+                    //子单状态回滚至待配货
+                    $_new_order_item_process
+                        ->allowField(true)
+                        ->save(['distribution_status'=>2], ['item_order_number' => $v['item_order_number']])
+                    ;
                 } else { //子单状态是未配货
                     //原sku增加可用库存、虚拟仓库存,减少占用库存
                     if ($warehouse_original_sku && $original_number) {
@@ -1965,32 +1967,38 @@ class Inventory extends Backend
                         ];
                     }
                 }
-
-                if ($stock_data) {
-                    $_stock_log->allowField(true)->saveAll($stock_data);
-                }
-
-                //提交
-                $_item->commit();
-                $_platform_sku->commit();
-                $_stock_log->commit();
-            } catch (ValidateException $e) {
-                $_item->rollback();
-                $_platform_sku->rollback();
-                $_stock_log->rollback();
-                $this->error($e->getMessage());
-            } catch (PDOException $e) {
-                $_item->rollback();
-                $_platform_sku->rollback();
-                $_stock_log->rollback();
-                $this->error($e->getMessage());
-            } catch (Exception $e) {
-                $_item->rollback();
-                $_platform_sku->rollback();
-                $_stock_log->rollback();
-                $this->error($e->getMessage());
             }
+
+            //库存日志
+            if ($stock_data) {
+                $_stock_log->allowField(true)->saveAll($stock_data);
+            }
+
+            //提交
+            $_item->commit();
+            $_platform_sku->commit();
+            $_stock_log->commit();
+            $_new_order_item_process->commit();
+        } catch (ValidateException $e) {
+            $_item->rollback();
+            $_platform_sku->rollback();
+            $_stock_log->rollback();
+            $_new_order_item_process->rollback();
+            $this->error($e->getMessage());
+        } catch (PDOException $e) {
+            $_item->rollback();
+            $_platform_sku->rollback();
+            $_stock_log->rollback();
+            $_new_order_item_process->rollback();
+            $this->error($e->getMessage());
+        } catch (Exception $e) {
+            $_item->rollback();
+            $_platform_sku->rollback();
+            $_stock_log->rollback();
+            $_new_order_item_process->rollback();
+            $this->error($e->getMessage());
         }
+
         return true;
     }
 
