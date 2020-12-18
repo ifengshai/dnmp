@@ -105,7 +105,7 @@ class OcPrescriptionPic extends Backend
             $model = Db::connect('database.db_voogueme');
             $url =config('url.new_voogueme_url').'/media';
         }
-        $row = $model->where('id',$ids)->find();
+        $row =$model->table('oc_prescription_pic')->where('id',$ids)->find();
         $photo_href = $row['pic'] =explode(',',$row['pic']);
         foreach ($photo_href as $key=>$item){
             $photo_href[$key]= $url.$item;
