@@ -86,7 +86,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 gettitle: {
                     //格式为：方法名+空格+DOM元素
                     'click .btn-gettitle': function (e, value, row, index) {
-                        Backend.api.open('oc_prescription_pic/question_message/type/view/ids/' + row.id, __('问题描述'), { area: ['70%', '70%'] });
+                        Backend.api.open('oc_prescription_pic/question_message/type/view/ids/' + row.id+'/site/'+row.site, __('问题描述'), { area: ['70%', '70%'] });
                     }
                 },
 

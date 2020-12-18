@@ -74,6 +74,7 @@ class OcPrescriptionPic extends Backend
                 }else{
                     $list[$key]['status']= '已处理';
                 }
+                $list[$key]['site'] = $site;
                 $list[$key]['created_at'] =date("Y-m-d H:i:s",strtotime($item['created_at'])+28800);;
             }
 
