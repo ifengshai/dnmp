@@ -1290,6 +1290,9 @@ class ScmWarehouse extends Scm
                             //根据入库数量插入各站虚拟仓库存
                             $all_num = count($rate_arr);
                             $stock_num = $v['in_stock_num'];
+                            //获得应到货数量
+                            $check = new \app\admin\model\warehouse\CheckItem();
+                            $should_arrivals_num = $check->where('check_id', $v['check_id'])->value('should_arrival_num');
                             foreach ($rate_arr as $key => $val) {
                                 //最后一个站点 剩余数量分给最后一个站
                                 if (($all_num - $key) == 1) {
@@ -1298,7 +1301,7 @@ class ScmWarehouse extends Scm
                                     //增加站点虚拟仓库存
                                     $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->setInc('stock', $stock_num);
                                     //入库的时候减少待入库数量
-                                    $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->setDec('wait_instock_num', $stock_num);
+                                    $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->setDec('wait_instock_num', $should_arrivals_num);
 
                                     //插入日志表
                                     $this->_stock_log->setData([
@@ -1312,7 +1315,7 @@ class ScmWarehouse extends Scm
                                         'fictitious_before' => $sku_platform['stock'],
                                         'fictitious_change' => $stock_num,
                                         'wait_instock_num_before' => $sku_platform['wait_instock_num'],
-                                        'wait_instock_num_change' => -$stock_num,
+                                        'wait_instock_num_change' => -$should_arrivals_num,
                                         'create_person' => $this->auth->nickname,
                                         'create_time' => time(),
                                         'number_type' => 3,
@@ -1320,12 +1323,14 @@ class ScmWarehouse extends Scm
 
                                 } else {
                                     $num = round($v['in_stock_num'] * $val['rate']);
+                                    $should_arrivals_num_plat = round($should_arrivals_num * $val['rate']);
                                     $stock_num -= $num;
+                                    $should_arrivals_num -= $should_arrivals_num_plat;
                                     $sku_platform = $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->find();
                                     //增加站点虚拟仓库存
                                     $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->setInc('stock', $num);
                                     //入库的时候减少待入库数量
-                                    $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->setDec('wait_instock_num', $num);
+                                    $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->setDec('wait_instock_num', $should_arrivals_num_plat);
                                     //插入日志表
                                     $this->_stock_log->setData([
                                         'type' => 2,
@@ -1338,7 +1343,7 @@ class ScmWarehouse extends Scm
                                         'fictitious_before' => $sku_platform['stock'],
                                         'fictitious_change' => $num,
                                         'wait_instock_num_before' => $sku_platform['wait_instock_num'],
-                                        'wait_instock_num_change' => -$num,
+                                        'wait_instock_num_change' => -$should_arrivals_num_plat,
                                         'create_person' => $this->auth->nickname,
                                         'create_time' => time(),
                                         'number_type' => 3,
@@ -1364,7 +1369,7 @@ class ScmWarehouse extends Scm
                             $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => 4])->setInc('stock', $v['in_stock_num']);
 
                             //入库的时候减少待入库数量
-                            $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => 4])->setDec('wait_instock_num', $v['in_stock_num']);
+                            // $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => 4])->setDec('wait_instock_num', $v['in_stock_num']);
 
                             //插入日志表
                             $this->_stock_log->setData([
@@ -1377,8 +1382,8 @@ class ScmWarehouse extends Scm
                                 'source' => 2,
                                 'fictitious_before' => $item_platform_sku['stock'],
                                 'fictitious_change' => $v['in_stock_num'],
-                                'wait_instock_num_before' => $item_platform_sku['wait_instock_num'],
-                                'wait_instock_num_change' => -$v['in_stock_num'],
+                                // 'wait_instock_num_before' => $item_platform_sku['wait_instock_num'],
+                                // 'wait_instock_num_change' => -$v['in_stock_num'],
                                 'create_person' => $this->auth->nickname,
                                 'create_time' => time(),
                                 'number_type' => 3,
@@ -1521,7 +1526,10 @@ class ScmWarehouse extends Scm
 
                         //有采购单减少待入库数量
                         if ($v['purchase_id']) {
-                            $this->_item->where($item_map)->dec('wait_instock_num', $v['in_stock_num'])->update();
+                            //获得应到货数量
+                            $check = new \app\admin\model\warehouse\CheckItem();
+                            $should_arrivals_num = $check->where('check_id', $v['check_id'])->value('should_arrival_num');
+                            $this->_item->where($item_map)->dec('wait_instock_num', $should_arrivals_num)->update();
                         }
 
                         //插入日志表
@@ -1540,7 +1548,7 @@ class ScmWarehouse extends Scm
                             'sample_num_before' => $sku_item['sample_num'],
                             'sample_num_change' => $v['sample_num'],
                             'wait_instock_num_before' => $sku_item['wait_instock_num'],
-                            'wait_instock_num_change' => -$v['in_stock_num'],
+                            'wait_instock_num_change' => -$should_arrivals_num,
                             'create_person' => $this->auth->nickname,
                             'create_time' => time(),
                             'number_type' => 3,

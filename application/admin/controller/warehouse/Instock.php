@@ -477,6 +477,8 @@ class Instock extends Backend
                 $this->error('此sku:' . $v['sku'] . '不存在！！');
             }
         }
+        // dump($list);
+        // die;
 
         $new_product_mapp = new \app\admin\model\NewProductMapping();
         $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
@@ -522,6 +524,9 @@ class Instock extends Backend
                             //根据入库数量插入各站虚拟仓库存
                             $all_num = count($rate_arr);
                             $stock_num = $v['in_stock_num'];
+                            //获得应到货数量
+                            $check = new \app\admin\model\warehouse\CheckItem();
+                            $should_arrivals_num = $check->where('check_id', $v['check_id'])->value('should_arrival_num');
                             foreach ($rate_arr as $key => $val) {
                                 //最后一个站点 剩余数量分给最后一个站
                                 if (($all_num - $key) == 1) {
@@ -530,7 +535,7 @@ class Instock extends Backend
                                     //增加站点虚拟仓库存
                                     $platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->setInc('stock', $stock_num);
                                     //入库的时候减少待入库数量
-                                    $platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->setDec('wait_instock_num', $stock_num);
+                                    $platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->setDec('wait_instock_num', $should_arrivals_num);
                                     //插入日志表
                                     (new StockLog())->setData([
                                         'type' => 2,
@@ -543,19 +548,21 @@ class Instock extends Backend
                                         'fictitious_before' => $sku_platform['stock'],
                                         'fictitious_change' => $stock_num,
                                         'wait_instock_num_before' => $sku_platform['wait_instock_num'],
-                                        'wait_instock_num_change' => -$stock_num,
+                                        'wait_instock_num_change' => -$should_arrivals_num,
                                         'create_person' => session('admin.nickname'),
                                         'create_time' => time(),
                                         'number_type' => 3,
                                     ]);
                                 } else {
                                     $num = round($v['in_stock_num'] * $val['rate']);
+                                    $should_arrivals_num_plat = round($should_arrivals_num * $val['rate']);
                                     $stock_num -= $num;
+                                    $should_arrivals_num -= $should_arrivals_num_plat;
                                     $sku_platform = $platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->find();
                                     //增加站点虚拟仓库存
                                     $platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->setInc('stock', $num);
                                     //入库的时候减少待入库数量
-                                    $platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->setDec('wait_instock_num', $num);
+                                    $platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->setDec('wait_instock_num', $should_arrivals_num_plat);
                                     //插入日志表
                                     (new StockLog())->setData([
                                         'type' => 2,
@@ -568,7 +575,7 @@ class Instock extends Backend
                                         'fictitious_before' => $sku_platform['stock'],
                                         'fictitious_change' => $num,
                                         'wait_instock_num_before' => $sku_platform['wait_instock_num'],
-                                        'wait_instock_num_change' => -$num,
+                                        'wait_instock_num_change' => -$should_arrivals_num_plat,
                                         'create_person' => session('admin.nickname'),
                                         'create_time' => time(),
                                         'number_type' => 3,
@@ -588,7 +595,7 @@ class Instock extends Backend
                             }
                             $platform->where(['sku' => $v['sku'], 'platform_type' => $item_platform_sku['platform_type']])->setInc('stock', $v['in_stock_num']);
                             //入库的时候减少待入库数量
-                             $platform->where(['sku' => $v['sku'], 'platform_type' => 4])->setDec('wait_instock_num', $v['in_stock_num']);
+                            //  $platform->where(['sku' => $v['sku'], 'platform_type' => 4])->setDec('wait_instock_num', $v['in_stock_num']);
 
                             //插入日志表
                             (new StockLog())->setData([
@@ -602,8 +609,8 @@ class Instock extends Backend
                                 'fictitious_before' => $item_platform_sku['stock'],
                                 'fictitious_change' => $v['in_stock_num'],
                                 'occupy_stock_before' => $sku_item['occupy_stock'],
-                                'wait_instock_num_before' => $item_platform_sku['wait_instock_num'],
-                                'wait_instock_num_change' => -$v['in_stock_num'],
+                                // 'wait_instock_num_before' => $item_platform_sku['wait_instock_num'],
+                                // 'wait_instock_num_change' => -$v['in_stock_num'],
                                 'create_person' => session('admin.nickname'),
                                 'create_time' => time(),
                                 'number_type' => 3,
@@ -740,15 +747,12 @@ class Instock extends Backend
                     if ($v['sku']) {
                         //增加商品表里的商品库存、可用库存、留样库存
                         $stock_res = $item->where($item_map)->inc('stock', $v['in_stock_num'])->inc('available_stock', $v['in_stock_num'])->inc('sample_num', $v['sample_num'])->update();
+                        //获得应到货数量
+                        $check = new \app\admin\model\warehouse\CheckItem();
+                        $should_arrivals_num = $check->where('check_id', $v['check_id'])->value('should_arrival_num');
+                        //减少待入库数量 扣减应到货数量
+                        $item->where($item_map)->dec('wait_instock_num', $should_arrivals_num)->update();
 
-                        //减少待入库数量
-                        if ($sku_item['wait_instock_num'] >= $v['in_stock_num']) {
-                            $item->where($item_map)->dec('wait_instock_num', $v['in_stock_num'])->update();
-                            $wait_instock_num_before = $v['in_stock_num'];
-                        } else {
-                            $item->where($item_map)->update(['wait_instock_num' => 0]);
-                            $wait_instock_num_before = $sku_item['wait_instock_num'];
-                        }
                         //插入日志表
                         (new StockLog())->setData([
                             'type' => 2,
@@ -765,7 +769,7 @@ class Instock extends Backend
                             'sample_num_before' => $sku_item['sample_num'],
                             'sample_num_change' => $v['sample_num'],
                             'wait_instock_num_before' => $sku_item['wait_instock_num'],
-                            'wait_instock_num_change' => -$wait_instock_num_before,
+                            'wait_instock_num_change' => -$should_arrivals_num,
                             'create_person' => session('admin.nickname'),
                             'create_time' => time(),
                             'number_type' => 3,
