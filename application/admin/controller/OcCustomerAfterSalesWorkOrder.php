@@ -79,7 +79,7 @@ class OcCustomerAfterSalesWorkOrder extends Backend
             unset($filter['site']);
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
 
-            
+
             $total = $this->model
                 ->where($where)
                 ->where($map)

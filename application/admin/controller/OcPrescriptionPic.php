@@ -23,6 +23,8 @@ class OcPrescriptionPic extends Backend
     {
         parent::_initialize();
         $this->model = new \app\admin\model\OcPrescriptionPic;
+        $this->zeelool = new \app\admin\model\order\order\Zeelool;
+        $this->voogueme = new \app\admin\model\order\order\Voogueme;
 
     }
     
@@ -51,13 +53,28 @@ class OcPrescriptionPic extends Backend
             }
 
             $filter = json_decode($this->request->get('filter'), true);
+            $site = $filter['site'];
+            switch ($site ==1) {
+                case 1:
+                    $db = 'database.db_zeelool';
+                    $model = $this->zeelool;
+                    break;
+                case 2:
+                    $db = 'database.db_voogueme';
+                    $model = $this->voogueme;
+                    break;
+
+                default:
+                    return false;
+                    break;
+            }
 
             unset($filter['site']);
             $this->request->get(['filter' => json_encode($filter)]);
 
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
-                    
+
                     ->where($where)
                     ->order($sort, $order)
                     ->count();
