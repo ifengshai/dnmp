@@ -106,10 +106,10 @@ class OcPrescriptionPic extends Backend
         $site = input('param.site');
         if ($site ==1){
             $model = Db::connect('database.db_zeelool');
-            $url =config('url.zeelool_url');
+            $url =config('url.zeelool_url').'/media';
         }else{
             $model = Db::connect('database.db_voogueme');
-            $url =config('url.voogueme_url');
+            $url =config('url.voogueme_url').'/media';
         }
         $row =$model->table('oc_prescription_pic')->where('id',$ids)->find();
         $photo_href = $row['pic'] =explode(',',$row['pic']);
