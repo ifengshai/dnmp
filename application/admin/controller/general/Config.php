@@ -112,6 +112,7 @@ class Config extends Backend
             $row = $this->request->post("row/a");
             if ($row) {
                 $configList = [];
+                $pda_md5 = '';
                 foreach ($this->model->all() as $v) {
                     if (isset($row[$v['name']])) {
                         $value = $row[$v['name']];
@@ -120,6 +121,19 @@ class Config extends Backend
                         } else {
                             $value = is_array($value) ? implode(',', $value) : $value;
                         }
+
+                        //PDA md5处理
+                        if($value && 'pda_download' == $v['name']){
+                            $path = ROOT_PATH.'public'.$value;
+                            if(is_file($path)){
+                                $pda_md5 = md5_file($path);
+                            }
+                        }
+
+                        if( $pda_md5 && 'pda_md5' == $v['name']){
+                            $value = $pda_md5;
+                        }
+
                         $v['value'] = $value;
                         $configList[] = $v->toArray();
                     }
