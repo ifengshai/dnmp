@@ -116,6 +116,7 @@ class OcPrescriptionPic extends Backend
         foreach ($photo_href as $key=>$item){
             $photo_href[$key]= $url.$item;
         }
+        dump($site);die();
         $row['pic'] = $photo_href;
         $this->assign('row',$row);
         $this->assign('site',$site);
