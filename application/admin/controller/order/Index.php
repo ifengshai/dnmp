@@ -223,6 +223,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
             $content =json_decode(curl_exec($curl),true);
             curl_close($curl);
             Log::write($content);
+            dump($content);die();
             if ($content['status'] == 200){
                 $this->success('操作成功');
             }else{
