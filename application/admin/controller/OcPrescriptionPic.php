@@ -73,13 +73,13 @@ class OcPrescriptionPic extends Backend
             $this->request->get(['filter' => json_encode($filter)]);
 
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-            $total = $this->model
+            $total = $model
 
                     ->where($where)
                     ->order($sort, $order)
                     ->count();
 
-            $list = $this->model
+            $list = $model
                     
                     ->where($where)
                     ->order($sort, $order)
