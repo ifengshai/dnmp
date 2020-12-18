@@ -160,7 +160,7 @@ class ZeeloolPrescriptionDetailHelper
                 $product_options['info_buyRequest']['tmplens']['prescription_pic_id'] > 0){
                 $items[$item_key]['to_examine'] = true;
             }else{
-                $items[$item_key]['to_examine'] = false;
+                $items[$item_key]['to_examine'] = true;
             }
 			//判断是否为新处方
 			if ($item_value['is_new_version'] == 1) {

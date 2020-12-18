@@ -4,6 +4,7 @@ namespace app\admin\controller\order;
 
 use app\common\controller\Backend;
 use fast\Trackingmore;
+use think\Log;
 use Util\NihaoPrescriptionDetailHelper;
 use Util\ZeeloolPrescriptionDetailHelper;
 use Util\VooguemePrescriptionDetailHelper;
@@ -207,6 +208,9 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
             //请求接口
             $url = config('url.zeelool_url').'magic/order/prescriptionPicCheck';
             $values = $value;
+            Log::write("接口请求");
+            Log::write($url);
+            Log::write($values);
             $curl = curl_init();
             curl_setopt($curl, CURLOPT_URL, $url);
             curl_setopt($curl, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
@@ -218,10 +222,11 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
             curl_setopt($curl, CURLOPT_TIMEOUT, 20);
             $content =json_decode(curl_exec($curl),true);
             curl_close($curl);
+            Log::write($content);
             if ($content['status'] == 200){
                 $this->success('操作成功');
             }else{
-                $this->erroe('操作失败,原因:'.$content['msg']);
+                $this->error('操作失败,原因:'.$content['msg']);
             }
 
 //          for ($i= 0;$i<$count;$i++){
