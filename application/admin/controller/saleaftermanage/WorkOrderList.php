@@ -1346,12 +1346,20 @@ class WorkOrderList extends Backend
                 //配货异常表
                 $_distribution_abnormal = new DistributionAbnormal();
 
+                //库位表
+                $_stock_house = new StockHouse();
+
+                //子单表
+                $_new_order_item_process = new NewOrderItemProcess();
+
                 if (!empty($row)) {
                     $row->startTrans();
                 }
                 $this->model->startTrans();
                 $this->work_order_note->startTrans();
                 $_distribution_abnormal->startTrans();
+                $_new_order_item_process->startTrans();
+                $_stock_house->startTrans();
                 try {
                     //跟单处理
                     if (!empty($row)) {
@@ -1379,15 +1387,16 @@ class WorkOrderList extends Backend
 
                     //仓库工单判断未处理异常，有则绑定异常
                     if($params['order_item_numbers'] || in_array(3,$measure_choose_id)){
-                        //获取子订单主键ID集合
-                        $_new_order_item_process = new NewOrderItemProcess();
-
                         //主单取消：绑定该订单下所有子单异常
                         if(in_array(3,$measure_choose_id)){
                             $item_process_where['b.increment_id'] = $platform_order;
+                            $type = 16;
                         }else{
                             $item_process_where['a.item_order_number'] = ['in',$params['order_item_numbers']];
+                            $type = 17;
                         }
+
+                        //获取子单ID集
                         $item_process_ids = $_new_order_item_process
                             ->alias('a')
                             ->join(['fa_order' => 'b'], 'a.order_id=b.id')
@@ -1395,19 +1404,65 @@ class WorkOrderList extends Backend
                             ->column('a.id')
                         ;
 
-                        //绑定异常数据
-                        $abnormal_count = $_distribution_abnormal
+                        //获取绑定异常子单ID集
+                        $abnormal_binding_ids = $_distribution_abnormal
                             ->where(['item_process_id' => ['in',$item_process_ids],'status'=>1])
-                            ->count()
+                            ->column('item_process_id')
                         ;
-                        if($abnormal_count){
+
+                        //已经标记异常的子单，绑定异常数据
+                        if(!empty($abnormal_binding_ids)){
                             $_distribution_abnormal
                                 ->allowField(true)
-                                ->save(['work_id'=>$work_id], ['item_process_id' => ['in',$item_process_ids],'status'=>1])
+                                ->save(['work_id'=>$work_id], ['item_process_id' => ['in',$abnormal_binding_ids],'status'=>1])
                             ;
 
                             //配货操作日志
                             DistributionLog::record((object)session('admin'),$item_process_ids,0,"创建工单绑定异常");
+                            $need_sign_ids = array_diff($item_process_ids,$abnormal_binding_ids);
+                        }else{
+                            $need_sign_ids = $item_process_ids;
+                        }
+
+                        //未标记异常子单，则标记异常
+                        if(!empty($need_sign_ids)){
+                            foreach($need_sign_ids as $val){
+                                //获取异常库位号
+                                $stock_house_info = $_stock_house
+                                    ->field('id,coding')
+                                    ->where(['status'=>1,'type'=>4,'occupy'=>['<',10]])
+                                    ->order('occupy', 'desc')
+                                    ->find()
+                                ;
+                                if(empty($stock_house_info)) throw new Exception("异常暂存架没有空余库位！！");
+
+                                //创建异常
+                                $abnormal_data = [
+                                    'work_id' => $work_id,
+                                    'item_process_id' => $val,
+                                    'type' => $type,
+                                    'status' => 1,
+                                    'create_time' => time(),
+                                    'create_person' => $nickname
+                                ];
+                                $_distribution_abnormal->allowField(true)->isUpdate(false)->data($abnormal_data)->save();
+
+                                //子订单绑定异常库位号
+                                $_new_order_item_process
+                                    ->allowField(true)
+                                    ->isUpdate(true, ['id'=>$val])
+                                    ->save(['abnormal_house_id'=>$stock_house_info['id']])
+                                ;
+
+                                //异常库位号占用数量+1
+                                $_stock_house
+                                    ->where(['id' => $stock_house_info['id']])
+                                    ->setInc('occupy', 1)
+                                ;
+
+                                //配货日志
+                                DistributionLog::record((object)session('admin'),$val,9,"创建工单，异常暂存架{$stock_house_info['coding']}库位");
+                            }
                         }
                     }
 
@@ -1466,6 +1521,8 @@ class WorkOrderList extends Backend
                     $this->model->commit();
                     $this->work_order_note->commit();
                     $_distribution_abnormal->commit();
+                    $_new_order_item_process->commit();
+                    $_stock_house->commit();
                 } catch (ValidateException $e) {
                     if (!empty($row)) {
                         $row->rollback();
@@ -1473,6 +1530,8 @@ class WorkOrderList extends Backend
                     $this->model->rollback();
                     $this->work_order_note->rollback();
                     $_distribution_abnormal->rollback();
+                    $_new_order_item_process->rollback();
+                    $_stock_house->rollback();
                     $this->error($e->getMessage());
                 } catch (PDOException $e) {
                     if (!empty($row)) {
@@ -1481,6 +1540,8 @@ class WorkOrderList extends Backend
                     $this->model->rollback();
                     $this->work_order_note->rollback();
                     $_distribution_abnormal->rollback();
+                    $_new_order_item_process->rollback();
+                    $_stock_house->rollback();
                     $this->error($e->getMessage());
                 } catch (Exception $e) {
                     if (!empty($row)) {
@@ -1489,6 +1550,8 @@ class WorkOrderList extends Backend
                     $this->model->rollback();
                     $this->work_order_note->rollback();
                     $_distribution_abnormal->rollback();
+                    $_new_order_item_process->rollback();
+                    $_stock_house->rollback();
                     $this->error($e->getMessage());
                 }
                 $this->success();

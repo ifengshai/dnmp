@@ -593,6 +593,7 @@ class ScmDistribution extends Scm
         $total_qty_ordered = $this->_new_order_item_process
             ->where(['order_id'=> $item_process_info['order_id'], 'distribution_status'=>['neq',0]])
             ->count();
+        $back_msg = '';
 
         $res = false;
         $this->_item->startTrans();
@@ -676,6 +677,8 @@ class ScmDistribution extends Scm
                 }
             }
 
+            if(empty($save_status)) throw new Exception('未获取到下一步状态');
+
             //订单主表标记已合单
             if(9 == $save_status){
                 //主订单状态表
@@ -686,11 +689,27 @@ class ScmDistribution extends Scm
                 ;
             }
 
+            //更新子单配货状态
             $res = $this->_new_order_item_process
                 ->allowField(true)
                 ->isUpdate(true, ['item_order_number'=>$item_order_number])
                 ->save(['distribution_status'=>$save_status])
             ;
+
+            //下一步提示信息
+            if(3 == $save_status){
+                //待配镜片
+                $back_msg = 2 == $item_process_info['order_prescription_type'] ? '去配现片' : '去配定制片';
+            }else{
+                $next_step = [
+                    4=>'去加工',
+                    5=>'印logo',
+                    6=>'去质检',
+                    7=>'去合单',
+                    9=>'去审单'
+                ];
+                $back_msg = $next_step[$save_status];
+            }
 
             $this->_item->commit();
             $this->_stock_log->commit();
@@ -725,15 +744,7 @@ class ScmDistribution extends Scm
             DistributionLog::record($this->auth,$item_process_info['id'],$check_status,$status_arr[$check_status].'完成');
 
             //成功返回
-            $next_step = [
-                3=>'去配镜片',
-                4=>'去加工',
-                5=>'印logo',
-                6=>'去质检',
-                7=>'去合单',
-                9=>'去审单'
-            ];
-            $this->success($next_step[$save_status], [],200);
+            $this->success($back_msg, [],200);
         }else{
             //操作失败记录
             DistributionLog::record($this->auth,$item_process_info['id'],0,$status_arr[$check_status].'：保存失败');
@@ -1877,11 +1888,6 @@ class ScmDistribution extends Scm
                         ->field('stock,occupy_stock,distribution_occupy_stock')
                         ->find()
                     ;
-                    $stock_arr = $stock_arr ? $stock_arr->toArray() : [];
-                    $stock = $this->_item->where(['sku'=>$true_sku])->value('stock');
-                    if ( in_array(0,$stock_arr) || empty($stock)){
-                        throw new Exception($value['sku'].':库存不足');
-                    }
 
                     //扣减占用库存、配货占用、总库存
                     $this->_item
