@@ -118,7 +118,9 @@ class OcPrescriptionPic extends Backend
         }
         $row['pic'] = $photo_href;
         $this->assign('row',$row);
-        $this->assign('site',$site);
+        $this->assign('zhandian',$site);
+
+        
         return $this->view->fetch();
     }
 }
