@@ -390,42 +390,45 @@ class ScmWarehouse extends Scm
         $do_type = $this->request->request('do_type');
         $get_out_stock_id = $this->request->request('out_stock_id');
 
-        if ($get_out_stock_id) {
-            $row = $this->_out_stock->get($get_out_stock_id);
-            empty($row) && $this->error(__('出库单不存在'), [], 403);
-            0 != $row['status'] && $this->error(__('只有新建状态才能编辑'), [], 405);
-
-            //更新出库单
-            $out_stock_data = [
-                'type_id' => $type_id,
-                'platform_id' => $platform_id,
-                'status' => 1 == $do_type ?: 0
-            ];
-            $result = $row->allowField(true)->save($out_stock_data);
-            $out_stock_id = $get_out_stock_id;
-        } else {
-            $out_stock_number = $this->request->request('out_stock_number');
-            empty($out_stock_number) && $this->error(__('出库单号不能为空'), [], 403);
-
-            //创建出库单
-            $out_stock_data = [
-                'out_stock_number' => $out_stock_number,
-                'type_id' => $type_id,
-                'platform_id' => $platform_id,
-                'status' => 1 == $do_type ?: 0,
-                'create_person' => $this->auth->nickname,
-                'createtime' => date('Y-m-d H:i:s')
-            ];
-            $result = $this->_out_stock->allowField(true)->save($out_stock_data);
-            $out_stock_id = $this->_out_stock->id;
-        }
-
-        false === $result && $this->error(__('提交失败'), [], 404);
-
+        $this->_out_stock->startTrans();
         $this->_out_stock_item->startTrans();
         $this->_product_bar_code_item->startTrans();
         try {
-            count($item_data) != count(array_unique(array_column($item_data, 'sku'))) && $this->error(__('sku重复，请检查'), [], 405);
+            //编辑提交
+            if ($get_out_stock_id) {
+                $row = $this->_out_stock->get($get_out_stock_id);
+                if(empty($row)) throw new Exception('出库单不存在');
+                if(0 != $row['status']) throw new Exception('只有新建状态才能编辑');
+
+                //更新出库单
+                $out_stock_data = [
+                    'type_id' => $type_id,
+                    'platform_id' => $platform_id,
+                    'status' => 1 == $do_type ?: 0
+                ];
+                $result = $this->_out_stock->allowField(true)->save($out_stock_data,['id'=>$get_out_stock_id]);
+                $out_stock_id = $get_out_stock_id;
+            } else {
+                //新建提交
+                $out_stock_number = $this->request->request('out_stock_number');
+                if(empty($out_stock_number)) throw new Exception('出库单号不能为空');
+
+                //创建出库单
+                $out_stock_data = [
+                    'out_stock_number' => $out_stock_number,
+                    'type_id' => $type_id,
+                    'platform_id' => $platform_id,
+                    'status' => 1 == $do_type ?: 0,
+                    'create_person' => $this->auth->nickname,
+                    'createtime' => date('Y-m-d H:i:s')
+                ];
+                $result = $this->_out_stock->allowField(true)->save($out_stock_data);
+                $out_stock_id = $this->_out_stock->id;
+            }
+
+            if(false === $result) throw new Exception('提交失败');
+
+            if(count($item_data) != count(array_unique(array_column($item_data, 'sku')))) throw new Exception('sku重复，请检查');
 
             //获取各站点虚拟仓库存
             $stock_list = $this->_item_platform_sku
@@ -434,26 +437,22 @@ class ScmWarehouse extends Scm
 
             //校验各站点虚拟仓库存
             foreach ($item_data as $key => $value) {
-                empty($stock_list[$value['sku']]) && $this->error(__('sku: ' . $value['sku'] . ' 没有同步至对应平台'), [], 405);
-                $value['out_stock_num'] > $stock_list[$value['sku']] && $this->error(__('sku: ' . $value['sku'] . ' 出库数量不能大于虚拟仓库存'), [], 405);
+                if(empty($stock_list[$value['sku']])) throw new Exception('sku: ' . $value['sku'] . ' 没有同步至对应平台');
+                if($value['out_stock_num'] > $stock_list[$value['sku']]) throw new Exception('sku: ' . $value['sku'] . ' 出库数量不能大于虚拟仓库存');
             }
 
             //检测条形码是否已绑定
             $where['out_stock_id'] = [['>', 0], ['neq', $out_stock_id]];
             foreach ($item_data as $key => $value) {
                 $sku_code = array_column($value['sku_agg'], 'code');
-                count($value['sku_agg']) != count(array_unique($sku_code))
-                &&
-                $this->error(__('条形码有重复，请检查'), [], 405);
+                if(count($value['sku_agg']) != count(array_unique($sku_code)))throw new Exception(' 条形码有重复，请检查');
 
                 $where['code'] = ['in', $sku_code];
                 $check_quantity = $this->_product_bar_code_item
                     ->where($where)
                     ->field('code')
                     ->find();
-                if (!empty($check_quantity['code'])) {
-                    throw new Exception('条形码:' . $check_quantity['code'] . ' 已绑定,请移除');
-                }
+                if (!empty($check_quantity['code'])) throw new Exception('条形码:' . $check_quantity['code'] . ' 已绑定,请移除');
             }
             //批量创建或更新出库单商品
             foreach ($item_data as $key => $value) {
@@ -473,7 +472,7 @@ class ScmWarehouse extends Scm
                 } else {//新增
                     $item_save['out_stock_id'] = $out_stock_id;
                     $item_save['sku'] = $value['sku'];
-                    $this->_out_stock_item->allowField(true)->save($item_save);
+                    $this->_out_stock_item->allowField(true)->isUpdate(false)->data($item_save)->save();
                 }
 
                 //绑定条形码
@@ -481,17 +480,22 @@ class ScmWarehouse extends Scm
                     $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => $v['code']])->save(['out_stock_id' => $out_stock_id]);
                 }
             }
+
+            $this->_out_stock->commit();
             $this->_out_stock_item->commit();
             $this->_product_bar_code_item->commit();
         } catch (ValidateException $e) {
+            $this->_out_stock->rollback();
             $this->_out_stock_item->rollback();
             $this->_product_bar_code_item->rollback();
             $this->error($e->getMessage(), [], 406);
         } catch (PDOException $e) {
+            $this->_out_stock->rollback();
             $this->_out_stock_item->rollback();
             $this->_product_bar_code_item->rollback();
             $this->error($e->getMessage(), [], 407);
         } catch (Exception $e) {
+            $this->_out_stock->rollback();
             $this->_out_stock_item->rollback();
             $this->_product_bar_code_item->rollback();
             $this->error($e->getMessage(), [], 408);
