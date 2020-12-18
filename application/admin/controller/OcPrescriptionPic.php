@@ -65,7 +65,7 @@ class OcPrescriptionPic extends Backend
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
 
             $total = $model->table('oc_prescription_pic')->where($where)->count();
-            $list = $model->table('oc_prescription_pic')->where($where)->select();
+            $list = $model->table('oc_prescription_pic')->where($where)->order('id desc')->select();
 
             foreach ($list as $key=>$item){
 
@@ -103,7 +103,7 @@ class OcPrescriptionPic extends Backend
             $url =config('url.zeelool_url').'/media';
         }else{
             $model = Db::connect('database.db_voogueme');
-            $url =config('url.new_voogueme_url').'/media';
+            $url =config('url.voogueme_url').'/media';
         }
         $row =$model->table('oc_prescription_pic')->where('id',$ids)->find();
         $photo_href = $row['pic'] =explode(',',$row['pic']);
