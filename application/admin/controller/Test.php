@@ -1188,4 +1188,21 @@ class Test extends Backend
         $data['custom_is_delivery_new'] = 1;
         $nihao->where(['created_at' => ['<', '2020-01-01']])->update($data);
     }
+
+
+    /**
+     * 处理SKU编码
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/12/18 11:10:38 
+     * @return void
+     */
+    public function process_sku_number()
+    {
+        $list = Db::name('zzzz_temp')->limit(10000)->select();
+        foreach($list as $k => $v) {
+            
+        }
+    }
 }
