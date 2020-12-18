@@ -239,7 +239,7 @@ class Distribution extends Backend
                     'a.change_type' => ['in', [1, 2, 3]],//1更改镜架  2更改镜片 3取消订单
                     'b.work_status' => ['in', [1, 2, 3, 5]]//工单未处理
                 ])
-                ->order('a.id', 'desc')
+                ->order('a.create_time', 'desc')
                 ->group('a.item_order_number')
                 ->column('a.item_order_number');
 
