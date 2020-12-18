@@ -1533,6 +1533,9 @@ class ScmWarehouse extends Scm
                             //获得应到货数量
                             $check = new \app\admin\model\warehouse\CheckItem();
                             $should_arrivals_num = $check->where('check_id', $v['check_id'])->value('should_arrival_num');
+                            if (!$should_arrivals_num){
+                                $should_arrivals_num = $check->where('check_id', $v['check_id'])->value('purchase_num');
+                            }
                             $this->_item->where($item_map)->dec('wait_instock_num', $should_arrivals_num)->update();
                         }
 

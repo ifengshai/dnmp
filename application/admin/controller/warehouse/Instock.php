@@ -608,7 +608,6 @@ class Instock extends Backend
                                 'source' => 1,
                                 'fictitious_before' => $item_platform_sku['stock'],
                                 'fictitious_change' => $v['in_stock_num'],
-                                'occupy_stock_before' => $sku_item['occupy_stock'],
                                 // 'wait_instock_num_before' => $item_platform_sku['wait_instock_num'],
                                 // 'wait_instock_num_change' => -$v['in_stock_num'],
                                 'create_person' => session('admin.nickname'),
@@ -750,6 +749,9 @@ class Instock extends Backend
                         //获得应到货数量
                         $check = new \app\admin\model\warehouse\CheckItem();
                         $should_arrivals_num = $check->where('check_id', $v['check_id'])->value('should_arrival_num');
+                        if (!$should_arrivals_num){
+                            $should_arrivals_num = $check->where('check_id', $v['check_id'])->value('purchase_num');
+                        }
                         //减少待入库数量 扣减应到货数量
                         $item->where($item_map)->dec('wait_instock_num', $should_arrivals_num)->update();
 
