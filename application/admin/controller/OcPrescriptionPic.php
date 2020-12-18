@@ -54,18 +54,39 @@ class OcPrescriptionPic extends Backend
 
             $filter = json_decode($this->request->get('filter'), true);
             $site = $filter['site'] ? $filter['site'] :1;
-            if ($site ==1){
-                $model = Db::connect('database.db_zeelool');
-            }else{
-                $model = Db::connect('database.db_voogueme');
+            switch ($site ==1) {
+                case 1:
+                    $db = 'database.db_zeelool';
+                    $model = $this->zeelool;
+                    break;
+                case 2:
+                    $db = 'database.db_voogueme';
+                    $model = $this->voogueme;
+                    break;
+
+                default:
+                    return false;
+                    break;
             }
+
             unset($filter['site']);
             $this->request->get(['filter' => json_encode($filter)]);
 
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $total = $model
 
-            $total = $model->table('oc_prescription_pic')->where($where)->count();
-            $list = $model->table('oc_prescription_pic')->where($where)->select();
+                    ->where($where)
+//                    ->order($sort, $order)
+                    ->count();
+
+            $list = $model
+
+                    ->where($where)
+//                    ->order($sort, $order)
+                    ->limit($offset, $limit)
+                    ->select();
+
+            $list = collection($list)->toArray();
 
             foreach ($list as $key=>$item){
 
@@ -78,6 +99,7 @@ class OcPrescriptionPic extends Backend
             }
 
             $result = array("total" => $total, "rows" => $list);
+
             return json($result);
         }
         return $this->view->fetch();
