@@ -412,7 +412,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
 
         //订单明细数据
         $item = $this->orderitemoption->where('order_id', $ids)->select();
-
+        dump($row);die();
         $this->view->assign("item", $item);
         $this->view->assign("row", $row);
         $this->view->assign("pay", $pay);
