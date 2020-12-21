@@ -35,11 +35,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             }, operate: false
                         },
                         {field: 'id', title: __('ID')},
-                        // {
-                        //     field: 'site',
-                        //     title: __('站点'),
-                        //     searchList: { 1: 'zeelool', 2: 'voogueme'}
-                        // },
+                        {
+                            field: 'site',
+                            title: __('站点'),
+                            searchList: { 1: 'zeelool', 2: 'voogueme'}
+                        },
                         {field: 'increment_id', title: __('订单号'),
                             events: Controller.api.events.gettitle,
 
@@ -148,6 +148,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 //点击标题，弹出窗口
                 gettitle: function (value) {
                     return '<a class="btn-gettitle" style="color: #333333!important;">' + value + '</a>';
+                },
+                status: function (value, row, index) {
+                    var str = '';
+                    if (value == 1) {
+                        str = '有';
+                    }  else {
+                        str = '无';
+                    }
+                    return str;
                 },
             },
             events: {
