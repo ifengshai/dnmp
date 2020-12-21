@@ -412,6 +412,8 @@ class ScmWarehouse extends Scm
                 //新建提交
                 $out_stock_number = $this->request->request('out_stock_number');
                 if(empty($out_stock_number)) throw new Exception('出库单号不能为空');
+                $check_number = $this->_out_stock->where(['out_stock_number' => $out_stock_number])->value('id');
+                if(!empty($check_number)) throw new Exception('出库单号已存在');
 
                 //创建出库单
                 $out_stock_data = [
