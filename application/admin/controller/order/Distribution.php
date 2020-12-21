@@ -1132,7 +1132,7 @@ class Distribution extends Backend
 
         //获取子订单处方数据
         $option_list = $this->_new_order_item_option
-            ->field('id,is_print_logo,index_name')
+            ->field('id,is_print_logo,order_prescription_type')
             ->where(['id' => ['in', array_unique($option_ids)]])
             ->select();
         $option_list = array_column($option_list, NULL, 'id');
@@ -1159,7 +1159,8 @@ class Distribution extends Backend
             foreach ($item_list as $value) {
                 //下一步状态
                 if (2 == $check_status) {
-                    if ($option_list[$value['option_id']]['index_name']) {
+                    //根据处方类型字段order_prescription_type(现货处方镜、定制处方镜)判断是否需要配镜片
+                    if(in_array($option_list[$value['option_id']]['order_prescription_type'],[2,3])){
                         $save_status = 3;
                     } else {
                         if ($option_list[$value['option_id']]['is_print_logo']) {
@@ -1804,7 +1805,7 @@ class Distribution extends Backend
                ')
                 ->where([
                     'custom_is_delivery_new' => 1,
-                    'custom_match_delivery_created_at_new' => ['between', ['2018-01-01', '2020-10-01']]
+//                    'custom_match_delivery_created_at_new' => ['between', ['2018-01-01', '2020-10-01']]
                 ])
                 ->select();
 
@@ -1829,7 +1830,7 @@ class Distribution extends Backend
                             $this->model
                                 ->allowField(true)
                                 ->save(
-                                    ['distribution_status' => 1],
+                                    ['distribution_status' => 9],
                                     ['id' => ['in',$item_process_ids]]
                                 );
 
