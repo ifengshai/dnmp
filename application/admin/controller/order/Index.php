@@ -194,6 +194,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                 }else{
                     $value['order_items'][$i]['pd_r'] = $data['pd_r'][$i];
                     $value['order_items'][$i]['pd_l'] = $data['pd_l'][$i];
+                    $value['order_items'][$i]['pdcheck'] = 'on';
                 }
                 $value['order_items'][$i]['od_pv'] = $data['od_pv'][$i];
                 $value['order_items'][$i]['os_pv'] = $data['os_pv'][$i];
@@ -214,13 +215,12 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
 
             //请求接口
             $url = config('url.esz_url').'magic/order/prescriptionPicCheck';
-            $values = $value;
             $curl = curl_init();
             curl_setopt($curl, CURLOPT_URL, $url);
             curl_setopt($curl, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
             curl_setopt($curl, CURLOPT_HEADER, 0);
             curl_setopt($curl, CURLOPT_POST, true);
-            curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($values));
+            curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($value));
             curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
             curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($curl, CURLOPT_TIMEOUT, 20);
@@ -228,7 +228,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
             curl_close($curl);
             Log::write("处方接口请求");
             Log::write($content);
-            Log::write($values);
+            Log::write($value);
             Log::write($url);
             if ($content['status'] == 200){
                 $this->success('操作成功');
