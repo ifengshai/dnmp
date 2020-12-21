@@ -475,7 +475,7 @@ class Distribution extends Backend
             ->order($sort, $order)
             ->limit($offset, $limit)
             ->select();
-
+        $list = collection($list)->toArray();
         print_r($map);
         print_r('---------');
         print_r($sql);
@@ -483,7 +483,7 @@ class Distribution extends Backend
         print_r($list);
         exit;
 
-        $list = collection($list)->toArray();
+
 
         //库位号列表
         $stock_house_data = $this->_stock_house
