@@ -1596,7 +1596,7 @@ class Distribution extends Backend
                     //检验库存
                     $stock_arr = $this->_item
                         ->where(['sku' => $true_sku])
-                        ->field('stock,occupy_stock,distribution_occupy_stock')
+                        ->field('stock,available_stock,distribution_occupy_stock')
                         ->find();
 
                     //扣减虚拟仓库存
@@ -1617,13 +1617,13 @@ class Distribution extends Backend
                     $this->_stock_log->setData([
                         'type' => 2,
                         'site' => $item_info['site'],
-                        'modular' => 4,
-                        'change_type' => 7,
+                        'modular' => 5,
+                        'change_type' => 4 == $item_info['distribution_status'] ? 8 : 9,
                         'source' => 1,
                         'sku' => $true_sku,
                         'number_type' => 2,
                         'order_number' => $item_info['item_order_number'],
-                        'available_stock_before' => $stock_arr['occupy_stock'],
+                        'available_stock_before' => $stock_arr['available_stock'],
                         'available_stock_change' => -1,
                         'distribution_stock_before' => $stock_arr['distribution_occupy_stock'],
                         'distribution_stock_change' => -1,
