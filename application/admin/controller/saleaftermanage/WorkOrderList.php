@@ -3572,7 +3572,7 @@ EOF;
         set_time_limit(0);
         ini_set('memory_limit', '1024M');
 
-        $map['work_platform'] =1;
+        $map['work_platform'] =2;
         $map['work_status'] = array('in','2,3,5');
 //        0: '已取消', 1: '新建', 2: '待审核', 4: '审核拒绝', 3: '待处理', 5: '部分处理', 6: '已处理'
 
@@ -3820,8 +3820,8 @@ EOF;
             '退回物流单号','退款金额', '退款百分比', '措施', '措施详情',
             '承接详情','工单回复备注', '订单支付时间','补发订单号'
         ];
-        $path = "/uploads/";
-        $fileName = '工单数据备份导出 - 12-21';
+        $path = "/uploads/ship_uploads";
+        $fileName = '工单数据V站备份导出 - 12-21';
         Excel::writeCsv($csv, $headlist, $path . $fileName);
     }
 
