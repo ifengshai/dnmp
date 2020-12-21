@@ -611,8 +611,12 @@ class ScmWarehouse extends Scm
 
                 //库存变动日志不分站点的
                 $this->_stock_log->allowField(true)->saveAll($stock_data);
+
                 //库存变动日志分站点的
                 $this->_stock_log->allowField(true)->saveAll($stock_data1);
+
+                //条形码出库时间
+                $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['out_stock_id' => $out_stock_id])->save(['out_stock_time'=>date('Y-m-d H:i:s')]);
             } else {//审核拒绝解除条形码绑定关系
                 $code_clear = [
                     'out_stock_id' => 0
@@ -813,6 +817,9 @@ class ScmWarehouse extends Scm
         empty($row) && $this->error(__('入库单不存在'), [], 503);
         0 != $row['status'] && $this->error(__('只有新建状态才能取消'), [], 504);
 
+        //解除条形码绑定关系
+        $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['in_stock_id' => $in_stock_id])->save(['in_stock_id' => 0]);
+
         $res = $this->_in_stock->allowField(true)->isUpdate(true, ['id' => $in_stock_id])->save(['status' => 4]);
         $res ? $this->success('取消成功', [], 200) : $this->error(__('取消失败'), [], 505);
     }
@@ -850,7 +857,6 @@ class ScmWarehouse extends Scm
         $item_sku = json_decode(htmlspecialchars_decode($item_sku), true);
         empty($item_sku) && $this->error(__('sku集合不能为空'), [], 403);
         $item_sku = array_filter($item_sku);
-
 
         $in_stock_id = $this->request->request("in_stock_id");//入库单ID，
         $platform_id = $this->request->request("platform_id");//站点，判断是否是新创建入库 还是 质检单入库
@@ -1603,6 +1609,12 @@ class ScmWarehouse extends Scm
                 if (count($error_num) > 0) {
                     throw new Exception('入库失败！！请检查SKU');
                 }
+
+                //条形码入库时间
+                $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['in_stock_id' => $in_stock_id])->save(['in_stock_time'=>date('Y-m-d H:i:s')]);
+            }else{
+                //审核拒绝解除条形码绑定关系
+                $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['in_stock_id' => $in_stock_id])->save(['in_stock_id' => 0]);
             }
 
             $this->_item->commit();
