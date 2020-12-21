@@ -51,14 +51,66 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function (row) {
+                                        console.log(row)
                                         //返回true时按钮显示,返回false隐藏
-                                        if (row.status == 'pending' ){
-                                            return false;
-                                        }else{
+                                        if (row.status !== 'pending' && row.site !=='9'){
+                                            console.log(1111)
                                             return  true;
+                                        }else{
+                                            console.log(2222)
+                                            return  false;
                                         }
                                     }
                                 },
+                                {
+                                    name: 'detail',
+                                    text: '详情',
+                                    title: __('Detail'),
+                                    classname: 'btn btn-xs  btn-primary  btn-dialog',
+                                    icon: 'fa fa-list',
+                                    url: 'order/index/detail?label=' + Config.label,
+                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        console.log(row)
+                                        //返回true时按钮显示,返回false隐藏
+                                        if (row.status == 'pending' && row.site !=='9'){
+                                            console.log(555)
+                                            return  true;
+                                        }else{
+                                            console.log(666)
+                                            return  false;
+                                        }
+                                    }
+                                },
+
+                                {
+                                    name: 'detail',
+                                    text: '详情',
+                                    title: __('Detail'),
+                                    classname: 'btn btn-xs  btn-primary  btn-dialog',
+                                    icon: 'fa fa-list',
+                                    url: 'order/index/detail?label=' + Config.label,
+                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        console.log(row)
+                                        //返回true时按钮显示,返回false隐藏
+                                        if (row.status !== 'pending' && row.site =='9'){
+                                            console.log(555)
+                                            return  true;
+                                        }else{
+                                            console.log(666)
+                                            return  false;
+                                        }
+                                    }
+                                },
+
+
 
                                 {
                                     name: 'detail',
@@ -72,9 +124,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function (row) {
-                                        if (row.status == 'pending' && row.site ==9){
+                                        console.log(row)
+                                        if (row.status =='pending' && row.site =='9'){
+                                            console.log(3333)
                                             return true;
                                         }else{
+                                            console.log(4444)
                                             return  false;
                                         }
                                         //返回true时按钮显示,返回false隐藏
@@ -92,7 +147,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
             // 为表格绑定事件
             Table.api.bindevent(table);
 
-            //批量打印标签    
+            //批量打印标签
             $('.btn-batch-printed_test').click(function () {
                 var ids = Table.api.selectedids(table);
                 var id_params = '';
@@ -103,7 +158,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                 window.open(Config.moduleurl + '/order/index/batch_print_label_new?id_params=' + id_params + '&label=' + Config.label, '_blank');
             });
 
-            //批量导出xls 
+            //批量导出xls
             $('.btn-batch-export-xls').click(function () {
                 var ids = Table.api.selectedids(table);
                 if (ids.length > 0) {

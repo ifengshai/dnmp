@@ -4,6 +4,7 @@ namespace app\admin\controller\order;
 
 use app\common\controller\Backend;
 use fast\Trackingmore;
+use think\Log;
 use Util\NihaoPrescriptionDetailHelper;
 use Util\ZeeloolPrescriptionDetailHelper;
 use Util\VooguemePrescriptionDetailHelper;
@@ -157,7 +158,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                 } else {
                     $v['label'] = 0;
                 }
-                $v['site']  = $label;
+                $v['site'] = $label;
             }
             unset($v);
 
@@ -176,53 +177,63 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
     public function detail($ids = null)
     {
         if ($_POST){
-          $data  = input('param.');
-          $value['order_id'] = $data['ids'];
-          $count = count($data['item_id']);
-         for ($i= 0;$i<$count;$i++) {
-             $value['order_items'][$i]['order_item_id'] = $data['item_id'][$i];
-             $value['order_items'][$i]['od_sph'] = $data['od_sph'][$i];
-             $value['order_items'][$i]['od_cyl'] = $data['od_cyl'][$i];
-             $value['order_items'][$i]['od_axis'] = $data['od_axis'][$i];
-             $value['order_items'][$i]['os_sph']= $data['os_sph'][$i];
-             $value['order_items'][$i]['os_cyl'] = $data['os_cyl'][$i];
-             $value['order_items'][$i]['os_axis'] = $data['os_axis'][$i];
-             $value['order_items'][$i]['pd_r'] = $data['pd_r'][$i];
-             $value['order_items'][$i]['pd_l'] = $data['pd_l'][$i];
-             $value['order_items'][$i]['od_pv'] = $data['od_pv'][$i];
-             $value['order_items'][$i]['os_pv'] = $data['os_pv'][$i];
-             $value['order_items'][$i]['od_bd'] = $data['od_bd'][$i];
-             $value['order_items'][$i]['os_bd'] = $data['os_bd'][$i];
-             $value['order_items'][$i]['od_pv_r'] = $data['od_pv_r'][$i];
-             $value['order_items'][$i]['os_pv_r'] = $data['os_pv_r'][$i];
-             $value['order_items'][$i]['od_bd_r'] = $data['od_bd_r'][$i];
-             $value['order_items'][$i]['os_bd_r'] = $data['os_bd_r'][$i];
-             $value['order_items'][$i]['os_add'] = $data['os_add'][$i];
-             $value['order_items'][$i]['od_add'] = $data['od_add'][$i];
-             if ($data['od_pv'][$i] !== null && $data['od_pv_r'][$i] !==null && $data['os_pv'][$i] !== null && $data['os_pv_r'][$i]){
-                 $value['order_items'][$i]['prismcheck'] = 'on';
-             }else{
-                 $value['order_items'][$i]['prismcheck'] = '';
-             }
-         }
-        //请求接口
-            $url = config('url.zeelool_url').'magic/order/prescriptionPicCheck';
+            $data  = input('param.');
+            $value['order_id'] = $data['ids'];
+            $count = count($data['item_id']);
+            for ($i= 0;$i<$count;$i++) {
+                $value['order_items'][$i]['order_item_id'] = $data['item_id'][$i];
+                $value['order_items'][$i]['od_sph'] = $data['od_sph'][$i];
+                $value['order_items'][$i]['od_cyl'] = $data['od_cyl'][$i];
+                $value['order_items'][$i]['od_axis'] = $data['od_axis'][$i];
+                $value['order_items'][$i]['os_sph']= $data['os_sph'][$i];
+                $value['order_items'][$i]['os_cyl'] = $data['os_cyl'][$i];
+                $value['order_items'][$i]['os_axis'] = $data['os_axis'][$i];
+
+                if ($data['pd_l'][$i] ==null && $data['pd_r'][$i] ){
+                    $value['order_items'][$i]['pd'] = $data['pd_r'][$i];
+                }else{
+                    $value['order_items'][$i]['pd_r'] = $data['pd_r'][$i];
+                    $value['order_items'][$i]['pd_l'] = $data['pd_l'][$i];
+                }
+                $value['order_items'][$i]['od_pv'] = $data['od_pv'][$i];
+                $value['order_items'][$i]['os_pv'] = $data['os_pv'][$i];
+                $value['order_items'][$i]['od_bd'] = $data['od_bd'][$i];
+                $value['order_items'][$i]['os_bd'] = $data['os_bd'][$i];
+                $value['order_items'][$i]['od_pv_r'] = $data['od_pv_r'][$i];
+                $value['order_items'][$i]['os_pv_r'] = $data['os_pv_r'][$i];
+                $value['order_items'][$i]['od_bd_r'] = $data['od_bd_r'][$i];
+                $value['order_items'][$i]['os_bd_r'] = $data['os_bd_r'][$i];
+                $value['order_items'][$i]['os_add'] = $data['os_add'][$i];
+                $value['order_items'][$i]['od_add'] = $data['od_add'][$i];
+                if ($data['od_pv'][$i] !== null && $data['od_pv_r'][$i] !==null && $data['os_pv'][$i] !== null && $data['os_pv_r'][$i]){
+                    $value['order_items'][$i]['prismcheck'] = 'on';
+                }else{
+                    $value['order_items'][$i]['prismcheck'] = '';
+                }
+            }
+
+            //请求接口
+            $url = config('url.esz_url').'magic/order/prescriptionPicCheck';
             $values = $value;
             $curl = curl_init();
             curl_setopt($curl, CURLOPT_URL, $url);
             curl_setopt($curl, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
             curl_setopt($curl, CURLOPT_HEADER, 0);
             curl_setopt($curl, CURLOPT_POST, true);
-            curl_setopt($curl, CURLOPT_POSTFIELDS, $values);
+            curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($values));
             curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
             curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($curl, CURLOPT_TIMEOUT, 20);
             $content =json_decode(curl_exec($curl),true);
             curl_close($curl);
+            Log::write("处方接口请求");
+            Log::write($content);
+            Log::write($values);
+            Log::write($url);
             if ($content['status'] == 200){
                 $this->success('操作成功');
             }else{
-                $this->erroe('操作失败,原因:'.$content['msg']);
+                $this->error('操作失败,原因:'.$content['msg']);
             }
 
 //          for ($i= 0;$i<$count;$i++){
@@ -324,6 +335,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
 
         //查询订单详情
         $row = $model->where('entity_id', '=', $ids)->find();
+
         if (!$row) {
             $this->error(__('No Results were found'));
         }
@@ -355,7 +367,6 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
         } elseif ($label == 11) {
             $goods = ZeeloolJpPrescriptionDetailHelper::get_list_by_entity_ids($ids);
         }
-
         //获取支付信息
         $pay = $this->zeelool->getPayDetail($label, $ids);
 
@@ -374,17 +385,19 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
     public function orderDetail($order_number = null)
     {
         $order_number = $order_number ?? $this->request->get('order_number');
-        //查询订单详情		
+        //查询订单详情
         $ruleList = collection($this->ordernodedeltail->where(['order_number' => ['eq', $order_number]])->order('node_type asc')->field('node_type,create_time,handle_user_name,shipment_type,track_number')->select())->toArray();
 
         $new_ruleList = array_column($ruleList, NULL, 'node_type');
         $key_list = array_keys($new_ruleList);
 
         $entity_id = $this->request->get('id');
+        $id = $this->request->get('id');
         $label = $this->request->get('label', 1);
         $this->view->assign(compact('order_number', 'entity_id', 'label'));
         $this->view->assign("list", $new_ruleList);
         $this->view->assign("key_list", $key_list);
+        $this->view->assign("id", $id);
         return $this->view->fetch();
     }
 
@@ -511,7 +524,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                 ->column('entity_id');
 
             $costInfo = $model->getOrderCostInfo($totalId, $thisPageId);
-         
+
             $list = collection($list)->toArray();
 
             foreach ($list as $k => $v) {
@@ -918,7 +931,7 @@ EOF;
      *
      * @Description
      * @author wpl
-     * @since 2020/02/28 14:45:39 
+     * @since 2020/02/28 14:45:39
      * @return void
      */
     public function batch_export_xls()
@@ -1019,7 +1032,7 @@ EOF;
             $finalResult[$key]['global_currency_code'] = $value['global_currency_code'];
             $finalResult[$key]['NUM'] = $value['NUM'];
             $tmp_product_options = unserialize($value['product_options']);
-           //新处方
+            //新处方
             if ($label ==1){
                 if ($value['is_new_version'] == 1) {
                     //镀膜
