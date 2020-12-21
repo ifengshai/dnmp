@@ -1806,24 +1806,6 @@ class ScmWarehouse extends Scm
             }
             if ($no_sku) $this->error(__('SKU：' . implode(',', $no_sku) . '不存在'), [], 523);
 
-            $list = [];
-            foreach ($item_sku as $k => $v) {
-                $list[$k]['inventory_id'] = $this->_inventory->id;
-                $list[$k]['sku'] = $v['sku'];
-                $item = $this->_item->field('name,stock,available_stock,distribution_occupy_stock')->where('sku', $v['sku'])->find();
-                if (empty($item)) {
-                    $this->error(__($v['sku'] . '不存在'), [], 525);
-                }
-
-                $list[$k]['name'] = $item['name'];//商品名
-                $list[$k]['distribution_occupy_stock'] = $item['distribution_occupy_stock'] ?? 0;//配货站用数量
-                $real_time_qty = ($item['stock'] * 1 - $item['distribution_occupy_stock'] * 1);//实时库存
-                $list[$k]['real_time_qty'] = $real_time_qty ?? 0;
-                $list[$k]['available_stock'] = $item['available_stock'] ?? 0;//可用库存
-                //                        $list[$k]['inventory_qty'] = $v['inventory_qty'] ?? 0;//盘点数量
-                //                        $list[$k]['error_qty'] = $v['error_qty'] ?? 0;//误差数量
-                $list[$k]['remark'] = $v['remark'];//备注
-            }
             $result = false;
             $this->_inventory->startTrans();
             $this->_inventory_item->startTrans();
@@ -1835,6 +1817,25 @@ class ScmWarehouse extends Scm
                 $arr['createtime'] = date('Y-m-d H:i:s', time());
                 $result = $this->_inventory->allowField(true)->save($arr);
                 if ($result) {
+                    $list = [];
+                    foreach ($item_sku as $k => $v) {
+                        $list[$k]['inventory_id'] = $this->_inventory->id;
+                        $list[$k]['sku'] = $v['sku'];
+                        $item = $this->_item->field('name,stock,available_stock,distribution_occupy_stock')->where('sku', $v['sku'])->find();
+                        if (empty($item)) {
+                            $this->error(__($v['sku'] . '不存在'), [], 525);
+                        }
+
+                        $list[$k]['name'] = $item['name'];//商品名
+                        $list[$k]['distribution_occupy_stock'] = $item['distribution_occupy_stock'] ?? 0;//配货站用数量
+                        $real_time_qty = ($item['stock'] * 1 - $item['distribution_occupy_stock'] * 1);//实时库存
+                        $list[$k]['real_time_qty'] = $real_time_qty ?? 0;
+                        $list[$k]['available_stock'] = $item['available_stock'] ?? 0;//可用库存
+                        //                        $list[$k]['inventory_qty'] = $v['inventory_qty'] ?? 0;//盘点数量
+                        //                        $list[$k]['error_qty'] = $v['error_qty'] ?? 0;//误差数量
+                        $list[$k]['remark'] = $v['remark'];//备注
+                    }
+
                     //添加明细表数据
                     $result = $this->_inventory_item->allowField(true)->saveAll($list);
                 }
