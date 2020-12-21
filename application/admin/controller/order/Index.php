@@ -212,7 +212,6 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                 }
             }
 
-            dump($value);die();
             //请求接口
             $url = config('url.esz_url').'magic/order/prescriptionPicCheck';
             $values = $value;

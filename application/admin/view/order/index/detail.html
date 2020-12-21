@@ -606,60 +606,6 @@
                                     <td>Prism Vertical</td>
                                     <td>Base Direction</td>
                                 </tr>
-
-
-                                {if condition="$sku['to_examine'] eq true"}
-                                <tr>
-                                    <td >Right(OD)</td>
-                                    <td >
-                                        <input type="text" class="inputs" value="{:$sku['od_sph'] ?? ''}" name="od_sph[]">
-                                    </td>
-                                    <td><input type="text" class="inputs" value="{:$sku['od_cyl'] ?? ''}" name="od_cyl[]"></td>
-                                    <td><input type="text" class="inputs" value="{:$sku['od_axis'] ?? ''}" name="od_axis[]"></td>
-                                    {if $sku['total_add']}
-                                    <td rowspan="2"><input type="text" class="inputs" value="{:$sku['total_add'] ?? ''}" name="total_add[]"></td>
-                                    {else/}
-                                    <td><input type="text" class="inputs" value="{:$sku['os_add']}" name="os_add[]"></td>
-                                    {/if}
-<!--                                    {if $sku['pdcheck'] == 'on'}-->
-                                    <td><input type="text" class="inputs" value="{:$sku['pd_r'] ?? ''}" name="pd_r[]"></td>
-<!--                                    {else/}-->
-<!--                                    <td rowspan="2"><input type="text" class="inputs" value="{:$sku['pd'] ?? ''}" name="pd[]"></td>-->
-<!--                                    {/if}-->
-                                    <td><input type="text" class="inputs" value="{:$sku['od_pv'] ?? ''}" name="od_pv[]"></td>
-                                    <td><input type="text" class="inputs" value="{:$sku['od_bd'] ?? ''}" name="od_bd[]"></td>
-                                    <td><input type="text" class="inputs" value="{:$sku['od_pv_r'] ?? ''}" name="od_pv_r[]"></td>
-                                    <td><input type="text" class="inputs" value="{:$sku['od_bd_r'] ?? ''}" name="od_bd_r[]"></td>
-                                </tr>
-                                <tr>
-                                    <td>Left(OS)</td>
-                                    <td> <input type="text" class="inputs" value="{:$sku['os_sph'] ?? ''}" name="os_sph[]"></td>
-                                    <td>
-                                        <input type="text" class="inputs" value="{:$sku['os_cyl'] ?? ''}" name="os_cyl[]">
-
-                                    </td>
-                                    <td>
-                                        <input type="text" class="inputs" value="{:$sku['os_axis'] ?? ''}" name="os_axis[]"></td>
-                                    {if !$sku['total_add']}
-                                    <td>
-                                        <input type="text" class="inputs" value="{:$sku['od_add']}" name="od_add[]"> </td>
-                                    {/if}
-<!--                                    {if $sku['pdcheck'] == 'on'}-->
-<!--                                    <td>-->
-                                        <input type="text" class="inputs" value="{:$sku['pd_l'] ?? ''}" name="pd_l[]"></td>
-<!--                                    {/if}-->
-                                    <td>
-                                        <input type="text" class="inputs" value="{:$sku['os_pv'] ?? ''}" name="os_pv[]"></td>
-                                    <td>
-                                        <input type="text" class="inputs" value="{:$sku['os_bd'] ?? ''}" name="os_bd[]"></td>
-                                    <td>
-                                        <input type="text" class="inputs" value="{:$sku['os_pv_r'] ?? ''}" name="os_pv_r[]"></td>
-                                    <td>
-                                        <input type="text" class="inputs" value="{:$sku['os_bd_r'] ?? ''}" name="os_bd_r[]"></td>
-                                </tr>
-
-                              {else/}
-
                                 <tr>
                                     <td>Right(OD)</td>
                                     <td>{:$sku['od_sph'] ?? ''}</td>
@@ -699,7 +645,6 @@
                                     <td>{:$sku['os_bd_r'] ?? ''}</td>
                                 </tr>
                                 </tbody>
-                                {/if}
                             </table>
                         </td>
                     </tr>

@@ -72,7 +72,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function (row) {
-                                        if (row.status == 'pending' && row.site ==9){
+                                        if (row.status =='pending' && row.site ==9){
                                             return true;
                                         }else{
                                             return  false;

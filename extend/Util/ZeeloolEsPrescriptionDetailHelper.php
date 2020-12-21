@@ -130,7 +130,7 @@ class ZeeloolEsPrescriptionDetailHelper
                 $product_options['info_buyRequest']['tmplens']['prescription_pic_id'] > 0){
                 $items[$item_key]['to_examine'] = true;
             }else{
-                $items[$item_key]['to_examine'] = true;
+                $items[$item_key]['to_examine'] = false;
             }
 			// dump($product_options);
 			$final_params = array();
