@@ -875,7 +875,7 @@ class TrackReg extends Backend
         $order_user_count2 = 0;
         foreach ($update_userids as $update_userid) {
             //判断活跃用户在当天下单的用户数
-            $order = $zeelool_model->table('sales_flat_order')->where($cart_where2)->where($status_where)->where('customer_id', $update_userid)->value('entity_id');
+            $order = $zeelool_model->table('sales_flat_order')->where($cart_where1)->where($status_where)->where('customer_id', $update_userid)->value('entity_id');
             if ($order) {
                 $order_user_count2++;
             }
@@ -1122,7 +1122,7 @@ class TrackReg extends Backend
         $order_user_count2 = 0;
         foreach ($update_userids as $update_userid) {
             //判断活跃用户在当天下单的用户数
-            $order = $zeelool_model->table('sales_flat_order')->where($cart_where2)->where($status_where)->where('customer_id', $update_userid)->value('entity_id');
+            $order = $zeelool_model->table('sales_flat_order')->where($cart_where1)->where($status_where)->where('customer_id', $update_userid)->value('entity_id');
             if ($order) {
                 $order_user_count2++;
             }
@@ -1243,7 +1243,7 @@ class TrackReg extends Backend
         $order_user_count2 = 0;
         foreach ($update_userids as $update_userid) {
             //判断活跃用户在当天下单的用户数
-            $order = $zeelool_model->table('sales_flat_order')->where($cart_where2)->where($status_where)->where('customer_id', $update_userid)->value('entity_id');
+            $order = $zeelool_model->table('sales_flat_order')->where($cart_where1)->where($status_where)->where('customer_id', $update_userid)->value('entity_id');
             if ($order) {
                 $order_user_count2++;
             }
