@@ -1147,7 +1147,7 @@ class Test extends Backend
     {
         $list = Db::table('fa_order_log')->where(['site' => 3])->order('id desc')->select();
         $wesee = new \app\admin\model\order\order\Nihao();
-       
+
         foreach ($list as $k => $v) {
             $data = [];
             if ($v['type'] == 1) {
@@ -1187,5 +1187,157 @@ class Test extends Backend
         $data['custom_is_send_factory_new'] = 1;
         $data['custom_is_delivery_new'] = 1;
         $nihao->where(['created_at' => ['<', '2020-01-01']])->update($data);
+    }
+
+    /***************处理工单旧数据*********************** */
+    public function process_worklist_data()
+    {
+        /**
+         * 判断措施是否为 id = 3主单取消   changesku表需插入所有子订单
+         * 判断措施如果id = 19 更改镜框 需插入对应sku 所有子订单
+         * 判断措施id = 20 更改镜片 需插入对应sku 所有子订单
+         */
+        $work = new \app\admin\model\saleaftermanage\WorkOrderList();
+        $order = new \app\admin\model\order\order\NewOrder();
+        $orderitemprocess = new \app\admin\model\order\order\NewOrderItemProcess();
+        $list = $work->where(['work_status' => 1])->select();
+        foreach ($list as $k => $v) {
+            //插入主表
+            Db::table('fa_work_order_list_copy1')->insert($v);
+            //查询措施表
+            $res = Db::table('fa_work_order_measure')->where(['work_id' => $v['id']])->select();
+            //查询订单号所有子单
+            $order_list = $order->alias('a')->field('b.*')->where(['increment_id' => $v['platform_order'], 'site' => $v['work_platform']])
+                ->join(['fa_order_item_process' => 'b'], 'a.id=b.order_id')
+                ->select();
+
+            foreach ($res as $k1 => $v1) {
+                //插入措施表
+                $id =  Db::table('fa_work_order_measure_copy1')->insertGetId($v1);
+                //措施为取消
+                if ($v1['measure_choose_id'] == 3) {
+                    //查询change sku表
+                    $change_sku_list = Db::table('fa_work_order_change_sku')->where(['work_id' => $v['id']])->find();
+
+                    $change_sku_data = [];
+                    foreach ($order_list as $key => $val) {
+                        $change_sku_data[$key]['work_id'] = $v['work_id'];
+                        $change_sku_data[$key]['increment_id'] = $change_sku_list['increment_id'];
+                        $change_sku_data[$key]['platform_type'] = $change_sku_list['platform_type'];
+                        $change_sku_data[$key]['original_name'] = $change_sku_list['original_name'];
+                        $change_sku_data[$key]['original_sku'] = $val['original_sku'];
+                        $change_sku_data[$key]['original_number'] = 1;
+                        $change_sku_data[$key]['change_type'] = 3;
+                        $change_sku_data[$key]['create_person'] = $change_sku_list['create_person'];
+                        $change_sku_data[$key]['create_time'] = $change_sku_list['create_time'];
+                        $change_sku_data[$key]['update_time'] = $change_sku_list['update_time'];
+                        $change_sku_data[$key]['measure_id'] = $id;
+                        $change_sku_data[$key]['item_order_number'] = $val['item_order_number'];
+                    }
+                    if ($change_sku_data) {
+                        Db::table('fa_work_order_change_sku_copy1')->insertAll($change_sku_data);
+                    }
+                }
+
+                //措施为更改镜框
+                if ($v1['measure_choose_id'] == 1) {
+                    //查询change sku表内容
+                    $change_sku_list = Db::table('fa_work_order_change_sku')->where(['work_id' => $v['id']])->select();
+                    foreach ($change_sku_list as $k2 => $v2) {
+                        //查询订单号所有子单
+                        $order_list = $order->alias('a')->field('b.item_order_number')
+                            ->where(['a.increment_id' => $v2['platform_order'], 'a.site' => $v2['platform_type'], 'b.sku' => $v2['sku']])
+                            ->join(['fa_order_item_process' => 'b'], 'a.id=b.order_id')
+                            ->select();
+                        $measure = [];
+                        $change_sku_data = [];
+                        foreach ($order_list as $k3 => $v3) {
+                            $measure['work_id'] = $v['id'];
+                            $measure['measure_choose_id'] = 19;
+                            $measure['measure_content'] = '更改镜框';
+                            $measure['create_time'] = $v1['create_time'];
+                            $measure['operation_type'] = $v1['operation_type'];
+                            $measure['operation_time'] = $v1['operation_time'];
+                            $measure['sku_change_type'] = $v1['sku_change_type'];
+                            $measure['item_order_number'] = $v3['item_order_number'];
+                            $id = Db::table('fa_work_order_measure_copy1')->insertGetId($measure);
+                            $change_sku_data[$key]['work_id'] = $v['work_id'];
+                            $change_sku_data[$key]['increment_id'] = $v2['increment_id'];
+                            $change_sku_data[$key]['platform_type'] = $v2['platform_type'];
+                            $change_sku_data[$key]['original_name'] = $v2['original_name'];
+                            $change_sku_data[$key]['original_sku'] = $v2['original_sku'];
+                            $change_sku_data[$key]['original_number'] = 1;
+                            $change_sku_data[$key]['change_type'] = 1;
+                            $change_sku_data[$key]['change_sku'] = $v2['change_sku'];
+                            $change_sku_data[$key]['change_number'] = 1;
+                            $change_sku_data[$key]['create_person'] = $v2['create_person'];
+                            $change_sku_data[$key]['create_time'] = $v2['create_time'];
+                            $change_sku_data[$key]['update_time'] = $v2['update_time'];
+                            $change_sku_data[$key]['measure_id'] = $id;
+                            $change_sku_data[$key]['item_order_number'] = $v3['item_order_number'];
+                        }
+
+                        if ($change_sku_data) {
+                            Db::table('fa_work_order_change_sku_copy1')->insertAll($change_sku_data);
+                        }
+
+                    }
+                }
+
+
+                //措施为更改镜片
+                if ($v1['measure_choose_id'] == 12) {
+                    //查询change sku表内容
+                    $change_sku_list = Db::table('fa_work_order_change_sku')->where(['work_id' => $v['id']])->select();
+                    foreach ($change_sku_list as $k2 => $v2) {
+                        //查询订单号所有子单
+                        $order_list = $order->alias('a')->field('b.item_order_number')
+                            ->where(['a.increment_id' => $v2['platform_order'], 'a.site' => $v2['platform_type'], 'b.sku' => $v2['sku']])
+                            ->join(['fa_order_item_process' => 'b'], 'a.id=b.order_id')
+                            ->select();
+                        $measure = [];
+                        $change_sku_data = [];
+                        foreach ($order_list as $k3 => $v3) {
+                            $measure['work_id'] = $v['id'];
+                            $measure['measure_choose_id'] = 20;
+                            $measure['measure_content'] = '更改镜片';
+                            $measure['create_time'] = $v1['create_time'];
+                            $measure['operation_type'] = $v1['operation_type'];
+                            $measure['operation_time'] = $v1['operation_time'];
+                            $measure['sku_change_type'] = $v1['sku_change_type'];
+                            $measure['item_order_number'] = $v3['item_order_number'];
+                            $id = Db::table('fa_work_order_measure_copy1')->insertGetId($measure);
+                            $change_sku_data[$key]['work_id'] = $v['work_id'];
+                            $change_sku_data[$key]['increment_id'] = $v2['increment_id'];
+                            $change_sku_data[$key]['platform_type'] = $v2['platform_type'];
+                            $change_sku_data[$key]['original_name'] = $v2['original_name'];
+                            $change_sku_data[$key]['original_sku'] = $v2['original_sku'];
+                            $change_sku_data[$key]['original_number'] = 1;
+                            $change_sku_data[$key]['change_type'] = 1;
+                            $change_sku_data[$key]['change_sku'] = $v2['change_sku'];
+                            $change_sku_data[$key]['change_number'] = 1;
+                            $change_sku_data[$key]['create_person'] = $v2['create_person'];
+                            $change_sku_data[$key]['create_time'] = $v2['create_time'];
+                            $change_sku_data[$key]['update_time'] = $v2['update_time'];
+                            $change_sku_data[$key]['measure_id'] = $id;
+                            $change_sku_data[$key]['item_order_number'] = $v3['item_order_number'];
+                        }
+
+                        if ($change_sku_data) {
+                            Db::table('fa_work_order_change_sku_copy1')->insertAll($change_sku_data);
+                        }
+
+                    }
+                }
+
+                //插入措施表
+
+                //查询change sku表 
+
+                //插入sku表
+
+
+            }
+        }
     }
 }
