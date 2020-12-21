@@ -391,6 +391,7 @@ class Test01 extends Backend
     public function export_v_data()
     {
         $sku_list = Db::name('datacenter_sku_import_test')->where('id', '>=', 1)->where('id', '<=', 99)->select();
+        dump($sku_list);die;
         foreach ($sku_list as $k => $v) {
             //站点
             $order_platform = 2;
