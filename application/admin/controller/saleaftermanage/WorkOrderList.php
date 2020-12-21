@@ -3583,7 +3583,6 @@ EOF;
 
         $list = $this->model
             ->where($map)
-            ->limit(10)
             ->select();
         $list = collection($list)->toArray();
 
@@ -3757,7 +3756,7 @@ EOF;
             $csv[$key]['work_picture'] = $value['work_picture'];
             $csv[$key]['create_user_name'] = $value['create_user_name'];
             $csv[$key]['is_after_deal_with'] =$value['is_after_deal_with'] == 1 ? '是' : '否';
-            $csv[$key]['assign_user_id'] = $value['assign_user_id'];
+//            $csv[$key]['assign_user_id'] = $value['assign_user_id'];
             $csv[$key]['operation_user_id'] = $value['operation_user_id'];
             $csv[$key]['check_note'] = $value['check_note'];
             $csv[$key]['create_time'] = $value['create_time'];
@@ -3814,8 +3813,8 @@ EOF;
             $csv[$key]['replacement_order'] = $value['replacement_order'];
 
         }
-        dump(count($csv[0]));
-        dump($csv);die();
+//        dump(count($csv[0]));
+//        dump($csv);die();
         $headlist = [
             '工单平台', '工单类型','工单状态','工单级别', '平台订单号',
             '客户邮箱', '订单金额', '订单支付的货币类型', '订单的支付方式','订单中的sku',
