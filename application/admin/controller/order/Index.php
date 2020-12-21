@@ -229,6 +229,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
             Log::write("处方接口请求");
             Log::write($content);
             Log::write($values);
+            Log::write($url);
             if ($content['status'] == 200){
                 $this->success('操作成功');
             }else{
