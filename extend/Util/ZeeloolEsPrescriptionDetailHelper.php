@@ -135,6 +135,8 @@ class ZeeloolEsPrescriptionDetailHelper
             }
             if ($product_options['info_buyRequest']['tmplens']['prescription_pic_id'] > 0){
                 $items[$item_key]['prescription_image'] = Db::connect('database.db_zeelool_es')->table('oc_prescription_pic')->where('id',$product_options['info_buyRequest']['tmplens']['prescription_pic_id'])->value('pic');
+            }else{
+                $items[$item_key]['prescription_image'] = null;
             }
 			// dump($product_options);
 			$final_params = array();
