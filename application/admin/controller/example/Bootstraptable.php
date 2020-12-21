@@ -153,6 +153,12 @@ class Bootstraptable extends Backend
         if (!$file) {
             $this->error(__('Parameter %s can not be empty', 'file'));
         }
+
+        //查询原文件名称 获取sku
+        $data = Db::name('attachment')->where('url', $file)->value('extparam');
+        $data = json_decode($data, true);
+        $sku = str_replace(strrchr($data['name'], "."), "", $data['name']);
+       
         $filePath = ROOT_PATH . DS . 'public' . DS . $file;
         if (!is_file($filePath)) {
             $this->error(__('No results were found'));
@@ -196,67 +202,34 @@ class Bootstraptable extends Backend
             if (!$PHPExcel = $reader->load($filePath)) {
                 $this->error(__('Unknown data format'));
             }
-            $currentSheet = $PHPExcel->getSheet(0);  //读取文件中的第一个工作表
-            $allColumn = $currentSheet->getHighestDataColumn(); //取得最大的列号
-            $allRow = $currentSheet->getHighestRow(); //取得一共有多少行
-            $maxColumnNumber = Coordinate::columnIndexFromString($allColumn);
-
-            $fields = [];
-            for ($currentRow = 1; $currentRow <= 1; $currentRow++) {
-                for ($currentColumn = 1; $currentColumn <= $maxColumnNumber; $currentColumn++) {
-                    $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getValue();
-                    $fields[] = $val;
-                }
-            }
-
-
+            $sheetCount = $PHPExcel->getSheetCount(); //获取sheet工作表总个数
+            /*读取表格数据*/
             $list = [];
-            for ($currentRow = 2; $currentRow <= $allRow; $currentRow++) {
-                for ($currentColumn = 1; $currentColumn <= $maxColumnNumber; $currentColumn++) {
-                    $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getValue();
-                    $list[$currentRow - 2][$currentColumn - 1] = is_null($val) ? '' : $val;
+            for ($i = 0; $i <= $sheetCount - 1; $i++) { //循环sheet工作表的总个数
+                $currentSheet = $PHPExcel->getSheet($i);  //读取文件中的第一个工作表
+                $allColumn = $currentSheet->getHighestDataColumn(); //取得最大的列号
+                $allRow = $currentSheet->getHighestRow(); //取得一共有多少行
+                $maxColumnNumber = Coordinate::columnIndexFromString($allColumn);
+                //从第$i个sheet的第1行开始获取数据
+               
+                for ($currentRow = 2; $currentRow <= $allRow; $currentRow++) {
+                    for ($currentColumn = 1; $currentColumn <= $maxColumnNumber; $currentColumn++) {
+                        $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getValue();
+                        $list[] = is_null($val) ? '' : $val;
+                    }
                 }
             }
         } catch (Exception $exception) {
             $this->error($exception->getMessage());
         }
-        $supplier = new \app\admin\model\purchase\Supplier();
+        $list = array_values(array_filter($list));
+        $data = [];
         foreach ($list as $k => $v) {
-            $data = [];
-            if ($v[3] == '手链') {
-                $category_id = 34;
-            } elseif ($v[3] == '耳饰') {
-                $category_id = 35;
-            } elseif ($v[3] == '项链') {
-                $category_id = 39;
-            }
-            $data['sku'] = $v[0];
-            $data['name'] = $v[3];
-            $data['price'] = $v[4];
-            $data['category_id'] = $category_id;
-            $data['item_status'] = 1;
-            //查询供应商
-            $supplier_id =  $supplier->where(['supplier_name' => ['like', "%" . $v[2] . "%"],'status' => 1])->value('id');
-            $data['supplier_id'] = $supplier_id ?: 0;
-            $data['supplier_sku'] = $v[1];
-            $data['create_person'] = '李衡';
-            $data['create_time'] = date("Y-m-d H:i:s", time());
-           
-            $lastInsertId = Db::name('new_product')->insertGetId($data);
-
-            if ($lastInsertId !== false) {
-                $itemAttribute['item_id'] = $lastInsertId;
-                $itemAttribute['attribute_type'] = 3;
-                Db::name('new_product_attribute')->insert($itemAttribute);
-                //绑定供应商SKU关系
-                $supplier_data['sku'] = $data['sku'];
-                $supplier_data['supplier_sku'] = $v[1];
-                $supplier_data['supplier_id'] = $data['supplier_id'];
-                $supplier_data['createtime'] = date("Y-m-d H:i:s", time());
-                $supplier_data['create_person'] = '李衡';
-                Db::name('supplier_sku')->insert($supplier_data);
-            }
+            $data[$k]['sku'] = $sku;
+            $data[$k]['product_number'] = $v;
         }
+        Db::name('zzzz_temp')->insertAll($data);
+        echo 'ok';
     }
 
     public function derive()
