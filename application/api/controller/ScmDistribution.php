@@ -1150,7 +1150,7 @@ class ScmDistribution extends Scm
                     //检验库存
                     $stock_arr = $this->_item
                         ->where(['sku'=>$true_sku])
-                        ->field('stock,occupy_stock,distribution_occupy_stock')
+                        ->field('stock,available_stock,distribution_occupy_stock')
                         ->find()
                     ;
 
@@ -1179,7 +1179,7 @@ class ScmDistribution extends Scm
                         'sku'                       => $true_sku,
                         'number_type'               => 2,
                         'order_number'              => $item_order_number,
-                        'available_stock_before'    => $stock_arr['occupy_stock'],
+                        'available_stock_before'    => $stock_arr['available_stock'],
                         'available_stock_change'    => -1,
                         'distribution_stock_before' => $stock_arr['distribution_occupy_stock'],
                         'distribution_stock_change' => -1,
