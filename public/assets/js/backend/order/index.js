@@ -51,6 +51,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function (row) {
+                                        console.log(row)
                                         //返回true时按钮显示,返回false隐藏
                                         if (row.status !== 'pending' && row.site !=='9'){
                                             return  true;
@@ -72,6 +73,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function (row) {
+                                        console.log(row)
                                         if (row.status =='pending' && row.site ==9){
                                             return true;
                                         }else{
