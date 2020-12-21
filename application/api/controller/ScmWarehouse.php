@@ -1994,13 +1994,11 @@ class ScmWarehouse extends Scm
         //检测条形码是否已绑定
         $where['inventory_id'] = [['>', 0], ['neq', $inventory_id]];
         foreach (array_filter($item_sku) as $key => $value) {
-            //            empty($value['sku_agg']) && $this->error(__($value['sku'].'的条形码数据为空，请检查'), [], 541);
-            $sku_code = array_column($value['sku_agg'], 'code');
-            count($value['sku_agg']) != count(array_unique($sku_code))
+            count($value['sku_agg']) != count(array_unique($value['sku_agg']))
             &&
             $this->error(__('条形码有重复，请检查'), [], 405);
 
-            $where['code'] = ['in', $sku_code];
+            $where['code'] = ['in', $value['sku_agg']];
             $inventory_info = $this->_product_bar_code_item
                 ->where($where)
                 ->field('code')
@@ -2021,6 +2019,7 @@ class ScmWarehouse extends Scm
             //提交盘点单状态为已完成，保存盘点单状态为盘点中
             $result = $this->_inventory->allowField(true)->save($params, ['id' => $inventory_id]);
             if ($result !== false) {
+                $where_code = [];
                 foreach (array_filter($item_sku) as $k => $v) {
                     $save_data = [];
                     $save_data['is_add'] = $is_add;//是否盘点
@@ -2030,8 +2029,8 @@ class ScmWarehouse extends Scm
                     $this->_inventory_item->where(['inventory_id' => $inventory_id, 'sku' => $v['sku']])->update($save_data);
                     //盘点单绑定条形码数组组装
                     foreach ($v['sku_agg'] as $k_code => $v_code) {
-                        if (!empty($v_code['code'])) {
-                            $where_code[] = $v_code['code'];
+                        if (!empty($v_code)) {
+                            $where_code[] = $v_code;
                         }
                     }
                     //盘点单移除条形码
@@ -2042,8 +2041,11 @@ class ScmWarehouse extends Scm
                         $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => ['in', $value['remove_agg']]])->save($code_clear);
                     }
                 }
+
                 //盘点单绑定条形码执行
-                $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => ['in', $where_code]])->save(['inventory_id' => $inventory_id]);
+                if($where_code){
+                    $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => ['in', $where_code]])->save(['inventory_id' => $inventory_id]);
+                }
             }
             $this->_inventory_item->commit();
             $this->_product_bar_code_item->commit();
