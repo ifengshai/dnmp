@@ -3572,13 +3572,12 @@ EOF;
         set_time_limit(0);
         ini_set('memory_limit', '1024M');
 
-        $map['work_platform'] =2;
-        $map['id'] =['lt',5249];
+        $map['work_platform'] =1;
+        $map['work_status'] = array('in','2,3,5');
+//        0: '已取消', 1: '新建', 2: '待审核', 4: '审核拒绝', 3: '待处理', 5: '部分处理', 6: '已处理'
 
         $list = $this->model
             ->where($map)
-            ->limit(7000)
-            ->order('id desc')
             ->select();
         $list = collection($list)->toArray();
 
@@ -3618,7 +3617,6 @@ EOF;
         //求出配置里面的大分类信息
         $customer_problem_classify = $workOrderConfigValue['customer_problem_classify'];
 
-
         foreach ($list as $key => $value) {
             if ($value['after_user_id']) {
                 $value['after_user_id'] = $users[$value['after_user_id']];
@@ -3629,6 +3627,36 @@ EOF;
             if ($value['operation_user_id']) {
                 $value['operation_user_id'] = $users[$value['operation_user_id']];
             }
+
+            //状态
+            switch ($value['work_status']) {
+                case 2:
+                    $work_status = '待审核';
+                    break;
+                case 3:
+                    $work_status = '待处理';
+                    break;
+                case 5:
+                    $work_status = '部分处理';
+                    break;
+                default:
+                    $work_status = '';
+                    break;
+            }
+            //级别
+            switch ($value['work_level']){
+                case 1:
+                    $work_level = '低';
+                    break;
+                case  2:
+                    $work_level = '中';
+                    break;
+                case  3:
+                    $work_level = '高';
+                    break;
+            }
+
+
             switch ($value['work_platform']) {
                 case 2:
                     $work_platform = 'voogueme';
@@ -3655,9 +3683,10 @@ EOF;
                     $work_platform = 'zeelool';
                     break;
             }
-            $csv[$key]['id'] = $value['id'];
             $csv[$key]['work_platform'] = $work_platform;
             $csv[$key]['work_type'] =$value['work_type'] == 1 ? '客服工单' : '仓库工单';
+            $csv[$key]['work_status'] =$work_status ;
+            $csv[$key]['work_level'] =$work_level ;
             $csv[$key]['platform_order'] =$value['platform_order'];
             $csv[$key]['email'] =$value['email'];
             $csv[$key]['base_grand_total'] =$value['base_grand_total'];
@@ -3722,7 +3751,7 @@ EOF;
             $csv[$key]['work_picture'] = $value['work_picture'];
             $csv[$key]['create_user_name'] = $value['create_user_name'];
             $csv[$key]['is_after_deal_with'] =$value['is_after_deal_with'] == 1 ? '是' : '否';
-            $csv[$key]['assign_user_id'] = $value['assign_user_id'];
+//            $csv[$key]['assign_user_id'] = $value['assign_user_id'];
             $csv[$key]['operation_user_id'] = $value['operation_user_id'];
             $csv[$key]['check_note'] = $value['check_note'];
             $csv[$key]['create_time'] = $value['create_time'];
@@ -3738,6 +3767,9 @@ EOF;
             $csv[$key]['integral'] = $value['integral'];
             $csv[$key]['refund_logistics_num'] = $value['refund_logistics_num'];
             $csv[$key]['refund_money'] = $value['refund_money'];
+
+
+
 
             //退款百分比
             if((0<$value['base_grand_total']) && (is_numeric($value['refund_money']))){
@@ -3775,23 +3807,21 @@ EOF;
             $csv[$key]['payment_time'] = $value['payment_time'];
             $csv[$key]['replacement_order'] = $value['replacement_order'];
 
-            echo $key . "\n";
         }
-
-
+//        dump(count($csv[0]));
+//        dump($csv);die();
         $headlist = [
-            'ID','工单平台', '工单类型', '平台订单号', '客户邮箱', '订单金额', '订单支付的货币类型', '订单的支付方式',
-            '订单中的sku', '对应商品sku', '工单状态','问题大分类',
-            '问题类型', '工单问题描述', '工单图片', '工单创建人', '工单是否需要审核',
-            '工单是否需要审核', '实际审核人', '审核人备注', '新建状态时间', '开始走流程时间',
-            '工单审核时间', '经手人处理时间', '工单完成时间', '补差价的金额', '补差价的订单号',
-            '优惠券类型', '优惠券描述', '优惠券', '积分', '退回物流单号',
-            '退款金额', '退款百分比', '措施', '措施详情', '承接详情',
-            '工单回复备注', '订单支付时间', '补发订单号'
-
+            '工单平台', '工单类型','工单状态','工单级别', '平台订单号',
+            '客户邮箱', '订单金额', '订单支付的货币类型', '订单的支付方式','订单中的sku',
+            '对应商品sku', '问题大分类','问题类型', '工单问题描述','工单图片',
+            '工单创建人',  '工单是否需要审核', '实际审核人', '审核人备注', '新建状态时间',
+            '开始走流程时间','工单审核时间', '经手人处理时间', '工单完成时间', '补差价的金额',
+            '补差价的订单号','优惠券类型', '优惠券描述','优惠券', '积分',
+            '退回物流单号','退款金额', '退款百分比', '措施', '措施详情',
+            '承接详情','工单回复备注', '订单支付时间','补发订单号'
         ];
         $path = "/uploads/";
-        $fileName = '工单数据 - 12-14';
+        $fileName = '工单数据备份导出 - 12-21';
         Excel::writeCsv($csv, $headlist, $path . $fileName);
     }
 
