@@ -298,6 +298,10 @@ class DataMarket extends Backend
         }
         return $arr;
     }
+    //库龄概况
+    public function stock_age_overview(){
+        
+    }
     //采购总览
     public function purchase_overview($time_str){
         $createat = explode(' ', $time_str);
@@ -401,8 +405,8 @@ class DataMarket extends Backend
             $date = $this->getDateFromRange($createat[0],$createat[3]);
 
             //所选时间段，每天订单发出数量；订单发出未超时订单、超时订单堆叠图；
-            $this->process->where()->
-            fa_order_item_process
+            /*$this->process->where()->
+            fa_order_item_process*/
            /* $where['create_time'] = ['between', [$createat[0], $createat[3]]];
 
             $list = $this->warehouse_model->where($where)
