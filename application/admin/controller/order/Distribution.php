@@ -1805,7 +1805,7 @@ class Distribution extends Backend
                ')
                 ->where([
                     'custom_is_delivery_new' => 1,
-                    'custom_match_delivery_created_at_new' => ['between', ['2018-01-01', '2020-10-01']]
+//                    'custom_match_delivery_created_at_new' => ['between', ['2018-01-01', '2020-10-01']]
                 ])
                 ->select();
 
@@ -1830,7 +1830,7 @@ class Distribution extends Backend
                             $this->model
                                 ->allowField(true)
                                 ->save(
-                                    ['distribution_status' => 1],
+                                    ['distribution_status' => 9],
                                     ['id' => ['in',$item_process_ids]]
                                 );
 
