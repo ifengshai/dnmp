@@ -3756,7 +3756,7 @@ class Crontab extends Backend
         $model->table('sales_flat_quote')->query("set time_zone='+8:00'");
         //昨天支付成功数
         $order_where['order_type'] = 1;
-        $order_success_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        $order_success_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
         $yes_date = date("Y-m-d", strtotime("-1 day"));
         $yestime_where = [];
         $yestime_where1 = [];
