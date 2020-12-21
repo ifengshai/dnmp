@@ -134,7 +134,7 @@ class ZeeloolEsPrescriptionDetailHelper
                 $items[$item_key]['to_examine'] = false;
             }
             if ($product_options['info_buyRequest']['tmplens']['prescription_pic_id'] > 0){
-                $items[$item_key]['prescription_image'] = \db('oc_prescription_pic')->where('id',$product_options['info_buyRequest']['tmplens']['prescription_pic_id'])->value('pic');
+                $items[$item_key]['prescription_image'] = Db::connect('database.db_zeelool_es')->table('oc_prescription_pic')->where('id',$product_options['info_buyRequest']['tmplens']['prescription_pic_id'])->value('pic');
             }
 			// dump($product_options);
 			$final_params = array();
