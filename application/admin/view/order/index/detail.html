@@ -539,6 +539,12 @@
                                 </tbody>
                             </table>
                         </td>
+
+                        {if condition="$sku['prescription_image'] neq null"}
+                        <td>
+                            <img src="{$sku['prescription_image']}" alt="" style="width: 3000px;height: 250px;float: right" data-tips-image>
+                        </td>
+                        {/if}
                     </tr>
                     {/foreach}
                     </tbody>
