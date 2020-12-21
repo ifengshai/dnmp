@@ -1226,7 +1226,7 @@ class Distribution extends Backend
                     $this->_new_order_process
                         ->allowField(true)
                         ->isUpdate(true, ['order_id' => $value['order_id']])
-                        ->save(['combine_status' => 1, 'combine_time' => time()]);
+                        ->save(['combine_status' => 1,'check_status' => 0, 'combine_time' => time()]);
                 }
 
                 $this->model
