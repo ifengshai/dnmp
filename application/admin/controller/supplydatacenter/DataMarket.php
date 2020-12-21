@@ -25,6 +25,9 @@ class DataMarket extends Backend
         $this->order = new \app\admin\model\order\order\NewOrder();
         $this->worklist = new \app\admin\model\saleaftermanage\WorkOrderList;
         $this->process = new \app\admin\model\order\order\NewOrderProcess;
+        $this->orderitemprocess = new \app\admin\model\order\order\NewOrderItemProcess();
+        $this->distributionLog = new \app\admin\model\DistributionLog;
+        $this->orderNode = new \app\admin\model\OrderNode;
     }
     /**
      * 显示资源列表
@@ -41,6 +44,8 @@ class DataMarket extends Backend
         }else{
             $time_str = $params['time_str'];
         }
+
+
         //库存总览
         $stock_overview = $this->stock_overview();
         //仓库指标总览
@@ -49,9 +54,13 @@ class DataMarket extends Backend
         $stock_level_overview = $this->stock_level_overview();
         //采购概况
         $purchase_overview = $this->purchase_overview($time_str);
+
+
+        //物流妥投概况
+        //$logistics_completed_overview = $this->logistics_completed_overview($time_str);
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
-        $this->view->assign(compact('stock_overview','stock_measure_overview','stock_level_overview','purchase_overview','magentoplatformarr'));
+        $this->view->assign(compact('stock_overview','stock_measure_overview','stock_level_overview','purchase_overview','logistics_completed_overview','magentoplatformarr'));
         return $this->view->fetch();
     }
     //库存总览
@@ -433,6 +442,141 @@ class DataMarket extends Backend
                     'stack'=>'订单'
                 ],
 
+            ];
+            return json(['code' => 1, 'data' => $json]);
+        }
+    }
+    //加工概况
+    public function process_overview(){
+        if ($this->request->isAjax()) {
+            $params = $this->request->param();
+            $time_str = $params['time_str'];
+            $cache_data = Cache::get('Supplydatacenter_userdata'.$time_str.md5(serialize('process_overview')));
+            if(!$cache_data){
+                if (!$time_str) {
+                    $start = date('Y-m-d 00:00:00', strtotime('-6 day'));
+                    $end = date('Y-m-d 23:59:59');
+                    $time_str = $start . ' - ' . $end;
+                }
+                $createat = explode(' ', $time_str);
+
+                $start_time = strtotime($createat[0]);
+                $end_time = strtotime($createat[3]);
+                $data1 = $this->getProcess(1,$start_time,$end_time); //打印标签
+                $data2 = $this->getProcess(2,$start_time,$end_time); //配货
+                $data3 = $this->getProcess(3,$start_time,$end_time); //配镜片
+                $data4 = $this->getProcess(4,$start_time,$end_time); //加工
+                $data5 = $this->getProcess(5,$start_time,$end_time); //印logo
+                $data6 = $this->getProcess(7,$start_time,$end_time); //合单
+
+                $check_where['check_time'] = $combine_where['combine_time'] = ['between',[$start_time,$end_time]];
+                $check_where['check_status'] = 1;
+                $combine_where['combine_status'] = 1;
+                $data7 = $this->process->where($check_where)->count();     //审单
+                $data8 = $this->process->where($combine_where)->count();    //合单
+
+                $arr = array(
+                    $data8, $data7, $data6, $data5, $data4, $data3, $data2, $data1
+                );
+                Cache::set('Supplydatacenter_userdata' . $time_str . md5(serialize('process_overview')), $arr, 36000);
+            }else{
+                $arr = $cache_data;
+            }
+            $data = $arr;
+            $json['firtColumnName'] = ['发货', '审单', '合单', '印logo', '加工', '配镜片', '配货', '打印标签'];
+            $json['columnData'] = [[
+                'type' => 'bar',
+                'barWidth' => '40%',
+                'data' => $data,
+                'name' => '加工概况',
+                'itemStyle' => [
+                    'normal' => [
+                        'label' => [
+                            'show' => true,
+                            'position' => 'right',
+                            'formatter'=>"{c}"."个",
+                            'textStyle'=>[
+                                'color'=> 'black'
+                            ],
+                        ],
+                    ]
+                ]
+            ]];
+            return json(['code' => 1, 'data' => $json]);
+        }
+    }
+    //统计子单加工流程数量
+    public function getProcess($type,$start,$end){
+        $where['create_time'] = ['between',[$start,$end]];
+        $where['distribution_node'] = $type;
+        return $this->distributionLog->where($where)->count();
+    }
+    //物流妥投概况
+    public function logistics_completed_overview($time_str){
+        if (!$time_str) {
+            $start = date('Y-m-d 00:00:00', strtotime('-6 day'));
+            $end = date('Y-m-d 23:59:59');
+            $time_str = $start . ' - ' . $end;
+        }
+        $createat = explode(' ', $time_str);
+
+        $start_time = strtotime($createat[0]);
+        $end_time = strtotime($createat[3]);
+        $where['check_status'] = 1;
+        $where['check_time'] = ['between',[$start_time,$end_time]];
+        $arr['delivery_count'] = $this->process->where($where)->count();  //发货数量
+        $completed_where['is_tracking'] = 5;
+        $arr['completed_count'] = $this->process->where($where)->where($completed_where)->count();  //总妥投数量
+        $uncompleted_where['is_tracking'] = ['<>',5];
+        $arr['uncompleted_count'] = $this->process->where($where)->where($uncompleted_where)->count();  //未妥投数量
+        $map = [];
+        $map[] = ['exp', Db::raw("DATE_ADD(check_time, INTERVAL 15 DAY)<now()")];
+        $arr['timeout_uncompleted_count'] = $this->process->where($where)->where($uncompleted_where)->where($map)->count();  //超时未妥投数量
+        return $arr;
+    }
+    //妥投时效占比
+    public function comleted_time_rate(){
+        if ($this->request->isAjax()) {
+            $params = $this->request->param();
+            $time_str = $params['time_str'] ? $params['time_str'] : '';
+            if (!$time_str) {
+                $start = date('Y-m-d 00:00:00', strtotime('-30 day'));
+                $end = date('Y-m-d 23:59:59');
+                $time_str = $start . ' - ' . $end;
+            }
+            $createat = explode(' ', $time_str);
+            $where['delivery_time'] = ['between',[$createat[0],$createat[3]]];
+            $where['node_type'] = 40;
+            //总的妥投订单数
+            $count = $this->orderNode->where($where)->count();
+
+            $sql2 = $this->orderNode->alias('t1')->field('TIMESTAMPDIFF(DAY,delivery_time,signing_time) AS total')->where($where)->group('order_number')->buildSql();
+
+            $sign_count = $this->orderNode->table([$sql2=>'t2'])->field('sum( IF ( total >= 10 and total<15, 1, 0 ) ) AS c,sum( IF ( total >= 7 and total<10, 1, 0 ) ) AS b,sum( IF ( total >= 0 and total<7, 1, 0 ) ) AS a')->select();
+
+            $data1 = $sign_count[0]['a'];
+            $data2 = $sign_count[0]['b'];
+            $data3 = $sign_count[0]['c'];
+            $data4 = $count - $data1 - $data2 - $data3;
+
+            $json['column'] = ['7天妥投率', '10天妥投率','15天妥投率','15天以上妥投率'];
+            $json['columnData'] = [
+                [
+                    'name' => '7天妥投率',
+                    'value' => $data1,
+                ],
+                [
+                    'name' => '10天妥投率',
+                    'value' => $data2,
+                ],
+                [
+                    'name' => '15天妥投率',
+                    'value' => $data3,
+                ],
+                [
+                    'name' => '15天以上妥投率',
+                    'value' => $data4,
+                ],
             ];
             return json(['code' => 1, 'data' => $json]);
         }
