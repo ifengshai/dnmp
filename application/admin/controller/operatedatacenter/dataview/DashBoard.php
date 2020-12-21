@@ -443,11 +443,16 @@ class DashBoard extends Backend
                 ];
 
             } else {
+                dump($start);
+                dump($end);
+                dump($where);
                 $arr = $model->where($where)->column('day_date', 'active_user_num');
+                $arr = $model->where($where)->column('active_user_num', 'day_date');
                 $date_arr = $arr;
                 // dump($arr);die;
                 dump($arr);
                 $arr1 = $model->where($where)->column('day_date', 'order_num');
+                $arr1 = $model->where($where)->column('order_num', 'day_date');
                 $date_arr1 = $arr1;
                 dump($arr1);
                 die;
