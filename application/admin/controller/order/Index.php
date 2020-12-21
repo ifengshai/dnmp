@@ -383,6 +383,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
         $key_list = array_keys($new_ruleList);
 
         $entity_id = $this->request->get('id');
+        dump($entity_id);die();
         $label = $this->request->get('label', 1);
         $this->view->assign(compact('order_number', 'entity_id', 'label'));
         $this->view->assign("list", $new_ruleList);
