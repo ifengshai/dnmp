@@ -194,6 +194,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                 }else{
                     $value['order_items'][$i]['pd_r'] = $data['pd_r'][$i];
                     $value['order_items'][$i]['pd_l'] = $data['pd_l'][$i];
+                    $value['order_items'][$i]['pdcheck'] = 'on';
                 }
                 $value['order_items'][$i]['od_pv'] = $data['od_pv'][$i];
                 $value['order_items'][$i]['os_pv'] = $data['os_pv'][$i];
