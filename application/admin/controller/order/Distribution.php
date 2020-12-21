@@ -443,10 +443,7 @@ class Distribution extends Backend
 
         list($where, $sort, $order, $offset, $limit) = $this->buildparams();
 
-        print_r($where);
-        print_r('---------');
-        print_r($map);
-        exit;
+
 
         $total = $this->model
             ->alias('a')
@@ -466,7 +463,12 @@ class Distribution extends Backend
             ->where($map)
             ->order($sort, $order)
             ->limit($offset, $limit)
-            ->select();
+            ->select(false);
+
+        print_r($map);
+        print_r('---------');
+        print_r($list);
+        exit;
 
         $list = collection($list)->toArray();
 
