@@ -52,49 +52,49 @@ class Scm extends Api
             'menu' => [
                 [
                     'name' => '配货',
-                    'link' => 'distribution/index',
+                    'link' => 'pda/product',
                     'icon' => '/assets/img/distribution/peihuo.png',
                     'href' => 'com.nextmar.mojing.ui.distribution.OrderDistributionActivity'
                 ],
                 [
                     'name' => '镜片分拣',
-                    'link' => 'distribution/sorting',
+                    'link' => 'pda/sorting',
                     'icon' => '/assets/img/distribution/jingpianfenjian.png',
                     'href' => 'com.nextmar.mojing.ui.sorting.OrderSortingActivity'
                 ],
                 [
                     'name' => '配镜片',
-                    'link' => 'distribution/withlens',
+                    'link' => 'pda/withlens',
                     'icon' => '/assets/img/distribution/peijingpian.png',
                     'href' => 'com.nextmar.mojing.ui.order.OrderWithlensActivity'
                 ],
                 [
                     'name' => '加工',
-                    'link' => 'distribution/machining',
+                    'link' => 'pda/machining',
                     'icon' => '/assets/img/distribution/jiagong.png',
                     'href' => 'com.nextmar.mojing.ui.order.OrderMachiningActivity'
                 ],
                 [
                     'name' => '印LOGO',
-                    'link' => 'distribution/logo',
+                    'link' => 'pda/logo',
                     'icon' => '/assets/img/distribution/logo.png',
                     'href' => 'com.nextmar.mojing.ui.order.OrderLogoActivity'
                 ],
                 [
                     'name' => '成品质检',
-                    'link' => 'distribution/quality',
+                    'link' => 'pda/quality',
                     'icon' => '/assets/img/distribution/zhijian.png',
                     'href' => 'com.nextmar.mojing.ui.order.OrderQualityActivity'
                 ],
                 [
                     'name' => '合单',
-                    'link' => 'distribution/merge',
+                    'link' => 'pda/merge',
                     'icon' => '/assets/img/distribution/hedan.png',
                     'href' => 'com.nextmar.mojing.ui.merge.OrderMergeActivity'
                 ],
                 [
                     'name' => '合单待取',
-                    'link' => 'distribution/waitmerge',
+                    'link' => 'pda/waitmerge',
                     'icon' => '/assets/img/distribution/hedandaiqu.png',
                     'href' => 'com.nextmar.mojing.ui.merge.OrderMergeCompletedActivity'
                 ]
