@@ -26,6 +26,13 @@ class Bootstraptable extends Backend
     protected $model = null;
 
     protected $apiKey = 'F26A807B685D794C676FA3CC76567035';
+
+    /**
+     * 无需登录的方法,同时也就不需要鉴权了
+     * @var array
+     */
+    protected $noNeedLogin = ['*'];
+
     /**
      * 无需鉴权的方法(需登录)
      * @var array
@@ -158,7 +165,7 @@ class Bootstraptable extends Backend
         $data = Db::name('attachment')->where('url', $file)->value('extparam');
         $data = json_decode($data, true);
         $sku = str_replace(strrchr($data['name'], "."), "", $data['name']);
-       
+
         $filePath = ROOT_PATH . DS . 'public' . DS . $file;
         if (!is_file($filePath)) {
             $this->error(__('No results were found'));
@@ -211,7 +218,7 @@ class Bootstraptable extends Backend
                 $allRow = $currentSheet->getHighestRow(); //取得一共有多少行
                 $maxColumnNumber = Coordinate::columnIndexFromString($allColumn);
                 //从第$i个sheet的第1行开始获取数据
-               
+
                 for ($currentRow = 2; $currentRow <= $allRow; $currentRow++) {
                     for ($currentColumn = 1; $currentColumn <= $maxColumnNumber; $currentColumn++) {
                         $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getValue();
