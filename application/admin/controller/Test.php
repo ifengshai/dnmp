@@ -651,21 +651,14 @@ class Test extends Backend
                     //插入措施表
                     $id =  Db::table('fa_work_order_measure_copy1')->insertGetId($v1);
 
-                    //查询订单号所有子单
-                    $order_list = $order->alias('a')->field('b.item_order_number')
-                        ->where(['a.increment_id' => $v['increment_id'], 'a.site' => $v['work_platform']])
-                        ->join(['fa_order_item_process' => 'b'], 'a.id=b.order_id')
-                        ->select();
-
                     //查询change sku表
-                    $change_sku_list = Db::table('fa_work_order_change_sku')->where(['work_id' => $v['id']])->find();
+                    $change_sku_list = Db::table('fa_work_order_change_sku')->where(['work_id' => $v['id']])->select();
 
                     if (!$change_sku_list) continue;
                     $change_sku_data = [];
-                    foreach ($order_list as $key => $val) {
-                        $change_sku_data = $change_sku_list;
+                    foreach ($change_sku_list as $key => $val) {
+                        $change_sku_data = $val;
                         $change_sku_data['measure_id'] = $id;
-                        $change_sku_data['item_order_number'] = $val['item_order_number'];
                         Db::table('fa_work_order_change_sku_copy1')->insert($change_sku_data);
                     }
                 }
