@@ -1273,6 +1273,7 @@ class ScmWarehouse extends Scm
         $this->_purchase_order->startTrans();
         $this->_item_platform_sku->startTrans();
         $this->_purchase_order_item->startTrans();
+        (new StockLog())->startTrans();
         try {
             $data['create_person'] = $this->auth->nickname;
             $res = $this->_in_stock->allowField(true)->isUpdate(true, ['id' => $in_stock_id])->save($data);//审核拒绝不更新数据
@@ -1316,7 +1317,7 @@ class ScmWarehouse extends Scm
                                     $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->setDec('wait_instock_num', $should_arrivals_num);
 
                                     //插入日志表
-                                    $this->_stock_log->setData([
+                                    (new StockLog())->setData([
                                         'type' => 2,
                                         'site' => $val['website_type'],
                                         'modular' => 10,
@@ -1344,7 +1345,7 @@ class ScmWarehouse extends Scm
                                     //入库的时候减少待入库数量
                                     $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->setDec('wait_instock_num', $should_arrivals_num_plat);
                                     //插入日志表
-                                    $this->_stock_log->setData([
+                                    (new StockLog())->setData([
                                         'type' => 2,
                                         'site' => $val['website_type'],
                                         'modular' => 10,
@@ -1384,7 +1385,7 @@ class ScmWarehouse extends Scm
                             // $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => 4])->setDec('wait_instock_num', $v['in_stock_num']);
 
                             //插入日志表
-                            $this->_stock_log->setData([
+                            (new StockLog())->setData([
                                 'type' => 2,
                                 'site' => 4,
                                 'modular' => 10,
@@ -1409,7 +1410,7 @@ class ScmWarehouse extends Scm
                         $is_purchase = 11;
                         $item_platform_sku = $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $v['platform_id']])->find();
                         $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $v['platform_id']])->setInc('stock', $v['in_stock_num']);
-                        $this->_stock_log->setData([
+                        (new StockLog())->setData([
                             'type' => 2,
                             'site' => $v['platform_id'],
                             'modular' => 11,
@@ -1444,7 +1445,7 @@ class ScmWarehouse extends Scm
                                 if (($all_num - $key) == 1) {
                                     $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setInc('stock', $stock_num);
                                     //插入日志表
-                                    $this->_stock_log->setData([
+                                    (new StockLog())->setData([
                                         'type' => 2,
                                         'site' => $val['platform_type'],
                                         'modular' => 12,
@@ -1463,7 +1464,7 @@ class ScmWarehouse extends Scm
                                     $stock_num -= $num;
                                     $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setInc('stock', $num);
                                     //插入日志表
-                                    $this->_stock_log->setData([
+                                    (new StockLog())->setData([
                                         'type' => 2,
                                         'site' => $val['platform_type'],
                                         'modular' => 12,
@@ -1489,7 +1490,7 @@ class ScmWarehouse extends Scm
                                 if (($all_num - $key) == 1) {
                                     $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setInc('stock', $stock_num);
                                     //插入日志表
-                                    $this->_stock_log->setData([
+                                    (new StockLog())->setData([
                                         'type' => 2,
                                         'site' => $val['platform_type'],
                                         'modular' => 12,
@@ -1508,7 +1509,7 @@ class ScmWarehouse extends Scm
                                     $stock_num -= $num;
                                     $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setInc('stock', $num);
                                     //插入日志表
-                                    $this->_stock_log->setData([
+                                    (new StockLog())->setData([
                                         'type' => 2,
                                         'site' => $val['platform_type'],
                                         'modular' => 12,
@@ -1548,7 +1549,7 @@ class ScmWarehouse extends Scm
                         }
 
                         //插入日志表
-                        $this->_stock_log->setData([
+                        (new StockLog())->setData([
                             'type' => 2,
                             'site' => 0,
                             'modular' => $is_purchase,
@@ -1627,6 +1628,7 @@ class ScmWarehouse extends Scm
             $this->_purchase_order->commit();
             $this->_item_platform_sku->commit();
             $this->_purchase_order_item->commit();
+            (new StockLog())->commit();
         } catch (ValidateException $e) {
             $this->_item->rollback();
             $this->_in_stock->rollback();
@@ -1636,6 +1638,7 @@ class ScmWarehouse extends Scm
             $this->_purchase_order->rollback();
             $this->_item_platform_sku->rollback();
             $this->_purchase_order_item->rollback();
+            (new StockLog())->rollback();
             $this->error($e->getMessage(), [], 4441);
         } catch (PDOException $e) {
             $this->_item->rollback();
@@ -1646,6 +1649,7 @@ class ScmWarehouse extends Scm
             $this->_purchase_order->rollback();
             $this->_item_platform_sku->rollback();
             $this->_purchase_order_item->rollback();
+            (new StockLog())->rollback();
             $this->error($e->getMessage(), [], 4442);
         } catch (Exception $e) {
             $this->_item->rollback();
@@ -1656,6 +1660,7 @@ class ScmWarehouse extends Scm
             $this->_purchase_order->rollback();
             $this->_item_platform_sku->rollback();
             $this->_purchase_order_item->rollback();
+            (new StockLog())->rollback();
             $this->error($e->getMessage(), [], 4443);
         }
 
@@ -2107,6 +2112,7 @@ class ScmWarehouse extends Scm
         $this->_in_stock_item->startTrans();
         $this->_out_stock_item->startTrans();
         $this->_item_platform_sku->startTrans();
+        (new StockLog())->startTrans();
         try {
             $res = $this->_inventory->allowField(true)->isUpdate(true, ['id' => $inventory_id])->save($data);
             //审核通过 生成入库单 并同步库存
@@ -2128,7 +2134,7 @@ class ScmWarehouse extends Scm
                     if ($v['sku']) {
                         $stock = $this->_item->where($item_map)->inc('stock', $v['error_qty'])->inc('available_stock', $v['error_qty'])->update();
                         //插入日志表
-                        $this->_stock_log->setData([
+                        (new StockLog())->setData([
                             'type' => 2,
                             'site' => 0,
                             'modular' => 12,
@@ -2168,7 +2174,7 @@ class ScmWarehouse extends Scm
                                     $item_platform_sku_detail = $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->find();
                                     $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->inc('stock', $stock_num)->update();
                                     //插入日志表
-                                    $this->_stock_log->setData([
+                                    (new StockLog())->setData([
                                         'type' => 2,
                                         'site' => $val['platform_type'],
                                         'modular' => 12,
@@ -2188,7 +2194,7 @@ class ScmWarehouse extends Scm
                                     $item_platform_sku_detail = $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->find();
                                     $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->inc('stock', $num)->update();
                                     //插入日志表
-                                    $this->_stock_log->setData([
+                                    (new StockLog())->setData([
                                         'type' => 2,
                                         'site' => $val['platform_type'],
                                         'modular' => 12,
@@ -2211,7 +2217,7 @@ class ScmWarehouse extends Scm
                                     $item_platform_sku_detail = $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->find();
                                     $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->inc('stock', $stock_num)->update();
                                     //插入日志表
-                                    $this->_stock_log->setData([
+                                    (new StockLog())->setData([
                                         'type' => 2,
                                         'site' => $val['platform_type'],
                                         'modular' => 12,
@@ -2231,7 +2237,7 @@ class ScmWarehouse extends Scm
                                     $item_platform_sku_detail = $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->find();
                                     $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->inc('stock', $num)->update();
                                     //插入日志表
-                                    $this->_stock_log->setData([
+                                    (new StockLog())->setData([
                                         'type' => 2,
                                         'site' => $val['platform_type'],
                                         'modular' => 12,
@@ -2328,6 +2334,7 @@ class ScmWarehouse extends Scm
             $this->_in_stock_item->commit();
             $this->_out_stock_item->commit();
             $this->_item_platform_sku->commit();
+            (new StockLog())->commit();
         } catch (ValidateException $e) {
             $this->_item->rollback();
             $this->_in_stock->rollback();
@@ -2337,6 +2344,7 @@ class ScmWarehouse extends Scm
             $this->_in_stock_item->rollback();
             $this->_out_stock_item->rollback();
             $this->_item_platform_sku->rollback();
+            (new StockLog())->rollback();
             $this->error($e->getMessage(), [], 443);
         } catch (PDOException $e) {
             $this->_item->rollback();
@@ -2347,6 +2355,7 @@ class ScmWarehouse extends Scm
             $this->_in_stock_item->rollback();
             $this->_out_stock_item->rollback();
             $this->_item_platform_sku->rollback();
+            (new StockLog())->rollback();
             $this->error($e->getMessage(), [], 442);
         } catch (Exception $e) {
             $this->_item->rollback();
@@ -2357,6 +2366,7 @@ class ScmWarehouse extends Scm
             $this->_in_stock_item->rollback();
             $this->_out_stock_item->rollback();
             $this->_item_platform_sku->rollback();
+            (new StockLog())->rollback();
             $this->error($e->getMessage(), [], 441);
         }
         if ($res) {
