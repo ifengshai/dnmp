@@ -1763,32 +1763,32 @@ class ScmWarehouse extends Scm
             empty($page) && $this->error(__('Page can not be empty'), [], 522);
             empty($page_size) && $this->error(__('Page size can not be empty'), [], 523);
 
-            $where['a.is_del'] = 1;
-            $skus = $this->_inventory_item
-                ->alias('a')
-                ->field('a.sku')
-                ->where('b.status', 'in', [0, 1])
-                ->join(['fa_inventory_list' => 'b'], 'a.inventory_id=b.id', 'left')
-                ->select();
-            $skus = collection($skus)->toArray();
-            $skus = array_column($skus, 'sku');
-            if ($skus) {
-                $where_item['sku'] = ['not in', $skus];
-            }
-            if ($start_stock && $end_stock) {
-                $where_item['stock'] = ['between', [$start_stock, $end_stock]];
-                $item = $this->_item->field('sku')->where($where_item)->select();
-                $item = collection($item)->toArray();
-                $sku_list = array_column($item, 'sku');
-                if ($sku_list) {
-                    $where['a.sku'] = ['in', $sku_list];
-                } else {
-                    $this->success('暂无数据', ['info' => []], 200);
-                }
-            } elseif ($skus) {
-                $where['a.sku'] = ['not in', $skus];
+            $item_where = [
+                'is_open'=>['in', [1, 2]]
+            ];
+
+            //排除待盘点sku
+            $sku_arr = $this->_inventory_item->where('is_add', 0)->column('sku');
+            if ($sku_arr) {
+                $item_where['sku'] = ['not in', $sku_arr];
             }
 
+            //库存范围
+            if ($start_stock && $end_stock) {
+                $item_where['stock'] = ['between', [$start_stock, $end_stock]];
+            }
+
+            //查询商品表
+            $item_sku = $this->_item
+                ->where($item_where)
+                ->limit(0,1000)
+                ->column('sku');
+            empty($item_sku) && $this->success('暂无数据', ['info' => []], 200);
+
+            $where = [
+                'a.is_del'=>1,
+                'a.sku'=>['in',$item_sku]
+            ];
             if ($query) {
                 $where['a.sku|b.coding'] = ['like', '%' . $query . '%'];//coding库位编码，library_name库位名称
             }
@@ -1806,10 +1806,10 @@ class ScmWarehouse extends Scm
                 ->limit($offset, $limit)
                 ->select();
             $list = collection($list)->toArray();
+
             //盘点单所需数据
             $info['list'] = $list;
             $this->success('', ['info' => $info], 200);
-
         } else {
             //点击保存，创建盘点单
             //继续写
@@ -1903,22 +1903,19 @@ class ScmWarehouse extends Scm
         $_inventory_info = $this->_inventory->get($inventory_id);
         empty($_inventory_info) && $this->error(__('盘点单不存在'), [], 531);
 //        $inventory_item_info = $_inventory_item->field('id,sku,inventory_qty,error_qty,real_time_qty,available_stock,distribution_occupy_stock')->where(['inventory_id'=>$inventory_id])->select();
-        $item = $this->_inventory_item->field('sku')->where(['inventory_id'=>$inventory_id])->select();
-        $item = collection($item)->toArray();
-        $sku_list = array_column($item, 'sku');
-        $where['sku'] = ['in', $sku_list];
+
         $inventory_item_info = $this->_inventory_item
             ->field('id,sku,inventory_qty,error_qty,real_time_qty,available_stock,distribution_occupy_stock')
-            ->where($where)
+            ->where(['inventory_id'=>$inventory_id])
             ->order('id', 'desc')
             ->select();
         $item_list = collection($inventory_item_info)->toArray();
+
         //获取条形码数据
         $bar_code_list = $this->_product_bar_code_item
             ->where(['inventory_id' => $inventory_id])
             ->field('sku,code')
             ->select();
-
         $bar_code_list = collection($bar_code_list)->toArray();
 
         foreach (array_filter($item_list) as $key => $value) {
