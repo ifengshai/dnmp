@@ -419,13 +419,10 @@ class DashBoard extends Backend
                 $date_arr1 = $arr1;
 
 
-                // $json['xcolumnData'] = array_keys($date_arr);
-                $json['xColumnName'] = ['2020-07-01', '2020-07-02', '2020-07-03', '2020-07-04', '2020-07-05', '2020-07-06', '2020-07-07', '2020-07-08'];
                 $json['xColumnName'] = array_keys($date_arr);
                 $json['columnData'] = [
                     [
                         'type' => 'line',
-                        // 'data' => [10, 26, 45, 40, 40, 65, 73, 80],
                         'data' => array_values($date_arr),
                         'name' => '活跃用户数',
                         'yAxisIndex' => 0,
@@ -434,7 +431,6 @@ class DashBoard extends Backend
                     [
                         'type' => 'line',
                         'data' => array_values($date_arr1),
-                        // 'data' => [10, 26, 45, 40, 40, 65, 73, 80],
                         'name' => '订单数',
                         'yAxisIndex' => 1,
                         'smooth' => true //平滑曲线
@@ -443,36 +439,23 @@ class DashBoard extends Backend
                 ];
 
             } else {
-                dump($start);
-                dump($end);
-                dump($where);
-                $arr = $model->where($where)->column('day_date', 'active_user_num');
                 $arr = $model->where($where)->column('active_user_num', 'day_date');
                 $date_arr = $arr;
-                // dump($arr);die;
-                dump($arr);
-                $arr1 = $model->where($where)->column('day_date', 'order_num');
                 $arr1 = $model->where($where)->column('order_num', 'day_date');
                 $date_arr1 = $arr1;
-                dump($arr1);
-                die;
-                // $json['xcolumnData'] = array_values($date_arr);
-                // $json['xColumnName'] = ['2020-07-01', '2020-07-02', '2020-07-03', '2020-07-04', '2020-07-05', '2020-07-06', '2020-07-07', '2020-07-08'];
-                $json['xColumnName'] = array_values($date_arr);
+                $json['xColumnName'] = array_keys($date_arr);
 
                 $json['columnData'] = [
                     [
                         'type' => 'line',
-                        // 'data' => [10, 26, 45, 40, 40, 65, 73, 80],
-                        'data' => array_keys($date_arr),
+                        'data' => array_values($date_arr),
                         'name' => '活跃用户数',
                         'yAxisIndex' => 0,
                         'smooth' => true //平滑曲线
                     ],
                     [
                         'type' => 'line',
-                        'data' => array_keys($date_arr1),
-                        // 'data' => [11, 22, 33, 66, 77, 99, 73, 80],
+                        'data' => array_values($date_arr1),
                         'name' => '订单数',
                         'yAxisIndex' => 1,
                         'smooth' => true //平滑曲线
