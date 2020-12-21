@@ -2671,6 +2671,21 @@ class WorkOrderList extends Backend
         }
         $this->view->assign('problem_type', $problem_type);
 
+        //补差价链接
+        if($row->replenish_money){
+            $domain_list = [
+                1=>'new_zeelool_url',
+                2=>'new_voogueme_url',
+                3=>'new_nihao_url',
+                4=>'meeloog_url',
+                9=>'new_zeelooles_url',
+                10=>'new_zeeloolde_url',
+                11=>'new_zeelooljp_url'
+            ];
+            $url = config('url.new_zeelooljp_url'.$domain_list[$row->work_platform]) . 'price-difference?customer_email=' . $row->email . '&origin_order_number=' . $row->platform_order . '&order_amount=' . $row->replenish_money . '&sign=' . $row->id;
+            $this->view->assign('url', $url);
+        }
+
         //审核
         if (2 == $operateType) {
             return $this->view->fetch('saleaftermanage/work_order_list/check');
@@ -2688,21 +2703,6 @@ class WorkOrderList extends Backend
         //工单处理备注
         $remarkList = $this->order_remark->where('work_id', $ids)->select();
         $this->view->assign('remarkList', $remarkList);
-
-        //补差价链接
-        if($row->replenish_money){
-            $domain_list = [
-                1=>'new_zeelool_url',
-                2=>'new_voogueme_url',
-                3=>'new_nihao_url',
-                4=>'meeloog_url',
-                9=>'new_zeelooles_url',
-                10=>'new_zeeloolde_url',
-                11=>'new_zeelooljp_url'
-            ];
-            $url = config('url.new_zeelooljp_url'.$domain_list[$row->work_platform]) . 'price-difference?customer_email=' . $row->email . '&origin_order_number=' . $row->platform_order . '&order_amount=' . $row->replenish_money . '&sign=' . $row->id;
-            $this->view->assign('url', $url);
-        }
 
         return $this->view->fetch();
     }
