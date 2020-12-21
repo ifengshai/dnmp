@@ -3620,13 +3620,7 @@ EOF;
         $workOrderConfigValue = $this->workOrderConfigValue;
         //求出配置里面的大分类信息
         $customer_problem_classify = $workOrderConfigValue['customer_problem_classify'];
-
-
-
-
-
-
-
+        
         foreach ($list as $key => $value) {
             if ($value['after_user_id']) {
                 $value['after_user_id'] = $users[$value['after_user_id']];
@@ -3637,6 +3631,10 @@ EOF;
             if ($value['operation_user_id']) {
                 $value['operation_user_id'] = $users[$value['operation_user_id']];
             }
+
+
+
+
             switch ($value['work_platform']) {
                 case 2:
                     $work_platform = 'voogueme';
