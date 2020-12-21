@@ -1202,13 +1202,14 @@ class Test extends Backend
     {
         $instock = new \app\admin\model\warehouse\Instock();
         $list = $instock->alias('a')->where(['status' => 2])->field('a.id,a.check_id,b.purchase_id,b.sku,b.in_stock_num')->join(['fa_in_stock_item' => 'b'],'a.id=b.in_stock_id')->order('a.createtime desc')->select();
+        $list = collection($list)->toArray();
         foreach($list as $k => $v) {
             //查询对应质检单
             $check = Db::name('check_order')->where(['id' => $v['check_id']])->find();
             if ($v['in_stock_num'] < 0) {
                 continue;
             }
-            $res = Db::name('zzzz_temp')->where(['is_process' => 1,'sku' => $v['sku']])->limit($v['in_stock_num'])->select();
+            $res = Db::name('zzzz_temp')->where(['is_process' => 0,'sku' => $v['sku']])->limit($v['in_stock_num'])->select();
             if (!$res) {
                continue; 
             } 
