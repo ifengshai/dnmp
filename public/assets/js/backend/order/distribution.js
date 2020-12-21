@@ -1,7 +1,7 @@
 define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump-to', 'template'], function ($, undefined, Backend, Table, Form, Template) {
     function viewTable(table,value){
         //隐藏、显示列
-        -1 != $.inArray(value,[7,8]) ? table.bootstrapTable('showColumn','stock_house_num') : table.bootstrapTable('hideColumn','stock_house_num');
+        -1 != $.inArray(value,[3,7,8]) ? table.bootstrapTable('showColumn','stock_house_num') : table.bootstrapTable('hideColumn','stock_house_num');
 
         //隐藏、显示搜索及按钮
         $('#stock_house_num').parents('.form-group').hide();
@@ -18,7 +18,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
             $('.btn-batch-printed').removeClass('hide');
             $('.btn-product').removeClass('hide');
         }else if(3 == value){
-            $('select[name="abnormal"]').parents('.form-group').show();
             $('#stock_house_num').parents('.form-group').show();
             $('.btn-batch-printed').removeClass('hide');
             $('.btn-lens').removeClass('hide');
@@ -114,7 +113,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                         {
                             field: 'order_type', title: __('订单类型'), addClass: 'selectpicker', data: 'multiple',
                             custom: { 1: 'blue', 2: 'blue', 3: 'blue', 4: 'blue', 5: 'blue' },
-                            searchList: { 1: '普通订单', 2: '批发单', 3: '网红单', 4: '补发单', 5: '补差价', 6: '一件代发' }, operate: 'IN',
+                            searchList: { 1: '普通订单', 2: '批发单', 3: '网红单', 4: '补发单', 5: '补差价', 6: '一件代发',10:'货到付款' }, operate: 'IN',
                             formatter: Table.api.formatter.status
                         },
                         {

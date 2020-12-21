@@ -1115,7 +1115,7 @@ class Crontab extends Backend
                     . "'" . $value['four_id'] . "',"
                     . "'" . $value['four_price'] . "',"
                     . "'" . $value['four_name'] . "',"
-                    
+
                     . "'" . $value['index_price'] . "',"
 
                     . "'" . $value['frame_price'] . "',"
@@ -1812,11 +1812,11 @@ class Crontab extends Backend
             $label = [];
             foreach ($items as $k => $v) {
                 //如果镜片参数为真 或 不等于 Plastic Lenses 并且不等于 FRAME ONLY则此订单为含处方
-                if ($v['index_type'] == '' || $v['index_type'] == 'Lentes  Plástico' || stripos($v['index_type'], 'SOLO MONTURA') !== false || stripos($v['index_type'], 'SOLO MONTURA (Lentes  Plástico)') !== false) {
+                if ($v['index_type'] == '' || $v['index_type'] == 'Lentes  Plástico' || stripos($v['index_type'], 'SÓLO MONTURA') !== false || stripos($v['index_type'], 'SÓLO MONTURA (Lentes  Plástico)') !== false) {
                     $label[] = 1; //仅镜架
-                } elseif (($v['index_type'] && $v['index_type'] != 'Lentes  Plástico' && stripos($v['index_type'], 'SOLO MONTURA') === false && stripos($v['index_type'], 'SOLO MONTURA (Lentes  Plástico)') === false) && $v['is_custom_lens'] == 0) {
+                } elseif (($v['index_type'] && $v['index_type'] != 'Lentes  Plástico' && stripos($v['index_type'], 'SÓLO MONTURA') === false && stripos($v['index_type'], 'SÓLO MONTURA (Lentes  Plástico)') === false) && $v['is_custom_lens'] == 0) {
                     $label[] = 2; //现片含处方
-                } elseif (($v['index_type'] && $v['index_type'] != 'Lentes  Plástico' && stripos($v['index_type'], 'SOLO MONTURA') === false && stripos($v['index_type'], 'SOLO MONTURA (Lentes  Plástico)') === false) && $v['is_custom_lens'] == 1) {
+                } elseif (($v['index_type'] && $v['index_type'] != 'Lentes  Plástico' && stripos($v['index_type'], 'SÓLO MONTURA') === false && stripos($v['index_type'], 'SÓLO MONTURA (Lentes  Plástico)') === false) && $v['is_custom_lens'] == 1) {
                     $label[] = 3; //定制含处方
                 }
             }
@@ -1908,15 +1908,12 @@ class Crontab extends Backend
             $final_params['index_price'] = $product_options['info_buyRequest']['tmplens']['index_price'];
             $final_params['coatiing_price'] = $product_options['info_buyRequest']['tmplens']['coatiing_price'];
 
-            $items[$order_item_key]['frame_regural_price'] = $final_params['frame_regural_price'] = $product_options['info_buyRequest']['tmplens']['frame_regural_price'];
-            $items[$order_item_key]['is_special_price'] = $final_params['is_special_price'] = $product_options['info_buyRequest']['tmplens']['is_special_price'];
-            $items[$order_item_key]['index_price_old'] = $final_params['index_price_old'] = $product_options['info_buyRequest']['tmplens']['index_price_old'];
+            $items[$order_item_key]['frame_regural_price'] = $final_params['frame_regural_price'] = $product_options['info_buyRequest']['tmplens']['frame_regural_price'] ?: 0;
+            $items[$order_item_key]['is_special_price'] = $final_params['is_special_price'] = $product_options['info_buyRequest']['tmplens']['is_special_price'] ?: 0;
             $items[$order_item_key]['index_name'] = $final_params['index_name'] = $product_options['info_buyRequest']['tmplens']['index_name'];
             $items[$order_item_key]['index_id'] = $final_params['index_id'] = $product_options['info_buyRequest']['tmplens']['index_id'];
             $items[$order_item_key]['lens'] = $final_params['lens'] = $product_options['info_buyRequest']['tmplens']['lens'];
-            $items[$order_item_key]['lens_old'] = $final_params['lens_old'] = $product_options['info_buyRequest']['tmplens']['lens_old'];
             $items[$order_item_key]['total'] = $final_params['total'] = $product_options['info_buyRequest']['tmplens']['total'];
-            $items[$order_item_key]['total_old'] = $final_params['total_old'] = $product_options['info_buyRequest']['tmplens']['total_old'];
 
             $prescription_params = $product_options['info_buyRequest']['tmplens']['prescription'];
             $prescription_params = explode("&", $prescription_params);
@@ -1962,14 +1959,22 @@ class Crontab extends Backend
             if ($final_params['os_add'] && $final_params['od_add']) {
                 $items[$order_item_key]['os_add'] = $final_params['os_add'];
                 $items[$order_item_key]['od_add'] = $final_params['od_add'];
+                $items[$order_item_key]['total_add'] = '';
             } else {
+                $items[$order_item_key]['os_add'] = $final_params['os_add'];
+                $items[$order_item_key]['od_add'] = $final_params['od_add'];
                 $items[$order_item_key]['total_add'] = $final_params['os_add'];
             }
+
+
 
             if ($final_params['pdcheck'] == 'on') {
                 $items[$order_item_key]['pd_l'] = $final_params['pd_l'];
                 $items[$order_item_key]['pd_r'] = $final_params['pd_r'];
+                $items[$order_item_key]['pd'] = '';
             } else {
+                $items[$order_item_key]['pd_l'] = $final_params['pd_l'];
+                $items[$order_item_key]['pd_r'] = $final_params['pd_r'];
                 $items[$order_item_key]['pd'] = $final_params['pd'];
             }
 
@@ -1983,6 +1988,16 @@ class Crontab extends Backend
                 $items[$order_item_key]['os_bd'] = $final_params['os_bd'];
                 $items[$order_item_key]['os_pv_r'] = $final_params['os_pv_r'];
                 $items[$order_item_key]['os_bd_r'] = $final_params['os_bd_r'];
+            } else {
+                $items[$order_item_key]['od_pv'] = '';
+                $items[$order_item_key]['od_bd'] = '';
+                $items[$order_item_key]['od_pv_r'] = '';
+                $items[$order_item_key]['od_bd_r'] = '';
+
+                $items[$order_item_key]['os_pv'] = '';
+                $items[$order_item_key]['os_bd'] = '';
+                $items[$order_item_key]['os_pv_r'] = '';
+                $items[$order_item_key]['os_bd_r'] = '';
             }
 
             /**
@@ -2000,7 +2015,7 @@ class Crontab extends Backend
                 $items[$order_item_key]['is_custom_lens'] = 1;
             }
 
-            if (strpos($final_params['index_type'], 'Lens with Color Tint') !== false) {
+            if (strpos($final_params['index_type'], 'Tinte de color') !== false) {
                 $items[$order_item_key]['is_custom_lens'] = 1;
             }
 
@@ -2029,90 +2044,22 @@ class Crontab extends Backend
                     $items[$order_item_key]['is_custom_lens'] = 1;
                 }
             }
-
+            $items[$order_item_key]['is_custom_lens'] = $items[$order_item_key]['is_custom_lens'] ?: 0;
             unset($final_params);
             unset($lens_params);
             unset($prescription_params);
             unset($product_options);
         }
 
-
         if ($items) {
-            $batch_order_item_prescription_values = "";
-            $batch_order_item_updateSql = "";
-            $batch_order_updateSql = "";
-            $frameArr = $orderArr = [];
-            foreach ($items as $key => $value) {
-                $frameArr[] = $value['sku'];
-                $orderArr[] = $value['item_id'];
-                $batch_order_item_prescription_values .= "("
-                    . $value['order_id'] . ","
-                    . $value['item_id'] . ","
-                    . $value['product_id'] . ","
-                    . $value['qty_ordered'] . ","
-                    . $value['quote_item_id'] . ","
 
-                    . "'" . $this->filter($value['name']) . "',"
-                    . "'" . $value['sku'] . "',"
-                    . "'" . $value['created_at'] . "',"
+            $result = Db::connect('database.db_zeelool_es')->table('sales_flat_order_item_prescription')->insertAll($items);
 
-                    . "'" . $value['index_type'] . "',"
-                    . "'" . $value['prescription_type'] . "',"
-                    . "'" . $value['coatiing_name'] . "',"
-
-                    . "'" . $value['year'] . "',"
-                    . "'" . $value['month'] . "',"
-
-                    . "'" . $value['frame_price'] . "',"
-                    . "'" . $value['index_price'] . "',"
-                    . "'" . $value['coatiing_price'] . "',"
-
-                    . "'" . $value['frame_regural_price'] . "',"
-                    . "'" . $value['is_special_price'] . "',"
-                    . "'" . $value['index_price_old'] . "',"
-                    . "'" . $value['index_name'] . "',"
-                    . "'" . $value['index_id'] . "',"
-                    . "'" . $value['lens'] . "',"
-                    . "'" . $value['lens_old'] . "',"
-                    . "'" . $value['total'] . "',"
-                    . "'" . $value['total_old'] . "',"
-                    . "'" . $this->filter($value['information']) . "',"
-
-                    . "'" . $value['od_sph'] . "',"
-                    . "'" . $value['os_sph'] . "',"
-                    . "'" . $value['od_cyl'] . "',"
-                    . "'" . $value['os_cyl'] . "',"
-                    . "'" . $value['od_axis'] . "',"
-                    . "'" . $value['os_axis'] . "',"
-                    . "'" . $value['pd_l'] . "',"
-                    . "'" . $value['pd_r'] . "',"
-                    . "'" . $value['pd'] . "',"
-                    . "'" . $value['os_add'] . "',"
-                    . "'" . $value['od_add'] . "',"
-                    . "'" . $value['total_add'] . "',"
-                    . "'" . $value['od_pv'] . "',"
-                    . "'" . $value['od_bd'] . "',"
-                    . "'" . $value['od_pv_r'] . "',"
-                    . "'" . $value['od_bd_r'] . "',"
-                    . "'" . $value['os_pv'] . "',"
-                    . "'" . $value['os_bd'] . "',"
-                    . "'" . $value['os_pv_r'] . "',"
-                    . "'" . $value['os_bd_r'] . "',"
-                    . "'" . $value['is_custom_lens'] . "'"
-                    . "),";
-            }
-
-            $batch_order_item_prescription_insertSql = "INSERT INTO sales_flat_order_item_prescription(order_id,item_id,product_id,qty_ordered,quote_item_id,name,sku,created_at,index_type,prescription_type,coatiing_name,year,month,frame_price,index_price,coatiing_price,
-                frame_regural_price,is_special_price,index_price_old,index_name,index_id,lens,lens_old,total,total_old,information,od_sph,os_sph,od_cyl,os_cyl,od_axis,os_axis,pd_l,pd_r,pd,os_add,od_add,total_add,od_pv,od_bd,od_pv_r,od_bd_r,os_pv,os_bd,os_pv_r,os_bd_r,is_custom_lens) values$batch_order_item_prescription_values";
-            $batch_order_item_prescription_insertSql = rtrim($batch_order_item_prescription_insertSql, ',');
-
-            $result = Db::connect('database.db_zeelool_es')->execute($batch_order_item_prescription_insertSql);
             if ($result) {
                 echo '<br>执行成功';
             } else {
                 echo '<br>执行失败';
             }
-           
         } else {
             echo '执行完毕！';
         }
@@ -2251,21 +2198,19 @@ class Crontab extends Backend
             $product_options = unserialize($order_item_value['product_options']);
 
             $final_params['coatiing_name'] = substr($product_options['info_buyRequest']['tmplens']['coatiing_name'], 0, 100);
-            $final_params['index_type'] = substr($product_options['info_buyRequest']['tmplens']['index_type'], 0, 100);
+            $final_params['index_type'] = substr($product_options['info_buyRequest']['tmplens']['index_type'], 0, 80);;
 
             $final_params['frame_price'] = $product_options['info_buyRequest']['tmplens']['frame_price'];
             $final_params['index_price'] = $product_options['info_buyRequest']['tmplens']['index_price'];
             $final_params['coatiing_price'] = $product_options['info_buyRequest']['tmplens']['coatiing_price'];
 
-            $items[$order_item_key]['frame_regural_price'] = $final_params['frame_regural_price'] = $product_options['info_buyRequest']['tmplens']['frame_regural_price'];
-            $items[$order_item_key]['is_special_price'] = $final_params['is_special_price'] = $product_options['info_buyRequest']['tmplens']['is_special_price'];
-            $items[$order_item_key]['index_price_old'] = $final_params['index_price_old'] = $product_options['info_buyRequest']['tmplens']['index_price_old'];
+            $items[$order_item_key]['frame_regural_price'] = $final_params['frame_regural_price'] = $product_options['info_buyRequest']['tmplens']['frame_regural_price'] ?: 0;
+            $items[$order_item_key]['is_special_price'] = $final_params['is_special_price'] = $product_options['info_buyRequest']['tmplens']['is_special_price'] ?: 0;
             $items[$order_item_key]['index_name'] = $final_params['index_name'] = $product_options['info_buyRequest']['tmplens']['index_name'];
             $items[$order_item_key]['index_id'] = $final_params['index_id'] = $product_options['info_buyRequest']['tmplens']['index_id'];
             $items[$order_item_key]['lens'] = $final_params['lens'] = $product_options['info_buyRequest']['tmplens']['lens'];
-            $items[$order_item_key]['lens_old'] = $final_params['lens_old'] = $product_options['info_buyRequest']['tmplens']['lens_old'];
             $items[$order_item_key]['total'] = $final_params['total'] = $product_options['info_buyRequest']['tmplens']['total'];
-            $items[$order_item_key]['total_old'] = $final_params['total_old'] = $product_options['info_buyRequest']['tmplens']['total_old'];
+
 
             $prescription_params = $product_options['info_buyRequest']['tmplens']['prescription'];
             $prescription_params = explode("&", $prescription_params);
@@ -2311,14 +2256,22 @@ class Crontab extends Backend
             if ($final_params['os_add'] && $final_params['od_add']) {
                 $items[$order_item_key]['os_add'] = $final_params['os_add'];
                 $items[$order_item_key]['od_add'] = $final_params['od_add'];
+                $items[$order_item_key]['total_add'] = '';
             } else {
+                $items[$order_item_key]['os_add'] = $final_params['os_add'];
+                $items[$order_item_key]['od_add'] = $final_params['od_add'];
                 $items[$order_item_key]['total_add'] = $final_params['os_add'];
             }
+
+
 
             if ($final_params['pdcheck'] == 'on') {
                 $items[$order_item_key]['pd_l'] = $final_params['pd_l'];
                 $items[$order_item_key]['pd_r'] = $final_params['pd_r'];
+                $items[$order_item_key]['pd'] = '';
             } else {
+                $items[$order_item_key]['pd_l'] = $final_params['pd_l'];
+                $items[$order_item_key]['pd_r'] = $final_params['pd_r'];
                 $items[$order_item_key]['pd'] = $final_params['pd'];
             }
 
@@ -2332,6 +2285,16 @@ class Crontab extends Backend
                 $items[$order_item_key]['os_bd'] = $final_params['os_bd'];
                 $items[$order_item_key]['os_pv_r'] = $final_params['os_pv_r'];
                 $items[$order_item_key]['os_bd_r'] = $final_params['os_bd_r'];
+            } else {
+                $items[$order_item_key]['od_pv'] = '';
+                $items[$order_item_key]['od_bd'] = '';
+                $items[$order_item_key]['od_pv_r'] = '';
+                $items[$order_item_key]['od_bd_r'] = '';
+
+                $items[$order_item_key]['os_pv'] = '';
+                $items[$order_item_key]['os_bd'] = '';
+                $items[$order_item_key]['os_pv_r'] = '';
+                $items[$order_item_key]['os_bd_r'] = '';
             }
 
             /**
@@ -2349,7 +2312,7 @@ class Crontab extends Backend
                 $items[$order_item_key]['is_custom_lens'] = 1;
             }
 
-            if (strpos($final_params['index_type'], 'Lens with Color Tint') !== false) {
+            if (strpos($final_params['index_type'], 'Farbtönung') !== false) {
                 $items[$order_item_key]['is_custom_lens'] = 1;
             }
 
@@ -2378,7 +2341,7 @@ class Crontab extends Backend
                     $items[$order_item_key]['is_custom_lens'] = 1;
                 }
             }
-
+            $items[$order_item_key]['is_custom_lens'] = $items[$order_item_key]['is_custom_lens'] ?: 0;
             unset($final_params);
             unset($lens_params);
             unset($prescription_params);
@@ -2387,81 +2350,308 @@ class Crontab extends Backend
 
 
         if ($items) {
-            $batch_order_item_prescription_values = "";
-            $batch_order_item_updateSql = "";
-            $batch_order_updateSql = "";
-            $frameArr = $orderArr = [];
-            foreach ($items as $key => $value) {
-                $frameArr[] = $value['sku'];
-                $orderArr[] = $value['item_id'];
-                $batch_order_item_prescription_values .= "("
-                    . $value['order_id'] . ","
-                    . $value['item_id'] . ","
-                    . $value['product_id'] . ","
-                    . $value['qty_ordered'] . ","
-                    . $value['quote_item_id'] . ","
-
-                    . "'" . $this->filter($value['name']) . "',"
-                    . "'" . $value['sku'] . "',"
-                    . "'" . $value['created_at'] . "',"
-
-                    . "'" . $value['index_type'] . "',"
-                    . "'" . $value['prescription_type'] . "',"
-                    . "'" . $value['coatiing_name'] . "',"
-
-                    . "'" . $value['year'] . "',"
-                    . "'" . $value['month'] . "',"
-
-                    . "'" . $value['frame_price'] . "',"
-                    . "'" . $value['index_price'] . "',"
-                    . "'" . $value['coatiing_price'] . "',"
-
-                    . "'" . $value['frame_regural_price'] . "',"
-                    . "'" . $value['is_special_price'] . "',"
-                    . "'" . $value['index_price_old'] . "',"
-                    . "'" . $value['index_name'] . "',"
-                    . "'" . $value['index_id'] . "',"
-                    . "'" . $value['lens'] . "',"
-                    . "'" . $value['lens_old'] . "',"
-                    . "'" . $value['total'] . "',"
-                    . "'" . $value['total_old'] . "',"
-                    . "'" . $this->filter($value['information']) . "',"
-
-                    . "'" . $value['od_sph'] . "',"
-                    . "'" . $value['os_sph'] . "',"
-                    . "'" . $value['od_cyl'] . "',"
-                    . "'" . $value['os_cyl'] . "',"
-                    . "'" . $value['od_axis'] . "',"
-                    . "'" . $value['os_axis'] . "',"
-                    . "'" . $value['pd_l'] . "',"
-                    . "'" . $value['pd_r'] . "',"
-                    . "'" . $value['pd'] . "',"
-                    . "'" . $value['os_add'] . "',"
-                    . "'" . $value['od_add'] . "',"
-                    . "'" . $value['total_add'] . "',"
-                    . "'" . $value['od_pv'] . "',"
-                    . "'" . $value['od_bd'] . "',"
-                    . "'" . $value['od_pv_r'] . "',"
-                    . "'" . $value['od_bd_r'] . "',"
-                    . "'" . $value['os_pv'] . "',"
-                    . "'" . $value['os_bd'] . "',"
-                    . "'" . $value['os_pv_r'] . "',"
-                    . "'" . $value['os_bd_r'] . "',"
-                    . "'" . $value['is_custom_lens'] . "'"
-                    . "),";
-            }
-
-            $batch_order_item_prescription_insertSql = "INSERT INTO sales_flat_order_item_prescription(order_id,item_id,product_id,qty_ordered,quote_item_id,name,sku,created_at,index_type,prescription_type,coatiing_name,year,month,frame_price,index_price,coatiing_price,
-                frame_regural_price,is_special_price,index_price_old,index_name,index_id,lens,lens_old,total,total_old,information,od_sph,os_sph,od_cyl,os_cyl,od_axis,os_axis,pd_l,pd_r,pd,os_add,od_add,total_add,od_pv,od_bd,od_pv_r,od_bd_r,os_pv,os_bd,os_pv_r,os_bd_r,is_custom_lens) values$batch_order_item_prescription_values";
-            $batch_order_item_prescription_insertSql = rtrim($batch_order_item_prescription_insertSql, ',');
-
-            $result = Db::connect('database.db_zeelool_de')->execute($batch_order_item_prescription_insertSql);
+            $result = Db::connect('database.db_zeelool_de')->table('sales_flat_order_item_prescription')->insertAll($items);
             if ($result) {
                 echo '<br>执行成功';
             } else {
                 echo '<br>执行失败';
             }
-           
+        } else {
+            echo '执行完毕！';
+        }
+    }
+
+
+    /**
+     * 德语站
+     * 定时处理 订单列表分类
+     * 1：仅镜架
+     * 2：仅现货处方镜
+     * 3：仅定制处方镜
+     * 4：镜架+现货
+     * 5：镜架+定制
+     * 6：现片+定制片
+     */
+    public function zeelool_jp_order_custom_order_prescription()
+    {
+        $order_entity_id_querySql = "select sfo.entity_id from sales_flat_order sfo where sfo.custom_order_prescription_type = 0 order by entity_id desc limit 1000 ";
+        $order_entity_id_list = Db::connect('database.db_zeelool_jp')->query($order_entity_id_querySql);
+        if (empty($order_entity_id_list)) {
+            echo '处理完毕！';
+            exit;
+        }
+
+        /**
+         * 1：仅镜架
+         * 2：仅现货处方镜
+         * 3：仅定制处方镜
+         * 4：镜架+现货
+         * 5：镜架+定制
+         * 6：现片+定制片
+         */
+        $type_1_entity_id = [];
+        $type_2_entity_id = [];
+        $type_3_entity_id = [];
+        $type_4_entity_id = [];
+        $type_5_entity_id = [];
+        $type_6_entity_id = [];
+        foreach ($order_entity_id_list as $key => $value) {
+            $items = Db::connect('database.db_zeelool_jp')->table('sales_flat_order_item_prescription')->where('order_id=' . $value['entity_id'])->select();
+            if (!$items) {
+                continue;
+            }
+
+            $label = [];
+            foreach ($items as $k => $v) {
+                //如果镜片参数为真 或 不等于 Plastic Lenses 并且不等于 FRAME ONLY则此订单为含处方
+                if ($v['index_type'] == '' || $v['index_type'] == 'プラスチックレンズ' || stripos($v['index_type'], 'フレームのみ') !== false || stripos($v['index_type'], 'フレームのみ (プラスチックレンズ)') !== false) {
+                    $label[] = 1; //仅镜架
+                } elseif (($v['index_type'] && $v['index_type'] != 'プラスチックレンズ' && stripos($v['index_type'], 'フレームのみ') === false && stripos($v['index_type'], 'フレームのみ (プラスチックレンズ)') === false) && $v['is_custom_lens'] == 0) {
+                    $label[] = 2; //现片含处方
+                } elseif (($v['index_type'] && $v['index_type'] != 'プラスチックレンズ' && stripos($v['index_type'], 'フレームのみ') === false && stripos($v['index_type'], 'フレームのみ (プラスチックレンズ)') === false) && $v['is_custom_lens'] == 1) {
+                    $label[] = 3; //定制含处方
+                }
+            }
+
+            //如果订单包括 仅镜架和现货处方镜 类型则为 镜架 + 现货
+            if (in_array(1, $label) && in_array(2, $label) && !in_array(3, $label)) {
+                $type_4_entity_id[] = $value['entity_id']; //镜架 + 现货
+
+                //如果订单包括 仅镜架和定制处方镜 类型则为 镜架 + 定制
+            } elseif (in_array(1, $label) && in_array(3, $label) && !in_array(2, $label)) {
+                $type_5_entity_id[] = $value['entity_id']; //镜架 + 定制
+
+                //如果订单只有 仅镜架 类型则为 仅镜架
+            } elseif (in_array(1, $label) && !in_array(3, $label) && !in_array(2, $label)) {
+                $type_1_entity_id[] = $value['entity_id']; //仅镜架
+
+                //如果订单只有 现货 类型则为 现货处方镜
+            } elseif (!in_array(1, $label) && !in_array(3, $label) && in_array(2, $label)) {
+                $type_2_entity_id[] = $value['entity_id']; //仅现货处方镜
+
+                //如果订单只有 定制 类型则为 仅定制处方镜
+            } elseif (!in_array(1, $label) && in_array(3, $label) && !in_array(2, $label)) {
+                $type_3_entity_id[] = $value['entity_id']; //仅定制处方镜
+            } elseif (in_array(2, $label) && in_array(3, $label)) {
+                $type_6_entity_id[] = $value['entity_id']; //现片+定制片
+            } else {
+                $type_1_entity_id[] = $value['entity_id']; //仅镜架
+            }
+        }
+
+        if ($type_1_entity_id) {
+            $map['entity_id'] = ['in', $type_1_entity_id];
+            Db::connect('database.db_zeelool_jp')->table('sales_flat_order')->where($map)->update(['custom_order_prescription_type' => 1]);
+        }
+
+        if ($type_2_entity_id) {
+            $map['entity_id'] = ['in', $type_2_entity_id];
+            Db::connect('database.db_zeelool_jp')->table('sales_flat_order')->where($map)->update(['custom_order_prescription_type' => 2]);
+        }
+
+        if ($type_3_entity_id) {
+            $map['entity_id'] = ['in', $type_3_entity_id];
+            Db::connect('database.db_zeelool_jp')->table('sales_flat_order')->where($map)->update(['custom_order_prescription_type' => 3]);
+        }
+
+
+        if ($type_4_entity_id) {
+            $map['entity_id'] = ['in', $type_4_entity_id];
+            Db::connect('database.db_zeelool_jp')->table('sales_flat_order')->where($map)->update(['custom_order_prescription_type' => 4]);
+        }
+
+
+        if ($type_5_entity_id) {
+            $map['entity_id'] = ['in', $type_5_entity_id];
+            Db::connect('database.db_zeelool_jp')->table('sales_flat_order')->where($map)->update(['custom_order_prescription_type' => 5]);
+        }
+
+
+        if ($type_6_entity_id) {
+            $map['entity_id'] = ['in', $type_6_entity_id];
+            Db::connect('database.db_zeelool_jp')->table('sales_flat_order')->where($map)->update(['custom_order_prescription_type' => 6]);
+        }
+
+        echo "执行成功！！";
+    }
+
+    /**
+     * 定时处理订单处方表序列化数据
+     */
+    public function zeelool_jp_order_item_process()
+    {
+        $max_item_id_querySql = "select max(boi.item_id) max_item_id from sales_flat_order_item_prescription boi";
+        $max_item_id_list = Db::connect('database.db_zeelool_jp')->query($max_item_id_querySql);
+        if ($max_item_id_list) {
+            $max_item_id = $max_item_id_list[0]['max_item_id'];
+        }
+
+        $max_item_id = $max_item_id > 0 ? $max_item_id : 0;
+        $order_item_prescription_querySql = "select sfoi.item_id,sfoi.order_id,sfoi.product_id,sfoi.`name`,sfoi.sku,sfoi.product_options,sfoi.created_at,sfoi.qty_ordered,sfoi.quote_item_id from sales_flat_order_item sfoi where sfoi.item_id > $max_item_id order by sfoi.item_id asc limit 1000";
+        $order_item_list = Db::connect('database.db_zeelool_jp')->query($order_item_prescription_querySql);
+
+        foreach ($order_item_list as $order_item_key => $order_item_value) {
+            $product_options = unserialize($order_item_value['product_options']);
+
+            $final_params['coatiing_name'] = substr($product_options['info_buyRequest']['tmplens']['coatiing_name'], 0, 100);
+            $final_params['index_type'] = $product_options['info_buyRequest']['tmplens']['index_type'];
+
+            $final_params['frame_price'] = $product_options['info_buyRequest']['tmplens']['frame_price'];
+            $final_params['index_price'] = $product_options['info_buyRequest']['tmplens']['index_price'];
+            $final_params['coatiing_price'] = $product_options['info_buyRequest']['tmplens']['coatiing_price'];
+
+            $items[$order_item_key]['frame_regural_price'] = $final_params['frame_regural_price'] = $product_options['info_buyRequest']['tmplens']['frame_regural_price'] ?: 0;
+            $items[$order_item_key]['is_special_price'] = $final_params['is_special_price'] = $product_options['info_buyRequest']['tmplens']['is_special_price'] ?: 0;
+            $items[$order_item_key]['index_name'] = $final_params['index_name'] = $product_options['info_buyRequest']['tmplens']['index_name'];
+            $items[$order_item_key]['index_id'] = $final_params['index_id'] = $product_options['info_buyRequest']['tmplens']['index_id'];
+            $items[$order_item_key]['lens'] = $final_params['lens'] = $product_options['info_buyRequest']['tmplens']['lens'];
+            $items[$order_item_key]['total'] = $final_params['total'] = $product_options['info_buyRequest']['tmplens']['total'];
+
+
+            $prescription_params = $product_options['info_buyRequest']['tmplens']['prescription'];
+            $prescription_params = explode("&", $prescription_params);
+            $lens_params = array();
+            foreach ($prescription_params as $key => $value) {
+                $arr_value = explode("=", $value);
+                $lens_params[$arr_value[0]] = $arr_value[1];
+            }
+
+            $final_params = array_merge($lens_params, $final_params);
+
+            $items[$order_item_key]['order_id'] = $order_item_value['order_id'];
+            $items[$order_item_key]['item_id'] = $order_item_value['item_id'];
+            $items[$order_item_key]['product_id'] = $order_item_value['product_id'];
+            $items[$order_item_key]['name'] = $order_item_value['name'];
+            $items[$order_item_key]['sku'] = $order_item_value['sku'];
+            $items[$order_item_key]['created_at'] = $order_item_value['created_at'];
+            $items[$order_item_key]['qty_ordered'] = $order_item_value['qty_ordered'];
+            $items[$order_item_key]['quote_item_id'] = $order_item_value['quote_item_id'];
+
+            $items[$order_item_key]['coatiing_name'] = $final_params['coatiing_name'];
+            $items[$order_item_key]['index_type'] = $final_params['index_type'];
+            $items[$order_item_key]['prescription_type'] = $final_params['prescription_type'];
+
+            $items[$order_item_key]['frame_price'] = $final_params['frame_price'] ? $final_params['frame_price'] : 0;
+            $items[$order_item_key]['index_price'] = $final_params['index_price'] ? $final_params['index_price'] : 0;
+            $items[$order_item_key]['coatiing_price'] = $final_params['coatiing_price'] ? $final_params['coatiing_price'] : 0;
+
+            $items[$order_item_key]['year'] = $final_params['year'] ? $final_params['year'] : '';
+            $items[$order_item_key]['month'] = $final_params['month'] ? $final_params['month'] : '';
+
+            $items[$order_item_key]['information'] = str_replace("+", " ", urldecode($final_params['information']));
+
+            $items[$order_item_key]['od_sph'] = $final_params['od_sph'];
+            $items[$order_item_key]['os_sph'] = $final_params['os_sph'];
+
+            $items[$order_item_key]['od_cyl'] = $final_params['od_cyl'];
+            $items[$order_item_key]['os_cyl'] = $final_params['os_cyl'];
+
+            $items[$order_item_key]['od_axis'] = $final_params['od_axis'];
+            $items[$order_item_key]['os_axis'] = $final_params['os_axis'];
+
+            if ($final_params['os_add'] && $final_params['od_add']) {
+                $items[$order_item_key]['os_add'] = $final_params['os_add'];
+                $items[$order_item_key]['od_add'] = $final_params['od_add'];
+                $items[$order_item_key]['total_add'] = '';
+            } else {
+                $items[$order_item_key]['os_add'] = $final_params['os_add'];
+                $items[$order_item_key]['od_add'] = $final_params['od_add'];
+                $items[$order_item_key]['total_add'] = $final_params['os_add'];
+            }
+
+
+
+            if ($final_params['pdcheck'] == 'on') {
+                $items[$order_item_key]['pd_l'] = $final_params['pd_l'];
+                $items[$order_item_key]['pd_r'] = $final_params['pd_r'];
+                $items[$order_item_key]['pd'] = '';
+            } else {
+                $items[$order_item_key]['pd_l'] = $final_params['pd_l'];
+                $items[$order_item_key]['pd_r'] = $final_params['pd_r'];
+                $items[$order_item_key]['pd'] = $final_params['pd'];
+            }
+
+            if ($final_params['prismcheck'] == 'on') {
+                $items[$order_item_key]['od_pv'] = $final_params['od_pv'];
+                $items[$order_item_key]['od_bd'] = $final_params['od_bd'];
+                $items[$order_item_key]['od_pv_r'] = $final_params['od_pv_r'];
+                $items[$order_item_key]['od_bd_r'] = $final_params['od_bd_r'];
+
+                $items[$order_item_key]['os_pv'] = $final_params['os_pv'];
+                $items[$order_item_key]['os_bd'] = $final_params['os_bd'];
+                $items[$order_item_key]['os_pv_r'] = $final_params['os_pv_r'];
+                $items[$order_item_key]['os_bd_r'] = $final_params['os_bd_r'];
+            } else {
+                $items[$order_item_key]['od_pv'] = '';
+                $items[$order_item_key]['od_bd'] = '';
+                $items[$order_item_key]['od_pv_r'] = '';
+                $items[$order_item_key]['od_bd_r'] = '';
+
+                $items[$order_item_key]['os_pv'] = '';
+                $items[$order_item_key]['os_bd'] = '';
+                $items[$order_item_key]['os_pv_r'] = '';
+                $items[$order_item_key]['os_bd_r'] = '';
+            }
+
+            /**
+             * 判断定制现片逻辑
+             * 1、渐进镜 Progressive
+             * 2、偏光镜 镜片类型包含Polarized
+             * 3、染色镜 镜片类型包含Lens with Color Tint
+             * 4、当cyl<=-4或cyl>=4
+             */
+            if ($final_params['prescription_type'] == '累進レンズ') {
+                $items[$order_item_key]['is_custom_lens'] = 1;
+            }
+
+            if (strpos($final_params['index_type'], '偏光レンズ') !== false) {
+                $items[$order_item_key]['is_custom_lens'] = 1;
+            }
+
+            if (strpos($final_params['index_type'], '色合い') !== false) {
+                $items[$order_item_key]['is_custom_lens'] = 1;
+            }
+
+            if ($final_params['od_cyl']) {
+                $final_params['od_cyl'] = urldecode($final_params['od_cyl']);
+                if ((float) $final_params['od_cyl'] * 1 <= -4 || (float) $final_params['od_cyl'] * 1 >= 4) {
+                    $items[$order_item_key]['is_custom_lens'] = 1;
+                }
+            }
+
+            if ($final_params['os_cyl']) {
+                $final_params['os_cyl'] = urldecode($final_params['os_cyl']);
+                if ((float) $final_params['os_cyl'] * 1 <= -4 || (float) $final_params['os_cyl'] * 1 >= 4) {
+                    $items[$order_item_key]['is_custom_lens'] = 1;
+                }
+            }
+
+            if ($final_params['od_sph']) {
+                if ((float) urldecode($final_params['od_sph']) * 1 < -8 || (float) urldecode($final_params['od_sph']) * 1 > 8) {
+                    $items[$order_item_key]['is_custom_lens'] = 1;
+                }
+            }
+
+            if ($final_params['os_sph']) {
+                if ((float) urldecode($final_params['os_sph']) * 1 < -8 || (float) urldecode($final_params['os_sph']) * 1 > 8) {
+                    $items[$order_item_key]['is_custom_lens'] = 1;
+                }
+            }
+            $items[$order_item_key]['is_custom_lens'] = $items[$order_item_key]['is_custom_lens'] ?: 0;
+            unset($final_params);
+            unset($lens_params);
+            unset($prescription_params);
+            unset($product_options);
+        }
+
+
+        if ($items) {
+            $result = Db::connect('database.db_zeelool_jp')->table('sales_flat_order_item_prescription')->insertAll($items);
+            if ($result) {
+                echo '<br>执行成功';
+            } else {
+                echo '<br>执行失败';
+            }
         } else {
             echo '执行完毕！';
         }
@@ -2666,7 +2856,7 @@ class Crontab extends Backend
         }
         //nihao注册用户数
         $meeloog_register_customer = $meeloog_model->table('customer_entity')->where($date)->count('*');
-        
+
         //zeelool es
         $zeelool_es_count = $zeelool_es_model->table('sales_flat_order')->where($map)->count(1);
         $zeelool_es_total = $zeelool_es_model->table('sales_flat_order')->where($map)->sum('base_grand_total');
@@ -2780,9 +2970,9 @@ class Crontab extends Backend
         $data['nihao_unit_price']                           = $nihao_unit_price;
         $data['meeloog_unit_price']                         = $meeloog_unit_price;
         $data['zeelool_es_unit_price']                      = $zeelool_es_unit_price;
-        $data['zeelool_de_unit_price']                      = $zeelool_de_unit_price;    
+        $data['zeelool_de_unit_price']                      = $zeelool_de_unit_price;
         $data['zeelool_jp_unit_price']                      = $zeelool_jp_unit_price;
-        $data['all_unit_price']                             = $data['all_sales_num'] ? @round($data['all_sales_money'] / $data['all_sales_num']*100, 2) : 0;
+        $data['all_unit_price']                             = $data['all_sales_num'] ? @round($data['all_sales_money'] / $data['all_sales_num'] * 100, 2) : 0;
         $data['zeelool_shoppingcart_total']                 = $zeelool_shoppingcart_total;
         $data['voogueme_shoppingcart_total']                = $voogueme_shoppingcart_total;
         $data['nihao_shoppingcart_total']                   = $nihao_shoppingcart_total;
@@ -2796,9 +2986,9 @@ class Crontab extends Backend
         $data['nihao_shoppingcart_conversion']              = $nihao_shoppingcart_conversion;
         $data['meeloog_shoppingcart_conversion']            = $meeloog_shoppingcart_conversion;
         $data['zeelool_es_shoppingcart_conversion']         = $zeelool_es_shoppingcart_conversion;
-        $data['zeelool_de_shoppingcart_conversion']         = $zeelool_de_shoppingcart_conversion; 
+        $data['zeelool_de_shoppingcart_conversion']         = $zeelool_de_shoppingcart_conversion;
         $data['zeelool_jp_shoppingcart_conversion']         = $zeelool_jp_shoppingcart_conversion;
-        $data['all_shoppingcart_conversion']                = $data['all_shoppingcart_total'] ? @round($data['all_sales_num'] / $data['all_shoppingcart_total']*100, 2) : 0;
+        $data['all_shoppingcart_conversion']                = $data['all_shoppingcart_total'] ? @round($data['all_sales_num'] / $data['all_shoppingcart_total'] * 100, 2) : 0;
         $data['zeelool_register_customer']                  = $zeelool_register_customer;
         $data['voogueme_register_customer']                 = $voogueme_register_customer;
         $data['nihao_register_customer']                    = $nihao_register_customer;
@@ -2822,7 +3012,7 @@ class Crontab extends Backend
         $data['zeelool_es_shoppingcart_update_conversion']  = $zeelool_es_shoppingcart_update_conversion;
         $data['zeelool_de_shoppingcart_update_conversion']  = $zeelool_de_shoppingcart_update_conversion;
         $data['zeelool_jp_shoppingcart_update_conversion']  = $zeelool_jp_shoppingcart_update_conversion;
-        $data['all_shoppingcart_update_conversion']       = $data['all_shoppingcart_update_total'] ? @round($data['all_sales_num']/$data['all_shoppingcart_update_total']*100, 2) : 0;
+        $data['all_shoppingcart_update_conversion']       = $data['all_shoppingcart_update_total'] ? @round($data['all_sales_num'] / $data['all_shoppingcart_update_total'] * 100, 2) : 0;
         $data['create_date'] = date("Y-m-d", strtotime("-1 day"));
         $data['createtime'] = date("Y-m-d H:i:s");
         Db::name('order_statistics')->insert($data);
@@ -3316,52 +3506,52 @@ class Crontab extends Backend
         //昨天销售额
         $order_where['order_type'] = 1;
         $order_success_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-        $yes_date = date("Y-m-d",strtotime("-1 day"));
+        $yes_date = date("Y-m-d", strtotime("-1 day"));
         $yestime_where = [];
         $yestime_where1 = [];
         $yestime_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $yes_date . "'")];
         $yestime_where1[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '" . $yes_date . "'")];
         $yesterday_sales_money = $model->table('sales_flat_order')->where($yestime_where)->where($order_where)->where($order_success_where)->field('sum(base_grand_total) base_grand_total,count(entity_id) order_num')->find();
-        $yesterday_sales_money_data           = round($yesterday_sales_money['base_grand_total'],2);
+        $yesterday_sales_money_data           = round($yesterday_sales_money['base_grand_total'], 2);
         //过去7天销售额
         $seven_start = date("Y-m-d", strtotime("-7 day"));
-        $seven_end = date("Y-m-d 23:59:59",strtotime("-1 day"));
+        $seven_end = date("Y-m-d 23:59:59", strtotime("-1 day"));
         $sev_where['created_at'] = $sev_where1['updated_at'] = ['between', [$seven_start, $seven_end]];
         $pastsevenday_sales_money = $model->table('sales_flat_order')->where($sev_where)->where($order_where)->where($order_success_where)->field('sum(base_grand_total) base_grand_total,count(entity_id) order_num')->find();
-        $pastsevenday_sales_money_data        = round($pastsevenday_sales_money['base_grand_total'],2);
+        $pastsevenday_sales_money_data        = round($pastsevenday_sales_money['base_grand_total'], 2);
         //过去30天销售额
         $thirty_start = date("Y-m-d", strtotime("-30 day"));
-        $thirty_end = date("Y-m-d 23:59:59",strtotime("-1 day"));
+        $thirty_end = date("Y-m-d 23:59:59", strtotime("-1 day"));
         $thirty_where['created_at'] = $thirty_where1['updated_at'] = ['between', [$thirty_start, $thirty_end]];
         $pastthirtyday_sales_money = $model->table('sales_flat_order')->where($thirty_where)->where($order_where)->where($order_success_where)->field('sum(base_grand_total) base_grand_total,count(entity_id) order_num')->find();
-        $pastthirtyday_sales_money_data       = round($pastthirtyday_sales_money['base_grand_total'],2);
+        $pastthirtyday_sales_money_data       = round($pastthirtyday_sales_money['base_grand_total'], 2);
         //当月销售额
         $thismonth_start = date('Y-m-01', strtotime($today));
         $thismonth_end =  $today;
         $thismonth_where['created_at'] = $thismonth_where1['updated_at'] = ['between', [$thismonth_start, $thismonth_end]];
         $thismonth_sales_money = $model->table('sales_flat_order')->where($thismonth_where)->where($order_where)->where($order_success_where)->field('sum(base_grand_total) base_grand_total,count(entity_id) order_num')->find();
-        $thismonth_sales_money_data           = round($thismonth_sales_money['base_grand_total'],2);
+        $thismonth_sales_money_data           = round($thismonth_sales_money['base_grand_total'], 2);
         //上月销售额
         $lastmonth_start = date('Y-m-01', strtotime("$today -1 month"));
         $lastmonth_end = date('Y-m-t 23:59:59', strtotime("$today -1 month"));
         $lastmonth_where['created_at'] = $lastmonth_where1['updated_at'] = ['between', [$lastmonth_start, $lastmonth_end]];
         $lastmonth_sales_money = $model->table('sales_flat_order')->where($lastmonth_where)->where($order_where)->where($order_success_where)->field('sum(base_grand_total) base_grand_total,count(entity_id) order_num')->find();
-        $lastmonth_sales_money_data           = round($lastmonth_sales_money['base_grand_total'],2);
+        $lastmonth_sales_money_data           = round($lastmonth_sales_money['base_grand_total'], 2);
         //今年销售额
-        $thisyear_start = date("Y",time())."-1"."-1"; //本年开始
+        $thisyear_start = date("Y", time()) . "-1" . "-1"; //本年开始
         $thisyear_end = $today;
         $thisyear_where['created_at'] = $thisyear_where1['updated_at'] = ['between', [$thisyear_start, $thisyear_end]];
         $thisyear_sales_money = $model->table('sales_flat_order')->where($thisyear_where)->where($order_where)->where($order_success_where)->field('sum(base_grand_total) base_grand_total,count(entity_id) order_num')->find();
-        $thisyear_sales_money_data            = round($thisyear_sales_money['base_grand_total'],2);
+        $thisyear_sales_money_data            = round($thisyear_sales_money['base_grand_total'], 2);
         //上年销售额
         $lastyear_start = date('Y-01-01 00:00:00', strtotime('last year'));
         $lastyear_end = date('Y-12-31 23:59:59', strtotime('last year'));
         $lastyear_where['created_at'] = $lastyear_where1['updated_at'] = ['between', [$lastyear_start, $lastyear_end]];
         $lastyear_sales_money = $model->table('sales_flat_order')->where($lastyear_where)->where($order_where)->where($order_success_where)->field('sum(base_grand_total) base_grand_total,count(entity_id) order_num')->find();
-        $lastyear_sales_money_data            = round($lastyear_sales_money['base_grand_total'],2);
+        $lastyear_sales_money_data            = round($lastyear_sales_money['base_grand_total'], 2);
         //总共销售额
         $total_sales_money = $model->table('sales_flat_order')->where($order_where)->where($order_success_where)->field('sum(base_grand_total) base_grand_total,count(entity_id) order_num')->find();
-        $total_sales_money_data               = round($total_sales_money['base_grand_total'],2);
+        $total_sales_money_data               = round($total_sales_money['base_grand_total'], 2);
         //昨天订单数
         $yesterday_order_num_data             = $model->table('sales_flat_order')->where($yestime_where)->where($order_where)->count();
         //过去7天订单数
@@ -3526,8 +3716,9 @@ class Crontab extends Backend
      */
     public function update_ashboard_data_two()
     {
+        ini_set('memory_limit', '512M');
         //求出平台
-        $platform = $this->request->get('platform');
+        $platform = $this->request->get('platform', 1);
         if (!$platform) {
             return false;
         }
@@ -3566,7 +3757,7 @@ class Crontab extends Backend
         //昨天支付成功数
         $order_where['order_type'] = 1;
         $order_success_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-        $yes_date = date("Y-m-d",strtotime("-1 day"));
+        $yes_date = date("Y-m-d", strtotime("-1 day"));
         $yestime_where = [];
         $yestime_where1 = [];
         $yestime_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $yes_date . "'")];
@@ -3574,12 +3765,12 @@ class Crontab extends Backend
         $yesterday_order_success_data = $model->table('sales_flat_order')->where($yestime_where)->where($order_where)->where($order_success_where)->count();
         //过去7天支付成功数
         $seven_start = date("Y-m-d", strtotime("-7 day"));
-        $seven_end = date("Y-m-d 23:59:59",strtotime("-1 day"));
+        $seven_end = date("Y-m-d 23:59:59", strtotime("-1 day"));
         $sev_where['created_at'] = $sev_where1['updated_at'] = ['between', [$seven_start, $seven_end]];
         $pastsevenday_order_success_data = $model->table('sales_flat_order')->where($sev_where)->where($order_where)->where($order_success_where)->count();
         //过去30天支付成功数
         $thirty_start = date("Y-m-d", strtotime("-30 day"));
-        $thirty_end = date("Y-m-d 23:59:59",strtotime("-1 day"));
+        $thirty_end = date("Y-m-d 23:59:59", strtotime("-1 day"));
         $thirty_where['created_at'] = $thirty_where1['updated_at'] = ['between', [$thirty_start, $thirty_end]];
         $pastthirtyday_order_success_data = $model->table('sales_flat_order')->where($thirty_where)->where($order_where)->where($order_success_where)->count();
         //当月支付成功数
@@ -3594,7 +3785,7 @@ class Crontab extends Backend
         $lastmonth_where['created_at'] = $lastmonth_where1['updated_at'] = ['between', [$lastmonth_start, $lastmonth_end]];
         $lastmonth_order_success_data = $model->table('sales_flat_order')->where($lastmonth_where)->where($order_where)->where($order_success_where)->count();
         //今年支付成功数
-        $thisyear_start = date("Y",time())."-1"."-1"; //本年开始
+        $thisyear_start = date("Y", time()) . "-1" . "-1"; //本年开始
         $thisyear_end = $today;
         $thisyear_where['created_at'] = $thisyear_where1['updated_at'] = ['between', [$thisyear_start, $thisyear_end]];
         $thisyear_order_success_data = $model->table('sales_flat_order')->where($thisyear_where)->where($order_where)->where($order_success_where)->count();
@@ -3606,7 +3797,7 @@ class Crontab extends Backend
         //总共支付成功数
         $total_order_success_data = $model->table('sales_flat_order')->where($order_where)->where($order_success_where)->count();
         //昨天购物车总数
-        $quote_where['base_grand_total'] = ['>',0];
+        $quote_where['base_grand_total'] = ['>', 0];
         $yesterday_shoppingcart_total_data = $model->table('sales_flat_quote')->where($yestime_where)->where($quote_where)->count();
         //过去7天购物车总数
         $pastsevenday_shoppingcart_total_data = $model->table('sales_flat_quote')->where($sev_where)->where($quote_where)->count();
@@ -3639,22 +3830,144 @@ class Crontab extends Backend
         //总共新增购物车总数
         $total_shoppingcart_new_data  = $total_shoppingcart_total_data;
 
+        //2020-11-25 更换仪表盘页面新增购物车转化率(%)的计算方法 start
+        //昨天支付成功数 从新增购物车中成功支付数
+        $order_where = [];
+        $order_where['o.order_type'] = 1;
+        $order_success_where = [];
+        $order_success_where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        $yes_date = date("Y-m-d", strtotime("-1 day"));
+        $yestime_where = [];
+        $yestime_where[] = ['exp', Db::raw("DATE_FORMAT(o.created_at, '%Y-%m-%d') = '" . $yes_date . "'")];
+        $yestime_wheres[] = ['exp', Db::raw("DATE_FORMAT(p.created_at, '%Y-%m-%d') = '" . $yes_date . "'")];
+        $yesterday_order_success_data1 = $model->table('sales_flat_order')
+            ->alias('o')
+            ->join('sales_flat_quote p', 'o.quote_id=p.entity_id')
+            ->where($yestime_wheres)
+            ->where('p.base_grand_total','>',0)
+            ->where($yestime_where)
+            ->where($order_where)
+            ->where($order_success_where)
+            ->count();
+
+        //过去7天从新增购物车中成功支付数
+        $seven_start = date("Y-m-d", strtotime("-7 day"));
+        $seven_end = date("Y-m-d 23:59:59", strtotime("-1 day"));
+        $sev_where = [];
+        $sev_where['o.created_at'] = $sev_where1['updated_at'] = ['between', [$seven_start, $seven_end]];
+        $sev_wheres['p.created_at'] = $sev_where1['updated_at'] = ['between', [$seven_start, $seven_end]];
+        $pastsevenday_order_success_data1 = $model->table('sales_flat_order')
+            ->alias('o')
+            ->join('sales_flat_quote p', 'o.quote_id=p.entity_id')
+            ->where($sev_wheres)
+            ->where('p.base_grand_total','>',0)
+            ->where($sev_where)
+            ->where($order_where)
+            ->where($order_success_where)
+            ->count();
+
+        //过去30天从新增购物车中成功支付数
+        $thirty_start = date("Y-m-d", strtotime("-30 day"));
+        $thirty_end = date("Y-m-d 23:59:59", strtotime("-1 day"));
+        $thirty_where = [];
+        $thirty_where['o.created_at'] = $thirty_where1['updated_at'] = ['between', [$thirty_start, $thirty_end]];
+        $thirty_wheres['p.created_at'] = $thirty_where1['updated_at'] = ['between', [$thirty_start, $thirty_end]];
+        $pastthirtyday_order_success_data1 = $model->table('sales_flat_order')
+            ->alias('o')
+            ->join('sales_flat_quote p', 'o.quote_id=p.entity_id')
+            ->where($thirty_wheres)
+            ->where('p.base_grand_total','>',0)
+            ->where($thirty_where)
+            ->where($order_where)
+            ->where($order_success_where)
+            ->count();
+        //当月从新增购物车中成功支付数
+        $thismonth_start = date('Y-m-01', strtotime($today));
+        $thismonth_end =  $today;
+        $thismonth_where = [];
+        $thismonth_where['o.created_at'] = ['between', [$thismonth_start, $thismonth_end]];
+        $thismonth_wheres['p.created_at'] = ['between', [$thismonth_start, $thismonth_end]];
+        $thismonth_where1['updated_at'] = ['between', [$thismonth_start, $thismonth_end]];
+        $thismonth_order_success_data1 = $model->table('sales_flat_order')
+            ->alias('o')
+            ->join('sales_flat_quote p', 'o.quote_id=p.entity_id')
+            ->where($thismonth_wheres)
+            ->where('p.base_grand_total','>',0)
+            ->where($thismonth_where)
+            ->where($order_where)
+            ->where($order_success_where)
+            ->count();
+        //上月从新增购物车中成功支付数
+        $lastmonth_start = date('Y-m-01', strtotime("$today -1 month"));
+        $lastmonth_end = date('Y-m-t 23:59:59', strtotime("$today -1 month"));
+        $lastmonth_where = [];
+        $lastmonth_where['o.created_at'] = $lastmonth_where1['updated_at'] = ['between', [$lastmonth_start, $lastmonth_end]];
+        $lastmonth_wheres['p.created_at'] = $lastmonth_where1['updated_at'] = ['between', [$lastmonth_start, $lastmonth_end]];
+        $lastmonth_order_success_data1 = $model->table('sales_flat_order')
+            ->alias('o')
+            ->join('sales_flat_quote p', 'o.quote_id=p.entity_id')
+            ->where($lastmonth_wheres)
+            ->where('p.base_grand_total','>',0)
+            ->where($lastmonth_where)
+            ->where($order_where)
+            ->where($order_success_where)
+            ->count();
+        //今年从新增购物车中成功支付数
+        $thisyear_start = date("Y", time()) . "-1" . "-1"; //本年开始
+        $thisyear_end = $today;
+        $thisyear_where = [];
+        $thisyear_where['o.created_at'] = $thisyear_where1['updated_at'] = ['between', [$thisyear_start, $thisyear_end]];
+        $thisyear_wheres['p.created_at'] = $thisyear_where1['updated_at'] = ['between', [$thisyear_start, $thisyear_end]];
+        $thisyear_order_success_data1 = $model->table('sales_flat_order')
+            ->alias('o')
+            ->join('sales_flat_quote p', 'o.quote_id=p.entity_id')
+            ->where($thisyear_wheres)
+            ->where('p.base_grand_total','>',0)
+            ->where($thisyear_where)
+            ->where($order_where)
+            ->where($order_success_where)
+            ->count();
+        //上年从新增购物车中成功支付数
+        $lastyear_start = date('Y-01-01 00:00:00', strtotime('last year'));
+        $lastyear_end = date('Y-12-31 23:59:59', strtotime('last year'));
+        $lastyear_where = [];
+        $lastyear_where['o.created_at'] = $lastyear_where1['updated_at'] = ['between', [$lastyear_start, $lastyear_end]];
+        $lastyear_wheres['p.created_at'] = $lastyear_where1['updated_at'] = ['between', [$lastyear_start, $lastyear_end]];
+        $lastyear_order_success_data1 = $model->table('sales_flat_order')
+            ->alias('o')
+            ->join('sales_flat_quote p', 'o.quote_id=p.entity_id')
+            ->where($lastyear_wheres)
+            ->where('p.base_grand_total','>',0)
+            ->where($lastyear_where)
+            ->where($order_where)
+            ->where($order_success_where)
+            ->count();
+        //总共从新增购物车中成功支付数
+        $total_order_success_data1 = $model->table('sales_flat_order')
+            ->alias('o')
+            ->join('sales_flat_quote p', 'o.quote_id=p.entity_id')
+            ->where('p.base_grand_total','>',0)
+            ->where($order_where)
+            ->where($order_success_where)
+            ->count();
+        //2020-11-25 更换仪表盘页面新增购物车转化率(%)的计算方法 end
+
         //昨天购物车转化率data
-        $yesterday_shoppingcart_conversion_data     = @round(($yesterday_order_success_data / $yesterday_shoppingcart_total_data), 4) * 100;
+        $yesterday_shoppingcart_conversion_data     = @round(($yesterday_order_success_data1 / $yesterday_shoppingcart_total_data), 4) * 100;
         //过去7天购物车转化率data
-        $pastsevenday_shoppingcart_conversion_data  = @round(($pastsevenday_order_success_data / $pastsevenday_shoppingcart_total_data), 4) * 100;
+        $pastsevenday_shoppingcart_conversion_data  = @round(($pastsevenday_order_success_data1 / $pastsevenday_shoppingcart_total_data), 4) * 100;
         //过去30天购物车转化率data
-        $pastthirtyday_shoppingcart_conversion_data = @round(($pastthirtyday_order_success_data / $pastthirtyday_shoppingcart_total_data), 4) * 100;
+        $pastthirtyday_shoppingcart_conversion_data = @round(($pastthirtyday_order_success_data1 / $pastthirtyday_shoppingcart_total_data), 4) * 100;
         //当月购物车转化率data
-        $thismonth_shoppingcart_conversion_data     = @round(($thismonth_order_success_data / $thismonth_shoppingcart_total_data), 4) * 100;
+        $thismonth_shoppingcart_conversion_data     = @round(($thismonth_order_success_data1 / $thismonth_shoppingcart_total_data), 4) * 100;
         //上月购物车转化率data
-        $lastmonth_shoppingcart_conversion_data     = @round(($lastmonth_order_success_data / $lastmonth_shoppingcart_total_data), 4) * 100;
+        $lastmonth_shoppingcart_conversion_data     = @round(($lastmonth_order_success_data1 / $lastmonth_shoppingcart_total_data), 4) * 100;
         //今年购物车转化率
-        $thisyear_shoppingcart_conversion_data      = @round(($thisyear_order_success_data / $thisyear_shoppingcart_total_data), 4) * 100;
+        $thisyear_shoppingcart_conversion_data      = @round(($thisyear_order_success_data1 / $thisyear_shoppingcart_total_data), 4) * 100;
         //上年购物车总数sql
-        $lastyear_shoppingcart_conversion_data      = @round(($lastyear_order_success_data / $lastyear_shoppingcart_total_data), 4) * 100;
+        $lastyear_shoppingcart_conversion_data      = @round(($lastyear_order_success_data1 / $lastyear_shoppingcart_total_data), 4) * 100;
         //总共购物车转化率
-        $total_shoppingcart_conversion_data         = @round(($total_order_success_data / $total_shoppingcart_total_data), 4) * 100;
+        $total_shoppingcart_conversion_data         = @round(($total_order_success_data1 / $total_shoppingcart_total_data), 4) * 100;
 
         //昨天新增购物车转化率
         $yesterday_shoppingcart_newconversion_data  = @round(($yesterday_order_success_data / $yesterday_shoppingcart_new_data), 4) * 100;

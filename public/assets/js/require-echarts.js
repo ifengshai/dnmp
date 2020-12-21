@@ -1038,6 +1038,7 @@ define(['echarts', 'echarts-theme', Config.store_enname], function (Echarts, und
                                 series: res.columnData
                             });
                         }
+                        console.log(EchartObj.api.barConfig)
 
                     } else if (chartOptions.type == 'pie') {
                         EchartObj.api.pieConfig = EchartObj.config.pie;
@@ -1051,6 +1052,9 @@ define(['echarts', 'echarts-theme', Config.store_enname], function (Echarts, und
                         }, {
                             legend: {
                                 data: res.column
+                            },
+                            title:{
+                                text:res.total
                             },
                             series: [{
                                 data: res.columnData

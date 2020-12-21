@@ -3,6 +3,7 @@
 namespace app\admin\controller\warehouse;
 
 use app\admin\model\itemmanage\ItemPlatformSku;
+use app\admin\model\StockLog;
 use app\common\controller\Backend;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Reader\Csv;
@@ -385,7 +386,10 @@ class TransferOrder extends Backend
                 $this->error('只有待审核状态才能操作！！');
             }
         }
+        $item_platform = new \app\admin\model\itemmanage\ItemPlatformSku();
         $status = input('status');
+        (new StockLog())->startTrans();
+        $item_platform->startTrans();
         $data['status'] = $status;
         Db::startTrans();
         try {
@@ -395,32 +399,169 @@ class TransferOrder extends Backend
             }
             //审核通过
             if ($status == 2) {
-                $item_platform = new \app\admin\model\itemmanage\ItemPlatformSku();
+
                 //审核通过冲减各站虚拟仓库存
                 $where['transfer_order_id'] = ['in', $ids];
-                $list = $this->transferOrderItem->alias('a')->field('a.*,b.call_out_site,b.call_in_site')->join(['fa_transfer_order' => 'b'], 'a.transfer_order_id=b.id')->where($where)->select();
+                $list = $this->transferOrderItem->alias('a')->field('a.*,b.call_out_site,b.call_in_site,b.transfer_order_number')->join(['fa_transfer_order' => 'b'], 'a.transfer_order_id=b.id')->where($where)->select();
                 foreach ($list as $v) {
+                    $item = new \app\admin\model\itemmanage\Item;
+                    $item_map['sku'] = $v['sku'];
+                    $sku_item = $item->where($item_map)->find();
                     //查询虚拟仓库存
                     $stock = $item_platform->where(['sku' => $v['sku'], 'platform_type' => $v['call_out_site']])->value('stock');
                     //如果调出数量大于虚拟仓现有库存 则调出失败
                     if ($v['num'] > $stock) {
                         throw new Exception('id:' . $v['id'] . '|' . $v['sku'] . ':' . '虚拟仓库存不足');
                     }
-                    //减少虚拟库存
+                    //减少调出仓虚拟库存
                     $item_platform->where(['sku' => $v['sku'], 'platform_type' => $v['call_out_site']])->setDec('stock', $v['num']);
-                    //增加虚拟库存
+                    //插入日志表
+                    (new StockLog())->setData([
+                        //'大站点类型：1网站 2魔晶',
+                        'type' => 2,
+                        //'站点类型：1Zeelool  2Voogueme 3Nihao 4Meeloog 5Wesee 8Amazon 9Zeelool_es 10Zeelool_de 11Zeelool_jp'
+                        'site' => $v['call_out_site'],
+                        //'模块：1普通订单 2配货 3质检 4审单 5异常处理 6更改镜架 7取消订单 8补发 9赠品 10采购入库 11出入库 12盘点 13调拨'
+                        'modular' => 13,
+                        //'变动类型：1非预售下单 2预售下单-虚拟仓>0 3预售下单-虚拟仓<0 4配货 5质检拒绝-镜架报损 6审单-成功 7审单-配错镜框
+                        // 8加工异常打回待配货 9印logo异常打回待配货 10更改镜架-配镜架前 11更改镜架-配镜架后 12取消订单-配镜架前 13取消订单-配镜架后
+                        // 14补发 15赠品 16采购-有比例入库 17采购-没有比例入库 18手动入库 19手动出库 20盘盈入库 21盘亏出库 22库存调拨'
+                        'change_type' => 22,
+                        // '关联sku'
+                        'sku' => $v['sku'],
+                        //'关联订单号或子单号'
+                        'order_number' => $v['transfer_order_number'],
+                        //'关联变化的ID'
+                        'public_id' => 0,
+                        //'操作端：1PC端 2PDA'
+                        'source' => 1,
+                        //'总库存变动前'
+                        'stock_before' => $sku_item['stock'],
+                        //'总库存变化量：正数为加，负数为减'
+                        'stock_change' => 0,
+                        //'可用库存变动前'
+                        'available_stock_before' => $sku_item['available_stock'],
+                        //'可用库存变化量：正数为加，负数为减'
+                        'available_stock_change' => 0,
+                        // '虚拟仓库存变动前'
+                        'fictitious_before' => $stock,
+                        // '虚拟仓库存变化量：正数为加，负数为减'
+                        'fictitious_change' => -$v['num'],
+                        //'订单占用变动前'
+                        'occupy_stock_before' => $sku_item['occupy_stock'],
+                        //'订单占用变化量：正数为加，负数为减'
+                        'occupy_stock_change' => 0,
+                        //'配货占用变动前'
+                        'distribution_stock_before' => $sku_item['distribution_occupy_stock'],
+                        //'配货占用变化量：正数为加，负数为减
+                        'distribution_stock_change' => 0,
+                        //'预售变动前'
+                        'presell_num_before' => $sku_item['presell_num'],
+                        //'预售变化量：正数为加，负数为减'
+                        'presell_num_change' =>0,
+                        //'留样库存变动前'
+                        'sample_num_before' => $sku_item['sample_num'],
+                        //'留样库存变化量：正数为加，负数为减'
+                        'sample_num_change' => 0,
+                        //'在途库存变动前'
+                        'on_way_stock_before' => $sku_item['on_way_stock'],
+                        //'在途库存变化量：正数为加，负数为减'
+                        'on_way_stock_change' => 0,
+                        //'待入库变动前'
+                        'wait_instock_num_before' => $sku_item['wait_instock_num'],
+                        //'待入库变化量：正数为加，负数为减'
+                        'wait_instock_num_change' => 0,
+                        'create_person' => session('admin.nickname'),
+                        'create_time' => time(),
+                        //'关联单号类型：1订单号 2子订单号 3入库单 4出库单 5盘点单 6调拨单'
+                        'number_type' => 6,
+                    ]);
+
+                    $stock_in = $item_platform->where(['sku' => $v['sku'], 'platform_type' => $v['call_in_site']])->value('stock');
+                    //增加调入仓虚拟库存
                     $item_platform->where(['sku' => $v['sku'], 'platform_type' => $v['call_in_site']])->setInc('stock', $v['num']);
+                    //插入日志表
+                    (new StockLog())->setData([
+                        //'大站点类型：1网站 2魔晶',
+                        'type' => 2,
+                        //'站点类型：1Zeelool  2Voogueme 3Nihao 4Meeloog 5Wesee 8Amazon 9Zeelool_es 10Zeelool_de 11Zeelool_jp'
+                        'site' => $v['call_in_site'],
+                        //'模块：1普通订单 2配货 3质检 4审单 5异常处理 6更改镜架 7取消订单 8补发 9赠品 10采购入库 11出入库 12盘点 13调拨'
+                        'modular' => 13,
+                        //'变动类型：1非预售下单 2预售下单-虚拟仓>0 3预售下单-虚拟仓<0 4配货 5质检拒绝-镜架报损 6审单-成功 7审单-配错镜框
+                        // 8加工异常打回待配货 9印logo异常打回待配货 10更改镜架-配镜架前 11更改镜架-配镜架后 12取消订单-配镜架前 13取消订单-配镜架后
+                        // 14补发 15赠品 16采购-有比例入库 17采购-没有比例入库 18手动入库 19手动出库 20盘盈入库 21盘亏出库 22库存调拨'
+                        'change_type' => 22,
+                        // '关联sku'
+                        'sku' => $v['sku'],
+                        //'关联订单号或子单号'
+                        'order_number' => $v['transfer_order_number'],
+                        //'关联变化的ID'
+                        'public_id' => 0,
+                        //'操作端：1PC端 2PDA'
+                        'source' => 1,
+                        //'总库存变动前'
+                        'stock_before' => $sku_item['stock'],
+                        //'总库存变化量：正数为加，负数为减'
+                        'stock_change' => 0,
+                        //'可用库存变动前'
+                        'available_stock_before' => $sku_item['available_stock'],
+                        //'可用库存变化量：正数为加，负数为减'
+                        'available_stock_change' => 0,
+                        // '虚拟仓库存变动前'
+                        'fictitious_before' => $stock_in,
+                        // '虚拟仓库存变化量：正数为加，负数为减'
+                        'fictitious_change' => $v['num'],
+                        //'订单占用变动前'
+                        'occupy_stock_before' => $sku_item['occupy_stock'],
+                        //'订单占用变化量：正数为加，负数为减'
+                        'occupy_stock_change' => 0,
+                        //'配货占用变动前'
+                        'distribution_stock_before' => $sku_item['distribution_occupy_stock'],
+                        //'配货占用变化量：正数为加，负数为减
+                        'distribution_stock_change' => 0,
+                        //'预售变动前'
+                        'presell_num_before' => $sku_item['presell_num'],
+                        //'预售变化量：正数为加，负数为减'
+                        'presell_num_change' =>0,
+                        //'留样库存变动前'
+                        'sample_num_before' => $sku_item['sample_num'],
+                        //'留样库存变化量：正数为加，负数为减'
+                        'sample_num_change' => 0,
+                        //'在途库存变动前'
+                        'on_way_stock_before' => $sku_item['on_way_stock'],
+                        //'在途库存变化量：正数为加，负数为减'
+                        'on_way_stock_change' => 0,
+                        //'待入库变动前'
+                        'wait_instock_num_before' => $sku_item['wait_instock_num'],
+                        //'待入库变化量：正数为加，负数为减'
+                        'wait_instock_num_change' => 0,
+                        'create_person' => session('admin.nickname'),
+                        'create_time' => time(),
+                        //'关联单号类型：1订单号 2子订单号 3入库单 4出库单 5盘点单 6调拨单'
+                        'number_type' => 6,
+                    ]);
+
+                    // throw new Exception("操作失败！！");
                 }
             }
             Db::commit();
+            (new StockLog())->commit();
+            $item_platform->commit();
         } catch (ValidateException $e) {
             Db::rollback();
+            (new StockLog())->rollback();
+            $item_platform->rollback();
             $this->error($e->getMessage());
         } catch (PDOException $e) {
             Db::rollback();
+            (new StockLog())->rollback();
+            $item_platform->rollback();
             $this->error($e->getMessage());
         } catch (Exception $e) {
             Db::rollback();
+            (new StockLog())->rollback();
+            $item_platform->rollback();
             $this->error($e->getMessage());
         }
         $this->success();

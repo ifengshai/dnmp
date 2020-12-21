@@ -3,6 +3,7 @@
 namespace app\admin\controller;
 
 use app\common\controller\Backend;
+use think\Log;
 use think\Request;
 use think\Db;
 use think\Exception;
@@ -75,12 +76,20 @@ class NewProduct extends Backend
         //设置过滤方法
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
+
             //如果发送的来源是Selectpage，则转发到Selectpage
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
             //如果切换站点清除默认值
             $filter = json_decode($this->request->get('filter'), true);
+            if (!empty($filter['sku'])){
+                if (preg_match("/\s/", $filter['sku'])){
+                    $map['sku'] = ['in', preg_split("/\s+/", $filter['sku'])];
+                    unset($filter['sku']);
+                    $this->request->get(['filter' => json_encode($filter)]);
+                }
+            }
             //可用库存搜索
             if ($filter['available_stock']) {
                 $item = new \app\admin\model\itemmanage\Item();
@@ -122,6 +131,7 @@ class NewProduct extends Backend
             // }
 
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+
             $total = $this->model
                 ->with(['supplier', 'newproductattribute'])
                 ->where($where)
@@ -844,12 +854,10 @@ class NewProduct extends Backend
             if (!$row) {
                 $this->error('未查询到数据');
             }
-
             $row = $row->toArray();
             if ($row['item_status'] != 1 && $row['item_status'] != 2) {
                 $this->error('此状态不能同步');
             }
-
             $map['id'] = $ids;
             $map['item_status'] = 1;
             $data['item_status'] = 2;
@@ -898,6 +906,89 @@ class NewProduct extends Backend
 
         $this->assign('platformarr', $magentoplatformarr);
         return $this->fetch('check');
+    }
+
+    /**
+     * 批量审核通过
+     */
+
+    public function passaudits(){
+        $ids  = input('param.ids');
+
+        if ($this->request->isAjax()) {
+
+            $site = input('site');
+            //查询所选择的数据
+            $where['new_product.id'] =   ['in',$ids];
+            $row = $this->model->where($where)->with(['newproductattribute'])->select();
+
+            if (!$row) {
+                $this->error('未查询到数据');
+            }
+            $row = collection($row)->toArray();
+
+            $test = array();
+            foreach ($row  as $key=>$item){
+                if ($item['item_status'] !=1 && $item['item_status'] !=2){
+                    $this->error($item['sku'].'数据状态不能同步');
+                }
+                $test[$key] =$item['id'];
+
+                $map['id'] = $item['id'];
+                $map['item_status'] = 1;
+                $data['item_status'] = 2;
+                $res = $this->model->where($map)->update($data);
+                if ($res !== false) {
+                    $params = $item;
+                    $params['create_person'] = session('admin.nickname');
+                    $params['create_time'] = date('Y-m-d H:i:s', time());
+                    $params['item_status'] = 1;
+                    unset($params['id']);
+                    unset($params['newproductattribute']);
+                    //查询商品表SKU是否存在
+                    $t_where['sku'] = $params['sku'];
+                    $t_where['is_del'] = 1;
+                    $count = $this->item->where($t_where)->count();
+                    //此SKU已存在 跳过
+                    if ($count < 1) {
+                        //添加商品主表信息
+                        $this->item->allowField(true)->isUpdate(false)->data($params)->save();
+                        $attributeParams = $item['newproductattribute'];
+                        unset($attributeParams['id']);
+                        unset($attributeParams['frame_images']);
+                        unset($attributeParams['frame_color']);
+                        $attributeParams['item_id'] = $this->item->id;
+                        //添加商品属性表信息
+                        $this->itemAttribute->allowField(true)->isUpdate(false)->data($attributeParams)->save();
+                    }
+
+                    //添加对应平台映射关系
+                    $skuParams['site'] = $site;
+                    $skuParams['sku'] = $params['sku'];
+                    $skuParams['frame_is_rimless'] = $item['frame_is_rimless'];
+                    $skuParams['name'] = $item['name'];
+                    $skuParams['category_id'] = $item['category_id'];
+                    $result = (new \app\admin\model\itemmanage\ItemPlatformSku())->addPlatformSku($skuParams);
+                } else {
+                    $this->error('审核失败');
+                }
+            }
+            $this->success('审核成功');
+
+        }else{
+            if ($ids)
+            $where['id'] = ['in',$ids];
+            $find = $this->model->where($where)->field('sku')->select();
+            $sku = implode(',',array_column($find,'sku'));
+            //查询对应平台
+            $magentoplatformarr = $this->magentoplatformarr;
+            $magentoplatformarr = array_column($this->magentoplatform->getAuthSite(), 'name', 'id');
+
+            $this->assign('platformarr', $magentoplatformarr);
+            $this->assign('sku', $sku);
+            $this->assign('ids', $ids);
+            return $this->fetch('checkall');
+        }
     }
 
     /***
@@ -1709,22 +1800,26 @@ class NewProduct extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
+
             //默认站点
             $platform_type = input('label');
-            if ($platform_type) {
-                $map['website_type'] = $platform_type;
-            }
+            $map['website_type'] = $platform_type;
+
             //如果切换站点清除默认值
             $filter = json_decode($this->request->get('filter'), true);
-            if ($filter['website_type']) {
+            if($filter['website_type']){
+                $platform_type = $filter['website_type'];
                 unset($map['website_type']);
+                if (100 == $filter['website_type']) {
+                    unset($filter['website_type']);
+                    $this->request->get(['filter' => json_encode($filter)]);
+                }
             }
 
             //sku
             if ($filter['sku']) {
                 //改为模糊搜索
                 $map['a.sku'] = ['LIKE','%'.trim($filter['sku'].'%')];
-                // $map['d.purchase_name'] = ['=',trim($filter['sku'])];
                 unset($filter['sku']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
@@ -1743,7 +1838,7 @@ class NewProduct extends Backend
                 unset($filter['create_time']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
-            // dump($map);
+
             $check_order_item = new \app\admin\model\warehouse\CheckItem();
             $in_stock_item = new \app\admin\model\warehouse\InstockItem();
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
@@ -1752,34 +1847,32 @@ class NewProduct extends Backend
                 ->join(['fa_new_product_replenish_list' => 'c'], 'a.replenish_id=c.replenish_id and a.sku = c.sku', 'left')
                 ->join(['fa_purchase_order' => 'd'], 'a.replenish_id=d.replenish_id and c.supplier_id = d.supplier_id and d.purchase_name = a.sku', 'left')
                 ->where($where)
-                // ->where('d.purchase_name', 'like','a.sku')
                 ->where('is_show', 0)
                 ->where('a.replenish_id<>0')
                 ->where($map)
+                ->group('d.id')
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model->alias('a')
-                ->field('a.*,b.status,c.real_dis_num,d.purchase_number,d.arrival_time,d.purchase_status,d.id as purchase_id,c.distribute_num')
+                ->field('a.*,sum(a.replenish_num) as replenish_count,b.status,c.real_dis_num,d.purchase_number,d.arrival_time,d.purchase_status,d.check_status,d.stock_status,d.id as purchase_id,sum(c.distribute_num) as distribute_count')
                 ->join(['fa_new_product_replenish' => 'b'], 'a.replenish_id=b.id')
                 ->join(['fa_new_product_replenish_list' => 'c'], 'a.replenish_id=c.replenish_id and a.sku = c.sku', 'left')
                 ->join(['fa_purchase_order' => 'd'], 'a.replenish_id=d.replenish_id and c.supplier_id = d.supplier_id and d.purchase_name = a.sku', 'left')
                 ->where($where)
-                // ->where('d.purchase_name', '=','WA069535-02')
                 ->where('is_show', 0)
                 ->where('a.replenish_id<>0')
                 ->where($map)
+                ->group('d.id')
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 // ->getLastSql();
                 ->select();
-            // dump($list);
-            // die;
             $list = collection($list)->toArray();
-            // dump($list);die;
+
             //根据采购单id 查询质检单
             $purchase_id = array_column($list, 'purchase_id');
-            $rows = $check_order_item->field("sum(arrivals_num) as arrivals_num,sum(quantity_num) as quantity_num,purchase_id,sku")->where(['purchase_id' => ['in', $purchase_id]])->group('purchase_id,sku')->select();
+            $rows = $check_order_item->field("sum(purchase_num) as purchase_num,sum(arrivals_num) as arrivals_num,sum(quantity_num) as quantity_num,purchase_id,sku")->where(['purchase_id' => ['in', $purchase_id]])->group('purchase_id,sku')->select();
             $rows = collection($rows)->toArray();
             //重组数组
             $check_list = [];
@@ -1801,10 +1894,12 @@ class NewProduct extends Backend
                 if (!$purchase_detail){
                     unset($v);
                 }else{
+                    $v['purchase_num'] = $check_list[$v['purchase_id']][$v['sku']]['purchase_num'];
                     $v['arrivals_num'] = $check_list[$v['purchase_id']][$v['sku']]['arrivals_num'];
                     $v['quantity_num'] = $check_list[$v['purchase_id']][$v['sku']]['quantity_num'];
                     $v['in_stock_num'] = $in_stock_list[$v['purchase_id']][$v['sku']]['in_stock_num'];
                 }
+                $v['platform_type'] = $platform_type;
             }
             unset($v);
             $result = array("total" => $total, "rows" => $list);
@@ -1812,10 +1907,10 @@ class NewProduct extends Backend
         }
 
         //查询对应平台权限
-        $magentoplatformarr = $this->magentoplatform->getAuthSite();
+        $magentoplatformarr = array_values($this->magentoplatform->getNewAuthSite1());
+
         //取第一个key为默认站点
         $site = input('site', $magentoplatformarr[0]['id']);
-
         $this->assignconfig('label', $site);
         $this->assign('site', $site);
         $this->assign('magentoplatformarr', $magentoplatformarr);
@@ -1842,6 +1937,7 @@ class NewProduct extends Backend
                 return $this->selectpage();
             }
             $purchase_id = input('purchase_id');
+            $platform_type = input('platform_type');
             $check_order_item = new \app\admin\model\warehouse\CheckItem();
             $in_stock = new \app\admin\model\warehouse\Instock();
             $in_stock_item = new \app\admin\model\warehouse\InstockItem();
@@ -1849,13 +1945,14 @@ class NewProduct extends Backend
             $map['a.purchase_id'] = $purchase_id;
             $total = $this->model->alias('a')
                 ->join(['fa_purchase_batch_item' => 'b'], 'a.id=b.purchase_batch_id')
+                ->join(['fa_check_order' => 'c'], 'a.id=c.batch_id', 'left')
                 ->where($where)
                 ->where($map)
                 ->order($sort, $order)
                 ->count();
             //查询分批到货
             $list = $this->model->alias('a')
-                ->field('a.purchase_id,a.id,a.arrival_time,b.sku,b.arrival_num as wait_arrival_num,c.status,c.id as check_id')
+                ->field('a.purchase_id,a.id,a.arrival_time,a.replenish_id,b.sku,b.arrival_num as wait_arrival_num,c.status,c.id as check_id')
                 ->join(['fa_purchase_batch_item' => 'b'], 'a.id=b.purchase_batch_id')
                 ->join(['fa_check_order' => 'c'], 'a.id=c.batch_id', 'left')
                 ->where($where)
@@ -1873,10 +1970,22 @@ class NewProduct extends Backend
                     //查询入库状态及入库数量
                     $in_stock_list = $in_stock->where(['check_id' => $v['check_id']])->find();
                 }
-                $v['quantity_num'] = $check_list['quantity_num'] ?: 0;
-                $v['arrivals_num'] = $check_list['arrivals_num'] ?: 0;
+                $quantity_num = $check_list['quantity_num'] ?: 0;
+                $arrivals_num = $check_list['arrivals_num'] ?: 0;
+                $wait_arrival_num = $v['wait_arrival_num'];
+                $instock_num = $in_stock_item->where(['in_stock_id' => $in_stock_list['id'], 'sku' => $v['sku']])->value('in_stock_num');
+                if(100 != $platform_type){
+                    $rate = $in_stock_item->where(['replenish_id' => $v['replenish_id'], 'sku' => $v['sku'], 'website_type' => $platform_type])->value('rate');
+                    $quantity_num = round($quantity_num * $rate);
+                    $arrivals_num = round($arrivals_num * $rate);
+                    $wait_arrival_num = round($wait_arrival_num * $rate);
+                    $instock_num = round($instock_num * $rate);
+                }
                 $v['instock_status'] = $in_stock_list['status'];
-                $v['instock_num'] = $in_stock_item->where(['in_stock_id' => $in_stock_list['id'], 'sku' => $v['sku']])->value('in_stock_num');
+                $v['quantity_num'] = $quantity_num;
+                $v['arrivals_num'] = $arrivals_num;
+                $v['wait_arrival_num'] = $wait_arrival_num;
+                $v['instock_num'] = $instock_num;
             }
             unset($v);
             $result = array("total" => $total, "rows" => $list);

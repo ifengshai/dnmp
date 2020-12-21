@@ -50,7 +50,7 @@
 
 <div class="all_div">
     {if $row['web_designer_group'] == 2 && $row['test_status'] >= 2}
-        <!--如果测试已经确认，并且不需要前端的话，不显示前端的操作-->
+        <!--如果测试已经确认，并且不需要前端的话，不显示前端大萨达多的操作-->
     {else}
     <form role="form" method="POST" id="form_web_group" data-toggle="validator" action="">
         <input type="hidden" name="row[id]" value="{$row.id}">
@@ -74,9 +74,18 @@
                 <label class="input_tiem_label">计划完成：</label>
                 <span class="input_tiem_span">
                     {if $row['test_status'] == 1}
-                        <input class="selectpicker datetimepicker select_input" type="text" name="row[web_designer_expect_time]" value="{$row.web_designer_expect_time}" data-date-format="YYYY-MM-DD" data-date-min-date="{$row.start_time}" data-date-max-date="{$row.end_time}" data-date-default-date="{$row.end_time}">
+<!--                        <input class="selectpicker datetimepicker select_input" type="text" name="row[web_designer_expect_time]" value="{$row.web_designer_expect_time}" data-date-format="YYYY-MM-DD" data-date-min-date="{$row.start_time}" data-date-max-date="{$row.end_time}" data-date-default-date="{$row.end_time}">-->
+<!--                        <input  class="selectpicker datetimepicker select_input" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[node_time]" type="text" value="{$row.web_designer_expect_time|datetime}">-->
+                        {if $row['web_designer_expect_time'] !== null}
+
+                     <input  class="selectpicker datetimepicker select_input" data-date-format="YYYY-MM-DD" data-use-current="true" name="row[web_designer_expect_time]" type="text" value="{$row.web_designer_expect_time|datetime}">
+                       {else/}
+                     <input  class="selectpicker datetimepicker select_input" data-date-format="YYYY-MM-DD" data-use-current="true" name="row[web_designer_expect_time]" type="text" >
+
+                        {/if}
                     {else}
-                        <input class="selectpicker datetimepicker select_input" disabled type="text" name="row[web_designer_expect_time]" value="{$row.web_designer_expect_time}" data-date-format="YYYY-MM-DD" data-date-min-date="{$row.start_time}" data-date-max-date="{$row.end_time}" data-date-default-date="{$row.end_time}">
+<!--                        <input class="selectpicker datetimepicker select_input" disabled type="text" name="row[web_designer_expect_time]" value="{$row.web_designer_expect_time}" data-date-format="YYYY-MM-DD" data-date-min-date="{$row.start_time}" data-date-max-date="{$row.end_time}" data-date-default-date="{$row.end_time}">-->
+                        <input  class="selectpicker datetimepicker select_input"  disabled data-date-format="YYYY-MM-DD" data-use-current="true" name="row[web_designer_expect_time]" type="text" value="{$row.web_designer_expect_time|datetime}">
                     {/if}
                 </span>
             </div>
@@ -90,32 +99,45 @@
                     {/if}
                 </span>
             </div>
-
+            <div class="input_item web_htmls">
+                <label class="input_tiem_label">备注：</label>
+                <span class="input_tiem_span">
+                    <input type="text" id="web_remarks" required name="row['web_remarks']" style="width: 65%;height: 35px" value="{$row['web_remarks']}">
+                </span>
+            </div>
             <div class="item_button">
                 {if $row['test_status'] == 1}
-                    {if $row['web_designer_group'] == 0}
-                        {if $distribution_status}
-                            <button type="submit" class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('前端确认')}</button>
-                        {else}
-                            <button type="submit" disabled class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('前端确认')}</button>
+                        {if $row['develop_finish_status'] ==4 && $row['web_remarks'] neq null}
+                            <button type="submit" class="btn btn-sub" disabled style='background-color: grey;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('已拒绝')}</button>
+                        {else/}
+                            {if $row['web_designer_group'] == 0}
+                                {if $distribution_status}
+                                    <button type="submit" class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('前端确认')}</button>
+                                    <button type='button' onsubmit='return false';  value="{$row['id']}" data-value="1" class="btn btn-sub-refuse" style='background-color: cadetblue;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('前端拒绝')}</button>
+                                {else}
+                                    <button type="submit" disabled class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('前端确认')}</button>
+                                    <button type="submit" disabled class="btn btn-sub-refuse" style='background-color: cadetblue;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('前端拒绝')}</button>
+                                {/if}
+                            {else}
+                                {if $distribution_status}
+                                    <button type="submit" class="btn btn-sub" style='background-color: #555555;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('修改')}</button>
+                                {else}
+                                    <button type="submit" disabled class="btn btn-sub" style='background-color: #555555;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('修改')}</button>
+                                {/if}
+                            {/if}
+
                         {/if}
-                    {else}
-                        {if $distribution_status}
-                            <button type="submit" class="btn btn-sub" style='background-color: #555555;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('修改')}</button>
-                        {else}
-                            <button type="submit" disabled class="btn btn-sub" style='background-color: #555555;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('修改')}</button>
-                        {/if}
-                    {/if}
+
                 {else}
-                    {if $row['web_designer_is_finish'] == 0}
-                        {if $distribution_status}
-                            <button type="submit" value="web_group" class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('前端完成')}</button>
+                        {if $row['web_designer_is_finish'] == 0}
+                            {if $distribution_status}
+                                <button type="submit" value="web_group" class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('前端完成')}</button>
+                            {else}
+                                <button type="submit" value="web_group" disabled class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('前端完成')}</button>
+                            {/if}
                         {else}
-                            <button type="submit" value="web_group" disabled class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('前端完成')}</button>
+                        <button type="submit" class="btn btn-sub" disabled style='background-color: #555555;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('前端已完成')}</button>
                         {/if}
-                    {else}
-                    <button type="submit" class="btn btn-sub" disabled style='background-color: #555555;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('前端已完成')}</button>
-                    {/if}
                 {/if}
             </div>
 
@@ -148,9 +170,10 @@
                 <label class="input_tiem_label">计划完成：</label>
                 <span class="input_tiem_span">
                     {if $row['test_status'] == 1}
-                        <input class="selectpicker datetimepicker select_input" type="text" name="row[phper_expect_time]" value="{$row.phper_expect_time}" data-date-format="YYYY-MM-DD" data-date-min-date="{$row.start_time}" data-date-max-date="{$row.end_time}" data-date-default-date="{$row.end_time}">
+                      <input  class="selectpicker datetimepicker select_input" data-date-format="YYYY-MM-DD" data-use-current="true" name="row[phper_expect_time]" type="text"  value="{$row.phper_expect_time}">
+
                     {else}
-                        <input class="selectpicker datetimepicker select_input" disabled type="text" name="row[phper_expect_time]" value="{$row.phper_expect_time}" data-date-format="YYYY-MM-DD" data-date-min-date="{$row.start_time}" data-date-max-date="{$row.end_time}" data-date-default-date="{$row.end_time}">
+                     <input  class="selectpicker datetimepicker select_input"  disabled data-date-format="YYYY-MM-DD" data-use-current="true" name="row[phper_expect_time]" type="text"  value="{$row.phper_expect_time}">
                     {/if}
                 </span>
             </div>
@@ -164,20 +187,31 @@
                     {/if}
                 </span>
             </div>
+            <div class="input_item php_htmls">
+                <label class="input_tiem_label">备注：</label>
+                <span class="input_tiem_span">
+                    <input type="text" id="phper_remarks" name="row['phper_remarks']" style="width: 65%;height: 35px" value="{$row['phper_remarks']}">
+                </span>
+            </div>
 
             <div class="item_button">
                 {if $row['test_status'] == 1}
-                    {if $row['phper_group'] == 0}
-                        {if $distribution_status}
-                            <button type="submit" class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('后端确认')}</button>
+                    {if $row['develop_finish_status'] ==4 && $row['phper_remarks'] neq null}
+                        <button type="submit" class="btn btn-sub" disabled style='background-color: grey;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('已拒绝')}</button>
+                    {else/}
+                        {if $row['phper_group'] == 0}
+                            {if $distribution_status}
+                                <button type="submit" class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('后端确认')}</button>
+                                <button type='button' onsubmit='return false';  value="{$row['id']}" data-value="2" class="btn btn-sub-refuse" style='background-color: cadetblue;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('后端拒绝')}</button>
+                            {else}
+                                <button type="submit" disabled class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('后端确认')}</button>
+                            {/if}
                         {else}
-                            <button type="submit" disabled class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('后端确认')}</button>
-                        {/if}
-                    {else}
-                        {if $distribution_status}
-                            <button type="submit" class="btn btn-sub" style='background-color: #555555;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('修改')}</button>
-                        {else}
-                            <button type="submit" disabled class="btn btn-sub" style='background-color: #555555;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('修改')}</button>
+                            {if $distribution_status}
+                                <button type="submit" class="btn btn-sub" style='background-color: #555555;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('修改')}</button>
+                            {else}
+                                <button type="submit" disabled class="btn btn-sub" style='background-color: #555555;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('修改')}</button>
+                            {/if}
                         {/if}
                     {/if}
                 {else}
@@ -222,9 +256,12 @@
                     <label class="input_tiem_label">计划完成：</label>
                     <span class="input_tiem_span">
                         {if $row['test_status'] == 1}
-                            <input class="selectpicker datetimepicker select_input" type="text" name="row[app_expect_time]" value="{$row.app_expect_time}" data-date-format="YYYY-MM-DD" data-date-min-date="{$row.start_time}" data-date-max-date="{$row.end_time}" data-date-default-date="{$row.end_time}">
+<!--                            <input class="selectpicker datetimepicker select_input" type="text" name="row[app_expect_time]" value="{$row.app_expect_time}" data-date-format="YYYY-MM-DD" data-date-min-date="{$row.start_time}" data-date-max-date="{$row.end_time}" data-date-default-date="{$row.end_time}">-->
+                            <input  class="selectpicker datetimepicker select_input" data-date-format="YYYY-MM-DD" data-use-current="true" name="row[app_expect_time]" type="text"  value="{$row.app_expect_time}">
+
                         {else}
-                            <input class="selectpicker datetimepicker select_input" disabled type="text" name="row[app_expect_time]" value="{$row.app_expect_time}" data-date-format="YYYY-MM-DD" data-date-min-date="{$row.start_time}" data-date-max-date="{$row.end_time}" data-date-default-date="{$row.end_time}">
+<!--                            <input class="selectpicker datetimepicker select_input" disabled type="text" name="row[app_expect_time]" value="{$row.app_expect_time}" data-date-format="YYYY-MM-DD" data-date-min-date="{$row.start_time}" data-date-max-date="{$row.end_time}" data-date-default-date="{$row.end_time}">-->
+                         <input  class="selectpicker datetimepicker select_input" disabled data-date-format="YYYY-MM-DD" data-use-current="true" name="row[app_expect_time]" type="text"  value="{$row.app_expect_time}">
                         {/if}
                     </span>
                 </div>
@@ -238,21 +275,33 @@
                         {/if}
                     </span>
                 </div>
+                <div class="input_item app_htmls">
+                    <label class="input_tiem_label">备注：</label>
+                    <span class="input_tiem_span">
+                    <input type="text" id="app_remarks" name="row['app_remarks']" style="width: 65%;height: 35px" value="{$row['app_remarks']}">
+                </span>
+                </div>
 
                 <div class="item_button">
                     {if $row['test_status'] == 1}
-                        {if $row['app_group'] == 0}
-                            {if $distribution_status}
-                                <button type="submit" class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('APP确认')}</button>
+                        {if $row['develop_finish_status'] ==4 && $row['app_remarks'] !== null}
+                            <button type="submit" class="btn btn-sub" disabled style='background-color: grey;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('已拒绝')}</button>
+                        {else/}
+                            {if $row['app_group'] == 0}
+                                {if $distribution_status}
+                                    <button type="submit" class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('APP确认')}</button>
+                                    <button type='button' onsubmit='return false'; value="{$row['id']}"   data-value="3" class="btn btn-sub-refuse" style='background-color: cadetblue;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('APP拒绝')}</button>
+                                {else}
+                                    <button type="submit" disabled class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('APP确认')}</button>
+                                {/if}
                             {else}
-                                <button type="submit" disabled class="btn btn-sub" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('APP确认')}</button>
+                                {if $distribution_status}
+                                    <button type="submit" class="btn btn-sub" style='background-color: #555555;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('修改')}</button>
+                                {else}
+                                    <button type="submit" disabled class="btn btn-sub" style='background-color: #555555;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('修改')}</button>
+                                {/if}
                             {/if}
-                        {else}
-                            {if $distribution_status}
-                                <button type="submit" class="btn btn-sub" style='background-color: #555555;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('修改')}</button>
-                            {else}
-                                <button type="submit" disabled class="btn btn-sub" style='background-color: #555555;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('修改')}</button>
-                            {/if}
+
                         {/if}
                     {else}
                         {if $row['app_is_finish'] == 0}
@@ -271,5 +320,34 @@
         {/if}
     {/if}
 </div>
+<script>
+    function jujue(ids,status){
+
+        var url = "{:url('demand/It_web_demand/distriRefuse')}";
+        if (status ==1){
+            var remarks = $('#web_remarks').val();
+        }else if(status ==2){
+            var remarks = $('#phper_remarks').val();
+        }else{
+            var remarks = $('#app_remarks').val();
+        }
+        if (remarks == ''){
+            layer.msg('备注内容不能为空');
+            return  false;
+        }
+        Fast.api.ajax({
+            url:url,
+            data:{ids:ids,status:status,remarks:remarks}
+        }, function(data, ret){
+            //成功的回调
+            layer.msg(ret.msg);
+            return false;
+        }, function(data, ret){
+            //失败的回调
+            layer.msg(ret.msg);
+            return false;
+        });
+    }
+</script>
 
 

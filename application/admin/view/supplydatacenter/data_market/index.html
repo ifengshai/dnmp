@@ -1,0 +1,523 @@
+<style type="text/css">
+    .echart-style td{
+        width:60px;
+    }
+    .margin-div{
+        margin-top: 30px;
+    }
+    .btn-div {
+        line-height: 50px;
+        background: inherit;
+        background-color: rgba(255, 255, 255, 1);
+        border: none;
+        border-radius: 4px;
+        box-shadow: 0px 0px 7px rgba(0, 0, 0, 0.349019607843137);
+        border-width: 0px;
+        font-family: 'Arial Negreta', 'Arial';
+        font-weight: 700;
+        font-style: normal;
+    }
+    .btn-div.div{
+        margin-right: 30px;
+        margin-left: 30px;
+        width: 15%;
+    }
+    .btn-div.div1{
+        margin-right: 30px;
+        margin-left: 30px;
+        margin-top: 20px;
+        width: 25%;
+    }
+    .btn-div.div2{
+        margin-right: 60px;
+        margin-left: 60px;
+        margin-top: 20px;
+        width: 25%;
+    }
+    .title{
+        font-size: 18px;
+        color: rgb(127, 127, 127);
+    }
+    .rate_class{
+        font-size: 12px;
+        display: none;
+    }
+
+    /*第一块*/
+    .new-form-group{
+        margin-top: 2%;
+        float: left;
+        min-width: 25%;
+        height: 30px;
+        line-height: 30px;
+    }
+    .new-form-group label{
+        text-align: right;
+    }
+    .col-xs-4{
+        width: 30%;
+    }
+    .new-col-xs-8{
+        width: 60%;
+    }
+    .new-background{
+        border-radius:2px;
+        margin-bottom:10px;
+        background:#f5f5f5;
+        padding:20px;
+    }
+    /*表格*/
+    table.altrowstable {
+        margin: 0 auto;
+        width: 100%;
+        font-family: verdana, arial, sans-serif;
+        font-size: 11px;
+        color: #333333;
+        border-width: 1px;
+        border-color: #247692;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+    table.altrowstable th {
+        border-width: 1px;
+        padding: 8px;
+        font-size: 14px;
+        border-style: solid;
+        border-color: #d2d6de;
+        text-align: center;
+        vertical-align: middle;
+        color: #666666;
+    }
+    table.altrowstable td {
+        border-width: 1px;
+        padding: 8px;
+        text-align: center;
+        font-size: 12px;
+        border-style: solid;
+        border-color: #ddd;
+        vertical-align: middle;
+        color: #666666;
+    }
+    table.altrowstable tr:nth-child(odd){
+        background:#E9F1F4;
+        background: #F5F5F5;
+    }
+    table.altrowstable tr:nth-child(even){
+        background: #fff;
+        background: #eee;
+    }
+
+    table.new-altrowstable{
+        float: left;
+        margin: 0 auto;
+        width: 48%;
+        font-family: verdana, arial, sans-serif;
+        font-size: 11px;
+        color: #333333;
+        border-width: 1px;
+        border-color: #247692;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+    table.new-altrowstable th {
+        border-width: 1px;
+        padding: 8px;
+        font-size: 14px;
+        border-style: solid;
+        border-color: #d2d6de;
+        text-align: center;
+        vertical-align: middle;
+        color: #666666;
+    }
+    table.new-altrowstable td {
+        border-width: 1px;
+        padding: 8px;
+        text-align: center;
+        font-size: 12px;
+        border-style: solid;
+        border-color: #ddd;
+        vertical-align: middle;
+        color: #666666;
+    }
+    table.new-altrowstable tr:nth-child(odd){
+        background:#E9F1F4;
+        background: #F5F5F5;
+    }
+    table.new-altrowstable tr:nth-child(even){
+        background: #fff;
+        background: #eee;
+    }
+    table.height-table td{
+        height: 76.5px;
+    }
+    .platform-select{
+        padding: 6px 12px;
+        font-size: 12px;
+        color: #555555;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+        width: 100px;
+        float: right;
+        margin-right: -155px;
+        margin-top: -7px;
+    }
+    .wrap{
+        margin:30px auto;
+        position: relative;
+        min-height: 300px;
+    }
+    .hLeft{
+        position: absolute;
+        left:0;
+        top:-25px;
+        width:50%;
+    }
+    .hRight{
+        margin-left:50%;
+    }
+    .wenhao-class{
+        width: 20px;
+        float: right;
+    }
+</style>
+
+<div class="panel panel-default panel-intro">
+    {:build_heading()}
+    <div class="panel-body">
+        <form action="" method="POST">
+        <div class="tab-pane fade active in" id="one">
+             <div class="new-background">
+                  <div class="row">
+                        <div class="form-group new-form-group" >
+                            <label class="control-label col-xs-4" >时间：</label>
+                            <div class="col-xs-8 new-col-xs-8" id="time_str" role="form">
+                                <input type="hidden" class="form-control operate" name="one_time-operate" data-name="time_str" value="RANGE" readonly="">
+                                <input type="text" autocomplete="off" class="form-control datetimerange" name="time_str"  id="time_str" value="{$time_str}" data-index="14">
+                            </div>
+                        </div>
+                        <div class="form-group new-form-group">
+                            <div class="col-xs-8 new-col-xs-8">
+                                <input type="submit" class="btn btn-success" id="sku_submit" value="提交">
+                                <input type="reset" class="btn btn-default reset" id="sku_reset" value="重置">
+                            </div>
+                        </div>
+                  </div>
+             </div>
+             <div class="new-background">
+                <b>库存总览</b>
+                <div class="row">
+                    <div class="margin-div" style="text-align: center">
+                        <div class="btn btn-div div">
+                            <span class="extend">
+                                <div class="title">库存总数量（个）<br/><span style="color: red;">{$stock_overview.stock_num}</span></div>
+                            </span>
+                        </div>
+                        <div class="btn btn-div div">
+                            <span tabindex="0" data-bs-toggle="tooltip" title="在途库存（数量/金额）指采购成&#10功供应商发货但未到仓库签收的&#10库存（数量/金额）">
+                                <img src="/wenhao.jpg" class="wenhao-class">
+                            </span>
+                            <span class="extend">
+                                <div class="title">在途库存数量（个）<br/><span style="color: red;">{$stock_overview.onway_stock_num}</span></div>
+                            </span>
+                        </div>
+                        <div class="btn btn-div div">
+                            <span tabindex="0" data-bs-toggle="tooltip" title="未入库库存（数量）指仓库已签收&#10但未入库的库存（数量）">
+                                <img src="/wenhao.jpg" class="wenhao-class">
+                            </span>
+                            <span class="extend">
+                                <div class="title">待入库数量（个）<br/><span style="color: red;">{$stock_overview.wait_stock_num}</span></div>
+                            </span>
+                        </div>
+                        <div class="btn btn-div div">
+                            <span class="extend">
+                                <div class="title">库存单价（￥）<br/><span style="color: red;">{$stock_overview.stock_price}</span></div>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="margin-div" style="text-align: center">
+                        <div class="btn btn-div div">
+                            <span class="extend">
+                                <div class="title">库存总金额（￥）<br/><span style="color: red;">{$stock_overview.stock_amount}</span></div>
+                            </span>
+                        </div>
+                        <div class="btn btn-div div">
+                            <span class="extend">
+                                <div class="title">在途库存金额（￥）<br/><span style="color: red;">{$stock_overview.onway_stock_amount}</span></div>
+                            </span>
+                        </div>
+                        <div class="btn btn-div div">
+                            <span class="extend">
+                                <div class="title">待入库金额（￥）<br/><span style="color: red;">{$stock_overview.wait_stock_amount}</span></div>
+                            </span>
+                        </div>
+                        <div class="btn btn-div div">
+                            <span class="extend">
+                                <div class="title">在途库存单价（￥）<br/><span style="color: red;">{$stock_overview.onway_stock_price}</span></div>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+             </div>
+            <div class="new-background">
+                <div>
+                    <label>仓库指标总览</label>
+                    <label style="float: right;margin-right: 120px">站点：</label>
+                    <select data-rule="required" class="platform-select" id="order_platform">
+                        {foreach name="magentoplatformarr" item="vo" key="key"}
+                        <option value="{$vo.id}" {if condition="$key == 0"}selected="selected"{/if}>{$vo.name}</option>
+                        {/foreach}
+                    </select>
+                </div>
+                <div class="row">
+                    <div class="margin-div" style="text-align: center">
+                        <div class="btn btn-div div">
+                            <span tabindex="0" data-bs-toggle="tooltip" title="库存周转率反映库存周转快慢程&#10度。公式：阶段内库存消耗数量/&#10阶段内平均库存数量">
+                                <img src="/wenhao.jpg" class="wenhao-class">
+                            </span>
+                            <span class="extend">
+                                <div class="title">库存周转率<br/><span style="color: red;" id="order_num">000</span></div>
+                            </span>
+                        </div>
+                        <div class="btn btn-div div">
+                            <span class="extend">
+                                <div class="title">库存精度<br/><span style="color: red;" id="order_unit_price">0000000</span></div>
+                            </span>
+                        </div>
+                        <div class="btn btn-div div">
+                            <span class="extend">
+                                <div class="title">库销比<br/><span style="color: red;" id="sales_total_money">00000</span></div>
+                            </span>
+                        </div>
+                        <div class="btn btn-div div">
+                            <span class="extend">
+                                <div class="title">缺货率<br/><span style="color: red;" id="shipping_total_money">111111</span></div>
+                            </span>
+                        </div>
+                        <div class="btn btn-div div">
+                            <span class="extend">
+                                <div class="title">虚拟仓库存周转率<br/><span style="color: red;" id="shipping_total_money">111111</span></div>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="margin-div" style="text-align: center">
+                        <div class="btn btn-div div">
+                            <span tabindex="0" data-bs-toggle="tooltip" title="库存周转天数反映库存周转一次&#10的时间长度。公式：阶段天数/库&#10存周转率">
+                                <img src="/wenhao.jpg" class="wenhao-class">
+                            </span>
+                            <span class="extend">
+                                <div class="title">库存周转天数<br/><span style="color: red;" id="order_num">000</span></div>
+                            </span>
+                        </div>
+                        <div class="btn btn-div div">
+                            <span class="extend">
+                                <div class="title">sku库存精度<br/><span style="color: red;" id="order_unit_price">0000000</span></div>
+                            </span>
+                        </div>
+                        <div class="btn btn-div div">
+                            <span class="extend">
+                                <div class="title">月度进销比<br/><span style="color: red;" id="sales_total_money">00000</span></div>
+                            </span>
+                        </div>
+                        <div class="btn btn-div div">
+                            <span class="extend">
+                                <div class="title">虚拟仓库存周转天数<br/><span style="color: red;" id="shipping_total_money">0</span></div>
+                            </span>
+                        </div>
+                        <div class="btn btn-div div">
+                            <span class="extend">
+                                <div class="title">虚拟仓月度进销比<br/><span style="color: red;" id="shipping_total_money">0</span></div>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="new-background">
+                <label>库存分级概况</label>
+                <table id="order-info-list" class="altrowstable" width="100%">
+                    <thead>
+                    <tr>
+                        <th>产品销量等级</th>
+                        <th>数量</th>
+                        <th>百分比</th>
+                        <th>库存</th>
+                        <th>库存占比</th>
+                        <th>库存金额（￥）</th>
+                        <th>库销比</th>
+                    </tr>
+                    </thead>
+                    {foreach $stock_level_overview as $item}
+                    <tr>
+                        <td>{$item.grade}</td>
+                        <td>{$item.count}</td>
+                        <td>{$item.percent}</td>
+                        <td>{$item.stock_num}</td>
+                        <td>{$item.stock_percent}</td>
+                        <td>{$item.stock_price}</td>
+                        <td>{$item.grade}</td>
+                    </tr>
+                    {/foreach}
+                </table>
+            <div>
+                <div class="new-background">
+                    <label>库龄概况</label>
+                    <table id="order-info-list" class="altrowstable" width="100%">
+                        <thead>
+                        <tr>
+                            <th>库龄</th>
+                            <th>数量</th>
+                            <th>百分比</th>
+                            <th>库存</th>
+                            <th>库存占比</th>
+                            <th>库存金额（￥）</th>
+                        </tr>
+                        </thead>
+                        <tr>
+                            <td>0~3月</td>
+                            <td id='replacement_order_num'>{$replacement_order_num.replacement_order_num}</td>
+                            <td id='replacement_order_total'>{$replacement_order_total.replacement_order_total}</td>
+                            <td id='replacement_order_num'>{$replacement_order_num.replacement_order_num}</td>
+                            <td id='replacement_order_total'>{$replacement_order_total.replacement_order_total}</td>
+                            <td id='replacement_order_num'>{$replacement_order_num.replacement_order_num}</td>
+                        </tr>
+                        <tr>
+                            <td>4~6月</td>
+                            <td id='replacement_order_num'>{$replacement_order_num.replacement_order_num}</td>
+                            <td id='replacement_order_total'>{$replacement_order_total.replacement_order_total}</td>
+                            <td id='replacement_order_num'>{$replacement_order_num.replacement_order_num}</td>
+                            <td id='replacement_order_total'>{$replacement_order_total.replacement_order_total}</td>
+                            <td id='replacement_order_num'>{$replacement_order_num.replacement_order_num}</td>
+                        </tr>
+                        <tr>
+                            <td>7~9月</td>
+                            <td id='replacement_order_num'>{$replacement_order_num.replacement_order_num}</td>
+                            <td id='replacement_order_total'>{$replacement_order_total.replacement_order_total}</td>
+                            <td id='replacement_order_num'>{$replacement_order_num.replacement_order_num}</td>
+                            <td id='replacement_order_total'>{$replacement_order_total.replacement_order_total}</td>
+                            <td id='replacement_order_num'>{$replacement_order_num.replacement_order_num}</td>
+                        </tr>
+                        <tr>
+                            <td>10~12月</td>
+                            <td id='replacement_order_num'>{$replacement_order_num.replacement_order_num}</td>
+                            <td id='replacement_order_total'>{$replacement_order_total.replacement_order_total}</td>
+                            <td id='replacement_order_num'>{$replacement_order_num.replacement_order_num}</td>
+                            <td id='replacement_order_total'>{$replacement_order_total.replacement_order_total}</td>
+                            <td id='replacement_order_num'>{$replacement_order_num.replacement_order_num}</td>
+                        </tr>
+                        <tr>
+                            <td>12个月以上</td>
+                            <td id='replacement_order_num'>{$replacement_order_num.replacement_order_num}</td>
+                            <td id='replacement_order_total'>{$replacement_order_total.replacement_order_total}</td>
+                            <td id='replacement_order_num'>{$replacement_order_num.replacement_order_num}</td>
+                            <td id='replacement_order_total'>{$replacement_order_total.replacement_order_total}</td>
+                            <td id='replacement_order_num'>{$replacement_order_num.replacement_order_num}</td>
+                        </tr>
+                    </table>
+                    <div>
+                <div class="widget-body no-padding">
+                    <div class="new-background">
+                        <div class="row">
+                            <div class="form-group" style="float:left;width: 100%;" >
+                                <label class="control-label col-xs-6">采购概况</label>
+                            </div>
+                            <div class="wrap">
+                                <div class="hLeft">
+                                    <div class="row">
+                                        <div class="margin-div" style="text-align: center">
+                                            <div class="btn btn-div div1">
+                                            <span class="extend">
+                                                <div class="title">采购总数<br/><span style="color: red;">{$purchase_overview.purchase_num}</span></div>
+                                            </span>
+                                            </div>
+                                            <div class="btn btn-div div1">
+                                            <span class="extend">
+                                                <div class="title">采购总金额（￥）<br/><span style="color: red;">{$purchase_overview.purchase_amount}</span></div>
+                                            </span>
+                                            </div>
+                                            <div class="btn btn-div div1">
+                                            <span class="extend">
+                                                <div class="title">采购总SKU数<br/><span style="color: red;">{$purchase_overview.purchase_sku_num}</span></div>
+                                            </span>
+                                            </div>
+                                            <div class="btn btn-div div1">
+                                            <span class="extend">
+                                                <div class="title">采购批次到货延时率<br/><span style="color: red;" >{$purchase_overview.purchase_delay_rate}</span></div>
+                                            </span>
+                                            </div>
+                                            <div class="btn btn-div div1">
+                                            <span class="extend">
+                                                <div class="title">采购批次到货合格率<br/><span style="color: red;">{$purchase_overview.purchase_qualified_rate}</span></div>
+                                            </span>
+                                            </div>
+                                            <div class="btn btn-div div1">
+                                            <span class="extend">
+                                                <div class="title">采购单价（￥）<br/><span style="color: red;">{$purchase_overview.purchase_price}</span></div>
+                                            </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="hRight">
+                                    <div id="echart1" style="height:300px;margin: 10px 0px 10px 0px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="new-background">
+                    <label>订单发出总览</label>
+                    <div id="echart2" style="height:500px;margin: 10px 0px 10px 0px;"></div>
+                <div>
+                <div class="new-background">
+                    <label>加工概况</label>
+                    <div id="echart3" style="height:500px;margin: 10px 0px 10px 0px;"></div>
+                <div>
+                <div class="widget-body no-padding">
+                    <div class="new-background">
+                        <div class="row">
+                            <div class="form-group" style="float:left;width: 100%;" >
+                                <label class="control-label col-xs-6">物流妥投概况</label>
+                                <label class="control-label col-xs-6">妥投失效占比</label>
+                            </div>
+                            <div class="wrap">
+                                <div class="hLeft">
+                                    <div class="row">
+                                        <div class="margin-div" style="text-align: center">
+                                            <div class="btn btn-div div2">
+                                            <span class="extend">
+                                                <div class="title">发货数量<br/><span style="color: red;">{$purchase_overview.purchase_num}</span></div>
+                                            </span>
+                                            </div>
+                                            <div class="btn btn-div div2">
+                                            <span class="extend">
+                                                <div class="title">妥投总数量<br/><span style="color: red;">{$purchase_overview.purchase_amount}</span></div>
+                                            </span>
+                                            </div>
+                                            <div class="btn btn-div div2">
+                                            <span class="extend">
+                                                <div class="title">未妥投数量<br/><span style="color: red;">{$purchase_overview.purchase_sku_num}</span></div>
+                                            </span>
+                                            </div>
+                                            <div class="btn btn-div div2">
+                                            <span class="extend">
+                                                <div class="title">超时未妥投数量<br/><span style="color: red;" >{$purchase_overview.purchase_delay_rate}</span></div>
+                                            </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="hRight">
+                                    <div id="echart4" style="height:300px;margin: 10px 0px 10px 0px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

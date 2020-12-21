@@ -342,7 +342,7 @@ class ScmQuality extends Scm
         //获取质检单商品数据
         $item_list = $this->_check_item
             ->where(['check_id' => $check_id])
-            ->field('sku,supplier_sku,arrivals_num,quantity_num,unqualified_num,sample_num,should_arrival_num')
+            ->field('sku,supplier_sku,arrivals_num,quantity_num,unqualified_num,sample_num,should_arrival_num,remark')
             ->select();
         $item_list = collection($item_list)->toArray();
 
@@ -525,6 +525,7 @@ class ScmQuality extends Scm
                 0 != $row['status'] && $this->error(__('只有新建状态才能编辑'), [], 405);
 
                 $check_id = $get_check_id;
+                $batch_id = $row['batch_id'];
                 $purchase_id = $row['purchase_id'];
                 $logistics_id = $row['logistics_id'];
 
@@ -605,6 +606,7 @@ class ScmQuality extends Scm
                         $code_clear = [
                             'sku' => '',
                             'purchase_id' => 0,
+                            'batch_id' => 0,
                             'logistics_id' => 0,
                             'check_id' => 0
                         ];
@@ -617,12 +619,13 @@ class ScmQuality extends Scm
                     $item_save['purchase_id']  = $purchase_id;
                     $item_save['purchase_num'] = $value['purchase_num'];
                     $item_save['should_arrival_num'] = $value['should_arrival_num'];
-                    $this->_check_item->allowField(true)->save($item_save);
+                    $this->_check_item->allowField(true)->isUpdate(false)->data($item_save)->save();
                 }
 
                 $code_item = [
                     'purchase_id' => $purchase_id,
                     'sku' => $value['sku'],
+                    'batch_id' => $batch_id,
                     'logistics_id' => $logistics_id,
                     'check_id' => $check_id,
                     'create_person' => $this->auth->nickname,
@@ -713,6 +716,7 @@ class ScmQuality extends Scm
             $code_clear = [
                 'sku' => '',
                 'purchase_id' => 0,
+                'batch_id' => 0,
                 'logistics_id' => 0,
                 'check_id' => 0
             ];
@@ -759,9 +763,7 @@ class ScmQuality extends Scm
         $row = $this->_check->get($check_id);
         1 != $row['status'] && $this->error(__('只有待审核状态才能审核'), [], 405);
 
-        $res = $this->_check->allowField(true)->isUpdate(true, ['id' => $check_id])->save(['status' => $do_type, 'examine_time' => date('Y-m-d H:i:s')]);
-        false === $res && $this->error(__('审核失败'), [], 404);
-
+        $this->_check->startTrans();
         $this->_purchase_order->startTrans();
         $this->_logistics_info->startTrans();
         $this->_purchase_abnormal->startTrans();
@@ -770,6 +772,9 @@ class ScmQuality extends Scm
         $this->_purchase_abnormal_item->startTrans();
         $this->_sample_work_order_item->startTrans();
         try {
+            $res = $this->_check->allowField(true)->isUpdate(true, ['id' => $check_id])->save(['status' => $do_type, 'examine_time' => date('Y-m-d H:i:s')]);
+            if(false === $res) throw new Exception('审核失败');
+
             //审核通过关联操作
             if ($do_type == 2) {
                 //标记物流单检索为已创建质检单
@@ -828,10 +833,8 @@ class ScmQuality extends Scm
                     if ($check_item_list) {
                         //获取采购价格
                         $purchase_item_list = $this->_purchase_order_item
-                            ->field('sku,purchase_price')
                             ->where(['purchase_id' => $row['purchase_id']])
-                            ->select();
-                        $purchase_item_list = array_column($purchase_item_list, NULL, 'sku');
+                            ->column('purchase_price','sku');
 
                         //获取采购单商品数据
                         $abnormal_item_save = [];
@@ -876,12 +879,14 @@ class ScmQuality extends Scm
                 $code_clear = [
                     'sku' => '',
                     'purchase_id' => 0,
+                    'batch_id' => 0,
                     'logistics_id' => 0,
                     'check_id' => 0
                 ];
                 $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['check_id' => $check_id])->save($code_clear);
             }
 
+            $this->_check->commit();
             $this->_purchase_order->commit();
             $this->_logistics_info->commit();
             $this->_purchase_abnormal->commit();
@@ -889,9 +894,8 @@ class ScmQuality extends Scm
             $this->_product_bar_code_item->commit();
             $this->_purchase_abnormal_item->commit();
             $this->_sample_work_order_item->commit();
-            
-            $this->success('操作成功', [], 200);
         } catch (ValidateException $e) {
+            $this->_check->rollback();
             $this->_purchase_order->rollback();
             $this->_logistics_info->rollback();
             $this->_purchase_abnormal->rollback();
@@ -901,6 +905,7 @@ class ScmQuality extends Scm
             $this->_sample_work_order_item->rollback();
             $this->error($e->getMessage(), [], 406);
         } catch (PDOException $e) {
+            $this->_check->rollback();
             $this->_purchase_order->rollback();
             $this->_logistics_info->rollback();
             $this->_purchase_abnormal->rollback();
@@ -910,6 +915,7 @@ class ScmQuality extends Scm
             $this->_sample_work_order_item->rollback();
             $this->error($e->getMessage(), [], 407);
         } catch (Exception $e) {
+            $this->_check->rollback();
             $this->_purchase_order->rollback();
             $this->_logistics_info->rollback();
             $this->_purchase_abnormal->rollback();
@@ -919,7 +925,7 @@ class ScmQuality extends Scm
             $this->_sample_work_order_item->rollback();
             $this->error($e->getMessage(), [], 408);
         }
-
+        $this->success('操作成功', [], 200);
     }
 
     /**
@@ -967,9 +973,7 @@ class ScmQuality extends Scm
         //获取采购单数据
         $purchase_list = $this->_purchase_order
             ->where(['purchase_status' => ['in', [6, 7, 9, 10]]])
-            ->field('id,purchase_number,is_new_product')
-            ->select();
-        $purchase_list = array_column($purchase_list, NULL, 'id');
+            ->column('purchase_number,is_new_product','id');
 
         //拼接采购单条件
         if (isset($is_new_product)) {

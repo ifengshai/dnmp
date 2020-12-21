@@ -1,29 +1,6 @@
 <style>
-    .list-div {
-        border-width: 1px;
-        border-style: solid;
-        border-color: rgba(188, 188, 188, 1);
-        border-radius: 6px;
-        padding: 10px;
-        width: 100%;
-        height: 400px;
-        margin-bottom: 10px;
-    }
-
-    .caigou {
-        width: 45%;
-        margin-bottom: 10px;
-        float: left;
-    }
-
-    #caigou-table {
-        width: 100%;
-        height: 130px;
-        border-width: 1px;
-        border-style: solid;
-        border-color: rgba(188, 188, 188, 1);
-        border-radius: 6px;
-        text-align: center;
+    body {
+       overflow: auto;
     }
 
     #caigou-table tr {
@@ -145,7 +122,7 @@
             <tbody>
                 <tr>
                     <td>
-                        <table class="altrowstable" style="margin:0 auto;margin:30px;width:90%;">
+                        <table class="altrowstable" style="margin:30px;width:90%;">
                             <tbody>
                                 <tr></tr>                               
                                 <tr>
@@ -160,16 +137,14 @@
                                     <td>处方类型：</td>
                                     <td>{$result['prescription_type']}</td>
                                 </tr>
-   
                                 <tr>
-                                    <td>镜片类型：</td>
-                                    <td>{$result['lens_name']}</td>
+                                    <td>镜片名称：</td>
+                                    <td>{:$result['lens_name'] ?: $result['web_lens_name']}</td>
                                 </tr>
-                                <!--<tr>
-                                    <td>镀膜类型：</td>
+                                <tr>
+                                    <td>镀膜名称：</td>
                                     <td>{$result['coating_name']}</td>
-                                </tr>-->
-                               
+                                </tr>
                             </tbody>
                         </table>
                     </td>
@@ -193,15 +168,15 @@
                                     <td>{:$result['od_sph'] ?? ''}</td>
                                     <td>{:$result['od_cyl'] ?? ''}</td>
                                     <td>{:$result['od_axis'] ?? ''}</td>
-                                    {if $result['os_add'] && $result['od_add'] && (float) $result['os_add'] * 1 != 0 && (float) $result['od_add'] * 1 != 0}
-                                    <td>{:$result['os_add'] ?? ''}</td>
+                                    {if $result['os_add'] && $result['od_add']}
+                                    <td>{:$result['od_add'] ?? ''}</td>
                                     {else/}
-                                    <td rowspan="2">{:$result['os_add'] ?? $result['od_add']}</td>
+                                    <td rowspan="2">{:$result['os_add'] ?: $result['od_add']}</td>
                                     {/if}
                                     {if $result['pdcheck'] == 'on'}
-                                    <td rowspan="2">{:$result['pd'] ?? ''}</td>
-                                    {else/}
                                     <td>{:$result['pd_r'] ?? ''}</td>
+                                    {else/}
+                                    <td rowspan="2">{:$result['pd'] ?? ''}</td>
                                     {/if}
                                 </tr>
                                 <tr>
@@ -209,10 +184,10 @@
                                     <td>{:$result['os_sph'] ?? ''}</td>
                                     <td>{:$result['os_cyl'] ?? ''}</td>
                                     <td>{:$result['os_axis'] ?? ''}</td>
-                                    {if $result['os_add'] && $result['od_add'] && (float) $result['os_add'] * 1 != 0 && (float) $result['od_add'] * 1 != 0}
-                                    <td>{:$result['od_add'] ?? ''}</td>
+                                    {if $result['os_add'] && $result['od_add']}
+                                    <td>{:$result['os_add'] ?? ''}</td>
                                     {/if}
-                                    {if $result['pdcheck'] != 'on'}
+                                    {if $result['pdcheck'] == 'on'}
                                     <td>{:$result['pd_l'] ?? ''}</td>
                                     {/if}                                    
                                 </tr>

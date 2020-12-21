@@ -33,6 +33,7 @@ class Workorderconfig extends Backend
      */
     protected $model = null;
     protected $noNeedRight = ['*'];
+    protected $noNeedLogin = ['*'];
     public function _initialize()
     {
         parent::_initialize();

@@ -28,8 +28,15 @@ class Inventory extends Model
         'status_text'
     ];
 
+    public function Inventoryone()
+    {
+        return $this->belongsTo('Inventory', 'id', 'id', [], 'LEFT')->setEagerlyType(0);
+    }
 
-
+    public function Inventoryitemtwo()
+    {
+        return $this->belongsTo('InventoryItem', 'id', 'inventory_id', [], 'LEFT')->setEagerlyType(0);
+    }
     public function getStatusList()
     {
         return ['0' => __('待盘点'), '1' => __('盘点中'), '2' => __('已完成')];
@@ -43,8 +50,8 @@ class Inventory extends Model
         return isset($list[$value]) ? $list[$value] : '';
     }
 
-    public function InventoryItem()
-    {
-        return $this->hasMany('InventoryItem', 'inventory_id');
-    }
+//    public function InventoryItem()
+//    {
+//        return $this->hasMany('InventoryItem', 'inventory_id');
+//    }
 }

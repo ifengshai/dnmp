@@ -7,6 +7,7 @@ use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Reader\Csv;
 use PhpOffice\PhpSpreadsheet\Reader\Xls;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use think\Db;
 use think\Exception;
 use think\exception\PDOException;
@@ -93,6 +94,113 @@ class Outstock extends Backend
         return $this->view->fetch();
     }
 
+
+    /**
+     * 出库单批量导出
+     */
+    public function batch_export_xls()
+    {
+        set_time_limit(0);
+        ini_set('memory_limit', '512M');
+
+        $ids = input('id_params');
+        if (!empty($ids)){
+            $item_map['s.out_stock_id'] = ['in', $ids];
+        }
+        $list = $this->model
+            ->alias('o')
+            ->join(['fa_out_stock_item' => 's'], 'o.id = s.out_stock_id')
+            ->field('o.create_person,o.createtime,o.out_stock_number,s.sku,s.out_stock_num')
+            ->order('o.id desc')
+            ->where($item_map)
+            ->select();
+        $list = collection($list)->toArray();
+
+
+        $spreadsheet = new Spreadsheet();
+
+        //常规方式：利用setCellValue()填充数据
+        $spreadsheet->setActiveSheetIndex(0)
+            ->setCellValue("A1", "出库单号")
+            ->setCellValue("B1", "SKU")
+            ->setCellValue("C1", "出库数量")
+            ->setCellValue("D1", "创建人")
+            ->setCellValue("E1", "创建时间");
+
+
+        // Rename worksheet
+        $spreadsheet->setActiveSheetIndex(0)->setTitle('出库列表数据');
+
+
+        foreach ($list as $key => $value) {
+            $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), $value['out_stock_number']);
+            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['sku']);
+            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['out_stock_num']);
+            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['create_person']);
+            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['createtime']);
+        }
+
+        //设置宽度
+        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(32);
+        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(20);
+
+        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+
+
+        //自动换行
+        $spreadsheet->getDefaultStyle()->getAlignment()->setWrapText(true);
+
+        //设置边框
+        $border = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
+                    'color' => ['argb' => 'FF000000'], // 设置border颜色
+                ],
+            ],
+        ];
+
+
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
+        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
+
+        // $spreadsheet->getActiveSheet()->getStyle('A1:Z'.$key)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle('A1:E' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle('A1:E' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+
+        // Set active sheet index to the first sheet, so Excel opens this as the first sheet
+        $spreadsheet->setActiveSheetIndex(0);
+        // return exportExcel($spreadsheet, 'xls', '登陆日志');
+        $format = 'xlsx';
+        $savename = '出库单' . date("YmdHis", time());;
+        // dump($spreadsheet);
+
+        // if (!$spreadsheet) return false;
+        if ($format == 'xls') {
+            //输出Excel03版本
+            header('Content-Type:application/vnd.ms-excel');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
+        } elseif ($format == 'xlsx') {
+            //输出07Excel版本
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
+        }
+
+        //输出名称
+        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
+        //禁止缓存
+        header('Cache-Control: max-age=0');
+        $writer = new $class($spreadsheet);
+
+        $writer->save('php://output');
+    }
+
+
+
+
     /**
      * 添加
      */
@@ -133,7 +241,7 @@ class Outstock extends Backend
                         if (!$sku_platform) {
                             $this->error('此sku：' . $v . '没有同步至此平台，请先同步后重试');
                         }
-                        if ($out_stock_num[$k] > $sku_platform['stock']){
+                        if ($out_stock_num[$k] > $sku_platform['stock']) {
                             $this->error('sku：' . $v . '出库数量不能大于当前站点虚拟仓库存');
                         }
                     }
@@ -237,7 +345,7 @@ class Outstock extends Backend
                         if (!$sku_platform) {
                             $this->error('此sku：' . $v . '没有同步至此平台，请先同步后重试');
                         }
-                        if ($out_stock_num[$k] > $sku_platform['stock']){
+                        if ($out_stock_num[$k] > $sku_platform['stock']) {
                             $this->error('sku：' . $v . '出库数量不能大于当前站点虚拟仓库存');
                         }
                     }
@@ -291,7 +399,7 @@ class Outstock extends Backend
         $this->iitem = new \app\admin\model\itemmanage\Item;
         $itemplatform = new \app\admin\model\itemmanage\ItemPlatformSku();
         //查询数据以显示在出库单编辑界面
-        foreach ($item as $k=>$v){
+        foreach ($item as $k => $v) {
             $res = $this->iitem->getGoodsInfo($item[$k]['sku']);
             $item[$k]['stock'] = $res['stock'];
             //名字
@@ -302,7 +410,7 @@ class Outstock extends Backend
             $item[$k]['available_stock'] = $res['available_stock'];
             //占用库存
             $item[$k]['occupy_stock'] = $res['occupy_stock'];
-            $info = $itemplatform->where(['sku'=>$item[$k]['sku'],'platform_type'=>$row['platform_id']])->field('stock')->find();
+            $info = $itemplatform->where(['sku' => $item[$k]['sku'], 'platform_type' => $row['platform_id']])->field('stock')->find();
             //虚拟仓库存
             $item[$k]['platform_stock'] = $info['stock'];
         }
@@ -332,6 +440,7 @@ class Outstock extends Backend
 
         //查询入库分类
         $type = $this->type->where('is_del', 1)->select();
+
         $this->assign('type', $type);
 
 
@@ -339,7 +448,6 @@ class Outstock extends Backend
         //查询入库单商品信息
         $item_map['out_stock_id'] = $ids;
         $item = $this->item->where($item_map)->select();
-
         $this->assign('item', $item);
         $this->view->assign("row", $row);
         return $this->view->fetch();
@@ -378,7 +486,7 @@ class Outstock extends Backend
         $where['out_stock_id'] = ['in', $ids];
         $list = $this->item
             ->alias('a')
-            ->join('fa_out_stock o','a.out_stock_id = o.id')
+            ->join('fa_out_stock o', 'a.out_stock_id = o.id')
             ->where($where)
             ->select();
         $data['status'] = input('status');
@@ -395,76 +503,103 @@ class Outstock extends Backend
                 }
             }
             foreach ($arr as $k => $v) {
-                $item_platform_sku = $platform->where(['sku'=>$k,'platform_type'=>$v['platform_type']])->find();
+                $item_platform_sku = $platform->where(['sku' => $k, 'platform_type' => $v['platform_type']])->find();
                 if ($v['num'] > $item_platform_sku['stock']) {
                     $this->error('出库的数量大于sku:' . $k . '的虚拟仓库存，请检查后重试');
                 }
             }
         }
         $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
-
+        $item = new \app\admin\model\itemmanage\Item;
         if ($res != false) {
             /**
              * @todo 审核通过扣减库存逻辑
              */
+            (new StockLog())->startTrans();
+            $platform->startTrans();
+            $item->startTrans();
+            Db::startTrans();
+            try {
+                if ($data['status'] == 2) {
+                    //                dump(collection($list)->toArray());die;
 
-            if ($data['status'] == 2) {
-                //                dump(collection($list)->toArray());die;
+                    //出库扣减库存
+                    $stock_data = [];
+                    foreach ($list as $v) {
+                        //扣除商品表商品总库存
+                        //总库存
 
-                //出库扣减库存
-                $stock_data = [];
-                foreach ($list as $v) {
-                    //扣除商品表商品总库存
-                    //总库存
-                    $item = new \app\admin\model\itemmanage\Item;
-                    $item_map['sku'] = $v['sku'];
-                    $item->where($item_map)->dec('stock', $v['out_stock_num'])->dec('available_stock', $v['out_stock_num'])->update();
+                        $item_map['sku'] = $v['sku'];
+                        $sku_item = $item->where($item_map)->find();
+                        $item_platform_sku = $platform->where(['sku' => $v['sku'], 'platform_type' => $v['platform_id']])->find();
 
-                    //直接扣减此平台sku的库存
-                    $platform->where(['sku' => $v['sku'], 'platform_type' => $v['platform_id']])->dec('stock', $v['out_stock_num'])->update();
+                        $item->where($item_map)->dec('stock', $v['out_stock_num'])->dec('available_stock', $v['out_stock_num'])->update();
+                        //直接扣减此平台sku的库存
+                        $platform->where(['sku' => $v['sku'], 'platform_type' => $v['platform_id']])->dec('stock', $v['out_stock_num'])->update();
 
-                    $stock_data[] = [
-                        'type'                      => 2,
-                        'two_type'                  => 4,
-                        'sku'                       => $v['sku'],
-                        'public_id'                 => $v['out_stock_id'],
-                        'stock_change'              => -$v['out_stock_num'],
-                        'available_stock_change'    => -$v['out_stock_num'],
-                        'create_person'             => session('admin.nickname'),
-                        'create_time'               => date('Y-m-d H:i:s'),
-                        'remark'                    => '出库单减少总库存,减少可用库存'
-                    ];
-
-                    // //同事配镜 厂家质量问题 带回办公室 扣减库存最大的那个站
-                    // if (in_array($v['type_id'], [3, 5, 9,23])) {
-                    //     $item_platform_sku = $platform->where('sku', $v['sku'])->order('stock desc')->field('platform_type,stock')->find();
-                    //     $platform->where(['sku' => $v['sku'], 'platform_type' => $item_platform_sku['platform_type']])->dec('stock', $v['out_stock_num'])->update();
-                    // }else{
-                    //     //盘点的时候盘盈入库 盘亏出库 的同时要对虚拟库存进行一定的操作
-                    //     //查出映射表中此sku对应的所有平台sku 并根据库存数量进行排序（用于遍历数据的时候首先分配到那个站点）
-                    //     $item_platform_sku = $platform->where('sku',$v['sku'])->order('stock asc')->field('platform_type,stock')->select();
-                    //     $all_num = count($item_platform_sku);
-                    //     $whole_num = $platform->where('sku',$v['sku'])->sum('stock');
-                    //     //盘盈或者盘亏的数量 根据此数量对平台sku虚拟库存进行操作
-                    //     $stock_num = $v['out_stock_num'];
-                    //     foreach ($item_platform_sku as $key => $val) {
-                    //         //最后一个站点 剩余数量分给最后一个站
-                    //         if (($all_num - $key) == 1) {
-                    //             $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->dec('stock', $stock_num)->update();
-                    //         } else {
-                    //             $num = round($v['out_stock_num'] * $val['stock']/$whole_num);
-                    //             $stock_num -= $num;
-                    //             $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->dec('stock', $num)->update();
-                    //         }
-                    //     }
-                    // }
+                        //插入日志表
+                        (new StockLog())->setData([
+                            //'大站点类型：1网站 2魔晶',
+                            'type' => 2,
+                            //'站点类型：1Zeelool  2Voogueme 3Nihao 4Meeloog 5Wesee 8Amazon 9Zeelool_es 10Zeelool_de 11Zeelool_jp'
+                            'site' => $v['platform_id'],
+                            //'模块：1普通订单 2配货 3质检 4审单 5异常处理 6更改镜架 7取消订单 8补发 9赠品 10采购入库 11出入库 12盘点 13调拨'
+                            'modular' => 11,
+                            //'变动类型：1非预售下单 2预售下单-虚拟仓>0 3预售下单-虚拟仓<0 4配货 5质检拒绝-镜架报损 6审单-成功 7审单-配错镜框
+                            // 8加工异常打回待配货 9印logo异常打回待配货 10更改镜架-配镜架前 11更改镜架-配镜架后 12取消订单-配镜架前 13取消订单-配镜架后
+                            // 14补发 15赠品 16采购-有比例入库 17采购-没有比例入库 18手动入库 19手动出库 20盘盈入库 21盘亏出库 22调拨 23调拨 24库存调拨'
+                            'change_type' => 19,
+                            // '关联sku'
+                            'sku' => $v['sku'],
+                            //'关联订单号或子单号'
+                            'order_number' => $v['out_stock_number'],
+                            //'关联变化的ID'
+                            'public_id' => 0,
+                            //'操作端：1PC端 2PDA'
+                            'source' => 1,
+                            //'总库存变动前'
+                            'stock_before' => $sku_item['stock'],
+                            //'总库存变化量：正数为加，负数为减'
+                            'stock_change' => -$v['out_stock_num'],
+                            //'可用库存变动前'
+                            'available_stock_before' => $sku_item['available_stock'],
+                            //'可用库存变化量：正数为加，负数为减'
+                            'available_stock_change' => -$v['out_stock_num'],
+                            // '虚拟仓库存变动前'
+                            'fictitious_before' => $item_platform_sku['stock'],
+                            // '虚拟仓库存变化量：正数为加，负数为减'
+                            'fictitious_change' => -$v['out_stock_num'],
+                            'create_person' => session('admin.nickname'),
+                            'create_time' => time(),
+                            //'关联单号类型：1订单号 2子订单号 3入库单 4出库单 5盘点单 6调拨单'
+                            'number_type' => 4,
+                        ]);
+                    }
+                    //先入先出逻辑
+                    //                $this->item->setPurchaseOrder($list);
                 }
-
-                //库存变动日志
-                (new StockLog())->allowField(true)->saveAll($stock_data);
-
-                //先入先出逻辑
-//                $this->item->setPurchaseOrder($list);
+                Db::commit();
+                (new StockLog())->commit();
+                $platform->commit();
+                $item->commit();
+            } catch (ValidateException $e) {
+                Db::rollback();
+                (new StockLog())->rollback();
+                $platform->rollback();
+                $item->rollback();
+                $this->error($e->getMessage());
+            } catch (PDOException $e) {
+                Db::rollback();
+                (new StockLog())->rollback();
+                $platform->rollback();
+                $item->rollback();
+                $this->error($e->getMessage());
+            } catch (Exception $e) {
+                Db::rollback();
+                (new StockLog())->rollback();
+                $platform->rollback();
+                $item->rollback();
+                $this->error($e->getMessage());
             }
 
             $this->success();
@@ -536,6 +671,7 @@ class Outstock extends Backend
             $this->error('404 Not found');
         }
     }
+
     /***
      * 出库单成本核算 create@lsw
      */
@@ -551,14 +687,14 @@ class Outstock extends Backend
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->with(['outstocktype'])
-                ->where(['status'=>2])
+                ->where(['status' => 2])
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
                 ->with(['outstocktype'])
-                ->where(['status'=>2])
+                ->where(['status' => 2])
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
@@ -567,7 +703,7 @@ class Outstock extends Backend
             //总共的
             $totalId = $this->model
                 ->with(['outstocktype'])
-                ->where(['status'=>2])
+                ->where(['status' => 2])
                 ->where($where)
                 ->column('outstock.id');
             $totalPriceInfo = (new OutStockLog())->calculateMoneyAccordOutStock($totalId);
@@ -576,32 +712,33 @@ class Outstock extends Backend
             //本页的
             $thisPageId = $this->model
                 ->with(['outstocktype'])
-                ->where(['status'=>2])
+                ->where(['status' => 2])
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->column('outstock.id');
             $thisPagePriceInfo = (new OutStockLog())->calculateMoneyAccordThisPageId($thisPageId);
-            if(0 != $thisPagePriceInfo){
-                foreach($list as $keys => $vals){
-                    if(array_key_exists($vals['id'],$thisPagePriceInfo)){
-                        $list[$keys]['total_money'] = round($thisPagePriceInfo[$vals['id']],2);
+            if (0 != $thisPagePriceInfo) {
+                foreach ($list as $keys => $vals) {
+                    if (array_key_exists($vals['id'], $thisPagePriceInfo)) {
+                        $list[$keys]['total_money'] = round($thisPagePriceInfo[$vals['id']], 2);
                     }
                 }
             }
-            $total_money = round($totalPriceInfo['total_money'],2);
-            $result = array("total" => $total, "rows" => $list,"totalPriceInfo"=>$total_money);
+            $total_money = round($totalPriceInfo['total_money'], 2);
+            $result = array("total" => $total, "rows" => $list, "totalPriceInfo" => $total_money);
 
             return json($result);
         }
         return $this->view->fetch();
     }
+
     /****
      * 出库单成本核算详情 create@lsw
      */
-    public function out_stock_order_detail($ids=null)
+    public function out_stock_order_detail($ids = null)
     {
-        $row = $this->model->get($ids,['outstocktype']);
+        $row = $this->model->get($ids, ['outstocktype']);
         if (!$row) {
             $this->error(__('No Results were found'));
         }
@@ -615,7 +752,7 @@ class Outstock extends Backend
         //查询入库分类
         $type = $this->type->select();
         $this->assign('type', $type);
-        if($item){
+        if ($item) {
             $this->assign('item', $item);
         }
         $this->assign("row", $row);
@@ -749,14 +886,14 @@ class Outstock extends Backend
                 default:
                     $this->error(__('请检查表格中调出仓的名称'));
             };
-            $instock_type = Db::name('out_stock_type')->where('is_del',1)->field('id,name')->select();
+            $instock_type = Db::name('out_stock_type')->where('is_del', 1)->field('id,name')->select();
             $instock_type = array_column(collection($instock_type)->toArray(), 'id', 'name');
 
             //插入一条数据到入库单主表
             $transfer_order['out_stock_number'] = 'OUT' . date('YmdHis') . rand(100, 999) . rand(100, 999);
             $transfer_order['type_id'] = $instock_type[$data[0][0]];
             $transfer_order['status'] = 0;
-            $transfer_order['platform_id'] =$out_label;
+            $transfer_order['platform_id'] = $out_label;
             $transfer_order['createtime'] = date('Y-m-d H:i:s');
             $transfer_order['create_person'] = session('admin.nickname');
             $transfer_order_id = $this->model->insertGetId($transfer_order);
@@ -767,10 +904,10 @@ class Outstock extends Backend
                 //获取sku
                 $sku = trim($v[2]);
 
-                $sku_plat = $_platform->where(['platform_type'=>$out_label,'sku'=>$sku])->find();
+                $sku_plat = $_platform->where(['platform_type' => $out_label, 'sku' => $sku])->find();
                 //校验当前平台是否存在此sku映射关系
-                if (empty($sku_plat)){
-                    $this->model->where('id', $transfer_order_id)->delete() && $this->error(__('导入失败,商品 ' . $sku .'在'. $out_plat.' 平台没有映射关系！'));
+                if (empty($sku_plat)) {
+                    $this->model->where('id', $transfer_order_id)->delete() && $this->error(__('导入失败,商品 ' . $sku . '在' . $out_plat . ' 平台没有映射关系！'));
                 }
 
                 //校验sku是否重复
@@ -782,8 +919,8 @@ class Outstock extends Backend
 
 
                 //校验出库数量是否大于当前虚拟仓库存量
-                if ($replenish_num > $sku_plat['stock']){
-                    $this->model->where('id', $transfer_order_id)->delete() && $this->error(__('导入失败,商品 ' . $sku .' 出库数量大于当前虚拟仓库库存！'));
+                if ($replenish_num > $sku_plat['stock']) {
+                    $this->model->where('id', $transfer_order_id)->delete() && $this->error(__('导入失败,商品 ' . $sku . ' 出库数量大于当前虚拟仓库库存！'));
                 }
 
                 //拼接参数 插入出库单详情表中

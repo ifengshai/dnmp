@@ -34,7 +34,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                         { field: 'base_grand_total', title: __('订单金额'), operate: false, formatter: Controller.api.formatter.float_format }, 
                         // { field: 'base_shipping_amount', title: __('邮费'), operate: false, formatter: Controller.api.formatter.float_format },
                        
-                        { field: 'order_type', title: __('订单类型'), custom: { 1: 'blue', 2: 'blue', 3: 'blue', 4: 'blue', 5: 'blue', 6: 'blue' }, searchList: { 1: '普通订单', 2: '批发单', 3: '网红单', 4: '补发单', 5: '补差价', 6: '一件代发' }, formatter: Table.api.formatter.status }, 
+                        { field: 'order_type', title: __('订单类型'), custom: { 1: 'blue', 2: 'blue', 3: 'blue', 4: 'blue', 5: 'blue', 6: 'blue', 10: 'blue' }, searchList: { 1: '普通订单', 2: '批发单', 3: '网红单', 4: '补发单', 5: '补差价', 6: '一件代发',10:'货到付款' }, formatter: Table.api.formatter.status }, 
                         // { field: 'sku', title: __('SKU'), operate: 'like', visible: false },
                         { field: 'created_at', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange',visible:false }, 
                         { field: 'created_at', title: __('创建时间'), operate: false}, 

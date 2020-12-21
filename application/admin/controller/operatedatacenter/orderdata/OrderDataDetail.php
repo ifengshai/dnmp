@@ -58,7 +58,6 @@ class OrderDataDetail extends Backend
             $web_model->table('sales_flat_order_payment')->query("set time_zone='+8:00'");
             $web_model->table('sales_flat_order_address')->query("set time_zone='+8:00'");
             $web_model->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
-            $map['o.order_type'] = 1;
             if($filter['time_str']){
                 $createat = explode(' ', $filter['time_str']);
                 $map['o.created_at'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
@@ -96,12 +95,18 @@ class OrderDataDetail extends Backend
             if($filter['increment_id']){
                 $map['o.increment_id'] = $filter['increment_id'];
             }
+            if($filter['is_refund'] && $filter['is_refund'] > 0){
+                $refund = $filter['is_refund'];
+            }else{
+                $refund = 0;
+            }
             unset($filter['time_str']);
             unset($filter['order_platform']);
             unset($filter['increment_id']);
             unset($filter['order_status']);
             unset($filter['customer_type']);
             unset($filter['store_id']);
+            unset($filter['is_refund']);
             $this->request->get(['filter' => json_encode($filter)]);
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $sort = 'o.entity_id';
@@ -117,7 +122,7 @@ class OrderDataDetail extends Backend
                 ->where($map)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
-                ->field('o.entity_id,o.increment_id,o.created_at,o.base_grand_total,o.base_shipping_amount,o.status,o.store_id,o.coupon_code,o.shipping_method,o.customer_email,o.customer_id,o.base_discount_amount')
+                ->field('o.entity_id,o.increment_id,o.created_at,o.coupon_rule_name,o.order_type,o.base_grand_total,o.base_shipping_amount,o.status,o.store_id,o.coupon_code,o.shipping_method,o.customer_email,o.customer_id,o.base_discount_amount')
                 ->select();
             $list = collection($list)->toArray();
             foreach ($list as $key=>$value){
@@ -125,6 +130,20 @@ class OrderDataDetail extends Backend
                 $list[$key]['created_at'] = $value['created_at'];
                 $list[$key]['base_grand_total'] = round($value['base_grand_total'],2);
                 $list[$key]['base_shipping_amount'] = round($value['base_shipping_amount'],2);
+                switch ($value['order_type']){
+                    case 1:
+                        $list[$key]['order_type'] = '普通订单';
+                        break;
+                    case 2:
+                        $list[$key]['order_type']  = '批发';
+                        break;
+                    case 3:
+                        $list[$key]['order_type']  = '网红';
+                        break;
+                    case 4:
+                        $list[$key]['order_type']  = '补发';
+                        break;
+                }
                 $order_node = Db::name('order_node')->where('order_id',$value['entity_id'])->value('node_type');
                 if($order_node == 7){
                     $order_shipping_status = '已发货';
@@ -230,6 +249,19 @@ class OrderDataDetail extends Backend
                 $list[$key]['register_email'] = $register_email;
                 $list[$key]['work_list_num'] = $work_list_num;
             }
+            if ($refund > 0){
+                if($refund == 1){
+                    $refund1 = '有';
+                }else{
+                    $refund1 = '无';
+                }
+                foreach ($list as $k=>$v){
+                    if ($v['is_refund'] != $refund1){
+                        unset($list[$k]);
+                    }
+                }
+                sort($list);
+            }
             $result = array("total" => $total, "rows" => $list);
 
             return json($result);
@@ -244,6 +276,7 @@ class OrderDataDetail extends Backend
         $this->view->assign('magentoplatformarr',$magentoplatformarr);
         return $this->view->fetch();
     }
+
     function filter_by_value ($array, $index, $value){
         if(is_array($array) && count($array)>0)
         {
@@ -375,6 +408,14 @@ class OrderDataDetail extends Backend
             array(
                 'name'=>'工单数',
                 'field'=>'work_list_num',
+            ),
+            array(
+                'name'=>'订单类型',
+                'field'=>'order_type',
+            )
+            ,array(
+                'name'=>'优惠券名称',
+                'field'=>'coupon_rule_name',
             )
         );
         $column_name = [];
@@ -404,7 +445,6 @@ class OrderDataDetail extends Backend
         $web_model->table('sales_flat_order_payment')->query("set time_zone='+8:00'");
         $web_model->table('sales_flat_order_address')->query("set time_zone='+8:00'");
         $web_model->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
-        $map['o.order_type'] = 1;
         if($time_str){
             $createat = explode(' ', $time_str);
             $map['o.created_at'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
@@ -449,7 +489,7 @@ class OrderDataDetail extends Backend
             $list = $order_model->alias('o')
                 ->join('customer_entity c','o.customer_id=c.entity_id','left')
                 ->where($map)
-                ->field('o.entity_id,o.increment_id,o.created_at,o.base_grand_total,o.base_shipping_amount,o.status,o.store_id,o.coupon_code,o.shipping_method,o.customer_email,o.customer_id,o.base_discount_amount')
+                ->field('o.entity_id,o.increment_id,o.created_at,o.base_grand_total,o.coupon_rule_name,o.order_type,o.base_shipping_amount,o.status,o.store_id,o.coupon_code,o.shipping_method,o.customer_email,o.customer_id,o.base_discount_amount')
                 ->limit($start,$pre_count)
                 ->select();
             $list = collection($list)->toArray();
@@ -494,6 +534,28 @@ class OrderDataDetail extends Backend
                     }
                     $index = array_keys($column_name,'status');
                     $tmpRow[$index[0]] =$order_shipping_status;
+                }
+                if(in_array('order_type',$column_name)) {
+                    switch ($val['order_type']) {
+                        case 1:
+                            $order_type = '普通订单';
+                            break;
+                        case 2:
+                            $order_type = '批发';
+                            break;
+                        case 3:
+                            $order_type = '网红';
+                            break;
+                        case 4:
+                            $order_type = '补发';
+                            break;
+                    }
+                    $index = array_keys($column_name,'order_type');
+                    $tmpRow[$index[0]] =$order_type;
+                }
+                if(in_array('coupon_rule_name',$column_name)){
+                    $index = array_keys($column_name,'coupon_rule_name');
+                    $tmpRow[$index[0]] =$val['coupon_rule_name'];
                 }
                 if(in_array('store_id',$column_name)){
                     switch ($val['store_id']){

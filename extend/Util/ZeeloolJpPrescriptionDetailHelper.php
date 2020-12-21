@@ -64,7 +64,7 @@ class ZeeloolJpPrescriptionDetailHelper
 	public static function get_list_by_entity_ids($entity_id)
 	{
 		if ($entity_id) {
-			$querySql = "select sfoi.original_price,sfoi.base_discount_amount,sfoi.base_row_total,sfo.increment_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.qty_ordered,sfoi.name,sfo.created_at
+			$querySql = "select sfoi.original_price,sfoi.item_id,sfoi.base_discount_amount,sfoi.base_row_total,sfo.increment_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.qty_ordered,sfoi.name,sfo.created_at
 			from sales_flat_order_item sfoi
 			left join sales_flat_order sfo on sfoi.order_id=sfo.entity_id 
 			where sfo.entity_id in($entity_id)";
@@ -135,8 +135,7 @@ class ZeeloolJpPrescriptionDetailHelper
 			$final_params['frame_price'] = $product_options['info_buyRequest']['tmplens']['frame_price'];
 			$final_params['index_price'] = $product_options['info_buyRequest']['tmplens']['index_price'];
 			$final_params['coatiing_price'] = $product_options['info_buyRequest']['tmplens']['coatiing_price'];
-
-
+			$final_params['index_color'] = $product_options['info_buyRequest']['tmplens']['index_color'];
 			$items[$item_key]['frame_regural_price'] = $final_params['frame_regural_price'] = $product_options['info_buyRequest']['tmplens']['frame_regural_price'];
 			$items[$item_key]['is_special_price'] = $final_params['is_special_price'] = $product_options['info_buyRequest']['tmplens']['is_special_price'];
 			$items[$item_key]['index_price_old'] = $final_params['index_price_old'] = $product_options['info_buyRequest']['tmplens']['index_price_old'];
@@ -152,6 +151,13 @@ class ZeeloolJpPrescriptionDetailHelper
 			$items[$item_key]['index_type'] = $final_params['index_type'] = $product_options['info_buyRequest']['tmplens']['index_type'];
 			$items[$item_key]['coating_id'] = $final_params['coating_id'] = $product_options['info_buyRequest']['tmplens']['coating_id'];
 			$items[$item_key]['coatiing_name'] = $final_params['coatiing_name'] = $product_options['info_buyRequest']['tmplens']['coatiing_name'];
+
+			if ($final_params['index_color']) {
+				$items[$item_key]['index_type'] = $final_params['index_type'] . '-' .  $final_params['index_color'];
+			} else {
+				$items[$item_key]['index_type'] = $final_params['index_type'];
+			}
+			
 			// dump($prescription_params);
 			$prescription_params = explode("&", $prescription_params);
 			$lens_params = array();
@@ -165,7 +171,6 @@ class ZeeloolJpPrescriptionDetailHelper
 			// dump($final_params);      
 
 			$items[$item_key]['coatiing_name'] = $final_params['coatiing_name'];
-			$items[$item_key]['index_type'] = $final_params['index_type'];
 			$items[$item_key]['prescription_type'] = $final_params['prescription_type'];
 
 			$items[$item_key]['frame_price'] = $final_params['frame_price'] ? $final_params['frame_price'] : 0;

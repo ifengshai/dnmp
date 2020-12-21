@@ -189,8 +189,6 @@ class SelfApi extends Api
         $site = $this->request->request('site'); //站点
         $title = $this->request->request('title'); //运营商
         $track_number = $this->request->request('track_number'); //快递单号
-
-        file_put_contents('/www/wwwroot/mojing/runtime/log/order_delivery.log', $order_id . ' - ' . $order_number . ' - ' . $site  . "\r\n", FILE_APPEND);
         if (!$order_id) {
             $this->error(__('缺少订单id参数'), [], 400);
         }
@@ -217,31 +215,33 @@ class SelfApi extends Api
             $this->error(__('订单记录不存在'), [], 400);
         }
 
-        //区分usps运营商
-        if (strtolower($title) == 'usps') {
-            $track_num1 = substr($track_number, 0, 4);
-            if ($track_num1 == '9200' || $track_num1 == '9205') {
-                //郭伟峰
-                $shipment_data_type = 'USPS_1';
-            } else {
-                $track_num2 = substr($track_number, 0, 4);
-                if ($track_num2 == '9400') {
-                    //加诺
-                    $shipment_data_type = 'USPS_2';
-                } else {
-                    //杜明明
-                    $shipment_data_type = 'USPS_3';
-                }
-            }
-        } else {
-            $shipment_data_type = $title;
-        }
+        // //区分usps运营商
+        // if (strtolower($title) == 'usps') {
+        //     $track_num1 = substr($track_number, 0, 4);
+        //     if ($track_num1 == '9200' || $track_num1 == '9205') {
+        //         //郭伟峰
+        //         $shipment_data_type = 'USPS_1';
+        //     } else {
+        //         $track_num2 = substr($track_number, 0, 4);
+        //         if ($track_num2 == '9400') {
+        //             //加诺
+        //             $shipment_data_type = 'USPS_2';
+        //         } else {
+        //             //杜明明
+        //             $shipment_data_type = 'USPS_3';
+        //         }
+        //     }
+        // } else {
+        //     $shipment_data_type = $title;
+        // }
 
         //如果已发货 则不再更新发货时间
         if ($row->order_node >= 2 && $row->node_type >= 7) {
             $this->error(__('订单节点已存在'), [], 400);
         }
-
+        //根据物流单号查询发货物流渠道
+        $shipment_data_type = Db::connect('database.db_delivery')->table('ld_deliver_order')->where(['track_number' => $track_number, 'increment_id' => $order_number])->value('agent_way_title');
+     
         //更新节点主表
         $row->allowField(true)->save([
             'order_node' => 2,
@@ -266,19 +266,18 @@ class SelfApi extends Api
             'shipment_data_type' => $shipment_data_type,
             'track_number' => $track_number,
         ]);
-
-
+        
+        file_put_contents('/www/wwwroot/mojing/runtime/log/order_delivery.log', $track_number . '-' . $shipment_data_type . "\r\n", FILE_APPEND);
         //注册17track
         $title = strtolower(str_replace(' ', '-', $title));
         $carrier = $this->getCarrier($title);
         $shipment_reg[0]['number'] =  $track_number;
         $shipment_reg[0]['carrier'] =  $carrier['carrierId'];
         $track = $this->regitster17Track($shipment_reg);
-        file_put_contents('/www/wwwroot/mojing/runtime/log/order_delivery.log', serialize($track)  . "\r\n", FILE_APPEND);
+
         if (count($track['data']['rejected']) > 0) {
             $this->error('物流接口注册失败！！', [], $track['data']['rejected']['error']['code']);
         }
-        file_put_contents('/www/wwwroot/mojing/runtime/log/order_delivery.log', 200  . "\r\n", FILE_APPEND);
         $this->success('提交成功', [], 200);
     }
 
@@ -311,7 +310,14 @@ class SelfApi extends Api
         } elseif (stripos($title, 'cpc') !== false) {
             $carrierId = 'cpc';
             $title = 'Canada Post';
+        } elseif (stripos($title, 'sua') !== false) {
+            $carrierId = 'sua';
+            $title = 'SUA';
+        } elseif (stripos($title, 'cod') !== false) {
+            $carrierId = 'cod';
+            $title = 'COD';
         }
+
         $carrier = [
             'dhl' => '100001',
             'chinapost' => '03011',
@@ -319,7 +325,9 @@ class SelfApi extends Api
             'cpc' =>  '03041',
             'fedex' => '100003',
             'usps' => '21051',
-            'yanwen' => '190012'
+            'yanwen' => '190012',
+            'sua' => '190111',
+            'cod' => '100040'
         ];
         if ($carrierId) {
             return ['title' => $title, 'carrierId' => $carrier[$carrierId]];
@@ -623,7 +631,7 @@ class SelfApi extends Api
     {
         if ($this->request->isPost()) {
             $site = $this->request->request('site'); //站点
-            $sku = $this->request->request('sku'); //true_sku
+            $sku = $this->request->request('sku'); //platform_sku
             $status = $this->request->request('status'); //status 1上架 2下架
             if (!$sku) {
                 $this->error(__('缺少SKU参数'), [], 400);
@@ -646,7 +654,7 @@ class SelfApi extends Api
             if (false !== $res) {
                 //如果是上架 则查询此sku是否存在当天有效sku表里
                 if ($status == 1) {
-                    $count = Db::name('sku_sales_num')->where(['sku' => $sku, 'site' => $site, 'createtime' => ['between', [date('Y-m-d 00:00:00'), date('Y-m-d 23:59:59')]]])->count();
+                    $count = Db::name('sku_sales_num')->where(['platform_sku' => $sku, 'site' => $site, 'createtime' => ['between', [date('Y-m-d 00:00:00'), date('Y-m-d 23:59:59')]]])->count();
                     //如果不存在则插入此sku
                     if ($count < 1) {
                         $data['sku'] = $list['sku'];
@@ -711,7 +719,7 @@ class SelfApi extends Api
                     file_put_contents('/www/wwwroot/mojing/runtime/log/set_goods_stock.log', '扣减虚拟库存失败：site:' . $site . '|订单id:' . $orderid . '|sku:' . $true_sku . "\r\n", FILE_APPEND);
                 }
 
-                
+
 
                 //如果虚拟仓库存不足 判断此sku 对应站点是否开启预售
                 if ($platform_data[$v['sku']]['stock'] < $qty) {
