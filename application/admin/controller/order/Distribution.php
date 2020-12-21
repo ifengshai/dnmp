@@ -415,7 +415,7 @@ class Distribution extends Backend
         }
 
         if (!$filter) {
-            $map['a.created_at'] = ['between', [strtotime('-3 month'), time()]];
+//            $map['a.created_at'] = ['between', [strtotime('-3 month'), time()]];
         }
         $this->request->get(['filter' => json_encode($filter)]);
 
