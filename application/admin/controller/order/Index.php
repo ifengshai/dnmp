@@ -228,6 +228,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
             curl_close($curl);
             Log::write("处方接口请求");
             Log::write($content);
+            Log::write($values);
             if ($content['status'] == 200){
                 $this->success('操作成功');
             }else{
