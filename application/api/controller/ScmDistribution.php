@@ -788,8 +788,24 @@ class ScmDistribution extends Scm
         $order_item_id = $this->_new_order_item_process->where('item_order_number',$item_order_number)->value('id');
         empty($order_item_id) && $this->error(__('订单不存在'), [], 403);
 
+        //获取子单sku
         $order_item_true_sku = $this->_new_order_item_process->where('item_order_number',$item_order_number)->value('sku');
         $order_item_sku = $this->_item_platform_sku->where('platform_sku',$order_item_true_sku)->value('sku');
+
+        //获取更改镜框最新信息
+        $change_sku = $this->_work_order_change_sku
+            ->alias('a')
+            ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
+            ->where([
+                'a.change_type'=>1,
+                'a.item_order_number'=>$item_order_number,
+                'b.operation_type'=>1
+            ])
+            ->order('a.id','desc')
+            ->value('a.change_sku');
+        if($change_sku){
+            $order_item_sku = $change_sku;
+        }
 
         $barcode_item_order_number = $this->_product_bar_code_item->where('code',$barcode)->value('item_order_number');
         !empty($barcode_item_order_number) && $this->error(__('此条形码已经绑定过其他订单'), [], 403);
