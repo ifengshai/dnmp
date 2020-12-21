@@ -139,7 +139,7 @@
                                 </tr>
                                 <tr>
                                     <td>镜片名称：</td>
-                                    <td>{$result['lens_name']}</td>
+                                    <td>{:$result['lens_name'] ?: $result['web_lens_name']}</td>
                                 </tr>
                                 <tr>
                                     <td>镀膜名称：</td>
