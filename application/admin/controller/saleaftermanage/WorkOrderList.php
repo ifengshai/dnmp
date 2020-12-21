@@ -3572,7 +3572,7 @@ EOF;
         set_time_limit(0);
         ini_set('memory_limit', '1024M');
 
-        $map['work_platform'] =2;
+//        $map['work_platform'] =2;
         $map['work_status'] = array('in','2,3,5');
 //        0: '已取消', 1: '新建', 2: '待审核', 4: '审核拒绝', 3: '待处理', 5: '部分处理', 6: '已处理'
 
