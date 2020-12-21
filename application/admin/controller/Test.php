@@ -545,7 +545,7 @@ class Test extends Backend
                 //措施为取消
                 if ($v1['measure_choose_id'] == 3) {
                     //查询change sku表
-                    $change_sku_list = Db::table('fa_work_order_change_sku')->where(['work_id' => $v['id'], 'change_type' => 3])->select();
+                    $change_sku_list = Db::table('fa_work_order_change_sku')->where(['work_id' => $v['id'], 'change_type' => 3, 'measure_id' => $v1['id']])->select();
                     foreach ($change_sku_list as $key1 => $val1) {
                         //查询订单号所有子单
                         $order_list = $order->alias('a')->field('b.item_order_number')
@@ -581,7 +581,7 @@ class Test extends Backend
                     }
                 } else if ($v1['measure_choose_id'] == 1) { //措施为更改镜框
                     //查询change sku表内容
-                    $change_sku_list = Db::table('fa_work_order_change_sku')->where(['work_id' => $v['id']])->select();
+                    $change_sku_list = Db::table('fa_work_order_change_sku')->where(['work_id' => $v['id'], 'change_type' => 1, 'measure_id' => $v1['id']])->select();
                     foreach ($change_sku_list as $k2 => $v2) {
                         //查询订单号所有子单
                         $order_list = $order->alias('a')->field('b.item_order_number')
@@ -615,7 +615,7 @@ class Test extends Backend
                     }
                 } else if ($v1['measure_choose_id'] == 12) {  //措施为更改镜片
                     //查询change sku表内容
-                    $change_sku_list = Db::table('fa_work_order_change_sku')->where(['work_id' => $v['id']])->select();
+                    $change_sku_list = Db::table('fa_work_order_change_sku')->where(['work_id' => $v['id'], 'change_type' => 2, 'measure_id' => $v1['id']])->select();
                     foreach ($change_sku_list as $k2 => $v2) {
                         //查询订单号所有子单
                         $order_list = $order->alias('a')->field('b.item_order_number')
@@ -652,7 +652,7 @@ class Test extends Backend
                     $id =  Db::table('fa_work_order_measure_copy1')->insertGetId($v1);
 
                     //查询change sku表
-                    $change_sku_list = Db::table('fa_work_order_change_sku')->where(['work_id' => $v['id']])->select();
+                    $change_sku_list = Db::table('fa_work_order_change_sku')->where(['work_id' => $v['id'], 'measure_id' => $v1['id']])->select();
 
                     if (!$change_sku_list) continue;
                     $change_sku_data = [];
