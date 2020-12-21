@@ -481,7 +481,7 @@
                         <div class="row">
                             <div class="form-group" style="float:left;width: 100%;" >
                                 <label class="control-label col-xs-6">物流妥投概况</label>
-                                <label class="control-label col-xs-6">妥投失效占比</label>
+                                <label class="control-label col-xs-6">妥投时效占比</label>
                             </div>
                             <div class="wrap">
                                 <div class="hLeft">
@@ -489,22 +489,22 @@
                                         <div class="margin-div" style="text-align: center">
                                             <div class="btn btn-div div2">
                                             <span class="extend">
-                                                <div class="title">发货数量<br/><span style="color: red;">{$purchase_overview.purchase_num}</span></div>
+                                                <div class="title">发货数量<br/><span style="color: red;">{$logistics_completed_overview.delivery_count}</span></div>
                                             </span>
                                             </div>
                                             <div class="btn btn-div div2">
                                             <span class="extend">
-                                                <div class="title">妥投总数量<br/><span style="color: red;">{$purchase_overview.purchase_amount}</span></div>
+                                                <div class="title">妥投总数量<br/><span style="color: red;">{$logistics_completed_overview.completed_count}</span></div>
                                             </span>
                                             </div>
                                             <div class="btn btn-div div2">
                                             <span class="extend">
-                                                <div class="title">未妥投数量<br/><span style="color: red;">{$purchase_overview.purchase_sku_num}</span></div>
+                                                <div class="title">未妥投数量<br/><span style="color: red;">{$logistics_completed_overview.uncompleted_count}</span></div>
                                             </span>
                                             </div>
                                             <div class="btn btn-div div2">
                                             <span class="extend">
-                                                <div class="title">超时未妥投数量<br/><span style="color: red;" >{$purchase_overview.purchase_delay_rate}</span></div>
+                                                <div class="title">超时未妥投数量<br/><span style="color: red;" >{$logistics_completed_overview.timeout_uncompleted_count}</span></div>
                                             </span>
                                             </div>
                                         </div>
