@@ -528,7 +528,7 @@ class Test extends Backend
          */
         $work = new \app\admin\model\saleaftermanage\WorkOrderList();
         $order = new \app\admin\model\order\order\NewOrder();
-        $list = $work->where(['work_status' => 1])->select();
+        $list = $work->where(['work_status' => ['in', [0, 1, 4, 6, 7]]])->select();
         $list = collection($list)->toArray();
         foreach ($list as $k => $v) {
             //插入主表
@@ -654,10 +654,10 @@ class Test extends Backend
                         ->where(['a.increment_id' => $v['increment_id'], 'a.site' => $v['work_platform']])
                         ->join(['fa_order_item_process' => 'b'], 'a.id=b.order_id')
                         ->select();
-                      
+
                     //查询change sku表
                     $change_sku_list = Db::table('fa_work_order_change_sku')->where(['work_id' => $v['id']])->find();
-                   
+
                     if (!$change_sku_list) continue;
                     $change_sku_data = [];
                     foreach ($order_list as $key => $val) {
