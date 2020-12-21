@@ -521,6 +521,8 @@ class Test extends Backend
     /***************处理工单旧数据*********************** */
     public function process_worklist_data()
     {
+
+        ini_set('memory_limit', '1280M');
         /**
          * 判断措施是否为 id = 3主单取消   changesku表需插入所有子订单
          * 判断措施如果id = 19 更改镜框 需插入对应sku 所有子订单
