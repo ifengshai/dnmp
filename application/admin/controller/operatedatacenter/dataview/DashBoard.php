@@ -446,12 +446,13 @@ class DashBoard extends Backend
                 $arr = $model->where($where)->column('day_date', 'active_user_num');
                 $date_arr = $arr;
                 // dump($arr);die;
-
+                dump($arr);
                 $arr1 = $model->where($where)->column('day_date', 'order_num');
                 $date_arr1 = $arr1;
-
+                dump($arr1);
+                die;
                 // $json['xcolumnData'] = array_values($date_arr);
-                $json['xColumnName'] = ['2020-07-01', '2020-07-02', '2020-07-03', '2020-07-04', '2020-07-05', '2020-07-06', '2020-07-07', '2020-07-08'];
+                // $json['xColumnName'] = ['2020-07-01', '2020-07-02', '2020-07-03', '2020-07-04', '2020-07-05', '2020-07-06', '2020-07-07', '2020-07-08'];
                 $json['xColumnName'] = array_values($date_arr);
 
                 $json['columnData'] = [
