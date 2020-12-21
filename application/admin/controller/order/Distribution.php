@@ -1561,14 +1561,10 @@ class Distribution extends Backend
                 //子订单状态回滚
                 $save_data = [
                     'distribution_status' => $status,//配货状态
-                    'abnormal_house_id' => 0//异常库位ID
+                    'abnormal_house_id' => 0,//异常库位ID
+                    'temporary_house_id' => 0,//定制片库位ID
+                    'customize_status' => 0//定制片处理状态
                 ];
-
-                //如果回退到待加工步骤之前，清空定制片库位ID及定制片处理状态
-                if (4 > $status) {
-                    $save_data['temporary_house_id'] = 0;
-                    $save_data['customize_status'] = 0;
-                }
 
                 $this->model
                     ->allowField(true)
