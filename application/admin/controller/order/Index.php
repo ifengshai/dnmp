@@ -188,8 +188,13 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                 $value['order_items'][$i]['os_sph']= $data['os_sph'][$i];
                 $value['order_items'][$i]['os_cyl'] = $data['os_cyl'][$i];
                 $value['order_items'][$i]['os_axis'] = $data['os_axis'][$i];
-                $value['order_items'][$i]['pd_r'] = $data['pd_r'][$i];
-                $value['order_items'][$i]['pd_l'] = $data['pd_l'][$i];
+
+                if ($data['pd_l'][$i] ==null && $data['pd_r'][$i] ){
+                    $value['order_items'][$i]['pd'] = $data['pd_r'][$i];
+                }else{
+                    $value['order_items'][$i]['pd_r'] = $data['pd_r'][$i];
+                    $value['order_items'][$i]['pd_l'] = $data['pd_l'][$i];
+                }
                 $value['order_items'][$i]['od_pv'] = $data['od_pv'][$i];
                 $value['order_items'][$i]['os_pv'] = $data['os_pv'][$i];
                 $value['order_items'][$i]['od_bd'] = $data['od_bd'][$i];
@@ -206,6 +211,8 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                     $value['order_items'][$i]['prismcheck'] = '';
                 }
             }
+
+            dump($value);die();
             //请求接口
             $url = config('url.esz_url').'magic/order/prescriptionPicCheck';
             $values = $value;
