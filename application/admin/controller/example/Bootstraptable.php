@@ -236,7 +236,7 @@ class Bootstraptable extends Backend
             $data[$k]['product_number'] = $v;
         }
         Db::name('zzzz_temp')->insertAll($data);
-        echo 'ok';
+        $this->success('ok');
     }
 
     public function derive()
