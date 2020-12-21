@@ -369,7 +369,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
         }
         //获取支付信息
         $pay = $this->zeelool->getPayDetail($label, $ids);
-        dump($goods);die();
+
         $this->view->assign("label", $label);
         $this->view->assign("row", $row);
         $this->view->assign("address", $address);

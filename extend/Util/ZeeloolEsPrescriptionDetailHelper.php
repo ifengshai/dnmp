@@ -126,7 +126,7 @@ class ZeeloolEsPrescriptionDetailHelper
 			$items[$item_key]['base_row_total'] = $item_value['base_row_total'];
 			$items[$item_key]['original_price'] = $item_value['original_price'];
 			$product_options = unserialize($item_value['product_options']);
-			dump($product_options);
+
             if ($product_options['info_buyRequest']['tmplens']['prescription_pic_checked'] === false &&
                 $product_options['info_buyRequest']['tmplens']['prescription_pic_id'] > 0){
                 $items[$item_key]['to_examine'] = true;
