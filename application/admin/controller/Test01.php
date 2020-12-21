@@ -505,6 +505,7 @@ class Test01 extends Backend
             $arr[$k]['whole_price'] = $whole_price;
             $arr[$k]['every_price'] = $every_price;
         }
+        dump($arr);die;
         //从数据库查询需要的数据
         $spreadsheet = new Spreadsheet();
         $spreadsheet->setActiveSheetIndex(0);
