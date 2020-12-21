@@ -651,12 +651,13 @@ class Test extends Backend
 
                     //查询订单号所有子单
                     $order_list = $order->alias('a')->field('b.item_order_number')
-                        ->where(['a.increment_id' => $v['increment_id'], 'a.site' => $v['platform_type']])
+                        ->where(['a.increment_id' => $v['increment_id'], 'a.site' => $v['work_platform']])
                         ->join(['fa_order_item_process' => 'b'], 'a.id=b.order_id')
                         ->select();
-
+                      
                     //查询change sku表
                     $change_sku_list = Db::table('fa_work_order_change_sku')->where(['work_id' => $v['id']])->find();
+                   
                     if (!$change_sku_list) continue;
                     $change_sku_data = [];
                     foreach ($order_list as $key => $val) {
