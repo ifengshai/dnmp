@@ -439,7 +439,7 @@
                                     {if $sku['total_add']}
                                     <td rowspan="2"><input type="text" class="inputs" value="{:$sku['total_add'] ?? ''}" name="total_add[]"></td>
                                     {else/}
-                                    <td><input type="text" class="inputs" value="{:$sku['od_add']}" name="os_add[]"></td>
+                                    <td><input type="text" class="inputs" value="{:$sku['od_add']}" name="od_add[]"></td>
                                     {/if}
 
                                     <td><input type="text" class="inputs" value="{:$sku['pd_r'] ?? ''}" name="pd_r[]"></td>
@@ -460,7 +460,7 @@
                                         <input type="text" class="inputs" value="{:$sku['os_axis'] ?? ''}" name="os_axis[]"></td>
                                     {if !$sku['total_add']}
                                     <td>
-                                        <input type="text" class="inputs" value="{:$sku['os_add']}" name="od_add[]"> </td>
+                                        <input type="text" class="inputs" value="{:$sku['os_add']}" name="os_add[]"> </td>
                                     {/if}
                                     <td>
                                         <input type="text" class="inputs" value="{:$sku['pd_l'] ?? ''}" name="pd_l[]"></td>
