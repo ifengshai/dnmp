@@ -473,7 +473,6 @@
                                     <td>
                                         <input type="text" class="inputs" value="{:$sku['os_bd_r'] ?? ''}" name="os_bd_r[]"></td>
                                 </tr>
-
                                 {else/}
                                 <tr>
                                     <td >Right(OD)</td>
@@ -535,6 +534,12 @@
                                 </tbody>
                             </table>
                         </td>
+                        {if condition="$sku['prescription_image'] neq null"}
+                            <td>
+                                <img src="https://esz.zhaokuangyi.com/media/prescription_file/160853807210954.jpg" alt="" style="width: 360px;height: 330px;float: right" data-tips-image>
+                            </td>
+                        {/if}
+
                     </tr>
                     {/foreach}
                     </tbody>
