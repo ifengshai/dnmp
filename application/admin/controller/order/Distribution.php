@@ -454,7 +454,7 @@ class Distribution extends Backend
             ->order($sort, $order)
             ->count();
 
-        $list = $this->model
+        $sql = $this->model
             ->alias('a')
             ->field('a.id,a.order_id,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.total_qty_ordered,b.site,b.order_type,b.status,a.distribution_status,a.temporary_house_id,a.abnormal_house_id,order_type,a.created_at,c.store_house_id')
             ->join(['fa_order' => 'b'], 'a.order_id=b.id')
@@ -465,7 +465,20 @@ class Distribution extends Backend
             ->limit($offset, $limit)
             ->select(false);
 
+        $list = $this->model
+            ->alias('a')
+            ->field('a.id,a.order_id,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.total_qty_ordered,b.site,b.order_type,b.status,a.distribution_status,a.temporary_house_id,a.abnormal_house_id,order_type,a.created_at,c.store_house_id')
+            ->join(['fa_order' => 'b'], 'a.order_id=b.id')
+            ->join(['fa_order_process' => 'c'], 'a.order_id=c.order_id')
+            ->where($where)
+            ->where($map)
+            ->order($sort, $order)
+            ->limit($offset, $limit)
+            ->select();
+
         print_r($map);
+        print_r('---------');
+        print_r($sql);
         print_r('---------');
         print_r($list);
         exit;
