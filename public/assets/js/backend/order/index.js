@@ -54,8 +54,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                         console.log(row)
                                         //返回true时按钮显示,返回false隐藏
                                         if (row.status !== 'pending' && row.site !=='9'){
+                                            console.log(1111)
                                             return  true;
                                         }else{
+                                            console.log(2222)
                                             return  false;
                                         }
                                     }
@@ -75,8 +77,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                     visible: function (row) {
                                         console.log(row)
                                         if (row.status =='pending' && row.site ==9){
+                                            console.log(3333)
                                             return true;
                                         }else{
+                                            console.log(4444)
                                             return  false;
                                         }
                                         //返回true时按钮显示,返回false隐藏
