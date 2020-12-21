@@ -41,7 +41,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
                                 {
                                     name: 'detail',
-                                    text: '详情0',
+                                    text: '详情',
                                     title: __('Detail'),
                                     classname: 'btn btn-xs  btn-primary  btn-dialog',
                                     icon: 'fa fa-list',
@@ -53,7 +53,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                     visible: function (row) {
                                         console.log(row)
                                         //返回true时按钮显示,返回false隐藏
-                                        if (row.status != 'pending' && row.site !=9){
+                                        if (row.status !== 'pending' && row.site !=='9'){
                                             console.log(1111)
                                             return  true;
                                         }else{
@@ -76,7 +76,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                     visible: function (row) {
                                         console.log(row)
                                         //返回true时按钮显示,返回false隐藏
-                                        if (row.status == 'pending' && row.site !=9){
+                                        if (row.status == 'pending' && row.site !=='9'){
                                             console.log(555)
                                             return  true;
                                         }else{
@@ -99,7 +99,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                     },
                                     visible: function (row) {
                                         console.log(row)
-                                        if (row.status =='pending' && row.site ==9){
+                                        if (row.status =='pending' && row.site =='9'){
                                             console.log(3333)
                                             return true;
                                         }else{
