@@ -789,8 +789,11 @@ class ScmDistribution extends Scm
         empty($order_item_id) && $this->error(__('订单不存在'), [], 403);
 
         //获取子单sku
-        $order_item_true_sku = $this->_new_order_item_process->where('item_order_number',$item_order_number)->value('sku');
-        $order_item_sku = $this->_item_platform_sku->where('platform_sku',$order_item_true_sku)->value('sku');
+        $order_item_info = $this->_new_order_item_process
+            ->field('sku,site')
+            ->where('item_order_number',$item_order_number)
+            ->find();
+        $order_item_true_sku = $order_item_info['sku'];
 
         //获取更改镜框最新信息
         $change_sku = $this->_work_order_change_sku
@@ -804,15 +807,25 @@ class ScmDistribution extends Scm
             ->order('a.id','desc')
             ->value('a.change_sku');
         if($change_sku){
-            $order_item_sku = $change_sku;
+            $order_item_true_sku = $change_sku;
         }
+
+        $sku_arr = explode(',',$order_item_true_sku);
+        if(2 < count($sku_arr)){
+            $order_item_true_sku = $sku_arr[0] . '-' . $sku_arr[1];
+        }
+
+        //获取仓库sku
+        $true_sku = $this->_item_platform_sku
+            ->where(['platform_sku'=>$order_item_true_sku,'platform_type'=>$order_item_info['site']])
+            ->value('sku');
 
         $barcode_item_order_number = $this->_product_bar_code_item->where('code',$barcode)->value('item_order_number');
         !empty($barcode_item_order_number) && $this->error(__('此条形码已经绑定过其他订单'), [], 403);
         $code_item_sku = $this->_product_bar_code_item->where('code',$barcode)->value('sku');
         empty($code_item_sku) && $this->error(__('此条形码未绑定SKU'), [], 403);
 
-        if ($order_item_sku != $code_item_sku){
+        if ($true_sku != $code_item_sku){
             //扫描获取的条形码 和 子订单查询出的 SKU(即true_sku)对比失败则配货失败
             //操作失败记录
             DistributionLog::record($this->auth,$order_item_id,2,'配货失败：sku配错');
