@@ -421,7 +421,6 @@ class Distribution extends Backend
             $lens_name = $this->_lens_data->where('lens_number', $result['lens_number'])->value('lens_name');
         }
         $result['lens_name'] = $lens_name;
-
         $this->assign('result', $result);
         return $this->view->fetch();
     }
@@ -727,7 +726,7 @@ class Distribution extends Backend
 
             //查询镜框尺寸
             $tmp_bridge = $this->get_frame_lens_width_height_bridge($value['product_id'], $value['site']);
-            $lens_name = $lens_list[$value['lens_number']] ?: '';
+            $lens_name = $lens_list[$value['lens_number']] ?: $value['web_lens_name'];
             $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 2 + 2), $lens_name);
             $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 2 + 2), $tmp_bridge['lens_width']);
             $spreadsheet->getActiveSheet()->setCellValue("P" . ($key * 2 + 2), $tmp_bridge['lens_height']);
@@ -984,7 +983,7 @@ class Distribution extends Backend
             }
 
             //获取镜片名称
-            $v['lens_name'] = $lens_list[$v['lens_number']] ?: '';
+            $v['lens_name'] = $lens_list[$v['lens_number']] ?: $v['web_lens_name'];
 
             $data[] = $v;
         }
