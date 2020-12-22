@@ -838,11 +838,13 @@ class Test extends Backend
         ini_set('memory_limit', '1280M');
         $list = Db::name('zzzz_temp')->group('sku')->select();
         $item = new \app\admin\model\itemmanage\Item();
-        $skus = $item->column('sku');
         foreach ($list as $k => $v) {
-            if (!in_array($v['sku'], $skus)) {
+
+            $count = $item->where(['sku' => $v['sku']])->count();
+            if ($count < 1) {
                 Db::name('zzzz_temp')->where(['sku' => $v['sku']])->update(['is_find' => 1]);
             }
+           
             echo $k ."\n";
             usleep(10000);
         }
