@@ -231,6 +231,11 @@ class Distribution extends Backend
                 unset($filter['site']);
             }
 
+            if (isset($filter['order_prescription_type'])){
+                $map['a.order_prescription_type'] = ['in', $filter['order_prescription_type']];
+                unset($filter['order_prescription_type']);
+            }
+
             if (!$filter) {
                 $map['a.created_at'] = ['between', [strtotime('-3 month'), time()]];
             }
