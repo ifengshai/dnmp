@@ -1833,7 +1833,7 @@ class ScmWarehouse extends Scm
             $list = collection($list)->toArray();
 
             //盘点单所需数据
-            $info['list'] = $list;
+            $info['list'] = !empty($list) ? $list : [];
             $this->success('', ['info' => $info], 200);
         } else {
             //点击保存，创建盘点单

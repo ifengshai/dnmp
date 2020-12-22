@@ -304,7 +304,6 @@ class Workorderconfig extends Backend
             $result = Cache::rm('Workorderconfig_getConfigInfo');
         }
         $row = $this->model->getQuetionMeasure($ids);
-        $order_type = Db::name('work_order_problem_type')->where(['id' => $ids])->value('order_type');
         $step = $this->model->getAllStep();
         foreach ($step as $k => $v) {
             $result = Db::name('work_order_problem_step')->where(['problem_id' => $ids, 'step_id' => $step[$k]['id']])->find();
@@ -416,7 +415,6 @@ class Workorderconfig extends Backend
             $this->success();
         }
         $this->view->assign("step", $step);
-        $this->view->assign("order_type", $order_type);
         $this->view->assign("extend_team", $extend_team);
         $this->view->assign("row", $row);
         return $this->view->fetch();
