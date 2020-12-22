@@ -1609,4 +1609,17 @@ class Test4 extends Controller
             echo $v['id'] . "\n";
         }
     }
+    //同步track签收数据到fa_order_process
+    public function track_process(){
+        $orderNode = new \app\admin\model\OrderNode;
+        $process = new \app\admin\model\order\order\NewOrderProcess;
+        //查询order_node表中签收的订单数据
+        $where['node_type'] = 40;
+        $all_order = $orderNode->where($where)->column('order_number');
+        foreach ($all_order as $key=>$value){
+            //更新process表中数据
+            $process->where('increment_id',$value)->update(['is_tracking'=>5]);
+            echo $value." is ok"."\n";
+        }
+    }
 }

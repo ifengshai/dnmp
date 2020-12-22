@@ -39,6 +39,9 @@ class ThirdApi extends Api
         //妥投给maagento接口
 
         if ($track_arr['data']['track']['e'] ==40){
+            //更新加工表中订单妥投状态
+            $process = new \app\admin\model\order\order\NewOrderProcess;
+            $process->where('increment_id',$track_arr['data']['number'])->update(['is_tracking'=>5]);
             $order_node = Db::name('order_node')->field('site,order_id,order_number,shipment_type,shipment_data_type')
                 ->where('track_number', $track_arr['data']['number'])->find();
             $url = config('url.zeelool_url').'magic/order/updateOrderStatus';
@@ -54,8 +57,6 @@ class ThirdApi extends Api
             curl_setopt($curl, CURLOPT_TIMEOUT, 20); //设置cURL允许执行的最长秒数。
             $content =json_decode(curl_exec($curl),true);
             curl_close($curl);
-            Log::write("输出接口返回信息");
-            Log::write($content);
         }
         if ($track_arr['event'] != 'TRACKING_STOPPED') {
             // file_put_contents('/www/wwwroot/mojing/runtime/log/track.txt',$track_info."\r\n",FILE_APPEND);

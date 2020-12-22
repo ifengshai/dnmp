@@ -31,4 +31,24 @@ class StockHouse extends Model
     {
         return $this->where('status', '=', 1)->column('coding', 'id');
     }
+
+    /**
+     * 获取所有货架号
+     *
+     * Created by Phpstorm.
+     * User: jhh
+     * Date: 2020/12/18
+     * Time: 15:10:01
+     */
+    public function get_shelf_number()
+    {
+        $shelf_number = $this->where('status',1)->field('id,coding')->select();
+        $shelf_number = collection($shelf_number)->toArray();
+        foreach ($shelf_number as $k=>$v){
+            $shelf_number[$k]['shelf_number'] = preg_replace("/\\d+/",'', (explode('-',$v['coding']))[0]);
+            unset($shelf_number[$k]['coding']);
+        }
+        $arr = array_values(array_column($shelf_number, 'shelf_number', 'shelf_number'));
+        return $arr;
+    }
 }

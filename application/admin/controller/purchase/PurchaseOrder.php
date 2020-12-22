@@ -3,6 +3,7 @@
 namespace app\admin\controller\purchase;
 
 use app\admin\model\itemmanage\ItemPlatformSku;
+use app\admin\model\StockLog;
 use app\common\controller\Backend;
 use think\Db;
 use think\Exception;
@@ -112,7 +113,6 @@ class PurchaseOrder extends Backend
         }
         return $this->view->fetch();
     }
-
 
 
     /**
@@ -235,7 +235,7 @@ class PurchaseOrder extends Backend
                     $this->error($e->getMessage());
                 }
                 if ($result !== false) {
-                    $this->success('添加成功！！',  url('PurchaseOrder/index'));
+                    $this->success('添加成功！！', url('PurchaseOrder/index'));
                 } else {
                     $this->error(__('No rows were inserted'));
                 }
@@ -766,7 +766,7 @@ class PurchaseOrder extends Backend
 
     /**
      * 备注
-     * 
+     *
      */
     public function remark()
     {
@@ -836,7 +836,12 @@ class PurchaseOrder extends Backend
 
 
     /**
-     * 审核
+     * 采购单审核 操作1：更改采购单状态 2：item添加在途库存 存库存日志 3：有补货单的需要将在途分站 存映射关系分站点库存日志 4：更新补货需求单状态为部分处理 5：更改sku为老品
+     *
+     * Created by Phpstorm.
+     * User: jhh
+     * Date: 2020/12/22
+     * Time: 10:46:53
      */
     public function setStatus()
     {
@@ -858,75 +863,162 @@ class PurchaseOrder extends Backend
         $item_platform = new ItemPlatformSku();
         $this->list = new \app\admin\model\purchase\NewProductReplenishList;
         $this->replenish = new \app\admin\model\purchase\NewProductReplenish;
+
+
         if ($res !== false) {
+            $item->startTrans();
+            $item_platform->startTrans();
+            $this->list->startTrans();
+            $this->replenish->startTrans();
+            (new StockLog())->startTrans();
+            try {
+                //在途库存新逻辑
+                if ($status == 2) {
+                    //审核通过添加在途库存
+                    $list = $this->purchase_order_item->alias('a')
+                        ->join(['fa_purchase_order' => 'b'], 'a.purchase_id=b.id')
+                        ->field('supplier_id,sku,replenish_list_id,purchase_num,purchase_number')
+                        ->where(['purchase_id' => ['in', $ids]])->select();
+                    $skus = array_column($list, 'sku');
 
-            //在途库存新逻辑
-            if ($status == 2) {
-                //审核通过添加在途库存
-                $list = $this->purchase_order_item->alias('a')
-                    ->join(['fa_purchase_order' => 'b'], 'a.purchase_id=b.id')
-                    ->field('supplier_id,sku,replenish_list_id,purchase_num')
-                    ->where(['purchase_id' => ['in', $ids]])->select();
-                $skus = array_column($list, 'sku');
+                    //查询供应商
+                    $supplier = new \app\admin\model\purchase\Supplier();
+                    $supplier_list = $supplier->column('supplier_name', 'id');
+                    // dump($list);die;
+                    foreach ($list as $v) {
+                        //插入日志表
+                        (new StockLog())->setData([
+                            'type' => 2,
+                            'site' => 0,
+                            'modular' => 10,
+                            'change_type' => 23,
+                            'sku' => $v['sku'],
+                            'order_number' => $v['purchase_number'],
+                            'source' => 1,
+                            'on_way_stock_before' => $item->where(['sku' => $v['sku']])->value('on_way_stock'),
+                            'on_way_stock_change' => $v['purchase_num'],
+                            'create_person' => session('admin.nickname'),
+                            'create_time' => time(),
+                            //关联采购单
+                            'number_type' => 7,
+                        ]);
+                        $item->where(['sku' => $v['sku']])->setInc('on_way_stock', $v['purchase_num']);
 
-                //查询供应商
-                $supplier = new \app\admin\model\purchase\Supplier();
-                $supplier_list = $supplier->column('supplier_name', 'id');
-                // dump($list);die;
-                foreach ($list as $v) {
-                    $item->where(['sku' => $v['sku']])->setInc('on_way_stock', $v['purchase_num']);
-                    //判断是否关联补货需求单 如果有回写实际采购数量 已采购状态 供应商
-                    if ($v['replenish_list_id']) {
-                        $this->list
-                            ->where('id', $v['replenish_list_id'])
-                            ->update(['supplier_id' => $v['supplier_id'], 'supplier_name' => $supplier_list[$v['supplier_id']], 'real_dis_num' => $v['purchase_num'], 'status' => 2]);
-                        //当对补货需求单对应的子子表 对应的采购单进行审核的时候 判断对应的补货需求单 是否还有未采购的单 如果没有 就更新主表状态为已处理
-                        $replenish_id = $this->list
-                            ->where('id', $v['replenish_list_id'])
-                            ->field('replenish_id,status')->find();
-                        //补货需求单id $replenish_id['replenish_id'] 新逻辑在途库存分站 在更新商品表的在途库存的时候 查找补货需求单中的原始比例 进行在途库存的分站点分配
-                        //比例
-                        $rate_arr = Db::name('new_product_mapping')
-                            ->where(['sku' => $v['sku'], 'replenish_id' => $replenish_id['replenish_id']])
-                            ->field('website_type,rate')
-                            ->select();
-                        //数量
-                        $all_num = count($rate_arr);
-                        //在途库存数量
-                        $stock_num = $v['purchase_num'];
-                        //在途库存分站 更新映射关系表
-                        foreach ($rate_arr as $key => $val) {
-                            //最后一个站点 剩余数量分给最后一个站
-                            if (($all_num - $key) == 1) {
-                                //根据sku站点类型进行在途库存的分配
-                                $item_platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->setInc('plat_on_way_stock', $stock_num);
-                            } else {
-                                $num = round($v['purchase_num'] * $val['rate']);
-                                $stock_num -= $num;
-                                $item_platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->setInc('plat_on_way_stock', $num);
+                        //判断是否关联补货需求单 如果有回写实际采购数量 已采购状态 供应商
+                        if ($v['replenish_list_id']) {
+                            $this->list
+                                ->where('id', $v['replenish_list_id'])
+                                ->update(['supplier_id' => $v['supplier_id'], 'supplier_name' => $supplier_list[$v['supplier_id']], 'real_dis_num' => $v['purchase_num'], 'status' => 2]);
+                            //当对补货需求单对应的子子表 对应的采购单进行审核的时候 判断对应的补货需求单 是否还有未采购的单 如果没有 就更新主表状态为已处理
+                            $replenish_id = $this->list
+                                ->where('id', $v['replenish_list_id'])
+                                ->field('replenish_id,status')->find();
+                            //补货需求单id $replenish_id['replenish_id'] 新逻辑在途库存分站 在更新商品表的在途库存的时候 查找补货需求单中的原始比例 进行在途库存的分站点分配
+                            //比例
+                            $rate_arr = Db::name('new_product_mapping')
+                                ->where(['sku' => $v['sku'], 'replenish_id' => $replenish_id['replenish_id']])
+                                ->field('website_type,rate')
+                                ->select();
+                            //数量
+                            $all_num = count($rate_arr);
+                            //在途库存数量
+                            $stock_num = $v['purchase_num'];
+                            //在途库存分站 更新映射关系表
+                            foreach ($rate_arr as $key => $val) {
+                                //最后一个站点 剩余数量分给最后一个站
+                                if (($all_num - $key) == 1) {
+                                    //插入日志表
+                                    (new StockLog())->setData([
+                                        'type' => 2,
+                                        'site' => $val['website_type'],
+                                        'modular' => 10,
+                                        'change_type' => 23,
+                                        'sku' => $v['sku'],
+                                        'order_number' => $v['purchase_number'],
+                                        'source' => 1,
+                                        'on_way_stock_before' => $item_platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->value('plat_on_way_stock'),
+                                        'on_way_stock_change' => $stock_num,
+                                        'create_person' => session('admin.nickname'),
+                                        'create_time' => time(),
+                                        //关联采购单
+                                        'number_type' => 7,
+                                    ]);
+                                    //根据sku站点类型进行在途库存的分配
+                                    $item_platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->setInc('plat_on_way_stock', $stock_num);
+
+                                } else {
+                                    $num = round($v['purchase_num'] * $val['rate']);
+                                    $stock_num -= $num;
+                                    //插入日志表
+                                    (new StockLog())->setData([
+                                        'type' => 2,
+                                        'site' => $val['website_type'],
+                                        'modular' => 10,
+                                        'change_type' => 23,
+                                        'sku' => $v['sku'],
+                                        'order_number' => $v['purchase_number'],
+                                        'source' => 1,
+                                        'on_way_stock_before' => $item_platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->value('plat_on_way_stock'),
+                                        'on_way_stock_change' => $num,
+                                        'create_person' => session('admin.nickname'),
+                                        'create_time' => time(),
+                                        //关联采购单
+                                        'number_type' => 7,
+                                    ]);
+                                    $item_platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->setInc('plat_on_way_stock', $num);
+
+                                }
+                            }
+
+                            $replenish_order = $this->list
+                                ->where(['replenish_id' => $replenish_id['replenish_id'], 'status' => 1])
+                                ->find();
+                            //当前补货单状态为待处理 有审核通过的采购单 立刻更新补货需求单状态为部分处理
+                            if ($replenish_id['status'] == 2) {
+                                $res = $this->replenish->where('id', $replenish_id['replenish_id'])->setField('status', 3);
+                            }
+                            if (empty($replenish_order)) {
+                                $res = $this->replenish->where('id', $replenish_id['replenish_id'])->setField('status', 4);
                             }
                         }
-
-                        $replenish_order = $this->list
-                            ->where(['replenish_id' => $replenish_id['replenish_id'], 'status' => 1])
-                            ->find();
-                        //当前补货单状态为待处理 有审核通过的采购单 立刻更新补货需求单状态为部分处理
-                        if ($replenish_id['status'] == 2) {
-                            $res = $this->replenish->where('id', $replenish_id['replenish_id'])->setField('status', 3);
-                        }
-                        if (empty($replenish_order)) {
-                            $res = $this->replenish->where('id', $replenish_id['replenish_id'])->setField('status', 4);
-                        }
                     }
+                    //采购单审核通过 sku 改为老品
+                    $item->where(['sku' => ['in', $skus]])->update(['is_new' => 2]);
                 }
-                //采购单审核通过 sku 改为老品
-                $item->where(['sku' => ['in', $skus]])->update(['is_new' => 2]);
+                $item->commit();
+                $item_platform->commit();
+                $this->list->commit();
+                $this->replenish->commit();
+                (new StockLog())->commit();
+            } catch (ValidateException $e) {
+                $item->rollback();
+                $item_platform->rollback();
+                $this->list->rollback();
+                $this->replenish->rollback();
+                (new StockLog())->rollback();
+                $this->error($e->getMessage());
+            } catch (PDOException $e) {
+                $item->rollback();
+                $item_platform->rollback();
+                $this->list->rollback();
+                $this->replenish->rollback();
+                (new StockLog())->rollback();
+                $this->error($e->getMessage());
+            } catch (Exception $e) {
+                $item->rollback();
+                $item_platform->rollback();
+                $this->list->rollback();
+                $this->replenish->rollback();
+                (new StockLog())->rollback();
+                $this->error($e->getMessage());
             }
 
             $this->success();
         } else {
             $this->error('修改失败！！');
         }
+
+
     }
 
     /**
@@ -1278,7 +1370,7 @@ class PurchaseOrder extends Backend
 
                     $params = [];
                     $kval = 0;
-                    foreach ($v['productItems'] as  $key => $val) {
+                    foreach ($v['productItems'] as $key => $val) {
                         //添加商品数据
                         $params[$key]['purchase_id'] = $result->id;
                         $params[$key]['purchase_order_number'] = $v['baseInfo']['idOfStr'];
@@ -1416,8 +1508,6 @@ class PurchaseOrder extends Backend
             //     ->column('sum(arrivals_num) as arrivals_num', 'sku');
 
 
-
-
             //查询生产周期
             $supplier_sku = new \app\admin\model\purchase\SupplierSku;
             $supplier_where['sku'] = ['in', $skus];
@@ -1429,8 +1519,8 @@ class PurchaseOrder extends Backend
              * 日均销量：A+ 和 A等级，日均销量变动较大，按照2天日均销量补；
              * B和C，C+等级按照5天的日均销量来补货;
              * D和E等级按照30天日均销量补货，生产入库周期按照7天；
-             * 
-             * 计划售卖周期	计划售卖周期至少是生产入库周期的1倍
+             *
+             * 计划售卖周期    计划售卖周期至少是生产入库周期的1倍
              * A+ 按照计划售卖周期的1.5倍来补
              * A和 B,C+等级按照计划售卖周期的1.3/1.2/1.1倍来补
              * C和D和E等级按照计划售卖周期的1倍来补
@@ -1675,7 +1765,7 @@ class PurchaseOrder extends Backend
             if (!$row) {
                 $this->error('导入失败！！,1688单号' . $v[0] . '未查询到记录');
             }
-            if ($row->purchase_status  != 2) {
+            if ($row->purchase_status != 2) {
                 $this->error('导入失败！！,1688单号' . $v[0] . '订单状态必须是已审核');
             }
             //拆分物流单号和物流公司
@@ -1829,13 +1919,12 @@ class PurchaseOrder extends Backend
         $spreadsheet->getActiveSheet()->getColumnDimension('Q')->setWidth(20);
 
 
-
         //设置边框
         $border = [
             'borders' => [
                 'allBorders' => [
                     'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
-                    'color'       => ['argb' => 'FF000000'], // 设置border颜色
+                    'color' => ['argb' => 'FF000000'], // 设置border颜色
                 ],
             ],
         ];
@@ -1876,14 +1965,13 @@ class PurchaseOrder extends Backend
     }
 
 
-
     /**
      * 批量导出xls
      *
      * @Description
-     * @author wpl
-     * @since 2020/02/28 14:45:39 
      * @return void
+     * @since 2020/02/28 14:45:39
+     * @author wpl
      */
     public function batch_export_xls()
     {
@@ -2010,7 +2098,7 @@ class PurchaseOrder extends Backend
             'borders' => [
                 'allBorders' => [
                     'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
-                    'color'       => ['argb' => 'FF000000'], // 设置border颜色
+                    'color' => ['argb' => 'FF000000'], // 设置border颜色
                 ],
             ],
         ];
@@ -2051,9 +2139,9 @@ class PurchaseOrder extends Backend
      * 批量导出xls
      *
      * @Description
-     * @author wpl
-     * @since 2020/02/28 14:45:39 
      * @return void
+     * @since 2020/02/28 14:45:39
+     * @author wpl
      */
     public function batch_export_test()
     {
@@ -2105,7 +2193,7 @@ class PurchaseOrder extends Backend
             'borders' => [
                 'allBorders' => [
                     'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
-                    'color'       => ['argb' => 'FF000000'], // 设置border颜色
+                    'color' => ['argb' => 'FF000000'], // 设置border颜色
                 ],
             ],
         ];
@@ -2158,7 +2246,7 @@ class PurchaseOrder extends Backend
 
             $whereCondition['purchase_status'] = ['egt', 2];
             $whereConditionOr = [];
-            $rep    = $this->request->get('filter');
+            $rep = $this->request->get('filter');
             //如果没有搜索条件
             if ($rep != '{}') {
                 $whereTotalId = '1=1';
@@ -2175,11 +2263,11 @@ class PurchaseOrder extends Backend
                     $measuerWorkIds = Purchase_order_pay::where($mapTime)->column('purchase_id');
                     if (!empty($whereCondition['id'])) {
                         $newWorkIds = array_intersect($workIds, $measuerWorkIds);
-                        $whereCondition['purchase_order.id']  = ['in', $newWorkIds];
+                        $whereCondition['purchase_order.id'] = ['in', $newWorkIds];
                     } else {
-                        $whereCondition['purchase_order.id']  = ['in', $measuerWorkIds];
+                        $whereCondition['purchase_order.id'] = ['in', $measuerWorkIds];
                     }
-                    $whereConditionOr['purchase_order.payment_time'] =  ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
+                    $whereConditionOr['purchase_order.payment_time'] = ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
                     unset($filter['pay_time']);
                 }
                 $this->request->get(['filter' => json_encode($filter)]);
@@ -2227,12 +2315,12 @@ class PurchaseOrder extends Backend
             // var_dump($purchaseMoney);
             // exit;
             //求出退款金额信息
-            $returnMoney   = $this->model->calculatePurchaseReturnMoney($totalId, $thisPageId);
+            $returnMoney = $this->model->calculatePurchaseReturnMoney($totalId, $thisPageId);
             if (is_array($returnMoney['thisPageArr'])) {
                 foreach ($list as $keys => $vals) {
                     if (array_key_exists($vals['id'], $returnMoney['thisPageArr'])) {
                         //采购单的退款金额 
-                        $list[$keys]['refund_amount']  = round($returnMoney['thisPageArr'][$vals['id']], 2) ?: 0;
+                        $list[$keys]['refund_amount'] = round($returnMoney['thisPageArr'][$vals['id']], 2) ?: 0;
                     }
                 }
             }
@@ -2242,10 +2330,10 @@ class PurchaseOrder extends Backend
                         //采购单的实际采购金额 
                         $list[$key]['purchase_virtual_total'] = round($purchaseMoney['thisPageArr'][$val['id']] + $val['purchase_freight'], 2) ?: 0;
                         //采购单实际结算金额(如果存在实际采购金额要从实际采购金额扣减)
-                        $list[$key]['purchase_settle_money']  = round($list[$key]['purchase_virtual_total'] - $list[$key]['refund_amount'], 2) ?: 0;
+                        $list[$key]['purchase_settle_money'] = round($list[$key]['purchase_virtual_total'] - $list[$key]['refund_amount'], 2) ?: 0;
                     } else {
                         //采购单实际结算金额(如果不存在实际采购金额要从采购金额中扣减) 
-                        $list[$key]['purchase_settle_money']  = round(($list[$key]['purchase_total'] - $list[$key]['refund_amount']), 2) ?: 0;
+                        $list[$key]['purchase_settle_money'] = round(($list[$key]['purchase_total'] - $list[$key]['refund_amount']), 2) ?: 0;
                     }
                 }
             }
@@ -2257,7 +2345,7 @@ class PurchaseOrder extends Backend
     }
 
     /***
-     * 采购单成本核算详情 create@lsw 
+     * 采购单成本核算详情 create@lsw
      */
     public function account_purchase_order_detail($ids = null, $purchase_virtual_total = 0, $refund_amount = 0, $purchase_settle_money = 0)
     {
@@ -2298,19 +2386,20 @@ class PurchaseOrder extends Backend
             }
             if (false !== $resultInfo) {
                 $this->model->save(['payment_status' => 3], ['id' => $row['id']]);
-                $params['purchase_id']   = $row['id'];
+                $params['purchase_id'] = $row['id'];
                 $params['create_person'] = session('admin.nickname');
                 $params['create_time'] = date('Y-m-d H:i:s', time());
                 $result = (new purchase_order_pay())->allowField(true)->save($params);
                 if ($result) {
-                    return    $this->success('添加成功');
+                    return $this->success('添加成功');
                 }
             } else {
-                return    $this->error('添加失败');
+                return $this->error('添加失败');
             }
         }
         return $this->view->fetch();
     }
+
     /***
      * 核算采购单确认退款 create@lsw
      */

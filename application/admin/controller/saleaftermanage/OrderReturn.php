@@ -331,8 +331,6 @@ class OrderReturn extends Backend
                     ->field('ze.id as ze_id,ze.ticket_id,ze.subject,ze.to_email,ze.due_id,ze.create_time,ze.update_time,ze.status as ze_status,ad.nickname')
                     ->where('ze.email',$customer_email)
                     ->select();
-
-                
                 $this->assign('email_select',$email_select);
             }
 

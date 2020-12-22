@@ -516,8 +516,6 @@ define(['jquery', 'bootstrap', 'upload', 'validator'], function ($, undefined, U
                 
                 events.datetimepickernew(form);
 
-                events.datetimepickernew(form);
-
                 events.plupload(form);
 
                 events.faselect(form);

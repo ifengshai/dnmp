@@ -27,12 +27,19 @@ class WorkOrderMeasure extends Model
      * @Description
      * @author lsw
      * @since 2020/04/15 16:25:24 
-     * @param [type] $id
+     * @param int $work_id 工单ID
+     * @param int $type 0全部 1主单措施 2子单措施
      * @return void
      */
-     static public function workMeasureList($id)
+     static public function workMeasureList($work_id,$type=0)
     {
-        return WorkOrderMeasure::where(['work_id'=>$id])->column('measure_choose_id');
+        $where = ['work_id'=>$work_id];
+        if(1 == $type){
+            $where['item_order_number'] = ['eq',''];
+        }elseif(2 == $type){
+            $where['item_order_number'] = ['neq',''];
+        }
+        return WorkOrderMeasure::where($where)->column('measure_choose_id');
     }
     /**
      * 

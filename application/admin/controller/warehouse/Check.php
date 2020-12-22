@@ -816,6 +816,14 @@ class Check extends Backend
             $this->request->get(['filter' => json_encode($filter)]);
         }
 
+        //是否存在sku检索
+        if (!empty($filter['sku'])) {
+            $map['b.sku'] = $filter['sku'];
+            unset($filter['sku']);
+            $this->request->get(['filter' => json_encode($filter)]);
+        }
+
+
         if ($ids) {
             $map['check.id'] = ['in', $ids];
         }
@@ -823,18 +831,19 @@ class Check extends Backend
         list($where) = $this->buildparams();
         $list = $this->model->alias('check')
             ->join(['fa_purchase_order' => 'purchaseorder'], 'check.purchase_id=purchaseorder.id')
+            ->join(['fa_supplier' => 'supplier'], 'check.supplier_id=supplier.id')
             ->join(['fa_check_order_item' => 'b'], 'b.check_id=check.id')
             ->join(['fa_purchase_order_item' => 'c'], 'b.purchase_id=c.purchase_id and c.sku=b.sku')
-            ->field('check.*,b.*,c.purchase_price,purchaseorder.purchase_number,purchaseorder.create_person as person,purchaseorder.purchase_remark')
+            ->field('check.*,b.*,c.purchase_price,purchaseorder.purchase_number,purchaseorder.create_person as person,purchaseorder.purchase_remark,supplier.supplier_name')
             ->where($where)
             ->where($map)
             ->order('check.id desc')
             ->select();
+            
         $list = collection($list)->toArray();
-
-        //查询供应商
+        /*//查询供应商
         $supplier = new \app\admin\model\purchase\Supplier();
-        $supplier_data = $supplier->getSupplierData();
+        $supplier_data = $supplier->getSupplierData();*/
 
         //从数据库查询需要的数据
         $spreadsheet = new Spreadsheet();
@@ -867,7 +876,7 @@ class Check extends Backend
             $spreadsheet->getActiveSheet()->setCellValueExplicit("C" . ($key * 1 + 2), $value['purchase_number'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
             $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['person']);
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), '');
-            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $supplier_data[$value['supplier_id']]);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['supplier_name']);
             $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['purchase_remark']);
             $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['remark']);
             $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), $value['sku']);

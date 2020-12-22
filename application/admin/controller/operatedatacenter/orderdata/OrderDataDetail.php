@@ -408,6 +408,14 @@ class OrderDataDetail extends Backend
             array(
                 'name'=>'工单数',
                 'field'=>'work_list_num',
+            ),
+            array(
+                'name'=>'订单类型',
+                'field'=>'order_type',
+            )
+            ,array(
+                'name'=>'优惠券名称',
+                'field'=>'coupon_rule_name',
             )
         );
         $column_name = [];
@@ -481,7 +489,7 @@ class OrderDataDetail extends Backend
             $list = $order_model->alias('o')
                 ->join('customer_entity c','o.customer_id=c.entity_id','left')
                 ->where($map)
-                ->field('o.entity_id,o.increment_id,o.created_at,o.base_grand_total,o.base_shipping_amount,o.status,o.store_id,o.coupon_code,o.shipping_method,o.customer_email,o.customer_id,o.base_discount_amount')
+                ->field('o.entity_id,o.increment_id,o.created_at,o.base_grand_total,o.coupon_rule_name,o.order_type,o.base_shipping_amount,o.status,o.store_id,o.coupon_code,o.shipping_method,o.customer_email,o.customer_id,o.base_discount_amount')
                 ->limit($start,$pre_count)
                 ->select();
             $list = collection($list)->toArray();
@@ -526,6 +534,28 @@ class OrderDataDetail extends Backend
                     }
                     $index = array_keys($column_name,'status');
                     $tmpRow[$index[0]] =$order_shipping_status;
+                }
+                if(in_array('order_type',$column_name)) {
+                    switch ($val['order_type']) {
+                        case 1:
+                            $order_type = '普通订单';
+                            break;
+                        case 2:
+                            $order_type = '批发';
+                            break;
+                        case 3:
+                            $order_type = '网红';
+                            break;
+                        case 4:
+                            $order_type = '补发';
+                            break;
+                    }
+                    $index = array_keys($column_name,'order_type');
+                    $tmpRow[$index[0]] =$order_type;
+                }
+                if(in_array('coupon_rule_name',$column_name)){
+                    $index = array_keys($column_name,'coupon_rule_name');
+                    $tmpRow[$index[0]] =$val['coupon_rule_name'];
                 }
                 if(in_array('store_id',$column_name)){
                     switch ($val['store_id']){
