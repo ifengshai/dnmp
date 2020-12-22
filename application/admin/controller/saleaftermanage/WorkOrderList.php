@@ -2040,6 +2040,7 @@ class WorkOrderList extends Backend
         }
         //求出订单sku列表,传输到页面当中
         $skus = $this->model->getSkuList($row->work_platform, $row->platform_order);
+
         if (is_array($skus['sku'])) {
             $arrSkus = [];
             foreach ($skus['sku'] as $val) {
@@ -3583,6 +3584,7 @@ EOF;
 
         $list = $this->model
             ->where($map)
+            ->limit(10)
             ->select();
         $list = collection($list)->toArray();
 
@@ -3609,7 +3611,9 @@ EOF;
             $receptInfo = [];
         }
         //求出所有的回复
+
         $noteInfo = $this->work_order_note->fetchNoteRecord($arr);
+
         if ($noteInfo) {
             $noteInfo = collection($noteInfo)->toArray();
         } else {
@@ -3617,8 +3621,10 @@ EOF;
         }
         //根据平台sku求出商品sku
         $itemPlatFormSku = new \app\admin\model\itemmanage\ItemPlatformSku();
+
         //求出配置里面信息
         $workOrderConfigValue = $this->workOrderConfigValue;
+
         //求出配置里面的大分类信息
         $customer_problem_classify = $workOrderConfigValue['customer_problem_classify'];
 
@@ -3813,8 +3819,6 @@ EOF;
             $csv[$key]['replacement_order'] = $value['replacement_order'];
 
         }
-//        dump(count($csv[0]));
-//        dump($csv);die();
         $headlist = [
             '工单平台', '工单类型','工单状态','工单级别', '平台订单号',
             '客户邮箱', '订单金额', '订单支付的货币类型', '订单的支付方式','订单中的sku',
