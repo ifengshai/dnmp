@@ -1132,7 +1132,7 @@ class Test extends Backend
                 if ($v1['measure_choose_id'] == 3) {
 
                     //查询change sku表
-                    $change_sku_list = Db::table('fa_work_order_change_sku')->where(['work_id' => $v['id'], 'change_type' => 3, 'measure_id' => $v1['id']])->select();
+                    $change_sku_list = Db::table('fa_work_order_change_sku')->where(['work_id' => $v['id'], 'change_type' => 3, 'measure_id' => $v1['id']])->group('original_sku')->select();
                     foreach ($change_sku_list as $key1 => $val1) {
                         //查询订单号所有子单
                         $order_list = $order->alias('a')->field('b.item_order_number,b.id')
@@ -1164,7 +1164,7 @@ class Test extends Backend
                                 ->where(['id' => $stock_house_info['id']])
                                 ->setInc('occupy', 1);
 
-                            DistributionLog::record((object)['nickname' => 'admin'],$val['id'],9,"创建工单，异常暂存架{$stock_house_info['coding']}库位");
+                            DistributionLog::record((object)['nickname' => 'admin'], $val['id'], 9, "创建工单，异常暂存架{$stock_house_info['coding']}库位");
 
                             //插入措施表
                             $measure['work_id'] = $v['id'];
@@ -1227,7 +1227,7 @@ class Test extends Backend
                                 ->where(['id' => $stock_house_info['id']])
                                 ->setInc('occupy', 1);
 
-                            DistributionLog::record((object)['nickname' => 'admin'],$v3['id'],9,"创建工单，异常暂存架{$stock_house_info['coding']}库位");
+                            DistributionLog::record((object)['nickname' => 'admin'], $v3['id'], 9, "创建工单，异常暂存架{$stock_house_info['coding']}库位");
 
                             $measure['work_id'] = $v['id'];
                             $measure['measure_choose_id'] = 19;
@@ -1288,7 +1288,7 @@ class Test extends Backend
                                 ->where(['id' => $stock_house_info['id']])
                                 ->setInc('occupy', 1);
 
-                            DistributionLog::record((object)['nickname' => 'admin'],$v3['id'],9,"创建工单，异常暂存架{$stock_house_info['coding']}库位");
+                            DistributionLog::record((object)['nickname' => 'admin'], $v3['id'], 9, "创建工单，异常暂存架{$stock_house_info['coding']}库位");
                             $measure['work_id'] = $v['id'];
                             $measure['measure_choose_id'] = 20;
                             $measure['measure_content'] = '更改镜片';
@@ -1314,14 +1314,19 @@ class Test extends Backend
                         }
                     }
                 } else {
-                   
+
 
                     //查询change sku表
                     $change_sku_list = Db::table('fa_work_order_change_sku')->where(['work_id' => $v['id'], 'measure_id' => $v1['id']])->select();
 
-                     //插入措施表
-                     unset($v1['id']);
-                     $id =  Db::table('fa_work_order_measure_copy1')->insertGetId($v1);
+                    //插入措施表
+                    unset($v1['id']);
+                    $id =  Db::table('fa_work_order_measure_copy1')->insertGetId($v1);
+
+                    unset($recept['id']);
+                    $recept_data = $recept;
+                    $recept_data['measure_id'] = $id;
+                    Db::table('fa_work_order_recept')->insertGetId($recept_data);
 
                     if (!$change_sku_list) continue;
                     $change_sku_data = [];
@@ -1378,7 +1383,7 @@ class Test extends Backend
                 if ($v1['measure_choose_id'] == 3) {
 
                     //查询change sku表
-                    $change_sku_list = Db::table('fa_work_order_change_sku')->where(['work_id' => $v['id'], 'change_type' => 3, 'measure_id' => $v1['id']])->select();
+                    $change_sku_list = Db::table('fa_work_order_change_sku')->where(['work_id' => $v['id'], 'change_type' => 3, 'measure_id' => $v1['id']])->group('original_sku')->select();
                     foreach ($change_sku_list as $key1 => $val1) {
                         //查询订单号所有子单
                         $order_list = $order->alias('a')->field('b.item_order_number,b.id')
@@ -1489,13 +1494,19 @@ class Test extends Backend
                         }
                     }
                 } else {
-                    
+
                     //查询change sku表
                     $change_sku_list = Db::table('fa_work_order_change_sku')->where(['work_id' => $v['id'], 'measure_id' => $v1['id']])->select();
 
                     //插入措施表
                     unset($v1['id']);
                     $id =  Db::table('fa_work_order_measure_copy1')->insertGetId($v1);
+
+                    
+                    unset($recept['id']);
+                    $recept_data = $recept;
+                    $recept_data['measure_id'] = $id;
+                    Db::table('fa_work_order_recept')->insertGetId($recept_data);
 
                     if (!$change_sku_list) continue;
                     $change_sku_data = [];

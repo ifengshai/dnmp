@@ -540,6 +540,7 @@ class OrderReturn extends Backend
         //     $this->view->assign("default", $default);
         // }
         $ids  = input('param.ids');
+
         if (!empty($ids)){
 //            $row = \app\common\model\OcCustomerAfterSalesWorkOrder::get($ids)->field('increment_id,email')->find()->toArray();
             $row = Db::connect('database.db_zeelool')->table('oc_customer_after_sales_work_order')->where('id',$ids)->find();
