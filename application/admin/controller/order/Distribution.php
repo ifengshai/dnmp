@@ -1788,10 +1788,10 @@ class Distribution extends Backend
                 'name' => 'weseeoptical',
                 'obj' => new \app\admin\model\order\printlabel\Weseeoptical,
             ],
-            5 => [
-                'name' => 'meeloog',
-                'obj' => new \app\admin\model\order\printlabel\Meeloog,
-            ],
+            // 5 => [
+            //     'name' => 'meeloog',
+            //     'obj' => new \app\admin\model\order\printlabel\Meeloog,
+            // ],
             9 => [
                 'name' => 'zeelool_es',
                 'obj' => new \app\admin\model\order\printlabel\ZeeloolEs,
