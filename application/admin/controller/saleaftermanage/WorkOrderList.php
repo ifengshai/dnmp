@@ -2681,7 +2681,7 @@ class WorkOrderList extends Backend
                 10=>'new_zeeloolde_url',
                 11=>'new_zeelooljp_url'
             ];
-            $url = config('url.new_zeelooljp_url'.$domain_list[$row->work_platform]) . 'price-difference?customer_email=' . $row->email . '&origin_order_number=' . $row->platform_order . '&order_amount=' . $row->replenish_money . '&sign=' . $row->id;
+            $url = config('url.'.$domain_list[$row->work_platform]) . 'price-difference?customer_email=' . $row->email . '&origin_order_number=' . $row->platform_order . '&order_amount=' . $row->replenish_money . '&sign=' . $row->id;
             $this->view->assign('url', $url);
         }
 
