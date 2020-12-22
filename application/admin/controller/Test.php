@@ -1106,7 +1106,7 @@ class Test extends Backend
          */
         $work = new \app\admin\model\saleaftermanage\WorkOrderList();
         $order = new \app\admin\model\order\order\NewOrder();
-        $list = $work->where(['work_status' => ['in', [0]]])->select();
+        $list = $work->where(['work_status' => ['in', [0, 1, 4, 6, 7]]])->select();
         $list = collection($list)->toArray();
         foreach ($list as $k => $v) {
             //插入主表
