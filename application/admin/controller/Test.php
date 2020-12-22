@@ -1284,7 +1284,7 @@ class Test extends Backend
 
                             echo $v3['id'] . "\n";
                             echo $stock_house_info['id'] . "\n";
-                            echo $_new_order_item_process->getLastSql();
+                            echo $_new_order_item_process->getLastSql(). "\n";
 
 
                             //异常库位号占用数量+1
