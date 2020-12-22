@@ -952,7 +952,7 @@ class PurchaseOrder extends Backend
                                     //插入日志表
                                     (new StockLog())->setData([
                                         'type' => 2,
-                                        'site' => 0,
+                                        'site' => $val['website_type'],
                                         'modular' => 10,
                                         'change_type' => 23,
                                         'sku' => $v['sku'],
