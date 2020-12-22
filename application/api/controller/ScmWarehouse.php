@@ -814,7 +814,7 @@ class ScmWarehouse extends Scm
             $list[$key]['show_edit'] = 0 == $value['status'] ? 1 : 0;//编辑按钮
             $list[$key]['cancel_show'] = 0 == $value['status'] ? 1 : 0;//取消按钮
             $list[$key]['show_examine'] = 1 == $value['status'] ? 1 : 0;//审核按钮
-            $list[$key]['show_detail'] = in_array($value['status'], [3, 4]) ? 1 : 0;//详情按钮
+            $list[$key]['show_detail'] = in_array($value['status'], [2, 3, 4]) ? 1 : 0;//详情按钮
         }
 
         $this->success('', ['list' => $list], 200);
@@ -881,41 +881,6 @@ class ScmWarehouse extends Scm
         $in_stock_id = $this->request->request("in_stock_id");//入库单ID，
         $platform_id = $this->request->request("platform_id");//站点，判断是否是新创建入库 还是 质检单入库
         $result = false;
-        //------------------测试----------------//
-        foreach (array_filter($item_sku) as $key => $value) {
-            /*$info_id = $this->_inventory_item->where(['sku' => $value['sku'],'is_add'=>0,'inventory_id'=>['neq',$inventory_id]])->column('id');
-            !empty($info_id) && $this->error(__('SKU=>'.$value['sku'].'存在未完成的盘点单'), [], 543);*/
-            $sku_code = array_column($value['sku_agg'], 'code');
-//            var_dump(json_encode($item_sku));
-//            var_dump(json_encode($sku_code));
-//            var_dump(json_encode($value['sku_agg']));
-//            die;
-            $save_data1['remark'] = json_encode($item_sku);
-            $save_data2['remark'] = json_encode($sku_code);
-            $save_data3['remark'] = json_encode($value['sku_agg']);
-            $this->_inventory_item->where(['id' => 8254])->update($save_data1);
-            $this->_inventory_item->where(['id' => 8253])->update($save_data2);
-            $this->_inventory_item->where(['id' => 8252])->update($save_data3);
-            var_dump(json_encode($item_sku));
-            die;
-            count($value['sku_agg']) != count(array_unique($sku_code))
-            &&
-            $this->error(__('条形码有重复，请检查'), [], 405);
-
-            $where = [];
-            $where['inventory_id'] = [['>', 0], ['neq', $inventory_id]];
-            $where['code'] = ['in', $sku_code];
-            $inventory_info = $this->_product_bar_code_item
-                ->where($where)
-                ->field('code')
-                ->find();
-            if (!empty($inventory_info['code'])) {
-                $this->error(__('条形码:' . $inventory_info['code'] . ' 已绑定,请移除'), [], 405);
-                exit;
-            }
-        }
-        //------------------测试----------------//
-        die;
 
         $this->_check->startTrans();
         $this->_in_stock->startTrans();
@@ -1211,8 +1176,25 @@ class ScmWarehouse extends Scm
                 ->field('sku,quantity_num,sample_num')
                 ->select();
             $item_list = collection($item_list)->toArray();
+            //获取条形码数据
+            $bar_code_list = $this->_product_bar_code_item
+                ->where(['check_id' => $check_id])
+                ->field('sku,code')
+                ->order('id', 'desc')
+                ->select();
+            $bar_code_list = collection($bar_code_list)->toArray();
             //拼接sku条形码数据
             foreach ($item_list as $key => $value) {
+                $sku = $value['sku'];
+                //条形码列表
+                $sku_agg = [];
+                foreach ($bar_code_list as $k => $v) {
+                    if ($v['sku'] == $sku) {
+                        $v['is_new'] = 0;
+                        $sku_agg[] = $v;
+                    }
+                }
+                $item_list[$key]['sku_agg'] = $sku_agg;
                 //质检单默认留样数量为1，入库数量为质检合格数量 - 留样数量
                 $item_list[$key]['in_stock_num'] = $value['quantity_num'] - $value['sample_num'];
             }
@@ -1268,15 +1250,14 @@ class ScmWarehouse extends Scm
         foreach ($item_list as $key => $value) {
             $sku = $value['sku'];
             //条形码列表
+            $sku_agg = [];
             foreach ($bar_code_list as $k => $v) {
-                $sku_agg = [];
                 if ($v['sku'] == $sku) {
                     $v['is_new'] = 0;
                     $sku_agg[] = $v;
-                    $item_list[$key]['sku_agg'] = $sku_agg;
                 }
             }
-
+            $item_list[$key]['sku_agg'] = $sku_agg;
         }
 
         $info = [];
