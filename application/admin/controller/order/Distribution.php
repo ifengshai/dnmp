@@ -199,17 +199,17 @@ class Distribution extends Backend
 
             //筛选库位号
             if ($filter['stock_house_num']) {
-                if(8 == $label){//跟单
+                if (8 == $label) {//跟单
                     $house_type = 4;
-                }elseif(3 == $label){//待配镜片-定制片
+                } elseif (3 == $label) {//待配镜片-定制片
                     $house_type = 3;
-                }else{//合单
+                } else {//合单
                     $house_type = 2;
                 }
                 $stock_house_id = $this->_stock_house
                     ->where([
-                        'coding'=>['like', $filter['stock_house_num'] . '%'],
-                        'type'=>$house_type
+                        'coding' => ['like', $filter['stock_house_num'] . '%'],
+                        'type' => $house_type
                     ])
                     ->column('id');
                 $map['a.temporary_house_id|a.abnormal_house_id|c.store_house_id'] = ['in', $stock_house_id ?: [-1]];
@@ -315,7 +315,7 @@ class Distribution extends Backend
 
                 //跟单：异常未处理且未创建工单的显示处理异常按钮
                 $work_id = $abnormal_data[$value['id']] ?? 0;
-                if (8 == $label && 0 < $value['abnormal_house_id'] && 0 == $work_id){
+                if (8 == $label && 0 < $value['abnormal_house_id'] && 0 == $work_id) {
                     $handle_abnormal = 1;
                 } else {
                     $handle_abnormal = 0;
@@ -820,9 +820,9 @@ class Distribution extends Backend
     /**
      * 标记已打印
      * @Description
-     * @author lzh
-     * @since 2020/10/28 14:45:39
      * @return void
+     * @since 2020/10/28 14:45:39
+     * @author lzh
      */
     public function tag_printed()
     {
@@ -1051,9 +1051,9 @@ class Distribution extends Backend
      * 更新配货状态
      *
      * @Description
-     * @author lzh
-     * @since 2020/10/28 14:45:39
      * @return void
+     * @since 2020/10/28 14:45:39
+     * @author lzh
      */
     public function set_status()
     {
@@ -1160,7 +1160,7 @@ class Distribution extends Backend
                 //下一步状态
                 if (2 == $check_status) {
                     //根据处方类型字段order_prescription_type(现货处方镜、定制处方镜)判断是否需要配镜片
-                    if(in_array($option_list[$value['option_id']]['order_prescription_type'],[2,3])){
+                    if (in_array($option_list[$value['option_id']]['order_prescription_type'], [2, 3])) {
                         $save_status = 3;
                     } else {
                         if ($option_list[$value['option_id']]['is_print_logo']) {
@@ -1226,7 +1226,7 @@ class Distribution extends Backend
                     $this->_new_order_process
                         ->allowField(true)
                         ->isUpdate(true, ['order_id' => $value['order_id']])
-                        ->save(['combine_status' => 1,'check_status' => 0, 'combine_time' => time()]);
+                        ->save(['combine_status' => 1, 'check_status' => 0, 'combine_time' => time()]);
                 }
 
                 $this->model
@@ -1263,9 +1263,9 @@ class Distribution extends Backend
      * 成检拒绝操作
      *
      * @Description
-     * @author lzh
-     * @since 2020/10/28 14:45:39
      * @return void
+     * @since 2020/10/28 14:45:39
+     * @author lzh
      */
     public function finish_refuse()
     {
@@ -1397,24 +1397,24 @@ class Distribution extends Backend
 
                     //记录库存日志
                     $this->_stock_log->setData([
-                        'type'                      => 2,
-                        'site'                      => $value['site'],
-                        'modular'                   => 3,
-                        'change_type'               => 5,
-                        'source'                    => 2,
-                        'sku'                       => $true_sku,
-                        'number_type'               => 2,
-                        'order_number'              => $value['item_order_number'],
-                        'available_stock_before'    => $stock_arr['available_stock'],
-                        'available_stock_change'    => -1,
+                        'type' => 2,
+                        'site' => $value['site'],
+                        'modular' => 3,
+                        'change_type' => 5,
+                        'source' => 2,
+                        'sku' => $true_sku,
+                        'number_type' => 2,
+                        'order_number' => $value['item_order_number'],
+                        'available_stock_before' => $stock_arr['available_stock'],
+                        'available_stock_change' => -1,
                         'distribution_stock_before' => $stock_arr['distribution_occupy_stock'],
                         'distribution_stock_change' => -1,
-                        'stock_before'              => $stock_arr['stock'],
-                        'stock_change'              => -1,
-                        'fictitious_before'         => $platform_info['stock'],
-                        'fictitious_change'         => -1,
-                        'create_person'             => session('admin.nickname'),
-                        'create_time'               => time()
+                        'stock_before' => $stock_arr['stock'],
+                        'stock_change' => -1,
+                        'fictitious_before' => $platform_info['stock'],
+                        'fictitious_change' => -1,
+                        'create_person' => session('admin.nickname'),
+                        'create_time' => time()
                     ]);
                 }
             }
@@ -1443,9 +1443,9 @@ class Distribution extends Backend
      * 处理异常
      *
      * @Description
-     * @author lzh
-     * @since 2020/10/28 14:45:39
      * @return void
+     * @since 2020/10/28 14:45:39
+     * @author lzh
      */
     public function handle_abnormal($ids = null)
     {
@@ -1672,9 +1672,9 @@ class Distribution extends Backend
      * 操作记录
      *
      * @Description
-     * @author lzh
-     * @since 2020/10/28 14:45:39
      * @return void
+     * @since 2020/10/28 14:45:39
+     * @author lzh
      */
     public function operation_log($ids = null)
     {
@@ -1699,9 +1699,9 @@ class Distribution extends Backend
      * 批量创建工单
      *
      * @Description
-     * @author wgj
-     * @since 2020/11/20 14:54:39
      * @return void
+     * @since 2020/11/20 14:54:39
+     * @author wgj
      */
     public function add()
     {
@@ -1746,9 +1746,9 @@ class Distribution extends Backend
      * 配货旧数据处理
      *
      * @Description
-     * @author lzh
-     * @since 2020/12/8 10:54:39
      * @return mixed
+     * @since 2020/12/8 10:54:39
+     * @author lzh
      */
     function legacy_data()
     {
@@ -1801,7 +1801,7 @@ class Distribution extends Backend
                ')
                 ->where([
                     'custom_is_delivery_new' => 1,
-//                    'custom_match_delivery_created_at_new' => ['between', ['2018-01-01', '2020-10-01']]
+                    //                    'custom_match_delivery_created_at_new' => ['between', ['2018-01-01', '2020-10-01']]
                 ])
                 ->select();
 
@@ -1821,20 +1821,20 @@ class Distribution extends Backend
 
                         //获取子单表id集
                         $item_process_ids = $this->model->where(['magento_order_id' => $value['entity_id'], 'site' => $key])->column('id');
-                        if($item_process_ids){
+                        if ($item_process_ids) {
                             //子单表：fa_order_item_process：distribution_status=配货状态
                             $this->model
                                 ->allowField(true)
                                 ->save(
                                     ['distribution_status' => 9],
-                                    ['id' => ['in',$item_process_ids]]
+                                    ['id' => ['in', $item_process_ids]]
                                 );
 
                             /**配货日志 Start*/
                             //打印标签
-                            if($value['custom_print_label_created_at_new']){
+                            if ($value['custom_print_label_created_at_new']) {
                                 DistributionLog::record(
-                                    (object)['nickname'=>$value['custom_print_label_person_new']], //操作人
+                                    (object)['nickname' => $value['custom_print_label_person_new']], //操作人
                                     $item_process_ids, //子单ID
                                     1, //操作类型
                                     '标记打印完成',//备注
@@ -1843,9 +1843,9 @@ class Distribution extends Backend
                             }
 
                             //配货
-                            if($value['custom_match_frame_created_at_new']){
+                            if ($value['custom_match_frame_created_at_new']) {
                                 DistributionLog::record(
-                                    (object)['nickname'=>$value['custom_match_frame_person_new']], //操作人
+                                    (object)['nickname' => $value['custom_match_frame_person_new']], //操作人
                                     $item_process_ids, //子单ID
                                     2, //操作类型
                                     '配货完成',//备注
@@ -1854,9 +1854,9 @@ class Distribution extends Backend
                             }
 
                             //配镜片
-                            if($value['custom_match_lens_created_at_new']){
+                            if ($value['custom_match_lens_created_at_new']) {
                                 DistributionLog::record(
-                                    (object)['nickname'=>$value['custom_match_lens_person_new']], //操作人
+                                    (object)['nickname' => $value['custom_match_lens_person_new']], //操作人
                                     $item_process_ids, //子单ID
                                     3, //操作类型
                                     '配镜片完成',//备注
@@ -1865,9 +1865,9 @@ class Distribution extends Backend
                             }
 
                             //加工
-                            if($value['custom_match_factory_created_at_new']){
+                            if ($value['custom_match_factory_created_at_new']) {
                                 DistributionLog::record(
-                                    (object)['nickname'=>$value['custom_match_factory_person_new']], //操作人
+                                    (object)['nickname' => $value['custom_match_factory_person_new']], //操作人
                                     $item_process_ids, //子单ID
                                     4, //操作类型
                                     '加工完成',//备注
@@ -1876,7 +1876,7 @@ class Distribution extends Backend
 
                                 //成品质检
                                 DistributionLog::record(
-                                    (object)['nickname'=>$value['custom_match_factory_person_new']], //操作人
+                                    (object)['nickname' => $value['custom_match_factory_person_new']], //操作人
                                     $item_process_ids, //子单ID
                                     6, //操作类型
                                     '成品质检完成',//备注
@@ -1885,9 +1885,9 @@ class Distribution extends Backend
                             }
 
                             //合单
-                            if($value['custom_match_delivery_created_at_new']){
+                            if ($value['custom_match_delivery_created_at_new']) {
                                 DistributionLog::record(
-                                    (object)['nickname'=>$value['custom_match_delivery_person_new']], //操作人
+                                    (object)['nickname' => $value['custom_match_delivery_person_new']], //操作人
                                     $item_process_ids, //子单ID
                                     7, //操作类型
                                     '合单完成',//备注
@@ -1896,7 +1896,7 @@ class Distribution extends Backend
 
                                 //审单
                                 DistributionLog::record(
-                                    (object)['nickname'=>$value['custom_match_delivery_person_new']], //操作人
+                                    (object)['nickname' => $value['custom_match_delivery_person_new']], //操作人
                                     $item_process_ids, //子单ID
                                     8, //操作类型
                                     '审单完成',//备注
@@ -1906,7 +1906,7 @@ class Distribution extends Backend
                             /**配货日志 End*/
 
                             $handle += 1;
-                        }else{
+                        } else {
                             echo $item['name'] . '-' . $value['increment_id'] . '：未获取到子单数据' . "\n";
                         }
 
@@ -2005,20 +2005,20 @@ class Distribution extends Backend
 
                         //获取子单表id集
                         $item_process_ids = $this->model->where(['magento_order_id' => $value['entity_id'], 'site' => $key])->column('id');
-                        if($item_process_ids){
+                        if ($item_process_ids) {
                             //子单表：fa_order_item_process：distribution_status=配货状态
                             $this->model
                                 ->allowField(true)
                                 ->save(
                                     ['distribution_status' => 1],
-                                    ['id' => ['in',$item_process_ids]]
+                                    ['id' => ['in', $item_process_ids]]
                                 );
 
                             /**配货日志 Start*/
                             //打印标签
-                            if($value['custom_print_label_created_at_new']){
+                            if ($value['custom_print_label_created_at_new']) {
                                 DistributionLog::record(
-                                    (object)['nickname'=>$value['custom_print_label_person_new']], //操作人
+                                    (object)['nickname' => $value['custom_print_label_person_new']], //操作人
                                     $item_process_ids, //子单ID
                                     1, //操作类型
                                     '标记打印完成',//备注
@@ -2028,7 +2028,7 @@ class Distribution extends Backend
                             /**配货日志 End*/
 
                             $handle += 1;
-                        }else{
+                        } else {
                             echo $item['name'] . '-' . $value['increment_id'] . '：未获取到子单数据' . "\n";
                         }
 
@@ -2103,58 +2103,65 @@ class Distribution extends Backend
                 ])
                 ->select();
 
-            $count = count($list);
-            $handle = 0;
-            if ($list) {
-                foreach ($list as $value) {
-                    try {
-                        //主单业务表：fa_order_process：check_status=审单状态、check_time=审单时间、combine_status=合单状态、combine_time=合单状态
-                        $do_time = strtotime($value['custom_match_delivery_created_at_new']) + 28800;
-                        $this->_new_order_process
-                            ->allowField(true)
-                            ->save(
-                                ['check_status' => 1, 'check_time' => $do_time, 'combine_status' => 1, 'combine_time' => $do_time],
-                                ['entity_id' => $value['entity_id'], 'site' => $key]
-                            );
-
-                        //获取子单表id集
-                        $item_process_ids = $this->model->where(['magento_order_id' => $value['entity_id'], 'site' => $key])->column('id');
-                        if($item_process_ids){
-                            //子单表：fa_order_item_process：distribution_status=配货状态
-                            $this->model
-                                ->allowField(true)
-                                ->save(
-                                    ['distribution_status' => 1],
-                                    ['id' => ['in',$item_process_ids]]
-                                );
-
-                            /**配货日志 Start*/
-                            //打印标签
-                            if($value['custom_print_label_created_at_new']){
-                                DistributionLog::record(
-                                    (object)['nickname'=>$value['custom_print_label_person_new']], //操作人
-                                    $item_process_ids, //子单ID
-                                    1, //操作类型
-                                    '标记打印完成',//备注
-                                    strtotime($value['custom_print_label_created_at_new'])//操作时间
-                                );
-                            }
-                            /**配货日志 End*/
-
-                            $handle += 1;
-                        }else{
-                            echo $item['name'] . '-' . $value['increment_id'] . '：未获取到子单数据' . "\n";
-                        }
-
-                    } catch (PDOException $e) {
-                        echo $item['name'] . '-' . $value['increment_id'] . '：' . $e->getMessage() . "\n";
-                    } catch (Exception $e) {
-                        echo $item['name'] . '-' . $value['increment_id'] . '：' . $e->getMessage() . "\n";
-                    }
-                }
+            //从数据库查询需要的数据
+            $spreadsheet = new Spreadsheet();
+            $spreadsheet->setActiveSheetIndex(0);
+            $spreadsheet->getActiveSheet()->setCellValue("A1", "entity_id");
+            $spreadsheet->getActiveSheet()->setCellValue("B1", "increment_id");
+            $spreadsheet->getActiveSheet()->setCellValue("C1", "是否质检 1是 0否");
+            $spreadsheet->getActiveSheet()->setCellValue("D1", "质检操作人");
+            $spreadsheet->getActiveSheet()->setCellValue("E1", "是否打标签 1是 0否");
+            $spreadsheet->getActiveSheet()->setCellValue("F1", "打标签操作人");
+            //设置宽度
+            $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(60);
+            $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(12);
+            $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(12);
+            $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(12);
+            $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(12);
+            $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(12);
+            $spreadsheet->setActiveSheetIndex(0)->setTitle('SKU明细');
+            $spreadsheet->setActiveSheetIndex(0);
+            $num = 0;
+            foreach ($list as $k => $v) {
+                $spreadsheet->getActiveSheet()->setCellValue('A' . ($num * 1 + 2), $v['entity_id']);
+                $spreadsheet->getActiveSheet()->setCellValue('B' . ($num * 1 + 2), $v['increment_id']);
+                $spreadsheet->getActiveSheet()->setCellValue('C' . ($num * 1 + 2), $v['custom_is_delivery_new'] == 1 ? '是' : '否');
+                $spreadsheet->getActiveSheet()->setCellValue('D' . ($num * 1 + 2), $v['custom_match_delivery_person_new']);
+                $spreadsheet->getActiveSheet()->setCellValue('E' . ($num * 1 + 2), $v['custom_print_label_new'] == 1 ? '是' : '否');
+                $spreadsheet->getActiveSheet()->setCellValue('F' . ($num * 1 + 2), $v['custom_print_label_person_new']);
+                $num += 1;
             }
-
-            echo $item['name'] . "：未质检已打印标签-{$count}，已处理-{$handle} End\n";
+            //设置边框
+            $border = [
+                'borders' => [
+                    'allBorders' => [
+                        'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
+                        'color' => ['argb' => 'FF000000'], // 设置border颜色
+                    ],
+                ],
+            ];
+            $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+            $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
+            $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
+            $spreadsheet->getActiveSheet()->getStyle('A1:Q' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            $spreadsheet->setActiveSheetIndex(0);
+            $format = 'xlsx';
+            $savename = '配货未质检已打印标签数据';
+            if ($format == 'xls') {
+                //输出Excel03版本
+                header('Content-Type:application/vnd.ms-excel');
+                $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
+            } elseif ($format == 'xlsx') {
+                //输出07Excel版本
+                header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+                $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
+            }
+            //输出名称
+            header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
+            //禁止缓存
+            header('Cache-Control: max-age=0');
+            $writer = new $class($spreadsheet);
+            $writer->save('php://output');
         }
     }
 }
