@@ -774,7 +774,9 @@ class Test extends Backend
                 continue;
             }
             $codes = array_column($res, 'product_number');
+            $where = [];
             $where['code'] = ['in', $codes];
+            $params = [];
             $params['sku'] = $v['sku'];
             $params['in_stock_id'] = $v['id'];
             $params['purchase_id'] = $v['purchase_id'];
@@ -784,7 +786,7 @@ class Test extends Backend
             $params['logistics_id'] = $check['logistics_id'];
             Db::name('product_barcode_item')->where($where)->update($params);
 
-            Db::name('zzzz_temp')->where($where)->update(['is_process' => 1]);
+            Db::name('zzzz_temp')->where(['product_number' => ['in', $codes]])->update(['is_process' => 1]);
 
             echo $k . "\n";
         }
