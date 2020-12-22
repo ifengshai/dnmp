@@ -39,7 +39,12 @@ class Distribution extends Backend
         'detail',
         'operation_log'
     ];
-
+    /**
+     * 无需登录验证
+     * @var array|string
+     * @access protected
+     */
+    protected $noNeedLogin = '*';
     /**
      * 子订单模型对象
      * @var object
@@ -1765,6 +1770,7 @@ class Distribution extends Backend
      */
     function legacy_data()
     {
+        ini_set('memory_limit', '1024M');
         //站点列表
         $site_arr = [
             1 => [
@@ -1783,10 +1789,10 @@ class Distribution extends Backend
                 'name' => 'weseeoptical',
                 'obj' => new \app\admin\model\order\printlabel\Weseeoptical,
             ],
-            5 => [
-                'name' => 'meeloog',
-                'obj' => new \app\admin\model\order\printlabel\Meeloog,
-            ],
+            // 5 => [
+            //     'name' => 'meeloog',
+            //     'obj' => new \app\admin\model\order\printlabel\Meeloog,
+            // ],
             9 => [
                 'name' => 'zeelool_es',
                 'obj' => new \app\admin\model\order\printlabel\ZeeloolEs,
@@ -1814,7 +1820,7 @@ class Distribution extends Backend
                ')
                 ->where([
                     'custom_is_delivery_new' => 1,
-                    //                    'custom_match_delivery_created_at_new' => ['between', ['2018-01-01', '2020-10-01']]
+                    'custom_match_delivery_created_at_new' => ['between', ['2018-01-01', '2019-10-01']]
                 ])
                 ->select();
 
@@ -1946,28 +1952,29 @@ class Distribution extends Backend
      */
     function legacy_data_wait_print_label()
     {
+        ini_set('memory_limit', '512M');
         //站点列表
         $site_arr = [
-            1 => [
-                'name' => 'zeelool',
-                'obj' => new \app\admin\model\order\printlabel\Zeelool,
-            ],
-            2 => [
-                'name' => 'voogueme',
-                'obj' => new \app\admin\model\order\printlabel\Voogueme,
-            ],
-            3 => [
-                'name' => 'nihao',
-                'obj' => new \app\admin\model\order\printlabel\Nihao,
-            ],
-            4 => [
-                'name' => 'weseeoptical',
-                'obj' => new \app\admin\model\order\printlabel\Weseeoptical,
-            ],
-            5 => [
-                'name' => 'meeloog',
-                'obj' => new \app\admin\model\order\printlabel\Meeloog,
-            ],
+            // 1 => [
+            //     'name' => 'zeelool',
+            //     'obj' => new \app\admin\model\order\printlabel\Zeelool,
+            // ],
+            // 2 => [
+            //     'name' => 'voogueme',
+            //     'obj' => new \app\admin\model\order\printlabel\Voogueme,
+            // ],
+            // 3 => [
+            //     'name' => 'nihao',
+            //     'obj' => new \app\admin\model\order\printlabel\Nihao,
+            // ],
+            // 4 => [
+            //     'name' => 'weseeoptical',
+            //     'obj' => new \app\admin\model\order\printlabel\Weseeoptical,
+            // ],
+            // 5 => [
+            //     'name' => 'meeloog',
+            //     'obj' => new \app\admin\model\order\printlabel\Meeloog,
+            // ],
             9 => [
                 'name' => 'zeelool_es',
                 'obj' => new \app\admin\model\order\printlabel\ZeeloolEs,

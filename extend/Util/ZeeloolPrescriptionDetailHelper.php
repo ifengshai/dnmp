@@ -72,14 +72,7 @@ class ZeeloolPrescriptionDetailHelper
 			left join sales_flat_order sfo on sfoi.order_id=sfo.entity_id 
 			where sfo.entity_id in($entity_id)";
 			$item_list = Db::connect('database.db_zeelool')->query($querySql);
-			dump($item_list);die();
-			$a  = unserialize($item_list[0]['product_options']);
-			dump($a);
-			$c = explode('&',$a['info_buyRequest']['tmplens']['prescription']);
-
-			dump($c);die();
-			dump(unserialize($a['info_buyRequest']['tmplens']['prescription']));
-
+		
 			// 如果为空，则直接返回false
 			if (empty($item_list)) {
 				return false;
