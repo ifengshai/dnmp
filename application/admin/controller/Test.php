@@ -1198,7 +1198,7 @@ class Test extends Backend
                     $change_sku_list = Db::table('fa_work_order_change_sku')->where(['work_id' => $v['id'], 'change_type' => 1, 'measure_id' => $v1['id']])->select();
                     foreach ($change_sku_list as $k2 => $v2) {
                         //查询订单号所有子单
-                        $order_list = $order->alias('a')->field('b.item_order_number')
+                        $order_list = $order->alias('a')->field('b.item_order_number,b.id')
                             ->where(['a.increment_id' => $v2['increment_id'], 'a.site' => $v2['platform_type'], 'b.sku' => $v2['original_sku']])
                             ->join(['fa_order_item_process' => 'b'], 'a.id=b.order_id')
                             ->select();
@@ -1260,7 +1260,7 @@ class Test extends Backend
                     $change_sku_list = Db::table('fa_work_order_change_sku')->where(['work_id' => $v['id'], 'change_type' => 2, 'measure_id' => $v1['id']])->select();
                     foreach ($change_sku_list as $k2 => $v2) {
                         //查询订单号所有子单
-                        $order_list = $order->alias('a')->field('b.item_order_number')
+                        $order_list = $order->alias('a')->field('b.item_order_number,b.id')
                             ->where(['a.increment_id' => $v2['increment_id'], 'a.site' => $v2['platform_type'], 'b.sku' => $v2['original_sku']])
                             ->join(['fa_order_item_process' => 'b'], 'a.id=b.order_id')
                             ->select();
