@@ -54,39 +54,18 @@ class OcPrescriptionPic extends Backend
 
             $filter = json_decode($this->request->get('filter'), true);
             $site = $filter['site'] ? $filter['site'] :1;
-            switch ($site ==1) {
-                case 1:
-                    $db = 'database.db_zeelool';
-                    $model = $this->zeelool;
-                    break;
-                case 2:
-                    $db = 'database.db_voogueme';
-                    $model = $this->voogueme;
-                    break;
-
-                default:
-                    return false;
-                    break;
+            if ($site ==1){
+                $model = Db::connect('database.db_zeelool');
+            }else{
+                $model = Db::connect('database.db_voogueme');
             }
-
             unset($filter['site']);
             $this->request->get(['filter' => json_encode($filter)]);
 
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-            $total = $model
 
-                    ->where($where)
-//                    ->order($sort, $order)
-                    ->count();
-
-            $list = $model
-
-                    ->where($where)
-//                    ->order($sort, $order)
-                    ->limit($offset, $limit)
-                    ->select();
-
-            $list = collection($list)->toArray();
+            $total = $model->table('oc_prescription_pic')->where($where)->count();
+            $list = $model->table('oc_prescription_pic')->where($where)->order('id desc')->select();
 
             foreach ($list as $key=>$item){
 
@@ -95,11 +74,11 @@ class OcPrescriptionPic extends Backend
                 }else{
                     $list[$key]['status']= '已处理';
                 }
+                $list[$key]['site'] = $site;
                 $list[$key]['created_at'] =date("Y-m-d H:i:s",strtotime($item['created_at'])+28800);;
             }
 
             $result = array("total" => $total, "rows" => $list);
-
             return json($result);
         }
         return $this->view->fetch();
@@ -110,21 +89,38 @@ class OcPrescriptionPic extends Backend
  * */
     public function question_message($ids = null){
         if ($this->request->isPost()){
+
             $params = $this->request->post("row/a");
-            $updata_queertion = $this->model->where('id',$params['id'])->update(['status'=>2,'handler_name'=>$this->auth->nickname,'completion_time'=>date('Y-m-d H:i:s',time()),'remarks'=>$params['remarks']]);
+            if ($params['site'] ==1){
+                $model = Db::connect('database.db_zeelool');
+            }else{
+                $model = Db::connect('database.db_voogueme');
+            }
+            $updata_queertion =$model->table('oc_prescription_pic')->where('id',$params['id'])->update(['status'=>2,'handler_name'=>$this->auth->nickname,'completion_time'=>date('Y-m-d H:i:s',time()),'remarks'=>$params['remarks']]);
             if ($updata_queertion){
                 $this->success('操作成功','oc_prescription_pic/index');
             }else{
                 $this->error('操作失败');
             }
         }
-        $row = $this->model->where('id',$ids)->find();
+        $site = input('param.site');
+        if ($site ==1){
+            $model = Db::connect('database.db_zeelool');
+            $url =config('url.zeelool_url').'/media';
+        }else{
+            $model = Db::connect('database.db_voogueme');
+            $url =config('url.voogueme_url').'/media';
+        }
+        $row =$model->table('oc_prescription_pic')->where('id',$ids)->find();
         $photo_href = $row['pic'] =explode(',',$row['pic']);
         foreach ($photo_href as $key=>$item){
-            $photo_href[$key]= 'https://pc.zeelool.com/media'.$item;
+            $photo_href[$key]= $url.$item;
         }
         $row['pic'] = $photo_href;
         $this->assign('row',$row);
+        $this->assign('zhandian',$site);
+
+
         return $this->view->fetch();
     }
 }

@@ -28,10 +28,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             field: 'site',
                             title: __('站点'),
                             searchList: { 1: 'Z站', 2: 'V站'},
-                             formatter: Table.api.formatter.status,
-                            visible: false
+                            custom: { 1: 'black', 2: 'red' },
+                            formatter: Table.api.formatter.status,
                         },
-
                         {field: 'id', title: __('Id')},
                         {field: 'email', title: __('Email'),operate: false},
 
