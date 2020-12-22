@@ -1951,6 +1951,7 @@ class Distribution extends Backend
      */
     function legacy_data_wait_print_label()
     {
+        ini_set('memory_limit', '512M');
         //站点列表
         $site_arr = [
             1 => [
