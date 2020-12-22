@@ -769,19 +769,19 @@ class Test extends Backend
     public function process_sku_number()
     {
         $instock = new \app\admin\model\warehouse\Instock();
-        $list = $instock->alias('a')->where(['status' => 2,'type_id' => 1])->field('a.id,a.check_id,b.purchase_id,b.sku,b.in_stock_num')->join(['fa_in_stock_item' => 'b'],'a.id=b.in_stock_id')->order('a.createtime desc')->select();
+        $list = $instock->alias('a')->where(['status' => 2, 'type_id' => 1])->field('a.id,a.check_id,b.purchase_id,b.sku,b.in_stock_num')->join(['fa_in_stock_item' => 'b'], 'a.id=b.in_stock_id')->order('a.createtime desc')->select();
         $list = collection($list)->toArray();
-        foreach($list as $k => $v) {
+        foreach ($list as $k => $v) {
             //查询对应质检单
             $check = Db::name('check_order')->where(['id' => $v['check_id']])->find();
             if ($v['in_stock_num'] < 0) {
                 continue;
             }
-            $res = Db::name('zzzz_temp')->where(['is_process' => 0,'sku' => $v['sku']])->limit($v['in_stock_num'])->select();
+            $res = Db::name('zzzz_temp')->where(['is_process' => 0, 'sku' => $v['sku']])->limit($v['in_stock_num'])->select();
             if (!$res) {
-               continue; 
-            } 
-            foreach($res as $key => $val) {
+                continue;
+            }
+            foreach ($res as $key => $val) {
                 $where['code'] = $val['product_number'];
                 $params['sku'] = $val['sku'];
                 $params['in_stock_id'] = $v['id'];
@@ -1092,10 +1092,10 @@ class Test extends Backend
 
 
 
-   
+
 
     /***************处理工单旧数据*********************** */
-    public function process_worklist_data()
+    public function process_worklist_data_new()
     {
 
         ini_set('memory_limit', '1280M');
@@ -1106,9 +1106,20 @@ class Test extends Backend
          */
         $work = new \app\admin\model\saleaftermanage\WorkOrderList();
         $order = new \app\admin\model\order\order\NewOrder();
-        $list = $work->where(['work_status' => ['in', [0, 1, 4, 6, 7]]])->select();
+        $_stock_house = new \app\admin\model\warehouse\StockHouse();
+        $_distribution_abnormal = new \app\admin\model\DistributionAbnormal();
+        $_new_order_item_process = new \app\admin\model\order\order\NewOrderItemProcess();
+        $list = $work->where(['work_status' => ['in', [0]]])->select();
         $list = collection($list)->toArray();
+
+        //获取异常库位号
+        $stock_house_info = $_stock_house
+            ->field('id,coding')
+            ->where(['status' => 1, 'type' => 4])
+            ->find();
+
         foreach ($list as $k => $v) {
+            echo $v['id'] . "\n";
             //插入主表
             Db::table('fa_work_order_list_copy1')->insert($v);
             //查询措施表
@@ -1125,7 +1136,253 @@ class Test extends Backend
                     $change_sku_list = Db::table('fa_work_order_change_sku')->where(['work_id' => $v['id'], 'change_type' => 3, 'measure_id' => $v1['id']])->select();
                     foreach ($change_sku_list as $key1 => $val1) {
                         //查询订单号所有子单
-                        $order_list = $order->alias('a')->field('b.item_order_number')
+                        $order_list = $order->alias('a')->field('b.item_order_number,b.id')
+                            ->where(['a.increment_id' => $val1['increment_id'], 'a.site' => $val1['platform_type'], 'b.sku' => $val1['original_sku']])
+                            ->join(['fa_order_item_process' => 'b'], 'a.id=b.order_id')
+                            ->select();
+                        $measure = [];
+                        $change_sku_data = [];
+                        $recept_data = [];
+                        foreach ($order_list as $key => $val) {
+
+                            //创建异常
+                            $abnormal_data = [
+                                'work_id' => $v['id'],
+                                'item_process_id' => $val['id'],
+                                'type' => 16,
+                                'status' => 1,
+                                'create_time' => time(),
+                                'create_person' => 'admin'
+                            ];
+                            $_distribution_abnormal->allowField(true)->isUpdate(false)->data($abnormal_data)->save();
+
+                            //子订单绑定异常库位号
+                            $_new_order_item_process
+                                ->allowField(true)
+                                ->isUpdate(true, ['id' => $val['id']])
+                                ->save(['abnormal_house_id' => $stock_house_info['id']]);
+
+                            //异常库位号占用数量+1
+                            $_stock_house
+                                ->where(['id' => $stock_house_info['id']])
+                                ->setInc('occupy', 1);
+
+
+                            //插入措施表
+                            $measure['work_id'] = $v['id'];
+                            $measure['measure_choose_id'] = 18;
+                            $measure['measure_content'] = '子单取消';
+                            $measure['create_time'] = $v1['create_time'];
+                            $measure['operation_type'] = $v1['operation_type'];
+                            $measure['operation_time'] = $v1['operation_time'];
+                            $measure['sku_change_type'] = $v1['sku_change_type'];
+                            $measure['item_order_number'] = $val['item_order_number'];
+                            $id = Db::table('fa_work_order_measure_copy1')->insertGetId($measure);
+
+                            unset($recept['id']);
+                            $recept_data = $recept;
+                            $recept_data['measure_id'] = $id;
+                            Db::table('fa_work_order_recept')->insertGetId($recept_data);
+
+                            unset($val1['id']);
+                            $change_sku_data = $val1;
+                            $change_sku_data['measure_id'] = $id;
+                            $change_sku_data['item_order_number'] = $val['item_order_number'];
+                            Db::table('fa_work_order_change_sku_copy1')->insert($change_sku_data);
+
+                            $item_number[] = $val['item_order_number'];
+                        }
+                    }
+                } else if ($v1['measure_choose_id'] == 1) { //措施为更改镜框
+                    //查询change sku表内容
+                    $change_sku_list = Db::table('fa_work_order_change_sku')->where(['work_id' => $v['id'], 'change_type' => 1, 'measure_id' => $v1['id']])->select();
+                    foreach ($change_sku_list as $k2 => $v2) {
+                        //查询订单号所有子单
+                        $order_list = $order->alias('a')->field('b.item_order_number,b.id')
+                            ->where(['a.increment_id' => $v2['increment_id'], 'a.site' => $v2['platform_type'], 'b.sku' => $v2['original_sku']])
+                            ->join(['fa_order_item_process' => 'b'], 'a.id=b.order_id')
+                            ->select();
+                        $measure = [];
+                        $change_sku_data = [];
+                        $recept_data = [];
+                        foreach ($order_list as $k3 => $v3) {
+
+
+                            //创建异常
+                            $abnormal_data = [
+                                'work_id' => $v['id'],
+                                'item_process_id' => $v3['id'],
+                                'type' => 17,
+                                'status' => 1,
+                                'create_time' => time(),
+                                'create_person' => 'admin'
+                            ];
+                            $_distribution_abnormal->allowField(true)->isUpdate(false)->data($abnormal_data)->save();
+
+                            //子订单绑定异常库位号
+                            $_new_order_item_process
+                                ->allowField(true)
+                                ->isUpdate(true, ['id' => $v3['id']])
+                                ->save(['abnormal_house_id' => $stock_house_info['id']]);
+
+                            //异常库位号占用数量+1
+                            $_stock_house
+                                ->where(['id' => $stock_house_info['id']])
+                                ->setInc('occupy', 1);
+
+
+                            $measure['work_id'] = $v['id'];
+                            $measure['measure_choose_id'] = 19;
+                            $measure['measure_content'] = '更改镜框';
+                            $measure['create_time'] = $v1['create_time'];
+                            $measure['operation_type'] = $v1['operation_type'];
+                            $measure['operation_time'] = $v1['operation_time'];
+                            $measure['sku_change_type'] = $v1['sku_change_type'];
+                            $measure['item_order_number'] = $v3['item_order_number'];
+                            $id = Db::table('fa_work_order_measure_copy1')->insertGetId($measure);
+
+                            unset($recept['id']);
+                            $recept_data = $recept;
+                            $recept_data['measure_id'] = $id;
+                            Db::table('fa_work_order_recept')->insertGetId($recept_data);
+
+                            unset($v2['id']);
+                            $change_sku_data = $v2;
+                            $change_sku_data['measure_id'] = $id;
+                            $change_sku_data['item_order_number'] = $v3['item_order_number'];
+                            Db::table('fa_work_order_change_sku_copy1')->insert($change_sku_data);
+
+                            $item_number[] = $v3['item_order_number'];
+                        }
+                    }
+                } else if ($v1['measure_choose_id'] == 12) {  //措施为更改镜片
+                    //查询change sku表内容
+                    $change_sku_list = Db::table('fa_work_order_change_sku')->where(['work_id' => $v['id'], 'change_type' => 2, 'measure_id' => $v1['id']])->select();
+                    foreach ($change_sku_list as $k2 => $v2) {
+                        //查询订单号所有子单
+                        $order_list = $order->alias('a')->field('b.item_order_number,b.id')
+                            ->where(['a.increment_id' => $v2['increment_id'], 'a.site' => $v2['platform_type'], 'b.sku' => $v2['original_sku']])
+                            ->join(['fa_order_item_process' => 'b'], 'a.id=b.order_id')
+                            ->select();
+                        $measure = [];
+                        $change_sku_data = [];
+                        $recept_data = [];
+                        foreach ($order_list as $k3 => $v3) {
+
+
+                            //创建异常
+                            $abnormal_data = [
+                                'work_id' => $v['id'],
+                                'item_process_id' => $v3['id'],
+                                'type' => 17,
+                                'status' => 1,
+                                'create_time' => time(),
+                                'create_person' => 'admin'
+                            ];
+                            $_distribution_abnormal->allowField(true)->isUpdate(false)->data($abnormal_data)->save();
+
+                            //子订单绑定异常库位号
+                            $_new_order_item_process
+                                ->allowField(true)
+                                ->isUpdate(true, ['id' => $v3['id']])
+                                ->save(['abnormal_house_id' => $stock_house_info['id']]);
+
+                            //异常库位号占用数量+1
+                            $_stock_house
+                                ->where(['id' => $stock_house_info['id']])
+                                ->setInc('occupy', 1);
+
+
+                            $measure['work_id'] = $v['id'];
+                            $measure['measure_choose_id'] = 20;
+                            $measure['measure_content'] = '更改镜片';
+                            $measure['create_time'] = $v1['create_time'];
+                            $measure['operation_type'] = $v1['operation_type'];
+                            $measure['operation_time'] = $v1['operation_time'];
+                            $measure['sku_change_type'] = $v1['sku_change_type'];
+                            $measure['item_order_number'] = $v3['item_order_number'];
+                            $id = Db::table('fa_work_order_measure_copy1')->insertGetId($measure);
+
+                            unset($recept['id']);
+                            $recept_data = $recept;
+                            $recept_data['measure_id'] = $id;
+                            Db::table('fa_work_order_recept')->insertGetId($recept_data);
+
+                            unset($v2['id']);
+                            $change_sku_data = $v2;
+                            $change_sku_data['measure_id'] = $id;
+                            $change_sku_data['item_order_number'] = $v3['item_order_number'];
+                            Db::table('fa_work_order_change_sku_copy1')->insert($change_sku_data);
+
+                            $item_number[] = $v3['item_order_number'];
+                        }
+                    }
+                } else {
+                    //插入措施表
+                    $id =  Db::table('fa_work_order_measure_copy1')->insertGetId($v1);
+
+                    //查询change sku表
+                    $change_sku_list = Db::table('fa_work_order_change_sku')->where(['work_id' => $v['id'], 'measure_id' => $v1['id']])->select();
+
+                    if (!$change_sku_list) continue;
+                    $change_sku_data = [];
+                    foreach ($change_sku_list as $key => $val) {
+                        unset($val['id']);
+                        $change_sku_data = $val;
+                        $change_sku_data['measure_id'] = $id;
+                        Db::table('fa_work_order_change_sku_copy1')->insert($change_sku_data);
+                    }
+                }
+            }
+
+            //插入子单号
+            if ($item_number) {
+                $numbers = implode(',', array_filter($item_number));
+                Db::table('fa_work_order_list_copy1')->where(['id' => $v['id']])->update(['order_item_numbers' => $numbers]);
+            }
+
+            echo $k . "\n";
+        }
+        echo "ok";
+    }
+
+
+    public function process_worklist_data_complete()
+    {
+
+        ini_set('memory_limit', '1280M');
+        /**
+         * 判断措施是否为 id = 3主单取消   changesku表需插入所有子订单
+         * 判断措施如果id = 19 更改镜框 需插入对应sku 所有子订单
+         * 判断措施id = 20 更改镜片 需插入对应sku 所有子订单 , 1, 4, 6, 7
+         */
+        $work = new \app\admin\model\saleaftermanage\WorkOrderList();
+        $order = new \app\admin\model\order\order\NewOrder();
+        $_stock_house = new \app\admin\model\warehouse\StockHouse();
+        $_distribution_abnormal = new \app\admin\model\DistributionAbnormal();
+        $_new_order_item_process = new \app\admin\model\order\order\NewOrderItemProcess();
+        $list = $work->where(['work_status' => ['in', [1, 4, 6, 7]]])->select();
+        $list = collection($list)->toArray();
+        foreach ($list as $k => $v) {
+            echo $v['id'] . "\n";
+            //插入主表
+            Db::table('fa_work_order_list_copy1')->insert($v);
+            //查询措施表
+            $res = Db::table('fa_work_order_measure')->where(['work_id' => $v['id']])->select();
+            $item_number = [];
+            foreach ($res as $k1 => $v1) {
+
+                //查询工单措施承接表
+                $recept = Db::table('fa_work_order_recept')->where(['work_id' => $v['id'], 'measure_id' => $v1['id']])->find();
+
+                //措施为取消
+                if ($v1['measure_choose_id'] == 3) {
+
+                    //查询change sku表
+                    $change_sku_list = Db::table('fa_work_order_change_sku')->where(['work_id' => $v['id'], 'change_type' => 3, 'measure_id' => $v1['id']])->select();
+                    foreach ($change_sku_list as $key1 => $val1) {
+                        //查询订单号所有子单
+                        $order_list = $order->alias('a')->field('b.item_order_number,b.id')
                             ->where(['a.increment_id' => $val1['increment_id'], 'a.site' => $val1['platform_type'], 'b.sku' => $val1['original_sku']])
                             ->join(['fa_order_item_process' => 'b'], 'a.id=b.order_id')
                             ->select();
@@ -1260,7 +1517,4 @@ class Test extends Backend
         }
         echo "ok";
     }
-
-
-
 }
