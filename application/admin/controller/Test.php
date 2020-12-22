@@ -1524,7 +1524,58 @@ class Test extends Backend
         $this->item
             ->where(['sku' => ['not in', $skus], 'category_id' => ['<>', 43], 'available_stock' => ['>', 0]])
             ->update(['stock' => 0, 'available_stock' => 0, 'distribution_occupy_stock' => 0]);
-            
+
         $this->itemplatformsku->where(['sku' => ['not in', $skus], 'stock' => ['>', 0]])->where(['sku' => ['not like', '%price%']])->update(['stock' => 0]);
+
+    }
+
+    /**
+     * 订单占用库存
+     */
+    public function set_sku_stock2()
+    {
+        $this->orderitemprocess = new \app\admin\model\order\order\NewOrderItemProcess();
+        $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
+        $this->item = new \app\admin\model\itemmanage\Item;
+        $skus = Db::table('fa_zz_temp2')->column('sku');
+        $skuarr = $this->item->where(['sku' => ['not in', $skus], 'category_id' => ['<>', 43], 'is_open' => 1,'is_del' => 1])->column('sku');
+       
+        foreach ($skuarr as $k => $v) {
+            $map = [];
+            $zeelool_sku = $this->itemplatformsku->getWebSku($v, 1);
+            $voogueme_sku = $this->itemplatformsku->getWebSku($v, 2);
+            $nihao_sku = $this->itemplatformsku->getWebSku($v, 3);
+            $wesee_sku = $this->itemplatformsku->getWebSku($v, 5);
+            $meeloog_sku = $this->itemplatformsku->getWebSku($v, 4);
+            $zeelool_es_sku = $this->itemplatformsku->getWebSku($v, 9);
+            $zeelool_de_sku = $this->itemplatformsku->getWebSku($v, 10);
+            $zeelool_jp_sku = $this->itemplatformsku->getWebSku($v, 11);
+            $skus = [];
+            $skus = [
+                $zeelool_sku,
+                $voogueme_sku,
+                $nihao_sku,
+                $wesee_sku,
+                $meeloog_sku,
+                $zeelool_es_sku,
+                $zeelool_de_sku,
+                $zeelool_jp_sku
+            ];
+
+            $map['a.sku'] = ['in', array_filter($skus)];
+            $map['b.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal']];
+            $map['a.distribution_status'] = 1; //打印标签
+            $map['b.created_at'] = ['between', [strtotime('2020-01-01 00:00:00'), time()]]; //时间节点
+            $occupy_stock = $this->orderitemprocess->alias('a')->where($map)->join(['fa_order' => 'b'], 'a.order_id = b.id')->count(1);
+
+            $p_map['sku'] = $v;
+            $data['occupy_stock'] = $occupy_stock;
+            $res = $this->item->where($p_map)->update($data);
+
+            echo $v . "\n";
+            usleep(20000);
+        }
+        echo 'ok';
+        die;
     }
 }
