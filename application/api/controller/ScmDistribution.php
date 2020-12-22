@@ -1135,6 +1135,7 @@ class ScmDistribution extends Scm
                 //如果回退到待加工步骤之前，清空定制片库位ID及定制片处理状态
                 if (4 > $status) {
                     $save_data['temporary_house_id'] = 0;
+                    
                     $save_data['customize_status'] = 0;
                 }
 
@@ -1857,6 +1858,7 @@ class ScmDistribution extends Scm
                         ->isUpdate(true, ['order_id' => $order_id,'distribution_status'=>['neq', 0]])
                         ->save([
                             'distribution_status'=>2,
+
                             'temporary_house_id'=>0,
                             'customize_status'=>0
                         ]);
