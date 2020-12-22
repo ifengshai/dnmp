@@ -223,6 +223,7 @@ class Distribution extends Backend
 
             if ($filter['increment_id']) {
                 $map['b.increment_id'] = ['like', $filter['increment_id'] . '%'];
+                $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
                 unset($filter['increment_id']);
             }
 
@@ -239,7 +240,13 @@ class Distribution extends Backend
             if (!$filter) {
                 $map['a.created_at'] = ['between', [strtotime('-3 month'), time()]];
             }
+
+            if (!$filter['status']) {
+                $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal']];
+            }
+
             $this->request->get(['filter' => json_encode($filter)]);
+
 
             //子单工单未处理
             $item_order_numbers = $this->_work_order_change_sku

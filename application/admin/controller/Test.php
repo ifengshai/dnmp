@@ -803,8 +803,7 @@ class Test extends Backend
      */
     public function process_sku_stock()
     {
-        $list = Db::name('zzzz_temp')->field('count(DISTINCT product_number) as stock,sku')->where(['is_find' => 0, 'is_error' => 0])->group('sku')->select();
-
+        $list = Db::name('zzzz_temp')->field('count(product_number) as stock,sku')->where(['is_find' => 0, 'is_error' => 0])->group('sku')->select();
 
         Db::name('zz_temp2')->insertAll($list);
         echo "ok";
