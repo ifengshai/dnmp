@@ -2076,14 +2076,14 @@ class ScmWarehouse extends Scm
 //            var_dump(json_encode($sku_code));
 //            var_dump(json_encode($value['sku_agg']));
 //            die;
-            $save_data1['remark'] = json_encode($item_sku);
-            $save_data2['remark'] = json_encode($sku_code);
-            $save_data3['remark'] = json_encode($value['sku_agg']);
-            $this->_inventory_item->where(['id' => 8254])->update($save_data1);
-            $this->_inventory_item->where(['id' => 8253])->update($save_data2);
-            $this->_inventory_item->where(['id' => 8252])->update($save_data3);
-            var_dump(json_encode($item_sku));
-            die;
+//            $save_data1['remark'] = json_encode($item_sku);
+//            $save_data2['remark'] = json_encode($sku_code);
+//            $save_data3['remark'] = json_encode($value['sku_agg']);
+//            $this->_inventory_item->where(['id' => 8254])->update($save_data1);
+//            $this->_inventory_item->where(['id' => 8253])->update($save_data2);
+//            $this->_inventory_item->where(['id' => 8252])->update($save_data3);
+//            var_dump(json_encode($item_sku));
+//            die;
             count($value['sku_agg']) != count(array_unique($sku_code))
             &&
             $this->error(__('条形码有重复，请检查'), [], 405);
