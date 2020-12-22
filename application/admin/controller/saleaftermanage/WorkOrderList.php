@@ -2691,7 +2691,10 @@ class WorkOrderList extends Backend
         }
 
         //获取承接表数据
-        $recepts = WorkOrderRecept::where('work_id', $row->id)->with('measure')->group('recept_group_id,measure_id')->select();
+        $recepts = WorkOrderRecept::where('work_id', $row->id)
+        ->join(['fa_work_order_measure' => 'b'], 'fa_work_order_recept.measure_id=b.id')
+        ->group('recept_group_id,measure_id')
+        ->select();
         $this->view->assign('recepts', $recepts);
 
         //处理
