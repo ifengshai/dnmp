@@ -491,10 +491,30 @@ class LogisticsInfo extends Backend
                                     $item_platform->where(['sku'=>$val['sku'],'platform_type'=>$vall['website_type']])->setInc('wait_instock_num',$num);
                                 }
                             }
+                            //插入日志表
+                            (new StockLog())->setData([
+                                'type' => 2,
+                                'site' => 0,
+                                'modular' => 10,
+                                //采购单签收
+                                'change_type' => 24,
+                                'sku' => $val['sku'],
+                                'public_id' => $v['purchase_id'],
+                                'source' => 1,
+                                'on_way_stock_before' => $item->where(['sku' => $val['sku']])->value('on_way_stock'),
+                                'on_way_stock_change' => -$val['arrival_num'],
+                                'wait_instock_num_before' => $item->where(['sku' => $val['sku']])->value('wait_instock_num'),
+                                'wait_instock_num_change' => $val['arrival_num'],
+                                'create_person' => session('admin.nickname'),
+                                'create_time' => time(),
+                                //关联采购单
+                                'number_type' => 7,
+                            ]);
                             //减总的在途库存也就是商品表里的在途库存
                             $item->where(['sku' => $val['sku']])->setDec('on_way_stock', $val['arrival_num']);
                             //减在途加待入库数量
                             $item->where(['sku' => $val['sku']])->setInc('wait_instock_num', $val['arrival_num']);
+
                         }
                     } else {
                         if ($v['purchase_id']) {
@@ -527,10 +547,30 @@ class LogisticsInfo extends Backend
                                         $item_platform->where(['sku'=>$val['sku'],'platform_type'=>$vall['website_type']])->setInc('wait_instock_num',$num);
                                     }
                                 }
+                                //插入日志表
+                                (new StockLog())->setData([
+                                    'type' => 2,
+                                    'site' => 0,
+                                    'modular' => 10,
+                                    //采购单签收
+                                    'change_type' => 24,
+                                    'sku' => $val['sku'],
+                                    'public_id' => $v['purchase_id'],
+                                    'source' => 1,
+                                    'on_way_stock_before' => $item->where(['sku' => $val['sku']])->value('on_way_stock'),
+                                    'on_way_stock_change' => -$val['purchase_num'],
+                                    'wait_instock_num_before' => $item->where(['sku' => $val['sku']])->value('wait_instock_num'),
+                                    'wait_instock_num_change' => $val['purchase_num'],
+                                    'create_person' => session('admin.nickname'),
+                                    'create_time' => time(),
+                                    //关联采购单
+                                    'number_type' => 7,
+                                ]);
                                 //减总的在途库存也就是商品表里的在途库存
                                 $item->where(['sku' => $val['sku']])->setDec('on_way_stock', $val['purchase_num']);
                                 //减在途加待入库数量
                                 $item->where(['sku' => $val['sku']])->setInc('wait_instock_num', $val['purchase_num']);
+
                             }
                         }
                     }
