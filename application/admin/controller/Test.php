@@ -1157,10 +1157,8 @@ class Test extends Backend
                             $_distribution_abnormal->allowField(true)->isUpdate(false)->data($abnormal_data)->save();
 
                             //子订单绑定异常库位号
-                            $_new_order_item_process
-                                ->allowField(true)
-                                ->isUpdate(true, ['id' => $val['id']])
-                                ->save(['abnormal_house_id' => $stock_house_info['id']]);
+                            $_new_order_item_process->where(['id' => $val['id']])
+                                ->update(['abnormal_house_id' => $stock_house_info['id']]);
 
                             //异常库位号占用数量+1
                             $_stock_house
@@ -1220,10 +1218,9 @@ class Test extends Backend
                             $_distribution_abnormal->allowField(true)->isUpdate(false)->data($abnormal_data)->save();
 
                             //子订单绑定异常库位号
-                            $_new_order_item_process
-                                ->allowField(true)
-                                ->isUpdate(true, ['id' => $v3['id']])
-                                ->save(['abnormal_house_id' => $stock_house_info['id']]);
+                            $_new_order_item_process->where(['id' => $v3['id']])
+                                ->update(['abnormal_house_id' => $stock_house_info['id']]);
+
 
                             //异常库位号占用数量+1
                             $_stock_house
@@ -1282,10 +1279,9 @@ class Test extends Backend
                             $_distribution_abnormal->allowField(true)->isUpdate(false)->data($abnormal_data)->save();
 
                             //子订单绑定异常库位号
-                            $_new_order_item_process
-                                ->allowField(true)
-                                ->isUpdate(true, ['id' => $v3['id']])
-                                ->save(['abnormal_house_id' => $stock_house_info['id']]);
+                            $_new_order_item_process->where(['id' => $v3['id']])
+                                ->update(['abnormal_house_id' => $stock_house_info['id']]);
+
 
                             //异常库位号占用数量+1
                             $_stock_house
@@ -1513,7 +1509,6 @@ class Test extends Backend
                 Db::table('fa_work_order_list_copy1')->where(['id' => $v['id']])->update(['order_item_numbers' => $numbers]);
             }
 
-            echo $k . "\n";
         }
         echo "ok";
     }
