@@ -1968,7 +1968,7 @@ class ScmWarehouse extends Scm
             'inventory_id' => $_inventory_info['id'],
             'inventory_number' => $_inventory_info['number'],
             //            'status'=>$_inventory_info['status'],
-            'item_list' => $item_list
+            'item_list' => !empty($item_list) ? $item_list : []
         ];
 
         $this->success('', ['info' => $info], 200);
