@@ -28,6 +28,9 @@ class DataMarket extends Backend
         $this->orderitemprocess = new \app\admin\model\order\order\NewOrderItemProcess();
         $this->distributionLog = new \app\admin\model\DistributionLog;
         $this->orderNode = new \app\admin\model\OrderNode;
+        $this->supply = new \app\admin\model\supplydatacenter\Supply();
+        $this->inventory = new \app\admin\model\warehouse\Inventory;
+        $this->inventoryitem = new \app\admin\model\warehouse\InventoryItem;
     }
     /**
      * 显示资源列表
@@ -97,7 +100,7 @@ class DataMarket extends Backend
         $where['status'] = 2;
         $start = strtotime($createat[0]);
         $end = strtotime($createat[3]);
-        $order_time_where['created_at'] = ['between', [$start, $end]];  //修改
+        $order_time_where['payment_time'] = ['between', [$start, $end]];  //修改
         $order_where['order_type'] = ['<>', 5];
         $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
         //订单销售数量
@@ -118,9 +121,21 @@ class DataMarket extends Backend
         $arr['turnover_rate'] = $sum ? round($stock_consume_num/$sum/2,2) : 0;
         /*
          * 库存精度
+         * 库存精度：（最新的盘点单）（该盘点单内盘点的总数量-盘点误差数）/盘点的总数量
          * */
-
-
+        $inv_where['is_del'] = 1;
+        $inv_where['check_status'] = 2;
+        $id = $this->inventory->where($inv_where)->order('id desc')->value('id');
+        $inventory_count = $this->inventoryitem->where('inventory_id',$id)->sum('inventory_qty');
+        $inventory_error_count = $this->inventoryitem->where('inventory_id',$id)->field('sum(ABS(error_qty)) as count')->select();
+        $inventory_error_count = $inventory_error_count[0]['count'];
+        $arr['stock_accuracy'] = $inventory_count ? round(($inventory_count-$inventory_error_count)/$inventory_count,2) : 0;
+        /*
+         * SKU库存精度：（最新的盘点单）该盘点单内有误差SKU/该盘点单总盘点的SKU
+         * */
+        $error_sku = $this->inventoryitem->where('inventory_id',$id)->where('error_qty','<>',0)->count();
+        $sku_count = $this->inventoryitem->where('inventory_id',$id)->count();
+        $arr['sku_accuracy'] = $sku_count ? round($error_sku/$sku_count,2) : 0;
         /*
          * 库销比：实时库存数量/所选时间段内销售数量
          * 实时库存 = 总库存-配货占用
@@ -187,7 +202,7 @@ class DataMarket extends Backend
             $where['status'] = 2;
             $start = strtotime($createat[0]);
             $end = strtotime($createat[3]);
-            $order_where['created_at'] = ['between', [$start, $end]];  //修改
+            $order_where['payment_time'] = ['between', [$start, $end]];  //修改
             $order_where['order_type'] = ['<>', 5];
             $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
             $order_where['o.site'] = $order_platform;
@@ -240,9 +255,6 @@ class DataMarket extends Backend
     }
     //库存分级概况
     public function stock_level_overview($time_str){
-        $createat = explode(' ', $time_str);
-        $start = strtotime($createat[0]);
-        $end = strtotime($createat[3]);
         $gradeSkuStock = $this->productGrade->getSkuStock();
         //计算产品等级的数量
         $arr = array(
@@ -306,21 +318,47 @@ class DataMarket extends Backend
         foreach ($arr as $key=>$val){
             $arr[$key]['percent'] = $all_num ? round($val['count']/$all_num,2).'%':0;
             $arr[$key]['stock_percent'] = $all_stock_num ? round($val['stock_num']/$all_stock_num,2).'%':0;
-            /*//库销比
-            $where['grade'] = $val['grade'];
-            $where['is_del'] = 1;
-            $where['category_id'] = ['<>',43];
-            $skus = $this->productGrade->where($where)->column('true_sku');
+            //库销比
+            $skus = $this->productGrade->where('grade',$val['grade'])->column('true_sku');
             $where['sku'] = ['in', $skus];
             //实时库存
-            $data['aa_stock_num'] = $this->model->where($where)->value('sum(stock)-sum(distribution_occupy_stock) as result');
-
+            $stock_num = $this->model->where($where)->value('sum(stock)-sum(distribution_occupy_stock) as result');
             //订单销售数量
-            $order_time_where['created_at'] = ['between', [$start, $end]];  //修改
-            $order_where['order_type'] = ['<>', 5];
-            $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
-            $skus = $this->productGrade->where($where)->column('true_sku');
-            $order_sales_num = $this->order->alias('o')->join('fa_order_item_option i','o.entity_id=i.order_id')->where($order_where)->where($order_time_where)->sum('i.qty');*/
+            $createat = explode(' ', $time_str);
+            $start = $createat[0];
+            $end = $createat[3];
+            $map['day_date'] = ['between', [$start, $end]];
+            switch ($val['grade']){
+                case 'A+':
+                    $field = 'sales_num_a1';
+                    break;
+                case 'A':
+                    $field = 'sales_num_a';
+                    break;
+                case 'B':
+                    $field = 'sales_num_b';
+                    break;
+                case 'C+':
+                    $field = 'sales_num_c1';
+                    break;
+                case 'C':
+                    $field = 'sales_num_c';
+                    break;
+                case 'D':
+                    $field = 'sales_num_d';
+                    break;
+                case 'E':
+                    $field = 'sales_num_e';
+                    break;
+                case 'F':
+                    $field = 'sales_num_f';
+                    break;
+                default:
+                    break;
+            }
+            $order_sales_num = $this->supply->where('day_date')->sum($field);
+            //库销比
+            $arr[$key]['stock_sales_rate'] = $order_sales_num ? round($stock_num/$order_sales_num,2) : 0;
         }
         return $arr;
     }

@@ -766,11 +766,6 @@ class TrackReg extends Backend
         $variance = $count / $length;
         return sqrt($variance);
     }
-
-    public function zeelool_day_sku_data()
-    {
-    }
-
     //运营数据中心 zeelool
     public function zeelool_day_data()
     {
@@ -1202,6 +1197,94 @@ class TrackReg extends Backend
             echo $value.' is ok'."\n";
             usleep(100000);
         }
+    }
+    //产品等级销量数据计划任务
+    public function product_level_salesnum(){
+        $now = date('Y-m-d', strtotime("-1 day"));
+        $arr['day_date'] = $now;
+        $zeelool = $this->getSalesnum(1);
+        $voogueme = $this->getSalesnum(2);
+        $nihao = $this->getSalesnum(3);
+        $arr['sales_num_a1'] = $zeelool[0]+$voogueme[0]+$nihao[0];
+        $arr['sales_num_a'] = $zeelool[1]+$voogueme[1]+$nihao[1];
+        $arr['sales_num_b'] = $zeelool[2]+$voogueme[2]+$nihao[2];
+        $arr['sales_num_c1'] = $zeelool[3]+$voogueme[3]+$nihao[3];
+        $arr['sales_num_c'] = $zeelool[4]+$voogueme[4]+$nihao[4];
+        $arr['sales_num_d'] = $zeelool[5]+$voogueme[5]+$nihao[5];
+        $arr['sales_num_e'] = $zeelool[6]+$voogueme[6]+$nihao[6];
+        $arr['sales_num_f'] = $zeelool[7]+$voogueme[7]+$nihao[7];
+        Db::name('datacenter_day_supply')->insert($arr);
+    }
+    public function getSalesnum($site){
+        $this->order = new \app\admin\model\order\order\NewOrder();
+        $this->productGrade = new \app\admin\model\ProductGrade();
+        switch ($site){
+            case '1':
+                $field = 'zeelool_sku';
+                break;
+            case '2':
+                $field = 'voogueme_sku';
+                break;
+            case '3':
+                $field = 'nihao_sku';
+                break;
+            default:
+                break;
+        }
+        //所选时间段内有销量的平台sku
+        $start = date('Y-m-d', strtotime("-1 day"));
+        $end = date('Y-m-d 23:59:59', strtotime("-1 day"));
+        $start_time = strtotime($start);
+        $end_time = strtotime($end);
+        $where['o.payment_time'] = ['between',[$start_time,$end_time]];
+        $where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+        $where['o.site'] = $site;
+        $order = $this->order->alias('o')->join('fa_order_item_option i','o.entity_id=i.order_id')->field('i.sku,count(*) as count')->where($where)->group('i.sku')->select();
+        $grade1 = 0;
+        $grade2 = 0;
+        $grade3 = 0;
+        $grade4 = 0;
+        $grade5 = 0;
+        $grade6 = 0;
+        $grade7 = 0;
+        $grade8 = 0;
+        foreach ($order as $key=>$value){
+            //查询该品的等级
+            $grade = $this->productGrade->where($field,$value['sku'])->value('grade');
+            switch ($grade){
+                case 'A+':
+                    $grade1 += $value['count'];
+                    break;
+                case 'A':
+                    $grade2 += $value['count'];
+                    break;
+                case 'B':
+                    $grade3 += $value['count'];
+                    break;
+                case 'C+':
+                    $grade4 += $value['count'];
+                    break;
+                case 'C':
+                    $grade5 += $value['count'];
+                    break;
+                case 'D':
+                    $grade6 += $value['count'];
+                    break;
+                case 'E':
+                    $grade7 += $value['count'];
+                    break;
+                case 'F':
+                    $grade8 += $value['count'];
+                    break;
+                default:
+                    break;
+            }
+        }
+        $arr = array(
+            $grade1,$grade2,$grade3,$grade4,$grade5,$grade6,$grade7,$grade8
+        );
+        return $arr;
+
     }
     //ga的数据单独摘出来跑 防止ga接口数据报错 2020.11.2防止了ga的数据报错
     public function only_ga_data()

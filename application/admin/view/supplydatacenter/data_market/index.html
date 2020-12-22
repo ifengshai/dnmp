@@ -283,7 +283,7 @@
                         </div>
                         <div class="btn btn-div div">
                             <span class="extend">
-                                <div class="title">库存精度<br/><span style="color: red;"></span></div>
+                                <div class="title">库存精度<br/><span style="color: red;">{$stock_measure_overview.stock_accuracy}</span></div>
                             </span>
                         </div>
                         <div class="btn btn-div div">
@@ -315,7 +315,7 @@
                         </div>
                         <div class="btn btn-div div">
                             <span class="extend">
-                                <div class="title">sku库存精度<br/><span style="color: red;" id="order_unit_price"></span></div>
+                                <div class="title">sku库存精度<br/><span style="color: red;" id="order_unit_price">{$stock_measure_overview.sku_accuracy}</span></div>
                             </span>
                         </div>
                         <div class="btn btn-div div">
@@ -358,12 +358,12 @@
                         <td>{$item.stock_num}</td>
                         <td>{$item.stock_percent}</td>
                         <td>{$item.stock_price}</td>
-                        <td>{$item.grade}</td>
+                        <td>{$item.stock_sales_rate}</td>
                     </tr>
                     {/foreach}
                 </table>
             <div>
-                <div class="new-background">
+               <!--  <div class="new-background">
                     <label>库龄概况</label>
                     <table id="order-info-list" class="altrowstable" width="100%">
                         <thead>
@@ -417,7 +417,7 @@
                             <td id='replacement_order_num'>{$replacement_order_num.replacement_order_num}</td>
                         </tr>
                     </table>
-                    <div>
+                    <div> -->
                 <div class="widget-body no-padding">
                     <div class="new-background">
                         <div class="row">

@@ -929,10 +929,6 @@ class ScmDistribution extends Scm
     /**
      * 镜片未分拣数量
      *
-     * @参数 string start_time  开始时间
-     * @参数 string end_time  结束时间
-     * @参数 int page  页码
-     * @参数 int page_size  每页显示数量
      * @author wgj
      * @return mixed
      */
