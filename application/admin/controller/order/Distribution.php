@@ -1345,6 +1345,7 @@ class Distribution extends Backend
             3 => ['status' => 3, 'name' => '质检拒绝：镜片报损'],
             4 => ['status' => 5, 'name' => '质检拒绝：logo调整']
         ];
+        $status = $status_arr[$reason]['status'];
 
         //操作人信息
         $admin = (object)session('admin');
@@ -1354,11 +1355,19 @@ class Distribution extends Backend
         $this->_item_platform_sku->startTrans();
         $this->_stock_log->startTrans();
         try {
+            $save_data['distribution_status'] = $status;
+            //如果回退到待加工步骤之前，清空定制片库位ID及定制片处理状态
+            if (4 > $status) {
+                $save_data['temporary_house_id'] = 0;
+
+                $save_data['customize_status'] = 0;
+            }
+
             //子订单状态回滚
             $this->model
                 ->allowField(true)
                 ->isUpdate(true, ['id' => ['in', $ids]])
-                ->save(['distribution_status' => $status_arr[$reason]['status']]);
+                ->save($save_data);
 
             //记录日志
             DistributionLog::record($admin, array_column($item_list, 'id'), 6, $status_arr[$reason]['name']);
@@ -1561,10 +1570,14 @@ class Distribution extends Backend
                 //子订单状态回滚
                 $save_data = [
                     'distribution_status' => $status,//配货状态
-                    'abnormal_house_id' => 0,//异常库位ID
-                    'temporary_house_id' => 0,//定制片库位ID
-                    'customize_status' => 0//定制片处理状态
+                    'abnormal_house_id' => 0//异常库位ID
                 ];
+
+                //如果回退到待加工步骤之前，清空定制片库位ID及定制片处理状态
+                if (4 > $status) {
+                    $save_data['temporary_house_id'] = 0;
+                    $save_data['customize_status'] = 0;
+                }
 
                 $this->model
                     ->allowField(true)
