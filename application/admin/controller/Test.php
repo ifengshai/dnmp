@@ -809,7 +809,9 @@ class Test extends Backend
      */
     public function process_sku_stock()
     {
-        $list = Db::name('zzzz_temp')->field('count(1) as stock,sku')->group('sku')->select();
+        $list = Db::name('zzzz_temp')->field('count(DISTINCT product_number) as stock,sku')->group('sku')->select();
+
+
         Db::name('zz_temp2')->insertAll($list);
         echo "ok";
     }
@@ -1177,6 +1179,7 @@ class Test extends Backend
                             $measure['item_order_number'] = $val['item_order_number'];
                             $id = Db::table('fa_work_order_measure_copy1')->insertGetId($measure);
 
+                            Db::table('fa_work_order_recept')->where(['id' => $recept['id']])->delete();
                             unset($recept['id']);
                             $recept_data = $recept;
                             $recept_data['measure_id'] = $id;
@@ -1239,6 +1242,7 @@ class Test extends Backend
                             $measure['item_order_number'] = $v3['item_order_number'];
                             $id = Db::table('fa_work_order_measure_copy1')->insertGetId($measure);
 
+                            Db::table('fa_work_order_recept')->where(['id' => $recept['id']])->delete();
                             unset($recept['id']);
                             $recept_data = $recept;
                             $recept_data['measure_id'] = $id;
@@ -1299,6 +1303,7 @@ class Test extends Backend
                             $measure['item_order_number'] = $v3['item_order_number'];
                             $id = Db::table('fa_work_order_measure_copy1')->insertGetId($measure);
 
+                            Db::table('fa_work_order_recept')->where(['id' => $recept['id']])->delete();
                             unset($recept['id']);
                             $recept_data = $recept;
                             $recept_data['measure_id'] = $id;
@@ -1323,6 +1328,7 @@ class Test extends Backend
                     unset($v1['id']);
                     $id =  Db::table('fa_work_order_measure_copy1')->insertGetId($v1);
 
+                    Db::table('fa_work_order_recept')->where(['id' => $recept['id']])->delete();
                     unset($recept['id']);
                     $recept_data = $recept;
                     $recept_data['measure_id'] = $id;
@@ -1405,6 +1411,7 @@ class Test extends Backend
                             $measure['item_order_number'] = $val['item_order_number'];
                             $id = Db::table('fa_work_order_measure_copy1')->insertGetId($measure);
 
+                            Db::table('fa_work_order_recept')->where(['id' => $recept['id']])->delete();
                             unset($recept['id']);
                             $recept_data = $recept;
                             $recept_data['measure_id'] = $id;
@@ -1442,6 +1449,7 @@ class Test extends Backend
                             $measure['item_order_number'] = $v3['item_order_number'];
                             $id = Db::table('fa_work_order_measure_copy1')->insertGetId($measure);
 
+                            Db::table('fa_work_order_recept')->where(['id' => $recept['id']])->delete();
                             unset($recept['id']);
                             $recept_data = $recept;
                             $recept_data['measure_id'] = $id;
@@ -1479,6 +1487,7 @@ class Test extends Backend
                             $measure['item_order_number'] = $v3['item_order_number'];
                             $id = Db::table('fa_work_order_measure_copy1')->insertGetId($measure);
 
+                            Db::table('fa_work_order_recept')->where(['id' => $recept['id']])->delete();
                             unset($recept['id']);
                             $recept_data = $recept;
                             $recept_data['measure_id'] = $id;
@@ -1502,7 +1511,7 @@ class Test extends Backend
                     unset($v1['id']);
                     $id =  Db::table('fa_work_order_measure_copy1')->insertGetId($v1);
 
-                    
+                    Db::table('fa_work_order_recept')->where(['id' => $recept['id']])->delete();
                     unset($recept['id']);
                     $recept_data = $recept;
                     $recept_data['measure_id'] = $id;

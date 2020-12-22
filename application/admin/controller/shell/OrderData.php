@@ -1477,7 +1477,7 @@ class OrderData extends Backend
         $params = [];
         foreach ($list as $k => $v) {
             $params[$k]['id'] = $v['id'];
-            $params[$k]['region_id'] = $res[$v['entity_id']]['region_id'];
+            $params[$k]['region_id'] = $res[$v['entity_id']]['region_id'] ?: 0;
             $params[$k]['region'] = $res[$v['entity_id']]['region'];
             // $params[$k]['city'] = $res[$v['entity_id']]['city'];
             // $params[$k]['street'] = $res[$v['entity_id']]['street'];
