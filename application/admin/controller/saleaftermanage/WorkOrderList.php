@@ -1449,9 +1449,8 @@ class WorkOrderList extends Backend
 
                                 //子订单绑定异常库位号
                                 $_new_order_item_process
-                                    ->allowField(true)
-                                    ->isUpdate(true, ['id'=>$val])
-                                    ->save(['abnormal_house_id'=>$stock_house_info['id']])
+                                    ->where(['id'=>$val])
+                                    ->update(['abnormal_house_id'=>$stock_house_info['id']])
                                 ;
 
                                 //异常库位号占用数量+1
