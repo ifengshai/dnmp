@@ -773,19 +773,19 @@ class Test extends Backend
             if (!$res) {
                 continue;
             }
-            foreach ($res as $key => $val) {
-                $where['code'] = $val['product_number'];
-                $params['sku'] = $val['sku'];
-                $params['in_stock_id'] = $v['id'];
-                $params['purchase_id'] = $v['purchase_id'];
-                $params['check_id'] = $v['check_id'];
-                $params['is_quantity'] = 1;
-                $params['batch_id'] = $check['batch_id'];
-                $params['logistics_id'] = $check['logistics_id'];
-                Db::name('product_barcode_item')->where($where)->update($params);
+            $codes = array_column($res, 'product_number');
+            $where['code'] = ['in', $codes];
+            $params['sku'] = $v['sku'];
+            $params['in_stock_id'] = $v['id'];
+            $params['purchase_id'] = $v['purchase_id'];
+            $params['check_id'] = $v['check_id'];
+            $params['is_quantity'] = 1;
+            $params['batch_id'] = $check['batch_id'];
+            $params['logistics_id'] = $check['logistics_id'];
+            Db::name('product_barcode_item')->where($where)->update($params);
 
-                Db::name('zzzz_temp')->where(['id' => $val['id']])->update(['is_process' => 1]);
-            }
+            Db::name('zzzz_temp')->where($where)->update(['is_process' => 1]);
+
             echo $k . "\n";
         }
         echo 'ok';
@@ -801,7 +801,7 @@ class Test extends Backend
      */
     public function process_sku_stock()
     {
-        $list = Db::name('zzzz_temp')->field('count(DISTINCT product_number) as stock,sku')->group('sku')->select();
+        $list = Db::name('zzzz_temp')->field('count(DISTINCT product_number) as stock,sku')->where(['is_find' => 0, 'is_error' => 0])->group('sku')->select();
 
 
         Db::name('zz_temp2')->insertAll($list);
@@ -884,7 +884,7 @@ class Test extends Backend
      */
     public function set_product_process_order()
     {
-        
+
         $this->orderitemprocess = new \app\admin\model\order\order\NewOrderItemProcess();
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
