@@ -235,7 +235,16 @@ class ScmWarehouse extends Scm
 
         $where = [];
         if ($query) {
-            $where['a.out_stock_number|a.create_person|b.sku'] = ['like', '%' . $query . '%'];
+//            $where['a.out_stock_number|a.create_person|b.sku'] = ['like', '%' . $query . '%'];
+            $where['a.id'] = ['in',function($search) use($query){
+                $search
+                    ->table('fa_out_stock')
+                    ->field('id')
+                    ->union("SELECT out_stock_id FROM fa_out_stock_item WHERE sku like '".$query."%'")
+                    ->union("SELECT id FROM fa_out_stock WHERE create_person like '".$query."%'")
+                    ->where(['out_stock_number'=>['like',$query . '%']])
+                ;
+            }];
         }
         if (isset($status)) {
             $where['a.status'] = $status;
@@ -252,7 +261,7 @@ class ScmWarehouse extends Scm
             ->alias('a')
             ->where($where)
             ->field('a.id,a.out_stock_number,a.createtime,a.status,a.type_id,a.remark')
-            ->join(['fa_out_stock_item' => 'b'], 'a.id=b.out_stock_id', 'left')
+//            ->join(['fa_out_stock_item' => 'b'], 'a.id=b.out_stock_id', 'left')
             ->order('a.createtime', 'desc')
             ->limit($offset, $limit)
             ->select();
@@ -759,7 +768,16 @@ class ScmWarehouse extends Scm
 
         $where = [];
         if ($query) {
-            $where['a.in_stock_number|b.check_order_number|c.sku|a.create_person|b.create_person'] = ['like', '%' . $query . '%'];
+//            $where['a.in_stock_number|b.check_order_number|c.sku|a.create_person|b.create_person'] = ['like', '%' . $query . '%'];
+            $where['a.check_id'] = ['in',function($search) use($query){
+                $search
+                    ->table('fa_check_order')
+                    ->field('id')
+                    ->union("SELECT id FROM fa_check_order WHERE create_person like '".$query."%'")
+                    ->union("SELECT check_id FROM fa_check_order_item WHERE sku like '".$query."%'")
+                    ->where(['check_order_number'=>['like',$query . '%']])
+                ;
+            }];
         }
         if (isset($status)) {
             $where['a.status'] = $status;
@@ -777,7 +795,7 @@ class ScmWarehouse extends Scm
             ->where($where)
             ->field('a.id,a.check_id,a.in_stock_number,b.check_order_number,a.createtime,a.status')
             ->join(['fa_check_order' => 'b'], 'a.check_id=b.id', 'left')
-            ->join(['fa_check_order_item' => 'c'], 'a.check_id=c.check_id', 'left')
+//            ->join(['fa_check_order_item' => 'c'], 'a.check_id=c.check_id', 'left')
             ->group('a.id')
             ->order('a.createtime', 'desc')
             ->limit($offset, $limit)
