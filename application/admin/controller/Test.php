@@ -816,6 +816,40 @@ class Test extends Backend
         echo "ok";
     }
 
+    public function process_sku_temp2()
+    {
+        ini_set('memory_limit', '1280M');
+        $list = Db::name('zzzz_temp')->select();
+        foreach ($list as $k => $v) {
+            $count =  Db::name('product_barcode_item')->where(['code' => $v['product_number']])->count();
+            if ($count < 1) {
+                Db::name('zzzz_temp')->where(['id' => $v['id']])->update(['is_error' => 1]);
+            }
+            echo $k ."\n";
+            usleep(10000);
+        }
+        echo "ok";
+    }
+
+
+
+    public function process_sku_temp()
+    {
+        ini_set('memory_limit', '1280M');
+        $list = Db::name('zzzz_temp')->select();
+        $item = new \app\admin\model\itemmanage\Item();
+        $skus = $item->column('sku');
+        foreach ($list as $k => $v) {
+            if (!in_array($v['sku'], $skus)) {
+                Db::name('zzzz_temp')->where(['id' => $v['id']])->update(['is_find' => 1]);
+            }
+            echo $k ."\n";
+            usleep(10000);
+        }
+        echo "ok";
+    }
+
+
     /************************跑库存数据用START*****勿删*****************************/
     //导入实时库存 第一步
     public function set_product_relstock()
