@@ -1117,7 +1117,7 @@ class Test extends Backend
             ->field('id,coding')
             ->where(['status' => 1, 'type' => 4])
             ->find();
-
+        dump($stock_house_info);
         foreach ($list as $k => $v) {
             echo $v['id'] . "\n";
             //插入主表
