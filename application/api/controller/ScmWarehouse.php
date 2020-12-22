@@ -472,13 +472,13 @@ class ScmWarehouse extends Scm
                 ];
                 if ($get_out_stock_id) {//更新
                     $where = ['sku' => $value['sku'], 'out_stock_id' => $out_stock_id];
-                    $this->_out_stock_item->allowField(true)->isUpdate(true, $where)->save($item_save);
+                    $this->_out_stock_item->where($where)->update($item_save);
                     //出库单移除条形码
                     if (!empty($value['remove_agg'])) {
                         $code_clear = [
                             'out_stock_id' => 0
                         ];
-                        $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => ['in', $value['remove_agg']]])->save($code_clear);
+                        $this->_product_bar_code_item->where(['code' => ['in', $value['remove_agg']]])->update($code_clear);
                     }
                 } else {//新增
                     $item_save['out_stock_id'] = $out_stock_id;
@@ -488,7 +488,7 @@ class ScmWarehouse extends Scm
 
                 //绑定条形码
                 foreach ($value['sku_agg'] as $v) {
-                    $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => $v['code']])->save(['out_stock_id' => $out_stock_id]);
+                    $this->_product_bar_code_item->where(['code' => $v['code']])->update(['out_stock_id' => $out_stock_id]);
                 }
             }
 
@@ -963,7 +963,7 @@ class ScmWarehouse extends Scm
                         $item_save['sample_num'] = $check_data[$v['sku']] ?: 0;//留样数量
                         //修改入库单子表
                         $where = ['sku' => $v['sku'], 'in_stock_id' => $in_stock_id];
-                        $this->_in_stock_item->allowField(true)->isUpdate(true, $where)->save($item_save);
+                        $this->_in_stock_item->where($where)->update($item_save);
 
                         //入库单绑定条形码数组组装
                         foreach ($v['sku_agg'] as $k_code => $v_code) {
@@ -976,7 +976,7 @@ class ScmWarehouse extends Scm
                             $code_clear = [
                                 'in_stock_id' => 0
                             ];
-                            $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => ['in', $value['remove_agg']]])->save($code_clear);
+                            $this->_product_bar_code_item->where(['code' => ['in', $value['remove_agg']]])->update($code_clear);
                         }
                     }
                     //入库单绑定条形码执行
@@ -2071,7 +2071,7 @@ class ScmWarehouse extends Scm
                         $save_data['sku'] = $v['sku'];//SKU
                         $this->_inventory_item->allowField(true)->isUpdate(false)->data($save_data)->save();
                     } else {
-                        $this->_inventory_item->allowField(true)->isUpdate(true, ['inventory_id' => $inventory_id, 'sku' => $v['sku']])->save($save_data);
+                        $this->_inventory_item->where(['inventory_id' => $inventory_id, 'sku' => $v['sku']])->update($save_data);
                     }
 //                    $this->_inventory_item->where(['inventory_id' => $inventory_id, 'sku' => $v['sku']])->update($save_data);
                     //盘点单绑定条形码数组组装
@@ -2085,7 +2085,7 @@ class ScmWarehouse extends Scm
                         $code_clear = [
                             'inventory_id' => 0
                         ];
-                        $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => ['in', $v['remove_agg']]])->save($code_clear);
+                        $this->_product_bar_code_item->where(['code' => ['in', $v['remove_agg']]])->update($code_clear);
                     }
                 }
 
