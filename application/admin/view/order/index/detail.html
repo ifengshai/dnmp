@@ -111,7 +111,7 @@
     <div style="width: 100%;" class="list-div">
         <div class='caigou'>
             <p style="font-size: 16px;text-align: center;"><b>订单基本信息</b></p>
-
+            <input type="hidden" name="entity_id" value="{$row['entity_id']}">
             <div class="form-group">
                 <label class="control-label col-xs-12 col-sm-2">订单编号:</label>
                 <div class="col-xs-12 col-sm-8">
@@ -344,11 +344,17 @@
                         border-style: solid;
                         border-color: #a9c6c9;
                     }
+                    .inputs{
+                        background-color:transparent;
+                        border:0;
+                        width: 90px
+                    }
                 </style>
 
                 <table class="altrowstable" style="border:#0f0 solid 1px;margin:0px auto;margin-bottom:10px;width:90%;">
                     <tbody>
                         {foreach $item as $v}
+                        <input type="hidden" name="item_id[]" value="{:$v.item_id}">
                         <tr>
                             <td>
                                 <table class="altrowstable" style="margin:0 auto;margin:30px;width:90%;">
@@ -404,6 +410,52 @@
                                             <td>Prism Vertical</td>
                                             <td>Base Direction</td>
                                         </tr>
+
+                                 {if condition="$v['to_examine'] eq true"}
+                                        <tr>
+                                            <td >Right(OD)</td>
+                                            <td >
+                                                <input type="text" class="inputs" value="{:$v['od_sph'] ?? ''}" name="od_sph[]">
+                                            </td>
+                                            <td><input type="text" class="inputs" value="{:$v['od_cyl'] ?? ''}" name="od_cyl[]"></td>
+                                            <td><input type="text" class="inputs" value="{:$v['od_axis'] ?? ''}" name="od_axis[]"></td>
+                                            {if $v['total_add']}
+                                            <td rowspan="2"><input type="text" class="inputs" value="{:$v['total_add'] ?? ''}" name="total_add[]"></td>
+                                            {else/}
+                                            <td><input type="text" class="inputs" value="{:$v['od_add']}" name="od_add[]"></td>
+                                            {/if}
+
+                                            <td><input type="text" class="inputs" value="{:$v['pd_r'] ?? ''}" name="pd_r[]"></td>
+
+                                            <td><input type="text" class="inputs" value="{:$v['od_pv'] ?? ''}" name="od_pv[]"></td>
+                                            <td><input type="text" class="inputs" value="{:$v['od_bd'] ?? ''}" name="od_bd[]"></td>
+                                            <td><input type="text" class="inputs" value="{:$v['od_pv_r'] ?? ''}" name="od_pv_r[]"></td>
+                                            <td><input type="text" class="inputs" value="{:$v['od_bd_r'] ?? ''}" name="od_bd_r[]"></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Left(OS)</td>
+                                            <td> <input type="text" class="inputs" value="{:$v['os_sph'] ?? ''}" name="os_sph[]"></td>
+                                            <td>
+                                                <input type="text" class="inputs" value="{:$v['os_cyl'] ?? ''}" name="os_cyl[]"></td>
+                                            <td>
+                                                <input type="text" class="inputs" value="{:$v['os_axis'] ?? ''}" name="os_axis[]"></td>
+                                            {if !$v['total_add']}
+                                            <td>
+                                                <input type="text" class="inputs" value="{:$sku['os_add']}" name="os_add[]"> </td>
+                                            {/if}
+                                            <td>
+                                                <input type="text" class="inputs" value="{:$v['pd_l'] ?? ''}" name="pd_l[]"></td>
+                                            <td>
+                                                <input type="text" class="inputs" value="{:$v['os_pv'] ?? ''}" name="os_pv[]"></td>
+                                            <td>
+                                                <input type="text" class="inputs" value="{:$v['os_bd'] ?? ''}" name="os_bd[]"></td>
+                                            <td>
+                                                <input type="text" class="inputs" value="{:$v['os_pv_r'] ?? ''}" name="os_pv_r[]"></td>
+                                            <td>
+                                                <input type="text" class="inputs" value="{:$v['os_bd_r'] ?? ''}" name="os_bd_r[]"></td>
+                                        </tr>
+
+                                 {else/}
                                         <tr>
                                             <td>Right(OD)</td>
                                             <td>{:$v['od_sph'] ?? ''}</td>
@@ -442,13 +494,31 @@
                                             <td>{:$v['os_pv_r'] ?? ''}</td>
                                             <td>{:$v['os_bd_r'] ?? ''}</td>
                                         </tr>
+
+                                 {/if}
+
+
                                     </tbody>
                                 </table>
                             </td>
+
+                            {if condition="$v['prescription_image'] neq null"}
+                            <td>
+                                <img src="{$v['prescription_image']}" alt="" style="width: 300px;height: 250px;float: right" data-tips-image>
+                            </td>
+                            {/if}
+
                         </tr>
                         {/foreach}
                     </tbody>
                 </table>
+
+                {if condition="$row['status'] eq 'pending'  && $row['site'] ==9"}
+                <div class="col-xs-12 col-sm-8">
+                    <button type="submit" value="Processing" class="btn btn-sub" style='background-color: dodgerblue;width: 120px;color: white;font-size: 14px;font-weight: 700;float: right'>{:__('提交')}</button>
+                </div>
+                {/if}
+
             </div>
         </form>
     </div>
