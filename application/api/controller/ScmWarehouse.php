@@ -1869,6 +1869,7 @@ class ScmWarehouse extends Scm
 
             //盘点单所需数据
             $info['list'] = !empty($list) ? $list : [];
+            $info['test'] = 'test';
             $this->success('', ['info' => $info], 200);
         } else {
             //点击保存，创建盘点单
