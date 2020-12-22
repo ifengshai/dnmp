@@ -4,6 +4,7 @@ namespace app\admin\controller;
 
 use app\common\controller\Backend;
 use Think\Db;
+use Think\Log;
 use think\Request;
 
 /**
@@ -25,10 +26,6 @@ class OcCustomerAfterSalesWorkOrder extends Backend
         parent::_initialize();
         $this->model = new \app\common\model\OcCustomerAfterSalesWorkOrder;
 
-        $this->zeelool = new \app\admin\model\order\order\Zeelool;
-        $this->voogueme = new \app\admin\model\order\order\Voogueme;
-
-
     }
 
     /**
@@ -45,12 +42,13 @@ class OcCustomerAfterSalesWorkOrder extends Backend
      */
     public function index()
     {
+
+
         //当前是否为关联查询
         $this->relationSearch = false;
+
         //设置过滤方法
         $this->request->filter(['strip_tags']);
-
-
         if ($this->request->isAjax())
         {
             //如果发送的来源是Selectpage，则转发到Selectpage
@@ -61,22 +59,8 @@ class OcCustomerAfterSalesWorkOrder extends Backend
 
             $filter = json_decode($this->request->get('filter'), true);
 
-            $site = $filter['site'];
-            switch ($site ==1) {
-                case 1:
-                    $db = 'database.db_zeelool';
-                    $model = $this->zeelool;
-                    break;
-                case 2:
-                    $db = 'database.db_voogueme';
-                    $model = $this->voogueme;
-                    break;
 
-                default:
-                    return false;
-                    break;
-            }
-            unset($filter['site']);
+
             //是否有工单
             $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
             if ($filter['is_task'] == 1 || $filter['is_task'] == '0') {
@@ -90,19 +74,23 @@ class OcCustomerAfterSalesWorkOrder extends Backend
                     $map['increment_id'] = ['not in', $order_arr];
                 }
                 unset($filter['is_task']);
-
+                $this->request->get(['filter' => json_encode($filter)]);
             }
-            $this->request->get(['filter' => json_encode($filter)]);
+            unset($filter['site']);
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
 
-            $total = $model
+
+            $total = $this->model
                 ->where($where)
                 ->where($map)
+                ->order($sort, $order)
                 ->count();
 
-            $list = $model
+            $list = $this->model
+
                 ->where($where)
                 ->where($map)
+                ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
 
@@ -111,16 +99,11 @@ class OcCustomerAfterSalesWorkOrder extends Backend
 
             }
             $list = collection($list)->toArray();
-
             //查询订单是否存在工单
             $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
 
             foreach ($list as $key=>$item){
-                if ($site ==1){
-                    $list[$key]['site'] = 'zeelool';
-                }else{
-                    $list[$key]['site'] = 'voogueme';
-                }
+                $list[$key]['site'] = 'zeelool';
                 if ($item['order_type']  ==1){
                     $list[$key]['order_type'] = '普通订单';
                 }elseif ($item['order_type'] ==2){
@@ -139,7 +122,7 @@ class OcCustomerAfterSalesWorkOrder extends Backend
                 }else{
                     $list[$key]['status'] = '待处理';
                 }
-                $list[$key]['created_at'] =date("Y-m-d H:i:s",strtotime($item['created_at'])+14400);;
+//                $list[$key]['created_at'] =date("Y-m-d H:i:s",strtotime($item['created_at'])+14400);;
                 $swhere['platform_order'] = $item['increment_id'];
                 $swhere['work_platform'] = 1;
                 $swhere['work_status'] = ['not in', [0, 4, 6]];
@@ -166,12 +149,14 @@ class OcCustomerAfterSalesWorkOrder extends Backend
     public function question_detail($ids = null){
         if ($_POST){
             $params = $this->request->post("row/a");
-
             $where['id'] = $params['ids'];
+            if ($params['pm_audit_status'] == null){
+                $params['pm_audit_status'] = 3;
+            }
             $save_question = $this->model->isUpdate(true, $where)->save(['status'=>$params['pm_audit_status'],'completed_at'=>date('Y-m-d H:i:s',time()),'handler_name'=>$this->auth->nickname]);
             if ($save_question){
                 //如果更新成功  提交接口
-                $url  =  config('url.zeelool_url').'/magic/customer/updateTicket';
+                $url  =  config('url.zeelool_url').'magic/customer/updateTicket';
                 $value['ticket_id'] = $params['ids'];
                 $value['status'] = $params['pm_audit_status'];
                 $curl = curl_init();
@@ -185,6 +170,7 @@ class OcCustomerAfterSalesWorkOrder extends Backend
                 curl_setopt($curl, CURLOPT_TIMEOUT, 20); //设置cURL允许执行的最长秒数。
                 $content =json_decode(curl_exec($curl),true);
                 curl_close($curl);
+               
                 if ($content['code'] ==200){
                     $this->success('操作成功');
                 }else{
