@@ -1132,7 +1132,7 @@ class Test extends Backend
                 if ($v1['measure_choose_id'] == 3) {
 
                     //查询change sku表
-                    $change_sku_list = Db::table('fa_work_order_change_sku')->where(['work_id' => $v['id'], 'change_type' => 3, 'measure_id' => $v1['id']])->select();
+                    $change_sku_list = Db::table('fa_work_order_change_sku')->where(['work_id' => $v['id'], 'change_type' => 3, 'measure_id' => $v1['id']])->group('original_sku')->select();
                     foreach ($change_sku_list as $key1 => $val1) {
                         //查询订单号所有子单
                         $order_list = $order->alias('a')->field('b.item_order_number,b.id')
@@ -1383,7 +1383,7 @@ class Test extends Backend
                 if ($v1['measure_choose_id'] == 3) {
 
                     //查询change sku表
-                    $change_sku_list = Db::table('fa_work_order_change_sku')->where(['work_id' => $v['id'], 'change_type' => 3, 'measure_id' => $v1['id']])->select();
+                    $change_sku_list = Db::table('fa_work_order_change_sku')->where(['work_id' => $v['id'], 'change_type' => 3, 'measure_id' => $v1['id']])->group('original_sku')->select();
                     foreach ($change_sku_list as $key1 => $val1) {
                         //查询订单号所有子单
                         $order_list = $order->alias('a')->field('b.item_order_number,b.id')
