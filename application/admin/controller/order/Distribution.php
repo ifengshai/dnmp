@@ -1820,7 +1820,7 @@ class Distribution extends Backend
                             );
 
                         //获取子单表id集
-                        $item_process_ids = $this->model->where(['entity_id' => $value['entity_id'], 'site' => $key])->column('id');
+                        $item_process_ids = $this->model->where(['magento_order_id' => $value['entity_id'], 'site' => $key])->column('id');
                         if($item_process_ids){
                             //子单表：fa_order_item_process：distribution_status=配货状态
                             $this->model
@@ -1923,4 +1923,238 @@ class Distribution extends Backend
 
     }
 
+    /**
+     * 配货旧数据处理 跑未质检已打印标签的数据
+     *
+     * Created by Phpstorm.
+     * User: jhh
+     * Date: 2020/12/22
+     * Time: 9:55:14
+     */
+    function legacy_data_wait_print_label()
+    {
+        //站点列表
+        $site_arr = [
+            1 => [
+                'name' => 'zeelool',
+                'obj' => new \app\admin\model\order\printlabel\Zeelool,
+            ],
+            2 => [
+                'name' => 'voogueme',
+                'obj' => new \app\admin\model\order\printlabel\Voogueme,
+            ],
+            3 => [
+                'name' => 'nihao',
+                'obj' => new \app\admin\model\order\printlabel\Nihao,
+            ],
+            4 => [
+                'name' => 'weseeoptical',
+                'obj' => new \app\admin\model\order\printlabel\Weseeoptical,
+            ],
+            5 => [
+                'name' => 'meeloog',
+                'obj' => new \app\admin\model\order\printlabel\Meeloog,
+            ],
+            9 => [
+                'name' => 'zeelool_es',
+                'obj' => new \app\admin\model\order\printlabel\ZeeloolEs,
+            ],
+            10 => [
+                'name' => 'zeelool_de',
+                'obj' => new \app\admin\model\order\printlabel\ZeeloolDe,
+            ],
+            11 => [
+                'name' => 'zeelool_jp',
+                'obj' => new \app\admin\model\order\printlabel\ZeeloolJp,
+            ]
+        ];
+
+        foreach ($site_arr as $key => $item) {
+            echo $item['name'] . " Start\n";
+            //获取已质检旧数据
+            $list = $item['obj']
+                ->field('entity_id,increment_id,
+                custom_print_label_created_at_new,custom_print_label_person_new,
+                custom_match_frame_created_at_new,custom_match_frame_person_new,
+                custom_match_lens_created_at_new,custom_match_lens_person_new,
+                custom_match_factory_created_at_new,custom_match_factory_person_new,
+                custom_match_delivery_created_at_new,custom_match_delivery_person_new
+               ')
+                ->where([
+                    //未质检
+                    'custom_is_delivery_new' => 0,
+                    //已打印标签
+                    'custom_print_label_new' => 1,
+                    //'custom_match_delivery_created_at_new' => ['between', ['2018-01-01', '2020-10-01']]
+                ])
+                ->select();
+
+            $count = count($list);
+            $handle = 0;
+            if ($list) {
+                foreach ($list as $value) {
+                    try {
+                        //主单业务表：fa_order_process：check_status=审单状态、check_time=审单时间、combine_status=合单状态、combine_time=合单状态
+                        $do_time = strtotime($value['custom_match_delivery_created_at_new']) + 28800;
+                        $this->_new_order_process
+                            ->allowField(true)
+                            ->save(
+                                ['check_status' => 1, 'check_time' => $do_time, 'combine_status' => 1, 'combine_time' => $do_time],
+                                ['entity_id' => $value['entity_id'], 'site' => $key]
+                            );
+
+                        //获取子单表id集
+                        $item_process_ids = $this->model->where(['magento_order_id' => $value['entity_id'], 'site' => $key])->column('id');
+                        if($item_process_ids){
+                            //子单表：fa_order_item_process：distribution_status=配货状态
+                            $this->model
+                                ->allowField(true)
+                                ->save(
+                                    ['distribution_status' => 1],
+                                    ['id' => ['in',$item_process_ids]]
+                                );
+
+                            /**配货日志 Start*/
+                            //打印标签
+                            if($value['custom_print_label_created_at_new']){
+                                DistributionLog::record(
+                                    (object)['nickname'=>$value['custom_print_label_person_new']], //操作人
+                                    $item_process_ids, //子单ID
+                                    1, //操作类型
+                                    '标记打印完成',//备注
+                                    strtotime($value['custom_print_label_created_at_new'])//操作时间
+                                );
+                            }
+                            /**配货日志 End*/
+
+                            $handle += 1;
+                        }else{
+                            echo $item['name'] . '-' . $value['increment_id'] . '：未获取到子单数据' . "\n";
+                        }
+
+                    } catch (PDOException $e) {
+                        echo $item['name'] . '-' . $value['increment_id'] . '：' . $e->getMessage() . "\n";
+                    } catch (Exception $e) {
+                        echo $item['name'] . '-' . $value['increment_id'] . '：' . $e->getMessage() . "\n";
+                    }
+                }
+            }
+
+            echo $item['name'] . "：未质检已打印标签-{$count}，已处理-{$handle} End\n";
+        }
+
+    }
+
+    public function export()
+    {
+        //站点列表
+        $site_arr = [
+            1 => [
+                'name' => 'zeelool',
+                'obj' => new \app\admin\model\order\printlabel\Zeelool,
+            ],
+            2 => [
+                'name' => 'voogueme',
+                'obj' => new \app\admin\model\order\printlabel\Voogueme,
+            ],
+            3 => [
+                'name' => 'nihao',
+                'obj' => new \app\admin\model\order\printlabel\Nihao,
+            ],
+            4 => [
+                'name' => 'weseeoptical',
+                'obj' => new \app\admin\model\order\printlabel\Weseeoptical,
+            ],
+            5 => [
+                'name' => 'meeloog',
+                'obj' => new \app\admin\model\order\printlabel\Meeloog,
+            ],
+            9 => [
+                'name' => 'zeelool_es',
+                'obj' => new \app\admin\model\order\printlabel\ZeeloolEs,
+            ],
+            10 => [
+                'name' => 'zeelool_de',
+                'obj' => new \app\admin\model\order\printlabel\ZeeloolDe,
+            ],
+            11 => [
+                'name' => 'zeelool_jp',
+                'obj' => new \app\admin\model\order\printlabel\ZeeloolJp,
+            ]
+        ];
+
+        foreach ($site_arr as $key => $item) {
+            echo $item['name'] . " Start\n";
+            //获取已质检旧数据
+            $list = $item['obj']
+                ->field('entity_id,increment_id,
+                custom_print_label_created_at_new,custom_print_label_person_new,
+                custom_match_frame_created_at_new,custom_match_frame_person_new,
+                custom_match_lens_created_at_new,custom_match_lens_person_new,
+                custom_match_factory_created_at_new,custom_match_factory_person_new,
+                custom_match_delivery_created_at_new,custom_match_delivery_person_new
+               ')
+                ->where([
+                    //未质检
+                    'custom_is_delivery_new' => 0,
+                    //已打印标签
+                    'custom_print_label_new' => 1,
+                    //'custom_match_delivery_created_at_new' => ['between', ['2018-01-01', '2020-10-01']]
+                ])
+                ->select();
+
+            $count = count($list);
+            $handle = 0;
+            if ($list) {
+                foreach ($list as $value) {
+                    try {
+                        //主单业务表：fa_order_process：check_status=审单状态、check_time=审单时间、combine_status=合单状态、combine_time=合单状态
+                        $do_time = strtotime($value['custom_match_delivery_created_at_new']) + 28800;
+                        $this->_new_order_process
+                            ->allowField(true)
+                            ->save(
+                                ['check_status' => 1, 'check_time' => $do_time, 'combine_status' => 1, 'combine_time' => $do_time],
+                                ['entity_id' => $value['entity_id'], 'site' => $key]
+                            );
+
+                        //获取子单表id集
+                        $item_process_ids = $this->model->where(['magento_order_id' => $value['entity_id'], 'site' => $key])->column('id');
+                        if($item_process_ids){
+                            //子单表：fa_order_item_process：distribution_status=配货状态
+                            $this->model
+                                ->allowField(true)
+                                ->save(
+                                    ['distribution_status' => 1],
+                                    ['id' => ['in',$item_process_ids]]
+                                );
+
+                            /**配货日志 Start*/
+                            //打印标签
+                            if($value['custom_print_label_created_at_new']){
+                                DistributionLog::record(
+                                    (object)['nickname'=>$value['custom_print_label_person_new']], //操作人
+                                    $item_process_ids, //子单ID
+                                    1, //操作类型
+                                    '标记打印完成',//备注
+                                    strtotime($value['custom_print_label_created_at_new'])//操作时间
+                                );
+                            }
+                            /**配货日志 End*/
+
+                            $handle += 1;
+                        }else{
+                            echo $item['name'] . '-' . $value['increment_id'] . '：未获取到子单数据' . "\n";
+                        }
+
+                    } catch (PDOException $e) {
+                        echo $item['name'] . '-' . $value['increment_id'] . '：' . $e->getMessage() . "\n";
+                    } catch (Exception $e) {
+                        echo $item['name'] . '-' . $value['increment_id'] . '：' . $e->getMessage() . "\n";
+                    }
+                }
+            }
+
+            echo $item['name'] . "：未质检已打印标签-{$count}，已处理-{$handle} End\n";
+        }
+    }
 }
