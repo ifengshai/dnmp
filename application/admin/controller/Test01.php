@@ -4,6 +4,7 @@ namespace app\admin\controller;
 
 use app\admin\model\itemmanage\ItemPlatformSku;
 use app\common\controller\Backend;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use think\Db;
 
 class Test01 extends Backend
@@ -231,10 +232,10 @@ class Test01 extends Backend
     public function test101()
     {
         $item_platform_sku = new ItemPlatformSku();
-        $item_skuy = $item_platform_sku->where('id','>',0)->where('platform_type',1)->column('grade','sku');
-        foreach ($item_skuy as $k=>$v){
-            $update = Db::name('datacenter_sku_day')->where('day_date','2020-12-02')->where('site',1)->where('sku',$k)->update(['goods_grade'=>$v]);
-            if ($update){
+        $item_skuy = $item_platform_sku->where('id', '>', 0)->where('platform_type', 1)->column('grade', 'sku');
+        foreach ($item_skuy as $k => $v) {
+            $update = Db::name('datacenter_sku_day')->where('day_date', '2020-12-02')->where('site', 1)->where('sku', $k)->update(['goods_grade' => $v]);
+            if ($update) {
                 echo $k;
             }
         }
@@ -243,10 +244,10 @@ class Test01 extends Backend
 
     public function test102()
     {
-        $data_center_sku_day = Db::name('datacenter_sku_day')->where('day_date','2020-11-11')->field('sku,site,now_pricce')->select();
-        foreach ($data_center_sku_day as $k=>$v){
-            $update = Db::name('datacenter_sku_day')->where('day_date','2020-11-12')->where('sku',$v['sku'])->where('site',$v['site'])->update(['now_pricce'=>$v['now_pricce']]);
-            if ($update){
+        $data_center_sku_day = Db::name('datacenter_sku_day')->where('day_date', '2020-11-11')->field('sku,site,now_pricce')->select();
+        foreach ($data_center_sku_day as $k => $v) {
+            $update = Db::name('datacenter_sku_day')->where('day_date', '2020-11-12')->where('sku', $v['sku'])->where('site', $v['site'])->update(['now_pricce' => $v['now_pricce']]);
+            if ($update) {
                 echo $v['sku'];
             }
         }
@@ -254,7 +255,7 @@ class Test01 extends Backend
 
     public function test200()
     {
-        $yes_date = date("Y-m-d",strtotime("-1 day"));
+        $yes_date = date("Y-m-d", strtotime("-1 day"));
         $yestime_where1[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '" . $yes_date . "'")];
         dump(Db::connect('database.db_zeelool')->table('customer_entity')->where($yestime_where1)->count());
         dump(Db::connect('database.db_zeelool')->getLastSql());
@@ -315,8 +316,8 @@ class Test01 extends Backend
     public function test300()
     {
         $createat = '2020-12-09 00:00:00 - 2020-12-09 23:59:59';
-        $createat = explode(' ',$createat);
-        $map['a.created_at'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3]  . ' ' . $createat[4]]];
+        $createat = explode(' ', $createat);
+        $map['a.created_at'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]]];
         $map['sku'] = ['in', ['VHP0189-01']];
         $model = Db::connect('database.db_zeelool');
         $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
@@ -330,7 +331,7 @@ class Test01 extends Backend
         dump($model->getLastSql());
         $data = '2020-12-09';
         $time_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $data . "'")];
-        $z_sku_list= $model
+        $z_sku_list = $model
             ->table('sales_flat_order_item')
             ->where('sku', 'like', 'VHP0189-01' . '%')
             ->where($time_where1)
@@ -340,4 +341,390 @@ class Test01 extends Backend
         dump($z_sku_list);
     }
 
+    public function export_v_data()
+    {
+        $sku_list = Db::name('datacenter_sku_import_test')->where('id', '>=', 1)->where('id', '<=', 99)->select();
+        // dump($sku_list);die;
+        foreach ($sku_list as $k => $v) {
+            //站点
+            $order_platform = 2;
+            //时间
+            $time_str = '2020-11-21 00:00:00 - 2020-12-20 23:59:59';
+            $createat = explode(' ', $time_str);
+            $same_where['day_date'] = ['between', [$createat[0], $createat[3]]];
+            $same_where['site'] = ['=', $order_platform];
+            $sku = $v['sku'];
+            $item_platform = new ItemPlatformSku();
+            $sku = $item_platform->where('sku', $sku)->where('platform_type', $order_platform)->value('platform_sku') ? $item_platform->where('sku', $sku)->where('platform_type', $order_platform)->value('platform_sku') : $sku;
+            $model = Db::connect('database.db_voogueme');
+            $coatiing_price['b.coatiing_price'] = ['=', 0];
+
+            $model->table('sales_flat_order')->query("set time_zone='+8:00'");
+            $model->table('sales_flat_order_item')->query("set time_zone='+8:00'");
+            $model->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
+            //此sku的总订单量
+            $map['sku'] = ['like', $sku . '%'];
+            $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+            $map['a.created_at'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]]];
+            $map['a.order_type'] = ['=', 1];
+            $total = $model->table('sales_flat_order')
+                ->where($map)
+                ->alias('a')
+                ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
+                ->group('order_id')
+                ->field('entity_id,sku,a.created_at,a.order_type,a.status')
+                ->count();
+
+            //整站订单量
+            $whole_platform_order_num = Db::name('datacenter_day')->where($same_where)->sum('order_num');
+            //订单占比
+            $order_rate = $whole_platform_order_num == 0 ? 0 : round($total / $whole_platform_order_num * 100, 2) . '%';
+            //平均订单副数
+            $whole_glass = $model
+                ->table('sales_flat_order_item')
+                ->where('sku', 'like', $sku . '%')
+                ->where('created_at', 'between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]])
+                ->sum('qty_ordered');//sku总副数
+            $avg_order_glass = $total == 0 ? 0 : round($whole_glass / $total, 2);
+            if ($order_platform != 3) {
+                //付费镜片订单数
+                $nopay_jingpian_glass = $model
+                    ->table('sales_flat_order')
+                    ->alias('a')
+                    ->join(['sales_flat_order_item_prescription' => 'b'], 'a.entity_id=b.order_id')
+                    ->where('a.created_at', 'between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]])
+                    ->where('sku', 'like', $sku . '%')
+                    ->where('a.order_type', '=', 1)
+                    ->where($coatiing_price)
+                    ->where('a.status', 'in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal'])
+                    ->where('b.index_price', '=', 0)
+                    ->group('order_id')
+                    ->count();
+            } else {
+                //付费镜片订单数
+                $nopay_jingpian_glass = $model
+                    ->table('sales_flat_order')
+                    ->alias('a')
+                    ->join(['sales_flat_order_item_prescription' => 'b'], 'a.entity_id=b.order_id')
+                    ->where('a.created_at', 'between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]])
+                    ->where('sku', 'like', $sku . '%')
+                    ->where('a.order_type', '=', 1)
+                    // ->where('b.coatiing_price', '=', 0)
+                    ->where($coatiing_price)
+                    ->where('a.status', 'in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal'])
+                    ->where('b.index_price', '=', 0)
+                    ->group('order_id')
+                    ->count();
+            }
+            $pay_jingpian_glass = $total - $nopay_jingpian_glass;
+            //付费镜片订单数占比
+            $pay_jingpian_glass_rate = $total == 0 ? 0 : round($pay_jingpian_glass / $total * 100, 2) . '%';
+            //只买一副的订单
+            $only_one_glass_order_list = $model->table('sales_flat_order')
+                ->where($map)
+                ->alias('a')
+                ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
+                ->group('order_id')
+                ->field('entity_id,sku,a.created_at,a.order_type,a.status,order_id,sum(qty_ordered) as all_qty_ordered')
+                ->select();
+            $only_one_glass_num = 0;
+            foreach ($only_one_glass_order_list as $kk => $v) {
+                $one = $model->table('sales_flat_order_item')->where('order_id', $v['order_id'])->sum('qty_ordered');
+                if ($one == 1) {
+                    $only_one_glass_num += 1;
+                }
+            }
+            //只买一副的订单占比
+            $only_one_glass_rate = $total == 0 ? 0 : round($only_one_glass_num / $total * 100, 2) . '%';
+            //订单总金额
+            $whole_price = $model
+                ->table('sales_flat_order')
+                ->where($map)
+                ->where('a.created_at', 'between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]])
+                ->alias('a')
+                ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
+                ->field('base_grand_total')
+                ->sum('base_grand_total');
+            //订单客单价
+            $every_price = $total == 0 ? 0 : round($whole_price / $total, 2);
+            $arr[$k]['sku'] = $sku;
+            $arr[$k]['total'] = $total;
+            $arr[$k]['whole_platform_order_num'] = $whole_platform_order_num;
+            $arr[$k]['order_rate'] = $order_rate;
+            $arr[$k]['avg_order_glass'] = $avg_order_glass;
+            $arr[$k]['pay_jingpian_glass'] = $pay_jingpian_glass;
+            $arr[$k]['pay_jingpian_glass_rate'] = $pay_jingpian_glass_rate;
+            $arr[$k]['only_one_glass_num'] = $only_one_glass_num;
+            $arr[$k]['only_one_glass_rate'] = $only_one_glass_rate;
+            $arr[$k]['whole_price'] = $whole_price;
+            $arr[$k]['every_price'] = $every_price;
+        }
+        // dump($arr);die;
+        //从数据库查询需要的数据
+        $spreadsheet = new Spreadsheet();
+        $spreadsheet->setActiveSheetIndex(0);
+        $spreadsheet->getActiveSheet()->setCellValue("A1", "sku");
+        $spreadsheet->getActiveSheet()->setCellValue("B1", "sku订单量");
+        $spreadsheet->getActiveSheet()->setCellValue("C1", "整站订单量");
+        $spreadsheet->getActiveSheet()->setCellValue("D1", "订单占比");
+        $spreadsheet->getActiveSheet()->setCellValue("E1", "平均订单副数");
+        $spreadsheet->getActiveSheet()->setCellValue("F1", "付费镜片订单数");
+        $spreadsheet->getActiveSheet()->setCellValue("G1", "付费镜片订单数占比");
+        $spreadsheet->getActiveSheet()->setCellValue("H1", "只买一副的订单量");
+        $spreadsheet->getActiveSheet()->setCellValue("I1", "只买一副订单占比");
+        $spreadsheet->getActiveSheet()->setCellValue("J1", "订单客单价");
+        $spreadsheet->getActiveSheet()->setCellValue("K1", "订单金额");
+        //设置宽度
+        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(60);
+        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('I')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('J')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('K')->setWidth(12);
+        $spreadsheet->setActiveSheetIndex(0)->setTitle('SKU明细');
+        $spreadsheet->setActiveSheetIndex(0);
+        $num = 0;
+        foreach ($arr as $k=>$v){
+            $spreadsheet->getActiveSheet()->setCellValue('A' . ($num * 1 + 2), $v['sku']);
+            $spreadsheet->getActiveSheet()->setCellValue('B' . ($num * 1 + 2), $v['total']);
+            $spreadsheet->getActiveSheet()->setCellValue('C' . ($num * 1 + 2), $v['whole_platform_order_num']);
+            $spreadsheet->getActiveSheet()->setCellValue('D' . ($num * 1 + 2), $v['order_rate']);
+            $spreadsheet->getActiveSheet()->setCellValue('E' . ($num * 1 + 2), $v['avg_order_glass']);
+            $spreadsheet->getActiveSheet()->setCellValue('F' . ($num * 1 + 2), $v['pay_jingpian_glass']);
+            $spreadsheet->getActiveSheet()->setCellValue('G' . ($num * 1 + 2), $v['pay_jingpian_glass_rate']);
+            $spreadsheet->getActiveSheet()->setCellValue('H' . ($num * 1 + 2), $v['only_one_glass_num']);
+            $spreadsheet->getActiveSheet()->setCellValue('I' . ($num * 1 + 2), $v['only_one_glass_rate']);
+            $spreadsheet->getActiveSheet()->setCellValue('J' . ($num * 1 + 2), $v['whole_price']);
+            $spreadsheet->getActiveSheet()->setCellValue('K' . ($num * 1 + 2), $v['every_price']);
+            $num += 1;
+        }
+        //设置边框
+        $border = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
+                    'color'       => ['argb' => 'FF000000'], // 设置border颜色
+                ],
+            ],
+        ];
+        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
+        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
+        $spreadsheet->getActiveSheet()->getStyle('A1:Q' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->setActiveSheetIndex(0);
+        $format = 'xlsx';
+        $savename = 'voogueme站'.$createat[0] .'至'.$createat[3] .'SKU销售情况';
+        if ($format == 'xls') {
+            //输出Excel03版本
+            header('Content-Type:application/vnd.ms-excel');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
+        } elseif ($format == 'xlsx') {
+            //输出07Excel版本
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
+        }
+        //输出名称
+        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
+        //禁止缓存
+        header('Cache-Control: max-age=0');
+        $writer = new $class($spreadsheet);
+        $writer->save('php://output');
+    }
+    public function export_n_data()
+    {
+        $sku_list = Db::name('datacenter_sku_import_test')->where('id', '>=', 100)->where('id', '<=', 199)->select();
+        foreach ($sku_list as $k => $v) {
+            //站点
+            $order_platform = 3;
+            //时间
+            $time_str = '2020-11-21 00:00:00 - 2020-12-20 23:59:59';
+            $createat = explode(' ', $time_str);
+            $same_where['day_date'] = ['between', [$createat[0], $createat[3]]];
+            $same_where['site'] = ['=', $order_platform];
+            $sku = $v['sku'];
+            $item_platform = new ItemPlatformSku();
+            $sku = $item_platform->where('sku', $sku)->where('platform_type', $order_platform)->value('platform_sku') ? $item_platform->where('sku', $sku)->where('platform_type', $order_platform)->value('platform_sku') : $sku;
+
+            $model = Db::connect('database.db_nihao');
+            $coatiing_price =[];
+
+            $model->table('sales_flat_order')->query("set time_zone='+8:00'");
+            $model->table('sales_flat_order_item')->query("set time_zone='+8:00'");
+            $model->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
+            //此sku的总订单量
+            $map['sku'] = ['like', $sku . '%'];
+            $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+            $map['a.created_at'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]]];
+            $map['a.order_type'] = ['=', 1];
+            $total = $model->table('sales_flat_order')
+                ->where($map)
+                ->alias('a')
+                ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
+                ->group('order_id')
+                ->field('entity_id,sku,a.created_at,a.order_type,a.status')
+                ->count();
+
+            //整站订单量
+            $whole_platform_order_num = Db::name('datacenter_day')->where($same_where)->sum('order_num');
+            //订单占比
+            $order_rate = $whole_platform_order_num == 0 ? 0 : round($total / $whole_platform_order_num * 100, 2) . '%';
+            //平均订单副数
+            $whole_glass = $model
+                ->table('sales_flat_order_item')
+                ->where('sku', 'like', $sku . '%')
+                ->where('created_at', 'between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]])
+                ->sum('qty_ordered');//sku总副数
+            $avg_order_glass = $total == 0 ? 0 : round($whole_glass / $total, 2);
+            if ($order_platform != 3) {
+                //付费镜片订单数
+                $nopay_jingpian_glass = $model
+                    ->table('sales_flat_order')
+                    ->alias('a')
+                    ->join(['sales_flat_order_item_prescription' => 'b'], 'a.entity_id=b.order_id')
+                    ->where('a.created_at', 'between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]])
+                    ->where('sku', 'like', $sku . '%')
+                    ->where('a.order_type', '=', 1)
+                    ->where($coatiing_price)
+                    ->where('a.status', 'in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal'])
+                    ->where('b.index_price', '=', 0)
+                    ->group('order_id')
+                    ->count();
+            } else {
+                //付费镜片订单数
+                $nopay_jingpian_glass = $model
+                    ->table('sales_flat_order')
+                    ->alias('a')
+                    ->join(['sales_flat_order_item_prescription' => 'b'], 'a.entity_id=b.order_id')
+                    ->where('a.created_at', 'between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]])
+                    ->where('sku', 'like', $sku . '%')
+                    ->where('a.order_type', '=', 1)
+                    ->where($coatiing_price)
+                    ->where('a.status', 'in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal'])
+                    ->where('b.index_price', '=', 0)
+                    ->group('order_id')
+                    ->count();
+            }
+            $pay_jingpian_glass = $total - $nopay_jingpian_glass;
+            //付费镜片订单数占比
+            $pay_jingpian_glass_rate = $total == 0 ? 0 : round($pay_jingpian_glass / $total * 100, 2) . '%';
+            //只买一副的订单
+            $only_one_glass_order_list = $model->table('sales_flat_order')
+                ->where($map)
+                ->alias('a')
+                ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
+                ->group('order_id')
+                ->field('entity_id,sku,a.created_at,a.order_type,a.status,order_id,sum(qty_ordered) as all_qty_ordered')
+                ->select();
+            $only_one_glass_num = 0;
+            foreach ($only_one_glass_order_list as $kk => $v) {
+                $one = $model->table('sales_flat_order_item')->where('order_id', $v['order_id'])->sum('qty_ordered');
+                if ($one == 1) {
+                    $only_one_glass_num += 1;
+                }
+            }
+            //只买一副的订单占比
+            $only_one_glass_rate = $total == 0 ? 0 : round($only_one_glass_num / $total * 100, 2) . '%';
+            //订单总金额
+            $whole_price = $model
+                ->table('sales_flat_order')
+                ->where($map)
+                ->where('a.created_at', 'between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]])
+                ->alias('a')
+                ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
+                ->field('base_grand_total')
+                ->sum('base_grand_total');
+            //订单客单价
+            $every_price = $total == 0 ? 0 : round($whole_price / $total, 2);
+            $arr[$k]['sku'] = $sku;
+            $arr[$k]['total'] = $total;
+            $arr[$k]['whole_platform_order_num'] = $whole_platform_order_num;
+            $arr[$k]['order_rate'] = $order_rate;
+            $arr[$k]['avg_order_glass'] = $avg_order_glass;
+            $arr[$k]['pay_jingpian_glass'] = $pay_jingpian_glass;
+            $arr[$k]['pay_jingpian_glass_rate'] = $pay_jingpian_glass_rate;
+            $arr[$k]['only_one_glass_num'] = $only_one_glass_num;
+            $arr[$k]['only_one_glass_rate'] = $only_one_glass_rate;
+            $arr[$k]['whole_price'] = $whole_price;
+            $arr[$k]['every_price'] = $every_price;
+        }
+        //从数据库查询需要的数据
+        $spreadsheet = new Spreadsheet();
+        $spreadsheet->setActiveSheetIndex(0);
+        $spreadsheet->getActiveSheet()->setCellValue("A1", "sku");
+        $spreadsheet->getActiveSheet()->setCellValue("B1", "sku订单量");
+        $spreadsheet->getActiveSheet()->setCellValue("C1", "整站订单量");
+        $spreadsheet->getActiveSheet()->setCellValue("D1", "订单占比");
+        $spreadsheet->getActiveSheet()->setCellValue("E1", "平均订单副数");
+        $spreadsheet->getActiveSheet()->setCellValue("F1", "付费镜片订单数");
+        $spreadsheet->getActiveSheet()->setCellValue("G1", "付费镜片订单数占比");
+        $spreadsheet->getActiveSheet()->setCellValue("H1", "只买一副的订单量");
+        $spreadsheet->getActiveSheet()->setCellValue("I1", "只买一副订单占比");
+        $spreadsheet->getActiveSheet()->setCellValue("J1", "订单客单价");
+        $spreadsheet->getActiveSheet()->setCellValue("K1", "订单金额");
+        //设置宽度
+        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(60);
+        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('I')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('J')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('K')->setWidth(12);
+        $spreadsheet->setActiveSheetIndex(0)->setTitle('SKU明细');
+        $spreadsheet->setActiveSheetIndex(0);
+        $num = 0;
+        foreach ($arr as $k=>$v){
+            $spreadsheet->getActiveSheet()->setCellValue('A' . ($num * 1 + 2), $v['sku']);
+            $spreadsheet->getActiveSheet()->setCellValue('B' . ($num * 1 + 2), $v['total']);
+            $spreadsheet->getActiveSheet()->setCellValue('C' . ($num * 1 + 2), $v['whole_platform_order_num']);
+            $spreadsheet->getActiveSheet()->setCellValue('D' . ($num * 1 + 2), $v['order_rate']);
+            $spreadsheet->getActiveSheet()->setCellValue('E' . ($num * 1 + 2), $v['avg_order_glass']);
+            $spreadsheet->getActiveSheet()->setCellValue('F' . ($num * 1 + 2), $v['pay_jingpian_glass']);
+            $spreadsheet->getActiveSheet()->setCellValue('G' . ($num * 1 + 2), $v['pay_jingpian_glass_rate']);
+            $spreadsheet->getActiveSheet()->setCellValue('H' . ($num * 1 + 2), $v['only_one_glass_num']);
+            $spreadsheet->getActiveSheet()->setCellValue('I' . ($num * 1 + 2), $v['only_one_glass_rate']);
+            $spreadsheet->getActiveSheet()->setCellValue('J' . ($num * 1 + 2), $v['whole_price']);
+            $spreadsheet->getActiveSheet()->setCellValue('K' . ($num * 1 + 2), $v['every_price']);
+            $num += 1;
+        }
+        //设置边框
+        $border = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
+                    'color'       => ['argb' => 'FF000000'], // 设置border颜色
+                ],
+            ],
+        ];
+        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
+        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
+        $spreadsheet->getActiveSheet()->getStyle('A1:Q' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->setActiveSheetIndex(0);
+        $format = 'xlsx';
+        $savename = 'nihao站'.$createat[0] .'至'.$createat[3] .'SKU销售情况';
+        if ($format == 'xls') {
+            //输出Excel03版本
+            header('Content-Type:application/vnd.ms-excel');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
+        } elseif ($format == 'xlsx') {
+            //输出07Excel版本
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
+        }
+        //输出名称
+        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
+        //禁止缓存
+        header('Cache-Control: max-age=0');
+        $writer = new $class($spreadsheet);
+        $writer->save('php://output');
+    }
 }

@@ -256,7 +256,7 @@
                     <td>{$v.frame_color}</td>
                     <td>{$v.coating_name}</td>
                     <td>{$v.coating_price}</td>
-                    <td>{$v.index_name}</td>
+                    <td>{$v.web_lens_name}</td>
                     <td>{$v.index_price}</td>
                     <td>{$v.frame_price}</td>
                     <td>{$row.base_currency_code}</td>
@@ -293,11 +293,11 @@
                     <td>{$row.base_currency_code} </td>
                     <td>{$row.base_grand_total|sprintf='%.2f',###}</td>
                     <td>{$row.base_grand_total|sprintf='%.2f',###} </td>
-                    <td>{$row.mw_rewardpoint_discount} </td>
+                    <td>{$row.mw_rewardpoint} </td>
                     <td>{$row.mw_rewardpoint_discount|sprintf='%.2f',###} </td>
-                    <td>{$row.mw_rewardpoint_discount|sprintf='%.2f',###} </td>
+                    <td>{$row.base_shipping_amount|sprintf='%.2f',###} </td>
                     <td>{$row.payment_method} </td>
-                    <td>{$pay.last_trans_id}</td>
+                    <td>{$row.last_trans_id}</td>
                     <td>{$pay.additional_information.paypal_payer_email}</td>
                     <td>{$pay.additional_information.paypal_payer_id}</td>
                     <td>{$pay.additional_information.paypal_payer_status}</td>
@@ -372,7 +372,7 @@
                                     </tr> -->
                                         <tr>
                                             <td>镜片类型：</td>
-                                            <td>{$v.index_name}</td>
+                                            <td>{$v.web_lens_name}</td>
                                         </tr>
                                         <!-- <tr>
                                         <td>折射率：</td>

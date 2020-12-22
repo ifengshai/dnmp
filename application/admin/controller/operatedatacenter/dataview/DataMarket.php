@@ -242,7 +242,7 @@ class DataMarket extends Backend
         $zeelool_es_model->table('sales_flat_order')->query("set time_zone='+8:00'");
         $zeelool_de_model->table('sales_flat_order')->query("set time_zone='+8:00'");
         $zeelool_jp_model->table('sales_flat_order')->query("set time_zone='+8:00'");
-        $status['status']  = ['in', ['processing', 'complete', 'free_processing','paypal_canceled_reversal','paypal_reversed']];
+        $status['status']  = ['in', ['processing', 'complete', 'free_processing','paypal_canceled_reversal','paypal_reversed','delivered']];
         $status['order_type'] = 1;
         $pc['store_id']    = 1;
         $wap['store_id']   = ['in',[2,4]];

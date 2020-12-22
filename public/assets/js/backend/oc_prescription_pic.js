@@ -27,7 +27,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {
                             field: 'site',
                             title: __('站点'),
-                            searchList: { 1: '全部', 2: 'Z站', 3: 'V站'},
+                            searchList: { 1: 'Z站', 2: 'V站'},
                             custom: { 1: 'black', 2: 'black', 3: 'black', 4: 'black', 5: 'black', 6: 'black', 7: 'black', 8: 'black', 9: 'black', 10: 'black', 11: 'black' },
                             formatter: Table.api.formatter.status,
                             visible: false
@@ -86,7 +86,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 gettitle: {
                     //格式为：方法名+空格+DOM元素
                     'click .btn-gettitle': function (e, value, row, index) {
-                        Backend.api.open('oc_prescription_pic/question_message/type/view/ids/' + row.id, __('问题描述'), { area: ['70%', '70%'] });
+                        Backend.api.open('oc_prescription_pic/question_message/type/view/ids/' + row.id+'/site/'+row.site, __('问题描述'), { area: ['70%', '70%'] });
                     }
                 },
 
