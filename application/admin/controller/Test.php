@@ -1502,6 +1502,12 @@ class Test extends Backend
                     unset($v1['id']);
                     $id =  Db::table('fa_work_order_measure_copy1')->insertGetId($v1);
 
+                    
+                    unset($recept['id']);
+                    $recept_data = $recept;
+                    $recept_data['measure_id'] = $id;
+                    Db::table('fa_work_order_recept')->insertGetId($recept_data);
+
                     if (!$change_sku_list) continue;
                     $change_sku_data = [];
                     foreach ($change_sku_list as $key => $val) {
