@@ -1272,6 +1272,7 @@ class OrderData extends Backend
         $list = collection($list)->toArray();
         foreach ($list as $v) {
             $res = $this->order->where(['entity_id' => $v['magento_order_id'], 'site' => $v['site']])->field('id,increment_id')->find();
+            if (!$res) continue;
             $data = $this->orderitemprocess->where(['magento_order_id' => $v['magento_order_id'], 'site' => $v['site']])->select();
             $item_params = [];
             foreach ($data as $key => $val) {
@@ -1314,7 +1315,7 @@ class OrderData extends Backend
         foreach ($list as $k => $v) {
             $order_id = $this->order->where(['entity_id' => $v['magento_order_id'], 'site' => $v['site']])->value('id');
             $params[$k]['id'] = $v['id'];
-            $params[$k]['order_id'] = $order_id;
+            $params[$k]['order_id'] = $order_id ?: 0;
             echo $v['id'] . "\n";
         }
         //更新数据
