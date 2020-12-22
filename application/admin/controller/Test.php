@@ -1109,12 +1109,15 @@ class Test extends Backend
         $list = $work->where(['work_status' => ['in', [0, 1, 4, 6, 7]]])->select();
         $list = collection($list)->toArray();
         foreach ($list as $k => $v) {
+
+            echo $v['id'] . "\n";
             //插入主表
             Db::table('fa_work_order_list_copy1')->insert($v);
             //查询措施表
             $res = Db::table('fa_work_order_measure')->where(['work_id' => $v['id']])->select();
             $item_number = [];
             foreach ($res as $k1 => $v1) {
+
                 //查询工单措施承接表
                 $recept = Db::table('fa_work_order_recept')->where(['work_id' => $v['id'], 'measure_id' => $v1['id']])->find();
 
@@ -1133,6 +1136,7 @@ class Test extends Backend
                         $change_sku_data = [];
                         $recept_data = [];
                         foreach ($order_list as $key => $val) {
+
                             //插入措施表
                             $measure['work_id'] = $v['id'];
                             $measure['measure_choose_id'] = 18;
