@@ -1430,7 +1430,7 @@ class WorkOrderList extends Backend
                                 //获取异常库位号
                                 $stock_house_info = $_stock_house
                                     ->field('id,coding')
-                                    ->where(['status'=>1,'type'=>4,'occupy'=>['<',10]])
+                                    ->where(['status'=>1,'type'=>4,'occupy'=>['<',10000]])
                                     ->order('occupy', 'desc')
                                     ->find()
                                 ;
@@ -1453,7 +1453,7 @@ class WorkOrderList extends Backend
                                     ->update(['abnormal_house_id'=>$stock_house_info['id']])
                                 ;
 
-                                //异常库位号占用数量+1
+                                //异常库位占用数量+1
                                 $_stock_house
                                     ->where(['id' => $stock_house_info['id']])
                                     ->setInc('occupy', 1)
