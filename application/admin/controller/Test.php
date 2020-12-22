@@ -1116,8 +1116,7 @@ class Test extends Backend
         $stock_house_info = $_stock_house
             ->field('id,coding')
             ->where(['status' => 1, 'type' => 4])
-            ->find();
-
+            ->find()->toArray();
         foreach ($list as $k => $v) {
             echo $v['id'] . "\n";
             //插入主表
@@ -1282,7 +1281,6 @@ class Test extends Backend
                             $_new_order_item_process->where(['id' => $v3['id']])
                                 ->update(['abnormal_house_id' => $stock_house_info['id']]);
 
-
                             //异常库位号占用数量+1
                             $_stock_house
                                 ->where(['id' => $stock_house_info['id']])
@@ -1314,11 +1312,14 @@ class Test extends Backend
                         }
                     }
                 } else {
-                    //插入措施表
-                    $id =  Db::table('fa_work_order_measure_copy1')->insertGetId($v1);
+                   
 
                     //查询change sku表
                     $change_sku_list = Db::table('fa_work_order_change_sku')->where(['work_id' => $v['id'], 'measure_id' => $v1['id']])->select();
+
+                     //插入措施表
+                     unset($v1['id']);
+                     $id =  Db::table('fa_work_order_measure_copy1')->insertGetId($v1);
 
                     if (!$change_sku_list) continue;
                     $change_sku_data = [];
@@ -1486,11 +1487,13 @@ class Test extends Backend
                         }
                     }
                 } else {
-                    //插入措施表
-                    $id =  Db::table('fa_work_order_measure_copy1')->insertGetId($v1);
-
+                    
                     //查询change sku表
                     $change_sku_list = Db::table('fa_work_order_change_sku')->where(['work_id' => $v['id'], 'measure_id' => $v1['id']])->select();
+
+                    //插入措施表
+                    unset($v1['id']);
+                    $id =  Db::table('fa_work_order_measure_copy1')->insertGetId($v1);
 
                     if (!$change_sku_list) continue;
                     $change_sku_data = [];
