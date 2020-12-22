@@ -226,6 +226,8 @@ class OrderData extends Backend
                             //地址表插入时或更新时更新主表地址
                             if (($payload['type'] == 'UPDATE' || $payload['type'] == 'INSERT') && $payload['table'] == 'sales_flat_order_address') {
                                 $params = [];
+
+                                dump($payload['data']);
                                 foreach ($payload['data'] as $k => $v) {
                                     $params['country_id'] = $v['country_id'];
                                     $params['region'] = $v['region'];
