@@ -917,7 +917,6 @@ class Test extends Backend
             $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal']];
             $map['b.distribution_status'] = 1; //打印标签
             $map['a.created_at'] = ['between', [strtotime('2020-01-01 00:00:00'), time()]]; //时间节点
-            $map['sku'] = $zeelool_sku;
             $occupy_stock = $this->orderitemprocess->alias('a')->where($map)->join(['fa_order' => 'b'], 'a.order_id = b.id')->count(1);
 
             $p_map['sku'] = $v;
@@ -1046,6 +1045,27 @@ class Test extends Backend
     /************************跑库存数据用END**********************************/
 
 
+    public function set_order_process()
+    {
+        $this->order = new \app\admin\model\order\order\NewOrder();
+        $this->orderprocess = new \app\admin\model\order\order\NewOrderProcess();
+        $this->orderitemprocess = new \app\admin\model\order\order\NewOrderItemProcess();
+        $this->worklist = new \app\admin\model\saleaftermanage\WorkOrderList();
+        $map['a.created_at'] = ['<', strtotime('2020-06-31')];
+        $map['b.distribution_status'] = 1;
+        $map['a.site'] = ['<>', 4];
+        $list = $this->order->alias('a')->field('a.id,a.increment_id')->join(['fa_order_item_process' => 'b'], 'a.id=b.order_id')->where($map)->select();
+        foreach($list as $k => $v) {
+            $res = $this->worklist->where(['platform_order' => $v['increment_id']])->find();
+            if (!$res || $res['work_status'] == 6) {
+                $this->orderitemprocess->where(['order_id' => $v['id']])->update(['distribution_status' => 9]);
+                $this->orderprocess->where(['order_id' => $v['id']])->update(['combine_status' => 1,'check_status' => 1]);
+            }
+
+            echo $v['id'] . "\n";
+        }
+
+    }
 
 
 
