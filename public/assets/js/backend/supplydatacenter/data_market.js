@@ -11,9 +11,11 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
             Controller.api.formatter.process_overview();
             Controller.api.formatter.comleted_time_rate_pie();
             $("#sku_submit").click(function () {
-                order_data_view();
-                //Controller.api.formatter.line_chart();
+                stock_measure_overview_platform();
                 Controller.api.formatter.line_histogram();
+                Controller.api.formatter.order_send_overview();
+                Controller.api.formatter.process_overview();
+                Controller.api.formatter.comleted_time_rate_pie();
             });
             $("#sku_reset").click(function () {
                 $("#order_platform").val(1);

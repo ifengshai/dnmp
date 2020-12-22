@@ -1430,7 +1430,7 @@ class WorkOrderList extends Backend
                                 //获取异常库位号
                                 $stock_house_info = $_stock_house
                                     ->field('id,coding')
-                                    ->where(['status'=>1,'type'=>4,'occupy'=>['<',10]])
+                                    ->where(['status'=>1,'type'=>4,'occupy'=>['<',10000]])
                                     ->order('occupy', 'desc')
                                     ->find()
                                 ;
@@ -1449,12 +1449,11 @@ class WorkOrderList extends Backend
 
                                 //子订单绑定异常库位号
                                 $_new_order_item_process
-                                    ->allowField(true)
-                                    ->isUpdate(true, ['id'=>$val])
-                                    ->save(['abnormal_house_id'=>$stock_house_info['id']])
+                                    ->where(['id'=>$val])
+                                    ->update(['abnormal_house_id'=>$stock_house_info['id']])
                                 ;
 
-                                //异常库位号占用数量+1
+                                //异常库位占用数量+1
                                 $_stock_house
                                     ->where(['id' => $stock_house_info['id']])
                                     ->setInc('occupy', 1)
@@ -2682,7 +2681,7 @@ class WorkOrderList extends Backend
                 10=>'new_zeeloolde_url',
                 11=>'new_zeelooljp_url'
             ];
-            $url = config('url.new_zeelooljp_url'.$domain_list[$row->work_platform]) . 'price-difference?customer_email=' . $row->email . '&origin_order_number=' . $row->platform_order . '&order_amount=' . $row->replenish_money . '&sign=' . $row->id;
+            $url = config('url.'.$domain_list[$row->work_platform]) . 'price-difference?customer_email=' . $row->email . '&origin_order_number=' . $row->platform_order . '&order_amount=' . $row->replenish_money . '&sign=' . $row->id;
             $this->view->assign('url', $url);
         }
 

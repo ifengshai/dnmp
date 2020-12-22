@@ -1470,7 +1470,7 @@ class Distribution extends Backend
     {
         //检测配货状态
         $item_info = $this->model
-            ->field('id,site,sku,distribution_status,abnormal_house_id,item_order_number')
+            ->field('id,site,sku,distribution_status,abnormal_house_id,temporary_house_id,item_order_number')
             ->where(['id' => $ids])
             ->find();
         empty($item_info) && $this->error('子订单不存在');
@@ -1577,6 +1577,12 @@ class Distribution extends Backend
             $this->_item->startTrans();
             $this->_stock_log->startTrans();
             try {
+                //异常库位占用数量-1
+                $this->_stock_house
+                    ->where(['id' => $item_info['abnormal_house_id']])
+                    ->setDec('occupy', 1)
+                ;
+
                 //子订单状态回滚
                 $save_data = [
                     'distribution_status' => $status,//配货状态
@@ -1587,6 +1593,14 @@ class Distribution extends Backend
                 if (4 > $status) {
                     $save_data['temporary_house_id'] = 0;
                     $save_data['customize_status'] = 0;
+
+                    //定制片库位占用数量-1
+                    if($item_info['temporary_house_id']){
+                        $this->_stock_house
+                            ->where(['id' => $item_info['temporary_house_id']])
+                            ->setDec('occupy', 1)
+                        ;
+                    }
                 }
 
                 $this->model

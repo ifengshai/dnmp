@@ -164,7 +164,7 @@ class ScmDistribution extends Scm
         //自动分配异常库位号
         $stock_house_info = $this->_stock_house
             ->field('id,coding')
-            ->where(['status'=>1,'type'=>4,'occupy'=>['<',10]])
+            ->where(['status'=>1,'type'=>4,'occupy'=>['<',10000]])
             ->order('occupy', 'desc')
             ->find()
         ;
@@ -193,7 +193,7 @@ class ScmDistribution extends Scm
                 ->save(['abnormal_house_id'=>$stock_house_info['id']])
             ;
 
-            //异常库位号占用数量+1
+            //异常库位占用数量+1
             $this->_stock_house
                 ->where(['id' => $stock_house_info['id']])
                 ->setInc('occupy', 1)
@@ -434,7 +434,7 @@ class ScmDistribution extends Scm
                     //暂存自动分配库位
                     $stock_house_info = $this->_stock_house
                         ->field('id,coding')
-                        ->where(['status'=>1,'type'=>3,'occupy'=>['<',10]])
+                        ->where(['status'=>1,'type'=>3,'occupy'=>['<',10000]])
                         ->order('occupy', 'desc')
                         ->find()
                     ;
@@ -995,7 +995,7 @@ class ScmDistribution extends Scm
 
         $res = false;
         if ($result != false){
-            //定制片库位号占用数量-1
+            //定制片库位占用数量-1
             $res = $this->_stock_house
                 ->where(['id' => $item_process_info['temporary_house_id']])
                 ->setDec('occupy', 1)
