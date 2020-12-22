@@ -1792,14 +1792,14 @@ class Distribution extends Backend
         ini_set('memory_limit', '1024M');
         //站点列表
         $site_arr = [
-            1 => [
-                'name' => 'zeelool',
-                'obj' => new \app\admin\model\order\printlabel\Zeelool,
-            ],
-            2 => [
-                'name' => 'voogueme',
-                'obj' => new \app\admin\model\order\printlabel\Voogueme,
-            ],
+            // 1 => [
+            //     'name' => 'zeelool',
+            //     'obj' => new \app\admin\model\order\printlabel\Zeelool,
+            // ],
+            // 2 => [
+            //     'name' => 'voogueme',
+            //     'obj' => new \app\admin\model\order\printlabel\Voogueme,
+            // ],
             3 => [
                 'name' => 'nihao',
                 'obj' => new \app\admin\model\order\printlabel\Nihao,
@@ -2197,7 +2197,7 @@ class Distribution extends Backend
                ')
                 ->where([
                     'custom_is_delivery_new' => 1,
-                    'custom_match_delivery_created_at_new' => ['between', ['2018-01-01', '2019-10-01']]
+                    'custom_match_delivery_created_at_new' => ['between', ['2019-10-01', '2020-12-23']]
                 ])
                 ->select();
 
