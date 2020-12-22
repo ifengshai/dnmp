@@ -882,6 +882,43 @@ class ScmWarehouse extends Scm
         $platform_id = $this->request->request("platform_id");//站点，判断是否是新创建入库 还是 质检单入库
         $result = false;
 
+        //------------------测试----------------//
+        foreach (array_filter($item_sku) as $key => $value) {
+            /*$info_id = $this->_inventory_item->where(['sku' => $value['sku'],'is_add'=>0,'inventory_id'=>['neq',$inventory_id]])->column('id');
+            !empty($info_id) && $this->error(__('SKU=>'.$value['sku'].'存在未完成的盘点单'), [], 543);*/
+            $sku_code = array_column($value['sku_agg'], 'code');
+//            var_dump(json_encode($item_sku));
+//            var_dump(json_encode($sku_code));
+//            var_dump(json_encode($value['sku_agg']));
+//            die;
+            $save_data1['remark'] = json_encode($item_sku);
+            $save_data2['remark'] = json_encode($sku_code);
+            $save_data3['remark'] = json_encode($value['sku_agg']);
+            $this->_inventory_item->where(['id' => 8254])->update($save_data1);
+            $this->_inventory_item->where(['id' => 8253])->update($save_data2);
+            $this->_inventory_item->where(['id' => 8252])->update($save_data3);
+            var_dump(json_encode($item_sku));
+            die;
+            count($value['sku_agg']) != count(array_unique($sku_code))
+            &&
+            $this->error(__('条形码有重复，请检查'), [], 405);
+
+            $where = [];
+            $where['inventory_id'] = [['>', 0], ['neq', $inventory_id]];
+            $where['code'] = ['in', $sku_code];
+            $inventory_info = $this->_product_bar_code_item
+                ->where($where)
+                ->field('code')
+                ->find();
+            if (!empty($inventory_info['code'])) {
+                $this->error(__('条形码:' . $inventory_info['code'] . ' 已绑定,请移除'), [], 405);
+                exit;
+            }
+        }
+        //------------------测试----------------//
+        die;
+
+
         $this->_check->startTrans();
         $this->_in_stock->startTrans();
         $this->_in_stock_item->startTrans();
@@ -2072,21 +2109,15 @@ class ScmWarehouse extends Scm
             /*$info_id = $this->_inventory_item->where(['sku' => $value['sku'],'is_add'=>0,'inventory_id'=>['neq',$inventory_id]])->column('id');
             !empty($info_id) && $this->error(__('SKU=>'.$value['sku'].'存在未完成的盘点单'), [], 543);*/
             $sku_code = array_column($value['sku_agg'], 'code');
-//            var_dump(json_encode($item_sku));
-//            var_dump(json_encode($sku_code));
-//            var_dump(json_encode($value['sku_agg']));
-//            die;
-//            $save_data1['remark'] = json_encode($item_sku);
-//            $save_data2['remark'] = json_encode($sku_code);
-//            $save_data3['remark'] = json_encode($value['sku_agg']);
-//            $this->_inventory_item->where(['id' => 8254])->update($save_data1);
-//            $this->_inventory_item->where(['id' => 8253])->update($save_data2);
-//            $this->_inventory_item->where(['id' => 8252])->update($save_data3);
-//            var_dump(json_encode($item_sku));
-//            die;
             count($value['sku_agg']) != count(array_unique($sku_code))
             &&
             $this->error(__('条形码有重复，请检查'), [], 405);
+
+            //检测合格条形码
+            $quantity_code = array_column($value['quantity_agg'], 'code');
+            count($value['quantity_agg']) != count(array_unique($quantity_code))
+            &&
+            $this->error(__('合格条形码有重复，请检查'), [], 405);
 
             $where = [];
             $where['inventory_id'] = [['>', 0], ['neq', $inventory_id]];
