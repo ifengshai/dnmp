@@ -39,7 +39,12 @@ class Distribution extends Backend
         'detail',
         'operation_log'
     ];
-
+    /**
+     * 无需登录验证
+     * @var array|string
+     * @access protected
+     */
+    protected $noNeedLogin = '*';
     /**
      * 子订单模型对象
      * @var object
