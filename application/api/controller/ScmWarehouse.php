@@ -1843,7 +1843,7 @@ class ScmWarehouse extends Scm
                 ->where($item_where)
                 ->limit(0,1000)
                 ->column('sku');
-            empty($item_sku) && $this->success('暂无数据11111', ['info' => []], 200);
+            empty($item_sku) && $this->success('暂无数据', ['info' => []], 200);
 
             $where = [
                 'a.is_del'=>1,
