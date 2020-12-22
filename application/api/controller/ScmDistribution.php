@@ -939,13 +939,15 @@ class ScmDistribution extends Scm
     public function no_sorting()
     {
         $where = [
-            'distribution_status'=>3,
-            'order_prescription_type'=>2,
+            'a.distribution_status'=>3,
+            'a.order_prescription_type'=>2,
+            'b.status'=>'processing',
         ];
 
         //未分拣子订单数量
         $count = $this->_new_order_item_process
             ->alias('a')
+            ->join(['fa_order' => 'b'], 'a.order_id=b.id')
             ->where($where)
             ->count();
         return 2*$count;
