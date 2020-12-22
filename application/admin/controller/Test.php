@@ -916,7 +916,7 @@ class Test extends Backend
             $map['b.sku'] = ['in', array_filter($skus)];
             $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal']];
             $map['b.distribution_status'] = 1; //打印标签
-            $map['a.created_at'] = ['between', [strtotime('2020-01-01 00:00:00'), time()]]; //时间节点
+            // $map['a.created_at'] = ['between', [strtotime('2020-01-01 00:00:00'), time()]]; //时间节点
             $occupy_stock = $this->orderitemprocess->alias('a')->where($map)->join(['fa_order' => 'b'], 'a.order_id = b.id')->count(1);
 
             $p_map['sku'] = $v;
