@@ -45,7 +45,7 @@ class OrderData extends Backend
          * 对 中台生产的  用户信息 进行消费
          */
         // 设置将要消费消息的主题
-        $topic = 'mojing_order';
+        $topic = 'test';
         $host = '127.0.0.1:9092';
         $group_id = '0';
         $conf = new \RdKafka\Conf();
@@ -113,19 +113,19 @@ class OrderData extends Backend
                         if ($payload) {
                             //根据库名判断站点
                             switch ($payload['database']) {
-                                case 'zeelool':
+                                case 'zeelool_test':
                                     $site = 1;
                                     break;
-                                case 'voogueme':
+                                case 'vuetest_voogueme':
                                     $site = 2;
                                     break;
-                                case 'nihao':
+                                case 'nihao_test':
                                     $site = 3;
                                     break;
                                 case 'meeloog':
                                     $site = 4;
                                     break;
-                                case 'wesee':
+                                case 'wesee_test':
                                     $site = 5;
                                     break;
                                 case 'zeelool_es':
@@ -142,6 +142,28 @@ class OrderData extends Backend
                             if ($payload['type'] == 'INSERT' && $payload['table'] == 'sales_flat_order') {
                                 $order_params = [];
                                 foreach ($payload['data'] as $k => $v) {
+
+                                                                       
+                                    $order_ids = $this->order->where('site=' . $site . ' and increment_id=' . $v['increment_id'])->value('id');
+                                    $order_ids2 = $this->order->where('site=' . $site . ' and entity_id=' . $v['entity_id'])->value('id');
+                                    if ($order_ids) {
+                                        $this->order->where('site=' . $site . ' and increment_id=' . $v['increment_id'])->delete();
+                                        $this->orderprocess->where('site=' . $site . ' and increment_id=' . $v['increment_id'])->delete();
+                                        
+                                        //删除子订单表
+                                        $this->orderitemoption->where('site=' . $site . ' and order_id=' . $order_ids)->delete();
+                                        $this->orderitemprocess->where('site=' . $site . ' and order_id=' . $order_ids)->delete();
+                                       
+                                    }
+
+                                    if ($order_ids2) {
+                                        $this->orderprocess->where('site=' . $site . ' and entity_id=' . $v['entity_id'])->delete();
+                                        $this->order->where('site=' . $site . ' and entity_id=' . $v['entity_id'])->delete();
+                                        $this->orderitemoption->where('site=' . $site . ' and order_id=' . $order_ids2)->delete();
+                                        $this->orderitemprocess->where('site=' . $site . ' and order_id=' . $order_ids2)->delete();
+                                    }
+
+
                                     $params = [];
                                     $params['entity_id'] = $v['entity_id'];
                                     $params['site'] = $site;
