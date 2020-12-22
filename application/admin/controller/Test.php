@@ -1246,6 +1246,7 @@ class Test extends Backend
                     if (!$change_sku_list) continue;
                     $change_sku_data = [];
                     foreach ($change_sku_list as $key => $val) {
+                        unset($val['id']);
                         $change_sku_data = $val;
                         $change_sku_data['measure_id'] = $id;
                         Db::table('fa_work_order_change_sku_copy1')->insert($change_sku_data);
