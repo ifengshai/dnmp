@@ -446,16 +446,16 @@ class LogisticsInfo extends Backend
                                         //插入日志表
                                         (new StockLog())->setData([
                                             'type' => 2,
-                                            'site' => $val['website_type'],
+                                            'site' => $vall['website_type'],
                                             'modular' => 10,
                                             //采购单签收
                                             'change_type' => 24,
-                                            'sku' => $v['sku'],
-                                            'public_id' => $row['purchase_id'],
+                                            'sku' => $val['sku'],
+                                            'public_id' => $v['purchase_id'],
                                             'source' => 1,
-                                            'on_way_stock_before' => $item_platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->value('plat_on_way_stock'),
+                                            'on_way_stock_before' => $item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->value('plat_on_way_stock'),
                                             'on_way_stock_change' => -$stock_num,
-                                            'wait_instock_num_before' => $item_platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->value('wait_instock_num'),
+                                            'wait_instock_num_before' => $item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->value('wait_instock_num'),
                                             'wait_instock_num_change' => $stock_num,
                                             'create_person' => session('admin.nickname'),
                                             'create_time' => time(),
@@ -472,16 +472,16 @@ class LogisticsInfo extends Backend
                                         //插入日志表
                                         (new StockLog())->setData([
                                             'type' => 2,
-                                            'site' => $val['website_type'],
+                                            'site' => $vall['website_type'],
                                             'modular' => 10,
                                             //采购单签收
                                             'change_type' => 24,
-                                            'sku' => $v['sku'],
-                                            'public_id' => $row['purchase_id'],
+                                            'sku' => $val['sku'],
+                                            'public_id' => $v['purchase_id'],
                                             'source' => 1,
-                                            'on_way_stock_before' => $item_platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->value('plat_on_way_stock'),
+                                            'on_way_stock_before' => $item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->value('plat_on_way_stock'),
                                             'on_way_stock_change' => -$num,
-                                            'wait_instock_num_before' => $item_platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->value('wait_instock_num'),
+                                            'wait_instock_num_before' => $item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->value('wait_instock_num'),
                                             'wait_instock_num_change' => -$num,
                                             'create_person' => session('admin.nickname'),
                                             'create_time' => time(),
@@ -540,16 +540,16 @@ class LogisticsInfo extends Backend
                                             //插入日志表
                                             (new StockLog())->setData([
                                                 'type' => 2,
-                                                'site' => $val['website_type'],
+                                                'site' => $vall['website_type'],
                                                 'modular' => 10,
                                                 //采购单签收
                                                 'change_type' => 24,
-                                                'sku' => $v['sku'],
-                                                'public_id' => $row['purchase_id'],
+                                                'sku' => $val['sku'],
+                                                'public_id' => $v['purchase_id'],
                                                 'source' => 1,
-                                                'on_way_stock_before' => $item_platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->value('plat_on_way_stock'),
+                                                'on_way_stock_before' => $item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->value('plat_on_way_stock'),
                                                 'on_way_stock_change' => -$stock_num,
-                                                'wait_instock_num_before' => $item_platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->value('wait_instock_num'),
+                                                'wait_instock_num_before' => $item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->value('wait_instock_num'),
                                                 'wait_instock_num_change' => $stock_num,
                                                 'create_person' => session('admin.nickname'),
                                                 'create_time' => time(),
@@ -566,16 +566,16 @@ class LogisticsInfo extends Backend
                                             //插入日志表
                                             (new StockLog())->setData([
                                                 'type' => 2,
-                                                'site' => $val['website_type'],
+                                                'site' => $vall['website_type'],
                                                 'modular' => 10,
                                                 //采购单签收
                                                 'change_type' => 24,
-                                                'sku' => $v['sku'],
-                                                'public_id' => $row['purchase_id'],
+                                                'sku' => $val['sku'],
+                                                'public_id' => $v['purchase_id'],
                                                 'source' => 1,
-                                                'on_way_stock_before' => $item_platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->value('plat_on_way_stock'),
+                                                'on_way_stock_before' => $item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->value('plat_on_way_stock'),
                                                 'on_way_stock_change' => -$num,
-                                                'wait_instock_num_before' => $item_platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->value('wait_instock_num'),
+                                                'wait_instock_num_before' => $item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->value('wait_instock_num'),
                                                 'wait_instock_num_change' => $num,
                                                 'create_person' => session('admin.nickname'),
                                                 'create_time' => time(),
@@ -617,28 +617,24 @@ class LogisticsInfo extends Backend
                     }
                     $item->commit();
                     $item_platform->commit();
-                    $this->list->commit();
-                    $this->replenish->commit();
+                    $this->purchase->commit();
                     (new StockLog())->commit();
                 } catch (ValidateException $e) {
                     $item->rollback();
                     $item_platform->rollback();
-                    $this->list->rollback();
-                    $this->replenish->rollback();
+                    $this->purchase->rollback();
                     (new StockLog())->rollback();
                     $this->error($e->getMessage());
                 } catch (PDOException $e) {
                     $item->rollback();
                     $item_platform->rollback();
-                    $this->list->rollback();
-                    $this->replenish->rollback();
+                    $this->purchase->rollback();
                     (new StockLog())->rollback();
                     $this->error($e->getMessage());
                 } catch (Exception $e) {
                     $item->rollback();
                     $item_platform->rollback();
-                    $this->list->rollback();
-                    $this->replenish->rollback();
+                    $this->purchase->rollback();
                     (new StockLog())->rollback();
                     $this->error($e->getMessage());
                 }
