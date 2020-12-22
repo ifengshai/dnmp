@@ -1770,7 +1770,7 @@ class Distribution extends Backend
      */
     function legacy_data()
     {
-        ini_set('memory_limit', '512M');
+        ini_set('memory_limit', '1024M');
         //站点列表
         $site_arr = [
             1 => [
@@ -1820,7 +1820,7 @@ class Distribution extends Backend
                ')
                 ->where([
                     'custom_is_delivery_new' => 1,
-                    //                    'custom_match_delivery_created_at_new' => ['between', ['2018-01-01', '2020-10-01']]
+                    'custom_match_delivery_created_at_new' => ['between', ['2018-01-01', '2019-10-01']]
                 ])
                 ->select();
 
