@@ -1511,4 +1511,20 @@ class Test extends Backend
         }
         echo "ok";
     }
+
+
+    /**
+     * 清除无用库存
+     */
+    public function set_sku_stock()
+    {
+        $skus = Db::table('fa_zz_temp2')->column('sku');
+        $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
+        $this->item = new \app\admin\model\itemmanage\Item;
+        $this->item
+            ->where(['sku' => ['not in', $skus], 'category_id' => ['<>', 43], 'available_stock' => ['>', 0]])
+            ->update(['stock' => 0, 'available_stock' => 0, 'distribution_occupy_stock' => 0]);
+            
+        $this->itemplatformsku->where(['sku' => ['not in', $skus], 'stock' => ['>', 0]])->where(['sku' => ['not like', '%price%']])->update(['stock' => 0]);
+    }
 }
