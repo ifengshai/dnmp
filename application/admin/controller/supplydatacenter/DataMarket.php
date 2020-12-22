@@ -51,7 +51,7 @@ class DataMarket extends Backend
         //仓库指标总览
         $stock_measure_overview = $this->stock_measure_overview($time_str);
         //库存分级概况
-        $stock_level_overview = $this->stock_level_overview();
+        $stock_level_overview = $this->stock_level_overview($time_str);
         //采购概况
         $purchase_overview = $this->purchase_overview($time_str);
 
@@ -190,7 +190,7 @@ class DataMarket extends Backend
             $order_where['created_at'] = ['between', [$start, $end]];  //修改
             $order_where['order_type'] = ['<>', 5];
             $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
-            $order_where['site'] = $order_platform;
+            $order_where['o.site'] = $order_platform;
             //站点订单销售数量
             $order_sales_num = $this->order->alias('o')->join('fa_order_item_option i','o.entity_id=i.order_id')->where($order_where)->sum('i.qty');
             //站点出库单出库数量
@@ -235,11 +235,14 @@ class DataMarket extends Backend
             $month_sales_num = $month_sales_num1+$month_sales_num2;
             //虚拟仓月度进销比
             $arr['virtual_month_in_out_rate'] = $month_sales_num ? round($instock_num/$month_sales_num,2) : 0;
-            return json($arr);
+            $this->success('', '', $arr);
         }
     }
     //库存分级概况
-    public function stock_level_overview(){
+    public function stock_level_overview($time_str){
+        $createat = explode(' ', $time_str);
+        $start = strtotime($createat[0]);
+        $end = strtotime($createat[3]);
         $gradeSkuStock = $this->productGrade->getSkuStock();
         //计算产品等级的数量
         $arr = array(
@@ -303,7 +306,21 @@ class DataMarket extends Backend
         foreach ($arr as $key=>$val){
             $arr[$key]['percent'] = $all_num ? round($val['count']/$all_num,2).'%':0;
             $arr[$key]['stock_percent'] = $all_stock_num ? round($val['stock_num']/$all_stock_num,2).'%':0;
+            /*//库销比
+            $where['grade'] = $val['grade'];
+            $where['is_del'] = 1;
+            $where['category_id'] = ['<>',43];
+            $skus = $this->productGrade->where($where)->column('true_sku');
+            $where['sku'] = ['in', $skus];
+            //实时库存
+            $data['aa_stock_num'] = $this->model->where($where)->value('sum(stock)-sum(distribution_occupy_stock) as result');
 
+            //订单销售数量
+            $order_time_where['created_at'] = ['between', [$start, $end]];  //修改
+            $order_where['order_type'] = ['<>', 5];
+            $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+            $skus = $this->productGrade->where($where)->column('true_sku');
+            $order_sales_num = $this->order->alias('o')->join('fa_order_item_option i','o.entity_id=i.order_id')->where($order_where)->where($order_time_where)->sum('i.qty');*/
         }
         return $arr;
     }
@@ -412,36 +429,44 @@ class DataMarket extends Backend
             }
             $createat = explode(' ', $time_str);
             $date = $this->getDateFromRange($createat[0],$createat[3]);
+            $arr = array();
+            foreach ($date as $key=>$value){
+                $arr[$key]['day'] = $value;
+                //查询该时间段的订单
+                $start = strtotime($value);
+                $end = strtotime($value.' 23:59:59');
 
-            //所选时间段，每天订单发出数量；订单发出未超时订单、超时订单堆叠图；
-            /*$this->process->where()->
-            fa_order_item_process*/
-           /* $where['create_time'] = ['between', [$createat[0], $createat[3]]];
+                $where['p.complete_time'] = ['between',[$start,$end]];
+                $map1['p.order_prescription_type'] = 1;
+                $map2['p.order_prescription_type'] = 2;
+                $map3['p.order_prescription_type'] = 3;
+                $sql1 = $this->process->alias('p')->join('fa_order o','p.order_id=o.entity_id')->field('p.complete_time - o.payment_time AS total')->where($where)->where($map1)->group('p.order_id')->buildSql();
+                $arr1 = $this->process->table([$sql1=>'t2'])->field('sum( IF ( total > 24, 1, 0) ) AS a,sum( IF ( total <= 24, 1, 0) ) AS b')->select();
 
-            $list = $this->warehouse_model->where($where)
-                ->field('all_purchase_num,create_date,all_purchase_price')
-                ->order('create_date asc')
-                ->select();
-            $warehouse_data = collection($list)->toArray();
-            //全部采购单
-            $barcloumndata = array_column($warehouse_data, 'all_purchase_num');
-            $linecloumndata = array_column($warehouse_data, 'all_purchase_price');*/
+                $sql2 = $this->process->alias('p')->join('fa_order o','p.order_id=o.entity_id')->field('p.complete_time - o.payment_time AS total')->where($where)->where($map2)->group('p.order_id')->buildSql();
+                $arr2 = $this->process->table([$sql2=>'t2'])->field('sum( IF ( total > 72, 1, 0) ) AS a,sum( IF ( total <= 72, 1, 0) ) AS b')->select();
 
-            $json['xColumnName'] = $date;
+                $sql3 = $this->process->alias('p')->join('fa_order o','p.order_id=o.entity_id')->field('p.complete_time - o.payment_time AS total')->where($where)->where($map3)->group('p.order_id')->buildSql();
+                $arr3 = $this->process->table([$sql3=>'t2'])->field('sum( IF ( total > 168, 1, 0) ) AS a,sum( IF ( total <= 168, 1, 0) ) AS b')->select();
+                $timeout_count = $arr1[0]['a'] + $arr2[0]['a'] + $arr3[0]['a'];
+                $untimeout_count = $arr1[0]['b'] + $arr2[0]['b'] + $arr3[0]['b'];
+                $arr[$key]['timeout_count'] = $timeout_count;
+                $arr[$key]['untimeout_count'] = $untimeout_count;
+            }
+            $json['xColumnName'] = array_column($arr,'day');
             $json['columnData'] = [
                 [
                     'type' => 'bar',
-                    'data' => [60, 72, 71, 74, 190, 130, 110],
+                    'data' => array_column($arr,'timeout_count'),
                     'name' => '超时订单',
                     'stack'=>'订单'
                 ],
                 [
                     'type' => 'bar',
-                    'data' => [62, 82, 91, 84, 109, 110, 120],
+                    'data' => array_column($arr,'untimeout_count'),
                     'name' => '未超时订单',
                     'stack'=>'订单'
                 ],
-
             ];
             return json(['code' => 1, 'data' => $json]);
         }

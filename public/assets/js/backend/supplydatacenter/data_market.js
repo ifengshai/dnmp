@@ -5,6 +5,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
             Controller.api.formatter.daterangepicker($("div[role=form]"));
             //订单数据概况折线图
             //Controller.api.formatter.line_chart();
+            stock_measure_overview_platform();
             Controller.api.formatter.line_histogram();
             Controller.api.formatter.order_send_overview();
             Controller.api.formatter.process_overview();
@@ -276,36 +277,13 @@ function stock_measure_overview_platform() {
         url: 'supplydatacenter/data_market/stock_measure_overview_platform',
         data: { order_platform: order_platform, time_str: time_str}
     }, function (data, ret) {
-        var order_num = ret.data.order_num;
-        var order_unit_price = ret.data.order_unit_price;
-        var sales_total_money = ret.data.sales_total_money;
-        var shipping_total_money = ret.data.shipping_total_money;
-        var replacement_order_num = ret.data.replacement_order_num;
-        var replacement_order_total = ret.data.replacement_order_total;
-        var online_celebrity_order_num = ret.data.online_celebrity_order_num;
-        var online_celebrity_order_total = ret.data.online_celebrity_order_total;
-        if(compare_time_str.length > 0){
-            $('.rate_class').show();
-        }
-        if(compare_time_str.length <= 0){
-            $('.rate_class').hide();
-        }
-        $('#huan_order_num').html(huan_rate1+order_num.contrast_order_num);
-        $('#order_unit_price').html(order_unit_price.order_unit_price);
-        if(order_unit_price.same_order_unit_price >= 0){
-            var same_rate2 = '<img src="/shangsheng.png">';
-        }else{
-            var same_rate2 = '<img src="/xiadie.png">';
-        }
-        $('#same_order_unit_price').html(same_rate2+order_unit_price.same_order_unit_price);
+        var virtual_turnover_rate = ret.data.virtual_turnover_rate;
+        var virtual_turnover_days_rate = ret.data.virtual_turnover_days_rate;
+        var virtual_month_in_out_rate = ret.data.virtual_month_in_out_rate;
         
-        $('#replacement_order_num').html(replacement_order_num.replacement_order_num);
-        $('#replacement_order_total').html(replacement_order_total.replacement_order_total);
-        $('#online_celebrity_order_num').html(online_celebrity_order_num.online_celebrity_order_num);
-        $('#online_celebrity_order_total').html(online_celebrity_order_total.online_celebrity_order_total);
-       
-        //国家地域分布
-        $("#country_info").html(ret.data.country_str);
+        $('#virtual_turnover_rate').html(virtual_turnover_rate);
+        $('#virtual_turnover_days_rate').html(virtual_turnover_days_rate);
+        $('#virtual_month_in_out_rate').html(virtual_month_in_out_rate);
         return false;
     }, function (data, ret) {
         Layer.alert(ret.msg);
