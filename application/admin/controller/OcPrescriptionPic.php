@@ -65,7 +65,7 @@ class OcPrescriptionPic extends Backend
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
 
             $total = $model->table('oc_prescription_pic')->where($where)->count();
-            $list = $model->table('oc_prescription_pic')->where($where)->order('id desc')->limit(10)->select();
+            $list = $model->table('oc_prescription_pic')->where($where)->order('id desc')->limit($offset, $limit)->select();
 
             foreach ($list as $key=>$item){
 
