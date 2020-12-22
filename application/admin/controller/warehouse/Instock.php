@@ -493,7 +493,7 @@ class Instock extends Backend
         (new StockLog())->startTrans();
 
         try {
-            $data['create_person'] = session('admin.nickname');
+            $data['check_person'] = session('admin.nickname');
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
 
             if ($data['status'] == 2) {

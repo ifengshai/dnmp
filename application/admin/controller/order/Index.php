@@ -4,7 +4,6 @@ namespace app\admin\controller\order;
 
 use app\common\controller\Backend;
 use fast\Trackingmore;
-use think\Log;
 use Util\NihaoPrescriptionDetailHelper;
 use Util\ZeeloolPrescriptionDetailHelper;
 use Util\VooguemePrescriptionDetailHelper;
@@ -44,6 +43,9 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
         $this->zeelool_de = new \app\admin\model\order\order\ZeeloolDe;
         $this->zeelool_jp = new \app\admin\model\order\order\ZeeloolJp;
         $this->ordernodedeltail = new \app\admin\model\order\order\Ordernodedeltail;
+
+        $this->order = new \app\admin\model\order\order\NewOrder();
+        $this->orderitemoption = new \app\admin\model\order\order\NewOrderItemOption();
     }
 
     /**
@@ -52,11 +54,96 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
      * 需要将application/admin/library/traits/Backend.php中对应的方法复制到当前控制器,然后进行修改
      */
 
+    /**
+     * 订单列表
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/11/16 09:42:29 
+     * @return void
+     */
+    public function index()
+    {
+        //设置过滤方法
+        $this->request->filter(['strip_tags']);
+        if ($this->request->isAjax()) {
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
+            }
+
+            $filter = json_decode($this->request->get('filter'), true);
+            //默认Z站数据
+            if (!$filter['site']) {
+                $map['site'] = 1;
+            }
+
+            // //SKU搜索
+            // if ($filter['sku']) {
+            //     $smap['sku'] = ['like', $filter['sku'] . '%'];
+            //     if ($filter['status']) {
+            //         $smap['status'] = ['in', $filter['status']];
+            //     }
+            //     $ids = $this->orderitemoption->where();
+            //     $map['entity_id'] = ['in', $ids];
+            //     unset($filter['sku']);
+            //     $this->request->get(['filter' => json_encode($filter)]);
+            // }
+
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $total = $this->order
+                ->where($where)
+                ->where($map)
+                ->order($sort, $order)
+                ->count();
+
+            $list = $this->order
+                ->where($where)
+                ->where($map)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();
+
+            $list = collection($list)->toArray();
+
+            $arr = [
+                'Business express(4-7 business days)',
+                'Expedited',
+                'Business express(7-14 Days)',
+                'Business express(7-12 Days)',
+                'Business express',
+                'Business express (7-12 days)',
+                'Business express(7-12 days)',
+                'Express Shipping (3-5 Days)',
+                'Express Shipping (5-8Days)',
+                'Express Shipping (3-5 Business Days)',
+                'Express Shipping (5-8 Business Days)',
+                'Business Express(7-12 Days)',
+                'Business express(7-12 business days)'
+            ];
+            foreach ($list as &$v) {
+                if ($v['shipping_method'] == 'tablerate_bestway') {
+                    $v['label'] = 1;
+                } else {
+                    $v['label'] = 0;
+                }
+                $v['created_at'] = date('Y-m-d H:i:s', $v['created_at']);
+            }
+            unset($v);
+
+            $result = array("total" => $total, "rows" => $list);
+
+            return json($result);
+        }
+        //选项卡
+        $this->assign('getTabList', $this->order->getTabList());
+        return $this->view->fetch();
+    }
 
     /**
      * 查看
      */
-    public function index()
+    public function index_bak()
     {
         $label = $this->request->get('label', 1);
         //设置过滤方法
@@ -158,7 +245,6 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                 } else {
                     $v['label'] = 0;
                 }
-                $v['site'] = $label;
             }
             unset($v);
 
@@ -172,170 +258,22 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
     }
 
     /**
-     * 详情
+     * 订单详情
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/11/16 09:42:40 
+     * @param [type] $ids
+     * @return void
      */
     public function detail($ids = null)
     {
         if ($_POST){
-            $data  = input('param.');
-            $value['order_id'] = $data['ids'];
-            $count = count($data['item_id']);
-            for ($i= 0;$i<$count;$i++) {
-                $value['order_items'][$i]['order_item_id'] = $data['item_id'][$i];
-                $value['order_items'][$i]['od_sph'] = $data['od_sph'][$i];
-                $value['order_items'][$i]['od_cyl'] = $data['od_cyl'][$i];
-                $value['order_items'][$i]['od_axis'] = $data['od_axis'][$i];
-                $value['order_items'][$i]['os_sph']= $data['os_sph'][$i];
-                $value['order_items'][$i]['os_cyl'] = $data['os_cyl'][$i];
-                $value['order_items'][$i]['os_axis'] = $data['os_axis'][$i];
-
-                if ($data['pd_l'][$i] ==null && $data['pd_r'][$i] ){
-                    $value['order_items'][$i]['pd'] = $data['pd_r'][$i];
-                }else{
-                    $value['order_items'][$i]['pd_r'] = $data['pd_r'][$i];
-                    $value['order_items'][$i]['pd_l'] = $data['pd_l'][$i];
-                    $value['order_items'][$i]['pdcheck'] = 'on';
-                }
-                $value['order_items'][$i]['od_pv'] = $data['od_pv'][$i];
-                $value['order_items'][$i]['os_pv'] = $data['os_pv'][$i];
-                $value['order_items'][$i]['od_bd'] = $data['od_bd'][$i];
-                $value['order_items'][$i]['os_bd'] = $data['os_bd'][$i];
-                $value['order_items'][$i]['od_pv_r'] = $data['od_pv_r'][$i];
-                $value['order_items'][$i]['os_pv_r'] = $data['os_pv_r'][$i];
-                $value['order_items'][$i]['od_bd_r'] = $data['od_bd_r'][$i];
-                $value['order_items'][$i]['os_bd_r'] = $data['os_bd_r'][$i];
-                $value['order_items'][$i]['os_add'] = $data['os_add'][$i];
-                $value['order_items'][$i]['od_add'] = $data['od_add'][$i];
-                if ($data['od_pv'][$i] !== null && $data['od_pv_r'][$i] !==null && $data['os_pv'][$i] !== null && $data['os_pv_r'][$i]){
-                    $value['order_items'][$i]['prismcheck'] = 'on';
-                }else{
-                    $value['order_items'][$i]['prismcheck'] = '';
-                }
-            }
-
-            //请求接口
-            $url = config('url.esz_url').'magic/order/prescriptionPicCheck';
-            $curl = curl_init();
-            curl_setopt($curl, CURLOPT_URL, $url);
-            curl_setopt($curl, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
-            curl_setopt($curl, CURLOPT_HEADER, 0);
-            curl_setopt($curl, CURLOPT_POST, true);
-            curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($value));
-            curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
-            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($curl, CURLOPT_TIMEOUT, 20);
-            $content =json_decode(curl_exec($curl),true);
-            curl_close($curl);
-            Log::write("处方接口请求");
-            Log::write($content);
-            Log::write($value);
-            Log::write($url);
-            if ($content['status'] == 200){
-                $this->success('操作成功');
-            }else{
-                $this->error('操作失败,原因:'.$content['msg']);
-            }
-
-//          for ($i= 0;$i<$count;$i++){
-//             $value[$i]['item_id'] = $data['item_id'][$i];
-//             //获取序列化信息
-//              if ($data['label'] == 1) {
-//                  $info[$i]= unserialize(ZeeloolPrescriptionDetailHelper::get_list_product_options($data['item_id'][$i]));
-//              } elseif ($data['label'] == 2) {
-//                  $info[$i]= unserialize(VooguemePrescriptionDetailHelper::get_list_product_options($data['item_id'][$i]));
-//              } elseif ($data['label'] == 3) {
-//                  $info[$i]= unserialize(NihaoPrescriptionDetailHelper::get_list_product_options($data['item_id'][$i]));
-//              } elseif ($data['label'] == 4) {
-//                  $info[$i]= unserialize(WeseeopticalPrescriptionDetailHelper::get_list_product_options($data['item_id'][$i]));
-//              } elseif ($data['label'] == 5) {
-//                  $info[$i]= unserialize(MeeloogPrescriptionDetailHelper::get_list_product_options($data['item_id'][$i]));
-//              } elseif ($data['label'] == 9) {
-//                  $info[$i]= unserialize(ZeeloolEsPrescriptionDetailHelper::get_list_product_options($data['item_id'][$i]));
-//              } elseif ($data['label'] == 10) {
-//                  $info[$i]= unserialize(ZeeloolDePrescriptionDetailHelper::get_list_product_options($data['item_id'][$i]));
-//              } elseif ($data['label'] == 11) {
-//                  $info[$i]= unserialize(ZeeloolJpPrescriptionDetailHelper::get_list_product_options($data['item_id'][$i]));
-//              }
-////             $info[$i]= unserialize(ZeeloolPrescriptionDetailHelper::get_list_product_options($data['item_id'][$i]));
-//             $prescription =  explode('&',$info[$i]['info_buyRequest']['tmplens']['prescription']);
-//             $prescription[0] = $prescription[0];
-//             $prescription[1] = "od_sph=".$data['od_sph'][$i];
-//             $prescription[2] = "od_cyl=". $data['od_cyl'][$i];
-//             $prescription[3] = "od_axis=".$data['od_axis'][$i];
-//             $prescription[4] = "os_sph=". $data['os_sph'][$i];
-//             $prescription[5] = "os_cyl=".$data['os_cyl'][$i];
-//             $prescription[6] = "os_axis=".$data['os_axis'][$i];
-//             $prescription[7] = $prescription[7];
-//             $prescription[8] = "pd_r=";
-//             $prescription[9] = "pd_l=";
-//             $prescription[10] = "pd=".$data['pd'][$i];
-//             $prescription[11] = "os_add=".$data['os_add'][$i];;
-//             $prescription[12] ="od_add=". $data['od_add'][$i];
-//             if ($data['od_pv'][$i] !== null && $data['od_pv_r'][$i] !==null && $data['os_pv'][$i] !== null && $data['os_pv_r'][$i]){
-//                 $prescription[13] ="prismcheck=on";
-//             }else{
-//                 $prescription[13] ="prismcheck=";
-//             }
-//             $prescription[14] = "od_pv=".$data['od_pv'][$i];
-//             $prescription[15] = "od_bd=".$data['od_bd'][$i];
-//             $prescription[16] = "od_pv_r=". $data['od_pv_r'][$i];
-//             $prescription[17] = "od_bd_r=".$data['od_bd_r'][$i];
-//             $prescription[18] = "os_pv=".$data['os_pv'][$i];
-//             $prescription[19] = "os_bd=".$data['os_bd'][$i];
-//             $prescription[20] = "os_pv_r=".$data['os_pv_r'][$i];
-//             $prescription[21] = "os_bd_r=". $data['os_bd_r'][$i];
-//             $prescription[22] = "save=";
-//             $info[$i]['info_buyRequest']['tmplens']['prescription'] =implode('&',$prescription);
-//             //更新对应数据信息
-//             $save_value['product_options'] = serialize($info[$i]);
-//
-//              if ($data['label'] == 1) {
-//                  $change_value = ZeeloolPrescriptionDetailHelper::save_list_product_options($data['item_id'][$i],$save_value);
-//              } elseif ($data['label'] == 2) {
-//                  $change_value = VooguemePrescriptionDetailHelper::save_list_product_options($data['item_id'][$i],$save_value);
-//              } elseif ($data['label'] == 3) {
-//                  $change_value = NihaoPrescriptionDetailHelper::save_list_product_options($data['item_id'][$i],$save_value);
-//              } elseif ($data['label'] == 4) {
-//                  $change_value = WeseeopticalPrescriptionDetailHelper::save_list_product_options($data['item_id'][$i],$save_value);
-//              } elseif ($data['label'] == 5) {
-//                  $change_value = MeeloogPrescriptionDetailHelper::save_list_product_options($data['item_id'][$i],$save_value);
-//              } elseif ($data['label'] == 9) {
-//                  $change_value = ZeeloolEsPrescriptionDetailHelper::save_list_product_options($data['item_id'][$i],$save_value);
-//              } elseif ($data['label'] == 10) {
-//                  $change_value = ZeeloolDePrescriptionDetailHelper::save_list_product_options($data['item_id'][$i],$save_value);
-//              } elseif ($data['label'] == 11) {
-//                  $change_value = ZeeloolJpPrescriptionDetailHelper::save_list_product_options($data['item_id'][$i],$save_value);
-//              }
-//
-//             $change_value = ZeeloolPrescriptionDetailHelper::save_list_product_options($data['item_id'][$i],$save_value);
-//             dump($change_value);die();
-//          }
-
+          $data  = input('param.');
         }
         $ids = $ids ?? $this->request->get('id');
-        //根据传的标签切换对应站点数据库
-        $label = $this->request->get('label', 1);
-        if ($label == 1) {
-            $model = $this->zeelool;
-        } elseif ($label == 2) {
-            $model = $this->voogueme;
-        } elseif ($label == 3) {
-            $model = $this->nihao;
-        } elseif ($label == 4) {
-            $model = $this->weseeoptical;
-        } elseif ($label == 5) {
-            $model = $this->meeloog;
-        } elseif ($label == 9) {
-            $model = $this->zeelool_es;
-        } elseif ($label == 10) {
-            $model = $this->zeelool_de;
-        } elseif ($label == 11) {
-            $model = $this->zeelool_jp;
-        }
-
         //查询订单详情
-        $row = $model->where('entity_id', '=', $ids)->find();
-
+        $row = $this->order->get($ids);
         if (!$row) {
             $this->error(__('No Results were found'));
         }
@@ -346,118 +284,43 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
             }
         }
 
-        //获取订单收货信息
-        $address = $this->zeelool->getOrderDetail($label, $ids);
-
-        //获取订单处方信息
-        if ($label == 1) {
-            $goods = ZeeloolPrescriptionDetailHelper::get_list_by_entity_ids($ids);
-        } elseif ($label == 2) {
-            $goods = VooguemePrescriptionDetailHelper::get_list_by_entity_ids($ids);
-        } elseif ($label == 3) {
-            $goods = NihaoPrescriptionDetailHelper::get_list_by_entity_ids($ids);
-        } elseif ($label == 4) {
-            $goods = WeseeopticalPrescriptionDetailHelper::get_list_by_entity_ids($ids);
-        } elseif ($label == 5) {
-            $goods = MeeloogPrescriptionDetailHelper::get_list_by_entity_ids($ids);
-        } elseif ($label == 9) {
-            $goods = ZeeloolEsPrescriptionDetailHelper::get_list_by_entity_ids($ids);
-        } elseif ($label == 10) {
-            $goods = ZeeloolDePrescriptionDetailHelper::get_list_by_entity_ids($ids);
-        } elseif ($label == 11) {
-            $goods = ZeeloolJpPrescriptionDetailHelper::get_list_by_entity_ids($ids);
-        }
         //获取支付信息
-        $pay = $this->zeelool->getPayDetail($label, $ids);
-        $this->view->assign("label", $label);
+        $pay = $this->zeelool->getPayDetail($row->site, $row->entity_id);
+
+        //订单明细数据
+        $item = $this->orderitemoption->where('order_id', $ids)->select();
+
+        $this->view->assign("item", $item);
         $this->view->assign("row", $row);
-        $this->view->assign("address", $address);
-        $this->view->assign("goods", $goods);
         $this->view->assign("pay", $pay);
-        $this->view->assign("label", $label);
         return $this->view->fetch();
     }
 
     /**
-     * 订单信息2
+     * 订单节点
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/11/16 09:42:52 
+     * @param [type] $order_number
+     * @return void
      */
     public function orderDetail($order_number = null)
     {
         $order_number = $order_number ?? $this->request->get('order_number');
-        //查询订单详情
+        //查询订单详情		
         $ruleList = collection($this->ordernodedeltail->where(['order_number' => ['eq', $order_number]])->order('node_type asc')->field('node_type,create_time,handle_user_name,shipment_type,track_number')->select())->toArray();
 
         $new_ruleList = array_column($ruleList, NULL, 'node_type');
         $key_list = array_keys($new_ruleList);
 
-        $entity_id = $this->request->get('id');
         $id = $this->request->get('id');
         $label = $this->request->get('label', 1);
-        $this->view->assign(compact('order_number', 'entity_id', 'label'));
+        $this->view->assign(compact('order_number', 'id', 'label'));
         $this->view->assign("list", $new_ruleList);
         $this->view->assign("key_list", $key_list);
-        $this->view->assign("id", $id);
         return $this->view->fetch();
     }
-
-    /**
-     * 订单执行信息
-     */
-    public function checkDetail($ids = null)
-    {
-        $ids = $ids ?? $this->request->get('id');
-        //根据传的标签切换对应站点数据库
-        $label = $this->request->get('label', 1);
-        if ($label == 1) {
-            $model = $this->zeelool;
-        } elseif ($label == 2) {
-            $model = $this->voogueme;
-        } elseif ($label == 3) {
-            $model = $this->nihao;
-        } elseif ($label == 4) {
-            $model = $this->weseeoptical;
-        } elseif ($label == 5) {
-            $model = $this->meeloog;
-        } elseif ($label == 9) {
-            $model = $this->zeelool_es;
-        } elseif ($label == 10) {
-            $model = $this->zeelool_de;
-        } elseif ($label == 11) {
-            $model = $this->zeelool_jp;
-        }
-
-        //查询订单详情
-        $row = $model->where('entity_id', '=', $ids)->find();
-        if (!$row) {
-            $this->error(__('No Results were found'));
-        }
-        //查询订单快递单号
-        $express = $this->zeelool->getExpressData($label, $ids);
-
-        if ($express) {
-            //缓存一个小时
-            $express_data = session('order_checkDetail_' . $express['track_number'] . '_' . date('YmdH'));
-            if (!$express_data) {
-                try {
-                    //查询物流信息
-                    $title = str_replace(' ', '-', $express['title']);
-                    $track = new Trackingmore();
-                    $track = $track->getRealtimeTrackingResults($title, $express['track_number']);
-                    $express_data = $track['data']['items'][0];
-                    session('order_checkDetail_' . $express['track_number'] . '_' . date('YmdH'), $express_data);
-                } catch (\Exception $e) {
-                    $this->error($e->getMessage());
-                }
-            }
-
-            $this->view->assign("express_data", $express_data);
-        }
-
-        $this->view->assign("row", $row);
-        $this->view->assign("label", $label);
-        return $this->view->fetch();
-    }
-
 
     /**
      * 订单成本核算 create@lsw
@@ -523,7 +386,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                 ->column('entity_id');
 
             $costInfo = $model->getOrderCostInfo($totalId, $thisPageId);
-
+         
             $list = collection($list)->toArray();
 
             foreach ($list as $k => $v) {
@@ -796,73 +659,25 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
         $drawing->finish(\BCGDrawing::IMG_FORMAT_PNG);
     }
 
-    //批量打印标签
+    /**
+     * 批量打印标签
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/11/16 09:58:44 
+     * @return void
+     */
     public function batch_print_label_new()
     {
-        //根据传的标签切换对应站点数据库
-        $label = $this->request->get('label', 1);
-        switch ($label) {
-            case 1:
-                $db = 'database.db_zeelool';
-                $model = $this->zeelool;
-                break;
-            case 2:
-                $db = 'database.db_voogueme';
-                $model = $this->voogueme;
-                break;
-            case 3:
-                $db = 'database.db_nihao';
-                $model = $this->nihao;
-                break;
-            case 4:
-                $db = 'database.db_weseeoptical';
-                $model = $this->weseeoptical;
-                break;
-            case 5:
-                $db = 'database.db_meeloog';
-                $model = $this->meeloog;
-                break;
-            case 9:
-                $db = 'database.db_zeelool_es';
-                $model = $this->zeelool_es;
-                break;
-            case 10:
-                $db = 'database.db_zeelool_de';
-                $model = $this->zeelool_de;
-                break;
-            case 11:
-                $db = 'database.db_zeelool_jp';
-                $model = $this->zeelool_jp;
-                break;
-            default:
-                return false;
-                break;
-        }
         ob_start();
-        $entity_ids = rtrim(input('id_params'), ',');
+        $ids = rtrim(input('id_params'), ',');
+        if (!$ids) {
+            return $this->error('缺少参数', url('index?ref=addtabs'));
+        }
 
-        if ($entity_ids) {
+        $row = $this->order->where(['id' => ['in', $ids]])->where(['country_id' => ['in', ['US', 'PR']]])->select();
 
-            //判断是否为美国且 非商业快递
-            $smap['parent_id'] = ['in', $entity_ids];
-            $smap['country_id'] = ['not in', ['US', 'PR']];
-            $smap['address_type'] = 'shipping';
-            $count = Db::connect($db)
-                ->table('sales_flat_order_address')
-                ->where($smap)
-                ->count(1);
-            if ($count > 0) {
-                return $this->error('存在非美国的订单', url('index?ref=addtabs&label=' . $label));
-            }
-
-
-            $processing_order_querySql = "select sfo.shipping_description,sfo.increment_id,round(sfo.total_qty_ordered,0) NUM,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.qty_ordered,sfo.created_at
-from sales_flat_order_item sfoi
-left join sales_flat_order sfo on  sfoi.order_id=sfo.entity_id 
-where sfo.`status` in ('processing','creditcard_proccessing','free_processing','complete','paypal_reversed','paypal_canceled_reversal') and sfo.entity_id in($entity_ids)
-order by NUM asc;";
-            $processing_order_list = $model->query($processing_order_querySql);
-            $file_header = <<<EOF
+        $file_header = <<<EOF
                 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <style>
 body{ margin:0; padding:0}
@@ -875,54 +690,52 @@ table.addpro.re tbody td{ position:relative}
 </style>
 EOF;
 
-            $arr = [
-                'Business express(4-7 business days)',
-                'Expedited',
-                'Business express(7-14 Days)',
-                'Business express(7-12 Days)',
-                'Business express',
-                'Business express (7-12 days)',
-                'Business express(7-12 days)',
-                'Express Shipping (3-5 Days)',
-                'Express Shipping (5-8Days)',
-                'Express Shipping (3-5 Business Days)',
-                'Express Shipping (5-8 Business Days)',
-                'Business Express(7-12 Days)'
-            ];
+        $arr = [
+            'Business express(4-7 business days)',
+            'Expedited',
+            'Business express(7-14 Days)',
+            'Business express(7-12 Days)',
+            'Business express',
+            'Business express (7-12 days)',
+            'Business express(7-12 days)',
+            'Express Shipping (3-5 Days)',
+            'Express Shipping (5-8Days)',
+            'Express Shipping (3-5 Business Days)',
+            'Express Shipping (5-8 Business Days)',
+            'Business Express(7-12 Days)'
+        ];
 
-            $file_content = '';
-            $temp_increment_id = 0;
-            foreach ($processing_order_list as $processing_key => $processing_value) {
-                if (in_array($processing_value['shipping_description'], $arr)) {
-                    return $this->error('存在商业快递的订单', url('index?ref=addtabs&label=' . $label));
+        $file_content = '';
+        $temp_increment_id = 0;
+        foreach ($row as $processing_key => $processing_value) {
+            if (in_array($processing_value['shipping_title'], $arr)) {
+                continue;
+            }
+
+            if ($temp_increment_id != $processing_value['increment_id']) {
+                $temp_increment_id = $processing_value['increment_id'];
+
+                $date = substr($processing_value['created_at'], 0, strpos($processing_value['created_at'], " "));
+                $fileName = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "zeelool" . DS . "new" . DS . "$date" . DS . "$temp_increment_id.png";
+                // dump($fileName);
+                $dir = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "zeelool" . DS . "new"  . DS . "$date";
+                if (!file_exists($dir)) {
+                    mkdir($dir, 0777, true);
+                    // echo '创建文件夹$dir成功';
+                } else {
+                    // echo '需创建的文件夹$dir已经存在';
                 }
-
-                if ($temp_increment_id != $processing_value['increment_id']) {
-                    $temp_increment_id = $processing_value['increment_id'];
-
-                    $date = substr($processing_value['created_at'], 0, strpos($processing_value['created_at'], " "));
-                    $fileName = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "zeelool" . DS . "new" . DS . "$date" . DS . "$temp_increment_id.png";
-                    // dump($fileName);
-                    $dir = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "zeelool" . DS . "new"  . DS . "$date";
-                    if (!file_exists($dir)) {
-                        mkdir($dir, 0777, true);
-                        // echo '创建文件夹$dir成功';
-                    } else {
-                        // echo '需创建的文件夹$dir已经存在';
-                    }
-                    $img_url = "/uploads/printOrder/zeelool/new/$date/$temp_increment_id.png";
-                    //生成条形码
-                    $this->generate_barcode_new($temp_increment_id, $fileName);
-                    // echo '<br>需要打印'.$temp_increment_id;
-                    $file_content .= "<div  class = 'single_box'>
+                $img_url = "/uploads/printOrder/zeelool/new/$date/$temp_increment_id.png";
+                //生成条形码
+                $this->generate_barcode_new($temp_increment_id, $fileName);
+                $file_content .= "<div  class = 'single_box'>
                 <table width='400mm' height='102px' border='0' cellspacing='0' cellpadding='0' class='addpro' style='margin:0px auto;margin-top:0px;padding:0px;'>
                 <tr>
                 <td rowspan='5' colspan='3' style='padding:10px;'><img src='" . $img_url . "' height='80%'><br></td></tr>                
                 </table></div>";
-                }
             }
-            echo $file_header . $file_content;
         }
+        echo $file_header . $file_content;
     }
 
     /**
@@ -930,7 +743,7 @@ EOF;
      *
      * @Description
      * @author wpl
-     * @since 2020/02/28 14:45:39
+     * @since 2020/02/28 14:45:39 
      * @return void
      */
     public function batch_export_xls()
@@ -1367,7 +1180,13 @@ EOF;
         $writer = new $class($spreadsheet);
 
         $writer->save('php://output');
+
     }
+
+
+
+
+
 
     /**
      * 获取镜架尺寸

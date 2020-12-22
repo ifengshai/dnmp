@@ -72,14 +72,7 @@ class ZeeloolPrescriptionDetailHelper
 			left join sales_flat_order sfo on sfoi.order_id=sfo.entity_id 
 			where sfo.entity_id in($entity_id)";
 			$item_list = Db::connect('database.db_zeelool')->query($querySql);
-//			dump($item_list);
-//			$a  = unserialize($item_list[0]['product_options']);
-//			dump($a);die();
-//			$c = explode('&',$a['info_buyRequest']['tmplens']['prescription']);
-//
-//			dump($c);die();
-//			dump(unserialize($a['info_buyRequest']['tmplens']['prescription']));
-
+		
 			// 如果为空，则直接返回false
 			if (empty($item_list)) {
 				return false;
@@ -89,24 +82,6 @@ class ZeeloolPrescriptionDetailHelper
 		}
 		return false;
 	}
-	/*
-	 *获取一个订单列表中的product_options 字段
-	 *
-	 **/
-    public static function get_list_product_options($item_id){
-        if ($item_id){
-            $item_list = Db::connect('database.db_zeelool')->table('sales_flat_order_item')->where('item_id',$item_id)->value('product_options');
-            return $item_list;
-        }
-    }
-    /*
-     * 更新订单列表中字段
-     * */
-    public static function save_list_product_options($item_id,$value){
-        $save_value = Db::connect('database.db_zeelool')->table('sales_flat_order_item')->where('item_id',$item_id)->update($value);
-        return $save_value;
-    }
-
 
 	/*
 	* 获取订单列表的处方明细  依据 increment_ids
@@ -156,12 +131,6 @@ class ZeeloolPrescriptionDetailHelper
 			$items[$item_key]['original_price'] = $item_value['original_price'];
 			$items[$item_key]['base_row_total'] = $item_value['base_row_total'];
 			$product_options = unserialize($item_value['product_options']);
-		    if ( $product_options['info_buyRequest']['tmplens']['prescription_pic_checked'] === false &&
-                $product_options['info_buyRequest']['tmplens']['prescription_pic_id'] > 0){
-                $items[$item_key]['to_examine'] = true;
-            }else{
-                $items[$item_key]['to_examine'] = true;
-            }
 			//判断是否为新处方
 			if ($item_value['is_new_version'] == 1) {
 				$items[$item_key]['coatiing_name'] = substr($product_options['info_buyRequest']['tmplens']['coating_name'], 0, 100);
