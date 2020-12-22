@@ -1149,7 +1149,7 @@ class Test extends Backend
                             $recept_data['measure_id'] = $id;
                             Db::table('fa_work_order_recept')->insertGetId($recept_data);
 
-
+                            unset($val1['id']);
                             $change_sku_data = $val1;
                             $change_sku_data['measure_id'] = $id;
                             $change_sku_data['item_order_number'] = $val['item_order_number'];
@@ -1186,6 +1186,7 @@ class Test extends Backend
                             $recept_data['measure_id'] = $id;
                             Db::table('fa_work_order_recept')->insertGetId($recept_data);
 
+                            unset($v2['id']);
                             $change_sku_data = $v2;
                             $change_sku_data['measure_id'] = $id;
                             $change_sku_data['item_order_number'] = $v3['item_order_number'];
@@ -1222,6 +1223,7 @@ class Test extends Backend
                             $recept_data['measure_id'] = $id;
                             Db::table('fa_work_order_recept')->insertGetId($recept_data);
 
+                            unset($v2['id']);
                             $change_sku_data = $v2;
                             $change_sku_data['measure_id'] = $id;
                             $change_sku_data['item_order_number'] = $v3['item_order_number'];
