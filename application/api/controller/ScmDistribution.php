@@ -810,7 +810,7 @@ class ScmDistribution extends Scm
             $order_item_true_sku = $change_sku;
         }
 
-        $sku_arr = explode(',',$order_item_true_sku);
+        $sku_arr = explode('-',$order_item_true_sku);
         if(2 < count($sku_arr)){
             $order_item_true_sku = $sku_arr[0] . '-' . $sku_arr[1];
         }
@@ -1124,17 +1124,26 @@ class ScmDistribution extends Scm
                 3=>['status'=>3,'name'=>'质检拒绝：镜片报损'],
                 4=>['status'=>5,'name'=>'质检拒绝：logo调整']
             ];
+            $status = $status_arr[$reason]['status'];
 
             $this->_new_order_item_process->startTrans();
             $this->_item->startTrans();
             $this->_item_platform_sku->startTrans();
             $this->_stock_log->startTrans();
             try {
+                $save_data['distribution_status'] = $status;
+                //如果回退到待加工步骤之前，清空定制片库位ID及定制片处理状态
+                if (4 > $status) {
+                    $save_data['temporary_house_id'] = 0;
+                    
+                    $save_data['customize_status'] = 0;
+                }
+
                 //子订单状态回退
                 $this->_new_order_item_process
                     ->allowField(true)
                     ->isUpdate(true, ['id'=>$item_process_info['id']])
-                    ->save(['distribution_status'=>$status_arr[$reason]['status']])
+                    ->save($save_data)
                 ;
 
                 //质检拒绝：镜架报损，扣减可用库存、配货占用、总库存、虚拟仓库存
@@ -1219,7 +1228,6 @@ class ScmDistribution extends Scm
                 $this->error($e->getMessage(), [], 408);
             }
             $this->success('操作成功', [], 200);
-            
         }
     }
 
@@ -1844,11 +1852,16 @@ class ScmDistribution extends Scm
                         ->isUpdate(true, ['order_id' => $order_id,'distribution_status'=>['neq', 0]])
                         ->save(['distribution_status'=>7]);
                 } else {
-                    //配错镜框，回退子单为待配货
+                    //配错镜框，回退子单为待配货，清空定制片库位ID及定制片处理状态
                     $this->_new_order_item_process
                         ->allowField(true)
                         ->isUpdate(true, ['order_id' => $order_id,'distribution_status'=>['neq', 0]])
-                        ->save(['distribution_status'=>2]);
+                        ->save([
+                            'distribution_status'=>2,
+
+                            'temporary_house_id'=>0,
+                            'customize_status'=>0
+                        ]);
 
                     //扣减占用库存、配货占用、总库存、虚拟仓库存
                     foreach($item_info as $key => $value){

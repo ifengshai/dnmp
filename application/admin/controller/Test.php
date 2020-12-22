@@ -795,7 +795,6 @@ class Test extends Backend
                 Db::name('zzzz_temp')->where(['id' => $val['id']])->update(['is_process' => 1]);
             }
             echo $k . "\n";
-            
         }
         echo 'ok';
     }
@@ -1103,11 +1102,11 @@ class Test extends Backend
         /**
          * 判断措施是否为 id = 3主单取消   changesku表需插入所有子订单
          * 判断措施如果id = 19 更改镜框 需插入对应sku 所有子订单
-         * 判断措施id = 20 更改镜片 需插入对应sku 所有子订单
+         * 判断措施id = 20 更改镜片 需插入对应sku 所有子订单 , 1, 4, 6, 7
          */
         $work = new \app\admin\model\saleaftermanage\WorkOrderList();
         $order = new \app\admin\model\order\order\NewOrder();
-        $list = $work->where(['work_status' => ['in', [0, 1, 4, 6, 7]]])->select();
+        $list = $work->where(['work_status' => ['in', [0]]])->select();
         $list = collection($list)->toArray();
         foreach ($list as $k => $v) {
             //插入主表
