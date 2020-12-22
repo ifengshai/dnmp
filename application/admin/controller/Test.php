@@ -348,73 +348,6 @@ class Test extends Backend
         }
     }
 
-    public function new_track_test2()
-    {
-
-        $order_shipment = Db::name('order_node')->where(['node_type' => 10, 'order_node' => 3, 'shipment_type' => 'USPS'])->select();
-        $order_shipment = collection($order_shipment)->toArray();
-
-        $trackingConnector = new TrackingConnector($this->apiKey);
-
-        foreach ($order_shipment as $k => $v) {
-            //先把主表状态更新为2-7
-            // $update['order_node'] = 2;
-            // $update['node_type'] = 7;
-            // Db::name('order_node')->where('id', $v['id'])->update($update); //更新主表状态
-
-            $title = strtolower(str_replace(' ', '-', $v['title']));
-
-            $carrier = $this->getCarrier($title);
-
-            $trackInfo = $trackingConnector->getTrackInfoMulti([[
-                'number' => $v['track_number'],
-                'carrier' => $carrier['carrierId']
-                /*'number' => 'LO546092713CN',//E邮宝
-                'carrier' => '03011'*/
-                /* 'number' => '3616952791',//DHL
-                'carrier' => '100001' */
-                /* 'number' => '74890988318620573173', //Fedex
-                'carrier' => '100003' */
-                /* 'number' => '92001902551559000101352584', //usps郭伟峰
-                'carrier' => '21051' */
-            ]]);
-
-            $add['site'] = $v['site'];
-            $add['order_id'] = $v['order_id'];
-            $add['order_number'] = $v['order_number'];
-            $add['shipment_type'] = $v['shipment_type'];
-            $add['shipment_data_type'] = $v['shipment_data_type'];
-            $add['track_number'] = $v['track_number'];
-
-            if ($trackInfo['code'] == 0 && $trackInfo['data']['accepted']) {
-                $trackdata = $trackInfo['data']['accepted'][0]['track'];
-
-                if (stripos($v['shipment_type'], 'USPS') !== false) {
-                    if ($v['shipment_data_type'] == 'USPS_1') {
-                        //郭伟峰
-                        $this->usps_1_data($trackdata, $add);
-                    }
-                    if ($v['shipment_data_type'] == 'USPS_2') {
-                        //加诺
-                        $this->usps_2_data($trackdata, $add);
-                    }
-                }
-
-                if (stripos($v['shipment_type'], 'DHL') !== false) {
-                    $this->new_dhl_data($trackdata, $add);
-                }
-
-                if (stripos($v['shipment_type'], 'fede') !== false) {
-                    $this->new_fedex_data($trackdata, $add);
-                }
-            }
-            echo 'site:' . $v['site'] . ';key:' . $k . ';order_id' . $v['order_id'] . "\n";
-            usleep(200000);
-        }
-        echo 'ok';
-    }
-
-
     public function new_track_test()
     {
 
@@ -818,263 +751,155 @@ class Test extends Backend
     }
 
 
+
+
+
+
+
+
+
     /**
-     * 获取订单节点数据
+     * 处理SKU编码 - 入库单
      *
      * @Description
      * @author wpl
-     * @since 2020/05/14 09:55:00 
+     * @since 2020/12/18 11:10:38 
      * @return void
      */
-    public function setOrderNoteDataMeeloog()
+    public function process_sku_number()
     {
-        $this->meeloog = new \app\admin\model\order\order\Meeloog();
-        $users = $this->user->column('id', 'nickname');
-        $field = 'status,custom_print_label,custom_print_label_person,custom_print_label_created_at,custom_is_match_frame,custom_match_frame_person,
-        custom_match_frame_created_at,custom_is_match_lens,custom_match_lens_created_at,custom_match_lens_person,custom_is_send_factory,
-        custom_match_factory_person,custom_match_factory_created_at,custom_is_delivery,custom_match_delivery_person,custom_match_delivery_created_at,
-        custom_order_prescription_type,a.created_at,a.updated_at,b.track_number,b.created_at as create_time,b.title,a.entity_id,a.increment_id,a.custom_order_prescription_type
-        ';
-        $map['a.created_at'] = ['>=', '2020-03-31 00:00:00'];
-        $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal', 'payment_review']];
-        $zeelool_data = $this->meeloog->alias('a')->field($field)
-            ->join(['sales_flat_shipment_track' => 'b'], 'a.entity_id=b.order_id', 'left')
-            ->where($map)->select();
-        foreach ($zeelool_data as $key => $v) {
-            $list = [];
-            $k = 0;
-            //下单
-            $list[$k]['order_node'] = 0;
-            $list[$k]['node_type'] = 0;
-            $list[$k]['content'] = 'Your order has been created.';
-            $list[$k]['create_time'] = $v['created_at'];
-            $list[$k]['site'] = 4;
-            $list[$k]['order_id'] = $v['entity_id'];
-            $list[$k]['order_number'] = $v['increment_id'];
-            $list[$k]['shipment_type'] = '';
-            $list[$k]['track_number'] = '';
-            $list[$k]['handle_user_id'] = 0;
-            $list[$k]['handle_user_name'] = '';
-            $data['order_node'] = 0;
-            $data['node_type'] = 0;
-
-            if (in_array($v['status'], ['processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal', 'payment_review'])) {
-
-                //支付
-                $list[$k + 1]['order_node'] = 0;
-                $list[$k + 1]['node_type'] = 1;
-                $list[$k + 1]['content'] = 'Your payment has been successful.';
-                $list[$k + 1]['create_time'] = $v['updated_at'];
-                $list[$k + 1]['site'] = 4;
-                $list[$k + 1]['order_id'] = $v['entity_id'];
-                $list[$k + 1]['order_number'] = $v['increment_id'];
-                $list[$k + 1]['shipment_type'] = '';
-                $list[$k + 1]['track_number'] = '';
-                $list[$k + 1]['handle_user_id'] = 0;
-                $list[$k + 1]['handle_user_name'] = '';
-
-                $data['order_node'] = 0;
-                $data['node_type'] = 1;
+        $instock = new \app\admin\model\warehouse\Instock();
+        $list = $instock->alias('a')->where(['status' => 2,'type_id' => 1])->field('a.id,a.check_id,b.purchase_id,b.sku,b.in_stock_num')->join(['fa_in_stock_item' => 'b'],'a.id=b.in_stock_id')->order('a.createtime desc')->select();
+        $list = collection($list)->toArray();
+        foreach($list as $k => $v) {
+            //查询对应质检单
+            $check = Db::name('check_order')->where(['id' => $v['check_id']])->find();
+            if ($v['in_stock_num'] < 0) {
+                continue;
             }
+            $res = Db::name('zzzz_temp')->where(['is_process' => 0,'sku' => $v['sku']])->limit($v['in_stock_num'])->select();
+            if (!$res) {
+               continue; 
+            } 
+            foreach($res as $key => $val) {
+                $where['code'] = $val['product_number'];
+                $params['sku'] = $val['sku'];
+                $params['in_stock_id'] = $v['id'];
+                $params['purchase_id'] = $v['purchase_id'];
+                $params['check_id'] = $v['check_id'];
+                $params['is_quantity'] = 1;
+                $params['batch_id'] = $check['batch_id'];
+                $params['logistics_id'] = $check['logistics_id'];
+                Db::name('product_barcode_item')->where($where)->update($params);
 
-            $data['create_time'] = $v['created_at'];
-            $data['site'] = 4;
-            $data['order_id'] = $v['entity_id'];
-            $data['order_number'] = $v['increment_id'];
-            $data['update_time'] = $v['created_at'];
-            //打标签
-            if ($v['custom_print_label'] == 1) {
-                $list[$k + 2]['order_node'] = 1;
-                $list[$k + 2]['node_type'] = 2;
-                $list[$k + 2]['content'] = 'Order is under processing';
-                $list[$k + 2]['create_time'] = $v['custom_print_label_created_at'];
-                $list[$k + 2]['site'] = 4;
-                $list[$k + 2]['order_id'] = $v['entity_id'];
-                $list[$k + 2]['order_number'] = $v['increment_id'];
-                $list[$k + 2]['handle_user_id'] = $users[$v['custom_print_label_person']];
-                $list[$k + 2]['handle_user_name'] = $v['custom_print_label_person'];
-                $list[$k + 2]['shipment_type'] = '';
-                $list[$k + 2]['track_number'] = '';
-
-                $data['order_node'] = 1;
-                $data['node_type'] = 2;
-                $data['update_time'] = $v['custom_print_label_created_at'];
+                Db::name('zzzz_temp')->where(['id' => $val['id']])->update(['is_process' => 1]);
             }
-
-            //判断订单是否为仅镜架
-            if ($v['custom_order_prescription_type'] == 1) {
-                if ($v['custom_is_match_frame'] == 1) {
-                    $list[$k + 3]['order_node'] = 2;
-                    $list[$k + 3]['node_type'] = 3;
-                    $list[$k + 3]['content'] = 'The product(s) is/are ready, waiting for Quality Inspection';
-                    $list[$k + 3]['create_time'] = $v['custom_match_frame_created_at'];
-                    $list[$k + 3]['site'] = 4;
-                    $list[$k + 3]['order_id'] = $v['entity_id'];
-                    $list[$k + 3]['order_number'] = $v['increment_id'];
-                    $list[$k + 3]['handle_user_id'] = $users[$v['custom_match_frame_person']];
-                    $list[$k + 3]['handle_user_name'] = $v['custom_match_frame_person'];
-                    $list[$k + 3]['shipment_type'] = '';
-                    $list[$k + 3]['track_number'] = '';
-
-                    $data['order_node'] = 2;
-                    $data['node_type'] = 3;
-                    $data['update_time'] = $v['custom_match_frame_created_at'];
-                }
-
-                if ($v['custom_is_delivery'] == 1) {
-                    $list[$k + 4]['order_node'] = 2;
-                    $list[$k + 4]['node_type'] = 6;
-                    $list[$k + 4]['content'] = 'Quality Inspection completed, preparing to dispatch this mail piece.';
-                    $list[$k + 4]['create_time'] = $v['custom_match_delivery_created_at'];
-                    $list[$k + 4]['site'] = 4;
-                    $list[$k + 4]['order_id'] = $v['entity_id'];
-                    $list[$k + 4]['order_number'] = $v['increment_id'];
-                    $list[$k + 4]['handle_user_id'] = $users[$v['custom_match_delivery_person']];
-                    $list[$k + 4]['handle_user_name'] = $v['custom_match_delivery_person'];
-                    $list[$k + 4]['shipment_type'] = '';
-                    $list[$k + 4]['track_number'] = '';
-
-                    $data['order_node'] = 2;
-                    $data['node_type'] = 6;
-                    $data['update_time'] = $v['custom_match_delivery_created_at'];
-                }
-
-                if ($v['track_number']) {
-                    $list[$k + 5]['order_node'] = 2;
-                    $list[$k + 5]['node_type'] = 7; //出库
-                    $list[$k + 5]['content']  = 'Leave warehouse, Waiting for being picked up.';
-                    $list[$k + 5]['create_time'] = $v['create_time'];
-                    $list[$k + 5]['site'] = 4;
-                    $list[$k + 5]['order_id'] = $v['entity_id'];
-                    $list[$k + 5]['order_number'] = $v['increment_id'];
-                    $list[$k + 5]['shipment_type'] = $v['title'];
-                    $list[$k + 5]['track_number'] = $v['track_number'];
-                    $list[$k + 5]['handle_user_id'] = 0;
-                    $list[$k + 5]['handle_user_name'] = '';
-
-                    $data['order_node'] = 2;
-                    $data['node_type'] = 7;
-                    $data['update_time'] = $v['create_time'];
-                }
-            } else {
-
-                if ($v['custom_is_match_frame'] == 1) {
-                    $list[$k + 3]['order_node'] = 2;
-                    $list[$k + 3]['node_type'] = 3; //配镜架
-                    $list[$k + 3]['content'] = 'Frame(s) is/are ready, waiting for lenses';
-                    $list[$k + 3]['create_time'] = $v['custom_match_frame_created_at'];
-                    $list[$k + 3]['site'] = 4;
-                    $list[$k + 3]['order_id'] = $v['entity_id'];
-                    $list[$k + 3]['order_number'] = $v['increment_id'];
-                    $list[$k + 3]['handle_user_id'] = $users[$v['custom_match_frame_person']];
-                    $list[$k + 3]['handle_user_name'] = $v['custom_match_frame_person'];
-                    $list[$k + 3]['shipment_type'] = '';
-                    $list[$k + 3]['track_number'] = '';
-
-                    $data['order_node'] = 2;
-                    $data['node_type'] = 3;
-                    $data['update_time'] = $v['custom_match_frame_created_at'];
-                }
-
-                if ($v['custom_is_match_lens'] == 1) {
-                    $list[$k + 4]['order_node'] = 2;
-                    $list[$k + 4]['node_type'] = 4; //配镜片
-                    $list[$k + 4]['content'] = 'Lenses production completed, waiting for customizing';
-                    $list[$k + 4]['create_time'] = $v['custom_match_lens_created_at'];
-                    $list[$k + 4]['site'] = 4;
-                    $list[$k + 4]['order_id'] = $v['entity_id'];
-                    $list[$k + 4]['order_number'] = $v['increment_id'];
-                    $list[$k + 4]['handle_user_id'] = $users[$v['custom_match_lens_person']];
-                    $list[$k + 4]['handle_user_name'] = $v['custom_match_lens_person'];
-                    $list[$k + 4]['shipment_type'] = '';
-                    $list[$k + 4]['track_number'] = '';
-
-                    $data['order_node'] = 2;
-                    $data['node_type'] = 4;
-                    $data['update_time'] = $v['custom_match_lens_created_at'];
-                }
-
-                if ($v['custom_is_send_factory'] == 1) {
-                    $list[$k + 5]['order_node'] = 2;
-                    $list[$k + 5]['node_type'] = 5; //加工
-                    $list[$k + 5]['content'] = 'Customizing completed, waiting for Quality Inspection';
-                    $list[$k + 5]['create_time'] = $v['custom_match_factory_created_at'];
-                    $list[$k + 5]['site'] = 4;
-                    $list[$k + 5]['order_id'] = $v['entity_id'];
-                    $list[$k + 5]['order_number'] = $v['increment_id'];
-                    $list[$k + 5]['handle_user_id'] = $users[$v['custom_match_factory_person']];
-                    $list[$k + 5]['handle_user_name'] = $v['custom_match_factory_person'];
-                    $list[$k + 5]['shipment_type'] = '';
-                    $list[$k + 5]['track_number'] = '';
-
-                    $data['order_node'] = 2;
-                    $data['node_type'] = 5;
-                    $data['update_time'] = $v['custom_match_factory_created_at'];
-                }
-
-
-                if ($v['custom_is_delivery'] == 1) {
-                    $list[$k + 6]['order_node'] = 2;
-                    $list[$k + 6]['node_type'] = 6; //质检
-                    $list[$k + 6]['content'] = 'Quality Inspection completed, preparing to dispatch this mail piece.';
-                    $list[$k + 6]['create_time'] = $v['custom_match_delivery_created_at'];
-                    $list[$k + 6]['site'] = 4;
-                    $list[$k + 6]['order_id'] = $v['entity_id'];
-                    $list[$k + 6]['order_number'] = $v['increment_id'];
-                    $list[$k + 6]['handle_user_id'] = $users[$v['custom_match_delivery_person']];
-                    $list[$k + 6]['handle_user_name'] = $v['custom_match_delivery_person'];
-                    $list[$k + 6]['shipment_type'] = '';
-                    $list[$k + 6]['track_number'] = '';
-
-                    $data['order_node'] = 2;
-                    $data['node_type'] = 6;
-                    $data['update_time'] = $v['custom_match_delivery_created_at'];
-                }
-
-                if ($v['track_number']) {
-                    $list[$k + 7]['order_node'] = 2;
-                    $list[$k + 7]['node_type'] = 7; //出库
-                    $list[$k + 7]['create_time'] = $v['create_time'];
-                    $list[$k + 7]['site'] = 4;
-                    $list[$k + 7]['order_id'] = $v['entity_id'];
-                    $list[$k + 7]['order_number'] = $v['increment_id'];
-                    $list[$k + 7]['shipment_type'] = $v['title'];
-                    $list[$k + 7]['track_number'] = $v['track_number'];
-                    $list[$k + 7]['handle_user_id'] = 0;
-                    $list[$k + 7]['handle_user_name'] = '';
-                    $list[$k + 7]['content'] = 'Leave warehouse, Waiting for being picked up.';
-
-                    $data['order_node'] = 2;
-                    $data['node_type'] = 7;
-                    $data['update_time'] = $v['create_time'];
-                }
-            }
-            $data['shipment_type'] = $v['title'];
-            $data['track_number'] = $v['track_number'];
-
-
-            $count = Db::name('order_node')->where(['order_id' => $v['entity_id'], 'site' => 4])->count();
-            if ($count > 0) {
-                Db::name('order_node')->where(['order_id' => $v['entity_id'], 'site' => 4])->update($data);
-            } else {
-                Db::name('order_node')->insert($data);
-            }
-            $this->ordernodedetail->saveAll($list);
-            echo $key . "\n";
+            echo $k . "\n";
         }
         echo 'ok';
     }
 
-    public function test1()
+    /**
+     * 计算sku实时库存
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/12/21 14:01:41 
+     * @return void
+     */
+    public function process_sku_stock()
     {
-        $this->orderNode = new \app\admin\model\OrderNode;
-        $this->orderNodeDetail = new \app\admin\model\OrderNodeDetail;
-        $data = $this->orderNode->where('site', 4)->select();
-        $data = collection($data)->toArray();
-        foreach ($data as $k => $v) {
-            $this->orderNodeDetail->where(['order_number' => $v['order_number'], 'site' => 4])->update(['order_id' => $v['order_id']]);
+        $list = Db::name('zzzz_temp')->field('count(1) as stock,sku')->group('sku')->select();
+        Db::name('zz_temp2')->insertAll($list);
+        echo "ok";
+    }
 
-            echo $k . "\n";
+    /************************跑库存数据用START*****勿删*****************************/
+    //导入实时库存 第一步
+    public function set_product_relstock()
+    {
+
+        $list = Db::table('fa_zz_temp2')->select();
+
+        foreach ($list as $k => $v) {
+            $p_map['sku'] = $v['sku'];
+            $data['real_time_qty'] = $v['stock'];
+            $res = $this->item->where($p_map)->update($data);
+            echo $v['sku'] . "\n";
+        }
+        echo 'ok';
+        die;
+    }
+
+    /**
+     * 统计配货占用 第二步 - 配货占用清0 无需跑
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/04/11 15:54:25
+     * @return void
+     */
+    public function set_product_process()
+    {
+        $this->zeelool = new \app\admin\model\order\order\Zeelool;
+        $this->voogueme = new \app\admin\model\order\order\Voogueme;
+        $this->nihao = new \app\admin\model\order\order\Nihao;
+        $this->weseeoptical = new \app\admin\model\order\order\Weseeoptical;
+        $this->meeloog = new \app\admin\model\order\order\Meeloog;
+        $this->zeelool_es = new \app\admin\model\order\order\ZeeloolEs();
+        $this->zeelool_de = new \app\admin\model\order\order\ZeeloolDe();
+        $this->zeelool_jp = new \app\admin\model\order\order\ZeeloolJp();
+        $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
+        $this->item = new \app\admin\model\itemmanage\Item;
+
+        $skus = Db::table('fa_zz_temp2')->column('sku');
+
+        foreach ($skus as $k => $v) {
+
+            $map = [];
+            $zeelool_sku = $this->itemplatformsku->getWebSku($v, 1);
+            $voogueme_sku = $this->itemplatformsku->getWebSku($v, 2);
+            $nihao_sku = $this->itemplatformsku->getWebSku($v, 3);
+            $wesee_sku = $this->itemplatformsku->getWebSku($v, 5);
+            $meeloog_sku = $this->itemplatformsku->getWebSku($v, 4);
+            $zeelool_es_sku = $this->itemplatformsku->getWebSku($v, 9);
+            $zeelool_de_sku = $this->itemplatformsku->getWebSku($v, 10);
+            $zeelool_jp_sku = $this->itemplatformsku->getWebSku($v, 11);
+
+            $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
+            $map['custom_is_delivery_new'] = 0; //是否提货
+            $map['custom_is_match_frame_new'] = 1; //是否配镜架
+            $map['a.created_at'] = ['between', ['2020-01-01 00:00:00', date('Y-m-d H:i:s')]]; //时间节点
+            $map['sku'] = $zeelool_sku;
+            $zeelool_qty = $this->zeelool->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
+            $map['sku'] = $voogueme_sku;
+            $voogueme_qty = $this->voogueme->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
+            $map['sku'] = $nihao_sku;
+            $nihao_qty = $this->nihao->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
+            $map['sku'] = $wesee_sku;
+            $weseeoptical_qty = $this->weseeoptical->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
+
+            $map['sku'] = $zeelool_es_sku;
+            $zeelool_es_qty = $this->zeelool_es->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
+            $map['sku'] = $zeelool_de_sku;
+            $zeelool_de_qty = $this->zeelool_de->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
+            $map['sku'] = $zeelool_jp_sku;
+            $zeelool_jp_qty = $this->zeelool_jp->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
+
+            $map['sku'] = $meeloog_sku;
+            $map['custom_is_delivery'] = 0; //是否提货
+            $map['custom_is_match_frame'] = 1; //是否配镜架
+            unset($map['custom_is_delivery_new']);
+            unset($map['custom_is_match_frame_new']);
+            $meeloog_qty = $this->meeloog->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
+
+            $p_map['sku'] = $v;
+            $data['distribution_occupy_stock'] = $zeelool_qty + $voogueme_qty + $nihao_qty + $weseeoptical_qty + $meeloog_qty + $zeelool_jp_qty + $zeelool_es_qty + $zeelool_de_qty;
+
+            $res = $this->item->where($p_map)->update($data);
+
+            echo $v . "\n";
+            usleep(20000);
         }
 
         echo 'ok';
@@ -1082,111 +907,355 @@ class Test extends Backend
     }
 
     /**
-     * 跑错误单数据
+     * 订单占用 第三步
      *
      * @Description
      * @author wpl
-     * @since 2020/07/15 16:50:21 
+     * @since 2020/04/11 15:54:25
      * @return void
      */
-    public function  test01()
+    public function set_product_process_order()
     {
-        $this->orderNode = new \app\admin\model\OrderNode;
-        $this->orderNodeDetail = new \app\admin\model\OrderNodeDetail();
-        $this->orderNodeCourier = new \app\admin\model\OrderNodeCourier();
-        $this->zeelool = new \app\admin\model\order\order\Zeelool();
-        $this->voogueme = new \app\admin\model\order\order\Voogueme();
-        $this->nihao = new \app\admin\model\order\order\Nihao();
-        $data = $this->orderNode->where(['order_id' => ['<', 15000], 'site' => ['<>', 4]])->select();
-        foreach ($data as $k => $v) {
-            if ($v['site'] == 1) {
-                $res = $this->zeelool->where(['increment_id' => $v['order_number']])->find();
-            } elseif ($v['site'] == 2) {
-                $res = $this->voogueme->where(['increment_id' => $v['order_number']])->find();
-            } elseif ($v['site'] == 3) {
-                $res = $this->nihao->where(['increment_id' => $v['order_number']])->find();
-            }
+        $this->zeelool = new \app\admin\model\order\order\Zeelool;
+        $this->voogueme = new \app\admin\model\order\order\Voogueme;
+        $this->nihao = new \app\admin\model\order\order\Nihao;
+        $this->weseeoptical = new \app\admin\model\order\order\Weseeoptical;
+        $this->meeloog = new \app\admin\model\order\order\Meeloog;
+        $this->zeelool_es = new \app\admin\model\order\order\ZeeloolEs();
+        $this->zeelool_de = new \app\admin\model\order\order\ZeeloolDe();
+        $this->zeelool_jp = new \app\admin\model\order\order\ZeeloolJp();
+        $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
+        $this->item = new \app\admin\model\itemmanage\Item;
+        $skus = Db::table('fa_zz_temp2')->column('sku');
 
-            if ($res) {
-                $this->orderNode->where(['order_number' => $v['order_number'], 'site' => $v['site']])->update(['order_id' => $res['entity_id']]);
-                $this->orderNodeDetail->where(['order_number' => $v['order_number'], 'site' => $v['site']])->update(['order_id' => $res['entity_id']]);
-                $this->orderNodeCourier->where(['order_number' => $v['order_number'], 'site' => $v['site']])->update(['order_id' => $res['entity_id']]);
-            } else {
-                $this->orderNode->where(['id' => $v['id']])->delete();
-                $this->orderNodeDetail->where(['order_number' => $v['order_number'], 'site' => $v['site']])->delete();
-                $this->orderNodeCourier->where(['order_number' => $v['order_number'], 'site' => $v['site']])->delete();
-            }
+        foreach ($skus as $k => $v) {
+            $map = [];
+            $zeelool_sku = $this->itemplatformsku->getWebSku($v, 1);
+            $voogueme_sku = $this->itemplatformsku->getWebSku($v, 2);
+            $nihao_sku = $this->itemplatformsku->getWebSku($v, 3);
+            $wesee_sku = $this->itemplatformsku->getWebSku($v, 5);
+            $meeloog_sku = $this->itemplatformsku->getWebSku($v, 4);
+            $zeelool_es_sku = $this->itemplatformsku->getWebSku($v, 9);
+            $zeelool_de_sku = $this->itemplatformsku->getWebSku($v, 10);
+            $zeelool_jp_sku = $this->itemplatformsku->getWebSku($v, 11);
+
+            $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
+            $map['custom_is_delivery_new'] = 0; //是否提货
+            $map['a.created_at'] = ['between', ['2020-01-01 00:00:00', date('Y-m-d H:i:s')]]; //时间节点
+            $map['sku'] = $zeelool_sku;
+            $zeelool_qty = $this->zeelool->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
+            $map['sku'] = $voogueme_sku;
+            $voogueme_qty = $this->voogueme->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
+            $map['sku'] = $nihao_sku;
+            $nihao_qty = $this->nihao->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
+            $map['sku'] = $wesee_sku;
+            $weseeoptical_qty = $this->weseeoptical->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
+
+            $map['sku'] = $zeelool_es_sku;
+            $zeelool_es_qty = $this->zeelool_es->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
+            $map['sku'] = $zeelool_de_sku;
+            $zeelool_de_qty = $this->zeelool_de->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
+            $map['sku'] = $zeelool_jp_sku;
+            $zeelool_jp_qty = $this->zeelool_jp->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
+
+            $map['sku'] = $meeloog_sku;
+            $map['custom_is_delivery'] = 0; //是否提货
+            unset($map['custom_is_delivery_new']);
+            $meeloog_qty = $this->meeloog->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
+
+
+            $p_map['sku'] = $v;
+            $data['occupy_stock'] = $zeelool_qty + $voogueme_qty + $nihao_qty + $weseeoptical_qty + $meeloog_qty + $zeelool_jp_qty + $zeelool_es_qty + $zeelool_de_qty;
+            $res = $this->item->where($p_map)->update($data);
+
+            echo $v . "\n";
+            usleep(20000);
         }
+        echo 'ok';
+        die;
     }
 
-    public function order_data3()
+    /**
+     * 可用库存计算 第四步
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/04/11 15:54:25
+     * @return void
+     */
+    public function set_product_sotck()
     {
-        $list = Db::table('fa_order_log')->where(['site' => 3])->order('id desc')->select();
-        $wesee = new \app\admin\model\order\order\Nihao();
+        $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
+        $this->item = new \app\admin\model\itemmanage\Item;
+
+        $skus = Db::table('fa_zz_temp2')->column('sku');
+        $list = $this->item->field('sku,stock,occupy_stock,available_stock,real_time_qty,distribution_occupy_stock')->where(['sku' => ['in', $skus]])->select();
         foreach ($list as $k => $v) {
-            $data['custom_print_label_new'] = 0;
-            $data['custom_print_label_person_new'] = '';
-            $data['custom_print_label_created_at_new'] = '0000-00-00';
-            $data['custom_is_match_frame_new'] = 0;
-            $data['custom_match_frame_person_new'] = '';
-            $data['custom_match_frame_created_at_new'] = '0000-00-00';
-            $data['custom_is_match_lens_new'] = 0;
-            $data['custom_match_lens_created_at_new'] = '0000-00-00';
-            $data['custom_match_lens_person_new'] = '';
-            $data['custom_is_send_factory_new'] = 0;
-            $data['custom_match_factory_person_new'] = '';
-            $data['custom_match_factory_created_at_new'] = '0000-00-00';
-            $data['custom_is_delivery_new'] = 0;
-            $data['custom_match_delivery_person_new'] = '';
-            $data['custom_match_delivery_created_at_new'] = '0000-00-00';
-            $wesee->where(['entity_id' => ['in', $v['order_ids']]])->update($data);
+            $data['stock'] = $v['real_time_qty'] + $v['distribution_occupy_stock'];
+            $data['available_stock'] = ($v['real_time_qty'] + $v['distribution_occupy_stock']) - $v['occupy_stock'];
+            $p_map['sku'] = $v['sku'];
+            $res = $this->item->where($p_map)->update($data);
+
+            echo $k . "\n";
+            usleep(20000);
         }
+        echo 'ok';
+        die;
     }
 
-    public function order_data()
+    /**
+     * 虚拟库存 第五步
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/04/11 15:54:25
+     * @return void
+     */
+    public function set_platform_stock()
     {
-        $list = Db::table('fa_order_log')->where(['site' => 3])->order('id desc')->select();
-        $wesee = new \app\admin\model\order\order\Nihao();
-       
-        foreach ($list as $k => $v) {
-            $data = [];
-            if ($v['type'] == 1) {
-                $data['custom_print_label_new'] = 1;
-                $data['custom_print_label_person_new'] = $v['create_person'];
-                $data['custom_print_label_created_at_new'] = $v['createtime'];
-            } elseif ($v['type'] == 2) {
-                $data['custom_is_match_frame_new'] = 1;
-                $data['custom_match_frame_person_new'] = $v['create_person'];
-                $data['custom_match_frame_created_at_new'] = $v['createtime'];
-            } elseif ($v['type'] == 3) {
-                $data['custom_is_match_lens_new'] = 1;
-                $data['custom_match_lens_created_at_new'] = $v['createtime'];
-                $data['custom_match_lens_person_new'] = $v['create_person'];
-            } elseif ($v['type'] == 4) {
-                $data['custom_is_send_factory_new'] = 1;
-                $data['custom_match_factory_person_new'] = $v['create_person'];
-                $data['custom_match_factory_created_at_new'] = $v['createtime'];
-            } elseif ($v['type'] == 5) {
-                $data['custom_is_delivery_new'] = 1;
-                $data['custom_match_delivery_person_new'] = $v['create_person'];
-                $data['custom_match_delivery_created_at_new'] = $v['createtime'];
+        $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
+        $item = new \app\admin\model\itemmanage\Item();
+        // $skus1 = $platform->where(['stock' => ['<', 0]])->column('sku');
+        $skus = Db::table('fa_zz_temp2')->column('sku');
+        foreach ($skus as $k => $v) {
+            // $v = 'OA01901-06';
+            //同步对应SKU库存
+            //更新商品表商品总库存
+            //总库存
+            $item_map['sku'] = $v;
+            $item_map['is_del'] = 1;
+            if ($v) {
+                $available_stock = $item->where($item_map)->value('available_stock');
+                //查出映射表中此sku对应的所有平台sku 并根据库存数量进行排序（用于遍历数据的时候首先分配到那个站点）
+                $item_platform_sku = $platform->where('sku', $v)->order('stock asc')->field('platform_type,stock')->select();
+                if (!$item_platform_sku) {
+                    continue;
+                }
+                //站点数量
+                $all_num = count($item_platform_sku);
+                $whole_num = $platform
+                    ->where('sku', $v)
+                    ->field('stock')
+                    ->select();
+                //取绝对值总库存数
+                $num_num = 0;
+                foreach ($whole_num as $kk => $vv) {
+                    $num_num += abs($vv['stock']);
+                }
+                //总可用库存
+                $stock_num = $available_stock;
+                //总虚拟库存
+                $stock_all_num = array_sum(array_column($item_platform_sku, 'stock'));
+                if ($stock_all_num < 0) {
+                    $stock_all_num = 0;
+                }
+                //如果现有总虚拟库存为0 平均分给各站点
+                if ($stock_all_num == 0) {
+                    $rate_rate = 1 / $all_num;
+                    foreach ($item_platform_sku as $key => $val) {
+                        //最后一个站点 剩余数量分给最后一个站
+                        if (($all_num - $key) == 1) {
+                            $platform->where(['sku' => $v, 'platform_type' => $val['platform_type']])->update(['stock' => $stock_num]);
+                        } else {
+                            $num = round($available_stock * $rate_rate);
+                            $stock_num -= $num;
+                            $platform->where(['sku' => $v, 'platform_type' => $val['platform_type']])->update(['stock' => $num]);
+                        }
+                    }
+                } else {
+                    foreach ($item_platform_sku as $key => $val) {
+                        //最后一个站点 剩余数量分给最后一个站
+                        if (($all_num - $key) == 1) {
+                            $platform->where(['sku' => $v, 'platform_type' => $val['platform_type']])->update(['stock' => $stock_num]);
+                        } else {
+                            //如果绝对值虚拟库存为0 平均分
+                            if ($num_num  == 0) {
+                                $rate_rate = 1 / $all_num;
+                                $num =  round($available_stock * $rate_rate);
+                            } else {
+                                $num = round($available_stock * abs($val['stock']) / $num_num);
+                            }
+                            $stock_num -= $num;
+                            $platform->where(['sku' => $v, 'platform_type' => $val['platform_type']])->update(['stock' => $num]);
+                        }
+                    }
+                }
             }
-            if ($data) {
-                $wesee->where(['entity_id' => ['in', $v['order_ids']]])->update($data);
-            }
+            usleep(10000);
+            echo $k . "\n";
         }
         echo "ok";
     }
 
-    public function order_data2()
+    /************************跑库存数据用END**********************************/
+
+
+
+
+   
+
+    /***************处理工单旧数据*********************** */
+    public function process_worklist_data()
     {
-        $nihao = new \app\admin\model\order\order\Nihao();
-        $data['custom_print_label_new'] = 1;
-        $data['custom_is_match_frame_new'] = 1;
-        $data['custom_is_match_lens_new'] = 1;
-        $data['custom_is_send_factory_new'] = 1;
-        $data['custom_is_delivery_new'] = 1;
-        $nihao->where(['created_at' => ['<', '2020-01-01']])->update($data);
+
+        ini_set('memory_limit', '1280M');
+        /**
+         * 判断措施是否为 id = 3主单取消   changesku表需插入所有子订单
+         * 判断措施如果id = 19 更改镜框 需插入对应sku 所有子订单
+         * 判断措施id = 20 更改镜片 需插入对应sku 所有子订单 , 1, 4, 6, 7
+         */
+        $work = new \app\admin\model\saleaftermanage\WorkOrderList();
+        $order = new \app\admin\model\order\order\NewOrder();
+        $list = $work->where(['work_status' => ['in', [0]]])->select();
+        $list = collection($list)->toArray();
+        foreach ($list as $k => $v) {
+            //插入主表
+            Db::table('fa_work_order_list_copy1')->insert($v);
+            //查询措施表
+            $res = Db::table('fa_work_order_measure')->where(['work_id' => $v['id']])->select();
+            $item_number = [];
+            foreach ($res as $k1 => $v1) {
+                //查询工单措施承接表
+                $recept = Db::table('fa_work_order_recept')->where(['work_id' => $v['id'], 'measure_id' => $v1['id']])->find();
+
+                //措施为取消
+                if ($v1['measure_choose_id'] == 3) {
+
+                    //查询change sku表
+                    $change_sku_list = Db::table('fa_work_order_change_sku')->where(['work_id' => $v['id'], 'change_type' => 3, 'measure_id' => $v1['id']])->select();
+                    foreach ($change_sku_list as $key1 => $val1) {
+                        //查询订单号所有子单
+                        $order_list = $order->alias('a')->field('b.item_order_number')
+                            ->where(['a.increment_id' => $val1['increment_id'], 'a.site' => $val1['platform_type'], 'b.sku' => $val1['original_sku']])
+                            ->join(['fa_order_item_process' => 'b'], 'a.id=b.order_id')
+                            ->select();
+                        $measure = [];
+                        $change_sku_data = [];
+                        $recept_data = [];
+                        foreach ($order_list as $key => $val) {
+                            //插入措施表
+                            $measure['work_id'] = $v['id'];
+                            $measure['measure_choose_id'] = 18;
+                            $measure['measure_content'] = '子单取消';
+                            $measure['create_time'] = $v1['create_time'];
+                            $measure['operation_type'] = $v1['operation_type'];
+                            $measure['operation_time'] = $v1['operation_time'];
+                            $measure['sku_change_type'] = $v1['sku_change_type'];
+                            $measure['item_order_number'] = $val['item_order_number'];
+                            $id = Db::table('fa_work_order_measure_copy1')->insertGetId($measure);
+
+                            unset($recept['id']);
+                            $recept_data = $recept;
+                            $recept_data['measure_id'] = $id;
+                            Db::table('fa_work_order_recept')->insertGetId($recept_data);
+
+
+                            $change_sku_data = $val1;
+                            $change_sku_data['measure_id'] = $id;
+                            $change_sku_data['item_order_number'] = $val['item_order_number'];
+                            Db::table('fa_work_order_change_sku_copy1')->insert($change_sku_data);
+
+                            $item_number[] = $val['item_order_number'];
+                        }
+                    }
+                } else if ($v1['measure_choose_id'] == 1) { //措施为更改镜框
+                    //查询change sku表内容
+                    $change_sku_list = Db::table('fa_work_order_change_sku')->where(['work_id' => $v['id'], 'change_type' => 1, 'measure_id' => $v1['id']])->select();
+                    foreach ($change_sku_list as $k2 => $v2) {
+                        //查询订单号所有子单
+                        $order_list = $order->alias('a')->field('b.item_order_number')
+                            ->where(['a.increment_id' => $v2['increment_id'], 'a.site' => $v2['platform_type'], 'b.sku' => $v2['original_sku']])
+                            ->join(['fa_order_item_process' => 'b'], 'a.id=b.order_id')
+                            ->select();
+                        $measure = [];
+                        $change_sku_data = [];
+                        $recept_data = [];
+                        foreach ($order_list as $k3 => $v3) {
+                            $measure['work_id'] = $v['id'];
+                            $measure['measure_choose_id'] = 19;
+                            $measure['measure_content'] = '更改镜框';
+                            $measure['create_time'] = $v1['create_time'];
+                            $measure['operation_type'] = $v1['operation_type'];
+                            $measure['operation_time'] = $v1['operation_time'];
+                            $measure['sku_change_type'] = $v1['sku_change_type'];
+                            $measure['item_order_number'] = $v3['item_order_number'];
+                            $id = Db::table('fa_work_order_measure_copy1')->insertGetId($measure);
+
+                            unset($recept['id']);
+                            $recept_data = $recept;
+                            $recept_data['measure_id'] = $id;
+                            Db::table('fa_work_order_recept')->insertGetId($recept_data);
+
+                            $change_sku_data = $v2;
+                            $change_sku_data['measure_id'] = $id;
+                            $change_sku_data['item_order_number'] = $v3['item_order_number'];
+                            Db::table('fa_work_order_change_sku_copy1')->insert($change_sku_data);
+
+                            $item_number[] = $v3['item_order_number'];
+                        }
+                    }
+                } else if ($v1['measure_choose_id'] == 12) {  //措施为更改镜片
+                    //查询change sku表内容
+                    $change_sku_list = Db::table('fa_work_order_change_sku')->where(['work_id' => $v['id'], 'change_type' => 2, 'measure_id' => $v1['id']])->select();
+                    foreach ($change_sku_list as $k2 => $v2) {
+                        //查询订单号所有子单
+                        $order_list = $order->alias('a')->field('b.item_order_number')
+                            ->where(['a.increment_id' => $v2['increment_id'], 'a.site' => $v2['platform_type'], 'b.sku' => $v2['original_sku']])
+                            ->join(['fa_order_item_process' => 'b'], 'a.id=b.order_id')
+                            ->select();
+                        $measure = [];
+                        $change_sku_data = [];
+                        $recept_data = [];
+                        foreach ($order_list as $k3 => $v3) {
+                            $measure['work_id'] = $v['id'];
+                            $measure['measure_choose_id'] = 20;
+                            $measure['measure_content'] = '更改镜片';
+                            $measure['create_time'] = $v1['create_time'];
+                            $measure['operation_type'] = $v1['operation_type'];
+                            $measure['operation_time'] = $v1['operation_time'];
+                            $measure['sku_change_type'] = $v1['sku_change_type'];
+                            $measure['item_order_number'] = $v3['item_order_number'];
+                            $id = Db::table('fa_work_order_measure_copy1')->insertGetId($measure);
+
+                            unset($recept['id']);
+                            $recept_data = $recept;
+                            $recept_data['measure_id'] = $id;
+                            Db::table('fa_work_order_recept')->insertGetId($recept_data);
+
+                            $change_sku_data = $v2;
+                            $change_sku_data['measure_id'] = $id;
+                            $change_sku_data['item_order_number'] = $v3['item_order_number'];
+                            Db::table('fa_work_order_change_sku_copy1')->insert($change_sku_data);
+
+                            $item_number[] = $v3['item_order_number'];
+                        }
+                    }
+                } else {
+                    //插入措施表
+                    $id =  Db::table('fa_work_order_measure_copy1')->insertGetId($v1);
+
+                    //查询change sku表
+                    $change_sku_list = Db::table('fa_work_order_change_sku')->where(['work_id' => $v['id'], 'measure_id' => $v1['id']])->select();
+
+                    if (!$change_sku_list) continue;
+                    $change_sku_data = [];
+                    foreach ($change_sku_list as $key => $val) {
+                        $change_sku_data = $val;
+                        $change_sku_data['measure_id'] = $id;
+                        Db::table('fa_work_order_change_sku_copy1')->insert($change_sku_data);
+                    }
+                }
+            }
+
+            //插入子单号
+            if ($item_number) {
+                $numbers = implode(',', array_filter($item_number));
+                Db::table('fa_work_order_list_copy1')->where(['id' => $v['id']])->update(['order_item_numbers' => $numbers]);
+            }
+
+            echo $k . "\n";
+        }
+        echo "ok";
     }
 
 

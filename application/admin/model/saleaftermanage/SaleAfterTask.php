@@ -11,15 +11,13 @@ use Util\ZeeloolEsPrescriptionDetailHelper;
 use Util\ZeeloolJpPrescriptionDetailHelper;
 use Util\VooguemePrescriptionDetailHelper;
 use Util\MeeloogPrescriptionDetailHelper;
-use app\admin\model\saleaftermanage\SaleAfterTaskRemark;
+use app\admin\model\order\order\NewOrder;
 
 class SaleAfterTask extends Model
 {
-
-
-
     //数据库
     protected $connection = 'database';
+
     // 表名
     protected $name = 'sale_after_task';
 
@@ -275,6 +273,24 @@ class SaleAfterTask extends Model
             $arr[] = $v['increment_id'];
         }
         return $arr;
+    }
+
+    /**
+     * 模糊查询订单-新
+     *
+     * @param string $increment_id  订单号
+     * @author lzh
+     * @return array
+     */
+    public function getLikeOrderNew($increment_id)
+    {
+        $_new_order = new NewOrder();
+        $result = $_new_order
+            ->where('increment_id', 'like', "%{$increment_id}%")
+            ->limit(10)
+            ->column('increment_id')
+        ;
+        return $result;
     }
 
     /***

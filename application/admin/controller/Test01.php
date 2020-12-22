@@ -16,8 +16,17 @@ class Test01 extends Backend
     {
         parent::_initialize();
         $this->zeelool = new \app\admin\model\order\order\Zeelool();
-        // $this->voogueme = new \app\admin\model\order\order\Voogueme();
-        // $this->nihao = new \app\admin\model\order\order\Nihao();
+        $this->voogueme = new \app\admin\model\order\order\Voogueme();
+        $this->nihao = new \app\admin\model\order\order\Nihao();
+        $this->orderitemprocess = new \app\admin\model\order\order\NewOrderItemProcess();
+        $this->order = new \app\admin\model\order\order\NewOrder();
+    }
+
+    public function test0001()
+    {
+        sleep(50);
+        echo "ok";
+
     }
 
     public function test01()
@@ -191,89 +200,33 @@ class Test01 extends Backend
 
     public function test99()
     {
-        // $yes_date = date("Y-m-d",strtotime("-1 day"));
-        // $yestime_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $yes_date . "'")];
-        // $yesterday_shoppingcart_total_data = Db::connect('database.db_zeelool')
-        //     ->table('sales_flat_quote')
-        //     ->where($yestime_where)
-        //     ->where('base_grand_total','>',0)
-        //     ->count();
-        // dump($yesterday_shoppingcart_total_data);
-        // $yesterday_shoppingcart_total_data1 = Db::connect('database.db_zeelool')
-        //     ->table('sales_flat_quote')
-        //     ->where($yestime_where)
-        //     ->where('base_grand_total','>',0)
-        //     ->column('entity_id');
-        // // dump($yesterday_shoppingcart_total_data1);
-        // $quote_where1['quote_id'] = ['in',$yesterday_shoppingcart_total_data1];
-        // $order_where['order_type'] = 1;
-        // $order_success_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-        // $yes_date = date("Y-m-d",strtotime("-1 day"));
-        // $yestime_where = [];
-        // $yestime_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $yes_date . "'")];
-        // $yesterday_order_success_data1 = Db::connect('database.db_zeelool')
-        //     ->table('sales_flat_order')
-        //     ->where($quote_where1)
-        //     ->where($yestime_where)
-        //     ->where($order_where)
-        //     ->where($order_success_where)
-        //     ->count();
-        // dump($yesterday_order_success_data1);
-        // //昨天购物车转化率data
-        // $yesterday_shoppingcart_conversion_data     = @round(($yesterday_order_success_data1 / $yesterday_shoppingcart_total_data), 4) * 100;
-        // dump($yesterday_shoppingcart_conversion_data);
+      //查询未生成子单号的数据
+      $list = $this->orderprocess->where('LENGTH(trim(item_order_number))=0')->order('id desc')->limit(10000)->select();
+      $list = collection($list)->toArray();
+      foreach ($list as $v) {
+          $res = $this->order->where(['entity_id' => $v['magento_order_id'], 'site' => $v['site']])->field('id,increment_id')->find();
+          $data = $this->orderitemprocess->where(['magento_order_id' => $v['magento_order_id'], 'site' => $v['site']])->select();
+          $item_params = [];
+          foreach ($data as $key => $val) {
+              $item_params[$key]['id'] = $val['id'];
+              $str = '';
+              if ($key < 9) {
+                  $str = '0' . ($key + 1);
+              } else {
+                  $str = $key + 1;
+              }
 
-        $order_where['o.order_type'] = 1;
-        $order_success_where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-        $yes_date = date("Y-m-d", strtotime("-1 day"));
-        $yestime_where = [];
-        $yestime_where[] = ['exp', Db::raw("DATE_FORMAT(o.created_at, '%Y-%m-%d') = '" . $yes_date . "'")];
-        $yestime_wheres[] = ['exp', Db::raw("DATE_FORMAT(p.created_at, '%Y-%m-%d') = '" . $yes_date . "'")];
-        $yesterday_order_success_data1 = Db::connect('database.db_zeelool')->table('sales_flat_order')
-            ->alias('o')
-            ->join('sales_flat_quote p', 'o.quote_id=p.entity_id')
-            ->where($yestime_wheres)
-            ->where('p.base_grand_total', '>', 0)
-            ->where($yestime_where)
-            ->where($order_where)
-            ->where($order_success_where)
-            ->count();
-        //过去7天从新增购物车中成功支付数
-        $seven_start = date("Y-m-d", strtotime("-7 day"));
-        $seven_end = date("Y-m-d 23:59:59", strtotime("-1 day"));
-        $sev_where['o.created_at'] = $sev_where1['updated_at'] = ['between', [$seven_start, $seven_end]];
-        $sev_wheres['p.created_at'] = $sev_where1['updated_at'] = ['between', [$seven_start, $seven_end]];
-        $pastsevenday_order_success_data1 = Db::connect('database.db_zeelool')->table('sales_flat_order')
-            ->alias('o')
-            ->join('sales_flat_quote p', 'o.quote_id=p.entity_id')
-            ->where($sev_wheres)
-            ->where('p.base_grand_total', '>', 0)
-            ->where($sev_where)
-            ->where($order_where)
-            ->where($order_success_where)
-            ->count();
-        dump($yesterday_order_success_data1);
-        dump($pastsevenday_order_success_data1);
-    }
+              $item_params[$key]['item_order_number'] = $res->increment_id . '-' . $str;
+              $item_params[$key]['order_id'] = $res->id ?? 0;
+          }
+          //更新数据
+          if ($item_params) $this->orderitemprocess->saveAll($item_params);
 
-    public function test100()
-    {
-        $now_date = date('Y-m-d');
-        $now_date = '2020-11-29';
-        $start = $end = $time_str = $now_date;
+          echo $v['id'] . "\n";
+          usleep(10000);
+      }
 
-        $model = new \app\admin\model\operatedatacenter\Zeelool;
-        //获取session
-        $ga_result = $model->ga_hour_data($start, $end);
-        dump($ga_result);
-
-        $now_date = date('Y-m-d');
-        $start = $end = $time_str = $now_date;
-        //获取session
-        $ga_result = $model->ga_hour_data($start, $end);
-        dump($ga_result);
-        die;
-
+      echo "ok";
     }
 
     public function test101()

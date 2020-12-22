@@ -32,12 +32,15 @@ class WorkOrderChangeSku extends Model
      * @param [type] $order_number
      * @return void
      */
-    public function getOrderChangeSku($work_id,$ordertype,$order_number,$change_type)
+    public function getOrderChangeSku($work_id,$ordertype,$order_number,$change_type,$item_order_number='')
     {
         $where['work_id'] = $work_id;
         $where['platform_type'] = $ordertype;
         $where['increment_id'] = $order_number;
         $where['change_type'] = $change_type;
+        if($item_order_number){
+            $where['item_order_number'] = $item_order_number;
+        }
         return WorkOrderChangeSku :: where($where)->select();
     }
 

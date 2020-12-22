@@ -10,7 +10,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 extend: {
                     index_url: 'warehouse/outstock/index' + location.search,
                     add_url: 'warehouse/outstock/add',
-                    edit_url: 'warehouse/outstock/edit',
+                    // edit_url: 'warehouse/outstock/edit',
                     // del_url: 'warehouse/outstock/del',
                     multi_url: 'warehouse/outstock/multi',
                     import_url: 'warehouse/outstock/import',
