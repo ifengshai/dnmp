@@ -1359,6 +1359,7 @@ class Distribution extends Backend
             //如果回退到待加工步骤之前，清空定制片库位ID及定制片处理状态
             if (4 > $status) {
                 $save_data['temporary_house_id'] = 0;
+
                 $save_data['customize_status'] = 0;
             }
 
