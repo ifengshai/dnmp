@@ -599,7 +599,7 @@ class ScmQuality extends Scm
                 ];
                 if ($get_check_id) { //更新
                     $where = ['sku' => $value['sku'], 'check_id' => $check_id];
-                    $this->_check_item->allowField(true)->isUpdate(true, $where)->save($item_save);
+                    $this->_check_item->where($where)->update($item_save);
 
                     //质检单移除条形码
                     if (!empty($value['remove_agg'])) {
@@ -610,7 +610,7 @@ class ScmQuality extends Scm
                             'logistics_id' => 0,
                             'check_id' => 0
                         ];
-                        $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => ['in', $value['remove_agg']]])->save($code_clear);
+                        $this->_product_bar_code_item->where(['code' => ['in', $value['remove_agg']]])->update($code_clear);
                     }
                 } else { //新增
                     $item_save['check_id'] = $check_id;
@@ -644,7 +644,7 @@ class ScmQuality extends Scm
                         }
                     }
                 }
-                $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => ['in', $ok_code_list]])->save($code_item);
+                $this->_product_bar_code_item->where(['code' => ['in', $ok_code_list]])->update($code_item);
 
                 //绑定不合格条形码
                 if (!empty($value['unqualified_agg'])) {
@@ -655,7 +655,7 @@ class ScmQuality extends Scm
                         }
                     }
                 }
-                $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => ['in', $no_code_list]])->save($code_item);
+                $this->_product_bar_code_item->where(['code' => ['in', $no_code_list]])->update($code_item);
 
                 //绑定留样条形码
                 if (!empty($value['sample_agg'])) {
@@ -666,7 +666,7 @@ class ScmQuality extends Scm
                         }
                     }
                 }
-                $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => ['in', $sm_code_list]])->save($code_item);
+                $this->_product_bar_code_item->where(['code' => ['in', $sm_code_list]])->update($code_item);
             }
 
             $this->_check->commit();
