@@ -1116,7 +1116,7 @@ class Test extends Backend
         $stock_house_info = $_stock_house
             ->field('id,coding')
             ->where(['status' => 1, 'type' => 4])
-            ->find();
+            ->find()->toArray();
         dump($stock_house_info);
         foreach ($list as $k => $v) {
             echo $v['id'] . "\n";
