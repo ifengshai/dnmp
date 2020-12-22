@@ -1047,6 +1047,7 @@ class Test extends Backend
 
     public function set_order_process()
     {
+        ini_set('memory_limit', '1280M');
         $this->order = new \app\admin\model\order\order\NewOrder();
         $this->orderprocess = new \app\admin\model\order\order\NewOrderProcess();
         $this->orderitemprocess = new \app\admin\model\order\order\NewOrderItemProcess();
@@ -1054,17 +1055,17 @@ class Test extends Backend
         $map['a.created_at'] = ['<', strtotime('2020-06-31')];
         $map['b.distribution_status'] = 1;
         $map['a.site'] = ['<>', 4];
+        $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal']];
         $list = $this->order->alias('a')->field('a.id,a.increment_id')->join(['fa_order_item_process' => 'b'], 'a.id=b.order_id')->where($map)->select();
-        foreach($list as $k => $v) {
+        foreach ($list as $k => $v) {
             $res = $this->worklist->where(['platform_order' => $v['increment_id']])->find();
             if (!$res || $res['work_status'] == 6) {
                 $this->orderitemprocess->where(['order_id' => $v['id']])->update(['distribution_status' => 9]);
-                $this->orderprocess->where(['order_id' => $v['id']])->update(['combine_status' => 1,'check_status' => 1]);
+                $this->orderprocess->where(['order_id' => $v['id']])->update(['combine_status' => 1, 'check_status' => 1]);
             }
 
             echo $v['id'] . "\n";
         }
-
     }
 
 
