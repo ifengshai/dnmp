@@ -2138,6 +2138,109 @@ class Distribution extends Backend
 
     }
     /**
+     * 配货旧数据处理
+     *
+     * @Description
+     * @return mixed
+     * @since 2020/12/8 10:54:39
+     * @author lzh
+     */
+    function legacy_data2()
+    {
+        ini_set('memory_limit', '1024M');
+        //站点列表
+        $site_arr = [
+            1 => [
+                'name' => 'zeelool',
+                'obj' => new \app\admin\model\order\printlabel\Zeelool,
+            ],
+            2 => [
+                'name' => 'voogueme',
+                'obj' => new \app\admin\model\order\printlabel\Voogueme,
+            ],
+            3 => [
+                'name' => 'nihao',
+                'obj' => new \app\admin\model\order\printlabel\Nihao,
+            ],
+            4 => [
+                'name' => 'weseeoptical',
+                'obj' => new \app\admin\model\order\printlabel\Weseeoptical,
+            ],
+            // 5 => [
+            //     'name' => 'meeloog',
+            //     'obj' => new \app\admin\model\order\printlabel\Meeloog,
+            // ],
+            9 => [
+                'name' => 'zeelool_es',
+                'obj' => new \app\admin\model\order\printlabel\ZeeloolEs,
+            ],
+            10 => [
+                'name' => 'zeelool_de',
+                'obj' => new \app\admin\model\order\printlabel\ZeeloolDe,
+            ],
+            11 => [
+                'name' => 'zeelool_jp',
+                'obj' => new \app\admin\model\order\printlabel\ZeeloolJp,
+            ]
+        ];
+
+        foreach ($site_arr as $key => $item) {
+            echo $item['name'] . " Start\n";
+            //获取已质检旧数据
+            $list = $item['obj']
+                ->field('entity_id,increment_id,
+                custom_print_label_created_at_new,custom_print_label_person_new,
+                custom_match_frame_created_at_new,custom_match_frame_person_new,
+                custom_match_lens_created_at_new,custom_match_lens_person_new,
+                custom_match_factory_created_at_new,custom_match_factory_person_new,
+                custom_match_delivery_created_at_new,custom_match_delivery_person_new
+               ')
+                ->where([
+                    'custom_is_delivery_new' => 1,
+                    'custom_match_delivery_created_at_new' => ['between', ['2018-01-01', '2019-10-01']]
+                ])
+                ->select();
+
+            // dump(collection($list)->toArray());die;
+            $count = count($list);
+            $handle = 0;
+            if ($list) {
+                foreach ($list as $value) {
+                    try {
+                        //主单业务表：fa_order_process：check_status=审单状态、check_time=审单时间、combine_status=合单状态、combine_time=合单时间
+                        $do_time = strtotime($value['custom_match_delivery_created_at_new']) + 28800;
+                        $this->_new_order_process
+                            ->allowField(true)
+                            ->where(['entity_id' => $value['entity_id'], 'site' => $key])
+                            ->update(['check_status' => 1, 'check_time' => $do_time, 'combine_status' => 1, 'combine_time' => $do_time]);
+
+                        //获取子单表id集
+                        $item_process_ids = $this->model->where(['magento_order_id' => $value['entity_id'], 'site' => $key])->column('id');
+                        if ($item_process_ids) {
+                            //子单表：fa_order_item_process：distribution_status=配货状态
+                            $this->model
+                                ->allowField(true)
+                                ->where(['id' => ['in', $item_process_ids]])
+                                ->update(['distribution_status' => 9]);
+
+                            $handle += 1;
+                        } else {
+                            echo $item['name'] . '-' . $value['increment_id'] . '：未获取到子单数据' . "\n";
+                        }
+                        echo 'id:'.$value['entity_id'] . '站点'.$key . 'ok' . "\n";
+                    } catch (PDOException $e) {
+                        echo $item['name'] . '-' . $value['increment_id'] . '：' . $e->getMessage() . "\n";
+                    } catch (Exception $e) {
+                        echo $item['name'] . '-' . $value['increment_id'] . '：' . $e->getMessage() . "\n";
+                    }
+                }
+            }
+
+            echo $item['name'] . "：已质检-{$count}，已处理-{$handle} End\n";
+        }
+
+    }
+    /**
      * 配货旧数据处理 跑未质检已打印标签的数据
      *
      * Created by Phpstorm.
