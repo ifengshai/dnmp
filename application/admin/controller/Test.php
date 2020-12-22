@@ -7,7 +7,7 @@ use app\Common\model\Auth;
 use GuzzleHttp\Client;
 use think\Db;
 use SchGroup\SeventeenTrack\Connectors\TrackingConnector;
-
+use app\admin\model\DistributionLog;
 
 class Test extends Backend
 {
@@ -1164,6 +1164,7 @@ class Test extends Backend
                                 ->where(['id' => $stock_house_info['id']])
                                 ->setInc('occupy', 1);
 
+                            DistributionLog::record((object)['nickname' => 'admin'],$val['id'],9,"创建工单，异常暂存架{$stock_house_info['coding']}库位");
 
                             //插入措施表
                             $measure['work_id'] = $v['id'];
@@ -1226,6 +1227,7 @@ class Test extends Backend
                                 ->where(['id' => $stock_house_info['id']])
                                 ->setInc('occupy', 1);
 
+                            DistributionLog::record((object)['nickname' => 'admin'],$v3['id'],9,"创建工单，异常暂存架{$stock_house_info['coding']}库位");
 
                             $measure['work_id'] = $v['id'];
                             $measure['measure_choose_id'] = 19;
@@ -1286,7 +1288,7 @@ class Test extends Backend
                                 ->where(['id' => $stock_house_info['id']])
                                 ->setInc('occupy', 1);
 
-
+                            DistributionLog::record((object)['nickname' => 'admin'],$v3['id'],9,"创建工单，异常暂存架{$stock_house_info['coding']}库位");
                             $measure['work_id'] = $v['id'];
                             $measure['measure_choose_id'] = 20;
                             $measure['measure_content'] = '更改镜片';
