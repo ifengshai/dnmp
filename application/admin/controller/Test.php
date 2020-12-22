@@ -831,6 +831,18 @@ class Test extends Backend
         echo "ok";
     }
 
+    public function process_sku_temp3()
+    {
+        ini_set('memory_limit', '1280M');
+        $list = Db::name('zzzz_temp2')->select();
+        foreach ($list as $k => $v) {
+            Db::name('zzzz_temp')->where(['product_number' => $v['product_number']])->delete();
+            echo $k ."\n";
+            usleep(10000);
+        }
+        echo "ok";
+    }
+
 
 
     public function process_sku_temp()
