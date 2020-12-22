@@ -1843,7 +1843,7 @@ class ScmWarehouse extends Scm
                 ->where($item_where)
                 ->limit(0,1000)
                 ->column('sku');
-            empty($item_sku) && $this->success('暂无数据', ['info' => []], 200);
+            empty($item_sku) && $this->success('暂无数据', ['info' => [],'list' => []], 200);
 
             $where = [
                 'a.is_del'=>1,
@@ -1869,7 +1869,6 @@ class ScmWarehouse extends Scm
 
             //盘点单所需数据
             $info['list'] = !empty($list) ? $list : [];
-            $info['test'] = 'test';
             $this->success('', ['info' => $info], 200);
         } else {
             //点击保存，创建盘点单
@@ -2052,8 +2051,8 @@ class ScmWarehouse extends Scm
 
         //检测条形码是否已绑定
         foreach (array_filter($item_sku) as $key => $value) {
-            $info_id = $this->_inventory_item->where(['sku' => $value['sku'],'is_add'=>0,'inventory_id'=>['neq',$inventory_id]])->column('id');
-            !empty($info_id) && $this->error(__('SKU=>'.$value['sku'].'存在未完成的盘点单'), [], 543);
+            /*$info_id = $this->_inventory_item->where(['sku' => $value['sku'],'is_add'=>0,'inventory_id'=>['neq',$inventory_id]])->column('id');
+            !empty($info_id) && $this->error(__('SKU=>'.$value['sku'].'存在未完成的盘点单'), [], 543);*/
             $sku_code = array_column($value['sku_agg'], 'code');
             count($value['sku_agg']) != count(array_unique($sku_code))
             &&
