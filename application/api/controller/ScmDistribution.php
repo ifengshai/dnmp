@@ -810,7 +810,7 @@ class ScmDistribution extends Scm
             $order_item_true_sku = $change_sku;
         }
 
-        $sku_arr = explode(',',$order_item_true_sku);
+        $sku_arr = explode('-',$order_item_true_sku);
         if(2 < count($sku_arr)){
             $order_item_true_sku = $sku_arr[0] . '-' . $sku_arr[1];
         }
