@@ -1997,13 +1997,17 @@ class ScmWarehouse extends Scm
         }
 
         //检测条形码是否已绑定
-        $where['inventory_id'] = [['>', 0], ['neq', $inventory_id]];
         foreach (array_filter($item_sku) as $key => $value) {
-            count($value['sku_agg']) != count(array_unique($value['sku_agg']))
+            $info_id = $this->_inventory_item->where(['sku' => $value['sku'],'is_add'=>0,'inventory_id'=>['neq',$inventory_id]])->column('id');
+            !empty($info_id) && $this->error(__('SKU=>'.$value['sku'].'存在未完成的盘点单'), [], 543);
+            $sku_code = array_column($value['sku_agg'], 'code');
+            count($value['sku_agg']) != count(array_unique($sku_code))
             &&
             $this->error(__('条形码有重复，请检查'), [], 405);
 
-            $where['code'] = ['in', $value['sku_agg']];
+            $where = [];
+            $where['inventory_id'] = [['>', 0], ['neq', $inventory_id]];
+            $where['code'] = ['in', $sku_code];
             $inventory_info = $this->_product_bar_code_item
                 ->where($where)
                 ->field('code')
@@ -2025,25 +2029,45 @@ class ScmWarehouse extends Scm
             $result = $this->_inventory->allowField(true)->save($params, ['id' => $inventory_id]);
             if ($result !== false) {
                 $where_code = [];
+                $sku_in = [];
                 foreach (array_filter($item_sku) as $k => $v) {
                     $save_data = [];
                     $save_data['is_add'] = $is_add;//是否盘点
                     $save_data['inventory_qty'] = $v['inventory_qty'] ?? 0;//盘点数量
                     $save_data['error_qty'] = $v['error_qty'] ?? 0;//误差数量
                     $save_data['remark'] = $v['remark'];//备注
-                    $this->_inventory_item->where(['inventory_id' => $inventory_id, 'sku' => $v['sku']])->update($save_data);
+
+                    $item_map['sku'] = $v['sku'];
+                    $item_map['is_del'] = 1;
+                    $sku_item = $this->_item->where($item_map)->field('stock,available_stock,distribution_occupy_stock')->find();
+                    if (empty($sku_item)) {
+                        throw new Exception('SKU=>' . $v['sku'].'不存在');
+                    }
+
+                    $save_data['real_time_qty'] = $sku_item['stock'];//实时库存
+                    $save_data['distribution_occupy_stock'] = $sku_item['available_stock'];//配货占用库存
+                    $save_data['available_stock'] = $sku_item['distribution_occupy_stock'];//可用库存
+                    $sku = $this->_inventory_item->where(['inventory_id' => $inventory_id, 'sku' => $v['sku']])->value('sku');
+                    if (empty($sku)){
+                        $save_data['inventory_id'] = $inventory_id;//SKU
+                        $save_data['sku'] = $v['sku'];//SKU
+                        $this->_inventory_item->allowField(true)->isUpdate(false)->data($save_data)->save();
+                    } else {
+                        $this->_inventory_item->allowField(true)->isUpdate(true, ['inventory_id' => $inventory_id, 'sku' => $v['sku']])->save($save_data);
+                    }
+//                    $this->_inventory_item->where(['inventory_id' => $inventory_id, 'sku' => $v['sku']])->update($save_data);
                     //盘点单绑定条形码数组组装
                     foreach ($v['sku_agg'] as $k_code => $v_code) {
                         if (!empty($v_code)) {
-                            $where_code[] = $v_code;
+                            $where_code[] = $v_code['code'];
                         }
                     }
                     //盘点单移除条形码
-                    if (!empty($value['remove_agg'])) {
+                    if (!empty($v['remove_agg'])) {
                         $code_clear = [
                             'inventory_id' => 0
                         ];
-                        $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => ['in', $value['remove_agg']]])->save($code_clear);
+                        $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => ['in', $v['remove_agg']]])->save($code_clear);
                     }
                 }
 
