@@ -150,6 +150,9 @@ class OcCustomerAfterSalesWorkOrder extends Backend
         if ($_POST){
             $params = $this->request->post("row/a");
             $where['id'] = $params['ids'];
+            if ($params['pm_audit_status'] == null){
+                $params['pm_audit_status'] = 3;
+            }
             $save_question = $this->model->isUpdate(true, $where)->save(['status'=>$params['pm_audit_status'],'completed_at'=>date('Y-m-d H:i:s',time()),'handler_name'=>$this->auth->nickname]);
             if ($save_question){
                 //如果更新成功  提交接口
