@@ -1820,7 +1820,7 @@ class Distribution extends Backend
                ')
                 ->where([
                     'custom_is_delivery_new' => 1,
-                    'custom_match_delivery_created_at_new' => ['between', ['2018-01-01', '2019-10-01']]
+                    'custom_match_delivery_created_at_new' => ['between', ['2019-10-01', '2020-10-01']]
                 ])
                 ->select();
 
@@ -1928,7 +1928,7 @@ class Distribution extends Backend
                         } else {
                             echo $item['name'] . '-' . $value['increment_id'] . '：未获取到子单数据' . "\n";
                         }
-
+                        echo 'id:'.$value['entity_id'] . '站点'.$key . 'ok';
                     } catch (PDOException $e) {
                         echo $item['name'] . '-' . $value['increment_id'] . '：' . $e->getMessage() . "\n";
                     } catch (Exception $e) {
