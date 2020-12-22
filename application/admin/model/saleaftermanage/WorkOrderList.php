@@ -1751,18 +1751,13 @@ class WorkOrderList extends Model
 
                 //获取异常库位id集
                 $abnormal_house_ids = $_new_order_item_process
-                    ->field('abnormal_house_id')
                     ->where(['id' => ['in',$item_process_ids]])
-                    ->select()
+                    ->column('abnormal_house_id')
                 ;
                 if($abnormal_house_ids){
                     //异常库位号占用数量减1
-                    $_stock_house = new StockHouse();
                     foreach($abnormal_house_ids as $v){
-                        $_stock_house
-                            ->where(['id' => $v['abnormal_house_id']])
-                            ->setDec('occupy', 1)
-                        ;
+                        $_stock_house->where(['id' => $v])->setDec('occupy', 1);
                     }
                 }
 
