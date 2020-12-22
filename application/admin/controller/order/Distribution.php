@@ -1954,26 +1954,26 @@ class Distribution extends Backend
         ini_set('memory_limit', '512M');
         //站点列表
         $site_arr = [
-            1 => [
-                'name' => 'zeelool',
-                'obj' => new \app\admin\model\order\printlabel\Zeelool,
-            ],
-            2 => [
-                'name' => 'voogueme',
-                'obj' => new \app\admin\model\order\printlabel\Voogueme,
-            ],
-            3 => [
-                'name' => 'nihao',
-                'obj' => new \app\admin\model\order\printlabel\Nihao,
-            ],
-            4 => [
-                'name' => 'weseeoptical',
-                'obj' => new \app\admin\model\order\printlabel\Weseeoptical,
-            ],
-            5 => [
-                'name' => 'meeloog',
-                'obj' => new \app\admin\model\order\printlabel\Meeloog,
-            ],
+            // 1 => [
+            //     'name' => 'zeelool',
+            //     'obj' => new \app\admin\model\order\printlabel\Zeelool,
+            // ],
+            // 2 => [
+            //     'name' => 'voogueme',
+            //     'obj' => new \app\admin\model\order\printlabel\Voogueme,
+            // ],
+            // 3 => [
+            //     'name' => 'nihao',
+            //     'obj' => new \app\admin\model\order\printlabel\Nihao,
+            // ],
+            // 4 => [
+            //     'name' => 'weseeoptical',
+            //     'obj' => new \app\admin\model\order\printlabel\Weseeoptical,
+            // ],
+            // 5 => [
+            //     'name' => 'meeloog',
+            //     'obj' => new \app\admin\model\order\printlabel\Meeloog,
+            // ],
             9 => [
                 'name' => 'zeelool_es',
                 'obj' => new \app\admin\model\order\printlabel\ZeeloolEs,
