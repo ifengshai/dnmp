@@ -64,7 +64,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
      */
     public function index()
     {
-        echo 1111;die();
+
         //设置过滤方法
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
@@ -92,6 +92,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
             // }
 
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            dump($order);dump($sort);die();
             $total = $this->order
                 ->where($where)
                 ->where($map)
