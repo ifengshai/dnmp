@@ -1014,7 +1014,7 @@ class TrackReg extends Backend
         //在售，预售，下架
         $item = new \app\admin\model\itemmanage\Item();
         $item_platform = new \app\admin\model\itemmanage\ItemPlatformSku;
-        $skus = $item->getFrameSku();
+        $skus = $item->getOrnamentsSku();
         $map_where['sku'] = ['in', $skus];
         $map_where['platform_type'] = $arr['site'];
         $arr['in_sale_num'] =$item_platform->where($map_where)->where('outer_sku_status',1)->count();
@@ -1146,10 +1146,7 @@ class TrackReg extends Backend
         $virtual_where['category_id'] = ['<>',43];
         $arr['virtual_stock'] = $model->where($virtual_where)->sum('stock');
         //在售，预售，下架
-        $item = new \app\admin\model\itemmanage\Item();
         $item_platform = new \app\admin\model\itemmanage\ItemPlatformSku;
-        $skus = $item->getFrameSku();
-        $map_where['sku'] = ['in', $skus];
         $map_where['platform_type'] = $arr['site'];
         $arr['in_sale_num'] =$item_platform->where($map_where)->where('outer_sku_status',1)->count();
         $arr['shelves_num'] =$item_platform->where($map_where)->where('outer_sku_status',2)->count();
@@ -1163,11 +1160,8 @@ class TrackReg extends Backend
     //运营数据中心  小站
     public function other_day_data(){
         $model = new \app\admin\model\itemmanage\ItemPlatformSku();
-        $item = new \app\admin\model\itemmanage\Item();
         $item_platform = new \app\admin\model\itemmanage\ItemPlatformSku;
-        $skus = $item->getFrameSku();
         $map_where = [];
-        $map_where['sku'] = ['in', $skus];
 
         $date_time = date('Y-m-d', strtotime("-1 day"));
         //meeloog
