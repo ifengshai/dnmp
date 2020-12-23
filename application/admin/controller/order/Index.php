@@ -346,20 +346,20 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
         $items = collection($item)->toArray();
         foreach ($items as $key=>$item){
             //临时模拟数据
-            $items[$key]['to_examine']= true;
-            $items[$key]['prescription_image'] = 'https://esz.zhaokuangyi.com/media/prescription_file/160860092995781.jpg';
-//            if ($item['site'] ==9){
-//                if ($item['prescription_pic_checked'] == false && $item['prescription_pic_id']>0){
-//                    $items[$key]['to_examine']= true;
-//                }else{
-//                    $items[$key]['to_examine'] = false;
-//                }
-//                if ($item['prescription_pic_id'] > 0){
-//                    $items[$key]['prescription_image'] = Db::connect('database.db_zeelool_es')->table('oc_prescription_pic')->where('id',$item['prescription_pic_id'])->value('pic');
-//                }else{
-//                    $items[$key]['prescription_image'] = null;
-//                }
-//            }
+//            $items[$key]['to_examine']= true;
+//            $items[$key]['prescription_image'] = 'https://esz.zhaokuangyi.com/media/prescription_file/160860092995781.jpg';
+            if ($item['site'] ==9){
+                if ($item['prescription_pic_checked'] == false && $item['prescription_pic_id']>0){
+                    $items[$key]['to_examine']= true;
+                }else{
+                    $items[$key]['to_examine'] = false;
+                }
+                if ($item['prescription_pic_id'] > 0){
+                    $items[$key]['prescription_image'] = Db::connect('database.db_zeelool_es')->table('oc_prescription_pic')->where('id',$item['prescription_pic_id'])->value('pic');
+                }else{
+                    $items[$key]['prescription_image'] = null;
+                }
+            }
         }
 
         $this->view->assign("item", $items);
