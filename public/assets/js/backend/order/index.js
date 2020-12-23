@@ -54,7 +54,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                     visible: function (row) {
                                         console.log(row)
                                         //返回true时按钮显示,返回false隐藏
-                                        if (row.status !== "pending" && row.site !=='9'){
+                                        if (row.status !== "pending" && row.site !==9){
                                             return  true;
                                         }else{
                                             return  false;
@@ -75,7 +75,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                     visible: function (row) {
                                         console.log(row)
                                         //返回true时按钮显示,返回false隐藏
-                                        if (row.status == "pending" && row.site !=='9'){
+                                        if (row.status == "pending" && row.site !==9){
                                             return  true;
                                         }else{
                                             return  false;
@@ -85,7 +85,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
 
                                 {
                                     name: 'detail',
-                                    text: '详情',
+                                    text: '详情03',
                                     title: __('Detail'),
                                     classname: 'btn btn-xs  btn-primary  btn-dialog',
                                     icon: 'fa fa-list',
@@ -97,16 +97,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                     visible: function (row) {
                                         console.log(row)
                                         //返回true时按钮显示,返回false隐藏
-                                        if (row.status !== "pending" && row.site =='9'){
+                                        if (row.status !== "pending" && row.site ==9){
                                             return  true;
                                         }else{
                                             return  false;
                                         }
                                     }
                                 },
-
-
-
+                                
                                 {
                                     name: 'detail',
                                     text: '编辑',
@@ -120,7 +118,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                     },
                                     visible: function (row) {
                                         console.log(row)
-                                        if (row.status =='pending' && row.site =='9'){
+                                        if (row.status =='pending' && row.site ==9){
                                             return true;
                                         }else{
                                             return  false;
