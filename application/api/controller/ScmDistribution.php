@@ -825,7 +825,7 @@ class ScmDistribution extends Scm
         $code_item_sku = $this->_product_bar_code_item->where('code',$barcode)->value('sku');
         empty($code_item_sku) && $this->error(__('此条形码未绑定SKU'), [], 403);
 
-        if ($true_sku != $code_item_sku){
+        if (strtolower($true_sku) != strtolower($code_item_sku)){
             //扫描获取的条形码 和 子订单查询出的 SKU(即true_sku)对比失败则配货失败
             //操作失败记录
             DistributionLog::record($this->auth,$order_item_id,2,'配货失败：sku配错');
