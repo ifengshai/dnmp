@@ -3,6 +3,10 @@
 namespace app\admin\controller\warehouse;
 
 use app\common\controller\Backend;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\Reader\Csv;
+use PhpOffice\PhpSpreadsheet\Reader\Xls;
+use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use think\Db;
 use think\Exception;
 use think\exception\PDOException;
@@ -16,7 +20,7 @@ use think\Loader;
  */
 class StockHouse extends Backend
 {
-
+    
     /**
      * StockHouse模型对象
      * @var \app\admin\model\warehouse\StockHouse
@@ -35,7 +39,7 @@ class StockHouse extends Backend
         $this->model = new \app\admin\model\warehouse\StockHouse;
 
     }
-
+    
     /**
      * 默认生成的控制器所继承的父类中有index/add/edit/del/multi五个基础方法、destroy/restore/recyclebin三个回收站方法
      * 因此在当前控制器中可不用编写增删改查的代码,除非需要自己控制这部分逻辑
@@ -56,13 +60,13 @@ class StockHouse extends Backend
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
-                ->where(['type' => 1])
+                ->where(['type'=>1])
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
-                ->where(['type' => 1])
+                ->where(['type'=>1])
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
@@ -75,8 +79,8 @@ class StockHouse extends Backend
         }
         return $this->view->fetch();
     }
-
-    /**
+    
+     /**
      * 添加
      */
     public function add()
@@ -91,9 +95,9 @@ class StockHouse extends Backend
                 }
 
                 //判断选择的库位是否已存在
-                if (2 == $type) {
+                if(2 == $type){
                     $params['location'] = $params['coding'];
-                    $params['coding'] = $params['subarea'] . '-' . $params['location'];
+                    $params['coding'] = $params['subarea'].'-'.$params['location'];
                 }
                 $map['type'] = $type;
                 $map['coding'] = $params['coding'];
@@ -158,9 +162,9 @@ class StockHouse extends Backend
                 $params = $this->preExcludeFields($params);
 
                 //判断选择的库位是否已存在
-                if (2 == $type) {
+                if(2 == $type){
                     $params['location'] = $params['coding'];
-                    $params['coding'] = $params['subarea'] . '-' . $params['location'];
+                    $params['coding'] = $params['subarea'].'-'.$params['location'];
                 }
                 $map['type'] = $type;
                 $map['coding'] = $params['coding'];
@@ -236,13 +240,13 @@ class StockHouse extends Backend
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
-                ->where(['type' => 2])
+                ->where(['type'=>2])
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
-                ->where(['type' => 2])
+                ->where(['type'=>2])
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
@@ -270,13 +274,13 @@ class StockHouse extends Backend
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
-                ->where(['type' => 3])
+                ->where(['type'=>3])
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
-                ->where(['type' => 3])
+                ->where(['type'=>3])
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
@@ -304,13 +308,13 @@ class StockHouse extends Backend
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
-                ->where(['type' => 4])
+                ->where(['type'=>4])
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
-                ->where(['type' => 4])
+                ->where(['type'=>4])
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
@@ -329,14 +333,18 @@ class StockHouse extends Backend
      */
     public function print_label($ids = null)
     {
-        //检测状态
+        
         $stock_house_info = $this->model
-            ->where(['id' => $ids])
+            ->where(['id' => ['in',$ids]])
             ->field('status,subarea,coding')
-            ->find();
-        1 != $stock_house_info['status'] && $this->error('禁用状态无法打印！');
-        $coding = $stock_house_info['coding'];
-
+            ->select()
+        ;
+        $stock_house_info = collection($stock_house_info)->toArray();
+        
+        $status_arr = array_column($stock_house_info, 'status');
+        if (in_array(2, $status_arr)) {
+            $this->error('禁用状态无法打印！');
+        }
         ob_start();
         $file_header =
             <<<EOF
@@ -352,24 +360,26 @@ table.addpro.re tbody td{ position:relative}
 </style>
 EOF;
 
-        //检测文件夹
-        $dir = ROOT_PATH . "public" . DS . "uploads" . DS . "stock_house" . DS . "merge_shelf";
-        !file_exists($dir) && mkdir($dir, 0777, true);
+        
+        foreach ($stock_house_info as $key => $value) {
+                //检测文件夹
+                $dir = ROOT_PATH . "public" . DS . "uploads" . DS . "stock_house" . DS . "merge_shelf";
+                !file_exists($dir) && mkdir($dir, 0777, true);
 
-        //生成条形码
-        $fileName = $dir . DS . $coding . ".png";
-        $this->generate_barcode($coding, $fileName);
+                //生成条形码
+                $fileName = $dir . DS . $value['coding'] .".png";
+                $this->generate_barcode($value['coding'], $fileName);
 
-        //拼接条形码
-        $img_url = "/uploads/stock_house/merge_shelf/{$coding}.png";
-        $file_content = "
+                //拼接条形码
+                $img_url = "/uploads/stock_house/merge_shelf/{$value['coding']}.png";
+                $file_content .= "
 <div style='display:list-item;margin: 0mm auto;padding-top:4mm;padding-right:2mm;text-align:center;'>
-    <p>合单架库位条形码</p>
-    <img src='" . $img_url . "' style='width:36mm'>
-</div>
-            ";
+<p>合单架库位条形码</p>
+<img src='" . $img_url . "' style='width:36mm'>
+</div>";
+        }
 
-        echo $file_header . $file_content;
+    echo $file_header . $file_content;
     }
 
     /**
@@ -508,7 +518,7 @@ EOF;
             $this->error('未导入任何数据！！');
         }
         //检测库存编码是否有重复
-        $list = array_column($data, '0');
+        $list = array_column($data,'0');
         if (count($list) != count(array_unique($list))) {
             $this->error('库存编码有重复！！请仔细核对库存编码');
         }
@@ -516,11 +526,11 @@ EOF;
         //批量添加产品
         foreach ($data as $k => $v) {
             //检测库存编码是否已入库
-            $findDetection = $this->model->where('coding', $v[0])->find();
-            if ($findDetection) {
-                $result = $this->model->save(['coding' => $v[0], 'library_name' => $v[1], 'remark' => $v[2], 'create_person' => $this->auth->username, 'createtime' => date('y-m-d h:i:s', time())], ['id' => $findDetection['id']]);
-            } else {
-                $result = $this->model->insert(['coding' => $v[0], 'library_name' => $v[1], 'remark' => $v[2], 'createtime' => date('y-m-d h:i:s', time()), 'create_person' => $this->auth->username]);
+            $findDetection  = $this->model->where('coding',$v[0])->find();
+            if ($findDetection){
+                $result = $this->model->save(['coding'=>$v[0],'library_name'=>$v[1],'remark'=>$v[2],'create_person'=>$this->auth->username,'createtime'=>date('y-m-d h:i:s',time())],['id'=>$findDetection['id']]);
+            }else{
+                $result = $this->model->insert(['coding'=>$v[0],'library_name'=>$v[1],'remark'=>$v[2],'createtime'=>date('y-m-d h:i:s',time()),'create_person'=>$this->auth->username]);
             }
         }
         if ($result) {
