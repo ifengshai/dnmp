@@ -1178,7 +1178,7 @@ class TrackReg extends Backend
         echo date("Y-m-d H:i:s") . "\n";
         echo "all is ok"."\n";
     }
-    //订单发出时间脚本
+    //订单发出时间计划任务
     public function order_send_time(){
         $process = new \app\admin\model\order\order\NewOrderProcess;
         $orderitemprocess = new \app\admin\model\order\order\NewOrderItemProcess();

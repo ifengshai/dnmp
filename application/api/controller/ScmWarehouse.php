@@ -2102,7 +2102,7 @@ class ScmWarehouse extends Scm
                     $save_data = [];
                     $save_data['is_add'] = $is_add;//是否盘点
                     $save_data['inventory_qty'] = $v['inventory_qty'] ?? 0;//盘点数量
-                    $save_data['error_qty'] = $v['error_qty'] ?? 0;//误差数量
+                    $save_data['error_qty'] = $save_data['inventory_qty'] - $row['real_time_qty'];//误差数量
                     $save_data['remark'] = $v['remark'];//备注
 
                     $item_map['sku'] = $v['sku'];

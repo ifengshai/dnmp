@@ -182,6 +182,14 @@ class Distribution extends Backend
             //处理异常选项
             $filter = json_decode($this->request->get('filter'), true);
 
+            if (!$filter) {
+                $map['a.created_at'] = ['between', [strtotime('-3 month'), time()]];
+            }
+
+            if (!$filter['status']) {
+                $map['b.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal']];
+            }
+
             //查询子单ID合集
             $item_process_ids = [];
 
@@ -232,17 +240,9 @@ class Distribution extends Backend
                 unset($filter['site']);
             }
 
-            if (isset($filter['order_prescription_type'])){
+            if (isset($filter['order_prescription_type'])) {
                 $map['a.order_prescription_type'] = ['in', $filter['order_prescription_type']];
                 unset($filter['order_prescription_type']);
-            }
-
-            if (!$filter) {
-                $map['a.created_at'] = ['between', [strtotime('-3 month'), time()]];
-            }
-
-            if (!$filter['status']) {
-                $map['b.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal']];
             }
 
             $this->request->get(['filter' => json_encode($filter)]);
@@ -283,7 +283,7 @@ class Distribution extends Backend
 
             $list = $this->model
                 ->alias('a')
-                ->field('a.id,a.order_id,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.total_qty_ordered,b.site,b.order_type,b.status,a.distribution_status,a.temporary_house_id,a.abnormal_house_id,order_type,a.created_at,c.store_house_id')
+                ->field('a.id,a.order_id,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.total_qty_ordered,b.site,b.order_type,b.status,a.distribution_status,a.temporary_house_id,a.abnormal_house_id,a.created_at,c.store_house_id')
                 ->join(['fa_order' => 'b'], 'a.order_id=b.id')
                 ->join(['fa_order_process' => 'c'], 'a.order_id=c.order_id')
                 ->where($where)
@@ -1587,8 +1587,7 @@ class Distribution extends Backend
                 //异常库位占用数量-1
                 $this->_stock_house
                     ->where(['id' => $item_info['abnormal_house_id']])
-                    ->setDec('occupy', 1)
-                ;
+                    ->setDec('occupy', 1);
 
                 //子订单状态回滚
                 $save_data = [
@@ -1602,11 +1601,10 @@ class Distribution extends Backend
                     $save_data['customize_status'] = 0;
 
                     //定制片库位占用数量-1
-                    if($item_info['temporary_house_id']){
+                    if ($item_info['temporary_house_id']) {
                         $this->_stock_house
                             ->where(['id' => $item_info['temporary_house_id']])
-                            ->setDec('occupy', 1)
-                        ;
+                            ->setDec('occupy', 1);
                     }
                 }
 
@@ -1954,7 +1952,7 @@ class Distribution extends Backend
                         } else {
                             echo $item['name'] . '-' . $value['increment_id'] . '：未获取到子单数据' . "\n";
                         }
-                        echo 'id:'.$value['entity_id'] . '站点'.$key . 'ok';
+                        echo 'id:' . $value['entity_id'] . '站点' . $key . 'ok';
                     } catch (PDOException $e) {
                         echo $item['name'] . '-' . $value['increment_id'] . '：' . $e->getMessage() . "\n";
                     } catch (Exception $e) {
@@ -1967,6 +1965,7 @@ class Distribution extends Backend
         }
 
     }
+
     /**
      * 配货旧数据处理
      *
@@ -2131,7 +2130,7 @@ class Distribution extends Backend
                         } else {
                             echo $item['name'] . '-' . $value['increment_id'] . '：未获取到子单数据' . "\n";
                         }
-                        echo 'id:'.$value['entity_id'] . '站点'.$key . 'ok' . "\n";
+                        echo 'id:' . $value['entity_id'] . '站点' . $key . 'ok' . "\n";
                     } catch (PDOException $e) {
                         echo $item['name'] . '-' . $value['increment_id'] . '：' . $e->getMessage() . "\n";
                     } catch (Exception $e) {
@@ -2144,6 +2143,7 @@ class Distribution extends Backend
         }
 
     }
+
     /**
      * 配货旧数据处理
      *
@@ -2234,7 +2234,7 @@ class Distribution extends Backend
                         } else {
                             echo $item['name'] . '-' . $value['increment_id'] . '：未获取到子单数据' . "\n";
                         }
-                        echo 'id:'.$value['entity_id'] . '站点'.$key . 'ok' . "\n";
+                        echo 'id:' . $value['entity_id'] . '站点' . $key . 'ok' . "\n";
                     } catch (PDOException $e) {
                         echo $item['name'] . '-' . $value['increment_id'] . '：' . $e->getMessage() . "\n";
                     } catch (Exception $e) {
@@ -2247,6 +2247,7 @@ class Distribution extends Backend
         }
 
     }
+
     /**
      * 配货旧数据处理 跑未质检已打印标签的数据
      *
