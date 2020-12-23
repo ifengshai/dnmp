@@ -2072,7 +2072,6 @@ class ScmWarehouse extends Scm
         foreach (array_filter($item_sku) as $key => $value) {
             /*$info_id = $this->_inventory_item->where(['sku' => $value['sku'],'is_add'=>0,'inventory_id'=>['neq',$inventory_id]])->column('id');
             !empty($info_id) && $this->error(__('SKU=>'.$value['sku'].'存在未完成的盘点单'), [], 543);*/
-//            $sku_code = $value['sku_agg'];//PDA传数据格式未和出入库质检单接口一致
             $sku_code = array_column($value['sku_agg'], 'code');
             if(count($value['sku_agg']) != count(array_unique($sku_code)))$this->error(__('条形码有重复，请检查'), [], 405);
 
@@ -2105,7 +2104,7 @@ class ScmWarehouse extends Scm
                     $save_data = [];
                     $save_data['is_add'] = $is_add;//是否盘点
                     $save_data['inventory_qty'] = $v['inventory_qty'] ?? 0;//盘点数量
-                    $save_data['error_qty'] = $save_data['inventory_qty'] - $item_row[$v['sku']]['real_time_qty'];//误差数量
+                    $save_data['error_qty'] = $save_data['inventory_qty'] - $item_row[$v['sku']];//误差数量
                     $save_data['remark'] = $v['remark'];//备注
 
                     $item_map['sku'] = $v['sku'];
