@@ -1856,7 +1856,6 @@ class ScmDistribution extends Scm
                         ->isUpdate(true, ['order_id' => $order_id,'distribution_status'=>['neq', 0]])
                         ->save([
                             'distribution_status'=>2,
-
                             'temporary_house_id'=>0,
                             'customize_status'=>0
                         ]);
@@ -1986,7 +1985,7 @@ class ScmDistribution extends Scm
             $this->_stock_house->rollback();
             $this->_new_order_process->rollback();
             $this->_new_order_item_process->rollback();
-            $this->error($e->getMessage(), [], 407);
+            $this->error('库存不足，请检查后操作', [], 407);
         } catch (Exception $e) {
             $this->_item->rollback();
             $this->_item_platform_sku->rollback();
