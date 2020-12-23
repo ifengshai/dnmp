@@ -333,15 +333,18 @@ class StockHouse extends Backend
      */
     public function print_label($ids = null)
     {
-        //检测状态
+        
         $stock_house_info = $this->model
-            ->where(['id' => $ids])
+            ->where(['id' => ['in',$ids]])
             ->field('status,subarea,coding')
-            ->find()
+            ->select()
         ;
-        1 != $stock_house_info['status'] && $this->error('禁用状态无法打印！');
-        $coding = $stock_house_info['coding'];
-
+        $stock_house_info = collection($stock_house_info)->toArray();
+        
+        $status_arr = array_column($stock_house_info, 'status');
+        if (in_array(2, $status_arr)) {
+            $this->error('禁用状态无法打印！');
+        }
         ob_start();
         $file_header =
             <<<EOF
@@ -357,24 +360,26 @@ table.addpro.re tbody td{ position:relative}
 </style>
 EOF;
 
-        //检测文件夹
-        $dir = ROOT_PATH . "public" . DS . "uploads" . DS . "stock_house" . DS . "merge_shelf";
-        !file_exists($dir) && mkdir($dir, 0777, true);
+        
+        foreach ($stock_house_info as $key => $value) {
+                //检测文件夹
+                $dir = ROOT_PATH . "public" . DS . "uploads" . DS . "stock_house" . DS . "merge_shelf";
+                !file_exists($dir) && mkdir($dir, 0777, true);
 
-        //生成条形码
-        $fileName = $dir . DS . $coding .".png";
-        $this->generate_barcode($coding, $fileName);
+                //生成条形码
+                $fileName = $dir . DS . $value['coding'] .".png";
+                $this->generate_barcode($value['coding'], $fileName);
 
-        //拼接条形码
-        $img_url = "/uploads/stock_house/merge_shelf/{$coding}.png";
-        $file_content = "
+                //拼接条形码
+                $img_url = "/uploads/stock_house/merge_shelf/{$value['coding']}.png";
+                $file_content .= "
 <div style='display:list-item;margin: 0mm auto;padding-top:4mm;padding-right:2mm;text-align:center;'>
-    <p>合单架库位条形码</p>
-    <img src='" . $img_url . "' style='width:36mm'>
-</div>
-            ";
+<p>合单架库位条形码</p>
+<img src='" . $img_url . "' style='width:36mm'>
+</div>";
+        }
 
-        echo $file_header . $file_content;
+    echo $file_header . $file_content;
     }
 
     /**
