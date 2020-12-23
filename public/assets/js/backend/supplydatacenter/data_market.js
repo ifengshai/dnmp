@@ -18,10 +18,17 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                 Controller.api.formatter.comleted_time_rate_pie();
             });
             $("#sku_reset").click(function () {
-                $("#order_platform").val(1);
-                $("#time_str").val('');
-                $("#compare_time_str").val('');
+                $("#time_str_hidden").val('')
+                stock_measure_overview_platform();
+                Controller.api.formatter.line_histogram();
+                Controller.api.formatter.order_send_overview();
+                Controller.api.formatter.process_overview();
+                Controller.api.formatter.comleted_time_rate_pie();
             });
+             $("#time_str").on("apply.daterangepicker", function (ev,picker) {
+                var time_str = picker.startDate.format('YYYY-MM-DD HH:mm:ss')+" - "+picker.endDate.format('YYYY-MM-DD HH:mm:ss');
+                $("#time_str_hidden").val(time_str)
+            })
             // $(document).on('change', '#order_platform', function () {
             //     order_data_view();
             //     Controller.api.formatter.line_chart();
@@ -137,7 +144,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                         type: 'post',
                         url: 'supplydatacenter/data_market/purchase_histogram_line',
                         data: {
-                            time_str: $("#time_str").val(),
+                            time_str: $("#time_str_hidden").val(),
                         }
                     }
                     EchartObj.api.ajax(options, chartOptions)
@@ -188,7 +195,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                         type: 'post',
                         url: 'supplydatacenter/data_market/order_send_overview',
                         data: {
-                            time_str: $("#time_str").val(),
+                            time_str: $("#time_str_hidden").val(),
                         }
                     }
                     EchartObj.api.ajax(options, chartOptions)
@@ -232,7 +239,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                         type: 'post',
                         url: 'supplydatacenter/data_market/process_overview',
                         data: {
-                            time_str: $("#time_str").val()
+                            time_str: $("#time_str_hidden").val()
                         }
                     }                
                     EchartObj.api.ajax(options, chartOptions)
@@ -258,7 +265,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                         type: 'post',
                         url: 'supplydatacenter/data_market/comleted_time_rate',
                         data: {
-                            'time_str' :  $("#time_str").val(),
+                            'time_str' :  $("#time_str_hidden").val(),
                         }
 
                     };
@@ -274,7 +281,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
 });
 function stock_measure_overview_platform() {
     var order_platform = $('#order_platform').val();
-    var time_str = $('#time_str').val();
+    var time_str = $('#time_str_hidden').val();
     Backend.api.ajax({
         url: 'supplydatacenter/data_market/stock_measure_overview_platform',
         data: { order_platform: order_platform, time_str: time_str}
