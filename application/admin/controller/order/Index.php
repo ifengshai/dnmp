@@ -92,7 +92,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
             // }
 
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-            dump($order);dump($sort);die();
+            $sort = 'id';
             $total = $this->order
                 ->where($where)
                 ->where($map)
