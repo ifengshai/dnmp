@@ -60,8 +60,7 @@ class OcPrescriptionPic extends Backend
             }elseif($site ==2){
                 $model = Db::connect('database.db_voogueme');
             }else{
-                $model = Db::connect('database.db_voogueme');
-                $models = Db::connect('database.db_voogueme');
+                $sql  = 'SELECT * ';
             }
             unset($filter['site']);
             $this->request->get(['filter' => json_encode($filter)]);
