@@ -182,6 +182,10 @@ class Distribution extends Backend
             //处理异常选项
             $filter = json_decode($this->request->get('filter'), true);
 
+            if (!$filter) {
+                $map['a.created_at'] = ['between', [strtotime('-3 month'), time()]];
+            }
+
             //查询子单ID合集
             $item_process_ids = [];
 
@@ -236,9 +240,6 @@ class Distribution extends Backend
                 unset($filter['order_prescription_type']);
             }
 
-            if (!$filter) {
-                $map['a.created_at'] = ['between', [strtotime('-3 month'), time()]];
-            }
             $this->request->get(['filter' => json_encode($filter)]);
 
             //子单工单未处理
@@ -276,7 +277,7 @@ class Distribution extends Backend
 
             $list = $this->model
                 ->alias('a')
-                ->field('a.id,a.order_id,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.total_qty_ordered,b.site,b.order_type,b.status,a.distribution_status,a.temporary_house_id,a.abnormal_house_id,order_type,a.created_at,c.store_house_id')
+                ->field('a.id,a.order_id,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.total_qty_ordered,b.site,b.order_type,b.status,a.distribution_status,a.temporary_house_id,a.abnormal_house_id,a.created_at,c.store_house_id')
                 ->join(['fa_order' => 'b'], 'a.order_id=b.id')
                 ->join(['fa_order_process' => 'c'], 'a.order_id=c.order_id')
                 ->where($where)
