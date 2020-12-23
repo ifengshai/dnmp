@@ -42,7 +42,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
                                 {
                                     name: 'detail',
-                                    text: '详情01',
+                                    text: '详情',
                                     title: __('Detail'),
                                     classname: 'btn btn-xs  btn-primary  btn-dialog',
                                     icon: 'fa fa-list',
@@ -63,7 +63,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                 },
                                 {
                                     name: 'detail',
-                                    text: '详情02',
+                                    text: '详情',
                                     title: __('Detail'),
                                     classname: 'btn btn-xs  btn-primary  btn-dialog',
                                     icon: 'fa fa-list',
@@ -85,7 +85,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
 
                                 {
                                     name: 'detail',
-                                    text: '详情03',
+                                    text: '详情',
                                     title: __('Detail'),
                                     classname: 'btn btn-xs  btn-primary  btn-dialog',
                                     icon: 'fa fa-list',
@@ -104,7 +104,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                         }
                                     }
                                 },
-                                
+
                                 {
                                     name: 'detail',
                                     text: '编辑',
