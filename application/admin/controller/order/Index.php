@@ -353,7 +353,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
 //            $items[$key]['to_examine']= true;
 //            $items[$key]['prescription_image'] = 'https://esz.zhaokuangyi.com/media/prescription_file/160860092995781.jpg';
             if ($item['site'] ==9){
-                if ($item['prescription_pic_checked'] == false && $item['prescription_pic_id']>0){
+                if ($item['prismcheck'] == false && $item['prescription_pic_id']>0){
                     $items[$key]['to_examine']= true;
                 }else{
                     $items[$key]['to_examine'] = false;

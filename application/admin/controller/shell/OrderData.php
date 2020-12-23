@@ -362,6 +362,8 @@ class OrderData extends Backend
         $arr['index_type'] = $options['info_buyRequest']['tmplens']['lenstype_data_name'] ?: '';
         //镜片名称
         $arr['index_name'] = $options['info_buyRequest']['tmplens']['lens_data_name'] ?: '';
+        //图片id
+        $arr['prescription_pic_id'] = $options['info_buyRequest']['tmplens']['coatiing_price'] ?: '';
         //光度等参数
         $prescription_params = explode("&", $options['info_buyRequest']['tmplens']['prescription']);
         $options_params = array();
@@ -369,6 +371,7 @@ class OrderData extends Backend
             $arr_value = explode("=", $value);
             $options_params[$arr_value[0]] = $arr_value[1];
         }
+
         //处方类型
         $arr['prescription_type'] = $options_params['prescription_type'] ?: '';
         //镀膜名称
@@ -458,6 +461,8 @@ class OrderData extends Backend
         $arr['index_type'] = $options['info_buyRequest']['tmplens']['index_type'] ?: '';
         //镜片名称
         $arr['index_name'] = $options['info_buyRequest']['tmplens']['index_type'] ?: '';
+        //图片id
+        $arr['prescription_pic_id'] = $options['info_buyRequest']['tmplens']['coatiing_price'] ?: '';
         //光度等参数
         $prescription_params = explode("&", $options['info_buyRequest']['tmplens']['prescription']);
         $options_params = array();
@@ -549,6 +554,8 @@ class OrderData extends Backend
         $arr['index_type'] = $options['info_buyRequest']['tmplens']['lens_type'] ?: '';
         //镜片名称
         $arr['index_name'] = $options['info_buyRequest']['tmplens']['third_name'] ?: '';
+        //图片id
+        $arr['prescription_pic_id'] = $options['info_buyRequest']['tmplens']['coatiing_price'] ?: '';
         //光度等参数
         $options_params = json_decode($options['info_buyRequest']['tmplens']['prescription'], true);
 
@@ -636,6 +643,8 @@ class OrderData extends Backend
         $arr['index_type'] = $options['info_buyRequest']['tmplens']['index_type'] ?: '';
         //镜片名称
         $arr['index_name'] = $options['info_buyRequest']['tmplens']['index_type'] ?: '';
+        //图片id
+        $arr['prescription_pic_id'] = $options['info_buyRequest']['tmplens']['coatiing_price'] ?: '';
         //光度等参数
         $prescription_params = explode("&", $options['info_buyRequest']['tmplens']['prescription']);
         $options_params = array();
@@ -726,6 +735,8 @@ class OrderData extends Backend
         $arr['index_type'] = $options['info_buyRequest']['tmplens']['index_type'] ?: '';
         //镜片名称
         $arr['index_name'] = $options['info_buyRequest']['tmplens']['index_type'] ?: '';
+        //图片id
+        $arr['prescription_pic_id'] = $options['info_buyRequest']['tmplens']['coatiing_price'] ?: '';
         //光度等参数
         $prescription_params = explode("&", $options['info_buyRequest']['tmplens']['prescription']);
         $options_params = array();
@@ -822,6 +833,8 @@ class OrderData extends Backend
         $arr['index_type'] = $options['info_buyRequest']['tmplens']['index_type'] ?: '';
         //镜片名称
         $arr['index_name'] = $options['info_buyRequest']['tmplens']['index_type'] ?: '';
+        //图片id
+        $arr['prescription_pic_id'] = $options['info_buyRequest']['tmplens']['coatiing_price'] ?: '';
         //光度等参数
         $prescription_params = explode("&", $options['info_buyRequest']['tmplens']['prescription']);
         $options_params = array();
@@ -829,6 +842,7 @@ class OrderData extends Backend
             $arr_value = explode("=", $value);
             $options_params[$arr_value[0]] = $arr_value[1];
         }
+
         //处方类型
         $arr['prescription_type'] = $options_params['prescription_type'] ?: '';
         //镀膜名称
@@ -872,9 +886,9 @@ class OrderData extends Backend
         $arr['pd'] = $options_params['pd'];
         $arr['pdcheck'] = $options_params['pdcheck'];
         $arr['prismcheck'] = $options_params['prismcheck'];
-        //小语种站左右眼add是反的
-        $arr['os_add'] = $options_params['od_add'];
-        $arr['od_add'] = $options_params['os_add'];
+        //小语种站左右眼add是反的 （转换过了）
+        $arr['os_add'] = $options_params['os_add'];
+        $arr['od_add'] = $options_params['od_add'];
         $arr['od_pv'] = $options_params['od_pv'];
         $arr['os_pv'] = $options_params['os_pv'];
         $arr['od_pv_r'] = $options_params['od_pv_r'];
@@ -914,6 +928,8 @@ class OrderData extends Backend
         $arr['index_type'] = $options['info_buyRequest']['tmplens']['index_type'] ?: '';
         //镜片名称
         $arr['index_name'] = $options['info_buyRequest']['tmplens']['index_type'] ?: '';
+        //图片id
+        $arr['prescription_pic_id'] = $options['info_buyRequest']['tmplens']['coatiing_price'] ?: '';
         //光度等参数
         $prescription_params = explode("&", $options['info_buyRequest']['tmplens']['prescription']);
         $options_params = array();
@@ -1004,6 +1020,8 @@ class OrderData extends Backend
         $arr['index_type'] = $options['info_buyRequest']['tmplens']['index_type'] ?: '';
         //镜片名称
         $arr['index_name'] = $options['info_buyRequest']['tmplens']['index_type'] ?: '';
+        //图片id
+        $arr['prescription_pic_id'] = $options['info_buyRequest']['tmplens']['coatiing_price'] ?: '';
         //光度等参数
         $prescription_params = explode("&", $options['info_buyRequest']['tmplens']['prescription']);
         $options_params = array();

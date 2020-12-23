@@ -53,11 +53,15 @@ class OcPrescriptionPic extends Backend
             }
 
             $filter = json_decode($this->request->get('filter'), true);
-            $site = $filter['site'] ? $filter['site'] :1;
+//            $site = $filter['site'] ? $filter['site'] :1;
+            $site = $filter['site'];
             if ($site ==1){
                 $model = Db::connect('database.db_zeelool');
+            }elseif($site ==2){
+                $model = Db::connect('database.db_voogueme');
             }else{
                 $model = Db::connect('database.db_voogueme');
+                $models = Db::connect('database.db_voogueme');
             }
             unset($filter['site']);
             $this->request->get(['filter' => json_encode($filter)]);
