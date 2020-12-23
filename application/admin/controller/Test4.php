@@ -1724,7 +1724,7 @@ class Test4 extends Controller
         $process = new \app\admin\model\order\order\NewOrderProcess;
         $orderitemprocess = new \app\admin\model\order\order\NewOrderItemProcess();
         //查询所有订单
-        $order = $process->where('order_prescription_type','<>',0)->where('order_id',2)->column('order_id');
+        $order = $process->where('order_prescription_type','<>',0)->column('order_id');
         foreach ($order as $key=>$value){
             $order_type = $orderitemprocess->where('order_id',$value)->column('order_prescription_type');
             if(in_array(3,$order_type)){

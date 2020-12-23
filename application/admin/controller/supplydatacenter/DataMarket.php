@@ -47,8 +47,6 @@ class DataMarket extends Backend
         }else{
             $time_str = $params['time_str'];
         }
-
-
         //库存总览
         $stock_overview = $this->stock_overview();
         //仓库指标总览
@@ -57,13 +55,11 @@ class DataMarket extends Backend
         $stock_level_overview = $this->stock_level_overview($time_str);
         //采购概况
         $purchase_overview = $this->purchase_overview($time_str);
-
-
         //物流妥投概况
         $logistics_completed_overview = $this->logistics_completed_overview($time_str);
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
-        $this->view->assign(compact('stock_overview','stock_measure_overview','stock_level_overview','purchase_overview','logistics_completed_overview','magentoplatformarr'));
+        $this->view->assign(compact('stock_overview','stock_measure_overview','stock_level_overview','purchase_overview','logistics_completed_overview','magentoplatformarr','time_str'));
         return $this->view->fetch();
     }
     //库存总览
