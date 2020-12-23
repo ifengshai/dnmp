@@ -361,7 +361,7 @@ class OrderData extends Backend
         //镜片类型
         $arr['index_type'] = $options['info_buyRequest']['tmplens']['lenstype_data_name'] ?: '';
         //镜片名称
-        $arr['index_name'] = $options['info_buyRequest']['tmplens']['lens_data_name'] ?: '';
+        $arr['index_name'] = $options['info_buyRequest']['tmplens']['lens_data_name'] ?: $options['info_buyRequest']['tmplens']['index_type'];
         //光度等参数
         $prescription_params = explode("&", $options['info_buyRequest']['tmplens']['prescription']);
         $options_params = array();
@@ -821,7 +821,9 @@ class OrderData extends Backend
         //镜片类型
         $arr['index_type'] = $options['info_buyRequest']['tmplens']['index_type'] ?: '';
         //镜片名称
-        $arr['index_name'] = $options['info_buyRequest']['tmplens']['index_type'] ?: '';
+        $arr['index_name'] = $options['info_buyRequest']['tmplens']['index_name'] ?: '';
+        //图片id
+        $arr['prescription_pic_id'] = $options['info_buyRequest']['tmplens']['prescription_pic_id'] ?: '';
         //光度等参数
         $prescription_params = explode("&", $options['info_buyRequest']['tmplens']['prescription']);
         $options_params = array();
@@ -1454,7 +1456,7 @@ class OrderData extends Backend
         $params = [];
         foreach ($list as $k => $v) {
             $params[$k]['id'] = $v['id'];
-            $params[$k]['region_id'] = $res[$v['entity_id']]['region_id'];
+            $params[$k]['region_id'] = $res[$v['entity_id']]['region_id'] ?: 0;
             $params[$k]['region'] = $res[$v['entity_id']]['region'];
             // $params[$k]['city'] = $res[$v['entity_id']]['city'];
             // $params[$k]['street'] = $res[$v['entity_id']]['street'];
@@ -1538,7 +1540,13 @@ class OrderData extends Backend
     public function order_item_data_shell()
     {
         $this->order_item_shell(1);
-        // $this->order_item_shell(5);
+        $this->order_item_shell(2);
+        $this->order_item_shell(3);
+        $this->order_item_shell(4);
+        $this->order_item_shell(5);
+        $this->order_item_shell(9);
+        $this->order_item_shell(10);
+        $this->order_item_shell(11);
 
     }
 
@@ -1753,7 +1761,7 @@ class OrderData extends Backend
 
     protected function order_item_data_shell_temp($site)
     {
-        $list = $this->orderitemoption->where('site=' . $site . ' and LENGTH(trim(os_axis))=0')->limit(2000)->select();
+        $list = $this->orderitemoption->where('site=' . $site . ' and LENGTH(trim(index_name))=0')->limit(2000)->select();
         $list = collection($list)->toArray();
         $item_ids = array_column($list, 'item_id');
 
@@ -1795,7 +1803,8 @@ class OrderData extends Backend
             } elseif ($site == 11) {
                 $options =  $this->zeelool_jp_prescription_analysis($item_data[$v['item_id']]);
             }
-            $option_params[$k]['os_axis'] = $options['os_axis'] ?: 'None';
+            $option_params[$k]['index_name'] = $options['index_name'] ?: 'None';
+            $option_params[$k]['index_type'] = $options['index_type'] ?: 'None';
             $option_params[$k]['id'] = $v['id'];
             
             echo $v['item_id'] . "\n";

@@ -727,4 +727,19 @@ class Test01 extends Backend
         $writer = new $class($spreadsheet);
         $writer->save('php://output');
     }
+
+    public function hedankuwei()
+    {
+        $list = Db::name('hedan_kuwei')->where('id','>',0)->select();
+        foreach ($list as $k=>$v){
+            $list[$k]['type'] = 2;
+            $list[$k]['createtime'] = '2020-12-22 20:03:31';
+            $list[$k]['create_person'] = 'Admin';
+            $list[$k]['shelf_number'] = '';
+            // Db::name('store_house')->insert($list[$k]);
+            unset($list[$k]['id']);
+        }
+        Db::name('store_house')->insertAll($list);
+        dump($list);
+    }
 }
