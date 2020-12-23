@@ -306,7 +306,6 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                     $value['order_items'][$i]['prismcheck'] = '';
                 }
             }
-            dump($value);die();
             //请求接口
             $url = config('url.esz_url').'magic/order/prescriptionPicCheck';
             $curl = curl_init();
