@@ -237,6 +237,7 @@ class Scm extends Api
                 }
             }
             if (!empty($value['menu'])) {
+                $value['menu'] = array_values($value['menu']);
                 $list[] = $value;
             }
         }
