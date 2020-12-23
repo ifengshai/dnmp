@@ -911,7 +911,7 @@ class Test extends Backend
             $zeelool_es_sku = $this->itemplatformsku->getWebSku($v, 9);
             $zeelool_de_sku = $this->itemplatformsku->getWebSku($v, 10);
             $zeelool_jp_sku = $this->itemplatformsku->getWebSku($v, 11);
-
+            $skus = [];
             $skus = [
                 $zeelool_sku,
                 $voogueme_sku,
