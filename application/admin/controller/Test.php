@@ -865,7 +865,7 @@ class Test extends Backend
         foreach ($list as $k => $v) {
             $p_map['sku'] = $v['sku'];
             $data['real_time_qty'] = $v['stock'];
-            $data['distribution_occupy_stock'] = 0;
+            // $data['distribution_occupy_stock'] = 0;
             $res = $this->item->where($p_map)->update($data);
             echo $v['sku'] . "\n";
         }
