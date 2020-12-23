@@ -822,6 +822,8 @@ class OrderData extends Backend
         $arr['index_type'] = $options['info_buyRequest']['tmplens']['index_type'] ?: '';
         //镜片名称
         $arr['index_name'] = $options['info_buyRequest']['tmplens']['index_name'] ?: '';
+        //图片id
+        $arr['prescription_pic_id'] = $options['info_buyRequest']['tmplens']['prescription_pic_id'] ?: '';
         //光度等参数
         $prescription_params = explode("&", $options['info_buyRequest']['tmplens']['prescription']);
         $options_params = array();
