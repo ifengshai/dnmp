@@ -264,10 +264,9 @@ class SingleItems extends Backend
                     }
                 }
             }
-
+            arsort($array_sku);
             //平均每副订单金额
             $every_money = $total ? round($whole_price/$total,2) : 0;
-            arsort($array_sku);
             $data = compact('sku', 'array_sku', 'total', 'orderPlatformList', 'whole_platform_order_num', 'order_rate', 'avg_order_glass', 'pay_jingpian_glass', 'pay_jingpian_glass_rate', 'only_one_glass_num', 'only_one_glass_rate', 'every_price', 'whole_price','every_money');
 
             $this->success('', '', $data);
