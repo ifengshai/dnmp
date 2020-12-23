@@ -955,7 +955,7 @@ class Distribution extends Backend
         $lens_list = $this->_lens_data->column('lens_name', 'lens_number');
 
         $data = [];
-        foreach ($list as $k => $v) {
+        foreach ($list as $k => &$v) {
             //更改镜框最新sku
             if ($change_sku[$v['item_order_number']]) {
                 $v['sku'] = $change_sku[$v['item_order_number']];
