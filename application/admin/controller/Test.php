@@ -8,6 +8,7 @@ use GuzzleHttp\Client;
 use think\Db;
 use SchGroup\SeventeenTrack\Connectors\TrackingConnector;
 use app\admin\model\DistributionLog;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
 class Test extends Backend
 {
@@ -1577,4 +1578,89 @@ class Test extends Backend
         echo 'ok';
         die;
     }
+
+
+
+    //导出，Z站所有商品的最近3次采购单里分别的采购单价（成本价）
+    public function purchase_order_export()
+    {
+        $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
+        $orderpurchase = new \app\admin\model\purchase\PurchaseOrder();
+
+        $item_platform_sku = $platform->where('platform_type', 1)->field('sku,platform_sku')->group('platform_sku')->select();
+        $item_platform_sku = collection($item_platform_sku)->toArray();
+
+        $spreadsheet = new Spreadsheet();
+        $spreadsheet->setActiveSheetIndex(0);
+        $spreadsheet->getActiveSheet()->setCellValue("A1", "平台sku");
+        $spreadsheet->getActiveSheet()->setCellValue("B1", "商品sku编码");
+        $spreadsheet->getActiveSheet()->setCellValue("C1", "采购单价1");
+        $spreadsheet->getActiveSheet()->setCellValue("D1", "采购时间1");
+        $spreadsheet->getActiveSheet()->setCellValue("E1", "采购单价2");
+        $spreadsheet->getActiveSheet()->setCellValue("F1", "采购时间2");
+        $spreadsheet->getActiveSheet()->setCellValue("G1", "采购单价3");
+        $spreadsheet->getActiveSheet()->setCellValue("H1", "采购时间3");
+
+
+        foreach ($item_platform_sku as $key => $value) {
+            $spreadsheet->getActiveSheet()->setCellValue('A' . ($key * 1 + 2), $value['platform_sku']);
+            $spreadsheet->getActiveSheet()->setCellValue('B' . ($key * 1 + 2), $value['sku']);
+            $order_purchase = $orderpurchase
+            ->join(['fa_purchase_order_item' => 'b'], 'fa_purchase_order.id=b.purchase_id')
+            ->where('b.sku', $value['sku'])
+            ->field('b.purchase_price,fa_purchase_order.createtime')
+            ->order('fa_purchase_order.createtime desc')
+            ->limit(3)
+            ->select();
+            $order_purchase_arr = collection($order_purchase)->toArray();
+            
+            
+            $spreadsheet->getActiveSheet()->setCellValue('C' . ($key * 1 + 2), !empty($order_purchase_arr[0]['purchase_price'])?$order_purchase_arr[0]['purchase_price']:'');
+            $spreadsheet->getActiveSheet()->setCellValue('D' . ($key * 1 + 2), !empty($order_purchase_arr[0]['createtime'])?$order_purchase_arr[0]['createtime']:'');
+
+            $spreadsheet->getActiveSheet()->setCellValue('E' . ($key * 1 + 2), !empty($order_purchase_arr[1]['purchase_price'])?$order_purchase_arr[1]['purchase_price']:'');
+            $spreadsheet->getActiveSheet()->setCellValue('F' . ($key * 1 + 2), !empty($order_purchase_arr[1]['createtime'])?$order_purchase_arr[1]['createtime']:'');
+
+            $spreadsheet->getActiveSheet()->setCellValue('G' . ($key * 1 + 2), !empty($order_purchase_arr[2]['purchase_price'])?$order_purchase_arr[2]['purchase_price']:'');
+            $spreadsheet->getActiveSheet()->setCellValue('H' . ($key * 1 + 2), !empty($order_purchase_arr[2]['createtime'])?$order_purchase_arr[2]['createtime']:'');
+
+        }
+        //print_r(count($item_platform_sku));die;
+        //设置边框
+        $border = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
+                    'color'       => ['argb' => 'FF000000'], // 设置border颜色
+                ],
+            ],
+        ];
+        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
+        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
+
+        $spreadsheet->getActiveSheet()->getStyle('A1:Q' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+        $spreadsheet->setActiveSheetIndex(0);
+        $format = 'xlsx';
+        $savename = 'Z站采购数据' . date("YmdHis", time());;
+
+        if ($format == 'xls') {
+            //输出Excel03版本
+            header('Content-Type:application/vnd.ms-excel');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
+        } elseif ($format == 'xlsx') {
+            //输出07Excel版本
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
+        }
+        //输出名称
+        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
+        //禁止缓存
+        header('Cache-Control: max-age=0');
+        $writer = new $class($spreadsheet);
+        $writer->save('php://output');
+
+    }
+
 }
