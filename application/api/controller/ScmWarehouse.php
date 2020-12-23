@@ -1176,7 +1176,7 @@ class ScmWarehouse extends Scm
             $item_list = collection($item_list)->toArray();
             //获取条形码数据
             $bar_code_list = $this->_product_bar_code_item
-                ->where(['check_id' => $check_id])
+                ->where(['check_id' => $check_id,'is_sample'=>0])
                 ->field('sku,code')
                 ->order('id', 'desc')
                 ->select();
