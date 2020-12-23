@@ -270,7 +270,6 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
     {
         if ($_POST){
             $data  = input('param.');
-
             $value['order_id'] = $data['entity_id'];
             $count = count($data['item_id']);
             for ($i= 0;$i<$count;$i++) {
@@ -298,6 +297,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                 $value['order_items'][$i]['os_bd_r'] = $data['os_bd_r'][$i];
                 $value['order_items'][$i]['os_add'] = $data['os_add'][$i];
                 $value['order_items'][$i]['od_add'] = $data['od_add'][$i];
+                $value['order_items'][$i]['prescription_type'] = $data['prescription_type'][$i];
                 if ($data['od_pv'][$i] !== null && $data['od_pv_r'][$i] !==null && $data['os_pv'][$i] !== null && $data['os_pv_r'][$i]){
                     $value['order_items'][$i]['prismcheck'] = 'on';
                 }else{
@@ -317,10 +317,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
             curl_setopt($curl, CURLOPT_TIMEOUT, 20);
             $content =json_decode(curl_exec($curl),true);
             curl_close($curl);
-            Log::write("处方接口请求");
-            Log::write($content);
-            Log::write($value);
-            Log::write($url);
+
             if ($content['status'] == 200){
                 $this->success('操作成功');
             }else{
@@ -345,25 +342,24 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
         $pay = $this->zeelool->getPayDetail($row->site, $row->entity_id);
 
         //订单明细数据
-
         $item = $this->orderitemoption->where('order_id', $ids)->select();
         $items = collection($item)->toArray();
         foreach ($items as $key=>$item){
             //临时模拟数据
-//            $items[$key]['to_examine']= true;
-//            $items[$key]['prescription_image'] = 'https://esz.zhaokuangyi.com/media/prescription_file/160860092995781.jpg';
-            if ($item['site'] ==9){
-                if ($item['prismcheck'] == false && $item['prescription_pic_id']>0){
-                    $items[$key]['to_examine']= true;
-                }else{
-                    $items[$key]['to_examine'] = false;
-                }
-                if ($item['prescription_pic_id'] > 0){
-                    $items[$key]['prescription_image'] = Db::connect('database.db_zeelool_es')->table('oc_prescription_pic')->where('id',$item['prescription_pic_id'])->value('pic');
-                }else{
-                    $items[$key]['prescription_image'] = null;
-                }
-            }
+            $items[$key]['to_examine']= true;
+            $items[$key]['prescription_image'] = 'https://esz.zhaokuangyi.com/media/prescription_file/160860092995781.jpg';
+//            if ($item['site'] ==9){
+//                if ($item['prescription_pic_checked'] == false && $item['prescription_pic_id']>0){
+//                    $items[$key]['to_examine']= true;
+//                }else{
+//                    $items[$key]['to_examine'] = false;
+//                }
+//                if ($item['prescription_pic_id'] > 0){
+//                    $items[$key]['prescription_image'] = Db::connect('database.db_zeelool_es')->table('oc_prescription_pic')->where('id',$item['prescription_pic_id'])->value('pic');
+//                }else{
+//                    $items[$key]['prescription_image'] = null;
+//                }
+//            }
         }
 
         $this->view->assign("item", $items);
