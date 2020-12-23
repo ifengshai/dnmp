@@ -2051,6 +2051,9 @@ class ScmWarehouse extends Scm
         if ($row['status'] > 1) {
             $this->error(__('此状态不能编辑'), [], 544);
         }
+        $item_row = $this->_inventory_item
+            ->where('inventory_id', $inventory_id)
+            ->column('real_time_qty', 'sku');
 
         if ($do_type == 1) {
             //提交
@@ -2102,7 +2105,7 @@ class ScmWarehouse extends Scm
                     $save_data = [];
                     $save_data['is_add'] = $is_add;//是否盘点
                     $save_data['inventory_qty'] = $v['inventory_qty'] ?? 0;//盘点数量
-                    $save_data['error_qty'] = $save_data['inventory_qty'] - $row['real_time_qty'];//误差数量
+                    $save_data['error_qty'] = $save_data['inventory_qty'] - $item_row[$v['sku']]['real_time_qty'];//误差数量
                     $save_data['remark'] = $v['remark'];//备注
 
                     $item_map['sku'] = $v['sku'];
