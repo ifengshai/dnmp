@@ -300,12 +300,14 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                 $value['order_items'][$i]['os_bd_r'] = $data['os_bd_r'][$i];
                 $value['order_items'][$i]['os_add'] = $data['os_add'][$i];
                 $value['order_items'][$i]['od_add'] = $data['od_add'][$i];
+                $value['order_items'][$i]['prescription_type'] = $data['prescription_type'][$i];
                 if ($data['od_pv'][$i] !== null && $data['od_pv_r'][$i] !==null && $data['os_pv'][$i] !== null && $data['os_pv_r'][$i]){
                     $value['order_items'][$i]['prismcheck'] = 'on';
                 }else{
                     $value['order_items'][$i]['prismcheck'] = '';
                 }
             }
+            dump($value);die();
             //请求接口
             $url = config('url.esz_url').'magic/order/prescriptionPicCheck';
             $curl = curl_init();

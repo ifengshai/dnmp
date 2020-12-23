@@ -355,6 +355,7 @@
                     <tbody>
                         {foreach $item as $v}
                         <input type="hidden" name="item_id[]" value="{:$v.item_id}">
+
                         <tr>
                             <td>
                                 <table class="altrowstable" style="margin:0 auto;margin:30px;width:90%;">
@@ -410,7 +411,7 @@
                                             <td>Prism Vertical</td>
                                             <td>Base Direction</td>
                                         </tr>
-
+                                        <input type="hidden" name="prescription_type[]" value="{:$v['prescription_type']}">
                                  {if condition="$v['to_examine'] eq true"}
                                         <tr>
                                             <td >Right(OD)</td>
