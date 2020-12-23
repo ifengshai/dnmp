@@ -969,6 +969,8 @@ class Test extends Backend
         $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
         $item = new \app\admin\model\itemmanage\Item();
         // $skus1 = $platform->where(['stock' => ['<', 0]])->column('sku');
+
+
         $skus = Db::table('fa_zz_temp2')->column('sku');
         foreach ($skus as $k => $v) {
             // $v = 'OA01901-06';
@@ -980,13 +982,14 @@ class Test extends Backend
             if ($v) {
                 $available_stock = $item->where($item_map)->value('available_stock');
                 //查出映射表中此sku对应的所有平台sku 并根据库存数量进行排序（用于遍历数据的时候首先分配到那个站点）
-                $item_platform_sku = $platform->where('sku', $v)->order('stock asc')->field('platform_type,stock')->select();
+
+                $item_platform_sku = Db::connect('database.db_stock')->table('fa_item_platform_sku_copy1')->where('sku', $v)->order('stock asc')->field('platform_type,stock')->select();
                 if (!$item_platform_sku) {
                     continue;
                 }
                 //站点数量
                 $all_num = count($item_platform_sku);
-                $whole_num = $platform
+                $whole_num = Db::connect('database.db_stock')->table('fa_item_platform_sku_copy1')
                     ->where('sku', $v)
                     ->field('stock')
                     ->select();
