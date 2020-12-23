@@ -2069,8 +2069,8 @@ class ScmWarehouse extends Scm
         foreach (array_filter($item_sku) as $key => $value) {
             /*$info_id = $this->_inventory_item->where(['sku' => $value['sku'],'is_add'=>0,'inventory_id'=>['neq',$inventory_id]])->column('id');
             !empty($info_id) && $this->error(__('SKU=>'.$value['sku'].'存在未完成的盘点单'), [], 543);*/
-//            $sku_code = array_column($value['sku_agg'], 'code');//PDA传数据格式未和出入库质检单接口一致
-            $sku_code = $value['sku_agg'];//PDA传数据格式未和出入库质检单接口一致
+//            $sku_code = $value['sku_agg'];//PDA传数据格式未和出入库质检单接口一致
+            $sku_code = array_column($value['sku_agg'], 'code');//PDA传数据格式与出入库质检单接口一致
             if(count($value['sku_agg']) != count(array_unique($value['sku_agg'])))$this->error(__('条形码有重复，请检查'), [], 405);
 
             $where = [];
