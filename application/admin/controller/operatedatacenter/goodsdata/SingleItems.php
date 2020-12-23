@@ -49,7 +49,7 @@ class SingleItems extends Backend
             }
 
             if ($filter['sku']) {
-                $map['p.sku'] = ['like',$filter['sku']];
+                $map['p.sku'] = ['like','%'.$filter['sku'].'%'];
                 unset($filter['sku']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }

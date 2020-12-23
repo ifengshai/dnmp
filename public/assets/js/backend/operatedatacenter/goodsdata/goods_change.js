@@ -80,6 +80,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                 // alert(sku)
                 $("#top_sku").val(sku);
             });
+            $('#export').click(function () {
+                var time_str = $('#time_str').val();
+                var sku = $('#sku').val();
+                var order_platform = $('#order_platform').val();
+                window.location.href=Config.moduleurl+'/operatedatacenter/goodsdata/goods_change/export?sku='+sku+'&time_str='+time_str+'&order_platform='+order_platform;
+            });
             // $("#search_sku_submit").click(function () {
             //     var order_platform = $('#order_platform').val();
             //     var time_str = $('#time_str').val();
