@@ -170,7 +170,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                 $.each(table.bootstrapTable('getSelections'), function (index, row) {
                     id_params.push(row['id']);
                 });
-                window.open(Config.moduleurl + '/warehouse/stock_house/print_label/do_type/1/ids/' + id_params.join(','), '_blank');
+                window.open(Config.moduleurl + '/warehouse/stock_house/print_label/ids/' + id_params.join(','), '_blank');
             });
         },
         temporary_shelf: function () {
