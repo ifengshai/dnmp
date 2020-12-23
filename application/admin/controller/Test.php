@@ -803,17 +803,7 @@ class Test extends Backend
      */
     public function process_sku_stock()
     {
-
-        $skus = [
-            'OM749624-03',
-            'OM749624-02',
-            'OP016615-02',
-            'OX01969-01',
-            'OX331639-02',
-            'SM189184-01',
-            'E60002-1'
-        ];
-        $list = Db::name('zzzz_temp')->field('count(DISTINCT product_number) as stock,sku')->where(['sku' => ['in', $skus]])->group('sku')->select();
+        $list = Db::name('zzzz_temp')->field('count(DISTINCT product_number) as stock,sku')->group('sku')->select();
 
         Db::name('zz_temp2')->insertAll($list);
         echo "ok";
@@ -845,8 +835,6 @@ class Test extends Backend
         }
         echo "ok";
     }
-
-
 
     public function process_sku_temp()
     {
@@ -1077,8 +1065,6 @@ class Test extends Backend
             echo $v['id'] . "\n";
         }
     }
-
-
 
 
     /***************处理工单旧数据*********************** */
