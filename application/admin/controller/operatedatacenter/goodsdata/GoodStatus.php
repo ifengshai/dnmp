@@ -205,6 +205,7 @@ class GoodStatus extends Backend
             $again_num = $this->item_platform
                 ->where('platform_type','in',[$platform_a,$platform_b])
                 ->where($map)
+                ->where('outer_sku_status',1)
                 ->group('sku')
                 ->having('count(platform_type)>1')
                 ->count();
