@@ -3,6 +3,7 @@
 namespace app\admin\controller\order;
 
 use app\common\controller\Backend;
+use EasyWeChat\Support\Log;
 use fast\Trackingmore;
 use Util\NihaoPrescriptionDetailHelper;
 use Util\ZeeloolPrescriptionDetailHelper;
@@ -318,10 +319,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
             curl_setopt($curl, CURLOPT_TIMEOUT, 20);
             $content =json_decode(curl_exec($curl),true);
             curl_close($curl);
-            Log::write("处方接口请求");
-            Log::write($content);
-            Log::write($value);
-            Log::write($url);
+            
             if ($content['status'] == 200){
                 $this->success('操作成功');
             }else{
