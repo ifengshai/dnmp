@@ -11,15 +11,13 @@ use Util\ZeeloolEsPrescriptionDetailHelper;
 use Util\ZeeloolJpPrescriptionDetailHelper;
 use Util\VooguemePrescriptionDetailHelper;
 use Util\MeeloogPrescriptionDetailHelper;
-use app\admin\model\saleaftermanage\SaleAfterTaskRemark;
+use app\admin\model\order\order\NewOrder;
 
 class SaleAfterTask extends Model
 {
-
-
-
     //数据库
     protected $connection = 'database';
+
     // 表名
     protected $name = 'sale_after_task';
 
@@ -277,6 +275,24 @@ class SaleAfterTask extends Model
         return $arr;
     }
 
+    /**
+     * 模糊查询订单-新
+     *
+     * @param string $increment_id  订单号
+     * @author lzh
+     * @return array
+     */
+    public function getLikeOrderNew($increment_id)
+    {
+        $_new_order = new NewOrder();
+        $result = $_new_order
+            ->where('increment_id', 'like', "%{$increment_id}%")
+            ->limit(10)
+            ->column('increment_id')
+        ;
+        return $result;
+    }
+
     /***
      * @param $order_platform 订单平台
      * @param $email  用户邮箱
@@ -309,7 +325,7 @@ class SaleAfterTask extends Model
                 return false;
                 break;
         }
-        $result = Db::connect($db)->table('sales_flat_order')->where('customer_email', 'like', "%{$email}%")->field('customer_email')->limit(10)->select();
+        $result = Db::connect($db)->table('sales_flat_order')->where('customer_email', 'like', "%{$email}%")->field('customer_email')->group('customer_email')->limit(10)->select();
         if (!$result) {
             return false;
         }

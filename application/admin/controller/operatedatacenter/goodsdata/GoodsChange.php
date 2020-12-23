@@ -257,7 +257,7 @@ class GoodsChange extends Backend
                 ->field('order_id,created_at')
                 ->count();
             $map['b.sku'] = ['=', $value['sku']];
-            $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
+            $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete','delivered']];
             //获取这个sku所有的订单情况
             $sku_order_data = Db::connect('database.db_zeelool')->table('sales_flat_order')
                 ->where($map)
@@ -399,7 +399,7 @@ class GoodsChange extends Backend
                 ->field('order_id,created_at')
                 ->count();
             $map['b.sku'] = ['=', $value['sku']];
-            $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
+            $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete','delivered']];
             //获取这个sku所有的订单情况
             $sku_order_data = Db::connect('database.db_zeelool')
                 ->table('sales_flat_order')

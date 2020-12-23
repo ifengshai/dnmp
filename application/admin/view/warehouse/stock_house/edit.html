@@ -1,9 +1,21 @@
 <form id="edit-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
 
+    <input id="c-type" class="form-control" name="row[type]" type="hidden" value="{$type}">
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Coding')}:</label>
         <div class="col-xs-12 col-sm-8">
-            <input id="c-coding" class="form-control" name="row[coding]" type="text" value="{$row.coding|htmlentities}">
+            {if $type == 2}
+            <select class="form-control" name="row[subarea]" style="width: 14%;">
+                <option>选择</option>
+                <option value="A" {if $row.subarea == 'A'} selected {/if}>A</option>
+                <option value="B" {if $row.subarea == 'B'} selected {/if}>B</option>
+                <option value="C" {if $row.subarea == 'C'} selected {/if}>C</option>
+                <option value="D" {if $row.subarea == 'D'} selected {/if}>D</option>
+            </select>
+            <input class="form-control" name="row[coding]" type="text" value="{$row.coding|htmlentities}" style="width: 85%;">
+            {else}
+            <input class="form-control" name="row[coding]" type="text" value="{$row.coding|htmlentities}">
+            {/if}
         </div>
     </div>
     <div class="form-group">
@@ -16,7 +28,7 @@
         <label class="control-label col-xs-12 col-sm-2">{:__('Remark')}:</label>
         <div class="col-xs-12 col-sm-8">
             <textarea id="c-remark" class="form-control " rows="5" name="row[remark]"
-                cols="50"></textarea>
+                cols="50">{$row.remark|htmlentities}</textarea>
         </div>
     </div>
     <div class="form-group layer-footer">

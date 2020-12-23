@@ -4,16 +4,17 @@ namespace app\admin\controller;
 
 use app\common\controller\Backend;
 use Think\Db;
+use Think\Log;
 use think\Request;
 
 /**
- * 
+ *
  *
  * @icon fa fa-circle-o
  */
 class OcCustomerAfterSalesWorkOrder extends Backend
 {
-    
+
     /**
      * OcCustomerAfterSalesWorkOrder模型对象
      * @var \app\common\model\OcCustomerAfterSalesWorkOrder
@@ -26,21 +27,26 @@ class OcCustomerAfterSalesWorkOrder extends Backend
         $this->model = new \app\common\model\OcCustomerAfterSalesWorkOrder;
 
     }
-    
+
     /**
      * 默认生成的控制器所继承的父类中有index/add/edit/del/multi五个基础方法、destroy/restore/recyclebin三个回收站方法
      * 因此在当前控制器中可不用编写增删改查的代码,除非需要自己控制这部分逻辑
      * 需要将application/admin/library/traits/Backend.php中对应的方法复制到当前控制器,然后进行修改
      */
-    
+
+
+
 
     /**
      * 查看
      */
     public function index()
     {
+
+
         //当前是否为关联查询
         $this->relationSearch = false;
+
         //设置过滤方法
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax())
@@ -52,24 +58,45 @@ class OcCustomerAfterSalesWorkOrder extends Backend
             }
 
             $filter = json_decode($this->request->get('filter'), true);
+
+
+
+            //是否有工单
+            $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
+            if ($filter['is_task'] == 1 || $filter['is_task'] == '0') {
+                $swhere = [];
+                $swhere['work_platform'] = 1;
+                $swhere['work_status'] = ['not in', [0, 4, 6]];
+                $order_arr = $workorder->where($swhere)->column('platform_order');
+                if ($filter['is_task'] == 1) {
+                    $map['increment_id'] = ['in', $order_arr];
+                } elseif ($filter['is_task'] == '0') {
+                    $map['increment_id'] = ['not in', $order_arr];
+                }
+                unset($filter['is_task']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
             unset($filter['site']);
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
 
+
             $total = $this->model
-                    ->where($where)
-                    ->order($sort, $order)
-                    ->count();
+                ->where($where)
+                ->where($map)
+                ->order($sort, $order)
+                ->count();
 
             $list = $this->model
-                    
-                    ->where($where)
-                    ->order($sort, $order)
-                    ->limit($offset, $limit)
-                    ->select();
+
+                ->where($where)
+                ->where($map)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();
 
             foreach ($list as $row) {
                 $row->visible(['id','email','increment_id','order_type','problem_type','concrete_problem','status','created_at','completed_at','handler_name']);
-                
+
             }
             $list = collection($list)->toArray();
             //查询订单是否存在工单
@@ -95,16 +122,20 @@ class OcCustomerAfterSalesWorkOrder extends Backend
                 }else{
                     $list[$key]['status'] = '待处理';
                 }
-
+//                $list[$key]['created_at'] =date("Y-m-d H:i:s",strtotime($item['created_at'])+14400);;
                 $swhere['platform_order'] = $item['increment_id'];
                 $swhere['work_platform'] = 1;
                 $swhere['work_status'] = ['not in', [0, 4, 6]];
+
                 $count = $workorder->where($swhere)->count();
-                if ($count>1){
+
+                if ($count>0){
                     $list[$key]['task_info'] = 1;
+                    $list[$key]['is_task'] = 1;
+                }else{
+                    $list[$key]['is_task'] = 0;
                 }
             }
-
             $result = array("total" => $total, "rows" => $list);
 
             return json($result);
@@ -118,12 +149,14 @@ class OcCustomerAfterSalesWorkOrder extends Backend
     public function question_detail($ids = null){
         if ($_POST){
             $params = $this->request->post("row/a");
-
             $where['id'] = $params['ids'];
+            if ($params['pm_audit_status'] == null){
+                $params['pm_audit_status'] = 3;
+            }
             $save_question = $this->model->isUpdate(true, $where)->save(['status'=>$params['pm_audit_status'],'completed_at'=>date('Y-m-d H:i:s',time()),'handler_name'=>$this->auth->nickname]);
             if ($save_question){
                 //如果更新成功  提交接口
-                $url  = 'https://z.zhaokuangyi.com/magic/customer/updateTicket';
+                $url  =  config('url.zeelool_url').'magic/customer/updateTicket';
                 $value['ticket_id'] = $params['ids'];
                 $value['status'] = $params['pm_audit_status'];
                 $curl = curl_init();
@@ -137,6 +170,7 @@ class OcCustomerAfterSalesWorkOrder extends Backend
                 curl_setopt($curl, CURLOPT_TIMEOUT, 20); //设置cURL允许执行的最长秒数。
                 $content =json_decode(curl_exec($curl),true);
                 curl_close($curl);
+
                 if ($content['code'] ==200){
                     $this->success('操作成功');
                 }else{
@@ -145,66 +179,76 @@ class OcCustomerAfterSalesWorkOrder extends Backend
             }else{
                 $this->error('操作失败');
             }
+            $this->success('操作成功');
         }
-        $row = Db::table('zeelool.oc_customer_after_sales_work_order oc')
-            ->join("mojing.fa_zendesk ze",'ze.email = oc.email','left')
-            ->join("mojing.fa_admin ad",'ze.due_id = ad.id','left')
-            ->field('oc.*,ze.id as ze_id,ze.ticket_id,ze.subject,ze.to_email,ze.due_id,ze.create_time,ze.update_time,ze.status as ze_status,ad.nickname')
-            ->where('oc.id',$ids)
-            ->select();
-
-        foreach ($row as $key=>$item){
-            $data['id'] = $item['id'];
-            $data['email'] = $item['email'];
-            $data['status'] = $item['status'];
-            $data['increment_id'] = $item['increment_id'];
-            $data['customer_id'] = $item['customer_id'];
-            $data['problem_type'] = $item['problem_type'];
-
-
-            $data['concrete_problem'] = $item['concrete_problem'];
-            $data['order_type'] = $item['order_type'];
-//            { 1: '普通订单', 2: '批发', 3: '网红',4:'补发'},
-            if ($item['order_type'] ==1){
-                $data['order_type'] = '普通订单';
-            }elseif ($data['order_type'] ==2){
-                $data['order_type'] = '批发';
-            }elseif($data['order_type'] ==3){
-                $data['order_type'] = '网红';
-            }else{
-                $data['order_type'] = '补发';
+        $type = input('param.type');
+        if (empty($type)){
+            $type =0;
+        }
+        $row  = \app\common\model\OcCustomerAfterSalesWorkOrder::get($ids)->toArray();
+        if (!empty($row['images'])){
+            $photo_href  =explode('|',$row['images']);
+            foreach ($photo_href as $key=>$item){
+                $photo_href[$key]= config('url.zeelool_url').'media/'.$item;
             }
-            $data['good_skus'] = $item['good_skus'];
-            if (!empty($item['images'])){
-                $data['images'] = explode(',',$item['images']);
-            }else{
-                $data['images'] = null;
-            }
+        }else{
+            $photo_href = null;
+        }
+        if ($row['order_type'] ==1){
+            $row['order_type'] = '普通订单';
+        }elseif ($row['order_type'] ==2){
+            $row['order_type'] = '批发';
+        }elseif($row['order_type'] ==3){
+            $row['order_type'] = '网红';
+        }else{
+            $row['order_type'] = '补发';
+        }
+        $row['images'] = $photo_href;
 
-            $data['description'] = $item['description'];
-
+        $email = Db::table('fa_zendesk')
+            ->alias('ze')
+            ->join("fa_admin ad",'ze.due_id = ad.id','left')
+            ->field('ze.id as ze_id,ze.ticket_id,ze.subject,ze.to_email,ze.due_id,ze.create_time,ze.update_time,ze.status as ze_status,ad.nickname')
+            ->where('ze.email',$row['email'])->select();
+        foreach ($email as $key=>$item){
             if ($item['ze_status'] == 1){
-                $data['email_message'][$key]['ze_status'] = 'new';
+                $email[$key]['ze_status'] = 'new';
             }elseif ($item['ze_status'] ==2){
-                $data['email_message'][$key]['ze_status'] = 'open';
+                $email[$key]['ze_status'] = 'open';
             }elseif ($item['ze_status'] ==3){
-                $data['email_message'][$key]['ze_status'] = 'pending';
+                $email[$key]['ze_status'] = 'pending';
             }elseif ($item['ze_status'] ==4){
-                $data['email_message'][$key]['ze_status'] = 'solved';
+                $email[$key]['ze_status'] = 'solved';
             }else{
-                $data['email_message'][$key]['ze_status'] = 'other';
+                $email[$key]['ze_status'] = 'other';
             }
-            $data['email_message'][$key]['ze_id'] = $item['ze_id'];
-            $data['email_message'][$key]['ticket_id'] = $item['ticket_id'];
-            $data['email_message'][$key]['subject'] = $item['subject'];
-            $data['email_message'][$key]['to_email'] = $item['to_email'];
-            $data['email_message'][$key]['nickname'] = $item['nickname'];
-            $data['email_message'][$key]['create_time'] = $item['create_time'];
-            $data['email_message'][$key]['update_time'] = $item['update_time'];
+
+        }
+        $row['email_message'] = $email;
+
+        if ($row['status'] ==1 && $type ==0){
+            Db::connect('database.db_zeelool')->table('oc_customer_after_sales_work_order')->where('id',$ids)->update(['status'=>2]);
+            $url  = config('url.zeelool_url').'magic/customer/updateTicket';
+            $value['ticket_id'] = $ids;
+            $value['status'] = 2;
+            $curl = curl_init();
+            curl_setopt($curl, CURLOPT_URL, $url);
+            curl_setopt($curl, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']); //在HTTP请求中包含一个"User-Agent: "头的字符串。
+            curl_setopt($curl, CURLOPT_HEADER, 0); //启用时会将头文件的信息作为数据流输出。
+            curl_setopt($curl, CURLOPT_POST, true); //发送一个常规的Post请求
+            curl_setopt($curl, CURLOPT_POSTFIELDS, $value);//Post提交的数据包
+            curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1); //启用时会将服务器服务器返回的"Location: "放在header中递归的返回给服务器，使用CURLOPT_MAXREDIRS可以限定递归返回的数量。
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true); //文件流形式
+            curl_setopt($curl, CURLOPT_TIMEOUT, 20); //设置cURL允许执行的最长秒数。
+            $content =json_decode(curl_exec($curl),true);
+            curl_close($curl);
+            if ($content['code'] !==200){
+                $this->success('工单信息更新失败');
+            }
         }
 
-       
-        $this->assign('row',$data);
+        $this->assign('type',$type);
+        $this->assign('row',$row);
         return $this->view->fetch();
     }
 

@@ -35,12 +35,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             }, operate: false
                         },
                         {field: 'id', title: __('ID')},
-                        // {
-                        //     field: 'site',
-                        //     title: __('站点'),
-                        //     searchList: { 1: 'zeelool', 2: 'voogueme'}
-                        // },
-                        {field: 'increment_id', title: __('订单号')},
+                        {
+                            field: 'site',
+                            title: __('站点'),
+                            searchList: { 1: 'zeelool', 2: 'voogueme'}
+                        },
+                        {field: 'increment_id', title: __('订单号'),
+                            events: Controller.api.events.gettitle,
+
+                            formatter: Controller.api.formatter.gettitle,},
                         {field: 'email', title: __('Email')},
                         {
                             field: 'order_type',
@@ -49,6 +52,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             formatter: Table.api.formatter.status,
                             visible: false
                         },
+                        { field: 'is_task', title: __('是否有工单'), visible: false, searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status },
+
                         {field: 'problem_type', title: __('Problem_type'),operate:false},
                         {field: 'status', title: __('处理状态'), searchList: { 1: 'Submitted', 2: 'Processing', 3: 'Completed'},},
                         {field: 'handler_name', title: __('Handler_name'),operate:'LIKE'},
@@ -68,8 +73,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             buttons: [
                                 {
                                     name: 'detail',
-                                    text: '问题详情',
-                                    title: __('问题详情'),
+                                    text: '处理',
+                                    title: __('处理'),
                                     extend: 'data-area = \'["80%","80%"]\'',
                                     classname: 'btn btn-xs btn-primary btn-dialog',
                                     icon: 'fa fa-list',
@@ -138,7 +143,32 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         api: {
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
+            },
+            formatter:{
+                //点击标题，弹出窗口
+                gettitle: function (value) {
+                    return '<a class="btn-gettitle" style="color: #333333!important;">' + value + '</a>';
+                },
+                status: function (value, row, index) {
+                    var str = '';
+                    if (value == 1) {
+                        str = '有';
+                    }  else {
+                        str = '无';
+                    }
+                    return str;
+                },
+            },
+            events: {
+                //点击标题，弹出窗口
+                gettitle: {
+                    //格式为：方法名+空格+DOM元素
+                    'click .btn-gettitle': function (e, value, row, index) {
+                        Backend.api.open('oc_customer_after_sales_work_order/question_detail/type/1/ids/' + row.id, __('问题查看'), { area: ['70%', '70%'] });
+                    }
+                },
             }
+
         }
     };
     return Controller;

@@ -67,12 +67,12 @@ class ZeeloolPrescriptionDetailHelper
 	public static function get_list_by_entity_ids($entity_id)
 	{
 		if ($entity_id) {
-			$querySql = "select sfo.is_new_version,sfoi.original_price,sfoi.base_discount_amount,sfoi.base_row_total,sfo.increment_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.qty_ordered,sfoi.name,sfo.created_at
+			$querySql = "select sfo.is_new_version,sfoi.item_id,sfoi.original_price,sfoi.base_discount_amount,sfoi.base_row_total,sfo.increment_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.qty_ordered,sfoi.name,sfo.created_at
 			from sales_flat_order_item sfoi
 			left join sales_flat_order sfo on sfoi.order_id=sfo.entity_id 
 			where sfo.entity_id in($entity_id)";
 			$item_list = Db::connect('database.db_zeelool')->query($querySql);
-
+		
 			// 如果为空，则直接返回false
 			if (empty($item_list)) {
 				return false;

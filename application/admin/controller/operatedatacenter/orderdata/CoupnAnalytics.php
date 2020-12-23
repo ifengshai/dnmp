@@ -55,6 +55,16 @@ class CoupnAnalytics extends Backend
             } else {
                 $site = 1;
             }
+            if ($filter['channel']) {
+                $map1['channel'] = ['=',$filter['channel']];
+            } else {
+                $map1 = [];
+            }
+            if ($filter['name']) {
+                $map2['name'] = ['like','%'.$filter['name'].'%'];
+            } else {
+                $map2 = [];
+            }
             switch ($site) {
                 case 1:
                     $model = Db::connect('database.db_zeelool');
@@ -76,16 +86,22 @@ class CoupnAnalytics extends Backend
             $total = $salesrule->table('salesrule')
                 ->where('channel', '>', 0)
                 ->field('name,rule_id,channel')
-                ->where($where)
+                // ->where($where)
+                ->where($map1)
+                ->where($map2)
                 ->count();
             //所有的优惠券
             $list = $salesrule->table('salesrule')
                 ->where('channel', '>', 0)
                 ->field('name,rule_id,channel')
-                ->where($where)
+                // ->where($where)
+                ->where($map1)
+                ->where($map2)
                 ->limit($offset, $limit)
                 ->select();
             $list = collection($list)->toArray();
+            // dump($offset);
+            // dump($limit);
             // dump($list);die;
             //判断订单的某些条件
             $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];

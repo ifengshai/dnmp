@@ -84,6 +84,17 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jstree'], function ($
                     $("#kefu").hide();
                 }
             });
+            $("#order_type").change(function () {
+                var orderTypeCheck=$("#order_type").val();
+                if (orderTypeCheck == 1){
+                    $("#order_type_item").hide();
+                    $("#order_type_main").show();
+                }
+                if (orderTypeCheck == 2){
+                    $("#order_type_item").show();
+                    $("#order_type_main").hide();
+                }
+            });
         },
         edit: function () {
             Controller.api.bindevent();

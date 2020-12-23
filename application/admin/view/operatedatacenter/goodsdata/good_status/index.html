@@ -24,6 +24,10 @@
         font-size: 5rem;
         margin-top: 60px;
     }
+    .form-control{
+        display: inline-block;
+        width: 100px;
+    }
 </style>
 <div class="panel panel-default panel-intro">
     {:build_heading()}
@@ -31,7 +35,7 @@
     <div class="panel-body">
         <div class="form-group">
             <label class="control-label col-xs-4" style="font-size: 2rem;"><i class="fa fa-search-plus"></i>  商品状态分析</label>
-            <select id="order_platform" data-rule="required" name="order_platform">
+            <select id="order_platform" data-rule="required" name="order_platform" class="form-control">
                 <option value="1">镜框</option>
                 <option value="2">饰品</option>
                 <option value="3">All</option>
@@ -44,7 +48,7 @@
         <div class="form-group">
             <label class="control-label col-xs-4" style="font-size: 2rem;"><i class="fa fa-pie-chart"></i>  各站点镜框产品重复比例及数量统计</label>
             <p style="display: inline-block;font-size: 2rem;margin-left: 21rem;">站点A</p>
-            <select id="platform_a" data-rule="required" name="order_platform">
+            <select id="platform_a" data-rule="required" name="order_platform" class="form-control">
                 <option value="1">zeelool</option>
                 <option value="2">voogueme</option>
                 <option value="3">nihao</option>
@@ -55,7 +59,7 @@
                 <option value="11">zeelool_jp</option>
             </select>
             <p style="display: inline-block;font-size: 2rem;">/站点B</p>
-            <select id="platform_b" data-rule="required" name="order_platform">
+            <select id="platform_b" data-rule="required" name="order_platform" class="form-control">
                 <option value="1">zeelool</option>
                 <option value="2">voogueme</option>
                 <option value="3">nihao</option>
