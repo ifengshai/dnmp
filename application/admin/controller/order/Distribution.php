@@ -954,7 +954,7 @@ class Distribution extends Backend
         //获取镜片编码及名称
         $lens_list = $this->_lens_data->column('lens_name', 'lens_number');
 
-        // $data = [];
+        $data = [];
         foreach ($list as $k => &$v) {
             //更改镜框最新sku
             if ($change_sku[$v['item_order_number']]) {
@@ -1002,9 +1002,9 @@ class Distribution extends Backend
             //获取镜片名称
             $v['lens_name'] = $lens_list[$v['lens_number']] ?: $v['web_lens_name'];
 
-            // $data[] = $v;
+            $data[] = $v;
         }
-        $this->assign('list', $list);
+        $this->assign('list', $data);
         $html = $this->view->fetch('print_label');
         echo $html;
     }
