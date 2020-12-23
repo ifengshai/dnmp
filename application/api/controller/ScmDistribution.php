@@ -1985,6 +1985,7 @@ class ScmDistribution extends Scm
             $this->_stock_house->rollback();
             $this->_new_order_process->rollback();
             $this->_new_order_item_process->rollback();
+            DistributionLog::record((object)['nickname'=>$create_person],$item_ids,8,$e->getMessage().'主单ID'.$row['order_id'].$msg.'失败，原因：库存不足，请检查后操作');
             $this->error('库存不足，请检查后操作', [], 407);
         } catch (Exception $e) {
             $this->_item->rollback();
