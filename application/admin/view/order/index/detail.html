@@ -419,14 +419,13 @@
                                             </td>
                                             <td><input type="text" class="inputs" value="{:$v['od_cyl'] ?? ''}" name="od_cyl[]"></td>
                                             <td><input type="text" class="inputs" value="{:$v['od_axis'] ?? ''}" name="od_axis[]"></td>
-                                            {if $v['total_add']}
-                                            <td rowspan="2"><input type="text" class="inputs" value="{:$v['total_add'] ?? ''}" name="total_add[]"></td>
-                                            {else/}
+
                                             <td><input type="text" class="inputs" value="{:$v['od_add']}" name="od_add[]"></td>
-                                            {/if}
-
+                                            {if $v['pd']}
+                                            <td><input type="text" class="inputs" value="{:$v['pd'] ?? ''}" name="pd_r[]"></td>
+                                            {else/}
                                             <td><input type="text" class="inputs" value="{:$v['pd_r'] ?? ''}" name="pd_r[]"></td>
-
+                                            {/if}
                                             <td><input type="text" class="inputs" value="{:$v['od_pv'] ?? ''}" name="od_pv[]"></td>
                                             <td><input type="text" class="inputs" value="{:$v['od_bd'] ?? ''}" name="od_bd[]"></td>
                                             <td><input type="text" class="inputs" value="{:$v['od_pv_r'] ?? ''}" name="od_pv_r[]"></td>
@@ -439,10 +438,10 @@
                                                 <input type="text" class="inputs" value="{:$v['os_cyl'] ?? ''}" name="os_cyl[]"></td>
                                             <td>
                                                 <input type="text" class="inputs" value="{:$v['os_axis'] ?? ''}" name="os_axis[]"></td>
-                                            {if !$v['total_add']}
+
                                             <td>
                                                 <input type="text" class="inputs" value="{:$sku['os_add']}" name="os_add[]"> </td>
-                                            {/if}
+
                                             <td>
                                                 <input type="text" class="inputs" value="{:$v['pd_l'] ?? ''}" name="pd_l[]"></td>
                                             <td>
