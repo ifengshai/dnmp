@@ -269,11 +269,65 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
     public function detail($ids = null)
     {
         if ($_POST){
-          $data  = input('param.');
+            $data  = input('param.');
+            $value['order_id'] = $data['entity_id'];
+            $count = count($data['item_id']);
+            for ($i= 0;$i<$count;$i++) {
+                $value['order_items'][$i]['order_item_id'] = $data['item_id'][$i];
+                $value['order_items'][$i]['od_sph'] = $data['od_sph'][$i];
+                $value['order_items'][$i]['od_cyl'] = $data['od_cyl'][$i];
+                $value['order_items'][$i]['od_axis'] = $data['od_axis'][$i];
+                $value['order_items'][$i]['os_sph']= $data['os_sph'][$i];
+                $value['order_items'][$i]['os_cyl'] = $data['os_cyl'][$i];
+                $value['order_items'][$i]['os_axis'] = $data['os_axis'][$i];
+                if ($data['pd_l'][$i] ==null && $data['pd_r'][$i] ){
+                    $value['order_items'][$i]['pd'] = $data['pd_r'][$i];
+                }else{
+                    $value['order_items'][$i]['pd_r'] = $data['pd_r'][$i];
+                    $value['order_items'][$i]['pd_l'] = $data['pd_l'][$i];
+                    $value['order_items'][$i]['pdcheck'] = 'on';
+                }
+                $value['order_items'][$i]['od_pv'] = $data['od_pv'][$i];
+                $value['order_items'][$i]['os_pv'] = $data['os_pv'][$i];
+                $value['order_items'][$i]['od_bd'] = $data['od_bd'][$i];
+                $value['order_items'][$i]['os_bd'] = $data['os_bd'][$i];
+                $value['order_items'][$i]['od_pv_r'] = $data['od_pv_r'][$i];
+                $value['order_items'][$i]['os_pv_r'] = $data['os_pv_r'][$i];
+                $value['order_items'][$i]['od_bd_r'] = $data['od_bd_r'][$i];
+                $value['order_items'][$i]['os_bd_r'] = $data['os_bd_r'][$i];
+                $value['order_items'][$i]['os_add'] = $data['os_add'][$i];
+                $value['order_items'][$i]['od_add'] = $data['od_add'][$i];
+                $value['order_items'][$i]['prescription_type'] = $data['prescription_type'][$i];
+                if ($data['od_pv'][$i] !== null && $data['od_pv_r'][$i] !==null && $data['os_pv'][$i] !== null && $data['os_pv_r'][$i]){
+                    $value['order_items'][$i]['prismcheck'] = 'on';
+                }else{
+                    $value['order_items'][$i]['prismcheck'] = '';
+                }
+            }
+            //请求接口
+            $url = config('url.esz_url').'magic/order/prescriptionPicCheck';
+            $curl = curl_init();
+            curl_setopt($curl, CURLOPT_URL, $url);
+            curl_setopt($curl, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
+            curl_setopt($curl, CURLOPT_HEADER, 0);
+            curl_setopt($curl, CURLOPT_POST, true);
+            curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($value));
+            curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($curl, CURLOPT_TIMEOUT, 20);
+            $content =json_decode(curl_exec($curl),true);
+            curl_close($curl);
+
+            if ($content['status'] == 200){
+                $this->success('操作成功');
+            }else{
+                $this->error('操作失败,原因:'.$content['msg']);
+            }
         }
         $ids = $ids ?? $this->request->get('id');
         //查询订单详情
         $row = $this->order->get($ids);
+
         if (!$row) {
             $this->error(__('No Results were found'));
         }
@@ -289,8 +343,22 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
 
         //订单明细数据
         $item = $this->orderitemoption->where('order_id', $ids)->select();
-
-        $this->view->assign("item", $item);
+        $items = collection($item)->toArray();
+        foreach ($items as $key=>$item){
+            if ($item['site'] ==9){
+                if ($item['prescription_pic_checked'] == false && $item['prescription_pic_id']>0){
+                    $items[$key]['to_examine']= true;
+                }else{
+                    $items[$key]['to_examine'] = false;
+                }
+                if ($item['prescription_pic_id'] > 0){
+                    $items[$key]['prescription_image'] = Db::connect('database.db_zeelool_es')->table('oc_prescription_pic')->where('id',$item['prescription_pic_id'])->value('pic');
+                }else{
+                    $items[$key]['prescription_image'] = null;
+                }
+            }
+        }
+        $this->view->assign("item", $items);
         $this->view->assign("row", $row);
         $this->view->assign("pay", $pay);
         return $this->view->fetch();
