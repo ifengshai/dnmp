@@ -60,7 +60,7 @@ class DataMarket extends Backend
 
 
         //物流妥投概况
-        //$logistics_completed_overview = $this->logistics_completed_overview($time_str);
+        $logistics_completed_overview = $this->logistics_completed_overview($time_str);
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
         $this->view->assign(compact('stock_overview','stock_measure_overview','stock_level_overview','purchase_overview','logistics_completed_overview','magentoplatformarr'));
