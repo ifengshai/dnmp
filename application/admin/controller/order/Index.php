@@ -272,7 +272,6 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
     {
         if ($_POST){
             $data  = input('param.');
-
             $value['order_id'] = $data['entity_id'];
             $count = count($data['item_id']);
             for ($i= 0;$i<$count;$i++) {
@@ -306,6 +305,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                     $value['order_items'][$i]['prismcheck'] = '';
                 }
             }
+            dump($value);die();
             //请求接口
             $url = config('url.esz_url').'magic/order/prescriptionPicCheck';
             $curl = curl_init();
