@@ -136,6 +136,12 @@ class StockHouse extends Backend
             $this->error(__('Parameter %s can not be empty', ''));
         }
         $this->view->assign("type", $type);
+        $arr = [];
+        $kuweihao = $this->shelf_number1();
+        foreach ($kuweihao as $k=>$v){
+            $arr[$v] = $v;
+        }
+        $this->assign('shelf_number',$arr);
         return $this->view->fetch();
     }
 
@@ -202,6 +208,12 @@ class StockHouse extends Backend
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
+        $arr = [];
+        $kuweihao = $this->shelf_number1();
+        foreach ($kuweihao as $k=>$v){
+            $arr[$v] = $v;
+        }
+        $this->assign('shelf_number',$arr);
         $this->view->assign("type", $type);
         $this->view->assign("row", $row);
         return $this->view->fetch();
@@ -548,6 +560,11 @@ EOF;
         // 获取重复数据的数组
         $repeat_arr = array_diff_assoc($arr, $unique_arr);
         return $repeat_arr;
+    }
+    public function shelf_number1()
+    {
+        $data = (new \app\admin\model\warehouse\StockHouse())->get_shelf_number();
+        return $data;
     }
 
 }
