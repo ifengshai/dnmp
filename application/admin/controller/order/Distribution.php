@@ -546,7 +546,9 @@ class Distribution extends Backend
             }
 
             $filter = json_decode($this->request->get('filter'), true);
-
+            if (!$filter['status']) {
+                $map['b.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal']];
+            }
             if ($filter['abnormal'] || $filter['stock_house_num']) {
 //                //筛选异常
                 if ($filter['abnormal']) {
@@ -607,7 +609,7 @@ class Distribution extends Backend
 
             list($where, $sort, $order) = $this->buildparams();
         }
-        
+
         $sort = 'a.id';
         $list = $this->model
             ->alias('a')
