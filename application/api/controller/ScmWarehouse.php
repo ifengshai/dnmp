@@ -2211,7 +2211,7 @@ class ScmWarehouse extends Scm
         (new StockLog())->startTrans();
         try {
             $res = $this->_inventory->allowField(true)->isUpdate(true, ['id' => $inventory_id])->save($data);
-            //审核通过 生成入库单 并同步库存
+            //审核通过 生成出、入库单 并同步库存
             if ($data['check_status'] == 2) {
                 $infos = $this->_inventory_item->where(['inventory_id' => $inventory_id])
                     ->field('sku,error_qty,inventory_id')
@@ -2408,8 +2408,7 @@ class ScmWarehouse extends Scm
                     $params['check_person'] = $this->auth->nickname;
                     $outstock_res = $this->_out_stock->isUpdate(false)->allowField(true)->data($params, true)->save();
 
-
-                    //添加入库信息
+                    //添加出库信息
                     if ($outstock_res !== false) {
                         $outstockItemList = array_values($list);
                         foreach ($outstockItemList as $k => $v) {
@@ -2418,7 +2417,7 @@ class ScmWarehouse extends Scm
                         //批量添加
                         $this->_out_stock_item->allowField(true)->saveAll($outstockItemList);
                     } else {
-                        throw new Exception('生成入库记录失败！！数据回滚');
+                        throw new Exception('生成出库记录失败！！数据回滚');
                     }
                 }
             }

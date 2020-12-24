@@ -79,7 +79,7 @@
                 <td>Direc</td>
                 {else/}
                 <td colspan='4' rowspan="3">
-                    {$v.lens_name}
+                    {$v.web_lens_name}
                 </td>
                 {/if}
             </tr>
@@ -128,13 +128,13 @@
             <tr>
                 <td colspan='10' style=' text-align:center'>
                     {if $v['prismcheck'] == 'on'}
-                        {$v.lens_name}
+                        {$v.web_lens_name}
                         <br>
                     {else}
                         {$v.prescription_type}
                         <br>
                     {/if}
-                        {$v.web_lens_name}
+                        {$v.lens_name}
                 </td>
             </tr>
         </tbody>

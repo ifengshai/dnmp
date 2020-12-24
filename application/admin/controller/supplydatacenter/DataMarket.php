@@ -39,24 +39,34 @@ class DataMarket extends Backend
      */
     public function index()
     {
-        $params = $this->request->param();
-        if(!$params['time_str']){
-            $start = date('Y-m-d 00:00:00', strtotime('-6 day'));
-            $end   = date('Y-m-d 23:59:59');
-            $time_str = $start.' - '.$end;
-        }else{
-            $time_str = $params['time_str'];
+        if ($this->request->isAjax()) {
+            $params = $this->request->param();
+            if(!$params['time_str']){
+                $start = date('Y-m-d 00:00:00', strtotime('-6 day'));
+                $end   = date('Y-m-d 23:59:59');
+                $time_str = $start.' - '.$end;
+            }else{
+                $time_str = $params['time_str'];
+            }
+            //仓库指标总览
+            $stock_measure_overview = $this->stock_measure_overview($time_str);
+            //采购概况
+            $purchase_overview = $this->purchase_overview($time_str);
+            //物流妥投概况
+            $logistics_completed_overview = $this->logistics_completed_overview($time_str);
+            $arr = compact('stock_measure_overview','purchase_overview','logistics_completed_overview');
+            $this->success('', '', $arr);
         }
         //库存总览
         $stock_overview = $this->stock_overview();
         //仓库指标总览
-        $stock_measure_overview = $this->stock_measure_overview($time_str);
+        $stock_measure_overview = $this->stock_measure_overview();
         //库存分级概况
-        $stock_level_overview = $this->stock_level_overview($time_str);
+        $stock_level_overview = $this->stock_level_overview();
         //采购概况
-        $purchase_overview = $this->purchase_overview($time_str);
+        $purchase_overview = $this->purchase_overview();
         //物流妥投概况
-        $logistics_completed_overview = $this->logistics_completed_overview($time_str);
+        $logistics_completed_overview = $this->logistics_completed_overview();
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
         $this->view->assign(compact('stock_overview','stock_measure_overview','stock_level_overview','purchase_overview','logistics_completed_overview','magentoplatformarr','time_str'));
@@ -91,10 +101,15 @@ class DataMarket extends Backend
         return $arr;
     }
     //仓库指标总览
-    public function stock_measure_overview($time_str){
+    public function stock_measure_overview($time_str = ''){
         $cache_data = Cache::get('Supplydatacenter_datamarket'  .$time_str. md5(serialize('stock_measure_overview')));
         if ($cache_data) {
             return $cache_data;
+        }
+        if(!$time_str){
+            $start = date('Y-m-d 00:00:00', strtotime('-6 day'));
+            $end   = date('Y-m-d 23:59:59');
+            $time_str = $start .' - '.$end;
         }
         /*
          * 库存周转率：所选时间内库存消耗数量/[（期初实时库存+期末实时库存）/2];
@@ -165,7 +180,7 @@ class DataMarket extends Backend
          * 库存周转天数：所选时间段的天数/库存周转率
          * */
         //库存周转天数
-        $days = round(($createat[3] - $createat[0]) / 3600 / 24);
+        $days = round(($start - $end) / 3600 / 24);
         $arr['turnover_days_rate'] = $arr['turnover_rate'] ? round($days/$arr['turnover_rate']) : 0;
         /*
          * 月进销比:（所选时间包含的月份整月）月度已审核采购单采购的数量/月度销售数量（订单、批发出库、亚马逊出库）
@@ -266,7 +281,7 @@ class DataMarket extends Backend
         }
     }
     //库存分级概况
-    public function stock_level_overview($time_str){
+    public function stock_level_overview($time_str = ''){
         $cache_data = Cache::get('Supplydatacenter_datamarket'  .$time_str. md5(serialize('stock_level_overview')));
         if ($cache_data) {
             return $cache_data;
@@ -384,7 +399,7 @@ class DataMarket extends Backend
         
     }
     //采购总览
-    public function purchase_overview($time_str){
+    public function purchase_overview($time_str = ''){
         $cache_data = Cache::get('Supplydatacenter_datamarket'  .$time_str. md5(serialize('purchase_overview')));
         if ($cache_data) {
             return $cache_data;
@@ -609,7 +624,7 @@ class DataMarket extends Backend
         return $this->distributionLog->where($where)->count();
     }
     //物流妥投概况
-    public function logistics_completed_overview($time_str){
+    public function logistics_completed_overview($time_str = ''){
         $cache_data = Cache::get('Supplydatacenter_userdata'.$time_str.md5(serialize('logistics_completed_overview')));
         if($cache_data){
             return $cache_data;
