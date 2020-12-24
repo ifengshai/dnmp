@@ -293,7 +293,7 @@ class Distribution extends Backend
                 ->select();
 
             $list = collection($list)->toArray();
-          
+
             //库位号列表
             $stock_house_data = $this->_stock_house
                 ->where(['status' => 1, 'type' => ['>', 1], 'occupy' => ['>', 0]])
@@ -620,20 +620,7 @@ class Distribution extends Backend
             ->select();
 
         $list = collection($list)->toArray();
-
-        $listz = $this->model
-            ->alias('a')
-            ->field('a.id')
-            ->join(['fa_order' => 'b'], 'a.order_id=b.id')
-            ->join(['fa_order_process' => 'c'], 'a.order_id=c.order_id')
-            ->where($where)
-            ->where($map)
-            ->order($sort, $order)
-            ->select();
-        $listz = collection($listz)->toArray();
-        dump($list);
-        dump($listz);
-        die();
+        
         //从数据库查询需要的数据
         $spreadsheet = new Spreadsheet();
 
