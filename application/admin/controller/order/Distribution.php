@@ -588,7 +588,7 @@ class Distribution extends Backend
             ->order($sort, $order)
             ->select();
         $list = collection($list)->toArray();
-
+        dump($list);die();
         //从数据库查询需要的数据
         $spreadsheet = new Spreadsheet();
 
