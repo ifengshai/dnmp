@@ -245,6 +245,7 @@ class OrderDataDetail extends Backend
                 $arr[$i]['register_time'] = $register_time;
                 $arr[$i]['register_email'] = $register_email;
                 $arr[$i]['work_list_num'] = $work_list_num;
+                $i++;
             }
             /*if ($refund > 0){
                 if($refund == 1){
