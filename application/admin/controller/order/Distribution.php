@@ -600,6 +600,8 @@ class Distribution extends Backend
             if ($filter['status']){
                 $map['b.status'] = ['in',$filter['status']];
                 unset($filter['status']);
+            }else{
+                $map['b.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal']];
             }
             $this->request->get(['filter' => json_encode($filter)]);
 
