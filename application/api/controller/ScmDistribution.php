@@ -1559,7 +1559,7 @@ class ScmDistribution extends Scm
             //合单待取出列表，主单为合单完成状态且子单都已合单
             if($query){
                 //线上不允许跨库联合查询，拆分，wang导与产品静确认去除SKU搜索
-                $store_house_id_store = $this->_stock_house->where(['coding'=> ['like', '%' . $query . '%']])->column('id');
+                $store_house_id_store = $this->_stock_house->where(['type'=>2, 'coding'=> ['like', '%' . $query . '%']])->column('id');
                /* $order_id = $this->_new_order_item_process->where(['sku'=> ['like', '%' . $query . '%']])->column('order_id');
                 $order_id = array_unique($order_id);
                 $store_house_id_sku = [];
