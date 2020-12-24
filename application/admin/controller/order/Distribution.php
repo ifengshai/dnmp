@@ -534,6 +534,115 @@ class Distribution extends Backend
             $order = 'desc';
         } else {
 
+
+
+
+            $map = [];
+            //普通状态剔除跟单数据
+            if (!in_array($label, [0, 8])) {
+                if (7 == $label) {
+                    $map['a.distribution_status'] = [['>', 6], ['<', 9]];
+                } else {
+                    $map['a.distribution_status'] = $label;
+                }
+                $map['a.abnormal_house_id'] = 0;
+            }
+
+            //处理异常选项
+            $filter = json_decode($this->request->get('filter'), true);
+
+            if (!$filter) {
+                $map['a.created_at'] = ['between', [strtotime('-3 month'), time()]];
+            }
+
+            if (!$filter['status']) {
+                $map['b.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal']];
+            }
+
+            //查询子单ID合集
+            $item_process_ids = [];
+
+            //跟单或筛选异常
+            if ($filter['abnormal'] || 8 == $label) {
+                //异常类型
+                if ($filter['abnormal']) {
+                    $abnormal_where['type'] = ['in', $filter['abnormal']];
+                    unset($filter['abnormal']);
+                }
+
+                //获取未处理异常
+                if (8 == $label) {
+                    $abnormal_where['status'] = 1;
+                }
+                $item_process_ids = $this->_distribution_abnormal
+                    ->where($abnormal_where)
+                    ->column('item_process_id');
+            }
+
+            //筛选库位号
+            if ($filter['stock_house_num']) {
+                if (8 == $label) {//跟单
+                    $house_type = 4;
+                } elseif (3 == $label) {//待配镜片-定制片
+                    $house_type = 3;
+                } else {//合单
+                    $house_type = 2;
+                }
+                $stock_house_id = $this->_stock_house
+                    ->where([
+                        'coding' => ['like', $filter['stock_house_num'] . '%'],
+                        'type' => $house_type
+                    ])
+                    ->column('id');
+                $map['a.temporary_house_id|a.abnormal_house_id|c.store_house_id'] = ['in', $stock_house_id ?: [-1]];
+                unset($filter['stock_house_num']);
+            }
+
+            if ($filter['increment_id']) {
+                $map['b.increment_id'] = ['like', $filter['increment_id'] . '%'];
+                $map['b.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
+                unset($filter['increment_id']);
+            }
+
+            if ($filter['site']) {
+                $map['a.site'] = ['in', $filter['site']];
+                unset($filter['site']);
+            }
+
+            if (isset($filter['order_prescription_type'])) {
+                $map['a.order_prescription_type'] = ['in', $filter['order_prescription_type']];
+                unset($filter['order_prescription_type']);
+            }
+
+
+
+
+            //子单工单未处理
+            $item_order_numbers = $this->_work_order_change_sku
+                ->alias('a')
+                ->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')
+                ->where([
+                    'a.change_type' => ['in', [1, 2, 3]],//1更改镜架  2更改镜片 3取消订单
+                    'b.work_status' => ['in', [1, 2, 3, 5]]//工单未处理
+                ])
+                ->order('a.create_time', 'desc')
+                ->group('a.item_order_number')
+                ->column('a.item_order_number');
+
+            //跟单
+            if (8 == $label && $item_order_numbers) {
+                $item_process_id_work = $this->model->where(['item_order_number' => ['in', $item_order_numbers]])->column('id');
+                $item_process_ids = array_unique(array_merge($item_process_ids, $item_process_id_work));
+            }
+
+            if ($item_process_ids) {
+                $map['a.id'] = ['in', $item_process_ids];
+            }
+
+
+
+
+
             //普通状态剔除跟单数据
             if (!in_array($label, [0, 8])) {
                 if (7 == $label) {
@@ -608,13 +717,13 @@ class Distribution extends Backend
                 $map['b.status'] = ['in',$filter['status']];
                 unset($filter['status']);
             }
-            $this->request->get(['filter' => json_encode($filter)]);
+
 
             list($where, $sort, $order) = $this->buildparams();
         }
 
 
-
+        $this->request->get(['filter' => json_encode($filter)]);
 
 
         $sort = 'a.id';
