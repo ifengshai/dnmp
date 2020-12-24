@@ -80,7 +80,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             field: 'total_qty_ordered', title: __('订单副数'), sortable: true, operate: false,
                             formatter: Controller.api.formatter.int_format
                         },
-                        { field: 'is_task', title: __('是否有工单'), visible: false, searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status },
+                        // { field: 'is_task', title: __('是否有工单'), visible: false, searchList: { 1: '是', 0: '否' }, formatter: Table.api.formatter.status },
                         {
                             field: 'task_info', title: __('工单'), operate: false,
                             formatter: function (value, row) {
