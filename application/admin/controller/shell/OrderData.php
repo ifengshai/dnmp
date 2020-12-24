@@ -383,7 +383,7 @@ class OrderData extends Backend
         //镜片类型
         $arr['index_type'] = $options['info_buyRequest']['tmplens']['lenstype_data_name'] ?: '';
         //镜片名称
-        $index_name = $options['info_buyRequest']['tmplens']['lens_data_name'] ?: $options['info_buyRequest']['tmplens']['index_type'];
+        $index_name = $options['info_buyRequest']['tmplens']['lens_data_name'] ?: '';
         $arr['index_name'] = $index_name ?: '';
         //光度等参数
         $prescription_params = explode("&", $options['info_buyRequest']['tmplens']['prescription']);
