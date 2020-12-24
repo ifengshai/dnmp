@@ -324,6 +324,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                 $this->error('操作失败,原因:'.$content['msg']);
             }
         }
+
         $ids = $ids ?? $this->request->get('id');
         //查询订单详情
         $row = $this->order->get($ids);

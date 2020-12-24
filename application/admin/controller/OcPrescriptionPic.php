@@ -3,7 +3,9 @@
 namespace app\admin\controller;
 
 use app\common\controller\Backend;
+use Defuse\Crypto\Exception\IOException;
 use Think\Db;
+
 
 /**
  *
@@ -44,6 +46,8 @@ class OcPrescriptionPic extends Backend
         $this->relationSearch = false;
         //设置过滤方法
         $this->request->filter(['strip_tags']);
+
+
         if ($this->request->isAjax())
         {
             //如果发送的来源是Selectpage，则转发到Selectpage
@@ -53,22 +57,54 @@ class OcPrescriptionPic extends Backend
             }
 
             $filter = json_decode($this->request->get('filter'), true);
+
+
+            if ($filter['id']){
+                $WhereSql = 'id='.$filter['id'];
+            }
+            if ($filter['status']){
+                $WhereSql.= ' status='.$filter['status'];
+            }
+            if ($filter['created_at']){
+                $created_at = explode(' - ', $filter['created_at']);
+                $WhereSql .= ' and created_at between'.$created_at[0] .'and'.$created_at[1];
+            }
+            if ($filter['completion_time']){
+                $completion_time = explode(' - ', $filter['completion_time']);
+                $WhereSql .= 'and created_at between'.$completion_time[0] .'and'.$completion_time[1];
+            }
+                $WhereSqls = '  ORDER BY created_at desc';
 //            $site = $filter['site'] ? $filter['site'] :1;
             $site = $filter['site'];
-            if ($site ==1){
-                $model = Db::connect('database.db_zeelool');
-            }elseif($site ==2){
-                $model = Db::connect('database.db_voogueme');
-            }else{
-                $sql  = 'SELECT * ';
+
+            if (!empty($site)){
+                if ($site ==1){
+                    $sql  = "SELECT *,1 as site from zeelool.oc_prescription_pic where".$WhereSql;
+                    $count_sql  = "SELECT COUNT(1) from zeelool.oc_prescription_pic where".$WhereSql;
+                }else{
+                    $sql  = "SELECT *,2 as site from voogueme.oc_prescription_pic where".$WhereSql;
+                    $count_sql  = "SELECT COUNT(1) from voogueme.oc_prescription_pic where".$WhereSql;
+                }
+                    $count = Db::query($count_sql);
+                    $total = $count[0]['COUNT(1)'];
+                }else{
+                    $sql  = "SELECT *,1 as site from zeelool.oc_prescription_pic where".$WhereSql." union all SELECT *,2 as site from voogueme.oc_prescription_pic where".$WhereSql . $WhereSqls;
+                    $count_sql  =  "SELECT COUNT(1) from zeelool.oc_prescription_pic where".$WhereSql." union all SELECT COUNT(1) from voogueme.oc_prescription_pic where".$WhereSql;
+                    $count = Db::query($count_sql);
+                    $total = $count[0]['COUNT(1)'] + $count[1]['COUNT(1)'];
+                }
             }
-            unset($filter['site']);
-            $this->request->get(['filter' => json_encode($filter)]);
 
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $list  = Db::query($sql);
 
-            $total = $model->table('oc_prescription_pic')->where($where)->count();
-            $list = $model->table('oc_prescription_pic')->where($where)->order('id desc')->limit($offset, $limit)->select();
+//            dump($list);die();
+//            unset($filter['site']);
+//            $this->request->get(['filter' => json_encode($filter)]);
+//
+//            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+//
+//            $total = $model->table('oc_prescription_pic')->where($where)->count();
+//            $list = $model->table('oc_prescription_pic')->where($where)->order('id desc')->limit($offset, $limit)->select();
 
             foreach ($list as $key=>$item){
 
@@ -77,14 +113,14 @@ class OcPrescriptionPic extends Backend
                 }else{
                     $list[$key]['status']= '已处理';
                 }
-                $list[$key]['site'] = $site;
                 $list[$key]['created_at'] =date("Y-m-d H:i:s",strtotime($item['created_at'])+28800);;
             }
 
             $result = array("total" => $total, "rows" => $list);
             return json($result);
-        }
+
         return $this->view->fetch();
+
     }
 
     /*
