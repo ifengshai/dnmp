@@ -1375,6 +1375,8 @@ class Test extends Backend
                         $change_sku_data = [];
                         $recept_data = [];
                         foreach ($order_list as $key => $val) {
+
+
                             //插入措施表
                             $measure['work_id'] = $v['id'];
                             $measure['measure_choose_id'] = 18;
@@ -1677,9 +1679,9 @@ class Test extends Backend
         $_stock_house = new \app\admin\model\warehouse\StockHouse();
         $_distribution_abnormal = new \app\admin\model\DistributionAbnormal();
         $_new_order_item_process = new \app\admin\model\order\order\NewOrderItemProcess();
-        $list = $work->where(['id' => ['in', [53032, 52446]]])->select();
+        $list = $work->where(['work_status' => [1, 2]])->select();
         $list = collection($list)->toArray();
-    
+
         //获取异常库位号
         $stock_house_info = $_stock_house
             ->field('id,coding')
@@ -1698,19 +1700,19 @@ class Test extends Backend
 
                     //查询change sku表
                     $change_sku_list = Db::table('fa_work_order_change_sku')
-                    ->where(['work_id' => $v['id'], 'measure_id' => $v1['id']])
-                    ->select();
+                        ->where(['work_id' => $v['id'], 'measure_id' => $v1['id']])
+                        ->select();
                     foreach ($change_sku_list as $key1 => $val1) {
                         //查询订单号所有子单
                         $order_list = $_new_order_item_process->field('item_order_number,id')
                             ->where(['item_order_number' => $val1['item_order_number']])
                             ->select();
                         foreach ($order_list as $key => $val) {
-                            echo '子单id:'. $val['id'] . "\n";
-                            echo '工单id:'. $val1['work_id'] . "\n";
-                            echo '库位id:'. $stock_house_info['id'] . "\n";
-                            echo '措施id:取消'."\n";
-                            
+                            echo '子单id:' . $val['id'] . "\n";
+                            echo '工单id:' . $val1['work_id'] . "\n";
+                            echo '库位id:' . $stock_house_info['id'] . "\n";
+                            echo '措施id:取消' . "\n";
+
                             //创建异常
                             $abnormal_data = [
                                 'work_id' => $v['id'],
@@ -1735,59 +1737,21 @@ class Test extends Backend
                         }
                     }
                 } else if ($v1['measure_choose_id'] == 19) { //措施为更改镜框
-                     //查询change sku表
-                     $change_sku_list = Db::table('fa_work_order_change_sku')
-                     ->where(['work_id' => $v['id'], 'measure_id' => $v1['id']])
-                     ->select();
-                     foreach ($change_sku_list as $key1 => $val1) {
-                         //查询订单号所有子单
-                         $order_list = $_new_order_item_process->field('item_order_number,id')
-                             ->where(['item_order_number' => $val1['item_order_number']])
-                             ->select();
-                         foreach ($order_list as $key => $val) {
-                            echo '子单id:'. $val['id'] . "\n";
-                            echo '工单id:'. $val1['work_id'] . "\n";
-                            echo '库位id:'. $stock_house_info['id'] . "\n";
-                            echo '措施id:更改镜框'."\n";
-                            
-                             //创建异常
-                             $abnormal_data = [
-                                 'work_id' => $v['id'],
-                                 'item_process_id' => $val['id'],
-                                 'type' => 17,
-                                 'status' => 1,
-                                 'create_time' => time(),
-                                 'create_person' => 'admin'
-                             ];
-                             $_distribution_abnormal->allowField(true)->isUpdate(false)->data($abnormal_data)->save();
- 
-                             //子订单绑定异常库位号
-                             $_new_order_item_process->where(['id' => $val['id']])
-                                 ->update(['abnormal_house_id' => $stock_house_info['id']]);
- 
-                             //异常库位号占用数量+1
-                             $_stock_house
-                                 ->where(['id' => $stock_house_info['id']])
-                                 ->setInc('occupy', 1);
- 
-                             DistributionLog::record((object)['nickname' => 'admin'], $val['id'], 9, "创建工单，异常暂存架{$stock_house_info['coding']}库位");
-                         }
-                     }
-                } else if ($v1['measure_choose_id'] == 20) {  //措施为更改镜片
                     //查询change sku表
                     $change_sku_list = Db::table('fa_work_order_change_sku')
-                    ->where(['work_id' => $v['id'], 'measure_id' => $v1['id']])
-                    ->select();
+                        ->where(['work_id' => $v['id'], 'measure_id' => $v1['id']])
+                        ->select();
                     foreach ($change_sku_list as $key1 => $val1) {
                         //查询订单号所有子单
                         $order_list = $_new_order_item_process->field('item_order_number,id')
                             ->where(['item_order_number' => $val1['item_order_number']])
                             ->select();
                         foreach ($order_list as $key => $val) {
-                            echo '子单id:'. $val['id'] . "\n";
-                            echo '工单id:'. $val1['work_id'] . "\n";
-                            echo '库位id:'. $stock_house_info['id'] . "\n";
-                            echo '措施id:更改镜片'."\n";
+                            echo '子单id:' . $val['id'] . "\n";
+                            echo '工单id:' . $val1['work_id'] . "\n";
+                            echo '库位id:' . $stock_house_info['id'] . "\n";
+                            echo '措施id:更改镜框' . "\n";
+
                             //创建异常
                             $abnormal_data = [
                                 'work_id' => $v['id'],
@@ -1810,13 +1774,46 @@ class Test extends Backend
 
                             DistributionLog::record((object)['nickname' => 'admin'], $val['id'], 9, "创建工单，异常暂存架{$stock_house_info['coding']}库位");
                         }
-
-                        
                     }
+                } else if ($v1['measure_choose_id'] == 20) {  //措施为更改镜片
+                    //查询change sku表
+                    $change_sku_list = Db::table('fa_work_order_change_sku')
+                        ->where(['work_id' => $v['id'], 'measure_id' => $v1['id']])
+                        ->select();
+                    foreach ($change_sku_list as $key1 => $val1) {
+                        //查询订单号所有子单
+                        $order_list = $_new_order_item_process->field('item_order_number,id')
+                            ->where(['item_order_number' => $val1['item_order_number']])
+                            ->select();
+                        foreach ($order_list as $key => $val) {
+                            echo '子单id:' . $val['id'] . "\n";
+                            echo '工单id:' . $val1['work_id'] . "\n";
+                            echo '库位id:' . $stock_house_info['id'] . "\n";
+                            echo '措施id:更改镜片' . "\n";
+                            //创建异常
+                            $abnormal_data = [
+                                'work_id' => $v['id'],
+                                'item_process_id' => $val['id'],
+                                'type' => 17,
+                                'status' => 1,
+                                'create_time' => time(),
+                                'create_person' => 'admin'
+                            ];
+                            $_distribution_abnormal->allowField(true)->isUpdate(false)->data($abnormal_data)->save();
 
-                    
+                            //子订单绑定异常库位号
+                            $_new_order_item_process->where(['id' => $val['id']])
+                                ->update(['abnormal_house_id' => $stock_house_info['id']]);
+
+                            //异常库位号占用数量+1
+                            $_stock_house
+                                ->where(['id' => $stock_house_info['id']])
+                                ->setInc('occupy', 1);
+
+                            DistributionLog::record((object)['nickname' => 'admin'], $val['id'], 9, "创建工单，异常暂存架{$stock_house_info['coding']}库位");
+                        }
+                    }
                 }
-                echo $k . "\n";
             }
             echo "ok";
         }
