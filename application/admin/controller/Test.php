@@ -1677,9 +1677,9 @@ class Test extends Backend
         $_stock_house = new \app\admin\model\warehouse\StockHouse();
         $_distribution_abnormal = new \app\admin\model\DistributionAbnormal();
         $_new_order_item_process = new \app\admin\model\order\order\NewOrderItemProcess();
-        $list = $work->where(['work_status' => ['in', [53032, 52446]]])->select();
+        $list = $work->where(['id' => ['in', [53032, 52446]]])->select();
         $list = collection($list)->toArray();
-
+    
         //获取异常库位号
         $stock_house_info = $_stock_house
             ->field('id,coding')
