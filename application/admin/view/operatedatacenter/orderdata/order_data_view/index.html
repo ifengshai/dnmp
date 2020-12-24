@@ -167,6 +167,10 @@
         width: 20px;
         float: right;
     }
+    .wenhao1 {
+        width: 12px;
+        float: right;
+    }
 </style>
 
 <div class="panel panel-default panel-intro">
@@ -221,7 +225,7 @@
                         <div class="row">
                             <div class="margin-div" style="text-align: center">
                                 <div class="btn btn-div">
-                                    <span class="question" tabindex="0" data-bs-toggle="tooltip" title="新增VIP会员数">
+                                    <span class="question" tabindex="0" data-bs-toggle="tooltip" title="支付成功的订单数">
                                         <img src="/wenhao.jpg" alt="" class="wenhao">
                                     </span>
                                     <span class="extend">
@@ -314,9 +318,11 @@
 
                 <div class="widget-body no-padding">
                     <div class="new-background">
-                        <div class="row">
+                        <div class="row" style="position: relative;z-index: 10;">
                             <div class="form-group" >
-                                <label class="control-label col-xs-4">中位数/客单价/标准差分析</label>
+                                <label class="control-label col-xs-4" style="position: static;">中位数/客单价/标准差分析<span tabindex="0" data-bs-toggle="tooltip" title="当前所选时间内，订单金额与客单价的偏离程度&#10{[（客单价-s1）²+...（客单价-sn）²]/n}的开平方" style="display: inline-block;position: absolute;left: 50%;margin-left: 116px;top: 64px;cursor: pointer;">
+                                    <img src="/wenhao.jpg" alt="" class="wenhao1">
+                                </span></label>
                             </div>
                         </div>
 
