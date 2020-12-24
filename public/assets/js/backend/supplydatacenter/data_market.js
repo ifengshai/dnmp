@@ -26,6 +26,9 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                 Controller.api.formatter.process_overview();
                 Controller.api.formatter.comleted_time_rate_pie();
             });
+            $(document).on('change', '#order_platform', function () {
+                stock_measure_overview_platform();
+            });
             // $(document).on('change', '#order_platform', function () {
             //     order_data_view();
             //     Controller.api.formatter.line_chart();
