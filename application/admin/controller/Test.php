@@ -1526,7 +1526,6 @@ class Test extends Backend
             ->update(['stock' => 0, 'available_stock' => 0, 'distribution_occupy_stock' => 0]);
 
         $this->itemplatformsku->where(['sku' => ['not in', $skus], 'stock' => ['>', 0]])->where(['sku' => ['not like', '%price%']])->update(['stock' => 0]);
-
     }
 
     /**
@@ -1538,8 +1537,8 @@ class Test extends Backend
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
         $skus = Db::table('fa_zz_temp2')->column('sku');
-        $skuarr = $this->item->where(['sku' => ['not in', $skus], 'category_id' => ['<>', 43], 'is_open' => 1,'is_del' => 1])->column('sku');
-       
+        $skuarr = $this->item->where(['sku' => ['not in', $skus], 'category_id' => ['<>', 43], 'is_open' => 1, 'is_del' => 1])->column('sku');
+
         foreach ($skuarr as $k => $v) {
             $map = [];
             $zeelool_sku = $this->itemplatformsku->getWebSku($v, 1);
@@ -1606,24 +1605,23 @@ class Test extends Backend
             $spreadsheet->getActiveSheet()->setCellValue('A' . ($key * 1 + 2), $value['platform_sku']);
             $spreadsheet->getActiveSheet()->setCellValue('B' . ($key * 1 + 2), $value['sku']);
             $order_purchase = $orderpurchase
-            ->join(['fa_purchase_order_item' => 'b'], 'fa_purchase_order.id=b.purchase_id')
-            ->where('b.sku', $value['sku'])
-            ->field('b.purchase_price,fa_purchase_order.createtime')
-            ->order('fa_purchase_order.createtime desc')
-            ->limit(3)
-            ->select();
+                ->join(['fa_purchase_order_item' => 'b'], 'fa_purchase_order.id=b.purchase_id')
+                ->where('b.sku', $value['sku'])
+                ->field('b.purchase_price,fa_purchase_order.createtime')
+                ->order('fa_purchase_order.createtime desc')
+                ->limit(3)
+                ->select();
             $order_purchase_arr = collection($order_purchase)->toArray();
-            
-            
-            $spreadsheet->getActiveSheet()->setCellValue('C' . ($key * 1 + 2), !empty($order_purchase_arr[0]['purchase_price'])?$order_purchase_arr[0]['purchase_price']:'');
-            $spreadsheet->getActiveSheet()->setCellValue('D' . ($key * 1 + 2), !empty($order_purchase_arr[0]['createtime'])?$order_purchase_arr[0]['createtime']:'');
 
-            $spreadsheet->getActiveSheet()->setCellValue('E' . ($key * 1 + 2), !empty($order_purchase_arr[1]['purchase_price'])?$order_purchase_arr[1]['purchase_price']:'');
-            $spreadsheet->getActiveSheet()->setCellValue('F' . ($key * 1 + 2), !empty($order_purchase_arr[1]['createtime'])?$order_purchase_arr[1]['createtime']:'');
 
-            $spreadsheet->getActiveSheet()->setCellValue('G' . ($key * 1 + 2), !empty($order_purchase_arr[2]['purchase_price'])?$order_purchase_arr[2]['purchase_price']:'');
-            $spreadsheet->getActiveSheet()->setCellValue('H' . ($key * 1 + 2), !empty($order_purchase_arr[2]['createtime'])?$order_purchase_arr[2]['createtime']:'');
+            $spreadsheet->getActiveSheet()->setCellValue('C' . ($key * 1 + 2), !empty($order_purchase_arr[0]['purchase_price']) ? $order_purchase_arr[0]['purchase_price'] : '');
+            $spreadsheet->getActiveSheet()->setCellValue('D' . ($key * 1 + 2), !empty($order_purchase_arr[0]['createtime']) ? $order_purchase_arr[0]['createtime'] : '');
 
+            $spreadsheet->getActiveSheet()->setCellValue('E' . ($key * 1 + 2), !empty($order_purchase_arr[1]['purchase_price']) ? $order_purchase_arr[1]['purchase_price'] : '');
+            $spreadsheet->getActiveSheet()->setCellValue('F' . ($key * 1 + 2), !empty($order_purchase_arr[1]['createtime']) ? $order_purchase_arr[1]['createtime'] : '');
+
+            $spreadsheet->getActiveSheet()->setCellValue('G' . ($key * 1 + 2), !empty($order_purchase_arr[2]['purchase_price']) ? $order_purchase_arr[2]['purchase_price'] : '');
+            $spreadsheet->getActiveSheet()->setCellValue('H' . ($key * 1 + 2), !empty($order_purchase_arr[2]['createtime']) ? $order_purchase_arr[2]['createtime'] : '');
         }
         //print_r(count($item_platform_sku));die;
         //设置边框
@@ -1660,7 +1658,167 @@ class Test extends Backend
         header('Cache-Control: max-age=0');
         $writer = new $class($spreadsheet);
         $writer->save('php://output');
-
     }
 
+
+
+
+    public function process_worklist_data()
+    {
+
+        ini_set('memory_limit', '1280M');
+        /**
+         * 判断措施是否为 id = 3主单取消   changesku表需插入所有子订单
+         * 判断措施如果id = 19 更改镜框 需插入对应sku 所有子订单
+         * 判断措施id = 20 更改镜片 需插入对应sku 所有子订单 , 1, 4, 6, 7
+         */
+        $work = new \app\admin\model\saleaftermanage\WorkOrderList();
+        $order = new \app\admin\model\order\order\NewOrder();
+        $_stock_house = new \app\admin\model\warehouse\StockHouse();
+        $_distribution_abnormal = new \app\admin\model\DistributionAbnormal();
+        $_new_order_item_process = new \app\admin\model\order\order\NewOrderItemProcess();
+        $list = $work->where(['work_status' => ['in', [53032, 52446]]])->select();
+        $list = collection($list)->toArray();
+
+        //获取异常库位号
+        $stock_house_info = $_stock_house
+            ->field('id,coding')
+            ->where(['status' => 1, 'type' => 4])
+            ->find()->toArray();
+        foreach ($list as $k => $v) {
+            echo $v['id'] . "\n";
+
+            //查询措施表
+            $res = Db::table('fa_work_order_measure')->where(['work_id' => $v['id']])->select();
+            $item_number = [];
+            foreach ($res as $k1 => $v1) {
+
+                //措施为取消
+                if ($v1['measure_choose_id'] == 18) {
+
+                    //查询change sku表
+                    $change_sku_list = Db::table('fa_work_order_change_sku')
+                    ->where(['work_id' => $v['id'], 'measure_id' => $v1['id']])
+                    ->select();
+                    foreach ($change_sku_list as $key1 => $val1) {
+                        //查询订单号所有子单
+                        $order_list = $_new_order_item_process->field('item_order_number,id')
+                            ->where(['item_order_number' => $val1['item_order_number']])
+                            ->select();
+                        foreach ($order_list as $key => $val) {
+                            echo '子单id:'. $val['id'] . "\n";
+                            echo '工单id:'. $val1['work_id'] . "\n";
+                            echo '库位id:'. $stock_house_info['id'] . "\n";
+                            echo '措施id:取消'."\n";
+                            
+                            //创建异常
+                            $abnormal_data = [
+                                'work_id' => $v['id'],
+                                'item_process_id' => $val['id'],
+                                'type' => 16,
+                                'status' => 1,
+                                'create_time' => time(),
+                                'create_person' => 'admin'
+                            ];
+                            $_distribution_abnormal->allowField(true)->isUpdate(false)->data($abnormal_data)->save();
+
+                            //子订单绑定异常库位号
+                            $_new_order_item_process->where(['id' => $val['id']])
+                                ->update(['abnormal_house_id' => $stock_house_info['id']]);
+
+                            //异常库位号占用数量+1
+                            $_stock_house
+                                ->where(['id' => $stock_house_info['id']])
+                                ->setInc('occupy', 1);
+
+                            DistributionLog::record((object)['nickname' => 'admin'], $val['id'], 9, "创建工单，异常暂存架{$stock_house_info['coding']}库位");
+                        }
+                    }
+                } else if ($v1['measure_choose_id'] == 19) { //措施为更改镜框
+                     //查询change sku表
+                     $change_sku_list = Db::table('fa_work_order_change_sku')
+                     ->where(['work_id' => $v['id'], 'measure_id' => $v1['id']])
+                     ->select();
+                     foreach ($change_sku_list as $key1 => $val1) {
+                         //查询订单号所有子单
+                         $order_list = $_new_order_item_process->field('item_order_number,id')
+                             ->where(['item_order_number' => $val1['item_order_number']])
+                             ->select();
+                         foreach ($order_list as $key => $val) {
+                            echo '子单id:'. $val['id'] . "\n";
+                            echo '工单id:'. $val1['work_id'] . "\n";
+                            echo '库位id:'. $stock_house_info['id'] . "\n";
+                            echo '措施id:更改镜框'."\n";
+                            
+                             //创建异常
+                             $abnormal_data = [
+                                 'work_id' => $v['id'],
+                                 'item_process_id' => $val['id'],
+                                 'type' => 17,
+                                 'status' => 1,
+                                 'create_time' => time(),
+                                 'create_person' => 'admin'
+                             ];
+                             $_distribution_abnormal->allowField(true)->isUpdate(false)->data($abnormal_data)->save();
+ 
+                             //子订单绑定异常库位号
+                             $_new_order_item_process->where(['id' => $val['id']])
+                                 ->update(['abnormal_house_id' => $stock_house_info['id']]);
+ 
+                             //异常库位号占用数量+1
+                             $_stock_house
+                                 ->where(['id' => $stock_house_info['id']])
+                                 ->setInc('occupy', 1);
+ 
+                             DistributionLog::record((object)['nickname' => 'admin'], $val['id'], 9, "创建工单，异常暂存架{$stock_house_info['coding']}库位");
+                         }
+                     }
+                } else if ($v1['measure_choose_id'] == 20) {  //措施为更改镜片
+                    //查询change sku表
+                    $change_sku_list = Db::table('fa_work_order_change_sku')
+                    ->where(['work_id' => $v['id'], 'measure_id' => $v1['id']])
+                    ->select();
+                    foreach ($change_sku_list as $key1 => $val1) {
+                        //查询订单号所有子单
+                        $order_list = $_new_order_item_process->field('item_order_number,id')
+                            ->where(['item_order_number' => $val1['item_order_number']])
+                            ->select();
+                        foreach ($order_list as $key => $val) {
+                            echo '子单id:'. $val['id'] . "\n";
+                            echo '工单id:'. $val1['work_id'] . "\n";
+                            echo '库位id:'. $stock_house_info['id'] . "\n";
+                            echo '措施id:更改镜片'."\n";
+                            //创建异常
+                            $abnormal_data = [
+                                'work_id' => $v['id'],
+                                'item_process_id' => $val['id'],
+                                'type' => 17,
+                                'status' => 1,
+                                'create_time' => time(),
+                                'create_person' => 'admin'
+                            ];
+                            $_distribution_abnormal->allowField(true)->isUpdate(false)->data($abnormal_data)->save();
+
+                            //子订单绑定异常库位号
+                            $_new_order_item_process->where(['id' => $val['id']])
+                                ->update(['abnormal_house_id' => $stock_house_info['id']]);
+
+                            //异常库位号占用数量+1
+                            $_stock_house
+                                ->where(['id' => $stock_house_info['id']])
+                                ->setInc('occupy', 1);
+
+                            DistributionLog::record((object)['nickname' => 'admin'], $val['id'], 9, "创建工单，异常暂存架{$stock_house_info['coding']}库位");
+                        }
+
+                        
+                    }
+
+                    
+                }
+                echo $k . "\n";
+            }
+            echo "ok";
+        }
+    }
 }
