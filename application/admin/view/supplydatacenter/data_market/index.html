@@ -198,13 +198,12 @@
                         </div>
                         <div class="form-group new-form-group">
                             <div class="col-xs-8 new-col-xs-8">
-                                <input type="submit" class="btn btn-success" id="sku_submit" value="提交">
-                                <input type="reset" class="btn btn-default reset" id="sku_reset" value="重置">
+                                <input type="button" class="btn btn-success" id="sku_submit" value="提交">
+                                <input type="button" class="btn btn-default reset" id="sku_reset" value="重置">
                             </div>
                         </div>
                   </div>
              </div>
-             <input type="hidden" id="time_str_hidden" value="">
              <div class="new-background">
                 <b>库存总览</b>
                 <div class="row">
@@ -279,7 +278,7 @@
                                 <img src="/wenhao.jpg" class="wenhao-class">
                             </span>
                             <span class="extend">
-                                <div class="title">库存周转率<br/><span style="color: red;">{$stock_measure_overview.turnover_rate}</span></div>
+                                <div class="title">库存周转率<br/><span style="color: red;" id="turnover_rate">{$stock_measure_overview.turnover_rate}</span></div>
                             </span>
                         </div>
                         <div class="btn btn-div div">
@@ -289,7 +288,7 @@
                         </div>
                         <div class="btn btn-div div">
                             <span class="extend">
-                                <div class="title">库销比<br/><span style="color: red;">{$stock_measure_overview.stock_sales_rate}</span></div>
+                                <div class="title">库销比<br/><span style="color: red;" id="stock_sales_rate">{$stock_measure_overview.stock_sales_rate}</span></div>
                             </span>
                         </div>
                         <div class="btn btn-div div">
@@ -311,17 +310,17 @@
                                 <img src="/wenhao.jpg" class="wenhao-class">
                             </span>
                             <span class="extend">
-                                <div class="title">库存周转天数<br/><span style="color: red;" id="order_num">{$stock_measure_overview.turnover_days_rate}</span></div>
+                                <div class="title">库存周转天数<br/><span style="color: red;" id="turnover_days_rate">{$stock_measure_overview.turnover_days_rate}</span></div>
                             </span>
                         </div>
                         <div class="btn btn-div div">
                             <span class="extend">
-                                <div class="title">sku库存精度<br/><span style="color: red;" id="order_unit_price">{$stock_measure_overview.sku_accuracy}</span></div>
+                                <div class="title">sku库存精度<br/><span style="color: red;">{$stock_measure_overview.sku_accuracy}</span></div>
                             </span>
                         </div>
                         <div class="btn btn-div div">
                             <span class="extend">
-                                <div class="title">月度进销比<br/><span style="color: red;" id="sales_total_money">{$stock_measure_overview.month_in_out_rate}</span></div>
+                                <div class="title">月度进销比<br/><span style="color: red;" id="month_in_out_rate">{$stock_measure_overview.month_in_out_rate}</span></div>
                             </span>
                         </div>
                         <div class="btn btn-div div">
@@ -431,32 +430,32 @@
                                         <div class="margin-div" style="text-align: center">
                                             <div class="btn btn-div div1">
                                             <span class="extend">
-                                                <div class="title">采购总数<br/><span style="color: red;">{$purchase_overview.purchase_num}</span></div>
+                                                <div class="title">采购总数<br/><span style="color: red;" id="purchase_num">{$purchase_overview.purchase_num}</span></div>
                                             </span>
                                             </div>
                                             <div class="btn btn-div div1">
                                             <span class="extend">
-                                                <div class="title">采购总金额（￥）<br/><span style="color: red;">{$purchase_overview.purchase_amount}</span></div>
+                                                <div class="title">采购总金额（￥）<br/><span style="color: red;" id="purchase_amount">{$purchase_overview.purchase_amount}</span></div>
                                             </span>
                                             </div>
                                             <div class="btn btn-div div1">
                                             <span class="extend">
-                                                <div class="title">采购总SKU数<br/><span style="color: red;">{$purchase_overview.purchase_sku_num}</span></div>
+                                                <div class="title">采购总SKU数<br/><span style="color: red;" id="purchase_sku_num">{$purchase_overview.purchase_sku_num}</span></div>
                                             </span>
                                             </div>
                                             <div class="btn btn-div div1">
                                             <span class="extend">
-                                                <div class="title">采购批次到货延时率<br/><span style="color: red;" >{$purchase_overview.purchase_delay_rate}</span></div>
+                                                <div class="title">采购批次到货延时率<br/><span style="color: red;" id="purchase_delay_rate">{$purchase_overview.purchase_delay_rate}</span></div>
                                             </span>
                                             </div>
                                             <div class="btn btn-div div1">
                                             <span class="extend">
-                                                <div class="title">采购批次到货合格率<br/><span style="color: red;">{$purchase_overview.purchase_qualified_rate}</span></div>
+                                                <div class="title">采购批次到货合格率<br/><span style="color: red;" id="purchase_qualified_rate">{$purchase_overview.purchase_qualified_rate}</span></div>
                                             </span>
                                             </div>
                                             <div class="btn btn-div div1">
                                             <span class="extend">
-                                                <div class="title">采购单价（￥）<br/><span style="color: red;">{$purchase_overview.purchase_price}</span></div>
+                                                <div class="title">采购单价（￥）<br/><span style="color: red;" id="purchase_price">{$purchase_overview.purchase_price}</span></div>
                                             </span>
                                             </div>
                                         </div>
@@ -490,22 +489,22 @@
                                         <div class="margin-div" style="text-align: center">
                                             <div class="btn btn-div div2">
                                             <span class="extend">
-                                                <div class="title">发货数量<br/><span style="color: red;">{$logistics_completed_overview.delivery_count}</span></div>
+                                                <div class="title">发货数量<br/><span style="color: red;" id="delivery_count">{$logistics_completed_overview.delivery_count}</span></div>
                                             </span>
                                             </div>
                                             <div class="btn btn-div div2">
                                             <span class="extend">
-                                                <div class="title">妥投总数量<br/><span style="color: red;">{$logistics_completed_overview.completed_count}</span></div>
+                                                <div class="title">妥投总数量<br/><span style="color: red;" id="completed_count">{$logistics_completed_overview.completed_count}</span></div>
                                             </span>
                                             </div>
                                             <div class="btn btn-div div2">
                                             <span class="extend">
-                                                <div class="title">未妥投数量<br/><span style="color: red;">{$logistics_completed_overview.uncompleted_count}</span></div>
+                                                <div class="title">未妥投数量<br/><span style="color: red;" id="uncompleted_count">{$logistics_completed_overview.uncompleted_count}</span></div>
                                             </span>
                                             </div>
                                             <div class="btn btn-div div2">
                                             <span class="extend">
-                                                <div class="title">超时未妥投数量<br/><span style="color: red;" >{$logistics_completed_overview.timeout_uncompleted_count}</span></div>
+                                                <div class="title">超时未妥投数量<br/><span style="color: red;" id="timeout_uncompleted_count">{$logistics_completed_overview.timeout_uncompleted_count}</span></div>
                                             </span>
                                             </div>
                                         </div>
