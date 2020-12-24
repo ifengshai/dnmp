@@ -11,7 +11,7 @@ class OcPrescriptionPic extends Model
 
 
     // 表名
-    protected $name = 'oc_prescription_pics';
+    protected $table = 'oc_prescription_pics';
     
     // 自动写入时间戳字段
     protected $autoWriteTimestamp = false;
