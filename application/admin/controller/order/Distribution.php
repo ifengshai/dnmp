@@ -606,6 +606,10 @@ class Distribution extends Backend
             list($where, $sort, $order) = $this->buildparams();
         }
 
+
+
+
+
         $sort = 'a.id';
         $list = $this->model
             ->alias('a')
@@ -618,7 +622,20 @@ class Distribution extends Backend
             ->select();
 
         $list = collection($list)->toArray();
-        dump($list);die();
+
+        $listz = $this->model
+            ->alias('a')
+            ->field('a.id')
+            ->join(['fa_order' => 'b'], 'a.order_id=b.id')
+            ->join(['fa_order_process' => 'c'], 'a.order_id=c.order_id')
+            ->where($where)
+            ->where($map)
+            ->order($sort, $order)
+            ->select();
+
+        dump($list);
+        dump($listz);
+        die();
         //从数据库查询需要的数据
         $spreadsheet = new Spreadsheet();
 
