@@ -51,30 +51,17 @@ class OcPrescriptionPic extends Backend
             {
                 return $this->selectpage();
             }
-
             $filter = json_decode($this->request->get('filter'), true);
-            $site = $filter['site'] ? $filter['site'] :1;
-            if ($site ==1){
-                $model = Db::connect('database.db_zeelool');
-            }else{
-                $model = Db::connect('database.db_voogueme');
-            }
-            unset($filter['site']);
             $this->request->get(['filter' => json_encode($filter)]);
-
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-
-            $total = $model->table('oc_prescription_pic')->where($where)->count();
-            $list = $model->table('oc_prescription_pic')->where($where)->order('id desc')->limit($offset, $limit)->select();
-
+            $total =  $this->model->table('oc_prescription_pics')->where($where)->count();
+            $list =  $this->model->table('oc_prescription_pics')->where($where)->order('created_at desc')->limit($offset, $limit)->select();
             foreach ($list as $key=>$item){
-
                 if ($item['status'] ==1){
                     $list[$key]['status']='未处理';
                 }else{
                     $list[$key]['status']= '已处理';
                 }
-                $list[$key]['site'] = $site;
                 $list[$key]['created_at'] =date("Y-m-d H:i:s",strtotime($item['created_at'])+28800);;
             }
 
@@ -90,20 +77,29 @@ class OcPrescriptionPic extends Backend
     public function question_message($ids = null){
         if ($this->request->isPost()){
             $params = $this->request->post("row/a");
-            $updata_queertion = $this->model->where('id',$params['id'])->update(['status'=>2,'handler_name'=>$this->auth->nickname,'completion_time'=>date('Y-m-d H:i:s',time()),'remarks'=>$params['remarks']]);
+            $updata_queertion = $this->model->table('oc_prescription_pics')->where('site',$params['site'])->where('id',$params['id'])->update(['status'=>2,'handler_name'=>$this->auth->nickname,'completion_time'=>date('Y-m-d H:i:s',time()),'remarks'=>$params['remarks']]);
             if ($updata_queertion){
                 $this->success('操作成功','oc_prescription_pic/index');
             }else{
                 $this->error('操作失败');
             }
         }
-        $row = $this->model->where('id',$ids)->find();
+        $site = input('param.site');
+        if ($site ==1){
+            $url =config('url.zeelool_url').'/media';
+        }else{
+            $url =config('url.voogueme_url').'/media';
+        }
+        $row = $this->model->table('oc_prescription_pics')->where('id',$ids)->find();
         $photo_href = $row['pic'] =explode(',',$row['pic']);
         foreach ($photo_href as $key=>$item){
-            $photo_href[$key]= 'https://pc.zeelool.com/media'.$item;
+            $photo_href[$key]= $url.$item;
         }
         $row['pic'] = $photo_href;
         $this->assign('row',$row);
+        $this->assign('zhandian',$site);
+
+
         return $this->view->fetch();
     }
 }
