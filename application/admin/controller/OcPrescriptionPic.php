@@ -3,9 +3,7 @@
 namespace app\admin\controller;
 
 use app\common\controller\Backend;
-use Defuse\Crypto\Exception\IOException;
 use Think\Db;
-
 
 /**
  *
@@ -46,8 +44,6 @@ class OcPrescriptionPic extends Backend
         $this->relationSearch = false;
         //设置过滤方法
         $this->request->filter(['strip_tags']);
-
-
         if ($this->request->isAjax())
         {
             //如果发送的来源是Selectpage，则转发到Selectpage
@@ -55,59 +51,13 @@ class OcPrescriptionPic extends Backend
             {
                 return $this->selectpage();
             }
-
             $filter = json_decode($this->request->get('filter'), true);
-
-
-            if ($filter['id']){
-                $WhereSql = 'id='.$filter['id'];
-            }
-            if ($filter['status']){
-                $WhereSql.= ' status='.$filter['status'];
-            }
-            if ($filter['created_at']){
-                $created_at = explode(' - ', $filter['created_at']);
-                $WhereSql .= ' and created_at between'.$created_at[0] .'and'.$created_at[1];
-            }
-            if ($filter['completion_time']){
-                $completion_time = explode(' - ', $filter['completion_time']);
-                $WhereSql .= 'and created_at between'.$completion_time[0] .'and'.$completion_time[1];
-            }
-                $WhereSqls = '  ORDER BY created_at desc';
-//            $site = $filter['site'] ? $filter['site'] :1;
-            $site = $filter['site'];
-
-            if (!empty($site)){
-                if ($site ==1){
-                    $sql  = "SELECT *,1 as site from zeelool.oc_prescription_pic where".$WhereSql;
-                    $count_sql  = "SELECT COUNT(1) from zeelool.oc_prescription_pic where".$WhereSql;
-                }else{
-                    $sql  = "SELECT *,2 as site from voogueme.oc_prescription_pic where".$WhereSql;
-                    $count_sql  = "SELECT COUNT(1) from voogueme.oc_prescription_pic where".$WhereSql;
-                }
-                    $count = Db::query($count_sql);
-                    $total = $count[0]['COUNT(1)'];
-                }else{
-                    $sql  = "SELECT *,1 as site from zeelool.oc_prescription_pic where".$WhereSql." union all SELECT *,2 as site from voogueme.oc_prescription_pic where".$WhereSql . $WhereSqls;
-                    $count_sql  =  "SELECT COUNT(1) from zeelool.oc_prescription_pic where".$WhereSql." union all SELECT COUNT(1) from voogueme.oc_prescription_pic where".$WhereSql;
-                    $count = Db::query($count_sql);
-                    $total = $count[0]['COUNT(1)'] + $count[1]['COUNT(1)'];
-                }
-            }
-
-            $list  = Db::query($sql);
-
-//            dump($list);die();
-//            unset($filter['site']);
-//            $this->request->get(['filter' => json_encode($filter)]);
-//
-//            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-//
-//            $total = $model->table('oc_prescription_pic')->where($where)->count();
-//            $list = $model->table('oc_prescription_pic')->where($where)->order('id desc')->limit($offset, $limit)->select();
-
+            $model = Db::connect('database.db_voogueme');
+            $this->request->get(['filter' => json_encode($filter)]);
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $total = $model->table('oc_prescription_pics')->where($where)->count();
+            $list = $model->table('oc_prescription_pics')->where($where)->order('id desc')->limit($offset, $limit)->select();
             foreach ($list as $key=>$item){
-
                 if ($item['status'] ==1){
                     $list[$key]['status']='未处理';
                 }else{
@@ -118,24 +68,19 @@ class OcPrescriptionPic extends Backend
 
             $result = array("total" => $total, "rows" => $list);
             return json($result);
-
+        }
         return $this->view->fetch();
-
     }
 
     /*
  * 问题描述
  * */
     public function question_message($ids = null){
+        $model = Db::connect('database.db_voogueme');
         if ($this->request->isPost()){
-
             $params = $this->request->post("row/a");
-            if ($params['site'] ==1){
-                $model = Db::connect('database.db_zeelool');
-            }else{
-                $model = Db::connect('database.db_voogueme');
-            }
-            $updata_queertion =$model->table('oc_prescription_pic')->where('id',$params['id'])->update(['status'=>2,'handler_name'=>$this->auth->nickname,'completion_time'=>date('Y-m-d H:i:s',time()),'remarks'=>$params['remarks']]);
+
+            $updata_queertion =$model->table('oc_prescription_pics')->where('site',$params['site'])->where('id',$params['id'])->update(['status'=>2,'handler_name'=>$this->auth->nickname,'completion_time'=>date('Y-m-d H:i:s',time()),'remarks'=>$params['remarks']]);
             if ($updata_queertion){
                 $this->success('操作成功','oc_prescription_pic/index');
             }else{
@@ -144,13 +89,11 @@ class OcPrescriptionPic extends Backend
         }
         $site = input('param.site');
         if ($site ==1){
-            $model = Db::connect('database.db_zeelool');
             $url =config('url.zeelool_url').'/media';
         }else{
-            $model = Db::connect('database.db_voogueme');
             $url =config('url.voogueme_url').'/media';
         }
-        $row =$model->table('oc_prescription_pic')->where('id',$ids)->find();
+        $row =$model->table('oc_prescription_pics')->where('id',$ids)->find();
         $photo_href = $row['pic'] =explode(',',$row['pic']);
         foreach ($photo_href as $key=>$item){
             $photo_href[$key]= $url.$item;
