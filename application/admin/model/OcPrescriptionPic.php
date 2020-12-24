@@ -10,10 +10,10 @@ class OcPrescriptionPic extends Model
 
 
 
-
+    protected $connection = 'database.mojing';
 
     // 表名
-    protected $table = 'oc_prescription_pic';
+    protected $table = 'oc_prescription_pics';
     
     // 自动写入时间戳字段
     protected $autoWriteTimestamp = false;

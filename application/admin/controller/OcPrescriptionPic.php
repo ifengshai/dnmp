@@ -22,6 +22,7 @@ class OcPrescriptionPic extends Backend
     public function _initialize()
     {
         parent::_initialize();
+        $this->model = new \app\admin\model\OcPrescriptionPic();
 
     }
 
@@ -51,8 +52,8 @@ class OcPrescriptionPic extends Backend
             $filter = json_decode($this->request->get('filter'), true);
             $this->request->get(['filter' => json_encode($filter)]);
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-            $total =  db('oc_prescription_pics')->where($where)->count();
-            $list =  db('oc_prescription_pics')->where($where)->order('created_at desc')->limit($offset, $limit)->select();
+            $total =  $this->model->table('oc_prescription_pics')->where($where)->count();
+            $list =  $this->model->table('oc_prescription_pics')->where($where)->order('created_at desc')->limit($offset, $limit)->select();
             foreach ($list as $key=>$item){
                 if ($item['status'] ==1){
                     $list[$key]['status']='未处理';
