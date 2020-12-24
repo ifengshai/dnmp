@@ -54,32 +54,84 @@ class OcPrescriptionPic extends Backend
 
             $filter = json_decode($this->request->get('filter'), true);
             $site = $filter['site'] ? $filter['site'] :1;
-            if ($site ==1){
+            // dump($site);
+            if ($site ==3){
                 $model = Db::connect('database.db_zeelool');
-            }else{
-                $model = Db::connect('database.db_voogueme');
-            }
-            unset($filter['site']);
-            $this->request->get(['filter' => json_encode($filter)]);
+                unset($filter['site']);
+                $this->request->get(['filter' => json_encode($filter)]);
 
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+                list($where, $sort, $order, $offset, $limit) = $this->buildparams();
 
-            $total = $model->table('oc_prescription_pic')->where($where)->count();
-            $list = $model->table('oc_prescription_pic')->where($where)->order('id desc')->limit($offset, $limit)->select();
+                $total = $model->table('oc_prescription_pic')->where($where)->count();
+                $list = $model->table('oc_prescription_pic')->where($where)->order('id desc')->limit($offset, $limit)->select();
 
-            foreach ($list as $key=>$item){
+                foreach ($list as $key=>$item){
 
-                if ($item['status'] ==1){
-                    $list[$key]['status']='未处理';
-                }else{
-                    $list[$key]['status']= '已处理';
+                    if ($item['status'] ==1){
+                        $list[$key]['status']='未处理';
+                    }else{
+                        $list[$key]['status']= '已处理';
+                    }
+                    $list[$key]['site'] = $site;
+                    $list[$key]['created_at'] =date("Y-m-d H:i:s",strtotime($item['created_at'])+28800);;
                 }
-                $list[$key]['site'] = $site;
-                $list[$key]['created_at'] =date("Y-m-d H:i:s",strtotime($item['created_at'])+28800);;
+
+                $result = array("total" => $total, "rows" => $list);
+                return json($result);
+            }elseif($site ==2){
+                $model = Db::connect('database.db_voogueme');
+                unset($filter['site']);
+                $this->request->get(['filter' => json_encode($filter)]);
+
+                list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+
+                $total = $model->table('oc_prescription_pic')->where($where)->count();
+                $list = $model->table('oc_prescription_pic')->where($where)->order('id desc')->limit($offset, $limit)->select();
+
+                foreach ($list as $key=>$item){
+
+                    if ($item['status'] ==1){
+                        $list[$key]['status']='未处理';
+                    }else{
+                        $list[$key]['status']= '已处理';
+                    }
+                    $list[$key]['site'] = $site;
+                    $list[$key]['created_at'] =date("Y-m-d H:i:s",strtotime($item['created_at'])+28800);;
+                }
+
+                $result = array("total" => $total, "rows" => $list);
+                return json($result);
+            }else{
+                $model = Db::connect('database.db_zeelool');
+                $model1 = Db::connect('database.db_voogueme');
+                unset($filter['site']);
+                $this->request->get(['filter' => json_encode($filter)]);
+
+                list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+
+                $total = $model->table('oc_prescription_pic')->where($where)->count();
+                $total1 = $model1->table('oc_prescription_pic')->where($where)->count();
+                $list = $model->table('oc_prescription_pic')->where($where)->order('id desc')->limit($offset, $limit)->select();
+                $list1 = $model1->table('oc_prescription_pic')->where($where)->order('id desc')->limit($offset, $limit)->select();
+
+                $total = $total + $total1;
+                $list = array_merge($list,$list1);
+
+                foreach ($list as $key=>$item){
+
+                    if ($item['status'] ==1){
+                        $list[$key]['status']='未处理';
+                    }else{
+                        $list[$key]['status']= '已处理';
+                    }
+                    $list[$key]['site'] = $site;
+                    $list[$key]['created_at'] =date("Y-m-d H:i:s",strtotime($item['created_at'])+28800);;
+                }
+
+                $result = array("total" => $total, "rows" => $list);
+                return json($result);
             }
 
-            $result = array("total" => $total, "rows" => $list);
-            return json($result);
         }
         return $this->view->fetch();
     }
