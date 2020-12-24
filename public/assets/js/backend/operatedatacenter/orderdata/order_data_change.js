@@ -44,6 +44,21 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
             });
             // 为表格绑定事件
             Table.api.bindevent(table);
+            /* var newData = [{
+                day_date:"合计",
+        sessions:"1111",
+        add_cart_rate:"1111",
+        session_rate:"1111",
+        order_num:"1111",
+        order_unit_price:"1111",
+        new_cart_num:"1111",
+        update_cart_num:"1111",
+        sales_total_money:"1111",
+        register_num:"1111", 
+            } ];
+            
+    table.bootstrapTable('append', newData); */
+
             Controller.api.formatter.order_num_data_line();
             Controller.api.formatter.order_sales_data_line();
             $("#change_submit").click(function(){
