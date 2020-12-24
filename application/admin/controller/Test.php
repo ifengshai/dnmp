@@ -1679,7 +1679,7 @@ class Test extends Backend
         $_stock_house = new \app\admin\model\warehouse\StockHouse();
         $_distribution_abnormal = new \app\admin\model\DistributionAbnormal();
         $_new_order_item_process = new \app\admin\model\order\order\NewOrderItemProcess();
-        $list = $work->where(['work_status' => [1, 2]])->select();
+        $list = $work->where(['work_status' => ['in', [1, 2]]])->select();
         $list = collection($list)->toArray();
 
         //获取异常库位号
