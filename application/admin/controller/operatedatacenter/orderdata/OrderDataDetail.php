@@ -523,12 +523,7 @@ class OrderDataDetail extends Backend
                     }elseif ($order_node == 35){
                         $order_shipping_status = '投递失败';
                     }else{
-                        $status_arr = ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal'];
-                        if(in_array($val['status'],$status_arr)){
-                            $order_shipping_status = '支付成功';
-                        }else{
-                            $order_shipping_status = '-';
-                        }
+                        $order_shipping_status = $val['status'];
                     }
                     $index = array_keys($column_name,'status');
                     $tmpRow[$index[0]] =$order_shipping_status;

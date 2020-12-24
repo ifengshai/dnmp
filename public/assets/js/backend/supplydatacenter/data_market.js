@@ -26,7 +26,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                 Controller.api.formatter.process_overview();
                 Controller.api.formatter.comleted_time_rate_pie();
             });
-            $("#order_platform").click(function () {
+            $(document).on('change', '#order_platform', function () {
                 stock_measure_overview_platform();
             });
             // $(document).on('change', '#order_platform', function () {
