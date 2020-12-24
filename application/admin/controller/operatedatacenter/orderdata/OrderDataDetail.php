@@ -228,6 +228,7 @@ class OrderDataDetail extends Backend
                 $frame_price = $web_model->table('sales_flat_order_item_prescription')->where($prescription_where)->sum('frame_price');
                 $list[$key]['frame_price'] = round($frame_price,2);
                 $list[$key]['frame_num'] = $web_model->table('sales_flat_order_item_prescription')->where($prescription_where)->count();
+                $list[$key]['frame_num'] = $web_model->table('sales_flat_order_item_prescription')->where($prescription_where)->select(false);
                 dump($list);exit;
                 if($site == 3){
                     $list[$key]['lens_num'] = $web_model->table('sales_flat_order_item_prescription')->where($prescription_where)->where('third_id','neq','')->count();
