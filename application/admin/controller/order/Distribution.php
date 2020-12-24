@@ -280,7 +280,8 @@ class Distribution extends Backend
                 ->where($map)
                 ->order($sort, $order)
                 ->count();
-
+            dump($where);
+            dump($map);
             $list = $this->model
                 ->alias('a')
                 ->field('a.id,a.order_id,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.total_qty_ordered,b.site,b.order_type,b.status,a.distribution_status,a.temporary_house_id,a.abnormal_house_id,a.created_at,c.store_house_id')
@@ -293,7 +294,7 @@ class Distribution extends Backend
                 ->select();
 
             $list = collection($list)->toArray();
-
+            dump($list);die();
             //库位号列表
             $stock_house_data = $this->_stock_house
                 ->where(['status' => 1, 'type' => ['>', 1], 'occupy' => ['>', 0]])
@@ -632,7 +633,7 @@ class Distribution extends Backend
             ->where($map)
             ->order($sort, $order)
             ->select();
-
+        $listz = collection($listz)->toArray();
         dump($list);
         dump($listz);
         die();
