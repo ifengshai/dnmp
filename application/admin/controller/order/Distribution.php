@@ -545,7 +545,13 @@ class Distribution extends Backend
             }
 
             $filter = json_decode($this->request->get('filter'), true);
+            if (!$filter) {
+                $map['a.created_at'] = ['between', [strtotime('-3 month'), time()]];
+            }
 
+            if (!$filter['status']) {
+                $map['b.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal']];
+            }
             if ($filter['abnormal'] || $filter['stock_house_num']) {
 //                //筛选异常
                 if ($filter['abnormal']) {
