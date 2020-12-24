@@ -11,6 +11,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
             Controller.api.formatter.process_overview();
             Controller.api.formatter.comleted_time_rate_pie();
             $("#sku_submit").click(function () {
+                index_data();
                 stock_measure_overview_platform();
                 Controller.api.formatter.line_histogram();
                 Controller.api.formatter.order_send_overview();
@@ -18,17 +19,13 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                 Controller.api.formatter.comleted_time_rate_pie();
             });
             $("#sku_reset").click(function () {
-                $("#time_str_hidden").val('')
+                index_data();
                 stock_measure_overview_platform();
                 Controller.api.formatter.line_histogram();
                 Controller.api.formatter.order_send_overview();
                 Controller.api.formatter.process_overview();
                 Controller.api.formatter.comleted_time_rate_pie();
             });
-             $("#time_str").on("apply.daterangepicker", function (ev,picker) {
-                var time_str = picker.startDate.format('YYYY-MM-DD HH:mm:ss')+" - "+picker.endDate.format('YYYY-MM-DD HH:mm:ss');
-                $("#time_str_hidden").val(time_str)
-            })
             // $(document).on('change', '#order_platform', function () {
             //     order_data_view();
             //     Controller.api.formatter.line_chart();
@@ -144,7 +141,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                         type: 'post',
                         url: 'supplydatacenter/data_market/purchase_histogram_line',
                         data: {
-                            time_str: $("#time_str_hidden").val(),
+                            time_str: $("#time_str").val(),
                         }
                     }
                     EchartObj.api.ajax(options, chartOptions)
@@ -195,7 +192,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                         type: 'post',
                         url: 'supplydatacenter/data_market/order_send_overview',
                         data: {
-                            time_str: $("#time_str_hidden").val(),
+                            time_str: $("#time_str").val(),
                         }
                     }
                     EchartObj.api.ajax(options, chartOptions)
@@ -239,7 +236,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                         type: 'post',
                         url: 'supplydatacenter/data_market/process_overview',
                         data: {
-                            time_str: $("#time_str_hidden").val()
+                            time_str: $("#time_str").val()
                         }
                     }                
                     EchartObj.api.ajax(options, chartOptions)
@@ -265,7 +262,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                         type: 'post',
                         url: 'supplydatacenter/data_market/comleted_time_rate',
                         data: {
-                            'time_str' :  $("#time_str_hidden").val(),
+                            'time_str' :  $("#time_str").val(),
                         }
 
                     };
@@ -279,9 +276,41 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
     };
     return Controller;
 });
+function index_data(){
+    var time_str = $('#time_str').val();
+    Backend.api.ajax({
+        url: 'supplydatacenter/data_market/index',
+        data: {time_str: time_str}
+    }, function (data, ret) {
+        var stock_measure_overview = ret.data.stock_measure_overview;
+        var purchase_overview = ret.data.purchase_overview;
+        var logistics_completed_overview = ret.data.logistics_completed_overview;
+        //仓库指标总览
+        $('#turnover_rate').html(stock_measure_overview.turnover_rate);
+        $('#stock_sales_rate').html(stock_measure_overview.stock_sales_rate);
+        $('#turnover_days_rate').html(stock_measure_overview.turnover_days_rate);
+        $('#month_in_out_rate').html(stock_measure_overview.month_in_out_rate);
+        //采购概况
+        $('#purchase_num').html(purchase_overview.purchase_num);
+        $('#purchase_amount').html(purchase_overview.purchase_amount);
+        $('#purchase_sku_num').html(purchase_overview.purchase_sku_num);
+        $('#purchase_delay_rate').html(purchase_overview.purchase_delay_rate);
+        $('#purchase_qualified_rate').html(purchase_overview.purchase_qualified_rate);
+        $('#purchase_price').html(purchase_overview.purchase_price);
+        //物流妥投概况
+        $('#delivery_count').html(logistics_completed_overview.delivery_count);
+        $('#completed_count').html(logistics_completed_overview.completed_count);
+        $('#uncompleted_count').html(logistics_completed_overview.uncompleted_count);
+        $('#timeout_uncompleted_count').html(logistics_completed_overview.timeout_uncompleted_count);
+        return false;
+    }, function (data, ret) {
+        Layer.alert(ret.msg);
+        return false;
+    });
+}
 function stock_measure_overview_platform() {
     var order_platform = $('#order_platform').val();
-    var time_str = $('#time_str_hidden').val();
+    var time_str = $('#time_str').val();
     Backend.api.ajax({
         url: 'supplydatacenter/data_market/stock_measure_overview_platform',
         data: { order_platform: order_platform, time_str: time_str}
