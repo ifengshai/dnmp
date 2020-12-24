@@ -103,8 +103,14 @@
         <div class="col-xs-12 col-sm-3">
             <input id="c-1688_number" class="form-control"  name="row[1688_number]" value="{$row['1688_number']}" type="text">
         </div>
+    <label class="control-label col-xs-12 col-sm-2">工厂类型:</label>
+    <div class="col-xs-12 col-sm-3">
+        <select name="row[factory_type]" class="form-control">
+            <option value="1"  {:$row['factory_type']==1 ? 'selected' : '' }>贸易</option>
+            <option value="0"  {:$row['factory_type']==0 ? 'selected' : '' }>工厂</option>
+        </select>
     </div>
-
+    </div>
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">采购备注:</label>
         <div class="col-xs-12 col-sm-8">
@@ -349,7 +355,7 @@
         <label class="control-label col-xs-12 col-sm-2"></label>
         <div class="col-xs-12 col-sm-8">
             <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
-            {if $row.purchase_type ==1 && $row.purchase_status == 0}  
+            {if $row.purchase_type ==1 && $row.purchase_status == 0}
             <button type="submit" class="btn btn-success btn-status btn-embossed disabled">提交审核</button>
             {/if}
             <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
