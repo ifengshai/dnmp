@@ -211,7 +211,7 @@ class OrderData extends Backend
                                     $params['base_shipping_amount'] = $v['base_shipping_amount'];
                                     $params['base_shipping_amount'] = $v['base_shipping_amount'];
                                     $params['updated_at'] = strtotime($v['updated_at']) + 28800;
-                                   
+
                                     $this->order->where(['entity_id' => $v['entity_id'], 'site' => $site])->update($params);
                                 }
                             }
@@ -220,7 +220,7 @@ class OrderData extends Backend
                             if (($payload['type'] == 'UPDATE' || $payload['type'] == 'INSERT') && $payload['table'] == 'sales_flat_order_address') {
                                 foreach ($payload['data'] as $k => $v) {
                                     $params = [];
-                                    if ($v['address_type'] == 'shipping') { 
+                                    if ($v['address_type'] == 'shipping') {
 
                                         $params['country_id'] = $v['country_id'];
                                         $params['region'] = $v['region'];
@@ -232,7 +232,6 @@ class OrderData extends Backend
                                         $params['updated_at'] = strtotime($v['updated_at']) + 28800;
                                         $this->order->where(['entity_id' => $v['parent_id'], 'site' => $site])->update($params);
                                     }
-                                    
                                 }
                             }
 
@@ -327,7 +326,7 @@ class OrderData extends Backend
                                     if ($options) {
                                         $this->orderitemoption->where(['item_id' => $v['item_id'], 'site' => $site])->update($options);
 
-                                        $this->orderitemprocess->where(['item_id' => $v['item_id'], 'site' => $site])->update(['order_prescription_type' => $order_prescription_type]);
+                                        $this->orderitemprocess->where(['item_id' => $v['item_id'], 'site' => $site])->update(['order_prescription_type' => $order_prescription_type, 'sku' => $options['sku']]);
                                     }
                                 }
                             }
@@ -531,9 +530,9 @@ class OrderData extends Backend
          * 4、当cyl<=-4或cyl>=4 或 sph < -8或 sph>8
          */
 
-       //判断加工类型
-       $result = $this->set_processing_type($arr);
-       $arr = array_merge($arr, $result);
+        //判断加工类型
+        $result = $this->set_processing_type($arr);
+        $arr = array_merge($arr, $result);
 
         return $arr;
     }
@@ -1086,7 +1085,7 @@ class OrderData extends Backend
     }
 
 
-     /**
+    /**
      * 判断定制现片逻辑
      */
     protected function set_processing_type($params = [])
@@ -1552,7 +1551,6 @@ class OrderData extends Backend
         $this->order_item_shell(9);
         $this->order_item_shell(10);
         $this->order_item_shell(11);
-
     }
 
     protected function order_item_shell($site)
@@ -1811,7 +1809,7 @@ class OrderData extends Backend
             $option_params[$k]['index_name'] = $options['index_name'] ?: 'None';
             $option_params[$k]['index_type'] = $options['index_type'] ?: 'None';
             $option_params[$k]['id'] = $v['id'];
-            
+
             echo $v['item_id'] . "\n";
             usleep(10000);
         }
