@@ -858,165 +858,167 @@ class PurchaseOrder extends Backend
         }
         $status = input('status');
         $data['purchase_status'] = $status;
-        $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+
         $item = new \app\admin\model\itemmanage\Item();
         $item_platform = new ItemPlatformSku();
         $this->list = new \app\admin\model\purchase\NewProductReplenishList;
         $this->replenish = new \app\admin\model\purchase\NewProductReplenish;
 
 
-        if ($res !== false) {
-            $item->startTrans();
-            $item_platform->startTrans();
-            $this->list->startTrans();
-            $this->replenish->startTrans();
-            (new StockLog())->startTrans();
-            try {
-                //在途库存新逻辑
-                if ($status == 2) {
-                    //审核通过添加在途库存
-                    $list = $this->purchase_order_item->alias('a')
-                        ->join(['fa_purchase_order' => 'b'], 'a.purchase_id=b.id')
-                        ->field('supplier_id,sku,replenish_list_id,purchase_num,purchase_number')
-                        ->where(['purchase_id' => ['in', $ids]])->select();
-                    $skus = array_column($list, 'sku');
+        $item->startTrans();
+        $item_platform->startTrans();
+        $this->list->startTrans();
+        $this->model->startTrans();
+        $this->replenish->startTrans();
+        (new StockLog())->startTrans();
+        try {
+            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+            //在途库存新逻辑
+            if ($status == 2) {
+                //审核通过添加在途库存
+                $list = $this->purchase_order_item->alias('a')
+                    ->join(['fa_purchase_order' => 'b'], 'a.purchase_id=b.id')
+                    ->field('supplier_id,sku,replenish_list_id,purchase_num,purchase_number')
+                    ->where(['purchase_id' => ['in', $ids]])->select();
+                $skus = array_column($list, 'sku');
 
-                    //查询供应商
-                    $supplier = new \app\admin\model\purchase\Supplier();
-                    $supplier_list = $supplier->column('supplier_name', 'id');
-                    // dump($list);die;
-                    foreach ($list as $v) {
-                        //插入日志表
-                        (new StockLog())->setData([
-                            'type' => 2,
-                            'site' => 0,
-                            'modular' => 10,
-                            'change_type' => 23,
-                            'sku' => $v['sku'],
-                            'order_number' => $v['purchase_number'],
-                            'source' => 1,
-                            'on_way_stock_before' => $item->where(['sku' => $v['sku']])->value('on_way_stock'),
-                            'on_way_stock_change' => $v['purchase_num'],
-                            'create_person' => session('admin.nickname'),
-                            'create_time' => time(),
-                            //关联采购单
-                            'number_type' => 7,
-                        ]);
-                        $item->where(['sku' => $v['sku']])->setInc('on_way_stock', $v['purchase_num']);
+                //查询供应商
+                $supplier = new \app\admin\model\purchase\Supplier();
+                $supplier_list = $supplier->column('supplier_name', 'id');
+                // dump($list);die;
+                foreach ($list as $v) {
+                    //插入日志表
+                    (new StockLog())->setData([
+                        'type' => 2,
+                        'site' => 0,
+                        'modular' => 10,
+                        'change_type' => 23,
+                        'sku' => $v['sku'],
+                        'order_number' => $v['purchase_number'],
+                        'source' => 1,
+                        'on_way_stock_before' => $item->where(['sku' => $v['sku']])->value('on_way_stock') ? $item->where(['sku' => $v['sku']])->value('on_way_stock') : 0,
+                        'on_way_stock_change' => $v['purchase_num'],
+                        'create_person' => session('admin.nickname'),
+                        'create_time' => time(),
+                        //关联采购单
+                        'number_type' => 7,
+                    ]);
+                    $item->where(['sku' => $v['sku']])->setInc('on_way_stock', $v['purchase_num']);
 
-                        //判断是否关联补货需求单 如果有回写实际采购数量 已采购状态 供应商
-                        if ($v['replenish_list_id']) {
-                            $this->list
-                                ->where('id', $v['replenish_list_id'])
-                                ->update(['supplier_id' => $v['supplier_id'], 'supplier_name' => $supplier_list[$v['supplier_id']], 'real_dis_num' => $v['purchase_num'], 'status' => 2]);
-                            //当对补货需求单对应的子子表 对应的采购单进行审核的时候 判断对应的补货需求单 是否还有未采购的单 如果没有 就更新主表状态为已处理
-                            $replenish_id = $this->list
-                                ->where('id', $v['replenish_list_id'])
-                                ->field('replenish_id,status')->find();
-                            //补货需求单id $replenish_id['replenish_id'] 新逻辑在途库存分站 在更新商品表的在途库存的时候 查找补货需求单中的原始比例 进行在途库存的分站点分配
-                            //比例
-                            $rate_arr = Db::name('new_product_mapping')
-                                ->where(['sku' => $v['sku'], 'replenish_id' => $replenish_id['replenish_id']])
-                                ->field('website_type,rate')
-                                ->select();
-                            //数量
-                            $all_num = count($rate_arr);
-                            //在途库存数量
-                            $stock_num = $v['purchase_num'];
-                            //在途库存分站 更新映射关系表
-                            foreach ($rate_arr as $key => $val) {
-                                //最后一个站点 剩余数量分给最后一个站
-                                if (($all_num - $key) == 1) {
-                                    //插入日志表
-                                    (new StockLog())->setData([
-                                        'type' => 2,
-                                        'site' => $val['website_type'],
-                                        'modular' => 10,
-                                        'change_type' => 23,
-                                        'sku' => $v['sku'],
-                                        'order_number' => $v['purchase_number'],
-                                        'source' => 1,
-                                        'on_way_stock_before' => $item_platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->value('plat_on_way_stock'),
-                                        'on_way_stock_change' => $stock_num,
-                                        'create_person' => session('admin.nickname'),
-                                        'create_time' => time(),
-                                        //关联采购单
-                                        'number_type' => 7,
-                                    ]);
-                                    //根据sku站点类型进行在途库存的分配
-                                    $item_platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->setInc('plat_on_way_stock', $stock_num);
+                    //判断是否关联补货需求单 如果有回写实际采购数量 已采购状态 供应商
+                    if ($v['replenish_list_id']) {
+                        $this->list
+                            ->where('id', $v['replenish_list_id'])
+                            ->update(['supplier_id' => $v['supplier_id'], 'supplier_name' => $supplier_list[$v['supplier_id']], 'real_dis_num' => $v['purchase_num'], 'status' => 2]);
+                        //当对补货需求单对应的子子表 对应的采购单进行审核的时候 判断对应的补货需求单 是否还有未采购的单 如果没有 就更新主表状态为已处理
+                        $replenish_id = $this->list
+                            ->where('id', $v['replenish_list_id'])
+                            ->field('replenish_id,status')->find();
+                        //补货需求单id $replenish_id['replenish_id'] 新逻辑在途库存分站 在更新商品表的在途库存的时候 查找补货需求单中的原始比例 进行在途库存的分站点分配
+                        //比例
+                        $rate_arr = Db::name('new_product_mapping')
+                            ->where(['sku' => $v['sku'], 'replenish_id' => $replenish_id['replenish_id']])
+                            ->field('website_type,rate')
+                            ->select();
+                        //数量
+                        $all_num = count($rate_arr);
+                        //在途库存数量
+                        $stock_num = $v['purchase_num'];
+                        //在途库存分站 更新映射关系表
+                        foreach ($rate_arr as $key => $val) {
+                            //最后一个站点 剩余数量分给最后一个站
+                            if (($all_num - $key) == 1) {
+                                //插入日志表
+                                (new StockLog())->setData([
+                                    'type' => 2,
+                                    'site' => $val['website_type'],
+                                    'modular' => 10,
+                                    'change_type' => 23,
+                                    'sku' => $v['sku'],
+                                    'order_number' => $v['purchase_number'],
+                                    'source' => 1,
+                                    'on_way_stock_before' => $item_platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->value('plat_on_way_stock') ? $item_platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->value('plat_on_way_stock') : 0,
+                                    'on_way_stock_change' => $stock_num,
+                                    'create_person' => session('admin.nickname'),
+                                    'create_time' => time(),
+                                    //关联采购单
+                                    'number_type' => 7,
+                                ]);
+                                //根据sku站点类型进行在途库存的分配
+                                $item_platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->setInc('plat_on_way_stock', $stock_num);
 
-                                } else {
-                                    $num = round($v['purchase_num'] * $val['rate']);
-                                    $stock_num -= $num;
-                                    //插入日志表
-                                    (new StockLog())->setData([
-                                        'type' => 2,
-                                        'site' => $val['website_type'],
-                                        'modular' => 10,
-                                        'change_type' => 23,
-                                        'sku' => $v['sku'],
-                                        'order_number' => $v['purchase_number'],
-                                        'source' => 1,
-                                        'on_way_stock_before' => $item_platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->value('plat_on_way_stock'),
-                                        'on_way_stock_change' => $num,
-                                        'create_person' => session('admin.nickname'),
-                                        'create_time' => time(),
-                                        //关联采购单
-                                        'number_type' => 7,
-                                    ]);
-                                    $item_platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->setInc('plat_on_way_stock', $num);
+                            } else {
+                                $num = round($v['purchase_num'] * $val['rate']);
+                                $stock_num -= $num;
+                                //插入日志表
+                                (new StockLog())->setData([
+                                    'type' => 2,
+                                    'site' => $val['website_type'],
+                                    'modular' => 10,
+                                    'change_type' => 23,
+                                    'sku' => $v['sku'],
+                                    'order_number' => $v['purchase_number'],
+                                    'source' => 1,
+                                    'on_way_stock_before' => $item_platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->value('plat_on_way_stock') ? $item_platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->value('plat_on_way_stock') : 0,
+                                    'on_way_stock_change' => $num,
+                                    'create_person' => session('admin.nickname'),
+                                    'create_time' => time(),
+                                    //关联采购单
+                                    'number_type' => 7,
+                                ]);
+                                $item_platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->setInc('plat_on_way_stock', $num);
 
-                                }
-                            }
-
-                            $replenish_order = $this->list
-                                ->where(['replenish_id' => $replenish_id['replenish_id'], 'status' => 1])
-                                ->find();
-                            //当前补货单状态为待处理 有审核通过的采购单 立刻更新补货需求单状态为部分处理
-                            if ($replenish_id['status'] == 2) {
-                                $res = $this->replenish->where('id', $replenish_id['replenish_id'])->setField('status', 3);
-                            }
-                            if (empty($replenish_order)) {
-                                $res = $this->replenish->where('id', $replenish_id['replenish_id'])->setField('status', 4);
                             }
                         }
-                    }
-                    //采购单审核通过 sku 改为老品
-                    $item->where(['sku' => ['in', $skus]])->update(['is_new' => 2]);
-                }
-                $item->commit();
-                $item_platform->commit();
-                $this->list->commit();
-                $this->replenish->commit();
-                (new StockLog())->commit();
-            } catch (ValidateException $e) {
-                $item->rollback();
-                $item_platform->rollback();
-                $this->list->rollback();
-                $this->replenish->rollback();
-                (new StockLog())->rollback();
-                $this->error($e->getMessage());
-            } catch (PDOException $e) {
-                $item->rollback();
-                $item_platform->rollback();
-                $this->list->rollback();
-                $this->replenish->rollback();
-                (new StockLog())->rollback();
-                $this->error($e->getMessage());
-            } catch (Exception $e) {
-                $item->rollback();
-                $item_platform->rollback();
-                $this->list->rollback();
-                $this->replenish->rollback();
-                (new StockLog())->rollback();
-                $this->error($e->getMessage());
-            }
 
-            $this->success();
-        } else {
-            $this->error('修改失败！！');
+                        $replenish_order = $this->list
+                            ->where(['replenish_id' => $replenish_id['replenish_id'], 'status' => 1])
+                            ->find();
+                        //当前补货单状态为待处理 有审核通过的采购单 立刻更新补货需求单状态为部分处理
+                        if ($replenish_id['status'] == 2) {
+                            $res = $this->replenish->where('id', $replenish_id['replenish_id'])->setField('status', 3);
+                        }
+                        if (empty($replenish_order)) {
+                            $res = $this->replenish->where('id', $replenish_id['replenish_id'])->setField('status', 4);
+                        }
+                    }
+                }
+                //采购单审核通过 sku 改为老品
+                $item->where(['sku' => ['in', $skus]])->update(['is_new' => 2]);
+            }
+            $item->commit();
+            $item_platform->commit();
+            $this->list->commit();
+            $this->model->commit();
+            $this->replenish->commit();
+            (new StockLog())->commit();
+        } catch (ValidateException $e) {
+            $item->rollback();
+            $item_platform->rollback();
+            $this->list->rollback();
+            $this->model->rollback();
+            $this->replenish->rollback();
+            (new StockLog())->rollback();
+            $this->error($e->getMessage());
+        } catch (PDOException $e) {
+            $item->rollback();
+            $item_platform->rollback();
+            $this->list->rollback();
+            $this->model->rollback();
+            $this->replenish->rollback();
+            (new StockLog())->rollback();
+            $this->error($e->getMessage());
+        } catch (Exception $e) {
+            $item->rollback();
+            $item_platform->rollback();
+            $this->list->rollback();
+            $this->model->rollback();
+            $this->replenish->rollback();
+            (new StockLog())->rollback();
+            $this->error($e->getMessage());
         }
+
+        $this->success();
 
 
     }

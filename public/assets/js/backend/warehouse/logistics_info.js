@@ -51,6 +51,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             searchList: { 1: '是', 0: '否' }, operate: false,
                             formatter: Table.api.formatter.status
                         },
+                        {
+                            field: 'factory_type', title: __('工厂类型'), custom: { 1: 'success', 0: 'danger' },
+                            searchList: { 1: '贸易', 0: '工厂' },operate: false,
+                            formatter: Table.api.formatter.status
+                        },
                         { field: 'createtime', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange' },
                         { field: 'create_person', title: __('创建人') },
                         {
