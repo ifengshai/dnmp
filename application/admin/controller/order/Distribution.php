@@ -620,7 +620,7 @@ class Distribution extends Backend
             ->select();
 
         $list = collection($list)->toArray();
-        
+
         //从数据库查询需要的数据
         $spreadsheet = new Spreadsheet();
 
