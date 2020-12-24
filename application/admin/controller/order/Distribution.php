@@ -293,9 +293,7 @@ class Distribution extends Backend
                 ->select();
 
             $list = collection($list)->toArray();
-            dump($total);
-            dump($map);
-            dump($where);die();
+          
             //库位号列表
             $stock_house_data = $this->_stock_house
                 ->where(['status' => 1, 'type' => ['>', 1], 'occupy' => ['>', 0]])
