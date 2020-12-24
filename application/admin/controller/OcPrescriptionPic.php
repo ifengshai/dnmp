@@ -56,7 +56,7 @@ class OcPrescriptionPic extends Backend
             $this->request->get(['filter' => json_encode($filter)]);
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $model->table('oc_prescription_pics')->where($where)->count();
-            $list = $model->table('oc_prescription_pics')->where($where)->order('id desc')->limit($offset, $limit)->select();
+            $list = $model->table('oc_prescription_pics')->where($where)->order('created_at desc')->limit($offset, $limit)->select();
             foreach ($list as $key=>$item){
                 if ($item['status'] ==1){
                     $list[$key]['status']='未处理';
