@@ -104,7 +104,7 @@ class CoupnAnalytics extends Backend
             // dump($limit);
             // dump($list);die;
             //判断订单的某些条件
-            $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+            $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
             $map['order_type'] = ['=', 1];
             $whole_order = $model->table('sales_flat_order')
                 ->where($map)
@@ -206,7 +206,7 @@ class CoupnAnalytics extends Backend
             $model->table('sales_flat_order')->query("set time_zone='+8:00'");
 
             //判断订单的某些条件
-            $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+            $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
             $map['created_at'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]]];
             $map['order_type'] = ['=', 1];
             //coupon_code不能为空
@@ -316,7 +316,7 @@ class CoupnAnalytics extends Backend
             }
 
             //判断订单的某些条件
-            $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+            $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
             $map['created_at'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]]];
             $map['order_type'] = ['=', 1];
             //coupon_code不能为空
@@ -333,7 +333,7 @@ class CoupnAnalytics extends Backend
             $order_coupon_querySql = "select sfo.coupon_rule_name,sfo.applied_rule_ids,count(*) counter,round(sum(sfo.base_grand_total),2) base_grand_total,round(sum(sfo.base_discount_amount),2) base_discount_amount 
                                         from sales_flat_order sfo 
                                         where sfo.`status` 
-                                        in ('processing','free_processing','complete','creditcard_proccessing')
+                                        in ('processing','free_processing','complete','creditcard_proccessing','delivered')
                                         $tmpSql 
                                         group by sfo.coupon_rule_name 
                                         order by counter desc;";
@@ -449,7 +449,7 @@ class CoupnAnalytics extends Backend
             $model->table('sales_flat_order')->query("set time_zone='+8:00'");
 
             //判断订单的某些条件
-            $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+            $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
             $map['created_at'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]]];
             $map['order_type'] = ['=', 1];
             //coupon_code不能为空
@@ -554,7 +554,7 @@ class CoupnAnalytics extends Backend
             $order_model = Db::connect('database.db_zeelool');
         }
         $order_model->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
-        $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
         $map['o.order_type'] = 1;
 
         $list = $order_model->table('sales_flat_order_item_prescription')
