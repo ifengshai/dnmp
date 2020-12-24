@@ -36,6 +36,7 @@ class OcPrescriptionPic extends Backend
 
 
     /**
+    /**
      * 查看
      */
     public function index()

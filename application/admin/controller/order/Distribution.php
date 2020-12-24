@@ -544,9 +544,7 @@ class Distribution extends Backend
             }
 
             $filter = json_decode($this->request->get('filter'), true);
-            if (!$filter['status']) {
-                $map['b.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal']];
-            }
+
             if ($filter['abnormal'] || $filter['stock_house_num']) {
 //                //筛选异常
                 if ($filter['abnormal']) {
@@ -866,6 +864,10 @@ class Distribution extends Backend
         $writer->save('php://output');
     }
 
+
+
+
+
     /**
      * 标记已打印
      * @Description
@@ -1018,7 +1020,7 @@ class Distribution extends Backend
             $v['increment_id'] = $order_list[$v['order_id']]['increment_id'];
 
             //库位号
-            $v['coding'] = $cargo_number[$item_res[$v['sku']]];
+            $v['coding'] = $cargo_number[$item_res[trim($v['sku'])]];
 
             //判断双ADD逻辑
             if ($v['os_add'] && $v['od_add'] && (float)$v['os_add'] * 1 != 0 && (float)$v['od_add'] * 1 != 0) {

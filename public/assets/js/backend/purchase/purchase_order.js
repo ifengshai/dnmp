@@ -125,6 +125,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                             searchList: {0: '否', 1: '是'},
                             formatter: Table.api.formatter.status
                         },
+                        {
+                            field: 'factory_type', title: __('工厂类型'),
+                            custom: {0: 'danger', 1: 'success'},
+                            searchList: {0: '工厂', 1: '贸易'},
+                            formatter: Table.api.formatter.status
+                        },
                         {field: 'create_person', title: __('Create_person'), operate: 'like'},
                         {field: 'createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange'},
                         {

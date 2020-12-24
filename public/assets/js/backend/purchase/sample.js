@@ -494,7 +494,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
             $(document).on('click', "#add_entry_product", function () {
                 var number = $("#product_data > tr").length;
                 var sku_arr = $("#sku_info").html();
-                var add_str = '<tr role="row" class="odd del_'+number+'"><td><select name="row[goods]['+number+'][sku]" id="sku" class="form-control sku_arr selectpicker" data-live-search="true">'+sku_arr+'</select></td><td><input type="text" class="form-control" name="row[goods]['+number+'][stock]" id="sku_'+number+'"></td><td class="location"></td><td id="del"><a href="javascript:;" style="color:white !important;" onclick=del_add_tr('+number+')> 删除 </a></td></tr>';
+                var add_str = '<tr role="row" class="odd del_'+number+'"><td><select name="row[goods]['+number+'][sku]" id="sku" class="form-control sku_arr selectpicker" data-live-search="true">'+sku_arr+'</select></td><td><input type="text" class="form-control" name="row[goods]['+number+'][stock]" id="sku_'+number+'" value="1"></td><td class="location"></td><td id="del"><a href="javascript:;" style="color:white !important;" onclick=del_add_tr('+number+')> 删除 </a></td></tr>';
                 $('#product_data').append(add_str);
 
                 Controller.api.bindevent();
@@ -509,7 +509,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
             $(document).on('click', "#add_entry_product", function () {
                 var number = $("#product_data > tr").length;
                 var sku_arr = $("#sku_info").html();
-                var add_str = '<tr role="row" class="odd del_'+number+'"><td><select name="row[goods]['+number+'][sku]" id="sku" class="form-control selectpicker sku_arr" data-live-search="true">'+sku_arr+'</select></td><td><input type="text" class="form-control" name="row[goods]['+number+'][lend_num]" id="sku_'+number+'"></td><td class="location"></td><td id="del"><a href="javascript:;" style="color:white !important;" onclick=del_add_tr('+number+')> 删除 </a></td></tr>';
+                var add_str = '<tr role="row" class="odd del_'+number+'"><td><select name="row[goods]['+number+'][sku]" id="sku" class="form-control selectpicker sku_arr" data-live-search="true">'+sku_arr+'</select></td><td><input type="text" class="form-control" name="row[goods]['+number+'][lend_num]" id="sku_'+number+'" value="1"></td><td class="location"></td><td id="del"><a href="javascript:;" style="color:white !important;" onclick=del_add_tr('+number+')> 删除 </a></td></tr>';
                 $('#product_data').append(add_str);
 
                 Controller.api.bindevent();
