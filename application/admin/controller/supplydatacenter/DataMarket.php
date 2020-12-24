@@ -106,6 +106,11 @@ class DataMarket extends Backend
         if ($cache_data) {
             return $cache_data;
         }
+        if(!$time_str){
+            $start = date('Y-m-d 00:00:00', strtotime('-6 day'));
+            $end   = date('Y-m-d 23:59:59');
+            $time_str = $start .' - '.$end;
+        }
         /*
          * 库存周转率：所选时间内库存消耗数量/[（期初实时库存+期末实时库存）/2];
          * 库存消耗数量: 订单销售数量+出库单出库数量
