@@ -931,7 +931,7 @@ class Distribution extends Backend
         //获取子订单列表
         $list = $this->model
             ->alias('a')
-            ->field('a.item_order_number,a.order_id,a.created_at,b.os_add,b.od_add,b.pdcheck,b.prismcheck,b.pd_r,b.pd_l,b.pd,b.od_pv,b.os_pv,b.od_bd,b.os_bd,b.od_bd_r,b.os_bd_r,b.od_pv_r,b.os_pv_r,b.index_name,b.coating_name,b.prescription_type,b.sku,b.od_sph,b.od_cyl,b.od_axis,b.os_sph,b.os_cyl,b.os_axis,b.lens_number,b.web_lens_name')
+            ->field('a.site,a.item_order_number,a.order_id,a.created_at,b.os_add,b.od_add,b.pdcheck,b.prismcheck,b.pd_r,b.pd_l,b.pd,b.od_pv,b.os_pv,b.od_bd,b.os_bd,b.od_bd_r,b.os_bd_r,b.od_pv_r,b.os_pv_r,b.index_name,b.coating_name,b.prescription_type,b.sku,b.od_sph,b.od_cyl,b.od_axis,b.os_sph,b.os_cyl,b.os_axis,b.lens_number,b.web_lens_name')
             ->join(['fa_order_item_option' => 'b'], 'a.option_id=b.id')
             ->where(['a.id' => ['in', $ids]])
             ->select();
@@ -940,7 +940,7 @@ class Distribution extends Backend
         $sku_arr = array_column($list, 'sku');
 
         //查询sku映射表
-        $item_res = $this->_item_platform_sku->cache(3600)->where(['platform_sku' => ['in', array_unique($sku_arr)]])->column('sku', 'platform_sku');
+        // $item_res = $this->_item_platform_sku->cache(3600)->where(['platform_sku' => ['in', array_unique($sku_arr)]])->column('sku', 'platform_sku');
 
         //获取订单数据
         $order_list = $this->_new_order->where(['id' => ['in', array_unique($order_ids)]])->column('total_qty_ordered,increment_id', 'id');
@@ -995,6 +995,9 @@ class Distribution extends Backend
                 $v['sku'] = $change_sku[$v['item_order_number']];
             }
 
+            //转仓库SKU
+            $trueSku = $this->_item_platform_sku->getTrueSku(trim($v['sku']), $v['site']);
+
             //更改镜片最新数据
             if ($change_lens[$v['item_order_number']]) {
                 $v = array_merge($v, $change_lens[$v['item_order_number']]);
@@ -1020,7 +1023,7 @@ class Distribution extends Backend
             $v['increment_id'] = $order_list[$v['order_id']]['increment_id'];
 
             //库位号
-            $v['coding'] = $cargo_number[$item_res[trim($v['sku'])]];
+            $v['coding'] = $cargo_number[$trueSku];
 
             //判断双ADD逻辑
             if ($v['os_add'] && $v['od_add'] && (float)$v['os_add'] * 1 != 0 && (float)$v['od_add'] * 1 != 0) {
