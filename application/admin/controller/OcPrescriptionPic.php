@@ -51,30 +51,56 @@ class OcPrescriptionPic extends Backend
             {
                 return $this->selectpage();
             }
-
+            $WhereSql = ' id > 0';
             $filter = json_decode($this->request->get('filter'), true);
-            $site = $filter['site'] ? $filter['site'] :1;
-            if ($site ==1){
-                $model = Db::connect('database.db_zeelool');
-            }else{
-                $model = Db::connect('database.db_voogueme');
+            list($where, $sort, $order,$offset,$limit) = $this->buildparams();
+            if ($filter['id']){
+                $WhereSql .= ' and id = '.$filter['id'];
             }
-            unset($filter['site']);
-            $this->request->get(['filter' => json_encode($filter)]);
+            if ($filter['status']){
+                $WhereSql .= ' and status='.$filter['status'];
+            }
+            if ($filter['created_at']){
+                $created_at = explode(' - ',$filter['created_at']);
+                $WhereSql .= " and created_at between '$created_at[0]' and '$created_at[1]' ";
+            }
+            if ($filter['completion_time']){
+                $completion_time = explode(' - ',$filter['completion_time']);
+                $WhereSql .= " and completion_time between '$completion_time[0]' and '$completion_time[1]' ";
+            }
+            if ($filter['site']){
+                if ($filter['site'] ==1){
+                    $count = "SELECT COUNT(1) FROM zeelool.oc_prescription_pic where".$WhereSql;
+                    $sql  = "SELECT * ,1 as site FROM zeelool.oc_prescription_pic where".$WhereSql." limit  ". $offset.','.$limit;
+                }else{
+                    $count = "SELECT COUNT(1) FROM voogueme.oc_prescription_pic where".$WhereSql;
+                    $sql  = "SELECT * ,2 as site FROM voogueme.oc_prescription_pic where".$WhereSql." limit  ". $offset.','.$limit;
+                }
+                $count = Db::query($count);
+                $total = $count[0]['COUNT(1)'];
+            }else{
+                $count = "SELECT COUNT(1) FROM zeelool.oc_prescription_pic where".$WhereSql." union all  SELECT COUNT(1) FROM voogueme.oc_prescription_pic where".$WhereSql;
+                $sql  = "SELECT * ,1 as site FROM zeelool.oc_prescription_pic where".$WhereSql." union all  SELECT * ,2 as site FROM voogueme.oc_prescription_pic where".$WhereSql." limit  ". $offset.','.$limit;
+                $count = Db::query($count);
+                $total = $count[0]['COUNT(1)']  + $count[1]['COUNT(1)'];
+            }
+            $list  = Db::query($sql);
 
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+//            $model = Db::connect('database.db_voogueme');
+//            $this->request->get(['filter' => json_encode($filter)]);
+//            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+//
+//            $total = $model->table('oc_prescription_pics')->where($where)->count();
+//            $list = $model->table('oc_prescription_pics')->where($where)->order('id desc')->limit($offset, $limit)->select();
+//            dump($sql);die();
 
-            $total = $model->table('oc_prescription_pic')->where($where)->count();
-            $list = $model->table('oc_prescription_pic')->where($where)->order('id desc')->limit($offset, $limit)->select();
 
             foreach ($list as $key=>$item){
-
                 if ($item['status'] ==1){
                     $list[$key]['status']='未处理';
                 }else{
                     $list[$key]['status']= '已处理';
                 }
-                $list[$key]['site'] = $site;
                 $list[$key]['created_at'] =date("Y-m-d H:i:s",strtotime($item['created_at'])+28800);;
             }
 
