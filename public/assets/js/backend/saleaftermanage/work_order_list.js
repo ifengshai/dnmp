@@ -3308,6 +3308,14 @@ function platform_order(){
                 shtml += '<option value="' + i +'/'+data.sku_list[i]+ '">' + i + '&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp' + data.sku_list[i] + '</option>';
             }
             $('#c-order_sku').append(shtml);
+
+            var sku_html = '';
+            for (var i in data.new_sku_list) {
+                var sku_selected = $.inArray(data.new_sku_list[i], data.select_sku) != -1 ? "selected" : "";
+                sku_html += '<option value="' + data.new_sku_list[i] +'" '+ sku_selected +'>' + data.new_sku_list[i] + '</option>';
+            }
+            $('#c-order_new_sku').append(sku_html);
+
             $('.selectpicker ').selectpicker('refresh');
             /*//判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
             if (!$('.step1-1').is(':hidden')) {
