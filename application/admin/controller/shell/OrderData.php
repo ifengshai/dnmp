@@ -1530,9 +1530,6 @@ class OrderData extends Backend
     }
 
 
-
-
-
     /**
      * 临时处理订单子表数据
      *
@@ -1544,45 +1541,40 @@ class OrderData extends Backend
     public function order_item_data_shell()
     {
         $this->order_item_shell(1);
-        $this->order_item_shell(2);
-        $this->order_item_shell(3);
-        $this->order_item_shell(4);
-        $this->order_item_shell(5);
-        $this->order_item_shell(9);
-        $this->order_item_shell(10);
-        $this->order_item_shell(11);
     }
 
     protected function order_item_shell($site)
     {
         if ($site == 1) {
             // $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 929673')->max('item_id');
-            $list = Db::connect('database.db_zeelool')->table('sales_flat_order_item')->where(['item_id' => 975454])->limit(3000)->select();
-        } elseif ($site == 2) {
-            $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 515947')->max('item_id');
-            $list = Db::connect('database.db_voogueme')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 515947]]])->limit(3000)->select();
-        } elseif ($site == 3) {
-            $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 76642')->max('item_id');
-            $list = Db::connect('database.db_nihao')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 76642]]])->limit(3000)->select();
-        } elseif ($site == 4) {
-            $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 4111')->max('item_id');
-            $list = Db::connect('database.db_meeloog')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 4111]]])->limit(3000)->select();
-        } elseif ($site == 5) {
-            $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 14134')->max('item_id');
-            $list = Db::connect('database.db_weseeoptical')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 14134]]])->limit(3000)->select();
-        } elseif ($site == 9) {
-            $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 139')->max('item_id');
-            $list = Db::connect('database.db_zeelool_es')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 139]]])->limit(3000)->select();
-        } elseif ($site == 10) {
-            $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 1038')->max('item_id');
-            $list = Db::connect('database.db_zeelool_de')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 1038]]])->limit(3000)->select();
-        } elseif ($site == 11) {
-            $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 215')->max('item_id');
-            $list = Db::connect('database.db_zeelool_jp')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 215]]])->limit(3000)->select();
-        }
+            $list = Db::connect('database.db_zeelool')->table('sales_flat_order_item')->where(['item_id' => ['>', 929673]])->limit(3000)->select();
+        } 
+        
+        // elseif ($site == 2) {
+        //     $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 515947')->max('item_id');
+        //     $list = Db::connect('database.db_voogueme')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 515947]]])->limit(3000)->select();
+        // } elseif ($site == 3) {
+        //     $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 76642')->max('item_id');
+        //     $list = Db::connect('database.db_nihao')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 76642]]])->limit(3000)->select();
+        // } elseif ($site == 4) {
+        //     $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 4111')->max('item_id');
+        //     $list = Db::connect('database.db_meeloog')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 4111]]])->limit(3000)->select();
+        // } elseif ($site == 5) {
+        //     $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 14134')->max('item_id');
+        //     $list = Db::connect('database.db_weseeoptical')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 14134]]])->limit(3000)->select();
+        // } elseif ($site == 9) {
+        //     $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 139')->max('item_id');
+        //     $list = Db::connect('database.db_zeelool_es')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 139]]])->limit(3000)->select();
+        // } elseif ($site == 10) {
+        //     $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 1038')->max('item_id');
+        //     $list = Db::connect('database.db_zeelool_de')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 1038]]])->limit(3000)->select();
+        // } elseif ($site == 11) {
+        //     $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 215')->max('item_id');
+        //     $list = Db::connect('database.db_zeelool_jp')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 215]]])->limit(3000)->select();
+        // }
 
         foreach ($list as $k => $v) {
-            $count = $this->orderitemoption->where('site=' . $site . ' and item_id=' . $v['item_id'])->count();
+            $count = $this->orderitemprocess->where('site=' . $site . ' and item_id=' . $v['item_id'])->count();
             if ($count > 0) {
                 continue;
             }
