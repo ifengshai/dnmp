@@ -84,7 +84,7 @@ class OcPrescriptionPic extends Backend
                                 voogueme.oc_prescription_pic.created_at AS created_at,voogueme.oc_prescription_pic.completion_time AS completion_time,
                                 voogueme.oc_prescription_pic.remarks AS remarks ,2 as site FROM voogueme.oc_prescription_pic where".$WhereSql. " limit  ". $offset.','.$limit;
                 }
-                $count = Db::query($count);
+                $count = $model->query($count);
                 $total = $count[0]['COUNT(1)'];
             }else{
                 $count = "SELECT COUNT(1) FROM zeelool.oc_prescription_pic where".$WhereSql." union all  SELECT COUNT(1) FROM voogueme.oc_prescription_pic where".$WhereSql;
