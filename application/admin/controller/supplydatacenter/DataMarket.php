@@ -645,7 +645,7 @@ class DataMarket extends Backend
         $uncompleted_where['is_tracking'] = ['<>',5];
         $arr['uncompleted_count'] = $this->process->where($where)->where($uncompleted_where)->count();  //未妥投数量
         $map = [];
-        $map[] = ['exp', Db::raw("DATE_ADD(check_time, INTERVAL 15 DAY)<now()")];
+        $map[] = ['exp', Db::raw("check_time+3600*24*15<unix_timestamp(now())")];
         $arr['timeout_uncompleted_count'] = $this->process->where($where)->where($uncompleted_where)->where($map)->count();  //超时未妥投数量
         Cache::set('Supplydatacenter_userdata' . $time_str . md5(serialize('logistics_completed_overview')), $arr, 7200);
         return $arr;
