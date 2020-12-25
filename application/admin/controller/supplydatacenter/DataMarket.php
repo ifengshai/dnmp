@@ -347,8 +347,8 @@ class DataMarket extends Backend
             $all_stock_num += $value['stock_num'];
         }
         foreach ($arr as $key=>$val){
-            $arr[$key]['percent'] = $all_num ? round($val['count']/$all_num,2).'%':0;
-            $arr[$key]['stock_percent'] = $all_stock_num ? round($val['stock_num']/$all_stock_num,2).'%':0;
+            $arr[$key]['percent'] = $all_num ? round($val['count']/$all_num*100,2).'%':0;
+            $arr[$key]['stock_percent'] = $all_stock_num ? round($val['stock_num']/$all_stock_num*100,2).'%':0;
             //库销比
             $skus = $this->productGrade->where('grade',$val['grade'])->column('true_sku');
             $where['sku'] = ['in', $skus];
@@ -572,8 +572,8 @@ class DataMarket extends Backend
                 }
                 $createat = explode(' ', $time_str);
 
-                $start_time = strtotime($createat[0]);
-                $end_time = strtotime($createat[3]);
+                $start_time = strtotime($createat[0].$createat[1]);
+                $end_time = strtotime($createat[3].$createat[4]);
                 $data1 = $this->getProcess(1,$start_time,$end_time); //打印标签
                 $data2 = $this->getProcess(2,$start_time,$end_time); //配货
                 $data3 = $this->getProcess(3,$start_time,$end_time); //配镜片
@@ -630,7 +630,7 @@ class DataMarket extends Backend
             return $cache_data;
         }
         if (!$time_str) {
-            $start = date('Y-m-d 00:00:00', strtotime('-6 day'));
+            $start = date('Y-m-d 00:00:00', strtotime('-30 day'));
             $end = date('Y-m-d 23:59:59');
             $time_str = $start . ' - ' . $end;
         }

@@ -1071,9 +1071,9 @@ class WorkOrderList extends Backend
                     && $this->error("已审单，不能创建工单");
 
                     //指定问题类型校验sku下拉框是否勾选
-                    in_array($params['problem_type_id'],[8,10,11,56,13,14,15,16,18,22,59])
+                    /*in_array($params['problem_type_id'],[8,10,11,56,13,14,15,16,18,22,59])
                     && empty($order_sku)
-                    && $this->error("请选择sku");
+                    && $this->error("请选择sku");*/
 
                     //校验工单类型
                     if (1 == $work_type) {
@@ -1890,9 +1890,9 @@ class WorkOrderList extends Backend
                 !$platform_order && $this->error("订单号不能为空");
 
                 //指定问题类型校验sku下拉框是否勾选
-                in_array($params['problem_type_id'],[8,10,11,56,13,14,15,16,18,22,59])
+                /*in_array($params['problem_type_id'],[8,10,11,56,13,14,15,16,18,22,59])
                 && empty($params['order_sku'])
-                && $this->error("请选择sku");
+                && $this->error("请选择sku");*/
 
                 //校验工单类型
                 if (1 == $work_type) {
