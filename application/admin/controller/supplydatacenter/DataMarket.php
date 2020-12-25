@@ -630,7 +630,7 @@ class DataMarket extends Backend
             return $cache_data;
         }
         if (!$time_str) {
-            $start = date('Y-m-d 00:00:00', strtotime('-6 day'));
+            $start = date('Y-m-d 00:00:00', strtotime('-30 day'));
             $end = date('Y-m-d 23:59:59');
             $time_str = $start . ' - ' . $end;
         }
