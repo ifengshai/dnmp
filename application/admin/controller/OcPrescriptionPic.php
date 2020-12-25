@@ -69,6 +69,7 @@ class OcPrescriptionPic extends Backend
                 $WhereSql .= " and completion_time between '$completion_time[0]' and '$completion_time[1]' ";
             }
             $model  = Db::connect('database.db_zeelool');
+            $WhereOrder = '  ORDER BY  creat_at desc';
             if ($filter['site']){
                 if ($filter['site'] ==1){
                     $count = "SELECT COUNT(1) FROM zeelool_test.oc_prescription_pic where".$WhereSql;
@@ -81,7 +82,7 @@ class OcPrescriptionPic extends Backend
                 $total = $count[0]['COUNT(1)'];
             }else{
                 $count = "SELECT COUNT(1) FROM zeelool_test.oc_prescription_pic where".$WhereSql." union all  SELECT COUNT(1) FROM vuetest_voogueme.oc_prescription_pic where".$WhereSql;
-                $sql  = "SELECT * ,1 as site FROM zeelool_test.oc_prescription_pic where".$WhereSql." union all  SELECT * ,2 as site FROM vuetest_voogueme.oc_prescription_pic where".$WhereSql." limit  ". $offset.','.$limit;
+                $sql  = "SELECT * ,1 as site FROM zeelool_test.oc_prescription_pic where".$WhereSql." union all  SELECT * ,2 as site FROM vuetest_voogueme.oc_prescription_pic where".$WhereSql.$WhereOrder." limit  ". $offset.','.$limit;
                 $count = $model->query($count);
                 $total = $count[0]['COUNT(1)']  + $count[1]['COUNT(1)'];
             }
