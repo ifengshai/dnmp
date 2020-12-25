@@ -410,7 +410,7 @@ class DataMarket extends Backend
             $time_str = $start .' - '.$end;
         }
         $createat = explode(' ', $time_str);
-        $where['p.createtime'] = ['between', [$createat[0], $createat[3]]];
+        $where['p.createtime'] = ['between', [$createat[0].$createat[1], $createat[3].$createat[4]]];
         $where['p.is_del'] = 1;
         $status_where['p.purchase_status'] = ['in', [2, 5, 6, 7]];
         $arrive_where['p.purchase_status'] = 7;
