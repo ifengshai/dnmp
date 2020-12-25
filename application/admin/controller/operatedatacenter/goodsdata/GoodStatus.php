@@ -29,7 +29,6 @@ class GoodStatus extends Backend
         $this->view->assign(compact('magentoplatformarr'));
         return $this->view->fetch();
     }
-
     /**
      * 商品状态分析柱状图
      *
@@ -44,41 +43,77 @@ class GoodStatus extends Backend
             $params = $this->request->param();
             $order_platform = $params['order_platform'];
             $json['xColumnName'] = ['zeelool','voogueme','nihao','meeloog','wesee','zeelool-es','zeelool-de','zeelool-jp'];
-            $item = new \app\admin\model\itemmanage\Item();
-            $map = [];
+
             if ($order_platform == 1){
-                $skus = $item->getFrameSku();
-                $map['sku'] = ['in', $skus];
+                $up_field = 'glass_in_sale_num as total';
+                $down_field = 'glass_shelves_num as total';
+                $presell_field = 'glass_presell_num as total';
             }elseif ($order_platform == 2){
-                $skus = $item->getOrnamentsSku();
-                $map['sku'] = ['in', $skus];
+                $up_field = 'box_in_sale_num as total';
+                $down_field = 'box_shelves_num as total';
+                $presell_field = 'box_presell_num as total';
             }else{
-                $map = [];
+                $up_field = 'sum(glass_in_sale_num)+sum(box_in_sale_num) as total';
+                $down_field = 'sum(glass_shelves_num)+sum(box_shelves_num) as total';
+                $presell_field = 'sum(glass_presell_num)+sum(box_presell_num) as total';
             }
-            $platform_z_up_num =$this->item_platform->where('platform_type',1)->where($map)->where('outer_sku_status',1)->count();
-            $platform_z_down_num =$this->item_platform->where('platform_type',1)->where($map)->where('outer_sku_status',2)->count();
-            $platform_z_yushou_num =$this->item_platform->where('platform_type',1)->where($map)->where('presell_status',1)->count();
-            $platform_v_up_num =$this->item_platform->where('platform_type',2)->where($map)->where('outer_sku_status',1)->count();
-            $platform_v_down_num =$this->item_platform->where('platform_type',2)->where($map)->where('outer_sku_status',2)->count();
-            $platform_v_yushou_num =$this->item_platform->where('platform_type',2)->where($map)->where('presell_status',1)->count();
-            $platform_n_up_num =$this->item_platform->where('platform_type',3)->where($map)->where('outer_sku_status',1)->count();
-            $platform_n_down_num =$this->item_platform->where('platform_type',3)->where($map)->where('outer_sku_status',2)->count();
-            $platform_n_yushou_num =$this->item_platform->where('platform_type',3)->where($map)->where('presell_status',1)->count();
-            $platform_w_up_num =$this->item_platform->where('platform_type',4)->where($map)->where('outer_sku_status',1)->count();
-            $platform_w_down_num =$this->item_platform->where('platform_type',4)->where($map)->where('outer_sku_status',2)->count();
-            $platform_w_yushou_num =$this->item_platform->where('platform_type',4)->where($map)->where('presell_status',1)->count();
-            $platform_m_up_num =$this->item_platform->where('platform_type',5)->where($map)->where('outer_sku_status',1)->count();
-            $platform_m_down_num =$this->item_platform->where('platform_type',5)->where($map)->where('outer_sku_status',2)->count();
-            $platform_m_yushou_num =$this->item_platform->where('platform_type',5)->where($map)->where('presell_status',1)->count();
-            $platform_es_up_num =$this->item_platform->where('platform_type',9)->where($map)->where('outer_sku_status',1)->count();
-            $platform_es_down_num =$this->item_platform->where('platform_type',9)->where($map)->where('outer_sku_status',2)->count();
-            $platform_es_yushou_num =$this->item_platform->where('platform_type',9)->where($map)->where('presell_status',1)->count();
-            $platform_de_up_num =$this->item_platform->where('platform_type',10)->where($map)->where('outer_sku_status',1)->count();
-            $platform_de_down_num =$this->item_platform->where('platform_type',10)->where($map)->where('outer_sku_status',2)->count();
-            $platform_de_yushou_num =$this->item_platform->where('platform_type',10)->where($map)->where('presell_status',1)->count();
-            $platform_jp_up_num =$this->item_platform->where('platform_type',11)->where($map)->where('outer_sku_status',1)->count();
-            $platform_jp_down_num =$this->item_platform->where('platform_type',11)->where($map)->where('outer_sku_status',2)->count();
-            $platform_jp_yushou_num =$this->item_platform->where('platform_type',11)->where($map)->where('presell_status',1)->count();
+            if(!$params['time_str']){
+                $start = date('Y-m-d', strtotime('-1 day'));
+                $end   = $start.' 23:59:59';
+                $where['day_date'] = ['between', [$start, $end]];
+            }else{
+                $createat = explode(' ', $params['time_str']);
+                $where['day_date'] = ['between', [$createat[0], $createat[3]]];
+            }
+            $platform_z_up_num =Db::name('datacenter_day')->where('site',1)->where($where)->field($up_field)->select();
+            $platform_z_up_num =$platform_z_up_num[0]['total'];
+
+            $platform_z_down_num =Db::name('datacenter_day')->where('site',1)->where($where)->field($down_field)->select();
+            $platform_z_down_num =$platform_z_down_num[0]['total'];
+            $platform_z_yushou_num =Db::name('datacenter_day')->where('site',1)->where($where)->field($presell_field)->select();
+            $platform_z_yushou_num =$platform_z_yushou_num[0]['total'];
+            $platform_v_up_num =Db::name('datacenter_day')->where('site',2)->where($where)->field($up_field)->select();
+            $platform_v_up_num =$platform_v_up_num[0]['total'];
+            $platform_v_down_num =Db::name('datacenter_day')->where('site',2)->where($where)->field($down_field)->select();
+            $platform_v_down_num =$platform_v_down_num[0]['total'];
+            $platform_v_yushou_num =Db::name('datacenter_day')->where('site',2)->where($where)->field($presell_field)->select();
+            $platform_v_yushou_num =$platform_v_yushou_num[0]['total'];
+            $platform_n_up_num =Db::name('datacenter_day')->where('site',3)->where($where)->field($up_field)->select();
+            $platform_n_up_num =$platform_n_up_num[0]['total'];
+            $platform_n_down_num =Db::name('datacenter_day')->where('site',3)->where($where)->field($down_field)->select();
+            $platform_n_down_num =$platform_n_down_num[0]['total'];
+            $platform_n_yushou_num =Db::name('datacenter_day')->where('site',3)->where($where)->field($presell_field)->select();
+            $platform_n_yushou_num =$platform_n_yushou_num[0]['total'];
+            $platform_w_up_num =Db::name('datacenter_day')->where('site',4)->where($where)->field($up_field)->select();
+            $platform_w_up_num =$platform_w_up_num[0]['total'];
+            $platform_w_down_num =Db::name('datacenter_day')->where('site',4)->where($where)->field($down_field)->select();
+            $platform_w_down_num =$platform_w_down_num[0]['total'];
+            $platform_w_yushou_num =Db::name('datacenter_day')->where('site',4)->where($where)->field($presell_field)->select();
+            $platform_w_yushou_num =$platform_w_yushou_num[0]['total'];
+            $platform_m_up_num =Db::name('datacenter_day')->where('site',5)->where($where)->field($up_field)->select();
+            $platform_m_up_num =$platform_m_up_num[0]['total'];
+            $platform_m_down_num =Db::name('datacenter_day')->where('site',5)->where($where)->field($down_field)->select();
+            $platform_m_down_num =$platform_m_down_num[0]['total'];
+            $platform_m_yushou_num =Db::name('datacenter_day')->where('site',5)->where($where)->field($presell_field)->select();
+            $platform_m_yushou_num =$platform_m_yushou_num[0]['total'];
+            $platform_es_up_num =Db::name('datacenter_day')->where('site',9)->where($where)->field($up_field)->select();
+            $platform_es_up_num =$platform_es_up_num[0]['total'];
+            $platform_es_down_num =Db::name('datacenter_day')->where('site',9)->where($where)->field($down_field)->select();
+            $platform_es_down_num =$platform_es_down_num[0]['total'];
+            $platform_es_yushou_num =Db::name('datacenter_day')->where('site',9)->where($where)->field($presell_field)->select();
+            $platform_es_yushou_num =$platform_es_yushou_num[0]['total'];
+            $platform_de_up_num =Db::name('datacenter_day')->where('site',10)->where($where)->field($up_field)->select();
+            $platform_de_up_num =$platform_de_up_num[0]['total'];
+            $platform_de_down_num =Db::name('datacenter_day')->where('site',10)->where($where)->field($down_field)->select();
+            $platform_de_down_num =$platform_de_down_num[0]['total'];
+            $platform_de_yushou_num =Db::name('datacenter_day')->where('site',10)->where($where)->field($presell_field)->select();
+            $platform_de_yushou_num =$platform_de_yushou_num[0]['total'];
+            $platform_jp_up_num =Db::name('datacenter_day')->where('site',11)->where($where)->field($up_field)->select();
+            $platform_jp_up_num =$platform_jp_up_num[0]['total'];
+            $platform_jp_down_num =Db::name('datacenter_day')->where('site',11)->where($where)->field($down_field)->select();
+            $platform_jp_down_num =$platform_jp_down_num[0]['total'];
+            $platform_jp_yushou_num =Db::name('datacenter_day')->where('site',11)->where($where)->field($presell_field)->select();
+            $platform_jp_yushou_num =$platform_jp_yushou_num[0]['total'];
 
             $json['columnData'] = [
                 [
@@ -170,6 +205,7 @@ class GoodStatus extends Backend
             $again_num = $this->item_platform
                 ->where('platform_type','in',[$platform_a,$platform_b])
                 ->where($map)
+                ->where('outer_sku_status',1)
                 ->group('sku')
                 ->having('count(platform_type)>1')
                 ->count();
