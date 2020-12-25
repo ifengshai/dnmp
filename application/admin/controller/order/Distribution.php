@@ -524,7 +524,6 @@ class Distribution extends Backend
         ini_set('memory_limit', '512M');
         //根据传的标签切换状态
         $label = $this->request->get('label', 0);
-
         $ids = input('ids');
         $map = [];
         if ($ids) {
@@ -533,6 +532,7 @@ class Distribution extends Backend
             $sort = 'a.created_at';
             $order = 'desc';
         } else {
+
             //普通状态剔除跟单数据
             if (!in_array($label, [0, 8])) {
                 if (7 == $label) {
@@ -544,13 +544,15 @@ class Distribution extends Backend
             }
 
             $filter = json_decode($this->request->get('filter'), true);
+
             if ($filter['abnormal'] || $filter['stock_house_num']) {
-                //筛选异常
+//                //筛选异常
                 if ($filter['abnormal']) {
-                    $abnormal_where['type'] = $filter['abnormal'];
+                    $abnormal_where['type'] = $filter['abnormal'][0];
                     if (8 == $label) {
                         $abnormal_where['status'] = 1;
                     }
+
                     $item_process_id = $this->_distribution_abnormal
                         ->where($abnormal_where)
                         ->column('item_process_id');
@@ -572,12 +574,41 @@ class Distribution extends Backend
                 }
                 unset($filter['abnormal']);
                 unset($filter['stock_house_num']);
-                $this->request->get(['filter' => json_encode($filter)]);
+                unset($filter['is_task']);
             }
+
+
+            if ($filter['site']){
+                $map['a.site'] = ['in',$filter['site']];
+                unset($filter['site']);
+            }
+            //加工类型
+            if ($filter['order_prescription_type']){
+                $map['a.order_prescription_type'] = ['in',$filter['order_prescription_type']];
+                unset($filter['order_prescription_type']);
+            }
+            //订单类型
+            if ($filter['order_type']){
+                $map['b.order_type'] = ['in',$filter['order_type']];
+                unset($filter['order_type']);
+
+            }
+            if ($filter['distribution_status']){
+                $map['a.distribution_status'] = ['in',$filter['distribution_status']];
+                unset($filter['distribution_status']);
+            }
+            if ($filter['status']){
+                $map['b.status'] = ['in',$filter['status']];
+                unset($filter['status']);
+            }else{
+                $map['b.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal']];
+            }
+            $this->request->get(['filter' => json_encode($filter)]);
 
             list($where, $sort, $order) = $this->buildparams();
         }
 
+        $sort = 'a.id';
         $list = $this->model
             ->alias('a')
             ->field('a.id,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.total_qty_ordered,b.site,a.distribution_status,a.created_at,c.*')
@@ -587,6 +618,7 @@ class Distribution extends Backend
             ->where($map)
             ->order($sort, $order)
             ->select();
+
         $list = collection($list)->toArray();
 
         //从数据库查询需要的数据
@@ -733,13 +765,13 @@ class Distribution extends Backend
                 }
             }
 
-            if ($value['pdcheck'] == 'on') {
-                $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 2 + 2), $value['pd_r']);
-                $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 2 + 3), $value['pd_l']);
-            } else {
-                $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 2 + 2), $value['pd']);
-                $spreadsheet->getActiveSheet()->mergeCells("M" . ($key * 2 + 2) . ":M" . ($key * 2 + 3));
-            }
+//            if ($value['pdcheck'] == 'on') {
+            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 2 + 2), $value['pd_r']);
+            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 2 + 3), $value['pd_l']);
+//            } else {
+            $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 2 + 2), $value['pd']);
+            $spreadsheet->getActiveSheet()->mergeCells("M" . ($key * 2 + 2) . ":M" . ($key * 2 + 3));
+//            }
 
             //查询镜框尺寸
             $tmp_bridge = $this->get_frame_lens_width_height_bridge($value['product_id'], $value['site']);
@@ -768,7 +800,7 @@ class Distribution extends Backend
             $spreadsheet->getActiveSheet()->mergeCells("D" . ($key * 2 + 2) . ":D" . ($key * 2 + 3));
             $spreadsheet->getActiveSheet()->mergeCells("E" . ($key * 2 + 2) . ":E" . ($key * 2 + 3));
             $spreadsheet->getActiveSheet()->mergeCells("F" . ($key * 2 + 2) . ":F" . ($key * 2 + 3));
-            $spreadsheet->getActiveSheet()->mergeCells("L" . ($key * 2 + 2) . ":L" . ($key * 2 + 3));
+
 
             $spreadsheet->getActiveSheet()->mergeCells("M" . ($key * 2 + 2) . ":M" . ($key * 2 + 3));
             $spreadsheet->getActiveSheet()->mergeCells("N" . ($key * 2 + 2) . ":N" . ($key * 2 + 3));
@@ -834,6 +866,10 @@ class Distribution extends Backend
         $writer->save('php://output');
     }
 
+
+
+
+
     /**
      * 标记已打印
      * @Description
@@ -897,7 +933,7 @@ class Distribution extends Backend
         //获取子订单列表
         $list = $this->model
             ->alias('a')
-            ->field('a.item_order_number,a.order_id,a.created_at,b.os_add,b.od_add,b.pdcheck,b.prismcheck,b.pd_r,b.pd_l,b.pd,b.od_pv,b.os_pv,b.od_bd,b.os_bd,b.od_bd_r,b.os_bd_r,b.od_pv_r,b.os_pv_r,b.index_name,b.coating_name,b.prescription_type,b.sku,b.od_sph,b.od_cyl,b.od_axis,b.os_sph,b.os_cyl,b.os_axis,b.lens_number,b.web_lens_name')
+            ->field('a.site,a.item_order_number,a.order_id,a.created_at,b.os_add,b.od_add,b.pdcheck,b.prismcheck,b.pd_r,b.pd_l,b.pd,b.od_pv,b.os_pv,b.od_bd,b.os_bd,b.od_bd_r,b.os_bd_r,b.od_pv_r,b.os_pv_r,b.index_name,b.coating_name,b.prescription_type,b.sku,b.od_sph,b.od_cyl,b.od_axis,b.os_sph,b.os_cyl,b.os_axis,b.lens_number,b.web_lens_name')
             ->join(['fa_order_item_option' => 'b'], 'a.option_id=b.id')
             ->where(['a.id' => ['in', $ids]])
             ->select();
@@ -906,7 +942,7 @@ class Distribution extends Backend
         $sku_arr = array_column($list, 'sku');
 
         //查询sku映射表
-        $item_res = $this->_item_platform_sku->cache(3600)->where(['platform_sku' => ['in', array_unique($sku_arr)]])->column('sku', 'platform_sku');
+        // $item_res = $this->_item_platform_sku->cache(3600)->where(['platform_sku' => ['in', array_unique($sku_arr)]])->column('sku', 'platform_sku');
 
         //获取订单数据
         $order_list = $this->_new_order->where(['id' => ['in', array_unique($order_ids)]])->column('total_qty_ordered,increment_id', 'id');
@@ -961,6 +997,9 @@ class Distribution extends Backend
                 $v['sku'] = $change_sku[$v['item_order_number']];
             }
 
+            //转仓库SKU
+            $trueSku = $this->_item_platform_sku->getTrueSku(trim($v['sku']), $v['site']);
+
             //更改镜片最新数据
             if ($change_lens[$v['item_order_number']]) {
                 $v = array_merge($v, $change_lens[$v['item_order_number']]);
@@ -986,7 +1025,7 @@ class Distribution extends Backend
             $v['increment_id'] = $order_list[$v['order_id']]['increment_id'];
 
             //库位号
-            $v['coding'] = $cargo_number[$item_res[$v['sku']]];
+            $v['coding'] = $cargo_number[$trueSku];
 
             //判断双ADD逻辑
             if ($v['os_add'] && $v['od_add'] && (float)$v['os_add'] * 1 != 0 && (float)$v['od_add'] * 1 != 0) {

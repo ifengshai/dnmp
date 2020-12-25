@@ -1719,4 +1719,24 @@ class Test4 extends Controller
         return $arr;
 
     }
+    //订单发出时间脚本
+    public function order_send_time(){
+        $process = new \app\admin\model\order\order\NewOrderProcess;
+        $orderitemprocess = new \app\admin\model\order\order\NewOrderItemProcess();
+        //查询所有订单
+        $order = $process->where('order_prescription_type',0)->column('order_id');
+        foreach ($order as $key=>$value){
+            $order_type = $orderitemprocess->where('order_id',$value)->column('order_prescription_type');
+            if(in_array(3,$order_type)){
+                $type = 3;
+            }elseif(in_array(2,$order_type)){
+                $type = 2;
+            }else{
+                $type = 1;
+            }
+            $process->where('order_id',$value)->update(['order_prescription_type'=>$type]);
+            echo $value.' is ok'."\n";
+            usleep(100000);
+        }
+    }
 }

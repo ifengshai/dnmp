@@ -17,6 +17,8 @@ class GoodsChange extends Backend
         $this->zeeloolOperate = new \app\admin\model\operatedatacenter\Zeelool;
         $this->vooguemeOperate = new \app\admin\model\operatedatacenter\Voogueme();
         $this->nihaoOperate = new \app\admin\model\operatedatacenter\Nihao();
+        $this->item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
+        $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform();
     }
 
     public function index()
@@ -26,8 +28,6 @@ class GoodsChange extends Backend
         $seven_days = $start . ' 00:00:00 - ' . $end . ' 00:00:00';
         //设置过滤方法
         $this->request->filter(['strip_tags']);
-        $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
-        $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform();
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
         foreach ($magentoplatformarr as $key => $val) {
@@ -35,7 +35,6 @@ class GoodsChange extends Backend
                 unset($magentoplatformarr[$key]);
             }
         }
-
         if ($this->request->isAjax()) {
             $filter = json_decode($this->request->get('filter'), true);
             // dump($filter);
@@ -92,7 +91,7 @@ class GoodsChange extends Backend
                 ->limit($offset, $limit)
                 ->select();
             foreach ($sku_data_day as $k => $v) {
-                $sku_detail = $_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $order_platform])->field('platform_sku,stock,plat_on_way_stock,outer_sku_status')->find();
+                $sku_detail = $this->item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $order_platform])->field('platform_sku,stock,plat_on_way_stock,outer_sku_status')->find();
                 //sku转换
                 $sku_data_day[$k]['sku_change'] = $sku_detail['platform_sku'];
                 $sku_data_day[$k]['single_price'] = $sku_data_day[$k]['glass_num'] != 0 ? round($sku_data_day[$k]['sku_row_total'] / $sku_data_day[$k]['glass_num'], 2) : 0;
@@ -216,8 +215,7 @@ class GoodsChange extends Backend
     {
         set_time_limit(0);
         $data = date('Y-m-d');
-        $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
-        $sku_data = $_item_platform_sku
+        $sku_data = $this->item_platform_sku
             ->field('sku,grade,platform_sku,outer_sku_status')
             ->where(['platform_type' => 1])
             // ->where(['platform_type' => 1,'outer_sku_status'=>1])
@@ -329,8 +327,7 @@ class GoodsChange extends Backend
         set_time_limit(0);
         $data = date('Y-m-d');
         $data = '2020-10-10';
-        $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
-        $sku_data = $_item_platform_sku
+        $sku_data = $this->item_platform_sku
             ->field('sku,grade,platform_sku,outer_sku_status')
             ->where(['platform_type' => 1])
             // ->where(['platform_type' => 1,'outer_sku_status'=>1])
@@ -376,8 +373,7 @@ class GoodsChange extends Backend
         set_time_limit(0);
         $data = date('Y-m-d');
         $data = '2020-10-20';
-        $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
-        $sku_data = $_item_platform_sku
+        $sku_data = $this->item_platform_sku
             ->field('sku,grade,platform_sku,outer_sku_status')
             // ->where(['platform_type' => 1])
             ->where(['platform_type' => 1, 'outer_sku_status' => 1])
@@ -472,8 +468,7 @@ class GoodsChange extends Backend
         set_time_limit(0);
         $data = date('Y-m-d');
         $data = '2020-10-20';
-        $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
-        $sku_data = $_item_platform_sku
+        $sku_data = $this->item_platform_sku
             ->field('sku,grade,platform_sku,outer_sku_status')
             ->where(['platform_type' => 1, 'outer_sku_status' => 1])
             ->select();
@@ -532,5 +527,89 @@ class GoodsChange extends Backend
 
         }
         dump($arr);
+    }
+    //导出
+    public function export(){
+        set_time_limit(0);
+        header ( "Content-type:application/vnd.ms-excel" );
+        header ( "Content-Disposition:filename=" . iconv ( "UTF-8", "GB18030", date('Y-m-d-His',time()) ) . ".csv" );//导出文件名
+        // 打开PHP文件句柄，php://output 表示直接输出到浏览器
+        $fp = fopen('php://output', 'a');
+        $time_str = input('time_str');
+        $sku = input('sku');
+        $order_platform = input('order_platform') ? input('order_platform') : 1;
+
+        // 将中文标题转换编码，否则乱码
+        $field_arr = array(
+            'ID','SKU','SKU转换','购物车数量','订单成功数','订单金额','购物车转化率','售价','更新时间','状态','销售副数','实际支付的销售额','副单价','虚拟库存','在途库存'
+        );
+        foreach ($field_arr as $i => $v) {
+            $field_arr[$i] = iconv('utf-8', 'GB18030', $v);
+        }
+        // 将标题名称通过fputcsv写到文件句柄
+        fputcsv($fp, $field_arr);
+
+        if (!$time_str) {
+            //时间段总和
+            $start = date('Y-m-d', strtotime('-6 day'));
+            $end = date('Y-m-d 23:59:59');
+            $time_str = $start . ' 00:00:00 - ' . $end . ' 00:00:00';
+        }
+        $createat = explode(' ', $time_str);
+        if ($sku) {
+            $map['sku'] = ['like', '%' . $sku . '%'];
+        }
+        $map['site'] = $order_platform;
+        $map['day_date'] = ['between', [$createat[0], $createat[3]]];
+        $total_export_count = Db::name('datacenter_sku_day')
+            ->where($map)
+            ->group('sku')
+            ->order('day_date', 'desc')
+            ->count();
+
+        $pre_count = 5000;
+        for ($i=0;$i<intval($total_export_count/$pre_count)+1;$i++){
+            $start = $i*$pre_count;
+            //切割每份数据
+            $list = Db::name('datacenter_sku_day')
+                ->where($map)
+                ->group('sku')
+                ->field('id,sku,sum(cart_num) as cart_num,now_pricce,max(day_date) as day_date,single_price,day_stock,day_onway_stock,sum(sales_num) as sales_num,sum(order_num) as order_num,sum(glass_num) as glass_num,sum(sku_row_total) as sku_row_total,sum(sku_grand_total) as sku_grand_total,sum(sku_grand_total) as sku_grand_total')
+                // ->order($sort, $order)
+                ->order('day_date', 'desc')
+                ->limit($start,$pre_count)
+                ->select();
+            $list = collection($list)->toArray();
+            //整理数据
+            foreach ($list as &$v) {
+                $tmpRow = [];
+                $tmpRow['id'] =$v['id'];//ID
+                $tmpRow['sku'] =$v['sku'];//sku
+                $sku_detail = $this->item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $order_platform])->field('platform_sku,stock,plat_on_way_stock,outer_sku_status')->find();
+                $tmpRow['sku_change'] = $sku_detail['platform_sku'];//sku转换
+                $tmpRow['cart_num'] =$v['cart_num'];//购物车数量
+                $tmpRow['order_num'] =$v['order_num'];//订单成功数
+                $tmpRow['sku_grand_total'] =$v['sku_grand_total'];//订单金额
+                $tmpRow['cart_change'] = $v['cart_num'] == 0 ? '0%' : round($v['order_num'] / $v['cart_num'] * 100, 2) . '%';//购物车转化率
+                $tmpRow['now_pricce'] =$v['now_pricce'];//售价
+                $tmpRow['day_date'] =$v['day_date'];//更新时间
+                $tmpRow['status'] = $sku_detail['outer_sku_status'] == 1 ? '上架' : '下架';//状态
+                $tmpRow['glass_num'] =$v['glass_num'];//销售副数
+                $tmpRow['sku_row_total'] =$v['sku_row_total'];//实际支付的销售额
+                $tmpRow['single_price'] = $v['glass_num'] != 0 ? round($v['sku_row_total'] / $v['glass_num'], 2) : 0;//副单价
+                $tmpRow['stock'] = $sku_detail['stock'];//虚拟库存
+                $tmpRow['on_way_stock'] =$sku_detail['plat_on_way_stock'];//在途库存
+                $rows = array();
+                foreach ( $tmpRow as $export_obj){
+                    $rows[] = iconv('utf-8', 'GB18030', $export_obj);
+                }
+                fputcsv($fp, $rows);
+            }
+            // 将已经写到csv中的数据存储变量销毁，释放内存占用
+            unset($list);
+            ob_flush();
+            flush();
+        }
+        fclose($fp);
     }
 }

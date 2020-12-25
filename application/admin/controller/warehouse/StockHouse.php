@@ -136,6 +136,12 @@ class StockHouse extends Backend
             $this->error(__('Parameter %s can not be empty', ''));
         }
         $this->view->assign("type", $type);
+        $arr = [];
+        $kuweihao = $this->shelf_number1();
+        foreach ($kuweihao as $k=>$v){
+            $arr[$v] = $v;
+        }
+        $this->assign('shelf_number',$arr);
         return $this->view->fetch();
     }
 
@@ -202,6 +208,12 @@ class StockHouse extends Backend
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
+        $arr = [];
+        $kuweihao = $this->shelf_number1();
+        foreach ($kuweihao as $k=>$v){
+            $arr[$v] = $v;
+        }
+        $this->assign('shelf_number',$arr);
         $this->view->assign("type", $type);
         $this->view->assign("row", $row);
         return $this->view->fetch();
@@ -548,6 +560,22 @@ EOF;
         // 获取重复数据的数组
         $repeat_arr = array_diff_assoc($arr, $unique_arr);
         return $repeat_arr;
+    }
+    //跑老的库位编码添加货架号字段
+    public function shelf_number()
+    {
+        $shelf_number = $this->model->where('status', 1)->where('type', 1)->field('id,coding')->select();
+        $shelf_number = collection($shelf_number)->toArray();
+        foreach ($shelf_number as $k => $v) {
+            $shelf_number[$k]['shelf_number'] = preg_replace("/\\d+/", '', (explode('-', $v['coding']))[0]);
+            unset($shelf_number[$k]['coding']);
+        }
+        $this->model->isUpdate()->saveAll($shelf_number);
+    }
+    public function shelf_number1()
+    {
+        $data = (new \app\admin\model\warehouse\StockHouse())->get_shelf_number();
+        return $data;
     }
 
 }

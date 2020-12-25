@@ -153,6 +153,7 @@ class OrderData extends Backend
                                     $params['total_qty_ordered'] = $v['total_qty_ordered'];
                                     $params['order_type'] = $v['order_type'];
                                     $params['base_currency_code'] = $v['base_currency_code'];
+                                    $params['order_currency_code'] = $v['order_currency_code'];
                                     $params['shipping_method'] = $v['shipping_method'];
                                     $params['shipping_title'] = $v['shipping_description'];
                                     $params['country_id'] = $v['country_id'];
@@ -197,6 +198,7 @@ class OrderData extends Backend
                                     }
 
                                     $params['base_currency_code'] = $v['base_currency_code'];
+                                    $params['order_currency_code'] = $v['order_currency_code'];
                                     $params['shipping_method'] = $v['shipping_method'];
                                     $params['shipping_title'] = $v['shipping_description'];
                                     $params['customer_email'] = $v['customer_email'];
@@ -209,7 +211,6 @@ class OrderData extends Backend
                                     $params['base_shipping_amount'] = $v['base_shipping_amount'];
                                     $params['base_shipping_amount'] = $v['base_shipping_amount'];
                                     $params['updated_at'] = strtotime($v['updated_at']) + 28800;
-                                    $params['order_prescription_type'] = $v['custom_order_prescription_type'] ?? 0;
 
                                     $this->order->where(['entity_id' => $v['entity_id'], 'site' => $site])->update($params);
                                 }
@@ -219,7 +220,7 @@ class OrderData extends Backend
                             if (($payload['type'] == 'UPDATE' || $payload['type'] == 'INSERT') && $payload['table'] == 'sales_flat_order_address') {
                                 foreach ($payload['data'] as $k => $v) {
                                     $params = [];
-                                    if ($v['address_type'] == 'shipping') { 
+                                    if ($v['address_type'] == 'shipping') {
 
                                         $params['country_id'] = $v['country_id'];
                                         $params['region'] = $v['region'];
@@ -228,10 +229,11 @@ class OrderData extends Backend
                                         $params['street'] = $v['street'];
                                         $params['postcode'] = $v['postcode'];
                                         $params['telephone'] = $v['telephone'];
+                                        $params['firstname'] = $v['firstname'];
+                                        $params['lastname'] = $v['lastname'];
                                         $params['updated_at'] = strtotime($v['updated_at']) + 28800;
                                         $this->order->where(['entity_id' => $v['parent_id'], 'site' => $site])->update($params);
                                     }
-                                    
                                 }
                             }
 
@@ -295,7 +297,7 @@ class OrderData extends Backend
                                 }
                             }
 
-                            //新增子表
+                            //更新子表
                             if ($payload['type'] == 'UPDATE' && $payload['table'] == 'sales_flat_order_item') {
                                 foreach ($payload['data'] as $k => $v) {
                                     $options = [];
@@ -321,9 +323,12 @@ class OrderData extends Backend
                                     $options['sku'] = $v['sku'];
                                     $options['qty'] = $v['qty_ordered'];
                                     $options['base_row_total'] = $v['base_row_total'];
+                                    $order_prescription_type = $options['order_prescription_type'];
                                     unset($options['order_prescription_type']);
                                     if ($options) {
                                         $this->orderitemoption->where(['item_id' => $v['item_id'], 'site' => $site])->update($options);
+
+                                        $this->orderitemprocess->where(['item_id' => $v['item_id'], 'site' => $site])->update(['order_prescription_type' => $order_prescription_type, 'sku' => $options['sku']]);
                                     }
                                 }
                             }
@@ -527,9 +532,9 @@ class OrderData extends Backend
          * 4、当cyl<=-4或cyl>=4 或 sph < -8或 sph>8
          */
 
-       //判断加工类型
-       $result = $this->set_processing_type($arr);
-       $arr = array_merge($arr, $result);
+        //判断加工类型
+        $result = $this->set_processing_type($arr);
+        $arr = array_merge($arr, $result);
 
         return $arr;
     }
@@ -1082,7 +1087,7 @@ class OrderData extends Backend
     }
 
 
-     /**
+    /**
      * 判断定制现片逻辑
      */
     protected function set_processing_type($params = [])
@@ -1413,7 +1418,6 @@ class OrderData extends Backend
 
     public function order_address_data_shell()
     {
-
         $this->order_address_data(1);
         $this->order_address_data(2);
         $this->order_address_data(3);
@@ -1434,31 +1438,31 @@ class OrderData extends Backend
      */
     protected function order_address_data($site)
     {
-        $list = $this->order->where('region_id is null and site = ' . $site)->limit(3000)->select();
+        $list = $this->order->where('firstname is null and site = ' . $site)->limit(3000)->select();
         $list = collection($list)->toArray();
         $entity_id = array_column($list, 'entity_id');
         if ($site == 1) {
-            $res = Db::connect('database.db_zeelool')->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_id]])->column('region_id,region', 'parent_id');
+            $res = Db::connect('database.db_zeelool')->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_id]])->column('lastname,firstname', 'parent_id');
         } elseif ($site == 2) {
-            $res = Db::connect('database.db_voogueme')->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_id]])->column('region_id,region', 'parent_id');
+            $res = Db::connect('database.db_voogueme')->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_id]])->column('lastname,firstname', 'parent_id');
         } elseif ($site == 3) {
-            $res = Db::connect('database.db_nihao')->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_id]])->column('region_id,region', 'parent_id');
+            $res = Db::connect('database.db_nihao')->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_id]])->column('lastname,firstname', 'parent_id');
         } elseif ($site == 4) {
-            $res = Db::connect('database.db_meeloog')->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_id]])->column('region_id,region', 'parent_id');
+            $res = Db::connect('database.db_meeloog')->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_id]])->column('lastname,firstname', 'parent_id');
         } elseif ($site == 5) {
-            $res = Db::connect('database.db_weseeoptical')->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_id]])->column('region_id,region', 'parent_id');
+            $res = Db::connect('database.db_weseeoptical')->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_id]])->column('lastname,firstname', 'parent_id');
         } elseif ($site == 9) {
-            $res = Db::connect('database.db_zeelool_es')->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_id]])->column('region_id,region', 'parent_id');
+            $res = Db::connect('database.db_zeelool_es')->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_id]])->column('lastname,firstname', 'parent_id');
         } elseif ($site == 10) {
-            $res = Db::connect('database.db_zeelool_de')->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_id]])->column('region_id,region', 'parent_id');
+            $res = Db::connect('database.db_zeelool_de')->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_id]])->column('lastname,firstname', 'parent_id');
         } elseif ($site == 11) {
-            $res = Db::connect('database.db_zeelool_jp')->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_id]])->column('region_id,region', 'parent_id');
+            $res = Db::connect('database.db_zeelool_jp')->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_id]])->column('lastname,firstname', 'parent_id');
         }
         $params = [];
         foreach ($list as $k => $v) {
             $params[$k]['id'] = $v['id'];
-            $params[$k]['region_id'] = $res[$v['entity_id']]['region_id'] ?: 0;
-            $params[$k]['region'] = $res[$v['entity_id']]['region'];
+            $params[$k]['firstname'] = $res[$v['entity_id']]['firstname'];
+            $params[$k]['lastname'] = $res[$v['entity_id']]['lastname'];
             // $params[$k]['city'] = $res[$v['entity_id']]['city'];
             // $params[$k]['street'] = $res[$v['entity_id']]['street'];
             // $params[$k]['postcode'] = $res[$v['entity_id']]['postcode'];
@@ -1491,31 +1495,30 @@ class OrderData extends Backend
      */
     protected function order_data($site)
     {
-        $list = $this->order->where('base_shipping_amount is null and site = ' . $site)->limit(3000)->select();
+        $list = $this->order->where('order_currency_code is null and site = ' . $site)->limit(3000)->select();
         $list = collection($list)->toArray();
         $entity_id = array_column($list, 'entity_id');
         if ($site == 1) {
-            $res = Db::connect('database.db_zeelool')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('mw_rewardpoint,base_shipping_amount', 'entity_id');
+            $res = Db::connect('database.db_zeelool')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('order_currency_code', 'entity_id');
         } elseif ($site == 2) {
-            $res = Db::connect('database.db_voogueme')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('mw_rewardpoint,base_shipping_amount', 'entity_id');
+            $res = Db::connect('database.db_voogueme')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('order_currency_code', 'entity_id');
         } elseif ($site == 3) {
-            $res = Db::connect('database.db_nihao')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('mw_rewardpoint,base_shipping_amount', 'entity_id');
+            $res = Db::connect('database.db_nihao')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('order_currency_code', 'entity_id');
         } elseif ($site == 4) {
-            $res = Db::connect('database.db_meeloog')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('mw_rewardpoint,base_shipping_amount', 'entity_id');
+            $res = Db::connect('database.db_meeloog')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('order_currency_code', 'entity_id');
         } elseif ($site == 5) {
-            $res = Db::connect('database.db_weseeoptical')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('mw_rewardpoint,base_shipping_amount', 'entity_id');
+            $res = Db::connect('database.db_weseeoptical')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('order_currency_code', 'entity_id');
         } elseif ($site == 9) {
-            $res = Db::connect('database.db_zeelool_es')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('mw_rewardpoint,base_shipping_amount', 'entity_id');
+            $res = Db::connect('database.db_zeelool_es')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('order_currency_code', 'entity_id');
         } elseif ($site == 10) {
-            $res = Db::connect('database.db_zeelool_de')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('mw_rewardpoint,base_shipping_amount', 'entity_id');
+            $res = Db::connect('database.db_zeelool_de')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('order_currency_code', 'entity_id');
         } elseif ($site == 11) {
-            $res = Db::connect('database.db_zeelool_jp')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('mw_rewardpoint,base_shipping_amount', 'entity_id');
+            $res = Db::connect('database.db_zeelool_jp')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('order_currency_code', 'entity_id');
         }
         $params = [];
         foreach ($list as $k => $v) {
             $params[$k]['id'] = $v['id'];
-            $params[$k]['mw_rewardpoint'] = $res[$v['entity_id']]['mw_rewardpoint'];
-            $params[$k]['base_shipping_amount'] = $res[$v['entity_id']]['base_shipping_amount'];
+            $params[$k]['order_currency_code'] = $res[$v['entity_id']];
             // $params[$k]['region'] = $res[$v['entity_id']]['region'];
             // $params[$k]['city'] = $res[$v['entity_id']]['city'];
             // $params[$k]['street'] = $res[$v['entity_id']]['street'];
@@ -1548,7 +1551,6 @@ class OrderData extends Backend
         $this->order_item_shell(9);
         $this->order_item_shell(10);
         $this->order_item_shell(11);
-
     }
 
     protected function order_item_shell($site)
@@ -1807,7 +1809,7 @@ class OrderData extends Backend
             $option_params[$k]['index_name'] = $options['index_name'] ?: 'None';
             $option_params[$k]['index_type'] = $options['index_type'] ?: 'None';
             $option_params[$k]['id'] = $v['id'];
-            
+
             echo $v['item_id'] . "\n";
             usleep(10000);
         }

@@ -68,6 +68,18 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                 var order_platform = $('#order_platform').val();
                 window.location.href=Config.moduleurl+'/operatedatacenter/userdata/user_data_view_vip/export?order_platform='+order_platform;
             });
+            $("#change_on_off").click(function () {
+                var obj_class = $(this).attr('class');
+                if(obj_class == 'fa fa-toggle-off'){
+                    $(this).removeClass('fa-toggle-off');
+                    $(this).addClass('fa-toggle-on');
+                    $(".question").css('display','block');
+                }else{
+                    $(this).removeClass('fa-toggle-on');
+                    $(this).addClass('fa-toggle-off');
+                    $(".question").css('display','none');
+                }
+            });
             var table = $("#table");
 
             // 初始化表格

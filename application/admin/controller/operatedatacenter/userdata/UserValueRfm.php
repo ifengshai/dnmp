@@ -58,8 +58,11 @@ class UserValueRfm extends Backend
                 $count4 = $result['data'][0]['d'];
                 $count5 = $result['data'][0]['e'];
                 $count6 = $result['data'][0]['f'];
+                $count7 = $result['data'][0]['g'];
+                $count8 = $result['data'][0]['h'];
+                $count9 = $result['data'][0]['i'];
                 $arr = array(
-                    'data'=>array($count1, $count2, $count3, $count4, $count5, $count6),
+                    'data'=>array($count1, $count2, $count3, $count4, $count5, $count6,$count7,$count8,$count9),
                     'count'=>$count
                 );
                 Cache::set('Operatedatacenter_userdata' . $order_platform . md5(serialize('ajax_user_order_amount')), $arr, 36000);
@@ -67,7 +70,7 @@ class UserValueRfm extends Backend
                 $arr = $cache_data;
             }
             $data = $arr['data'];
-            $json['firtColumnName'] = ['0-40', '40-80', '80-150', '150-200', '200-300', '300+'];
+            $json['firtColumnName'] = ['0-10','10-20','20-30','30-40', '40-80', '80-150', '150-200', '200-300', '300+'];
             $json['columnData'] = [[
                 'type' => 'bar',
                 'barWidth' => '40%',
@@ -120,9 +123,9 @@ class UserValueRfm extends Backend
 
         $sql2 = $order_model->alias('t1')->field('sum( base_grand_total ) AS total')->where($where)->where($arr_where)->group('customer_id')->buildSql();
 
-        $order_customer_count = $web_model->table([$sql2=>'t2'])->field('sum( IF ( total >= 300, 1, 0 ) ) AS f,sum( IF ( total >= 200 AND total < 300, 1, 0 ) ) AS e,sum( IF ( total >= 150 AND total < 200, 1, 0 ) ) AS d,sum( IF ( total >= 80 AND total < 150, 1, 0 ) ) AS c,sum( IF ( total >= 40 AND total < 80, 1, 0 ) ) AS b')->select();
+        $order_customer_count = $web_model->table([$sql2=>'t2'])->field('sum( IF ( total >= 300, 1, 0 ) ) AS i,sum( IF ( total >= 200 AND total < 300, 1, 0 ) ) AS h,sum( IF ( total >= 150 AND total < 200, 1, 0 ) ) AS g,sum( IF ( total >= 80 AND total < 150, 1, 0 ) ) AS f,sum( IF ( total >= 40 AND total < 80, 1, 0 ) ) AS e,sum( IF ( total >= 30 AND total < 40, 1, 0 ) ) AS d,sum( IF ( total >= 20 AND total < 30, 1, 0 ) ) AS c,sum( IF ( total >= 10 AND total < 20, 1, 0 ) ) AS b')->select();
 
-        $order_customer_count[0]['a'] = $count-$order_customer_count[0]['b']-$order_customer_count[0]['c']-$order_customer_count[0]['d']-$order_customer_count[0]['e']-$order_customer_count[0]['f'];
+        $order_customer_count[0]['a'] = $count-$order_customer_count[0]['b']-$order_customer_count[0]['c']-$order_customer_count[0]['d']-$order_customer_count[0]['e']-$order_customer_count[0]['f']-$order_customer_count[0]['g']-$order_customer_count[0]['h']-$order_customer_count[0]['i'];
 
         $arr = array(
             'count'=>$count,
@@ -272,8 +275,10 @@ class UserValueRfm extends Backend
                 $count4 = $result['data'][0]['d'];
                 $count5 = $result['data'][0]['e'];
                 $count6 = $result['data'][0]['f'];
+                $count7 = $result['data'][0]['g'];
+                $count8 = $result['data'][0]['h'];
                 $arr = array(
-                    'data'=>array($count1, $count2, $count3, $count4, $count5, $count6),
+                    'data'=>array($count1, $count2, $count3, $count4, $count5, $count6,$count7,$count8),
                     'count'=>$count
                 );
                 Cache::set('Operatedatacenter_userdata' . $order_platform . md5(serialize('ajax_user_shopping_near_days')), $arr, 36000);
@@ -281,7 +286,7 @@ class UserValueRfm extends Backend
                 $arr = $cache_data;
             }
             $data = $arr['data'];
-            $json['firtColumnName'] = ['0-14', '14-30', '30-60', '60-90', '90-360', '360+'];
+            $json['firtColumnName'] = ['0-14', '14-30', '30-60', '60-90', '90-180','180-360','360-720', '720+'];
             $json['columnData'] = [[
                 'type' => 'bar',
                 'barWidth' => '40%',
@@ -330,9 +335,9 @@ class UserValueRfm extends Backend
 
         $sql2 = $web_model->table('sales_flat_order')->alias('t1')->field('TIMESTAMPDIFF(DAY,max(created_at),now()) AS total')->where($where)->where($arr_where)->group('customer_id')->buildSql();
 
-        $order_customer_count = $web_model->table([$sql2=>'t2'])->field('sum( IF ( total >= 90 and total<360, 1, 0 ) ) AS e,sum( IF ( total >= 60 and total<90, 1, 0 ) ) AS d,sum( IF ( total >= 30 and total<60, 1, 0 ) ) AS c,sum( IF ( total >= 14 and total<30, 1, 0 ) ) AS b,sum( IF ( total >= 0 and total<14, 1, 0 ) ) AS a')->select();
+        $order_customer_count = $web_model->table([$sql2=>'t2'])->field('sum( IF ( total >= 360 and total<720, 1, 0 ) ) AS g,sum( IF ( total >= 180 and total<360, 1, 0 ) ) AS f,sum( IF ( total >= 90 and total<180, 1, 0 ) ) AS e,sum( IF ( total >= 60 and total<90, 1, 0 ) ) AS d,sum( IF ( total >= 30 and total<60, 1, 0 ) ) AS c,sum( IF ( total >= 14 and total<30, 1, 0 ) ) AS b,sum( IF ( total >= 0 and total<14, 1, 0 ) ) AS a')->select();
 
-        $order_customer_count[0]['f'] = $count-$order_customer_count[0]['a']-$order_customer_count[0]['b']-$order_customer_count[0]['c']-$order_customer_count[0]['d']-$order_customer_count[0]['e'];
+        $order_customer_count[0]['h'] = $count-$order_customer_count[0]['a']-$order_customer_count[0]['b']-$order_customer_count[0]['c']-$order_customer_count[0]['d']-$order_customer_count[0]['e']-$order_customer_count[0]['f']-$order_customer_count[0]['g'];
         $arr = array(
             'count'=>$count,
             'data'=>$order_customer_count,
