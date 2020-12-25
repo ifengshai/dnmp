@@ -78,7 +78,7 @@ class OcPrescriptionPic extends Backend
                     $count = "SELECT COUNT(1) FROM vuetest_voogueme.oc_prescription_pic where".$WhereSql;
                     $sql  = "SELECT * ,2 as site FROM voogueme.oc_prescription_pic where".$WhereSql." limit  ". $offset.','.$limit;
                 }
-                $count = Db::query($count);
+                $count = $model->query($count);
                 $total = $count[0]['COUNT(1)'];
             }else{
                 $count = "SELECT COUNT(1) FROM zeelool_test.oc_prescription_pic where".$WhereSql." union all  SELECT COUNT(1) FROM vuetest_voogueme.oc_prescription_pic where".$WhereSql;
@@ -107,22 +107,40 @@ class OcPrescriptionPic extends Backend
  * 问题描述
  * */
     public function question_message($ids = null){
+
         if ($this->request->isPost()){
             $params = $this->request->post("row/a");
-            $updata_queertion = $this->model->where('id',$params['id'])->update(['status'=>2,'handler_name'=>$this->auth->nickname,'completion_time'=>date('Y-m-d H:i:s',time()),'remarks'=>$params['remarks']]);
+            if ($params['site'] ==1){
+                $model = Db::connect('database.db_zeelool');
+            }else{
+                $model = Db::connect('database.db_voogueme');
+            }
+            $updata_queertion =$model->table('oc_prescription_pic')->where('id',$params['id'])->update(['status'=>2,'handler_name'=>$this->auth->nickname,'completion_time'=>date('Y-m-d H:i:s',time()),'remarks'=>$params['remarks']]);
             if ($updata_queertion){
                 $this->success('操作成功','oc_prescription_pic/index');
             }else{
                 $this->error('操作失败');
             }
         }
-        $row = $this->model->where('id',$ids)->find();
+        $site = input('param.site');
+        if ($site ==1){
+            $model = Db::connect('database.db_zeelool');
+            $url =config('url.zeelool_url').'/media';
+        }else{
+            $model = Db::connect('database.db_voogueme');
+            $url =config('url.voogueme_url').'/media';
+        }
+        $row =$model->table('oc_prescription_pic')->where('id',$ids)->find();
         $photo_href = $row['pic'] =explode(',',$row['pic']);
         foreach ($photo_href as $key=>$item){
-            $photo_href[$key]= 'https://pc.zeelool.com/media'.$item;
+            $photo_href[$key]= $url.$item;
         }
         $row['pic'] = $photo_href;
+
         $this->assign('row',$row);
+        $this->assign('zhandian',$site);
+
+
         return $this->view->fetch();
     }
 }
