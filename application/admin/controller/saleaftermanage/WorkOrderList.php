@@ -2402,13 +2402,12 @@ class WorkOrderList extends Backend
         $this->assignconfig('create_user_id', $row->create_user_id);
 
         //子订单措施及数据
-        if (!empty($row->order_item_numbers)) {
-            $order_data = $this->model->getOrderItem($row->platform_order, $row->order_item_numbers, $row->work_type, $row);
+        $order_data = $this->model->getOrderItem($row->platform_order, $row->order_item_numbers, $row->work_type, $row);
+        if(!empty($order_data['item_order_info'])){
             $this->assignconfig('item_order_info', $order_data['item_order_info']);
-
             unset($order_data['item_order_info']);
-            $this->view->assign('order_item', $order_data);
         }
+        $this->view->assign('order_item', $order_data);
 
         //把问题类型传递到js页面
         $row->problem_type_id && $this->assignconfig('problem_type_id', $row->problem_type_id);
@@ -2762,13 +2761,12 @@ class WorkOrderList extends Backend
         $this->assignconfig('work_status', $row->work_status);
 
         //子订单措施及数据
-        if (!empty($row->order_item_numbers)) {
-            $order_data = $this->model->getOrderItem($row->platform_order, $row->order_item_numbers, $row->work_type, $row);
+        $order_data = $this->model->getOrderItem($row->platform_order, $row->order_item_numbers, $row->work_type, $row);
+        if(!empty($order_data['item_order_info'])){
             $this->assignconfig('item_order_info', $order_data['item_order_info']);
-
             unset($order_data['item_order_info']);
-            $this->view->assign('order_item', $order_data);
         }
+        $this->view->assign('order_item', $order_data);
 
         //把问题类型传递到js页面
         $row->problem_type_id && $this->assignconfig('problem_type_id', $row->problem_type_id);
