@@ -2695,6 +2695,7 @@ class WorkOrderList extends Backend
         ->join(['fa_work_order_measure' => 'b'], 'fa_work_order_recept.measure_id=b.id')
         ->group('recept_group_id,measure_id')
         ->select();
+        $this->assignconfig('recepts', $recepts);
         $this->view->assign('recepts', $recepts);
 
         //处理
