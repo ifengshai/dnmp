@@ -81,11 +81,11 @@ class OcPrescriptionPic extends Backend
             }else{
                 $count = "SELECT COUNT(1) FROM zeelool.oc_prescription_pic where".$WhereSql." union all  SELECT COUNT(1) FROM voogueme.oc_prescription_pic where".$WhereSql;
                 $sql  = "SELECT * ,1 as site FROM zeelool.oc_prescription_pic where".$WhereSql." union all  SELECT * ,2 as site FROM voogueme.oc_prescription_pic where".$WhereSql." limit  ". $offset.','.$limit;
-                $count = Db::query($count);
+                $count = Db::connect('database.db_zeelool')->query($count);
                 $total = $count[0]['COUNT(1)']  + $count[1]['COUNT(1)'];
             }
-            $list  = Db::query($sql);
-            
+            $list  = Db::connect('database.db_zeelool')->query($sql);
+
             foreach ($list as $key=>$item){
                 if ($item['status'] ==1){
                     $list[$key]['status']='未处理';
