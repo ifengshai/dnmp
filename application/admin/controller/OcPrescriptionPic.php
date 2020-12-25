@@ -68,6 +68,8 @@ class OcPrescriptionPic extends Backend
                 $completion_time = explode(' - ',$filter['completion_time']);
                 $WhereSql .= " and completion_time between '$completion_time[0]' and '$completion_time[1]' ";
             }
+            $model  = Db::connect('database.db_zeelool');
+            dump($model);die();
             if ($filter['site']){
                 if ($filter['site'] ==1){
                     $count = "SELECT COUNT(1) FROM zeelool_test.oc_prescription_pic where".$WhereSql;
