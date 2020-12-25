@@ -572,8 +572,8 @@ class DataMarket extends Backend
                 }
                 $createat = explode(' ', $time_str);
 
-                $start_time = strtotime($createat[0]);
-                $end_time = strtotime($createat[3]);
+                $start_time = strtotime($createat[0].$createat[1]);
+                $end_time = strtotime($createat[3].$createat[4]);
                 $data1 = $this->getProcess(1,$start_time,$end_time); //打印标签
                 $data2 = $this->getProcess(2,$start_time,$end_time); //配货
                 $data3 = $this->getProcess(3,$start_time,$end_time); //配镜片
