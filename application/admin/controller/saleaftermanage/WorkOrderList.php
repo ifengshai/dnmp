@@ -1071,9 +1071,9 @@ class WorkOrderList extends Backend
                     && $this->error("已审单，不能创建工单");
 
                     //指定问题类型校验sku下拉框是否勾选
-                    in_array($params['problem_type_id'],[8,10,11,56,13,14,15,16,18,22,59])
+                    /*in_array($params['problem_type_id'],[8,10,11,56,13,14,15,16,18,22,59])
                     && empty($order_sku)
-                    && $this->error("请选择sku");
+                    && $this->error("请选择sku");*/
 
                     //校验工单类型
                     if (1 == $work_type) {
@@ -1890,9 +1890,9 @@ class WorkOrderList extends Backend
                 !$platform_order && $this->error("订单号不能为空");
 
                 //指定问题类型校验sku下拉框是否勾选
-                in_array($params['problem_type_id'],[8,10,11,56,13,14,15,16,18,22,59])
+                /*in_array($params['problem_type_id'],[8,10,11,56,13,14,15,16,18,22,59])
                 && empty($params['order_sku'])
-                && $this->error("请选择sku");
+                && $this->error("请选择sku");*/
 
                 //校验工单类型
                 if (1 == $work_type) {
@@ -2402,13 +2402,12 @@ class WorkOrderList extends Backend
         $this->assignconfig('create_user_id', $row->create_user_id);
 
         //子订单措施及数据
-        if (!empty($row->order_item_numbers)) {
-            $order_data = $this->model->getOrderItem($row->platform_order, $row->order_item_numbers, $row->work_type, $row);
+        $order_data = $this->model->getOrderItem($row->platform_order, $row->order_item_numbers, $row->work_type, $row);
+        if(!empty($order_data['item_order_info'])){
             $this->assignconfig('item_order_info', $order_data['item_order_info']);
-
             unset($order_data['item_order_info']);
-            $this->view->assign('order_item', $order_data);
         }
+        $this->view->assign('order_item', $order_data);
 
         //把问题类型传递到js页面
         $row->problem_type_id && $this->assignconfig('problem_type_id', $row->problem_type_id);
@@ -2762,13 +2761,12 @@ class WorkOrderList extends Backend
         $this->assignconfig('work_status', $row->work_status);
 
         //子订单措施及数据
-        if (!empty($row->order_item_numbers)) {
-            $order_data = $this->model->getOrderItem($row->platform_order, $row->order_item_numbers, $row->work_type, $row);
+        $order_data = $this->model->getOrderItem($row->platform_order, $row->order_item_numbers, $row->work_type, $row);
+        if(!empty($order_data['item_order_info'])){
             $this->assignconfig('item_order_info', $order_data['item_order_info']);
-
             unset($order_data['item_order_info']);
-            $this->view->assign('order_item', $order_data);
         }
+        $this->view->assign('order_item', $order_data);
 
         //把问题类型传递到js页面
         $row->problem_type_id && $this->assignconfig('problem_type_id', $row->problem_type_id);
