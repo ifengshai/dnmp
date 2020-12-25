@@ -2436,6 +2436,12 @@ class ScmWarehouse extends Scm
                         throw new Exception('生成出库记录失败！！数据回滚');
                     }
                 }
+            } else {
+                //审核拒绝 解除条形码绑定的盘点单号
+                $code_clear = [
+                    'inventory_id' => 0
+                ];
+                $this->_product_bar_code_item->where(['inventory_id' => $inventory_id])->update($code_clear);
             }
             $this->_item->commit();
             $this->_in_stock->commit();
