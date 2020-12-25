@@ -477,7 +477,17 @@
         <div class="form-group-child">
             <label class="control-label col-xs-12 col-sm-2">{:__('order_sku')}：</label>
             <div class="col-xs-12 col-sm-8">
+                {if $order_item['sku_list']}
+                <?php 
+                    $new_sku_list = [];
+                    foreach ($order_item->new_sku_list as $key => $value){
+                        $new_sku_list[$value] = $value;
+                    }
+                ?>
+                {:build_select('row[order_sku][]', $new_sku_list, $order_item->select_sku, ['class'=>'form-control selectpicker','multiple'=>'multiple','id'=>'c-order_new_sku'])}
+                {else/}
                 {:build_select('row[order_sku][]', [], [], ['class'=>'form-control selectpicker','multiple'=>'multiple','id'=>'c-order_new_sku','title'=>"请选择"])}
+                {/if}
             </div>
         </div>
         <div class="form-group-child">
