@@ -286,6 +286,7 @@ function index_data(){
         data: {time_str: time_str}
     }, function (data, ret) {
         var stock_measure_overview = ret.data.stock_measure_overview;
+        var stock_level_sales_rate = ret.data.stock_level_sales_rate;
         var purchase_overview = ret.data.purchase_overview;
         var logistics_completed_overview = ret.data.logistics_completed_overview;
         //仓库指标总览
@@ -293,6 +294,15 @@ function index_data(){
         $('#stock_sales_rate').html(stock_measure_overview.stock_sales_rate);
         $('#turnover_days_rate').html(stock_measure_overview.turnover_days_rate);
         $('#month_in_out_rate').html(stock_measure_overview.month_in_out_rate);
+        //仓库分级库销比
+        $('#a1_stock_sales_rate').html(stock_level_sales_rate.a1_stock_sales_rate);
+        $('#a_stock_sales_rate').html(stock_level_sales_rate.a_stock_sales_rate);
+        $('#b_stock_sales_rate').html(stock_level_sales_rate.b_stock_sales_rate);
+        $('#c1_stock_sales_rate').html(stock_level_sales_rate.c1_stock_sales_rate);
+        $('#c_stock_sales_rate').html(stock_level_sales_rate.c_stock_sales_rate);
+        $('#d_stock_sales_rate').html(stock_level_sales_rate.d_stock_sales_rate);
+        $('#e_stock_sales_rate').html(stock_level_sales_rate.e_stock_sales_rate);
+        $('#f_stock_sales_rate').html(stock_level_sales_rate.f_stock_sales_rate);
         //采购概况
         $('#purchase_num').html(purchase_overview.purchase_num);
         $('#purchase_amount').html(purchase_overview.purchase_amount);

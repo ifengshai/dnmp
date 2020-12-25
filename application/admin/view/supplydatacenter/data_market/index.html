@@ -349,17 +349,78 @@
                         <th>库销比</th>
                     </tr>
                     </thead>
-                    {foreach $stock_level_overview as $item}
                     <tr>
-                        <td>{$item.grade}</td>
-                        <td>{$item.count}</td>
-                        <td>{$item.percent}</td>
-                        <td>{$item.stock_num}</td>
-                        <td>{$item.stock_percent}</td>
-                        <td>{$item.stock_price}</td>
-                        <td>{$item.stock_sales_rate}</td>
+                        <td>A+</td>
+                        <td>{$stock_level_overview.a1_count}</td>
+                        <td>{$stock_level_overview.a1_percent}</td>
+                        <td>{$stock_level_overview.a1_stock_num}</td>
+                        <td>{$stock_level_overview.a1_stock_percent}</td>
+                        <td>{$stock_level_overview.a1_stock_price}</td>
+                        <td id="a1_stock_sales_rate">{$stock_level_sales_rate.a1_stock_sales_rate}</td>
                     </tr>
-                    {/foreach}
+                    <tr>
+                        <td>A</td>
+                        <td>{$stock_level_overview.a_count}</td>
+                        <td>{$stock_level_overview.a_percent}</td>
+                        <td>{$stock_level_overview.a_stock_num}</td>
+                        <td>{$stock_level_overview.a_stock_percent}</td>
+                        <td>{$stock_level_overview.a_stock_price}</td>
+                        <td id="a_stock_sales_rate">{$stock_level_sales_rate.a_stock_sales_rate}</td>
+                    </tr>
+                    <tr>
+                        <td>B</td>
+                        <td>{$stock_level_overview.b_count}</td>
+                        <td>{$stock_level_overview.b_percent}</td>
+                        <td>{$stock_level_overview.b_stock_num}</td>
+                        <td>{$stock_level_overview.b_stock_percent}</td>
+                        <td>{$stock_level_overview.b_stock_price}</td>
+                        <td id="b_stock_sales_rate">{$stock_level_sales_rate.b_stock_sales_rate}</td>
+                    </tr>
+                    <tr>
+                        <td>C+</td>
+                        <td>{$stock_level_overview.c1_count}</td>
+                        <td>{$stock_level_overview.c1_percent}</td>
+                        <td>{$stock_level_overview.c1_stock_num}</td>
+                        <td>{$stock_level_overview.c1_stock_percent}</td>
+                        <td>{$stock_level_overview.c1_stock_price}</td>
+                        <td id="c1_stock_sales_rate">{$stock_level_sales_rate.c1_stock_sales_rate}</td>
+                    </tr>
+                    <tr>
+                        <td>C</td>
+                        <td>{$stock_level_overview.c_count}</td>
+                        <td>{$stock_level_overview.c_percent}</td>
+                        <td>{$stock_level_overview.c_stock_num}</td>
+                        <td>{$stock_level_overview.c_stock_percent}</td>
+                        <td>{$stock_level_overview.c_stock_price}</td>
+                        <td id="c_stock_sales_rate">{$stock_level_sales_rate.c_stock_sales_rate}</td>
+                    </tr>
+                    <tr>
+                        <td>D</td>
+                        <td>{$stock_level_overview.d_count}</td>
+                        <td>{$stock_level_overview.d_percent}</td>
+                        <td>{$stock_level_overview.d_stock_num}</td>
+                        <td>{$stock_level_overview.d_stock_percent}</td>
+                        <td>{$stock_level_overview.d_stock_price}</td>
+                        <td id="d_stock_sales_rate">{$stock_level_sales_rate.d_stock_sales_rate}</td>
+                    </tr>
+                    <tr>
+                        <td>E</td>
+                        <td>{$stock_level_overview.e_count}</td>
+                        <td>{$stock_level_overview.e_percent}</td>
+                        <td>{$stock_level_overview.e_stock_num}</td>
+                        <td>{$stock_level_overview.e_stock_percent}</td>
+                        <td>{$stock_level_overview.e_stock_price}</td>
+                        <td id="e_stock_sales_rate">{$stock_level_sales_rate.e_stock_sales_rate}</td>
+                    </tr>
+                    <tr>
+                        <td>F</td>
+                        <td>{$stock_level_overview.f_count}</td>
+                        <td>{$stock_level_overview.f_percent}</td>
+                        <td>{$stock_level_overview.f_stock_num}</td>
+                        <td>{$stock_level_overview.f_stock_percent}</td>
+                        <td>{$stock_level_overview.f_stock_price}</td>
+                        <td id="f_stock_sales_rate">{$stock_level_sales_rate.f_stock_sales_rate}</td>
+                    </tr>
                 </table>
             <div>
                <!--  <div class="new-background">
