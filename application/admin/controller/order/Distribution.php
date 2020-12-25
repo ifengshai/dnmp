@@ -455,9 +455,17 @@ class Distribution extends Backend
     protected function get_frame_lens_width_height_bridge($product_id, $site)
     {
         if ($product_id) {
-            $querySql = "select cpev.entity_type_id,cpev.attribute_id,cpev.`value`,cpev.entity_id
-            from catalog_product_entity_varchar cpev LEFT JOIN catalog_product_entity cpe on cpe.entity_id=cpev.entity_id 
-            where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$product_id";
+
+            if ($site == 3) {
+                $querySql = "select cpev.entity_type_id,cpev.attribute_id,cpev.`value`,cpev.entity_id
+                from catalog_product_entity_varchar cpev LEFT JOIN catalog_product_entity cpe on cpe.entity_id=cpev.entity_id 
+                where cpev.attribute_id in(146,147,149) and cpev.store_id=0 and cpev.entity_id=$product_id";
+            } else {
+                $querySql = "select cpev.entity_type_id,cpev.attribute_id,cpev.`value`,cpev.entity_id
+                from catalog_product_entity_varchar cpev LEFT JOIN catalog_product_entity cpe on cpe.entity_id=cpev.entity_id 
+                where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$product_id";
+            }
+
             switch ($site) {
                 case 1:
                     $model = Db::connect('database.db_zeelool');
