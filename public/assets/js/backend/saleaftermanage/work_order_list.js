@@ -1799,6 +1799,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
         },
         detail: function () {
             Controller.api.bindevent();
+            console.log(Config.recepts);
             $("input[name='row[measure_choose_id][]']:checked").each(function (i) {
                 var id = $(this).val();
                 if(id == 15){
