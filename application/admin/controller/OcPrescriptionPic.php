@@ -51,6 +51,7 @@ class OcPrescriptionPic extends Backend
             {
                 return $this->selectpage();
             }
+            $model = Db::connect('database.db_zeelool');
             $WhereSql = ' id > 0';
             $filter = json_decode($this->request->get('filter'), true);
             list($where, $sort, $order,$offset,$limit) = $this->buildparams();
@@ -81,11 +82,11 @@ class OcPrescriptionPic extends Backend
             }else{
                 $count = "SELECT COUNT(1) FROM zeelool_test.oc_prescription_pic where".$WhereSql." union all  SELECT COUNT(1) FROM vuetest_voogueme.oc_prescription_pic where".$WhereSql;
                 $sql  = "SELECT * ,1 as site FROM zeelool_test.oc_prescription_pic where".$WhereSql." union all  SELECT * ,2 as site FROM vuetest_voogueme.oc_prescription_pic where".$WhereSql." limit  ". $offset.','.$limit;
-                $count = Db::connect('database.db_zeelool')->query($count);
+                $count = $model->query($count);
                 dump($count);
                 $total = $count[0]['COUNT(1)']  + $count[1]['COUNT(1)'];
             }
-            $list  = Db::connect('database.db_zeelool')->query($sql);
+            $list  = $model->query($sql);
             dump($list);die();
             foreach ($list as $key=>$item){
                 if ($item['status'] ==1){
