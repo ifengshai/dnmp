@@ -1818,4 +1818,25 @@ class Test extends Backend
             echo "ok";
         }
     }
+
+    public function pro_old_order_sku(){
+        $work = new \app\admin\model\saleaftermanage\WorkOrderList();
+        $info = $work->where('order_sku','like',"%/%")->select();
+        echo count($info)."/";
+        $ex_order_sku_arr = [];
+        foreach ($info as $key => $value) {
+            $ex_order_sku = explode(',',$value['order_sku']);
+            foreach ($ex_order_sku as $k => $v) {
+                $ex_order_sku_pro = explode('/',$v);
+                $ex_order_sku_arr[$value['id']][] = $ex_order_sku_pro[1];
+            }
+            $ex_order_sku_arr[$value['id']] = implode(',',$ex_order_sku_arr[$value['id']]);
+        }
+        
+        foreach ($ex_order_sku_arr as $key => $value) {
+            $res = $work->where('id',$key)->update(['order_sku' => $value]);
+            echo $res;
+        }
+        echo count($ex_order_sku_arr)."/";
+    }
 }
