@@ -102,10 +102,16 @@ class OcPrescriptionPic extends Backend
         }
         return $this->view->fetch();
     }
-
-    /*
- * 问题描述
- * */
+    /**
+     * @param null $ids
+     * @return string
+     * @throws \think\Exception
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     * @throws \think\exception\PDOException
+     * 问题详情
+     */
     public function question_message($ids = null){
 
         if ($this->request->isPost()){
