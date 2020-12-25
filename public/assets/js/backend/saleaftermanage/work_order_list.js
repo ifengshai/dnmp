@@ -3314,7 +3314,10 @@ function platform_order(){
                 var sku_selected = $.inArray(data.new_sku_list[i], data.select_sku) != -1 ? "selected" : "";
                 sku_html += '<option value="' + data.new_sku_list[i] +'" '+ sku_selected +'>' + data.new_sku_list[i] + '</option>';
             }
-            $('#c-order_new_sku').append(sku_html);
+            
+            var is_order_item = $('#is_order_item').val();
+            if (2 != Config.work_type && 1 != is_order_item) {$('#c-order_new_sku').append(sku_html);}
+            
 
             $('.selectpicker ').selectpicker('refresh');
             /*//判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
