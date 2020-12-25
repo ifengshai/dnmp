@@ -2190,7 +2190,7 @@ class ScmWarehouse extends Scm
      * 审核盘点单
      *
      * @参数 int inventory_id  盘点单ID
-     * @参数 int do_type  审核类型 1通过-盘点结束-更改状态-创建入库单-盘盈加库存、盘亏扣减库存; 2拒绝-盘点结束-更改状态
+     * @参数 int do_type  审核类型 2通过-盘点结束-更改状态-创建入库单-盘盈加库存、盘亏扣减库存; 3拒绝-盘点结束-更改状态
      * @return mixed
      * @author wgj
      */
@@ -2208,7 +2208,7 @@ class ScmWarehouse extends Scm
         $data['check_person'] = $this->auth->nickname;
 
         $msg = '';
-        if (2 == $do_type) {
+        if (3 == $do_type) {
             $data['check_status'] = 3;
             $this->_inventory->allowField(true)->save($data, ['id' => $inventory_id]);
             $msg = '操作成功';
