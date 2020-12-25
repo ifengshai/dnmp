@@ -190,7 +190,7 @@ class WorkOrderList extends Model
      */
     public function getOrderItem($increment_id, $item_order_number='', $work_type=0, $work=[], $do_type=0)
     {
-        $order_field = 'id,site,base_grand_total,base_to_order_rate,payment_method,customer_email,customer_firstname,customer_lastname,order_type,mw_rewardpoint_discount,base_currency_code,created_at as payment_time';
+        $order_field = 'id,site,base_grand_total,base_to_order_rate,payment_method as method,customer_email,customer_firstname,customer_lastname,order_type,mw_rewardpoint_discount,base_currency_code,created_at as payment_time';
 
         $_new_order = new NewOrder();
         $result = $_new_order
@@ -203,6 +203,7 @@ class WorkOrderList extends Model
         }
 
         $select_number = [];
+        $select_sku = [];
         $order_item_where['order_id'] = $result['id'];
         if(!empty($item_order_number) && 2 == $work_type){
             if(empty($work)){
@@ -217,6 +218,12 @@ class WorkOrderList extends Model
         $order_item_list = $_new_order_item_process
             ->where($order_item_where)
             ->column('sku','item_order_number')
+        ;
+
+        $sku_data = $_new_order_item_process
+            ->where(['order_id'=>$result['id']])
+            ->group('sku')
+            ->column('sku')
         ;
 
         //已创建工单获取最新镜架和镜片数据
@@ -280,10 +287,25 @@ class WorkOrderList extends Model
                 }
                 $result['item_order_info'] = $item_order_info;
             }
+
+            //获取勾选sku
+            if($work['order_sku']){
+                $order_sku = explode(',',$work['order_sku']);
+                foreach($order_sku as $val){
+                    if(strpos($val,'/') !== false){
+                        $sku_str = explode('/',$val)[1];
+                    }else{
+                        $sku_str = $val;
+                    }
+                    $select_sku[] = $sku_str;
+                }
+            }
         }
 
         $result['sku_list'] = $order_item_list;//子单号下拉框数据
         $result['select_number'] = $select_number;//已勾选子单号
+        $result['new_sku_list'] = $sku_data;//sku下拉框数据
+        $result['select_sku'] = $select_sku;//已勾选sku
         $result['mw_rewardpoint_discount'] = round($result['mw_rewardpoint_discount'],2);
         $result['payment_time'] = date('Y-m-d H:i:s',$result['payment_time']);
 
