@@ -68,32 +68,38 @@ class OcPrescriptionPic extends Backend
                 $completion_time = explode(' - ',$filter['completion_time']);
                 $WhereSql .= " and completion_time between '$completion_time[0]' and '$completion_time[1]' ";
             }
+            $model  = Db::connect('database.db_zeelool');
+            $WhereOrder = '  ORDER BY  created_at desc';
             if ($filter['site']){
                 if ($filter['site'] ==1){
                     $count = "SELECT COUNT(1) FROM zeelool.oc_prescription_pic where".$WhereSql;
-                    $sql  = "SELECT * ,1 as site FROM zeelool.oc_prescription_pic where".$WhereSql." limit  ". $offset.','.$limit;
+                    $sql  = "SELECT zeelool.oc_prescription_pic.id AS id,zeelool.oc_prescription_pic.email AS email,zeelool.oc_prescription_pic.query AS query,
+                                zeelool.oc_prescription_pic.pic AS pic ,zeelool.oc_prescription_pic.status AS status,zeelool.oc_prescription_pic.handler_name AS handler_name,
+                                zeelool.oc_prescription_pic.created_at AS created_at,zeelool.oc_prescription_pic.completion_time AS completion_time,
+                                zeelool.oc_prescription_pic.remarks AS remarks,1 as site FROM zeelool.oc_prescription_pic where".$WhereSql. " limit  ". $offset.','.$limit;
                 }else{
                     $count = "SELECT COUNT(1) FROM voogueme.oc_prescription_pic where".$WhereSql;
-                    $sql  = "SELECT * ,2 as site FROM voogueme.oc_prescription_pic where".$WhereSql." limit  ". $offset.','.$limit;
+                    $sql  = "SELECT voogueme.oc_prescription_pic.id AS id,voogueme.oc_prescription_pic.email AS email,voogueme.oc_prescription_pic.query AS query,
+                                voogueme.oc_prescription_pic.pic AS pic ,voogueme.oc_prescription_pic.status AS status,voogueme.oc_prescription_pic.handler_name AS handler_name,
+                                voogueme.oc_prescription_pic.created_at AS created_at,voogueme.oc_prescription_pic.completion_time AS completion_time,
+                                voogueme.oc_prescription_pic.remarks AS remarks ,2 as site FROM voogueme.oc_prescription_pic where".$WhereSql. " limit  ". $offset.','.$limit;
                 }
-                $count = Db::query($count);
+                $count = $model->query($count);
                 $total = $count[0]['COUNT(1)'];
             }else{
                 $count = "SELECT COUNT(1) FROM zeelool.oc_prescription_pic where".$WhereSql." union all  SELECT COUNT(1) FROM voogueme.oc_prescription_pic where".$WhereSql;
-                $sql  = "SELECT * ,1 as site FROM zeelool.oc_prescription_pic where".$WhereSql." union all  SELECT * ,2 as site FROM voogueme.oc_prescription_pic where".$WhereSql." limit  ". $offset.','.$limit;
-                $count = Db::query($count);
+                $sql  = "SELECT zeelool.oc_prescription_pic.id AS id,zeelool.oc_prescription_pic.email AS email,zeelool.oc_prescription_pic.query AS query,
+                                zeelool.oc_prescription_pic.pic AS pic ,zeelool.oc_prescription_pic.status AS status,zeelool.oc_prescription_pic.handler_name AS handler_name,
+                                zeelool.oc_prescription_pic.created_at AS created_at,zeelool.oc_prescription_pic.completion_time AS completion_time,
+                                zeelool.oc_prescription_pic.remarks AS remarks,1 as site FROM zeelool.oc_prescription_pic where".$WhereSql." union all  
+                         SELECT voogueme.oc_prescription_pic.id AS id,voogueme.oc_prescription_pic.email AS email,voogueme.oc_prescription_pic.query AS query,
+                                voogueme.oc_prescription_pic.pic AS pic ,voogueme.oc_prescription_pic.status AS status,voogueme.oc_prescription_pic.handler_name AS handler_name,
+                                voogueme.oc_prescription_pic.created_at AS created_at,voogueme.oc_prescription_pic.completion_time AS completion_time,
+                                voogueme.oc_prescription_pic.remarks AS remarks,2 as site FROM voogueme.oc_prescription_pic where".$WhereSql. $WhereOrder." limit  ". $offset.','.$limit;
+                $count = $model->query($count);
                 $total = $count[0]['COUNT(1)']  + $count[1]['COUNT(1)'];
             }
-            $list  = Db::query($sql);
-
-//            $model = Db::connect('database.db_voogueme');
-//            $this->request->get(['filter' => json_encode($filter)]);
-//            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-//
-//            $total = $model->table('oc_prescription_pics')->where($where)->count();
-//            $list = $model->table('oc_prescription_pics')->where($where)->order('id desc')->limit($offset, $limit)->select();
-//            dump($sql);die();
-
+            $list  = $model->query($sql);
 
             foreach ($list as $key=>$item){
                 if ($item['status'] ==1){
@@ -109,10 +115,16 @@ class OcPrescriptionPic extends Backend
         }
         return $this->view->fetch();
     }
-
-    /*
- * 问题描述
- * */
+    /**
+     * @param null $ids
+     * @return string
+     * @throws \think\Exception
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     * @throws \think\exception\PDOException
+     * 问题详情
+     */
     public function question_message($ids = null){
 
         if ($this->request->isPost()){
