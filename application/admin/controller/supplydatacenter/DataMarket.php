@@ -636,8 +636,8 @@ class DataMarket extends Backend
         }
         $createat = explode(' ', $time_str);
 
-        $start_time = strtotime($createat[0]);
-        $end_time = strtotime($createat[3]);
+        $start_time = strtotime($createat[0].$createat[1]);
+        $end_time = strtotime($createat[3].$createat[4]);
         $where['check_status'] = 1;
         $where['check_time'] = ['between',[$start_time,$end_time]];
         $arr['delivery_count'] = $this->process->where($where)->count();  //发货数量
