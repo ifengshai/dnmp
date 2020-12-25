@@ -1620,6 +1620,123 @@ class Test4 extends Controller
             //更新process表中数据
             $process->where('increment_id',$value)->update(['is_tracking'=>5]);
             echo $value." is ok"."\n";
+            usleep(10000);
+        }
+    }
+    //产品等级销量数据脚本
+    public function product_level_salesnum(){
+        //查询时间
+        $date_time = $this->zeelool->query("SELECT DATE_FORMAT(created_at, '%Y-%m-%d') AS date_time FROM `sales_flat_order` where created_at between '2018-01-01' and '2020-12-31' GROUP BY DATE_FORMAT(created_at, '%Y%m%d') order by DATE_FORMAT(created_at, '%Y%m%d') asc");
+        foreach ($date_time as $val) {
+            $is_exist = Db::name('datacenter_day_supply')->where('day_date', $val['date_time'])->value('id');
+            if (!$is_exist) {
+                $arr['day_date'] = $val['date_time'];
+                $zeelool = $this->getSalesnum(1,$val['date_time']);
+                $voogueme = $this->getSalesnum(2,$val['date_time']);
+                $nihao = $this->getSalesnum(3,$val['date_time']);
+                $arr['sales_num_a1'] = $zeelool[0] + $voogueme[0] + $nihao[0];
+                $arr['sales_num_a'] = $zeelool[1] + $voogueme[1] + $nihao[1];
+                $arr['sales_num_b'] = $zeelool[2] + $voogueme[2] + $nihao[2];
+                $arr['sales_num_c1'] = $zeelool[3] + $voogueme[3] + $nihao[3];
+                $arr['sales_num_c'] = $zeelool[4] + $voogueme[4] + $nihao[4];
+                $arr['sales_num_d'] = $zeelool[5] + $voogueme[5] + $nihao[5];
+                $arr['sales_num_e'] = $zeelool[6] + $voogueme[6] + $nihao[6];
+                $arr['sales_num_f'] = $zeelool[7] + $voogueme[7] + $nihao[7];
+                Db::name('datacenter_day_supply')->insert($arr);
+                echo $val['date_time']." is ok"."\n";
+                usleep(10000);
+            }
+        }
+    }
+    public function getSalesnum($site,$date){
+        $this->order = new \app\admin\model\order\order\NewOrder();
+        $this->productGrade = new \app\admin\model\ProductGrade();
+        switch ($site){
+            case '1':
+                $field = 'zeelool_sku';
+                break;
+            case '2':
+                $field = 'voogueme_sku';
+                break;
+            case '3':
+                $field = 'nihao_sku';
+                break;
+            default:
+                break;
+        }
+        //所选时间段内有销量的平台sku
+        $start = $date;
+        $end = $date.' 23:59:59';
+        $start_time = strtotime($start);
+        $end_time = strtotime($end);
+        $where['o.payment_time'] = ['between',[$start_time,$end_time]];
+        $where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+        $where['o.site'] = $site;
+        $order = $this->order->alias('o')->join('fa_order_item_option i','o.entity_id=i.order_id')->field('i.sku,count(*) as count')->where($where)->group('i.sku')->select();
+        $grade1 = 0;
+        $grade2 = 0;
+        $grade3 = 0;
+        $grade4 = 0;
+        $grade5 = 0;
+        $grade6 = 0;
+        $grade7 = 0;
+        $grade8 = 0;
+        foreach ($order as $key=>$value){
+            //查询该品的等级
+            $grade = $this->productGrade->where($field,$value['sku'])->value('grade');
+            switch ($grade){
+                case 'A+':
+                    $grade1 += $value['count'];
+                    break;
+                case 'A':
+                    $grade2 += $value['count'];
+                    break;
+                case 'B':
+                    $grade3 += $value['count'];
+                    break;
+                case 'C+':
+                    $grade4 += $value['count'];
+                    break;
+                case 'C':
+                    $grade5 += $value['count'];
+                    break;
+                case 'D':
+                    $grade6 += $value['count'];
+                    break;
+                case 'E':
+                    $grade7 += $value['count'];
+                    break;
+                case 'F':
+                    $grade8 += $value['count'];
+                    break;
+                default:
+                    break;
+            }
+        }
+        $arr = array(
+            $grade1,$grade2,$grade3,$grade4,$grade5,$grade6,$grade7,$grade8
+        );
+        return $arr;
+
+    }
+    //订单发出时间脚本
+    public function order_send_time(){
+        $process = new \app\admin\model\order\order\NewOrderProcess;
+        $orderitemprocess = new \app\admin\model\order\order\NewOrderItemProcess();
+        //查询所有订单
+        $order = $process->where('order_prescription_type',0)->column('order_id');
+        foreach ($order as $key=>$value){
+            $order_type = $orderitemprocess->where('order_id',$value)->column('order_prescription_type');
+            if(in_array(3,$order_type)){
+                $type = 3;
+            }elseif(in_array(2,$order_type)){
+                $type = 2;
+            }else{
+                $type = 1;
+            }
+            $process->where('order_id',$value)->update(['order_prescription_type'=>$type]);
+            echo $value.' is ok'."\n";
+            usleep(100000);
         }
     }
 }

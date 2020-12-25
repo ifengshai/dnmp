@@ -4,6 +4,7 @@ namespace app\admin\controller\order;
 
 use app\common\controller\Backend;
 use fast\Trackingmore;
+use Think\Log;
 use Util\NihaoPrescriptionDetailHelper;
 use Util\ZeeloolPrescriptionDetailHelper;
 use Util\VooguemePrescriptionDetailHelper;
@@ -305,7 +306,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                 }
             }
             //请求接口
-            $url = config('url.esz_url').'magic/order/prescriptionPicCheck';
+            $url = config('url.zeelooles_url').'magic/order/prescriptionPicCheck';
             $curl = curl_init();
             curl_setopt($curl, CURLOPT_URL, $url);
             curl_setopt($curl, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
@@ -317,14 +318,12 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
             curl_setopt($curl, CURLOPT_TIMEOUT, 20);
             $content =json_decode(curl_exec($curl),true);
             curl_close($curl);
-
             if ($content['status'] == 200){
                 $this->success('操作成功');
             }else{
                 $this->error('操作失败,原因:'.$content['msg']);
             }
         }
-
         $ids = $ids ?? $this->request->get('id');
         //查询订单详情
         $row = $this->order->get($ids);
@@ -346,9 +345,6 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
         $item = $this->orderitemoption->where('order_id', $ids)->select();
         $items = collection($item)->toArray();
         foreach ($items as $key=>$item){
-            //临时模拟数据
-//            $items[$key]['to_examine']= true;
-//            $items[$key]['prescription_image'] = 'https://esz.zhaokuangyi.com/media/prescription_file/160860092995781.jpg';
             if ($item['site'] ==9){
                 if ($item['prescription_pic_checked'] == false && $item['prescription_pic_id']>0){
                     $items[$key]['to_examine']= true;
@@ -362,7 +358,6 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                 }
             }
         }
-
         $this->view->assign("item", $items);
         $this->view->assign("row", $row);
         $this->view->assign("pay", $pay);

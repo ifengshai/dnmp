@@ -54,7 +54,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
             //     Controller.api.formatter.user_chart();
             //     Controller.api.formatter.user_change_chart();
             // });
-
+            
             var table = $("#table");
 
             // 初始化表格

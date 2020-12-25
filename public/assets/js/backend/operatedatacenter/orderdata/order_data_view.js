@@ -43,7 +43,6 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
             //     Controller.api.formatter.line_histogram();
             // });
             
-            
             var table = $("#table");
 
             // 初始化表格

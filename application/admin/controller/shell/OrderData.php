@@ -153,6 +153,7 @@ class OrderData extends Backend
                                     $params['total_qty_ordered'] = $v['total_qty_ordered'];
                                     $params['order_type'] = $v['order_type'];
                                     $params['base_currency_code'] = $v['base_currency_code'];
+                                    $params['order_currency_code'] = $v['order_currency_code'];
                                     $params['shipping_method'] = $v['shipping_method'];
                                     $params['shipping_title'] = $v['shipping_description'];
                                     $params['country_id'] = $v['country_id'];
@@ -197,6 +198,7 @@ class OrderData extends Backend
                                     }
 
                                     $params['base_currency_code'] = $v['base_currency_code'];
+                                    $params['order_currency_code'] = $v['order_currency_code'];
                                     $params['shipping_method'] = $v['shipping_method'];
                                     $params['shipping_title'] = $v['shipping_description'];
                                     $params['customer_email'] = $v['customer_email'];
@@ -209,7 +211,6 @@ class OrderData extends Backend
                                     $params['base_shipping_amount'] = $v['base_shipping_amount'];
                                     $params['base_shipping_amount'] = $v['base_shipping_amount'];
                                     $params['updated_at'] = strtotime($v['updated_at']) + 28800;
-                                    $params['order_prescription_type'] = $v['custom_order_prescription_type'] ?? 0;
 
                                     $this->order->where(['entity_id' => $v['entity_id'], 'site' => $site])->update($params);
                                 }
@@ -219,7 +220,7 @@ class OrderData extends Backend
                             if (($payload['type'] == 'UPDATE' || $payload['type'] == 'INSERT') && $payload['table'] == 'sales_flat_order_address') {
                                 foreach ($payload['data'] as $k => $v) {
                                     $params = [];
-                                    if ($v['address_type'] == 'shipping') { 
+                                    if ($v['address_type'] == 'shipping') {
 
                                         $params['country_id'] = $v['country_id'];
                                         $params['region'] = $v['region'];
@@ -228,10 +229,11 @@ class OrderData extends Backend
                                         $params['street'] = $v['street'];
                                         $params['postcode'] = $v['postcode'];
                                         $params['telephone'] = $v['telephone'];
+                                        $params['firstname'] = $v['firstname'];
+                                        $params['lastname'] = $v['lastname'];
                                         $params['updated_at'] = strtotime($v['updated_at']) + 28800;
                                         $this->order->where(['entity_id' => $v['parent_id'], 'site' => $site])->update($params);
                                     }
-                                    
                                 }
                             }
 
@@ -295,7 +297,7 @@ class OrderData extends Backend
                                 }
                             }
 
-                            //新增子表
+                            //更新子表
                             if ($payload['type'] == 'UPDATE' && $payload['table'] == 'sales_flat_order_item') {
                                 foreach ($payload['data'] as $k => $v) {
                                     $options = [];
@@ -321,9 +323,12 @@ class OrderData extends Backend
                                     $options['sku'] = $v['sku'];
                                     $options['qty'] = $v['qty_ordered'];
                                     $options['base_row_total'] = $v['base_row_total'];
+                                    $order_prescription_type = $options['order_prescription_type'];
                                     unset($options['order_prescription_type']);
                                     if ($options) {
                                         $this->orderitemoption->where(['item_id' => $v['item_id'], 'site' => $site])->update($options);
+
+                                        $this->orderitemprocess->where(['item_id' => $v['item_id'], 'site' => $site])->update(['order_prescription_type' => $order_prescription_type, 'sku' => $options['sku']]);
                                     }
                                 }
                             }
@@ -361,9 +366,8 @@ class OrderData extends Backend
         //镜片类型
         $arr['index_type'] = $options['info_buyRequest']['tmplens']['lenstype_data_name'] ?: '';
         //镜片名称
-        $arr['index_name'] = $options['info_buyRequest']['tmplens']['lens_data_name'] ?: '';
-        //图片id
-        $arr['prescription_pic_id'] = $options['info_buyRequest']['tmplens']['coatiing_price'] ?: '';
+        $index_name = $options['info_buyRequest']['tmplens']['lens_data_name'] ?: $options['info_buyRequest']['tmplens']['index_type'];
+        $arr['index_name'] = $index_name ?: '';
         //光度等参数
         $prescription_params = explode("&", $options['info_buyRequest']['tmplens']['prescription']);
         $options_params = array();
@@ -371,7 +375,6 @@ class OrderData extends Backend
             $arr_value = explode("=", $value);
             $options_params[$arr_value[0]] = $arr_value[1];
         }
-
         //处方类型
         $arr['prescription_type'] = $options_params['prescription_type'] ?: '';
         //镀膜名称
@@ -461,8 +464,6 @@ class OrderData extends Backend
         $arr['index_type'] = $options['info_buyRequest']['tmplens']['index_type'] ?: '';
         //镜片名称
         $arr['index_name'] = $options['info_buyRequest']['tmplens']['index_type'] ?: '';
-        //图片id
-        $arr['prescription_pic_id'] = $options['info_buyRequest']['tmplens']['coatiing_price'] ?: '';
         //光度等参数
         $prescription_params = explode("&", $options['info_buyRequest']['tmplens']['prescription']);
         $options_params = array();
@@ -531,9 +532,9 @@ class OrderData extends Backend
          * 4、当cyl<=-4或cyl>=4 或 sph < -8或 sph>8
          */
 
-       //判断加工类型
-       $result = $this->set_processing_type($arr);
-       $arr = array_merge($arr, $result);
+        //判断加工类型
+        $result = $this->set_processing_type($arr);
+        $arr = array_merge($arr, $result);
 
         return $arr;
     }
@@ -554,8 +555,6 @@ class OrderData extends Backend
         $arr['index_type'] = $options['info_buyRequest']['tmplens']['lens_type'] ?: '';
         //镜片名称
         $arr['index_name'] = $options['info_buyRequest']['tmplens']['third_name'] ?: '';
-        //图片id
-        $arr['prescription_pic_id'] = $options['info_buyRequest']['tmplens']['coatiing_price'] ?: '';
         //光度等参数
         $options_params = json_decode($options['info_buyRequest']['tmplens']['prescription'], true);
 
@@ -643,8 +642,6 @@ class OrderData extends Backend
         $arr['index_type'] = $options['info_buyRequest']['tmplens']['index_type'] ?: '';
         //镜片名称
         $arr['index_name'] = $options['info_buyRequest']['tmplens']['index_type'] ?: '';
-        //图片id
-        $arr['prescription_pic_id'] = $options['info_buyRequest']['tmplens']['coatiing_price'] ?: '';
         //光度等参数
         $prescription_params = explode("&", $options['info_buyRequest']['tmplens']['prescription']);
         $options_params = array();
@@ -735,8 +732,6 @@ class OrderData extends Backend
         $arr['index_type'] = $options['info_buyRequest']['tmplens']['index_type'] ?: '';
         //镜片名称
         $arr['index_name'] = $options['info_buyRequest']['tmplens']['index_type'] ?: '';
-        //图片id
-        $arr['prescription_pic_id'] = $options['info_buyRequest']['tmplens']['coatiing_price'] ?: '';
         //光度等参数
         $prescription_params = explode("&", $options['info_buyRequest']['tmplens']['prescription']);
         $options_params = array();
@@ -832,9 +827,9 @@ class OrderData extends Backend
         //镜片类型
         $arr['index_type'] = $options['info_buyRequest']['tmplens']['index_type'] ?: '';
         //镜片名称
-        $arr['index_name'] = $options['info_buyRequest']['tmplens']['index_type'] ?: '';
+        $arr['index_name'] = $options['info_buyRequest']['tmplens']['index_name'] ?: '';
         //图片id
-        $arr['prescription_pic_id'] = $options['info_buyRequest']['tmplens']['coatiing_price'] ?: '';
+        $arr['prescription_pic_id'] = $options['info_buyRequest']['tmplens']['prescription_pic_id'] ?: '';
         //光度等参数
         $prescription_params = explode("&", $options['info_buyRequest']['tmplens']['prescription']);
         $options_params = array();
@@ -842,7 +837,6 @@ class OrderData extends Backend
             $arr_value = explode("=", $value);
             $options_params[$arr_value[0]] = $arr_value[1];
         }
-
         //处方类型
         $arr['prescription_type'] = $options_params['prescription_type'] ?: '';
         //镀膜名称
@@ -886,9 +880,9 @@ class OrderData extends Backend
         $arr['pd'] = $options_params['pd'];
         $arr['pdcheck'] = $options_params['pdcheck'];
         $arr['prismcheck'] = $options_params['prismcheck'];
-        //小语种站左右眼add是反的 （转换过了）
-        $arr['os_add'] = $options_params['os_add'];
-        $arr['od_add'] = $options_params['od_add'];
+        //小语种站左右眼add是反的
+        $arr['os_add'] = $options_params['od_add'];
+        $arr['od_add'] = $options_params['os_add'];
         $arr['od_pv'] = $options_params['od_pv'];
         $arr['os_pv'] = $options_params['os_pv'];
         $arr['od_pv_r'] = $options_params['od_pv_r'];
@@ -928,8 +922,6 @@ class OrderData extends Backend
         $arr['index_type'] = $options['info_buyRequest']['tmplens']['index_type'] ?: '';
         //镜片名称
         $arr['index_name'] = $options['info_buyRequest']['tmplens']['index_type'] ?: '';
-        //图片id
-        $arr['prescription_pic_id'] = $options['info_buyRequest']['tmplens']['coatiing_price'] ?: '';
         //光度等参数
         $prescription_params = explode("&", $options['info_buyRequest']['tmplens']['prescription']);
         $options_params = array();
@@ -1020,8 +1012,6 @@ class OrderData extends Backend
         $arr['index_type'] = $options['info_buyRequest']['tmplens']['index_type'] ?: '';
         //镜片名称
         $arr['index_name'] = $options['info_buyRequest']['tmplens']['index_type'] ?: '';
-        //图片id
-        $arr['prescription_pic_id'] = $options['info_buyRequest']['tmplens']['coatiing_price'] ?: '';
         //光度等参数
         $prescription_params = explode("&", $options['info_buyRequest']['tmplens']['prescription']);
         $options_params = array();
@@ -1097,7 +1087,7 @@ class OrderData extends Backend
     }
 
 
-     /**
+    /**
      * 判断定制现片逻辑
      */
     protected function set_processing_type($params = [])
@@ -1139,6 +1129,8 @@ class OrderData extends Backend
              */
             if ((((float) urldecode($params['od_sph']) >= -12 && (float) urldecode($params['od_sph']) <= -3) || ((float) urldecode($params['os_sph']) >= -12 && (float) urldecode($params['os_sph']) <= -3)) && (((float) urldecode($params['od_cyl']) >= -2 && (float) urldecode($params['od_cyl']) < 0 && (float) urldecode($params['od_cyl']) != -0.25) || ((float) urldecode($params['os_cyl']) >= -2 && (float) urldecode($params['os_cyl']) <= 0 && (float) urldecode($params['od_cyl']) != -0.25))) {
                 $arr['order_prescription_type'] = 2;
+            } elseif ((float) urldecode($params['od_sph']) == 0 && (float) urldecode($params['os_sph']) == 0) {
+                $arr['order_prescription_type'] = 2;
             } else {
                 $arr['is_custom_lens'] = 1;
                 $arr['order_prescription_type'] = 3;
@@ -1152,6 +1144,8 @@ class OrderData extends Backend
              */
             if ((((float) urldecode($params['od_sph']) >= -15 && (float) urldecode($params['od_sph']) < 0) || ((float) urldecode($params['os_sph']) >= -15 && (float) urldecode($params['os_sph']) < 0)) && (((float) urldecode($params['od_cyl']) >= -2 && (float) urldecode($params['od_cyl']) < 0 && (float) urldecode($params['od_cyl']) != -0.25) || ((float) urldecode($params['os_cyl']) >= -2 && (float) urldecode($params['os_cyl']) < 0 && (float) urldecode($params['od_cyl']) != -0.25))) {
                 $arr['order_prescription_type'] = 2;
+            } elseif ((float) urldecode($params['od_sph']) == 0 && (float) urldecode($params['os_sph']) == 0) {
+                $arr['order_prescription_type'] = 2;
             } else {
                 $arr['is_custom_lens'] = 1;
                 $arr['order_prescription_type'] = 3;
@@ -1164,6 +1158,8 @@ class OrderData extends Backend
              * SPH:-3.00～-13.00 CYL:0.00～-2.00（不含-0.25）
              */
             if ((((float) urldecode($params['od_sph']) >= -13 && (float) urldecode($params['od_sph']) <= -3) || ((float) urldecode($params['os_sph']) >= -13 && (float) urldecode($params['os_sph']) <= -3)) && (((float) urldecode($params['od_cyl']) >= -2 && (float) urldecode($params['od_cyl']) < 0 && (float) urldecode($params['od_cyl']) != -0.25) || ((float) urldecode($params['os_cyl']) >= -2 && (float) urldecode($params['os_cyl']) < 0 && (float) urldecode($params['od_cyl']) != -0.25))) {
+                $arr['order_prescription_type'] = 2;
+            } elseif ((float) urldecode($params['od_sph']) == 0 && (float) urldecode($params['os_sph']) == 0) {
                 $arr['order_prescription_type'] = 2;
             } else {
                 $arr['is_custom_lens'] = 1;
@@ -1179,6 +1175,8 @@ class OrderData extends Backend
              */
             if ((((float) urldecode($params['od_sph']) >= -8 && (float) urldecode($params['od_sph']) < 0) || ((float) urldecode($params['os_sph']) >= -8 && (float) urldecode($params['os_sph']) < 0)) && (((float) urldecode($params['od_cyl']) >= -4 && (float) urldecode($params['od_cyl']) < 0) || ((float) urldecode($params['os_cyl']) >= -4 && (float) urldecode($params['os_cyl']) < 0))) {
                 $arr['order_prescription_type'] = 2;
+            } elseif ((float) urldecode($params['od_sph']) == 0 && (float) urldecode($params['os_sph']) == 0) {
+                $arr['order_prescription_type'] = 2;
             } else {
                 $arr['is_custom_lens'] = 1;
                 $arr['order_prescription_type'] = 3;
@@ -1192,6 +1190,8 @@ class OrderData extends Backend
              */
             if ((((float) urldecode($params['od_sph']) >= -12 && (float) urldecode($params['od_sph']) < 0) || ((float) urldecode($params['os_sph']) >= -12 && (float) urldecode($params['os_sph']) < 0)) && (((float) urldecode($params['od_cyl']) >= -2 && (float) urldecode($params['od_cyl']) < 0 && (float) urldecode($params['od_cyl']) != -0.25) || ((float) urldecode($params['os_cyl']) >= -2 && (float) urldecode($params['os_cyl']) < 0 && (float) urldecode($params['od_cyl']) != -0.25))) {
                 $arr['order_prescription_type'] = 2;
+            } elseif ((float) urldecode($params['od_sph']) == 0 && (float) urldecode($params['os_sph']) == 0) {
+                $arr['order_prescription_type'] = 2;
             } else {
                 $arr['is_custom_lens'] = 1;
                 $arr['order_prescription_type'] = 3;
@@ -1204,6 +1204,8 @@ class OrderData extends Backend
              * SPH:0.00～-12.00 CYL:0.00～-2.00（不含-0.25）
              */
             if ((((float) urldecode($params['od_sph']) >= -3 && (float) urldecode($params['od_sph']) < 0) || ((float) urldecode($params['os_sph']) >= -3 && (float) urldecode($params['os_sph']) < 0)) && (((float) urldecode($params['od_cyl']) >= -2 && (float) urldecode($params['od_cyl']) < 0) || ((float) urldecode($params['os_cyl']) >= -2 && (float) urldecode($params['os_cyl']) < 0))) {
+                $arr['order_prescription_type'] = 2;
+            } elseif ((float) urldecode($params['od_sph']) == 0 && (float) urldecode($params['os_sph']) == 0) {
                 $arr['order_prescription_type'] = 2;
             } else {
                 $arr['is_custom_lens'] = 1;
@@ -1219,6 +1221,8 @@ class OrderData extends Backend
              */
             if ((((float) urldecode($params['od_sph']) >= -8 && (float) urldecode($params['od_sph']) < 0) || ((float) urldecode($params['os_sph']) >= -8 && (float) urldecode($params['os_sph']) < 0)) && (((float) urldecode($params['od_cyl']) >= -2 && (float) urldecode($params['od_cyl']) < 0) || ((float) urldecode($params['os_cyl']) >= -2 && (float) urldecode($params['os_cyl']) < 0))) {
                 $arr['order_prescription_type'] = 2;
+            } elseif ((float) urldecode($params['od_sph']) == 0 && (float) urldecode($params['os_sph']) == 0) {
+                $arr['order_prescription_type'] = 2;
             } else {
                 $arr['is_custom_lens'] = 1;
                 $arr['order_prescription_type'] = 3;
@@ -1231,6 +1235,8 @@ class OrderData extends Backend
              * SPH:0.00～-8.00 CYL:0.00～-2.00
              */
             if ((((float) urldecode($params['od_sph']) >= -8 && (float) urldecode($params['od_sph']) < 0) || ((float) urldecode($params['os_sph']) >= -8 && (float) urldecode($params['os_sph']) < 0)) && (((float) urldecode($params['od_cyl']) >= -2 && (float) urldecode($params['od_cyl']) <= 0.5) || ((float) urldecode($params['os_cyl']) >= -2 && (float) urldecode($params['os_cyl']) <= 0.5))) {
+                $arr['order_prescription_type'] = 2;
+            } elseif ((float) urldecode($params['od_sph']) == 0 && (float) urldecode($params['os_sph']) == 0) {
                 $arr['order_prescription_type'] = 2;
             } else {
                 $arr['is_custom_lens'] = 1;
@@ -1428,7 +1434,6 @@ class OrderData extends Backend
 
     public function order_address_data_shell()
     {
-
         $this->order_address_data(1);
         $this->order_address_data(2);
         $this->order_address_data(3);
@@ -1449,31 +1454,31 @@ class OrderData extends Backend
      */
     protected function order_address_data($site)
     {
-        $list = $this->order->where('region_id is null and site = ' . $site)->limit(3000)->select();
+        $list = $this->order->where('firstname is null and site = ' . $site)->limit(3000)->select();
         $list = collection($list)->toArray();
         $entity_id = array_column($list, 'entity_id');
         if ($site == 1) {
-            $res = Db::connect('database.db_zeelool')->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_id]])->column('region_id,region', 'parent_id');
+            $res = Db::connect('database.db_zeelool')->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_id]])->column('lastname,firstname', 'parent_id');
         } elseif ($site == 2) {
-            $res = Db::connect('database.db_voogueme')->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_id]])->column('region_id,region', 'parent_id');
+            $res = Db::connect('database.db_voogueme')->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_id]])->column('lastname,firstname', 'parent_id');
         } elseif ($site == 3) {
-            $res = Db::connect('database.db_nihao')->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_id]])->column('region_id,region', 'parent_id');
+            $res = Db::connect('database.db_nihao')->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_id]])->column('lastname,firstname', 'parent_id');
         } elseif ($site == 4) {
-            $res = Db::connect('database.db_meeloog')->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_id]])->column('region_id,region', 'parent_id');
+            $res = Db::connect('database.db_meeloog')->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_id]])->column('lastname,firstname', 'parent_id');
         } elseif ($site == 5) {
-            $res = Db::connect('database.db_weseeoptical')->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_id]])->column('region_id,region', 'parent_id');
+            $res = Db::connect('database.db_weseeoptical')->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_id]])->column('lastname,firstname', 'parent_id');
         } elseif ($site == 9) {
-            $res = Db::connect('database.db_zeelool_es')->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_id]])->column('region_id,region', 'parent_id');
+            $res = Db::connect('database.db_zeelool_es')->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_id]])->column('lastname,firstname', 'parent_id');
         } elseif ($site == 10) {
-            $res = Db::connect('database.db_zeelool_de')->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_id]])->column('region_id,region', 'parent_id');
+            $res = Db::connect('database.db_zeelool_de')->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_id]])->column('lastname,firstname', 'parent_id');
         } elseif ($site == 11) {
-            $res = Db::connect('database.db_zeelool_jp')->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_id]])->column('region_id,region', 'parent_id');
+            $res = Db::connect('database.db_zeelool_jp')->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_id]])->column('lastname,firstname', 'parent_id');
         }
         $params = [];
         foreach ($list as $k => $v) {
             $params[$k]['id'] = $v['id'];
-            $params[$k]['region_id'] = $res[$v['entity_id']]['region_id'];
-            $params[$k]['region'] = $res[$v['entity_id']]['region'];
+            $params[$k]['firstname'] = $res[$v['entity_id']]['firstname'];
+            $params[$k]['lastname'] = $res[$v['entity_id']]['lastname'];
             // $params[$k]['city'] = $res[$v['entity_id']]['city'];
             // $params[$k]['street'] = $res[$v['entity_id']]['street'];
             // $params[$k]['postcode'] = $res[$v['entity_id']]['postcode'];
@@ -1506,31 +1511,30 @@ class OrderData extends Backend
      */
     protected function order_data($site)
     {
-        $list = $this->order->where('base_shipping_amount is null and site = ' . $site)->limit(3000)->select();
+        $list = $this->order->where('order_currency_code is null and site = ' . $site)->limit(3000)->select();
         $list = collection($list)->toArray();
         $entity_id = array_column($list, 'entity_id');
         if ($site == 1) {
-            $res = Db::connect('database.db_zeelool')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('mw_rewardpoint,base_shipping_amount', 'entity_id');
+            $res = Db::connect('database.db_zeelool')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('order_currency_code', 'entity_id');
         } elseif ($site == 2) {
-            $res = Db::connect('database.db_voogueme')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('mw_rewardpoint,base_shipping_amount', 'entity_id');
+            $res = Db::connect('database.db_voogueme')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('order_currency_code', 'entity_id');
         } elseif ($site == 3) {
-            $res = Db::connect('database.db_nihao')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('mw_rewardpoint,base_shipping_amount', 'entity_id');
+            $res = Db::connect('database.db_nihao')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('order_currency_code', 'entity_id');
         } elseif ($site == 4) {
-            $res = Db::connect('database.db_meeloog')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('mw_rewardpoint,base_shipping_amount', 'entity_id');
+            $res = Db::connect('database.db_meeloog')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('order_currency_code', 'entity_id');
         } elseif ($site == 5) {
-            $res = Db::connect('database.db_weseeoptical')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('mw_rewardpoint,base_shipping_amount', 'entity_id');
+            $res = Db::connect('database.db_weseeoptical')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('order_currency_code', 'entity_id');
         } elseif ($site == 9) {
-            $res = Db::connect('database.db_zeelool_es')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('mw_rewardpoint,base_shipping_amount', 'entity_id');
+            $res = Db::connect('database.db_zeelool_es')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('order_currency_code', 'entity_id');
         } elseif ($site == 10) {
-            $res = Db::connect('database.db_zeelool_de')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('mw_rewardpoint,base_shipping_amount', 'entity_id');
+            $res = Db::connect('database.db_zeelool_de')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('order_currency_code', 'entity_id');
         } elseif ($site == 11) {
-            $res = Db::connect('database.db_zeelool_jp')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('mw_rewardpoint,base_shipping_amount', 'entity_id');
+            $res = Db::connect('database.db_zeelool_jp')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('order_currency_code', 'entity_id');
         }
         $params = [];
         foreach ($list as $k => $v) {
             $params[$k]['id'] = $v['id'];
-            $params[$k]['mw_rewardpoint'] = $res[$v['entity_id']]['mw_rewardpoint'];
-            $params[$k]['base_shipping_amount'] = $res[$v['entity_id']]['base_shipping_amount'];
+            $params[$k]['order_currency_code'] = $res[$v['entity_id']];
             // $params[$k]['region'] = $res[$v['entity_id']]['region'];
             // $params[$k]['city'] = $res[$v['entity_id']]['city'];
             // $params[$k]['street'] = $res[$v['entity_id']]['street'];
@@ -1540,9 +1544,6 @@ class OrderData extends Backend
         $this->order->saveAll($params);
         echo $site . 'ok';
     }
-
-
-
 
 
     /**
@@ -1556,40 +1557,40 @@ class OrderData extends Backend
     public function order_item_data_shell()
     {
         $this->order_item_shell(1);
-        // $this->order_item_shell(5);
-
     }
 
     protected function order_item_shell($site)
     {
         if ($site == 1) {
             // $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 929673')->max('item_id');
-            $list = Db::connect('database.db_zeelool')->table('sales_flat_order_item')->where(['item_id' => 975454])->limit(3000)->select();
-        } elseif ($site == 2) {
-            $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 515947')->max('item_id');
-            $list = Db::connect('database.db_voogueme')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 515947]]])->limit(3000)->select();
-        } elseif ($site == 3) {
-            $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 76642')->max('item_id');
-            $list = Db::connect('database.db_nihao')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 76642]]])->limit(3000)->select();
-        } elseif ($site == 4) {
-            $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 4111')->max('item_id');
-            $list = Db::connect('database.db_meeloog')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 4111]]])->limit(3000)->select();
-        } elseif ($site == 5) {
-            $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 14134')->max('item_id');
-            $list = Db::connect('database.db_weseeoptical')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 14134]]])->limit(3000)->select();
-        } elseif ($site == 9) {
-            $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 139')->max('item_id');
-            $list = Db::connect('database.db_zeelool_es')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 139]]])->limit(3000)->select();
-        } elseif ($site == 10) {
-            $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 1038')->max('item_id');
-            $list = Db::connect('database.db_zeelool_de')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 1038]]])->limit(3000)->select();
-        } elseif ($site == 11) {
-            $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 215')->max('item_id');
-            $list = Db::connect('database.db_zeelool_jp')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 215]]])->limit(3000)->select();
+            $list = Db::connect('database.db_zeelool')->table('sales_flat_order_item')->where(['item_id' => ['>', 929673]])->where(['item_id' => ['<', 1026606]])->limit(3000)->select();
         }
 
+        // elseif ($site == 2) {
+        //     $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 515947')->max('item_id');
+        //     $list = Db::connect('database.db_voogueme')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 515947]]])->limit(3000)->select();
+        // } elseif ($site == 3) {
+        //     $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 76642')->max('item_id');
+        //     $list = Db::connect('database.db_nihao')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 76642]]])->limit(3000)->select();
+        // } elseif ($site == 4) {
+        //     $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 4111')->max('item_id');
+        //     $list = Db::connect('database.db_meeloog')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 4111]]])->limit(3000)->select();
+        // } elseif ($site == 5) {
+        //     $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 14134')->max('item_id');
+        //     $list = Db::connect('database.db_weseeoptical')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 14134]]])->limit(3000)->select();
+        // } elseif ($site == 9) {
+        //     $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 139')->max('item_id');
+        //     $list = Db::connect('database.db_zeelool_es')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 139]]])->limit(3000)->select();
+        // } elseif ($site == 10) {
+        //     $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 1038')->max('item_id');
+        //     $list = Db::connect('database.db_zeelool_de')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 1038]]])->limit(3000)->select();
+        // } elseif ($site == 11) {
+        //     $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 215')->max('item_id');
+        //     $list = Db::connect('database.db_zeelool_jp')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 215]]])->limit(3000)->select();
+        // }
+
         foreach ($list as $k => $v) {
-            $count = $this->orderitemoption->where('site=' . $site . ' and item_id=' . $v['item_id'])->count();
+            $count = $this->orderitemprocess->where('site=' . $site . ' and item_id=' . $v['item_id'])->count();
             if ($count > 0) {
                 continue;
             }
@@ -1771,7 +1772,7 @@ class OrderData extends Backend
 
     protected function order_item_data_shell_temp($site)
     {
-        $list = $this->orderitemoption->where('site=' . $site . ' and LENGTH(trim(os_axis))=0')->limit(2000)->select();
+        $list = $this->orderitemoption->where('site=' . $site . ' and LENGTH(trim(index_name))=0')->limit(2000)->select();
         $list = collection($list)->toArray();
         $item_ids = array_column($list, 'item_id');
 
@@ -1813,9 +1814,10 @@ class OrderData extends Backend
             } elseif ($site == 11) {
                 $options =  $this->zeelool_jp_prescription_analysis($item_data[$v['item_id']]);
             }
-            $option_params[$k]['os_axis'] = $options['os_axis'] ?: 'None';
+            $option_params[$k]['index_name'] = $options['index_name'] ?: 'None';
+            $option_params[$k]['index_type'] = $options['index_type'] ?: 'None';
             $option_params[$k]['id'] = $v['id'];
-            
+
             echo $v['item_id'] . "\n";
             usleep(10000);
         }

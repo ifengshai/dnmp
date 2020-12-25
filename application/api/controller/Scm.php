@@ -2,6 +2,7 @@
 
 namespace app\api\controller;
 
+use app\admin\model\InterfaceTimeLog;
 use app\common\controller\Api;
 use app\admin\library\Auth;
 use app\admin\model\warehouse\ProductBarCodeItem;
@@ -155,7 +156,9 @@ class Scm extends Api
         $this->auth = Auth::instance();
 
         //校验api_key
-        $this->auth->match(['login', 'version', 'order_examine']) || $this->auth->id || $this->error(__('Api key invalid, please log in again'), [], 401);
+        $this->auth->match(['login', 'version', 'order_examine', 'record_run_time'])
+        ||
+        $this->auth->id || $this->error(__('Api key invalid, please log in again'), [], 401);
 
         //校验请求类型
         $this->request->isPost() || $this->error(__('Request method must be post'), [], 402);
@@ -222,9 +225,9 @@ class Scm extends Api
                 if (!$this->auth->check($val['link'])) {
                     //当前用户无此菜单权限
                     unset($value['menu'][$k]);
-                }else{
+                } else {
                     //图片链接
-                    $value['menu'][$k]['icon'] = $val['icon'] ? $this->request->domain().$val['icon'] : '';
+                    $value['menu'][$k]['icon'] = $val['icon'] ? $this->request->domain() . $val['icon'] : '';
 
                     //镜片未分拣数量
                     if ('镜片分拣' == $val['name']) {
@@ -237,6 +240,7 @@ class Scm extends Api
                 }
             }
             if (!empty($value['menu'])) {
+                $value['menu'] = array_values($value['menu']);
                 $list[] = $value;
             }
         }
@@ -289,4 +293,74 @@ class Scm extends Api
 
         $this->success('', ['list' => $list], 200);
     }
+
+    /**
+     * 记录接口访问时间
+     *
+     * @参数 json time_data  时间数据集合
+     * @author lzh
+     * @return mixed
+     */
+    public function record_run_time()
+    {
+        $time_data = $this->request->request("time_data");
+        $time_data = json_decode(htmlspecialchars_decode($time_data), true);
+        empty($time_data) && $this->error(__('时间集合不能为空'), [], 400);
+        $time_data = array_filter($time_data);
+
+        $save_data = [];
+        foreach ($time_data as $key => $value) {
+            $start_time = $value['start_time'];
+            $end_time = $value['end_time'];
+            $difference = $value['difference'];
+            $function = $value['function'];
+            empty($start_time) && $this->error(__("第{$key}列开始时间不能为空"), [], 402);
+            empty($end_time) && $this->error(__("第{$key}列结束时间不能为空"), [], 403);
+            empty($difference) && $this->error(__("第{$key}列耗费时间差不能为空"), [], 404);
+            empty($function) && $this->error(__("第{$key}列方法名不能为空"), [], 405);
+
+            $save_data[] = [
+                'type' => 2,
+                'start_time' => $start_time,
+                'end_time' => $end_time,
+                'difference' => $difference * 0.001,
+                'function' => $function
+            ];
+        }
+
+        empty($save_data) && $this->error(__('数据获取失败'), [], 406);
+
+        $_interface_time_log = new InterfaceTimeLog();
+        $_interface_time_log->record($save_data);
+
+        $this->success('记录成功', [], 200);
+    }
+
+    /**
+     * 操作成功返回的数据（重写）
+     * @param string $msg 提示信息
+     * @param mixed $data 要返回的数据
+     * @param int $code 错误码，默认为1
+     * @param string $type 输出类型
+     * @param array $header 发送的 Header 信息
+     */
+    protected function success($msg = '', $data = null, $code = 1, $type = null, array $header = [])
+    {
+        $start_time = $GLOBALS['code_run_start_time'];
+        $end_time = microtime(true);
+        $difference = round($start_time - $end_time, 3);
+        $_interface_time_log = new InterfaceTimeLog();
+        $_interface_time_log
+            ->record([
+                [
+                    'type' => 1,
+                    'start_time' => $start_time,
+                    'end_time' => $end_time,
+                    'difference' => $difference,
+                    'function' => $this->request->url()
+                ]
+            ]);
+        $this->result($msg, $data, $code, $type, $header);
+    }
+
 }

@@ -27,6 +27,12 @@ class StockHouse extends Backend
      */
     protected $model = null;
 
+    /**
+     * 无需鉴权的方法,但需要登录
+     * @var array
+     */
+    protected $noNeedRight = ['print_label'];
+
     public function _initialize()
     {
         parent::_initialize();
@@ -130,6 +136,12 @@ class StockHouse extends Backend
             $this->error(__('Parameter %s can not be empty', ''));
         }
         $this->view->assign("type", $type);
+        $arr = [];
+        $kuweihao = $this->shelf_number1();
+        foreach ($kuweihao as $k=>$v){
+            $arr[$v] = $v;
+        }
+        $this->assign('shelf_number',$arr);
         return $this->view->fetch();
     }
 
@@ -196,6 +208,12 @@ class StockHouse extends Backend
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
+        $arr = [];
+        $kuweihao = $this->shelf_number1();
+        foreach ($kuweihao as $k=>$v){
+            $arr[$v] = $v;
+        }
+        $this->assign('shelf_number',$arr);
         $this->view->assign("type", $type);
         $this->view->assign("row", $row);
         return $this->view->fetch();
@@ -327,15 +345,18 @@ class StockHouse extends Backend
      */
     public function print_label($ids = null)
     {
-        //检测状态
+        
         $stock_house_info = $this->model
-            ->where(['id' => $ids])
+            ->where(['id' => ['in',$ids]])
             ->field('status,subarea,coding')
-            ->find()
+            ->select()
         ;
-        1 != $stock_house_info['status'] && $this->error('禁用状态无法打印！');
-        $coding = $stock_house_info['coding'];
-
+        $stock_house_info = collection($stock_house_info)->toArray();
+        
+        $status_arr = array_column($stock_house_info, 'status');
+        if (in_array(2, $status_arr)) {
+            $this->error('禁用状态无法打印！');
+        }
         ob_start();
         $file_header =
             <<<EOF
@@ -351,24 +372,26 @@ table.addpro.re tbody td{ position:relative}
 </style>
 EOF;
 
-        //检测文件夹
-        $dir = ROOT_PATH . "public" . DS . "uploads" . DS . "stock_house" . DS . "merge_shelf";
-        !file_exists($dir) && mkdir($dir, 0777, true);
+        
+        foreach ($stock_house_info as $key => $value) {
+                //检测文件夹
+                $dir = ROOT_PATH . "public" . DS . "uploads" . DS . "stock_house" . DS . "merge_shelf";
+                !file_exists($dir) && mkdir($dir, 0777, true);
 
-        //生成条形码
-        $fileName = $dir . DS . $coding .".png";
-        $this->generate_barcode($coding, $fileName);
+                //生成条形码
+                $fileName = $dir . DS . $value['coding'] .".png";
+                $this->generate_barcode($value['coding'], $fileName);
 
-        //拼接条形码
-        $img_url = "/uploads/stock_house/merge_shelf/{$coding}.png";
-        $file_content = "
+                //拼接条形码
+                $img_url = "/uploads/stock_house/merge_shelf/{$value['coding']}.png";
+                $file_content .= "
 <div style='display:list-item;margin: 0mm auto;padding-top:4mm;padding-right:2mm;text-align:center;'>
-    <p>合单架库位条形码</p>
-    <img src='" . $img_url . "' style='width:36mm'>
-</div>
-            ";
+<p>合单架库位条形码</p>
+<img src='" . $img_url . "' style='width:36mm'>
+</div>";
+        }
 
-        echo $file_header . $file_content;
+    echo $file_header . $file_content;
     }
 
     /**
@@ -537,6 +560,22 @@ EOF;
         // 获取重复数据的数组
         $repeat_arr = array_diff_assoc($arr, $unique_arr);
         return $repeat_arr;
+    }
+    //跑老的库位编码添加货架号字段
+    public function shelf_number()
+    {
+        $shelf_number = $this->model->where('status', 1)->where('type', 1)->field('id,coding')->select();
+        $shelf_number = collection($shelf_number)->toArray();
+        foreach ($shelf_number as $k => $v) {
+            $shelf_number[$k]['shelf_number'] = preg_replace("/\\d+/", '', (explode('-', $v['coding']))[0]);
+            unset($shelf_number[$k]['coding']);
+        }
+        $this->model->isUpdate()->saveAll($shelf_number);
+    }
+    public function shelf_number1()
+    {
+        $data = (new \app\admin\model\warehouse\StockHouse())->get_shelf_number();
+        return $data;
     }
 
 }

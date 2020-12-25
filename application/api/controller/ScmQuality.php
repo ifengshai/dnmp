@@ -434,6 +434,36 @@ class ScmQuality extends Scm
     }
 
     /**
+     * 条形码扫码
+     *
+     * @参数 string code  条形码
+     * @参数 int check_id  质检单ID
+     * @author lzh
+     * @return mixed
+     */
+    public function scan_code()
+    {
+        $code = $this->request->request('code');
+        empty($code) && $this->error(__('条形码不能为空'), [], 403);
+
+        //检测条形码是否已绑定
+        $get_check_id = $this->request->request('check_id');
+        if ($get_check_id){
+            $where['check_id'] = [['>', 0], ['neq', $get_check_id]];
+        } else {
+            $where['check_id'] = ['>', 0];
+        }
+        $where['code'] = $code;
+        $check_quantity = $this->_product_bar_code_item
+            ->where($where)
+            ->field('code')
+            ->find();
+        !empty($check_quantity['code']) && $this->error(__('条形码已绑定'), [], 405);
+
+        $this->success('扫码成功', [], 200);
+    }
+
+    /**
      * 新建/编辑质检单提交
      *
      * @参数 int check_id  质检单ID
@@ -502,7 +532,7 @@ class ScmQuality extends Scm
             $sample_code = array_column($value['sample_agg'], 'code');
             count($value['sample_agg']) != count(array_unique($sample_code))
             &&
-            $this->error(__('不合格条形码有重复，请检查'), [], 405);
+            $this->error(__('留样条形码有重复，请检查'), [], 405);
 
             $where['code'] = ['in', $sample_code];
             $check_sample = $this->_product_bar_code_item
@@ -599,7 +629,7 @@ class ScmQuality extends Scm
                 ];
                 if ($get_check_id) { //更新
                     $where = ['sku' => $value['sku'], 'check_id' => $check_id];
-                    $this->_check_item->allowField(true)->isUpdate(true, $where)->save($item_save);
+                    $this->_check_item->where($where)->update($item_save);
 
                     //质检单移除条形码
                     if (!empty($value['remove_agg'])) {
@@ -610,7 +640,7 @@ class ScmQuality extends Scm
                             'logistics_id' => 0,
                             'check_id' => 0
                         ];
-                        $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => ['in', $value['remove_agg']]])->save($code_clear);
+                        $this->_product_bar_code_item->where(['code' => ['in', $value['remove_agg']]])->update($code_clear);
                     }
                 } else { //新增
                     $item_save['check_id'] = $check_id;
@@ -644,7 +674,7 @@ class ScmQuality extends Scm
                         }
                     }
                 }
-                $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => ['in', $ok_code_list]])->save($code_item);
+                $this->_product_bar_code_item->where(['code' => ['in', $ok_code_list]])->update($code_item);
 
                 //绑定不合格条形码
                 if (!empty($value['unqualified_agg'])) {
@@ -655,7 +685,7 @@ class ScmQuality extends Scm
                         }
                     }
                 }
-                $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => ['in', $no_code_list]])->save($code_item);
+                $this->_product_bar_code_item->where(['code' => ['in', $no_code_list]])->update($code_item);
 
                 //绑定留样条形码
                 if (!empty($value['sample_agg'])) {
@@ -666,7 +696,7 @@ class ScmQuality extends Scm
                         }
                     }
                 }
-                $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => ['in', $sm_code_list]])->save($code_item);
+                $this->_product_bar_code_item->where(['code' => ['in', $sm_code_list]])->update($code_item);
             }
 
             $this->_check->commit();

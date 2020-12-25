@@ -80,6 +80,10 @@
         border-color: #a9c6c9;
         border-radius: 6px;
     }
+    .wenhao-class{
+        width: 12px;
+        float: right;
+    }
 </style>
 <div class="panel panel-default panel-intro">
     {:build_heading()}
@@ -116,11 +120,27 @@
                             <th style="text-align: center; vertical-align: middle;">销售额($)</th>
                             <th style="text-align: center; vertical-align: middle;">订单数</th>
                             <th style="text-align: center; vertical-align: middle;">订单支付成功数</th>
-                            <th style="text-align: center; vertical-align: middle;">客单价($)</th>
-                            <th style="text-align: center; vertical-align: middle;">新增购物车</th>
-                            <th style="text-align: center; vertical-align: middle;">新增购物车转化率(%)</th>
-                            <th style="text-align: center; vertical-align: middle;">更新购物车数</th>
-                            <th style="text-align: center; vertical-align: middle;">更新购物车转化率(%)</th>
+                            <th style="text-align: center; vertical-align: middle;">客单价($)
+                                <span tabindex="0" data-bs-toggle="tooltip" title="平均订单金额 （销售额/订单数）">
+                                    <img src="/wenhao.jpg" alt="" class="wenhao-class">
+                                </span>
+                            </th>
+                            <th style="text-align: center; vertical-align: middle;">新增购物车
+                                <span tabindex="0" data-bs-toggle="tooltip" title="用户购物车从0到1，数量+1">
+                                    <img src="/wenhao.jpg" alt="" class="wenhao-class">
+                                </span></th>
+                            <th style="text-align: center; vertical-align: middle;">新增购物车转化率(%)
+                                <span tabindex="0" data-bs-toggle="tooltip" title="从新增购物车生成的订单数/新增购物车数">
+                                    <img src="/wenhao.jpg" alt="" class="wenhao-class">
+                                </span></th>
+                            <th style="text-align: center; vertical-align: middle;">更新购物车数
+                                <span tabindex="0" data-bs-toggle="tooltip" title="用户购物车有变更时，数量+1">
+                                    <img src="/wenhao.jpg" alt="" class="wenhao-class">
+                                </span></th>
+                            <th style="text-align: center; vertical-align: middle;">更新购物车转化率(%)
+                                <span tabindex="0" data-bs-toggle="tooltip" title="订单数/更新购物车数">
+                                    <img src="/wenhao.jpg" alt="" class="wenhao-class">
+                                </span></th>
                             <th style="text-align: center; vertical-align: middle;">新增注册用户数</th>
                             <th style="text-align: center; vertical-align: middle;">登录用户数</th>
                         </tr>
