@@ -2823,6 +2823,7 @@ class WorkOrderList extends Backend
 
         //获取承接表数据
         $recepts = WorkOrderRecept::where('fa_work_order_recept.work_id', $row->id)
+        ->field('fa_work_order_recept.*,b.measure_choose_id,b.measure_content,b.operation_type,b.item_order_number,b.sku_change_type,b.operation_type,b.operation_time')
         ->join(['fa_work_order_measure' => 'b'], 'fa_work_order_recept.measure_id=b.id')
         ->group('recept_group_id,measure_id')
         ->select();
