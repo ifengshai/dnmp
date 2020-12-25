@@ -1547,7 +1547,7 @@ class OrderData extends Backend
     {
         if ($site == 1) {
             // $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 929673')->max('item_id');
-            $list = Db::connect('database.db_zeelool')->table('sales_flat_order_item')->where(['item_id' => ['>', 929673]])->limit(3000)->select();
+            $list = Db::connect('database.db_zeelool')->table('sales_flat_order_item')->where(['item_id' => ['>', 929673]])->where(['item_id' => ['<', 1026606]])->limit(3000)->select();
         } 
         
         // elseif ($site == 2) {
