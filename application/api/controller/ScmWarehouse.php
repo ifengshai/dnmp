@@ -2114,22 +2114,20 @@ class ScmWarehouse extends Scm
                 $where_code = [];
                 $sku_in = [];
                 foreach (array_filter($item_sku) as $k => $v) {
-                    $save_data = [];
-                    $save_data['is_add'] = $is_add;//是否盘点
-                    $save_data['inventory_qty'] = $v['inventory_qty'] ?? 0;//盘点数量
-                    $save_data['error_qty'] = $save_data['inventory_qty'] - $item_row[$v['sku']];//误差数量
-                    $save_data['remark'] = $v['remark'];//备注
-
                     $item_map['sku'] = $v['sku'];
                     $item_map['is_del'] = 1;
                     $sku_item = $this->_item->where($item_map)->field('stock,available_stock,distribution_occupy_stock')->find();
                     if (empty($sku_item)) {
                         throw new Exception('SKU=>' . $v['sku'] . '不存在');
                     }
-
-                    $save_data['real_time_qty'] = $sku_item['stock'];//实时库存
-                    $save_data['distribution_occupy_stock'] = $sku_item['available_stock'];//配货占用库存
-                    $save_data['available_stock'] = $sku_item['distribution_occupy_stock'];//可用库存
+                    $save_data = [];
+                    $save_data['is_add'] = $is_add;//是否盘点
+                    $save_data['inventory_qty'] = $v['inventory_qty'] ?? 0;//盘点数量
+                    $save_data['error_qty'] = $save_data['inventory_qty'] - $item_row[$v['sku']];//误差数量
+                    $save_data['remark'] = $v['remark'];//备注
+                    $save_data['real_time_qty'] = $sku_item['stock'];//实时库存即为商品库存,fa_item表中real_time_qty字段无效
+                    $save_data['distribution_occupy_stock'] = $sku_item['distribution_occupy_stock'];//配货占用库存
+                    $save_data['available_stock'] = $sku_item['available_stock'];//可用库存
                     $sku = $this->_inventory_item->where(['inventory_id' => $inventory_id, 'sku' => $v['sku']])->value('sku');
                     if (empty($sku)) {
                         $save_data['inventory_id'] = $inventory_id;//SKU
