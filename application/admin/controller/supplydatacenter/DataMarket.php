@@ -410,7 +410,7 @@ class DataMarket extends Backend
             $time_str = $start .' - '.$end;
         }
         $createat = explode(' ', $time_str);
-        $where['p.createtime'] = ['between', [$createat[0].$createat[1], $createat[3].$createat[4]]];
+        $where['p.createtime'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
         $where['p.is_del'] = 1;
         $status_where['p.purchase_status'] = ['in', [2, 5, 6, 7]];
         $arrive_where['p.purchase_status'] = 7;
@@ -577,8 +577,8 @@ class DataMarket extends Backend
                 }
                 $createat = explode(' ', $time_str);
 
-                $start_time = strtotime($createat[0].$createat[1]);
-                $end_time = strtotime($createat[3].$createat[4]);
+                $start_time = strtotime($createat[0].' '.$createat[1]);
+                $end_time = strtotime($createat[3].' '.$createat[4]);
                 $data1 = $this->getProcess(1,$start_time,$end_time); //打印标签
                 $data2 = $this->getProcess(2,$start_time,$end_time); //配货
                 $data3 = $this->getProcess(3,$start_time,$end_time); //配镜片
@@ -641,8 +641,8 @@ class DataMarket extends Backend
         }
         $createat = explode(' ', $time_str);
 
-        $start_time = strtotime($createat[0].$createat[1]);
-        $end_time = strtotime($createat[3].$createat[4]);
+        $start_time = strtotime($createat[0].' '.$createat[1]);
+        $end_time = strtotime($createat[3].' '.$createat[4]);
         $where['check_status'] = 1;
         $where['check_time'] = ['between',[$start_time,$end_time]];
         $arr['delivery_count'] = $this->process->where($where)->count();  //发货数量
@@ -669,7 +669,7 @@ class DataMarket extends Backend
                     $time_str = $start . ' - ' . $end;
                 }
                 $createat = explode(' ', $time_str);
-                $where['delivery_time'] = ['between',[$createat[0],$createat[3]]];
+                $where['delivery_time'] = ['between',[$createat[0].' '.$createat[1],$createat[3].' '.$createat[4]]];
                 $where['node_type'] = 40;
                 //总的妥投订单数
                 $count = $this->orderNode->where($where)->count();
