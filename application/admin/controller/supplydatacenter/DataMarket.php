@@ -283,7 +283,7 @@ class DataMarket extends Backend
     //库存分级概况
     public function stock_level_overview($time_str = ''){
         $cache_data = Cache::get('Supplydatacenter_datamarket'  .$time_str. md5(serialize('stock_level_overview')));
-        if ($cache_data) {
+        if (!$cache_data) {
             return $cache_data;
         }
         $gradeSkuStock = $this->productGrade->getSkuStock();

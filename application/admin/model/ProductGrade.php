@@ -51,6 +51,8 @@ class ProductGrade extends Model
         //B等级
         $where['grade'] = 'B';
         $skus = $this->where($where)->column('true_sku');
+        $data['b_stock_num'] = $item->where(['sku' => ['in', $skus], 'is_del' => 1])->select(false);
+        echo $data['b_stock_num'];exit;
         $data['b_stock_num'] = $item->where(['sku' => ['in', $skus], 'is_del' => 1])->sum('stock');
         //库存金额
         $data['b_stock_price'] = $item->where(['sku' => ['in', $skus], 'is_del' => 1])->sum('stock*purchase_price');
