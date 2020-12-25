@@ -40,24 +40,17 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                         { field: 'sales_total_money', title: __('订单金额'),sortable: true },
                         { field: 'register_num', title: __('注册量'),sortable: true }
                     ]
-                ]
+                ],
+                onLoadSuccess: function (data) {
+                    var length = $("#table >tbody> tr").length;
+                    if(length>1){
+                        var tr=$("#table tr:last");
+                        tr.after('<tr data-index="10"> <td style="text-align: center; vertical-align: middle; ">合计</td> <td style="text-align: center; vertical-align: middle; ">'+data.data.sessions+'</td> <td style="text-align: center; vertical-align: middle; ">'+data.data.add_cart_rate+'%</td> <td style="text-align: center; vertical-align: middle; ">'+data.data.session_rate+'%</td> <td style="text-align: center; vertical-align: middle; ">'+data.data.order_num+'</td> <td style="text-align: center; vertical-align: middle; ">'+data.data.order_unit_price+'</td> <td style="text-align: center; vertical-align: middle; ">'+data.data.new_cart_num+'</td> <td style="text-align: center; vertical-align: middle; ">'+data.data.update_cart_num+'</td> <td style="text-align: center; vertical-align: middle; ">'+data.data.sales_total_money+'</td> <td style="text-align: center; vertical-align: middle; ">'+data.data.register_num+'</td> </tr>');
+                    }
+                 }
             });
             // 为表格绑定事件
             Table.api.bindevent(table);
-            /* var newData = [{
-                day_date:"合计",
-        sessions:"1111",
-        add_cart_rate:"1111",
-        session_rate:"1111",
-        order_num:"1111",
-        order_unit_price:"1111",
-        new_cart_num:"1111",
-        update_cart_num:"1111",
-        sales_total_money:"1111",
-        register_num:"1111", 
-            } ];
-            
-    table.bootstrapTable('append', newData); */
 
             Controller.api.formatter.order_num_data_line();
             Controller.api.formatter.order_sales_data_line();
