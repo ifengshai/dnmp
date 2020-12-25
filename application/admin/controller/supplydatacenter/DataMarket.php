@@ -347,8 +347,8 @@ class DataMarket extends Backend
             $all_stock_num += $value['stock_num'];
         }
         foreach ($arr as $key=>$val){
-            $arr[$key]['percent'] = $all_num ? round($val['count']/$all_num,2).'%':0;
-            $arr[$key]['stock_percent'] = $all_stock_num ? round($val['stock_num']/$all_stock_num,2).'%':0;
+            $arr[$key]['percent'] = $all_num ? round($val['count']/$all_num*100,2).'%':0;
+            $arr[$key]['stock_percent'] = $all_stock_num ? round($val['stock_num']/$all_stock_num*100,2).'%':0;
             //库销比
             $skus = $this->productGrade->where('grade',$val['grade'])->column('true_sku');
             $where['sku'] = ['in', $skus];
