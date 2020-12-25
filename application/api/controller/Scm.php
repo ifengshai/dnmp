@@ -323,7 +323,7 @@ class Scm extends Api
                 'type' => 2,
                 'start_time' => $start_time,
                 'end_time' => $end_time,
-                'difference' => $difference,
+                'difference' => $difference * 0.001,
                 'function' => $function
             ];
         }
