@@ -401,8 +401,13 @@ class DataMarket extends Backend
     //采购总览
     public function purchase_overview($time_str = ''){
         $cache_data = Cache::get('Supplydatacenter_datamarket'  .$time_str. md5(serialize('purchase_overview')));
-        if (!$cache_data) {
+        if ($cache_data) {
             return $cache_data;
+        }
+        if(!$time_str){
+            $start = date('Y-m-d 00:00:00', strtotime('-6 day'));
+            $end   = date('Y-m-d 23:59:59');
+            $time_str = $start .' - '.$end;
         }
         $createat = explode(' ', $time_str);
         $where['p.createtime'] = ['between', [$createat[0], $createat[3]]];
@@ -410,8 +415,6 @@ class DataMarket extends Backend
         $status_where['p.purchase_status'] = ['in', [2, 5, 6, 7]];
         $arrive_where['p.purchase_status'] = 7;
         //采购总数
-        $arr['purchase_num'] = $this->purchase->alias('p')->where($where)->where($status_where)->join(['fa_purchase_order_item' => 'b'], 'p.id=b.purchase_id')->field('b.purchase_num')->select(false);
-        echo $arr['purchase_num'];exit;
         $arr['purchase_num'] = $this->purchase->alias('p')->where($where)->where($status_where)->join(['fa_purchase_order_item' => 'b'], 'p.id=b.purchase_id')->sum('b.purchase_num');
         //采购总金额
         $arr['purchase_amount'] = $this->purchase->alias('p')->where($where)->where($status_where)->join(['fa_purchase_order_item' => 'b'], 'p.id=b.purchase_id')->sum('purchase_num*purchase_price');
