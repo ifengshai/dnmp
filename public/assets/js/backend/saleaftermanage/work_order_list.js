@@ -56,7 +56,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
 
                         { field: 'create_user_name', title: __('create_user_name'), operate: 'like', visible: false },
 
-                        /*{
+                        {
                             field: 'order_sku',
                             title: __('Order_sku'),
                             operate: 'like',
@@ -72,7 +72,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 }
                                 return all_user_name;
                             },
-                        },*/
+                        },
                         { field: 'coupon_str', title: __('优惠券') },
                         { field: 'replacement_order', title: __('补发订单号') },
                         { field: 'work_level', title: __('Work_level'), custom: { 1: 'success', 2: 'orange', 3: 'danger' }, searchList: { 1: '低', 2: '中', 3: '高' }, formatter: Table.api.formatter.status },
