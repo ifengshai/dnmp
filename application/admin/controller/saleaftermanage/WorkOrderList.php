@@ -1041,6 +1041,7 @@ class WorkOrderList extends Backend
                 $measure_choose_id = $params['measure_choose_id'] ? array_unique(array_filter($params['measure_choose_id'])) : [];//措施ID数组
                 $work_type = $params['work_type'];//工单类型：1客服 2仓库
                 $item_order_info = $params['item_order_info'];//子订单措施
+                $order_sku = $params['order_sku'] ? implode(',', $params['order_sku']) : '';//sku列表
 
                 //校验问题类型、问题描述
                 $params['problem_type_id'] = $params['problem_type_id'] ?: $params['problem_id'];
@@ -1068,6 +1069,11 @@ class WorkOrderList extends Backend
                         !empty($item_order_info)
                     )
                     && $this->error("已审单，不能创建工单");
+
+                    //指定问题类型校验sku下拉框是否勾选
+                    in_array($params['problem_type_id'],[8,10,11,56,13,14,15,16,18,22,59])
+                    && empty($order_sku)
+                    && $this->error("请选择sku");
 
                     //校验工单类型
                     if (1 == $work_type) {
@@ -1375,7 +1381,7 @@ class WorkOrderList extends Backend
                         $params['create_user_name'] = $nickname;
                         $params['create_user_id'] = $admin_id;
                         $params['create_time'] = date('Y-m-d H:i:s');
-                        $params['order_sku'] = $params['order_sku'] ? implode(',', $params['order_sku']) : '';
+                        $params['order_sku'] = $order_sku;
                         $params['assign_user_id'] = $params['assign_user_id'] ?: 0;
                         $params['customer_group'] = $this->customer_group;
 
@@ -1875,12 +1881,18 @@ class WorkOrderList extends Backend
                 $measure_choose_id = $params['measure_choose_id'] ? array_unique(array_filter($params['measure_choose_id'])) : [];//措施ID数组
                 $work_type = $params['work_type'];//工单类型：1客服 2仓库
                 $item_order_info = $params['item_order_info'];//子订单措施
+                $params['order_sku'] = $params['order_sku'] ? implode(',', $params['order_sku']) : '';//sku列表
 
                 //校验问题类型、问题描述
                 $params['problem_type_id'] = $params['problem_type_id'] ?: $params['problem_id'];
                 !$params['problem_type_id'] && $this->error("请选择问题类型");
                 !$params['problem_description'] && $this->error("问题描述不能为空");
                 !$platform_order && $this->error("订单号不能为空");
+
+                //指定问题类型校验sku下拉框是否勾选
+                in_array($params['problem_type_id'],[8,10,11,56,13,14,15,16,18,22,59])
+                && empty($params['order_sku'])
+                && $this->error("请选择sku");
 
                 //校验工单类型
                 if (1 == $work_type) {
