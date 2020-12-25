@@ -80,11 +80,11 @@ class OcPrescriptionPic extends Backend
                 $count = Db::query($count);
                 $total = $count[0]['COUNT(1)'];
             }else{
-                $count = "SELECT COUNT(1) FROM ".$model.".oc_prescription_pic where".$WhereSql;
-                dump($count);die();
-                $count = "SELECT COUNT(1) FROM ".$model.".oc_prescription_pic where".$WhereSql." union all  SELECT COUNT(1) FROM vuetest_voogueme.oc_prescription_pic where".$WhereSql;
+                $count = "SELECT COUNT(1) FROM zeelool_test.oc_prescription_pic where".$WhereSql." union all  SELECT COUNT(1) FROM vuetest_voogueme.oc_prescription_pic where".$WhereSql;
                 $sql  = "SELECT * ,1 as site FROM zeelool_test.oc_prescription_pic where".$WhereSql." union all  SELECT * ,2 as site FROM vuetest_voogueme.oc_prescription_pic where".$WhereSql." limit  ". $offset.','.$limit;
                 $count = $model->query($count);
+
+                
                 dump($count);
                 $total = $count[0]['COUNT(1)']  + $count[1]['COUNT(1)'];
             }
