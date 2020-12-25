@@ -434,6 +434,36 @@ class ScmQuality extends Scm
     }
 
     /**
+     * 条形码扫码
+     *
+     * @参数 string code  条形码
+     * @参数 int check_id  质检单ID
+     * @author lzh
+     * @return mixed
+     */
+    public function scan_code()
+    {
+        $code = $this->request->request('code');
+        empty($code) && $this->error(__('条形码不能为空'), [], 403);
+
+        //检测条形码是否已绑定
+        $get_check_id = $this->request->request('check_id');
+        if ($get_check_id){
+            $where['check_id'] = [['>', 0], ['neq', $get_check_id]];
+        } else {
+            $where['check_id'] = ['>', 0];
+        }
+        $where['code'] = $code;
+        $check_quantity = $this->_product_bar_code_item
+            ->where($where)
+            ->field('code')
+            ->find();
+        !empty($check_quantity['code']) && $this->error(__('条形码已绑定'), [], 405);
+
+        $this->success('扫码成功', [], 200);
+    }
+
+    /**
      * 新建/编辑质检单提交
      *
      * @参数 int check_id  质检单ID
@@ -502,7 +532,7 @@ class ScmQuality extends Scm
             $sample_code = array_column($value['sample_agg'], 'code');
             count($value['sample_agg']) != count(array_unique($sample_code))
             &&
-            $this->error(__('不合格条形码有重复，请检查'), [], 405);
+            $this->error(__('留样条形码有重复，请检查'), [], 405);
 
             $where['code'] = ['in', $sample_code];
             $check_sample = $this->_product_bar_code_item
