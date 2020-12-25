@@ -428,7 +428,7 @@
 
 
         <div class="form-group-child">
-            <label class="control-label col-xs-12 col-sm-2">{:__('order_sku')}：</label>
+            <label class="control-label col-xs-12 col-sm-2">{:__('子单号')}：</label>
             <div class="col-xs-12 col-sm-8">
                 <?php
                     $sku = [];
@@ -454,18 +454,20 @@
                     $order_item_numbers = implode(',', $item_arr_value);
                 ?>
                 <input type="hidden" id='order_item_numbers' name="row[order_item_numbers]"  value="{:$order_item_numbers}" />
-                {:build_select('row[order_sku][]', $sku, $sku_selected,['class'=>'form-control selectpicker item_order_selectpicker','multiple'=>'multiple','id'=>'c-order_sku'])}
+                {:build_select('row[itemorder_sku][]', $sku, $sku_selected,['class'=>'form-control selectpicker item_order_selectpicker','multiple'=>'multiple','id'=>'c-order_sku'])}
             </div>
         </div>
 
         <div class="form-group-child">
-            <label class="control-label col-xs-12 col-sm-2">{:__('work_level')}：</label>
+            <label class="control-label col-xs-12 col-sm-2">{:__('order_sku')}：</label>
             <div class="col-xs-12 col-sm-8">
-                <select id="c-work_level" class="form-control selectpicker" name="row[work_level]">
-                    <option value="1" {eq name="1" value="$row.work_level"}selected{/eq}>低</option>
-                    <option value="2" {eq name="2" value="$row.work_level"}selected{/eq}>中</option>
-                    <option value="3" {eq name="3" value="$row.work_level"}selected{/eq}>高</option>
-                </select>
+                <?php 
+                    $new_sku_list = [];
+                    foreach ($order_item->new_sku_list as $key => $value){
+                        $new_sku_list[$value] = $value;
+                    }
+                ?>
+                {:build_select('row[order_sku][]', $new_sku_list, $order_item->select_sku, ['class'=>'form-control selectpicker','multiple'=>'multiple','id'=>'c-order_new_sku','title'=>"请选择"])}
             </div>
         </div>
         <div class="form-group-child">
