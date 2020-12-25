@@ -458,9 +458,7 @@ class ScmQuality extends Scm
             ->where($where)
             ->field('code')
             ->find();
-        if (!empty($check_quantity['code'])) {
-            $this->error(__('条形码已绑定'), [], 405);
-        }
+        !empty($check_quantity['code']) && $this->error(__('条形码已绑定'), [], 405);
 
         $this->success('扫码成功', [], 200);
     }
