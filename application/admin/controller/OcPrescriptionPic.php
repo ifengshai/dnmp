@@ -85,8 +85,8 @@ class OcPrescriptionPic extends Backend
                 $count = Db::query($count);
                 $total = $count[0]['COUNT(1)']  + $count[1]['COUNT(1)'];
             }
-            $list  = Db::query($sql);
-
+            $list  = Db::connect('db_zeelool')->query($sql);
+            dump($list);die();
             foreach ($list as $key=>$item){
                 if ($item['status'] ==1){
                     $list[$key]['status']='未处理';
