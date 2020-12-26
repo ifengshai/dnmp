@@ -3505,7 +3505,7 @@ class Crontab extends Backend
         $model->table('customer_entity')->query("set time_zone='+8:00'");
         //昨天销售额
         if($platform == 11){
-            $order_where['order_type'] = 10;
+            $order_where['order_type'] = ['in',[1,10]];
         }else{
             $order_where['order_type'] = 1;
         }
@@ -3760,7 +3760,7 @@ class Crontab extends Backend
         $model->table('sales_flat_quote')->query("set time_zone='+8:00'");
         //昨天支付成功数
         if($platform == 11){
-            $order_where['order_type'] = 10;
+            $order_where['order_type'] = ['in',[1,10]];
         }else{
             $order_where['order_type'] = 1;
         }
