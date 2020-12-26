@@ -191,7 +191,7 @@ class WorkOrderList extends Model
      */
     public function getOrderItem($increment_id, $item_order_number='', $work_type=0, $work=[], $do_type=0)
     {
-        $order_field = 'id,site,base_grand_total,base_to_order_rate,payment_method as method,customer_email,customer_firstname,customer_lastname,order_type,mw_rewardpoint_discount,base_currency_code,created_at as payment_time';
+        $order_field = 'id,site,base_grand_total,base_to_order_rate,payment_method as method,customer_email,customer_firstname,customer_lastname,order_type,mw_rewardpoint_discount,base_currency_code,order_currency_code,created_at as payment_time';
 
         $_new_order = new NewOrder();
         $result = $_new_order
