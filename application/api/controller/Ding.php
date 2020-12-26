@@ -595,6 +595,10 @@ class Ding extends Controller
                     if ($demand->type == 2) { //需求类型,产品经理确认
                         $send_ids = Auth::getUsersId('demand/develop_demand/review_status_develop'); // 所有有权限点击[通过]按钮的人
                         $msg = '一个任务已开发完成,等待您的确认';
+                        //需求开发完成时，钉钉推送创建人和提出人
+                        $user_all = explode(',',$demand->duty_user_id);
+                        $user_all[] = $demand->create_person_id;
+                        Ding::cc_ding(array_merge(array_filter($user_all)), '任务ID:' . $demand->id . '+任务已开发完成', $demand->title);
                     } elseif ($demand->type == 1) { //BUG 类型`
                         $send_ids = array_merge(
                             Auth::getUsersId('demand/develop_demand/review_status_develop'),

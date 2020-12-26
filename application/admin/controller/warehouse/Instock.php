@@ -3,6 +3,7 @@
 namespace app\admin\controller\warehouse;
 
 use app\admin\model\itemmanage\ItemPlatformSku;
+use app\admin\model\warehouse\ProductBarCodeItem;
 use app\common\controller\Backend;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Reader\Csv;
@@ -822,6 +823,13 @@ class Instock extends Backend
                 if (count($error_num) > 0) {
                     throw new Exception("入库失败！！请检查SKU");
                 }
+            }else{
+                //审核拒绝解除条形码绑定关系
+                $_product_bar_code_item = new ProductBarCodeItem();
+                $_product_bar_code_item
+                    ->allowField(true)
+                    ->isUpdate(true, ['in_stock_id' => ['in', $ids]])
+                    ->save(['in_stock_id' => 0]);
             }
 
             $this->model->commit();
