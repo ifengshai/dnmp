@@ -446,19 +446,20 @@ class ScmQuality extends Scm
         $code = $this->request->request('code');
         empty($code) && $this->error(__('条形码不能为空'), [], 403);
 
+        //检测条形码是否存在
+        $check_quantity = $this->_product_bar_code_item
+            ->field('code,check_id')
+            ->where(['code'=>$code])
+            ->find();
+        empty($check_quantity['code']) && $this->error(__('条形码不存在'), [], 405);
+
         //检测条形码是否已绑定
         $get_check_id = $this->request->request('check_id');
         if ($get_check_id){
-            $where['check_id'] = [['>', 0], ['neq', $get_check_id]];
+            !empty($check_quantity['check_id']) && $get_check_id != $check_quantity['check_id'] && $this->error(__('条形码已绑定'), [], 405);
         } else {
-            $where['check_id'] = ['>', 0];
+            !empty($check_quantity['check_id']) && $this->error(__('条形码已绑定'), [], 405);
         }
-        $where['code'] = $code;
-        $check_quantity = $this->_product_bar_code_item
-            ->where($where)
-            ->field('code')
-            ->find();
-        !empty($check_quantity['code']) && $this->error(__('条形码已绑定'), [], 405);
 
         $this->success('扫码成功', [], 200);
     }
@@ -497,6 +498,7 @@ class ScmQuality extends Scm
         }
         foreach ($item_data as $key => $value) {
             //检测合格条形码
+            count($value['quantity_agg']) != $value['quantity_num'] && $this->error(__('合格条形码数量不一致，请检查'), [], 405);
             $quantity_code = array_column($value['quantity_agg'], 'code');
             count($value['quantity_agg']) != count(array_unique($quantity_code))
             &&
@@ -513,6 +515,7 @@ class ScmQuality extends Scm
             }
 
             //检测不合格条形码
+            count($value['unqualified_agg']) != $value['unqualified_num'] && $this->error(__('不合格条形码数量不一致，请检查'), [], 405);
             $unqualified_code = array_column($value['unqualified_agg'], 'code');
             count($value['unqualified_agg']) != count(array_unique($unqualified_code))
             &&
@@ -529,6 +532,7 @@ class ScmQuality extends Scm
             }
 
             //检测留样条形码
+            count($value['sample_agg']) != $value['sample_num'] && $this->error(__('留样条形码数量不一致，请检查'), [], 405);
             $sample_code = array_column($value['sample_agg'], 'code');
             count($value['sample_agg']) != count(array_unique($sample_code))
             &&
