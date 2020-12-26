@@ -1352,7 +1352,7 @@ class Distribution extends Backend
             $this->error($e->getMessage());
         }
 
-        // $this->success('操作成功!', '', 'success', 200);
+        $this->success('操作成功!', '', 'success', 200);
     }
 
     /**
