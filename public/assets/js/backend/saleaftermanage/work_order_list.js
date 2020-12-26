@@ -1254,9 +1254,29 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
 
         },
         edit: function () {
-            if (!$('.item_order_selectpicker').val()) {platform_order();}
             if(Config.work_type == 2 && Config.work_status == 1){$('#c-order_sku').attr("disabled",true);}
+            if (!$('.item_order_selectpicker').val()) {
+                platform_order();
+                $('#c-order_sku').attr("disabled",false);
+            }
             Controller.api.bindevent();
+
+            $('.btn-status,.btn-warning').click(function () {
+                if(Config.work_type == 2 && Config.work_status == 1){
+                    if (!$('.item_order_selectpicker').val()) {
+                        Toastr.error('仓库工单，请选择子单号');
+                        return false;
+                    }else{
+                        var item_order_selectpicker = $('.item_order_selectpicker').val();
+                        var item_order_sku_number = [];
+                        for (var i = item_order_selectpicker.length - 1; i >= 0; i--) {
+                           $split = item_order_selectpicker[i].split("/");
+                           item_order_sku_number[i] = $split[0];
+                        }
+                        $('#order_item_numbers').val(item_order_sku_number)
+                    }
+                }
+            })
             //进入页面展示按钮下的数据
             $("input[name='row[measure_choose_id][]']:checked").each(function (i) {
                 var id = $(this).val();
