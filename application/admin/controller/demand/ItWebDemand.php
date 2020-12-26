@@ -1530,7 +1530,7 @@ class ItWebDemand extends Backend
                         Ding::cc_ding($usersIds, '任务ID:' . $params['id'] . '+测试未通过', $row['title'], $this->request->domain() . url('index') . '?ref=addtabs');
                     } elseif ($label == 3) { //任务上线 通知提出人
                         Ding::cc_ding($row['entry_user_id'], '任务ID:' . $params['id'] . '+任务已上线，等待确认', $row['title'], $this->request->domain() . url('index') . '?ref=addtabs');
-                    }else{
+                    }else if ($label ==1){
                         //测试通过 推送给对应开发者
                         $user_all = array_merge(array_filter(array($row['app_user_id'],$row['phper_user_id'],$row['web_designer_user_id'])));
                         Ding::cc_ding($user_all, '任务ID:' . $params['id'] . '+测试已通过，等待上线', $row['title'], $this->request->domain() . url('index') . '?ref=addtabs');
