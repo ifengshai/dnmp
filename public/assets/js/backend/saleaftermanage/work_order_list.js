@@ -3318,9 +3318,7 @@ function platform_order(){
             
             var is_order_item = $('#is_order_item').val();
             var status = $('.status').val();
-            if (1 != status) {
-                if (2 != Config.work_type && 1 != is_order_item) {$('#c-order_new_sku').append(sku_html);}
-            }
+            if (2 != Config.work_type && 1 != is_order_item) {$('#c-order_new_sku').append(sku_html);}
             
             
 
