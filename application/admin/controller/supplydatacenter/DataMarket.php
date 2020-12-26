@@ -393,51 +393,55 @@ class DataMarket extends Backend
     }
     //库龄概况
     public function stock_age_overview(){
+        $cache_data = Cache::get('Supplydatacenter_datamarket' . md5(serialize('stock_age_overview')));
+        if ($cache_data) {
+            return $cache_data;
+        }
         $where['library_status'] = 1;
-        $count = $this->item->where($where)->count();
-        $sql = $this->item->alias('t1')->field('TIMESTAMPDIFF(MONTH,in_stock_time,now()) AS total')->where($where)->buildSql();
+        $count = $this->item->where($where)->where('in_stock_time is not null')->count();
+        $sql = $this->item->alias('t1')->field('TIMESTAMPDIFF(MONTH,in_stock_time,now()) AS total')->where($where)->where('in_stock_time is not null')->buildSql();
         $data = $this->item->table([$sql=>'t2'])->field('sum( IF ( total >= 10 and total<13, 1, 0 ) ) AS d,sum( IF ( total >= 7 and total<10, 1, 0 ) ) AS c,sum( IF ( total >= 4 and total<7, 1, 0 ) ) AS b,sum( IF ( total >= 0 and total<4, 1, 0 ) ) AS a')->select();
         $data1 = $data[0]['a'];
         $data2 = $data[0]['b'];
         $data3 = $data[0]['c'];
         $data4 = $data[0]['d'];
         $data5 = $count - $data1 - $data2 - $data3 - $data4;
-        $stock = $this->item->where($where)->count();
+        $stock = $this->item->where($where)->where('in_stock_time is not null')->count();
         $map1 = [];
         $map1[] = ['exp', Db::raw("TIMESTAMPDIFF(MONTH,in_stock_time,now())>=0 and TIMESTAMPDIFF(MONTH,in_stock_time,now())<4")];
-        $stock1 = $this->item->where($where)->where($map1)->count();
+        $stock1 = $this->item->where($where)->where('in_stock_time is not null')->where($map1)->count();
 
         $map2 = [];
         $map2[] = ['exp', Db::raw("TIMESTAMPDIFF(MONTH,in_stock_time,now())>=4 and TIMESTAMPDIFF(MONTH,in_stock_time,now())<7")];
-        $stock2 = $this->item->where($where)->where($map2)->count();
+        $stock2 = $this->item->where($where)->where('in_stock_time is not null')->where($map2)->count();
 
         $map3 = [];
         $map3[] = ['exp', Db::raw("TIMESTAMPDIFF(MONTH,in_stock_time,now())>=7 and TIMESTAMPDIFF(MONTH,in_stock_time,now())<10")];
-        $stock3 = $this->item->where($where)->where($map3)->count();
+        $stock3 = $this->item->where($where)->where('in_stock_time is not null')->where($map3)->count();
 
         $map4 = [];
         $map4[] = ['exp', Db::raw("TIMESTAMPDIFF(MONTH,in_stock_time,now())>=10 and TIMESTAMPDIFF(MONTH,in_stock_time,now())<13")];
-        $stock4 = $this->item->where($where)->where($map4)->count();
+        $stock4 = $this->item->where($where)->where('in_stock_time is not null')->where($map4)->count();
 
         $stock5 = $stock - $stock1 - $stock2 - $stock3 - $stock4;
 
-        $total = $this->item->alias('b')->join('fa_purchase_order_item o','b.purchase_id=o.purchase_id')->where($where)->sum('o.purchase_price');
+        $total = $this->item->alias('b')->join('fa_purchase_order_item o','b.purchase_id=o.purchase_id')->where($where)->where('in_stock_time is not null')->sum('o.purchase_price');
 
         $flag1 = [];
         $flag1[] = ['exp', Db::raw("TIMESTAMPDIFF(MONTH,in_stock_time,now())>=0 and TIMESTAMPDIFF(MONTH,in_stock_time,now())<4")];
-        $total1 = $this->item->alias('b')->join('fa_purchase_order_item o','b.purchase_id=o.purchase_id')->where($where)->where($flag1)->sum('o.purchase_price');
+        $total1 = $this->item->alias('b')->join('fa_purchase_order_item o','b.purchase_id=o.purchase_id')->where($where)->where('in_stock_time is not null')->where($flag1)->sum('o.purchase_price');
 
         $flag2 = [];
         $flag2[] = ['exp', Db::raw("TIMESTAMPDIFF(MONTH,in_stock_time,now())>=4 and TIMESTAMPDIFF(MONTH,in_stock_time,now())<7")];
-        $total2 = $this->item->alias('b')->join('fa_purchase_order_item o','b.purchase_id=o.purchase_id')->where($where)->where($flag2)->sum('o.purchase_price');
+        $total2 = $this->item->alias('b')->join('fa_purchase_order_item o','b.purchase_id=o.purchase_id')->where($where)->where('in_stock_time is not null')->where($flag2)->sum('o.purchase_price');
 
         $flag3 = [];
         $flag3[] = ['exp', Db::raw("TIMESTAMPDIFF(MONTH,in_stock_time,now())>=7 and TIMESTAMPDIFF(MONTH,in_stock_time,now())<10")];
-        $total3 = $this->item->alias('b')->join('fa_purchase_order_item o','b.purchase_id=o.purchase_id')->where($where)->where($flag3)->sum('o.purchase_price');
+        $total3 = $this->item->alias('b')->join('fa_purchase_order_item o','b.purchase_id=o.purchase_id')->where($where)->where('in_stock_time is not null')->where($flag3)->sum('o.purchase_price');
 
         $flag4 = [];
         $flag4[] = ['exp', Db::raw("TIMESTAMPDIFF(MONTH,in_stock_time,now())>=10 and TIMESTAMPDIFF(MONTH,in_stock_time,now())<13")];
-        $total4 = $this->item->alias('b')->join('fa_purchase_order_item o','b.purchase_id=o.purchase_id')->where($where)->where($flag4)->sum('o.purchase_price');
+        $total4 = $this->item->alias('b')->join('fa_purchase_order_item o','b.purchase_id=o.purchase_id')->where($where)->where('in_stock_time is not null')->where($flag4)->sum('o.purchase_price');
 
         $total5 = $total - $total1 - $total2 - $total3 - $total4;
 
@@ -495,6 +499,7 @@ class DataMarket extends Backend
                 'total'=>$total5
             ),
         );
+        Cache::set('Supplydatacenter_datamarket'.md5(serialize('stock_age_overview')),$arr,7200);
         return $arr;
     }
     //采购总览
