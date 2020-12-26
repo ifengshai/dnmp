@@ -1090,7 +1090,7 @@ class OrderData extends Backend
     /**
      * 判断定制现片逻辑
      */
-    protected function set_processing_type($params = [])
+    public function set_processing_type($params = [])
     {
         /**
          * 判断定制现片逻辑
