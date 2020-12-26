@@ -31,6 +31,7 @@ class DataMarket extends Backend
         $this->supply = new \app\admin\model\supplydatacenter\Supply();
         $this->inventory = new \app\admin\model\warehouse\Inventory;
         $this->inventoryitem = new \app\admin\model\warehouse\InventoryItem;
+        $this->item = new \app\admin\model\warehouse\ProductBarCodeItem;
     }
     /**
      * 显示资源列表
@@ -390,7 +391,12 @@ class DataMarket extends Backend
     }
     //库龄概况
     public function stock_age_overview(){
-        
+
+        $where['library_status'] = 1;
+
+        $sql = $this->item->alias('t1')->field('TIMESTAMPDIFF(MONTH,in_stock_time,now()) AS total')->where($where)->group('customer_id')->buildSql();
+
+        $order_customer_count = $this->item->table([$sql=>'t2'])->field('sum( IF ( total >= 360 and total<720, 1, 0 ) ) AS g,sum( IF ( total >= 180 and total<360, 1, 0 ) ) AS f,sum( IF ( total >= 90 and total<180, 1, 0 ) ) AS e,sum( IF ( total >= 60 and total<90, 1, 0 ) ) AS d,sum( IF ( total >= 30 and total<60, 1, 0 ) ) AS c,sum( IF ( total >= 14 and total<30, 1, 0 ) ) AS b,sum( IF ( total >= 0 and total<14, 1, 0 ) ) AS a')->select();
     }
     //采购总览
     public function purchase_overview($time_str = ''){
@@ -406,7 +412,7 @@ class DataMarket extends Backend
         $createat = explode(' ', $time_str);
         $where['p.createtime'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
         $where['p.is_del'] = 1;
-        $status_where['p.purchase_status'] = ['in', [2, 5, 6, 7]];
+        $status_where['p.purchase_status'] = ['in', [2, 5, 6, 7,8,9,10]];
         $arrive_where['p.purchase_status'] = 7;
         //采购总数
         $arr['purchase_num'] = $this->purchase->alias('p')->where($where)->where($status_where)->join(['fa_purchase_order_item' => 'b'], 'p.id=b.purchase_id')->sum('b.purchase_num');
