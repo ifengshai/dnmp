@@ -50,11 +50,13 @@ class DataMarket extends Backend
             }
             //仓库指标总览
             $stock_measure_overview = $this->stock_measure_overview($time_str);
+            //库存分级概览库销比
+            $stock_level_sales_rate = $this->stock_level_sales_rate($time_str);
             //采购概况
             $purchase_overview = $this->purchase_overview($time_str);
             //物流妥投概况
             $logistics_completed_overview = $this->logistics_completed_overview($time_str);
-            $arr = compact('stock_measure_overview','purchase_overview','logistics_completed_overview');
+            $arr = compact('stock_measure_overview','stock_level_sales_rate','purchase_overview','logistics_completed_overview');
             $this->success('', '', $arr);
         }
         //库存总览
@@ -63,13 +65,14 @@ class DataMarket extends Backend
         $stock_measure_overview = $this->stock_measure_overview();
         //库存分级概况
         $stock_level_overview = $this->stock_level_overview();
+        $stock_level_sales_rate = $this->stock_level_sales_rate();
         //采购概况
         $purchase_overview = $this->purchase_overview();
         //物流妥投概况
         $logistics_completed_overview = $this->logistics_completed_overview();
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
-        $this->view->assign(compact('stock_overview','stock_measure_overview','stock_level_overview','purchase_overview','logistics_completed_overview','magentoplatformarr','time_str'));
+        $this->view->assign(compact('stock_overview','stock_measure_overview','stock_level_overview','stock_level_sales_rate','purchase_overview','logistics_completed_overview','magentoplatformarr','time_str'));
         return $this->view->fetch();
     }
     //库存总览
@@ -281,118 +284,109 @@ class DataMarket extends Backend
         }
     }
     //库存分级概况
-    public function stock_level_overview($time_str = ''){
-        $cache_data = Cache::get('Supplydatacenter_datamarket'  .$time_str. md5(serialize('stock_level_overview')));
+    public function stock_level_overview(){
+        $cache_data = Cache::get('Supplydatacenter_datamarket'  . md5(serialize('stock_level_overview')));
         if ($cache_data) {
             return $cache_data;
         }
         $gradeSkuStock = $this->productGrade->getSkuStock();
         //计算产品等级的数量
         $arr = array(
-            array(
-                'grade'=>'A+',
-                'count'=>$this->productGrade->where('grade','A+')->count(),
-                'stock_num'=>$gradeSkuStock['aa_stock_num'],
-                'stock_price'=>$gradeSkuStock['aa_stock_price'],
-            ),
-            array(
-                'grade'=>'A',
-                'count'=>$this->productGrade->where('grade','A')->count(),
-                'stock_num'=>$gradeSkuStock['a_stock_num'],
-                'stock_price'=>$gradeSkuStock['a_stock_price'],
-            ),
-            array(
-                'grade'=>'B',
-                'count'=>$this->productGrade->where('grade','B')->count(),
-                'stock_num'=>$gradeSkuStock['b_stock_num'],
-                'stock_price'=>$gradeSkuStock['b_stock_price'],
-            ),
-            array(
-                'grade'=>'C+',
-                'count'=>$this->productGrade->where('grade','C+')->count(),
-                'stock_num'=>$gradeSkuStock['ca_stock_num'],
-                'stock_price'=>$gradeSkuStock['ca_stock_price'],
-            ),
-            array(
-                'grade'=>'C',
-                'count'=>$this->productGrade->where('grade','C')->count(),
-                'stock_num'=>$gradeSkuStock['c_stock_num'],
-                'stock_price'=>$gradeSkuStock['c_stock_price'],
-            ),
-            array(
-                'grade'=>'D',
-                'count'=>$this->productGrade->where('grade','D')->count(),
-                'stock_num'=>$gradeSkuStock['d_stock_num'],
-                'stock_price'=>$gradeSkuStock['d_stock_price'],
-            ),
-            array(
-                'grade'=>'E',
-                'count'=>$this->productGrade->where('grade','E')->count(),
-                'stock_num'=>$gradeSkuStock['e_stock_num'],
-                'stock_price'=>$gradeSkuStock['e_stock_price'],
-            ),
-            array(
-                'grade'=>'F',
-                'count'=>$this->productGrade->where('grade','F')->count(),
-                'stock_num'=>$gradeSkuStock['f_stock_num'],
-                'stock_price'=>$gradeSkuStock['f_stock_price'],
-            ),
+            'a1_count'=>$this->productGrade->where('grade','A+')->count(),
+            'a1_stock_num'=>$gradeSkuStock['aa_stock_num'],
+            'a1_stock_price'=>$gradeSkuStock['aa_stock_price'],
+
+            'a_count'=>$this->productGrade->where('grade','A')->count(),
+            'a_stock_num'=>$gradeSkuStock['a_stock_num'],
+            'a_stock_price'=>$gradeSkuStock['a_stock_price'],
+
+            'b_count'=>$this->productGrade->where('grade','B')->count(),
+            'b_stock_num'=>$gradeSkuStock['b_stock_num'],
+            'b_stock_price'=>$gradeSkuStock['b_stock_price'],
+
+            'c1_count'=>$this->productGrade->where('grade','C+')->count(),
+            'c1_stock_num'=>$gradeSkuStock['ca_stock_num'],
+            'c1_stock_price'=>$gradeSkuStock['ca_stock_price'],
+
+            'c_count'=>$this->productGrade->where('grade','C')->count(),
+            'c_stock_num'=>$gradeSkuStock['c_stock_num'],
+            'c_stock_price'=>$gradeSkuStock['c_stock_price'],
+
+            'd_count'=>$this->productGrade->where('grade','D')->count(),
+            'd_stock_num'=>$gradeSkuStock['d_stock_num'],
+            'd_stock_price'=>$gradeSkuStock['d_stock_price'],
+
+            'e_count'=>$this->productGrade->where('grade','E')->count(),
+            'e_stock_num'=>$gradeSkuStock['e_stock_num'],
+            'e_stock_price'=>$gradeSkuStock['e_stock_price'],
+
+            'f_count'=>$this->productGrade->where('grade','F')->count(),
+            'f_stock_num'=>$gradeSkuStock['f_stock_num'],
+            'f_stock_price'=>$gradeSkuStock['f_stock_price'],
         );
-        $all_num = 0;
-        $all_stock_num = 0;
-        foreach ($arr as $value){
-            //总数
-            $all_num += $value['count'];
-            //总库存
-            $all_stock_num += $value['stock_num'];
-        }
-        foreach ($arr as $key=>$val){
-            $arr[$key]['percent'] = $all_num ? round($val['count']/$all_num*100,2).'%':0;
-            $arr[$key]['stock_percent'] = $all_stock_num ? round($val['stock_num']/$all_stock_num*100,2).'%':0;
-            //库销比
-            $skus = $this->productGrade->where('grade',$val['grade'])->column('true_sku');
-            $where['sku'] = ['in', $skus];
-            //实时库存
-            $stock_num = $this->model->where($where)->value('sum(stock)-sum(distribution_occupy_stock) as result');
-            //订单销售数量
-            $createat = explode(' ', $time_str);
-            $start = $createat[0];
-            $end = $createat[3];
-            $map['day_date'] = ['between', [$start, $end]];
-            switch ($val['grade']){
-                case 'A+':
-                    $field = 'sales_num_a1';
-                    break;
-                case 'A':
-                    $field = 'sales_num_a';
-                    break;
-                case 'B':
-                    $field = 'sales_num_b';
-                    break;
-                case 'C+':
-                    $field = 'sales_num_c1';
-                    break;
-                case 'C':
-                    $field = 'sales_num_c';
-                    break;
-                case 'D':
-                    $field = 'sales_num_d';
-                    break;
-                case 'E':
-                    $field = 'sales_num_e';
-                    break;
-                case 'F':
-                    $field = 'sales_num_f';
-                    break;
-                default:
-                    break;
-            }
-            $order_sales_num = $this->supply->where('day_date')->sum($field);
-            //库销比
-            $arr[$key]['stock_sales_rate'] = $order_sales_num ? round($stock_num/$order_sales_num,2) : 0;
-        }
-        Cache::set('Supplydatacenter_datamarket'.$time_str.md5(serialize('stock_level_overview')),$arr,7200);
+        $all_num = $arr['a1_count']+$arr['a_count']+$arr['b_count']+$arr['c1_count']+$arr['c_count']+$arr['d_count']+$arr['e_count']+$arr['f_count'];
+        $all_stock_num = $arr['a1_stock_num']+$arr['a_stock_num']+$arr['b_stock_num']+$arr['c1_stock_num']+$arr['c_stock_num']+$arr['d_stock_num']+$arr['e_stock_num']+$arr['f_stock_num'];
+        $arr['a1_percent'] = $all_num ? round($arr['a1_count']/$all_num*100,2).'%':0;
+        $arr['a1_stock_percent'] = $all_stock_num ? round($arr['a1_stock_num']/$all_stock_num*100,2).'%':0;
+        $arr['a_percent'] = $all_num ? round($arr['a_count']/$all_num*100,2).'%':0;
+        $arr['a_stock_percent'] = $all_stock_num ? round($arr['a_stock_num']/$all_stock_num*100,2).'%':0;
+
+        $arr['b_percent'] = $all_num ? round($arr['b_count']/$all_num*100,2).'%':0;
+        $arr['b_stock_percent'] = $all_stock_num ? round($arr['b_stock_num']/$all_stock_num*100,2).'%':0;
+
+        $arr['c1_percent'] = $all_num ? round($arr['c1_count']/$all_num*100,2).'%':0;
+        $arr['c1_stock_percent'] = $all_stock_num ? round($arr['c1_stock_num']/$all_stock_num*100,2).'%':0;
+        $arr['c_percent'] = $all_num ? round($arr['c_count']/$all_num*100,2).'%':0;
+        $arr['c_stock_percent'] = $all_stock_num ? round($arr['c_stock_num']/$all_stock_num*100,2).'%':0;
+
+        $arr['d_percent'] = $all_num ? round($arr['d_count']/$all_num*100,2).'%':0;
+        $arr['d_stock_percent'] = $all_stock_num ? round($arr['d_stock_num']/$all_stock_num*100,2).'%':0;
+
+        $arr['e_percent'] = $all_num ? round($arr['e_count']/$all_num*100,2).'%':0;
+        $arr['e_stock_percent'] = $all_stock_num ? round($arr['e_stock_num']/$all_stock_num*100,2).'%':0;
+
+        $arr['f_percent'] = $all_num ? round($arr['f_count']/$all_num*100,2).'%':0;
+        $arr['f_stock_percent'] = $all_stock_num ? round($arr['f_stock_num']/$all_stock_num*100,2).'%':0;
+        Cache::set('Supplydatacenter_datamarket'.md5(serialize('stock_level_overview')),$arr,7200);
         return $arr;
+    }
+    //库存分级库销比
+    public function stock_level_sales_rate($time_str = ''){
+        $cache_data = Cache::get('Supplydatacenter_datamarket'.$time_str. md5(serialize('stock_level_sales_rate')));
+        if ($cache_data) {
+            return $cache_data;
+        }
+        $arr['a1_stock_sales_rate'] = $this->getStockLevelRate('A+','sales_num_a1',$time_str);
+        $arr['a_stock_sales_rate'] = $this->getStockLevelRate('A','sales_num_a',$time_str);
+        $arr['b_stock_sales_rate'] = $this->getStockLevelRate('B','sales_num_b',$time_str);
+        $arr['c1_stock_sales_rate'] = $this->getStockLevelRate('C+','sales_num_c1',$time_str);
+        $arr['c_stock_sales_rate'] = $this->getStockLevelRate('C','sales_num_c',$time_str);
+        $arr['d_stock_sales_rate'] = $this->getStockLevelRate('D','sales_num_d',$time_str);
+        $arr['e_stock_sales_rate'] = $this->getStockLevelRate('E','sales_num_e',$time_str);
+        $arr['f_stock_sales_rate'] = $this->getStockLevelRate('F','sales_num_f',$time_str);
+        Cache::set('Supplydatacenter_datamarket'.$time_str.md5(serialize('stock_level_sales_rate')),$arr,7200);
+        return $arr;
+    }
+    //库存分级库销比方法
+    public function getStockLevelRate($grade,$field,$time_str = ''){
+        if(!$time_str){
+            $start = date('Y-m-d 00:00:00', strtotime('-6 day'));
+            $end   = date('Y-m-d 23:59:59');
+            $time_str = $start .' - '.$end;
+        }
+        $createat = explode(' ', $time_str);
+        $start = $createat[0];
+        $end = $createat[3];
+        $map['day_date'] = ['between', [$start, $end]];
+
+        $skus = $this->productGrade->where('grade',$grade)->column('true_sku');
+        $where['sku'] = ['in', $skus];
+        //实时库存
+        $stock_num = $this->model->where($where)->value('sum(stock)-sum(distribution_occupy_stock) as result');
+        $order_sales_num = $this->supply->where('day_date')->sum($field);
+        //库销比
+        $stock_sales_rate = $order_sales_num ? round($stock_num/$order_sales_num,2) : 0;
+        return $stock_sales_rate;
     }
     //库龄概况
     public function stock_age_overview(){
@@ -404,8 +398,13 @@ class DataMarket extends Backend
         if ($cache_data) {
             return $cache_data;
         }
+        if(!$time_str){
+            $start = date('Y-m-d 00:00:00', strtotime('-6 day'));
+            $end   = date('Y-m-d 23:59:59');
+            $time_str = $start .' - '.$end;
+        }
         $createat = explode(' ', $time_str);
-        $where['p.createtime'] = ['between', [$createat[0], $createat[3]]];
+        $where['p.createtime'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
         $where['p.is_del'] = 1;
         $status_where['p.purchase_status'] = ['in', [2, 5, 6, 7]];
         $arrive_where['p.purchase_status'] = 7;
@@ -572,8 +571,8 @@ class DataMarket extends Backend
                 }
                 $createat = explode(' ', $time_str);
 
-                $start_time = strtotime($createat[0].$createat[1]);
-                $end_time = strtotime($createat[3].$createat[4]);
+                $start_time = strtotime($createat[0].' '.$createat[1]);
+                $end_time = strtotime($createat[3].' '.$createat[4]);
                 $data1 = $this->getProcess(1,$start_time,$end_time); //打印标签
                 $data2 = $this->getProcess(2,$start_time,$end_time); //配货
                 $data3 = $this->getProcess(3,$start_time,$end_time); //配镜片
@@ -636,8 +635,8 @@ class DataMarket extends Backend
         }
         $createat = explode(' ', $time_str);
 
-        $start_time = strtotime($createat[0].$createat[1]);
-        $end_time = strtotime($createat[3].$createat[4]);
+        $start_time = strtotime($createat[0].' '.$createat[1]);
+        $end_time = strtotime($createat[3].' '.$createat[4]);
         $where['check_status'] = 1;
         $where['check_time'] = ['between',[$start_time,$end_time]];
         $arr['delivery_count'] = $this->process->where($where)->count();  //发货数量
@@ -646,7 +645,7 @@ class DataMarket extends Backend
         $uncompleted_where['is_tracking'] = ['<>',5];
         $arr['uncompleted_count'] = $this->process->where($where)->where($uncompleted_where)->count();  //未妥投数量
         $map = [];
-        $map[] = ['exp', Db::raw("DATE_ADD(check_time, INTERVAL 15 DAY)<now()")];
+        $map[] = ['exp', Db::raw("check_time+3600*24*15<unix_timestamp(now())")];
         $arr['timeout_uncompleted_count'] = $this->process->where($where)->where($uncompleted_where)->where($map)->count();  //超时未妥投数量
         Cache::set('Supplydatacenter_userdata' . $time_str . md5(serialize('logistics_completed_overview')), $arr, 7200);
         return $arr;
@@ -664,7 +663,7 @@ class DataMarket extends Backend
                     $time_str = $start . ' - ' . $end;
                 }
                 $createat = explode(' ', $time_str);
-                $where['delivery_time'] = ['between',[$createat[0],$createat[3]]];
+                $where['delivery_time'] = ['between',[$createat[0].' '.$createat[1],$createat[3].' '.$createat[4]]];
                 $where['node_type'] = 40;
                 //总的妥投订单数
                 $count = $this->orderNode->where($where)->count();

@@ -1584,9 +1584,10 @@ class OrderData extends Backend
 
     protected function order_item_shell($site)
     {
+        ini_set('memory_limit', '2280M');
         if ($site == 1) {
             // $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 929673')->max('item_id');
-            $list = Db::connect('database.db_zeelool')->table('sales_flat_order_item')->where(['item_id' => ['>', 929673]])->where(['item_id' => ['<', 1026606]])->limit(3000)->select();
+            $list = Db::connect('database.db_zeelool')->table('sales_flat_order_item')->where(['item_id' => ['>', 929673]])->where(['item_id' => ['<', 1026606]])->select();
         }
 
         // elseif ($site == 2) {
@@ -1795,7 +1796,7 @@ class OrderData extends Backend
 
     protected function order_item_data_shell_temp($site)
     {
-        $list = $this->orderitemoption->where('site=' . $site . ' and LENGTH(trim(index_name))=0')->limit(2000)->select();
+        $list = $this->orderitemprocess->where('site=' . $site . ' and distribution_status = 3')->limit(3000)->select();
         $list = collection($list)->toArray();
         $item_ids = array_column($list, 'item_id');
 
@@ -1837,15 +1838,13 @@ class OrderData extends Backend
             } elseif ($site == 11) {
                 $options =  $this->zeelool_jp_prescription_analysis($item_data[$v['item_id']]);
             }
-            $option_params[$k]['index_name'] = $options['index_name'] ?: 'None';
-            $option_params[$k]['index_type'] = $options['index_type'] ?: 'None';
+            $option_params[$k]['order_prescription_type'] = $options['order_prescription_type'];
             $option_params[$k]['id'] = $v['id'];
-
             echo $v['item_id'] . "\n";
             usleep(10000);
         }
 
-        $this->orderitemoption->saveAll($option_params);
+        $this->orderitemprocess->saveAll($option_params);
         echo "ok";
     }
 }

@@ -212,11 +212,11 @@ class Distribution extends Backend
 
             //筛选库位号
             if ($filter['stock_house_num']) {
-                if (8 == $label) {//跟单
+                if (8 == $label) { //跟单
                     $house_type = 4;
-                } elseif (3 == $label) {//待配镜片-定制片
+                } elseif (3 == $label) { //待配镜片-定制片
                     $house_type = 3;
-                } else {//合单
+                } else { //合单
                     $house_type = 2;
                 }
                 $stock_house_id = $this->_stock_house
@@ -253,8 +253,8 @@ class Distribution extends Backend
                 ->alias('a')
                 ->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')
                 ->where([
-                    'a.change_type' => ['in', [1, 2, 3]],//1更改镜架  2更改镜片 3取消订单
-                    'b.work_status' => ['in', [1, 2, 3, 5]]//工单未处理
+                    'a.change_type' => ['in', [1, 2, 3]], //1更改镜架  2更改镜片 3取消订单
+                    'b.work_status' => ['in', [1, 2, 3, 5]] //工单未处理
                 ])
                 ->order('a.create_time', 'desc')
                 ->group('a.item_order_number')
@@ -320,11 +320,11 @@ class Distribution extends Backend
             foreach ($list as $key => $value) {
                 $stock_house_num = '-';
                 if (!empty($value['temporary_house_id']) && 3 == $label) {
-                    $stock_house_num = $stock_house_data[$value['temporary_house_id']];//定制片库位号
+                    $stock_house_num = $stock_house_data[$value['temporary_house_id']]; //定制片库位号
                 } elseif (!empty($value['abnormal_house_id']) && 8 == $label) {
-                    $stock_house_num = $stock_house_data[$value['abnormal_house_id']];//异常库位号
+                    $stock_house_num = $stock_house_data[$value['abnormal_house_id']]; //异常库位号
                 } elseif (!empty($value['store_house_id']) && 7 == $label) {
-                    $stock_house_num = $stock_house_data[$value['store_house_id']];//合单库位号
+                    $stock_house_num = $stock_house_data[$value['store_house_id']]; //合单库位号
                 }
 
                 $list[$key]['stock_house_num'] = $stock_house_num;
@@ -455,9 +455,21 @@ class Distribution extends Backend
     protected function get_frame_lens_width_height_bridge($product_id, $site)
     {
         if ($product_id) {
-            $querySql = "select cpev.entity_type_id,cpev.attribute_id,cpev.`value`,cpev.entity_id
-            from catalog_product_entity_varchar cpev LEFT JOIN catalog_product_entity cpe on cpe.entity_id=cpev.entity_id 
-            where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$product_id";
+
+            if ($site == 3) {
+                $querySql = "select cpev.entity_type_id,cpev.attribute_id,cpev.`value`,cpev.entity_id
+                from catalog_product_entity_varchar cpev LEFT JOIN catalog_product_entity cpe on cpe.entity_id=cpev.entity_id 
+                where cpev.attribute_id in(146,147,149) and cpev.store_id=0 and cpev.entity_id=$product_id";
+
+                $lensSql = "select cpev.entity_type_id,cpev.attribute_id,cpev.`value`,cpev.entity_id
+                from catalog_product_entity_decimal cpev LEFT JOIN catalog_product_entity cpe on cpe.entity_id=cpev.entity_id 
+                where cpev.attribute_id in(146,147) and cpev.store_id=0 and cpev.entity_id=$product_id";
+            } else {
+                $querySql = "select cpev.entity_type_id,cpev.attribute_id,cpev.`value`,cpev.entity_id
+                from catalog_product_entity_varchar cpev LEFT JOIN catalog_product_entity cpe on cpe.entity_id=cpev.entity_id 
+                where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$product_id";
+            }
+
             switch ($site) {
                 case 1:
                     $model = Db::connect('database.db_zeelool');
@@ -488,23 +500,42 @@ class Distribution extends Backend
             }
 
             $resultList = $model->query($querySql);
-            if ($resultList) {
-                $result = array();
-                foreach ($resultList as $key => $value) {
-                    if ($value['attribute_id'] == 161) {
-                        $result['lens_width'] = $value['value'];
-                    }
-                    if ($value['attribute_id'] == 164) {
-                        $result['lens_height'] = $value['value'];
-                    }
-                    if ($value['attribute_id'] == 163) {
-                        $result['bridge'] = $value['value'];
+            $result = array();
+            //你好站
+            if ($site == 3) {
+                $lensList = $model->query($lensSql);
+                if ($lensList) {
+                    foreach ($lensList as $key => $value) {
+
+                        if ($value['attribute_id'] == 146) {
+                            $result['lens_width'] = $value['value'];
+                        }
+                        if ($value['attribute_id'] == 147) {
+                            $result['lens_height'] = $value['value'];
+                        }
                     }
                 }
-            } else {
-                $result['lens_width'] = '';
-                $result['lens_height'] = '';
-                $result['bridge'] = '';
+            }
+            if ($resultList) {
+                foreach ($resultList as $key => $value) {
+                    //你好站
+                    if ($site == 3) {
+                       
+                        if ($value['attribute_id'] == 149) {
+                            $result['bridge'] = $value['value'];
+                        }
+                    } else {
+                        if ($value['attribute_id'] == 161) {
+                            $result['lens_width'] = $value['value'];
+                        }
+                        if ($value['attribute_id'] == 164) {
+                            $result['lens_height'] = $value['value'];
+                        }
+                        if ($value['attribute_id'] == 163) {
+                            $result['bridge'] = $value['value'];
+                        }
+                    }
+                }
             }
         }
         return $result;
@@ -546,7 +577,7 @@ class Distribution extends Backend
             $filter = json_decode($this->request->get('filter'), true);
 
             if ($filter['abnormal'] || $filter['stock_house_num']) {
-//                //筛选异常
+                //                //筛选异常
                 if ($filter['abnormal']) {
                     $abnormal_where['type'] = $filter['abnormal'][0];
                     if (8 == $label) {
@@ -578,29 +609,28 @@ class Distribution extends Backend
             }
 
 
-            if ($filter['site']){
-                $map['a.site'] = ['in',$filter['site']];
+            if ($filter['site']) {
+                $map['a.site'] = ['in', $filter['site']];
                 unset($filter['site']);
             }
             //加工类型
-            if ($filter['order_prescription_type']){
-                $map['a.order_prescription_type'] = ['in',$filter['order_prescription_type']];
+            if ($filter['order_prescription_type']) {
+                $map['a.order_prescription_type'] = ['in', $filter['order_prescription_type']];
                 unset($filter['order_prescription_type']);
             }
             //订单类型
-            if ($filter['order_type']){
-                $map['b.order_type'] = ['in',$filter['order_type']];
+            if ($filter['order_type']) {
+                $map['b.order_type'] = ['in', $filter['order_type']];
                 unset($filter['order_type']);
-
             }
-            if ($filter['distribution_status']){
-                $map['a.distribution_status'] = ['in',$filter['distribution_status']];
+            if ($filter['distribution_status']) {
+                $map['a.distribution_status'] = ['in', $filter['distribution_status']];
                 unset($filter['distribution_status']);
             }
-            if ($filter['status']){
-                $map['b.status'] = ['in',$filter['status']];
+            if ($filter['status']) {
+                $map['b.status'] = ['in', $filter['status']];
                 unset($filter['status']);
-            }else{
+            } else {
                 $map['b.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal']];
             }
             $this->request->get(['filter' => json_encode($filter)]);
@@ -765,13 +795,13 @@ class Distribution extends Backend
                 }
             }
 
-//            if ($value['pdcheck'] == 'on') {
+            //            if ($value['pdcheck'] == 'on') {
             $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 2 + 2), $value['pd_r']);
             $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 2 + 3), $value['pd_l']);
-//            } else {
+            //            } else {
             $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 2 + 2), $value['pd']);
             $spreadsheet->getActiveSheet()->mergeCells("M" . ($key * 2 + 2) . ":M" . ($key * 2 + 3));
-//            }
+            //            }
 
             //查询镜框尺寸
             $tmp_bridge = $this->get_frame_lens_width_height_bridge($value['product_id'], $value['site']);
@@ -1160,12 +1190,11 @@ class Distribution extends Backend
             ->select();
         if ($check_work_order) {
             foreach ($check_work_order as $val) {
-                (
-                    3 == $val['measure_choose_id']//主单取消措施未处理
+                (3 == $val['measure_choose_id'] //主单取消措施未处理
                     ||
-                    in_array($val['item_order_number'], $item_order_numbers)//子单措施未处理:更改镜框18、更改镜片19、取消20
+                    in_array($val['item_order_number'], $item_order_numbers) //子单措施未处理:更改镜框18、更改镜片19、取消20
                 )
-                && $this->error('子单号：' . $val['item_order_number'] . '有工单未处理');
+                    && $this->error('子单号：' . $val['item_order_number'] . '有工单未处理');
             }
         }
 
@@ -1373,12 +1402,11 @@ class Distribution extends Backend
             ->select();
         if ($check_work_order) {
             foreach ($check_work_order as $val) {
-                (
-                    3 == $val['measure_choose_id']//主单取消措施未处理
+                (3 == $val['measure_choose_id'] //主单取消措施未处理
                     ||
-                    in_array($val['item_order_number'], $item_order_numbers)//子单措施未处理:更改镜框18、更改镜片19、取消20
+                    in_array($val['item_order_number'], $item_order_numbers) //子单措施未处理:更改镜框18、更改镜片19、取消20
                 )
-                && $this->error('子单号：' . $val['item_order_number'] . '有工单未处理');
+                    && $this->error('子单号：' . $val['item_order_number'] . '有工单未处理');
             }
         }
 
@@ -1630,8 +1658,8 @@ class Distribution extends Backend
 
                 //子订单状态回滚
                 $save_data = [
-                    'distribution_status' => $status,//配货状态
-                    'abnormal_house_id' => 0//异常库位ID
+                    'distribution_status' => $status, //配货状态
+                    'abnormal_house_id' => 0 //异常库位ID
                 ];
 
                 //如果回退到待加工步骤之前，清空定制片库位ID及定制片处理状态
@@ -1786,7 +1814,7 @@ class Distribution extends Backend
      */
     public function add()
     {
-        $ids = input('id_params/a');//子单ID
+        $ids = input('id_params/a'); //子单ID
         !$ids && $this->error('请选择要创建工单的数据');
 
         //获取子单号
@@ -1800,7 +1828,7 @@ class Distribution extends Backend
             ->where(['a.id' => ['in', $ids]])
             ->column('b.increment_id');
         !$order_id && $this->error('订单不存在');
-        $order_id = array_unique(array_filter($order_id));//数组去空、去重
+        $order_id = array_unique(array_filter($order_id)); //数组去空、去重
         1 < count($order_id) && $this->error('所选子订单的主单不唯一');
 
         //检测是否有未处理工单
@@ -1919,8 +1947,8 @@ class Distribution extends Backend
                                     (object)['nickname' => $value['custom_print_label_person_new']], //操作人
                                     $item_process_ids, //子单ID
                                     1, //操作类型
-                                    '标记打印完成',//备注
-                                    strtotime($value['custom_print_label_created_at_new'])//操作时间
+                                    '标记打印完成', //备注
+                                    strtotime($value['custom_print_label_created_at_new']) //操作时间
                                 );
                             }
 
@@ -1930,8 +1958,8 @@ class Distribution extends Backend
                                     (object)['nickname' => $value['custom_match_frame_person_new']], //操作人
                                     $item_process_ids, //子单ID
                                     2, //操作类型
-                                    '配货完成',//备注
-                                    strtotime($value['custom_match_frame_created_at_new'])//操作时间
+                                    '配货完成', //备注
+                                    strtotime($value['custom_match_frame_created_at_new']) //操作时间
                                 );
                             }
 
@@ -1941,8 +1969,8 @@ class Distribution extends Backend
                                     (object)['nickname' => $value['custom_match_lens_person_new']], //操作人
                                     $item_process_ids, //子单ID
                                     3, //操作类型
-                                    '配镜片完成',//备注
-                                    strtotime($value['custom_match_lens_created_at_new'])//操作时间
+                                    '配镜片完成', //备注
+                                    strtotime($value['custom_match_lens_created_at_new']) //操作时间
                                 );
                             }
 
@@ -1952,8 +1980,8 @@ class Distribution extends Backend
                                     (object)['nickname' => $value['custom_match_factory_person_new']], //操作人
                                     $item_process_ids, //子单ID
                                     4, //操作类型
-                                    '加工完成',//备注
-                                    strtotime($value['custom_match_factory_created_at_new'])//操作时间
+                                    '加工完成', //备注
+                                    strtotime($value['custom_match_factory_created_at_new']) //操作时间
                                 );
 
                                 //成品质检
@@ -1961,8 +1989,8 @@ class Distribution extends Backend
                                     (object)['nickname' => $value['custom_match_factory_person_new']], //操作人
                                     $item_process_ids, //子单ID
                                     6, //操作类型
-                                    '成品质检完成',//备注
-                                    strtotime($value['custom_match_factory_created_at_new'])//操作时间
+                                    '成品质检完成', //备注
+                                    strtotime($value['custom_match_factory_created_at_new']) //操作时间
                                 );
                             }
 
@@ -1972,8 +2000,8 @@ class Distribution extends Backend
                                     (object)['nickname' => $value['custom_match_delivery_person_new']], //操作人
                                     $item_process_ids, //子单ID
                                     7, //操作类型
-                                    '合单完成',//备注
-                                    strtotime($value['custom_match_delivery_created_at_new'])//操作时间
+                                    '合单完成', //备注
+                                    strtotime($value['custom_match_delivery_created_at_new']) //操作时间
                                 );
 
                                 //审单
@@ -1981,8 +2009,8 @@ class Distribution extends Backend
                                     (object)['nickname' => $value['custom_match_delivery_person_new']], //操作人
                                     $item_process_ids, //子单ID
                                     8, //操作类型
-                                    '审单完成',//备注
-                                    strtotime($value['custom_match_delivery_created_at_new'])//操作时间
+                                    '审单完成', //备注
+                                    strtotime($value['custom_match_delivery_created_at_new']) //操作时间
                                 );
                             }
                             /**配货日志 End*/
@@ -2002,7 +2030,6 @@ class Distribution extends Backend
 
             echo $item['name'] . "：已质检-{$count}，已处理-{$handle} End\n";
         }
-
     }
 
     /**
@@ -2097,8 +2124,8 @@ class Distribution extends Backend
                                     (object)['nickname' => $value['custom_print_label_person_new']], //操作人
                                     $item_process_ids, //子单ID
                                     1, //操作类型
-                                    '标记打印完成',//备注
-                                    strtotime($value['custom_print_label_created_at_new'])//操作时间
+                                    '标记打印完成', //备注
+                                    strtotime($value['custom_print_label_created_at_new']) //操作时间
                                 );
                             }
 
@@ -2108,8 +2135,8 @@ class Distribution extends Backend
                                     (object)['nickname' => $value['custom_match_frame_person_new']], //操作人
                                     $item_process_ids, //子单ID
                                     2, //操作类型
-                                    '配货完成',//备注
-                                    strtotime($value['custom_match_frame_created_at_new'])//操作时间
+                                    '配货完成', //备注
+                                    strtotime($value['custom_match_frame_created_at_new']) //操作时间
                                 );
                             }
 
@@ -2119,8 +2146,8 @@ class Distribution extends Backend
                                     (object)['nickname' => $value['custom_match_lens_person_new']], //操作人
                                     $item_process_ids, //子单ID
                                     3, //操作类型
-                                    '配镜片完成',//备注
-                                    strtotime($value['custom_match_lens_created_at_new'])//操作时间
+                                    '配镜片完成', //备注
+                                    strtotime($value['custom_match_lens_created_at_new']) //操作时间
                                 );
                             }
 
@@ -2130,8 +2157,8 @@ class Distribution extends Backend
                                     (object)['nickname' => $value['custom_match_factory_person_new']], //操作人
                                     $item_process_ids, //子单ID
                                     4, //操作类型
-                                    '加工完成',//备注
-                                    strtotime($value['custom_match_factory_created_at_new'])//操作时间
+                                    '加工完成', //备注
+                                    strtotime($value['custom_match_factory_created_at_new']) //操作时间
                                 );
 
                                 //成品质检
@@ -2139,8 +2166,8 @@ class Distribution extends Backend
                                     (object)['nickname' => $value['custom_match_factory_person_new']], //操作人
                                     $item_process_ids, //子单ID
                                     6, //操作类型
-                                    '成品质检完成',//备注
-                                    strtotime($value['custom_match_factory_created_at_new'])//操作时间
+                                    '成品质检完成', //备注
+                                    strtotime($value['custom_match_factory_created_at_new']) //操作时间
                                 );
                             }
 
@@ -2150,8 +2177,8 @@ class Distribution extends Backend
                                     (object)['nickname' => $value['custom_match_delivery_person_new']], //操作人
                                     $item_process_ids, //子单ID
                                     7, //操作类型
-                                    '合单完成',//备注
-                                    strtotime($value['custom_match_delivery_created_at_new'])//操作时间
+                                    '合单完成', //备注
+                                    strtotime($value['custom_match_delivery_created_at_new']) //操作时间
                                 );
 
                                 //审单
@@ -2159,8 +2186,8 @@ class Distribution extends Backend
                                     (object)['nickname' => $value['custom_match_delivery_person_new']], //操作人
                                     $item_process_ids, //子单ID
                                     8, //操作类型
-                                    '审单完成',//备注
-                                    strtotime($value['custom_match_delivery_created_at_new'])//操作时间
+                                    '审单完成', //备注
+                                    strtotime($value['custom_match_delivery_created_at_new']) //操作时间
                                 );
                             }
                             /**配货日志 End*/
@@ -2180,7 +2207,6 @@ class Distribution extends Backend
 
             echo $item['name'] . "：已质检-{$count}，已处理-{$handle} End\n";
         }
-
     }
 
     /**
@@ -2284,7 +2310,6 @@ class Distribution extends Backend
 
             echo $item['name'] . "：已质检-{$count}，已处理-{$handle} End\n";
         }
-
     }
 
     /**
@@ -2375,7 +2400,6 @@ class Distribution extends Backend
                         } else {
                             echo $item['name'] . '-' . $value['increment_id'] . '：未获取到子单数据' . "\n";
                         }
-
                     } catch (PDOException $e) {
                         echo $item['name'] . '-' . $value['increment_id'] . '：' . $e->getMessage() . "\n";
                     } catch (Exception $e) {
@@ -2386,7 +2410,6 @@ class Distribution extends Backend
 
             echo $item['name'] . "：未质检已打印标签-{$count}，已处理-{$handle} End\n";
         }
-
     }
 
     public function export()
