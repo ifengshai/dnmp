@@ -3281,7 +3281,6 @@ function platform_order(){
 
         var sitetype = $('#work_platform').val();
         $('#c-order_sku').html('');
-        $('#c-order_new_sku').html('');
         $('#item_input-hidden').html('');
         Layer.load();
         Backend.api.ajax({
@@ -3319,8 +3318,13 @@ function platform_order(){
             
             var is_order_item = $('#is_order_item').val();
             var status = $('.status').val();
-            if (2 != Config.work_type && 1 != is_order_item) {$('#c-order_new_sku').append(sku_html);}
-            
+            var work_id = $('#work_id').val();
+            if (status == 1 && !work_id) {
+                if (2 != Config.work_type && 1 != is_order_item) {
+                    $('#c-order_new_sku').html('');
+                    $('#c-order_new_sku').append(sku_html);
+                }
+            }
             
 
             $('.selectpicker ').selectpicker('refresh');
