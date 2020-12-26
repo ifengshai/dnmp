@@ -455,9 +455,21 @@ class Distribution extends Backend
     protected function get_frame_lens_width_height_bridge($product_id, $site)
     {
         if ($product_id) {
-            $querySql = "select cpev.entity_type_id,cpev.attribute_id,cpev.`value`,cpev.entity_id
-            from catalog_product_entity_varchar cpev LEFT JOIN catalog_product_entity cpe on cpe.entity_id=cpev.entity_id 
-            where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$product_id";
+
+            if ($site == 3) {
+                $querySql = "select cpev.entity_type_id,cpev.attribute_id,cpev.`value`,cpev.entity_id
+                from catalog_product_entity_varchar cpev LEFT JOIN catalog_product_entity cpe on cpe.entity_id=cpev.entity_id 
+                where cpev.attribute_id in(146,147,149) and cpev.store_id=0 and cpev.entity_id=$product_id";
+
+                $lensSql = "select cpev.entity_type_id,cpev.attribute_id,cpev.`value`,cpev.entity_id
+                from catalog_product_entity_decimal cpev LEFT JOIN catalog_product_entity cpe on cpe.entity_id=cpev.entity_id 
+                where cpev.attribute_id in(146,147) and cpev.store_id=0 and cpev.entity_id=$product_id";
+            } else {
+                $querySql = "select cpev.entity_type_id,cpev.attribute_id,cpev.`value`,cpev.entity_id
+                from catalog_product_entity_varchar cpev LEFT JOIN catalog_product_entity cpe on cpe.entity_id=cpev.entity_id 
+                where cpev.attribute_id in(161,163,164) and cpev.store_id=0 and cpev.entity_id=$product_id";
+            }
+
             switch ($site) {
                 case 1:
                     $model = Db::connect('database.db_zeelool');
@@ -488,17 +500,27 @@ class Distribution extends Backend
             }
 
             $resultList = $model->query($querySql);
-            if ($resultList) {
-                $result = array();
-                foreach ($resultList as $key => $value) {
-                    //你好站
-                    if ($site == 3) {
+            $result = array();
+            //你好站
+            if ($site == 3) {
+                $lensList = $model->query($lensSql);
+                if ($lensList) {
+                    foreach ($lensList as $key => $value) {
+
                         if ($value['attribute_id'] == 146) {
                             $result['lens_width'] = $value['value'];
                         }
                         if ($value['attribute_id'] == 147) {
                             $result['lens_height'] = $value['value'];
                         }
+                    }
+                }
+            }
+            if ($resultList) {
+                foreach ($resultList as $key => $value) {
+                    //你好站
+                    if ($site == 3) {
+                       
                         if ($value['attribute_id'] == 149) {
                             $result['bridge'] = $value['value'];
                         }
@@ -514,10 +536,6 @@ class Distribution extends Backend
                         }
                     }
                 }
-            } else {
-                $result['lens_width'] = '';
-                $result['lens_height'] = '';
-                $result['bridge'] = '';
             }
         }
         return $result;
