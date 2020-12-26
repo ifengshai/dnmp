@@ -1795,6 +1795,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     $('.selectpicker ').selectpicker('refresh');
                 }
             });
+            console.log(Config.order_item);
 
         },
         detail: function () {
