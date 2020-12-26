@@ -520,7 +520,7 @@ class Distribution extends Backend
                 foreach ($resultList as $key => $value) {
                     //你好站
                     if ($site == 3) {
-                       
+
                         if ($value['attribute_id'] == 149) {
                             $result['bridge'] = $value['value'];
                         }
@@ -924,11 +924,8 @@ class Distribution extends Backend
         $this->model->startTrans();
         try {
             //标记状态
-            $this->model
-                ->allowField(true)
-                ->isUpdate(true, ['id' => ['in', $ids]])
-                ->save(['distribution_status' => 2]);
-
+            $this->model->where(['id' => ['in', $ids]])->update(['distribution_status' => 2]);
+               
             //记录配货日志
             $admin = (object)session('admin');
             DistributionLog::record($admin, $ids, 1, '标记打印完成');
@@ -1160,6 +1157,7 @@ class Distribution extends Backend
             ->field('id,site,distribution_status,order_id,option_id,sku,item_order_number,order_prescription_type')
             ->where(['id' => ['in', $ids]])
             ->select();
+        $item_list = collection($item_list)->toArray();
         $order_ids = [];
         $option_ids = [];
         $item_order_numbers = [];
@@ -1323,16 +1321,11 @@ class Distribution extends Backend
 
                 //订单主表标记已合单
                 if (9 == $save_status) {
-                    $this->_new_order_process
-                        ->allowField(true)
-                        ->isUpdate(true, ['order_id' => $value['order_id']])
-                        ->save(['combine_status' => 1, 'check_status' => 0, 'combine_time' => time()]);
+                    $this->_new_order_process->where(['order_id' => $value['order_id']])
+                    ->update(['combine_status' => 1, 'check_status' => 0, 'combine_time' => time(), 'check_time' => time()]);
                 }
 
-                $this->model
-                    ->allowField(true)
-                    ->isUpdate(true, ['id' => $value['id']])
-                    ->save(['distribution_status' => $save_status]);
+                $this->model->where(['id' => $value['id']])->update(['distribution_status' => $save_status]);
 
                 //操作成功记录
                 DistributionLog::record($admin, $value['id'], $check_status, $status_arr[$check_status] . '完成');
@@ -1356,7 +1349,7 @@ class Distribution extends Backend
             $this->error($e->getMessage());
         }
 
-        $this->success('操作成功!', '', 'success', 200);
+        // $this->success('操作成功!', '', 'success', 200);
     }
 
     /**
@@ -1463,11 +1456,8 @@ class Distribution extends Backend
             }
 
             //子订单状态回滚
-            $this->model
-                ->allowField(true)
-                ->isUpdate(true, ['id' => ['in', $ids]])
-                ->save($save_data);
-
+            $this->model->where(['id' => ['in', $ids]])->update($save_data);
+               
             //记录日志
             DistributionLog::record($admin, array_column($item_list, 'id'), 6, $status_arr[$reason]['name']);
 
@@ -1690,17 +1680,11 @@ class Distribution extends Backend
                     }
                 }
 
-                $this->model
-                    ->allowField(true)
-                    ->isUpdate(true, ['id' => $ids])
-                    ->save($save_data);
-
+                $this->model->where(['id' => $ids])->update($save_data);
+                   
                 //标记处理异常状态及时间
-                $this->_distribution_abnormal
-                    ->allowField(true)
-                    ->isUpdate(true, ['id' => $abnormal_info['id']])
-                    ->save(['status' => 2, 'do_time' => time(), 'do_person' => $admin->nickname]);
-
+                $this->_distribution_abnormal->where(['id' => $abnormal_info['id']])->update(['status' => 2, 'do_time' => time(), 'do_person' => $admin->nickname]);
+                   
                 //配货操作内容
                 $remark = '处理异常：' . $abnormal_arr[$abnormal_info['type']] . ',当前节点：' . $status_arr[$item_info['distribution_status']] . ',返回节点：' . $status_arr[$status];
 
