@@ -1129,6 +1129,8 @@ class OrderData extends Backend
              */
             if ((((float) urldecode($params['od_sph']) >= -12 && (float) urldecode($params['od_sph']) <= -3) || ((float) urldecode($params['os_sph']) >= -12 && (float) urldecode($params['os_sph']) <= -3)) && (((float) urldecode($params['od_cyl']) >= -2 && (float) urldecode($params['od_cyl']) < 0 && (float) urldecode($params['od_cyl']) != -0.25) || ((float) urldecode($params['os_cyl']) >= -2 && (float) urldecode($params['os_cyl']) <= 0 && (float) urldecode($params['od_cyl']) != -0.25))) {
                 $arr['order_prescription_type'] = 2;
+            } elseif ((float) urldecode($params['od_sph']) == 0 && (float) urldecode($params['os_sph']) == 0) {
+                $arr['order_prescription_type'] = 2;
             } else {
                 $arr['is_custom_lens'] = 1;
                 $arr['order_prescription_type'] = 3;
@@ -1142,6 +1144,8 @@ class OrderData extends Backend
              */
             if ((((float) urldecode($params['od_sph']) >= -15 && (float) urldecode($params['od_sph']) < 0) || ((float) urldecode($params['os_sph']) >= -15 && (float) urldecode($params['os_sph']) < 0)) && (((float) urldecode($params['od_cyl']) >= -2 && (float) urldecode($params['od_cyl']) < 0 && (float) urldecode($params['od_cyl']) != -0.25) || ((float) urldecode($params['os_cyl']) >= -2 && (float) urldecode($params['os_cyl']) < 0 && (float) urldecode($params['od_cyl']) != -0.25))) {
                 $arr['order_prescription_type'] = 2;
+            } elseif ((float) urldecode($params['od_sph']) == 0 && (float) urldecode($params['os_sph']) == 0) {
+                $arr['order_prescription_type'] = 2;
             } else {
                 $arr['is_custom_lens'] = 1;
                 $arr['order_prescription_type'] = 3;
@@ -1154,6 +1158,8 @@ class OrderData extends Backend
              * SPH:-3.00～-13.00 CYL:0.00～-2.00（不含-0.25）
              */
             if ((((float) urldecode($params['od_sph']) >= -13 && (float) urldecode($params['od_sph']) <= -3) || ((float) urldecode($params['os_sph']) >= -13 && (float) urldecode($params['os_sph']) <= -3)) && (((float) urldecode($params['od_cyl']) >= -2 && (float) urldecode($params['od_cyl']) < 0 && (float) urldecode($params['od_cyl']) != -0.25) || ((float) urldecode($params['os_cyl']) >= -2 && (float) urldecode($params['os_cyl']) < 0 && (float) urldecode($params['od_cyl']) != -0.25))) {
+                $arr['order_prescription_type'] = 2;
+            } elseif ((float) urldecode($params['od_sph']) == 0 && (float) urldecode($params['os_sph']) == 0) {
                 $arr['order_prescription_type'] = 2;
             } else {
                 $arr['is_custom_lens'] = 1;
@@ -1169,6 +1175,8 @@ class OrderData extends Backend
              */
             if ((((float) urldecode($params['od_sph']) >= -8 && (float) urldecode($params['od_sph']) < 0) || ((float) urldecode($params['os_sph']) >= -8 && (float) urldecode($params['os_sph']) < 0)) && (((float) urldecode($params['od_cyl']) >= -4 && (float) urldecode($params['od_cyl']) < 0) || ((float) urldecode($params['os_cyl']) >= -4 && (float) urldecode($params['os_cyl']) < 0))) {
                 $arr['order_prescription_type'] = 2;
+            } elseif ((float) urldecode($params['od_sph']) == 0 && (float) urldecode($params['os_sph']) == 0) {
+                $arr['order_prescription_type'] = 2;
             } else {
                 $arr['is_custom_lens'] = 1;
                 $arr['order_prescription_type'] = 3;
@@ -1182,6 +1190,8 @@ class OrderData extends Backend
              */
             if ((((float) urldecode($params['od_sph']) >= -12 && (float) urldecode($params['od_sph']) < 0) || ((float) urldecode($params['os_sph']) >= -12 && (float) urldecode($params['os_sph']) < 0)) && (((float) urldecode($params['od_cyl']) >= -2 && (float) urldecode($params['od_cyl']) < 0 && (float) urldecode($params['od_cyl']) != -0.25) || ((float) urldecode($params['os_cyl']) >= -2 && (float) urldecode($params['os_cyl']) < 0 && (float) urldecode($params['od_cyl']) != -0.25))) {
                 $arr['order_prescription_type'] = 2;
+            } elseif ((float) urldecode($params['od_sph']) == 0 && (float) urldecode($params['os_sph']) == 0) {
+                $arr['order_prescription_type'] = 2;
             } else {
                 $arr['is_custom_lens'] = 1;
                 $arr['order_prescription_type'] = 3;
@@ -1194,6 +1204,8 @@ class OrderData extends Backend
              * SPH:0.00～-12.00 CYL:0.00～-2.00（不含-0.25）
              */
             if ((((float) urldecode($params['od_sph']) >= -3 && (float) urldecode($params['od_sph']) < 0) || ((float) urldecode($params['os_sph']) >= -3 && (float) urldecode($params['os_sph']) < 0)) && (((float) urldecode($params['od_cyl']) >= -2 && (float) urldecode($params['od_cyl']) < 0) || ((float) urldecode($params['os_cyl']) >= -2 && (float) urldecode($params['os_cyl']) < 0))) {
+                $arr['order_prescription_type'] = 2;
+            } elseif ((float) urldecode($params['od_sph']) == 0 && (float) urldecode($params['os_sph']) == 0) {
                 $arr['order_prescription_type'] = 2;
             } else {
                 $arr['is_custom_lens'] = 1;
@@ -1209,6 +1221,8 @@ class OrderData extends Backend
              */
             if ((((float) urldecode($params['od_sph']) >= -8 && (float) urldecode($params['od_sph']) < 0) || ((float) urldecode($params['os_sph']) >= -8 && (float) urldecode($params['os_sph']) < 0)) && (((float) urldecode($params['od_cyl']) >= -2 && (float) urldecode($params['od_cyl']) < 0) || ((float) urldecode($params['os_cyl']) >= -2 && (float) urldecode($params['os_cyl']) < 0))) {
                 $arr['order_prescription_type'] = 2;
+            } elseif ((float) urldecode($params['od_sph']) == 0 && (float) urldecode($params['os_sph']) == 0) {
+                $arr['order_prescription_type'] = 2;
             } else {
                 $arr['is_custom_lens'] = 1;
                 $arr['order_prescription_type'] = 3;
@@ -1221,6 +1235,8 @@ class OrderData extends Backend
              * SPH:0.00～-8.00 CYL:0.00～-2.00
              */
             if ((((float) urldecode($params['od_sph']) >= -8 && (float) urldecode($params['od_sph']) < 0) || ((float) urldecode($params['os_sph']) >= -8 && (float) urldecode($params['os_sph']) < 0)) && (((float) urldecode($params['od_cyl']) >= -2 && (float) urldecode($params['od_cyl']) <= 0.5) || ((float) urldecode($params['os_cyl']) >= -2 && (float) urldecode($params['os_cyl']) <= 0.5))) {
+                $arr['order_prescription_type'] = 2;
+            } elseif ((float) urldecode($params['od_sph']) == 0 && (float) urldecode($params['os_sph']) == 0) {
                 $arr['order_prescription_type'] = 2;
             } else {
                 $arr['is_custom_lens'] = 1;
@@ -1530,9 +1546,6 @@ class OrderData extends Backend
     }
 
 
-
-
-
     /**
      * 临时处理订单子表数据
      *
@@ -1544,45 +1557,41 @@ class OrderData extends Backend
     public function order_item_data_shell()
     {
         $this->order_item_shell(1);
-        $this->order_item_shell(2);
-        $this->order_item_shell(3);
-        $this->order_item_shell(4);
-        $this->order_item_shell(5);
-        $this->order_item_shell(9);
-        $this->order_item_shell(10);
-        $this->order_item_shell(11);
     }
 
     protected function order_item_shell($site)
     {
+        ini_set('memory_limit', '2280M');
         if ($site == 1) {
             // $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 929673')->max('item_id');
-            $list = Db::connect('database.db_zeelool')->table('sales_flat_order_item')->where(['item_id' => 975454])->limit(3000)->select();
-        } elseif ($site == 2) {
-            $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 515947')->max('item_id');
-            $list = Db::connect('database.db_voogueme')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 515947]]])->limit(3000)->select();
-        } elseif ($site == 3) {
-            $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 76642')->max('item_id');
-            $list = Db::connect('database.db_nihao')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 76642]]])->limit(3000)->select();
-        } elseif ($site == 4) {
-            $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 4111')->max('item_id');
-            $list = Db::connect('database.db_meeloog')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 4111]]])->limit(3000)->select();
-        } elseif ($site == 5) {
-            $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 14134')->max('item_id');
-            $list = Db::connect('database.db_weseeoptical')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 14134]]])->limit(3000)->select();
-        } elseif ($site == 9) {
-            $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 139')->max('item_id');
-            $list = Db::connect('database.db_zeelool_es')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 139]]])->limit(3000)->select();
-        } elseif ($site == 10) {
-            $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 1038')->max('item_id');
-            $list = Db::connect('database.db_zeelool_de')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 1038]]])->limit(3000)->select();
-        } elseif ($site == 11) {
-            $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 215')->max('item_id');
-            $list = Db::connect('database.db_zeelool_jp')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 215]]])->limit(3000)->select();
+            $list = Db::connect('database.db_zeelool')->table('sales_flat_order_item')->where(['item_id' => ['>', 929673]])->where(['item_id' => ['<', 1026606]])->select();
         }
 
+        // elseif ($site == 2) {
+        //     $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 515947')->max('item_id');
+        //     $list = Db::connect('database.db_voogueme')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 515947]]])->limit(3000)->select();
+        // } elseif ($site == 3) {
+        //     $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 76642')->max('item_id');
+        //     $list = Db::connect('database.db_nihao')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 76642]]])->limit(3000)->select();
+        // } elseif ($site == 4) {
+        //     $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 4111')->max('item_id');
+        //     $list = Db::connect('database.db_meeloog')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 4111]]])->limit(3000)->select();
+        // } elseif ($site == 5) {
+        //     $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 14134')->max('item_id');
+        //     $list = Db::connect('database.db_weseeoptical')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 14134]]])->limit(3000)->select();
+        // } elseif ($site == 9) {
+        //     $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 139')->max('item_id');
+        //     $list = Db::connect('database.db_zeelool_es')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 139]]])->limit(3000)->select();
+        // } elseif ($site == 10) {
+        //     $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 1038')->max('item_id');
+        //     $list = Db::connect('database.db_zeelool_de')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 1038]]])->limit(3000)->select();
+        // } elseif ($site == 11) {
+        //     $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 215')->max('item_id');
+        //     $list = Db::connect('database.db_zeelool_jp')->table('sales_flat_order_item')->where(['item_id' => ['between', [$id, 215]]])->limit(3000)->select();
+        // }
+
         foreach ($list as $k => $v) {
-            $count = $this->orderitemoption->where('site=' . $site . ' and item_id=' . $v['item_id'])->count();
+            $count = $this->orderitemprocess->where('site=' . $site . ' and item_id=' . $v['item_id'])->count();
             if ($count > 0) {
                 continue;
             }

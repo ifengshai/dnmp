@@ -75,7 +75,29 @@ class OrderDataChange extends Backend
                 $list[$key]['add_cart_rate'] = $value['add_cart_rate'].'%';
                 $list[$key]['session_rate'] = $value['session_rate'].'%';
             }
-            $result = array("total" => $total, "rows" => $list);
+            //合计
+            $sessions = Db::name('datacenter_day')->where($map)->sum('sessions');
+            $order_num = Db::name('datacenter_day')->where($map)->sum('order_num');
+            $new_cart_num = Db::name('datacenter_day')->where($map)->sum('new_cart_num');
+            $update_cart_num = Db::name('datacenter_day')->where($map)->sum('update_cart_num');
+            $sales_total_money = Db::name('datacenter_day')->where($map)->sum('sales_total_money');
+            $register_num = Db::name('datacenter_day')->where($map)->sum('register_num');
+            $add_cart_rate = $sessions ? round($new_cart_num / $sessions * 100, 2) : 0;
+            $session_rate = $sessions ? round($order_num / $sessions * 100, 2) : 0;
+            $order_unit_price = $order_num ? round($sales_total_money / $order_num, 2) : 0;
+
+            $data =array(
+                'sessions'=>$sessions,
+                'add_cart_rate'=>$add_cart_rate,
+                'session_rate'=>$session_rate,
+                'order_num'=>$order_num,
+                'order_unit_price'=>$order_unit_price,
+                'new_cart_num'=>$new_cart_num,
+                'update_cart_num'=>$update_cart_num,
+                'sales_total_money'=>$sales_total_money,
+                'register_num'=>$register_num,
+            );
+            $result = array("total" => $total, "rows" => $list,'data'=>$data);
 
             return json($result);
         }
