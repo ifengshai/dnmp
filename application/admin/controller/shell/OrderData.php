@@ -213,7 +213,6 @@ class OrderData extends Backend
                                     $params['mw_rewardpoint'] = $v['mw_rewardpoint'];
                                     $params['mw_rewardpoint_discount'] = $v['mw_rewardpoint_discount'];
                                     $params['base_shipping_amount'] = $v['base_shipping_amount'];
-                                    $params['base_shipping_amount'] = $v['base_shipping_amount'];
                                     $params['updated_at'] = strtotime($v['updated_at']) + 28800;
                                     if (isset($v['payment_time'])) {
                                         $params['payment_time'] = strtotime($v['payment_time']) + 28800;
