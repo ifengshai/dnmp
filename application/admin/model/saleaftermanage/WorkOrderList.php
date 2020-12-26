@@ -2,6 +2,7 @@
 
 namespace app\admin\model\saleaftermanage;
 
+use app\admin\controller\shell\OrderData;
 use app\admin\model\Admin;
 use app\admin\model\DistributionAbnormal;
 use app\admin\model\DistributionLog;
@@ -893,6 +894,12 @@ class WorkOrderList extends Model
                         $web_lens_name = $lens_info['lens_name'] ?: '';
                     }
 
+                    //获取处方分类
+                    $lens_arr = $changeLens;
+                    $lens_arr['lens_number'] = $lens_number;
+                    $_order_data = new OrderData();
+                    $prescription_info = $_order_data->set_processing_type($lens_arr);
+
                     $data = [
                         'email' => '',
                         'prescription_option' => serialize($prescriptionOption),
@@ -909,6 +916,7 @@ class WorkOrderList extends Model
                         'change_number' => intval($changeLens['original_number']),
                         'recipe_type' => $recipe_type,
                         'lens_number' => $lens_number,
+                        'order_prescription_type' => $prescription_info['order_prescription_type'] ?? 0,
                         'web_lens_name' => $web_lens_name,
                         'lens_type' => $lensCoatName['lensName'] ?? '',
                         'coating_type' => $lensCoatName['coatingName'] ?? '',

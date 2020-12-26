@@ -2407,6 +2407,7 @@ class WorkOrderList extends Backend
             $this->assignconfig('item_order_info', $order_data['item_order_info']);
             unset($order_data['item_order_info']);
         }
+        $this->assignconfig('order_item', $order_data);
         $this->view->assign('order_item', $order_data);
 
         //把问题类型传递到js页面

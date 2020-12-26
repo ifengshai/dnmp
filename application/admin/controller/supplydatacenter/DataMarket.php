@@ -31,6 +31,7 @@ class DataMarket extends Backend
         $this->supply = new \app\admin\model\supplydatacenter\Supply();
         $this->inventory = new \app\admin\model\warehouse\Inventory;
         $this->inventoryitem = new \app\admin\model\warehouse\InventoryItem;
+        $this->item = new \app\admin\model\warehouse\ProductBarCodeItem;
     }
     /**
      * 显示资源列表
@@ -390,7 +391,53 @@ class DataMarket extends Backend
     }
     //库龄概况
     public function stock_age_overview(){
-        
+        $where['library_status'] = 1;
+        $count = $this->item->where($where)->count();
+        $sql = $this->item->alias('t1')->field('TIMESTAMPDIFF(MONTH,in_stock_time,now()) AS total')->where($where)->group('customer_id')->buildSql();
+        $data = $this->item->table([$sql=>'t2'])->field('sum( IF ( total >= 10 and total<13, 1, 0 ) ) AS d,sum( IF ( total >= 7 and total<10, 1, 0 ) ) AS c,sum( IF ( total >= 4 and total<7, 1, 0 ) ) AS b,sum( IF ( total >= 0 and total<4, 1, 0 ) ) AS a')->select();
+        $data1 = $data[0]['a'];
+        $data2 = $data[0]['b'];
+        $data3 = $data[0]['c'];
+        $data4 = $data[0]['d'];
+        $data5 = $count - $data1 - $data2 - $data3 - $data4;
+        $stock = $this->item->where($where)->count();
+        $map1 = [];
+        $map1[] = ['exp', Db::raw("TIMESTAMPDIFF(MONTH,in_stock_time,now())>=0 and TIMESTAMPDIFF(MONTH,in_stock_time,now())<4")];
+        $stock1 = $this->item->where($where)->where($map1)->count();
+
+        $map2 = [];
+        $map2[] = ['exp', Db::raw("TIMESTAMPDIFF(MONTH,in_stock_time,now())>=4 and TIMESTAMPDIFF(MONTH,in_stock_time,now())<7")];
+        $stock2 = $this->item->where($where)->where($map2)->count();
+
+        $map3 = [];
+        $map3[] = ['exp', Db::raw("TIMESTAMPDIFF(MONTH,in_stock_time,now())>=7 and TIMESTAMPDIFF(MONTH,in_stock_time,now())<10")];
+        $stock3 = $this->item->where($where)->where($map3)->count();
+
+        $map4 = [];
+        $map4[] = ['exp', Db::raw("TIMESTAMPDIFF(MONTH,in_stock_time,now())>=10 and TIMESTAMPDIFF(MONTH,in_stock_time,now())<13")];
+        $stock4 = $this->item->where($where)->where($map4)->count();
+
+        $stock5 = $stock - $stock1 - $stock2 - $stock3 - $stock4;
+
+
+        $total = $this->item->alias('b')->join('fa_purchase_order_item o','b.purchase_id=o.purchase_id')->where($where)->sum('o.purchase_price');
+
+        $flag1 = [];
+        $flag1[] = ['exp', Db::raw("TIMESTAMPDIFF(MONTH,in_stock_time,now())>=0 and TIMESTAMPDIFF(MONTH,in_stock_time,now())<4")];
+        $total1 = $this->item->alias('b')->join('fa_purchase_order_item o','b.purchase_id=o.purchase_id')->where($where)->where($flag1)->sum('o.purchase_price');
+
+        $flag2 = [];
+        $flag2[] = ['exp', Db::raw("TIMESTAMPDIFF(MONTH,in_stock_time,now())>=4 and TIMESTAMPDIFF(MONTH,in_stock_time,now())<7")];
+        $total2 = $this->item->alias('b')->join('fa_purchase_order_item o','b.purchase_id=o.purchase_id')->where($where)->where($flag2)->sum('o.purchase_price');
+
+        $flag3 = [];
+        $flag3[] = ['exp', Db::raw("TIMESTAMPDIFF(MONTH,in_stock_time,now())>=7 and TIMESTAMPDIFF(MONTH,in_stock_time,now())<10")];
+        $total3 = $this->item->alias('b')->join('fa_purchase_order_item o','b.purchase_id=o.purchase_id')->where($where)->where($flag3)->sum('o.purchase_price');
+
+        $flag4 = [];
+        $flag4[] = ['exp', Db::raw("TIMESTAMPDIFF(MONTH,in_stock_time,now())>=10 and TIMESTAMPDIFF(MONTH,in_stock_time,now())<13")];
+        $total4 = $this->item->alias('b')->join('fa_purchase_order_item o','b.purchase_id=o.purchase_id')->where($where)->where($flag4)->sum('o.purchase_price');
+
     }
     //采购总览
     public function purchase_overview($time_str = ''){
@@ -406,7 +453,7 @@ class DataMarket extends Backend
         $createat = explode(' ', $time_str);
         $where['p.createtime'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
         $where['p.is_del'] = 1;
-        $status_where['p.purchase_status'] = ['in', [2, 5, 6, 7]];
+        $status_where['p.purchase_status'] = ['in', [2, 5, 6, 7,8,9,10]];
         $arrive_where['p.purchase_status'] = 7;
         //采购总数
         $arr['purchase_num'] = $this->purchase->alias('p')->where($where)->where($status_where)->join(['fa_purchase_order_item' => 'b'], 'p.id=b.purchase_id')->sum('b.purchase_num');
@@ -419,11 +466,11 @@ class DataMarket extends Backend
         //所选时间内到货的采购单延迟的批次
         $delay_batch = $this->purchase->alias('p')->join('fa_purchase_batch b','p.id=b.purchase_id','left')->join('fa_logistics_info l','p.id=l.purchase_id','left')->where($where)->where($arrive_where)->where('p.arrival_time<l.sign_time')->count();
         //采购批次到货延时率
-        $arr['purchase_delay_rate'] = $sum_batch ? round($delay_batch/$sum_batch,2).'%' : 0;
+        $arr['purchase_delay_rate'] = $sum_batch ? round($delay_batch/$sum_batch*100,2).'%' : 0;
         //所选时间内到货的采购单合格率90%以上的批次
         $qualified_num = $this->purchase->alias('p')->join('fa_check_order o','p.id = o.purchase_id','left')->join('fa_check_order_item i','o.id = i.check_id','left')->where($where)->where($arrive_where)->group('p.id')->having('sum( quantity_num )/ sum( arrivals_num )>= 0.9')->count();
         //采购批次到货合格率
-        $arr['purchase_qualified_rate'] = $sum_batch ? round($qualified_num/$sum_batch,2).'%' : 0;
+        $arr['purchase_qualified_rate'] = $sum_batch ? round($qualified_num/$sum_batch*100,2).'%' : 0;
         //采购单价
         $arr['purchase_price'] = $arr['purchase_num'] ? round($arr['purchase_amount']/$arr['purchase_num'],2) : 0;
         Cache::set('Supplydatacenter_datamarket'.$time_str.md5(serialize('purchase_overview')),$arr,7200);
