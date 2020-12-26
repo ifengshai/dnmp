@@ -1260,16 +1260,14 @@ class ItWebDemand extends Backend
 
                         //任务完成 钉钉推送抄送人 提出人
                         Ding::cc_ding($row->entry_user_id, '任务ID:' . $params['id'] . '+任务已完成', $row->title, $this->request->domain() . url('index') . '?ref=addtabs');
-                        Ding::cc_ding($row->test_user_id, '任务ID:' . $params['id'] . '+任务已完成', $row->title, $this->request->domain() . url('index') . '?ref=addtabs');
 
                         if ($row->copy_to_user_id) {
                             $usersId = explode(',', $row->copy_to_user_id);
                             Ding::cc_ding($usersId, '任务ID:' . $params['id'] . '+任务已完成', $row->title, $this->request->domain() . url('index') . '?ref=addtabs');
                         }
-
-//                        //测试主管
-//                        $testAuthUserIds = Auth::getGroupUserId(config('demand.test_group_id')) ?: [];
-//                        Ding::cc_ding($testAuthUserIds, '任务ID:' . $params['id'] . '+任务等待完成', $row['title'], $this->request->domain() . url('index') . '?ref=addtabs');
+                        //测试主管
+                        $testAuthUserIds = Auth::getGroupUserId(config('demand.test_group_id')) ?: [];
+                        Ding::cc_ding($testAuthUserIds, '任务ID:' . $params['id'] . '+任务已完成，等待测试', $row['title'], $this->request->domain() . url('index') . '?ref=addtabs');
                     }
 
                     $this->success('成功');
