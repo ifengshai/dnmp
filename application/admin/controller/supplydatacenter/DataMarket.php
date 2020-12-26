@@ -441,11 +441,11 @@ class DataMarket extends Backend
 
         $total5 = $total - $total1 - $total2 - $total3 - $total4;
 
-        $percent1 = $data ? round($data1/$data*100,2) : 0;
-        $percent2 = $data ? round($data2/$data*100,2) : 0;
-        $percent3 = $data ? round($data3/$data*100,2) : 0;
-        $percent4 = $data ? round($data4/$data*100,2) : 0;
-        $percent5 = $data ? round($data5/$data*100,2) : 0;
+        $percent1 = $count ? round($data1/$count*100,2) : 0;
+        $percent2 = $count ? round($data2/$count*100,2) : 0;
+        $percent3 = $count ? round($data3/$count*100,2) : 0;
+        $percent4 = $count ? round($data4/$count*100,2) : 0;
+        $percent5 = $count ? round($data5/$count*100,2) : 0;
 
         $stock_percent1 = $stock ? round($stock1/$stock*100,2) : 0;
         $stock_percent2 = $stock ? round($stock2/$stock*100,2) : 0;
