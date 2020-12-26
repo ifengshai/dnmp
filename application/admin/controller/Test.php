@@ -2237,7 +2237,7 @@ class Test extends Backend
         ->where(['a.item_order_number' => ['in', $item_order_number]])
         ->where('LENGTH(trim(b.lens_number))=0')
         ->join(['fa_order_item_option' => 'b'],'a.option_id=b.id')
-        ->coulmn('item_order_number');
+        ->column('item_order_number');
         file_put_contents('/www/wwwroot/mojing/runtime/log/test.log', serialize($list) . "\r\n", FILE_APPEND);
 
         echo "ok";
