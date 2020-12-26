@@ -2,6 +2,7 @@
 
 namespace app\admin\controller\warehouse;
 
+use app\admin\model\warehouse\ProductBarCodeItem;
 use app\common\controller\Backend;
 use think\Db;
 use think\Exception;
@@ -649,6 +650,17 @@ class Check extends Backend
                         Db::name('purchase_abnormal_item')->insertAll($item);
                     }
                 }
+            }else{
+                //审核拒绝，解绑条形码
+                $code_clear = [
+                    'sku' => '',
+                    'purchase_id' => 0,
+                    'batch_id' => 0,
+                    'logistics_id' => 0,
+                    'check_id' => 0
+                ];
+                $_product_bar_code_item = new ProductBarCodeItem();
+                $_product_bar_code_item->allowField(true)->isUpdate(true, ['check_id' => $ids])->save($code_clear);
             }
 
             $this->success();
@@ -673,6 +685,17 @@ class Check extends Backend
         $data['status'] = input('status');
         $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
         if ($res) {
+            //取消质检单，解绑条形码
+            $code_clear = [
+                'sku' => '',
+                'purchase_id' => 0,
+                'batch_id' => 0,
+                'logistics_id' => 0,
+                'check_id' => 0
+            ];
+            $_product_bar_code_item = new ProductBarCodeItem();
+            $_product_bar_code_item->allowField(true)->isUpdate(true, ['check_id' => $ids])->save($code_clear);
+
             $this->success();
         } else {
             $this->error('取消失败！！');

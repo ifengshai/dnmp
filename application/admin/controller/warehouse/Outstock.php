@@ -2,6 +2,7 @@
 
 namespace app\admin\controller\warehouse;
 
+use app\admin\model\warehouse\ProductBarCodeItem;
 use app\common\controller\Backend;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Reader\Csv;
@@ -577,7 +578,15 @@ class Outstock extends Backend
                     }
                     //先入先出逻辑
                     //                $this->item->setPurchaseOrder($list);
+                }else{
+                    //审核拒绝解除条形码绑定关系
+                    $_product_bar_code_item = new ProductBarCodeItem();
+                    $_product_bar_code_item
+                        ->allowField(true)
+                        ->isUpdate(true, ['out_stock_id' => ['in', $ids]])
+                        ->save(['out_stock_id' => 0]);
                 }
+
                 Db::commit();
                 (new StockLog())->commit();
                 $platform->commit();

@@ -1271,7 +1271,8 @@ class ItWebDemand extends Backend
                             Ding::cc_ding($usersId, '任务ID:' . $params['id'] . '+任务已完成', $row->title, $this->request->domain() . url('index') . '?ref=addtabs');
                         }
                         //测试主管
-                        $testAuthUserIds = Auth::getGroupUserId(config('demand.test_group_id')) ?: [];
+                        //$testAuthUserIds = Auth::getGroupUserId(config('demand.test_group_id')) ?: [];
+                        $testAuthUserIds = config('demand.test_group_id');
                         Ding::cc_ding($testAuthUserIds, '任务ID:' . $params['id'] . '+任务已完成，等待测试', $row['title'], $this->request->domain() . url('index') . '?ref=addtabs');
                     }
 
