@@ -67,13 +67,15 @@ class DataMarket extends Backend
         //库存分级概况
         $stock_level_overview = $this->stock_level_overview();
         $stock_level_sales_rate = $this->stock_level_sales_rate();
+        //库龄概况
+        $stock_age_overview = $this->stock_age_overview();
         //采购概况
         $purchase_overview = $this->purchase_overview();
         //物流妥投概况
         $logistics_completed_overview = $this->logistics_completed_overview();
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
-        $this->view->assign(compact('stock_overview','stock_measure_overview','stock_level_overview','stock_level_sales_rate','purchase_overview','logistics_completed_overview','magentoplatformarr','time_str'));
+        $this->view->assign(compact('stock_overview','stock_measure_overview','stock_level_overview','stock_level_sales_rate','purchase_overview','logistics_completed_overview','magentoplatformarr','stock_age_overview','time_str'));
         return $this->view->fetch();
     }
     //库存总览
@@ -419,7 +421,6 @@ class DataMarket extends Backend
 
         $stock5 = $stock - $stock1 - $stock2 - $stock3 - $stock4;
 
-
         $total = $this->item->alias('b')->join('fa_purchase_order_item o','b.purchase_id=o.purchase_id')->where($where)->sum('o.purchase_price');
 
         $flag1 = [];
@@ -438,6 +439,51 @@ class DataMarket extends Backend
         $flag4[] = ['exp', Db::raw("TIMESTAMPDIFF(MONTH,in_stock_time,now())>=10 and TIMESTAMPDIFF(MONTH,in_stock_time,now())<13")];
         $total4 = $this->item->alias('b')->join('fa_purchase_order_item o','b.purchase_id=o.purchase_id')->where($where)->where($flag4)->sum('o.purchase_price');
 
+        $total5 = $total - $total1 - $total2 - $total3 - $total4;
+
+        $arr = array(
+            array(
+                'title'=>'0~3月',
+                'count'=>$data1,
+                'percent'=>$data ? round($data1/$data*100,2) : 0,
+                'stock'=>$stock1,
+                'stock_percent' => $stock ? round($stock1/$stock*100,2) : 0,
+                'total'=>$total1
+            ),
+            array(
+                'title'=>'4~6月',
+                'count'=>$data2,
+                'percent'=>$data ? round($data2/$data*100,2) : 0,
+                'stock'=>$stock2,
+                'stock_percent' => $stock ? round($stock2/$stock*100,2) : 0,
+                'total'=>$total2
+            ),
+            array(
+                'title'=>'7~9月',
+                'count'=>$data3,
+                'percent'=>$data ? round($data3/$data*100,2) : 0,
+                'stock'=>$stock3,
+                'stock_percent' => $stock ? round($stock3/$stock*100,2) : 0,
+                'total'=>$total3
+            ),
+            array(
+                'title'=>'10~12月',
+                'count'=>$data4,
+                'percent'=>$data ? round($data4/$data*100,2) : 0,
+                'stock'=>$stock4,
+                'stock_percent' => $stock ? round($stock4/$stock*100,2) : 0,
+                'total'=>$total4
+            ),
+            array(
+                'title'=>'12个月以上',
+                'count'=>$data5,
+                'percent'=>$data ? round($data5/$data*100,2) : 0,
+                'stock'=>$stock5,
+                'stock_percent' => $stock ? round($stock5/$stock*100,2) : 0,
+                'total'=>$total5
+            ),
+        );
+        return $arr;
     }
     //采购总览
     public function purchase_overview($time_str = ''){
