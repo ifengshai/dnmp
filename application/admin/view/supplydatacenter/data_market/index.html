@@ -438,12 +438,12 @@
                         </thead>
                         {foreach $stock_age_overview as $value}
                         <tr>
-                            <td>{$stock_age_overview.title}</td>
-                            <td>{$stock_age_overview.count}</td>
-                            <td>{$stock_age_overview.percent}%</td>
-                            <td>{$stock_age_overview.stock}</td>
-                            <td>{$stock_age_overview.stock_percent}%</td>
-                            <td>{$stock_age_overview.total}</td>
+                            <td>{$value.title}</td>
+                            <td>{$value.count}</td>
+                            <td>{$value.percent}%</td>
+                            <td>{$value.stock}</td>
+                            <td>{$value.stock_percent}%</td>
+                            <td>{$value.total}</td>
                         </tr>
                         {/foreach}
                     </table>
