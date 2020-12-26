@@ -3280,6 +3280,7 @@ function platform_order(){
 
         var sitetype = $('#work_platform').val();
         $('#c-order_sku').html('');
+        $('#c-order_new_sku').html('');
         $('#item_input-hidden').html('');
         Layer.load();
         Backend.api.ajax({
