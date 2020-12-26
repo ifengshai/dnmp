@@ -3312,8 +3312,8 @@ function platform_order(){
         }, function (data, ret) {
             Layer.closeAll();
             $('#payment_time').val(data.payment_time);
-            $('#order_pay_currency').val(data.base_currency_code);
-            $('#step2_pay_currency').val(data.base_currency_code);
+            $('#order_pay_currency').val(data.order_currency_code);
+            $('#step2_pay_currency').val(data.order_currency_code);
             $('#c-rewardpoint_discount_money').val(data.mw_rewardpoint_discount);
             $('#grand_total').val(data.grand_total);
             $('#base_grand_total').val(data.base_grand_total);
