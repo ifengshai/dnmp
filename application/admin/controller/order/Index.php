@@ -345,6 +345,9 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
         $item = $this->orderitemoption->where('order_id', $ids)->select();
         $items = collection($item)->toArray();
         foreach ($items as $key=>$item){
+                $items['coating_price'] = number_format($item['number_format'],2);
+                $items['index_price'] = number_format($item['index_price'],2);
+                $items['frame_price'] = number_format($item['frame_price'],2);
             if ($item['site'] ==9){
                 if ($item['prescription_pic_checked'] == false && $item['prescription_pic_id']>0){
                     $items[$key]['to_examine']= true;
