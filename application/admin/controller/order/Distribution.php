@@ -1325,7 +1325,7 @@ class Distribution extends Backend
                 //订单主表标记已合单
                 if (9 == $save_status) {
                     $this->_new_order_process->where(['order_id' => $value['order_id']])
-                    ->update(['combine_status' => 1, 'check_status' => 0, 'combine_time' => time(), 'check_time' => time()]);
+                    ->update(['combine_status' => 1, 'check_status' => 0, 'combine_time' => time()]);
                 }
 
                 $this->model->where(['id' => $value['id']])->update(['distribution_status' => $save_status]);
