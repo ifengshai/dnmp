@@ -395,7 +395,7 @@ class DataMarket extends Backend
     public function stock_age_overview(){
         $where['library_status'] = 1;
         $count = $this->item->where($where)->count();
-        $sql = $this->item->alias('t1')->field('TIMESTAMPDIFF(MONTH,in_stock_time,now()) AS total')->where($where)->group('customer_id')->buildSql();
+        $sql = $this->item->alias('t1')->field('TIMESTAMPDIFF(MONTH,in_stock_time,now()) AS total')->where($where)->buildSql();
         $data = $this->item->table([$sql=>'t2'])->field('sum( IF ( total >= 10 and total<13, 1, 0 ) ) AS d,sum( IF ( total >= 7 and total<10, 1, 0 ) ) AS c,sum( IF ( total >= 4 and total<7, 1, 0 ) ) AS b,sum( IF ( total >= 0 and total<4, 1, 0 ) ) AS a')->select();
         $data1 = $data[0]['a'];
         $data2 = $data[0]['b'];
@@ -441,45 +441,57 @@ class DataMarket extends Backend
 
         $total5 = $total - $total1 - $total2 - $total3 - $total4;
 
+        $percent1 = $data ? round($data1/$data*100,2) : 0;
+        $percent2 = $data ? round($data2/$data*100,2) : 0;
+        $percent3 = $data ? round($data3/$data*100,2) : 0;
+        $percent4 = $data ? round($data4/$data*100,2) : 0;
+        $percent5 = $data ? round($data5/$data*100,2) : 0;
+
+        $stock_percent1 = $stock ? round($stock1/$stock*100,2) : 0;
+        $stock_percent2 = $stock ? round($stock2/$stock*100,2) : 0;
+        $stock_percent3 = $stock ? round($stock3/$stock*100,2) : 0;
+        $stock_percent4 = $stock ? round($stock4/$stock*100,2) : 0;
+        $stock_percent5 = $stock ? round($stock5/$stock*100,2) : 0;
+
         $arr = array(
             array(
                 'title'=>'0~3月',
                 'count'=>$data1,
-                'percent'=>$data ? round($data1/$data*100,2) : 0,
+                'percent'=>$percent1,
                 'stock'=>$stock1,
-                'stock_percent' => $stock ? round($stock1/$stock*100,2) : 0,
+                'stock_percent' => $stock_percent1,
                 'total'=>$total1
             ),
             array(
                 'title'=>'4~6月',
                 'count'=>$data2,
-                'percent'=>$data ? round($data2/$data*100,2) : 0,
+                'percent'=>$percent2,
                 'stock'=>$stock2,
-                'stock_percent' => $stock ? round($stock2/$stock*100,2) : 0,
+                'stock_percent' => $stock_percent2,
                 'total'=>$total2
             ),
             array(
                 'title'=>'7~9月',
                 'count'=>$data3,
-                'percent'=>$data ? round($data3/$data*100,2) : 0,
+                'percent'=>$percent3,
                 'stock'=>$stock3,
-                'stock_percent' => $stock ? round($stock3/$stock*100,2) : 0,
+                'stock_percent' => $stock_percent3,
                 'total'=>$total3
             ),
             array(
                 'title'=>'10~12月',
                 'count'=>$data4,
-                'percent'=>$data ? round($data4/$data*100,2) : 0,
+                'percent'=>$percent4,
                 'stock'=>$stock4,
-                'stock_percent' => $stock ? round($stock4/$stock*100,2) : 0,
+                'stock_percent' => $stock_percent4,
                 'total'=>$total4
             ),
             array(
                 'title'=>'12个月以上',
                 'count'=>$data5,
-                'percent'=>$data ? round($data5/$data*100,2) : 0,
+                'percent'=>$percent5,
                 'stock'=>$stock5,
-                'stock_percent' => $stock ? round($stock5/$stock*100,2) : 0,
+                'stock_percent' => $stock_percent5,
                 'total'=>$total5
             ),
         );
