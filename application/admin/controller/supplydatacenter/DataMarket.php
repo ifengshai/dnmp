@@ -393,6 +393,10 @@ class DataMarket extends Backend
     }
     //库龄概况
     public function stock_age_overview(){
+        $cache_data = Cache::get('Supplydatacenter_datamarket' . md5(serialize('stock_age_overview')));
+        if ($cache_data) {
+            return $cache_data;
+        }
         $where['library_status'] = 1;
         $count = $this->item->where($where)->where('in_stock_time is not null')->count();
         $sql = $this->item->alias('t1')->field('TIMESTAMPDIFF(MONTH,in_stock_time,now()) AS total')->where($where)->where('in_stock_time is not null')->buildSql();
@@ -495,6 +499,7 @@ class DataMarket extends Backend
                 'total'=>$total5
             ),
         );
+        Cache::set('Supplydatacenter_datamarket'.md5(serialize('stock_age_overview')),$arr,7200);
         return $arr;
     }
     //采购总览

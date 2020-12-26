@@ -1329,6 +1329,10 @@ class WorkOrderList extends Backend
                 //没有审核人则不需要审核
                 if (!$params['assign_user_id']) {
                     $params['is_check'] = 0;
+                }else{
+                    if ($params['assign_user_id'] == 95 && $admin_id == 198){
+                        $params['assign_user_id'] = 117;
+                    }
                 }
                 /**获取审核人 end*/
 
