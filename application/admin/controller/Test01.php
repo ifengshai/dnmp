@@ -730,7 +730,7 @@ class Test01 extends Backend
 
     public function hedankuwei()
     {
-        $res = Db::name('work_order_list')->where('id','in',['54811','54817','54822'])->setField('assign_user_id',117);
+        $res = Db::name('work_order_list')->where('id','in',['54818'])->setField('assign_user_id',117);
         die;
         $list = Db::name('hedan_kuwei')->where('id','>',0)->select();
         foreach ($list as $k=>$v){
