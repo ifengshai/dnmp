@@ -333,7 +333,7 @@ class ScmWarehouse extends Scm
                     }, ['is_new' => 0]);
                 }
 
-                $item_data[$key]['sku_agg'] = $sku_agg;
+                $item_data[$key]['sku_agg'] = array_values($sku_agg);
                 $item_data[$key]['stock'] = $stock_list[$sku];
             }
 
@@ -2024,7 +2024,7 @@ class ScmWarehouse extends Scm
                 }, ['is_new' => 0]);
             }
 
-            $item_list[$key]['sku_agg'] = $sku_agg;
+            $item_list[$key]['sku_agg'] = array_values($sku_agg);
         }
 
         //盘点单所需数据
