@@ -1289,7 +1289,22 @@ class Distribution extends Backend
                         'create_time' => time()
                     ]);
                 } elseif (3 == $check_status) {
-                    $save_status = 4;
+
+                    if (in_array($value['order_prescription_type'], [2, 3])) {
+                        $save_status = 4;
+                    } else {
+                        if ($option_list[$value['option_id']]['is_print_logo']) {
+                            $save_status = 5; //待印logo
+                        } else {
+                            if ($total_list[$value['order_id']]['total_qty_ordered'] > 1) {
+                                $save_status = 7;
+                            } else {
+                                $save_status = 9;
+                            }
+                        }
+                    }
+
+                    // $save_status = 4;
                 } elseif (4 == $check_status) {
                     if ($option_list[$value['option_id']]['is_print_logo']) {
                         $save_status = 5;
