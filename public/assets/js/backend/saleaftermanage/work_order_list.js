@@ -3317,7 +3317,11 @@ function platform_order(){
             }
             
             var is_order_item = $('#is_order_item').val();
-            if (2 != Config.work_type && 1 != is_order_item) {$('#c-order_new_sku').append(sku_html);}
+            var status = $('.status').val();
+            if (1 != status) {
+                if (2 != Config.work_type && 1 != is_order_item) {$('#c-order_new_sku').append(sku_html);}
+            }
+            
             
 
             $('.selectpicker ').selectpicker('refresh');
