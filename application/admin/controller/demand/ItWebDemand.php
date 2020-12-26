@@ -1263,7 +1263,8 @@ class ItWebDemand extends Backend
                         $update['develop_finish_time'] = date('Y-m-d H:i', time());
                         $update['test_status'] = 3;
                         $this->model->allowField(true)->save($update, ['id' => $params['id']]);
-
+                        echo 1111;
+                        dump($row->test_user_id);die();
                         //任务完成 钉钉推送抄送人 提出人
                         Ding::cc_ding($row->entry_user_id, '任务ID:' . $params['id'] . '+任务已完成', $row->title, $this->request->domain() . url('index') . '?ref=addtabs');
                         //推送测试负责人
