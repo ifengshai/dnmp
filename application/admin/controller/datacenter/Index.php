@@ -492,11 +492,10 @@ class Index extends Backend
             $time = explode(' ', $create_time);
             $map['b.created_at'] = ['between', [strtotime($time[0] . ' ' . $time[1]), strtotime($time[3] . ' ' . $time[4])]];
         } else {
-            $map['b.created_at'] = ['between', [1604122029, time()]];
+            $map['b.created_at'] = ['between', [strtotime(date('Y-m-d')), time()]];
         }
 
         $neworderprocess = new \app\admin\model\order\order\NewOrderProcess();
-        $neworderitemprocess = new \app\admin\model\order\order\NewOrderItemProcess();
         $undeliveredOrder = $neworderprocess->undeliveredOrder($map);
         //统计时间段内未发货订单
         $zeeloolUnorderNum = $undeliveredOrder[1];

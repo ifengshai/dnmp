@@ -55,7 +55,7 @@ class NewOrderProcess extends Model
         //过滤补差价单
         $map['b.order_type'] = ['<>', 5];
         $map['b.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
-        return $this->alias('a')->where($map)->join(['fa_order' => 'b'], 'a.order_id=b.id')->column('sum(total_qty_ordered)', 'b.site');
+        return $this->alias('a')->where($map)->join(['fa_order' => 'b'], 'a.order_id=b.id')->group('b.site')->column('sum(b.total_qty_ordered)', 'b.site');
     }
 
     /**
