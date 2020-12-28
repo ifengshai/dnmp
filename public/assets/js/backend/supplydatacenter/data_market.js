@@ -221,7 +221,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                                 },
                                 formatter: function (param) { //格式化提示信息
                                     console.log(param);
-                                    return param[0].name + '<br/>人数：' + param[0].value;
+                                    return param[0].name + '<br/>个数：' + param[0].value;
                                 }
                             },                        
                             xAxis: {
