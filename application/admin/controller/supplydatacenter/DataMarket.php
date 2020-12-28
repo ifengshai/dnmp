@@ -75,6 +75,11 @@ class DataMarket extends Backend
         $logistics_completed_overview = $this->logistics_completed_overview();
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
+        foreach ($magentoplatformarr as $key=>$val){
+            if(in_array($val['name'],['meeloog'])){
+                unset($magentoplatformarr[$key]);
+            }
+        }
         $this->view->assign(compact('stock_overview','stock_measure_overview','stock_level_overview','stock_level_sales_rate','purchase_overview','logistics_completed_overview','magentoplatformarr','stock_age_overview','time_str'));
         return $this->view->fetch();
     }
