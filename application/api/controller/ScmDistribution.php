@@ -684,7 +684,7 @@ class ScmDistribution extends Scm
                     5 => '印logo',
                     6 => '去质检',
                     7 => '去合单',
-                    9 => '去审单'
+                    9 => '去合单'
                 ];
                 $back_msg = $next_step[$save_status];
             }
@@ -1216,6 +1216,7 @@ class ScmDistribution extends Scm
             ->field('id,distribution_status,sku,order_id,temporary_house_id,abnormal_house_id')
             ->find();
         empty($item_process_info) && $this->error(__('子订单不存在'), [], 403);
+        9 == $item_process_info['distribution_status'] && $this->error(__('订单合单完成，去审单！'), [], 403);
         !in_array($item_process_info['distribution_status'], [7, 8]) && $this->error(__('子订单当前状态不可合单操作'), [], 403);
 
         //判断异常状态
@@ -1252,12 +1253,6 @@ class ScmDistribution extends Scm
                 && $this->error(__('有工单未处理，无法操作'), [], 405);
             }
         }
-
-        //获取订单购买总数
-        $total_qty_ordered = $this->_new_order_item_process
-            ->where('order_id', $item_process_info['order_id'])
-            ->count();
-        if (1 == $total_qty_ordered) $this->error(__("订单中只包含一个商品，不需要合单\n需要将子订单放至审单处"), [], 403);
 
         $order_process_info = $this->_new_order_process
             ->where('order_id', $item_process_info['order_id'])
