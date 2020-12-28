@@ -3453,6 +3453,9 @@ class Crontab extends Backend
         $num = $item->getAllStock();
         $data['allnum'] = $num;
         $data['createtime'] = date('Y-m-d H:i:s');
+        //实时库存
+        $realtime_stock = $item->getRealtimeStock();
+        $data['realtime_stock'] = $realtime_stock;
         $res = Db::table('fa_product_allstock_log')->insert($data);
     }
     /**

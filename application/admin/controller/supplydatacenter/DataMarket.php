@@ -142,11 +142,11 @@ class DataMarket extends Backend
         //期初实时库存
         $start_stock_where = [];
         $start_stock_where[] = ['exp', Db::raw("DATE_FORMAT(createtime, '%Y-%m-%d') = '" . $createat[0] . "'")];
-        $start_stock = Db::table('fa_product_allstock_log')->where($start_stock_where)->value('allnum');
+        $start_stock = Db::table('fa_product_allstock_log')->where($start_stock_where)->value('realtime_stock');
         //期末实时库存
         $end_stock_where = [];
         $end_stock_where[] = ['exp', Db::raw("DATE_FORMAT(createtime, '%Y-%m-%d') = '" . $createat[3] . "'")];
-        $end_stock = Db::table('fa_product_allstock_log')->where($start_stock_where)->value('allnum');
+        $end_stock = Db::table('fa_product_allstock_log')->where($start_stock_where)->value('realtime_stock');
         $sum = $start_stock+$end_stock;
         //库存周转率
         $arr['turnover_rate'] = $sum ? round($stock_consume_num/$sum/2,2) : 0;
