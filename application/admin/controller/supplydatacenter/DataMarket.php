@@ -632,6 +632,7 @@ class DataMarket extends Backend
                     $map1['p.order_prescription_type'] = 1;
                     $map2['p.order_prescription_type'] = 2;
                     $map3['p.order_prescription_type'] = 3;
+                    $where['o.status'] = ['in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
                     $sql1 = $this->process->alias('p')->join('fa_order o','p.order_id=o.entity_id')->field('p.complete_time - o.payment_time AS total')->where($where)->where($map1)->group('p.order_id')->buildSql();
                     $arr1 = $this->process->table([$sql1=>'t2'])->field('sum( IF ( total > 24, 1, 0) ) AS a,sum( IF ( total <= 24, 1, 0) ) AS b')->select();
 
