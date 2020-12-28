@@ -1529,7 +1529,21 @@ class ItWebDemand extends Backend
                         $usersIds = array_merge($authUserIds, $webAuthUserIds, $appAuthUserIds);
                         Ding::cc_ding($usersIds, '任务ID:' . $params['id'] . '+测试未通过', $row['title'], $this->request->domain() . url('index') . '?ref=addtabs');
                     } elseif ($label == 3) { //任务上线 通知提出人
-                        Ding::cc_ding($row['entry_user_id'], '任务ID:' . $params['id'] . '+任务已上线，等待确认', $row['title'], $this->request->domain() . url('index') . '?ref=addtabs');
+                        //任务上线 通知提出人 + 抄送人
+                        if (!empty($row['copy_to_user_id'])){
+                            $copy_to_user_id = explode(',',$row['copy_to_user_id']);
+                            if (in_array($row['entry_user_id'],$copy_to_user_id)){
+                                $recipient = $copy_to_user_id;
+                            }else{
+                                $copy_to_user_id[] = $row['entry_user_id'];
+                                $recipient =$copy_to_user_id;
+                            }
+                            Ding::cc_ding($recipient, '任务ID:' . $params['id'] . '+任务已上线，等待确认', $row['title'], $this->request->domain() . url('index') . '?ref=addtabs');
+                        }else{
+                            Ding::cc_ding($row['entry_user_id'], '任务ID:' . $params['id'] . '+任务已上线，等待确认', $row['title'], $this->request->domain() . url('index') . '?ref=addtabs');
+                        }
+
+//                        Ding::cc_ding($row['entry_user_id'], '任务ID:' . $params['id'] . '+任务已上线，等待确认', $row['title'], $this->request->domain() . url('index') . '?ref=addtabs');
                     }else if ($label ==1){
                         //测试通过 推送给对应开发者
                         $user_all = array_merge(array_filter(array($row['app_user_id'],$row['phper_user_id'],$row['web_designer_user_id'])));
