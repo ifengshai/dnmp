@@ -210,6 +210,7 @@ class DataMarket extends Backend
         $month_sales_num = $month_sales_num1+$month_sales_num2;
         //月进销比
         $arr['month_in_out_rate'] = $month_sales_num ? round($purchase_num/$month_sales_num,2) : 0;
+        dump($arr);exit;
         Cache::set('Supplydatacenter_datamarket'  .$time_str. md5(serialize('stock_measure_overview')), $arr, 7200);
         return $arr;
     }
