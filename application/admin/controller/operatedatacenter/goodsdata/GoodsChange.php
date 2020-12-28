@@ -79,7 +79,7 @@ class GoodsChange extends Backend
                 ->where($map)
                 ->group('sku')
                 // ->order($sort, $order)
-                ->order('day_date', 'desc')
+                ->order('id', 'desc')
                 ->count();
             $sku_data_day = Db::name('datacenter_sku_day')
                 ->where($where)
@@ -87,7 +87,7 @@ class GoodsChange extends Backend
                 ->group('sku')
                 ->field('id,sku,sum(cart_num) as cart_num,now_pricce,max(day_date) as day_date,single_price,day_stock,day_onway_stock,sum(sales_num) as sales_num,sum(order_num) as order_num,sum(glass_num) as glass_num,sum(sku_row_total) as sku_row_total,sum(sku_grand_total) as sku_grand_total,sum(sku_grand_total) as sku_grand_total')
                 // ->order($sort, $order)
-                ->order('day_date', 'desc')
+                ->order('id', 'desc')
                 ->limit($offset, $limit)
                 ->select();
             foreach ($sku_data_day as $k => $v) {
@@ -564,7 +564,7 @@ class GoodsChange extends Backend
         $total_export_count = Db::name('datacenter_sku_day')
             ->where($map)
             ->group('sku')
-            ->order('day_date', 'desc')
+            ->order('id', 'desc')
             ->count();
 
         $pre_count = 5000;
@@ -576,7 +576,7 @@ class GoodsChange extends Backend
                 ->group('sku')
                 ->field('id,sku,sum(cart_num) as cart_num,now_pricce,max(day_date) as day_date,single_price,day_stock,day_onway_stock,sum(sales_num) as sales_num,sum(order_num) as order_num,sum(glass_num) as glass_num,sum(sku_row_total) as sku_row_total,sum(sku_grand_total) as sku_grand_total,sum(sku_grand_total) as sku_grand_total')
                 // ->order($sort, $order)
-                ->order('day_date', 'desc')
+                ->order('id', 'desc')
                 ->limit($start,$pre_count)
                 ->select();
             $list = collection($list)->toArray();
