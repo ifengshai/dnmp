@@ -744,4 +744,21 @@ class Test01 extends Backend
         Db::name('store_house')->insertAll($list);
         dump($list);
     }
+
+    public function xiaoliangpaihangbang()
+    {
+        $this->zeelool = new \app\admin\model\order\order\Zeelool;
+        $createat = explode(' ', '2020-12-01 00:00:00 - 2020-12-31 23:59:59');
+        $map['sku'] = ['=', 'ZOP049594-01'];
+        $map['a.created_at'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3]  . ' ' . $createat[4]]];
+        $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
+        $res = $this->zeelool
+            ->where($map)
+            ->alias('a')
+            ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
+            ->group('sku')
+            ->order('num desc')
+            ->column('round(sum(b.qty_ordered)) as num', 'trim(sku)');
+        dump($this->zeelool->getLastSql());
+    }
 }
