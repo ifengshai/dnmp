@@ -322,6 +322,16 @@ class Item extends Model
         $where['category_id']  = ['<>', 43];
         return $this->where($where)->sum('stock');
     }
+    /*
+     * 获取仓库实时库存
+     * */
+    public function getRealtimeStock(){
+        $where['is_del']  = 1;
+        $where['is_open']  = 1;
+        $where['category_id']  = ['<>', 43];
+        $stock = $this->where($where)->field('sum(stock)-sum(distribution_occupy_stock) as total')->select();
+        return $stock[0]['total'];
+    }
 
     /**
      * 获取仓库可用库存
