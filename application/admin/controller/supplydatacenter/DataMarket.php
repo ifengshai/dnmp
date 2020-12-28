@@ -119,7 +119,7 @@ class DataMarket extends Backend
             $time_str = $start .' - '.$end;
         }
         $cache_data = Cache::get('Supplydatacenter_datamarket'  .$time_str. md5(serialize('stock_measure_overview')));
-        if (!$cache_data) {
+        if ($cache_data) {
             return $cache_data;
         }
         /*
