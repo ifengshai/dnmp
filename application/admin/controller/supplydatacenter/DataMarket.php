@@ -384,6 +384,8 @@ class DataMarket extends Backend
 
         $skus = $this->productGrade->where('grade',$grade)->column('true_sku');
         $where['sku'] = ['in', $skus];
+        $where['is_del'] = 1;
+        $where['is_open'] = 1;
         //实时库存
         $stock_num = $this->model->where($where)->value('sum(stock)-sum(distribution_occupy_stock) as result');
         $order_sales_num = $this->supply->where('day_date')->sum($field);
