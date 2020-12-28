@@ -191,7 +191,7 @@ class DataMarket extends Backend
          * 库存周转天数：所选时间段的天数/库存周转率
          * */
         //库存周转天数
-        $days = round(($start - $end) / 3600 / 24);
+        $days = round(($end - $start) / 3600 / 24);
         $arr['turnover_days_rate'] = $arr['turnover_rate'] ? round($days/$arr['turnover_rate']) : 0;
         /*
          * 月进销比:（所选时间包含的月份整月）月度已审核采购单采购的数量/月度销售数量（订单、批发出库、亚马逊出库）
