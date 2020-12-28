@@ -1013,7 +1013,7 @@ class WorkOrderList extends Backend
     {
         //获取工单配置信息
         $workOrderConfigValue = $this->workOrderConfigValue;
-
+        
         //获取用户ID和所在权限组
         $admin_id = session('admin.id');
         $nickname = session('admin.nickname');
@@ -1221,7 +1221,7 @@ class WorkOrderList extends Backend
                             }
                         }
                     }
-
+                  
                     //判断是否选择积分措施
                     if (in_array(10, $measure_choose_id)) {
                         (!$params['integral'] || !is_numeric($params['integral']))
@@ -1278,14 +1278,16 @@ class WorkOrderList extends Backend
                     unset($item);
                 }
 
+               
+
                 /**获取审核人 start*/
                 $check_person_weight = $workOrderConfigValue['check_person_weight'];//审核人列表
                 $check_group_weight = $workOrderConfigValue['check_group_weight'];//审核组列表
                 $all_group = $workOrderConfigValue['group'];//所有的成员组
-
                 //核算审核组
                 if (!empty($check_group_weight)) {
                     foreach ($check_group_weight as $gv) {
+                        $all_person = [];
                         //获取当前组下的所有成员
                         $subordinate = (new AuthGroup)->getAllNextGroup($gv['work_create_person_id']);
                         if ($subordinate) {
@@ -1300,6 +1302,8 @@ class WorkOrderList extends Backend
                         } else {
                             $all_person = $all_group[$gv['work_create_person_id']];
                         }
+
+                       
                         if (!empty($all_person)) {
                             //如果符合创建组
                             if (in_array($admin_id, array_unique($all_person))) {
@@ -1312,7 +1316,6 @@ class WorkOrderList extends Backend
                         }
                     }
                 }
-
                 //核算审核人
                 if (!empty($check_person_weight)) {
                     foreach ($check_person_weight as $wkv) {
@@ -1325,7 +1328,7 @@ class WorkOrderList extends Backend
                         }
                     }
                 }
-
+               
                 //没有审核人则不需要审核
                 if (!$params['assign_user_id']) {
                     $params['is_check'] = 0;
@@ -1334,6 +1337,7 @@ class WorkOrderList extends Backend
                         $params['assign_user_id'] = 117;
                     }
                 }
+
                 /**获取审核人 end*/
 
                 //点击提交按钮
@@ -2097,6 +2101,7 @@ class WorkOrderList extends Backend
                 //核算审核组
                 if (!empty($check_group_weight)) {
                     foreach ($check_group_weight as $gv) {
+                        $all_person = [];
                         //获取当前组下的所有成员
                         $subordinate = (new AuthGroup)->getAllNextGroup($gv['work_create_person_id']);
                         if ($subordinate) {
