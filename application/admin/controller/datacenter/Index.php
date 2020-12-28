@@ -105,9 +105,9 @@ class Index extends Backend
 
                 $v['w_sku'] = $this->itemplatformsku->getWebSku($v['sku'], 5);
 
-                $v['z_es_sku'] = $this->itemplatformsku->getWebSku($v['sku'],9);
-                
-                $v['z_de_sku'] = $this->itemplatformsku->getWebSku($v['sku'],10);
+                $v['z_es_sku'] = $this->itemplatformsku->getWebSku($v['sku'], 9);
+
+                $v['z_de_sku'] = $this->itemplatformsku->getWebSku($v['sku'], 10);
             }
             unset($v);
             $z_sku = array_column($list, 'z_sku');
@@ -115,8 +115,8 @@ class Index extends Backend
             $n_sku = array_column($list, 'n_sku');
             $m_sku = array_column($list, 'm_sku');
             $w_sku = array_column($list, 'w_sku');
-            $z_es_sku = array_column($list,'z_es_sku');
-            $z_de_sku = array_column($list,'z_de_sku');
+            $z_es_sku = array_column($list, 'z_es_sku');
+            $z_de_sku = array_column($list, 'z_de_sku');
 
             //获取三个站销量数据
             $zeelool = $this->zeelool->getOrderSalesNum($z_sku, $map);
@@ -124,8 +124,8 @@ class Index extends Backend
             $nihao = $this->nihao->getOrderSalesNum($n_sku, $map);
             $meeloog = $this->meeloog->getOrderSalesNum($m_sku, $map);
             $wesee = $this->wesee->getOrderSalesNum($w_sku, $map);
-            $zeelool_es = $this->zeeloolEs->getOrderSalesNum($z_es_sku,$map);
-            $zeelool_de = $this->zeeloolDe->getOrderSalesNum($z_de_sku,$map);
+            $zeelool_es = $this->zeeloolEs->getOrderSalesNum($z_es_sku, $map);
+            $zeelool_de = $this->zeeloolDe->getOrderSalesNum($z_de_sku, $map);
             //重组数组
             foreach ($list as &$v) {
 
@@ -490,40 +490,45 @@ class Index extends Backend
         $create_time = input('create_time');
         if ($create_time) {
             $time = explode(' ', $create_time);
-            $map['a.created_at'] = ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
+            $map['b.created_at'] = ['between', [strtotime($time[0] . ' ' . $time[1]), strtotime($time[3] . ' ' . $time[4])]];
         } else {
-            $map['a.created_at'] = ['between', [date('Y-m-d 00:00:00'), date('Y-m-d H:i:s', time())]];
+            $map['b.created_at'] = ['between', [strtotime(date('Y-m-d')), time()]];
         }
 
+        $neworderprocess = new \app\admin\model\order\order\NewOrderProcess();
+        $undeliveredOrder = $neworderprocess->undeliveredOrder($map);
         //统计时间段内未发货订单
-        $zeeloolUnorderNum = $this->zeelool->undeliveredOrder($map);
-        $vooguemeUnorderNum = $this->voogueme->undeliveredOrder($map);
-        $nihaoUnorderNum = $this->nihao->undeliveredOrder($map);
+        $zeeloolUnorderNum = $undeliveredOrder[1];
+        $vooguemeUnorderNum = $undeliveredOrder[2];
+        $nihaoUnorderNum = $undeliveredOrder[3];
 
         //统计时间段内未发货订单副数
-        $zeeloolNum = $this->zeelool->undeliveredOrderNum($map);
-        $vooguemeNum = $this->voogueme->undeliveredOrderNum($map);
-        $nihaoNum = $this->nihao->undeliveredOrderNum($map);
+        $undeliveredOrderNum = $neworderprocess->undeliveredOrderNum($map);
+        $zeeloolNum = $undeliveredOrderNum[1];
+        $vooguemeNum = $undeliveredOrderNum[2];
+        $nihaoNum = $undeliveredOrderNum[3];
 
         //统计处方镜
-        $zeeloolOrderPrescriptionNum = $this->zeelool->getOrderPrescriptionNum($map);
-        $vooguemeOrderPrescriptionNum = $this->voogueme->getOrderPrescriptionNum($map);
-        $nihaoOrderPrescriptionNum = $this->nihao->getOrderPrescriptionNum($map);
+        $orderPrescriptionNum = $neworderprocess->getOrderPrescriptionNum($map);
+       
+        $zeeloolOrderPrescriptionNum = $orderPrescriptionNum[1][2] + $orderPrescriptionNum[1][3];
+        $vooguemeOrderPrescriptionNum = $orderPrescriptionNum[2][2] + $orderPrescriptionNum[2][3];
+        $nihaoOrderPrescriptionNum = $orderPrescriptionNum[3][2] + $orderPrescriptionNum[3][3];
 
         //统计现货处方镜
-        $zeeloolSpotOrderPrescriptionNum = $this->zeelool->getSpotOrderPrescriptionNum($map);
-        $vooguemeSpotOrderPrescriptionNum = $this->voogueme->getSpotOrderPrescriptionNum($map);
-        $nihaoSpotOrderPrescriptionNum = $this->nihao->getSpotOrderPrescriptionNum($map);
+        $zeeloolSpotOrderPrescriptionNum = $orderPrescriptionNum[1][2];
+        $vooguemeSpotOrderPrescriptionNum = $orderPrescriptionNum[2][2];
+        $nihaoSpotOrderPrescriptionNum = $orderPrescriptionNum[3][2];
 
         //统计定制处方镜副数
-        $zeeloolCustomOrderPrescriptionNum = $this->zeelool->getCustomOrderPrescriptionNum($map);
-        $vooguemeCustomOrderPrescriptionNum = $this->voogueme->getCustomOrderPrescriptionNum($map);
-        $nihaoCustomOrderPrescriptionNum = $this->nihao->getCustomOrderPrescriptionNum($map);
+        $zeeloolCustomOrderPrescriptionNum = $orderPrescriptionNum[1][3];
+        $vooguemeCustomOrderPrescriptionNum = $orderPrescriptionNum[2][3];
+        $nihaoCustomOrderPrescriptionNum = $orderPrescriptionNum[3][3];
 
         //统计仅镜架订单
-        $zeeloolFrameOrderNum = $this->zeelool->frameOrder($map);
-        $vooguemeFrameOrderNum = $this->voogueme->frameOrder($map);
-        $nihaoFrameOrderNum = $this->nihao->frameOrder($map);
+        $zeeloolFrameOrderNum = $orderPrescriptionNum[1][1];
+        $vooguemeFrameOrderNum = $orderPrescriptionNum[1][1];
+        $nihaoFrameOrderNum = $orderPrescriptionNum[1][1];
 
         //统计处方度数范围数据
         $skuRes = $this->order_sku_num($create_time);
@@ -625,9 +630,9 @@ class Index extends Backend
                     $res = $this->meeloog->getOrderSalesNumTop30([], $map);
                 } elseif ($params['site'] == 5) {
                     $res = $this->wesee->getOrderSalesNumTop30([], $map);
-                }elseif ($params['site'] == 9){ //zeelool西语站
+                } elseif ($params['site'] == 9) { //zeelool西语站
                     $res = $this->zeeloolEs->getOrderSalesNumTop30([], $map);
-                }elseif($params['site'] == 10){ //zeelool德语站
+                } elseif ($params['site'] == 10) { //zeelool德语站
                     $res = $this->zeeloolDe->getOrderSalesNumTop30([], $map);
                 }
                 cache($cachename, $res, 7200);
@@ -672,13 +677,13 @@ class Index extends Backend
                     //查询对应平台销量
                     $list = $this->wesee->getOrderSalesNum([], $map);
                     //查询对应平台商品SKU
-                    $skus = $itemPlatformSku->getWebSkuAll(5);                    
-                }elseif($params['site'] == 9){ //zeelool的西语站
+                    $skus = $itemPlatformSku->getWebSkuAll(5);
+                } elseif ($params['site'] == 9) { //zeelool的西语站
                     //查询对应平台销量
                     $list = $this->zeeloolEs->getOrderSalesNum([], $map);
                     //查询对应平台商品sku
                     $skus = $itemPlatformSku->getWebSkuAll(9);
-                }elseif($params['site'] == 10){ //zeelool德语站
+                } elseif ($params['site'] == 10) { //zeelool德语站
                     //查询对应平台销量
                     $list = $this->zeeloolDe->getOrderSalesNum([], $map);
                     $skus = $itemPlatformSku->getWebSkuAll(10);
