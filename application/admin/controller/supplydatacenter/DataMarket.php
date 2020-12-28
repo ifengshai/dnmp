@@ -119,7 +119,7 @@ class DataMarket extends Backend
             $time_str = $start .' - '.$end;
         }
         $cache_data = Cache::get('Supplydatacenter_datamarket'  .$time_str. md5(serialize('stock_measure_overview')));
-        if (!$cache_data) {
+        if ($cache_data) {
             return $cache_data;
         }
         /*
@@ -146,14 +146,8 @@ class DataMarket extends Backend
         //期末实时库存
         $end_stock_where = [];
         $end_stock_where[] = ['exp', Db::raw("DATE_FORMAT(createtime, '%Y-%m-%d') = '" . $createat[3] . "'")];
-        $end_stock = Db::table('fa_product_allstock_log')->where($start_stock_where)->value('realtime_stock');
+        $end_stock = Db::table('fa_product_allstock_log')->where($end_stock_where)->value('realtime_stock');
         $sum = $start_stock+$end_stock;
-        dump($createat[3]);
-        dump($order_sales_num);
-        dump($stock_consume_num);
-        dump($start_stock);
-        dump($end_stock);
-        dump($sum);exit;
         //库存周转率
         $arr['turnover_rate'] = $sum ? round($stock_consume_num/$sum/2,2) : 0;
         /*
@@ -197,7 +191,7 @@ class DataMarket extends Backend
          * 库存周转天数：所选时间段的天数/库存周转率
          * */
         //库存周转天数
-        $days = round(($start - $end) / 3600 / 24);
+        $days = round(($end - $start) / 3600 / 24);
         $arr['turnover_days_rate'] = $arr['turnover_rate'] ? round($days/$arr['turnover_rate']) : 0;
         /*
          * 月进销比:（所选时间包含的月份整月）月度已审核采购单采购的数量/月度销售数量（订单、批发出库、亚马逊出库）
