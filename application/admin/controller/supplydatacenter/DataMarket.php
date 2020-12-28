@@ -148,6 +148,7 @@ class DataMarket extends Backend
         $end_stock_where[] = ['exp', Db::raw("DATE_FORMAT(createtime, '%Y-%m-%d') = '" . $createat[3] . "'")];
         $end_stock = Db::table('fa_product_allstock_log')->where($start_stock_where)->value('realtime_stock');
         $sum = $start_stock+$end_stock;
+        dump($createat[3]);
         dump($order_sales_num);
         dump($stock_consume_num);
         dump($start_stock);
