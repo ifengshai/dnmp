@@ -323,7 +323,7 @@ class Distribution extends Backend
                     $stock_house_num = $stock_house_data[$value['temporary_house_id']]; //定制片库位号
                 } elseif (!empty($value['abnormal_house_id']) && 8 == $label) {
                     $stock_house_num = $stock_house_data[$value['abnormal_house_id']]; //异常库位号
-                } elseif (!empty($value['store_house_id']) && 7 == $label) {
+                } elseif (!empty($value['store_house_id']) && 7 == $label && in_array($value['distribution_status'],[8,9])) {
                     $stock_house_num = $stock_house_data[$value['store_house_id']]; //合单库位号
                 }
 
