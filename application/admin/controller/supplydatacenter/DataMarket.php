@@ -67,13 +67,15 @@ class DataMarket extends Backend
         //库存分级概况
         $stock_level_overview = $this->stock_level_overview();
         $stock_level_sales_rate = $this->stock_level_sales_rate();
+        //库龄概况
+        $stock_age_overview = $this->stock_age_overview();
         //采购概况
         $purchase_overview = $this->purchase_overview();
         //物流妥投概况
         $logistics_completed_overview = $this->logistics_completed_overview();
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
-        $this->view->assign(compact('stock_overview','stock_measure_overview','stock_level_overview','stock_level_sales_rate','purchase_overview','logistics_completed_overview','magentoplatformarr','time_str'));
+        $this->view->assign(compact('stock_overview','stock_measure_overview','stock_level_overview','stock_level_sales_rate','purchase_overview','logistics_completed_overview','magentoplatformarr','stock_age_overview','time_str'));
         return $this->view->fetch();
     }
     //库存总览
@@ -391,12 +393,114 @@ class DataMarket extends Backend
     }
     //库龄概况
     public function stock_age_overview(){
-
+        $cache_data = Cache::get('Supplydatacenter_datamarket' . md5(serialize('stock_age_overview')));
+        if ($cache_data) {
+            return $cache_data;
+        }
         $where['library_status'] = 1;
+        $count = $this->item->where($where)->where('in_stock_time is not null')->count();
+        $sql = $this->item->alias('t1')->field('TIMESTAMPDIFF(MONTH,in_stock_time,now()) AS total')->where($where)->where('in_stock_time is not null')->buildSql();
+        $data = $this->item->table([$sql=>'t2'])->field('sum( IF ( total >= 10 and total<13, 1, 0 ) ) AS d,sum( IF ( total >= 7 and total<10, 1, 0 ) ) AS c,sum( IF ( total >= 4 and total<7, 1, 0 ) ) AS b,sum( IF ( total >= 0 and total<4, 1, 0 ) ) AS a')->select();
+        $data1 = $data[0]['a'];
+        $data2 = $data[0]['b'];
+        $data3 = $data[0]['c'];
+        $data4 = $data[0]['d'];
+        $data5 = $count - $data1 - $data2 - $data3 - $data4;
+        $stock = $this->item->where($where)->where('in_stock_time is not null')->count();
+        $map1 = [];
+        $map1[] = ['exp', Db::raw("TIMESTAMPDIFF(MONTH,in_stock_time,now())>=0 and TIMESTAMPDIFF(MONTH,in_stock_time,now())<4")];
+        $stock1 = $this->item->where($where)->where('in_stock_time is not null')->where($map1)->count();
 
-        $sql = $this->item->alias('t1')->field('TIMESTAMPDIFF(MONTH,in_stock_time,now()) AS total')->where($where)->group('customer_id')->buildSql();
+        $map2 = [];
+        $map2[] = ['exp', Db::raw("TIMESTAMPDIFF(MONTH,in_stock_time,now())>=4 and TIMESTAMPDIFF(MONTH,in_stock_time,now())<7")];
+        $stock2 = $this->item->where($where)->where('in_stock_time is not null')->where($map2)->count();
 
-        $order_customer_count = $this->item->table([$sql=>'t2'])->field('sum( IF ( total >= 360 and total<720, 1, 0 ) ) AS g,sum( IF ( total >= 180 and total<360, 1, 0 ) ) AS f,sum( IF ( total >= 90 and total<180, 1, 0 ) ) AS e,sum( IF ( total >= 60 and total<90, 1, 0 ) ) AS d,sum( IF ( total >= 30 and total<60, 1, 0 ) ) AS c,sum( IF ( total >= 14 and total<30, 1, 0 ) ) AS b,sum( IF ( total >= 0 and total<14, 1, 0 ) ) AS a')->select();
+        $map3 = [];
+        $map3[] = ['exp', Db::raw("TIMESTAMPDIFF(MONTH,in_stock_time,now())>=7 and TIMESTAMPDIFF(MONTH,in_stock_time,now())<10")];
+        $stock3 = $this->item->where($where)->where('in_stock_time is not null')->where($map3)->count();
+
+        $map4 = [];
+        $map4[] = ['exp', Db::raw("TIMESTAMPDIFF(MONTH,in_stock_time,now())>=10 and TIMESTAMPDIFF(MONTH,in_stock_time,now())<13")];
+        $stock4 = $this->item->where($where)->where('in_stock_time is not null')->where($map4)->count();
+
+        $stock5 = $stock - $stock1 - $stock2 - $stock3 - $stock4;
+
+        $total = $this->item->alias('b')->join('fa_purchase_order_item o','b.purchase_id=o.purchase_id')->where($where)->where('in_stock_time is not null')->sum('o.purchase_price');
+
+        $flag1 = [];
+        $flag1[] = ['exp', Db::raw("TIMESTAMPDIFF(MONTH,in_stock_time,now())>=0 and TIMESTAMPDIFF(MONTH,in_stock_time,now())<4")];
+        $total1 = $this->item->alias('b')->join('fa_purchase_order_item o','b.purchase_id=o.purchase_id')->where($where)->where('in_stock_time is not null')->where($flag1)->sum('o.purchase_price');
+
+        $flag2 = [];
+        $flag2[] = ['exp', Db::raw("TIMESTAMPDIFF(MONTH,in_stock_time,now())>=4 and TIMESTAMPDIFF(MONTH,in_stock_time,now())<7")];
+        $total2 = $this->item->alias('b')->join('fa_purchase_order_item o','b.purchase_id=o.purchase_id')->where($where)->where('in_stock_time is not null')->where($flag2)->sum('o.purchase_price');
+
+        $flag3 = [];
+        $flag3[] = ['exp', Db::raw("TIMESTAMPDIFF(MONTH,in_stock_time,now())>=7 and TIMESTAMPDIFF(MONTH,in_stock_time,now())<10")];
+        $total3 = $this->item->alias('b')->join('fa_purchase_order_item o','b.purchase_id=o.purchase_id')->where($where)->where('in_stock_time is not null')->where($flag3)->sum('o.purchase_price');
+
+        $flag4 = [];
+        $flag4[] = ['exp', Db::raw("TIMESTAMPDIFF(MONTH,in_stock_time,now())>=10 and TIMESTAMPDIFF(MONTH,in_stock_time,now())<13")];
+        $total4 = $this->item->alias('b')->join('fa_purchase_order_item o','b.purchase_id=o.purchase_id')->where($where)->where('in_stock_time is not null')->where($flag4)->sum('o.purchase_price');
+
+        $total5 = $total - $total1 - $total2 - $total3 - $total4;
+
+        $percent1 = $count ? round($data1/$count*100,2) : 0;
+        $percent2 = $count ? round($data2/$count*100,2) : 0;
+        $percent3 = $count ? round($data3/$count*100,2) : 0;
+        $percent4 = $count ? round($data4/$count*100,2) : 0;
+        $percent5 = $count ? round($data5/$count*100,2) : 0;
+
+        $stock_percent1 = $stock ? round($stock1/$stock*100,2) : 0;
+        $stock_percent2 = $stock ? round($stock2/$stock*100,2) : 0;
+        $stock_percent3 = $stock ? round($stock3/$stock*100,2) : 0;
+        $stock_percent4 = $stock ? round($stock4/$stock*100,2) : 0;
+        $stock_percent5 = $stock ? round($stock5/$stock*100,2) : 0;
+
+        $arr = array(
+            array(
+                'title'=>'0~3月',
+                'count'=>$data1,
+                'percent'=>$percent1,
+                'stock'=>$stock1,
+                'stock_percent' => $stock_percent1,
+                'total'=>$total1
+            ),
+            array(
+                'title'=>'4~6月',
+                'count'=>$data2,
+                'percent'=>$percent2,
+                'stock'=>$stock2,
+                'stock_percent' => $stock_percent2,
+                'total'=>$total2
+            ),
+            array(
+                'title'=>'7~9月',
+                'count'=>$data3,
+                'percent'=>$percent3,
+                'stock'=>$stock3,
+                'stock_percent' => $stock_percent3,
+                'total'=>$total3
+            ),
+            array(
+                'title'=>'10~12月',
+                'count'=>$data4,
+                'percent'=>$percent4,
+                'stock'=>$stock4,
+                'stock_percent' => $stock_percent4,
+                'total'=>$total4
+            ),
+            array(
+                'title'=>'12个月以上',
+                'count'=>$data5,
+                'percent'=>$percent5,
+                'stock'=>$stock5,
+                'stock_percent' => $stock_percent5,
+                'total'=>$total5
+            ),
+        );
+        Cache::set('Supplydatacenter_datamarket'.md5(serialize('stock_age_overview')),$arr,7200);
+        return $arr;
     }
     //采购总览
     public function purchase_overview($time_str = ''){
@@ -425,11 +529,11 @@ class DataMarket extends Backend
         //所选时间内到货的采购单延迟的批次
         $delay_batch = $this->purchase->alias('p')->join('fa_purchase_batch b','p.id=b.purchase_id','left')->join('fa_logistics_info l','p.id=l.purchase_id','left')->where($where)->where($arrive_where)->where('p.arrival_time<l.sign_time')->count();
         //采购批次到货延时率
-        $arr['purchase_delay_rate'] = $sum_batch ? round($delay_batch/$sum_batch,2).'%' : 0;
+        $arr['purchase_delay_rate'] = $sum_batch ? round($delay_batch/$sum_batch*100,2).'%' : 0;
         //所选时间内到货的采购单合格率90%以上的批次
         $qualified_num = $this->purchase->alias('p')->join('fa_check_order o','p.id = o.purchase_id','left')->join('fa_check_order_item i','o.id = i.check_id','left')->where($where)->where($arrive_where)->group('p.id')->having('sum( quantity_num )/ sum( arrivals_num )>= 0.9')->count();
         //采购批次到货合格率
-        $arr['purchase_qualified_rate'] = $sum_batch ? round($qualified_num/$sum_batch,2).'%' : 0;
+        $arr['purchase_qualified_rate'] = $sum_batch ? round($qualified_num/$sum_batch*100,2).'%' : 0;
         //采购单价
         $arr['purchase_price'] = $arr['purchase_num'] ? round($arr['purchase_amount']/$arr['purchase_num'],2) : 0;
         Cache::set('Supplydatacenter_datamarket'.$time_str.md5(serialize('purchase_overview')),$arr,7200);
@@ -525,17 +629,25 @@ class DataMarket extends Backend
                     $end = strtotime($value.' 23:59:59');
 
                     $where['p.complete_time'] = ['between',[$start,$end]];
+                    $where['p.site'] = ['<>',4];
                     $map1['p.order_prescription_type'] = 1;
                     $map2['p.order_prescription_type'] = 2;
                     $map3['p.order_prescription_type'] = 3;
-                    $sql1 = $this->process->alias('p')->join('fa_order o','p.order_id=o.entity_id')->field('p.complete_time - o.payment_time AS total')->where($where)->where($map1)->group('p.order_id')->buildSql();
-                    $arr1 = $this->process->table([$sql1=>'t2'])->field('sum( IF ( total > 24, 1, 0) ) AS a,sum( IF ( total <= 24, 1, 0) ) AS b')->select();
+                    $where['o.status'] = ['in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+                    $sql1 = $this->process->alias('p')->join('fa_order o','p.increment_id = o.increment_id')->field('(p.complete_time-o.payment_time)/3600 AS total')->where($where)->where($map1)->group('p.order_id')->buildSql();
+                    $arr1 = $this->process->table([$sql1=>'t2'])->field('sum( IF ( total > 24, 1, 0) ) AS a,sum( IF ( total <= 24, 1, 0) ) AS b')->select(false);
+                    echo $arr1;exit;
 
-                    $sql2 = $this->process->alias('p')->join('fa_order o','p.order_id=o.entity_id')->field('p.complete_time - o.payment_time AS total')->where($where)->where($map2)->group('p.order_id')->buildSql();
+                    $sql2 = $this->process->alias('p')->join('fa_order o','p.increment_id = o.increment_id')->field('(p.complete_time-o.payment_time)/3600 AS total')->where($where)->where($map2)->group('p.order_id')->buildSql();
                     $arr2 = $this->process->table([$sql2=>'t2'])->field('sum( IF ( total > 72, 1, 0) ) AS a,sum( IF ( total <= 72, 1, 0) ) AS b')->select();
 
-                    $sql3 = $this->process->alias('p')->join('fa_order o','p.order_id=o.entity_id')->field('p.complete_time - o.payment_time AS total')->where($where)->where($map3)->group('p.order_id')->buildSql();
+                    $sql3 = $this->process->alias('p')->join('fa_order o','p.increment_id = o.increment_id')->field('(p.complete_time-o.payment_time)/3600 AS total')->where($where)->where($map3)->group('p.order_id')->buildSql();
                     $arr3 = $this->process->table([$sql3=>'t2'])->field('sum( IF ( total > 168, 1, 0) ) AS a,sum( IF ( total <= 168, 1, 0) ) AS b')->select();
+                    if($value == '2020-12-23'){
+                        dump($arr1);
+                        dump($arr2);
+                        dump($arr3);exit;
+                    }
                     $timeout_count = $arr1[0]['a'] + $arr2[0]['a'] + $arr3[0]['a'];
                     $untimeout_count = $arr1[0]['b'] + $arr2[0]['b'] + $arr3[0]['b'];
                     $arr[$key]['timeout_count'] = $timeout_count;

@@ -423,7 +423,7 @@
                     </tr>
                 </table>
             <div>
-               <!--  <div class="new-background">
+                 <div class="new-background">
                     <label>库龄概况</label>
                     <table id="order-info-list" class="altrowstable" width="100%">
                         <thead>
@@ -436,48 +436,18 @@
                             <th>库存金额（￥）</th>
                         </tr>
                         </thead>
+                        {foreach $stock_age_overview as $value}
                         <tr>
-                            <td>0~3月</td>
-                            <td id='replacement_order_num'>{$replacement_order_num.replacement_order_num}</td>
-                            <td id='replacement_order_total'>{$replacement_order_total.replacement_order_total}</td>
-                            <td id='replacement_order_num'>{$replacement_order_num.replacement_order_num}</td>
-                            <td id='replacement_order_total'>{$replacement_order_total.replacement_order_total}</td>
-                            <td id='replacement_order_num'>{$replacement_order_num.replacement_order_num}</td>
+                            <td>{$value.title}</td>
+                            <td>{$value.count}</td>
+                            <td>{$value.percent}%</td>
+                            <td>{$value.stock}</td>
+                            <td>{$value.stock_percent}%</td>
+                            <td>{$value.total}</td>
                         </tr>
-                        <tr>
-                            <td>4~6月</td>
-                            <td id='replacement_order_num'>{$replacement_order_num.replacement_order_num}</td>
-                            <td id='replacement_order_total'>{$replacement_order_total.replacement_order_total}</td>
-                            <td id='replacement_order_num'>{$replacement_order_num.replacement_order_num}</td>
-                            <td id='replacement_order_total'>{$replacement_order_total.replacement_order_total}</td>
-                            <td id='replacement_order_num'>{$replacement_order_num.replacement_order_num}</td>
-                        </tr>
-                        <tr>
-                            <td>7~9月</td>
-                            <td id='replacement_order_num'>{$replacement_order_num.replacement_order_num}</td>
-                            <td id='replacement_order_total'>{$replacement_order_total.replacement_order_total}</td>
-                            <td id='replacement_order_num'>{$replacement_order_num.replacement_order_num}</td>
-                            <td id='replacement_order_total'>{$replacement_order_total.replacement_order_total}</td>
-                            <td id='replacement_order_num'>{$replacement_order_num.replacement_order_num}</td>
-                        </tr>
-                        <tr>
-                            <td>10~12月</td>
-                            <td id='replacement_order_num'>{$replacement_order_num.replacement_order_num}</td>
-                            <td id='replacement_order_total'>{$replacement_order_total.replacement_order_total}</td>
-                            <td id='replacement_order_num'>{$replacement_order_num.replacement_order_num}</td>
-                            <td id='replacement_order_total'>{$replacement_order_total.replacement_order_total}</td>
-                            <td id='replacement_order_num'>{$replacement_order_num.replacement_order_num}</td>
-                        </tr>
-                        <tr>
-                            <td>12个月以上</td>
-                            <td id='replacement_order_num'>{$replacement_order_num.replacement_order_num}</td>
-                            <td id='replacement_order_total'>{$replacement_order_total.replacement_order_total}</td>
-                            <td id='replacement_order_num'>{$replacement_order_num.replacement_order_num}</td>
-                            <td id='replacement_order_total'>{$replacement_order_total.replacement_order_total}</td>
-                            <td id='replacement_order_num'>{$replacement_order_num.replacement_order_num}</td>
-                        </tr>
+                        {/foreach}
                     </table>
-                    <div> -->
+                    <div> 
                 <div class="widget-body no-padding">
                     <div class="new-background">
                         <div class="row">

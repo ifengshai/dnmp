@@ -194,6 +194,10 @@ class OrderData extends Backend
                                     $params['base_shipping_amount'] = $v['base_shipping_amount'];
                                     $params['created_at'] = strtotime($v['created_at']) + 28800;
                                     $params['updated_at'] = strtotime($v['updated_at']) + 28800;
+                                    if (isset($v['payment_time'])) {
+                                        $params['payment_time'] = strtotime($v['payment_time']) + 28800;
+                                    }
+                                   
                                     //插入订单主表
                                     $order_id = $this->order->insertGetId($params);
                                     $order_params[$k]['site'] = $site;
@@ -231,8 +235,10 @@ class OrderData extends Backend
                                     $params['mw_rewardpoint'] = $v['mw_rewardpoint'];
                                     $params['mw_rewardpoint_discount'] = $v['mw_rewardpoint_discount'];
                                     $params['base_shipping_amount'] = $v['base_shipping_amount'];
-                                    $params['base_shipping_amount'] = $v['base_shipping_amount'];
                                     $params['updated_at'] = strtotime($v['updated_at']) + 28800;
+                                    if (isset($v['payment_time'])) {
+                                        $params['payment_time'] = strtotime($v['payment_time']) + 28800;
+                                    }
 
                                     $this->order->where(['entity_id' => $v['entity_id'], 'site' => $site])->update($params);
                                 }
@@ -1517,7 +1523,7 @@ class OrderData extends Backend
         $this->order_data(1);
         $this->order_data(2);
         $this->order_data(3);
-        $this->order_data(4);
+        // $this->order_data(4);
         $this->order_data(5);
         $this->order_data(9);
         $this->order_data(10);
@@ -1534,30 +1540,30 @@ class OrderData extends Backend
      */
     protected function order_data($site)
     {
-        $list = $this->order->where('order_currency_code is null and site = ' . $site)->limit(3000)->select();
+        $list = $this->order->where('payment_time is null and site = ' . $site)->limit(3000)->select();
         $list = collection($list)->toArray();
         $entity_id = array_column($list, 'entity_id');
         if ($site == 1) {
-            $res = Db::connect('database.db_zeelool')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('order_currency_code', 'entity_id');
+            $res = Db::connect('database.db_zeelool')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('payment_time', 'entity_id');
         } elseif ($site == 2) {
-            $res = Db::connect('database.db_voogueme')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('order_currency_code', 'entity_id');
+            $res = Db::connect('database.db_voogueme')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('payment_time', 'entity_id');
         } elseif ($site == 3) {
-            $res = Db::connect('database.db_nihao')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('order_currency_code', 'entity_id');
+            $res = Db::connect('database.db_nihao')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('payment_time', 'entity_id');
         } elseif ($site == 4) {
-            $res = Db::connect('database.db_meeloog')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('order_currency_code', 'entity_id');
+            $res = Db::connect('database.db_meeloog')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('payment_time', 'entity_id');
         } elseif ($site == 5) {
-            $res = Db::connect('database.db_weseeoptical')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('order_currency_code', 'entity_id');
+            $res = Db::connect('database.db_weseeoptical')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('payment_time', 'entity_id');
         } elseif ($site == 9) {
-            $res = Db::connect('database.db_zeelool_es')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('order_currency_code', 'entity_id');
+            $res = Db::connect('database.db_zeelool_es')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('payment_time', 'entity_id');
         } elseif ($site == 10) {
-            $res = Db::connect('database.db_zeelool_de')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('order_currency_code', 'entity_id');
+            $res = Db::connect('database.db_zeelool_de')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('payment_time', 'entity_id');
         } elseif ($site == 11) {
-            $res = Db::connect('database.db_zeelool_jp')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('order_currency_code', 'entity_id');
+            $res = Db::connect('database.db_zeelool_jp')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('payment_time', 'entity_id');
         }
         $params = [];
         foreach ($list as $k => $v) {
             $params[$k]['id'] = $v['id'];
-            $params[$k]['order_currency_code'] = $res[$v['entity_id']];
+            $params[$k]['payment_time'] = strtotime($res[$v['entity_id']]) + 28800;
             // $params[$k]['region'] = $res[$v['entity_id']]['region'];
             // $params[$k]['city'] = $res[$v['entity_id']]['city'];
             // $params[$k]['street'] = $res[$v['entity_id']]['street'];
@@ -1847,4 +1853,63 @@ class OrderData extends Backend
         $this->orderitemprocess->saveAll($option_params);
         echo "ok";
     }
+
+
+
+
+    public function process_order_type()
+    {
+        $item_order_number = [
+          
+
+        ];
+
+        $orderitemprocess = new \app\admin\model\order\OrderItemProcess();
+        $list = $orderitemprocess->where(['item_order_number' => ['in', $item_order_number]])->select();
+        $option_params = [];
+        foreach ($list as $k => $v) {
+            $site = $v['site'];
+            $options = [];
+            //处方解析 不同站不同字段
+            if ($site == 1) {
+                $item_data = Db::connect('database.db_zeelool')->table('sales_flat_order_item')->where(['item_id' => $v['item_id']])->column('product_options', 'item_id');
+                $options =  $this->zeelool_prescription_analysis($item_data[$v['item_id']]);
+            } elseif ($site == 2) {
+                $item_data = Db::connect('database.db_voogueme')->table('sales_flat_order_item')->where(['item_id' => $v['item_id']])->column('product_options', 'item_id');
+                $options =  $this->voogueme_prescription_analysis($item_data[$v['item_id']]);
+            } elseif ($site == 3) {
+                $item_data = Db::connect('database.db_nihao')->table('sales_flat_order_item')->where(['item_id' => $v['item_id']])->column('product_options', 'item_id');
+                $options =  $this->nihao_prescription_analysis($item_data[$v['item_id']]);
+            } elseif ($site == 4) {
+                $item_data = Db::connect('database.db_meeloog')->table('sales_flat_order_item')->where(['item_id' => $v['item_id']])->column('product_options', 'item_id');
+                $options =  $this->meeloog_prescription_analysis($item_data[$v['item_id']]);
+            } elseif ($site == 5) {
+                $item_data = Db::connect('database.db_weseeoptical')->table('sales_flat_order_item')->where(['item_id' => $v['item_id']])->column('product_options', 'item_id');
+                $options =  $this->wesee_prescription_analysis($item_data[$v['item_id']]);
+            } elseif ($site == 9) {
+                $item_data = Db::connect('database.db_zeelool_es')->table('sales_flat_order_item')->where(['item_id' => $v['item_id']])->column('product_options', 'item_id');
+                $options =  $this->zeelool_es_prescription_analysis($item_data[$v['item_id']]);
+            } elseif ($site == 10) {
+                $item_data = Db::connect('database.db_zeelool_de')->table('sales_flat_order_item')->where(['item_id' => $v['item_id']])->column('product_options', 'item_id');
+                $options =  $this->zeelool_de_prescription_analysis($item_data[$v['item_id']]);
+            } elseif ($site == 11) {
+                $item_data = Db::connect('database.db_zeelool_jp')->table('sales_flat_order_item')->where(['item_id' => $v['item_id']])->column('product_options', 'item_id');
+                $options =  $this->zeelool_jp_prescription_analysis($item_data[$v['item_id']]);
+            }
+            $option_params[$k]['order_prescription_type'] = $options['order_prescription_type'];
+            $option_params[$k]['id'] = $v['id'];
+            echo $v['item_id'] . "\n";
+            usleep(10000);
+        }
+
+        $this->orderitemprocess->saveAll($option_params);
+        echo "ok";
+
+
+
+        echo "ok";
+    }
+
+
+
 }

@@ -520,7 +520,7 @@ class Distribution extends Backend
                 foreach ($resultList as $key => $value) {
                     //你好站
                     if ($site == 3) {
-                       
+
                         if ($value['attribute_id'] == 149) {
                             $result['bridge'] = $value['value'];
                         }
@@ -641,7 +641,7 @@ class Distribution extends Backend
         $sort = 'a.id';
         $list = $this->model
             ->alias('a')
-            ->field('a.id,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.total_qty_ordered,b.site,a.distribution_status,a.created_at,c.*')
+            ->field('a.id,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.total_qty_ordered,b.site,a.distribution_status,a.created_at,c.*,b.base_grand_total')
             ->join(['fa_order' => 'b'], 'a.order_id=b.id')
             ->join(['fa_order_item_option' => 'c'], 'a.option_id=c.id')
             ->where($where)
@@ -677,7 +677,8 @@ class Distribution extends Backend
             ->setCellValue("S1", "Prism\n(out/in)")
             ->setCellValue("T1", "Direct\n(out/in)")
             ->setCellValue("U1", "Prism\n(up/down)")
-            ->setCellValue("V1", "Direct\n(up/down)");
+            ->setCellValue("V1", "Direct\n(up/down)")
+            ->setCellValue("W1", "订单金额");
         $spreadsheet->setActiveSheetIndex(0)->setTitle('订单处方');
 
         //站点列表
@@ -822,6 +823,7 @@ class Distribution extends Backend
 
             $spreadsheet->getActiveSheet()->setCellValue("V" . ($key * 2 + 2), isset($value['od_bd_r']) ? $value['od_bd_r'] : '');
             $spreadsheet->getActiveSheet()->setCellValue("V" . ($key * 2 + 3), isset($value['os_bd_r']) ? $value['os_bd_r'] : '');
+            $spreadsheet->getActiveSheet()->setCellValue("W" . ($key * 2 + 2), $value['base_grand_total']);
 
             //合并单元格
             $spreadsheet->getActiveSheet()->mergeCells("A" . ($key * 2 + 2) . ":A" . ($key * 2 + 3));
@@ -838,6 +840,7 @@ class Distribution extends Backend
             $spreadsheet->getActiveSheet()->mergeCells("P" . ($key * 2 + 2) . ":P" . ($key * 2 + 3));
             $spreadsheet->getActiveSheet()->mergeCells("Q" . ($key * 2 + 2) . ":Q" . ($key * 2 + 3));
             $spreadsheet->getActiveSheet()->mergeCells("R" . ($key * 2 + 2) . ":R" . ($key * 2 + 3));
+            $spreadsheet->getActiveSheet()->mergeCells("W" . ($key * 2 + 2) . ":W" . ($key * 2 + 3));
         }
 
         //设置宽度
@@ -880,8 +883,8 @@ class Distribution extends Backend
         $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
         $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
 
-        $spreadsheet->getActiveSheet()->getStyle('A1:V' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-        $spreadsheet->getActiveSheet()->getStyle('A1:V' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle('A1:W' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle('A1:W' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
 
         $spreadsheet->setActiveSheetIndex(0);
 
@@ -924,11 +927,8 @@ class Distribution extends Backend
         $this->model->startTrans();
         try {
             //标记状态
-            $this->model
-                ->allowField(true)
-                ->isUpdate(true, ['id' => ['in', $ids]])
-                ->save(['distribution_status' => 2]);
-
+            $this->model->where(['id' => ['in', $ids]])->update(['distribution_status' => 2]);
+               
             //记录配货日志
             $admin = (object)session('admin');
             DistributionLog::record($admin, $ids, 1, '标记打印完成');
@@ -1157,9 +1157,10 @@ class Distribution extends Backend
 
         //检测配货状态
         $item_list = $this->model
-            ->field('id,site,distribution_status,order_id,option_id,sku,item_order_number')
+            ->field('id,site,distribution_status,order_id,option_id,sku,item_order_number,order_prescription_type')
             ->where(['id' => ['in', $ids]])
             ->select();
+        $item_list = collection($item_list)->toArray();
         $order_ids = [];
         $option_ids = [];
         $item_order_numbers = [];
@@ -1217,7 +1218,7 @@ class Distribution extends Backend
 
         //获取子订单处方数据
         $option_list = $this->_new_order_item_option
-            ->field('id,is_print_logo,order_prescription_type')
+            ->field('id,is_print_logo')
             ->where(['id' => ['in', array_unique($option_ids)]])
             ->select();
         $option_list = array_column($option_list, NULL, 'id');
@@ -1245,7 +1246,7 @@ class Distribution extends Backend
                 //下一步状态
                 if (2 == $check_status) {
                     //根据处方类型字段order_prescription_type(现货处方镜、定制处方镜)判断是否需要配镜片
-                    if (in_array($option_list[$value['option_id']]['order_prescription_type'], [2, 3])) {
+                    if (in_array($value['order_prescription_type'], [2, 3])) {
                         $save_status = 3;
                     } else {
                         if ($option_list[$value['option_id']]['is_print_logo']) {
@@ -1289,7 +1290,22 @@ class Distribution extends Backend
                         'create_time' => time()
                     ]);
                 } elseif (3 == $check_status) {
-                    $save_status = 4;
+
+                    if (in_array($value['order_prescription_type'], [2, 3])) {
+                        $save_status = 4;
+                    } else {
+                        if ($option_list[$value['option_id']]['is_print_logo']) {
+                            $save_status = 5; //待印logo
+                        } else {
+                            if ($total_list[$value['order_id']]['total_qty_ordered'] > 1) {
+                                $save_status = 7;
+                            } else {
+                                $save_status = 9;
+                            }
+                        }
+                    }
+
+                    // $save_status = 4;
                 } elseif (4 == $check_status) {
                     if ($option_list[$value['option_id']]['is_print_logo']) {
                         $save_status = 5;
@@ -1308,16 +1324,11 @@ class Distribution extends Backend
 
                 //订单主表标记已合单
                 if (9 == $save_status) {
-                    $this->_new_order_process
-                        ->allowField(true)
-                        ->isUpdate(true, ['order_id' => $value['order_id']])
-                        ->save(['combine_status' => 1, 'check_status' => 0, 'combine_time' => time()]);
+                    $this->_new_order_process->where(['order_id' => $value['order_id']])
+                    ->update(['combine_status' => 1, 'check_status' => 0, 'combine_time' => time()]);
                 }
 
-                $this->model
-                    ->allowField(true)
-                    ->isUpdate(true, ['id' => $value['id']])
-                    ->save(['distribution_status' => $save_status]);
+                $this->model->where(['id' => $value['id']])->update(['distribution_status' => $save_status]);
 
                 //操作成功记录
                 DistributionLog::record($admin, $value['id'], $check_status, $status_arr[$check_status] . '完成');
@@ -1448,11 +1459,8 @@ class Distribution extends Backend
             }
 
             //子订单状态回滚
-            $this->model
-                ->allowField(true)
-                ->isUpdate(true, ['id' => ['in', $ids]])
-                ->save($save_data);
-
+            $this->model->where(['id' => ['in', $ids]])->update($save_data);
+               
             //记录日志
             DistributionLog::record($admin, array_column($item_list, 'id'), 6, $status_arr[$reason]['name']);
 
@@ -1675,17 +1683,11 @@ class Distribution extends Backend
                     }
                 }
 
-                $this->model
-                    ->allowField(true)
-                    ->isUpdate(true, ['id' => $ids])
-                    ->save($save_data);
-
+                $this->model->where(['id' => $ids])->update($save_data);
+                   
                 //标记处理异常状态及时间
-                $this->_distribution_abnormal
-                    ->allowField(true)
-                    ->isUpdate(true, ['id' => $abnormal_info['id']])
-                    ->save(['status' => 2, 'do_time' => time(), 'do_person' => $admin->nickname]);
-
+                $this->_distribution_abnormal->where(['id' => $abnormal_info['id']])->update(['status' => 2, 'do_time' => time(), 'do_person' => $admin->nickname]);
+                   
                 //配货操作内容
                 $remark = '处理异常：' . $abnormal_arr[$abnormal_info['type']] . ',当前节点：' . $status_arr[$item_info['distribution_status']] . ',返回节点：' . $status_arr[$status];
 

@@ -1010,7 +1010,7 @@ class ItWebDemand extends Backend
                         $data['entry_user_confirm'] = 1;
                         $data['entry_user_confirm_time'] = date('Y-m-d H:i', time());
                     }
-                    $data['end_time']  = date('Y-m-d H:i',time());
+
 
                     //如果当前登录人有产品确认权限，并且提出人==当前登录的人，则一个确认，就可以直接当成提出人确认&产品确认。
 
@@ -1018,7 +1018,6 @@ class ItWebDemand extends Backend
                     if ($res) {
                         //$res = $this ->model ->get(input('ids'));
                         //Ding::dingHook('test_group_finish', $res);
-                        //
                         $this->success('成功');
                     } else {
                         $this->error('失败');
@@ -1046,7 +1045,6 @@ class ItWebDemand extends Backend
                     $add['status'] = 1;
                     $add['create_time'] = date('Y-m-d H:i', time());
                     $add['pm_audit_status'] = 1;
-                    $add['product_remarks'] = $data['product_remarks'];
 
                     if (!empty($data['important_reasons'])){
                         $add['important_reasons'] = implode(',', $data['important_reasons']);
@@ -1089,10 +1087,6 @@ class ItWebDemand extends Backend
                         $row = $this->model->get($params['id']);
                         $row = $row->toArray();
                         $add['site_type'] = implode(',', $params['site_type']);
-                        //判断需求内容是否修改
-                        if ($params['title'] !== $params['start_title'] || $params['start_content'] !== $params['content'] ||  $params['start_accessory'] !==$params['accessory']){
-                            $add['secondary_operation'] = 2;
-                        }
                         //status  状态  1 未激活 2 激活 3 已响应 4 完成 5超时完成
                         //priority  优先级
                         //pm_audit_status  产品审核状态 1 等待审核 2pend  3通过  4拒绝
@@ -1124,9 +1118,9 @@ class ItWebDemand extends Backend
                         $add['priority'] = $params['priority'];
                         $add['node_time'] = $params['node_time'];
                         //老版本计算周期方法，摒弃掉
-                      $time_data = $this->start_time($params['priority'], $params['node_time']);
-                      $add['start_time'] = $time_data['start_time'];
-                      $add['end_time'] = $time_data['end_time'];
+//                      $time_data = $this->start_time($params['priority'], $params['node_time']);
+//                      $add['start_time'] = $time_data['start_time'];
+//                      $add['end_time'] = $time_data['end_time'];
                         $add['pm_audit_status'] = $params['pm_audit_status'];
                         $add['pm_audit_status_time'] = date('Y-m-d H:i', time());
                     }
@@ -1153,7 +1147,7 @@ class ItWebDemand extends Backend
                         $add['important_reasons'] = implode(',', $params['important_reasons']);
                     }
                 }
-                $add['product_remarks'] =  $params['product_remarks'];
+
                 $res = $this->model->allowField(true)->save($add, ['id' => $params['id']]);
                 if ($res) {
                     //Ding::dingHook(__FUNCTION__, $this ->model ->get($params['id']));
@@ -1263,6 +1257,7 @@ class ItWebDemand extends Backend
                         $update['develop_finish_time'] = date('Y-m-d H:i', time());
                         $update['test_status'] = 3;
                         $this->model->allowField(true)->save($update, ['id' => $params['id']]);
+
                         //任务完成 钉钉推送抄送人 提出人
                         Ding::cc_ding($row->entry_user_id, '任务ID:' . $params['id'] . '+任务已完成', $row->title, $this->request->domain() . url('index') . '?ref=addtabs');
 
@@ -1534,7 +1529,21 @@ class ItWebDemand extends Backend
                         $usersIds = array_merge($authUserIds, $webAuthUserIds, $appAuthUserIds);
                         Ding::cc_ding($usersIds, '任务ID:' . $params['id'] . '+测试未通过', $row['title'], $this->request->domain() . url('index') . '?ref=addtabs');
                     } elseif ($label == 3) { //任务上线 通知提出人
-                        Ding::cc_ding($row['entry_user_id'], '任务ID:' . $params['id'] . '+任务已上线，等待确认', $row['title'], $this->request->domain() . url('index') . '?ref=addtabs');
+                        //任务上线 通知提出人 + 抄送人
+                        if (!empty($row['copy_to_user_id'])){
+                            $copy_to_user_id = explode(',',$row['copy_to_user_id']);
+                            if (in_array($row['entry_user_id'],$copy_to_user_id)){
+                                $recipient = $copy_to_user_id;
+                            }else{
+                                $copy_to_user_id[] = $row['entry_user_id'];
+                                $recipient =$copy_to_user_id;
+                            }
+                            Ding::cc_ding($recipient, '任务ID:' . $params['id'] . '+任务已上线，等待确认', $row['title'], $this->request->domain() . url('index') . '?ref=addtabs');
+                        }else{
+                            Ding::cc_ding($row['entry_user_id'], '任务ID:' . $params['id'] . '+任务已上线，等待确认', $row['title'], $this->request->domain() . url('index') . '?ref=addtabs');
+                        }
+
+//                        Ding::cc_ding($row['entry_user_id'], '任务ID:' . $params['id'] . '+任务已上线，等待确认', $row['title'], $this->request->domain() . url('index') . '?ref=addtabs');
                     }else if ($label ==1){
                         //测试通过 推送给对应开发者
                         $user_all = array_merge(array_filter(array($row['app_user_id'],$row['phper_user_id'],$row['web_designer_user_id'])));
