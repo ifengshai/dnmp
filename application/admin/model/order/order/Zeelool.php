@@ -195,6 +195,7 @@ class Zeelool extends Model
             $map['sku'] = ['not like', '%Price%'];
         }
         $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete','delivered']];
+        $map['a.order_type'] = ['=', 1];
         $res = $this
             ->where($map)
             ->where($where)
@@ -222,6 +223,7 @@ class Zeelool extends Model
         }
         $map['sku'] = ['not like', '%Price%'];
         $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete','delivered']];
+        $map['a.order_type'] = ['=', 1];
         $res = $this
             ->where($map)
             ->where($where)
