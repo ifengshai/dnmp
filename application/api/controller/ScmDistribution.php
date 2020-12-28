@@ -684,7 +684,7 @@ class ScmDistribution extends Scm
                     5 => '印logo',
                     6 => '去质检',
                     7 => '去合单',
-                    9 => '去审单'
+                    9 => '去合单'
                 ];
                 $back_msg = $next_step[$save_status];
             }
@@ -1216,6 +1216,7 @@ class ScmDistribution extends Scm
             ->field('id,distribution_status,sku,order_id,temporary_house_id,abnormal_house_id')
             ->find();
         empty($item_process_info) && $this->error(__('子订单不存在'), [], 403);
+        9 == $item_process_info['distribution_status'] && $this->error(__('订单合单完成，去审单！'), [], 403);
         !in_array($item_process_info['distribution_status'], [7, 8]) && $this->error(__('子订单当前状态不可合单操作'), [], 403);
 
         //判断异常状态
@@ -1252,12 +1253,6 @@ class ScmDistribution extends Scm
                 && $this->error(__('有工单未处理，无法操作'), [], 405);
             }
         }
-
-        //获取订单购买总数
-        $total_qty_ordered = $this->_new_order_item_process
-            ->where('order_id', $item_process_info['order_id'])
-            ->count();
-        if (1 == $total_qty_ordered) $this->error(__("订单中只包含一个商品，不需要合单\n需要将子订单放至审单处"), [], 403);
 
         $order_process_info = $this->_new_order_process
             ->where('order_id', $item_process_info['order_id'])
@@ -1744,6 +1739,7 @@ class ScmDistribution extends Scm
      * @参数 string check_refuse  审单拒绝原因 1.SKU缺失  2.配错镜框
      * @参数 int check_status  1审单通过，2审单拒绝
      * @参数 string create_person  操作人名称
+     * @参数 array item_order_numbers  子单号列表
      * @author wgj
      * @return mixed
      */
@@ -1764,6 +1760,10 @@ class ScmDistribution extends Scm
             $check_refuse = $this->request->request('check_refuse');//check_refuse   1SKU缺失  2 配错镜框
             empty($check_refuse) && $this->error(__('审单拒绝原因不能为空'), [], 403);
             !in_array($check_refuse, [1, 2]) && $this->error(__('审单拒绝原因错误'), [], 403);
+            if(2 == $check_refuse){
+                $item_order_numbers = $this->request->request('item_order_numbers');
+                empty($item_order_numbers) && $this->error(__('请选择子单号'), [], 403);
+            }
 
             switch ($check_refuse) {
                 case 1:
@@ -1802,13 +1802,20 @@ class ScmDistribution extends Scm
 
             $log_data = [];
             //审单通过和拒绝都影响库存
+            $item_where['order_id'] = $order_id;
+            if(!empty($item_order_numbers)){
+                $item_where['item_order_number'] = ['in',$item_order_numbers];
+            }
             $item_info = $this->_new_order_item_process
                 ->field('sku,site,item_order_number')
-                ->where(['order_id' => $order_id])
+                ->where($item_where)
                 ->select();
             if (2 == $check_status) {
                 //审单拒绝，回退合单状态
-                $this->_new_order_process->allowField(true)->isUpdate(true, ['order_id' => $order_id])->save(['combine_status' => 0, 'combine_time' => null]);
+                $this->_new_order_process
+                    ->allowField(true)
+                    ->isUpdate(true, ['order_id' => $order_id])
+                    ->save(['combine_status' => 0, 'combine_time' => null]);
                 if (1 == $check_refuse) {
                     //SKU缺失，回退子单号为待合单中状态，不影响库存
                     $this->_new_order_item_process
@@ -1816,14 +1823,22 @@ class ScmDistribution extends Scm
                         ->isUpdate(true, ['order_id' => $order_id, 'distribution_status' => ['neq', 0]])
                         ->save(['distribution_status' => 7]);
                 } else {
-                    //配错镜框，回退子单为待配货，清空定制片库位ID及定制片处理状态
+                    //配错镜框，指定子单回退到待配货，清空定制片库位ID及定制片处理状态
                     $this->_new_order_item_process
                         ->allowField(true)
-                        ->isUpdate(true, ['order_id' => $order_id, 'distribution_status' => ['neq', 0]])
+                        ->isUpdate(true, ['order_id' => $order_id, 'distribution_status' => ['neq', 0], 'item_order_number' => ['in', $item_order_numbers]])
                         ->save([
                             'distribution_status' => 2,
                             'temporary_house_id' => 0,
                             'customize_status' => 0
+                        ]);
+
+                    //非指定子单回退到待合单
+                    $this->_new_order_item_process
+                        ->allowField(true)
+                        ->isUpdate(true, ['order_id' => $order_id, 'distribution_status' => ['neq', 0], 'item_order_number' => ['not in', $item_order_numbers]])
+                        ->save([
+                            'distribution_status' => 7
                         ]);
 
                     //扣减占用库存、配货占用、总库存、虚拟仓库存

@@ -515,8 +515,9 @@ class ScmQuality extends Scm
             }
 
             //检测不合格条形码
-            count($value['unqualified_agg']) != $value['unqualified_num'] && $this->error(__('不合格条形码数量不一致，请检查'), [], 405);
-            $unqualified_code = array_column($value['unqualified_agg'], 'code');
+            ( $value['arrivals_num'] - count($value['quantity_agg']) ) != $value['unqualified_num']
+            && $this->error(__('不合格条形码数量不一致，请检查'), [], 405);
+            /*$unqualified_code = array_column($value['unqualified_agg'], 'code');
             count($value['unqualified_agg']) != count(array_unique($unqualified_code))
             &&
             $this->error(__('不合格条形码有重复，请检查'), [], 405);
@@ -529,7 +530,7 @@ class ScmQuality extends Scm
             if (!empty($check_unqualified['code'])) {
                 $this->error(__('不合格条形码:' . $check_unqualified['code'] . ' 已绑定,请移除'), [], 405);
                 exit;
-            }
+            }*/
 
             //检测留样条形码
             count($value['sample_agg']) != $value['sample_num'] && $this->error(__('留样条形码数量不一致，请检查'), [], 405);
@@ -668,7 +669,7 @@ class ScmQuality extends Scm
 
                 //绑定合格条形码
                 $ok_code_list = [];
-                $no_code_list = [];
+//                $no_code_list = [];
                 $sm_code_list = [];
                 if (!empty($value['quantity_agg'])) {
                     foreach ($value['quantity_agg'] as $v) {
@@ -681,7 +682,7 @@ class ScmQuality extends Scm
                 $this->_product_bar_code_item->where(['code' => ['in', $ok_code_list]])->update($code_item);
 
                 //绑定不合格条形码
-                if (!empty($value['unqualified_agg'])) {
+                /*if (!empty($value['unqualified_agg'])) {
                     foreach ($value['unqualified_agg'] as $v) {
                         if ($v['is_new'] == 1) {
                             $code_item['is_quantity'] = 2;
@@ -689,7 +690,7 @@ class ScmQuality extends Scm
                         }
                     }
                 }
-                $this->_product_bar_code_item->where(['code' => ['in', $no_code_list]])->update($code_item);
+                $this->_product_bar_code_item->where(['code' => ['in', $no_code_list]])->update($code_item);*/
 
                 //绑定留样条形码
                 if (!empty($value['sample_agg'])) {

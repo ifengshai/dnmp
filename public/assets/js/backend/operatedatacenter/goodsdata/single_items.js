@@ -253,6 +253,8 @@ function order_data_view() {
         $('#every_price').text(every_price);
         var whole_price = ret.data.whole_price;
         $('#whole_price').text(whole_price);
+        var every_money = ret.data.every_money;
+        $('#every_money').text(every_money);
 
         var $table = $('#guanliangoumai');
         $table.html($("<tr>" + "<td>" + "SKU" + "</td>" + "<td>" + "数量" + "</td>" + "</tr>"));

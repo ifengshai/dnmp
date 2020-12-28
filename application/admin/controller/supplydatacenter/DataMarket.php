@@ -108,14 +108,14 @@ class DataMarket extends Backend
     }
     //仓库指标总览
     public function stock_measure_overview($time_str = ''){
-        $cache_data = Cache::get('Supplydatacenter_datamarket'  .$time_str. md5(serialize('stock_measure_overview')));
-        if ($cache_data) {
-            return $cache_data;
-        }
         if(!$time_str){
             $start = date('Y-m-d 00:00:00', strtotime('-6 day'));
             $end   = date('Y-m-d 23:59:59');
             $time_str = $start .' - '.$end;
+        }
+        $cache_data = Cache::get('Supplydatacenter_datamarket'  .$time_str. md5(serialize('stock_measure_overview')));
+        if ($cache_data) {
+            return $cache_data;
         }
         /*
          * 库存周转率：所选时间内库存消耗数量/[（期初实时库存+期末实时库存）/2];
@@ -214,13 +214,13 @@ class DataMarket extends Backend
             $params = $this->request->param();
             $order_platform = $params['order_platform'] ? $params['order_platform'] : 1;
             $time_str = $params['time_str'] ? $params['time_str'] : '';
+            if(!$params['time_str']){
+                $start = date('Y-m-d 00:00:00', strtotime('-6 day'));
+                $end   = date('Y-m-d 23:59:59');
+                $time_str = $start .' - '.$end;
+            }
             $cache_data = Cache::get('Supplydatacenter_datamarket'  .$order_platform.$time_str. md5(serialize('stock_measure_overview_platform')));
             if (!$cache_data) {
-                if(!$params['time_str']){
-                    $start = date('Y-m-d 00:00:00', strtotime('-6 day'));
-                    $end   = date('Y-m-d 23:59:59');
-                    $time_str = $start .' - '.$end;
-                }
                 /*
              * 虚拟仓库存周转率：时间段内所选站点虚拟仓库存消耗数量/[（该站点虚拟仓期初实时库存+该站点虚拟仓期末实时库存）/2]；
              * 虚拟仓库存消耗数量指该站点订单销售数量、该站点出库单出库数量
@@ -355,6 +355,11 @@ class DataMarket extends Backend
     }
     //库存分级库销比
     public function stock_level_sales_rate($time_str = ''){
+        if(!$time_str){
+            $start = date('Y-m-d 00:00:00', strtotime('-6 day'));
+            $end   = date('Y-m-d 23:59:59');
+            $time_str = $start .' - '.$end;
+        }
         $cache_data = Cache::get('Supplydatacenter_datamarket'.$time_str. md5(serialize('stock_level_sales_rate')));
         if ($cache_data) {
             return $cache_data;
@@ -372,11 +377,6 @@ class DataMarket extends Backend
     }
     //库存分级库销比方法
     public function getStockLevelRate($grade,$field,$time_str = ''){
-        if(!$time_str){
-            $start = date('Y-m-d 00:00:00', strtotime('-6 day'));
-            $end   = date('Y-m-d 23:59:59');
-            $time_str = $start .' - '.$end;
-        }
         $createat = explode(' ', $time_str);
         $start = $createat[0];
         $end = $createat[3];
@@ -384,6 +384,8 @@ class DataMarket extends Backend
 
         $skus = $this->productGrade->where('grade',$grade)->column('true_sku');
         $where['sku'] = ['in', $skus];
+        $where['is_del'] = 1;
+        $where['is_open'] = 1;
         //实时库存
         $stock_num = $this->model->where($where)->value('sum(stock)-sum(distribution_occupy_stock) as result');
         $order_sales_num = $this->supply->where('day_date')->sum($field);
@@ -504,14 +506,14 @@ class DataMarket extends Backend
     }
     //采购总览
     public function purchase_overview($time_str = ''){
-        $cache_data = Cache::get('Supplydatacenter_datamarket'  .$time_str. md5(serialize('purchase_overview')));
-        if ($cache_data) {
-            return $cache_data;
-        }
         if(!$time_str){
             $start = date('Y-m-d 00:00:00', strtotime('-6 day'));
             $end   = date('Y-m-d 23:59:59');
             $time_str = $start .' - '.$end;
+        }
+        $cache_data = Cache::get('Supplydatacenter_datamarket'  .$time_str. md5(serialize('purchase_overview')));
+        if ($cache_data) {
+            return $cache_data;
         }
         $createat = explode(' ', $time_str);
         $where['p.createtime'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
@@ -543,13 +545,13 @@ class DataMarket extends Backend
     public function purchase_histogram_line(){
         if ($this->request->isAjax()) {
             $time_str = input('time_str');
+            if (!$time_str) {
+                $start = date('Y-m-d 00:00:00', strtotime('-6 day'));
+                $end = date('Y-m-d 23:59:59');
+                $time_str = $start . ' - ' . $end;
+            }
             $cache_data = Cache::get('Supplydatacenter_datamarket'  .$time_str. md5(serialize('purchase_histogram_line')));
             if (!$cache_data) {
-                if (!$time_str) {
-                    $start = date('Y-m-d 00:00:00', strtotime('-6 day'));
-                    $end = date('Y-m-d 23:59:59');
-                    $time_str = $start . ' - ' . $end;
-                }
                 $createat = explode(' ', $time_str);
                 $where['create_time'] = ['between', [$createat[0], $createat[3]]];
                 $list = $this->warehouse_model->where($where)
@@ -612,13 +614,13 @@ class DataMarket extends Backend
     public function order_send_overview(){
         if ($this->request->isAjax()) {
             $time_str = input('time_str');
+            if (!$time_str) {
+                $start = date('Y-m-d 00:00:00', strtotime('-6 day'));
+                $end = date('Y-m-d 23:59:59');
+                $time_str = $start . ' - ' . $end;
+            }
             $cache_data = Cache::get('Supplydatacenter_datamarket'  .$time_str. md5(serialize('order_send_overview')));
             if (!$cache_data) {
-                if (!$time_str) {
-                    $start = date('Y-m-d 00:00:00', strtotime('-6 day'));
-                    $end = date('Y-m-d 23:59:59');
-                    $time_str = $start . ' - ' . $end;
-                }
                 $createat = explode(' ', $time_str);
                 $date = $this->getDateFromRange($createat[0],$createat[3]);
                 $arr = array();
@@ -635,19 +637,13 @@ class DataMarket extends Backend
                     $map3['p.order_prescription_type'] = 3;
                     $where['o.status'] = ['in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
                     $sql1 = $this->process->alias('p')->join('fa_order o','p.increment_id = o.increment_id')->field('(p.complete_time-o.payment_time)/3600 AS total')->where($where)->where($map1)->group('p.order_id')->buildSql();
-                    $arr1 = $this->process->table([$sql1=>'t2'])->field('sum( IF ( total > 24, 1, 0) ) AS a,sum( IF ( total <= 24, 1, 0) ) AS b')->select(false);
-                    echo $arr1;exit;
+                    $arr1 = $this->process->table([$sql1=>'t2'])->field('sum( IF ( total > 24, 1, 0) ) AS a,sum( IF ( total <= 24, 1, 0) ) AS b')->select();
 
                     $sql2 = $this->process->alias('p')->join('fa_order o','p.increment_id = o.increment_id')->field('(p.complete_time-o.payment_time)/3600 AS total')->where($where)->where($map2)->group('p.order_id')->buildSql();
                     $arr2 = $this->process->table([$sql2=>'t2'])->field('sum( IF ( total > 72, 1, 0) ) AS a,sum( IF ( total <= 72, 1, 0) ) AS b')->select();
 
                     $sql3 = $this->process->alias('p')->join('fa_order o','p.increment_id = o.increment_id')->field('(p.complete_time-o.payment_time)/3600 AS total')->where($where)->where($map3)->group('p.order_id')->buildSql();
                     $arr3 = $this->process->table([$sql3=>'t2'])->field('sum( IF ( total > 168, 1, 0) ) AS a,sum( IF ( total <= 168, 1, 0) ) AS b')->select();
-                    if($value == '2020-12-23'){
-                        dump($arr1);
-                        dump($arr2);
-                        dump($arr3);exit;
-                    }
                     $timeout_count = $arr1[0]['a'] + $arr2[0]['a'] + $arr3[0]['a'];
                     $untimeout_count = $arr1[0]['b'] + $arr2[0]['b'] + $arr3[0]['b'];
                     $arr[$key]['timeout_count'] = $timeout_count;
@@ -680,13 +676,13 @@ class DataMarket extends Backend
         if ($this->request->isAjax()) {
             $params = $this->request->param();
             $time_str = $params['time_str'];
+            if (!$time_str) {
+                $start = date('Y-m-d 00:00:00', strtotime('-6 day'));
+                $end = date('Y-m-d 23:59:59');
+                $time_str = $start . ' - ' . $end;
+            }
             $cache_data = Cache::get('Supplydatacenter_userdata'.$time_str.md5(serialize('process_overview')));
             if(!$cache_data){
-                if (!$time_str) {
-                    $start = date('Y-m-d 00:00:00', strtotime('-6 day'));
-                    $end = date('Y-m-d 23:59:59');
-                    $time_str = $start . ' - ' . $end;
-                }
                 $createat = explode(' ', $time_str);
 
                 $start_time = strtotime($createat[0].' '.$createat[1]);
@@ -742,14 +738,14 @@ class DataMarket extends Backend
     }
     //物流妥投概况
     public function logistics_completed_overview($time_str = ''){
-        $cache_data = Cache::get('Supplydatacenter_userdata'.$time_str.md5(serialize('logistics_completed_overview')));
-        if($cache_data){
-            return $cache_data;
-        }
         if (!$time_str) {
             $start = date('Y-m-d 00:00:00', strtotime('-30 day'));
             $end = date('Y-m-d 23:59:59');
             $time_str = $start . ' - ' . $end;
+        }
+        $cache_data = Cache::get('Supplydatacenter_userdata'.$time_str.md5(serialize('logistics_completed_overview')));
+        if($cache_data){
+            return $cache_data;
         }
         $createat = explode(' ', $time_str);
 
@@ -773,13 +769,13 @@ class DataMarket extends Backend
         if ($this->request->isAjax()) {
             $params = $this->request->param();
             $time_str = $params['time_str'] ? $params['time_str'] : '';
+            if (!$time_str) {
+                $start = date('Y-m-d 00:00:00', strtotime('-30 day'));
+                $end = date('Y-m-d 23:59:59');
+                $time_str = $start . ' - ' . $end;
+            }
             $cache_data = Cache::get('Supplydatacenter_userdata'.$time_str.md5(serialize('comleted_time_rate')));
             if(!$cache_data){
-                if (!$time_str) {
-                    $start = date('Y-m-d 00:00:00', strtotime('-30 day'));
-                    $end = date('Y-m-d 23:59:59');
-                    $time_str = $start . ' - ' . $end;
-                }
                 $createat = explode(' ', $time_str);
                 $where['delivery_time'] = ['between',[$createat[0].' '.$createat[1],$createat[3].' '.$createat[4]]];
                 $where['node_type'] = 40;
