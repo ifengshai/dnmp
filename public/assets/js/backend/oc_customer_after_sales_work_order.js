@@ -90,7 +90,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                 {
                                     name: 'order_detail',
                                     text: '订单详情',
-                                    title: __('订单详情'),
+                                    title: __('客户订单检索'),
                                     extend: 'data-area = \'["100%","100%"]\'',
                                     classname: 'btn btn-xs btn-warning btn-addtabs',
                                     icon: 'fa fa-pencil',
