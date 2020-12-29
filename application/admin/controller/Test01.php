@@ -805,7 +805,7 @@ class Test01 extends Backend
             $map['a.order_type'] = ['=', 1];
             $time_where[] = ['exp', Db::raw("DATE_FORMAT(a.created_at, '%Y-%m-%d') = '" . $v['day_date'] . "'")];
             //sku销售总副数
-            $z_sku_list[$k]['glass_num'] = Db::connect('database.db_zeelool')->table('sales_flat_order')
+            $glass_num = Db::connect('database.db_zeelool')->table('sales_flat_order')
                 ->where($map)
                 ->where($time_where)
                 ->alias('a')
@@ -816,7 +816,7 @@ class Test01 extends Backend
             // dump(Db::connect('database.db_zeelool')->getLastSql());die;
             // $z_sku_list[$k]['glass_num'] = 1099;
             // $glass_num = 1099;
-            $res = Db::name('datacenter_sku_day')->update($z_sku_list[$k]);
+            $res = Db::name('datacenter_sku_day')->where('id',$v['id'])->setField('glass_num',$glass_num);
                 // ->where('platform_sku',$v['platform_sku'])
                 // ->where('day_date',$v['day_date'])
                 // ->update(['glass_num'=>$glass_num]);
