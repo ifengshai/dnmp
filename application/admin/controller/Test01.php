@@ -808,7 +808,7 @@ class Test01 extends Backend
                 ->alias('a')
                 ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
                 ->sum('qty_ordered');
-            $z_sku_list[$k]['glass_num'] = 1099;
+            // $z_sku_list[$k]['glass_num'] = 1099;
             $res = Db::name('datacenter_sku_day')->update($z_sku_list[$k]);
             if ($res){
                 echo 'sku:'.$v['platform_sku'].$v['day_date'].'更新成功'. "\n";
