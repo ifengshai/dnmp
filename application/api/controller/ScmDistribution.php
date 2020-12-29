@@ -1271,14 +1271,26 @@ class ScmDistribution extends Scm
             }
         }
 
-        //未合单，首次扫描
-        if (!$order_process_info['store_house_id']) {
-            //主单中无库位号，首个子单进入时，分配一个合单库位给PDA，暂不占用根据是否确认放入合单架占用或取消
-            $store_house_info = $this->_stock_house->field('id,coding,subarea')->where(['status' => 1, 'type' => 2, 'occupy' => 0])->find();
-            empty($store_house_info) && $this->error(__('合单失败，合单库位已用完，请添加后再操作'), [], 403);
-        } else {
-            //主单已绑定合单库位,根据ID查询库位信息
-            $store_house_info = $this->_stock_house->field('id,coding,subarea')->where('id', $order_process_info['store_house_id'])->find();
+        //查询预库位占用
+        $fictitious_time = time();
+        $fictitious_store_house_info = $this->_stock_house->field('id,coding,subarea')->where(['status' => 1, 'type' => 2, 'occupy' => 0, 'fictitious_occupy_time' => ['>',$fictitious_time], 'order_id' => $item_process_info['order_id']])->find();
+
+        //如果预占用信息不为空，实际占用信息为空。返回预占用库位
+        if (empty($fictitious_store_house_info)) {
+
+            //未合单，首次扫描
+            if (!$order_process_info['store_house_id']) {
+                //主单中无库位号，首个子单进入时，分配一个合单库位给PDA，暂不占用根据是否确认放入合单架占用或取消
+                $store_house_info = $this->_stock_house->field('id,coding,subarea')->where(['status' => 1, 'type' => 2, 'occupy' => 0])->find();
+                empty($store_house_info) && $this->error(__('合单失败，合单库位已用完，请添加后再操作'), [], 403);
+                //绑定预占用库存和有效时间
+                $this->_stock_house->where(['id' => $store_house_info['id']])->update(['fictitious_occupy_time' => time()+600,'order_id' => $item_process_info['order_id']]);
+            } else {
+                //主单已绑定合单库位,根据ID查询库位信息
+                $store_house_info = $this->_stock_house->field('id,coding,subarea')->where('id', $order_process_info['store_house_id'])->find();
+            }
+        }else{
+            $store_house_info = $fictitious_store_house_info;
         }
 
         //异常原因列表
@@ -1331,9 +1343,16 @@ class ScmDistribution extends Scm
         empty($order_process_info) && $this->error(__('主订单不存在'), [], 403);
 
         //获取库位信息
-        $store_house_info = $this->_stock_house->field('id,coding,subarea,occupy')->where('id', $store_house_id)->find();//查询合单库位--占用数量
+        $store_house_info = $this->_stock_house->field('id,coding,subarea,occupy,fictitious_occupy_time,order_id')->where('id', $store_house_id)->find();//查询合单库位--占用数量
         empty($store_house_info) && $this->error(__('合单库位不存在'), [], 403);
-
+        //检查当前订单和预占用时的订单id是否相同
+        if ($store_house_info['order_id'] != $order_process_info['id']) {
+            $this->error(__('预占用库位信息错误'), [], 403);
+        }
+        //检查是否预占用
+        if ($store_house_info['fictitious_occupy_time'] < time()) {
+            $this->error(__('库位预占用超10分钟，请重新操作'), [], 403);
+        }
         if ($order_process_info['store_house_id'] != $store_house_id) {
             if ($store_house_info['occupy'] && empty($order_process_info['store_house_id'])) {
                 //主单无绑定库位，且分配的库位被占用，重新分配合单库位后再次提交确认放入新分配合单架
