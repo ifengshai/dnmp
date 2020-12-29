@@ -166,7 +166,7 @@ class Zeelool extends Model
         //查询产品库镜框采购单价
         $sku_list = $this->item->where(['is_open' => 1, 'is_del' => 1])->column('purchase_price', 'sku');
 
-        $whereFrame['o.status'] = ['in',['complete','free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal']];
+        $whereFrame['o.status'] = ['in',['complete','free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal','delivered']];
         $whereFrame['o.created_at'] = ['between',[$start_time,$end_time]];
         //Db::connect('database.db_zeelool')->query("SET time_zone = '+8:00'");
         $all_frame_result = Db::connect('database.db_zeelool')->table('sales_flat_order_item m')->join('sales_flat_order o','m.order_id=o.entity_id','left')
@@ -189,7 +189,10 @@ class Zeelool extends Model
         $all_lens_price = 0;
         //求销售额、运费、毛利润
         $base_grand_total_result = Db::connect('database.db_zeelool')->table('sales_flat_order o')->where($whereFrame)
-        ->field('sum(o.base_grand_total) base_grand_total,sum(o.shipping_amount) shipping_amount')->select();
+        ->field('sum(o.base_grand_total) base_grand_total,sum(o.shipping_amount) shipping_amount')->select(false);
+        echo $base_grand_total_result;die;
+
+
         //销售额
         $all_base_grand_total = round($base_grand_total_result[0]['base_grand_total'],2);
         //运费
@@ -211,9 +214,9 @@ class Zeelool extends Model
     public function index_cost($rate,$start_time,$end_time)
     {
         //facebook金额
-        $facebook_money = $this->facebook_cost($start_time,$end_time);
+        // $facebook_money = $this->facebook_cost($start_time,$end_time);
         //google金额
-        $google_money   = $this->goole_cost($start_time,$end_time);
+        // $google_money   = $this->goole_cost($start_time,$end_time);
         //镜框等价格
         $all_money      = $this->all_cost($start_time,$end_time);
         //销售额
