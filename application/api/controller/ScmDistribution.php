@@ -1823,7 +1823,10 @@ class ScmDistribution extends Scm
 
             $log_data = [];
             //审单通过和拒绝都影响库存
-            $item_where['order_id'] = $order_id;
+            $item_where = [
+                'order_id'=>$order_id,
+                'distribution_status' => ['neq', 0]
+            ];
             if(!empty($item_order_numbers)){
                 $item_where['item_order_number'] = ['in',$item_order_numbers];
             }
