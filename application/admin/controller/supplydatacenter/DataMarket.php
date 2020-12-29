@@ -405,32 +405,30 @@ class DataMarket extends Backend
             return $cache_data;
         }
         $where['library_status'] = 1;
-        $count = $this->item->where($where)->where('in_stock_time is not null')->count();
-        $sql = $this->item->alias('t1')->field('TIMESTAMPDIFF(MONTH,in_stock_time,now()) AS total')->where($where)->where('in_stock_time is not null')->buildSql();
-        $data = $this->item->table([$sql=>'t2'])->field('sum( IF ( total >= 10 and total<13, 1, 0 ) ) AS d,sum( IF ( total >= 7 and total<10, 1, 0 ) ) AS c,sum( IF ( total >= 4 and total<7, 1, 0 ) ) AS b,sum( IF ( total >= 0 and total<4, 1, 0 ) ) AS a')->select();
-        $data1 = $data[0]['a'];
-        $data2 = $data[0]['b'];
-        $data3 = $data[0]['c'];
-        $data4 = $data[0]['d'];
-        $data5 = $count - $data1 - $data2 - $data3 - $data4;
         $stock = $this->item->where($where)->where('in_stock_time is not null')->count();
+        $count = $this->item->where($where)->where('in_stock_time is not null')->count('distict sku');
         $map1 = [];
         $map1[] = ['exp', Db::raw("TIMESTAMPDIFF(MONTH,in_stock_time,now())>=0 and TIMESTAMPDIFF(MONTH,in_stock_time,now())<4")];
         $stock1 = $this->item->where($where)->where('in_stock_time is not null')->where($map1)->count();
+        $data1 = $this->item->where($where)->where('in_stock_time is not null')->where($map1)->count('distict sku');
 
         $map2 = [];
         $map2[] = ['exp', Db::raw("TIMESTAMPDIFF(MONTH,in_stock_time,now())>=4 and TIMESTAMPDIFF(MONTH,in_stock_time,now())<7")];
         $stock2 = $this->item->where($where)->where('in_stock_time is not null')->where($map2)->count();
+        $data2 = $this->item->where($where)->where('in_stock_time is not null')->where($map2)->count('distict sku');
 
         $map3 = [];
         $map3[] = ['exp', Db::raw("TIMESTAMPDIFF(MONTH,in_stock_time,now())>=7 and TIMESTAMPDIFF(MONTH,in_stock_time,now())<10")];
         $stock3 = $this->item->where($where)->where('in_stock_time is not null')->where($map3)->count();
+        $data3 = $this->item->where($where)->where('in_stock_time is not null')->where($map3)->count('distict sku');
 
         $map4 = [];
         $map4[] = ['exp', Db::raw("TIMESTAMPDIFF(MONTH,in_stock_time,now())>=10 and TIMESTAMPDIFF(MONTH,in_stock_time,now())<13")];
         $stock4 = $this->item->where($where)->where('in_stock_time is not null')->where($map4)->count();
+        $data4 = $this->item->where($where)->where('in_stock_time is not null')->where($map4)->count('distict sku');
 
         $stock5 = $stock - $stock1 - $stock2 - $stock3 - $stock4;
+        $data5 = $count - $data1 - $data2 - $data3 - $data4;
 
         $total = $this->item->alias('b')->join('fa_purchase_order_item o','b.purchase_id=o.purchase_id')->where($where)->where('in_stock_time is not null')->sum('o.purchase_price');
 
