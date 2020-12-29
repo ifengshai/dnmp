@@ -174,8 +174,8 @@ class ScmQuality extends Scm
      * @参数 string end_time  结束时间
      * @参数 int page  页码
      * @参数 int page_size  每页显示数量
-     * @author lzh
      * @return mixed
+     * @author lzh
      */
     public function list()
     {
@@ -234,8 +234,8 @@ class ScmQuality extends Scm
      * 新建质检单页面
      *
      * @参数 int logistics_id  物流单ID
-     * @author lzh
      * @return mixed
+     * @author lzh
      */
     public function add()
     {
@@ -311,8 +311,8 @@ class ScmQuality extends Scm
      * 编辑质检单页面
      *
      * @参数 int check_id  质检单ID
-     * @author lzh
      * @return mixed
+     * @author lzh
      */
     public function edit()
     {
@@ -438,8 +438,8 @@ class ScmQuality extends Scm
      *
      * @参数 string code  条形码
      * @参数 int check_id  质检单ID
-     * @author lzh
      * @return mixed
+     * @author lzh
      */
     public function scan_code()
     {
@@ -449,13 +449,13 @@ class ScmQuality extends Scm
         //检测条形码是否存在
         $check_quantity = $this->_product_bar_code_item
             ->field('code,check_id')
-            ->where(['code'=>$code])
+            ->where(['code' => $code])
             ->find();
         empty($check_quantity['code']) && $this->error(__('条形码不存在'), [], 405);
 
         //检测条形码是否已绑定
         $get_check_id = $this->request->request('check_id');
-        if ($get_check_id){
+        if ($get_check_id) {
             !empty($check_quantity['check_id']) && $get_check_id != $check_quantity['check_id'] && $this->error(__('条形码已绑定'), [], 405);
         } else {
             !empty($check_quantity['check_id']) && $this->error(__('条形码已绑定'), [], 405);
@@ -477,8 +477,8 @@ class ScmQuality extends Scm
      * @参数 int is_error  是否错发：1是2否
      * @参数 int batch_id  批次ID
      * @参数 json item_data  sku数据集合
-     * @author lzh
      * @return mixed
+     * @author lzh
      */
     public function submit()
     {
@@ -491,7 +491,7 @@ class ScmQuality extends Scm
         $is_error = $this->request->request('is_error');
         $get_check_id = $this->request->request('check_id');
         //检测条形码是否已绑定
-        if ($get_check_id){
+        if ($get_check_id) {
             $where['check_id'] = [['>', 0], ['neq', $get_check_id]];
         } else {
             $where['check_id'] = ['>', 0];
@@ -515,7 +515,7 @@ class ScmQuality extends Scm
             }
 
             //检测不合格条形码
-            ( $value['arrivals_num'] - count($value['quantity_agg']) ) != $value['unqualified_num']
+            ($value['arrivals_num'] - count($value['quantity_agg'])) != $value['unqualified_num']
             && $this->error(__('不合格条形码数量不一致，请检查'), [], 405);
             /*$unqualified_code = array_column($value['unqualified_agg'], 'code');
             count($value['unqualified_agg']) != count(array_unique($unqualified_code))
@@ -651,7 +651,7 @@ class ScmQuality extends Scm
                     $item_save['check_id'] = $check_id;
                     $item_save['sku'] = $value['sku'];
                     $item_save['supplier_sku'] = $value['supplier_sku'];
-                    $item_save['purchase_id']  = $purchase_id;
+                    $item_save['purchase_id'] = $purchase_id;
                     $item_save['purchase_num'] = $value['purchase_num'];
                     $item_save['should_arrival_num'] = $value['should_arrival_num'];
                     $this->_check_item->allowField(true)->isUpdate(false)->data($item_save)->save();
@@ -669,7 +669,7 @@ class ScmQuality extends Scm
 
                 //绑定合格条形码
                 $ok_code_list = [];
-//                $no_code_list = [];
+                //                $no_code_list = [];
                 $sm_code_list = [];
                 if (!empty($value['quantity_agg'])) {
                     foreach ($value['quantity_agg'] as $v) {
@@ -731,8 +731,8 @@ class ScmQuality extends Scm
      * 取消质检
      *
      * @参数 int check_id  质检单ID
-     * @author lzh
      * @return mixed
+     * @author lzh
      */
     public function cancel()
     {
@@ -782,8 +782,8 @@ class ScmQuality extends Scm
      *
      * @参数 int check_id  质检单ID
      * @参数 int do_type  2审核通过，3审核拒绝
-     * @author lzh
      * @return mixed
+     * @author lzh
      */
     public function examine()
     {
@@ -808,7 +808,7 @@ class ScmQuality extends Scm
         $this->_sample_work_order_item->startTrans();
         try {
             $res = $this->_check->allowField(true)->isUpdate(true, ['id' => $check_id])->save(['status' => $do_type, 'examine_time' => date('Y-m-d H:i:s')]);
-            if(false === $res) throw new Exception('审核失败');
+            if (false === $res) throw new Exception('审核失败');
 
             //审核通过关联操作
             if ($do_type == 2) {
@@ -869,7 +869,7 @@ class ScmQuality extends Scm
                         //获取采购价格
                         $purchase_item_list = $this->_purchase_order_item
                             ->where(['purchase_id' => $row['purchase_id']])
-                            ->column('purchase_price','sku');
+                            ->column('purchase_price', 'sku');
 
                         //获取采购单商品数据
                         $abnormal_item_save = [];
@@ -974,13 +974,13 @@ class ScmQuality extends Scm
      * @参数 string end_time  结束时间
      * @参数 int page  页码
      * @参数 int page_size  每页显示数量
-     * @author lzh
      * @return mixed
+     * @author lzh
      */
     public function logistics_list()
     {
         $logistics_number = $this->request->request('logistics_number');
-//        $sign_number = $this->request->request('sign_number');
+        //        $sign_number = $this->request->request('sign_number');
         $status = $this->request->request('status');
         $is_new_product = $this->request->request('is_new_product');
         $start_time = $this->request->request('start_time');
@@ -995,9 +995,9 @@ class ScmQuality extends Scm
         if ($logistics_number) {
             $where['logistics_number'] = ['like', '%' . $logistics_number . '%'];
         }
-//        if ($sign_number) {
-//            $where['sign_number'] = ['like', '%' . $sign_number . '%'];
-//        }
+        //        if ($sign_number) {
+        //            $where['sign_number'] = ['like', '%' . $sign_number . '%'];
+        //        }
         if (isset($status)) {
             $where['status'] = $status;
         }
@@ -1008,7 +1008,7 @@ class ScmQuality extends Scm
         //获取采购单数据
         $purchase_list = $this->_purchase_order
             ->where(['purchase_status' => ['in', [6, 7, 9, 10]]])
-            ->column('purchase_number,is_new_product','id');
+            ->column('purchase_number,is_new_product', 'id');
 
         //拼接采购单条件
         if (isset($is_new_product)) {
@@ -1027,7 +1027,7 @@ class ScmQuality extends Scm
         //获取物流单列表数据
         $list = $this->_logistics_info
             ->where($where)
-            ->where('type', 1) //采购单类型
+            ->where('type', 1)//采购单类型
             ->field('id,logistics_number,sign_number,createtime,sign_time,status,purchase_id,type,is_check_order')
             ->order('createtime', 'desc')
             ->limit($offset, $limit)
@@ -1042,9 +1042,17 @@ class ScmQuality extends Scm
                 $is_new_product = 1 == $purchase_list[$value['purchase_id']]['is_new_product'] ? 1 : 0;
             }
             $list[$key]['purchase_number'] = $purchase_number;
+            //sku
+            $list[$key]['sku'] = $purchase_number;
+            //供应商名称
+            $list[$key]['supplier_name'] = $this->_purchase_order
+                ->alias('a')
+                ->join(['fa_supplier' => 'b'], 'a.supplier_id=b.id')
+                ->where('a.purchase_number', $purchase_number)
+                ->value('b.supplier_name');
             $list[$key]['is_new_product'] = $is_new_product;
             $list[$key]['status'] = 1 == $value['status'] ? '已签收' : '未签收';
-            $list[$key]['show_sign'] = 0 == $value['status']  ? 1 : 0;
+            $list[$key]['show_sign'] = 0 == $value['status'] ? 1 : 0;
             $list[$key]['show_quality'] = (1 == $value['type'] && 1 == $value['status']) ? 1 : 0;
         }
 
@@ -1056,8 +1064,8 @@ class ScmQuality extends Scm
      *
      * @参数 int logistics_id  物流单ID
      * @参数 string sign_number  签收编号
-     * @author lzh
      * @return mixed
+     * @author lzh
      */
     public function logistics_sign()
     {
