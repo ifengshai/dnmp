@@ -3,6 +3,7 @@
 namespace app\admin\controller;
 
 use app\common\controller\Backend;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use Think\Db;
 
 /**
@@ -249,6 +250,7 @@ class OcPrescriptionPic extends Backend
         }
 
         //从数据库查询需要的数据
+
         $spreadsheet = new Spreadsheet();
 
         $spreadsheet
