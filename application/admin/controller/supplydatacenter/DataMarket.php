@@ -393,7 +393,7 @@ class DataMarket extends Backend
         $where['is_open'] = 1;
         //实时库存
         $stock_num = $this->model->where($where)->value('sum(stock)-sum(distribution_occupy_stock) as result');
-        $order_sales_num = $this->supply->where('day_date')->sum($field);
+        $order_sales_num = $this->supply->where($map)->sum($field);
         //库销比
         $stock_sales_rate = $order_sales_num ? round($stock_num/$order_sales_num,2) : 0;
         return $stock_sales_rate;
