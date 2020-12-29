@@ -792,7 +792,7 @@ class Test01 extends Backend
         Db::connect('database.db_zeelool')->table('sales_flat_order')->query("set time_zone='+8:00'");
         $z_sku_list = Db::name('datacenter_sku_day')
             ->where(['site' => 1])
-            ->where('day_date','between',['2020-12-02','2020-12-31'])
+            ->where('day_date','between',['2020-12-03','2020-12-31'])
             // ->where('glass_num','>',0)
             ->field('id,day_date,platform_sku')
             ->limit(2000)
@@ -822,8 +822,10 @@ class Test01 extends Backend
                 // ->update(['glass_num'=>$glass_num]);
             if ($res){
                 echo 'sku:'.$v['platform_sku'].$v['day_date'].'更新成功'. "\n";
+                echo '<br>';
             }else{
                 echo 'sku:'.$v['platform_sku'].$v['day_date'].'更新失败'. "\n";
+                echo '<br>';
             }
         }
 
