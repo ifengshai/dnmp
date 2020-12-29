@@ -172,7 +172,7 @@ class DataMarket extends Backend
          * 实时库存 = 总库存-配货占用
          * */
         //实时库存
-        $real_time_stock = $this->model->where('category_id','<>',43)->value('sum(stock)-sum(distribution_occupy_stock) as result');
+        $real_time_stock = $this->model->where('category_id','<>',43)->where('is_del',1)->where('is_open',1)->value('sum(stock)-sum(distribution_occupy_stock) as result');
         //库销比
         $arr['stock_sales_rate'] = $order_sales_num ? round($real_time_stock/$order_sales_num,2) : 0;
         /*
@@ -199,7 +199,7 @@ class DataMarket extends Backend
         $month_start=date('Y-m-01',$start);
         $month_end_first = date('Y-m-01', $end);
         $month_end=date('Y-m-d 23:59:59',strtotime("$month_end_first +1 month -1 day"));
-        $time_where['createtime'] = $order_time_where['created_at'] = ['between', [$month_start, $month_end]];
+        $time_where['createtime'] = $order_time_where['payment_time'] = ['between', [$month_start, $month_end]];
         $purchase_where['purchase_status'] = ['>=',2];
         $purchase_where['is_del'] = 1;
         //（所选时间包含的月份整月）月度已审核采购单采购的数量--暂时使用的是采购单创建时间
@@ -268,7 +268,7 @@ class DataMarket extends Backend
                 $month_start=date('Y-m-01',$start);
                 $month_end_first = date('Y-m-01', $end);
                 $month_end=date('Y-m-d 23:59:59',strtotime("$month_end_first +1 month -1 day"));
-                $time_where['createtime'] = $order_where['created_at'] = ['between', [$month_start, $month_end]];
+                $time_where['createtime'] = $order_where['payment_time'] = ['between', [$month_start, $month_end]];
                 $instock_where['platform_id'] = $order_platform;
                 $instock_where['status'] = 2;
                 //（所选时间包含的月份整月）所选站点月度虚拟仓入库数量
