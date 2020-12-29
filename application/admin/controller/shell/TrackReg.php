@@ -2099,11 +2099,20 @@ class TrackReg extends Backend
                 ->count();
             //sku销售总副数
             $time_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $data . "'")];
-            $z_sku_list[$k]['glass_num'] = Db::connect('database.db_zeelool')
-                ->table('sales_flat_order_item')
-                ->where('sku', 'like', $v['platform_sku'] . '%')
-                ->where($time_where1)
+
+            //统计错误 弃用此方法
+            // $z_sku_list[$k]['glass_num'] = Db::connect('database.db_zeelool')
+            //     ->table('sales_flat_order_item')
+            //     ->where('sku', 'like', $v['platform_sku'] . '%')
+            //     ->where($time_where1)
+            //     ->sum('qty_ordered');
+            $z_sku_list[$k]['glass_num'] = Db::connect('database.db_zeelool')->table('sales_flat_order')
+                ->where($map)
+                ->where($time_where)
+                ->alias('a')
+                ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
                 ->sum('qty_ordered');
+
             $whereItem = " o.status in ('free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered')";
             $whereItem1 = " o.order_type = 1";
             $itemMap[] = ['exp', Db::raw("DATE_FORMAT(m.created_at, '%Y-%m-%d') = '" . $data . "'")];
@@ -2156,10 +2165,16 @@ class TrackReg extends Backend
                 ->count();
             //sku销售总副数
             $time_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $data . "'")];
-            $z_sku_list[$k]['glass_num'] = Db::connect('database.db_voogueme')
-                ->table('sales_flat_order_item')
-                ->where('sku', 'like', $v['platform_sku'] . '%')
-                ->where($time_where1)
+            // $z_sku_list[$k]['glass_num'] = Db::connect('database.db_voogueme')
+            //     ->table('sales_flat_order_item')
+            //     ->where('sku', 'like', $v['platform_sku'] . '%')
+            //     ->where($time_where1)
+            //     ->sum('qty_ordered');
+            $z_sku_list[$k]['glass_num'] = Db::connect('database.db_voogueme')->table('sales_flat_order')
+                ->where($map)
+                ->where($time_where)
+                ->alias('a')
+                ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
                 ->sum('qty_ordered');
             $whereItem = " o.status in ('free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered')";
             $whereItem1 = " o.order_type = 1";
@@ -2213,10 +2228,16 @@ class TrackReg extends Backend
                 ->count();
             //sku销售总副数
             $time_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $data . "'")];
-            $z_sku_list[$k]['glass_num'] = Db::connect('database.db_nihao')
-                ->table('sales_flat_order_item')
-                ->where('sku', 'like', $v['platform_sku'] . '%')
-                ->where($time_where1)
+            // $z_sku_list[$k]['glass_num'] = Db::connect('database.db_nihao')
+            //     ->table('sales_flat_order_item')
+            //     ->where('sku', 'like', $v['platform_sku'] . '%')
+            //     ->where($time_where1)
+            //     ->sum('qty_ordered');
+            $z_sku_list[$k]['glass_num'] = Db::connect('database.db_voogueme')->table('sales_flat_order')
+                ->where($map)
+                ->where($time_where)
+                ->alias('a')
+                ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
                 ->sum('qty_ordered');
             $whereItem = " o.status in ('free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered')";
             $whereItem1 = " o.order_type = 1";
