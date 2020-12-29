@@ -1387,7 +1387,7 @@ class TrackReg extends Backend
         $date_time = date('Y-m-d', strtotime("-1 day"));
 
         //z站
-        $data = Db::name('datacenter_day')->where(['day_date' => $date_time, 'site' => 1])->field('order_num,new_cart_num,update_cart_num')->find();
+        $data = Db::name('datacenter_day')->where(['day_date' => $date_time, 'site' => 1])->field('order_num,new_cart_num,update_cart_num,active_user_num')->find();
 
         //活跃用户数
         $arr['active_user_num'] = $this->google_active_user(1, $date_time);
@@ -1412,7 +1412,7 @@ class TrackReg extends Backend
         usleep(100000);
 
         //v站
-        $data = Db::name('datacenter_day')->where(['day_date' => $date_time, 'site' => 2])->field('order_num,new_cart_num,update_cart_num')->find();
+        $data = Db::name('datacenter_day')->where(['day_date' => $date_time, 'site' => 2])->field('order_num,new_cart_num,update_cart_num,active_user_num')->find();
         //活跃用户数
         $arr['active_user_num'] = $this->google_active_user(2, $date_time);
         //会话
@@ -1436,7 +1436,7 @@ class TrackReg extends Backend
         usleep(100000);
 
         //nihao站
-        $data = Db::name('datacenter_day')->where(['day_date' => $date_time, 'site' => 3])->field('order_num,new_cart_num,update_cart_num')->find();
+        $data = Db::name('datacenter_day')->where(['day_date' => $date_time, 'site' => 3])->field('order_num,new_cart_num,update_cart_num,active_user_num')->find();
         //活跃用户数
         $arr['active_user_num'] = $this->google_active_user(3, $date_time);
         //会话
@@ -1458,6 +1458,10 @@ class TrackReg extends Backend
         $arr['complete_num'] = $zeelool_data->google_target_end(3, $date_time);
         $update = Db::name('datacenter_day')->where(['day_date' => $date_time, 'site' => 3])->update($arr);
         usleep(100000);
+
+        if ($data['active_user_num'] == 0){
+            $this->only_ga_data();
+        }
     }
     public function test103()
     {
