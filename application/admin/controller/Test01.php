@@ -795,7 +795,7 @@ class Test01 extends Backend
             ->where('day_date','between',['2020-12-02','2020-12-31'])
             // ->where('glass_num','>',0)
             ->field('id,day_date,platform_sku')
-            // ->limit(1000)
+            ->limit(2000)
             ->select();
         // dump($z_sku_list);die;
         // dump($z_sku_list);
