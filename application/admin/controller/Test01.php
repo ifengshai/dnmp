@@ -792,7 +792,7 @@ class Test01 extends Backend
         Db::connect('database.db_zeelool')->table('sales_flat_order')->query("set time_zone='+8:00'");
         $z_sku_list = Db::name('datacenter_sku_day')
             ->where(['site' => 1])
-            ->where('day_date','between',['2020-12-04','2020-12-31'])
+            ->where('day_date','between',['2020-12-05','2020-12-31'])
             // ->where('glass_num','>',0)
             ->field('id,day_date,platform_sku')
             ->limit(2000)
@@ -813,11 +813,11 @@ class Test01 extends Backend
                 ->sum('qty_ordered');
             // dump($v['platform_sku'].':'.$v['day_date'].':'.$z_sku_list[$k]['glass_num']);
             // dump($glass_num);
-            // dump(Db::connect('database.db_zeelool')->getLastSql());die;
+            dump(Db::connect('database.db_zeelool')->getLastSql());
             // $z_sku_list[$k]['glass_num'] = 1099;
             // $glass_num = 1099;
             $res = Db::name('datacenter_sku_day')->where('id',$v['id'])->setField('glass_num',$glass_num);
-            dump(Db::name('datacenter_sku_day')->getLastSql());
+            // dump(Db::name('datacenter_sku_day')->getLastSql());
                 // ->where('platform_sku',$v['platform_sku'])
                 // ->where('day_date',$v['day_date'])
                 // ->update(['glass_num'=>$glass_num]);
