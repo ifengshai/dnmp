@@ -103,6 +103,7 @@ class OcPrescriptionPic extends Backend
             $list  = $model->query($sql);
 
             foreach ($list as $key=>$item){
+                $list[$key]['realy_pk'] = $item['id'].'-'.$item['site'];
                 if ($item['status'] ==1){
                     $list[$key]['status']='未处理';
                 }else{

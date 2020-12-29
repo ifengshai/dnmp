@@ -19,7 +19,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             // 初始化表格
             table.bootstrapTable({
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
-                pk: 'id',
+                pk: 'realy_pk',
                 sortName: 'id',
                 search: false,
                 columns: [
