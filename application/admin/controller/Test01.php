@@ -816,17 +816,17 @@ class Test01 extends Backend
             // dump(Db::connect('database.db_zeelool')->getLastSql());die;
             // $z_sku_list[$k]['glass_num'] = 1099;
             // $glass_num = 1099;
-            // $res = Db::name('datacenter_sku_day')->update($z_sku_list[$k]);
+            $res = Db::name('datacenter_sku_day')->update($z_sku_list[$k]);
                 // ->where('platform_sku',$v['platform_sku'])
                 // ->where('day_date',$v['day_date'])
                 // ->update(['glass_num'=>$glass_num]);
-            // if ($res){
-            //     echo 'sku:'.$v['platform_sku'].$v['day_date'].'更新成功'. "\n";
-            // }else{
-            //     echo 'sku:'.$v['platform_sku'].$v['day_date'].'更新失败'. "\n";
-            // }
+            if ($res){
+                echo 'sku:'.$v['platform_sku'].$v['day_date'].'更新成功'. "\n";
+            }else{
+                echo 'sku:'.$v['platform_sku'].$v['day_date'].'更新失败'. "\n";
+            }
         }
 
-        dump($z_sku_list);die;
+        // dump($z_sku_list);die;
     }
 }
