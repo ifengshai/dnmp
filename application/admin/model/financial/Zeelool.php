@@ -212,9 +212,9 @@ class Zeelool extends Model
     public function index_cost($rate,$start_time,$end_time)
     {
         //facebook金额
-        // $facebook_money = $this->facebook_cost($start_time,$end_time);
+        $facebook_money = $this->facebook_cost($start_time,$end_time);
         //google金额
-        // $google_money   = $this->goole_cost($start_time,$end_time);
+        $google_money   = $this->goole_cost($start_time,$end_time);
         //镜框等价格
         $all_money      = $this->all_cost($start_time,$end_time);
         //销售额
