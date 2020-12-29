@@ -791,11 +791,11 @@ class Test01 extends Backend
         $z_sku_list = Db::name('datacenter_sku_day')
             ->where(['site' => 1])
             ->where('day_date','between',['2020-12-01','2020-12-31'])
-            ->where('glass_num','>',0)
+            // ->where('glass_num','>',0)
             ->field('id,day_date,platform_sku')
             // ->limit(2)
             ->select();
-        // dump($z_sku_list);
+        // dump($z_sku_list);die;
         foreach ($z_sku_list as $k => $v) {
             $map['sku'] = ['like', $v['platform_sku'] . '%'];
             $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
@@ -809,7 +809,10 @@ class Test01 extends Backend
                 ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
                 ->sum('qty_ordered');
             // $z_sku_list[$k]['glass_num'] = 1099;
-            $res = Db::name('datacenter_sku_day')->update($z_sku_list[$k]);
+            $res = Db::name('datacenter_sku_day')
+                ->where('platform_sku',$v['platform_sku'])
+                ->where('day_date',$v['day_date'])
+                ->update(['glass_num'=>$z_sku_list[$k]['glass_num']]);
             if ($res){
                 echo 'sku:'.$v['platform_sku'].$v['day_date'].'更新成功'. "\n";
             }else{
