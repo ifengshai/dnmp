@@ -189,10 +189,8 @@ class Zeelool extends Model
         $all_lens_price = 0;
         //求销售额、运费、毛利润
         $base_grand_total_result = Db::connect('database.db_zeelool')->table('sales_flat_order o')->where($whereFrame)
-        ->field('sum(o.base_grand_total) base_grand_total,sum(o.shipping_amount) shipping_amount')->select(false);
-        echo $base_grand_total_result;die;
-
-
+        ->field('sum(o.base_grand_total) base_grand_total,sum(o.shipping_amount) shipping_amount')->select();
+        
         //销售额
         $all_base_grand_total = round($base_grand_total_result[0]['base_grand_total'],2);
         //运费
