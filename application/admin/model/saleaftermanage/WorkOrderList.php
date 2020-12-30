@@ -406,30 +406,33 @@ class WorkOrderList extends Model
         ;
         empty($address) && exception('无此订单号，请查询后重试');
 
-        //获取更改镜片sku集
-        $showPrescriptions = [];
-        $prescriptions = [];
+        $where = ['a.order_id'=>$address['id']];
         if($item_order_number){
-            $prescription_field = 'a.sku,a.name,b.prescription_type,b.index_type,b.index_id,b.coating_id,b.color_id,b.od_sph,b.os_sph,b.od_cyl,b.os_cyl,b.od_axis,b.os_axis,b.pd_l,b.pd_r,b.pd,b.os_add,b.od_add,b.od_pv,b.os_pv,b.od_pv_r,b.os_pv_r,b.od_bd,b.os_bd,b.od_bd_r,b.os_bd_r';
-            $_order_item_process = new NewOrderItemProcess();
-            $prescriptions = $_order_item_process
-                ->alias('a')
-                ->field($prescription_field)
-                ->where('a.item_order_number',$item_order_number)
-                ->join(['fa_order_item_option' => 'b'], 'a.option_id=b.id')
-                ->select()
-            ;
-            $prescriptions = collection($prescriptions)->toArray();
-            empty($prescriptions) && exception('子订单不存在，请查询后重试');
+            $where['a.item_order_number'] = $item_order_number;
+        }
 
+        $prescription_field = 'a.sku,a.name,b.prescription_type,b.index_type,b.index_id,b.coating_id,b.color_id,b.od_sph,b.os_sph,b.od_cyl,b.os_cyl,b.od_axis,b.os_axis,b.pd_l,b.pd_r,b.pd,b.os_add,b.od_add,b.od_pv,b.os_pv,b.od_pv_r,b.os_pv_r,b.od_bd,b.os_bd,b.od_bd_r,b.os_bd_r';
+        $_order_item_process = new NewOrderItemProcess();
+        $prescriptions = $_order_item_process
+            ->alias('a')
+            ->field($prescription_field)
+            ->where($where)
+            ->join(['fa_order_item_option' => 'b'], 'a.option_id=b.id')
+            ->select()
+        ;
+        $prescriptions = collection($prescriptions)->toArray();
+
+        if($item_order_number){
+            empty($prescriptions) && exception('子订单不存在，请查询后重试');
             //增加默认数量
             array_walk($prescriptions, function (&$value, $k, $p) {
                 $value = array_merge($value, $p);
             }, ['qty_ordered' => 1]);
+        }
 
-            foreach ($prescriptions as $prescription) {
-                $showPrescriptions[] = $prescription['prescription_type'] . '--' . $prescription['index_type'];
-            }
+        $showPrescriptions = [];
+        foreach ($prescriptions as $prescription) {
+            $showPrescriptions[] = $prescription['prescription_type'] . '--' . $prescription['index_type'];
         }
 
         return $address ? compact('address', 'prescriptions', 'showPrescriptions') : [];
