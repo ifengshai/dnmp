@@ -544,6 +544,8 @@ class ItWebDemand extends Backend
             }
             if ($v['secondary_operation'] !== 2){
                 $list[$k]['secondary_operation'] ='否';
+
+                
             }else{
                 $list[$k]['secondary_operation'] ='是';
             }
