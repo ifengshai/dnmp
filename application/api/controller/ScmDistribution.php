@@ -1362,14 +1362,17 @@ class ScmDistribution extends Scm
             $this->error(__('请将子单号' . $item_order_number . '的商品放入合单架' . $store_house_info['coding'] . '库位'), [], 511);
         }
 
-        //检查当前订单和预占用时的订单id是否相同
-        if ($store_house_info['order_id'] != $order_process_info['id']) {
-            $this->error(__('预占用库位信息错误'), [], 403);
+        if (!empty($store_house_info['order_id'])) {
+            //检查当前订单和预占用时的订单id是否相同
+            if ($store_house_info['order_id'] != $order_process_info['id']) {
+                $this->error(__('预占用库位信息错误'), [], 403);
+            }
+            //检查是否预占用
+            if ($store_house_info['fictitious_occupy_time'] < time()) {
+                $this->error(__('库位预占用超10分钟，请重新操作'), [], 403);
+            }        
         }
-        //检查是否预占用
-        if ($store_house_info['fictitious_occupy_time'] < time()) {
-            $this->error(__('库位预占用超10分钟，请重新操作'), [], 403);
-        }
+        
 
         //主单表有合单库位ID，查询主单商品总数，与子单合单入库计算数量对比
         //获取订单购买总数，计算过滤掉取消状态的子单
