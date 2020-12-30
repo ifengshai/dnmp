@@ -172,7 +172,7 @@ class DataMarket extends Backend
          * 实时库存 = 总库存-配货占用
          * */
         //实时库存
-        $real_time_stock = $this->model->where('category_id','<>',43)->value('sum(stock)-sum(distribution_occupy_stock) as result');
+        $real_time_stock = $this->model->where('category_id','<>',43)->where('is_del',1)->where('is_open',1)->value('sum(stock)-sum(distribution_occupy_stock) as result');
         //库销比
         $arr['stock_sales_rate'] = $order_sales_num ? round($real_time_stock/$order_sales_num,2) : 0;
         /*
@@ -199,7 +199,7 @@ class DataMarket extends Backend
         $month_start=date('Y-m-01',$start);
         $month_end_first = date('Y-m-01', $end);
         $month_end=date('Y-m-d 23:59:59',strtotime("$month_end_first +1 month -1 day"));
-        $time_where['createtime'] = $order_time_where['created_at'] = ['between', [$month_start, $month_end]];
+        $time_where['createtime'] = $order_time_where['payment_time'] = ['between', [$month_start, $month_end]];
         $purchase_where['purchase_status'] = ['>=',2];
         $purchase_where['is_del'] = 1;
         //（所选时间包含的月份整月）月度已审核采购单采购的数量--暂时使用的是采购单创建时间
@@ -268,7 +268,7 @@ class DataMarket extends Backend
                 $month_start=date('Y-m-01',$start);
                 $month_end_first = date('Y-m-01', $end);
                 $month_end=date('Y-m-d 23:59:59',strtotime("$month_end_first +1 month -1 day"));
-                $time_where['createtime'] = $order_where['created_at'] = ['between', [$month_start, $month_end]];
+                $time_where['createtime'] = $order_where['payment_time'] = ['between', [$month_start, $month_end]];
                 $instock_where['platform_id'] = $order_platform;
                 $instock_where['status'] = 2;
                 //（所选时间包含的月份整月）所选站点月度虚拟仓入库数量
@@ -393,7 +393,7 @@ class DataMarket extends Backend
         $where['is_open'] = 1;
         //实时库存
         $stock_num = $this->model->where($where)->value('sum(stock)-sum(distribution_occupy_stock) as result');
-        $order_sales_num = $this->supply->where('day_date')->sum($field);
+        $order_sales_num = $this->supply->where($map)->sum($field);
         //库销比
         $stock_sales_rate = $order_sales_num ? round($stock_num/$order_sales_num,2) : 0;
         return $stock_sales_rate;
@@ -405,32 +405,30 @@ class DataMarket extends Backend
             return $cache_data;
         }
         $where['library_status'] = 1;
-        $count = $this->item->where($where)->where('in_stock_time is not null')->count();
-        $sql = $this->item->alias('t1')->field('TIMESTAMPDIFF(MONTH,in_stock_time,now()) AS total')->where($where)->where('in_stock_time is not null')->buildSql();
-        $data = $this->item->table([$sql=>'t2'])->field('sum( IF ( total >= 10 and total<13, 1, 0 ) ) AS d,sum( IF ( total >= 7 and total<10, 1, 0 ) ) AS c,sum( IF ( total >= 4 and total<7, 1, 0 ) ) AS b,sum( IF ( total >= 0 and total<4, 1, 0 ) ) AS a')->select();
-        $data1 = $data[0]['a'];
-        $data2 = $data[0]['b'];
-        $data3 = $data[0]['c'];
-        $data4 = $data[0]['d'];
-        $data5 = $count - $data1 - $data2 - $data3 - $data4;
         $stock = $this->item->where($where)->where('in_stock_time is not null')->count();
+        $count = $this->item->where($where)->where('in_stock_time is not null')->count('distinct sku');
         $map1 = [];
         $map1[] = ['exp', Db::raw("TIMESTAMPDIFF(MONTH,in_stock_time,now())>=0 and TIMESTAMPDIFF(MONTH,in_stock_time,now())<4")];
         $stock1 = $this->item->where($where)->where('in_stock_time is not null')->where($map1)->count();
+        $data1 = $this->item->where($where)->where('in_stock_time is not null')->where($map1)->count('distinct sku');
 
         $map2 = [];
         $map2[] = ['exp', Db::raw("TIMESTAMPDIFF(MONTH,in_stock_time,now())>=4 and TIMESTAMPDIFF(MONTH,in_stock_time,now())<7")];
         $stock2 = $this->item->where($where)->where('in_stock_time is not null')->where($map2)->count();
+        $data2 = $this->item->where($where)->where('in_stock_time is not null')->where($map2)->count('distinct sku');
 
         $map3 = [];
         $map3[] = ['exp', Db::raw("TIMESTAMPDIFF(MONTH,in_stock_time,now())>=7 and TIMESTAMPDIFF(MONTH,in_stock_time,now())<10")];
         $stock3 = $this->item->where($where)->where('in_stock_time is not null')->where($map3)->count();
+        $data3 = $this->item->where($where)->where('in_stock_time is not null')->where($map3)->count('distinct sku');
 
         $map4 = [];
         $map4[] = ['exp', Db::raw("TIMESTAMPDIFF(MONTH,in_stock_time,now())>=10 and TIMESTAMPDIFF(MONTH,in_stock_time,now())<13")];
         $stock4 = $this->item->where($where)->where('in_stock_time is not null')->where($map4)->count();
+        $data4 = $this->item->where($where)->where('in_stock_time is not null')->where($map4)->count('distinct sku');
 
         $stock5 = $stock - $stock1 - $stock2 - $stock3 - $stock4;
+        $data5 = $count - $data1 - $data2 - $data3 - $data4;
 
         $total = $this->item->alias('b')->join('fa_purchase_order_item o','b.purchase_id=o.purchase_id')->where($where)->where('in_stock_time is not null')->sum('o.purchase_price');
 

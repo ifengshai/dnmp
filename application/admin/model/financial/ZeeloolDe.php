@@ -160,7 +160,7 @@ class ZeeloolDe extends Model
         //查询产品库镜框采购单价
         $sku_list = $this->item->where(['is_open' => 1, 'is_del' => 1])->column('purchase_price', 'sku');
 
-        $whereFrame['o.status'] = ['in', ['complete', 'processing', 'creditcard_proccessing', 'free_proccessing']];
+        $whereFrame['o.status'] = ['in', ['complete', 'free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal']];
         $whereFrame['o.created_at'] = ['between', [$start_time, $end_time]];
         //Db::connect('database.db_zeelool')->query("SET time_zone = '+8:00'");
         $all_frame_result = Db::connect('database.zeelool_de')->table('sales_flat_order_item m')->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
