@@ -1900,22 +1900,21 @@ class Test extends Backend
             if ($v['sales_num'] <= 0) {
                 $no_skus[] = $v['sku'];
                 $no_stock += $skus[$v['sku']]['stock'];
-                $no_price += $skus[$v['sku']]['purchase_price'];
+                $no_price += ($skus[$v['sku']]['purchase_price']*$skus[$v['sku']]['stock']);
             }
         }
-        dump($no_skus);
-        dump($no_stock);
-        dump($no_price);
-
+    
         $percent = count($no_skus) / count(array_keys($skus));
-
+        echo count($no_skus) . "\n";
         echo $percent . "\n";
         $stock = array_sum(array_column($skus, 'stock'));
         $stock_percent = $no_stock / $stock;
 
+        echo $no_stock . "\n";
         echo $stock_percent . "\n";
-
-        $price = array_sum(array_column($skus, 'purchase_price'));
+        
+        echo $no_price. "\n";
+        $price = $item->where(['is_del' => 1, 'is_open' => 1, 'stock' => ['>', 0], 'category_id' => ['<>', 43]])->sum('purchase_price*stock');
         $price_percent = $no_price / $price;
 
         echo $price_percent . "\n";
