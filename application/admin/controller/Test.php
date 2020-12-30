@@ -1908,17 +1908,8 @@ class Test extends Backend
             }
         }
 
-        $percent = count($no_skus) / count(array_keys($skus));
-        echo count($no_skus) . "\n";
-        echo $percent . "\n";
-        $stock = array_sum(array_column($skus, 'stock'));
-        $stock_percent = $no_stock / $stock;
+        dump($no_skus);die;
 
-        echo $no_stock . "\n";
-        echo $stock_percent . "\n";
-        echo $no_price . "\n";
-        $price = $item->where(['is_del' => 1, 'is_open' => 1, 'stock' => ['>', 0], 'category_id' => ['<>', 43]])->sum('purchase_price*stock');
-        $price_percent = $no_price / $price;
-        echo $price_percent . "\n";
+      
     }
 }
