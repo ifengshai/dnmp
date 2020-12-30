@@ -543,9 +543,9 @@ class ItWebDemand extends Backend
                 $list[$k]['pm_audit_status'] ='是';
             }
             if ($v['secondary_operation'] !== 2){
-                $list[$k]['pm_audit_status'] ='否';
+                $list[$k]['secondary_operation'] ='否';
             }else{
-                $list[$k]['pm_audit_status'] ='是';
+                $list[$k]['secondary_operation'] ='是';
             }
         }
 
