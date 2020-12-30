@@ -548,7 +548,12 @@ class ScmDistribution extends Scm
         }
 
         //查询订单号
-        $increment_id = $this->_new_order->where(['id' => $item_process_info['order_id']])->value('increment_id');
+        $order_info = $this->_new_order
+            ->field('increment_id,status')
+            ->where(['id' => $item_process_info['order_id']])
+            ->find();
+        'processing' != $order_info['status'] && $this->error(__('当前订单状态不可操作'), [], 405);
+        $increment_id = $order_info['increment_id'];
 
         //检测是否有工单未处理
         $check_work_order = $this->_work_order_measure

@@ -239,26 +239,7 @@ class Test2 extends Backend
 
                 if ($v['track_number']) {
 
-                    if (strtolower($v['title']) == 'usps') {
-                        $track_num1 = substr($v['track_number'], 0, 4);
-                        if ($track_num1 == '9200' || $track_num1 == '9205') {
-                            //郭伟峰
-                            $shipment_data_type = 'USPS_1';
-                        } else {
-                            $track_num2 = substr($v['track_number'], 0, 4);
-                            if ($track_num2 == '9400') {
-                                //加诺
-                                $shipment_data_type = 'USPS_2';
-                            } else {
-                                //杜明明
-                                $shipment_data_type = 'USPS_3';
-                            }
-                        }
-                    } else {
-                        $shipment_data_type = $v['title'];
-                    }
-
-
+                  
                     $list[$k + 5]['order_node'] = 2;
                     $list[$k + 5]['node_type'] = 7; //出库
                     $list[$k + 5]['content']  = 'Leave warehouse, Waiting for being picked up.';
@@ -270,14 +251,14 @@ class Test2 extends Backend
                     $list[$k + 5]['track_number'] = $v['track_number'];
                     $list[$k + 5]['handle_user_id'] = 0;
                     $list[$k + 5]['handle_user_name'] = '';
-                    $list[$k + 5]['shipment_data_type'] = $shipment_data_type;
+                    $list[$k + 5]['shipment_data_type'] = '';
 
 
                     $data['order_node'] = 2;
                     $data['node_type'] = 7;
                     $data['update_time'] = $v['create_time'];
                     $data['delivery_time'] = $v['create_time'];
-                    $data['shipment_data_type'] = $shipment_data_type;
+                    $data['shipment_data_type'] = '';
                 }
             } else {
 
@@ -427,6 +408,7 @@ class Test2 extends Backend
         custom_order_prescription_type,a.created_at,a.updated_at,b.track_number,b.created_at as create_time,b.title,a.entity_id,a.increment_id,a.custom_order_prescription_type
         ';
         $map['a.created_at'] = ['>=', '2020-03-31 00:00:00'];
+        $map['a.entity_id'] = 306580;
         $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal', 'payment_review']];
         $zeelool_data = Db::connect('database.db_voogueme')->table('sales_flat_order')->alias('a')->field($field)
             ->join(['sales_flat_shipment_track' => 'b'], 'a.entity_id=b.order_id', 'left')

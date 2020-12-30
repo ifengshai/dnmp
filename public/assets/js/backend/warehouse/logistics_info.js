@@ -44,7 +44,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                         {
                             field: 'is_check_order', title: __('质检状态'), custom: { 1: 'success', 0: 'danger' },
                             searchList: { 1: '已质检', 0: '未质检' },
-            formatter: Table.api.formatter.status
+                            formatter: Table.api.formatter.status
                         },
                         {
                             field: 'is_new_product', title: __('是否为新品采购单'), custom: { 1: 'success', 0: 'danger' },

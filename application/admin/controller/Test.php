@@ -170,11 +170,31 @@ class Test extends Backend
      */
     public function new_track_total()
     {
+        $trackingConnector = new TrackingConnector($this->apiKey);
+        $trackInfo = $trackingConnector->getTrackInfoMulti([[
+            'number' => '781883394172',
+            'carrier' => '100003'
+            //测试数据
+            /*'number' => 'LZ358046313CN',//E邮宝
+            'carrier' => '03011'*/
+            /* 'number' => '3616952791',//DHL
+            'carrier' => '100001'*/
+            /*'number' => '74890988318620573173', //Fedex
+            'carrier' => '100003' */
+            /*'number' => '92001902551559000101352584', //usps郭伟峰
+            'carrier' => '21051' */
+            /*'number' => 'UF127024493YP', //yanwen
+            'carrier' => '190012'*/
+        ]]);
+
+
+
+        die;
         //        $order_shipment = Db::name('order_node')->where(['order_node' => 2, 'node_type' => 7, 'create_time' => ['>=', '2020-04-11 10:00:00']])->select();//本地测试数据无发货时间（发货是走发货系统同步的时间，线上有），使用了创建时间
         $order_shipment = Db::name('order_node')->where(['node_type' => 7, 'order_node' => 2, 'delivery_time' => ['>=', '2020-08-30 00:00:00']])->select();
         $order_shipment = collection($order_shipment)->toArray();
 
-        $trackingConnector = new TrackingConnector($this->apiKey);
+        
 
         foreach ($order_shipment as $k => $v) {
 
@@ -182,22 +202,7 @@ class Test extends Backend
 
             $carrier = $this->getCarrier($title);
 
-            $trackInfo = $trackingConnector->getTrackInfoMulti([[
-                'number' => $v['track_number'],
-                'carrier' => $carrier['carrierId']
-                //测试数据
-                /*'number' => 'LZ358046313CN',//E邮宝
-                'carrier' => '03011'*/
-                /* 'number' => '3616952791',//DHL
-                'carrier' => '100001'*/
-                /*'number' => '74890988318620573173', //Fedex
-                'carrier' => '100003' */
-                /*'number' => '92001902551559000101352584', //usps郭伟峰
-                'carrier' => '21051' */
-                /*'number' => 'UF127024493YP', //yanwen
-                'carrier' => '190012'*/
-            ]]);
-
+           
             $add['site'] = $v['site'];
             $add['order_id'] = $v['order_id'];
             $add['order_number'] = $v['order_number'];
@@ -1888,11 +1893,11 @@ class Test extends Backend
     {
         $item = new \app\admin\model\itemmanage\Item();
         $skus = $item->where(['is_del' => 1, 'is_open' => 1, 'stock' => ['>', 0], 'category_id' => ['<>', 43]])->column('purchase_price,stock', 'sku');
-
-        $yestime_where[] = ['exp', Db::raw("createtime < DATE_SUB(CURDATE(),INTERVAL 90 DAY)")];
+      
+    
+        $yestime_where[] = ['exp', Db::raw("createtime >= DATE_SUB(CURDATE(),INTERVAL 90 DAY)")];
         $yestime_where['sku'] = ['in', array_keys($skus)];
         $list = Db::table('fa_sku_sales_num')->field('sku,sum(sales_num) as sales_num')->where($yestime_where)->group('sku')->select();
-        dump($list);
         $no_skus = [];
         $no_stock = 0;
         $no_price = 0;
@@ -1900,23 +1905,12 @@ class Test extends Backend
             if ($v['sales_num'] <= 0) {
                 $no_skus[] = $v['sku'];
                 $no_stock += $skus[$v['sku']]['stock'];
-                $no_price += ($skus[$v['sku']]['purchase_price']*$skus[$v['sku']]['stock']);
+                $no_price += ($skus[$v['sku']]['purchase_price'] * $skus[$v['sku']]['stock']);
+
+                file_put_contents('/www/wwwroot/mojing/runtime/log/test.log', $v['sku'] . "\r\n", FILE_APPEND);
             }
         }
+
     
-        $percent = count($no_skus) / count(array_keys($skus));
-        echo count($no_skus) . "\n";
-        echo $percent . "\n";
-        $stock = array_sum(array_column($skus, 'stock'));
-        $stock_percent = $no_stock / $stock;
-
-        echo $no_stock . "\n";
-        echo $stock_percent . "\n";
-        
-        echo $no_price. "\n";
-        $price = $item->where(['is_del' => 1, 'is_open' => 1, 'stock' => ['>', 0], 'category_id' => ['<>', 43]])->sum('purchase_price*stock');
-        $price_percent = $no_price / $price;
-
-        echo $price_percent . "\n";
     }
 }
