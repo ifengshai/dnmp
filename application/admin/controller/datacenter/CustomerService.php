@@ -1219,7 +1219,7 @@ class CustomerService extends Backend
 
             }
             //查找group_id为131的所有用户   运营客服角色
-            $mat['group_id'] = 34;
+            $mat['group_id'] = 131;
             $cat = model('AuthGroupAccess')->field('uid')->where($mat)->select();
             $cat = collection($cat)->toArray();
             $cat = array_column($cat,'uid');
