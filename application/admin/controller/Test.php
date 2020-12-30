@@ -1891,7 +1891,7 @@ class Test extends Backend
 
         $yestime_where[] = ['exp', Db::raw("createtime >= DATE_SUB(CURDATE(),INTERVAL 90 DAY)")];
         $yestime_where['sku'] = ['in', array_keys($skus)];
-        $list = Db::table('fa_sku_sales_num')->field('sku,sum(sales_num) as sales_num')->where($yestime_where)->select();
+        $list = Db::table('fa_sku_sales_num')->field('sku,sum(sales_num) as sales_num')->where($yestime_where)->group('sku')->select();
         dump($list);
         $no_skus = [];
         $no_stock = 0;
