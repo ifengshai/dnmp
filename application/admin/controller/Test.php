@@ -1907,7 +1907,7 @@ class Test extends Backend
                 $no_stock += $skus[$v['sku']]['stock'];
                 $no_price += ($skus[$v['sku']]['purchase_price'] * $skus[$v['sku']]['stock']);
 
-                file_put_contents('/www/wwwroot/mojing/runtime/log/test.log', $v['sku'] . '-' . $skus[$v['sku']]['purchase_price'] . "\r\n", FILE_APPEND);
+                file_put_contents('/www/wwwroot/mojing/runtime/log/test.log', $v['sku'] . "\r\n", FILE_APPEND);
                 file_put_contents('/www/wwwroot/mojing/runtime/log/test01.log', $skus[$v['sku']]['purchase_price'] . "\r\n", FILE_APPEND);
                 file_put_contents('/www/wwwroot/mojing/runtime/log/test02.log', $skus[$v['sku']]['stock'] . "\r\n", FILE_APPEND);
             }
