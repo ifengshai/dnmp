@@ -123,7 +123,7 @@ class TrackReg extends Backend
         $params = [];
         foreach ($list as $k => $v) {
             //根据物流单号查询发货物流渠道
-            $shipment_data_type = Db::connect('database.db_delivery')->table('ld_deliver_order')->where(['track_number' => $v['track_number'], 'increment_id' => $v['order_number']])->value('agent_way_title');
+            $shipment_data_type = Db::connect('database.mojing_base')->table('fa_order_process')->where(['track_number' => $v['track_number'], 'increment_id' => $v['order_number']])->value('agent_way_title');
             $params[$k]['id'] = $v['id'];
             $params[$k]['shipment_data_type'] = $shipment_data_type;
             $this->ordernodedetail->where(['order_number' => $v['order_number'], 'track_number' => $v['track_number']])->update(['shipment_data_type' => $shipment_data_type]);
