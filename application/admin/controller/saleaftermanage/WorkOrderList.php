@@ -2504,9 +2504,11 @@ class WorkOrderList extends Backend
                             ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
                             ->where(['a.work_id' => $work_id, 'b.measure_choose_id' => $measure_choose_id])
                             ->value('a.userinfo_option');
-                        $address = unserialize($address);
-                        $address['address_type'] = $address['address_id'] == 0 ? 'shipping' : 'billing';
-                        $res['address'] = $address;
+                        if ($address) {
+                            $address = unserialize($address);
+                            $address['address_type'] = $address['address_id'] == 0 ? 'shipping' : 'billing';
+                            $res['address'] = $address;
+                        }
                     }
                 }
             } catch (\Exception $e) {

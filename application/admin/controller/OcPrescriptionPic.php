@@ -3,6 +3,7 @@
 namespace app\admin\controller;
 
 use app\common\controller\Backend;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use Think\Db;
 
 /**
@@ -102,6 +103,7 @@ class OcPrescriptionPic extends Backend
             $list  = $model->query($sql);
 
             foreach ($list as $key=>$item){
+                $list[$key]['realy_pk'] = $item['id'].'-'.$item['site'];
                 if ($item['status'] ==1){
                     $list[$key]['status']='未处理';
                 }else{
@@ -162,4 +164,164 @@ class OcPrescriptionPic extends Backend
 
         return $this->view->fetch();
     }
+
+
+
+    public function batch_export_xls()
+    {
+        $data  =  input('get.ids');
+        if ($data){
+            $ct =explode(',',$data);
+            $ids = explode(',',$data);
+            foreach ($ids as $key=>$item){
+                $ids[$key] = explode('-',$item);
+            }
+            foreach ($ids as $key=>$item){
+                if ($item[1] ==1 ){
+                    $model = Db::connect('database.db_zeelool');
+                }else{
+                    $model = Db::connect('database.db_voogueme');
+                }
+                $list[] = $model->table('oc_prescription_pic')->where('id',$item[0])->find();
+                $list[$key]['site'] = $item[1];
+            }
+        }else{
+            $filter = json_decode($this->request->get('filter'), true);
+            $WhereSql = ' id > 0';
+            list($where, $sort, $order,$offset,$limit) = $this->buildparams();
+            if ($filter['id']){
+                $WhereSql .= ' and id = '.$filter['id'];
+            }
+            if ($filter['status']){
+                $WhereSql .= ' and status='.$filter['status'];
+            }
+            if ($filter['created_at']){
+                $created_at = explode(' - ',$filter['created_at']);
+                $WhereSql .= " and created_at between '$created_at[0]' and '$created_at[1]' ";
+            }
+            if ($filter['completion_time']){
+                $completion_time = explode(' - ',$filter['completion_time']);
+                $WhereSql .= " and completion_time between '$completion_time[0]' and '$completion_time[1]' ";
+            }
+            $model  = Db::connect('database.db_zeelool');
+            $WhereOrder = '  ORDER BY  created_at desc';
+            if ($filter['site']){
+                if ($filter['site'] ==1){
+                    $count = "SELECT COUNT(1) FROM zeelool.oc_prescription_pic where".$WhereSql;
+                    $sql  = "SELECT zeelool.oc_prescription_pic.id AS id,zeelool.oc_prescription_pic.email AS email,zeelool.oc_prescription_pic.query AS query,
+                                zeelool.oc_prescription_pic.pic AS pic ,zeelool.oc_prescription_pic.status AS status,zeelool.oc_prescription_pic.handler_name AS handler_name,
+                                zeelool.oc_prescription_pic.created_at AS created_at,zeelool.oc_prescription_pic.completion_time AS completion_time,
+                                zeelool.oc_prescription_pic.remarks AS remarks,1 as site FROM zeelool.oc_prescription_pic where".$WhereSql;
+                }else{
+                    $count = "SELECT COUNT(1) FROM voogueme.oc_prescription_pic where".$WhereSql;
+                    $sql  = "SELECT voogueme.oc_prescription_pic.id AS id,voogueme.oc_prescription_pic.email AS email,voogueme.oc_prescription_pic.query AS query,
+                                voogueme.oc_prescription_pic.pic AS pic ,voogueme.oc_prescription_pic.status AS status,voogueme.oc_prescription_pic.handler_name AS handler_name,
+                                voogueme.oc_prescription_pic.created_at AS created_at,voogueme.oc_prescription_pic.completion_time AS completion_time,
+                                voogueme.oc_prescription_pic.remarks AS remarks ,2 as site FROM voogueme.oc_prescription_pic where".$WhereSql;
+                }
+                $count = $model->query($count);
+                $total = $count[0]['COUNT(1)'];
+            }else{
+                $count = "SELECT COUNT(1) FROM zeelool.oc_prescription_pic where".$WhereSql." union all  SELECT COUNT(1) FROM voogueme.oc_prescription_pic where".$WhereSql;
+                $sql  = "SELECT zeelool.oc_prescription_pic.id AS id,zeelool.oc_prescription_pic.email AS email,zeelool.oc_prescription_pic.query AS query,
+                                zeelool.oc_prescription_pic.pic AS pic ,zeelool.oc_prescription_pic.status AS status,zeelool.oc_prescription_pic.handler_name AS handler_name,
+                                zeelool.oc_prescription_pic.created_at AS created_at,zeelool.oc_prescription_pic.completion_time AS completion_time,
+                                zeelool.oc_prescription_pic.remarks AS remarks,1 as site FROM zeelool.oc_prescription_pic where".$WhereSql." union all  
+                         SELECT voogueme.oc_prescription_pic.id AS id,voogueme.oc_prescription_pic.email AS email,voogueme.oc_prescription_pic.query AS query,
+                                voogueme.oc_prescription_pic.pic AS pic ,voogueme.oc_prescription_pic.status AS status,voogueme.oc_prescription_pic.handler_name AS handler_name,
+                                voogueme.oc_prescription_pic.created_at AS created_at,voogueme.oc_prescription_pic.completion_time AS completion_time,
+                                voogueme.oc_prescription_pic.remarks AS remarks,2 as site FROM voogueme.oc_prescription_pic where".$WhereSql. $WhereOrder." limit  ". $offset.','.$limit;
+                $count = $model->query($count);
+                $total = $count[0]['COUNT(1)']  + $count[1]['COUNT(1)'];
+            }
+            $list  = $model->query($sql);
+
+        }
+        foreach ($list as $key=>$item){
+            if ($item['status'] ==1){
+                $list[$key]['status']='未处理';
+            }else{
+                $list[$key]['status']= '已处理';
+            }
+            if ($item['site'] ==1){
+                $list[$key]['site']='Z站';
+            }else{
+                $list[$key]['site']= 'V站';
+            }
+        }
+
+        //从数据库查询需要的数据
+
+        $spreadsheet = new Spreadsheet();
+
+        $spreadsheet
+            ->setActiveSheetIndex(0)
+            ->setCellValue("A1", "站点")
+            ->setCellValue("B1", "邮箱")
+            ->setCellValue("C1", "问题详情")  //利用setCellValues()填充数据
+            ->setCellValue("D1", "状态")
+            ->setCellValue("E1", "处理人")
+            ->setCellValue("F1", "创建时间")
+            ->setCellValue("G1", "处理时间")
+            ->setCellValue("H1", "备注");
+
+        foreach ($list as $key => $value) {
+            $spreadsheet->getActiveSheet()->setCellValueExplicit("A" . ($key * 1 + 2), $value['site'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['email']);
+            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['query']);
+            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['status']);
+            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['handler_name']);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['created_at']);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['completion_time']);
+            $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['remarks']);
+        }
+        //设置宽度
+        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(40);
+        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(15);
+
+        //设置边框
+        $border = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
+                    'color'       => ['argb' => 'FF000000'], // 设置border颜色
+                ],
+            ],
+        ];
+
+        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
+        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
+
+        $spreadsheet->getActiveSheet()->getStyle('A1:H1' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->setActiveSheetIndex(0);
+
+        $format = 'xlsx';
+        $savename = '售前问题列表' . date("YmdHis", time());
+
+        if ($format == 'xls') {
+            //输出Excel03版本
+            header('Content-Type:application/vnd.ms-excel');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
+        } elseif ($format == 'xlsx') {
+            //输出07Excel版本
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
+        }
+        //输出名称
+        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
+        //禁止缓存
+        header('Cache-Control: max-age=0');
+        $writer = new $class($spreadsheet);
+
+        $writer->save('php://output');
+
+    }
+
 }
