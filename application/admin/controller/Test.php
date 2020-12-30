@@ -1911,8 +1911,9 @@ class Test extends Backend
         $stock_percent = $no_stock / $stock;
 
         echo $stock_percent . "\n";
+        
 
-        $price = array_sum(array_column($skus, 'purchase_price'));
+        $price = $item->where(['is_del' => 1, 'is_open' => 1, 'stock' => ['>', 0], 'category_id' => ['<>', 43]])->value('purchase_price*stock');
         $price_percent = $no_price / $price;
 
         echo $price_percent . "\n";
