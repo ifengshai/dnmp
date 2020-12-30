@@ -1907,7 +1907,7 @@ class Test extends Backend
         echo count($no_skus) . "\n";
         echo $percent . "\n";
 
-        echo count(array_keys($skus));
+        echo count(array_keys($skus)). "\n";
 
 
         $stock = array_sum(array_column($skus, 'stock'));
