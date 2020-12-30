@@ -1903,7 +1903,7 @@ class Test extends Backend
                 $no_price += ($skus[$v['sku']]['purchase_price']*$skus[$v['sku']]['stock']);
             }
         }
-    
+        dump($no_skus);
         $percent = count($no_skus) / count(array_keys($skus));
         echo count($no_skus) . "\n";
         echo $percent . "\n";
