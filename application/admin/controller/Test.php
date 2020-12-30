@@ -1913,7 +1913,7 @@ class Test extends Backend
         echo $stock_percent . "\n";
         
 
-        $price = $item->where(['is_del' => 1, 'is_open' => 1, 'stock' => ['>', 0], 'category_id' => ['<>', 43]])->value('purchase_price*stock');
+        $price = $item->where(['is_del' => 1, 'is_open' => 1, 'stock' => ['>', 0], 'category_id' => ['<>', 43]])->sum('purchase_price*stock');
         $price_percent = $no_price / $price;
 
         echo $price_percent . "\n";
