@@ -1900,6 +1900,7 @@ class Test extends Backend
             if ($v['sales_num'] <= 0) {
                 $no_skus[] = $v['sku'];
                 $no_stock += $skus[$v['sku']]['stock'];
+                echo $skus[$v['sku']]['purchase_price'];
                 $no_price += $skus[$v['sku']]['purchase_price'];
             }
         }
