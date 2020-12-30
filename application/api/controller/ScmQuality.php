@@ -211,7 +211,7 @@ class ScmQuality extends Scm
         $list = $this->_check
             ->alias('a')
             ->where($where)
-            ->field('a.id,a.check_order_number,a.createtime,a.status,c.purchase_number')
+            ->field('a.id,a.check_order_number,a.createtime,a.status,c.purchase_number,b.sku,a.create_person,a.logistics_id,a.batch_id,b.remark')
             ->join(['fa_check_order_item' => 'b'], 'a.id=b.check_id', 'left')
             ->join(['fa_purchase_order' => 'c'], 'a.purchase_id=c.id')
             ->order('a.createtime', 'desc')
@@ -225,6 +225,18 @@ class ScmQuality extends Scm
             $list[$key]['cancel_show'] = 0 == $value['status'] ? 1 : 0;
             $list[$key]['edit_show'] = 0 == $value['status'] ? 1 : 0;
             $list[$key]['examine_show'] = 1 == $value['status'] ? 1 : 0;
+            //签收编号
+            $list[$key]['sign_number'] = $this->_logistics_info->where('id', $value['logistics_id'])->value('sign_number');
+            //应到货数量
+            $list[$key]['should_arrival_num'] = Db::name('check_order_item')->where('check_id', $value['id'])->value('should_arrival_num');
+            //供应商名称
+            $list[$key]['supplier_name'] = $this->_purchase_order
+                ->alias('a')
+                ->join(['fa_supplier' => 'b'], 'a.supplier_id=b.id')
+                ->where('a.purchase_number', $value['purchase_number'])
+                ->value('b.supplier_name');
+            $list[$key]['batch_id'] = $value['batch_id'] == 0 ? '无批次' : $value['batch_id'];
+
         }
 
         $this->success('', ['list' => $list], 200);
@@ -1042,11 +1054,11 @@ class ScmQuality extends Scm
                 $is_new_product = 1 == $purchase_list[$value['purchase_id']]['is_new_product'] ? 1 : 0;
             }
             $list[$key]['purchase_number'] = $purchase_number;
-            if ($value['batch_id']){
+            if ($value['batch_id']) {
                 //sku 有批次的拿批次子表的sku字段值 无批次的拿采购单子表的sku字段值
-                $list[$key]['sku'] = Db::name('purchase_batch_item')->where('purchase_batch_id',$value['batch_id'])->value('sku');
-            }else{
-                $list[$key]['sku']= Db::name('purchase_order_item')->where('purchase_id',$value['purchase_id'])->value('sku');
+                $list[$key]['sku'] = Db::name('purchase_batch_item')->where('purchase_batch_id', $value['batch_id'])->value('sku');
+            } else {
+                $list[$key]['sku'] = Db::name('purchase_order_item')->where('purchase_id', $value['purchase_id'])->value('sku');
             }
 
             //供应商名称
