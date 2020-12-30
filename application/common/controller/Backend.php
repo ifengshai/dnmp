@@ -113,8 +113,8 @@ class Backend extends Controller
     use \app\admin\library\traits\Backend;
 
     public function _initialize()
-    {        
-		$modulename = $this->request->module();
+    {
+        $modulename = $this->request->module();
         $controllername = Loader::parseName($this->request->controller());
         $actionname = strtolower($this->request->action());
 
@@ -144,9 +144,7 @@ class Backend extends Controller
                     $this->redirect('index/login', [], 302, ['referer' => $url]);
                     exit;
                 }
-                $this->redirect('index/login', [], 302, ['referer' => $url]);
-                exit;
-                // $this->error(__('Please login first'), url('index/login', ['url' => $url]));
+                $this->error(__('Please login first'), url('index/login', ['url' => $url]), '', 1);
             }
             // 判断是否需要验证权限
             if (!$this->auth->match($this->noNeedRight)) {
@@ -159,8 +157,8 @@ class Backend extends Controller
         }
 
         //校验后台操作权限是否开启
-        $operation_authority = model('Config')->get(['name'=>'operation_authority']);
-        if(!in_array($controllername,['general.config','shell.track_reg','crontab','index','dashboard']) && 1 != $operation_authority['value']){
+        $operation_authority = model('Config')->get(['name' => 'operation_authority']);
+        if (!in_array($controllername, ['general.config', 'shell.track_reg', 'crontab', 'index', 'dashboard']) && 1 != $operation_authority['value']) {
             $url = Session::get('referer');
             $url = $url ? $url : $this->request->url();
             $this->redirect('general/config/jurisdiction', [], 302, ['referer' => $url]);
@@ -299,7 +297,7 @@ class Backend extends Controller
             $where[] = [implode("|", $searcharr), "LIKE", "%{$search}%"];
         }
         foreach ($filter as $k => $v) {
-           
+
             $sym = isset($op[$k]) ? $op[$k] : '=';
             if (stripos($k, ".") === false) {
                 $k = $tableName . $k;
@@ -380,19 +378,17 @@ class Backend extends Controller
                 default:
                     break;
             }
-
         }
 
         //判断是否存在逻辑删除字段
         if (!empty($this->model)) {
             $fieldArr = $this->model->getTableFields();
             if (in_array('is_del', $fieldArr)) {
-                $where[] = [$tableName.'is_del', '=', 1];
+                $where[] = [$tableName . 'is_del', '=', 1];
             }
-           
         }
-  
-        
+
+
         $where = function ($query) use ($where) {
             foreach ($where as $k => $v) {
                 if (is_array($v)) {
@@ -451,10 +447,10 @@ class Backend extends Controller
         $field = $this->request->request("showField");
         //主键
         $primarykey = $this->request->request("keyField");
-		
+
         //主键值
         $primaryvalue = $this->request->request("keyValue");
-		
+
         //搜索字段
         $searchfield = (array) $this->request->request("searchField/a");
         //自定义搜索条件
@@ -498,14 +494,14 @@ class Backend extends Controller
             $this->model->where($this->dataLimitField, 'in', $adminIds);
         }
         $list = [];
-		
+
         $total = $this->model->where($where)->count();
-		
+
         if ($total > 0) {
             if (is_array($adminIds)) {
                 $this->model->where($this->dataLimitField, 'in', $adminIds);
             }
-		
+
             $datalist = $this->model->where($where)
                 ->order($order)
                 ->page($page, $pagesize)
