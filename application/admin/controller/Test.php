@@ -1892,6 +1892,7 @@ class Test extends Backend
         $yestime_where[] = ['exp', Db::raw("createtime >= DATE_SUB(CURDATE(),INTERVAL 90 DAY)")];
         $yestime_where['sku'] = ['in', array_keys($skus)];
         $list = Db::table('fa_sku_sales_num')->field('sku,sum(sales_num) as sales_num')->where($yestime_where)->select();
+        dump($list);
         $no_skus = [];
         $no_stock = 0;
         $no_price = 0;
@@ -1902,7 +1903,9 @@ class Test extends Backend
                 $no_price += $skus[$v['sku']]['purchase_price'];
             }
         }
-
+        dump($no_skus);
+        dump($no_stock);
+        dump($no_price);
 
         $percent = count($no_skus) / count(array_keys($skus));
 
