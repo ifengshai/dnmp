@@ -1028,7 +1028,7 @@ class ScmQuality extends Scm
         $list = $this->_logistics_info
             ->where($where)
             ->where('type', 1)//采购单类型
-            ->field('id,logistics_number,sign_number,createtime,sign_time,status,purchase_id,type,is_check_order')
+            ->field('id,logistics_number,sign_number,createtime,sign_time,status,purchase_id,type,is_check_order,batch_id')
             ->order('createtime', 'desc')
             ->limit($offset, $limit)
             ->select();
@@ -1042,8 +1042,13 @@ class ScmQuality extends Scm
                 $is_new_product = 1 == $purchase_list[$value['purchase_id']]['is_new_product'] ? 1 : 0;
             }
             $list[$key]['purchase_number'] = $purchase_number;
-            //sku
-            $list[$key]['sku'] = $purchase_number;
+            if ($value['batch_id']){
+                //sku 有批次的拿批次子表的sku字段值 无批次的拿采购单子表的sku字段值
+                $list[$key]['sku'] = Db::name('purchase_batch_item')->where('purchase_batch_id',$value['batch_id'])->value('sku');
+            }else{
+                $list[$key]['sku']= Db::name('purchase_order_item')->where('purchase_id',$value['purchase_id'])->value('sku');
+            }
+
             //供应商名称
             $list[$key]['supplier_name'] = $this->_purchase_order
                 ->alias('a')
