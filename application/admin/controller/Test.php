@@ -1901,11 +1901,11 @@ class Test extends Backend
                 $no_skus[] = $v['sku'];
                 $no_stock += $skus[$v['sku']]['stock'];
                 $no_price += ($skus[$v['sku']]['purchase_price'] * $skus[$v['sku']]['stock']);
+
+                file_put_contents('/www/wwwroot/mojing/runtime/log/test.log', $v['sku'] . "\r\n", FILE_APPEND);
             }
         }
 
-        dump($no_skus);die;
-
-      
+    
     }
 }
