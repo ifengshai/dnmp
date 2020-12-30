@@ -378,8 +378,8 @@ class ItWebDemand extends Backend
 
     public function batch_export_xls(){
         $where['is_del'] =['eq',1];
-        $where['demand_type'] =['eq',2];
-        $where['create_time'] = ['between',['2020-11-01 00:00:00','2020-11-30 23:59:59']];
+        $where['demand_type'] =['eq',1];
+        $where['create_time'] = ['between',['2020-12-01 00:00:00','2020-12-30 23:59:59']];
 //        $field = 'id,site,entry_user_id,type,functional_module,title,create_time,pm_audit_status_time,web_designer_user_id,app_user_id,phper_user_id,node_time
 //        develop_finish_time,web_designer_complexity,web_designer_group,web_remarks,pm_audit_status,pm_confirm_time,copy_to_user_id';
         $list = $this->model
@@ -542,118 +542,124 @@ class ItWebDemand extends Backend
             }else{
                 $list[$k]['pm_audit_status'] ='是';
             }
+            if ($v['secondary_operation'] !== 2){
+                $list[$k]['pm_audit_status'] ='否';
+            }else{
+                $list[$k]['pm_audit_status'] ='是';
+            }
         }
 
 
-            //从数据库查询需要的数据
-            $spreadsheet = new Spreadsheet();
+        //从数据库查询需要的数据
+        $spreadsheet = new Spreadsheet();
 
-            //常规方式：利用setCellValue()填充数据
-            $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "需求ID")
-                ->setCellValue("B1", "站点")
-                ->setCellValue("C1", "提出人");
-            $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "任务类型")
-                ->setCellValue("E1", "功能模块")
-                ->setCellValue("F1", "标题")
-                ->setCellValue("G1", "创建时间")
-                ->setCellValue("H1", "产品审核通过时间")
-                ->setCellValue("I1", "开发责任人")
-                ->setCellValue("J1", "计划完成时间")
-                ->setCellValue("K1", "实际开发完成时间")
-                ->setCellValue("L1", "需求上线时间")
-                ->setCellValue("M1", "前端预期难易度")
-                ->setCellValue("N1", "是否存在二次修改需求")
-                ->setCellValue("O1", "是否需要前端")
-                ->setCellValue("P1", "是否需要测试")
-                ->setCellValue("Q1", "是否超时")
-                ->setCellValue("R1", "是否拒绝")
-                ->setCellValue("S1", "是否存在过pending")
-                ->setCellValue("T1", "前端负责人")
-                ->setCellValue("U1", "后端负责人")
-                ->setCellValue("V1", "APP负责人");
-            foreach ($list as $key => $value) {
-                $spreadsheet->getActiveSheet()->setCellValueExplicit("A" . ($key * 1 + 2), $value['id'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-                $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['site']);
-                $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['entry_user_name']);
-                $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['site_type']);
-                $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['functional_module']);
-                $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['title']);
-                $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['create_time']);
-                $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['pm_confirm_time']);
-                $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), $value['copy_to_user_id']);
-                $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 1 + 2), $value['node_time']);
-                $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 1 + 2), $value['develop_finish_time']);
-                //测试确认时间
-                $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 1 + 2), $value['test_confirm_time']);
-                $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 1 + 2), $value['web_designer_complexity']);
+        //常规方式：利用setCellValue()填充数据
+        $spreadsheet
+            ->setActiveSheetIndex(0)->setCellValue("A1", "创建时间")
+//                ->setCellValue("B1", "站点")
+//                ->setCellValue("C1", "提出人");
+//            $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "任务类型")
+//                ->setCellValue("E1", "功能模块")
+//                ->setCellValue("F1", "标题")
+//                ->setCellValue("A1", "创建时间")
+            ->setCellValue("B1", "产品审核通过时间")
+            ->setCellValue("C1", "开发责任人")
+            ->setCellValue("D1", "计划完成时间")
+            ->setCellValue("E1", "实际开发完成时间")
+            ->setCellValue("F1", "需求上线时间")
+            ->setCellValue("G1", "前端预期难易度")
+            ->setCellValue("H1", "是否存在二次修改需求")
+            ->setCellValue("I1", "是否需要前端")
+            ->setCellValue("J1", "是否需要测试")
+//                ->setCellValue("Q1", "是否超时")
+//                ->setCellValue("R1", "是否拒绝")
+//                ->setCellValue("S1", "是否存在过pending")
+            ->setCellValue("K1", "前端负责人")
+            ->setCellValue("L1", "后端负责人")
+            ->setCellValue("M1", "APP负责人");
+        foreach ($list as $key => $value) {
+//                $spreadsheet->getActiveSheet()->setCellValueExplicit("A" . ($key * 1 + 2), $value['id'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+//                $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['site']);
+//                $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['entry_user_name']);
+//                $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['site_type']);
+//                $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['functional_module']);
+//                $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['title']);
+            $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), $value['create_time']);
+            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['pm_confirm_time']);
+            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['copy_to_user_id']);
+            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['node_time']);
+            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['develop_finish_time']);
+            //测试确认时间
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['test_confirm_time']);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['web_designer_complexity']);
 
-                $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 1 + 2), '否');
+            $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['secondary_operation']);
 
-                $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 1 + 2), $value['web_designer_group']);
-                $spreadsheet->getActiveSheet()->setCellValue("P" . ($key * 1 + 2), $value['test_group']);
-                $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 1 + 2), $value['overtime']);
-                $spreadsheet->getActiveSheet()->setCellValue("R" . ($key * 1 + 2), $value['web_remarks']);
-                $spreadsheet->getActiveSheet()->setCellValue("S" . ($key * 1 + 2), $value['pm_audit_status']);
-                $spreadsheet->getActiveSheet()->setCellValue("T" . ($key * 1 + 2), $value['web_designer_user_name']);
-                $spreadsheet->getActiveSheet()->setCellValue("U" . ($key * 1 + 2), $value['php_user_name']);
-                $spreadsheet->getActiveSheet()->setCellValue("V" . ($key * 1 + 2), $value['app_user_name']);
+            $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), $value['web_designer_group']);
+            $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 1 + 2), $value['test_group']);
+//                $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 1 + 2), $value['overtime']);
+//                $spreadsheet->getActiveSheet()->setCellValue("R" . ($key * 1 + 2), $value['web_remarks']);
+//                $spreadsheet->getActiveSheet()->setCellValue("S" . ($key * 1 + 2), $value['pm_audit_status']);
+            $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 1 + 2), $value['web_designer_user_name']);
+            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 1 + 2), $value['php_user_name']);
+            $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 1 + 2), $value['app_user_name']);
 
-            }
+        }
 
-            //设置宽度
-            $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(20);
-            $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(20);
-            $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(20);
-            $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(20);
-            $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(20);
-            $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(40);
-            $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(20);
-            $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(20);
-            $spreadsheet->getActiveSheet()->getColumnDimension('J')->setWidth(20);
-            $spreadsheet->getActiveSheet()->getColumnDimension('L')->setWidth(20);
+        //设置宽度
+        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(40);
+        $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('J')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('L')->setWidth(20);
 
 
-            //设置边框
-            $border = [
-                'borders' => [
-                    'allBorders' => [
-                        'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
-                        'color' => ['argb' => 'FF000000'], // 设置border颜色
-                    ],
+        //设置边框
+        $border = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
+                    'color' => ['argb' => 'FF000000'], // 设置border颜色
                 ],
-            ];
+            ],
+        ];
 
-            $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
 
 
-            $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
-            $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
+        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
 
-            $spreadsheet->getActiveSheet()->getStyle('A1:V' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-            $spreadsheet->setActiveSheetIndex(0);
+        $spreadsheet->getActiveSheet()->getStyle('A1:M' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->setActiveSheetIndex(0);
 
-            $format = 'xlsx';
-            $savename = '十一月份网站需求' . date("YmdHis", time());;
+        $format = 'xlsx';
+        $savename = '十二月份网站需求' . date("YmdHis", time());;
 
-            if ($format == 'xls') {
-                //输出Excel03版本
-                header('Content-Type:application/vnd.ms-excel');
-                $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
-            } elseif ($format == 'xlsx') {
-                //输出07Excel版本
-                header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-                $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
-            }
-
-            //输出名称
-            header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
-            //禁止缓存
-            header('Cache-Control: max-age=0');
-            $writer = new $class($spreadsheet);
-
-            $writer->save('php://output');
-
+        if ($format == 'xls') {
+            //输出Excel03版本
+            header('Content-Type:application/vnd.ms-excel');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
+        } elseif ($format == 'xlsx') {
+            //输出07Excel版本
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
         }
+
+        //输出名称
+        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
+        //禁止缓存
+        header('Cache-Control: max-age=0');
+        $writer = new $class($spreadsheet);
+
+        $writer->save('php://output');
+
+    }
 
 
     /**
