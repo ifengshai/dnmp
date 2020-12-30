@@ -294,17 +294,6 @@ class Distribution extends Backend
 
             $list = collection($list)->toArray();
 
-            $sql = $this->model
-                ->alias('a')
-                ->field('a.id,a.order_id,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.total_qty_ordered,b.site,b.order_type,b.status,a.distribution_status,a.temporary_house_id,a.abnormal_house_id,a.created_at,c.store_house_id')
-                ->join(['fa_order' => 'b'], 'a.order_id=b.id')
-                ->join(['fa_order_process' => 'c'], 'a.order_id=c.order_id')
-                ->where($where)
-                ->where($map)
-                ->order($sort, $order)
-                ->limit($offset, $limit)
-                ->select(false);
-
             //库位号列表
             $stock_house_data = $this->_stock_house
                 ->where(['status' => 1, 'type' => ['>', 1], 'occupy' => ['>', 0]])
@@ -358,7 +347,7 @@ class Distribution extends Backend
                 }
             }
 
-            $result = array("total" => $total, "rows" => $list, "sql" => $sql);
+            $result = array("total" => $total, "rows" => $list);
             return json($result);
         }
         $this->assign('label', $label);
