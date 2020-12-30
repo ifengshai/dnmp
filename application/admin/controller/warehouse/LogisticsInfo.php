@@ -104,6 +104,7 @@ class LogisticsInfo extends Backend
                     $list[$k]['is_new_product'] = 0;
                     $list[$k]['supplier_sku'] = '';
                     $list[$k]['purchase_num'] = 0;
+                    $list[$k]['factory_type'] = '';
                 }
 
 
