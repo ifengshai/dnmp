@@ -1888,6 +1888,11 @@ class Test extends Backend
     {
         $item = new \app\admin\model\itemmanage\Item();
         $skus = $item->where(['is_del' => 1, 'is_open' => 1, 'stock' => ['>', 0], 'category_id' => ['<>', 43]])->column('purchase_price,stock', 'sku');
+        //90天内无销量
+        $y90daysyestime_where[] = ['exp', Db::raw("createtime >= DATE_SUB(CURDATE(),INTERVAL 90 DAY)")];
+        $y90daysyestime_where['sku'] = ['in', array_keys($skus)];
+        $y90dayslist = Db::table('fa_sku_sales_num')->field('sku,sum(sales_num) as sales_num')->where($y90daysyestime_where)->group('sku')->select();
+        $y90dayssku = array_column($y90dayslist, 'sku');
 
         // $yestime_where[] = ['exp', Db::raw("createtime >= DATE_SUB(CURDATE(),INTERVAL 90 DAY)")];
         $yestime_where['sku'] = ['in', array_keys($skus)];
@@ -1896,32 +1901,24 @@ class Test extends Backend
         $no_stock = 0;
         $no_price = 0;
         foreach ($list as $k => $v) {
-            if ($v['sales_num'] <= 0) {
+            if ($v['sales_num'] <= 0 && !in_array($v['sku'], $y90dayssku)) {
                 $no_skus[] = $v['sku'];
                 $no_stock += $skus[$v['sku']]['stock'];
-                $no_price += ($skus[$v['sku']]['purchase_price']*$skus[$v['sku']]['stock']);
+                $no_price += ($skus[$v['sku']]['purchase_price'] * $skus[$v['sku']]['stock']);
             }
         }
-    
+
         $percent = count($no_skus) / count(array_keys($skus));
         echo count($no_skus) . "\n";
         echo $percent . "\n";
-
-        echo count(array_keys($skus)). "\n";
-
-
         $stock = array_sum(array_column($skus, 'stock'));
         $stock_percent = $no_stock / $stock;
 
         echo $no_stock . "\n";
         echo $stock_percent . "\n";
-
-        echo $stock. "\n";
-        
-        echo $no_price. "\n";
+        echo $no_price . "\n";
         $price = $item->where(['is_del' => 1, 'is_open' => 1, 'stock' => ['>', 0], 'category_id' => ['<>', 43]])->sum('purchase_price*stock');
         $price_percent = $no_price / $price;
         echo $price_percent . "\n";
-        echo $price . "\n";
     }
 }
