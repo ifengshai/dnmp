@@ -1887,7 +1887,7 @@ class Test extends Backend
     public function test002()
     {
         $item = new \app\admin\model\itemmanage\Item();
-        $skus = $item->where(['is_del' => 1, 'is_open' => 1, 'stock' => ['>', 0]])->column('purchase_price,stock', 'sku');
+        $skus = $item->where(['is_del' => 1, 'is_open' => 1, 'stock' => ['>', 0], 'category_id' => ['<>', 43]])->column('purchase_price,stock', 'sku');
 
         $yestime_where[] = ['exp', Db::raw("createtime >= DATE_SUB(CURDATE(),INTERVAL 90 DAY)")];
         $yestime_where['sku'] = ['in', array_keys($skus)];
@@ -1916,11 +1916,8 @@ class Test extends Backend
         echo $stock_percent . "\n";
 
         $price = array_sum(array_column($skus, 'purchase_price'));
-        $price_percent = $no_price/$price;
+        $price_percent = $no_price / $price;
 
         echo $price_percent . "\n";
-
-
-
     }
 }
