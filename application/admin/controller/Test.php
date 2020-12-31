@@ -1991,6 +1991,7 @@ class Test extends Backend
                     'entity_id' => $v['entity_id'],
                 ])
                 ->select();
+            $list = collection($list)->toArray();
             if ($list) {
                 foreach ($list as $value) {
 
@@ -2002,8 +2003,11 @@ class Test extends Backend
                             ['check_status' => 1, 'check_time' => $do_time, 'combine_status' => 1, 'combine_time' => $do_time]
                         );
 
+
+                    dump(111);
                     //获取子单表id集
                     $item_process_ids = $this->model->where(['magento_order_id' => $value['entity_id'], 'site' => $v['site']])->column('id');
+                    dump($item_process_ids);
                     if ($item_process_ids) {
                         //子单表：fa_order_item_process：distribution_status=配货状态
                         $this->model->where(['id' => ['in', $item_process_ids]])
