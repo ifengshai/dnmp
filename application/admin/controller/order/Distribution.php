@@ -1875,7 +1875,12 @@ class Distribution extends Backend
             ->select();
         $list = collection($list)->toArray();
         $item_process_ids = array_column($list, 'id');
+        print_R(implode(',',$item_process_ids));
+
         $order_ids = array_column($list, 'order_id');
+        echo "\n";
+        print_R(implode(',',$order_ids));
+        exit;
         if ($order_ids) {
             $this->_new_order_process
                 ->allowField(true)
