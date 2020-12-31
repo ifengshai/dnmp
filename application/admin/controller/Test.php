@@ -1938,6 +1938,8 @@ class Test extends Backend
         ];
         $order = new \app\admin\model\order\order\NewOrder();
         $lists = $order->where(['increment_id' => ['in', $order_number]])->select();
+        $this->_new_order_process = new \app\admin\model\order\order\NewOrderProcess();
+        $this->model = new \app\admin\model\order\order\NewOrderItemProcess();
 
 
         //站点列表
