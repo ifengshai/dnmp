@@ -634,7 +634,7 @@ class DataMarket extends Backend
                     $start = strtotime($value);
                     $end = strtotime($value.' 23:59:59');
 
-                    $where['p.complete_time'] = ['between',[$start,$end]];
+                    $where['p.delivery_time'] = ['between',[$start,$end]];
                     $where['p.site'] = ['<>',4];
                     $map1['p.order_prescription_type'] = 1;
                     $map2['p.order_prescription_type'] = 2;
