@@ -11,6 +11,7 @@ use think\Request;
 
 class DataMarket extends Backend
 {
+    protected $noNeedRight = ['stock_overview','stock_measure_overview','stock_measure_overview_platform','stock_level_overview','stock_level_sales_rate','stock_age_overview','purchase_overview','purchase_histogram_line','order_send_overview','process_overview','logistics_completed_overview','comleted_time_rate'];
     public function _initialize()
     {
         parent::_initialize();
