@@ -19,6 +19,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                 Controller.api.formatter.comleted_time_rate_pie();
             });
             $("#sku_reset").click(function () {
+                $("#time_str").val('');
                 index_data();
                 stock_measure_overview_platform();
                 Controller.api.formatter.line_histogram();
