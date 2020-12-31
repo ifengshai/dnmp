@@ -323,7 +323,7 @@ class Distribution extends Backend
                     $stock_house_num = $stock_house_data[$value['temporary_house_id']]; //定制片库位号
                 } elseif (!empty($value['abnormal_house_id']) && 8 == $label) {
                     $stock_house_num = $stock_house_data[$value['abnormal_house_id']]; //异常库位号
-                } elseif (!empty($value['store_house_id']) && 7 == $label && in_array($value['distribution_status'],[8,9])) {
+                } elseif (!empty($value['store_house_id']) && 7 == $label && in_array($value['distribution_status'], [8, 9])) {
                     $stock_house_num = $stock_house_data[$value['store_house_id']]; //合单库位号
                 }
 
@@ -900,9 +900,6 @@ class Distribution extends Backend
     }
 
 
-
-
-
     /**
      * 标记已打印
      * @Description
@@ -928,7 +925,7 @@ class Distribution extends Backend
         try {
             //标记状态
             $this->model->where(['id' => ['in', $ids]])->update(['distribution_status' => 2]);
-               
+
             //记录配货日志
             $admin = (object)session('admin');
             DistributionLog::record($admin, $ids, 1, '标记打印完成');
@@ -1195,7 +1192,7 @@ class Distribution extends Backend
                     ||
                     in_array($val['item_order_number'], $item_order_numbers) //子单措施未处理:更改镜框18、更改镜片19、取消20
                 )
-                    && $this->error('子单号：' . $val['item_order_number'] . '有工单未处理');
+                && $this->error('子单号：' . $val['item_order_number'] . '有工单未处理');
             }
         }
 
@@ -1325,7 +1322,7 @@ class Distribution extends Backend
                 //订单主表标记已合单
                 if (9 == $save_status) {
                     $this->_new_order_process->where(['order_id' => $value['order_id']])
-                    ->update(['combine_status' => 1, 'check_status' => 0, 'combine_time' => time()]);
+                        ->update(['combine_status' => 1, 'check_status' => 0, 'combine_time' => time()]);
                 }
 
                 $this->model->where(['id' => $value['id']])->update(['distribution_status' => $save_status]);
@@ -1417,7 +1414,7 @@ class Distribution extends Backend
                     ||
                     in_array($val['item_order_number'], $item_order_numbers) //子单措施未处理:更改镜框18、更改镜片19、取消20
                 )
-                    && $this->error('子单号：' . $val['item_order_number'] . '有工单未处理');
+                && $this->error('子单号：' . $val['item_order_number'] . '有工单未处理');
             }
         }
 
@@ -1460,7 +1457,7 @@ class Distribution extends Backend
 
             //子订单状态回滚
             $this->model->where(['id' => ['in', $ids]])->update($save_data);
-               
+
             //记录日志
             DistributionLog::record($admin, array_column($item_list, 'id'), 6, $status_arr[$reason]['name']);
 
@@ -1684,10 +1681,10 @@ class Distribution extends Backend
                 }
 
                 $this->model->where(['id' => $ids])->update($save_data);
-                   
+
                 //标记处理异常状态及时间
                 $this->_distribution_abnormal->where(['id' => $abnormal_info['id']])->update(['status' => 2, 'do_time' => time(), 'do_person' => $admin->nickname]);
-                   
+
                 //配货操作内容
                 $remark = '处理异常：' . $abnormal_arr[$abnormal_info['type']] . ',当前节点：' . $status_arr[$item_info['distribution_status']] . ',返回节点：' . $status_arr[$status];
 
@@ -1852,7 +1849,7 @@ class Distribution extends Backend
         $url = $url_domain . $url_root;
         if ($ids) {
             $url = $url . '/saleaftermanage/work_order_list/add?order_number=' . $order_id[0] . '&order_item_numbers=' . implode(',', $item_process_numbers);
-        }else{
+        } else {
             $url = $url . '/saleaftermanage/work_order_list/add';
         }
         //http://www.mojing.cn/admin_1biSSnWyfW.php/saleaftermanage/work_order_list/add?order_number=859063&order_item_numbers=430224120-03,430224120-04
@@ -1869,6 +1866,37 @@ class Distribution extends Backend
      */
     function legacy_data()
     {
+        $item_order_numbers = ['300045198-01', '300045198-02', '400431222-03', '130081349-02', '200001206-14', '400430966-10', '400430819-02', '500017333-02', '400431230-02', '500017333-01', '130081466-03', '400431417-04', '400431477-02', '400431520-01', '400430748-01', '400430339-09', '530002610-03', '400431405-01', '530002629-03', '100185686-02', '400431195-02', '400431214-01', '400430636-01', '400431377-03', '400430847-04', '400431377-02', '400431346-01', '400431250-01', '200001206-34', '100185423-04', '100185547-02', '130081448-02', '400430586-04', '400431135-01', '430243809-01', '400430966-01', '400431049-01', '400430163-06', '500017468-02', '400430163-04', '430243643-02', '400341538-01', '100185914-02', '100185406-01', '400431435-02'];
+        $list = $this->model
+            ->alias('a')
+            ->field('a.id,a.order_id')
+            ->join(['fa_order' => 'b'], 'a.order_id=b.id')
+            ->where(['a.item_order_number' => ['in', $item_order_numbers]])
+            ->select();
+        $list = collection($list)->toArray();
+        $item_process_ids = array_column($list, 'id');
+        $order_ids = array_column($list, 'order_id');
+        if ($order_ids) {
+            $this->_new_order_process
+                ->allowField(true)
+                ->save(
+                    ['check_status' => 0, 'check_time' => null, 'combine_status' => 0, 'combine_time' => null],
+                    ['order_id' => ['in', $order_ids]]
+                );
+            echo '订单状态修改成功';
+        }
+        if ($item_process_ids) {
+            $this->model
+                ->allowField(true)
+                ->save(
+                    ['distribution_status' => 7],
+                    ['id' => ['in', $item_process_ids]]
+                );
+            echo '子单状态修改成功';
+        }
+        echo 'success!!';
+        exit;
+
         ini_set('memory_limit', '1024M');
         //站点列表
         $site_arr = [
