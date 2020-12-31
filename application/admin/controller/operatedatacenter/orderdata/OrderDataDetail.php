@@ -177,6 +177,7 @@ class OrderDataDetail extends Backend
                 }
                 $arr[$i]['store_id'] = $store_id;
                 $arr[$i]['coupon_code'] = $value['coupon_code'];
+                $arr[$i]['coupon_rule_name'] = $value['coupon_rule_name'];
                 $arr[$i]['shipping_method'] = $value['shipping_method'];  //快递类别
                 //收货信息
                 $shipping_where['address_type'] = 'shipping';
