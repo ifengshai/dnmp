@@ -6,15 +6,15 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
             //订单数据概况折线图
             //Controller.api.formatter.line_chart();
             stock_measure_overview_platform();
-            Controller.api.formatter.line_histogram();
             Controller.api.formatter.order_send_overview();
+            Controller.api.formatter.line_histogram();
             Controller.api.formatter.process_overview();
             Controller.api.formatter.comleted_time_rate_pie();
             $("#sku_submit").click(function () {
                 index_data();
                 stock_measure_overview_platform();
-                Controller.api.formatter.line_histogram();
                 Controller.api.formatter.order_send_overview();
+                Controller.api.formatter.line_histogram();
                 Controller.api.formatter.process_overview();
                 Controller.api.formatter.comleted_time_rate_pie();
             });
@@ -22,8 +22,8 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                 $("#time_str").val('');
                 index_data();
                 stock_measure_overview_platform();
-                Controller.api.formatter.line_histogram();
                 Controller.api.formatter.order_send_overview();
+                Controller.api.formatter.line_histogram();
                 Controller.api.formatter.process_overview();
                 Controller.api.formatter.comleted_time_rate_pie();
             });
@@ -164,7 +164,8 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                                 },
                                 formatter: function (param) { //格式化提示信息
                                     console.log(param);
-                                    return param[0].name + '<br/>' + param[0].seriesName + '：' + param[0].value + '<br/>' + param[1].seriesName + '：' + param[1].value;
+                                    var num = param[0].value+param[1].value;
+                                    return param[0].name + '<br/>' + param[0].seriesName + '：' + param[0].value + '<br/>' + param[1].seriesName + '：' + param[1].value+'<br/>合计：'+num;
                                 }
                             },
                             grid: { //直角坐标系内绘图网格
