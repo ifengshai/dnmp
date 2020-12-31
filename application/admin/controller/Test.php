@@ -170,11 +170,31 @@ class Test extends Backend
      */
     public function new_track_total()
     {
+        $trackingConnector = new TrackingConnector($this->apiKey);
+        $trackInfo = $trackingConnector->getTrackInfoMulti([[
+            'number' => '781883394172',
+            'carrier' => '100003'
+            //测试数据
+            /*'number' => 'LZ358046313CN',//E邮宝
+            'carrier' => '03011'*/
+            /* 'number' => '3616952791',//DHL
+            'carrier' => '100001'*/
+            /*'number' => '74890988318620573173', //Fedex
+            'carrier' => '100003' */
+            /*'number' => '92001902551559000101352584', //usps郭伟峰
+            'carrier' => '21051' */
+            /*'number' => 'UF127024493YP', //yanwen
+            'carrier' => '190012'*/
+        ]]);
+
+
+
+        die;
         //        $order_shipment = Db::name('order_node')->where(['order_node' => 2, 'node_type' => 7, 'create_time' => ['>=', '2020-04-11 10:00:00']])->select();//本地测试数据无发货时间（发货是走发货系统同步的时间，线上有），使用了创建时间
         $order_shipment = Db::name('order_node')->where(['node_type' => 7, 'order_node' => 2, 'delivery_time' => ['>=', '2020-08-30 00:00:00']])->select();
         $order_shipment = collection($order_shipment)->toArray();
 
-        $trackingConnector = new TrackingConnector($this->apiKey);
+
 
         foreach ($order_shipment as $k => $v) {
 
@@ -182,21 +202,6 @@ class Test extends Backend
 
             $carrier = $this->getCarrier($title);
 
-            $trackInfo = $trackingConnector->getTrackInfoMulti([[
-                'number' => $v['track_number'],
-                'carrier' => $carrier['carrierId']
-                //测试数据
-                /*'number' => 'LZ358046313CN',//E邮宝
-                'carrier' => '03011'*/
-                /* 'number' => '3616952791',//DHL
-                'carrier' => '100001'*/
-                /*'number' => '74890988318620573173', //Fedex
-                'carrier' => '100003' */
-                /*'number' => '92001902551559000101352584', //usps郭伟峰
-                'carrier' => '21051' */
-                /*'number' => 'UF127024493YP', //yanwen
-                'carrier' => '190012'*/
-            ]]);
 
             $add['site'] = $v['site'];
             $add['order_id'] = $v['order_id'];
@@ -1874,5 +1879,224 @@ class Test extends Backend
             echo $k . "\n";
         }
         echo "ok";
+    }
+
+    /**
+     * 统计数据
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/12/30 09:19:01 
+     * @return void
+     */
+    public function test002()
+    {
+        $item = new \app\admin\model\itemmanage\Item();
+        $skus = $item->where(['is_del' => 1, 'is_open' => 1, 'stock' => ['>', 0], 'category_id' => ['<>', 43]])->column('purchase_price,stock', 'sku');
+
+
+        $yestime_where[] = ['exp', Db::raw("createtime >= DATE_SUB(CURDATE(),INTERVAL 90 DAY)")];
+        $yestime_where['sku'] = ['in', array_keys($skus)];
+        $list = Db::table('fa_sku_sales_num')->field('sku,sum(sales_num) as sales_num')->where($yestime_where)->group('sku')->select();
+        $no_skus = [];
+        $no_stock = 0;
+        $no_price = 0;
+        foreach ($list as $k => $v) {
+            if ($v['sales_num'] <= 0) {
+                $no_skus[] = $v['sku'];
+                $no_stock += $skus[$v['sku']]['stock'];
+                $no_price += ($skus[$v['sku']]['purchase_price'] * $skus[$v['sku']]['stock']);
+
+                file_put_contents('/www/wwwroot/mojing/runtime/log/test.log', $v['sku'] . "\r\n", FILE_APPEND);
+                file_put_contents('/www/wwwroot/mojing/runtime/log/test01.log', $skus[$v['sku']]['purchase_price'] . "\r\n", FILE_APPEND);
+                file_put_contents('/www/wwwroot/mojing/runtime/log/test02.log', $skus[$v['sku']]['stock'] . "\r\n", FILE_APPEND);
+            }
+        }
+    }
+
+    public function test01()
+    {
+        ini_set('memory_limit', '1024M');
+        $order_number = [
+            '300044240',
+            '100170426',
+            '430241086',
+            '400407633',
+            '600124518',
+            '400405208',
+            '400421840',
+            '430241392',
+            '430239894',
+            '300044838',
+            '430238662',
+            '130079685',
+            '400426660',
+            '430241392',
+            '400405208',
+            '400407633',
+            '400426660'
+        ];
+        $order = new \app\admin\model\order\order\NewOrder();
+        $lists = $order->where(['increment_id' => ['in', $order_number]])->select();
+        $this->_new_order_process = new \app\admin\model\order\order\NewOrderProcess();
+        $this->model = new \app\admin\model\order\order\NewOrderItemProcess();
+
+
+        //站点列表
+        $site_arr = [
+            1 => [
+                'name' => 'zeelool',
+                'obj' => new \app\admin\model\order\printlabel\Zeelool,
+            ],
+            2 => [
+                'name' => 'voogueme',
+                'obj' => new \app\admin\model\order\printlabel\Voogueme,
+            ],
+            3 => [
+                'name' => 'nihao',
+                'obj' => new \app\admin\model\order\printlabel\Nihao,
+            ],
+            4 => [
+                'name' => 'weseeoptical',
+                'obj' => new \app\admin\model\order\printlabel\Weseeoptical,
+            ],
+            5 => [
+                'name' => 'meeloog',
+                'obj' => new \app\admin\model\order\printlabel\Meeloog,
+            ],
+            9 => [
+                'name' => 'zeelool_es',
+                'obj' => new \app\admin\model\order\printlabel\ZeeloolEs,
+            ],
+            10 => [
+                'name' => 'zeelool_de',
+                'obj' => new \app\admin\model\order\printlabel\ZeeloolDe,
+            ],
+            11 => [
+                'name' => 'zeelool_jp',
+                'obj' => new \app\admin\model\order\printlabel\ZeeloolJp,
+            ]
+        ];
+
+        foreach ($lists as $key => $v) {
+
+            //获取已质检旧数据
+            $list = $site_arr[$v['site']]['obj']
+                ->field('entity_id,increment_id,
+                custom_print_label_created_at_new,custom_print_label_person_new,
+                custom_match_frame_created_at_new,custom_match_frame_person_new,
+                custom_match_lens_created_at_new,custom_match_lens_person_new,
+                custom_match_factory_created_at_new,custom_match_factory_person_new,
+                custom_match_delivery_created_at_new,custom_match_delivery_person_new
+               ')
+                ->where([
+                    'entity_id' => $v['entity_id'],
+                ])
+                ->select();
+            $list = collection($list)->toArray();
+            if ($list) {
+                foreach ($list as $value) {
+
+                    dump($value);
+                    //主单业务表：fa_order_process：check_status=审单状态、check_time=审单时间、combine_status=合单状态、combine_time=合单状态
+                    $do_time = strtotime($value['custom_match_delivery_created_at_new']) + 28800;
+                    $this->_new_order_process->where(['entity_id' => $value['entity_id'], 'site' => $v['site']])
+                        ->update(
+                            ['check_status' => 1, 'check_time' => $do_time, 'combine_status' => 1, 'combine_time' => $do_time]
+                        );
+
+
+                    dump(111);
+                    //获取子单表id集
+                    $item_process_ids = $this->model->where(['magento_order_id' => $value['entity_id'], 'site' => $v['site']])->column('id');
+                    dump($item_process_ids);
+                    if ($item_process_ids) {
+                        //子单表：fa_order_item_process：distribution_status=配货状态
+                        $this->model->where(['id' => ['in', $item_process_ids]])
+                            ->update(
+                                ['distribution_status' => 9]
+                            );
+
+                        /**配货日志 Start*/
+                        //打印标签
+                        if ($value['custom_print_label_created_at_new']) {
+                            DistributionLog::record(
+                                (object)['nickname' => $value['custom_print_label_person_new']], //操作人
+                                $item_process_ids, //子单ID
+                                1, //操作类型
+                                '标记打印完成', //备注
+                                strtotime($value['custom_print_label_created_at_new']) //操作时间
+                            );
+                        }
+
+                        //配货
+                        if ($value['custom_match_frame_created_at_new']) {
+                            DistributionLog::record(
+                                (object)['nickname' => $value['custom_match_frame_person_new']], //操作人
+                                $item_process_ids, //子单ID
+                                2, //操作类型
+                                '配货完成', //备注
+                                strtotime($value['custom_match_frame_created_at_new']) //操作时间
+                            );
+                        }
+
+                        //配镜片
+                        if ($value['custom_match_lens_created_at_new']) {
+                            DistributionLog::record(
+                                (object)['nickname' => $value['custom_match_lens_person_new']], //操作人
+                                $item_process_ids, //子单ID
+                                3, //操作类型
+                                '配镜片完成', //备注
+                                strtotime($value['custom_match_lens_created_at_new']) //操作时间
+                            );
+                        }
+
+                        //加工
+                        if ($value['custom_match_factory_created_at_new']) {
+                            DistributionLog::record(
+                                (object)['nickname' => $value['custom_match_factory_person_new']], //操作人
+                                $item_process_ids, //子单ID
+                                4, //操作类型
+                                '加工完成', //备注
+                                strtotime($value['custom_match_factory_created_at_new']) //操作时间
+                            );
+
+                            //成品质检
+                            DistributionLog::record(
+                                (object)['nickname' => $value['custom_match_factory_person_new']], //操作人
+                                $item_process_ids, //子单ID
+                                6, //操作类型
+                                '成品质检完成', //备注
+                                strtotime($value['custom_match_factory_created_at_new']) //操作时间
+                            );
+                        }
+
+                        //合单
+                        if ($value['custom_match_delivery_created_at_new']) {
+                            DistributionLog::record(
+                                (object)['nickname' => $value['custom_match_delivery_person_new']], //操作人
+                                $item_process_ids, //子单ID
+                                7, //操作类型
+                                '合单完成', //备注
+                                strtotime($value['custom_match_delivery_created_at_new']) //操作时间
+                            );
+
+                            //审单
+                            DistributionLog::record(
+                                (object)['nickname' => $value['custom_match_delivery_person_new']], //操作人
+                                $item_process_ids, //子单ID
+                                8, //操作类型
+                                '审单完成', //备注
+                                strtotime($value['custom_match_delivery_created_at_new']) //操作时间
+                            );
+                        }
+                        /**配货日志 End*/
+
+                        $handle += 1;
+                    }
+                    echo 'id:' . $value['entity_id'] . '站点' . $key . 'ok';
+                }
+            }
+        }
     }
 }
