@@ -136,11 +136,12 @@ class StockHouse extends Backend
             $this->error(__('Parameter %s can not be empty', ''));
         }
         $this->view->assign("type", $type);
-        $arr = [];
-        $kuweihao = $this->shelf_number1();
-        foreach ($kuweihao as $k=>$v){
-            $arr[$v] = $v;
-        }
+//        $arr = [];
+//        $kuweihao = $this->shelf_number1();
+//        foreach ($kuweihao as $k=>$v){
+//            $arr[$v] = $v;
+//        }
+        $arr =['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
         $this->assign('shelf_number',$arr);
         return $this->view->fetch();
     }
@@ -208,11 +209,12 @@ class StockHouse extends Backend
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
-        $arr = [];
-        $kuweihao = $this->shelf_number1();
-        foreach ($kuweihao as $k=>$v){
-            $arr[$v] = $v;
-        }
+//        $arr = [];
+//        $kuweihao = $this->shelf_number1();
+//        foreach ($kuweihao as $k=>$v){
+//            $arr[$v] = $v;
+//        }
+        $arr =['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
         $this->assign('shelf_number',$arr);
         $this->view->assign("type", $type);
         $this->view->assign("row", $row);
