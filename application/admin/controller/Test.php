@@ -2000,7 +2000,6 @@ class Test extends Backend
                         //主单业务表：fa_order_process：check_status=审单状态、check_time=审单时间、combine_status=合单状态、combine_time=合单状态
                         $do_time = strtotime($value['custom_match_delivery_created_at_new']) + 28800;
                         $this->_new_order_process
-                            ->allowField(true)
                             ->save(
                                 ['check_status' => 1, 'check_time' => $do_time, 'combine_status' => 1, 'combine_time' => $do_time],
                                 ['entity_id' => $value['entity_id'], 'site' => $v['site']]
@@ -2011,7 +2010,6 @@ class Test extends Backend
                         if ($item_process_ids) {
                             //子单表：fa_order_item_process：distribution_status=配货状态
                             $this->model
-                                ->allowField(true)
                                 ->save(
                                     ['distribution_status' => 9],
                                     ['id' => ['in', $item_process_ids]]
