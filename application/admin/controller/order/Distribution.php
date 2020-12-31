@@ -194,6 +194,7 @@ class Distribution extends Backend
             $item_process_ids = [];
 
             //跟单或筛选异常
+
             if ($filter['abnormal'] || 8 == $label) {
                 //异常类型
                 if ($filter['abnormal']) {
@@ -205,11 +206,16 @@ class Distribution extends Backend
                 if (8 == $label) {
                     $abnormal_where['status'] = 1;
                 }
+                //获取异常的子订单id
                 $item_process_ids = $this->_distribution_abnormal
                     ->where($abnormal_where)
                     ->column('item_process_id');
-            }
+               
+                if ($item_process_ids ==null){
+                    $map['a.id'] = ['eq',null];
+                }
 
+            };
             //筛选库位号
             if ($filter['stock_house_num']) {
                 if (8 == $label) { //跟单
