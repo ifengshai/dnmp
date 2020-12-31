@@ -388,6 +388,7 @@ class ItWebDemand extends Backend
 //            ->field($field)
             ->select();
         $list = collection($list)->toArray();
+
         foreach ($list as $k => $v) {
             $user_detail = $this->auth->getUserInfo($list[$k]['entry_user_id']);
             $web_designer_user_id = $this->auth->getUserInfo($list[$k]['web_designer_user_id']);
@@ -398,15 +399,16 @@ class ItWebDemand extends Backend
             //获取各组负责人
             $list[$k]['web_designer_user_name'] = '';
             if ($v['web_designer_user_id']) {
-                //获取php组长&组员
+                //获取前端组长&组员
                 $web_userid_arr = explode(',', $v['web_designer_user_id']);
                 $web_users = Db::name("admin")
                     ->whereIn("id", $web_userid_arr)
                     ->column('nickname', 'id');
+
                 if (!empty($web_users)){
                     $list[$k]['web_designer_user_name'] = implode(',',$web_users);
                 }else{
-                    $list[$k]['web_designer_user_name'] = $web_users;
+                    $list[$k]['web_designer_user_name'] = '';
                 }
 
             }
@@ -421,7 +423,7 @@ class ItWebDemand extends Backend
                 if (!empty($php_users)){
                     $list[$k]['php_user_name'] = implode(',',$php_users);
                 }else{
-                    $list[$k]['php_user_name'] = $php_users;
+                    $list[$k]['php_user_name'] = '';
                 }
             }
 
@@ -435,7 +437,7 @@ class ItWebDemand extends Backend
                 if (!empty($app_users)){
                     $list[$k]['app_user_name'] = implode(',',$app_users);
                 }else{
-                    $list[$k]['app_user_name'] = $app_users;
+                    $list[$k]['app_user_name'] = '';
                 }
             }
             //站点
@@ -543,68 +545,66 @@ class ItWebDemand extends Backend
                 $list[$k]['pm_audit_status'] ='是';
             }
             if ($v['secondary_operation'] !== 2){
-                $list[$k]['secondary_operation'] ='否';
-
-
+                $list[$k]['pm_audit_status'] ='否';
             }else{
-                $list[$k]['secondary_operation'] ='是';
+                $list[$k]['pm_audit_status'] ='是';
             }
         }
-
 
         //从数据库查询需要的数据
         $spreadsheet = new Spreadsheet();
 
+
         //常规方式：利用setCellValue()填充数据
         $spreadsheet
-            ->setActiveSheetIndex(0)->setCellValue("A1", "创建时间")
-//                ->setCellValue("B1", "站点")
-//                ->setCellValue("C1", "提出人");
-//            $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "任务类型")
-//                ->setCellValue("E1", "功能模块")
-//                ->setCellValue("F1", "标题")
-//                ->setCellValue("A1", "创建时间")
-            ->setCellValue("B1", "产品审核通过时间")
-            ->setCellValue("C1", "开发责任人")
-            ->setCellValue("D1", "计划完成时间")
-            ->setCellValue("E1", "实际开发完成时间")
-            ->setCellValue("F1", "需求上线时间")
-            ->setCellValue("G1", "前端预期难易度")
-            ->setCellValue("H1", "是否存在二次修改需求")
-            ->setCellValue("I1", "是否需要前端")
-            ->setCellValue("J1", "是否需要测试")
+            ->setActiveSheetIndex(0)->setCellValue("A1", "需求ID")
+            ->setCellValue("B1", "站点")
+            ->setCellValue("C1", "提出人");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "任务类型")
+            ->setCellValue("E1", "功能模块")
+            ->setCellValue("F1", "标题")
+            ->setCellValue("G1", "创建时间")
+            ->setCellValue("H1", "产品审核通过时间")
+            ->setCellValue("I1", "开发责任人")
+            ->setCellValue("J1", "计划完成时间")
+            ->setCellValue("K1", "实际开发完成时间")
+            ->setCellValue("L1", "需求上线时间")
+            ->setCellValue("M1", "前端预期难易度")
+//                ->setCellValue("H1", "是否存在二次修改需求")
+            ->setCellValue("N1", "是否需要前端")
+            ->setCellValue("O1", "是否需要测试")
 //                ->setCellValue("Q1", "是否超时")
 //                ->setCellValue("R1", "是否拒绝")
 //                ->setCellValue("S1", "是否存在过pending")
-            ->setCellValue("K1", "前端负责人")
-            ->setCellValue("L1", "后端负责人")
-            ->setCellValue("M1", "APP负责人");
+            ->setCellValue("P1", "前端负责人")
+            ->setCellValue("Q1", "后端负责人")
+            ->setCellValue("R1", "APP负责人");
         foreach ($list as $key => $value) {
-//                $spreadsheet->getActiveSheet()->setCellValueExplicit("A" . ($key * 1 + 2), $value['id'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-//                $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['site']);
-//                $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['entry_user_name']);
-//                $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['site_type']);
-//                $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['functional_module']);
-//                $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['title']);
-            $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), $value['create_time']);
-            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['pm_confirm_time']);
-            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['copy_to_user_id']);
-            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['node_time']);
-            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['develop_finish_time']);
+            $spreadsheet->getActiveSheet()->setCellValueExplicit("A" . ($key * 1 + 2), $value['id'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['site']);
+            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['entry_user_name']);
+            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['site_type']);
+            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['functional_module']);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['title']);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['create_time']);
+            $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['pm_confirm_time']);
+            $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), $value['copy_to_user_id']);
+            $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 1 + 2), $value['node_time']);
+            $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 1 + 2), $value['develop_finish_time']);
             //测试确认时间
-            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['test_confirm_time']);
-            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['web_designer_complexity']);
+            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 1 + 2), $value['test_confirm_time']);
+            $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 1 + 2), $value['web_designer_complexity']);
 
-            $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['secondary_operation']);
+//                $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), '否');
 
-            $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), $value['web_designer_group']);
-            $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 1 + 2), $value['test_group']);
+            $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 1 + 2), $value['web_designer_group']);
+            $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 1 + 2), $value['test_group']);
 //                $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 1 + 2), $value['overtime']);
 //                $spreadsheet->getActiveSheet()->setCellValue("R" . ($key * 1 + 2), $value['web_remarks']);
 //                $spreadsheet->getActiveSheet()->setCellValue("S" . ($key * 1 + 2), $value['pm_audit_status']);
-            $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 1 + 2), $value['web_designer_user_name']);
-            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 1 + 2), $value['php_user_name']);
-            $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 1 + 2), $value['app_user_name']);
+            $spreadsheet->getActiveSheet()->setCellValue("P" . ($key * 1 + 2), $value['web_designer_user_name']);
+            $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 1 + 2), $value['php_user_name']);
+            $spreadsheet->getActiveSheet()->setCellValue("R" . ($key * 1 + 2), $value['app_user_name']);
 
         }
 
@@ -637,11 +637,11 @@ class ItWebDemand extends Backend
         $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
         $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
 
-        $spreadsheet->getActiveSheet()->getStyle('A1:M' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle('A1:R' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         $spreadsheet->setActiveSheetIndex(0);
 
         $format = 'xlsx';
-        $savename = '十二月份网站RDC需求' . date("YmdHis", time());;
+        $savename = '十二月份网站需求' . date("YmdHis", time());;
 
         if ($format == 'xls') {
             //输出Excel03版本

@@ -359,7 +359,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
             $('.btn-creat-work-order').click(function () {
                 var ids = Table.api.selectedids(table);
                 Layer.confirm(
-                    __('确定要为这%s条记录创建工单吗?', ids.length),
+                    __('确定要%s创建工单吗?', ids.length?'为这'+ids.length+'条记录':''),
                     { icon: 3, title: __('Warning'), shadeClose: true },
                     function (index) {
                         Layer.close(index);
