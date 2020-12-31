@@ -1991,12 +1991,10 @@ class Test extends Backend
                     'entity_id' => $v['entity_id'],
                 ])
                 ->select();
-
-            $count = count($list);
-            $handle = 0;
             if ($list) {
                 foreach ($list as $value) {
 
+                    dump($value);
                     //主单业务表：fa_order_process：check_status=审单状态、check_time=审单时间、combine_status=合单状态、combine_time=合单状态
                     $do_time = strtotime($value['custom_match_delivery_created_at_new']) + 28800;
                     $this->_new_order_process->where(['entity_id' => $value['entity_id'], 'site' => $v['site']])
