@@ -1817,30 +1817,32 @@ class Distribution extends Backend
     public function add()
     {
         $ids = input('id_params/a'); //子单ID
-        !$ids && $this->error('请选择要创建工单的数据');
+        //!$ids && $this->error('请选择要创建工单的数据');
+        if ($ids) {
 
-        //获取子单号
-        $item_process_numbers = $this->model->where(['id' => ['in', $ids]])->column('item_order_number');
-        !$item_process_numbers && $this->error('子单不存在');
+            //获取子单号
+            $item_process_numbers = $this->model->where(['id' => ['in', $ids]])->column('item_order_number');
+            !$item_process_numbers && $this->error('子单不存在');
 
-        //判断子单是否为同一主单
-        $order_id = $this->model
-            ->alias('a')
-            ->join(['fa_order' => 'b'], 'a.order_id=b.id')
-            ->where(['a.id' => ['in', $ids]])
-            ->column('b.increment_id');
-        !$order_id && $this->error('订单不存在');
-        $order_id = array_unique(array_filter($order_id)); //数组去空、去重
-        1 < count($order_id) && $this->error('所选子订单的主单不唯一');
+            //判断子单是否为同一主单
+            $order_id = $this->model
+                ->alias('a')
+                ->join(['fa_order' => 'b'], 'a.order_id=b.id')
+                ->where(['a.id' => ['in', $ids]])
+                ->column('b.increment_id');
+            !$order_id && $this->error('订单不存在');
+            $order_id = array_unique(array_filter($order_id)); //数组去空、去重
+            1 < count($order_id) && $this->error('所选子订单的主单不唯一');
 
-        //检测是否有未处理工单
-        $check_work_order = $this->_work_order_list
-            ->where([
-                'work_status' => ['in', [1, 2, 3, 5]],
-                'platform_order' => $order_id[0]
-            ])
-            ->value('id');
-        $check_work_order && $this->error('当前订单有未完成工单，不可创建工单');
+            //检测是否有未处理工单
+            $check_work_order = $this->_work_order_list
+                ->where([
+                    'work_status' => ['in', [1, 2, 3, 5]],
+                    'platform_order' => $order_id[0]
+                ])
+                ->value('id');
+            $check_work_order && $this->error('当前订单有未完成工单，不可创建工单');
+        }
 
         //调用创建工单接口
         //saleaftermanage/work_order_list/add?order_number=123&order_item_numbers=35456,23465,1111
@@ -1848,7 +1850,11 @@ class Distribution extends Backend
         $url_domain = $request->domain();
         $url_root = $request->root();
         $url = $url_domain . $url_root;
-        $url = $url . '/saleaftermanage/work_order_list/add?order_number=' . $order_id[0] . '&order_item_numbers=' . implode(',', $item_process_numbers);
+        if ($ids) {
+            $url = $url . '/saleaftermanage/work_order_list/add?order_number=' . $order_id[0] . '&order_item_numbers=' . implode(',', $item_process_numbers);
+        }else{
+            $url = $url . '/saleaftermanage/work_order_list/add';
+        }
         //http://www.mojing.cn/admin_1biSSnWyfW.php/saleaftermanage/work_order_list/add?order_number=859063&order_item_numbers=430224120-03,430224120-04
         $this->success('跳转!', '', ['url' => $url], 200);
     }
