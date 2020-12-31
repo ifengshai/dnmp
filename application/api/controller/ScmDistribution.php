@@ -2,6 +2,7 @@
 
 namespace app\api\controller;
 
+use app\admin\model\platformManage\MagentoPlatform;
 use app\admin\model\saleaftermanage\WorkOrderChangeSku;
 use app\admin\model\saleaftermanage\WorkOrderMeasure;
 use app\admin\model\StockLog;
@@ -1547,6 +1548,7 @@ class ScmDistribution extends Scm
         $type = $this->request->request("type") ?? 1;
         $start_time = $this->request->request('start_time');
         $end_time = $this->request->request('end_time');
+        $site = $this->request->request('site');
         $page = $this->request->request('page');
         $page_size = $this->request->request('page_size');
         empty($page) && $this->error(__('Page can not be empty'), [], 520);
@@ -1578,6 +1580,9 @@ class ScmDistribution extends Scm
             }
             if ($start_time && $end_time) {
                 $where['combine_time'] = ['between', [strtotime($start_time), strtotime($end_time)]];
+            }
+            if ($site){
+                $where['site'] =  ['=', $site];
             }
             $list = $this->_new_order_process
                 ->where($where)
@@ -1626,7 +1631,10 @@ class ScmDistribution extends Scm
             }
         }
 
-        $this->success('', ['list' => $list], 200);
+        $this->_magento_platform = new MagentoPlatform();
+        $platform_list = $this->_magento_platform->field('id, name')->where(['is_del' => 1, 'status' => 1])->select();
+
+        $this->success('', ['list' => $list,'platform_list' => $platform_list], 200);
     }
 
     /**
