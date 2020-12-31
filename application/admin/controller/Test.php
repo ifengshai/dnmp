@@ -2108,11 +2108,11 @@ class Test extends Backend
     {
         $item = new \app\admin\model\itemmanage\Item();
         $purchase = new \app\admin\model\purchase\PurchaseOrder();
-        
+
         $list = $item->where(['is_open' => 1, 'is_del' => 1, 'wait_instock_num' => ['<>', 0]])->select();
         $params = [];
-        foreach($list as $k => $v) {
-            $purchase_num = $purchase->alias('a')->where(['purchase_status' => 7,'stock_status' => 0,'b.sku' => $v['sku']])->join(['fa_purchase_order_item' => 'b'])->sum('purchase_num');
+        foreach ($list as $k => $v) {
+            $purchase_num = $purchase->alias('a')->where(['purchase_status' => 7, 'stock_status' => 0, 'b.sku' => $v['sku']])->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')->sum('purchase_num');
             $params[$k]['id'] = $v['id'];
             $params[$k]['wait_instock_num'] = $purchase_num;
         }
