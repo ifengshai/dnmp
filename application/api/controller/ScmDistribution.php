@@ -1106,12 +1106,12 @@ class ScmDistribution extends Scm
             $this->_item->startTrans();
             $this->_item_platform_sku->startTrans();
             $this->_stock_log->startTrans();
+            $this->_product_bar_code_item->startTrans();
             try {
                 $save_data['distribution_status'] = $status;
                 //如果回退到待加工步骤之前，清空定制片库位ID及定制片处理状态
                 if (4 > $status) {
                     $save_data['temporary_house_id'] = 0;
-
                     $save_data['customize_status'] = 0;
                 }
 
@@ -1120,6 +1120,14 @@ class ScmDistribution extends Scm
                     ->allowField(true)
                     ->isUpdate(true, ['id' => $item_process_info['id']])
                     ->save($save_data);
+
+                //回退到待配货，解绑条形码
+                if (2 == $status) {
+                    $this->_product_bar_code_item
+                        ->allowField(true)
+                        ->isUpdate(true, ['item_order_number' => $item_order_number])
+                        ->save(['item_order_number' => '']);
+                }
 
                 //质检拒绝：镜架报损，扣减可用库存、配货占用、总库存、虚拟仓库存
                 if (2 == $reason) {
@@ -1180,23 +1188,27 @@ class ScmDistribution extends Scm
                 $this->_item->commit();
                 $this->_item_platform_sku->commit();
                 $this->_stock_log->commit();
+                $this->_product_bar_code_item->commit();
             } catch (ValidateException $e) {
                 $this->_new_order_item_process->rollback();
                 $this->_item->rollback();
                 $this->_item_platform_sku->rollback();
                 $this->_stock_log->rollback();
+                $this->_product_bar_code_item->rollback();
                 $this->error($e->getMessage(), [], 406);
             } catch (PDOException $e) {
                 $this->_new_order_item_process->rollback();
                 $this->_item->rollback();
                 $this->_item_platform_sku->rollback();
                 $this->_stock_log->rollback();
+                $this->_product_bar_code_item->rollback();
                 $this->error($e->getMessage(), [], 407);
             } catch (Exception $e) {
                 $this->_new_order_item_process->rollback();
                 $this->_item->rollback();
                 $this->_item_platform_sku->rollback();
                 $this->_stock_log->rollback();
+                $this->_product_bar_code_item->rollback();
                 $this->error($e->getMessage(), [], 408);
             }
             $this->success('操作成功', [], 200);
@@ -1864,6 +1876,12 @@ class ScmDistribution extends Scm
                             'temporary_house_id' => 0,
                             'customize_status' => 0
                         ]);
+
+                    //回退到待配货，解绑条形码
+                    $this->_product_bar_code_item
+                        ->allowField(true)
+                        ->isUpdate(true, ['item_order_number' => ['in', $item_order_numbers]])
+                        ->save(['out_stock_time' => null, 'library_status' => 1, 'item_order_number' => '']);
 
                     //非指定子单回退到待合单
                     $this->_new_order_item_process

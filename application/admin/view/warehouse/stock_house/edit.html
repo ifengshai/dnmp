@@ -3,7 +3,11 @@
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('货架号')}:</label>
         <div class="col-xs-12 col-sm-8">
-            {:build_select('row[shelf_number]', $shelf_number ,$row['shelf_number'], ['class'=>'form-control selectpicker', 'data-live-search' => true])}
+           <select class="form-control" name="row[shelf_number]">
+                {volist name="shelf_number" id="vo"}
+                <option value="{$vo}" {if condition="$row.shelf_number eq $vo"}selected{/if} >{$vo}</option>
+                {/volist}
+            </select>
         </div>
     </div>
     <input id="c-type" class="form-control" name="row[type]" type="hidden" value="{$type}">
