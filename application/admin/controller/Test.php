@@ -1937,7 +1937,7 @@ class Test extends Backend
             '400426660'
         ];
         $order = new \app\admin\model\order\order\NewOrder();
-        $list = $order->where(['increment_id' => ['in', $order_number]])->select();
+        $lists = $order->where(['increment_id' => ['in', $order_number]])->select();
 
 
         //站点列表
@@ -1976,7 +1976,7 @@ class Test extends Backend
             ]
         ];
 
-        foreach ($list as $key => $v) {
+        foreach ($lists as $key => $v) {
 
             //获取已质检旧数据
             $list = $site_arr[$v['site']]['obj']
