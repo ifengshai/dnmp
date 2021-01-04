@@ -261,13 +261,13 @@
     {/in}
     {if condition="($is_shendan['check_status'] == 1)"}
     <li>
-        <span>{:date('Y-m-d h:i:s',$is_shendan['delivery_time'])}</span>
+        <span>{:date('Y-m-d H:i:s',$is_shendan['delivery_time'])}</span>
         <div>
             <p>已出库</p>
         </div>
     </li>
     <li>
-        <span>{:date('Y-m-d h:i:s',$is_shendan['check_time'])}</span>
+        <span>{:date('Y-m-d H:i:s',$is_shendan['check_time'])}</span>
         <div>
             <p>已审单</p>
         </div>
@@ -356,7 +356,7 @@
             <p>sku:{$key}</p>
             {volist name="vo" id="vv"}
             <div>
-                <p>{$vv.remark} {:date('Y-m-d h:i:s', $vv.create_time)} 处理人：{$vv.create_person}</p>
+                <p>{$vv.remark} {:date('Y-m-d H:i:s', $vv.create_time)} 处理人：{$vv.create_person}</p>
             </div>
             {/volist}
             {/volist}
@@ -366,7 +366,7 @@
 
     {if condition="(!empty($distribution_log))"}
     <li>
-        <span>{:date('Y-m-d h:i:s',$distribution_log_times[0])}</span>
+        <span>{:date('Y-m-d H:i:s',$distribution_log_times[0])}</span>
         <div>
             <p>已打印标签</p>
         </div>
