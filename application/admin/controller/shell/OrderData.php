@@ -195,7 +195,7 @@ class OrderData extends Backend
                                     $params['created_at'] = strtotime($v['created_at']) + 28800;
                                     $params['updated_at'] = strtotime($v['updated_at']) + 28800;
                                     if (isset($v['payment_time'])) {
-                                        $params['payment_time'] = strtotime($v['payment_time']) + 28800;
+                                        $params['payment_time'] = (int)strtotime($v['payment_time']) + 28800;
                                     }
                                    
                                     //插入订单主表
