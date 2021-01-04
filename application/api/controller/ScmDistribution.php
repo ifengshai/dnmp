@@ -1299,10 +1299,10 @@ class ScmDistribution extends Scm
             //未合单，首次扫描
             if (!$order_process_info['store_house_id']) {
                 //主单中无库位号，首个子单进入时，分配一个合单库位给PDA，暂不占用根据是否确认放入合单架占用或取消
-                $store_house_info = $this->_stock_house->field('id,coding,subarea')->where(['status' => 1, 'type' => 2, 'occupy' => 0])->find();
+                $store_house_info = $this->_stock_house->field('id,coding,subarea')->where(['status' => 1, 'type' => 2, 'occupy' => 0,  'fictitious_occupy_time' => ['<',$fictitious_time]])->find();
                 empty($store_house_info) && $this->error(__('合单失败，合单库位已用完，请添加后再操作'), [], 403);
                 //绑定预占用库存和有效时间
-                $this->_stock_house->where(['id' => $store_house_info['id']])->update(['fictitious_occupy_time' => time()+600,'order_id' => $item_process_info['order_id']]);
+                $this->_stock_house->where(['id' => $store_house_info['id']])->update(['fictitious_occupy_time' => $fictitious_time+600,'order_id' => $item_process_info['order_id']]);
             } else {
                 //主单已绑定合单库位,根据ID查询库位信息
                 $store_house_info = $this->_stock_house->field('id,coding,subarea')->where('id', $order_process_info['store_house_id'])->find();
