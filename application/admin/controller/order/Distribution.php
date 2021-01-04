@@ -225,7 +225,7 @@ class Distribution extends Backend
             }
             if ($label ==0){
                 if (!$filter['status']) {
-                    $map['b.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal']];
+                    $map['b.status'] = ['in', ['processing', 'free_processing', 'paypal_reversed', 'creditcard_proccessing','paypal_canceled_reversal','complete']];
                     $WhereSql .= "  and b.status in ('processing','free_processing','paypal_reversed','creditcard_proccessing','paypal_canceled_reversal','complete')";
                 }else{
                     $map['b.status'] = ['in', $filter['status']];
