@@ -198,6 +198,7 @@ class OrderData extends Backend
                                     if (isset($v['payment_time'])) {
                                         $params['payment_time'] = (int)strtotime($v['payment_time']) + 28800;
                                     }
+                                    dump($params['payment_time']);
                                    
                                     //插入订单主表
                                     $order_id = $this->order->insertGetId($params);
@@ -241,7 +242,7 @@ class OrderData extends Backend
                                     if (isset($v['payment_time'])) {
                                         $params['payment_time'] = (int)strtotime($v['payment_time']) + 28800;
                                     }
-
+                                    dump($params['payment_time']);
                                     $this->order->where(['entity_id' => $v['entity_id'], 'site' => $site])->update($params);
                                 }
                             }
