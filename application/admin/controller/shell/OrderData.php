@@ -138,6 +138,7 @@ class OrderData extends Backend
                                     $site = 11;
                                     break;
                             }
+                            dump($payload['database']);
                             //主表
                             if ($payload['type'] == 'INSERT' && $payload['table'] == 'sales_flat_order') {
                                 $order_params = [];
@@ -162,6 +163,9 @@ class OrderData extends Backend
                                         $this->orderitemoption->where('site=' . $site . ' and order_id=' . $order_ids2)->delete();
                                         $this->orderitemprocess->where('site=' . $site . ' and order_id=' . $order_ids2)->delete();
                                     }
+
+                                    dump($order_ids);
+                                    dump($order_ids2);
 
 
                                     $params = [];
