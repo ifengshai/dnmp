@@ -464,7 +464,6 @@ class Distribution extends Backend
 
         $filter = json_decode($this->request->get('filter'), true);
         $data = input('');
-
         if ($data['ids']){
             $where['a.id'] = ['in',$data['ids']];
         }else{
@@ -505,6 +504,7 @@ class Distribution extends Backend
             $where['b.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
         }
 
+
         //订单里面所有的
         $list = $this->model
             ->alias('a')
@@ -515,6 +515,7 @@ class Distribution extends Backend
             ->select();
 
         $list = collection($list)->toArray();
+
         $sku = array();
         foreach ($list as $k => $v) {
             $item_platform_sku = Db::connect('database.db_stock');
@@ -548,6 +549,7 @@ class Distribution extends Backend
                 }
             }
         }
+        $sku = array_unique($sku, SORT_REGULAR);
         $spreadsheet = new Spreadsheet();
         //常规方式：利用setCellValue()填充数据
         $spreadsheet
