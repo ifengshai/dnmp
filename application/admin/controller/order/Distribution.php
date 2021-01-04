@@ -549,7 +549,7 @@ class Distribution extends Backend
                 }
             }
         }
-        $sku = array_unique($sku, SORT_REGULAR);
+        $sku =array_merge(array_unique($sku, SORT_REGULAR));
         $spreadsheet = new Spreadsheet();
         //常规方式：利用setCellValue()填充数据
         $spreadsheet
