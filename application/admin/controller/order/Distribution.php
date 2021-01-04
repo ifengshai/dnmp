@@ -474,7 +474,7 @@ class Distribution extends Backend
         if ($filter['ids']){
             $where['id'] = ['in',$filter['ids']];
         }else{
-            $where['distribution_status'] = 5;
+            $where['distribution_status'] = 1;
         }
         //子订单号
         if ($filter['item_order_number']){
