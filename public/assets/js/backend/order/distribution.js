@@ -152,7 +152,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             field: 'work_status', title: __('工单状态'), addClass: 'selectpicker', data: 'multiple',
                             searchList: {
                                 1: __('新建'),
-                                2: __('带审核'),
+                                2: __('待审核'),
                                 3: __('待处理'),
                                 5: __('部分处理')
                             }, operate: 'IN',visible:false 
