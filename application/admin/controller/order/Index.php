@@ -402,6 +402,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
             $distribution_log[$v['sku']] = Db::name('distribution_log')->where('item_process_id',$v['id'])->select();
         }
 
+
         $new_order_item_process_id1 =array_column($new_order_item_process_id, 'id');
         $distribution_log_times = Db::name('distribution_log')
             ->where('item_process_id','in',$new_order_item_process_id1)
@@ -417,6 +418,9 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
 
         $id = $this->request->get('id');
         $label = $this->request->get('label', 1);
+        dump($distribution_log);
+        dump($distribution_log_times);
+        dump($key_list);
 
         $this->view->assign(compact('order_number', 'id', 'label'));
         $this->view->assign("list", $new_ruleList);
