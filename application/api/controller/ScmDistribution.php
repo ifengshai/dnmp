@@ -1631,8 +1631,8 @@ class ScmDistribution extends Scm
             }
         }
 
-        $this->_magento_platform = new MagentoPlatform();
-        $platform_list = $this->_magento_platform->field('id, name')->where(['is_del' => 1, 'status' => 1])->select();
+        $magento_platform = new MagentoPlatform();
+        $platform_list = $magento_platform->field('id, name')->where(['is_del' => 1, 'status' => 1])->select();
 
         $this->success('', ['list' => $list,'platform_list' => $platform_list], 200);
     }
