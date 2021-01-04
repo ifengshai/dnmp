@@ -6,6 +6,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
         //隐藏、显示搜索及按钮
         $('#stock_house_num').parents('.form-group').hide();
         $('select[name="abnormal"]').parents('.form-group').hide();
+        $('select[name="work_status"]').parents('.form-group').hide();
+        $('select[name="work_type"]').parents('.form-group').hide();
         $('.btn-distribution').addClass('hide');
         if(0 == value){
             $('select[name="abnormal"]').parents('.form-group').show();
@@ -35,6 +37,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
             // $('.btn-join-complete').removeClass('hide');
         }else if(8 == value){
             $('select[name="abnormal"]').parents('.form-group').show();
+            $('select[name="work_status"]').parents('.form-group').show();
+            $('select[name="work_type"]').parents('.form-group').show();
             $('#stock_house_num').parents('.form-group').show();
             $('.btn-creat-work-order').removeClass('hide');
             $('.btn-batch-export-xls').removeClass('hide');
@@ -143,6 +147,22 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                 9: __('合单完成')
                             }, operate: 'IN',
                             formatter: Table.api.formatter.status
+                        },
+                        {
+                            field: 'work_status', title: __('工单状态'), addClass: 'selectpicker', data: 'multiple',
+                            searchList: {
+                                1: __('新建'),
+                                2: __('带审核'),
+                                3: __('待处理'),
+                                5: __('部分处理')
+                            }, operate: 'IN',visible:false 
+                        },
+                        {
+                            field: 'work_type', title: __('工单类型'),
+                            searchList: {
+                                1: __('客服工单'),
+                                2: __('仓库工单')
+                            },visible:false 
                         },
                         {
                             field: 'abnormal', title: __('处理异常'), addClass: 'selectpicker', data: 'multiple', visible:false, operate: 'IN',
