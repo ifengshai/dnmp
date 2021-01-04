@@ -27,6 +27,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
         }else if(5 == value){
             $('.btn-batch-printed').removeClass('hide');
             $('.btn-logo').removeClass('hide');
+            $('.btn-batch-export-xlsz').removeClass('hide');
         }else if(6 == value){
             $('.btn-finish-adopt').removeClass('hide');
             $('.btn-finish-refuse').removeClass('hide');
@@ -164,8 +165,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             }
                         },
                         { field: 'stock_house_num', title: __('库位号'), operate: 'LIKE' },
-                        { field: 'a.created_at', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange',visible:false  },
+                        { field: 'a.created_at', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange',visible:false},
                         { field: 'created_at', title: __('创建时间'), operate: false},
+
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate,
                             buttons: [
@@ -267,6 +269,22 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                     params = 'filter=' + filter + '&op=' + op + '&label=' + Config.label;
                 }
                 window.open(Config.moduleurl + '/order/distribution/batch_export_xls?' + params, '_blank');
+            });
+
+            //批量导出xls
+            $('.btn-batch-export-xlsz').click(function () {
+                var ids = Table.api.selectedids(table);
+                var params = '';
+                if (ids.length > 0) {
+                    params = 'ids=' + ids;
+                } else {
+                    var options = table.bootstrapTable('getOptions');
+                    var search = options.queryParams({});
+                    var filter = search.filter;
+                    var op = search.op;
+                    params = 'filter=' + filter + '&op=' + op + '&label=' + Config.label;
+                }
+                window.open(Config.moduleurl + '/order/distribution/printing_batch_export_xls?' + params, '_blank');
             });
 
             //批量打印
