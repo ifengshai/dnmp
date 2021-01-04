@@ -195,10 +195,8 @@
     <!--    /in}><span>已成品质检</span></li>-->
     <!--    <li {in name="7" value="$key_list" } class="on" {-->
     <!--    /in}><span>已出库</span></li>-->
-    <li {in name="8" value="$key_list" } class="on" {
-    /in}><span>物流上网</span></li>
-    <li {in name="10" value="$key_list" } class="on" {
-    /in}><span>运输途中</span></li>
+    <li {in name="8" value="$key_list" } class="on" {/in}><span>物流上网</span></li>
+    <li {in name="10" value="$key_list" } class="on" {/in}><span>运输途中</span></li>
 
     <?php if(in_array(30,$key_list)){ ?>
     <li class="on"><span>到达待取</span></li>
@@ -354,8 +352,8 @@
     <li>
         <span>订单加工详情</span>
         <div style="float: left;margin-top: 20px;overflow-y:auto;display: inline-block">
-            {volist name="distribution_log" id="vo" key="k"}
-            <p>sku:{$k}</p>
+            {volist name="distribution_log" id="vo"}
+            <p>sku:{$key}</p>
             {volist name="vo" id="vv"}
             <div>
                 <p>{$vv.remark} {:date('Y-m-d h:i:s', $vv.create_time)} 处理人：{$vv.create_person}</p>
