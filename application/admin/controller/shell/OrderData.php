@@ -194,12 +194,10 @@ class OrderData extends Backend
                                     $params['base_shipping_amount'] = $v['base_shipping_amount'];
                                     $params['created_at'] = strtotime($v['created_at']) + 28800;
                                     $params['updated_at'] = strtotime($v['updated_at']) + 28800;
-                                    dump($v['payment_time']);
                                     if (isset($v['payment_time'])) {
                                         $params['payment_time'] = (int)strtotime($v['payment_time']) + 28800;
                                     }
-                                    dump($params['payment_time']);
-                                   
+                                    $params['payment_time'] = $params['payment_time'] < 0 ? 0 : $params['payment_time']; 
                                     //插入订单主表
                                     $order_id = $this->order->insertGetId($params);
                                     $order_params[$k]['site'] = $site;
@@ -238,11 +236,10 @@ class OrderData extends Backend
                                     $params['mw_rewardpoint_discount'] = $v['mw_rewardpoint_discount'];
                                     $params['base_shipping_amount'] = $v['base_shipping_amount'];
                                     $params['updated_at'] = strtotime($v['updated_at']) + 28800;
-                                    dump($v['payment_time']);
                                     if (isset($v['payment_time'])) {
                                         $params['payment_time'] = (int)strtotime($v['payment_time']) + 28800;
                                     }
-                                    dump($params['payment_time']);
+                                    $params['payment_time'] = $params['payment_time'] < 0 ? 0 : $params['payment_time']; 
                                     $this->order->where(['entity_id' => $v['entity_id'], 'site' => $site])->update($params);
                                 }
                             }
