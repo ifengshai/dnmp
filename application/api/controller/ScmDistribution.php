@@ -1386,9 +1386,12 @@ class ScmDistribution extends Scm
                 $this->error(__('预占用库位信息错误'), [], 403);
             }
             //检查是否预占用
-            if ($store_house_info['fictitious_occupy_time'] < time()) {
-                $this->error(__('库位预占用超10分钟，请重新操作'), [], 403);
-            }        
+            if (empty($order_process_info['store_house_id'])) {
+               if ($store_house_info['fictitious_occupy_time'] < time()) {
+                    $this->error(__('库位预占用超10分钟，请重新操作'), [], 403);
+                }    
+            }
+                 
         }
         
 
