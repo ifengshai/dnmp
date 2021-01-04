@@ -14,6 +14,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
         }else if(1 == value){
             $('.btn-batch-printed').removeClass('hide');
             $('.btn-tag-printed').removeClass('hide');
+            $('.btn-batch-export-xlsz').removeClass('hide');
         }else if(2 == value){
             $('.btn-batch-printed').removeClass('hide');
             $('.btn-product').removeClass('hide');
@@ -27,7 +28,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
         }else if(5 == value){
             $('.btn-batch-printed').removeClass('hide');
             $('.btn-logo').removeClass('hide');
-            $('.btn-batch-export-xlsz').removeClass('hide');
+
         }else if(6 == value){
             $('.btn-finish-adopt').removeClass('hide');
             $('.btn-finish-refuse').removeClass('hide');

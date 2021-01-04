@@ -461,11 +461,14 @@ class Distribution extends Backend
      *
      */
     public function printing_batch_export_xls(){
+
         $filter = json_decode($this->request->get('filter'), true);
-        if ($filter['ids']){
-            $where['id'] = ['in',$filter['ids']];
+        $data = input('');
+
+        if ($data['ids']){
+            $where['a.id'] = ['in',$data['ids']];
         }else{
-            $where['distribution_status'] = 5;
+            $where['a.distribution_status'] = 1;
         }
         //子订单号
         if ($filter['item_order_number']){
@@ -501,6 +504,7 @@ class Distribution extends Backend
             $where['b.increment_id'] = ['like', $filter['increment_id'] . '%'];
             $where['b.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
         }
+
         //订单里面所有的
         $list = $this->model
             ->alias('a')
@@ -509,6 +513,7 @@ class Distribution extends Backend
             ->join(['fa_order_process' => 'c'], 'a.order_id=c.order_id')
             ->where($where)
             ->select();
+
         $list = collection($list)->toArray();
         $sku = array();
         foreach ($list as $k => $v) {
