@@ -142,19 +142,11 @@ class SkuDetail extends Backend
             }else{
                 $order_model = new \app\admin\model\order\order\Zeelool();
             }
-            $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+            $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
             $map['o.customer_id'] = ['>',0];
             $map['i.sku'] = $params['sku'];
             $map['o.order_type'] = 1;
-            $customer_ids = $order_model->where($map_where)->alias('o')->join('sales_flat_order_item i','o.entity_id=i.order_id')->where($map)->column('distinct o.customer_id');
-            $first_shopping_num = 0;
-            foreach ($customer_ids as $val){
-                $order_where_arr['customer_id'] = $val;
-                $is_buy = $order_model->where($order_where)->where($order_where_arr)->alias('o')->join('sales_flat_order_item i','o.entity_id=i.order_id')->where($map)->value('o.entity_id');
-                if(!$is_buy){
-                    $first_shopping_num++;
-                }
-            }
+            $first_shopping_num = $order_model->where($map_where)->alias('o')->join('sales_flat_order_item i','o.entity_id=i.order_id')->where($map)->count('distinct o.customer_id');
             //复购用户数
             //查询时间段内的订单 根据customer_id先计算出此事件段内的复购用户数
             $again_buy_num1 = $order_model->alias('o')
