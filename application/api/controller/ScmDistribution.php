@@ -2,7 +2,7 @@
 
 namespace app\api\controller;
 
-use app\admin\model\platformManage\MagentoPlatform;
+use app\admin\model\platformmanage\MagentoPlatform;
 use app\admin\model\saleaftermanage\WorkOrderChangeSku;
 use app\admin\model\saleaftermanage\WorkOrderMeasure;
 use app\admin\model\StockLog;
