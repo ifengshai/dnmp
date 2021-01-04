@@ -415,6 +415,8 @@ class ScmWarehouse extends Scm
                 ];
                 $result = $this->_out_stock->allowField(true)->save($out_stock_data, ['id' => $get_out_stock_id]);
                 $out_stock_id = $get_out_stock_id;
+
+                $this->_out_stock_item->where(['out_stock_id' => $out_stock_id])->delete();
             } else {
                 //新建提交
                 $out_stock_number = $this->request->request('out_stock_number');
@@ -463,26 +465,23 @@ class ScmWarehouse extends Scm
                     ->find();
                 if (!empty($check_quantity['code'])) throw new Exception('条形码:' . $check_quantity['code'] . ' 已绑定,请移除');
             }
+
             //批量创建或更新出库单商品
             foreach ($item_data as $key => $value) {
-                $item_save = [
-                    'out_stock_num' => $value['out_stock_num']
-                ];
-                if ($get_out_stock_id) {//更新
-                    $where = ['sku' => $value['sku'], 'out_stock_id' => $out_stock_id];
-                    $this->_out_stock_item->where($where)->update($item_save);
-                    //出库单移除条形码
-                    if (!empty($value['remove_agg'])) {
-                        $code_clear = [
-                            'out_stock_id' => 0
-                        ];
-                        $this->_product_bar_code_item->where(['code' => ['in', $value['remove_agg']]])->update($code_clear);
-                    }
-                } else {//新增
-                    $item_save['out_stock_id'] = $out_stock_id;
-                    $item_save['sku'] = $value['sku'];
-                    $this->_out_stock_item->allowField(true)->isUpdate(false)->data($item_save)->save();
+                //出库单移除条形码
+                if (!empty($value['remove_agg'])) {
+                    $this->_product_bar_code_item
+                        ->where(['code' => ['in', $value['remove_agg']]])
+                        ->update(['out_stock_id' => 0]);
                 }
+
+                //新增出库单sku数据
+                $item_save = [
+                    'out_stock_num' => $value['out_stock_num'],
+                    'out_stock_id' => $out_stock_id,
+                    'sku' => $value['sku']
+                ];
+                $this->_out_stock_item->allowField(true)->isUpdate(false)->data($item_save)->save();
 
                 //绑定条形码
                 foreach ($value['sku_agg'] as $v) {

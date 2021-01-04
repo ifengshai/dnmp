@@ -2361,7 +2361,7 @@ class TrackReg extends Backend
     public function only_ga_data_12_18()
     {
         $date_time = date('Y-m-d', strtotime("-1 day"));
-        $date_time = '2020-12-26';
+        $date_time = '2020-12-31';
 
         //z站
         $data = Db::name('datacenter_day')->where(['day_date' => $date_time, 'site' => 1])->field('order_num,new_cart_num,update_cart_num')->find();

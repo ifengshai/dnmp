@@ -378,8 +378,8 @@ class ItWebDemand extends Backend
 
     public function batch_export_xls(){
         $where['is_del'] =['eq',1];
-        $where['demand_type'] =['eq',1];
-        $where['create_time'] = ['between',['2020-12-01 00:00:00','2020-12-30 23:59:59']];
+        $where['demand_type'] =['eq',2];
+        $where['create_time'] = ['between',['2020-12-01 00:00:00','2020-12-31 23:59:59']];
 //        $field = 'id,site,entry_user_id,type,functional_module,title,create_time,pm_audit_status_time,web_designer_user_id,app_user_id,phper_user_id,node_time
 //        develop_finish_time,web_designer_complexity,web_designer_group,web_remarks,pm_audit_status,pm_confirm_time,copy_to_user_id';
         $list = $this->model
@@ -632,8 +632,7 @@ class ItWebDemand extends Backend
         ];
 
         $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
-
-
+        
         $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
         $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
 
@@ -641,7 +640,7 @@ class ItWebDemand extends Backend
         $spreadsheet->setActiveSheetIndex(0);
 
         $format = 'xlsx';
-        $savename = '十二月份网站需求' . date("YmdHis", time());;
+        $savename = '十二月份网站RDC需求' . date("YmdHis", time());
 
         if ($format == 'xls') {
             //输出Excel03版本
