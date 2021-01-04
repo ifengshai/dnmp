@@ -231,6 +231,51 @@
 
     </div>
     <div style="width: 100%;">
+        <p style="font-size: 16px;text-align: center;"><b>订单支付列表</b></p>
+        <div style="margin-bottom: 20px;">
+
+            <table id="caigou-table">
+                <tr>
+                    <th>订单号</th>
+                    <th>支付方式</th>
+                    <th>货币</th>
+                    <th>支付金额</th>
+                    <th>订单金额</th>
+                    <th>积分</th>
+                    <th>抵扣金额</th>
+                    <th>运费</th>
+                    <th>支付方式</th>
+                    <th>last_trans_id</th>
+                    <th>paypal_payer_email</th>
+                    <th>paypal_payer_id</th>
+                    <th>paypal_payer_status</th>
+                    <th>paypal_payment_status</th>
+                </tr>
+                <tr>
+                    <td>{$row.increment_id} </td>
+                    {if condition="($row['order_type'] == 10)"}
+                    <td>货到付款</td>
+                    {else /}
+                    <td>在线支付</td>
+                    {/if}
+                    <td>{$row.base_currency_code} </td>
+                    <td>{$row.base_grand_total|sprintf='%.2f',###}</td>
+                    <td>{$row.base_grand_total|sprintf='%.2f',###} </td>
+                    <td>{$row.mw_rewardpoint} </td>
+                    <td>{$row.mw_rewardpoint_discount|sprintf='%.2f',###} </td>
+                    <td>{$row.base_shipping_amount|sprintf='%.2f',###} </td>
+                    <td>{$row.payment_method} </td>
+                    <td>{$row.last_trans_id}</td>
+                    <td>{$pay.additional_information.paypal_payer_email}</td>
+                    <td>{$pay.additional_information.paypal_payer_id}</td>
+                    <td>{$pay.additional_information.paypal_payer_status}</td>
+                    <td>{$pay.additional_information.paypal_payment_status}</td>
+                </tr>
+
+            </table>
+        </div>
+    </div>
+    <div style="width: 100%;">
         <p style="font-size: 16px;text-align: center;"><b>订单项列表</b></p>
         <div style="margin-bottom: 20px;">
 
@@ -269,45 +314,7 @@
         </div>
     </div>
 
-    <div style="width: 100%;">
-        <p style="font-size: 16px;text-align: center;"><b>订单支付列表</b></p>
-        <div style="margin-bottom: 20px;">
 
-            <table id="caigou-table">
-                <tr>
-                    <th>订单号</th>
-                    <th>货币</th>
-                    <th>支付金额</th>
-                    <th>订单金额</th>
-                    <th>积分</th>
-                    <th>抵扣金额</th>
-                    <th>运费</th>
-                    <th>支付方式</th>
-                    <th>last_trans_id</th>
-                    <th>paypal_payer_email</th>
-                    <th>paypal_payer_id</th>
-                    <th>paypal_payer_status</th>
-                    <th>paypal_payment_status</th>
-                </tr>
-                <tr>
-                    <td>{$row.increment_id} </td>
-                    <td>{$row.base_currency_code} </td>
-                    <td>{$row.base_grand_total|sprintf='%.2f',###}</td>
-                    <td>{$row.base_grand_total|sprintf='%.2f',###} </td>
-                    <td>{$row.mw_rewardpoint} </td>
-                    <td>{$row.mw_rewardpoint_discount|sprintf='%.2f',###} </td>
-                    <td>{$row.base_shipping_amount|sprintf='%.2f',###} </td>
-                    <td>{$row.payment_method} </td>
-                    <td>{$row.last_trans_id}</td>
-                    <td>{$pay.additional_information.paypal_payer_email}</td>
-                    <td>{$pay.additional_information.paypal_payer_id}</td>
-                    <td>{$pay.additional_information.paypal_payer_status}</td>
-                    <td>{$pay.additional_information.paypal_payment_status}</td>
-                </tr>
-
-            </table>
-        </div>
-    </div>
     <hr>
     <div class="row item_info" style="margin-top:15px;">
         <p style="font-size: 16px;text-align: center;"><b>处方信息</b></p>
