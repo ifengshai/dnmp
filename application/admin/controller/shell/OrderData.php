@@ -237,7 +237,7 @@ class OrderData extends Backend
                                     $params['base_shipping_amount'] = $v['base_shipping_amount'];
                                     $params['updated_at'] = strtotime($v['updated_at']) + 28800;
                                     if (isset($v['payment_time'])) {
-                                        $params['payment_time'] = strtotime($v['payment_time']) + 28800;
+                                        $params['payment_time'] = (int)strtotime($v['payment_time']) + 28800;
                                     }
 
                                     $this->order->where(['entity_id' => $v['entity_id'], 'site' => $site])->update($params);
