@@ -415,10 +415,6 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
 
         $new_ruleList = array_column($ruleList, NULL, 'node_type');
         $key_list = array_keys($new_ruleList);
-        // dump($new_order_item_process_id);
-        dump($new_order_item_process_id2);
-        dump($distribution_log);
-        dump($distribution_log_times);
 
         $id = $this->request->get('id');
         $label = $this->request->get('label', 1);
