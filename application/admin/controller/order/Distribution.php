@@ -471,7 +471,8 @@ class Distribution extends Backend
         }else{
             if ($filter['a.created_at']){
                 $time = explode(' - ',$filter['a.created_at']);
-                $where['a.created_at'] = ['between', [strtotime($time[0]),strtotime($time[1])]];
+
+                $map['a.created_at'] = ['between', [strtotime($time[0]),strtotime($time[1])]];
             }
         }
 
@@ -544,7 +545,7 @@ class Distribution extends Backend
 //        }
 
         $map['a.abnormal_house_id'] = 0;
-
+     
         //订单里面所有的
         $list = $this->model
             ->alias('a')
@@ -553,10 +554,10 @@ class Distribution extends Backend
             ->join(['fa_order_process' => 'c'], 'a.order_id=c.order_id')
             ->where($where)
             ->where($map)
-            ->select(false);
-        
-        $list = collection($list)->toArray();
+            ->select();
 
+        $list = collection($list)->toArray();
+        dump($list);die();
         $data = array();
         foreach ($list as $k => $v) {
             $item_platform_sku = Db::connect('database.db_stock');
@@ -570,6 +571,7 @@ class Distribution extends Backend
             $data[$sku]['sku'] = $sku;
             $data[$sku]['number']++;
         }
+
         // dump($data);die;
 
 
