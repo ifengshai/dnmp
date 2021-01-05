@@ -378,9 +378,7 @@ class Distribution extends Backend
                 if ($label == 8) {
                     $list[$key]['created_at'] = Db::table('fa_distribution_log')->where('item_process_id', $item['id'])->where('distribution_node', 7)->value('create_time');
                 }
-                if ($list[$key]['created_at'] ==''){
-                    $list[$key]['created_at'] =='暂无';
-                }
+
             }
 
             //库位号列表
@@ -415,9 +413,13 @@ class Distribution extends Backend
                 } elseif (!empty($value['store_house_id']) && 7 == $label && in_array($value['distribution_status'], [8, 9])) {
                     $stock_house_num = $stock_house_data[$value['store_house_id']]; //合单库位号
                 }
-
+                if ($list[$key]['created_at'] ==''){
+                    $list[$key]['created_at'] =='暂无';
+                }else{
+                    $list[$key]['created_at'] = date('Y-m-d H:i:s', $value['created_at']);
+                }
                 $list[$key]['stock_house_num'] = $stock_house_num;
-                $list[$key]['created_at'] = date('Y-m-d H:i:s', $value['created_at']);
+
 
                 //跟单：异常未处理且未创建工单的显示处理异常按钮
                 $work_id = $abnormal_data[$value['id']] ?? 0;
