@@ -527,10 +527,12 @@ class Distribution extends Backend
                     ->where('a.sku',$sku[$k]['sku'])
                     ->value('b.coding');
         }
+        dump($sku);
         $b=array();
         foreach($sku as $v){
             $b[]=$v['sku'];
         }
+        dump($b);
         $c=array_unique($b);
         foreach($c as$k => $v){
             $n=0;
@@ -540,6 +542,7 @@ class Distribution extends Backend
             }
             $new[$v]=$n;
         }
+        dump($new);die();
         foreach ($sku as $ky=>$ite){
             $new_value = array_keys($new);
             $count = count($new_value)-1;
