@@ -169,13 +169,12 @@
 
     {if condition="($is_shendan['check_status'] == 1)"}
     <li class="on"><span>已审单</span></li>
-    <li class="on"><span>已出库</span></li>
     {elseif condition="$is_shendan['check_status'] eq 0"/}
     <li class="on"><span>待审单</span></li>
-	<li {if condition="($is_shendan['check_status'] == 1)" }class="on" {/if}><span>已出库</span></li>
     {else /}
     <li class="on"><span>审单拒绝</span></li>
     {/if}
+    <li {if condition="(!empty($is_shendan['delivery_time']))"}class="on" {/if}><span>已出库</span></li>
     <!--    <li {in name="2" value="$key_list" } class="on" {-->
     <!--    /in}><span>已打印标签</span></li>-->
     <!--    <li {in name="3" value="$key_list" } class="on" {-->
@@ -260,13 +259,15 @@
         </div>
     </li>
     {/in}
-    {if condition="($is_shendan['check_status'] == 1)"}
+    {if condition="(!empty($is_shendan['delivery_time']))"}
     <li>
         <span>{:date('Y-m-d H:i:s',$is_shendan['delivery_time'])}</span>
         <div>
             <p>已出库</p>
         </div>
     </li>
+    {/if}
+    {if condition="($is_shendan['check_status'] == 1)"}
     <li>
         <span>{:date('Y-m-d H:i:s',$is_shendan['check_time'])}</span>
         <div>
