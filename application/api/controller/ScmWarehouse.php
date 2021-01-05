@@ -1288,6 +1288,9 @@ class ScmWarehouse extends Scm
             foreach ($item_list as $key => $value) {
                 //质检单默认留样数量为1，质检合格数量为入库数量 + 留样数量
                 $item_list[$key]['quantity_num'] = $value['in_stock_num'] + $value['sample_num'];
+                //从质检单子表获得应到货数量
+                $item_list[$key]['arrivals_num'] = $this->_check_item->where('check_id',$check_order_info['id'])->value('arrivals_num');
+                $item_list[$key]['remark'] = $this->_check_item->where('check_id',$check_order_info['id'])->value('remark');
             }
             $info['check_order_number'] = $check_order_info['check_order_number'];
 
