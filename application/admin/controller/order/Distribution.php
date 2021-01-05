@@ -452,7 +452,6 @@ class Distribution extends Backend
     public function printing_batch_export_xls()
     {
 
-        $filter = json_decode($this->request->get('filter'), true);
         $data = input('');
         if ($data['ids']) {
             $where['a.id'] = ['in', $data['ids']];
@@ -469,6 +468,11 @@ class Distribution extends Backend
         if (!$filter) {
             $map['a.created_at'] = ['between', [strtotime('-3 month'), time()]];
             $WhereSql .= " and a.created_at between " . strtotime('-3 month') . " and " . time();
+        }else{
+            if ($filter['a.created_at']){
+                $time = explode(' - ',$filter['a.created_at']);
+                $where['a.created_at'] = ['between', [strtotime($time[0]),strtotime($time[1])]];
+            }
         }
 
         if (!$filter['status']) {
@@ -550,7 +554,7 @@ class Distribution extends Backend
             ->where($where)
             ->where($map)
             ->select(false);
-        dump($list);die();
+        
         $list = collection($list)->toArray();
 
         $data = array();
