@@ -545,7 +545,7 @@ class Distribution extends Backend
 //        }
 
         $map['a.abnormal_house_id'] = 0;
-     
+
         //订单里面所有的
         $list = $this->model
             ->alias('a')
@@ -557,7 +557,6 @@ class Distribution extends Backend
             ->select();
 
         $list = collection($list)->toArray();
-        dump($list);die();
         $data = array();
         foreach ($list as $k => $v) {
             $item_platform_sku = Db::connect('database.db_stock');
