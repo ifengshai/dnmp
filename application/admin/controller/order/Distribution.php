@@ -516,52 +516,60 @@ class Distribution extends Backend
 
         $list = collection($list)->toArray();
 
-        $sku = array();
+        $data = array();
         foreach ($list as $k => $v) {
             $item_platform_sku = Db::connect('database.db_stock');
-            $sku[$k]['sku'] =  $item_platform_sku->table('fa_item_platform_sku')->where('platform_sku',$v['sku'])->where('platform_type',$v['site'])->value('sku');
-            $sku[$k]['location'] =
+            $sku =  $item_platform_sku->table('fa_item_platform_sku')->where('platform_sku',$v['sku'])->where('platform_type',$v['site'])->value('sku');
+            $data[$sku]['location'] =
                     Db::table('fa_store_sku')
                     ->alias('a')
                     ->join(['fa_store_house' => 'b'], 'a.store_id=b.id')
-                    ->where('a.sku',$sku[$k]['sku'])
+                    ->where('a.sku',$sku)
                     ->value('b.coding');
+            $data[$sku]['sku'] = $sku;
+            $data[$sku]['number']++;
         }
-        dump($sku);
-        $b=array();
-        foreach($sku as $v){
-            $b[]=$v['sku'];
-        }
-        dump($b);
-        $c=array_unique($b);
-        foreach($c as$k => $v){
-            $n=0;
-            foreach($sku as $t){
-                if($v==$t['sku'])
-                    $n++;
-            }
-            $new[$v]=$n;
-        }
-        dump($new);
-        foreach ($sku as $ky=>$ite){
-            $new_value = array_keys($new);
-            $count = count($new_value)-1;
-            for ($i=0;$i<=$count;$i++){
-                if ($new_value[$i] == $ite['sku']){
-                    $sku[$ky]['number'] = $new[$new_value[$i]];
-                }
-            }
-        }
-        dump($sku);
-        $sku =array_merge(array_unique($sku, SORT_REGULAR));
-        dump($sku);die();
+        // dump($data);die;
+
+
+
+        // dump($sku);
+        // $b=array();
+        // foreach($sku as $v){
+        //     $b[]=$v['sku'];
+        // }
+        // dump($b);
+        // $c=array_unique($b);
+        // foreach($c as$k => $v){
+        //     $n=0;
+        //     foreach($sku as $t){
+        //         if($v==$t['sku'])
+        //             $n++;
+        //     }
+        //     $new[$v]=$n;
+        // }
+        // dump($new);
+        // foreach ($sku as $ky=>$ite){
+        //     $new_value = array_keys($new);
+        //     $count = count($new_value)-1;
+        //     for ($i=0;$i<=$count;$i++){
+        //         if ($new_value[$i] == $ite['sku']){
+        //             $sku[$ky]['number'] = $new[$new_value[$i]];
+        //         }
+        //     }
+        // }
+        // dump($sku);
+        // $sku =array_merge(array_unique($sku, SORT_REGULAR));
+        // dump($sku);die();
+
+        $data = array_values($data);
         $spreadsheet = new Spreadsheet();
         //常规方式：利用setCellValue()填充数据
         $spreadsheet
             ->setActiveSheetIndex(0)->setCellValue("A1", "仓库SKU")
             ->setCellValue("B1", "库位号")
             ->setCellValue("C1", "数量");
-        foreach ($sku as $key => $value) {
+        foreach ($data as $key => $value) {
             $spreadsheet->getActiveSheet()->setCellValueExplicit("A" . ($key * 1 + 2), $value['sku'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
             $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['location']);
             $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['number']);
