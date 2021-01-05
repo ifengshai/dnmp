@@ -69,7 +69,7 @@ class SkuDetail extends Backend
                 $order_model = Db::connect('database.db_zeelool');
             }
             $order_model->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
-            $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+            $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
             $map['o.order_type'] = 1;
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $order_model->table('sales_flat_order_item_prescription')
@@ -284,7 +284,7 @@ class SkuDetail extends Backend
         }
         $createat = explode(' ', $time_str);
         $where['p.created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
-        $where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        $where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
         $where['p.sku'] = $sku;
         $where['o.order_type'] = 1;
         if($flag){
@@ -321,7 +321,7 @@ class SkuDetail extends Backend
             $order_model = Db::connect('database.db_zeelool');
         }
         $order_model->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
-        $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
         $map['o.order_type'] = 1;
 
         $list = $order_model->table('sales_flat_order_item_prescription')
