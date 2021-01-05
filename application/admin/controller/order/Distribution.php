@@ -515,7 +515,7 @@ class Distribution extends Backend
             ->select();
 
         $list = collection($list)->toArray();
-        dump($list);die();
+
         $sku = array();
         foreach ($list as $k => $v) {
             $item_platform_sku = Db::connect('database.db_stock');
@@ -527,6 +527,7 @@ class Distribution extends Backend
                     ->where('a.sku',$sku[$k]['sku'])
                     ->value('b.coding');
         }
+        dump($sku);
         $b=array();
         foreach($sku as $v){
             $b[]=$v['sku'];
@@ -549,7 +550,9 @@ class Distribution extends Backend
                 }
             }
         }
+        dump($sku);
         $sku =array_merge(array_unique($sku, SORT_REGULAR));
+        dump($sku);die();
         $spreadsheet = new Spreadsheet();
         //常规方式：利用setCellValue()填充数据
         $spreadsheet
