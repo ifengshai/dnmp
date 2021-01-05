@@ -549,8 +549,8 @@ class Distribution extends Backend
             ->join(['fa_order_process' => 'c'], 'a.order_id=c.order_id')
             ->where($where)
             ->where($map)
-            ->select(false);
-        dump($list);die();
+            ->select();
+        
         $list = collection($list)->toArray();
 
         $data = array();
