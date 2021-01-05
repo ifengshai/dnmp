@@ -176,35 +176,33 @@ class Distribution extends Backend
 
                 if (7 == $label) {
                     $map['a.distribution_status'] = [['>', 6], ['<', 9]];
-
                 } else {
                     $map['a.distribution_status'] = $label;
-
                 }
-                if ($label ==2){
+                if ($label == 2) {
                     $WhereSql .= '  and  d.distribution_node   = 1';
-                    $WhereSql .= '  and  a.distribution_status   = '.$label ;
-                }elseif ($label ==3){
+                    $WhereSql .= '  and  a.distribution_status   = ' . $label;
+                } elseif ($label == 3) {
                     $WhereSql .= '  and  d.distribution_node   = 2';
-                    $WhereSql .= '  and  a.distribution_status   = '.$label ;
-                }elseif ($label ==4){
+                    $WhereSql .= '  and  a.distribution_status   = ' . $label;
+                } elseif ($label == 4) {
                     $WhereSql .= '  and  d.distribution_node   = 3';
-                    $WhereSql .= '  and  a.distribution_status   = '.$label ;
-                }elseif ($label ==5){
+                    $WhereSql .= '  and  a.distribution_status   = ' . $label;
+                } elseif ($label == 5) {
                     $WhereSql .= '  and  d.distribution_node   = 4';
-                    $WhereSql .= '  and  a.distribution_status   = '.$label ;
-                }elseif ($label ==6){
+                    $WhereSql .= '  and  a.distribution_status   = ' . $label;
+                } elseif ($label == 6) {
                     $WhereSql .= '  and  d.distribution_node   = 5';
-                    $WhereSql .= '  and  a.distribution_status   = '.$label ;
-                }elseif ($label ==7){
+                    $WhereSql .= '  and  a.distribution_status   = ' . $label;
+                } elseif ($label == 7) {
                     $WhereSql .= '  and  d.distribution_node   = 6';
-                    $WhereSql .= '  and  a.distribution_status >6  and a.distribution_status <9  ' ;
-                }else{
+                    $WhereSql .= '  and  a.distribution_status >6  and a.distribution_status <9  ';
+                } else {
                     $WhereSql .= '  and  d.distribution_node   = null';
                 }
 
                 $map['a.abnormal_house_id'] = 0;
-                $WhereSql .= ' and  a.abnormal_house_id   = '.$label ;
+                $WhereSql .= ' and  a.abnormal_house_id   = ' . $label;
             }
 
             //处理异常选项
@@ -212,24 +210,24 @@ class Distribution extends Backend
 
             if (!$filter) {
                 $map['a.created_at'] = ['between', [strtotime('-3 month'), time()]];
-                $WhereSql .= " and a.created_at between ".strtotime('-3 month')." and ". time()  ;
+                $WhereSql .= " and a.created_at between " . strtotime('-3 month') . " and " . time();
             }
-            if ($label ==0){
+            if ($label == 0) {
                 if (!$filter['status']) {
                     $map['b.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal']];
                     $WhereSql .= "  and b.status in ('processing','free_processing','paypal_reversed','creditcard_proccessing','paypal_canceled_reversal','complete')";
-                }else{
+                } else {
                     $map['b.status'] = ['in', $filter['status']];
-                    $WhereSql .= "  and b.status in ('".$filter["status"]."')";
+                    $WhereSql .= "  and b.status in ('" . $filter["status"] . "')";
                 }
                 unset($filter['status']);
-            }else{
+            } else {
                 if (!$filter['status']) {
-                    $map['b.status'] = ['eq', 'processing'];
+                    $map['b.status'] = ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal']];
                     $WhereSql .= "  and b.status = 'processing' ";
-                }else{
+                } else {
                     $map['b.status'] = ['in', $filter['status']];
-                    $WhereSql .= "  and b.status in ('".$filter["status"]."')";
+                    $WhereSql .= "  and b.status in ('" . $filter["status"] . "')";
                 }
                 unset($filter['status']);
             }
@@ -255,11 +253,10 @@ class Distribution extends Backend
                     ->where($abnormal_where)
                     ->column('item_process_id');
 
-                if ($item_process_ids ==null){
-                    $map['a.id'] = ['eq',null];
-                    $WhereSql.= "a.id =  null";
+                if ($item_process_ids == null) {
+                    $map['a.id'] = ['eq', null];
+                    $WhereSql .= "a.id =  null";
                 }
-
             };
             //筛选库位号
             if ($filter['stock_house_num']) {
@@ -334,10 +331,10 @@ class Distribution extends Backend
             $sql = "SELECT a.id,a.order_id,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.total_qty_ordered,b.site,b.order_type,b.status,a.distribution_status,a.temporary_house_id,a.abnormal_house_id,a.created_at,c.store_house_id,d.distribution_node,d.create_time as create_time_log FROM fa_order_item_process as a 
                     LEFT JOIN fa_order AS b ON (a.`order_id`=b.`id`)
                     LEFT JOIN fa_order_process AS c ON (a.`order_id`=c.`order_id`)
-                    LEFT JOIN mojing.fa_distribution_log AS d ON (a.`id`=d.`item_process_id`) where " .$WhereSql.  $WhereOrder ." limit  ". $offset.','.$limit;;
-//            dump($sql);
-//                    $data = $this->model->query($sql);
-//            dump($data);die();
+                    LEFT JOIN mojing.fa_distribution_log AS d ON (a.`id`=d.`item_process_id`) where " . $WhereSql .  $WhereOrder . " limit  " . $offset . ',' . $limit;;
+            //            dump($sql);
+            //                    $data = $this->model->query($sql);
+            //            dump($data);die();
             $list = $this->model
                 ->alias('a')
                 ->field('a.id,a.order_id,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.total_qty_ordered,b.site,b.order_type,b.status,a.distribution_status,a.temporary_house_id,a.abnormal_house_id,a.created_at,c.store_house_id')
@@ -351,44 +348,36 @@ class Distribution extends Backend
 
             $list = collection($list)->toArray();
 
-            foreach ($list as $key=>$item){
+            foreach ($list as $key => $item) {
                 $list[$key]['label'] = $label;
                 //待打印标签时间
-                if ($label ==2){
-                    $list[$key]['created_at']= Db::table('fa_distribution_log')->where('item_process_id',$item['id'])->where('distribution_node',1)->value('create_time');
-
+                if ($label == 2) {
+                    $list[$key]['created_at'] = Db::table('fa_distribution_log')->where('item_process_id', $item['id'])->where('distribution_node', 1)->value('create_time');
                 }
                 //待配货
-                if ($label ==3){
-                    $list[$key]['created_at']= Db::table('fa_distribution_log')->where('item_process_id',$item['id'])->where('distribution_node',2)->value('create_time');
-
+                if ($label == 3) {
+                    $list[$key]['created_at'] = Db::table('fa_distribution_log')->where('item_process_id', $item['id'])->where('distribution_node', 2)->value('create_time');
                 }
                 //待配镜片
-                if ($label ==4){
-                    $list[$key]['created_at']= Db::table('fa_distribution_log')->where('item_process_id',$item['id'])->where('distribution_node',3)->value('create_time');
-
+                if ($label == 4) {
+                    $list[$key]['created_at'] = Db::table('fa_distribution_log')->where('item_process_id', $item['id'])->where('distribution_node', 3)->value('create_time');
                 }
                 //待加工
-                if ($label ==5){
-                    $list[$key]['created_at']= Db::table('fa_distribution_log')->where('item_process_id',$item['id'])->where('distribution_node',4)->value('create_time');
-
+                if ($label == 5) {
+                    $list[$key]['created_at'] = Db::table('fa_distribution_log')->where('item_process_id', $item['id'])->where('distribution_node', 4)->value('create_time');
                 }
                 //待印logo
-                if ($label ==6){
-                    $list[$key]['created_at']= Db::table('fa_distribution_log')->where('item_process_id',$item['id'])->where('distribution_node',5)->value('create_time');
-
+                if ($label == 6) {
+                    $list[$key]['created_at'] = Db::table('fa_distribution_log')->where('item_process_id', $item['id'])->where('distribution_node', 5)->value('create_time');
                 }
                 //待成品质检
-                if ($label ==7){
-                    $list[$key]['created_at']= Db::table('fa_distribution_log')->where('item_process_id',$item['id'])->where('distribution_node',6)->value('create_time');
-
+                if ($label == 7) {
+                    $list[$key]['created_at'] = Db::table('fa_distribution_log')->where('item_process_id', $item['id'])->where('distribution_node', 6)->value('create_time');
                 }
                 //待合单
-                if ($label ==8){
-                    $list[$key]['created_at']= Db::table('fa_distribution_log')->where('item_process_id',$item['id'])->where('distribution_node',7)->value('create_time');
-
+                if ($label == 8) {
+                    $list[$key]['created_at'] = Db::table('fa_distribution_log')->where('item_process_id', $item['id'])->where('distribution_node', 7)->value('create_time');
                 }
-
             }
 
             //库位号列表
@@ -420,7 +409,7 @@ class Distribution extends Backend
                     $stock_house_num = $stock_house_data[$value['temporary_house_id']]; //定制片库位号
                 } elseif (!empty($value['abnormal_house_id']) && 8 == $label) {
                     $stock_house_num = $stock_house_data[$value['abnormal_house_id']]; //异常库位号
-                } elseif (!empty($value['store_house_id']) && 7 == $label && in_array($value['distribution_status'],[8,9])) {
+                } elseif (!empty($value['store_house_id']) && 7 == $label && in_array($value['distribution_status'], [8, 9])) {
                     $stock_house_num = $stock_house_data[$value['store_house_id']]; //合单库位号
                 }
 
@@ -460,50 +449,97 @@ class Distribution extends Backend
      * 待印logo数据导出
      *
      */
-    public function printing_batch_export_xls(){
+    public function printing_batch_export_xls()
+    {
 
         $filter = json_decode($this->request->get('filter'), true);
         $data = input('');
-        if ($data['ids']){
-            $where['a.id'] = ['in',$data['ids']];
-        }else{
+        if ($data['ids']) {
+            $where['a.id'] = ['in', $data['ids']];
+        } else {
             $where['a.distribution_status'] = 1;
         }
-        //子订单号
-        if ($filter['item_order_number']){
-            $where['item_order_number'] = ['eq',$filter['item_order_number']];
-        }
-        //sku
-        if ($filter['sku']){
-            $where['sku'] = ['eq',$filter['sku']];
-        }
-        //站点
-        if ($filter['site']){
-            $where['site'] = ['eq',$filter['site']];
-        }
-        //加工类型
-        if (isset($filter['order_prescription_type'])) {
-            $where['a.order_prescription_type'] = ['in', $filter['order_prescription_type']];
-        }
-        //订单类型
-        if ($filter['order_type']) {
-            $where['b.order_type'] = ['in', $filter['order_type']];
-        }
-        //订单状态
-        if ($filter['status']) {
-            $where['b.status'] = ['in', $filter['status']];
+        $map = [];
+        $WhereSql = 'a.id > 0';
+        //普通状态剔除跟单数据
+
+        //处理异常选项
+        $filter = json_decode($this->request->get('filter'), true);
+
+        if (!$filter) {
+            $map['a.created_at'] = ['between', [strtotime('-3 month'), time()]];
+            $WhereSql .= " and a.created_at between " . strtotime('-3 month') . " and " . time();
         }
 
-        if ($filter['a.created_at']) {
-            $time = explode(' - ',$filter['a.created_at']);
-            $where['a.created_at'] = ['between', [strtotime($time[0]),strtotime($time[1])]];
+        if (!$filter['status']) {
+            $map['b.status'] = ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal']];
+        } else {
+            $map['b.status'] = ['in', $filter['status']];
         }
-        //订单号
+        unset($filter['status']);
+
+        //查询子单ID合集
+        $item_process_ids = [];
+
+        //跟单或筛选异常
+
+        if ($filter['abnormal']) {
+            //异常类型
+            if ($filter['abnormal']) {
+                $abnormal_where['type'] = ['in', $filter['abnormal']];
+                unset($filter['abnormal']);
+            }
+
+            //获取异常的子订单id
+            $item_process_ids = $this->_distribution_abnormal
+                ->where($abnormal_where)
+                ->column('item_process_id');
+
+            if ($item_process_ids == null) {
+                $map['a.id'] = ['eq', null];
+                $WhereSql .= "a.id =  null";
+            }
+        };
+
         if ($filter['increment_id']) {
-            $where['b.increment_id'] = ['like', $filter['increment_id'] . '%'];
-            $where['b.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
+            $map['b.increment_id'] = ['like', $filter['increment_id'] . '%'];
+            $map['b.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
+            unset($filter['increment_id']);
         }
 
+        if ($filter['site']) {
+            $map['a.site'] = ['in', $filter['site']];
+            unset($filter['site']);
+        }
+
+        if (isset($filter['order_prescription_type'])) {
+            $map['a.order_prescription_type'] = ['in', $filter['order_prescription_type']];
+            unset($filter['order_prescription_type']);
+        }
+        $this->request->get(['filter' => json_encode($filter)]);
+        //子单工单未处理
+        $item_order_numbers = $this->_work_order_change_sku
+            ->alias('a')
+            ->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')
+            ->where([
+                'a.change_type' => ['in', [1, 2, 3]], //1更改镜架  2更改镜片 3取消订单
+                'b.work_status' => ['in', [1, 2, 3, 5]] //工单未处理
+            ])
+            ->order('a.create_time', 'desc')
+            ->group('a.item_order_number')
+            ->column('a.item_order_number');
+
+        //跟单
+        if ($item_order_numbers) {
+            $item_process_id_work = $this->model->where(['item_order_number' => ['in', $item_order_numbers]])->column('id');
+            $item_process_ids = array_unique(array_merge($item_process_ids, $item_process_id_work));
+        }
+
+        if ($item_process_ids) {
+            $map['a.id'] = ['in', $item_process_ids];
+        }
+
+        $map['a.abnormal_house_id'] = 0;
 
         //订单里面所有的
         $list = $this->model
@@ -512,20 +548,20 @@ class Distribution extends Backend
             ->join(['fa_order' => 'b'], 'a.order_id=b.id')
             ->join(['fa_order_process' => 'c'], 'a.order_id=c.order_id')
             ->where($where)
+            ->where($map)
             ->select();
-
         $list = collection($list)->toArray();
 
         $data = array();
         foreach ($list as $k => $v) {
             $item_platform_sku = Db::connect('database.db_stock');
-            $sku =  $item_platform_sku->table('fa_item_platform_sku')->where('platform_sku',$v['sku'])->where('platform_type',$v['site'])->value('sku');
+            $sku =  $item_platform_sku->table('fa_item_platform_sku')->where('platform_sku', $v['sku'])->where('platform_type', $v['site'])->value('sku');
             $data[$sku]['location'] =
-                    Db::table('fa_store_sku')
-                    ->alias('a')
-                    ->join(['fa_store_house' => 'b'], 'a.store_id=b.id')
-                    ->where('a.sku',$sku)
-                    ->value('b.coding');
+                Db::table('fa_store_sku')
+                ->alias('a')
+                ->join(['fa_store_house' => 'b'], 'a.store_id=b.id')
+                ->where('a.sku', $sku)
+                ->value('b.coding');
             $data[$sku]['sku'] = $sku;
             $data[$sku]['number']++;
         }
@@ -1188,7 +1224,7 @@ class Distribution extends Backend
         try {
             //标记状态
             $this->model->where(['id' => ['in', $ids]])->update(['distribution_status' => 2]);
-               
+
             //记录配货日志
             $admin = (object)session('admin');
             DistributionLog::record($admin, $ids, 1, '标记打印完成');
@@ -1585,7 +1621,7 @@ class Distribution extends Backend
                 //订单主表标记已合单
                 if (9 == $save_status) {
                     $this->_new_order_process->where(['order_id' => $value['order_id']])
-                    ->update(['combine_status' => 1, 'check_status' => 0, 'combine_time' => time()]);
+                        ->update(['combine_status' => 1, 'check_status' => 0, 'combine_time' => time()]);
                 }
 
                 $this->model->where(['id' => $value['id']])->update(['distribution_status' => $save_status]);
@@ -1720,7 +1756,7 @@ class Distribution extends Backend
 
             //子订单状态回滚
             $this->model->where(['id' => ['in', $ids]])->update($save_data);
-               
+
             //记录日志
             DistributionLog::record($admin, array_column($item_list, 'id'), 6, $status_arr[$reason]['name']);
 
@@ -1944,10 +1980,10 @@ class Distribution extends Backend
                 }
 
                 $this->model->where(['id' => $ids])->update($save_data);
-                   
+
                 //标记处理异常状态及时间
                 $this->_distribution_abnormal->where(['id' => $abnormal_info['id']])->update(['status' => 2, 'do_time' => time(), 'do_person' => $admin->nickname]);
-                   
+
                 //配货操作内容
                 $remark = '处理异常：' . $abnormal_arr[$abnormal_info['type']] . ',当前节点：' . $status_arr[$item_info['distribution_status']] . ',返回节点：' . $status_arr[$status];
 
@@ -2112,7 +2148,7 @@ class Distribution extends Backend
         $url = $url_domain . $url_root;
         if ($ids) {
             $url = $url . '/saleaftermanage/work_order_list/add?order_number=' . $order_id[0] . '&order_item_numbers=' . implode(',', $item_process_numbers);
-        }else{
+        } else {
             $url = $url . '/saleaftermanage/work_order_list/add';
         }
         //http://www.mojing.cn/admin_1biSSnWyfW.php/saleaftermanage/work_order_list/add?order_number=859063&order_item_numbers=430224120-03,430224120-04
