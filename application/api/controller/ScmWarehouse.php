@@ -1290,6 +1290,7 @@ class ScmWarehouse extends Scm
                 $item_list[$key]['quantity_num'] = $value['in_stock_num'] + $value['sample_num'];
                 //从质检单子表获得应到货数量
                 $item_list[$key]['should_arrival_num'] = $this->_check_item->where('check_id',$check_order_info['id'])->value('should_arrival_num');
+                $item_list[$key]['remark'] = $this->_check_item->where('check_id',$check_order_info['id'])->value('remark');
             }
             $info['check_order_number'] = $check_order_info['check_order_number'];
 
@@ -1304,7 +1305,6 @@ class ScmWarehouse extends Scm
         $info['in_stock_id'] = $_in_stock_info['id'];
         $info['in_stock_number'] = $_in_stock_info['in_stock_number'];
         $info['in_stock_type_check_id'] = $_in_stock_info['type_id'];
-        $info['remark'] = $_in_stock_info['remark'];
         $info['in_stock_type'] = $in_stock_type_list;
         $info['item_list'] = $item_list;
 
