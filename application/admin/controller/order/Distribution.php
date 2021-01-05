@@ -378,6 +378,9 @@ class Distribution extends Backend
                 if ($label == 8) {
                     $list[$key]['created_at'] = Db::table('fa_distribution_log')->where('item_process_id', $item['id'])->where('distribution_node', 7)->value('create_time');
                 }
+                if ($list[$key]['created_at'] ==''){
+                    $list[$key]['created_at'] =='暂无';
+                }
             }
 
             //库位号列表
