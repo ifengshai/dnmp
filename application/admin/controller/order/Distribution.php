@@ -471,15 +471,15 @@ class Distribution extends Backend
         }
         //子订单号
         if ($filter['item_order_number']){
-            $where['a.item_order_number'] = ['eq',$filter['item_order_number']];
+            $where['item_order_number'] = ['eq',$filter['item_order_number']];
         }
         //sku
         if ($filter['sku']){
-            $where['a.sku'] = ['eq',$filter['sku']];
+            $where['sku'] = ['eq',$filter['sku']];
         }
         //站点
         if ($filter['site']){
-            $where['a.site'] = ['eq',$filter['site']];
+            $where['site'] = ['eq',$filter['site']];
         }
         //加工类型
         if (isset($filter['order_prescription_type'])) {
@@ -527,11 +527,12 @@ class Distribution extends Backend
                     ->where('a.sku',$sku[$k]['sku'])
                     ->value('b.coding');
         }
-        
+        dump($sku);
         $b=array();
         foreach($sku as $v){
             $b[]=$v['sku'];
         }
+        dump($b);
         $c=array_unique($b);
         foreach($c as$k => $v){
             $n=0;
@@ -541,6 +542,7 @@ class Distribution extends Backend
             }
             $new[$v]=$n;
         }
+        dump($new);die();
         foreach ($sku as $ky=>$ite){
             $new_value = array_keys($new);
             $count = count($new_value)-1;
@@ -550,9 +552,7 @@ class Distribution extends Backend
                 }
             }
         }
-
         $sku =array_merge(array_unique($sku, SORT_REGULAR));
-
         $spreadsheet = new Spreadsheet();
         //常规方式：利用setCellValue()填充数据
         $spreadsheet
