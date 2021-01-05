@@ -1833,7 +1833,6 @@ class ScmDistribution extends Scm
         } else {
             $msg = '审单通过';
         }
-
         //检测订单审单状态
         $row = $this->_new_order_process->where(['order_id' => $order_id])->find();
         empty($row) && $this->error(__('主订单数据不存在'), [], 403);
@@ -1880,6 +1879,14 @@ class ScmDistribution extends Scm
                         ->isUpdate(true, ['order_id' => $order_id, 'distribution_status' => ['neq', 0]])
                         ->save(['distribution_status' => 7]);
                 } else {
+                    //非指定子单回退到待合单
+                    $this->_new_order_item_process
+                        ->allowField(true)
+                        ->isUpdate(true, ['order_id' => $order_id, 'distribution_status' => ['neq', 0]])
+                        ->save([
+                            'distribution_status' => 7
+                        ]);
+
                     //配错镜框，指定子单回退到待配货，清空定制片库位ID及定制片处理状态
                     $this->_new_order_item_process
                         ->allowField(true)
@@ -1895,14 +1902,6 @@ class ScmDistribution extends Scm
                         ->allowField(true)
                         ->isUpdate(true, ['item_order_number' => ['in', $item_order_numbers]])
                         ->save(['out_stock_time' => null, 'library_status' => 1, 'item_order_number' => '']);
-
-                    //非指定子单回退到待合单
-                    $this->_new_order_item_process
-                        ->allowField(true)
-                        ->isUpdate(true, ['order_id' => $order_id, 'distribution_status' => ['neq', 0], 'item_order_number' => ['not in', $item_order_numbers]])
-                        ->save([
-                            'distribution_status' => 7
-                        ]);
 
                     //扣减占用库存、配货占用、总库存、虚拟仓库存
                     foreach ($item_info as $key => $value) {
