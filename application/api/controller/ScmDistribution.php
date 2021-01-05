@@ -726,7 +726,9 @@ class ScmDistribution extends Scm
         if ($res) {
             //操作成功记录
             DistributionLog::record($this->auth, $item_process_info['id'], $check_status, $status_arr[$check_status] . '完成');
-
+            if (9 == $save_status) {
+                DistributionLog::record($this->auth, $item_process_info['id'], 9,  '合单完成');
+            }
             //成功返回
             $this->success($back_msg, [], 200);
         } else {
