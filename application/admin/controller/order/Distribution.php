@@ -515,7 +515,7 @@ class Distribution extends Backend
             ->select();
 
         $list = collection($list)->toArray();
-
+        dump($list);die();
         $sku = array();
         foreach ($list as $k => $v) {
             $item_platform_sku = Db::connect('database.db_stock');
