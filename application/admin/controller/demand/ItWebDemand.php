@@ -1052,6 +1052,7 @@ class ItWebDemand extends Backend
                     $add['status'] = 1;
                     $add['create_time'] = date('Y-m-d H:i', time());
                     $add['pm_audit_status'] = 1;
+                    $add['product_remarks'] = $data['product_remarks'] ?$data['product_remarks'] :'';
 
                     if (!empty($data['important_reasons'])){
                         $add['important_reasons'] = implode(',', $data['important_reasons']);
@@ -1094,6 +1095,9 @@ class ItWebDemand extends Backend
                         $row = $this->model->get($params['id']);
                         $row = $row->toArray();
                         $add['site_type'] = implode(',', $params['site_type']);
+                        if ($params['title'] !== $params['start_title'] || $params['content'] !== $params['start_content'] || $params['accessory'] !== $params['start_accessory']){
+                            $add['secondary_operation'] =2;
+                        }
                         //status  状态  1 未激活 2 激活 3 已响应 4 完成 5超时完成
                         //priority  优先级
                         //pm_audit_status  产品审核状态 1 等待审核 2pend  3通过  4拒绝
