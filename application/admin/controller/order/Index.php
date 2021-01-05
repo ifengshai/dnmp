@@ -396,10 +396,11 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
             ->where('a.increment_id',$order_number)
             ->field('b.id,b.sku,b.distribution_status')
             ->select();
+        $new_order_item_process_id2 = array_column($new_order_item_process_id,'sku','id');
         $is_shendan = $new_order_process->where('increment_id',$order_number)->field('check_time,check_status,delivery_time')->find();
         //子单节点日志
         foreach ($new_order_item_process_id as $k=>$v){
-            $distribution_log[$v['sku']] = Db::name('distribution_log')->where('item_process_id',$v['id'])->select();
+            $distribution_log[$v['id']] = Db::name('distribution_log')->where('item_process_id',$v['id'])->select();
         }
 
         $new_order_item_process_id1 =array_column($new_order_item_process_id, 'id');
@@ -414,6 +415,8 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
 
         $new_ruleList = array_column($ruleList, NULL, 'node_type');
         $key_list = array_keys($new_ruleList);
+        // dump($new_order_item_process_id);
+        dump($new_order_item_process_id2);
         dump($distribution_log);
         dump($distribution_log_times);
 
@@ -426,6 +429,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
         $this->view->assign("distribution_log_times", $distribution_log_times);
         $this->view->assign("distribution_log", $distribution_log);
         $this->view->assign("key_list", $key_list);
+        $this->view->assign("new_order_item_process_id2", $new_order_item_process_id2);
         return $this->view->fetch();
     }
 
