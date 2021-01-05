@@ -529,15 +529,15 @@ class Distribution extends Backend
             ->group('a.item_order_number')
             ->column('a.item_order_number');
 
-        //跟单
-        if ($item_order_numbers) {
-            $item_process_id_work = $this->model->where(['item_order_number' => ['in', $item_order_numbers]])->column('id');
-            $item_process_ids = array_unique(array_merge($item_process_ids, $item_process_id_work));
-        }
-
-        if ($item_process_ids) {
-            $map['a.id'] = ['in', $item_process_ids];
-        }
+//        //跟单
+//        if ($item_order_numbers) {
+//            $item_process_id_work = $this->model->where(['item_order_number' => ['in', $item_order_numbers]])->column('id');
+//            $item_process_ids = array_unique(array_merge($item_process_ids, $item_process_id_work));
+//        }
+//
+//        if ($item_process_ids) {
+//            $map['a.id'] = ['in', $item_process_ids];
+//        }
 
         $map['a.abnormal_house_id'] = 0;
 
