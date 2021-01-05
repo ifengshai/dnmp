@@ -471,15 +471,15 @@ class Distribution extends Backend
         }
         //子订单号
         if ($filter['item_order_number']){
-            $where['item_order_number'] = ['eq',$filter['item_order_number']];
+            $where['a.item_order_number'] = ['eq',$filter['item_order_number']];
         }
         //sku
         if ($filter['sku']){
-            $where['sku'] = ['eq',$filter['sku']];
+            $where['a.sku'] = ['eq',$filter['sku']];
         }
         //站点
         if ($filter['site']){
-            $where['site'] = ['eq',$filter['site']];
+            $where['a.site'] = ['eq',$filter['site']];
         }
         //加工类型
         if (isset($filter['order_prescription_type'])) {
