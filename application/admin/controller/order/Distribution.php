@@ -542,7 +542,7 @@ class Distribution extends Backend
             }
             $new[$v]=$n;
         }
-        dump($new);die();
+        dump($new);
         foreach ($sku as $ky=>$ite){
             $new_value = array_keys($new);
             $count = count($new_value)-1;
@@ -552,7 +552,9 @@ class Distribution extends Backend
                 }
             }
         }
+        dump($sku);
         $sku =array_merge(array_unique($sku, SORT_REGULAR));
+        dump($sku);die();
         $spreadsheet = new Spreadsheet();
         //常规方式：利用setCellValue()填充数据
         $spreadsheet
