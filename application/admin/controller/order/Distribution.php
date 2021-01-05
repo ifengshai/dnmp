@@ -550,7 +550,7 @@ class Distribution extends Backend
             $data[$sku]['sku'] = $sku;
             $data[$sku]['number']++;
         }
-        
+
         // $b=array();
         // foreach($sku as $v){
         //     $b[]=$v['sku'];
