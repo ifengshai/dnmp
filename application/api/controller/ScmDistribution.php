@@ -1816,6 +1816,7 @@ class ScmDistribution extends Scm
             !in_array($check_refuse, [1, 2]) && $this->error(__('审单拒绝原因错误'), [], 403);
             if(2 == $check_refuse){
                 $item_order_numbers = $this->request->request('item_order_numbers');
+                $item_order_numbers = json_decode($item_order_numbers);
                 empty($item_order_numbers) && $this->error(__('请选择子单号'), [], 403);
             }
 
