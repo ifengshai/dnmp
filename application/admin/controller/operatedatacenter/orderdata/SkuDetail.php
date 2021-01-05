@@ -225,17 +225,33 @@ class SkuDetail extends Backend
             'name'=>'progressive',
             'value'=>$progressive_num,
         );
-        $reading_glasses_num = $this->prescrtion_num('Readingglasses',$site,$time_str,$sku);
+        if($site == 3){
+            $reading_glasses_num = $this->prescrtion_num('Reading Glasses',$site,$time_str,$sku);
+        }else{
+            $reading_glasses_num = $this->prescrtion_num('Readingglasses',$site,$time_str,$sku);
+        }
         $reading_glasses_arr = array(
             'name'=>'reading glasses',
             'value'=>$reading_glasses_num,
         );
-        $reading_glassesno_num = $this->prescrtion_num('ReadingGlassesNon',$site,$time_str,$sku);
+        if($site == 2){
+            $reading_glassesno_num = $this->prescrtion_num('ReadingNoprescription',$site,$time_str,$sku);
+        }elseif($site == 3){
+            $reading_glassesno_num = $this->prescrtion_num('Reading Glasses2',$site,$time_str,$sku);
+        }else{
+            $reading_glassesno_num = $this->prescrtion_num('ReadingGlassesNon',$site,$time_str,$sku);
+        }
         $reading_glassesno_arr = array(
             'name'=>'reading glasses no prescription',
             'value'=>$reading_glassesno_num,
         );
-        $no_prescription_num = $this->prescrtion_num('NonPrescription',$site,$time_str,$sku);
+        if($site == 2){
+            $no_prescription_num1 = $this->prescrtion_num('NonPrescription',$site,$time_str,$sku);
+            $no_prescription_num2 = $this->prescrtion_num('Noprescription',$site,$time_str,$sku);
+            $no_prescription_num = $no_prescription_num1+$no_prescription_num2;
+        }else{
+            $no_prescription_num = $this->prescrtion_num('NonPrescription',$site,$time_str,$sku);
+        }
         $no_prescription_arr = array(
             'name'=>'no prescription',
             'value'=>$no_prescription_num,
@@ -245,7 +261,18 @@ class SkuDetail extends Backend
             'name'=>'sunglasses',
             'value'=>$sunglasses_num,
         );
-        $sunglassesno_num = $this->prescrtion_num('SunGlassesNoprescription',$site,$time_str,$sku);
+        if($site == 2){
+            $sunglassesno_num1 = $this->prescrtion_num('Sunglasses_NonPrescription',$site,$time_str,$sku);
+            $sunglassesno_num2 = $this->prescrtion_num('SunGlassesNoprescription',$site,$time_str,$sku);
+            $sunglassesno_num = $sunglassesno_num1+$sunglassesno_num2;
+
+        }elseif($site == 1){
+            $sunglassesno_num1 = $this->prescrtion_num('SunGlassesNoprescription',$site,$time_str,$sku);
+            $sunglassesno_num2 = $this->prescrtion_num('Non',$site,$time_str,$sku);
+            $sunglassesno_num = $sunglassesno_num1 + $sunglassesno_num2;
+        }else{
+            $sunglassesno_num = $this->prescrtion_num('SunGlassesNoprescription',$site,$time_str,$sku);
+        }
         $sunglassesno_arr = array(
             'name'=>'sunglasses non-prescription',
             'value'=>$sunglassesno_num,
