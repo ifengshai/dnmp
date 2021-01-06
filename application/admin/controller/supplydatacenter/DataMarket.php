@@ -253,17 +253,10 @@ class DataMarket extends Backend
                 //站点虚拟仓期末实时库存
                 $end_stock_where = [];
                 $end_stock_where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $createat[3] . "'")];
-                $end_stock = Db::table('fa_datacenter_day')->where($start_stock_where)->where('site',$order_platform)->value('virtual_stock');
+                $end_stock = Db::table('fa_datacenter_day')->where($end_stock_where)->where('site',$order_platform)->value('virtual_stock');
                 $sum = $start_stock+$end_stock;
                 //虚拟仓库存周转率
                 $arr['virtual_turnover_rate'] = $sum ? round($stock_consume_num/$sum/2,2) : 0;
-                dump($order_sales_num);
-                dump($out_stock_num);
-                dump($stock_consume_num);
-                dump($start_stock);
-                dump($end_stock);
-                dump($sum);
-                dump($arr['virtual_turnover_rate']);exit;
                 /*
                  * 虚拟仓库存周转天数：所选时间段的天数/库存周转率
                  * */
