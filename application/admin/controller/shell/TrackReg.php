@@ -879,8 +879,10 @@ class TrackReg extends Backend
         $arr['update_user_change_rate'] = $update_num ? round($order_user_count2 / $update_num * 100, 0) : 0;
         //虚拟库存
         $virtual_where['platform_type'] = 1;
-        $virtual_where['category_id'] = ['<>',43];
-        $arr['virtual_stock'] = $model->where($virtual_where)->sum('stock');
+        $virtual_where['i.category_id'] = ['<>',43];
+        $virtual_where['i.is_del'] = 1;
+        $virtual_where['i.is_open'] = 1;
+        $arr['virtual_stock'] = $model->alias('p')->join('fa_item i','p.sku=i.sku')->where($virtual_where)->sum('p.stock');
         //在售，预售，下架
         $item = new \app\admin\model\itemmanage\Item();
         $item_platform = new \app\admin\model\itemmanage\ItemPlatformSku;
@@ -1014,8 +1016,10 @@ class TrackReg extends Backend
         $arr['update_user_change_rate'] = $update_num ? round($order_user_count2 / $update_num * 100, 0) : 0;
         //虚拟库存
         $virtual_where['platform_type'] = 2;
-        $virtual_where['category_id'] = ['<>',43];
-        $arr['virtual_stock'] = $model->where($virtual_where)->sum('stock');
+        $virtual_where['i.category_id'] = ['<>',43];
+        $virtual_where['i.is_del'] = 1;
+        $virtual_where['i.is_open'] = 1;
+        $arr['virtual_stock'] = $model->alias('p')->join('fa_item i','p.sku=i.sku')->where($virtual_where)->sum('p.stock');
         //在售，预售，下架
         //在售，预售，下架
         $item = new \app\admin\model\itemmanage\Item();
@@ -1154,8 +1158,10 @@ class TrackReg extends Backend
         $arr['update_user_change_rate'] = $update_num ? round($order_user_count2 / $update_num * 100, 0) : 0;
         //虚拟库存
         $virtual_where['platform_type'] = 3;
-        $virtual_where['category_id'] = ['<>',43];
-        $arr['virtual_stock'] = $model->where($virtual_where)->sum('stock');
+        $virtual_where['i.category_id'] = ['<>',43];
+        $virtual_where['i.is_del'] = 1;
+        $virtual_where['i.is_open'] = 1;
+        $arr['virtual_stock'] = $model->alias('p')->join('fa_item i','p.sku=i.sku')->where($virtual_where)->sum('p.stock');
         //在售，预售，下架
         $item = new \app\admin\model\itemmanage\Item();
         $item_platform = new \app\admin\model\itemmanage\ItemPlatformSku;
@@ -1191,12 +1197,14 @@ class TrackReg extends Backend
         $date_time = date('Y-m-d', strtotime("-1 day"));
         //meeloog
         $site_where['platform_type'] = $platform_where['platform_type'] = 4;
-        $where['category_id'] = ['<>',43];
+        $where['i.category_id'] = ['<>',43];
+        $where['i.is_del'] = 1;
+        $where['i.is_open'] = 1;
+
         $arr = [];
         $arr['site'] = 4;
         $arr['day_date'] = $date_time;
-        $arr['virtual_stock'] = $model->where($where)->where($platform_where)->sum('stock');
-
+        $arr['virtual_stock'] = $model->alias('p')->join('fa_item i','p.sku=i.sku')->where($where)->where($platform_where)->sum('p.stock');
         //在售，预售，下架
         $arr['glass_in_sale_num'] =$item_platform->where($map_where)->where($site_where)->where('outer_sku_status',1)->count();
         $arr['glass_shelves_num'] =$item_platform->where($map_where)->where($site_where)->where('outer_sku_status',2)->count();
@@ -1209,7 +1217,7 @@ class TrackReg extends Backend
         //批发站
         $site_where['platform_type'] = $platform_where['platform_type'] = 5;
         $arr['site'] = 5;
-        $arr['virtual_stock'] = $model->where($where)->where($platform_where)->sum('stock');
+        $arr['virtual_stock'] = $model->alias('p')->join('fa_item i','p.sku=i.sku')->where($where)->where($platform_where)->sum('p.stock');
         //在售，预售，下架
         $arr['glass_in_sale_num'] =$item_platform->where($map_where)->where($site_where)->where('outer_sku_status',1)->count();
         $arr['glass_shelves_num'] =$item_platform->where($map_where)->where($site_where)->where('outer_sku_status',2)->count();
@@ -1222,7 +1230,7 @@ class TrackReg extends Backend
         //亚马逊
         $site_where['platform_type'] = $platform_where['platform_type'] = 8;
         $arr['site'] = 8;
-        $arr['virtual_stock'] = $model->where($where)->where($platform_where)->sum('stock');
+        $arr['virtual_stock'] = $model->alias('p')->join('fa_item i','p.sku=i.sku')->where($where)->where($platform_where)->sum('p.stock');
         //在售，预售，下架
         $arr['glass_in_sale_num'] =$item_platform->where($map_where)->where($site_where)->where('outer_sku_status',1)->count();
         $arr['glass_shelves_num'] =$item_platform->where($map_where)->where($site_where)->where('outer_sku_status',2)->count();
@@ -1235,7 +1243,7 @@ class TrackReg extends Backend
         //zeelool_es
         $site_where['platform_type'] = $platform_where['platform_type'] = 9;
         $arr['site'] = 9;
-        $arr['virtual_stock'] = $model->where($where)->where($platform_where)->sum('stock');
+        $arr['virtual_stock'] = $model->alias('p')->join('fa_item i','p.sku=i.sku')->where($where)->where($platform_where)->sum('p.stock');
         //在售，预售，下架
         $arr['glass_in_sale_num'] =$item_platform->where($map_where)->where($site_where)->where('outer_sku_status',1)->count();
         $arr['glass_shelves_num'] =$item_platform->where($map_where)->where($site_where)->where('outer_sku_status',2)->count();
@@ -1248,7 +1256,7 @@ class TrackReg extends Backend
         //zeelool_de
         $site_where['platform_type'] = $platform_where['platform_type'] = 10;
         $arr['site'] = 10;
-        $arr['virtual_stock'] = $model->where($where)->where($platform_where)->sum('stock');
+        $arr['virtual_stock'] = $model->alias('p')->join('fa_item i','p.sku=i.sku')->where($where)->where($platform_where)->sum('p.stock');
         //在售，预售，下架
         $arr['glass_in_sale_num'] =$item_platform->where($map_where)->where($site_where)->where('outer_sku_status',1)->count();
         $arr['glass_shelves_num'] =$item_platform->where($map_where)->where($site_where)->where('outer_sku_status',2)->count();
@@ -1261,7 +1269,7 @@ class TrackReg extends Backend
         //zeelool_jp
         $site_where['platform_type'] = $platform_where['platform_type'] = 11;
         $arr['site'] = 11;
-        $arr['virtual_stock'] = $model->where($where)->where($platform_where)->sum('stock');
+        $arr['virtual_stock'] = $model->alias('p')->join('fa_item i','p.sku=i.sku')->where($where)->where($platform_where)->sum('p.stock');
         //在售，预售，下架
         $arr['glass_in_sale_num'] =$item_platform->where($map_where)->where($site_where)->where('outer_sku_status',1)->count();
         $arr['glass_shelves_num'] =$item_platform->where($map_where)->where($site_where)->where('outer_sku_status',2)->count();
