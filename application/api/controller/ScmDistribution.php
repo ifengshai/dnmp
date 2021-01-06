@@ -1823,11 +1823,13 @@ class ScmDistribution extends Scm
             switch ($check_refuse) {
                 case 1:
                     $param['check_remark'] = 'SKU缺失';
-                    $msg_info = 'SKU缺失，退回至待合单';
+                    $msg_info_l = 'SKU缺失，';
+                    $msg_info_r = '退回至待合单';
                     break;
                 case 2:
                     $param['check_remark'] = '配错镜框';
-                    $msg_info = '配错镜框，退回至待配货';
+                    $msg_info_l = '配错镜框，';
+                    $msg_info_r = '退回至待配货';
                     break;
             }
             $msg = '审单拒绝';
@@ -2053,11 +2055,36 @@ class ScmDistribution extends Scm
             $this->_new_order_process->rollback();
             $this->_new_order_item_process->rollback();
             $this->_product_bar_code_item->rollback();
-            DistributionLog::record((object)['nickname' => $create_person], $item_ids, 8, $e->getMessage() . '主单ID' . $row['order_id'] . $msg . '失败' . $msg_info);
+            DistributionLog::record((object)['nickname' => $create_person], $item_ids, 8, $e->getMessage() . '主单ID' . $row['order_id'] . $msg . '失败' . $msg_info_l.$msg_info_r);
             $this->error($e->getMessage(), [], 408);
         }
-
-        DistributionLog::record((object)['nickname' => $create_person], $item_ids, 8, '主单ID' . $row['order_id'] . $msg . '成功' . $msg_info);
+        //打印操作记录
+        if (1 != $check_refuse) {
+            $item_order_numbers = $this->_new_order_item_process->where(['item_order_number' => ['in',$item_order_numbers]])->column('id');
+            $item_order_numbers = collection($item_order_numbers)->toArray();
+            $item_ids_diff = array_diff($item_ids, $item_order_numbers);
+            if (!empty($item_ids_diff)) {
+                foreach ($item_ids_diff as $key => $value) {
+                    $item_numbers = $this->_new_order_item_process->where(['id' => $value])->column('item_order_number');
+                    DistributionLog::record((object)['nickname' => $create_person], [$item_ids_diff[$key]], 8, '主单ID' . $row['order_id'] . $msg . '成功SKU缺失，' .$item_numbers[0].'退回至待合单');
+                }
+                foreach ($item_order_numbers as $key => $value) {
+                    $item_numbers = $this->_new_order_item_process->where(['id' => $value])->column('item_order_number');
+                    DistributionLog::record((object)['nickname' => $create_person], [$item_order_numbers[$key]], 8, '主单ID' . $row['order_id'] . $msg . '成功配错镜框，'.$item_numbers[0].'退回至待配货');
+                }
+            }else{
+                foreach ($item_ids as $key => $value) {
+                    $item_numbers = $this->_new_order_item_process->where(['id' => $value])->column('item_order_number');
+                    DistributionLog::record((object)['nickname' => $create_person], [$item_ids[$key]], 8, '主单ID' . $row['order_id'] . $msg . '成功' . $msg_info_l.$item_numbers[0].$msg_info_r);
+                }
+            }
+        }else{
+            foreach ($item_ids as $key => $value) {
+                $item_numbers = $this->_new_order_item_process->where(['id' => $value])->column('item_order_number');
+                DistributionLog::record((object)['nickname' => $create_person], [$item_ids[$key]], 8, '主单ID' . $row['order_id'] . $msg . '成功' . $msg_info_l.$item_numbers[0].$msg_info_r);
+            } 
+        }
+        
         $this->success($msg . '成功', [], 200);
     }
 
