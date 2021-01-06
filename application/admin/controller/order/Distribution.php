@@ -258,7 +258,7 @@ class Distribution extends Backend
                 }
             };
             //筛选库位号
-            if ($filter['stock_house_num']) {
+            if ($filter['stock_house_num'] || $filter['shelf_number']) {
                 if (8 == $label) { //跟单
                     $house_type = 4;
                 } elseif (3 == $label) { //待配镜片-定制片
@@ -266,14 +266,20 @@ class Distribution extends Backend
                 } else { //合单
                     $house_type = 2;
                 }
+                $stock_where = ['type' => $house_type];
+                if ($filter['stock_house_num']) {
+                    $stock_where['coding'] = ['like', $filter['stock_house_num']. '%'];
+                    unset($filter['stock_house_num']);
+                }
+                if ($filter['shelf_number']) {
+                    $arr =['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
+                    $stock_where['shelf_number'] = $arr[$filter['shelf_number']-1];
+                    unset($filter['shelf_number']);
+                }
                 $stock_house_id = $this->_stock_house
-                    ->where([
-                        'coding' => ['like', $filter['stock_house_num'] . '%'],
-                        'type' => $house_type
-                    ])
+                    ->where($stock_where)
                     ->column('id');
                 $map['a.temporary_house_id|a.abnormal_house_id|c.store_house_id'] = ['in', $stock_house_id ?: [-1]];
-                unset($filter['stock_house_num']);
             }
 
             if ($filter['increment_id']) {
