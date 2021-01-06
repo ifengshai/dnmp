@@ -125,7 +125,11 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                             ],
                             yAxis: [
                                 {
-                                    type: 'value'
+                                    type: 'value',
+                                    name: '订单数量',
+                                    axisLabel: {
+                                        formatter: '{value} 个'
+                                    }
                                 },
                             ],
                         }
