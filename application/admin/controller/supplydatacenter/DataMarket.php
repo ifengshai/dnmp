@@ -4,6 +4,7 @@ namespace app\admin\controller\supplydatacenter;
 
 use app\admin\model\OrderStatistics;
 use app\common\controller\Backend;
+use function GuzzleHttp\Psr7\str;
 use think\Cache;
 use think\Controller;
 use think\Db;
@@ -200,7 +201,10 @@ class DataMarket extends Backend
         $month_start=date('Y-m-01',$start);
         $month_end_first = date('Y-m-01', $end);
         $month_end=date('Y-m-d 23:59:59',strtotime("$month_end_first +1 month -1 day"));
-        $time_where['createtime'] = $order_time_where['payment_time'] = ['between', [$month_start, $month_end]];
+        $month_start_time = strtotime($month_start);
+        $month_end_time = strtotime($month_end);
+        $time_where['createtime'] = ['between', [$month_start, $month_end]];
+        $order_time_where['payment_time'] = ['between', [$month_start_time, $month_end_time]];
         $purchase_where['purchase_status'] = ['>=',2];
         $purchase_where['is_del'] = 1;
         //（所选时间包含的月份整月）月度已审核采购单采购的数量--暂时使用的是采购单创建时间
@@ -253,7 +257,7 @@ class DataMarket extends Backend
                 //站点虚拟仓期末实时库存
                 $end_stock_where = [];
                 $end_stock_where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $createat[3] . "'")];
-                $end_stock = Db::table('fa_datacenter_day')->where($start_stock_where)->where('site',$order_platform)->value('virtual_stock');
+                $end_stock = Db::table('fa_datacenter_day')->where($end_stock_where)->where('site',$order_platform)->value('virtual_stock');
                 $sum = $start_stock+$end_stock;
                 //虚拟仓库存周转率
                 $arr['virtual_turnover_rate'] = $sum ? round($stock_consume_num/$sum/2,2) : 0;
@@ -261,7 +265,7 @@ class DataMarket extends Backend
                  * 虚拟仓库存周转天数：所选时间段的天数/库存周转率
                  * */
                 //库存周转天数
-                $days = round(($createat[3] - $createat[0]) / 3600 / 24);
+                $days = round(($end - $start) / 3600 / 24);
                 $arr['virtual_turnover_days_rate'] = $arr['virtual_turnover_rate'] ? round($days/$arr['virtual_turnover_rate']) : 0;
                 /*
                  * 虚拟仓月度进销比：（所选时间包含的月份整月）所选站点月度虚拟仓入库数量/站点虚拟仓月度销售数量（订单、出库）
@@ -269,7 +273,10 @@ class DataMarket extends Backend
                 $month_start=date('Y-m-01',$start);
                 $month_end_first = date('Y-m-01', $end);
                 $month_end=date('Y-m-d 23:59:59',strtotime("$month_end_first +1 month -1 day"));
-                $time_where['createtime'] = $order_where['payment_time'] = ['between', [$month_start, $month_end]];
+                $start_time = strtotime($month_start);
+                $end_time = strtotime($month_end);
+                $time_where['createtime'] = ['between', [$month_start, $month_end]];
+                $order_where['payment_time'] = ['between', [$start_time, $end_time]];
                 $instock_where['platform_id'] = $order_platform;
                 $instock_where['status'] = 2;
                 //（所选时间包含的月份整月）所选站点月度虚拟仓入库数量
