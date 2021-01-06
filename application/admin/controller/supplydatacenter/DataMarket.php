@@ -261,7 +261,7 @@ class DataMarket extends Backend
                  * 虚拟仓库存周转天数：所选时间段的天数/库存周转率
                  * */
                 //库存周转天数
-                $days = round(($createat[3] - $createat[0]) / 3600 / 24);
+                $days = round(($end - $start) / 3600 / 24);
                 $arr['virtual_turnover_days_rate'] = $arr['virtual_turnover_rate'] ? round($days/$arr['virtual_turnover_rate']) : 0;
                 /*
                  * 虚拟仓月度进销比：（所选时间包含的月份整月）所选站点月度虚拟仓入库数量/站点虚拟仓月度销售数量（订单、出库）
