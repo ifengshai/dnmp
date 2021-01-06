@@ -263,23 +263,35 @@ class Distribution extends Backend
                     $house_type = 4;
                 } elseif (3 == $label) { //待配镜片-定制片
                     $house_type = 3;
-                } else { //合单
+                } elseif (1 == $label){
+                    $house_type = 1;
+                }else { //合单
                     $house_type = 2;
                 }
                 $stock_where = ['type' => $house_type];
                 if ($filter['stock_house_num']) {
                     $stock_where['coding'] = ['like', $filter['stock_house_num']. '%'];
-                    unset($filter['stock_house_num']);
                 }
                 if ($filter['shelf_number']) {
                     $arr =['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
                     $stock_where['shelf_number'] = $arr[$filter['shelf_number']-1];
-                    unset($filter['shelf_number']);
                 }
-                $stock_house_id = $this->_stock_house
+                $stock_house = $this->_stock_house
+                    ->alias('a')
+                    ->field('a.id,b.sku')
+                    ->join(['fa_store_sku' => 'b'], 'a.id=b.store_id')
                     ->where($stock_where)
-                    ->column('id');
-                $map['a.temporary_house_id|a.abnormal_house_id|c.store_house_id'] = ['in', $stock_house_id ?: [-1]];
+                    ->select();
+                $stock_house = collection($stock_house)->toArray();
+                $stock_house_id = array_column($stock_house, 'id');
+                $stock_house_sku = array_column($stock_house, 'sku');
+                if ($filter['shelf_number']) {
+                    $map['a.sku'] = ['in',$stock_house_sku];
+                    unset($filter['shelf_number']);
+                }else{
+                    $map['a.temporary_house_id|a.abnormal_house_id|c.store_house_id'] = ['in', $stock_house_id ?: [-1]];
+                    unset($filter['stock_house_num']);
+                }
             }
 
             if ($filter['increment_id']) {

@@ -18,6 +18,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
             $('.btn-batch-printed').removeClass('hide');
             $('.btn-tag-printed').removeClass('hide');
             $('.btn-batch-export-xlsz').removeClass('hide');
+            $('select[name="shelf_number"]').parents('.form-group').show();
         }else if(2 == value){
             $('.btn-batch-printed').removeClass('hide');
             $('.btn-product').removeClass('hide');
@@ -42,7 +43,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
             $('select[name="abnormal"]').parents('.form-group').show();
             $('select[name="work_status"]').parents('.form-group').show();
             $('select[name="work_type"]').parents('.form-group').show();
-            $('select[name="shelf_number"]').parents('.form-group').show();
             $('#stock_house_num').parents('.form-group').show();
             $('.btn-creat-work-order').removeClass('hide');
             $('.btn-batch-export-xls').removeClass('hide');
