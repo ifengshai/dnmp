@@ -1205,8 +1205,6 @@ class TrackReg extends Backend
         $arr['site'] = 4;
         $arr['day_date'] = $date_time;
         $arr['virtual_stock'] = $model->alias('p')->join('fa_item i','p.sku=i.sku')->where($where)->where($platform_where)->sum('p.stock');
-        dump($arr['virtual_stock']);exit;
-
         //在售，预售，下架
         $arr['glass_in_sale_num'] =$item_platform->where($map_where)->where($site_where)->where('outer_sku_status',1)->count();
         $arr['glass_shelves_num'] =$item_platform->where($map_where)->where($site_where)->where('outer_sku_status',2)->count();
