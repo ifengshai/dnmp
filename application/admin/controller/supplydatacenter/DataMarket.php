@@ -257,6 +257,13 @@ class DataMarket extends Backend
                 $sum = $start_stock+$end_stock;
                 //虚拟仓库存周转率
                 $arr['virtual_turnover_rate'] = $sum ? round($stock_consume_num/$sum/2,2) : 0;
+                dump($order_sales_num);
+                dump($out_stock_num);
+                dump($stock_consume_num);
+                dump($start_stock);
+                dump($end_stock);
+                dump($sum);
+                dump($arr['virtual_turnover_rate']);exit;
                 /*
                  * 虚拟仓库存周转天数：所选时间段的天数/库存周转率
                  * */
