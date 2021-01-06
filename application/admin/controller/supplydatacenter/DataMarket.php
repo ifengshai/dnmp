@@ -4,6 +4,7 @@ namespace app\admin\controller\supplydatacenter;
 
 use app\admin\model\OrderStatistics;
 use app\common\controller\Backend;
+use function GuzzleHttp\Psr7\str;
 use think\Cache;
 use think\Controller;
 use think\Db;
@@ -200,7 +201,10 @@ class DataMarket extends Backend
         $month_start=date('Y-m-01',$start);
         $month_end_first = date('Y-m-01', $end);
         $month_end=date('Y-m-d 23:59:59',strtotime("$month_end_first +1 month -1 day"));
-        $time_where['createtime'] = $order_time_where['payment_time'] = ['between', [$month_start, $month_end]];
+        $month_start_time = strtotime($month_start);
+        $month_end_time = strtotime($month_end);
+        $time_where['createtime'] = ['between', [$month_start, $month_end]];
+        $order_time_where['payment_time'] = ['between', [$month_start_time, $month_end_time]];
         $purchase_where['purchase_status'] = ['>=',2];
         $purchase_where['is_del'] = 1;
         //（所选时间包含的月份整月）月度已审核采购单采购的数量--暂时使用的是采购单创建时间
@@ -269,7 +273,10 @@ class DataMarket extends Backend
                 $month_start=date('Y-m-01',$start);
                 $month_end_first = date('Y-m-01', $end);
                 $month_end=date('Y-m-d 23:59:59',strtotime("$month_end_first +1 month -1 day"));
-                $time_where['createtime'] = $order_where['payment_time'] = ['between', [$month_start, $month_end]];
+                $start_time = strtotime($month_start);
+                $end_time = strtotime($month_end);
+                $time_where['createtime'] = ['between', [$month_start, $month_end]];
+                $order_where['payment_time'] = ['between', [$start_time, $end_time]];
                 $instock_where['platform_id'] = $order_platform;
                 $instock_where['status'] = 2;
                 //（所选时间包含的月份整月）所选站点月度虚拟仓入库数量
