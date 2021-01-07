@@ -2066,7 +2066,7 @@ class ScmDistribution extends Scm
             if (!empty($item_ids_diff)) {
                 foreach ($item_ids_diff as $key => $value) {
                     $item_numbers = $this->_new_order_item_process->where(['id' => $value])->column('item_order_number');
-                    DistributionLog::record((object)['nickname' => $create_person], [$item_ids_diff[$key]], 8, '主单ID' . $row['order_id'] . $msg . '成功SKU缺失，' .$item_numbers[0].'退回至待合单');
+                    DistributionLog::record((object)['nickname' => $create_person], [$item_ids_diff[$key]], 8, '主单ID' . $row['order_id'] . $msg . $item_numbers[0].'退回至待合单');
                 }
                 foreach ($item_order_numbers as $key => $value) {
                     $item_numbers = $this->_new_order_item_process->where(['id' => $value])->column('item_order_number');
