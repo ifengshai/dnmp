@@ -799,6 +799,341 @@ class Test extends Backend
         echo 'ok';
     }
 
+
+
+
+
+    /**
+     * 处理绑错的商品条形码 第一步 解绑
+     *
+     * @Description
+     * @author wpl
+     * @since 2021/01/05 10:57:09 
+     * @return void
+     */
+    public function process_error_number()
+    {
+        $list = Db::name('zzzzzzz_temp')->column('product_number');
+        $params['sku'] = '';
+        $params['in_stock_id'] = 0;
+        $params['purchase_id'] = 0;
+        $params['batch_id'] = 0;
+        $params['logistics_id'] = 0;
+        $params['check_id'] = 0;
+        $params['batch_id'] = 0;
+        $params['library_status'] = 1;
+        Db::name('product_barcode_item')->where(['code' => ['in', $list]])->update($params);
+    }
+
+
+    /**
+     * 绑定sku编码
+     *
+     * @Description
+     * @author wpl
+     * @since 2021/01/05 11:25:04 
+     * @return void
+     */
+    public function process_number_new()
+    {
+        $list = Db::name('zzzzzzz_temp2')->select();
+        foreach ($list as $k => $v) {
+            $params['sku'] = $v['sku'];
+            $params['library_status'] = 1;
+            Db::name('product_barcode_item')->where(['code' => ['in', $v['product_number']]])->update($params);
+        }
+        echo "ok";
+    }
+
+    /**
+     * 绑定sku编码
+     *
+     * @Description
+     * @author wpl
+     * @since 2021/01/05 11:25:04 
+     * @return void
+     */
+    public function process_number_new2()
+    {
+        $list = Db::name('zzzzzzz_temp3')->select();
+        foreach ($list as $k => $v) {
+            $params['sku'] = $v['sku'];
+            $params['library_status'] = 1;
+            Db::name('product_barcode_item')->where(['code' => ['in', $v['product_number']]])->update($params);
+        }
+        echo "ok";
+    }
+
+
+    /**
+     * 清空编码错误的sku 库存
+     *
+     * @Description
+     * @author wpl
+     * @since 2021/01/05 11:28:43 
+     * @return void
+     */
+    public function process_stock()
+    {
+        $sku = [
+            'WA581464-03',
+            'OP313158-02',
+            'OM02119-02',
+            'Chain-01',
+            'ER5032-01',
+            'OX461818-03'
+        ];
+        $list = Db::name('zzzzzzz_temp')->where(['sku' => ['not in', $sku]])->group('sku')->column('sku');
+        $item = new \app\admin\model\itemmanage\Item();
+        $platformsku = new \app\admin\model\itemmanage\ItemPlatformSku();
+        $item->where(['sku' => ['in', $list]])->update(['stock' => 0, 'available_stock' => 0]);
+        $platformsku->where(['sku' => ['in', $list]])->update(['stock' => 0]);
+    }
+
+
+    /**
+     * 累加新绑定sku库存
+     *
+     * @Description
+     * @author wpl
+     * @since 2021/01/05 11:28:43 
+     * @return void
+     */
+    public function process_stock_new()
+    {
+
+        $list = Db::name('zzzzzzz_temp2')->field('sku,count(distinct product_number) as num')->group('sku')->select();
+        $item = new \app\admin\model\itemmanage\Item();
+        $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
+        foreach ($list as $k => $v) {
+            $item->where(['sku' => $v['sku']])->inc('stock', $v['num'])->inc('available_stock', $v['num'])->update();
+            $platform->where(['sku' => $v['sku'], 'platform_type' => 4])->setInc('stock', $v['num']);
+        }
+    }
+
+
+    /**
+     * 累加新绑定sku库存
+     *
+     * @Description
+     * @author wpl
+     * @since 2021/01/05 11:28:43 
+     * @return void
+     */
+    public function process_stock_new2()
+    {
+
+        $list = Db::name('zzzzzzz_temp3')->field('sku,count(distinct product_number) as num')->group('sku')->select();
+        $item = new \app\admin\model\itemmanage\Item();
+        $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
+        foreach ($list as $k => $v) {
+            $item->where(['sku' => $v['sku']])->inc('stock', $v['num'])->inc('available_stock', $v['num'])->update();
+            $platform->where(['sku' => $v['sku'], 'platform_type' => 4])->setInc('stock', $v['num']);
+        }
+    }
+
+
+
+    /**
+     * 处理SKU编码绑定关系 - 入库单
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/12/18 11:10:38 
+     * @return void
+     */
+    public function process_sku_number_new2()
+    {
+        $skus = Db::name('zzzzzzz_temp2')->group('sku')->column('sku');
+        $instock = new \app\admin\model\warehouse\Instock();
+        $list = $instock->alias('a')->where(['status' => 2, 'type_id' => 1])->where(['b.sku' => ['in', $skus]])->field('a.id,a.check_id,b.purchase_id,b.sku,b.in_stock_num')->join(['fa_in_stock_item' => 'b'], 'a.id=b.in_stock_id')->order('a.createtime desc')->select();
+        $list = collection($list)->toArray();
+        foreach ($list as $k => $v) {
+            //查询对应质检单
+            $check = Db::name('check_order')->where(['id' => $v['check_id']])->find();
+            if ($v['in_stock_num'] < 0) {
+                continue;
+            }
+            $res = Db::name('zzzzzzz_temp2')->where(['is_process' => 0, 'sku' => $v['sku']])->limit($v['in_stock_num'])->select();
+            if (!$res) {
+                continue;
+            }
+            $codes = array_column($res, 'product_number');
+            $where = [];
+            $where['code'] = ['in', $codes];
+            $params = [];
+            $params['in_stock_id'] = $v['id'];
+            $params['purchase_id'] = $v['purchase_id'];
+            $params['check_id'] = $v['check_id'];
+            $params['is_quantity'] = 1;
+            $params['batch_id'] = $check['batch_id'];
+            $params['logistics_id'] = $check['logistics_id'];
+            Db::name('product_barcode_item')->where($where)->update($params);
+
+            Db::name('zzzzzzz_temp2')->where(['product_number' => ['in', $codes]])->update(['is_process' => 1]);
+
+            echo $k . "\n";
+        }
+        echo 'ok';
+    }
+
+
+    /**
+     * 处理SKU编码绑定关系 - 入库单 end
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/12/18 11:10:38 
+     * @return void
+     */
+    public function process_sku_number_new3()
+    {
+        $skus = Db::name('zzzzzzz_temp3')->group('sku')->column('sku');
+        $instock = new \app\admin\model\warehouse\Instock();
+        $list = $instock->alias('a')->where(['status' => 2, 'type_id' => 1])->where(['b.sku' => ['in', $skus]])->field('a.id,a.check_id,b.purchase_id,b.sku,b.in_stock_num')->join(['fa_in_stock_item' => 'b'], 'a.id=b.in_stock_id')->order('a.createtime desc')->select();
+        $list = collection($list)->toArray();
+        foreach ($list as $k => $v) {
+            //查询对应质检单
+            $check = Db::name('check_order')->where(['id' => $v['check_id']])->find();
+            if ($v['in_stock_num'] < 0) {
+                continue;
+            }
+            $res = Db::name('zzzzzzz_temp3')->where(['is_process' => 0, 'sku' => $v['sku']])->limit($v['in_stock_num'])->select();
+            if (!$res) {
+                continue;
+            }
+            $codes = array_column($res, 'product_number');
+            $where = [];
+            $where['code'] = ['in', $codes];
+            $params = [];
+            $params['in_stock_id'] = $v['id'];
+            $params['purchase_id'] = $v['purchase_id'];
+            $params['check_id'] = $v['check_id'];
+            $params['is_quantity'] = 1;
+            $params['batch_id'] = $check['batch_id'];
+            $params['logistics_id'] = $check['logistics_id'];
+            Db::name('product_barcode_item')->where($where)->update($params);
+
+            Db::name('zzzzzzz_temp3')->where(['product_number' => ['in', $codes]])->update(['is_process' => 1]);
+
+            echo $k . "\n";
+        }
+        echo 'ok';
+
+
+
+        
+    }
+
+
+
+
+
+
+    /**
+     * 累加新绑定sku库存
+     *
+     * @Description
+     * @author wpl
+     * @since 2021/01/05 11:28:43 
+     * @return void
+     */
+    public function process_stock_new_bak()
+    {
+
+        $list = Db::name('zzzzzzz_temp2')->field('sku,count(distinct product_number) as num')->group('sku')->select();
+        $item = new \app\admin\model\itemmanage\Item();
+        $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
+        foreach ($list as $k => $v) {
+            $item->where(['sku' => $v['sku']])->inc('stock', $v['num'])->inc('available_stock', $v['num'])->update();
+            $item_map['sku'] = $v['sku'];
+            $item_map['is_del'] = 1;
+            if ($v['sku']) {
+                $available_stock = $v['num'];
+                //查出映射表中此sku对应的所有平台sku 并根据库存数量进行排序（用于遍历数据的时候首先分配到那个站点）
+
+                $item_platform_sku = Db::connect('database.db_stock')->table('fa_item_platform_sku')->where('sku', $v['sku'])->order('stock asc')->field('platform_type,stock')->select();
+                if (!$item_platform_sku) {
+                    continue;
+                }
+                //站点数量
+                $all_num = count($item_platform_sku);
+                $whole_num = Db::connect('database.db_stock')->table('fa_item_platform_sku')
+                    ->where('sku', $v['sku'])
+                    ->field('stock')
+                    ->select();
+                //取绝对值总库存数
+                $num_num = 0;
+                foreach ($whole_num as $kk => $vv) {
+                    $num_num += abs($vv['stock']);
+                }
+                //总可用库存
+                $stock_num = $available_stock;
+                //总虚拟库存
+                $stock_all_num = array_sum(array_column($item_platform_sku, 'stock'));
+                if ($stock_all_num < 0) {
+                    $stock_all_num = 0;
+                }
+                //如果现有总虚拟库存为0 平均分给各站点
+                if ($stock_all_num == 0) {
+                    $rate_rate = 1 / $all_num;
+                    foreach ($item_platform_sku as $key => $val) {
+                        //最后一个站点 剩余数量分给最后一个站
+                        if (($all_num - $key) == 1) {
+                            $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setInc('stock', $stock_num);
+                        } else {
+                            $num = round($available_stock * $rate_rate);
+                            $stock_num -= $num;
+                            $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setInc('stock', $num);
+                        }
+                    }
+                } else {
+                    foreach ($item_platform_sku as $key => $val) {
+                        //最后一个站点 剩余数量分给最后一个站
+                        if (($all_num - $key) == 1) {
+                            $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setInc(['stock' => $stock_num]);
+                        } else {
+                            //如果绝对值虚拟库存为0 平均分
+                            if ($num_num  == 0) {
+                                $rate_rate = 1 / $all_num;
+                                $num =  round($available_stock * $rate_rate);
+                            } else {
+                                $num = round($available_stock * abs($val['stock']) / $num_num);
+                            }
+                            $stock_num -= $num;
+                            $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setInc(['stock' => $num]);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     /**
      * 计算sku实时库存
      *
