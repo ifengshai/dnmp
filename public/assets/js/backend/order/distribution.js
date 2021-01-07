@@ -25,6 +25,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
         }else if(3 == value){
             $('#stock_house_num').parents('.form-group').show();
             $('.btn-batch-printed').removeClass('hide');
+            $('.btn-sign-abnormals').removeClass('hide');
             $('.btn-lens').removeClass('hide');
         }else if(4 == value){
             $('.btn-batch-printed').removeClass('hide');
@@ -420,6 +421,34 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                 });
                             }
                         });
+                    }
+                );
+            });
+
+            //批量标记异常
+            $('.btn-sign-abnormals').click(function () {
+                var ids = Table.api.selectedids(table);
+                Layer.confirm(
+                    __('确定要为这%s条子订单标记异常么?', ids.length),
+                    { icon: 3, title: __('Warning'), shadeClose: true },
+                    function (index) {
+                        alert(ids);
+                        /*Layer.close(index);
+                        Backend.api.ajax({
+                            url: Config.moduleurl + '/order/distribution/sign-abnormals',
+                            data: { id_params: ids },
+                            type: 'post'
+                        }, function (data, ret) {
+                            if (data.url) {
+                                //跳转添加工单页面
+                                Fast.api.open(data.url, __('创建工单'), {
+                                    area: ["100%", "100%"],
+                                    end: function () {
+                                        table.bootstrapTable('refresh');
+                                    }
+                                });
+                            }
+                        });*/
                     }
                 );
             });

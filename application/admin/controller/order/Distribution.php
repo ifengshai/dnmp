@@ -300,6 +300,17 @@ class Distribution extends Backend
                 unset($filter['increment_id']);
             }
 
+            if ($filter['item_order_number']) {
+                $ex_fil_arr = explode(' ' , $filter['item_order_number']);
+                if (count($ex_fil_arr) > 1) {
+                    $map['a.item_order_number'] = ['in', $ex_fil_arr];
+                }else{
+                    $map['a.item_order_number'] = ['like', $filter['item_order_number'] . '%'];
+                }
+                
+                unset($filter['item_order_number']);
+            }
+
             if ($filter['site']) {
                 $map['a.site'] = ['in', $filter['site']];
                 unset($filter['site']);
