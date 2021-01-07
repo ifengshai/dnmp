@@ -1232,4 +1232,168 @@ class ScmQuality extends Scm
 
         $this->success('签收成功', [], 200);
     }
+
+    /**
+     * 物流单批量签收功能
+     *
+     * Created by Phpstorm.
+     * User: jhh
+     * Date: 2021/1/7
+     * Time: 14:08:59
+     */
+    public function batch_logistics_sign()
+    {
+        $logistics_ids = $this->request->request('logistics_ids');
+        empty($logistics_ids) && $this->error(__('物流单ID不能为空'), [], 403);
+        $sign_number = $this->request->request('sign_number');
+        empty($sign_number) && $this->error(__('签收编号不能为空'), [], 403);
+
+        $logistics_ids = explode(',',$logistics_ids);
+        //检测物流单状态 未签收才能操作
+        foreach ($logistics_ids as $k => $v) {
+            $row = $this->_logistics_info->get($v);
+            (0 != $row['status'] || 1 != $row['type']) && $this->error(__('物流单号:'.$row['logistics_number'].'已签收，只有未签收状态才能操作,请检查当前所选的物流单号'), [], 405);
+        }
+
+
+        //签收关联操作
+        $this->_item->startTrans();
+        $this->_logistics_info->startTrans();
+        $this->_purchase_order->startTrans();
+        $this->_item_platform_sku->startTrans();
+        try {
+            foreach ($logistics_ids as $k => $v) {
+                $row = $this->_logistics_info->get($v);
+                $logistics_save = [
+                    'sign_person' => $this->auth->nickname,
+                    'sign_time' => date('Y-m-d H:i:s'),
+                    'status' => 1,
+                    'sign_number' => $sign_number
+                ];
+                $res = $this->_logistics_info->where('id',$v)->update($logistics_save);
+                false === $res && $this->error(__('签收失败'), [], 404);
+
+                //签收成功时更改采购单签收状态
+                $count = $this->_logistics_info->where(['purchase_id' => $row['purchase_id'], 'status' => 0])->count();
+                $purchase_save = [
+                    'purchase_status' => $count > 0 ? 9 : 7,
+                    'receiving_time' => date('Y-m-d H:i:s')
+                ];
+                $this->_purchase_order->where('id',$row['purchase_id'])->update($purchase_save);
+
+                //根据采购单获取补货单ID
+                $replenish_id = $this->_purchase_order->where(['id' => $row['purchase_id']])->value('replenish_id');
+
+                //获取补货单数据
+                $mapping_list = $this->_new_product_mapping
+                    ->field('website_type,rate,sku')
+                    ->where(['replenish_id' => $replenish_id])
+                    ->select();
+
+                //批次物流签收
+                if ($row['batch_id']) {
+                    //获取批次商品数据
+                    $batch_item_list = $this->_purchase_batch_item
+                        ->field('sku,arrival_num')
+                        ->where(['purchase_batch_id' => $row['batch_id']])
+                        ->select();
+                    foreach ($batch_item_list as $v) {
+                        $sku = $v['sku'];
+                        $arrival_num = $v['arrival_num'];
+                        //获取各站虚拟仓占比
+                        $rate_arr = array_filter($mapping_list, function ($value) use ($sku) {
+                            if ($value['sku'] == $sku) {
+                                return $value;
+                            }
+                        });
+                        //各站点列表总数
+                        $all_num = count($rate_arr);
+                        //在途库存数量
+                        $stock_num = $arrival_num;
+                        foreach ($rate_arr as $key => $val) {
+                            $website_type = $val['website_type'];
+                            //剩余数量分给最后一个站点
+                            if (($all_num - $key) == 1) {
+                                $num = $stock_num;
+                            } else {
+                                $num = round($arrival_num * $val['rate']);
+                                $stock_num -= $num;
+                            }
+                            //减站点在途
+                            $this->_item_platform_sku->where(['sku' => $sku, 'platform_type' => $website_type])->setDec('plat_on_way_stock', $num);
+                            //加站点待入库数量
+                            $this->_item_platform_sku->where(['sku' => $sku, 'platform_type' => $website_type])->setInc('wait_instock_num', $num);
+                        }
+                        //减全部在途
+                        $this->_item->where(['sku' => $sku])->setDec('on_way_stock', $arrival_num);
+                        //加全部待入库数量
+                        $this->_item->where(['sku' => $sku])->setInc('wait_instock_num', $arrival_num);
+                    }
+                } elseif ($row['purchase_id']) { //采购物流签收
+                    //获取采购单商品数据
+                    $purchase_item_list = $this->_purchase_order_item
+                        ->field('sku,purchase_num')
+                        ->where(['purchase_id' => $row['purchase_id']])
+                        ->select();
+                    foreach ($purchase_item_list as $v) {
+                        $sku = $v['sku'];
+                        $purchase_num = $v['purchase_num'];
+                        //获取各站虚拟仓占比
+                        $rate_arr = array_filter($mapping_list, function ($value) use ($sku) {
+                            if ($value['sku'] == $sku) {
+                                return $value;
+                            }
+                        });
+                        //各站点列表总数
+                        $all_num = count($rate_arr);
+                        //在途库存数量
+                        $stock_num = $purchase_num;
+                        foreach ($rate_arr as $key => $val) {
+                            $website_type = $val['website_type'];
+                            //剩余数量分给最后一个站点
+                            if (($all_num - $key) == 1) {
+                                $num = $stock_num;
+                            } else {
+                                $num = round($purchase_num * $val['rate']);
+                                $stock_num -= $num;
+                            }
+                            //减站点在途
+                            $this->_item_platform_sku->where(['sku' => $sku, 'platform_type' => $website_type])->setDec('plat_on_way_stock', $num);
+                            //加站点待入库数量
+                            $this->_item_platform_sku->where(['sku' => $sku, 'platform_type' => $website_type])->setInc('wait_instock_num', $num);
+                        }
+                        //减全部在途
+                        $this->_item->where(['sku' => $sku])->setDec('on_way_stock', $purchase_num);
+                        //加全部待入库数量
+                        $this->_item->where(['sku' => $sku])->setInc('wait_instock_num', $purchase_num);
+                    }
+                }
+            }
+
+            $this->_item->commit();
+            $this->_logistics_info->commit();
+            $this->_purchase_order->commit();
+            $this->_item_platform_sku->commit();
+        } catch (ValidateException $e) {
+            $this->_item->rollback();
+            $this->_logistics_info->rollback();
+            $this->_purchase_order->rollback();
+            $this->_item_platform_sku->rollback();
+            $this->error($e->getMessage(), [], 406);
+        } catch (PDOException $e) {
+            $this->_item->rollback();
+            $this->_logistics_info->rollback();
+            $this->_purchase_order->rollback();
+            $this->_item_platform_sku->rollback();
+            $this->error($e->getMessage(), [], 407);
+        } catch (Exception $e) {
+            $this->_item->rollback();
+            $this->_logistics_info->rollback();
+            $this->_purchase_order->rollback();
+            $this->_item_platform_sku->rollback();
+            $this->error($e->getMessage(), [], 408);
+        }
+
+        $this->success('签收成功', [], 200);
+    }
 }
