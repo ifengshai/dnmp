@@ -10,7 +10,8 @@
         width: 400px;
         display: list-item;
         /* list-style: none; */
-        padding-top:1mm;
+        padding-top: 1mm;
+        position: relative;
     }
 
     table.addpro {
@@ -42,13 +43,33 @@
         border-right: 1px solid #000;
         width: 35px;
     }
-
-  
+    .single_box > img{
+        position: absolute;
+        top: 35%;
+        left: 30%;
+        z-index: -1;    
+        width: 130px;
+    }
 </style>
 
 {if $list}
 {foreach $list as $v}
 <div class='single_box'>
+    {if $v['site'] == 1}
+    <img src="/assets/img/distribution/zeelool.jpg" alt="">
+    {elseif($v['site'] == 2) }
+    <img src="/assets/img/distribution/voogueme.png" alt="">
+    {elseif($v['site'] == 3) }
+    <img src="/assets/img/distribution/nihao.jpg" alt="">
+    {elseif($v['site'] == 5) }
+    <img src="/assets/img/distribution/wesee.jpg" alt="">
+    {elseif($v['site'] == 9) }
+    <img src="/assets/img/distribution/zeelool_es.jpg" alt="">
+    {elseif($v['site'] == 10) }
+    <img src="/assets/img/distribution/zeelool_de.jpg" alt="">
+    {elseif($v['site'] == 11) }
+    <img src="/assets/img/distribution/zeelool_jp.jpg" alt="">
+    {/if}
     <table width='380mm' height='200mm' border='0' cellspacing='0' cellpadding='0' class='addpro'>
         <tbody cellpadding='0'>
             <tr>
@@ -129,13 +150,13 @@
             <tr>
                 <td colspan='10' style=' text-align:center'>
                     {if $v['prismcheck'] == 'on'}
-                        {$v.web_lens_name}
-                        <br>
+                    {$v.web_lens_name}
+                    <br>
                     {else}
-                        {$v.prescription_type}
-                        <br>
+                    {$v.prescription_type}
+                    <br>
                     {/if}
-                        {$v.lens_name}
+                    {$v.lens_name}
                 </td>
             </tr>
         </tbody>
