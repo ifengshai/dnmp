@@ -5,6 +5,7 @@ namespace app\admin\controller\order;
 use app\admin\model\DistributionLog;
 use app\admin\model\saleaftermanage\WorkOrderChangeSku;
 use app\admin\model\saleaftermanage\WorkOrderList;
+use app\admin\model\warehouse\ProductBarCodeItem;
 use app\common\controller\Backend;
 use think\Request;
 use think\exception\PDOException;
@@ -136,6 +137,13 @@ class Distribution extends Backend
      */
     protected $_work_order_change_sku = null;
 
+    /**
+     * 商品条形码模型对象
+     * @var object
+     * @access protected
+     */
+    protected $_product_bar_code_item = null;
+
     public function _initialize()
     {
         parent::_initialize();
@@ -152,6 +160,7 @@ class Distribution extends Backend
         $this->_work_order_list = new WorkOrderList();
         $this->_work_order_measure = new WorkOrderMeasure();
         $this->_work_order_change_sku = new WorkOrderChangeSku();
+        $this->_product_bar_code_item = new ProductBarCodeItem();
     }
 
     /**
@@ -1755,17 +1764,25 @@ class Distribution extends Backend
         $this->_item->startTrans();
         $this->_item_platform_sku->startTrans();
         $this->_stock_log->startTrans();
+        $this->_product_bar_code_item->startTrans();
         try {
             $save_data['distribution_status'] = $status;
             //如果回退到待加工步骤之前，清空定制片库位ID及定制片处理状态
             if (4 > $status) {
                 $save_data['temporary_house_id'] = 0;
-
                 $save_data['customize_status'] = 0;
             }
 
             //子订单状态回滚
             $this->model->where(['id' => ['in', $ids]])->update($save_data);
+
+            //回退到待配货，解绑条形码
+            if (2 == $status) {
+                $this->_product_bar_code_item
+                    ->allowField(true)
+                    ->isUpdate(true, ['item_order_number' => ['in', $item_order_numbers]])
+                    ->save(['item_order_number' => '']);
+            }
                
             //记录日志
             DistributionLog::record($admin, array_column($item_list, 'id'), 6, $status_arr[$reason]['name']);
@@ -1830,17 +1847,20 @@ class Distribution extends Backend
             $this->_item->commit();
             $this->_item_platform_sku->commit();
             $this->_stock_log->commit();
+            $this->_product_bar_code_item->commit();
         } catch (PDOException $e) {
             $this->model->rollback();
             $this->_item->rollback();
             $this->_item_platform_sku->rollback();
             $this->_stock_log->rollback();
+            $this->_product_bar_code_item->rollback();
             $this->error($e->getMessage());
         } catch (Exception $e) {
             $this->model->rollback();
             $this->_item->rollback();
             $this->_item_platform_sku->rollback();
             $this->_stock_log->rollback();
+            $this->_product_bar_code_item->rollback();
             $this->error($e->getMessage());
         }
         $this->success('操作成功!', '', 'success', 200);
@@ -1964,6 +1984,7 @@ class Distribution extends Backend
             $this->_item_platform_sku->startTrans();
             $this->_item->startTrans();
             $this->_stock_log->startTrans();
+            $this->_product_bar_code_item->startTrans();
             try {
                 //异常库位占用数量-1
                 $this->_stock_house
@@ -1990,6 +2011,14 @@ class Distribution extends Backend
                 }
 
                 $this->model->where(['id' => $ids])->update($save_data);
+
+                //回退到待配货、待打印标签，解绑条形码
+                if (3 > $status) {
+                    $this->_product_bar_code_item
+                        ->allowField(true)
+                        ->isUpdate(true, ['item_order_number' => $item_info['item_order_number']])
+                        ->save(['item_order_number' => '']);
+                }
                    
                 //标记处理异常状态及时间
                 $this->_distribution_abnormal->where(['id' => $abnormal_info['id']])->update(['status' => 2, 'do_time' => time(), 'do_person' => $admin->nickname]);
@@ -2059,12 +2088,14 @@ class Distribution extends Backend
                 $this->_item_platform_sku->commit();
                 $this->_item->commit();
                 $this->_stock_log->commit();
+                $this->_product_bar_code_item->commit();
             } catch (PDOException $e) {
                 $this->model->rollback();
                 $this->_distribution_abnormal->rollback();
                 $this->_item_platform_sku->rollback();
                 $this->_item->rollback();
                 $this->_stock_log->rollback();
+                $this->_product_bar_code_item->rollback();
                 $this->error($e->getMessage());
             } catch (Exception $e) {
                 $this->model->rollback();
@@ -2072,6 +2103,7 @@ class Distribution extends Backend
                 $this->_item_platform_sku->rollback();
                 $this->_item->rollback();
                 $this->_stock_log->rollback();
+                $this->_product_bar_code_item->rollback();
                 $this->error($e->getMessage());
             }
 
