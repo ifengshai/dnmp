@@ -1591,7 +1591,7 @@ class Distribution extends Backend
                         'number_type' => 2,
                         'order_number' => $value['item_order_number'],
                         'distribution_stock_before' => $item_before['distribution_occupy_stock'],
-                        'distribution_stock_change' => -1,
+                        'distribution_stock_change' => 1,
                         'create_person' => session('admin.nickname'),
                         'create_time' => time()
                     ]);
