@@ -208,7 +208,7 @@ class Distribution extends Backend
                 $map['a.created_at'] = ['between', [strtotime('-3 month'), time()]];
                 //                $WhereSql .= " and a.created_at between " . strtotime('-3 month') . " and " . time();
             }
-            if ($label !== 0) {
+            if ($label != 0) {
                 if (!$filter['status']) {
                     $map['b.status'] = ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal']];
                     //                    $WhereSql .= "  and b.status = 'processing' ";
