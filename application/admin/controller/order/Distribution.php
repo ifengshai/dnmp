@@ -212,8 +212,9 @@ class Distribution extends Backend
                 if (!$filter['status']) {
                     $map['b.status'] = ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal']];
                     //                    $WhereSql .= "  and b.status = 'processing' ";
+                    unset($filter['status']);
                 }
-                unset($filter['status']);
+
                 //                if (!$filter['status']) {
                 //                    $map['b.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal']];
                 //                    $WhereSql .= "  and b.status in ('processing','free_processing','paypal_reversed','creditcard_proccessing','paypal_canceled_reversal','complete')";
@@ -225,6 +226,7 @@ class Distribution extends Backend
             if ($filter['status']) {
                 $map['b.status'] = ['in', $filter['status']];
                 //              $WhereSql .= "  and b.status in ('" . $filter["status"] . "')";
+                unset($filter['status']);
             }
 
             //查询子单ID合集
