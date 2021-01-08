@@ -1218,6 +1218,7 @@ class ScmWarehouse extends Scm
                 $item_list[$key]['sku_agg'] = $sku_agg;
                 //质检单默认留样数量为1，入库数量为质检合格数量 - 留样数量
                 $item_list[$key]['in_stock_num'] = $value['quantity_num'] - $value['sample_num'];
+                $item_list[$key]['remark'] = $this->_check_item->where('check_id',$check_id)->value('remark');
             }
             $info['item_list'] = $item_list;
 
