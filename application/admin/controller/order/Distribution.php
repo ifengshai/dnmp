@@ -190,6 +190,12 @@ class Distribution extends Backend
             if (!$filter) {
                 $map['a.created_at'] = ['between', [strtotime('-3 month'), time()]];
 //                $WhereSql .= " and a.created_at between " . strtotime('-3 month') . " and " . time();
+            }else{
+                if ($filter['a.created_at']) {
+                    $time = explode(' - ', $filter['a.created_at']);
+
+                    $map['a.created_at'] = ['between', [strtotime($time[0]), strtotime($time[1])]];
+                }
             }
 
             if ($label != 0) {
@@ -890,8 +896,6 @@ class Distribution extends Backend
             if ($filter['status']) {
                 $map['b.status'] = ['in', $filter['status']];
                 unset($filter['status']);
-            } else {
-                $map['b.status'] = ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal']];
             }
             $this->request->get(['filter' => json_encode($filter)]);
 
@@ -899,6 +903,8 @@ class Distribution extends Backend
         }
 
         $sort = 'a.id';
+        
+
         $list = $this->model
             ->alias('a')
             ->field('a.id,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.total_qty_ordered,b.site,a.distribution_status,a.created_at,c.*,b.base_grand_total')
