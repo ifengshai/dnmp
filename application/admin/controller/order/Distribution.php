@@ -1511,6 +1511,9 @@ class Distribution extends Backend
                     in_array($val['item_order_number'], $item_order_numbers) //子单措施未处理:更改镜框18、更改镜片19、取消20
                 )
                     && $this->error('子单号：' . $val['item_order_number'] . '有工单未处理');
+                if ($val['measure_choose_id'] == 21){
+                    $this->error(__('有工单存在暂缓措施未处理，无法操作'), [], 405);
+                }
             }
         }
 
