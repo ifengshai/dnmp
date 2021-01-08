@@ -856,6 +856,7 @@ class Test01 extends Backend
         foreach ($list as $key => $value) {
             $csv[$key]['item_order_number'] = $value['item_order_number'];
             $timediff = $this->timediff($value['payment_time'], 1610093513);
+            dump($timediff);
             //状态
             switch ($value['order_prescription_type']) {
                 case 1:
@@ -893,8 +894,8 @@ class Test01 extends Backend
             }
             $csv[$key]['order_prescription_type'] = $work_status;
         }
-        // dump($csv);
-        // die();
+        dump($csv);
+        die();
         $headlist = [
             '子订单号', '子单加工类型', '是否超时'
         ];
