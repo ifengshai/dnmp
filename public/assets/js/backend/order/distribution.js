@@ -128,12 +128,22 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                         {
                             field: 'status', title: __('订单状态'), addClass: 'selectpicker', data: 'multiple',
                             searchList: {
-                                "processing": __('processing'),
+                                "canceled": __('canceled'),
+                                "closed": __('closed'),
+                                "complete": __('complete'),
+                                "creditcard_failed": __('creditcard_failed'),
+                                "creditcard_pending": __('creditcard_pending'),
+                                "delivered": __('delivered'),
+                                "export": __('export'),
+                                "fraud": __('fraud'),
                                 "free_processing": __('free_processing'),
-                                "paypal_reversed": __('paypal_reversed'),
-                                "creditcard_proccessing": __('creditcard_proccessing'),
+                                "holded": __('holded'),
+                                "payment_review": __('payment_review'),
                                 "paypal_canceled_reversal": __('paypal_canceled_reversal'),
-                                'complete': __('complete')
+                                "paypal_reversed": __('paypal_reversed'),
+                                "pending": __('pending'),
+                                "processing": __('processing'),
+                                "unpaid": __('unpaid')
                             }, operate: 'IN',
                             formatter: Table.api.formatter.status
                         },
