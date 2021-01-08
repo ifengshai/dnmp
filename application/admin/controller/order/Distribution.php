@@ -179,56 +179,32 @@ class Distribution extends Backend
                 } else {
                     $map['a.distribution_status'] = $label;
                 }
-//                if ($label == 2) {
-//                    $WhereSql .= '  and  d.distribution_node   = 1';
-//                    $WhereSql .= '  and  a.distribution_status   = ' . $label;
-//                } elseif ($label == 3) {
-//                    $WhereSql .= '  and  d.distribution_node   = 2';
-//                    $WhereSql .= '  and  a.distribution_status   = ' . $label;
-//                } elseif ($label == 4) {
-//                    $WhereSql .= '  and  d.distribution_node   = 3';
-//                    $WhereSql .= '  and  a.distribution_status   = ' . $label;
-//                } elseif ($label == 5) {
-//                    $WhereSql .= '  and  d.distribution_node   = 4';
-//                    $WhereSql .= '  and  a.distribution_status   = ' . $label;
-//                } elseif ($label == 6) {
-//                    $WhereSql .= '  and  d.distribution_node   = 5';
-//                    $WhereSql .= '  and  a.distribution_status   = ' . $label;
-//                } elseif ($label == 7) {
-//                    $WhereSql .= '  and  d.distribution_node   = 6';
-//                    $WhereSql .= '  and  a.distribution_status >6  and a.distribution_status <9  ';
-//                } else {
-//                    $WhereSql .= '  and  d.distribution_node   = null';
-//                }
 
                 $map['a.abnormal_house_id'] = 0;
-//                $WhereSql .= ' and  a.abnormal_house_id   = ' . $label;
             }
 
             //处理异常选项
             $filter = json_decode($this->request->get('filter'), true);
 
+
             if (!$filter) {
                 $map['a.created_at'] = ['between', [strtotime('-3 month'), time()]];
 //                $WhereSql .= " and a.created_at between " . strtotime('-3 month') . " and " . time();
             }
-            if ($label !== 0) {
+
+            if ($label != 0) {
+
                 if (!$filter['status']) {
                     $map['b.status'] = ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal']];
 //                    $WhereSql .= "  and b.status = 'processing' ";
                 }
                 unset($filter['status']);
-//                if (!$filter['status']) {
-//                    $map['b.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal']];
-//                    $WhereSql .= "  and b.status in ('processing','free_processing','paypal_reversed','creditcard_proccessing','paypal_canceled_reversal','complete')";
-//                } else {
-//                    $map['b.status'] = ['in', $filter['status']];
-//                    $WhereSql .= "  and b.status in ('" . $filter["status"] . "')";
-//                }
+
             }
             if ($filter['status']) {
                 $map['b.status'] = ['in', $filter['status']];
 //              $WhereSql .= "  and b.status in ('" . $filter["status"] . "')";
+                unset($filter['status']);
             }
 
             //查询子单ID合集
@@ -327,13 +303,15 @@ class Distribution extends Backend
             //combine_time  合单时间  delivery_time 打印时间 check_time审单时间  update_time更新时间  created_at创建时间
             $WhereOrder = '  ORDER BY  a.created_at desc';
 
-            $sql = "SELECT a.id,a.order_id,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.total_qty_ordered,b.site,b.order_type,b.status,a.distribution_status,a.temporary_house_id,a.abnormal_house_id,a.created_at,c.store_house_id,d.distribution_node,d.create_time as create_time_log FROM fa_order_item_process as a 
+            $sql = "SELECT a.id,a.order_id,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.total_qty_ordered,b.site,b.order_type,b.status,a.distribution_status,a.temporary_house_id,a.abnormal_house_id,a.created_at,c.store_house_id,d.distribution_node,d.create_time as create_time_log 
+                    FROM fa_order_item_process as a 
                     LEFT JOIN fa_order AS b ON (a.`order_id`=b.`id`)
                     LEFT JOIN fa_order_process AS c ON (a.`order_id`=c.`order_id`)
                     LEFT JOIN mojing.fa_distribution_log AS d ON (a.`id`=d.`item_process_id`) where " . $WhereSql . $WhereOrder . " limit  " . $offset . ',' . $limit;;
             //            dump($sql);
             //                    $data = $this->model->query($sql);
             //            dump($data);die();
+           
             $list = $this->model
                 ->alias('a')
                 ->field('a.id,a.order_id,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.total_qty_ordered,b.site,b.order_type,b.status,a.distribution_status,a.temporary_house_id,a.abnormal_house_id,a.created_at,c.store_house_id')
