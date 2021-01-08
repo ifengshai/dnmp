@@ -134,7 +134,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                 "creditcard_failed": __('creditcard_failed'),
                                 "creditcard_pending": __('creditcard_pending'),
                                 "delivered": __('delivered'),
-                                "export": __('export'),
                                 "fraud": __('fraud'),
                                 "free_processing": __('free_processing'),
                                 "holded": __('holded'),
