@@ -3,6 +3,7 @@
 namespace app\admin\controller;
 
 use app\admin\model\itemmanage\ItemPlatformSku;
+use app\admin\model\order\order\NewOrderItemProcess;
 use app\common\controller\Backend;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use think\Db;
@@ -833,5 +834,19 @@ class Test01 extends Backend
         }
 
         // dump($z_sku_list);die;
+    }
+
+    public function export_8_month_not_complete_son_order()
+    {
+        $new_order_item = new NewOrderItemProcess();
+        $list = $new_order_item->alias('a')
+            ->join(['fa_order_process' => 'b'], 'a.magento_order_id=b.order_id')
+            ->join(['fa_order' => 'c'], 'a.magento_order_id=c.entity_id')
+            ->where('c.status','=','processing')
+            ->where('c.created_at','>',1596211200)
+            ->where('b.delivery_time','=',null)
+            ->field('a.item_order_number,a.order_prescription_type,c.payment_time')
+            ->select();
+        dump($list);
     }
 }
