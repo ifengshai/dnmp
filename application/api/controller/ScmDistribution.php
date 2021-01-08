@@ -2123,7 +2123,7 @@ class ScmDistribution extends Scm
         empty($item_sku) && $this->error(__('sku不存在'), ['purchase_price' => ''], 403);
         $PurchaseOrderItem = new \app\admin\model\purchase\PurchaseOrderItem;
         $purchase_price = $PurchaseOrderItem->alias('a')->field('a.purchase_price')->join(['fa_purchase_order' => 'b'], 'a.purchase_id=b.id')->where(['a.sku' => $sku])->order('b.createtime','desc')->find();
-        empty($purchase_price['purchase_price']) && $this->error(__('没有采购单价'), ['purchase_price' => ''], 403);
+        empty($purchase_price['purchase_price']) && $this->error(__('没有采购单价'), ['purchase_price' => ''], 405);
         $this->success('成功', ['purchase_price' => $purchase_price['purchase_price']], 200);
     }
 
