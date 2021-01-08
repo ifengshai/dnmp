@@ -2005,8 +2005,7 @@ class Distribution extends Backend
 
                 $this->model->where(['id' => $ids])->update($save_data);
 
-<<<<<<< HEAD
-=======
+
                 //回退到待配货、待打印标签，解绑条形码
                 if (3 > $status) {
                     $this->_product_bar_code_item
@@ -2015,7 +2014,7 @@ class Distribution extends Backend
                         ->save(['item_order_number' => '']);
                 }
                    
->>>>>>> 483de02f26a247b8b624b9f02a7e7c1675400dcc
+
                 //标记处理异常状态及时间
                 $this->_distribution_abnormal->where(['id' => $abnormal_info['id']])->update(['status' => 2, 'do_time' => time(), 'do_person' => $admin->nickname]);
 
