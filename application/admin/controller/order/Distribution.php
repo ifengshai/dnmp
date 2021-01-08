@@ -864,7 +864,11 @@ class Distribution extends Backend
                 unset($filter['is_task']);
             }
 
+            if ($filter['a.created_at']) {
+                $time = explode(' - ', $filter['a.created_at']);
 
+                $map['a.created_at'] = ['between', [strtotime($time[0]), strtotime($time[1])]];
+            }
             if ($filter['site']) {
                 $map['a.site'] = ['in', $filter['site']];
                 unset($filter['site']);
@@ -887,7 +891,7 @@ class Distribution extends Backend
                 $map['b.status'] = ['in', $filter['status']];
                 unset($filter['status']);
             } else {
-                $map['b.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal']];
+                $map['b.status'] = ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal']];
             }
             $this->request->get(['filter' => json_encode($filter)]);
 
@@ -906,7 +910,6 @@ class Distribution extends Backend
             ->select();
 
         $list = collection($list)->toArray();
-
         //从数据库查询需要的数据
         $spreadsheet = new Spreadsheet();
 
@@ -1002,7 +1005,6 @@ class Distribution extends Backend
 
         //获取镜片编码及名称
         $lens_list = $this->_lens_data->column('lens_name', 'lens_number');
-
         foreach ($list as $key => &$value) {
             //更改镜框最新sku
             if ($change_sku[$value['item_order_number']]) {
