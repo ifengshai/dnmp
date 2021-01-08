@@ -197,8 +197,9 @@ class Distribution extends Backend
                 if (!$filter['status']) {
                     $map['b.status'] = ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal']];
 //                    $WhereSql .= "  and b.status = 'processing' ";
+                    unset($filter['status']);
                 }
-                unset($filter['status']);
+
 
             }
             if ($filter['status']) {
