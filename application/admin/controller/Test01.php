@@ -855,8 +855,7 @@ class Test01 extends Backend
         $list = collection($list)->toArray();
         foreach ($list as $key => $value) {
             $csv[$key]['item_order_number'] = $value['item_order_number'];
-            $timediff = $this->timediff($value['payment_time'], 1610093513);
-            dump($timediff);
+            $timediff = $this->timediff(1610093513,$value['payment_time']);
             //状态
             switch ($value['order_prescription_type']) {
                 case 1:
@@ -894,13 +893,13 @@ class Test01 extends Backend
             }
             $csv[$key]['order_prescription_type'] = $work_status;
         }
-        dump($csv);
-        die();
+        // dump($csv);
+        // die();
         $headlist = [
             '子订单号', '子单加工类型', '是否超时'
         ];
         $path = "/uploads/ship_uploads/";
-        $fileName = '导出订单加工数据 2021-01-08';
+        $fileName = '导出订单加工数据1 2021-01-08';
         Excel::writeCsv($csv, $headlist, $path . $fileName);
     }
 
@@ -910,29 +909,17 @@ class Test01 extends Backend
      * @param $end_time 结束时间戳
      * @return array
      */
-    function timediff($begin_time, $end_time)
+    function timediff($start_time, $end_time)
     {
-        if ($begin_time < $end_time) {
-            $starttime = $begin_time;
-            $endtime = $end_time;
-        } else {
-            $starttime = $end_time;
-            $endtime = $begin_time;
-        }
+        if (strtotime($start_time) > strtotime($end_time)) list($start_time, $end_time) = array($end_time, $start_time);
 
-        //计算天数
-        $timediff = $endtime - $starttime;
-        $days = intval($timediff / 86400);
-        //计算小时数
-        $remain = $timediff % 86400;
-        $hours = intval($remain / 3600);
-        //计算分钟数
-        $remain = $remain % 3600;
-        $mins = intval($remain / 60);
-        //计算秒数
-        $secs = $remain % 60;
-        $res = array("day" => $days, "hour" => $hours, "min" => $mins, "sec" => $secs);
-        return $res['hour'];
+        $sec = $start_time - $end_time;
+        $sec = round($sec / 60);
+        $min = str_pad($sec % 60, 2, 0, STR_PAD_LEFT);
+        $hours_min = floor($sec / 60);
+        $min != 0 && $hours_min .= '.' . $min;
+        return $hours_min;
     }
+
 
 }
