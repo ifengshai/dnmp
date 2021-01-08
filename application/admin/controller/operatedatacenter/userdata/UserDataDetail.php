@@ -94,8 +94,9 @@ class UserDataDetail extends Backend
                 $list[$key]['created_at'] = $value['created_at'];  //注册时间
                 $order_where['customer_id'] = $value['entity_id'];
                 $order_status_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
-                $list[$key]['order_num'] = $order_model->where($order_where)->where($order_status_where)->count();  //总支付订单数
-                $list[$key]['order_amount'] = $order_model->where($order_where)->where($order_status_where)->sum('base_grand_total');//总订单金额
+                $order = $order_model->where($order_where)->where($order_status_where)->field('count(*) count,sum(base_grand_total) total')->select();
+                $list[$key]['order_num'] = $order[0]['count'];  //总支付订单数
+                $list[$key]['order_amount'] = $order[0]['total'];//总订单金额
                 if($site != 3){
                     $list[$key]['point'] = $web_model->table('mw_reward_point_customer')->where('customer_id',$value['entity_id'])->value('mw_reward_point');  //积分
                     $recommend_userids = $web_model->table('mw_reward_point_customer')->where('mw_friend_id',$value['entity_id'])->count();
@@ -114,8 +115,9 @@ class UserDataDetail extends Backend
                     $recommend_order_num = 0;   //推荐订单数
                     $recommend_register_num = 0;   //推荐注册量
                 }
-                $list[$key]['coupon_order_num'] = $order_model->where($order_where)->where($order_status_where)->where("coupon_code is not null")->count();//使用优惠券订单数
-                $list[$key]['coupon_order_amount'] = $order_model->where($order_where)->where($order_status_where)->where("coupon_code is not null")->sum('base_grand_total');//使用优惠券订单金额
+                $order_coupon = $order_model->where($order_where)->where($order_status_where)->where("coupon_code is not null")->field('count(*) count,sum(base_grand_total) total')->select();
+                $list[$key]['coupon_order_num'] = $order_coupon[0]['count'];//使用优惠券订单数
+                $list[$key]['coupon_order_amount'] = $order_coupon[0]['total'];//使用优惠券订单金额
                 $list[$key]['first_order_time'] = $order_model->where($order_where)->where($order_status_where)->order('created_at asc')->value('created_at');//首次下单时间
                 $list[$key]['last_order_time'] = $order_model->where($order_where)->where($order_status_where)->order('created_at desc')->value('created_at');//最后一次下单时间
                 $list[$key]['recommend_order_num'] = $recommend_order_num;   //推荐订单数
