@@ -1,6 +1,6 @@
 <?php
 
-namespace app\admin\model\platformManage;
+namespace app\admin\model\platformmanage;
 
 use think\Model;
 use app\admin\library\Auth;

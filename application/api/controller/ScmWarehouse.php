@@ -737,14 +737,30 @@ class ScmWarehouse extends Scm
         $list = $this->_check
             ->alias('a')
             ->where($where)
-            ->field('a.id,a.check_order_number,c.logistics_number,a.createtime,a.examine_time')
+            ->field('a.id,a.check_order_number,c.logistics_number,a.createtime,a.examine_time,b.sku,a.create_person,a.logistics_id,a.batch_id,b.remark,d.purchase_number')
             ->join(['fa_check_order_item' => 'b'], 'a.id=b.check_id', 'left')
             ->join(['fa_logistics_info' => 'c'], 'a.logistics_id=c.id', 'left')
+            ->join(['fa_purchase_order' => 'd'], 'a.purchase_id=d.id')
             ->group('a.id')
             ->order('a.createtime', 'desc')
             ->limit($offset, $limit)
             ->select();
         $list = collection($list)->toArray();
+        // dump($list);
+        foreach ($list as $key => $value) {
+            //签收编号
+            $list[$key]['sign_number'] = Db::name('logistics_info')->where('id', $value['logistics_id'])->value('sign_number');
+            //应到货数量
+            $list[$key]['should_arrival_num'] = Db::name('check_order_item')->where('check_id', $value['id'])->value('should_arrival_num');
+            //供应商名称
+            $list[$key]['supplier_name'] = $this->_purchase_order
+                ->alias('a')
+                ->join(['fa_supplier' => 'b'], 'a.supplier_id=b.id')
+                ->where('a.purchase_number', $value['purchase_number'])
+                ->value('b.supplier_name');
+            $list[$key]['batch_id'] = $value['batch_id'] == 0 ? '无批次' : $value['batch_id'];
+
+        }
 
         $this->success('', ['list' => $list], 200);
     }
@@ -1201,6 +1217,7 @@ class ScmWarehouse extends Scm
                 $item_list[$key]['sku_agg'] = $sku_agg;
                 //质检单默认留样数量为1，入库数量为质检合格数量 - 留样数量
                 $item_list[$key]['in_stock_num'] = $value['quantity_num'] - $value['sample_num'];
+                $item_list[$key]['remark'] = $this->_check_item->where('check_id',$check_id)->value('remark');
             }
             $info['item_list'] = $item_list;
 
@@ -1271,6 +1288,9 @@ class ScmWarehouse extends Scm
             foreach ($item_list as $key => $value) {
                 //质检单默认留样数量为1，质检合格数量为入库数量 + 留样数量
                 $item_list[$key]['quantity_num'] = $value['in_stock_num'] + $value['sample_num'];
+                //从质检单子表获得应到货数量
+                $item_list[$key]['arrivals_num'] = $this->_check_item->where('check_id',$check_order_info['id'])->value('arrivals_num');
+                $item_list[$key]['remark'] = $this->_check_item->where('check_id',$check_order_info['id'])->value('remark');
             }
             $info['check_order_number'] = $check_order_info['check_order_number'];
 

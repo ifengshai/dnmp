@@ -2,6 +2,13 @@
 
 namespace app\admin\controller\order;
 
+use app\admin\model\DistributionAbnormal;
+use app\admin\model\order\order\LensData;
+use app\admin\model\order\order\NewOrder;
+use app\admin\model\order\order\NewOrderItemOption;
+use app\admin\model\order\order\NewOrderItemProcess;
+use app\admin\model\order\order\NewOrderProcess;
+use app\admin\model\warehouse\StockHouse;
 use app\common\controller\Backend;
 use fast\Trackingmore;
 use Think\Log;
@@ -379,8 +386,31 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
      */
     public function orderDetail($order_number = null)
     {
+
+        $new_order = new NewOrder();
+        $new_order_process = new NewOrderProcess();
         $order_number = $order_number ?? $this->request->get('order_number');
-        //查询订单详情		
+
+        $new_order_item_process_id =$new_order->alias('a')
+            ->join(['fa_order_item_process' => 'b'], 'a.id=b.order_id')
+            ->where('a.increment_id',$order_number)
+            ->field('b.id,b.sku,b.distribution_status')
+            ->select();
+        $new_order_item_process_id2 = array_column($new_order_item_process_id,'sku','id');
+        $is_shendan = $new_order_process->where('increment_id',$order_number)->field('check_time,check_status,delivery_time')->find();
+        //子单节点日志
+        foreach ($new_order_item_process_id as $k=>$v){
+            $distribution_log[$v['id']] = Db::name('distribution_log')->where('item_process_id',$v['id'])->select();
+        }
+
+        $new_order_item_process_id1 =array_column($new_order_item_process_id, 'id');
+        $distribution_log_times = Db::name('distribution_log')
+            ->where('item_process_id','in',$new_order_item_process_id1)
+            ->where('distribution_node',1)
+            ->order('create_time asc')
+            ->column('create_time');
+
+        //查询订单详情
         $ruleList = collection($this->ordernodedeltail->where(['order_number' => ['eq', $order_number]])->order('node_type asc')->field('node_type,create_time,handle_user_name,shipment_type,track_number')->select())->toArray();
 
         $new_ruleList = array_column($ruleList, NULL, 'node_type');
@@ -388,9 +418,14 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
 
         $id = $this->request->get('id');
         $label = $this->request->get('label', 1);
+
         $this->view->assign(compact('order_number', 'id', 'label'));
         $this->view->assign("list", $new_ruleList);
+        $this->view->assign("is_shendan", $is_shendan);
+        $this->view->assign("distribution_log_times", $distribution_log_times);
+        $this->view->assign("distribution_log", $distribution_log);
         $this->view->assign("key_list", $key_list);
+        $this->view->assign("new_order_item_process_id2", $new_order_item_process_id2);
         return $this->view->fetch();
     }
 
