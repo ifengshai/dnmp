@@ -844,7 +844,7 @@ class Test01 extends Backend
             ->join(['fa_order' => 'c'], 'b.order_id=c.id')
             ->where('c.status','=','processing')
             ->where('c.created_at','>',1596211200)
-            ->where('b.delivery_time','NULL')
+            ->where('b.delivery_time','EXP','IS NULL')
             ->field('a.item_order_number,a.order_prescription_type,c.payment_time')
             ->select();
         dump($new_order_item->getLastSql());
