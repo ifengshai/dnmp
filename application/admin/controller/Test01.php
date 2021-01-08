@@ -838,6 +838,8 @@ class Test01 extends Backend
 
     public function export_8_month_not_complete_son_order()
     {
+        set_time_limit(0);
+        ini_set('memory_limit', '512M');
         $new_order_item = new NewOrderItemProcess();
         $list = $new_order_item->alias('a')
             ->join(['fa_order_process' => 'b'], 'a.order_id=b.order_id')
