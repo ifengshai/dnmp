@@ -258,28 +258,57 @@ class Distribution extends Backend
                 }
             };
             //筛选库位号
-            if ($filter['stock_house_num']) {
+            if ($filter['stock_house_num'] || $filter['shelf_number']) {
                 if (8 == $label) { //跟单
                     $house_type = 4;
                 } elseif (3 == $label) { //待配镜片-定制片
                     $house_type = 3;
-                } else { //合单
+                } elseif (1 == $label){
+                    $house_type = 1;
+                }else { //合单
                     $house_type = 2;
                 }
-                $stock_house_id = $this->_stock_house
-                    ->where([
-                        'coding' => ['like', $filter['stock_house_num'] . '%'],
-                        'type' => $house_type
-                    ])
-                    ->column('id');
-                $map['a.temporary_house_id|a.abnormal_house_id|c.store_house_id'] = ['in', $stock_house_id ?: [-1]];
-                unset($filter['stock_house_num']);
+                $stock_where = ['type' => $house_type];
+                if ($filter['stock_house_num']) {
+                    $stock_where['coding'] = ['like', $filter['stock_house_num']. '%'];
+                }
+                if ($filter['shelf_number']) {
+                    $arr =['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
+                    $stock_where['shelf_number'] = $arr[$filter['shelf_number']-1];
+                }
+                $stock_house = $this->_stock_house
+                    ->alias('a')
+                    ->field('a.id,b.sku')
+                    ->join(['fa_store_sku' => 'b'], 'a.id=b.store_id')
+                    ->where($stock_where)
+                    ->select();
+                $stock_house = collection($stock_house)->toArray();
+                $stock_house_id = array_column($stock_house, 'id');
+                $stock_house_sku = array_column($stock_house, 'sku');
+                if ($filter['shelf_number']) {
+                    $map['a.sku'] = ['in',$stock_house_sku];
+                    unset($filter['shelf_number']);
+                }else{
+                    $map['a.temporary_house_id|a.abnormal_house_id|c.store_house_id'] = ['in', $stock_house_id ?: [-1]];
+                    unset($filter['stock_house_num']);
+                }
             }
 
             if ($filter['increment_id']) {
                 $map['b.increment_id'] = ['like', $filter['increment_id'] . '%'];
                 $map['b.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
                 unset($filter['increment_id']);
+            }
+
+            if ($filter['item_order_number']) {
+                $ex_fil_arr = explode(' ' , $filter['item_order_number']);
+                if (count($ex_fil_arr) > 1) {
+                    $map['a.item_order_number'] = ['in', $ex_fil_arr];
+                }else{
+                    $map['a.item_order_number'] = ['like', $filter['item_order_number'] . '%'];
+                }
+                
+                unset($filter['item_order_number']);
             }
 
             if ($filter['site']) {
@@ -551,10 +580,6 @@ class Distribution extends Backend
             $data[$sku]['number']++;
         }
 
-        // dump($data);die;
-
-
-        // dump($sku);
         // $b=array();
         // foreach($sku as $v){
         //     $b[]=$v['sku'];
@@ -1563,7 +1588,7 @@ class Distribution extends Backend
                         'number_type' => 2,
                         'order_number' => $value['item_order_number'],
                         'distribution_stock_before' => $item_before['distribution_occupy_stock'],
-                        'distribution_stock_change' => -1,
+                        'distribution_stock_change' => 1,
                         'create_person' => session('admin.nickname'),
                         'create_time' => time()
                     ]);
@@ -2815,5 +2840,34 @@ class Distribution extends Backend
             $writer = new $class($spreadsheet);
             $writer->save('php://output');
         }
+    }
+
+
+    //取消异常
+    public function cancel_abnormal($ids = null){
+        foreach ($ids as $key => $value) {
+            $item_info = $this->model
+            ->field('id,site,sku,distribution_status,abnormal_house_id,temporary_house_id,item_order_number')
+            ->where(['id' => $ids[$key]])
+            ->find();
+            empty($item_info) && $this->error('子订单'.$item_info['item_order_number'].'不存在');
+            empty($item_info['abnormal_house_id']) && $this->error('子订单'.$item_info['item_order_number'].'没有异常存在');
+            //检测工单
+            $work_order_list = $this->_work_order_list->where(['order_item_numbers' => ['like',$item_info['item_order_number'].'%'], 'work_status' => ['in',[1,2,3,5]]])->find();
+            !empty($work_order_list) && $this->error('子订单'.$item_info['item_order_number'].'存在未完成的工单');
+            $abnormal_house_id[] = $item_info['abnormal_house_id'];
+        }
+        
+        //异常库位占用数量-1
+        $this->_stock_house
+            ->where(['id' => ['in',$abnormal_house_id]])
+            ->setDec('occupy', 1);
+
+        //子订单状态回滚
+        $save_data = [
+            'abnormal_house_id' => 0 //异常库位ID
+        ];
+        $this->model->where(['id' => ['in',$ids]])->update($save_data);
+        $this->success('操作成功!', '', 'success', 200);
     }
 }

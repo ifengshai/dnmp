@@ -5,7 +5,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
 
         //隐藏、显示搜索及按钮
         $('#stock_house_num').parents('.form-group').hide();
+        $('.btn-cancel-abnormal').parents('.form-group').hide();
         $('select[name="abnormal"]').parents('.form-group').hide();
+        $('select[name="work_status"]').parents('.form-group').hide();
+        $('select[name="work_type"]').parents('.form-group').hide();
+        $('select[name="shelf_number"]').parents('.form-group').hide();
         $('.btn-distribution').addClass('hide');
         if(0 == value){
             $('select[name="abnormal"]').parents('.form-group').show();
@@ -15,12 +19,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
             $('.btn-batch-printed').removeClass('hide');
             $('.btn-tag-printed').removeClass('hide');
             $('.btn-batch-export-xlsz').removeClass('hide');
+            $('select[name="shelf_number"]').parents('.form-group').show();
         }else if(2 == value){
             $('.btn-batch-printed').removeClass('hide');
             $('.btn-product').removeClass('hide');
         }else if(3 == value){
             $('#stock_house_num').parents('.form-group').show();
             $('.btn-batch-printed').removeClass('hide');
+            $('.btn-sign-abnormals').removeClass('hide');
             $('.btn-lens').removeClass('hide');
         }else if(4 == value){
             $('.btn-batch-printed').removeClass('hide');
@@ -37,8 +43,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
             // $('.btn-join-complete').removeClass('hide');
         }else if(8 == value){
             $('select[name="abnormal"]').parents('.form-group').show();
+            $('select[name="work_status"]').parents('.form-group').show();
+            $('select[name="work_type"]').parents('.form-group').show();
             $('#stock_house_num').parents('.form-group').show();
             $('.btn-creat-work-order').removeClass('hide');
+            $('.btn-cancel-abnormal').removeClass('hide');
             $('.btn-batch-export-xls').removeClass('hide');
             // $('.btn-abnormal-handle').removeClass('hide');
             // $('.btn-abnormal-sign').removeClass('hide');
@@ -147,6 +156,22 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             formatter: Table.api.formatter.status
                         },
                         {
+                            field: 'work_status', title: __('工单状态'), addClass: 'selectpicker', data: 'multiple',
+                            searchList: {
+                                1: __('新建'),
+                                2: __('待审核'),
+                                3: __('待处理'),
+                                5: __('部分处理')
+                            }, operate: 'IN',visible:false 
+                        },
+                        {
+                            field: 'work_type', title: __('工单类型'),
+                            searchList: {
+                                1: __('客服工单'),
+                                2: __('仓库工单')
+                            },visible:false 
+                        },
+                        {
                             field: 'abnormal', title: __('处理异常'), addClass: 'selectpicker', data: 'multiple', visible:false, operate: 'IN',
                             searchList: {
                                 1: __('缺货'),
@@ -166,6 +191,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             }
                         },
                         { field: 'stock_house_num', title: __('库位号'), operate: 'LIKE' },
+                        { field: 'shelf_number', title: __('货架号'), visible: false, searchList: {1: 'A', 2: 'B', 3: 'C', 4: 'D', 5: 'E', 6: 'F', 7: 'G', 8: 'H', 9: 'I', 10: 'J', 11: 'K', 12: 'L', 13: 'M', 14: 'N', 15: 'O', 16: 'P', 17: 'Q', 18: 'R', 19: 'S', 20: 'T', 21: 'U', 22: 'V', 23: 'W', 24: 'X', 25: 'Y', 26: 'Z'}},
                         { field: 'a.created_at', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange',visible:false},
                         { field: 'created_at', title: __('创建时间'), operate: false},
 
@@ -395,6 +421,55 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                         table.bootstrapTable('refresh');
                                     }
                                 });
+                            }
+                        });
+                    }
+                );
+            });
+
+            //批量标记异常
+            $('.btn-sign-abnormals').click(function () {
+                var ids = Table.api.selectedids(table);
+                Layer.confirm(
+                    __('确定要为这%s条子订单标记异常么?', ids.length),
+                    { icon: 3, title: __('Warning'), shadeClose: true },
+                    function (index) {
+                        alert(ids);
+                        /*Layer.close(index);
+                        Backend.api.ajax({
+                            url: Config.moduleurl + '/order/distribution/sign-abnormals',
+                            data: { id_params: ids },
+                            type: 'post'
+                        }, function (data, ret) {
+                            if (data.url) {
+                                //跳转添加工单页面
+                                Fast.api.open(data.url, __('创建工单'), {
+                                    area: ["100%", "100%"],
+                                    end: function () {
+                                        table.bootstrapTable('refresh');
+                                    }
+                                });
+                            }
+                        });*/
+                    }
+                );
+            });
+
+            //取消异常
+            $('.btn-cancel-abnormal').click(function () {
+                var ids = Table.api.selectedids(table);
+                Layer.confirm(
+                    __('确定要为这%s条子订单取消异常么?', ids.length),
+                    { icon: 3, title: __('Warning'), shadeClose: true },
+                    function (index) {
+                        Layer.close(index);
+                        Backend.api.ajax({
+                            url: Config.moduleurl + '/order/distribution/cancel_abnormal',
+                            data: { ids: ids },
+                            type: 'post'
+                        }, function (data, ret) {
+                            if (data == 'success') {
+                                table.bootstrapTable('refresh');
                             }
                         });
                     }

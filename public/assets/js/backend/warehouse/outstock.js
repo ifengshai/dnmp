@@ -108,7 +108,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                 },
                                 {
                                     name: 'edit',
-                                    text: '',
+                                    text: '修改',
                                     title: __('Edit'),
                                     classname: 'btn btn-xs btn-success btn-dialog',
                                     icon: 'fa fa-pencil',

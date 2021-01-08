@@ -69,7 +69,7 @@ class SkuDetail extends Backend
                 $order_model = Db::connect('database.db_zeelool');
             }
             $order_model->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
-            $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+            $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
             $map['o.order_type'] = 1;
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $order_model->table('sales_flat_order_item_prescription')
@@ -142,19 +142,11 @@ class SkuDetail extends Backend
             }else{
                 $order_model = new \app\admin\model\order\order\Zeelool();
             }
-            $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+            $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
             $map['o.customer_id'] = ['>',0];
             $map['i.sku'] = $params['sku'];
             $map['o.order_type'] = 1;
-            $customer_ids = $order_model->where($map_where)->alias('o')->join('sales_flat_order_item i','o.entity_id=i.order_id')->where($map)->column('distinct o.customer_id');
-            $first_shopping_num = 0;
-            foreach ($customer_ids as $val){
-                $order_where_arr['customer_id'] = $val;
-                $is_buy = $order_model->where($order_where)->where($order_where_arr)->alias('o')->join('sales_flat_order_item i','o.entity_id=i.order_id')->where($map)->value('o.entity_id');
-                if(!$is_buy){
-                    $first_shopping_num++;
-                }
-            }
+            $first_shopping_num = $order_model->where($map_where)->alias('o')->join('sales_flat_order_item i','o.entity_id=i.order_id')->where($map)->count('distinct o.customer_id');
             //复购用户数
             //查询时间段内的订单 根据customer_id先计算出此事件段内的复购用户数
             $again_buy_num1 = $order_model->alias('o')
@@ -233,17 +225,33 @@ class SkuDetail extends Backend
             'name'=>'progressive',
             'value'=>$progressive_num,
         );
-        $reading_glasses_num = $this->prescrtion_num('Readingglasses',$site,$time_str,$sku);
+        if($site == 3){
+            $reading_glasses_num = $this->prescrtion_num('Reading Glasses',$site,$time_str,$sku);
+        }else{
+            $reading_glasses_num = $this->prescrtion_num('Readingglasses',$site,$time_str,$sku);
+        }
         $reading_glasses_arr = array(
             'name'=>'reading glasses',
             'value'=>$reading_glasses_num,
         );
-        $reading_glassesno_num = $this->prescrtion_num('ReadingGlassesNon',$site,$time_str,$sku);
+        if($site == 2){
+            $reading_glassesno_num = $this->prescrtion_num('ReadingNoprescription',$site,$time_str,$sku);
+        }elseif($site == 3){
+            $reading_glassesno_num = $this->prescrtion_num('Reading Glasses2',$site,$time_str,$sku);
+        }else{
+            $reading_glassesno_num = $this->prescrtion_num('ReadingGlassesNon',$site,$time_str,$sku);
+        }
         $reading_glassesno_arr = array(
             'name'=>'reading glasses no prescription',
             'value'=>$reading_glassesno_num,
         );
-        $no_prescription_num = $this->prescrtion_num('NonPrescription',$site,$time_str,$sku);
+        if($site == 2){
+            $no_prescription_num1 = $this->prescrtion_num('NonPrescription',$site,$time_str,$sku);
+            $no_prescription_num2 = $this->prescrtion_num('Noprescription',$site,$time_str,$sku);
+            $no_prescription_num = $no_prescription_num1+$no_prescription_num2;
+        }else{
+            $no_prescription_num = $this->prescrtion_num('NonPrescription',$site,$time_str,$sku);
+        }
         $no_prescription_arr = array(
             'name'=>'no prescription',
             'value'=>$no_prescription_num,
@@ -253,7 +261,18 @@ class SkuDetail extends Backend
             'name'=>'sunglasses',
             'value'=>$sunglasses_num,
         );
-        $sunglassesno_num = $this->prescrtion_num('SunGlassesNoprescription',$site,$time_str,$sku);
+        if($site == 2){
+            $sunglassesno_num1 = $this->prescrtion_num('Sunglasses_NonPrescription',$site,$time_str,$sku);
+            $sunglassesno_num2 = $this->prescrtion_num('SunGlassesNoprescription',$site,$time_str,$sku);
+            $sunglassesno_num = $sunglassesno_num1+$sunglassesno_num2;
+
+        }elseif($site == 1){
+            $sunglassesno_num1 = $this->prescrtion_num('SunGlassesNoprescription',$site,$time_str,$sku);
+            $sunglassesno_num2 = $this->prescrtion_num('Non',$site,$time_str,$sku);
+            $sunglassesno_num = $sunglassesno_num1 + $sunglassesno_num2;
+        }else{
+            $sunglassesno_num = $this->prescrtion_num('SunGlassesNoprescription',$site,$time_str,$sku);
+        }
         $sunglassesno_arr = array(
             'name'=>'sunglasses non-prescription',
             'value'=>$sunglassesno_num,
@@ -292,7 +311,7 @@ class SkuDetail extends Backend
         }
         $createat = explode(' ', $time_str);
         $where['p.created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
-        $where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        $where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
         $where['p.sku'] = $sku;
         $where['o.order_type'] = 1;
         if($flag){
@@ -329,7 +348,7 @@ class SkuDetail extends Backend
             $order_model = Db::connect('database.db_zeelool');
         }
         $order_model->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
-        $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
         $map['o.order_type'] = 1;
 
         $list = $order_model->table('sales_flat_order_item_prescription')

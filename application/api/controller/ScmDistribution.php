@@ -20,6 +20,7 @@ use app\admin\model\itemmanage\Item;
 use app\admin\model\order\order\NewOrderProcess;
 use app\admin\model\warehouse\ProductBarCodeItem;
 use app\admin\model\order\order\LensData;
+use app\admin\model\saleaftermanage\WorkOrderList;
 
 /**
  * 供应链配货接口类
@@ -135,6 +136,7 @@ class ScmDistribution extends Scm
         $this->_work_order_measure = new WorkOrderMeasure();
         $this->_work_order_change_sku = new WorkOrderChangeSku();
         $this->_lens_data = new LensData();
+        $this->_work_order_list = new WorkOrderList();
     }
 
     /**
@@ -145,13 +147,12 @@ class ScmDistribution extends Scm
      * @author lzh
      * @return mixed
      */
-    public function sign_abnormal()
+    public function sign_abnormal($item_order_number,$type,$flag = 0)
     {
-        $item_order_number = $this->request->request('item_order_number');
+        $item_order_number = $this->request->request('item_order_number')?$this->request->request('item_order_number'):$item_order_number;
         empty($item_order_number) && $this->error(__('子订单号不能为空'), [], 403);
-        $type = $this->request->request('type');
+        $type = $this->request->request('type')?$this->request->request('type'):$type;
         empty($type) && $this->error(__('异常类型不能为空'), [], 403);
-
         //获取子订单数据
         $item_process_info = $this->_new_order_item_process
             ->field('id,abnormal_house_id')
@@ -215,8 +216,9 @@ class ScmDistribution extends Scm
             $this->_new_order_item_process->rollback();
             $this->error($e->getMessage(), [], 408);
         }
-
-        $this->success(__("请将子单号{$item_order_number}的商品放入异常暂存架{$stock_house_info['coding']}库位"), ['coding' => $stock_house_info['coding']], 200);
+        if (!$flag) {
+            $this->success(__("请将子单号{$item_order_number}的商品放入异常暂存架{$stock_house_info['coding']}库位"), ['coding' => $stock_house_info['coding']], 200);
+        } 
     }
 
     /**
@@ -1827,7 +1829,7 @@ class ScmDistribution extends Scm
         if ($check_status == 2) {
             $check_refuse = $this->request->request('check_refuse'); //check_refuse   1SKU缺失  2 配错镜框
             empty($check_refuse) && $this->error(__('审单拒绝原因不能为空'), [], 403);
-            !in_array($check_refuse, [1, 2]) && $this->error(__('审单拒绝原因错误'), [], 403);
+            !in_array($check_refuse, [1, 2 ,999]) && $this->error(__('审单拒绝原因错误'), [], 403);
             if(2 == $check_refuse){
                 $item_order_numbers = $this->request->request('item_order_numbers');
                 $item_order_numbers = explode(',',$item_order_numbers);
@@ -1852,7 +1854,11 @@ class ScmDistribution extends Scm
         }
         //检测订单审单状态
         $row = $this->_new_order_process->where(['order_id' => $order_id])->find();
+
         empty($row) && $this->error(__('主订单数据不存在'), [], 403);
+        //判断有没有子单工单未完成
+        $work_order_list = $this->_work_order_list->where(['platform_order' => $row->increment_id, 'work_status' => ['in',[1,2,3,5]]])->find();
+        !empty($work_order_list) && $this->error(__('有子单工单未完成'), [], 403);
         $item_ids = $this->_new_order_item_process->where(['order_id' => $order_id])->column('id');
         empty($item_ids) && $this->error(__('子订单数据不存在'), [], 403);
         if (1 == $row['check_status']) {
@@ -1895,7 +1901,27 @@ class ScmDistribution extends Scm
                         ->allowField(true)
                         ->isUpdate(true, ['order_id' => $order_id, 'distribution_status' => ['neq', 0]])
                         ->save(['distribution_status' => 7]);
-                } else {
+                } else if(999 == $check_refuse){
+                    //审核拒绝选择标记异常-核实地址
+                    $all_item_order_number = $this->_new_order_item_process->where(['id' => ['in',$item_ids]])->column('item_order_number');
+                    $abnormal_house_id = $this->_new_order_item_process->where(['id' => ['in',$item_ids] ,'abnormal_house_id' => ['>',1]])->column('abnormal_house_id');//查询当前主单下面是否有已标记异常的子单
+
+                    !empty($abnormal_house_id) && $this->error(__('有子单已存在异常'), [], 403);
+                    foreach ($all_item_order_number as $key => $value) {
+                        //查询给所有子单标记异常异常库位是否足够
+                        $stock_house_info = $this->_stock_house
+                            ->field('id,coding')
+                            ->where(['status' => 1, 'type' => 4, 'occupy' => ['<', 10000-count($all_item_order_number)]])
+                            ->order('occupy', 'desc')
+                            ->find();
+                        if (empty($stock_house_info)) {
+                            DistributionLog::record($this->auth, $item_process_id, 0, '异常暂存架没有空余库位');
+                            $this->error(__('异常暂存架没有空余库位'), [], 405);
+                        }
+                        $this->sign_abnormal($value,13,1);
+                    }
+                    $this->success($msg . '成功', [], 200);
+                }else {
                     //非指定子单回退到待合单
                     $this->_new_order_item_process
                         ->allowField(true)
@@ -2121,4 +2147,14 @@ class ScmDistribution extends Scm
         
         $this->success($msg . '成功', [], 200);
     }
+
+    public function get_purchase_price(){
+        $sku = $this->request->request('sku');
+        empty($sku) && $this->error(__('sku不能为空'), [], 403);
+        $PurchaseOrderItem = new \app\admin\model\purchase\PurchaseOrderItem;
+        $purchase_price = $PurchaseOrderItem->alias('a')->field('a.purchase_price')->join(['fa_purchase_order' => 'b'], 'a.purchase_id=b.id')->where(['a.sku' => $sku])->order('b.createtime','desc')->find();
+        !empty($purchase_price) && $this->error(__('没有找到采购单'), ['purchase_price' => ''], 403);
+        $this->success('成功', ['purchase_price' => $purchase_price['purchase_price']], 200);
+    }
+
 }
