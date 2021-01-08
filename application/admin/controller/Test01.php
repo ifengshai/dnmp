@@ -840,7 +840,7 @@ class Test01 extends Backend
     {
         $new_order_item = new NewOrderItemProcess();
         $list = $new_order_item->alias('a')
-            ->join(['fa_order_process' => 'b'], 'a.magento_order_id=b.order_id')
+            ->join(['fa_order_process' => 'b'], 'a.order_id=b.order_id')
             ->join(['fa_order' => 'c'], 'b.order_id=c.id')
             ->where('c.status','=','processing')
             ->where('c.created_at','>',1596211200)
