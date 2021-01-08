@@ -5,6 +5,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
 
         //隐藏、显示搜索及按钮
         $('#stock_house_num').parents('.form-group').hide();
+        $('.btn-cancel-abnormal').parents('.form-group').hide();
         $('select[name="abnormal"]').parents('.form-group').hide();
         $('select[name="work_status"]').parents('.form-group').hide();
         $('select[name="work_type"]').parents('.form-group').hide();
@@ -46,6 +47,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
             $('select[name="work_type"]').parents('.form-group').show();
             $('#stock_house_num').parents('.form-group').show();
             $('.btn-creat-work-order').removeClass('hide');
+            $('.btn-cancel-abnormal').removeClass('hide');
             $('.btn-batch-export-xls').removeClass('hide');
             // $('.btn-abnormal-handle').removeClass('hide');
             // $('.btn-abnormal-sign').removeClass('hide');
@@ -449,6 +451,27 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                 });
                             }
                         });*/
+                    }
+                );
+            });
+
+            //取消异常
+            $('.btn-cancel-abnormal').click(function () {
+                var ids = Table.api.selectedids(table);
+                Layer.confirm(
+                    __('确定要为这%s条子订单取消异常么?', ids.length),
+                    { icon: 3, title: __('Warning'), shadeClose: true },
+                    function (index) {
+                        Layer.close(index);
+                        Backend.api.ajax({
+                            url: Config.moduleurl + '/order/distribution/cancel_abnormal',
+                            data: { ids: ids },
+                            type: 'post'
+                        }, function (data, ret) {
+                            if (data == 'success') {
+                                table.bootstrapTable('refresh');
+                            }
+                        });
                     }
                 );
             });

@@ -2876,4 +2876,33 @@ class Distribution extends Backend
             $writer->save('php://output');
         }
     }
+
+
+    //取消异常
+    public function cancel_abnormal($ids = null){
+        foreach ($ids as $key => $value) {
+            $item_info = $this->model
+            ->field('id,site,sku,distribution_status,abnormal_house_id,temporary_house_id,item_order_number')
+            ->where(['id' => $ids[$key]])
+            ->find();
+            empty($item_info) && $this->error('子订单'.$item_info['item_order_number'].'不存在');
+            empty($item_info['abnormal_house_id']) && $this->error('子订单'.$item_info['item_order_number'].'没有异常存在');
+            //检测工单
+            $work_order_list = $this->_work_order_list->where(['order_item_numbers' => ['like',$item_info['item_order_number'].'%'], 'work_status' => ['in',[1,2,3,5]]])->find();
+            !empty($work_order_list) && $this->error('子订单'.$item_info['item_order_number'].'存在未完成的工单');
+            $abnormal_house_id[] = $item_info['abnormal_house_id'];
+        }
+        
+        //异常库位占用数量-1
+        $this->_stock_house
+            ->where(['id' => ['in',$abnormal_house_id]])
+            ->setDec('occupy', 1);
+
+        //子订单状态回滚
+        $save_data = [
+            'abnormal_house_id' => 0 //异常库位ID
+        ];
+        $this->model->where(['id' => ['in',$ids]])->update($save_data);
+        $this->success('操作成功!', '', 'success', 200);
+    }
 }
