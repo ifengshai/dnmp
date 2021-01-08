@@ -980,6 +980,7 @@ class ScmWarehouse extends Scm
                     foreach (array_filter($item_sku) as $k => $v) {
                         $item_save['purchase_id'] = $purchase_id;//采购单id
                         $item_save['in_stock_num'] = $v['in_stock_num'];//入库数量
+                        $item_save['price'] = $v['price'];//退货入库采购单单价
                         $item_save['sample_num'] = $check_data[$v['sku']] ?: 0;//留样数量
                         //修改入库单子表
                         $where = ['sku' => $v['sku'], 'in_stock_id' => $in_stock_id];
@@ -1049,6 +1050,7 @@ class ScmWarehouse extends Scm
                         foreach (array_filter($item_sku) as $k => $v) {
                             $data[$k]['sku'] = $v['sku'];
                             $data[$k]['in_stock_num'] = $v['in_stock_num'];//入库数量
+                            $data[$k]['price'] = $v['price'];//退货入库采购单单价
                             $data[$k]['in_stock_id'] = $this->_in_stock->id;
 
                             //入库单绑定条形码数组组装
@@ -1102,6 +1104,7 @@ class ScmWarehouse extends Scm
                             $data[$k]['sku'] = $v['sku'];
                             $data[$k]['purchase_id'] = $purchase_id;//采购单id
                             $data[$k]['in_stock_num'] = $v['in_stock_num'];//入库数量
+                            $data[$k]['price'] = $v['price'];//退货入库采购单价
                             $data[$k]['in_stock_id'] = $this->_in_stock->id;//入库单ID
                             $data[$k]['sample_num'] = $check_data[$v['sku']] ?: 0;//留样数量
 
@@ -1251,7 +1254,7 @@ class ScmWarehouse extends Scm
 
         $item_list = $this->_in_stock_item
             ->where(['in_stock_id' => $in_stock_id])
-            ->field('sku,in_stock_num')
+            ->field('sku,in_stock_num,price')
             ->select();
         empty($item_list) && $this->error(__('入库单子单数据异常'), [], 515);
 

@@ -80,15 +80,21 @@ class PurchaseOrder extends Backend
             }
 
             //自定义sku搜索
+            $map['purchase_order.is_in_stock'] = 0;
             $filter = json_decode($this->request->get('filter'), true);
             if ($filter['sku']) {
                 $smap['sku'] = ['like', '%' . $filter['sku'] . '%'];
                 $ids = $this->purchase_order_item->where($smap)->column('purchase_id');
                 $map['purchase_order.id'] = ['in', $ids];
                 unset($filter['sku']);
-                $this->request->get(['filter' => json_encode($filter)]);
             }
 
+            //列表默认不显示是退货入库的采购单
+            if ($filter['is_in_stock']) {
+                $map['purchase_order.is_in_stock'] = $filter['is_in_stock'];
+                unset($filter['is_in_stock']);
+            }
+            $this->request->get(['filter' => json_encode($filter)]);
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->with(['supplier'])
@@ -2247,6 +2253,7 @@ class PurchaseOrder extends Backend
             }
 
             $whereCondition['purchase_status'] = ['egt', 2];
+            $whereCondition['is_in_stock'] = ['eq', 0];
             $whereConditionOr = [];
             $rep = $this->request->get('filter');
             //如果没有搜索条件
