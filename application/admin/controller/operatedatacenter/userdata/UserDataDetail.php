@@ -313,13 +313,16 @@ class UserDataDetail extends Backend
                     $index = array_keys($column_name,'last_order_time');
                     $tmpRow[$index[0]] =$order_model->where($order_where)->where($order_status_where)->order('created_at desc')->value('created_at');//最后一次下单时间
                 }
-
+                
                 if(in_array('recommend_order_num',$column_name)){
                     $index = array_keys($column_name,'recommend_order_num');
                     if($site != 3){
-                        $recommend_userids = $web_model->table('mw_reward_point_customer')->where('mw_friend_id',$val['entity_id'])->column('customer_id');
-                        if($recommend_userids){
-                            $tmpRow[$index[0]] = $order_model->where($order_status_where)->where('customer_id','in',$recommend_userids)->count();   //推荐订单数
+                        $recommend_userids = $web_model->table('mw_reward_point_customer')->where('mw_friend_id',$val['entity_id'])->count();
+                        if($recommend_userids != 0){
+                            $sql1 = $web_model->table('mw_reward_point_customer')->where('mw_friend_id',$val['entity_id'])->field('customer_id')->buildSql();
+                            $arr_where = [];
+                            $arr_where[] = ['exp', Db::raw("customer_id in " . $sql1)];
+                            $tmpRow[$index[0]] = $order_model->where($order_status_where)->where($arr_where)->count();   //推荐订单数
                         }else{
                             $tmpRow[$index[0]] = 0;
                         }
