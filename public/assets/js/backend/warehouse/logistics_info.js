@@ -34,7 +34,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                         { field: 'order_number', title: __('关联单号') },
                         { field: 'supplier_sku', title: __('供应商SKU') },
                         { field: 'purchase_num', title: __('采购数量'), operate: false },
-                        { field: 'purchase_name', title: __('采购名称'), operate: false },
+                        // { field: 'purchase_name', title: __('采购名称'), operate: false },
+                        { field: 'sku', title: __('sku'), operate: false },
                         { field: 'batch_id', title: __('关联批次ID') },
                         {
                             field: 'status', title: __('签收状态'), custom: { 1: 'success', 0: 'danger' },
