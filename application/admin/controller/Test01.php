@@ -850,7 +850,7 @@ class Test01 extends Backend
             ->where('c.created_at', '>', 1596211200)
             ->where('b.delivery_time', 'EXP', 'IS NULL')
             ->field('a.item_order_number,a.order_prescription_type,c.payment_time')
-            ->limit(500)
+            // ->limit(500)
             ->select();
         $list = collection($list)->toArray();
         foreach ($list as $key => $value) {
@@ -893,8 +893,8 @@ class Test01 extends Backend
             }
             $csv[$key]['order_prescription_type'] = $work_status;
         }
-        dump($csv);
-        die();
+        // dump($csv);
+        // die();
         $headlist = [
             '子订单号', '子单加工类型', '是否超时'
         ];
