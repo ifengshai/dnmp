@@ -96,8 +96,10 @@ class LogisticsInfo extends Backend
                     //获取供应商SKU 采购数量字段
                     $supplier_sku = $this->purchase_item->where(['purchase_id' => $v['purchase_id']])->column('supplier_sku');
                     $purchase_num = $this->purchase_item->where(['purchase_id' => $v['purchase_id']])->column('purchase_num');
+                    $sku= $this->purchase_item->where(['purchase_id' => $v['purchase_id']])->column('sku');
                     $list[$k]['supplier_sku'] = implode(',', $supplier_sku);
                     $list[$k]['purchase_num'] = implode(',', $purchase_num);
+                    $list[$k]['sku'] = implode(',', $sku);
                 } else {
                     $list[$k]['purchase_name'] = '';
                     $list[$k]['is_new_product'] = 0;
