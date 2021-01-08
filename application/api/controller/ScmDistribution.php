@@ -2,6 +2,7 @@
 
 namespace app\api\controller;
 
+use app\admin\model\platformmanage\MagentoPlatform;
 use app\admin\model\saleaftermanage\WorkOrderChangeSku;
 use app\admin\model\saleaftermanage\WorkOrderMeasure;
 use app\admin\model\StockLog;
@@ -705,7 +706,7 @@ class ScmDistribution extends Scm
                     5 => '印logo',
                     6 => '去质检',
                     7 => '去合单',
-                    9 => '去审单'
+                    9 => '去合单'
                 ];
                 $back_msg = $next_step[$save_status];
             }
@@ -741,7 +742,9 @@ class ScmDistribution extends Scm
         if ($res) {
             //操作成功记录
             DistributionLog::record($this->auth, $item_process_info['id'], $check_status, $status_arr[$check_status] . '完成');
-
+            if (9 == $save_status) {
+                DistributionLog::record($this->auth, $item_process_info['id'], 7,  '合单完成');
+            }
             //成功返回
             $this->success($back_msg, [], 200);
         } else {
@@ -1122,12 +1125,12 @@ class ScmDistribution extends Scm
             $this->_item->startTrans();
             $this->_item_platform_sku->startTrans();
             $this->_stock_log->startTrans();
+            $this->_product_bar_code_item->startTrans();
             try {
                 $save_data['distribution_status'] = $status;
                 //如果回退到待加工步骤之前，清空定制片库位ID及定制片处理状态
                 if (4 > $status) {
                     $save_data['temporary_house_id'] = 0;
-
                     $save_data['customize_status'] = 0;
                 }
 
@@ -1136,6 +1139,14 @@ class ScmDistribution extends Scm
                     ->allowField(true)
                     ->isUpdate(true, ['id' => $item_process_info['id']])
                     ->save($save_data);
+
+                //回退到待配货，解绑条形码
+                if (2 == $status) {
+                    $this->_product_bar_code_item
+                        ->allowField(true)
+                        ->isUpdate(true, ['item_order_number' => $item_order_number])
+                        ->save(['item_order_number' => '']);
+                }
 
                 //质检拒绝：镜架报损，扣减可用库存、配货占用、总库存、虚拟仓库存
                 if (2 == $reason) {
@@ -1196,23 +1207,27 @@ class ScmDistribution extends Scm
                 $this->_item->commit();
                 $this->_item_platform_sku->commit();
                 $this->_stock_log->commit();
+                $this->_product_bar_code_item->commit();
             } catch (ValidateException $e) {
                 $this->_new_order_item_process->rollback();
                 $this->_item->rollback();
                 $this->_item_platform_sku->rollback();
                 $this->_stock_log->rollback();
+                $this->_product_bar_code_item->rollback();
                 $this->error($e->getMessage(), [], 406);
             } catch (PDOException $e) {
                 $this->_new_order_item_process->rollback();
                 $this->_item->rollback();
                 $this->_item_platform_sku->rollback();
                 $this->_stock_log->rollback();
+                $this->_product_bar_code_item->rollback();
                 $this->error($e->getMessage(), [], 407);
             } catch (Exception $e) {
                 $this->_new_order_item_process->rollback();
                 $this->_item->rollback();
                 $this->_item_platform_sku->rollback();
                 $this->_stock_log->rollback();
+                $this->_product_bar_code_item->rollback();
                 $this->error($e->getMessage(), [], 408);
             }
             $this->success('操作成功', [], 200);
@@ -1237,6 +1252,7 @@ class ScmDistribution extends Scm
             ->field('id,distribution_status,sku,order_id,temporary_house_id,abnormal_house_id')
             ->find();
         empty($item_process_info) && $this->error(__('子订单不存在'), [], 403);
+        9 == $item_process_info['distribution_status'] && $this->error(__('订单合单完成，去审单！'), [], 403);
         !in_array($item_process_info['distribution_status'], [7, 8]) && $this->error(__('子订单当前状态不可合单操作'), [], 403);
 
         //判断异常状态
@@ -1273,12 +1289,6 @@ class ScmDistribution extends Scm
             }
         }
 
-        //获取订单购买总数
-        $total_qty_ordered = $this->_new_order_item_process
-            ->where('order_id', $item_process_info['order_id'])
-            ->count();
-        if (1 == $total_qty_ordered) $this->error(__("订单中只包含一个商品，不需要合单\n需要将子订单放至审单处"), [], 403);
-
         $order_process_info = $this->_new_order_process
             ->where('order_id', $item_process_info['order_id'])
             ->field('order_id,store_house_id')
@@ -1296,14 +1306,26 @@ class ScmDistribution extends Scm
             }
         }
 
-        //未合单，首次扫描
-        if (!$order_process_info['store_house_id']) {
-            //主单中无库位号，首个子单进入时，分配一个合单库位给PDA，暂不占用根据是否确认放入合单架占用或取消
-            $store_house_info = $this->_stock_house->field('id,coding,subarea')->where(['status' => 1, 'type' => 2, 'occupy' => 0])->find();
-            empty($store_house_info) && $this->error(__('合单失败，合单库位已用完，请添加后再操作'), [], 403);
-        } else {
-            //主单已绑定合单库位,根据ID查询库位信息
-            $store_house_info = $this->_stock_house->field('id,coding,subarea')->where('id', $order_process_info['store_house_id'])->find();
+        //查询预库位占用
+        $fictitious_time = time();
+        $fictitious_store_house_info = $this->_stock_house->field('id,coding,subarea')->where(['status' => 1, 'type' => 2, 'occupy' => 0, 'fictitious_occupy_time' => ['>',$fictitious_time], 'order_id' => $item_process_info['order_id']])->find();
+
+        //如果预占用信息不为空。返回预占用库位
+        if (empty($fictitious_store_house_info)) {
+
+            //未合单，首次扫描
+            if (!$order_process_info['store_house_id']) {
+                //主单中无库位号，首个子单进入时，分配一个合单库位给PDA，暂不占用根据是否确认放入合单架占用或取消
+                $store_house_info = $this->_stock_house->field('id,coding,subarea')->where(['status' => 1, 'type' => 2, 'occupy' => 0,  'fictitious_occupy_time' => ['<',$fictitious_time]])->find();
+                empty($store_house_info) && $this->error(__('合单失败，合单库位已用完，请添加后再操作'), [], 403);
+                //绑定预占用库存和有效时间
+                $this->_stock_house->where(['id' => $store_house_info['id']])->update(['fictitious_occupy_time' => $fictitious_time+600,'order_id' => $item_process_info['order_id']]);
+            } else {
+                //主单已绑定合单库位,根据ID查询库位信息
+                $store_house_info = $this->_stock_house->field('id,coding,subarea')->where('id', $order_process_info['store_house_id'])->find();
+            }
+        }else{
+            $store_house_info = $fictitious_store_house_info;
         }
 
         //异常原因列表
@@ -1356,7 +1378,7 @@ class ScmDistribution extends Scm
         empty($order_process_info) && $this->error(__('主订单不存在'), [], 403);
 
         //获取库位信息
-        $store_house_info = $this->_stock_house->field('id,coding,subarea,occupy')->where('id', $store_house_id)->find(); //查询合单库位--占用数量
+        $store_house_info = $this->_stock_house->field('id,coding,subarea,occupy,fictitious_occupy_time,order_id')->where('id', $store_house_id)->find();//查询合单库位--占用数量
         empty($store_house_info) && $this->error(__('合单库位不存在'), [], 403);
 
         if ($order_process_info['store_house_id'] != $store_house_id) {
@@ -1374,6 +1396,21 @@ class ScmDistribution extends Scm
             //重复扫描子单号--提示语句
             $this->error(__('请将子单号' . $item_order_number . '的商品放入合单架' . $store_house_info['coding'] . '库位'), [], 511);
         }
+
+        if (!empty($store_house_info['order_id'])) {
+            //检查当前订单和预占用时的订单id是否相同
+            if ($store_house_info['order_id'] != $order_process_info['id']) {
+                $this->error(__('预占用库位信息错误'), [], 403);
+            }
+            //检查是否预占用
+            if (empty($order_process_info['store_house_id'])) {
+               if ($store_house_info['fictitious_occupy_time'] < time()) {
+                    $this->error(__('库位预占用超10分钟，请重新操作'), [], 403);
+                }    
+            }
+                 
+        }
+        
 
         //主单表有合单库位ID，查询主单商品总数，与子单合单入库计算数量对比
         //获取订单购买总数，计算过滤掉取消状态的子单
@@ -1530,6 +1567,7 @@ class ScmDistribution extends Scm
         $type = $this->request->request("type") ?? 1;
         $start_time = $this->request->request('start_time');
         $end_time = $this->request->request('end_time');
+        $site = $this->request->request('site');
         $page = $this->request->request('page');
         $page_size = $this->request->request('page_size');
         empty($page) && $this->error(__('Page can not be empty'), [], 520);
@@ -1561,6 +1599,9 @@ class ScmDistribution extends Scm
             }
             if ($start_time && $end_time) {
                 $where['combine_time'] = ['between', [strtotime($start_time), strtotime($end_time)]];
+            }
+            if ($site){
+                $where['site'] =  ['=', $site];
             }
             $list = $this->_new_order_process
                 ->where($where)
@@ -1609,7 +1650,10 @@ class ScmDistribution extends Scm
             }
         }
 
-        $this->success('', ['list' => $list], 200);
+        $magento_platform = new MagentoPlatform();
+        $platform_list = $magento_platform->field('id, name')->where(['is_del' => 1, 'status' => 1])->select();
+
+        $this->success('', ['list' => $list,'platform_list' => $platform_list], 200);
     }
 
     /**
@@ -1763,6 +1807,7 @@ class ScmDistribution extends Scm
      * @参数 string check_refuse  审单拒绝原因 1.SKU缺失  2.配错镜框
      * @参数 int check_status  1审单通过，2审单拒绝
      * @参数 string create_person  操作人名称
+     * @参数 array item_order_numbers  子单号列表
      * @author wgj
      * @return mixed
      */
@@ -1783,22 +1828,28 @@ class ScmDistribution extends Scm
             $check_refuse = $this->request->request('check_refuse'); //check_refuse   1SKU缺失  2 配错镜框
             empty($check_refuse) && $this->error(__('审单拒绝原因不能为空'), [], 403);
             !in_array($check_refuse, [1, 2]) && $this->error(__('审单拒绝原因错误'), [], 403);
+            if(2 == $check_refuse){
+                $item_order_numbers = $this->request->request('item_order_numbers');
+                $item_order_numbers = explode(',',$item_order_numbers);
+                empty($item_order_numbers) && $this->error(__('请选择子单号'), [], 403);
+            }
 
             switch ($check_refuse) {
                 case 1:
                     $param['check_remark'] = 'SKU缺失';
-                    $msg_info = 'SKU缺失，退回至待合单';
+                    $msg_info_l = 'SKU缺失，';
+                    $msg_info_r = '退回至待合单';
                     break;
                 case 2:
                     $param['check_remark'] = '配错镜框';
-                    $msg_info = '配错镜框，退回至待配货';
+                    $msg_info_l = '配错镜框，';
+                    $msg_info_r = '退回至待配货';
                     break;
             }
             $msg = '审单拒绝';
         } else {
             $msg = '审单通过';
         }
-
         //检测订单审单状态
         $row = $this->_new_order_process->where(['order_id' => $order_id])->find();
         empty($row) && $this->error(__('主订单数据不存在'), [], 403);
@@ -1821,13 +1872,23 @@ class ScmDistribution extends Scm
 
             $log_data = [];
             //审单通过和拒绝都影响库存
+            $item_where = [
+                'order_id'=>$order_id,
+                'distribution_status' => ['neq', 0]
+            ];
+            if(!empty($item_order_numbers)){
+                $item_where['item_order_number'] = ['in',$item_order_numbers];
+            }
             $item_info = $this->_new_order_item_process
                 ->field('sku,site,item_order_number')
-                ->where(['order_id' => $order_id])
+                ->where($item_where)
                 ->select();
             if (2 == $check_status) {
                 //审单拒绝，回退合单状态
-                $this->_new_order_process->allowField(true)->isUpdate(true, ['order_id' => $order_id])->save(['combine_status' => 0, 'combine_time' => null]);
+                $this->_new_order_process
+                    ->allowField(true)
+                    ->isUpdate(true, ['order_id' => $order_id])
+                    ->save(['combine_status' => 0, 'combine_time' => null]);
                 if (1 == $check_refuse) {
                     //SKU缺失，回退子单号为待合单中状态，不影响库存
                     $this->_new_order_item_process
@@ -1835,15 +1896,29 @@ class ScmDistribution extends Scm
                         ->isUpdate(true, ['order_id' => $order_id, 'distribution_status' => ['neq', 0]])
                         ->save(['distribution_status' => 7]);
                 } else {
-                    //配错镜框，回退子单为待配货，清空定制片库位ID及定制片处理状态
+                    //非指定子单回退到待合单
                     $this->_new_order_item_process
                         ->allowField(true)
                         ->isUpdate(true, ['order_id' => $order_id, 'distribution_status' => ['neq', 0]])
+                        ->save([
+                            'distribution_status' => 7
+                        ]);
+
+                    //配错镜框，指定子单回退到待配货，清空定制片库位ID及定制片处理状态
+                    $this->_new_order_item_process
+                        ->allowField(true)
+                        ->isUpdate(true, ['order_id' => $order_id, 'distribution_status' => ['neq', 0], 'item_order_number' => ['in', $item_order_numbers]])
                         ->save([
                             'distribution_status' => 2,
                             'temporary_house_id' => 0,
                             'customize_status' => 0
                         ]);
+
+                    //回退到待配货，解绑条形码
+                    $this->_product_bar_code_item
+                        ->allowField(true)
+                        ->isUpdate(true, ['item_order_number' => ['in', $item_order_numbers]])
+                        ->save(['out_stock_time' => null, 'library_status' => 1, 'item_order_number' => '']);
 
                     //扣减占用库存、配货占用、总库存、虚拟仓库存
                     foreach ($item_info as $key => $value) {
@@ -2014,11 +2089,36 @@ class ScmDistribution extends Scm
             $this->_new_order_process->rollback();
             $this->_new_order_item_process->rollback();
             $this->_product_bar_code_item->rollback();
-            DistributionLog::record((object)['nickname' => $create_person], $item_ids, 8, $e->getMessage() . '主单ID' . $row['order_id'] . $msg . '失败' . $msg_info);
+            DistributionLog::record((object)['nickname' => $create_person], $item_ids, 8, $e->getMessage() . '主单ID' . $row['order_id'] . $msg . '失败' . $msg_info_l.$msg_info_r);
             $this->error($e->getMessage(), [], 408);
         }
-
-        DistributionLog::record((object)['nickname' => $create_person], $item_ids, 8, '主单ID' . $row['order_id'] . $msg . '成功' . $msg_info);
+        //打印操作记录
+        if (1 != $check_refuse) {
+            $item_order_numbers = $this->_new_order_item_process->where(['item_order_number' => ['in',$item_order_numbers]])->column('id');
+            $item_order_numbers = collection($item_order_numbers)->toArray();
+            $item_ids_diff = array_diff($item_ids, $item_order_numbers);
+            if (!empty($item_ids_diff)) {
+                foreach ($item_ids_diff as $key => $value) {
+                    $item_numbers = $this->_new_order_item_process->where(['id' => $value])->column('item_order_number');
+                    DistributionLog::record((object)['nickname' => $create_person], [$item_ids_diff[$key]], 8, '主单ID' . $row['order_id'] . $msg . $item_numbers[0].'退回至待合单');
+                }
+                foreach ($item_order_numbers as $key => $value) {
+                    $item_numbers = $this->_new_order_item_process->where(['id' => $value])->column('item_order_number');
+                    DistributionLog::record((object)['nickname' => $create_person], [$item_order_numbers[$key]], 8, '主单ID' . $row['order_id'] . $msg . '成功配错镜框，'.$item_numbers[0].'退回至待配货');
+                }
+            }else{
+                foreach ($item_ids as $key => $value) {
+                    $item_numbers = $this->_new_order_item_process->where(['id' => $value])->column('item_order_number');
+                    DistributionLog::record((object)['nickname' => $create_person], [$item_ids[$key]], 8, '主单ID' . $row['order_id'] . $msg . '成功' . $msg_info_l.$item_numbers[0].$msg_info_r);
+                }
+            }
+        }else{
+            foreach ($item_ids as $key => $value) {
+                $item_numbers = $this->_new_order_item_process->where(['id' => $value])->column('item_order_number');
+                DistributionLog::record((object)['nickname' => $create_person], [$item_ids[$key]], 8, '主单ID' . $row['order_id'] . $msg . '成功' . $msg_info_l.$item_numbers[0].$msg_info_r);
+            } 
+        }
+        
         $this->success($msg . '成功', [], 200);
     }
 }
