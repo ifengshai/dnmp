@@ -1402,7 +1402,7 @@ class WorkOrderList extends Model
             $postData = array_merge($postData, $postDataCommon);
             if(!empty($postData)){
                 try {
-                    echo 123;
+                    echo 123;die;
                     $res = $this->httpRequest($siteType, 'magic/order/createOrder', $postData, 'POST');
                     $increment_id = $res['increment_id'];
                     echo 456;
