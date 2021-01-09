@@ -1115,15 +1115,15 @@ class Distribution extends Backend
 
         $list = $this->model
             ->alias('a')
-            ->field('a.id,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.total_qty_ordered,b.site,a.distribution_status,a.created_at,c.*,b.base_grand_total')
+            ->field('a.id as aid,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.total_qty_ordered,b.site,a.distribution_status,a.created_at,c.*,b.base_grand_total')
             ->join(['fa_order' => 'b'], 'a.order_id=b.id')
             ->join(['fa_order_item_option' => 'c'], 'a.option_id=c.id')
             ->where($where)
             ->where($map)
             ->order($sort, $order)
             ->limit(10000)
-            ->select(false);
-        dump($list);die();
+            ->select();
+
         $list = collection($list)->toArray();
         //从数据库查询需要的数据
         $spreadsheet = new Spreadsheet();
@@ -1298,7 +1298,7 @@ class Distribution extends Backend
             $spreadsheet->getActiveSheet()->setCellValue("V" . ($key * 2 + 2), isset($value['od_bd_r']) ? $value['od_bd_r'] : '');
             $spreadsheet->getActiveSheet()->setCellValue("V" . ($key * 2 + 3), isset($value['os_bd_r']) ? $value['os_bd_r'] : '');
             $spreadsheet->getActiveSheet()->setCellValue("W" . ($key * 2 + 2), $value['base_grand_total']);
-            $spreadsheet->getActiveSheet()->setCellValue("X" . ($key * 2 + 2), $value['id']);
+            $spreadsheet->getActiveSheet()->setCellValue("X" . ($key * 2 + 2), $value['aid']);
 
             //合并单元格
             $spreadsheet->getActiveSheet()->mergeCells("A" . ($key * 2 + 2) . ":A" . ($key * 2 + 3));
