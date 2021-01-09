@@ -1109,7 +1109,7 @@ class Distribution extends Backend
 
             list($where, $sort, $order) = $this->buildparams();
         }
-        $map['a.id'] = ['lt','2021251'];
+        $map['a.id'] = ['lt','2004496'];
 
         $sort = 'a.id';
 
