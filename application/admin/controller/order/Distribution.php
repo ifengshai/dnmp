@@ -330,7 +330,6 @@ class Distribution extends Backend
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
-
             $list = collection($list)->toArray();
 
             foreach ($list as $key => $item) {
@@ -1122,7 +1121,6 @@ class Distribution extends Backend
             ->where($where)
             ->where($map)
             ->order($sort, $order)
-            ->limit(10000)
             ->select();
         $list = collection($list)->toArray();
         //从数据库查询需要的数据
