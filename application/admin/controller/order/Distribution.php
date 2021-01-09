@@ -441,7 +441,7 @@ class Distribution extends Backend
         ini_set('memory_limit', '512M');
         $map = [];
         $map['a.site'] =1;
-        $map['a.created_at'] = ['between',['1604160000','1606751999']];
+        $map['a.created_at'] = ['between',['1606752000','1609430399']];
 
         //子单工单未处理
         $item_order_numbers = $this->_work_order_change_sku
@@ -1109,7 +1109,7 @@ class Distribution extends Backend
 
             list($where, $sort, $order) = $this->buildparams();
         }
-        $map['a.id'] = ['lt','2051812'];
+        $map['a.id'] = ['lt','2036805'];
 
         $sort = 'a.id';
 
