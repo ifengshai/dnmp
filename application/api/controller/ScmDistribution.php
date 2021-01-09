@@ -306,7 +306,12 @@ class ScmDistribution extends Scm
                     ||
                     $val['item_order_number'] == $item_order_number //子单措施未处理:更改镜框18、更改镜片19、取消20
                 )
-                    && $this->error(__('有工单未处理，无法操作'), [], 405);
+
+                // && $this->error(__('有工单未处理，无法操作'), [], 405);
+                && $this->error(__('子订单存在工单A-01-01'), [], 405);
+                if ($val['measure_choose_id'] == 21){
+                    $this->error(__('有工单存在暂缓措施未处理，无法操作'), [], 405);
+                }
             }
         }
 
@@ -546,7 +551,8 @@ class ScmDistribution extends Scm
         //操作失败记录
         if ($abnormal_id) {
             DistributionLog::record($this->auth, $item_process_info['id'], 0, $status_arr[$check_status] . '：有异常[' . $abnormal_id . ']待处理不可操作');
-            $this->error(__('有异常待处理无法操作'), [], 405);
+            // $this->error(__('有异常待处理无法操作'), [], 405);
+            $this->error(__('子订单存在异常A-01-01'), [], 405);
         }
 
         //查询订单号
@@ -554,7 +560,8 @@ class ScmDistribution extends Scm
             ->field('increment_id,status')
             ->where(['id' => $item_process_info['order_id']])
             ->find();
-        'processing' != $order_info['status'] && $this->error(__('当前订单状态不可操作'), [], 405);
+        // 'processing' != $order_info['status'] && $this->error(__('当前订单状态不可操作'), [], 405);
+        'processing' != $order_info['status'] && $this->error(__('订单状态异常'), [], 405);
         $increment_id = $order_info['increment_id'];
 
         //检测是否有工单未处理
@@ -575,7 +582,8 @@ class ScmDistribution extends Scm
                     $val['item_order_number'] == $item_order_number //子单措施未处理:更改镜框18、更改镜片19、取消20
                 )
 
-                && $this->error(__('有工单未处理，无法操作'), [], 405);
+                // && $this->error(__('有工单未处理，无法操作'), [], 405);
+                && $this->error(__('子订单存在工单A-01-01'), [], 405);
 
                 if ($val['measure_choose_id'] == 21){
                     $this->error(__('有工单存在暂缓措施未处理，无法操作'), [], 405);
@@ -832,7 +840,8 @@ class ScmDistribution extends Scm
         $barcode_item_order_number = $this->_product_bar_code_item->where('code', $barcode)->value('item_order_number');
         !empty($barcode_item_order_number) && $this->error(__('此条形码已经绑定过其他订单'), [], 403);
         $code_item_sku = $this->_product_bar_code_item->where('code', $barcode)->value('sku');
-        empty($code_item_sku) && $this->error(__('此条形码未绑定SKU'), [], 403);
+        // empty($code_item_sku) && $this->error(__('此条形码未绑定SKU'), [], 403);
+        empty($code_item_sku) && $this->error(__('商品条码没有绑定关系'), [], 403);
 
         if (strtolower($true_sku) != strtolower($code_item_sku)) {
             //扫描获取的条形码 和 子订单查询出的 SKU(即true_sku)对比失败则配货失败
@@ -1266,7 +1275,8 @@ class ScmDistribution extends Scm
         $abnormal_id = $this->_distribution_abnormal
             ->where(['item_process_id' => $item_process_info['id'], 'status' => 1])
             ->value('id');
-        $abnormal_id && $this->error(__('有异常待处理，无法操作'), [], 405);
+        // $abnormal_id && $this->error(__('有异常待处理，无法操作'), [], 405);
+        $abnormal_id && $this->error(__('子订单存在异常A-01-01'), [], 405);
 
         //查询订单号
         $order_info = $this->_new_order
@@ -1292,7 +1302,12 @@ class ScmDistribution extends Scm
                     ||
                     $val['item_order_number'] == $item_order_number //子单措施未处理:更改镜框18、更改镜片19、取消20
                 )
-                    && $this->error(__('有工单未处理，无法操作'), [], 405);
+
+                // && $this->error(__('有工单未处理，无法操作'), [], 405);
+                && $this->error(__('子订单存在工单A-01-01'), [], 405);
+                if ($val['measure_choose_id'] == 21){
+                    $this->error(__('有工单存在暂缓措施未处理，无法操作'), [], 405);
+                }
             }
         }
 
