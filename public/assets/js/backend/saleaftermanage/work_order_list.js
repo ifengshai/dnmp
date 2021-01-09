@@ -2422,6 +2422,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     $('#c-postcode').val(real_address.postcode);
                                     $('#c-currency_code').val(order_pay_currency);
                                     $('#shipping_type').val(real_address.shipping_type);
+                                    $('#pay_method').val(real_address.pay_method);
                                     /*for (var i = 0; i < data.address.length; i++) {
                                         if (i == real_address.address_type) {*/
                                             address += '<option value="0" selected>shipping</option>';
