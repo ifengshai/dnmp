@@ -591,6 +591,12 @@ class Index extends Backend
         (select if (od_sph>os_sph,od_sph,os_sph) as sph,if(od_cyl>os_cyl,od_cyl,os_cyl) as cyl 
         from sales_flat_order_item_prescription as p join sales_flat_order as o on p.order_id=o.entity_id where o.status in ('free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete','delivered') and  $where ) b where sph != '' and cyl != '' limit 1";
         $res = Db::connect('database.db_zeelool')->table('sales_flat_order_item_prescription')->query($sql);
+        $sql1 = "select count(*) count from
+        (select if (od_sph>os_sph,od_sph,os_sph) as sph,if(od_cyl>os_cyl,od_cyl,os_cyl) as cyl 
+        from sales_flat_order_item_prescription as p join sales_flat_order as o on p.order_id=o.entity_id where o.status in ('free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete','delivered') and  $where ) b where sph != '' and cyl != '' limit 1";
+        $count = Db::connect('database.db_zeelool')->table('sales_flat_order_item_prescription')->query($sql1);
+        $res[0]['D'] = $count[0]['count']-$res[0]['A']-$res[0]['B']-$res[0]['C'];
+        $res['count'] = $count[0]['count'];
         return $res;
     }
 
