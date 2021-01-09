@@ -1120,7 +1120,7 @@ class Distribution extends Backend
             ->where($where)
             ->where($map)
             ->order($sort, $order)
-            ->limit(10000)
+            ->limit(20000)
             ->select();
 
         $list = collection($list)->toArray();
@@ -1151,7 +1151,8 @@ class Distribution extends Backend
             ->setCellValue("T1", "Direct\n(out/in)")
             ->setCellValue("U1", "Prism\n(up/down)")
             ->setCellValue("V1", "Direct\n(up/down)")
-            ->setCellValue("W1", "订单金额");
+            ->setCellValue("W1", "订单金额")
+            ->setCellValue("X1", "ID");;
         $spreadsheet->setActiveSheetIndex(0)->setTitle('订单处方');
 
         //站点列表
@@ -1296,6 +1297,7 @@ class Distribution extends Backend
             $spreadsheet->getActiveSheet()->setCellValue("V" . ($key * 2 + 2), isset($value['od_bd_r']) ? $value['od_bd_r'] : '');
             $spreadsheet->getActiveSheet()->setCellValue("V" . ($key * 2 + 3), isset($value['os_bd_r']) ? $value['os_bd_r'] : '');
             $spreadsheet->getActiveSheet()->setCellValue("W" . ($key * 2 + 2), $value['base_grand_total']);
+            $spreadsheet->getActiveSheet()->setCellValue("X" . ($key * 2 + 2), $value['id']);
 
             //合并单元格
             $spreadsheet->getActiveSheet()->mergeCells("A" . ($key * 2 + 2) . ":A" . ($key * 2 + 3));
@@ -1313,6 +1315,7 @@ class Distribution extends Backend
             $spreadsheet->getActiveSheet()->mergeCells("Q" . ($key * 2 + 2) . ":Q" . ($key * 2 + 3));
             $spreadsheet->getActiveSheet()->mergeCells("R" . ($key * 2 + 2) . ":R" . ($key * 2 + 3));
             $spreadsheet->getActiveSheet()->mergeCells("W" . ($key * 2 + 2) . ":W" . ($key * 2 + 3));
+
         }
 
         //设置宽度
