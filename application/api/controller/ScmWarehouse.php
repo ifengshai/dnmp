@@ -946,11 +946,20 @@ class ScmWarehouse extends Scm
                     if (empty($row)) {
                         throw new Exception('入库单不存在');
                     }
+                    //退货入库生成采购单质检单
+                    if ($type_id == 3) {
+                        $generate_purchase_check = $this->generate_purchase_check($item_sku);
+                    }
 
                     //编辑入库单主表
                     $_in_stock_data['platform_id'] = $platform_id;
                     $purchase_id = 0;//无采购单id
                     $check_data = [];//质检单子表数据
+                    //退货入库生成采购单质检单
+                    if ($type_id == 3) {
+                        $generate_purchase_check = $this->generate_purchase_check($item_sku);
+                        $params['purchase_id'] = $generate_purchase_check['purchase_id'];
+                    }
                 } else {
                     //无站点，是质检单入口
                     $check_order_number = $this->request->request("check_order_number");
@@ -1009,6 +1018,7 @@ class ScmWarehouse extends Scm
                 //检测条形码是否已绑定
                 $where['in_stock_id'] = ['>', 0];
                 foreach ($item_sku as $key => $value) {
+
                     $sku_code = array_column($value['sku_agg'], 'code');
                     if (count($value['sku_agg']) != count(array_unique($sku_code))) {
                         throw new Exception('条形码有重复，请检查');
@@ -1034,6 +1044,11 @@ class ScmWarehouse extends Scm
                 $params['createtime'] = date('Y-m-d H:i:s', time());
                 if ($platform_id) {
                     $params['platform_id'] = $platform_id;
+                    //退货入库生成采购单质检单
+                    if ($type_id == 3) {
+                        $generate_purchase_check = $this->generate_purchase_check($item_sku);
+                        $params['check_id'] = $generate_purchase_check['check_id'];
+                    }
                     foreach (array_filter($item_sku) as $k => $v) {
                         $sku_platform = $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $params['platform_id']])->find();
                         if (!$sku_platform) {
@@ -1052,6 +1067,9 @@ class ScmWarehouse extends Scm
                             $data[$k]['in_stock_num'] = $v['in_stock_num'];//入库数量
                             $data[$k]['price'] = $v['price'];//退货入库采购单单价
                             $data[$k]['in_stock_id'] = $this->_in_stock->id;
+                            if ($type_id == 3) {
+                                $data[$k]['price'] = $generate_purchase_check['purchase_id'];
+                            }
 
                             //入库单绑定条形码数组组装
                             foreach ($v['sku_agg'] as $k_code => $v_code) {
@@ -1160,6 +1178,33 @@ class ScmWarehouse extends Scm
             $this->error(__($msg . '失败'), [], 511);
         }
 
+    }
+
+    //生成退货入库采购单质检单
+    public function generate_purchase_check($item_sku){
+        $gen_check = new \app\admin\model\warehouse\Check;
+        $gen_check_item = new \app\admin\model\warehouse\CheckItem;
+        $gen_purchase_order = new \app\admin\model\purchase\PurchaseOrder;
+        $gen_purchase_order_item = new \app\admin\model\purchase\PurchaseOrderItem;
+        //生成采购单
+        $purchase_number = 'PO' . date('YmdHis') . rand(100, 999) . rand(100, 999);
+        $purchase_data = ['purchase_number'=>$purchase_number,'purchase_name'=>'退货入库','purchase_status'=>10,'check_status'=>2,'is_in_stock'=>1,'stock_status'=>2];
+
+        $purchase = $gen_purchase_order->insertGetId($purchase_data);
+        //生成质检单
+        $check_order_number = 'QC' . date('YmdHis') . rand(100, 999) . rand(100, 999);
+        $check_data = ['check_order_number'=>$check_order_number,'type'=>2,'purchase_id'=>$purchase,'status'=>2,'is_in_stock'=>1,'is_stock'=>1];
+        $check = $gen_check->insertGetId($check_data);
+
+        //生成子数据
+        foreach ($item_sku as $key => $value) {
+            $check_item_data = ['check_id'=>$check,'sku'=>$value['sku'],'purchase_num'=>$value['in_stock_num'],'check_num'=>$value['in_stock_num'],'purchase_id'=>$purchase];
+            $gen_check_item->insert($check_item_data);
+            $purchase_order_item_data = ['purchase_id'=>$purchase,'sku'=>$value['sku'],'purchase_order_number'=>$value['in_stock_num'],'purchase_num'=>$value['in_stock_num'],'purchase_price'=>$value['price'],'purchase_total'=>$value['price']*$value['in_stock_num'],'instock_num'=>$value['in_stock_num']];
+            $gen_purchase_order_item->insert($purchase_order_item_data);
+        }
+
+        return $data['purchase_id'=>$purchase,'check_id'=>$check];
     }
 
     /**

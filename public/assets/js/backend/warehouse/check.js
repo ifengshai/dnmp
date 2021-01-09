@@ -53,6 +53,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                             formatter: Table.api.formatter.status
                         },
                         {
+                            field: 'is_in_stock', title: __('是否退货入库'), custom: { 0: 'danger', 1: 'success' },
+                            searchList: { 0: '否', 1: '是' },
+                            formatter: Table.api.formatter.status
+                        },
+                        {
                             field: 'purchaseorder.factory_type', title: __('工厂类型'), custom: { 1: 'success', 0: 'danger' },
                             searchList: { 1: '贸易', 0: '工厂' },
                             formatter: Table.api.formatter.status
