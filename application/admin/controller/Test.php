@@ -2249,23 +2249,22 @@ class Test extends Backend
     {
         ini_set('memory_limit', '1024M');
         $order_number = [
-            '300044240',
-            '100170426',
-            '430241086',
-            '400407633',
-            '600124518',
-            '400405208',
-            '400421840',
-            '430241392',
-            '430239894',
-            '300044838',
-            '430238662',
-            '130079685',
-            '400426660',
-            '430241392',
-            '400405208',
-            '400407633',
-            '400426660'
+            '130080396',
+            '400422673',
+            '400413427',
+            '100182981',
+            '100183873',
+            '430234285',
+            '400414286',
+            '130080283',
+            '400420258',
+            '400427588',
+            '600124789',
+            '100180378',
+            '400405402',
+            '100180966',
+            '400424387',
+            '100182555'
         ];
         $order = new \app\admin\model\order\order\NewOrder();
         $lists = $order->where(['increment_id' => ['in', $order_number]])->select();
@@ -2327,20 +2326,16 @@ class Test extends Backend
             $list = collection($list)->toArray();
             if ($list) {
                 foreach ($list as $value) {
-
-                    dump($value);
                     //主单业务表：fa_order_process：check_status=审单状态、check_time=审单时间、combine_status=合单状态、combine_time=合单状态
                     $do_time = strtotime($value['custom_match_delivery_created_at_new']) + 28800;
+                    $do_time = $do_time ?: time();
                     $this->_new_order_process->where(['entity_id' => $value['entity_id'], 'site' => $v['site']])
                         ->update(
                             ['check_status' => 1, 'check_time' => $do_time, 'combine_status' => 1, 'combine_time' => $do_time]
                         );
 
-
-                    dump(111);
                     //获取子单表id集
                     $item_process_ids = $this->model->where(['magento_order_id' => $value['entity_id'], 'site' => $v['site']])->column('id');
-                    dump($item_process_ids);
                     if ($item_process_ids) {
                         //子单表：fa_order_item_process：distribution_status=配货状态
                         $this->model->where(['id' => ['in', $item_process_ids]])
@@ -2422,8 +2417,6 @@ class Test extends Backend
                             );
                         }
                         /**配货日志 End*/
-
-                        $handle += 1;
                     }
                     echo 'id:' . $value['entity_id'] . '站点' . $key . 'ok';
                 }
