@@ -1109,7 +1109,7 @@ class Distribution extends Backend
             list($where, $sort, $order) = $this->buildparams();
         }
         $map['a.id'] = ['<','1950853'];
-      
+
         $sort = 'a.id';
 
 
@@ -1122,8 +1122,8 @@ class Distribution extends Backend
             ->where($map)
             ->order($sort, $order)
             ->limit(10000)
-            ->select();
-
+            ->select(false);
+        dump($list);die();
         $list = collection($list)->toArray();
         //从数据库查询需要的数据
         $spreadsheet = new Spreadsheet();
