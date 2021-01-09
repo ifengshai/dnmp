@@ -437,7 +437,8 @@ class Distribution extends Backend
 
 
     public function csv_array(){
-
+        set_time_limit(0);
+        ini_set('memory_limit', '512M');
         $map = [];
         $map['a.site'] =1;
         $map['a.created_at'] = ['between',['1604160000','1606751999']];
@@ -1108,7 +1109,7 @@ class Distribution extends Backend
 
             list($where, $sort, $order) = $this->buildparams();
         }
-        $map['a.id'] = ['lt','2067169'];
+        $map['a.id'] = ['lt','2051812'];
 
         $sort = 'a.id';
 
