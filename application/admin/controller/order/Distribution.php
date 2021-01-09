@@ -1108,10 +1108,11 @@ class Distribution extends Backend
 
             list($where, $sort, $order) = $this->buildparams();
         }
-
+        $map['a.id'] = ['<','1950853'];
+      
         $sort = 'a.id';
 
-        $map['a.id'] = ['lt','1950853'];
+
         $list = $this->model
             ->alias('a')
             ->field('a.id,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.total_qty_ordered,b.site,a.distribution_status,a.created_at,c.*,b.base_grand_total')
