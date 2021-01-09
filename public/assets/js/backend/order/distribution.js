@@ -197,8 +197,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                 14: __('客户退件')
                             }
                         },
+
+
+
                         { field: 'stock_house_num', title: __('库位号'), operate: 'LIKE' },
-                        { field: 'shelf_number', title: __('货架号'), visible: false, searchList: {1: 'A', 2: 'B', 3: 'C', 4: 'D', 5: 'E', 6: 'F', 7: 'G', 8: 'H', 9: 'I', 10: 'J', 11: 'K', 12: 'L', 13: 'M', 14: 'N', 15: 'O', 16: 'P', 17: 'Q', 18: 'R', 19: 'S', 20: 'T', 21: 'U', 22: 'V', 23: 'W', 24: 'X', 25: 'Y', 26: 'Z'}},
+                        { field: 'shelf_number', title: __('货架号'), visible: false, searchList: {'A': 'A', 'B': 'B', 'C': 'C', 'D': 'D', 'E': 'E', 'F': 'F', 'G': 'G', 'H': 'H', 'I': 'I', 'J': 'J', 'K': 'K', 'L': 'L', 'M': 'M', 'N': 'N', 'O': 'O', 'P': 'P', 'Q': 'Q', 'R': 'R', 'S': 'S', 'T': 'T', 'U': 'U', 'V': 'V', 'W': 'W', 'X': 'X', 'Y': 'Y', 'Z': 'Z'}},
                         { field: 'a.created_at', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange',visible:false},
                         { field: 'created_at', title: __('创建时间'), operate: false},
 
