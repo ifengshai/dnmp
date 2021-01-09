@@ -1400,9 +1400,9 @@ class WorkOrderList extends Model
                 $measure_id = $changeSku['measure_id'];
             }
             $postData = array_merge($postData, $postDataCommon);
+            echo 123;die;
             if(!empty($postData)){
                 try {
-                    echo 123;die;
                     $res = $this->httpRequest($siteType, 'magic/order/createOrder', $postData, 'POST');
                     $increment_id = $res['increment_id'];
                     echo 456;
