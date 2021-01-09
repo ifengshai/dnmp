@@ -336,6 +336,9 @@
                 <tr>
                     <th>商品名称</th>
                     <th>商品颜色</th>
+                    {if $row['category_id'] == 53}
+                    <th>商品尺寸</th>
+                    {/if}
                     <th>供应商SKU</th>
                     <th>单价</th>
                     <!-- <th>操作</th> -->
@@ -351,6 +354,19 @@
                             </select>
                         </div>
                     </td>
+                    {if $row['category_id'] == 53}
+                    <td>
+                        <div class="col-xs-12 col-sm-12">
+                            <select id="c-frame_texture" data-rule="required" class="form-control"
+                                 disabled>
+                                <option value="">请选择</option>
+                                {foreach $AllFramePiece as $k => $vo}
+                                <option value="{$k}" {:$row['newproductattribute']['frame_piece']===$k ? 'selected' : '' }>{$vo}</option>
+                                {/foreach}
+                            </select>
+                        </div>
+                    </td>
+                    {/if}
                     <td><input  data-rule="required"  class="form-control c-supplier_sku" readonly name="row[supplier_sku]" value="{$row.supplier_sku}" type="text"></td>
                     <td><input  data-rule="required"  class="form-control c-price" readonly  name="row[price]" type="text" value="{$row.price}"></td>
                     
