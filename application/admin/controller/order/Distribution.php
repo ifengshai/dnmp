@@ -1120,6 +1120,7 @@ class Distribution extends Backend
             ->where($where)
             ->where($map)
             ->order($sort, $order)
+            ->limit(10000)
             ->select();
 
         $list = collection($list)->toArray();
