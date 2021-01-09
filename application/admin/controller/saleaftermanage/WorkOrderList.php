@@ -1242,6 +1242,7 @@ class WorkOrderList extends Backend
                 if ($item_order_info) {
                     $item_order_info = array_filter($item_order_info);
                     //查询所有子单数量
+                    $_new_order_process = new NewOrderProcess();
                     $order_id = $_new_order_process->where('increment_id', $platform_order)->value('order_id');
                     $_new_order_item_process = new NewOrderItemProcess();
                     $count_item_num = $_new_order_item_process->where('order_id', $order_id)->count();
