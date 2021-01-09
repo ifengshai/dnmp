@@ -6,6 +6,7 @@ use app\admin\model\DistributionLog;
 use app\admin\model\saleaftermanage\WorkOrderChangeSku;
 use app\admin\model\saleaftermanage\WorkOrderList;
 use app\common\controller\Backend;
+use fast\Excel;
 use think\Request;
 use think\exception\PDOException;
 use think\Exception;
@@ -318,7 +319,7 @@ class Distribution extends Backend
             //            dump($sql);
             //                    $data = $this->model->query($sql);
             //            dump($data);die();
-           
+
             $list = $this->model
                 ->alias('a')
                 ->field('a.id,a.order_id,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.total_qty_ordered,b.site,b.order_type,b.status,a.distribution_status,a.temporary_house_id,a.abnormal_house_id,a.created_at,c.store_house_id')
@@ -433,6 +434,212 @@ class Distribution extends Backend
 
         return $this->view->fetch();
     }
+
+
+    public function csv_array(){
+
+        $map = [];
+        $map['a.site'] =1;
+        $map['a.created_at'] = ['between',['1604160000','1606751999']];
+
+        //子单工单未处理
+        $item_order_numbers = $this->_work_order_change_sku
+            ->alias('a')
+            ->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')
+            ->where([
+                'a.change_type' => ['in', [1, 2, 3]], //1更改镜架  2更改镜片 3取消订单
+                'b.work_status' => ['in', [1, 2, 3, 5]] //工单未处理
+            ])
+            ->order('a.create_time', 'desc')
+            ->group('a.item_order_number')
+            ->column('a.item_order_number');
+
+        list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+
+        $list = $this->model
+            ->alias('a')
+            ->field('a.id,a.order_id,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.total_qty_ordered,b.site,b.order_type,b.status,a.distribution_status,a.temporary_house_id,a.abnormal_house_id,a.created_at,c.store_house_id')
+            ->join(['fa_order' => 'b'], 'a.order_id=b.id')
+            ->join(['fa_order_process' => 'c'], 'a.order_id=c.order_id')
+            ->where($where)
+            ->where($map)
+            ->order($sort, $order)
+            ->select();
+
+        $list = collection($list)->toArray();
+
+
+        //获取工单更改镜框最新信息
+        $change_sku = $this->_work_order_change_sku
+            ->alias('a')
+            ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
+            ->where([
+                'a.change_type' => 1,
+                'a.item_order_number' => ['in', array_column($list, 'item_order_number')],
+                'b.operation_type' => 1
+            ])
+            ->order('a.id', 'desc')
+            ->group('a.item_order_number')
+            ->column('a.change_sku', 'a.item_order_number');
+
+        foreach ($list as $key => $value) {
+            $stock_house_num = '-';
+
+            if ($list[$key]['created_at'] == '') {
+                $list[$key]['created_at'] == '暂无';
+            } else {
+                $list[$key]['created_at'] = date('Y-m-d H:i:s', $value['created_at']);
+            }
+            $list[$key]['stock_house_num'] = $stock_house_num;
+
+            //判断是否显示工单按钮
+            $list[$key]['task_info'] = in_array($value['item_order_number'], $item_order_numbers) ? 1 : 0;
+
+            if ($change_sku[$value['item_order_number']]) {
+                $list[$key]['sku'] = $change_sku[$value['item_order_number']];
+            }
+//站点
+            switch ($value['site']){
+                case 1:
+                    $list[$key]['site'] = 'Zeelool';
+                    break;
+                case 2:
+                    $list[$key]['site'] = 'Voogueme';
+                    break;
+                case 3:
+                    $list[$key]['site'] = 'Nihao';
+                    break;
+                case 4:
+                    $list[$key]['site'] = 'Meeloog';
+                    break;
+                case 5:
+                    $list[$key]['site'] = 'Wesee';
+                    break;
+                case 8:
+                    $list[$key]['site'] = 'Amazon';
+                    break;
+                case 9:
+                    $list[$key]['site'] = 'Zeelool_es';
+                    break;
+                case 10:
+                    $list[$key]['site'] = 'Zeelool_de';
+                    break;
+                case 11:
+                    $list[$key]['site'] = 'Zeelool_jp';
+                    break;
+                default:
+                    break;
+            }
+//加工类型
+            switch ($value['order_prescription_type']){
+                case 0:
+                    $list[$key]['order_prescription_type'] = '待处理';
+                    break;
+                case 1:
+                    $list[$key]['order_prescription_type'] = '仅镜架';
+                    break;
+                case 2:
+                    $list[$key]['order_prescription_type'] = '现货处方镜';
+                    break;
+                case 3:
+                    $list[$key]['order_prescription_type'] = '定制处方镜';
+                    break;
+                case 4:
+                    $list[$key]['order_prescription_type'] = '其他';
+                    break;
+                default:
+                    break;
+            }
+//订单类型
+            switch ($value['order_type']){
+
+                case 1:
+                    $list[$key]['order_type'] = '普通订单';
+                    break;
+                case 2:
+                    $list[$key]['order_type'] = '批发单';
+                    break;
+                case 3:
+                    $list[$key]['order_type'] = '网红单';
+                    break;
+                case 4:
+                    $list[$key]['order_type'] = '补发单';
+                    break;
+                case 5:
+                    $list[$key]['order_type'] = '补差价';
+                    break;
+                case 6:
+                    $list[$key]['order_type'] = '一件代发';
+                    break;
+                case 10:
+                    $list[$key]['order_type'] = '货到付款';
+                    break;
+                default:
+                    break;
+            }
+
+//子订单状态
+            switch ($value['distribution_status']){
+                case 0:
+                    $list[$key]['distribution_status'] = '取消';
+                    break;
+                case 1:
+                    $list[$key]['distribution_status'] = '待打印标签';
+                    break;
+                case 2:
+                    $list[$key]['distribution_status'] = '待配货';
+                    break;
+                case 3:
+                    $list[$key]['distribution_status'] = '待配镜片';
+                    break;
+                case 4:
+                    $list[$key]['distribution_status'] = '待加工';
+                    break;
+                case 5:
+                    $list[$key]['distribution_status'] = '待印logo';
+                    break;
+                case 6:
+                    $list[$key]['distribution_status'] = '待成品质检';
+                    break;
+                case 7:
+                    $list[$key]['distribution_status'] = '待合单';
+                    break;
+                case 8:
+                    $list[$key]['distribution_status'] = '合单中';
+                    break;
+                case 9:
+                    $list[$key]['distribution_status'] = '合单完成';
+                    break;
+                default:
+                    break;
+            }
+
+        }
+
+        foreach ($list as $key=>$item){
+            $csv[$key]['increment_id'] = $item['increment_id'];
+            $csv[$key]['item_order_number'] = $item['item_order_number'];
+            $csv[$key]['sku'] = $item['sku'];
+            $csv[$key]['total_qty_ordered'] = $item['total_qty_ordered'];
+            $csv[$key]['task_info'] = $item['task_info'];
+            $csv[$key]['site'] = $item['site'];
+            $csv[$key]['order_prescription_type'] = $item['order_prescription_type'];
+            $csv[$key]['order_type'] = $item['order_type'];
+            $csv[$key]['status'] = $item['status'];
+            $csv[$key]['distribution_status'] = $item['distribution_status'];
+            $csv[$key]['created_at'] = $item['created_at'];
+        }
+        $headlist = [
+            '订单号', '子单号', 'SKU', '订单副数', '工单', '站点', '加工类型', '订单类型', '订单状态', '子单号状态', '创建时间'
+
+        ];
+
+        $path = "/uploads/";
+        $fileName = 'Zeelool站配货列表十二月份数据';
+        Excel::writeCsv($csv, $headlist, $path . $fileName);
+
+    }
+
 
     /**
      * 待印logo数据导出
@@ -903,7 +1110,7 @@ class Distribution extends Backend
         }
 
         $sort = 'a.id';
-        
+
 
         $list = $this->model
             ->alias('a')
@@ -1192,7 +1399,7 @@ class Distribution extends Backend
         try {
             //标记状态
             $this->model->where(['id' => ['in', $ids]])->update(['distribution_status' => 2]);
-               
+
             //记录配货日志
             $admin = (object)session('admin');
             DistributionLog::record($admin, $ids, 1, '标记打印完成');
@@ -1459,7 +1666,7 @@ class Distribution extends Backend
                     ||
                     in_array($val['item_order_number'], $item_order_numbers) //子单措施未处理:更改镜框18、更改镜片19、取消20
                 )
-                    && $this->error('子单号：' . $val['item_order_number'] . '有工单未处理');
+                && $this->error('子单号：' . $val['item_order_number'] . '有工单未处理');
             }
         }
 
@@ -1589,7 +1796,7 @@ class Distribution extends Backend
                 //订单主表标记已合单
                 if (9 == $save_status) {
                     $this->_new_order_process->where(['order_id' => $value['order_id']])
-                    ->update(['combine_status' => 1, 'check_status' => 0, 'combine_time' => time()]);
+                        ->update(['combine_status' => 1, 'check_status' => 0, 'combine_time' => time()]);
                 }
 
                 $this->model->where(['id' => $value['id']])->update(['distribution_status' => $save_status]);
@@ -1681,7 +1888,7 @@ class Distribution extends Backend
                     ||
                     in_array($val['item_order_number'], $item_order_numbers) //子单措施未处理:更改镜框18、更改镜片19、取消20
                 )
-                    && $this->error('子单号：' . $val['item_order_number'] . '有工单未处理');
+                && $this->error('子单号：' . $val['item_order_number'] . '有工单未处理');
             }
         }
 
@@ -1724,7 +1931,7 @@ class Distribution extends Backend
 
             //子订单状态回滚
             $this->model->where(['id' => ['in', $ids]])->update($save_data);
-               
+
             //记录日志
             DistributionLog::record($admin, array_column($item_list, 'id'), 6, $status_arr[$reason]['name']);
 
@@ -1948,10 +2155,10 @@ class Distribution extends Backend
                 }
 
                 $this->model->where(['id' => $ids])->update($save_data);
-                   
+
                 //标记处理异常状态及时间
                 $this->_distribution_abnormal->where(['id' => $abnormal_info['id']])->update(['status' => 2, 'do_time' => time(), 'do_person' => $admin->nickname]);
-                   
+
                 //配货操作内容
                 $remark = '处理异常：' . $abnormal_arr[$abnormal_info['type']] . ',当前节点：' . $status_arr[$item_info['distribution_status']] . ',返回节点：' . $status_arr[$status];
 
