@@ -116,6 +116,7 @@ class ThirdApi extends Api
                     file_put_contents('/www/wwwroot/mojing/runtime/log/track.log', serialize($trackdetail) . "\r\n", FILE_APPEND);
                     file_put_contents('/www/wwwroot/mojing/runtime/log/track.log', serialize($contents) . "\r\n", FILE_APPEND);
                     file_put_contents('/www/wwwroot/mojing/runtime/log/track.log', $v['z'] . "\r\n", FILE_APPEND);
+                    file_put_contents('/www/wwwroot/mojing/runtime/log/track.log', !in_array($v['z'], $contents) . "\r\n", FILE_APPEND);
                 }
 
                 if (!in_array($v['z'], $contents)) {
