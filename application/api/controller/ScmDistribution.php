@@ -1956,10 +1956,13 @@ class ScmDistribution extends Scm
                 ->select();
             if (2 == $check_status) {
                 //审单拒绝，回退合单状态
-                $this->_new_order_process
+                if (999 != $check_refuse) {
+                    $this->_new_order_process
                     ->allowField(true)
                     ->isUpdate(true, ['order_id' => $order_id])
                     ->save(['combine_status' => 0, 'combine_time' => null]);
+                }
+                
                 if (1 == $check_refuse) {
                     //SKU缺失，回退子单号为待合单中状态，不影响库存
                     $this->_new_order_item_process
