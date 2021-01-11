@@ -100,7 +100,6 @@ class UserDataDetail extends Backend
                 if($site != 3){
                     $list[$key]['point'] = $web_model->table('mw_reward_point_customer')->where('customer_id',$value['entity_id'])->value('mw_reward_point');  //积分
                     $recommend_userids = $web_model->table('mw_reward_point_customer')->where('mw_friend_id',$value['entity_id'])->count();
-
                     if($recommend_userids){
                         $sql1 = $web_model->table('mw_reward_point_customer')->where('mw_friend_id',$value['entity_id'])->field('customer_id')->buildSql();
                         $arr_where = [];
@@ -109,7 +108,7 @@ class UserDataDetail extends Backend
                     }else{
                         $recommend_order_num = 0;
                     }
-                    $recommend_register_num = $web_model->table('mw_reward_point_customer')->where('mw_friend_id',$value['entity_id'])->count();   //推荐注册量
+                    $recommend_register_num = $recommend_userids;   //推荐注册量
                 }else{
                     $list[$key]['point'] = 0;  //积分
                     $recommend_order_num = 0;   //推荐订单数
