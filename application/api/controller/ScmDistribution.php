@@ -382,12 +382,7 @@ class ScmDistribution extends Scm
             7 => '合单'
         ];
         // $check_status != $item_process_info['distribution_status'] && $this->error(__('只有' . $status_arr[$check_status] . '状态才能操作'), [], 405);
-        $check_status != $item_process_info['distribution_status'] && $this->error(__('去'.$status_arr[($item_process_info['distribution_status']+1)]), [], 405);
-
-
-
-
-
+        $check_status != $item_process_info['distribution_status'] && $this->error(__('去'.$status_arr1[$item_process_info['distribution_status']]), [], 405);
 
         //获取子订单处方数据
         $option_info = $this->_new_order_item_option
@@ -530,7 +525,7 @@ class ScmDistribution extends Scm
 
                                 $second = 0; //是第一次扫描
                                 // $msg = "请将子单号{$item_order_number}的商品放入定制片暂存架{$coding}库位";
-                                $msg = "请放在暂存架"."\n"."{$coding}";
+                                $msg = "请放在暂存架1"."\n"."{$coding}";
                             }
 
                             $this->_stock_house->commit();
