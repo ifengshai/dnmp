@@ -1383,6 +1383,7 @@ class ScmDistribution extends Scm
                     $val['item_order_number'] == $item_order_number //子单措施未处理:更改镜框18、更改镜片19、取消20
                 )
                 // && $this->error(__('有工单未处理，无法操作'), [], 405);
+
                 && $this->error(__("子订单存在工单 '\n' <b>$codeing</b>"), [], 405);
                 if ($val['measure_choose_id'] == 21) {
                     $this->error(__("子订单存在工单 '\n' <b>$codeing</b>"), [], 405);
