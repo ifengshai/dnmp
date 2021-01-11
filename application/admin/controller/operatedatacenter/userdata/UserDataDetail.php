@@ -48,17 +48,19 @@ class UserDataDetail extends Backend
                 $site = 1;
             }
             if($filter['customer_type']){
-                $map['group_id'] = $filter['customer_type'];
+                $map['c.group_id'] = $filter['customer_type'];
             }
             if($filter['time_str']){
                 $createat = explode(' ', $filter['time_str']);
-                $map['created_at'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
+                $map['o.created_at'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
             }else{
                 $start = date('Y-m-d', strtotime('-6 day'));
                 $end   = date('Y-m-d 23:59:59');
-                $map['created_at'] = ['between', [$start,$end]];
+                $map['o.created_at'] = ['between', [$start,$end]];
             }
-            $web_model->table('customer_entity')->query("set time_zone='+8:00'");
+            $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+            $map['o.customer_id'] = ['>',0];
+            $web_model->table('sales_flat_order')->query("set time_zone='+8:00'");
             unset($filter['one_time-operate']);
             unset($filter['time_str']);
             unset($filter['order_platform']);
@@ -66,29 +68,35 @@ class UserDataDetail extends Backend
             $this->request->get(['filter' => json_encode($filter)]);
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $web_model
-                ->table('customer_entity')
+                ->table('sales_flat_order')
+                ->alias('o')
+                ->join('customer_entity c','o.customer_id=c.entity_id')
                 ->where($where)
                 ->where($map)
+                ->group('c.entity_id')
                 ->count();
 
             $list = $web_model
-                ->table('customer_entity')
+                ->table('sales_flat_order')
+                ->alias('o')
+                ->join('customer_entity c','o.customer_id=c.entity_id')
                 ->where($where)
                 ->where($map)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
-                ->field('entity_id,created_at,email')
+                ->field('c.entity_id,c.created_at,c.email')
+                ->group('c.entity_id')
                 ->select();
-
             $list = collection($list)->toArray();
             foreach ($list as $key=>$value){
                 $list[$key]['entity_id'] = $value['entity_id'];  //用户id
                 $list[$key]['email'] = $value['email'];          //注册邮箱
                 $list[$key]['created_at'] = $value['created_at'];  //注册时间
                 $order_where['customer_id'] = $value['entity_id'];
-                $order_status_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
-                $list[$key]['order_num'] = $order_model->where($order_where)->where($order_status_where)->count();  //总支付订单数
-                $list[$key]['order_amount'] = $order_model->where($order_where)->where($order_status_where)->sum('base_grand_total');//总订单金额
+                $order_status_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+                $order = $order_model->where($order_where)->where($order_status_where)->field('count(*) count,sum(base_grand_total) total')->select();
+                $list[$key]['order_num'] = $order[0]['count'];  //总支付订单数
+                $list[$key]['order_amount'] = $order[0]['total'];//总订单金额
                 if($site != 3){
                     $list[$key]['point'] = $web_model->table('mw_reward_point_customer')->where('customer_id',$value['entity_id'])->value('mw_reward_point');  //积分
                     $recommend_userids = $web_model->table('mw_reward_point_customer')->where('mw_friend_id',$value['entity_id'])->count();
@@ -107,8 +115,9 @@ class UserDataDetail extends Backend
                     $recommend_order_num = 0;   //推荐订单数
                     $recommend_register_num = 0;   //推荐注册量
                 }
-                $list[$key]['coupon_order_num'] = $order_model->where($order_where)->where($order_status_where)->where("coupon_code is not null")->count();//使用优惠券订单数
-                $list[$key]['coupon_order_amount'] = $order_model->where($order_where)->where($order_status_where)->where("coupon_code is not null")->sum('base_grand_total');//使用优惠券订单金额
+                $order_coupon = $order_model->where($order_where)->where($order_status_where)->where("coupon_code is not null")->field('count(*) count,sum(base_grand_total) total')->select();
+                $list[$key]['coupon_order_num'] = $order_coupon[0]['count'];//使用优惠券订单数
+                $list[$key]['coupon_order_amount'] = $order_coupon[0]['total'];//使用优惠券订单金额
                 $list[$key]['first_order_time'] = $order_model->where($order_where)->where($order_status_where)->order('created_at asc')->value('created_at');//首次下单时间
                 $list[$key]['last_order_time'] = $order_model->where($order_where)->where($order_status_where)->order('created_at desc')->value('created_at');//最后一次下单时间
                 $list[$key]['recommend_order_num'] = $recommend_order_num;   //推荐订单数
@@ -224,29 +233,38 @@ class UserDataDetail extends Backend
             $web_model = Db::connect('database.db_zeelool');
             $site = 1;
         }
-        $web_model->table('customer_entity')->query("set time_zone='+8:00'");
+        $web_model->table('sales_flat_order')->query("set time_zone='+8:00'");
         if($time_str){
             $createat = explode(' ', $time_str);
-            $map['created_at'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
+            $map['o.created_at'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
         }else{
             $start = date('Y-m-d', strtotime('-6 day'));
             $end   = date('Y-m-d 23:59:59');
-            $map['created_at'] = ['between', [$start,$end]];
+            $map['o.created_at'] = ['between', [$start,$end]];
         }
         if($customer_type){
-            $map['group_id'] = $customer_type;
+            $map['c.group_id'] = $customer_type;
         }
+        $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+        $map['o.customer_id'] = ['>',0];
         $total_export_count = $web_model
-            ->table('customer_entity')
+            ->table('sales_flat_order')
+            ->alias('o')
+            ->join('customer_entity c','o.customer_id=c.entity_id')
             ->where($map)
+            ->group('c.entity_id')
             ->count();
         $pre_count = 5000;
         for ($i=0;$i<intval($total_export_count/$pre_count)+1;$i++){
             $start = $i*$pre_count;
             //切割每份数据
-            $list = $web_model->table('customer_entity')
+            $list = $web_model
+                ->table('sales_flat_order')
+                ->alias('o')
+                ->join('customer_entity c','o.customer_id=c.entity_id')
                 ->where($map)
-                ->field('entity_id,created_at,email')
+                ->field('c.entity_id,c.created_at,c.email')
+                ->group('c.entity_id')
                 ->limit($start,$pre_count)
                 ->order('entity_id desc')
                 ->select();
@@ -261,7 +279,7 @@ class UserDataDetail extends Backend
                 $created_at_index = array_keys($column_name,'created_at');
                 $tmpRow[$created_at_index[0]] =$val['created_at'];
                 $order_where['customer_id'] = $val['entity_id'];
-                $order_status_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+                $order_status_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
                 if(in_array('order_num',$column_name)){
                     //总支付订单数
                     $index = array_keys($column_name,'order_num');
@@ -295,16 +313,13 @@ class UserDataDetail extends Backend
                     $index = array_keys($column_name,'last_order_time');
                     $tmpRow[$index[0]] =$order_model->where($order_where)->where($order_status_where)->order('created_at desc')->value('created_at');//最后一次下单时间
                 }
-
                 if(in_array('recommend_order_num',$column_name)){
                     $index = array_keys($column_name,'recommend_order_num');
                     if($site != 3){
-                        $recommend_userids = $web_model->table('mw_reward_point_customer')->where('mw_friend_id',$val['entity_id'])->column('customer_id');
-                        if($recommend_userids){
-                            $tmpRow[$index[0]] = $order_model->where($order_status_where)->where('customer_id','in',$recommend_userids)->count();   //推荐订单数
-                        }else{
-                            $tmpRow[$index[0]] = 0;
-                        }
+                        $sql1 = $web_model->table('mw_reward_point_customer')->where('mw_friend_id',$val['entity_id'])->field('customer_id')->buildSql();
+                        $arr_where = [];
+                        $arr_where[] = ['exp', Db::raw("customer_id in " . $sql1)];
+                        $tmpRow[$index[0]] = $order_model->where($order_status_where)->where($arr_where)->count();   //推荐订单数
                     }else{
                         $tmpRow[$index[0]] = 0;   //推荐订单数
                     }
