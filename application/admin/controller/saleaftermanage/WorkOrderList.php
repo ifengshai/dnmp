@@ -141,11 +141,11 @@ class WorkOrderList extends Backend
             }
             $platform_order = input('platform_order');
             if ($platform_order) {
-                $map['a.platform_order'] = $platform_order;
+                $map['platform_order'] = $platform_order;
             }
             $work_id = input('work_id');
             if ($work_id) {
-                $map['a.id'] = $work_id;
+                $map['id'] = $work_id;
             }
             //选项卡我的任务切换
             $filter = json_decode($this->request->get('filter'), true);
@@ -163,22 +163,22 @@ class WorkOrderList extends Backend
                         $newWorkIds = implode(',', $newWorkIds);
                         if (strlen($newWorkIds) > 0) {
                             //数据查询的条件
-                            $map = "(a.id in ($newWorkIds) or a.after_user_id = {$filter['recept_person_id']} or find_in_set({$filter['recept_person_id']},a.all_after_user_id) or a.assign_user_id = {$filter['recept_person_id']}) and a.work_status not in (0,1,7) and a.id in ($arr)";
+                            $map = "(id in ($newWorkIds) or after_user_id = {$filter['recept_person_id']} or find_in_set({$filter['recept_person_id']},all_after_user_id) or assign_user_id = {$filter['recept_person_id']}) and work_status not in (0,1,7) and id in ($arr)";
                         } else {
-                            $map = "(a.after_user_id = {$filter['recept_person_id']} or find_in_set({$filter['recept_person_id']},a.all_after_user_id) or a.assign_user_id = {$filter['recept_person_id']}) and a.work_status not in (0,1,7) and a.id in ($arr)";
+                            $map = "(after_user_id = {$filter['recept_person_id']} or find_in_set({$filter['recept_person_id']},all_after_user_id) or assign_user_id = {$filter['recept_person_id']}) and work_status not in (0,1,7) and id in ($arr)";
                         }
                     } else {
-                        $map = "(a.id in (" . join(',', $workIds) . ") or a.after_user_id = {$filter['recept_person_id']} or find_in_set({$filter['recept_person_id']},a.all_after_user_id) or a.assign_user_id = {$filter['recept_person_id']}) and a.work_status not in (0,1,7)";
+                        $map = "(id in (" . join(',', $workIds) . ") or after_user_id = {$filter['recept_person_id']} or find_in_set({$filter['recept_person_id']},all_after_user_id) or assign_user_id = {$filter['recept_person_id']}) and work_status not in (0,1,7)";
                     }
                 } else {
-                    $map = "(a.after_user_id = {$filter['recept_person_id']} or find_in_set({$filter['recept_person_id']},a.all_after_user_id) or a.assign_user_id = {$filter['recept_person_id']}) and a.work_status not in (0,1,7)";
+                    $map = "(after_user_id = {$filter['recept_person_id']} or find_in_set({$filter['recept_person_id']},all_after_user_id) or assign_user_id = {$filter['recept_person_id']}) and work_status not in (0,1,7)";
                 }
                 unset($filter['recept_person_id']);
                 unset($filter['measure_choose_id']);
             }
             if ($filter['recept_person']) {
                 $workIds = WorkOrderRecept::where('recept_person_id', 'in', $filter['recept_person'])->column('work_id');
-                $map['a.id'] = ['in', $workIds];
+                $map['id'] = ['in', $workIds];
                 unset($filter['recept_person']);
             }
             //筛选措施
@@ -186,22 +186,20 @@ class WorkOrderList extends Backend
                 $measuerWorkIds = WorkOrderMeasure::where('measure_choose_id', 'in', $filter['measure_choose_id'])->column('work_id');
                 if (!empty($map['id'])) {
                     $newWorkIds = array_intersect($workIds, $measuerWorkIds);
-                    $map['a.id'] = ['in', $newWorkIds];
+                    $map['id'] = ['in', $newWorkIds];
                 } else {
-                    $map['a.id'] = ['in', $measuerWorkIds];
+                    $map['id'] = ['in', $measuerWorkIds];
                 }
                 unset($filter['measure_choose_id']);
             }
             if ($filter['payment_time']) {
                 $createat = explode(' ', $filter['payment_time']);
-                $map1['a.payment_time'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]]];
+                $map1['payment_time'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]]];
                 unset($filter['payment_time']);
             }
 
             $this->request->get(['filter' => json_encode($filter)]);
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-            // dump($sort);
-            // dump(collection($order)->toArray());
             $total = $this->model
                 ->where($where)
                 ->where($map)
@@ -209,13 +207,11 @@ class WorkOrderList extends Backend
                 ->order($sort, $order)
                 ->count();
             $list = $this->model
-                ->alias('a')
-                ->join("mojing_order.fa_order o","a.platform_order = o.increment_id",'left')
                 ->where($where)
                 ->where($map)
                 ->where($map1)
-                ->order('a.id', $order)
-                ->limit(1, 1)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
                 ->select();
             $list = collection($list)->toArray();
 
