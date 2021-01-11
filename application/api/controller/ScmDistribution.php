@@ -1975,6 +1975,27 @@ class ScmDistribution extends Scm
             $this->success('审单已通过，请勿重复操作！', [], 200);
         }
 
+        if (999 == $check_refuse) {
+            //审核拒绝选择标记异常-核实地址
+            $all_item_order_number = $this->_new_order_item_process->where(['id' => ['in', $item_ids]])->column('item_order_number');
+            $abnormal_house_id = $this->_new_order_item_process->where(['id' => ['in', $item_ids], 'abnormal_house_id' => ['>', 1]])->column('abnormal_house_id');//查询当前主单下面是否有已标记异常的子单
+
+            !empty($abnormal_house_id) && $this->error(__('有子单已存在异常'), [], 403);
+            foreach ($all_item_order_number as $key => $value) {
+                //查询给所有子单标记异常异常库位是否足够
+                $stock_house_info = $this->_stock_house
+                    ->field('id,coding')
+                    ->where(['status' => 1, 'type' => 4, 'occupy' => ['<', 10000 - count($all_item_order_number)]])
+                    ->order('occupy', 'desc')
+                    ->find();
+                if (empty($stock_house_info)) {
+                    DistributionLog::record($this->auth, $item_process_id, 0, '异常暂存架没有空余库位');
+                    $this->error(__('异常暂存架没有空余库位'), [], 405);
+                }
+                $this->in_sign_abnormal($value, 13, 1);
+            }
+            $this->success('标记异常成功', [], 200);
+        }
         $this->_item->startTrans();
         $this->_item_platform_sku->startTrans();
         $this->_stock_log->startTrans();
@@ -2014,25 +2035,6 @@ class ScmDistribution extends Scm
                         ->allowField(true)
                         ->isUpdate(true, ['order_id' => $order_id, 'distribution_status' => ['neq', 0]])
                         ->save(['distribution_status' => 7]);
-                } else if (999 == $check_refuse) {
-                    //审核拒绝选择标记异常-核实地址
-                    $all_item_order_number = $this->_new_order_item_process->where(['id' => ['in', $item_ids]])->column('item_order_number');
-                    $abnormal_house_id = $this->_new_order_item_process->where(['id' => ['in', $item_ids], 'abnormal_house_id' => ['>', 1]])->column('abnormal_house_id');//查询当前主单下面是否有已标记异常的子单
-
-                    !empty($abnormal_house_id) && $this->error(__('有子单已存在异常'), [], 403);
-                    foreach ($all_item_order_number as $key => $value) {
-                        //查询给所有子单标记异常异常库位是否足够
-                        $stock_house_info = $this->_stock_house
-                            ->field('id,coding')
-                            ->where(['status' => 1, 'type' => 4, 'occupy' => ['<', 10000 - count($all_item_order_number)]])
-                            ->order('occupy', 'desc')
-                            ->find();
-                        if (empty($stock_house_info)) {
-                            DistributionLog::record($this->auth, $item_process_id, 0, '异常暂存架没有空余库位');
-                            $this->error(__('异常暂存架没有空余库位'), [], 405);
-                        }
-                        $this->in_sign_abnormal($value, 13, 1);
-                    }
                 } else {
                     //非指定子单回退到待合单
                     $this->_new_order_item_process
