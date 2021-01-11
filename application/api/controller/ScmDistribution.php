@@ -2167,7 +2167,6 @@ class ScmDistribution extends Scm
         
         $this->success($msg . '成功', [], 200);
     }
-<<<<<<< HEAD
 
     public function get_purchase_price(){
         $sku = $this->request->request('sku');
@@ -2182,6 +2181,4 @@ class ScmDistribution extends Scm
         $this->success('成功', ['purchase_price' => $purchase_price['purchase_price']], 200);
     }
 
-=======
->>>>>>> demand_1242
 }
