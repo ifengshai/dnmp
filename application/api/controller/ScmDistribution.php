@@ -355,10 +355,10 @@ class ScmDistribution extends Scm
                 )
 
                 // && $this->error(__('有工单未处理，无法操作'), [], 405);
-                && $this->error(__('子订单存在工单'."\n"."<b>$coding</b>"), [], 405);
+                && $this->error(__('子订单存在工单'."\\n"."<b>$coding</b>"), [], 405);
                 if ($val['measure_choose_id'] == 21) {
                     // $this->error(__('有工单存在暂缓措施未处理，无法操作'), [], 405);
-                    $this->error(__("子订单存在工单"."\n"." <b>$coding</b>"), [], 405);
+                    $this->error(__("子订单存在工单"."\\n"." <b>$coding</b>"), [], 405);
                 }
             }
         }
@@ -368,7 +368,7 @@ class ScmDistribution extends Scm
             ->where(['item_process_id' => $item_process_info['id'], 'status' => 1])
             ->value('id');
         // $abnormal_id && $this->error(__('有异常待处理，无法操作'), [], 405);
-        $abnormal_id && $this->error(__("子订单存在异常"."\n"."<b>$coding</b>"), [], 405);
+        $abnormal_id && $this->error(__("子订单存在异常"."\\n"."<b>$coding</b>"), [], 405);
 
         //检测状态
         $status_arr = [
@@ -500,7 +500,7 @@ class ScmDistribution extends Scm
                 $second = 1; //是第二次扫描
                 // $msg = "请将子单号{$item_order_number}的商品从定制片暂存架{$coding}库位取出";
 
-                $msg = "<b>$coding</b>"."\n"."是否将商品取出";
+                $msg = "<b>$coding</b>"."\\n"."是否将商品取出";
             } else {
                 //判断是否定制片且未处理状态
                 if (0 == $item_process_info['customize_status'] && 3 == $item_process_info['order_prescription_type']) {
@@ -533,7 +533,7 @@ class ScmDistribution extends Scm
                                 $second = 0; //是第一次扫描
                                 // $msg = "请将子单号{$item_order_number}的商品放入定制片暂存架{$coding}库位";
 
-                                $msg = "请放在暂存架"."\n"."<b>$coding</b>";
+                                $msg = "请放在暂存架"."\\n"."<b>$coding</b>";
                             }
 
                             $this->_stock_house->commit();
@@ -634,7 +634,7 @@ class ScmDistribution extends Scm
         if ($abnormal_id) {
             DistributionLog::record($this->auth, $item_process_info['id'], 0, $status_arr[$check_status] . '：有异常[' . $abnormal_id . ']待处理不可操作');
             // $this->error(__('有异常待处理无法操作'), [], 405);
-            $this->error(__("子订单存在异常"."\n"."<b>$coding</b>"), [], 405);
+            $this->error(__("子订单存在异常"."\\n"."<b>$coding</b>"), [], 405);
         }
 
         //查询订单号
@@ -665,10 +665,10 @@ class ScmDistribution extends Scm
                 )
 
                 // && $this->error(__('有工单未处理，无法操作'), [], 405);
-                && $this->error(__("子订单存在工单"."\n"."<b>$coding</b>"), [], 405);
+                && $this->error(__("子订单存在工单"."\\n"."<b>$coding</b>"), [], 405);
 
                 if ($val['measure_choose_id'] == 21) {
-                    $this->error(__("子订单存在工单"."\n"."<b>$coding</b>"), [], 405);
+                    $this->error(__("子订单存在工单"."\\n"."<b>$coding</b>"), [], 405);
                 }
             }
         }
@@ -1384,9 +1384,9 @@ class ScmDistribution extends Scm
                 )
                 // && $this->error(__('有工单未处理，无法操作'), [], 405);
 
-                && $this->error(__("子订单存在工单"."\n"."<b>$codeing</b>"), [], 405);
+                && $this->error(__("子订单存在工单"."\\n"."<b>$codeing</b>"), [], 405);
                 if ($val['measure_choose_id'] == 21) {
-                    $this->error(__("子订单存在工单"."\n"."<b>$codeing</b>"), [], 405);
+                    $this->error(__("子订单存在工单"."\\n"."<b>$codeing</b>"), [], 405);
                 }
             }
         }
@@ -1397,14 +1397,14 @@ class ScmDistribution extends Scm
             ->value('id');
         // $abnormal_id && $this->error(__('有异常待处理，无法操作'), [], 405);
 
-        $abnormal_id && $this->error(__("子订单存在异常"."\n"."<b>$codeing</b>"), [], 405);
+        $abnormal_id && $this->error(__("子订单存在异常"."\\n"."<b>$codeing</b>"), [], 405);
 
         empty($item_process_info) && $this->error(__('子订单不存在'), [], 403);
 
 
         //产品婧让改的
         if (!empty($store_house_is) && 9 == $item_process_info['distribution_status']) {
-            $this->error(__("请放在合单架"."\n"."<b>$codeing</b>"), [], 403);
+            $this->error(__("请放在合单架"."\\n"."<b>$codeing</b>"), [], 403);
         } elseif (empty($store_house_is) && 9 == $item_process_info['distribution_status']) {
             $this->error(__('订单合单完成，去审单！'), [], 403);
         }
@@ -1428,7 +1428,7 @@ class ScmDistribution extends Scm
                 $store_house_info = $this->_stock_house->field('id,coding,subarea')->where('id', $order_process_info['store_house_id'])->find();
                 // $this->error(__('请将子单号' . $item_order_number . '的商品放入合单架' . $store_house_info['coding'] . '合单库位'), [], 403);
 
-                $this->error(__("请放在合单架"."\n"."<b>$codeing</b>"), [], 403);
+                $this->error(__("请放在合单架"."\\n"."<b>$codeing</b>"), [], 403);
             } else {
                 //                $this->_new_order_item_process->allowField(true)->isUpdate(true, ['item_order_number'=>$item_order_number])->save(['distribution_status'=>7]);
                 $this->error(__('合单失败，主单未分配合单库位'), [], 403);
@@ -1525,7 +1525,7 @@ class ScmDistribution extends Scm
             //重复扫描子单号--提示语句
             // $this->error(__('请将子单号' . $item_order_number . '的商品放入合单架' . $store_house_info['coding'] . '库位'), [], 511);
             $codeing = $store_house_info['coding'];
-            $this->error(__("请放在合单架"."\n"."<b>$codeing</b>"), [], 511);
+            $this->error(__("请放在合单架"."\\n"."<b>$codeing</b>"), [], 511);
         }
 
         if (!empty($store_house_info['order_id'])) {
