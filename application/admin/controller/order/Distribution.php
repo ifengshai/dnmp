@@ -2903,7 +2903,7 @@ class Distribution extends Backend
         ];
 
         //标记处理异常状态及时间
-        $this->_distribution_abnormal->where(['id' => ['in',$ids]])->update(['status' => 2, 'do_time' => time(), 'do_person' => $admin->nickname]);
+        $this->_distribution_abnormal->where(['item_process_id' => ['in',$ids]])->update(['status' => 2, 'do_time' => time(), 'do_person' => $admin->nickname]);
         $this->model->where(['id' => ['in',$ids]])->update($save_data);
         $this->success('操作成功!', '', 'success', 200);
     }
