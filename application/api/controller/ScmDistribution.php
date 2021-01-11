@@ -1385,6 +1385,7 @@ class ScmDistribution extends Scm
                 // && $this->error(__('有工单未处理，无法操作'), [], 405);
 
                 && $this->error(__("子订单存在工单"."\\n"."<b>$codeing</b>"), [], 405);
+
                 if ($val['measure_choose_id'] == 21) {
                     $this->error(__("子订单存在工单"."\\n"."<b>$codeing</b>"), [], 405);
                 }
@@ -1429,6 +1430,7 @@ class ScmDistribution extends Scm
                 // $this->error(__('请将子单号' . $item_order_number . '的商品放入合单架' . $store_house_info['coding'] . '合单库位'), [], 403);
 
                 $this->error(__("请放在合单架"."\\n"."<b>$codeing</b>"), [], 403);
+
             } else {
                 //                $this->_new_order_item_process->allowField(true)->isUpdate(true, ['item_order_number'=>$item_order_number])->save(['distribution_status'=>7]);
                 $this->error(__('合单失败，主单未分配合单库位'), [], 403);
@@ -1999,12 +2001,12 @@ class ScmDistribution extends Scm
             $this->success('审单已通过，请勿重复操作！', [], 200);
         }
 
+        $abnormal_house_id = $this->_new_order_item_process->where(['id' => ['in', $item_ids], 'abnormal_house_id' => ['>', 1]])->column('abnormal_house_id');//查询当前主单下面是否有已标记异常的子单
+
+        !empty($abnormal_house_id) && $this->error(__('有子单存在异常'), [], 403);
         if (999 == $check_refuse) {
             //审核拒绝选择标记异常-核实地址
             $all_item_order_number = $this->_new_order_item_process->where(['id' => ['in', $item_ids]])->column('item_order_number');
-            $abnormal_house_id = $this->_new_order_item_process->where(['id' => ['in', $item_ids], 'abnormal_house_id' => ['>', 1]])->column('abnormal_house_id');//查询当前主单下面是否有已标记异常的子单
-
-            !empty($abnormal_house_id) && $this->error(__('有子单已存在异常'), [], 403);
             foreach ($all_item_order_number as $key => $value) {
                 //查询给所有子单标记异常异常库位是否足够
                 $stock_house_info = $this->_stock_house
