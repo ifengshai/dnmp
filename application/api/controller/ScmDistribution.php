@@ -1351,11 +1351,6 @@ class ScmDistribution extends Scm
             ->find();
         'processing' != $order_info['status'] && $this->error(__('订单状态异常'), [], 405);
 
-        empty($item_process_info) && $this->error(__('子订单不存在'), [], 403);
-        9 == $item_process_info['distribution_status'] && $this->error(__('订单合单完成，去审单！'), [], 403);
-        !in_array($item_process_info['distribution_status'], [7, 8]) && $this->error(__('子订单当前状态不可合单操作'), [], 403);
-
-
 
         //检测是否有工单未处理
         $check_work_order = $this->_work_order_measure
@@ -1390,8 +1385,9 @@ class ScmDistribution extends Scm
         // $abnormal_id && $this->error(__('有异常待处理，无法操作'), [], 405);
         $abnormal_id && $this->error(__('子订单存在异常A-01-01'), [], 405);
 
-
-
+        empty($item_process_info) && $this->error(__('子订单不存在'), [], 403);
+        9 == $item_process_info['distribution_status'] && $this->error(__('订单合单完成，去审单！'), [], 403);
+        !in_array($item_process_info['distribution_status'], [7, 8]) && $this->error(__('子订单当前状态不可合单操作'), [], 403);
 
         $order_process_info = $this->_new_order_process
             ->where('order_id', $item_process_info['order_id'])
