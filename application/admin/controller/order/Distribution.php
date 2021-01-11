@@ -2899,6 +2899,8 @@ class Distribution extends Backend
             $work_order_list = $this->_work_order_list->where(['order_item_numbers' => ['like',$item_info['item_order_number'].'%'], 'work_status' => ['in',[1,2,3,5]]])->find();
             !empty($work_order_list) && $this->error('子订单'.$item_info['item_order_number'].'存在未完成的工单');
             $abnormal_house_id[] = $item_info['abnormal_house_id'];
+            //配货日志
+            DistributionLog::record($this->auth, $ids[$key], 10, "子单号{$item_info['item_order_number']}，异常取消");
         }
         
         //异常库位占用数量-1
@@ -2914,6 +2916,7 @@ class Distribution extends Backend
         //标记处理异常状态及时间
         $this->_distribution_abnormal->where(['item_process_id' => ['in',$ids]])->update(['status' => 2, 'do_time' => time(), 'do_person' => $admin->nickname]);
         $this->model->where(['id' => ['in',$ids]])->update($save_data);
+        
         $this->success('操作成功!', '', 'success', 200);
     }
 }
