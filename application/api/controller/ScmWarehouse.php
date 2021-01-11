@@ -1007,7 +1007,6 @@ class ScmWarehouse extends Scm
                         }
                     }
                     //入库单绑定条形码执行
-                    print_r($where_code_sku);die;
                     if ($where_code) {
                         $save_code_data = [];
                         if ($type_id == 3) {//退货入库绑定sku和商品条形码
