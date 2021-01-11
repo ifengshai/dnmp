@@ -1092,7 +1092,7 @@ class ScmDistribution extends Scm
             $this->error(__("取出失败"), [], 403);
         }
         // $this->success("子单号{$item_order_number}的商品从定制片暂存架{$coding}库位取出成功", [], 200);
-        $this->success("{$coding}".""."是否将商品取出", [], 200);
+        $this->success('', [], 200);
     }
 
     /**
@@ -1381,13 +1381,21 @@ class ScmDistribution extends Scm
         $abnormal_id && $this->error(__('子订单存在异常A-01-01'), [], 405);
 
         empty($item_process_info) && $this->error(__('子订单不存在'), [], 403);
-        9 == $item_process_info['distribution_status'] && $this->error(__('订单合单完成，去审单！'), [], 403);
-        !in_array($item_process_info['distribution_status'], [7, 8]) && $this->error(__('子订单当前状态不可合单操作'), [], 403);
-
         $order_process_info = $this->_new_order_process
             ->where('order_id', $item_process_info['order_id'])
             ->field('order_id,store_house_id')
             ->find();
+        $store_house_is = $this->_stock_house->field('id,coding,subarea')->where('id', $order_process_info['store_house_id'])->find();
+        //产品婧让改的
+        if (!empty($store_house_is) && 9 == $item_process_info['distribution_status']){
+            $this->error(__('请放在合单架' ."\n". $store_house_is['coding']), [], 403);
+        }elseif (empty($store_house_is) && 9 == $item_process_info['distribution_status']){
+            $this->error(__('订单合单完成，去审单！'), [], 403);
+        }
+        9 == $item_process_info['distribution_status'] && $this->error(__('订单合单完成，去审单！'), [], 403);
+        !in_array($item_process_info['distribution_status'], [7, 8]) && $this->error(__('子订单当前状态不可合单操作'), [], 403);
+
+
 
         //第二次扫描提示语
         if (7 < $item_process_info['distribution_status']) {
