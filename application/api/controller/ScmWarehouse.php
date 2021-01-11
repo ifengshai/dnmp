@@ -1202,12 +1202,12 @@ class ScmWarehouse extends Scm
         $gen_purchase_order_item = new \app\admin\model\purchase\PurchaseOrderItem;
         //生成采购单
         $purchase_number = 'PO' . date('YmdHis') . rand(100, 999) . rand(100, 999);
-        $purchase_data = ['purchase_number'=>$purchase_number,'purchase_name'=>'退货入库','purchase_status'=>10,'check_status'=>2,'is_in_stock'=>1,'stock_status'=>2];
+        $purchase_data = ['purchase_number'=>$purchase_number,'purchase_name'=>'退货入库','purchase_status'=>10,'check_status'=>2,'is_in_stock'=>1,'stock_status'=>2,'createtime'=>date('Y-m-d H:i:s')];
 
         $purchase = $gen_purchase_order->insertGetId($purchase_data);
         //生成质检单
         $check_order_number = 'QC' . date('YmdHis') . rand(100, 999) . rand(100, 999);
-        $check_data = ['check_order_number'=>$check_order_number,'type'=>2,'purchase_id'=>$purchase,'status'=>2,'is_in_stock'=>1,'is_stock'=>1];
+        $check_data = ['check_order_number'=>$check_order_number,'type'=>2,'purchase_id'=>$purchase,'status'=>2,'is_in_stock'=>1,'is_stock'=>1,'createtime'=>date('Y-m-d H:i:s')];
         $check = $gen_check->insertGetId($check_data);
 
         //生成子数据
@@ -1280,6 +1280,7 @@ class ScmWarehouse extends Scm
                 $item_list[$key]['sku_agg'] = $sku_agg;
                 //质检单默认留样数量为1，入库数量为质检合格数量 - 留样数量
                 $item_list[$key]['in_stock_num'] = $value['quantity_num'] - $value['sample_num'];
+                $item_list[$key]['remark'] = $this->_check_item->where('check_id',$check_id)->value('remark');
             }
             $info['item_list'] = $item_list;
 
