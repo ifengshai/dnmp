@@ -1204,7 +1204,7 @@ class ScmWarehouse extends Scm
             $gen_purchase_order_item->insert($purchase_order_item_data);
         }
 
-        return $data['purchase_id'=>$purchase,'check_id'=>$check];
+        return ['purchase_id'=>$purchase , 'check_id'=>$check];
     }
 
     /**
