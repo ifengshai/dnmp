@@ -103,16 +103,18 @@ class ThirdApi extends Api
             $order_node_detail['shipment_type'] = $add['shipment_type'];
             $order_node_detail['shipment_data_type'] = $add['shipment_data_type'];
             $order_node_detail['track_number'] = $add['track_number'];
+
+            file_put_contents('/www/wwwroot/mojing/runtime/log/track.log', serialize($add) . "\r\n", FILE_APPEND);
             //获取物流明细表中的描述
             $contents = Db::name('order_node_courier')->where('track_number', $add['track_number'])->column('content');
             foreach ($trackdetail as $k => $v) {
-                file_put_contents('/www/wwwroot/mojing/runtime/log/track.log', serialize($v) . "\r\n", FILE_APPEND);
+                
                 if (!in_array($v['z'], $contents)) {
                     $add['create_time'] = $v['a'];
                     $add['content'] = $v['z'];
                     $add['courier_status'] = $data['e'];
                     Db::name('order_node_courier')->insert($add); //插入物流日志表
-                    file_put_contents('/www/wwwroot/mojing/runtime/log/track.log', serialize($add) . "\r\n", FILE_APPEND);
+                    file_put_contents('/www/wwwroot/mojing/runtime/log/track.log', '11111111111--------'. serialize($add) . "\r\n", FILE_APPEND);
                 }
                 if ($k == 1) {
                     //更新上网
