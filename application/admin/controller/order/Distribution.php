@@ -2878,6 +2878,7 @@ class Distribution extends Backend
 
     //取消异常
     public function cancel_abnormal($ids = null){
+        $admin = (object)session('admin');
         foreach ($ids as $key => $value) {
             $item_info = $this->model
             ->field('id,site,sku,distribution_status,abnormal_house_id,temporary_house_id,item_order_number')
@@ -2900,6 +2901,9 @@ class Distribution extends Backend
         $save_data = [
             'abnormal_house_id' => 0 //异常库位ID
         ];
+
+        //标记处理异常状态及时间
+        $this->_distribution_abnormal->where(['id' => ['in',$ids]])->update(['status' => 2, 'do_time' => time(), 'do_person' => $admin->nickname]);
         $this->model->where(['id' => ['in',$ids]])->update($save_data);
         $this->success('操作成功!', '', 'success', 200);
     }

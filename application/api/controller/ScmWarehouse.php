@@ -1248,6 +1248,7 @@ class ScmWarehouse extends Scm
             //入库单所需数据
             $info['check_id'] = $check_id;
             $info['check_order_number'] = $check_data['check_order_number'];
+            $info['check_order_number'] = $check_data['check_order_number'];
             //有关联质检单ID，则入库类型只取第一条数据：采购入库
             //            $in_stock_type = $in_stock_type[0];
             $in_stock_type_list[] = $in_stock_type[0];
@@ -1255,7 +1256,7 @@ class ScmWarehouse extends Scm
             //获取质检单商品数据
             $item_list = $this->_check_item
                 ->where(['check_id' => $check_id])
-                ->field('sku,quantity_num,sample_num')
+                ->field('sku,quantity_num,sample_num,arrivals_num')
                 ->select();
             $item_list = collection($item_list)->toArray();
             //获取条形码数据
