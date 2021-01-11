@@ -263,12 +263,11 @@ class ScmDistribution extends Scm
                 'create_person' => $this->auth->nickname
             ];
 
-            $res = $this->_distribution_abnormal->allowField(true)->isUpdate(false)->save($abnormal_data);
+            $res = $this->_distribution_abnormal->insert($abnormal_data);
             //子订单绑定异常库位号
             $this->_new_order_item_process
-                ->allowField(true)
-                ->isUpdate(true, ['item_order_number' => $item_order_number])
-                ->save(['abnormal_house_id' => $stock_house_info['id']]);
+                ->where(['item_order_number' => $item_order_number])
+                ->update(['abnormal_house_id' => $stock_house_info['id']]);
 
         //异常库位占用数量+1
         $this->_stock_house
