@@ -8,6 +8,7 @@ use app\admin\model\order\order\LensData;
 use app\admin\model\order\order\NewOrder;
 use app\admin\model\order\order\NewOrderItemProcess;
 use app\admin\model\order\order\NewOrderProcess;
+use app\admin\model\order\order\Order;
 use app\admin\model\saleaftermanage\WorkOrderNote;
 use app\admin\model\warehouse\StockHouse;
 use app\common\controller\Backend;
@@ -214,7 +215,7 @@ class WorkOrderList extends Backend
                 ->limit($offset, $limit)
                 ->select();
             $list = collection($list)->toArray();
-
+            $fa_order = new NewOrder();
             //用户
             $user_list = $this->users;
             foreach ($list as $k => $v) {
@@ -275,6 +276,7 @@ class WorkOrderList extends Backend
                 } else {
                     $list[$k]['has_recept'] = 1;
                 }
+                $list[$k]['order_status'] = $fa_order->where('increment_id',$list[$k]['platform_order'])->value('status');
             }
             $result = array("total" => $total, "rows" => $list);
 
