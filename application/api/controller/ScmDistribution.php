@@ -355,7 +355,6 @@ class ScmDistribution extends Scm
                 )
 
                 // && $this->error(__('有工单未处理，无法操作'), [], 405);
-
                 && $this->error(__("<font size='20'>子订单存在工单 \n $coding</font>"), [], 405);
                 if ($val['measure_choose_id'] == 21) {
                     // $this->error(__('有工单存在暂缓措施未处理，无法操作'), [], 405);
@@ -369,7 +368,6 @@ class ScmDistribution extends Scm
             ->where(['item_process_id' => $item_process_info['id'], 'status' => 1])
             ->value('id');
         // $abnormal_id && $this->error(__('有异常待处理，无法操作'), [], 405);
-
         $abnormal_id && $this->error(__("<font size='20'>子订单存在异常 \n $coding</font>"), [], 405);
 
         //检测状态
@@ -1359,7 +1357,6 @@ class ScmDistribution extends Scm
             ->find();
         'processing' != $order_info['status'] && $this->error(__('订单状态异常'), [], 405);
 
-
         $order_process_info = $this->_new_order_process
             ->where('order_id', $item_process_info['order_id'])
             ->field('order_id,store_house_id')
@@ -1385,7 +1382,6 @@ class ScmDistribution extends Scm
                     ||
                     $val['item_order_number'] == $item_order_number //子单措施未处理:更改镜框18、更改镜片19、取消20
                 )
-
                 // && $this->error(__('有工单未处理，无法操作'), [], 405);
 
                 && $this->error(__("<font size='20'>子订单存在工单 \n $codeing</font>"), [], 405);
@@ -1414,6 +1410,7 @@ class ScmDistribution extends Scm
         }
         9 == $item_process_info['distribution_status'] && $this->error(__('订单合单完成，去审单！'), [], 403);
         !in_array($item_process_info['distribution_status'], [7, 8]) && $this->error(__('子订单当前状态不可合单操作'), [], 403);
+
 
         //第二次扫描提示语
         if (7 < $item_process_info['distribution_status']) {
