@@ -996,11 +996,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
 
                 //多项添加商品名称和颜色
                 $(document).on('click', '.btn-add', function () {
-                    $(".selectpicker").selectpicker('refresh');
+                  
                     var content = $('#table-content table tbody').html();
                     //console.log(content);
                     $('.caigou table tbody').append(content);
-                    // Form.api.bindevent($("form[role=form]"));
+                    $(".selectpicker").selectpicker('refresh');
                 });
                 $(document).on('click', '.btn-del', function () {
                     $(this).parent().parent().remove();
