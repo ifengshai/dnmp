@@ -2140,7 +2140,7 @@ class TrackReg extends Backend
     public function only_ga_data_01_09()
     {
         $date_time = date('Y-m-d', strtotime("-1 day"));
-        $date_time = '2020-01-09';
+        $date_time = '2021-01-09';
 
         //z站
         $data = Db::name('datacenter_day')->where(['day_date' => $date_time, 'site' => 1])->field('order_num,new_cart_num,update_cart_num')->find();
@@ -2218,7 +2218,7 @@ class TrackReg extends Backend
     public function only_ga_data_01_08()
     {
         $date_time = date('Y-m-d', strtotime("-1 day"));
-        $date_time = '2020-01-08';
+        $date_time = '2021-01-08';
 
         //z站
         $data = Db::name('datacenter_day')->where(['day_date' => $date_time, 'site' => 1])->field('order_num,new_cart_num,update_cart_num')->find();
