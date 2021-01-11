@@ -186,9 +186,9 @@ class ItWebDemand extends Backend
                     $usersId = array_merge($usersId, [$adminId]);
                     foreach ($usersId as $k => $v) {
                         if ($k == 0) {
-                            $meWhere .= " and locate({$v},test_group_person_id)";
+                            $meWhere .= " and locate({$v},test_user_id)";
                         } else {
-                            $meWhere .= " or locate({$v},test_group_person_id)";
+                            $meWhere .= " or locate({$v},test_user_id)";
                         }
                     }
                 }
@@ -202,9 +202,9 @@ class ItWebDemand extends Backend
                     $usersId = array_merge($usersId, [$adminId]);
                     foreach ($usersId as $k => $v) {
                         if ($k == 0) {
-                            $meWhere .= " and locate({$v},web_group_person_id)";
+                            $meWhere .= " and locate({$v},web_designer_user_id)";
                         } else {
-                            $meWhere .= " or locate({$v},web_group_person_id)";
+                            $meWhere .= " or locate({$v},web_designer_user_id)";
                         }
                     }
                 }
@@ -218,9 +218,9 @@ class ItWebDemand extends Backend
                     $usersId = array_merge($usersId, [$adminId]);
                     foreach ($usersId as $k => $v) {
                         if ($k == 0) {
-                            $meWhere .= " and locate({$v},app_group_person_id)";
+                            $meWhere .= " and locate({$v},app_user_id)";
                         } else {
-                            $meWhere .= " or locate({$v},app_group_person_id)";
+                            $meWhere .= " or locate({$v},app_user_id)";
                         }
                     }
                 }
@@ -740,9 +740,9 @@ class ItWebDemand extends Backend
                     $usersId = array_merge($usersId, [$adminId]);
                     foreach ($usersId as $k => $v) {
                         if ($k == 0) {
-                            $meWhere .= " and locate({$v},test_group_person_id)";
+                            $meWhere .= " and locate({$v},test_user_id)";
                         } else {
-                            $meWhere .= " or locate({$v},test_group_person_id)";
+                            $meWhere .= " or locate({$v},test_user_id)";
                         }
                     }
                 }
@@ -756,9 +756,9 @@ class ItWebDemand extends Backend
                     $usersId = array_merge($usersId, [$adminId]);
                     foreach ($usersId as $k => $v) {
                         if ($k == 0) {
-                            $meWhere .= " and locate({$v},web_group_person_id)";
+                            $meWhere .= " and locate({$v},web_designer_user_id)";
                         } else {
-                            $meWhere .= " or locate({$v},web_group_person_id)";
+                            $meWhere .= " or locate({$v},web_designer_user_id)";
                         }
                     }
                 }
@@ -772,9 +772,9 @@ class ItWebDemand extends Backend
                     $usersId = array_merge($usersId, [$adminId]);
                     foreach ($usersId as $k => $v) {
                         if ($k == 0) {
-                            $meWhere .= " and locate({$v},app_group_person_id)";
+                            $meWhere .= " and locate({$v},app_user_id)";
                         } else {
-                            $meWhere .= " or locate({$v},app_group_person_id)";
+                            $meWhere .= " or locate({$v},app_user_id)";
                         }
                     }
                 }
