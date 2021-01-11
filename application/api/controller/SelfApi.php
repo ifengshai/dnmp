@@ -127,10 +127,6 @@ class SelfApi extends Api
             $this->error(__('缺少状态参数'), [], 400);
         }
 
-        if (!in_array($status, ['processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal', 'payment_review'])) {
-            $this->error(__('非支付成功状态'), [], 400);
-        }
-
         //判断如果子节点大于等于1时  不更新
         $order_count = (new OrderNode)->where([
             'order_number' => $order_number,

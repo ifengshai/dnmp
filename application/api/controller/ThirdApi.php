@@ -104,26 +104,15 @@ class ThirdApi extends Api
             $order_node_detail['shipment_data_type'] = $add['shipment_data_type'];
             $order_node_detail['track_number'] = $add['track_number'];
 
-           
             //获取物流明细表中的描述
             $contents = Db::name('order_node_courier')->where('track_number', $add['track_number'])->column('content');
             
-
             foreach ($trackdetail as $k => $v) {
-                
-
-                if ($add['track_number'] == '9400111108296466298805') {
-                    file_put_contents('/www/wwwroot/mojing/runtime/log/track.log', serialize($trackdetail) . "\r\n", FILE_APPEND);
-                    file_put_contents('/www/wwwroot/mojing/runtime/log/track.log', serialize($contents) . "\r\n", FILE_APPEND);
-                    file_put_contents('/www/wwwroot/mojing/runtime/log/track.log', $v['z'] . "\r\n", FILE_APPEND);
-                    file_put_contents('/www/wwwroot/mojing/runtime/log/track.log', !in_array($v['z'], $contents) . "\r\n", FILE_APPEND);
-                }
-
+              
                 if (!in_array($v['z'], $contents)) {
                     $add['create_time'] = $v['a'];
                     $add['content'] = $v['z'];
                     $add['courier_status'] = $data['e'];
-                    file_put_contents('/www/wwwroot/mojing/runtime/log/track.log', '11111111111--------'. serialize($add) . "\r\n", FILE_APPEND);
                     Db::name('order_node_courier')->insert($add); //插入物流日志表
                     
                 }
