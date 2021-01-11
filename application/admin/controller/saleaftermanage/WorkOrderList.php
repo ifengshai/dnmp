@@ -8,6 +8,7 @@ use app\admin\model\order\order\LensData;
 use app\admin\model\order\order\NewOrder;
 use app\admin\model\order\order\NewOrderItemProcess;
 use app\admin\model\order\order\NewOrderProcess;
+use app\admin\model\order\order\Order;
 use app\admin\model\saleaftermanage\WorkOrderNote;
 use app\admin\model\warehouse\StockHouse;
 use app\common\controller\Backend;
