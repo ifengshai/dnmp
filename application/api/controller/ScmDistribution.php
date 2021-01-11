@@ -147,11 +147,11 @@ class ScmDistribution extends Scm
      * @author lzh
      * @return mixed
      */
-    public function sign_abnormal($item_order_number,$type,$flag = 0)
+    public function sign_abnormal()
     {
-        $item_order_number = $this->request->request('item_order_number')?$this->request->request('item_order_number'):$item_order_number;
+        $item_order_number = $this->request->request('item_order_number');
         empty($item_order_number) && $this->error(__('子订单号不能为空'), [], 403);
-        $type = $this->request->request('type')?$this->request->request('type'):$type;
+        $type = $this->request->request('type');
         empty($type) && $this->error(__('异常类型不能为空'), [], 403);
         //获取子订单数据
         $item_process_info = $this->_new_order_item_process
@@ -184,6 +184,7 @@ class ScmDistribution extends Scm
                 'create_time' => time(),
                 'create_person' => $this->auth->nickname
             ];
+
             $this->_distribution_abnormal->allowField(true)->save($abnormal_data);
 
             //子订单绑定异常库位号
@@ -216,11 +217,67 @@ class ScmDistribution extends Scm
             $this->_new_order_item_process->rollback();
             $this->error($e->getMessage(), [], 408);
         }
-        if (!$flag) {
-            $this->success(__("请将子单号{$item_order_number}的商品放入异常暂存架{$stock_house_info['coding']}库位"), ['coding' => $stock_house_info['coding']], 200);
-        } 
+
+        $this->success(__("请将子单号{$item_order_number}的商品放入异常暂存架{$stock_house_info['coding']}库位"), ['coding' => $stock_house_info['coding']], 200);
+
     }
 
+        /**
+     * 发货系统标记异常
+     *
+     * @参数 string item_order_number  子订单号
+     * @参数 int type  异常类型
+     * @author lzh
+     * @return mixed
+     */
+    public function in_sign_abnormal($item_order_number,$type,$flag = 0)
+    {
+        empty($item_order_number) && $this->error(__('子订单号不能为空'), [], 403);
+        empty($type) && $this->error(__('异常类型不能为空'), [], 403);
+        //获取子订单数据
+        $item_process_info = $this->_new_order_item_process
+            ->field('id,abnormal_house_id')
+            ->where('item_order_number', $item_order_number)
+            ->find();
+        empty($item_process_info) && $this->error(__('子订单不存在'), [], 403);
+        !empty($item_process_info['abnormal_house_id']) && $this->error(__('已标记异常，不能多次标记'), [], 403);
+        $item_process_id = $item_process_info['id'];
+
+        //自动分配异常库位号
+        $stock_house_info = $this->_stock_house
+            ->field('id,coding')
+            ->where(['status' => 1, 'type' => 4, 'occupy' => ['<', 10000]])
+            ->order('occupy', 'desc')
+            ->find();
+        if (empty($stock_house_info)) {
+            DistributionLog::record($this->auth, $item_process_id, 0, '异常暂存架没有空余库位');
+            $this->error(__('异常暂存架没有空余库位'), [], 405);
+        }
+
+            //绑定异常子单号
+            $abnormal_data = [
+                'item_process_id' => $item_process_id,
+                'type' => $type,
+                'status' => 1,
+                'create_time' => time(),
+                'create_person' => $this->auth->nickname
+            ];
+            //print_r($this->_distribution_abnormal);die;
+            $res = $this->_distribution_abnormal->allowField(true)->isUpdate(false)->save($abnormal_data);
+            //子订单绑定异常库位号
+            $this->_new_order_item_process
+                ->allowField(true)
+                ->isUpdate(true, ['item_order_number' => $item_order_number])
+                ->save(['abnormal_house_id' => $stock_house_info['id']]);
+
+            //异常库位占用数量+1
+            $this->_stock_house
+                ->where(['id' => $stock_house_info['id']])
+                ->setInc('occupy', 1);
+
+            //配货日志
+            DistributionLog::record($this->auth, $item_process_id, 9, "子单号{$item_order_number}，异常暂存架{$stock_house_info['coding']}库位");
+    }
     /**
      * 子单号模糊搜索（配货通用）
      *
@@ -1867,6 +1924,11 @@ class ScmDistribution extends Scm
                     $msg_info_l = '配错镜框，';
                     $msg_info_r = '退回至待配货';
                     break;
+                case 999:
+                    $param['check_remark'] = '标记异常';
+                    $msg_info_l = '审单拒绝';
+                    $msg_info_r = '标记异常';
+                    break;
             }
             $msg = '审单拒绝';
         } else {
@@ -1938,9 +2000,8 @@ class ScmDistribution extends Scm
                             DistributionLog::record($this->auth, $item_process_id, 0, '异常暂存架没有空余库位');
                             $this->error(__('异常暂存架没有空余库位'), [], 405);
                         }
-                        $this->sign_abnormal($value,13,1);
+                        $this->in_sign_abnormal($value,13,1);
                     }
-                    $this->success($msg . '成功', [], 200);
                 }else {
                     //非指定子单回退到待合单
                     $this->_new_order_item_process
