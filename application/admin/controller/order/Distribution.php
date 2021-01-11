@@ -2885,7 +2885,6 @@ class Distribution extends Backend
         }
     }
 
-
     //取消异常
     public function cancel_abnormal($ids = null){
         foreach ($ids as $key => $value) {
