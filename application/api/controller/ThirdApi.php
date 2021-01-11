@@ -211,6 +211,10 @@ class ThirdApi extends Api
                             Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
                         }
                     }
+                    $order_node_date = Db::name('order_node')->where(['track_number' => $add['track_number'], 'shipment_type' => $add['shipment_type']])->find();
+                    $update_order_node = [];
+                    $update_order_node['shipment_last_msg'] =  $v['z'];
+                    Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
                 }
             }
         }
