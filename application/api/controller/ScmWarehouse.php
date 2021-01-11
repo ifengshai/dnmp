@@ -1316,7 +1316,7 @@ class ScmWarehouse extends Scm
         }
 
         $info = [];
-        if ($check_order_info) {
+        if ($check_order_info && $_in_stock_info['type_id'] != 3) {
             //存在质检单号，则入库类型只取第一条数据：采购入库
             $in_stock_type_list[] = $in_stock_type[0];
             foreach ($item_list as $key => $value) {
