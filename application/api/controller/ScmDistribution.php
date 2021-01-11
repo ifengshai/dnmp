@@ -500,7 +500,7 @@ class ScmDistribution extends Scm
                 $second = 1; //是第二次扫描
                 // $msg = "请将子单号{$item_order_number}的商品从定制片暂存架{$coding}库位取出";
 
-                $msg = "<b>$coding</b></br>"."是否将商品取出";
+                $msg = "<b>$coding</b><br>"."是否将商品取出";
             } else {
                 //判断是否定制片且未处理状态
                 if (0 == $item_process_info['customize_status'] && 3 == $item_process_info['order_prescription_type']) {
