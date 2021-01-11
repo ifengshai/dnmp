@@ -33,7 +33,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         { field: 'work_type_str', title: __('Work_type'), operate: false },
                         { field: 'work_type', title: __('Work_type'), searchList: { 1: '客服工单', 2: '仓库工单' }, visible: false, formatter: Table.api.formatter.status },
                         { field: 'platform_order', title: __('Platform_order') },
-                        { field: 'order_status', title: __('订单状态') },
+
+                        { field: 'order_status', title: __('订单状态') , operate: false },
                         {
                             field: 'order_item_numbers',
                             title: __('子单号'),
