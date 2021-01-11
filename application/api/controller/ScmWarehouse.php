@@ -1008,14 +1008,16 @@ class ScmWarehouse extends Scm
                         }
                     }
                     //入库单绑定条形码执行
-                    $save_code_data = ['in_stock_id' => $in_stock_id];
-                    if ($type_id == 3) {//退货入库绑定sku和商品条形码
-                        foreach ($where_code_sku as $key => $value) {
-                            $save_code_data['sku'] = $where_code_sku[$key];
-                            $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => $key])->save($save_code_data);
+                    if ($where_code) {
+                        $save_code_data = ['in_stock_id' => $in_stock_id];
+                        if ($type_id == 3) {//退货入库绑定sku和商品条形码
+                            foreach ($where_code_sku as $key => $value) {
+                                $save_code_data['sku'] = $where_code_sku[$key];
+                                $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => $key])->save($save_code_data);
+                            }
+                        }else{
+                            $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => ['in', $where_code]])->save($save_code_data);
                         }
-                    }else{
-                        $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => ['in', $where_code]])->save($save_code_data);
                     }
                 }
             } else {
@@ -1064,6 +1066,7 @@ class ScmWarehouse extends Scm
                     if ($result !== false) {
                         $data = [];
                         $where_code = [];
+                        $where_code_sku = [];
                         foreach (array_filter($item_sku) as $k => $v) {
                             $data[$k]['sku'] = $v['sku'];
                             $data[$k]['in_stock_num'] = $v['in_stock_num'];//入库数量
@@ -1077,16 +1080,22 @@ class ScmWarehouse extends Scm
                             foreach ($v['sku_agg'] as $k_code => $v_code) {
                                 if (!empty($v_code['code'])) {
                                     $where_code[] = $v_code['code'];
+                                    $where_code_sku[$v_code['code']] = $v['sku'];
                                 }
                             }
                         }
 
                         //入库单绑定条形码执行
                         if ($where_code) {
-                            $this->_product_bar_code_item
-                                ->allowField(true)
-                                ->isUpdate(true, ['code' => ['in', $where_code]])
-                                ->save(['in_stock_id' => $this->_in_stock->id]);
+                            $save_code_data = ['in_stock_id' => $in_stock_id];
+                            if ($type_id == 3) {//退货入库绑定sku和商品条形码
+                                foreach ($where_code_sku as $key => $value) {
+                                    $save_code_data['sku'] = $where_code_sku[$key];
+                                    $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => $key])->save($save_code_data);
+                                }
+                            }else{
+                                $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => ['in', $where_code]])->save($save_code_data);
+                            }
                         }
 
                         //批量添加
