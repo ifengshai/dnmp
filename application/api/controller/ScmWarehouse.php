@@ -815,7 +815,7 @@ class ScmWarehouse extends Scm
         $list = $this->_in_stock
             ->alias('a')
             ->where($where)
-            ->field('a.id,a.check_id,a.in_stock_number,b.check_order_number,a.createtime,a.status')
+            ->field('a.id,a.check_id,a.in_stock_number,b.check_order_number,a.createtime,a.status,a.type_id')
             ->join(['fa_check_order' => 'b'], 'a.check_id=b.id', 'left')
 //            ->join(['fa_check_order_item' => 'c'], 'a.check_id=c.check_id', 'left')
             ->group('a.id')
@@ -832,6 +832,11 @@ class ScmWarehouse extends Scm
                 $list[$key]['check_in'] = 1;//是否有质检单 1有 0没有
             } else {
                 $list[$key]['check_in'] = 0;//是否有质检单 1有 0没有
+            }
+            //退货入库
+            if ($list[$key]['type_id'] == 3) {
+                $list[$key]['check_in'] = 0;
+                $list[$key]['check_id'] = 0;
             }
             $list[$key]['show_edit'] = 0 == $value['status'] ? 1 : 0;//编辑按钮
             $list[$key]['cancel_show'] = 0 == $value['status'] ? 1 : 0;//取消按钮
