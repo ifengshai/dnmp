@@ -978,7 +978,6 @@ class ScmWarehouse extends Scm
 
                 //更新数据
                 $result = $this->_in_stock->allowField(true)->save($_in_stock_data, ['id' => $in_stock_id]);
-
                 //添加入库商品信息
                 if ($result !== false) {
                     $where_code = [];
@@ -1014,7 +1013,7 @@ class ScmWarehouse extends Scm
                             foreach ($where_code_sku as $key => $value) {
                                 $save_code_data['in_stock_id'] = $in_stock_id;
                                 $save_code_data['sku'] = $where_code_sku[$key];
-                                $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => $key])->save($save_code_data);
+                                $this->_product_bar_code_item->where(['code' => $key])->update($save_code_data);
                             }
                         }else{
                             $save_code_data['in_stock_id'] = $in_stock_id;
@@ -1086,18 +1085,18 @@ class ScmWarehouse extends Scm
                                 }
                             }
                         }
-
+                        
                         //入库单绑定条形码执行
                         if ($where_code) {
                             $save_code_data = [];
                             if ($type_id == 3) {//退货入库绑定sku和商品条形码
                                 foreach ($where_code_sku as $key => $value) {
-                                    $save_code_data['in_stock_id'] = $in_stock_id;
+                                    $save_code_data['in_stock_id'] = $this->_in_stock->id;
                                     $save_code_data['sku'] = $where_code_sku[$key];
-                                    $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => $key])->save($save_code_data);
+                                    $this->_product_bar_code_item->where(['code' => $key])->update($save_code_data);
                                 }
                             }else{
-                                $save_code_data['in_stock_id'] = $in_stock_id;
+                                $save_code_data['in_stock_id'] = $this->_in_stock->id;
                                 $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => ['in', $where_code]])->save($save_code_data);
                             }
                         }

@@ -2219,15 +2219,17 @@ class ScmDistribution extends Scm
             $this->_product_bar_code_item->rollback();
             $this->error($e->getMessage(), [], 406);
         } catch (PDOException $e) {
-            $this->_item->rollback();
-            $this->_item_platform_sku->rollback();
-            $this->_stock_log->rollback();
-            $this->_stock_house->rollback();
-            $this->_new_order_process->rollback();
-            $this->_new_order_item_process->rollback();
-            $this->_product_bar_code_item->rollback();
-            DistributionLog::record((object)['nickname' => $create_person], $item_ids, 8, $e->getMessage() . '主单ID' . $row['order_id'] . $msg . '失败，原因：库存不足，请检查后操作');
-            $this->error('库存不足，请检查后操作', [], 407);
+            if(999 != $check_refuse){
+                $this->_item->rollback();
+                $this->_item_platform_sku->rollback();
+                $this->_stock_log->rollback();
+                $this->_stock_house->rollback();
+                $this->_new_order_process->rollback();
+                $this->_new_order_item_process->rollback();
+                $this->_product_bar_code_item->rollback();
+                DistributionLog::record((object)['nickname' => $create_person], $item_ids, 8, $e->getMessage() . '主单ID' . $row['order_id'] . $msg . '失败，原因：库存不足，请检查后操作');
+                $this->error('库存不足，请检查后操作', [], 407);
+            }
         } catch (Exception $e) {
             $this->_item->rollback();
             $this->_item_platform_sku->rollback();
