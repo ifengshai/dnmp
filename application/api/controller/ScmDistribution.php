@@ -265,6 +265,14 @@ class ScmDistribution extends Scm
             ->find();
         empty($item_process_info) && $this->error(__('子订单不存在'), [], 403);
 
+        //查询订单号
+        $order_info = $this->_new_order
+            ->field('increment_id,status')
+            ->where(['id' => $item_process_info['order_id']])
+            ->find();
+        // 'processing' != $order_info['status'] && $this->error(__('当前订单状态不可操作'), [], 405);
+        'processing' != $order_info['status'] && $this->error(__('订单状态异常'), [], 405);
+
         //检测状态
         $status_arr = [
             2 => '待配货',
@@ -274,7 +282,16 @@ class ScmDistribution extends Scm
             6 => '待成品质检',
             7 => '待合单'
         ];
-        $check_status != $item_process_info['distribution_status'] && $this->error(__('只有' . $status_arr[$check_status] . '状态才能操作'), [], 405);
+        $status_arr1 = [
+            2 => '配货',
+            3 => '配镜片',
+            4 => '加工',
+            5 => '印logo',
+            6 => '成品质检',
+            7 => '合单'
+        ];
+        // $check_status != $item_process_info['distribution_status'] && $this->error(__('只有' . $status_arr[$check_status] . '状态才能操作'), [], 405);
+        $check_status != $item_process_info['distribution_status'] && $this->error(__('去'.$status_arr[($item_process_info['distribution_status']+1)]), [], 405);
 
         //判断异常状态
         $abnormal_id = $this->_distribution_abnormal
@@ -282,12 +299,7 @@ class ScmDistribution extends Scm
             ->value('id');
         $abnormal_id && $this->error(__('有异常待处理，无法操作'), [], 405);
 
-        //查询订单号
-        $order_info = $this->_new_order
-            ->field('increment_id,status')
-            ->where(['id' => $item_process_info['order_id']])
-            ->find();
-        'processing' != $order_info['status'] && $this->error(__('当前订单状态不可操作'), [], 405);
+
 
         //检测是否有工单未处理
         $check_work_order = $this->_work_order_measure
