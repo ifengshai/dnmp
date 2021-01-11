@@ -254,21 +254,21 @@ class ScmDistribution extends Scm
             $this->error(__('异常暂存架没有空余库位'), [], 405);
         }
 
-        //绑定异常子单号
-        $abnormal_data = [
-            'item_process_id' => $item_process_id,
-            'type' => $type,
-            'status' => 1,
-            'create_time' => time(),
-            'create_person' => $this->auth->nickname
-        ];
-        //print_r($this->_distribution_abnormal);die;
-        $res = $this->_distribution_abnormal->allowField(true)->isUpdate(false)->save($abnormal_data);
-        //子订单绑定异常库位号
-        $this->_new_order_item_process
-            ->allowField(true)
-            ->isUpdate(true, ['item_order_number' => $item_order_number])
-            ->save(['abnormal_house_id' => $stock_house_info['id']]);
+            //绑定异常子单号
+            $abnormal_data = [
+                'item_process_id' => $item_process_id,
+                'type' => $type,
+                'status' => 1,
+                'create_time' => time(),
+                'create_person' => $this->auth->nickname
+            ];
+
+            $res = $this->_distribution_abnormal->allowField(true)->isUpdate(false)->save($abnormal_data);
+            //子订单绑定异常库位号
+            $this->_new_order_item_process
+                ->allowField(true)
+                ->isUpdate(true, ['item_order_number' => $item_order_number])
+                ->save(['abnormal_house_id' => $stock_house_info['id']]);
 
         //异常库位占用数量+1
         $this->_stock_house
@@ -2190,7 +2190,6 @@ class ScmDistribution extends Scm
             $this->_product_bar_code_item->rollback();
             $this->error($e->getMessage(), [], 406);
         } catch (PDOException $e) {
-            if(999 != $check_refuse){
                 $this->_item->rollback();
                 $this->_item_platform_sku->rollback();
                 $this->_stock_log->rollback();
@@ -2200,7 +2199,6 @@ class ScmDistribution extends Scm
                 $this->_product_bar_code_item->rollback();
                 DistributionLog::record((object)['nickname' => $create_person], $item_ids, 8, $e->getMessage() . '主单ID' . $row['order_id'] . $msg . '失败，原因：库存不足，请检查后操作');
                 $this->error('库存不足，请检查后操作', [], 407);
-            }
         } catch (Exception $e) {
             $this->_item->rollback();
             $this->_item_platform_sku->rollback();
