@@ -236,7 +236,7 @@ class SelfApi extends Api
             $this->error(__('订单节点已存在'), [], 400);
         }
         //根据物流单号查询发货物流渠道
-        $shipment_data_type = Db::connect('database.db_delivery')->table('ld_deliver_order')->where(['track_number' => $track_number, 'increment_id' => $order_number])->value('agent_way_title');
+        $shipment_data_type = Db::connect('database.db_mojing_order')->table('fa_order_process')->where(['track_number' => $track_number, 'increment_id' => $order_number])->value('agent_way_title');
      
         //更新节点主表
         $row->allowField(true)->save([
