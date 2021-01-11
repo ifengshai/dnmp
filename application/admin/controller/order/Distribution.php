@@ -1896,7 +1896,7 @@ class Distribution extends Backend
 
         //状态列表
         $status_arr = [
-            1 => '待打印标签',
+            //1 => '待打印标签',
             2 => '待配货',
             3 => '待配镜片',
             4 => '待加工',
@@ -1928,6 +1928,11 @@ class Distribution extends Backend
                 unset($status_arr[4]);
                 unset($status_arr[5]);
                 break;
+        }
+
+        //核实地址
+        if($abnormal_info['type'] == 13){
+            $status_arr = [];
         }
 
         //异常原因列表
