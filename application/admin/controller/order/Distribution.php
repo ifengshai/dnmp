@@ -279,7 +279,6 @@ class Distribution extends Backend
 
             if ($filter['increment_id']) {
                 $map['b.increment_id'] = ['like', $filter['increment_id'] . '%'];
-//                $map['b.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
                 unset($filter['increment_id']);
             }
 
@@ -506,7 +505,7 @@ class Distribution extends Backend
             if ($change_sku[$value['item_order_number']]) {
                 $list[$key]['sku'] = $change_sku[$value['item_order_number']];
             }
-//站点
+            //站点
             switch ($value['site']) {
                 case 1:
                     $list[$key]['site'] = 'Zeelool';
@@ -558,7 +557,7 @@ class Distribution extends Backend
                 default:
                     break;
             }
-//订单类型
+            //订单类型
             switch ($value['order_type']) {
 
                 case 1:
@@ -586,7 +585,7 @@ class Distribution extends Backend
                     break;
             }
 
-//子订单状态
+            //子订单状态
             switch ($value['distribution_status']) {
                 case 0:
                     $list[$key]['distribution_status'] = '取消';
@@ -1116,10 +1115,8 @@ class Distribution extends Backend
 
             list($where, $sort, $order) = $this->buildparams();
         }
-//        $map['a.id'] = ['lt','1971608'];
 
         $sort = 'a.id';
-
 
         $list = $this->model
             ->alias('a')
