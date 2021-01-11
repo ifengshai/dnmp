@@ -2164,28 +2164,32 @@ class ScmDistribution extends Scm
         }
         //打印操作记录
         if (1 != $check_refuse) {
-            $item_order_numbers = $this->_new_order_item_process->where(['item_order_number' => ['in',$item_order_numbers]])->column('id');
-            $item_order_numbers = collection($item_order_numbers)->toArray();
-            $item_ids_diff = array_diff($item_ids, $item_order_numbers);
-            if (!empty($item_ids_diff)) {
-                foreach ($item_ids_diff as $key => $value) {
-                    $item_numbers = $this->_new_order_item_process->where(['id' => $value])->column('item_order_number');
-                    DistributionLog::record((object)['nickname' => $create_person], [$item_ids_diff[$key]], 8, '主单ID' . $row['order_id'] . $msg . $item_numbers[0].'退回至待合单');
-                }
-                foreach ($item_order_numbers as $key => $value) {
-                    $item_numbers = $this->_new_order_item_process->where(['id' => $value])->column('item_order_number');
-                    DistributionLog::record((object)['nickname' => $create_person], [$item_order_numbers[$key]], 8, '主单ID' . $row['order_id'] . $msg . '成功配错镜框，'.$item_numbers[0].'退回至待配货');
-                }
-            }else{
-                foreach ($item_ids as $key => $value) {
-                    $item_numbers = $this->_new_order_item_process->where(['id' => $value])->column('item_order_number');
-                    DistributionLog::record((object)['nickname' => $create_person], [$item_ids[$key]], 8, '主单ID' . $row['order_id'] . $msg . '成功' . $msg_info_l.$item_numbers[0].$msg_info_r);
+            if (999 != $check_refuse) {
+                $item_order_numbers = $this->_new_order_item_process->where(['item_order_number' => ['in',$item_order_numbers]])->column('id');
+                $item_order_numbers = collection($item_order_numbers)->toArray();
+                $item_ids_diff = array_diff($item_ids, $item_order_numbers);
+                if (!empty($item_ids_diff)) {
+                    foreach ($item_ids_diff as $key => $value) {
+                        $item_numbers = $this->_new_order_item_process->where(['id' => $value])->column('item_order_number');
+                        DistributionLog::record((object)['nickname' => $create_person], [$item_ids_diff[$key]], 8, '主单ID' . $row['order_id'] . $msg . $item_numbers[0].'退回至待合单');
+                    }
+                    foreach ($item_order_numbers as $key => $value) {
+                        $item_numbers = $this->_new_order_item_process->where(['id' => $value])->column('item_order_number');
+                        DistributionLog::record((object)['nickname' => $create_person], [$item_order_numbers[$key]], 8, '主单ID' . $row['order_id'] . $msg . '成功配错镜框，'.$item_numbers[0].'退回至待配货');
+                    }
+                }else{
+                    foreach ($item_ids as $key => $value) {
+                        $item_numbers = $this->_new_order_item_process->where(['id' => $value])->column('item_order_number');
+                        DistributionLog::record((object)['nickname' => $create_person], [$item_ids[$key]], 8, '主单ID' . $row['order_id'] . $msg . '成功' . $msg_info_l.$item_numbers[0].$msg_info_r);
+                    }
                 }
             }
         }else{
-            foreach ($item_ids as $key => $value) {
-                $item_numbers = $this->_new_order_item_process->where(['id' => $value])->column('item_order_number');
-                DistributionLog::record((object)['nickname' => $create_person], [$item_ids[$key]], 8, '主单ID' . $row['order_id'] . $msg . '成功' . $msg_info_l.$item_numbers[0].$msg_info_r);
+            if (999 != $check_refuse) {
+                foreach ($item_ids as $key => $value) {
+                    $item_numbers = $this->_new_order_item_process->where(['id' => $value])->column('item_order_number');
+                    DistributionLog::record((object)['nickname' => $create_person], [$item_ids[$key]], 8, '主单ID' . $row['order_id'] . $msg . '成功' . $msg_info_l.$item_numbers[0].$msg_info_r);
+                } 
             } 
         }
         
