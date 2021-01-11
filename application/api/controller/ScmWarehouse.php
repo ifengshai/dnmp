@@ -1565,7 +1565,7 @@ class ScmWarehouse extends Scm
                         $item_platform_sku = $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $v['platform_id']])->find();
                         $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $v['platform_id']])->setInc('stock', $v['in_stock_num']);
                         //退货入库生成采购单质检单
-                        if ($v['type_id'] == 3) {
+                        if ($v['type_id'] == 3 && $k == 0) {
                             $item_sku = $this->_in_stock_item->where(['in_stock_id' => $in_stock_id])->select();
                             $item_sku = collection($item_sku)->toArray();
                             $generate_purchase_check = $this->generate_purchase_check($item_sku);
