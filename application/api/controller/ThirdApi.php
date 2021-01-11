@@ -122,8 +122,9 @@ class ThirdApi extends Api
                     $add['create_time'] = $v['a'];
                     $add['content'] = $v['z'];
                     $add['courier_status'] = $data['e'];
-                    Db::name('order_node_courier')->insert($add); //插入物流日志表
                     file_put_contents('/www/wwwroot/mojing/runtime/log/track.log', '11111111111--------'. serialize($add) . "\r\n", FILE_APPEND);
+                    Db::name('order_node_courier')->insert($add); //插入物流日志表
+                    
                 }
                 if ($k == 1) {
                     //更新上网
