@@ -41,7 +41,7 @@ class Distribution extends Backend
         'operation_log',
         'add'
     ];
-  
+
     /**
      * 子订单模型对象
      * @var object
@@ -308,13 +308,13 @@ class Distribution extends Backend
             }
 
             if ($filter['item_order_number']) {
-                $ex_fil_arr = explode(' ' , $filter['item_order_number']);
+                $ex_fil_arr = explode(' ', $filter['item_order_number']);
                 if (count($ex_fil_arr) > 1) {
                     $map['a.item_order_number'] = ['in', $ex_fil_arr];
-                }else{
+                } else {
                     $map['a.item_order_number'] = ['like', $filter['item_order_number'] . '%'];
                 }
-                
+
                 unset($filter['item_order_number']);
             }
 
@@ -1108,16 +1108,17 @@ class Distribution extends Backend
                 }
             }
 
-            //            if ($value['pdcheck'] == 'on') {
             $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 2 + 2), $value['pd_r']);
             $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 2 + 3), $value['pd_l']);
-            //            } else {
             $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 2 + 2), $value['pd']);
             $spreadsheet->getActiveSheet()->mergeCells("M" . ($key * 2 + 2) . ":M" . ($key * 2 + 3));
-            //            }
 
-            //查询镜框尺寸
-            $tmp_bridge = $this->get_frame_lens_width_height_bridge($value['product_id'], $value['site']);
+            //过滤饰品站
+            if ($value['site'] != 12) {
+                //查询镜框尺寸
+                $tmp_bridge = $this->get_frame_lens_width_height_bridge($value['product_id'], $value['site']);
+            }
+
             $lens_name = $lens_list[$value['lens_number']] ?: $value['web_lens_name'];
             $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 2 + 2), $lens_name);
             $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 2 + 2), $tmp_bridge['lens_width']);
@@ -1776,7 +1777,7 @@ class Distribution extends Backend
                     ->isUpdate(true, ['item_order_number' => ['in', $item_order_numbers]])
                     ->save(['item_order_number' => '']);
             }
-               
+
             //记录日志
             DistributionLog::record($admin, array_column($item_list, 'id'), 6, $status_arr[$reason]['name']);
 
@@ -2017,7 +2018,7 @@ class Distribution extends Backend
                         ->isUpdate(true, ['item_order_number' => $item_info['item_order_number']])
                         ->save(['item_order_number' => '']);
                 }
-                   
+
                 //标记处理异常状态及时间
                 $this->_distribution_abnormal->where(['id' => $abnormal_info['id']])->update(['status' => 2, 'do_time' => time(), 'do_person' => $admin->nickname]);
 
