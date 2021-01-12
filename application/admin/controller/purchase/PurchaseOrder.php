@@ -660,7 +660,22 @@ class PurchaseOrder extends Backend
                     $logistics_ids = $params['logistics_ids'];
                     // dump($params);die;
 
-
+                    //所有的物流单号
+                    $result = array_reduce($logistics_number, function ($result, $value) {
+                        return array_merge($result, array_values($value));
+                    }, array());
+                    $have_logistics = $logistics->whereIn('logistics_number',$result)->where('status',1)->count();
+                    $count_result = count($result);
+                    if ($have_logistics ==0){
+                        $purchase_status = 6;
+                    }else{
+                        if ($have_logistics>$count_result || $have_logistics == $count_result){
+                            $purchase_status = 7;
+                        }else{
+                            $purchase_status = 9;
+                        }
+                    }
+                    $this->model->where(['id' => $row['id']])->update(['purchase_status'=>$purchase_status]);
                     //添加物流单明细表
                     if ($params['batch_id']) {
                         foreach ($logistics_company_no as $k => $v) {
@@ -682,7 +697,7 @@ class PurchaseOrder extends Backend
                                 //若物流单号已经签收的话直接更改采购单的状态为已签收
                                 $have_logistics = $logistics->where(['logistics_number'=>$logistics_number[$k][$key],'status'=>1])->find();
                                 if (!empty($have_logistics)){
-                                    $this->model->where(['id' => $row['id']])->update(['purchase_status'=>7]);
+                                    // $this->model->where(['id' => $row['id']])->update(['purchase_status'=>7]);
                                     $list['status'] = 1;
                                     $list['sign_number'] = $have_logistics['sign_number'];
                                 }
@@ -705,7 +720,7 @@ class PurchaseOrder extends Backend
                                     //若物流单号已经签收的话直接更改采购单的状态为已签收
                                     $have_logistics = $logistics->where(['logistics_number'=>$logistics_number[$k],'status'=>1])->find();
                                     if (!empty($have_logistics)){
-                                        $this->model->where(['id' => $v['id']])->update(['purchase_status'=>7]);
+                                        // $this->model->where(['id' => $v['id']])->update(['purchase_status'=>7]);
                                         $list['status'] = 1;
                                         $list['sign_number'] = $have_logistics['sign_number'];
                                     }
@@ -730,7 +745,7 @@ class PurchaseOrder extends Backend
                                 //若物流单号已经签收的话直接更改采购单的状态为已签收
                                 $have_logistics = $logistics->where(['logistics_number'=>$logistics_number[$k],'status'=>1])->find();
                                 if (!empty($have_logistics)){
-                                    $this->model->where(['id' => $row['id']])->update(['purchase_status'=>7]);
+                                    // $this->model->where(['id' => $row['id']])->update(['purchase_status'=>7]);
                                     $list['status'] = 1;
                                     $list['sign_number'] = $have_logistics['sign_number'];
                                 }
