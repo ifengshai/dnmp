@@ -35,6 +35,7 @@ class NewOrder extends Model
             ['name' => 'Zeelool_es', 'field' => 'site', 'value' => 9],
             ['name' => 'Zeelool_de', 'field' => 'site', 'value' => 10],
             ['name' => 'Zeelool_jp', 'field' => 'site', 'value' => 11],
+            ['name' => 'Voogueme_acc', 'field' => 'site', 'value' => 12],
         ];
     }
 }
