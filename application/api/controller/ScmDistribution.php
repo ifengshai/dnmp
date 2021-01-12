@@ -1417,8 +1417,8 @@ class ScmDistribution extends Scm
 
 
         //产品婧让改的
-        if (!empty($store_house_is) && 9 == $item_process_info['distribution_status']) {
 
+        if (!empty($hedan_codeing) && 9 == $item_process_info['distribution_status']) {
             $this->error(__("请放在合单架"."<br><b>$hedan_codeing</b>"), [], 403);
         } elseif (empty($store_house_is) && 9 == $item_process_info['distribution_status']) {
             $this->error(__('订单合单完成，去审单！'), [], 403);
