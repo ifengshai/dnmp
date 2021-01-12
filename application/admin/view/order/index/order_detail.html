@@ -352,8 +352,8 @@
 
     {if condition="(!empty($distribution_log))"}
     <li>
-        <span>订单加工详情</span>
-        <div style="float: left;margin-top: 20px;overflow-y:auto;display: inline-block">
+        <span id="showmessage">订单加工详情</span>
+        <div style="float: left;margin-top: 20px;overflow-y:auto;display: none" id="winuiconsole">
             {volist name="distribution_log" id="vo"}
             <p>sku:{$new_order_item_process_id2[$key]}</p>
             {volist name="vo" id="vv"}
@@ -400,4 +400,17 @@
     </li>
     {/in}
 </ul>
+<script>
+    function my(id){
+        return document.getElementById(id);
+    }
+    var trageet =  document.getElementById("winuiconsole");
+    my("showmessage").onclick = function (){
+        if (trageet.style.display =="none"){
+            my("winuiconsole").style.display ="block"
+        }else{
+            my("winuiconsole").style.display ="none"
+        }
 
+    }
+</script>
