@@ -137,6 +137,9 @@ class OrderData extends Backend
                                 case 'zeelool_jp':
                                     $site = 11;
                                     break;
+                                case 'voogueme_acc':
+                                    $site = 12;
+                                    break;
                             }
                             //主表
                             if ($payload['type'] == 'INSERT' && $payload['table'] == 'sales_flat_order') {
@@ -175,7 +178,7 @@ class OrderData extends Backend
                                     if (isset($v['payment_time'])) {
                                         $params['payment_time'] = strtotime($v['payment_time']) + 28800;
                                     }
-                                   
+
                                     //插入订单主表
                                     $order_id = $this->order->insertGetId($params);
                                     $order_params[$k]['site'] = $site;
@@ -274,6 +277,8 @@ class OrderData extends Backend
                                         $options =  $this->zeelool_de_prescription_analysis($v['product_options']);
                                     } elseif ($site == 11) {
                                         $options =  $this->zeelool_jp_prescription_analysis($v['product_options']);
+                                    } elseif ($site == 12) {
+                                        $options =  $this->voogueme_acc_prescription_analysis($v['product_options']);
                                     }
 
                                     $options['item_id'] = $v['item_id'];
@@ -324,6 +329,8 @@ class OrderData extends Backend
                                         $options =  $this->zeelool_de_prescription_analysis($v['product_options']);
                                     } elseif ($site == 11) {
                                         $options =  $this->zeelool_jp_prescription_analysis($v['product_options']);
+                                    } elseif ($site == 12) {
+                                        $options =  $this->voogueme_acc_prescription_analysis($v['product_options']);
                                     }
 
                                     $options['sku'] = $v['sku'];
@@ -1094,6 +1101,96 @@ class OrderData extends Backend
 
 
     /**
+     * 饰品站 处方解析逻辑
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/10/28 10:16:53 
+     * @return void
+     */
+    protected function voogueme_acc_prescription_analysis($data)
+    {
+        $options = unserialize($data);
+        //镜片类型
+        $arr['index_type'] = $options['info_buyRequest']['tmplens']['index_type'] ?: '';
+        //镜片名称
+        $arr['index_name'] = $options['info_buyRequest']['tmplens']['index_type'] ?: '';
+        //光度等参数
+        $prescription_params = explode("&", $options['info_buyRequest']['tmplens']['prescription']);
+        $options_params = array();
+        foreach ($prescription_params as $key => $value) {
+            $arr_value = explode("=", $value);
+            $options_params[$arr_value[0]] = $arr_value[1];
+        }
+        //处方类型
+        $arr['prescription_type'] = $options_params['prescription_type'] ?: '';
+        //镀膜名称
+        $arr['coating_name'] = $options['info_buyRequest']['tmplens']['coatiing_name'] ?: '';
+        //镀膜价格
+        $arr['coating_price'] = $options['info_buyRequest']['tmplens']['coatiing_price'];
+        //镜框价格
+        $arr['frame_price'] = $options['info_buyRequest']['tmplens']['frame_price'];
+        //镜片价格
+        $arr['index_price'] = $options['info_buyRequest']['tmplens']['index_price'];
+        //镜框原始价格
+        $arr['frame_regural_price'] = $options['info_buyRequest']['tmplens']['frame_regural_price'];
+        //镜片颜色
+        $arr['index_color'] = $options['info_buyRequest']['tmplens']['color_name'];
+        //镜框颜色
+        $arr['frame_color'] = $options['options'][0]['value'];
+        //镜片+镀膜价格
+        $arr['lens_price'] = $options['info_buyRequest']['tmplens']['lens'] ?? 0;
+        //镜框+镜片+镀膜价格
+        $arr['total'] = $options['info_buyRequest']['tmplens']['total'] ?? 0;
+        //镜片分类
+        $arr['goods_type'] = $options['info_buyRequest']['tmplens']['goods_type'] ?? 0;
+        $arr['color_id'] = $options['info_buyRequest']['tmplens']['color_id'];
+        $arr['coating_id'] = $options['info_buyRequest']['tmplens']['coating_id'];
+        $arr['index_id'] = $options['info_buyRequest']['tmplens']['index_id'];
+
+        //镜片编码
+        $arr['lens_number'] = $options['info_buyRequest']['tmplens']['lens_number'] ?? 0;
+        $arr['web_lens_name'] = $options['info_buyRequest']['tmplens']['web_lens_name'];
+        //光度参数
+        $arr['od_sph'] = $options_params['od_sph'] ?: '';;
+        $arr['os_sph'] = $options_params['os_sph'] ?: '';;
+        $arr['od_cyl'] = $options_params['od_cyl'] ?: '';;
+        $arr['os_cyl'] = $options_params['os_cyl'] ?: '';;
+        $arr['od_axis'] = $options_params['od_axis'];
+        $arr['os_axis'] = $options_params['os_axis'];
+        $arr['pd_l'] = $options_params['pd_l'];
+        $arr['pd_r'] = $options_params['pd_r'];
+        $arr['pd'] = $options_params['pd'];
+        $arr['pdcheck'] = $options_params['pdcheck'];
+        $arr['prismcheck'] = $options_params['prismcheck'];
+        //饰品站左右眼add恢复正常
+        $arr['os_add'] = $options_params['os_add'];
+        $arr['od_add'] = $options_params['od_add'];
+        $arr['od_pv'] = $options_params['od_pv'];
+        $arr['os_pv'] = $options_params['os_pv'];
+        $arr['od_pv_r'] = $options_params['od_pv_r'];
+        $arr['os_pv_r'] = $options_params['os_pv_r'];
+        $arr['od_bd'] = $options_params['od_bd'];
+        $arr['os_bd'] = $options_params['os_bd'];
+        $arr['od_bd_r'] = $options_params['od_bd_r'];
+        $arr['os_bd_r'] = $options_params['os_bd_r'];
+
+        /**
+         * 判断定制现片逻辑
+         * 1、渐进镜 Progressive
+         * 2、偏光镜 镜片类型包含Polarized
+         * 3、染色镜 镜片类型包含Lens with Color Tint 或 Tinted 或 Color Tint
+         * 4、当cyl<=-4或cyl>=4 或 sph < -8或 sph>8
+         */
+
+        //判断加工类型
+        $result = $this->set_processing_type($arr);
+        $arr = array_merge($arr, $result);
+        return $arr;
+    }
+
+
+    /**
      * 判断定制现片逻辑
      */
     public function set_processing_type($params = [])
@@ -1836,10 +1933,7 @@ class OrderData extends Backend
 
     public function process_order_type()
     {
-        $item_order_number = [
-          
-
-        ];
+        $item_order_number = [];
 
         $orderitemprocess = new \app\admin\model\order\OrderItemProcess();
         $list = $orderitemprocess->where(['item_order_number' => ['in', $item_order_number]])->select();
@@ -1886,7 +1980,4 @@ class OrderData extends Backend
 
         echo "ok";
     }
-
-
-
 }
