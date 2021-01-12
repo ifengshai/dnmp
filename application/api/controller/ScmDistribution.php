@@ -263,12 +263,14 @@ class ScmDistribution extends Scm
                 'create_person' => $this->auth->nickname
             ];
 
+
             $res = $this->_distribution_abnormal->insert($abnormal_data);
             
             //子订单绑定异常库位号
             $this->_new_order_item_process
-                ->where(['item_order_number' => $item_order_number])
-                ->update(['abnormal_house_id' => $stock_house_info['id']]);
+                ->allowField(true)
+                ->isUpdate(true, ['item_order_number' => $item_order_number])
+                ->save(['abnormal_house_id' => $stock_house_info['id']]);
 
         //异常库位占用数量+1
         $this->_stock_house
@@ -1342,7 +1344,7 @@ class ScmDistribution extends Scm
             ->field('order_id,store_house_id')
             ->find();
         $store_house_is = $this->_stock_house->field('id,coding,subarea')->where('id', $order_process_info['store_house_id'])->find();
-
+        $codeing = $store_house_is['coding'];
         //检测是否有工单未处理
         $check_work_order = $this->_work_order_measure
             ->alias('a')
@@ -1356,7 +1358,7 @@ class ScmDistribution extends Scm
             ->select();
         if ($check_work_order) {
             foreach ($check_work_order as $val) {
-                $codeing = $store_house_is['coding'];
+
                 (3 == $val['measure_choose_id'] //主单取消措施未处理
                     ||
                     $val['item_order_number'] == $item_order_number //子单措施未处理:更改镜框18、更改镜片19、取消20
