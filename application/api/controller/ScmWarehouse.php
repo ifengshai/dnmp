@@ -2585,4 +2585,19 @@ class ScmWarehouse extends Scm
         $this->success($msg, ['info' => ''], 200);
     }
 
+    //判断条形码是否绑定过sku
+    public function is_empty_code(){
+        $code = $this->request->request('code');
+        empty($code) && $this->error(__('条形码不能为空'), [], 403);
+
+        //检测条形码是否存在
+        $check_quantity = $this->_product_bar_code_item
+            ->field('code,sku')
+            ->where(['code' => $code])
+            ->find();
+        !empty($check_quantity['sku']) && $this->error(__('条形码不可用'), [], 405);
+
+        $this->success('扫码成功', [], 200);
+    }
+
 }
