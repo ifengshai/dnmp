@@ -1041,7 +1041,7 @@ class ScmQuality extends Scm
             ->where($where)
             ->where('type', 1)//采购单类型
             ->field('id,logistics_number,sign_number,createtime,sign_time,status,purchase_id,type,is_check_order,batch_id')
-            ->order('createtime', 'desc')
+            ->order('createtime desc')
             ->limit($offset, $limit)
             ->select();
         $list = collection($list)->toArray();
