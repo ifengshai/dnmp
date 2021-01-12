@@ -684,6 +684,7 @@ class PurchaseOrder extends Backend
                                 if (!empty($have_logistics)){
                                     $this->model->where(['id' => $row['id']])->update(['purchase_status'=>7]);
                                     $list['status'] = 1;
+                                    $list['sign_number'] = $have_logistics['sign_number'];
                                 }
                                 $logistics->addLogisticsInfo($list);
                             }
@@ -706,6 +707,7 @@ class PurchaseOrder extends Backend
                                     if (!empty($have_logistics)){
                                         $this->model->where(['id' => $v['id']])->update(['purchase_status'=>7]);
                                         $list['status'] = 1;
+                                        $list['sign_number'] = $have_logistics['sign_number'];
                                     }
                                     $logistics->addLogisticsInfo($list);
                                 }
@@ -730,6 +732,7 @@ class PurchaseOrder extends Backend
                                 if (!empty($have_logistics)){
                                     $this->model->where(['id' => $row['id']])->update(['purchase_status'=>7]);
                                     $list['status'] = 1;
+                                    $list['sign_number'] = $have_logistics['sign_number'];
                                 }
                                 $logistics->addLogisticsInfo($list);
                             }
