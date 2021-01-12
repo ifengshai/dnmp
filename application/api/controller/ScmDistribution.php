@@ -1382,7 +1382,7 @@ class ScmDistribution extends Scm
             ->value('id');
         // $abnormal_id && $this->error(__('有异常待处理，无法操作'), [], 405);
         //子单异常库位号
-        $codeing1 = $this->_stock_house->field('id,coding,subarea')->where('id', $item_process_info['abnormal_house_id'])->find();
+        $codeing1 = $this->_stock_house->field('id,coding,subarea')->where('id', $item_process_info['abnormal_house_id'])->value('coding');
         $abnormal_id && $this->error(__("子订单存在异常"."<br><b>$codeing1</b>"), [], 405);
 
         empty($item_process_info) && $this->error(__('子订单不存在'), [], 403);
