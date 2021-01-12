@@ -214,7 +214,7 @@ class WorkOrderList extends Backend
                 ->limit($offset, $limit)
                 ->select();
             $list = collection($list)->toArray();
-
+            $fa_order = new NewOrder();
             //用户
             $user_list = $this->users;
             foreach ($list as $k => $v) {
@@ -275,6 +275,7 @@ class WorkOrderList extends Backend
                 } else {
                     $list[$k]['has_recept'] = 1;
                 }
+                $list[$k]['order_status'] = $fa_order->where('increment_id',$list[$k]['platform_order'])->value('status');
             }
             $result = array("total" => $total, "rows" => $list);
 
@@ -1241,10 +1242,18 @@ class WorkOrderList extends Backend
                 //检测子订单措施
                 if ($item_order_info) {
                     $item_order_info = array_filter($item_order_info);
+                    //查询所有子单数量
+                    $_new_order_process = new NewOrderProcess();
+                    $order_id = $_new_order_process->where('increment_id', $platform_order)->value('order_id');
+                    $_new_order_item_process = new NewOrderItemProcess();
+                    $count_item_num = $_new_order_item_process->where('order_id', $order_id)->count();
+
                     1 > count($item_order_info) && $this->error("子订单号错误");
                     foreach ($item_order_info as $key => &$item) {
                         $item['item_choose'] = array_unique(array_filter($item['item_choose']));
-                        empty($item['item_choose']) && $this->error("请选择子订单：{$key} 的实施措施");
+                        if ($count_item_num != count($item_order_info)) {
+                            empty($item['item_choose']) && $this->error("请选择子订单：{$key} 的实施措施");
+                        }
                         $all_choose_ids = array_unique(array_merge($all_choose_ids, $item['item_choose']));
 
                         //获取子单之前处理成功的措施类型
@@ -2055,10 +2064,18 @@ class WorkOrderList extends Backend
                 //检测子订单措施
                 if ($item_order_info) {
                     $item_order_info = array_filter($item_order_info);
+                    //查询所有子单数量
+                    $_new_order_process = new NewOrderProcess();
+                    $order_id = $_new_order_process->where('increment_id', $platform_order)->value('order_id');
+                    $_new_order_item_process = new NewOrderItemProcess();
+                    $count_item_num = $_new_order_item_process->where('order_id', $order_id)->count();
+
                     1 > count($item_order_info) && $this->error("子订单号错误");
                     foreach ($item_order_info as $key => &$item) {
                         $item['item_choose'] = array_unique(array_filter($item['item_choose']));
-                        empty($item['item_choose']) && $this->error("请选择子订单：{$key} 的实施措施");
+                        if ($count_item_num != count($item_order_info)) {
+                            empty($item['item_choose']) && $this->error("请选择子订单：{$key} 的实施措施");
+                        }
                         $all_choose_ids = array_unique(array_merge($all_choose_ids, $item['item_choose']));
 
                         //获取子单之前处理成功的措施类型

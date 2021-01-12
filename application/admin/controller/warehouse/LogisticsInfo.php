@@ -89,15 +89,18 @@ class LogisticsInfo extends Backend
             $list = collection($list)->toArray();
             foreach ($list as $k => $v) {
                 if ($v['purchase_id']) {
-                    $res = $this->purchase->where(['id' => $v['purchase_id']])->field('purchase_name,is_new_product,factory_type')->find();
+                    $res = $this->purchase->where(['id' => $v['purchase_id']])->field('purchase_name,is_new_product,factory_type,supplier_id')->find();
                     $list[$k]['purchase_name'] = $res->purchase_name;
                     $list[$k]['is_new_product'] = $res->is_new_product;
                     $list[$k]['factory_type'] = $res->factory_type;
                     //获取供应商SKU 采购数量字段
                     $supplier_sku = $this->purchase_item->where(['purchase_id' => $v['purchase_id']])->column('supplier_sku');
                     $purchase_num = $this->purchase_item->where(['purchase_id' => $v['purchase_id']])->column('purchase_num');
+                    $sku= $this->purchase_item->where(['purchase_id' => $v['purchase_id']])->column('sku');
                     $list[$k]['supplier_sku'] = implode(',', $supplier_sku);
                     $list[$k]['purchase_num'] = implode(',', $purchase_num);
+                    $list[$k]['sku'] = implode(',', $sku);
+                    $list[$k]['supplier_name'] = Db::name('supplier')->where('id',$res->supplier_id)->value('supplier_name');
                 } else {
                     $list[$k]['purchase_name'] = '';
                     $list[$k]['is_new_product'] = 0;
