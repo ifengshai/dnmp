@@ -264,6 +264,7 @@ class ScmDistribution extends Scm
             ];
 
             $res = $this->_distribution_abnormal->insert($abnormal_data);
+            
             //子订单绑定异常库位号
             $this->_new_order_item_process
                 ->where(['item_order_number' => $item_order_number])
