@@ -666,7 +666,6 @@ class PurchaseOrder extends Backend
                             return array_merge($result, array_values($value));
                         }, array());
                     }
-                    
                     $have_logistics = $logistics->whereIn('logistics_number',$result)->where('status',1)->count();
                     $count_result = count($result);
                     if ($have_logistics ==0){
