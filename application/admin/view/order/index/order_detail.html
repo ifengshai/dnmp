@@ -352,7 +352,7 @@
 
     {if condition="(!empty($distribution_log))"}
     <li>
-        <span id="showmessage" style="cursor:pointer">订单加工详情</span>
+        <span id="showmessage" style="cursor:pointer">订单加工详情(点击展开)</span>
         <div style="float: left;margin-top: 20px;overflow-y:auto;display: none" id="winuiconsole">
             {volist name="distribution_log" id="vo"}
             <p>sku:{$new_order_item_process_id2[$key]}</p>
