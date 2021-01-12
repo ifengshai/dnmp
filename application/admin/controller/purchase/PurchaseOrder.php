@@ -659,7 +659,14 @@ class PurchaseOrder extends Backend
                     $logistics_number = $params['logistics_number'];
                     $logistics_ids = $params['logistics_ids'];
                     // dump($params);die;
-
+                    if(count($logistics_number) == count($logistics_number,1)){
+                        $result = $logistics_number;
+                    }else{
+                        //所有的物流单号
+                        $result = array_reduce($logistics_number, function ($result, $value) {
+                            return array_merge($result, array_values($value));
+                        }, array());
+                    }
                     //所有的物流单号
                     $result = array_reduce($logistics_number, function ($result, $value) {
                         return array_merge($result, array_values($value));
