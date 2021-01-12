@@ -1349,6 +1349,7 @@ class ScmDistribution extends Scm
             ->field('order_id,store_house_id')
             ->find();
         $store_house_is = $this->_stock_house->field('id,coding,subarea')->where('id', $item_process_info['temporary_house_id'])->find();
+        $hedan_codeing = $this->_stock_house->field('id,coding,subarea')->where('id', $order_process_info['temporary_house_id'])->value('coding');
         $codeing = $store_house_is['coding'];
         //检测是否有工单未处理
         $check_work_order = $this->_work_order_measure
@@ -1390,7 +1391,7 @@ class ScmDistribution extends Scm
 
         //产品婧让改的
         if (!empty($store_house_is) && 9 == $item_process_info['distribution_status']) {
-            $this->error(__("请放在合单架"."<br><b>$codeing</b>"), [], 403);
+            $this->error(__("请放在合单架"."<br><b>$hedan_codeing</b>"), [], 403);
         } elseif (empty($store_house_is) && 9 == $item_process_info['distribution_status']) {
             $this->error(__('订单合单完成，去审单！'), [], 403);
         }
@@ -1413,7 +1414,7 @@ class ScmDistribution extends Scm
                 //有主单合单库位
                 $store_house_info = $this->_stock_house->field('id,coding,subarea')->where('id', $order_process_info['store_house_id'])->find();
                 // $this->error(__('请将子单号' . $item_order_number . '的商品放入合单架' . $store_house_info['coding'] . '合单库位'), [], 403);
-                $this->error(__("请放在合单架"."<br><b>$codeing</b>"), [], 403);
+                $this->error(__("请放在合单架"."<br><b>$hedan_codeing</b>"), [], 403);
             } else {
                 //                $this->_new_order_item_process->allowField(true)->isUpdate(true, ['item_order_number'=>$item_order_number])->save(['distribution_status'=>7]);
                 $this->error(__('合单失败，主单未分配合单库位'), [], 403);
