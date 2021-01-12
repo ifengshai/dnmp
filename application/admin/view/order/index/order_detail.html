@@ -353,7 +353,7 @@
     {if condition="(!empty($distribution_log))"}
     <li>
         <span>订单加工详情</span>
-        <div style="float: left;margin-top: 20px;overflow-y:auto;display: inline-block">
+        <div style="float: left;margin-top: 20px;overflow-y:auto;display: none">
             {volist name="distribution_log" id="vo"}
             <p>sku:{$new_order_item_process_id2[$key]}</p>
             {volist name="vo" id="vv"}
