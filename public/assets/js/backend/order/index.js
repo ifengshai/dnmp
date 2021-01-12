@@ -195,7 +195,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
         detail: function () {
             Controller.api.bindevent();
         },
-        detail: function () {
+        order_detail: function () {
             $('#showmessage').onclick = function (){
                 var winuiconsole = $('#winuiconsole');
                 if (winuiconsole.isHidden()){
