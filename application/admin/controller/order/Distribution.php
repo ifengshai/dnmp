@@ -254,8 +254,8 @@ class Distribution extends Backend
                         return array_merge($result, array_values($value));
                     }, array());
                     $map['a.sku'] = ['in', $result];
-                    unset($filter['shelf_number']);
                 }
+                unset($filter['shelf_number']);
             }
 
             //筛选库位号
