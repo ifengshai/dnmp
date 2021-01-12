@@ -1048,12 +1048,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     prescription_div.find('input[name="row[replacement][os_add][]"]').val(prescription.os_add);
                 }
 
-                if (prescription.hasOwnProperty("pd") && (prescription.pd != '' || prescription.pd != 0)) {
-                    prescription_div.find('input[name="row[replacement][pd_r][]"]').val(prescription.pd);
-                    //prescription_div.find('input[name="row[replacement][pd_l][]"]').attr('disabled',true);
-                }else{
+                if (prescription.pd == '' || prescription.pd == 0) {
                     prescription_div.find('input[name="row[replacement][pd_r][]"]').val(prescription.pd_r);
                     prescription_div.find('input[name="row[replacement][pd_l][]"]').val(prescription.pd_l);
+                }else{
+                    prescription_div.find('input[name="row[replacement][pd_r][]"]').val(prescription.pd);
+                    //prescription_div.find('input[name="row[replacement][pd_l][]"]').attr('disabled',true);
                 }
                 //
                 if (prescription.hasOwnProperty("od_pv")) {
@@ -1768,12 +1768,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         prescription_div.find('input[name="row[replacement][os_add][]"]').val(prescription.os_add);
                     }
 
-                    if (prescription.hasOwnProperty("pd") && (prescription.pd != '' || prescription.pd != 0)) {
-                        prescription_div.find('input[name="row[replacement][pd_r][]"]').val(prescription.pd);
-                        //prescription_div.find('input[name="row[replacement][pd_l][]"]').attr('disabled',true);
-                    } else {
+                    if (prescription.pd == '' || prescription.pd == 0) {
                         prescription_div.find('input[name="row[replacement][pd_r][]"]').val(prescription.pd_r);
                         prescription_div.find('input[name="row[replacement][pd_l][]"]').val(prescription.pd_l);
+                        
+                    } else {
+                        prescription_div.find('input[name="row[replacement][pd_r][]"]').val(prescription.pd);
+                        //prescription_div.find('input[name="row[replacement][pd_l][]"]').attr('disabled',true);
                     }
                     //
                     if (prescription.hasOwnProperty("od_pv")) {
