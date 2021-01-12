@@ -198,6 +198,7 @@ class OrderData extends Backend
                                     if (isset($v['payment_time'])) {
                                         $params['payment_time'] = (int)strtotime($v['payment_time']) + 28800;
                                     }
+                                    $params['payment_time'] = $params['payment_time'] < 0 ? 0 : $params['payment_time']; 
                                     //插入订单主表
                                     $order_id = $this->order->insertGetId($params);
                                     $order_params[$k]['site'] = $site;
