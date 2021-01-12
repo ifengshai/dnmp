@@ -1349,7 +1349,7 @@ class ScmDistribution extends Scm
             ->field('order_id,store_house_id')
             ->find();
         $store_house_is = $this->_stock_house->field('id,coding,subarea')->where('id', $item_process_info['temporary_house_id'])->find();
-        $hedan_codeing = $this->_stock_house->field('id,coding,subarea')->where('id', $order_process_info['temporary_house_id'])->value('coding');
+        $hedan_codeing = $this->_stock_house->field('id,coding,subarea')->where('id', $order_process_info['store_house_id'])->value('coding');
         $codeing = $store_house_is['coding'];
         //检测是否有工单未处理
         $check_work_order = $this->_work_order_measure
