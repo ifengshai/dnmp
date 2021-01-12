@@ -401,11 +401,16 @@
     {/in}
 </ul>
 <script>
+    function my(id){
+        return document.getElementById(id);
+    }
     var trageet =  document.getElementById("winuiconsole");
-    $('#showmessage').onclick = function (){
+    my("showmessage").onclick = function (){
         if (trageet.style.display =="none"){
+            console.log(1111)
             my("winuiconsole").style.display ="block"
         }else{
+            console.log(2222)
             my("winuiconsole").style.display ="none"
         }
 
