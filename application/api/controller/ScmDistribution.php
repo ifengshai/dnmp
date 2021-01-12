@@ -1776,6 +1776,9 @@ class ScmDistribution extends Scm
                     $where['a.id'] = -1;
                 }
             }
+            if ($site) {
+                $where['b.site'] = ['=', $site];
+            }
             $list = $this->_new_order_item_process
                 ->alias('a')
                 ->where($where)
