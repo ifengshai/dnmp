@@ -1387,8 +1387,10 @@ class ScmDistribution extends Scm
             ->select();
         if ($check_work_order) {
             foreach ($check_work_order as $val) {
-
-                $codeing = $store_house_is['coding'];
+                $codeing = '';
+                if ($val['item_order_number'] == $item_order_number) {
+                    $codeing = $store_house_is['coding'];
+                }
 
                 (3 == $val['measure_choose_id'] //主单取消措施未处理
                     ||
