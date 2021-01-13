@@ -4751,7 +4751,7 @@ EOF;
 //            '退回物流单号', '退款金额', '退款百分比', '措施', '措施详情',
 //            '承接详情', '工单回复备注', '订单支付时间', '补发订单号'
         ];
-        $path = "/uploads       /";
+        $path = "/uploads/";
         $fileName = '工单数据V站备份导出 - 12-21';
         Excel::writeCsv($csv, $headlist, $path . $fileName);
     }

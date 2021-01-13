@@ -65,13 +65,17 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                             title: __('平台'),
                             custom: {10: 'success', 1: 'success', 2: 'blue', 3: 'danger', 4: 'gray'},
                             searchList: {
-                                10: '无',
+                                13: '无',
                                 1: 'zeelool',
                                 2: 'voogueme',
                                 3: 'nihao',
                                 4: 'meeloog',
                                 5: 'wesee',
-                                8: 'amazon'
+                                8: 'amazon',
+                                9: 'zeelool_de',
+                                10: 'zeelool_es',
+                                11: 'zeelool_jp',
+                                12: 'voogmechic',
                             },
                             formatter: Table.api.formatter.status
                         },
