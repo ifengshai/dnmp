@@ -469,6 +469,17 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
         handle_abnormal: function () {
             Controller.api.bindevent();
         },
+        sign_abnormals: function () {
+            Controller.api.bindevent();
+            $('#abnormal').change(function () {
+                var flag = $('#abnormal').val();
+                if (flag == 3) {
+                    $('#status').show();
+                }else{
+                    $('#status').hide();
+                }
+            })
+        },
         api: {
             formatter: {
                 device: function (value, row, index) {

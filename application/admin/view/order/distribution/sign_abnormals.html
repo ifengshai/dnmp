@@ -11,10 +11,10 @@
         </div>
     </div>
     <input type="hidden" name="ids" value="{$ids}">
-    <div class="form-group" id="status">
+    <div class="form-group" id="status" hidden>
         <label class="control-label col-xs-12 col-sm-2">{:__('核实原因')}:</label>
         <div class="col-xs-12 col-sm-8">
-            <select name="status" >
+            <select name="status">
                 <option value="0">选择</option>
                 {foreach name="status_arr" item="value"}
                 <option value="{$value}">{$value}</option>
@@ -29,19 +29,3 @@
         </div>
     </div>
 </form>
-<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
-<script type="text/javascript">
-    $('#status').hide();
-    $('#abnormal').change(function () {
-        var flag = $('#abnormal').val();
-        if (flag == 3) {
-            $('#status').show();
-        }else{
-            $('#status').hide();
-        }
-    })
-
-    $('.btn-embossed').click(function(){
-        window.location.reload();
-    })
-</script>
