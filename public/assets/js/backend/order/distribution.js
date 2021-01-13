@@ -111,7 +111,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                 8 : 'Amazon',
                                 9 : 'Zeelool_es',
                                 10 : 'Zeelool_de',
-                                11 : 'Zeelool_jp'
+                                11 : 'Zeelool_jp',
+                                12 : 'Voogueme_acc',
                             }, operate: 'IN',
                             formatter: Table.api.formatter.status
                         },

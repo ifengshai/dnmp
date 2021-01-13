@@ -320,7 +320,7 @@ class ScmDistribution extends Scm
         //获取子订单数据
         $item_process_info = $this->_new_order_item_process
             ->where('item_order_number', $item_order_number)
-            ->field('id,option_id,distribution_status,temporary_house_id,order_prescription_type,order_id,customize_status')
+            ->field('id,option_id,distribution_status,temporary_house_id,abnormal_house_id,order_prescription_type,order_id,customize_status')
             ->find();
         empty($item_process_info) && $this->error(__('子订单不存在'), [], 403);
 
@@ -371,8 +371,10 @@ class ScmDistribution extends Scm
             ->value('id');
         // $abnormal_id && $this->error(__('有异常待处理，无法操作'), [], 405);
 
-        $abnormal_id && $this->error(__("子订单存在异常"."<br><b>$coding</b>"), [], 405);
-
+        $coding1 = $this->_stock_house
+            ->where(['id' => $item_process_info['abnormal_house_id']])
+            ->value('coding');
+        $abnormal_id && $this->error(__("子订单存在异常"."<br><b>$coding1</b>"), [], 405);
         //检测状态
         $status_arr = [
             2 => '待配货',
@@ -590,7 +592,7 @@ class ScmDistribution extends Scm
 
         //获取子订单数据
         $item_process_info = $this->_new_order_item_process
-            ->field('id,distribution_status,order_prescription_type,option_id,order_id,site,customize_status,temporary_house_id')
+            ->field('id,distribution_status,order_prescription_type,option_id,order_id,site,customize_status,temporary_house_id,abnormal_house_id')
             ->where('item_order_number', $item_order_number)
             ->find();
 
@@ -638,7 +640,10 @@ class ScmDistribution extends Scm
             DistributionLog::record($this->auth, $item_process_info['id'], 0, $status_arr[$check_status] . '：有异常[' . $abnormal_id . ']待处理不可操作');
             // $this->error(__('有异常待处理无法操作'), [], 405);
 
-            $this->error(__("子订单存在异常"."<br><b>$coding</b>"), [], 405);
+            $coding1 = $this->_stock_house
+                ->where(['id' => $item_process_info['abnormal_house_id']])
+                ->value('coding');
+            $this->error(__("子订单存在异常"."<br><b>$coding1</b>"), [], 405);
         }
 
         //查询订单号
@@ -1353,7 +1358,7 @@ class ScmDistribution extends Scm
         //获取子订单数据
         $item_process_info = $this->_new_order_item_process
             ->where('item_order_number', $item_order_number)
-            ->field('id,distribution_status,sku,order_id,temporary_house_id,abnormal_house_id')
+            ->field('id,distribution_status,sku,order_id,temporary_house_id,abnormal_house_id,abnormal_house_id')
             ->find();
         //查询订单号
         $order_info = $this->_new_order
@@ -1366,7 +1371,8 @@ class ScmDistribution extends Scm
             ->where('order_id', $item_process_info['order_id'])
             ->field('order_id,store_house_id')
             ->find();
-        $store_house_is = $this->_stock_house->field('id,coding,subarea')->where('id', $order_process_info['store_house_id'])->find();
+        $store_house_is = $this->_stock_house->field('id,coding,subarea')->where('id', $item_process_info['temporary_house_id'])->find();
+        $hedan_codeing = $this->_stock_house->field('id,coding,subarea')->where('id', $order_process_info['store_house_id'])->value('coding');
         $codeing = $store_house_is['coding'];
         //检测是否有工单未处理
         $check_work_order = $this->_work_order_measure
@@ -1403,15 +1409,17 @@ class ScmDistribution extends Scm
             ->value('id');
         // $abnormal_id && $this->error(__('有异常待处理，无法操作'), [], 405);
 
-        $abnormal_id && $this->error(__("子订单存在异常"."<br><b>$codeing</b>"), [], 405);
+        //子单异常库位号
+        $codeing1 = $this->_stock_house->field('id,coding,subarea')->where('id', $item_process_info['abnormal_house_id'])->value('coding');
+        $abnormal_id && $this->error(__("子订单存在异常"."<br><b>$codeing1</b>"), [], 405);
 
         empty($item_process_info) && $this->error(__('子订单不存在'), [], 403);
 
 
         //产品婧让改的
-        if (!empty($store_house_is) && 9 == $item_process_info['distribution_status']) {
 
-            $this->error(__("请放在合单架"."<br><b>$codeing</b>"), [], 403);
+        if (!empty($hedan_codeing) && 9 == $item_process_info['distribution_status']) {
+            $this->error(__("请放在合单架"."<br><b>$hedan_codeing</b>"), [], 403);
         } elseif (empty($store_house_is) && 9 == $item_process_info['distribution_status']) {
             $this->error(__('订单合单完成，去审单！'), [], 403);
         }
@@ -1435,7 +1443,7 @@ class ScmDistribution extends Scm
                 $store_house_info = $this->_stock_house->field('id,coding,subarea')->where('id', $order_process_info['store_house_id'])->find();
                 // $this->error(__('请将子单号' . $item_order_number . '的商品放入合单架' . $store_house_info['coding'] . '合单库位'), [], 403);
 
-                $this->error(__("请放在合单架"."<br><b>$codeing</b>"), [], 403);
+                $this->error(__("请放在合单架"."<br><b>$hedan_codeing</b>"), [], 403);
             } else {
                 //                $this->_new_order_item_process->allowField(true)->isUpdate(true, ['item_order_number'=>$item_order_number])->save(['distribution_status'=>7]);
                 $this->error(__('合单失败，主单未分配合单库位'), [], 403);
@@ -1775,6 +1783,9 @@ class ScmDistribution extends Scm
                 } else {
                     $where['a.id'] = -1;
                 }
+            }
+            if ($site) {
+                $where['b.site'] = ['=', $site];
             }
             $list = $this->_new_order_item_process
                 ->alias('a')
