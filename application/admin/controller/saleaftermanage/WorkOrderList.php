@@ -1056,21 +1056,41 @@ class WorkOrderList extends Backend
                     $count = $this->model->where(['platform_order' => $platform_order, 'work_status' => ['in', [1, 2, 3, 5]]])->count();
                     0 < $count && $this->error("此订单存在未处理完成的工单");
 
+                    $flag = 0;
+                    if (is_array($item_order_info)) {
+                        $item_choose = array_column($item_order_info , 'item_choose');
+                        if (!empty($item_choose)) {
+                            foreach ($item_choose as $key => $value) {
+                                if (!empty($item_choose[$key][0])) {
+                                     $flag = 1;
+                                }
+                            }
+                        }
+                    }
+
                     //判断订单状态
                     $_new_order_process = new NewOrderProcess();
                     $check_status = $_new_order_process
                         ->where('increment_id', $platform_order)
                         ->value('check_status');
-
-                    //已审单，包含主单取消、子单措施不能创建工单
-                    1 == $check_status
-                    &&
-                    (
-                        in_array(3, $measure_choose_id)
-                        ||
-                        !empty($item_order_info)
-                    )
-                    && $this->error("已审单，不能创建工单");
+                    
+                    $_new_order = new NewOrder();
+                    $new_order_status = $_new_order
+                        ->where('increment_id', $platform_order)
+                        ->value('status');
+                    //processing状态的判断审单状态
+                    if ('processing' == $new_order_status) {
+                        //已审单，包含主单取消、子单措施不能创建工单
+                        1 == $check_status
+                        &&
+                        (
+                            in_array(3, $measure_choose_id)
+                            ||
+                            $flag
+                        )
+                        && $this->error("已审单，不能创建工单");
+                    }
+                    
 
                     //指定问题类型校验sku下拉框是否勾选
                     in_array($params['problem_type_id'],[8,10,11,56,13,14,15,16,18,22,59])
@@ -1098,7 +1118,6 @@ class WorkOrderList extends Backend
                 } else {
                     //校验工单措施
                     empty($measure_choose_id) && empty($item_order_info) && $this->error("请选择实施措施");
-
                     //工单是否存在
                     $row = $this->model->get($ids);
                     !$row && $this->error(__('No Results were found'));
