@@ -440,29 +440,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
             //批量标记异常
             $('.btn-sign-abnormals').click(function () {
                 var ids = Table.api.selectedids(table);
-                Layer.confirm(
-                    __('确定要为这%s条子订单标记异常么?', ids.length),
-                    { icon: 3, title: __('Warning'), shadeClose: true },
-                    function (index) {
-                        alert(ids);
-                        /*Layer.close(index);
-                        Backend.api.ajax({
-                            url: Config.moduleurl + '/order/distribution/sign-abnormals',
-                            data: { id_params: ids },
-                            type: 'post'
-                        }, function (data, ret) {
-                            if (data.url) {
-                                //跳转添加工单页面
-                                Fast.api.open(data.url, __('创建工单'), {
-                                    area: ["100%", "100%"],
-                                    end: function () {
-                                        table.bootstrapTable('refresh');
-                                    }
-                                });
-                            }
-                        });*/
-                    }
-                );
+                Backend.api.open(Config.moduleurl + '/order/distribution/sign_abnormals/ids/' + ids, __('批量标记异常'), { area: ['50%', '50%'] });
             });
         },
         handle_abnormal: function () {

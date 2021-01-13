@@ -282,6 +282,13 @@ class Distribution extends Backend
                 unset($filter['increment_id']);
             }
 
+            //子单批量
+            $filter_item_order_number = explode(' ', $filter['item_order_number']);
+            if (count($filter_item_order_number) > 1) {
+                $map['a.item_order_number'] = ['in', $filter_item_order_number];
+                unset($filter['item_order_number']);
+            }
+
             if ($filter['site']) {
                 $map['a.site'] = ['in', $filter['site']];
                 unset($filter['site']);
@@ -2036,7 +2043,7 @@ class Distribution extends Backend
 
         //检测异常状态
         $abnormal_info = $this->_distribution_abnormal
-            ->field('id,type')
+            ->field('id,type,remark')
             ->where(['item_process_id' => $ids, 'status' => 1])
             ->find();
         empty($abnormal_info) && $this->error('当前子订单异常信息获取失败');
@@ -3013,5 +3020,90 @@ class Distribution extends Backend
             $writer = new $class($spreadsheet);
             $writer->save('php://output');
         }
+    }
+
+
+    //待配镜片批量标记异常
+    public function sign_abnormals($ids=null){
+
+        //异常原因列表
+        $abnormal_arr = [
+            3 => '核实处方',
+            4 => '镜片缺货',
+            5 => '镜片重做',
+            6 => '定制片超时'
+        ];
+        $status_arr = [
+            1 => '核实轴位（AXI）',
+            2 => '核实瞳距（PD）',
+            3 => '核实处方光度符号',
+            4 => '核实镜片类型',
+            5 => '核实处方光度（左右眼光度相差过多）',
+        ];
+        if ($this->request->post()) {
+            $ids = $this->request->post('ids', 0);
+            $ids = explode(',', $ids);
+            $type = $this->request->post('abnormal');
+            $status = $this->request->post('status', 0);
+            empty($ids) && $this->error('子订单号不能为空');
+            empty($type) && $this->error('异常类型不能为空');
+
+            foreach ($ids as $key => $value) {
+                //获取子订单数据
+                $item_process_info = $this->model
+                    ->field('id,abnormal_house_id,item_order_number')
+                    ->where('id', $ids[$key])
+                    ->find();
+                empty($item_process_info) && $this->error(__('子订单不存在'), [], 403);
+                !empty($item_process_info['abnormal_house_id']) && $this->error(__('已标记异常，不能多次标记'), [], 403);
+                $item_process_id = $item_process_info['id'];
+                $item_order_number = $item_process_info['item_order_number'];
+                //自动分配异常库位号
+                $stock_house_info = $this->_stock_house
+                    ->field('id,coding')
+                    ->where(['status' => 1, 'type' => 4, 'occupy' => ['<', 10000]])
+                    ->order('occupy', 'desc')
+                    ->find();
+                if (empty($stock_house_info)) {
+                    DistributionLog::record($this->auth, $item_process_id, 0, '异常暂存架没有空余库位');
+                    $this->error(__('异常暂存架没有空余库位'), [], 405);
+                }
+
+                    //绑定异常子单号
+                    $abnormal_data = [
+                        'item_process_id' => $item_process_id,
+                        'type' => $type,
+                        'status' => 1,
+                        'create_time' => time(),
+                        'create_person' => $this->auth->nickname
+                    ];
+                    if ($status) {
+                        $abnormal_data['remark'] = $status;
+                    }
+
+
+                    $res = $this->_distribution_abnormal->insert($abnormal_data);
+                    
+                    //子订单绑定异常库位号
+                    $this->model
+                        ->where(['id' => $item_process_id])
+                        ->update(['abnormal_house_id' => $stock_house_info['id']]);
+
+                //异常库位占用数量+1
+                $this->_stock_house
+                    ->where(['id' => $stock_house_info['id']])
+                    ->setInc('occupy', 1);
+
+                //配货日志
+                DistributionLog::record($this->auth, $item_process_id, 9, "子单号{$item_order_number}，异常暂存架{$stock_house_info['coding']}库位");
+            }
+            
+            $this->success('处理成功!', '', 'success', 200);
+        }
+
+        $this->view->assign("abnormal_arr", $abnormal_arr);
+        $this->view->assign("status_arr", $status_arr);
+        $this->view->assign("ids", $ids);
+        return $this->view->fetch('sign_abnormals');
     }
 }

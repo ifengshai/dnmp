@@ -4,9 +4,12 @@
         <div class="col-xs-12 col-sm-8">
             <select name="abnormal" disabled>
                 {foreach name="abnormal_arr" item="value"}
-                <option value="{$key}" {if $key == $abnormal_info['type']}selected{/if} >{$value}</option>
+                    <option value="{$key}" {if $key == $abnormal_info['type']}selected{/if} >{$value}</option>
                 {/foreach}
             </select>
+            {if $abnormal_info['type'] == 3}
+                <font>{$abnormal_info['remark']}</font>
+            {/if}
         </div>
     </div>
     <div class="form-group">
