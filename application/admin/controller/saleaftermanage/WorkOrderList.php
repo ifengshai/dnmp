@@ -4739,7 +4739,7 @@ EOF;
             $csv[$key]['replacement_order'] = $value['replacement_order'];//补发订单号
 
         }
-   
+
         $headlist = [
 //            '工单平台', '工单类型', '工单状态', '工单级别', '平台订单号',
             '工单平台', '工单类型', '工单状态', '平台订单号',
@@ -4754,7 +4754,7 @@ EOF;
 //            '退回物流单号', '退款金额', '退款百分比', '措施', '措施详情',
 //            '承接详情', '工单回复备注', '订单支付时间', '补发订单号'
         ];
-        $path = "/uploads       /";
+        $path = "/uploads/";
         $fileName = '工单数据2020导出';
         Excel::writeCsv($csv, $headlist, $path . $fileName);
     }
