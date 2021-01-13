@@ -1678,7 +1678,11 @@ class Distribution extends Backend
                     ||
                     in_array($val['item_order_number'], $item_order_numbers) //子单措施未处理:更改镜框18、更改镜片19、取消20
                 )
-                && $this->error('子单号：' . $val['item_order_number'] . '有工单未处理');
+
+                    && $this->error('子单号：' . $val['item_order_number'] . '有工单未处理');
+                if ($val['measure_choose_id'] == 21){
+                    $this->error(__('有工单存在暂缓措施未处理，无法操作'), [], 405);
+                }
             }
         }
 
@@ -2050,7 +2054,7 @@ class Distribution extends Backend
 
         //状态列表
         $status_arr = [
-            1 => '待打印标签',
+            //1 => '待打印标签',
             2 => '待配货',
             3 => '待配镜片',
             4 => '待加工',
@@ -2082,6 +2086,11 @@ class Distribution extends Backend
                 unset($status_arr[4]);
                 unset($status_arr[5]);
                 break;
+        }
+
+        //核实地址
+        if($abnormal_info['type'] == 13){
+            $status_arr = [];
         }
 
         //异常原因列表
@@ -3105,5 +3114,41 @@ class Distribution extends Backend
         $this->view->assign("status_arr", $status_arr);
         $this->view->assign("ids", $ids);
         return $this->view->fetch('sign_abnormals');
+    }
+
+    //取消异常
+    public function cancel_abnormal($ids = null){
+        $admin = (object)session('admin');
+        foreach ($ids as $key => $value) {
+            $item_info = $this->model
+            ->field('id,site,sku,distribution_status,abnormal_house_id,temporary_house_id,item_order_number')
+            ->where(['id' => $ids[$key]])
+            ->find();
+            empty($item_info) && $this->error('子订单'.$item_info['item_order_number'].'不存在');
+            empty($item_info['abnormal_house_id']) && $this->error('子订单'.$item_info['item_order_number'].'没有异常存在');
+            //检测工单
+            $work_order_list = $this->_work_order_list->where(['order_item_numbers' => ['like',$item_info['item_order_number'].'%'], 'work_status' => ['in',[1,2,3,5]]])->find();
+            !empty($work_order_list) && $this->error('子订单'.$item_info['item_order_number'].'存在未完成的工单');
+            $abnormal_house_id[] = $item_info['abnormal_house_id'];
+            //配货日志
+            DistributionLog::record($this->auth, $ids[$key], 10, "子单号{$item_info['item_order_number']}，异常取消");
+        }
+        
+        //异常库位占用数量-1
+        $this->_stock_house
+            ->where(['id' => ['in',$abnormal_house_id]])
+            ->setDec('occupy', 1);
+
+        //子订单状态回滚
+        $save_data = [
+            'abnormal_house_id' => 0 //异常库位ID
+        ];
+
+        //标记处理异常状态及时间
+        $this->_distribution_abnormal->where(['item_process_id' => ['in',$ids]])->update(['status' => 2, 'do_time' => time(), 'do_person' => $admin->nickname]);
+        $this->model->where(['id' => ['in',$ids]])->update($save_data);
+        
+        $this->success('操作成功!', '', 'success', 200);
+
     }
 }
