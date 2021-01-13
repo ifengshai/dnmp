@@ -1299,10 +1299,10 @@ class WorkOrderList extends Backend
                             !$item['change_frame']['change_sku'] && $this->error("子订单：{$key} 的新sku不能为空");
                             $back_data = $this->skuIsStock([$item['change_frame']['change_sku']], $params['work_platform'], [1]);
                             !$back_data['result'] && $this->error($back_data['msg']);
-                        } elseif (in_array(20, $item['item_choose'])) {//更改镜片
+                        } /*elseif (in_array(20, $item['item_choose'])) {//更改镜片
                             //检测之前是否处理过更改镜片措施
                             in_array(2, $change_type) && $this->error("子订单：{$key} 措施已处理，不能重复创建");
-                        }
+                        }*/
                     }
                     unset($item);
                 }
@@ -2122,10 +2122,10 @@ class WorkOrderList extends Backend
                             !$item['change_frame']['change_sku'] && $this->error("子订单：{$key} 的新sku不能为空");
                             $back_data = $this->skuIsStock([$item['change_frame']['change_sku']], $params['work_platform'], [1]);
                             !$back_data['result'] && $this->error($back_data['msg']);
-                        } elseif (in_array(20, $item['item_choose'])) {//更改镜片
+                        } /*elseif (in_array(20, $item['item_choose'])) {//更改镜片
                             //检测之前是否处理过更改镜片措施
                             in_array(2, $change_type) && $this->error("子订单：{$key} 措施已处理，不能重复创建");
-                        }
+                        }*/
                     }
                     unset($item);
                 }
