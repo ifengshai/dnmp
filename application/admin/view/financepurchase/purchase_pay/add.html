@@ -1,0 +1,206 @@
+<style>
+    .caigou {
+        padding: 10px;
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .caigou #caigou-table {
+        width: 100%;
+        height: 130px;
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        text-align: center;
+
+    }
+
+    .caigou #caigou-table tr {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        line-height: 50px;
+    }
+
+    .caigou #caigou-table tr th {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        text-align: center;
+        font-size: 14px;
+    }
+
+    .caigou #caigou-table tr td {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+    }
+
+    .caigou #caigou-table tr td input {
+
+        width: 150px;
+    }
+</style>
+<form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+    <div class='caigou' style="width: 80%;margin-left: 10%;">
+        <p style="font-size: 16px;text-align: left;"><b>基本信息</b></p>
+        <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2">付款申请单号:</label>
+            <div class="col-xs-12 col-sm-3">
+                <input id="order_number" class="form-control" readonly name="row[order_number]" value="{$order_number}"
+                       type="text">
+            </div>
+
+        </div>
+        <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2">采购单号:</label>
+            <div class="col-xs-12 col-sm-3">
+                <input id="purchase_number" class="form-control" readonly name="row[purchase_number]"
+                       value="{$purchase_order.purchase_number}" type="text">
+            </div>
+            <label class="control-label col-xs-12 col-sm-2">采购单名称:</label>
+            <div class="col-xs-12 col-sm-3">
+                <input id="purchase_name" class="form-control" name="row[purchase_name]" value="{$purchase_order.purchase_name}" type="text">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2">供应商名称:</label>
+            <div class="col-xs-12 col-sm-3">
+                <input id="supplier_name" class="form-control" readonly name="row[supplier_name]"
+                       value="{$supplier_name}" type="text">
+            </div>
+            <label class="control-label col-xs-12 col-sm-2">供应商账期:</label>
+            <div class="col-xs-12 col-sm-3">
+                <input id="supplier_time" class="form-control" name="row[supplier_time]" type="text">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2">收款方名称:</label>
+            <div class="col-xs-12 col-sm-3">
+                <input id="linkname" class="form-control" readonly name="row[linkname]"
+                       value="{$purchase_number}" type="text">
+            </div>
+            <label class="control-label col-xs-12 col-sm-2">收款方开户行:</label>
+            <div class="col-xs-12 col-sm-3">
+                <input id="opening_bank_address" class="form-control" name="row[opening_bank_address]" type="text">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2">收款方账户:</label>
+            <div class="col-xs-12 col-sm-3">
+                <input id="bank_account" class="form-control" readonly name="row[bank_account]"
+                       value="{$purchase_number}" type="text">
+            </div>
+            <label class="control-label col-xs-12 col-sm-2">付款币种:</label>
+            <div class="col-xs-12 col-sm-3">
+                <input id="base_currency_code" class="form-control" name="row[base_currency_code]" type="text">
+            </div>
+        </div>
+        <div class="form-group">
+
+            <label class="control-label col-xs-12 col-sm-2">付款类型:</label>
+            <div class="col-xs-12 col-sm-3">
+                <select name="row[pay_type]" class="form-control" id="pay_type">
+                    <option value="">请选择</option>
+                    <option value="1" {:$row['pay_type']==1 ? 'selected' : '' }>预付款</option>
+                    <option value="2" {:$row['pay_type']==2 ? 'selected' : '' }>全款预付</option>
+                    <option value="3" {:$row['pay_type']==3 ? 'selected' : '' }>货到付款</option>
+                </select>
+            </div>
+            <label class="control-label col-xs-12 col-sm-2">收款方账户:</label>
+            <div class="col-xs-12 col-sm-3">
+                <select name="row[pay_rate]" class="form-control">
+                    <option value="">请选择</option>
+                    <option value="1" {:$row['pay_rate']==1 ? 'selected' : '' }>30%</option>
+                </select>
+            </div>
+        </div>
+
+    </div>
+    <hr>
+    <div class='caigou' style="width: 80%;margin-left: 10%;">
+        <p style="font-size: 16px;text-align: left;"><b>采购事由</b></p>
+        <div style="margin-bottom: 20px;">
+            <table id="caigou-table" class="purchase-table">
+                <tr>
+                    <th>序号
+                    </td>
+                    <th>采购品名
+                    </td>
+                    <th>商品分类
+                    </td>
+                    <th>采购数量（个）
+                    </td>
+                    <th>采购单价（元）
+                    </td>
+                    <th>金额（元）
+                    </td>
+                </tr>
+
+                <input class="form-control" name="row[replenish_id]" type="hidden" value="{$v.replenish_id}">
+                <tr>
+                    <input class="form-control replenish_list_id" name="replenish_list_id[]" type="hidden"
+                           value="{$v.id}">
+                    <td>
+                        <input id="c-purchase_remark" class="form-control sku" readonly name="sku[]" type="text"
+                               value="{$v.sku}">
+                    </td>
+                    <td>
+                        <input id="c-purchase_remark" class="form-control product_name" readonly name="product_name[]"
+                               type="text" value="{$v.product_name}">
+                    </td>
+                    <td>
+                        <input id="c-purchase_remark" class="form-control supplier_sku" readonly name="supplier_sku[]"
+                               type="text" value="{$v.supplier_sku}">
+                    </td>
+                    <td>
+                        <input id="c-purchase_remark" class="form-control purchase_num" name="purchase_num[]"
+                               type="text" value="{$v.distribute_num}">
+                    </td>
+                    <td>
+                        <input id="c-purchase_remark" class="form-control purchase_price" name="purchase_price[]"
+                               type="text">
+                    </td>
+                    <td>
+                        <input id="c-purchase_remark" class="form-control goods_total" readonly name="purchase_total[]"
+                               type="text">
+                    </td>
+
+                </tr>
+            </table>
+        </div>
+
+    </div>
+    <hr>
+    </div>
+    <div class='caigou' style="width: 80%;margin-left: 10%;">
+        <p style="font-size: 16px;text-align: left;"><b>审批流程</b></p>
+        <br>
+        审批人
+        <br>
+        任萍->王涛->王剑
+        <br>
+        抄送
+        <br>
+        屈金金
+    </div>
+    <hr>
+    <input type='hidden' name="row[purchase_status]" class="status" value="0">
+    <div class="form-group layer-footer">
+        <label class="control-label col-xs-12 col-sm-2"></label>
+        <div class="col-xs-12 col-sm-8">
+            <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
+            <button type="submit" class="btn btn-success btn-status btn-embossed disabled">提交审核</button>
+            <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>
+
+
