@@ -4550,7 +4550,7 @@ EOF;
             ,create_user_name,after_user_id,create_time,complete_time,replenish_money,replenish_increment_id,coupon_describe,integral,refund_money,replacement_order
             ')
             ->order('id desc')
-            ->limit(100)
+            ->limit(11000)
             ->select();
         $list = collection($list)->toArray();
 
@@ -4781,7 +4781,7 @@ EOF;
 //            '承接详情', '工单回复备注', '订单支付时间', '补发订单号'
         ];
         $path = "/uploads/";
-        $fileName = '工单数据2020-007导出';
+        $fileName = '工单数据2020-001导出';
         Excel::writeCsv($csv, $headlist, $path . $fileName);
     }
 
