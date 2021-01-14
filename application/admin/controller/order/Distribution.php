@@ -1585,7 +1585,6 @@ class Distribution extends Backend
             return array_merge($result, array_values($value));
         }, array());
         $where['order_id'] = ['in',$result];
-        dump($where);die();
         $values['distribution_status'] = 9;
         $values['updated_at'] = time();
         $model->table('fa_order_item_process')->where($where)->update($values);
