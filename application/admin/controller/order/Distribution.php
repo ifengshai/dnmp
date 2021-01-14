@@ -1555,6 +1555,44 @@ class Distribution extends Backend
         echo $html;
     }
 
+
+    public function save_order_statsu(){
+        $map['increment_id'] = ['in',['100181408',
+            '400409680',
+            '100180688',
+            '100179774',
+            '400414709',
+            '400425817',
+            '500016847',
+            '130079900',
+            '300044713',
+            '400425744',
+            '400421790',
+            '130078015',
+            '400426437',
+            '430241978',
+            '430242375',
+            '430238882',
+            '600122332',
+            '600122873',
+            '100181629',
+            '400426702',
+            '400427440',
+            '400421813',]];
+        $data = Db::table('fa_order')->where($map)->field('id')->select();
+        $result = array_reduce($data, function ($result, $value) {
+            return array_merge($result, array_values($value));
+        }, array());
+        dump($result);die();
+
+
+        //记录配货日志
+        $admin = (object)session('admin');
+        DistributionLog::record($admin, '100181408', 7, '标记打印完成');
+    }
+
+
+
     /**
      * 生成新的条形码
      */
