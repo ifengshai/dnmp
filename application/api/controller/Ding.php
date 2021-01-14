@@ -264,7 +264,7 @@ class Ding extends Controller
      * @author wpl
      * @since 2020/06/01 17:35:27
      */
-    protected function initiate_approval($params)
+    public function initiate_approval($params)
     {
 
         $params['agent_id'] = config('ding.agent_id');
@@ -283,6 +283,7 @@ class Ding extends Controller
         $params['form_component_values'] = $params['form_component_values'];
         //发起审批
         $res = $this->app->process->create($params);
+        dump($res);die;
         if ($res['errcode'] == 0) {
             return $res;
         } else {

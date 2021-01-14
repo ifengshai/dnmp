@@ -34,7 +34,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'base_currency_code', title: __('付款币种'), visible: false},
                         {
                             field: 'status', title: __('状态'), custom: { 0: 'success', 1: 'yellow', 2: 'blue', 3: 'danger'},
-                            searchList: { 0: '新建', 1: '待审核', 2: '审核通过', 3: '已完成'},
+                            searchList: { 0: '新建', 1: '待审核', 2: '审核通过', 3: '审核拒绝', 4: '已完成', 5: '已取消'},
                             formatter: Table.api.formatter.status
                         },
                         {field: 'create_person', title: __('创建人'), operate: 'LIKE'},
@@ -87,6 +87,42 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         },
         add: function () {
             Controller.api.bindevent();
+            //获取采购单信息
+            $(document).on('change', '#purchase_number', function () {
+                var purchase_number = $(this).val();
+                var pay_type = $('#pay_type').val();
+                var _this = $(this);
+                if (pay_type == 0) {
+                    Layer.alert('请先选择付款类型');
+                    return false;
+                }
+                Backend.api.ajax({
+                    url: 'financepurchase/purchase_pay/getPurchaseDetail',
+                    data: {purchase_number: purchase_number,pay_type:pay_type}
+                }, function (data, ret) {
+                    //渲染基本信息
+                    $('#purchase_type').val(data.purchase_order.purchase_type)
+                    $('#purchase_number').val(data.purchase_order.purchase_number)
+                    $('#purchase_name').val(data.purchase_order.purchase_name)
+                    $('#supplier_name').val(data.data.supplier_name)
+                    $('#supplier_time').val(data.data.period)
+                    $('#linkname').val(data.data.linkname)
+                    $('#opening_bank_address').val(data.data.opening_bank)
+                    $('#bank_account').val(data.data.bank_account)
+                    $('#base_currency_code').val(data.data.currency)
+                    //渲染采购事由
+                    $('#id').val(data.purchase_detail.id)
+                    $('#name').val(data.purchase_detail.sku)
+                    $('#number').val(data.purchase_order.purchase_number)
+                    $('#type').val(data.purchase_detail.type)
+                    $('#num').val(data.purchase_detail.purchase_num)
+                    $('#single').val(data.purchase_detail.purchase_price)
+                    $('#money').val(data.purchase_detail.purchase_total)
+                }, function (data, ret) {
+                    Fast.api.error(ret.msg);
+                });
+
+            })
         },
         edit: function () {
             Controller.api.bindevent();
@@ -95,12 +131,36 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
                 //付款类型
-                $(document).on('click', '#pay_type', function () {
+                $(document).on('change', '#pay_type', function () {
                     var val = $(this).val();
-                    if (val != 3) {
-                        $('.deposit_amount').removeClass('hidden');
-                    } else {
-                        $('.deposit_amount').addClass('hidden');
+                    //预付款
+                    if (val == 1) {
+                        $('#fuikuanbili').removeClass('hidden');
+                        purchase_total = ($('#purchase_total').val() * 0.3).toFixed(2);
+                        $('#pay_grand_total').val(purchase_total);
+                    } else if(val == 3) {
+                        $('#purchase_text').html('结算单号:');
+                        $('#fuikuanbili').addClass('hidden');
+                    } else {//全款预付
+                        $('#fuikuanbili').addClass('hidden');
+                        purchase_total = $('#purchase_total').val()
+                        $('#pay_grand_total').val(purchase_total);
+                    }
+                });
+                //保存 跟提交审核做校验 付款类型不能为空
+                $(document).on('click', '.btn-save', function () {
+                    var pay_type = $('#pay_type').val();
+                    if (pay_type == 0) {
+                        Layer.alert('请先选择付款类型');
+                        return false;
+                    }
+                })
+                $(document).on('click', '.btn-save1', function () {
+                    var pay_type = $('#pay_type').val();
+                    if (pay_type == 0) {
+                        $('#status').val(1);
+                        Layer.alert('请先选择付款类型');
+                        return false;
                     }
                 })
             }
