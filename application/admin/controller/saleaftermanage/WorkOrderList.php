@@ -4785,6 +4785,42 @@ EOF;
         Excel::writeCsv($csv, $headlist, $path . $fileName);
     }
 
+    public function batch_export_xls_array_copy()
+    {
+
+
+        set_time_limit(0);
+        ini_set('memory_limit', '1024M');
+
+        $map['create_time'] =['between',['2020-01-01 00:00:00','2020-12-31 23:59:59']];
+//        $map['id'] = ['lt',5212];
+//        $map['work_status'] = array('in', '2,3,5');
+//        0: '已取消', 1: '新建', 2: '待审核', 4: '审核拒绝', 3: '待处理', 5: '部分处理', 6: '已处理'
+        $list = $this->model
+            ->where($map)
+            ->field('id,base_grand_total,email')
+            ->order('id desc')
+            ->select();
+        $list = collection($list)->toArray();
+
+
+
+
+        foreach ($list as $key => $value) {
+
+            $csv[$key]['email'] = $value['email'];  //客户邮箱
+            $csv[$key]['base_grand_total'] = $value['base_grand_total']; //订单金额
+
+        }
+
+        $headlist = [
+            '客户邮箱', '订单金额'
+        ];
+        $path = "/uploads/";
+        $fileName = '工单数据2020-单独字段导出';
+        Excel::writeCsv($csv, $headlist, $path . $fileName);
+    }
+
 
     /**
      * 导出工单
