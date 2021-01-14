@@ -1579,7 +1579,8 @@ class Distribution extends Backend
             '400426702',
             '400427440',
             '400421813',]];
-        $data = Db::table('fa_order')->where($map)->field('id')->select();
+        $model = Db::connect('database.db_mojing_order');
+        $data = $model->table('fa_order')->where($map)->field('id')->select();
         $result = array_reduce($data, function ($result, $value) {
             return array_merge($result, array_values($value));
         }, array());
