@@ -1590,6 +1590,8 @@ class Distribution extends Backend
         $model->table('fa_order_item_process')->where($where)->update($values);
         $cat['combine_status'] =1;
         $cat['store_house_id'] =0;
+        $cat['check_status'] =1;
+        $cat['check_time'] =time();
         $model->table('fa_order_process')->where($where)->update($cat);
 
         //记录配货日志
