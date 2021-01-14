@@ -6,7 +6,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
             Table.api.init({
                 searchFormVisible: true,
                 extend: {
-                    index_url: 'finance/settle_order/index' + location.search,
+                    index_url: 'finance/stock_parameter/index' + location.search,
                 }
             });
 
@@ -20,19 +20,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                 columns: [
                     [
                         {checkbox: true},
-                        {field: 'id', title: __('ID'),operate:false},
-                        {field: 'id', title: __('结算单号'),},
-                        {field: 'email', title: __('供应商名称')},
-                        {field: 'email', title: __('供应商账期')},
-                        {field: 'email', title: __('结算金额')},
-                        {field: 'email', title: __('采购负责人')},
-                        {field: 'status', title: __('状态'),custom: { 1: 'danger', 2: 'success', 3: 'orange', 4: 'warning', 5: 'purple', 6: 'primary' , 7: 'primary'}, searchList: { 1: '新建', 2: '待审核', 3: '待对账', 4: '待财务确认', 5: '已完成',6:'已拒绝' ,7:'已取消'},formatter: Table.api.formatter.status},
-                        {field: 'id', title: __('结算类型'),visible:false},
+                        {field: 'id', title: __('ID'),},
+                        {field: 'createtime', title: __('日期'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime},
+                        {field: 'mobile', title: __('入库金额（￥）'), visible: false},
+                        {field: 'customer_name', title: __('出库金额（￥）')},
+                        {field: 'mobile', title: __('余额（￥）')},
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
                                  {
                                   name: 'detail',
-                                  text: '详情',
+                                  text: '查看详情',
                                   title: __('查看详情'),
                                   extend: 'data-area = \'["80%","70%"]\'',
                                   classname: 'btn btn-xs btn-primary btn-dialog',
@@ -56,31 +53,41 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
 
             // 为表格绑定事件
             Table.api.bindevent(table);
-
-
-            //批量导出xls
-            $('.btn-batch-export-xls').click(function () {
-                var ids = Table.api.selectedids(table);
-                if (ids.length > 0) {
-                    window.open(Config.moduleurl + '/customer/wholesale_customer/batch_export_xls?ids=' + ids, '_blank');
-                } else {
-                    var options = table.bootstrapTable('getOptions');
-                    var search = options.queryParams({});
-                    var filter = search.filter;
-                    var op = search.op;
-                    window.open(Config.moduleurl + '/customer/wholesale_customer/batch_export_xls?filter=' + filter + '&op=' + op, '_blank');
-                }
-
-            });
-        },
-        add: function () {
-            Controller.api.bindevent();
-        },
-        edit: function () {
-            Controller.api.bindevent();
         },
         detail: function () {
-            Controller.api.bindevent();
+            // 初始化表格参数配置
+            Table.api.init({
+                searchFormVisible: true,
+                extend: {
+                    index_url: 'finance/stock_parameter/detail' + location.search,
+                }
+            });
+
+            var table = $("#table");
+
+            // 初始化表格
+            table.bootstrapTable({
+                url: $.fn.bootstrapTable.defaults.extend.index_url,
+                pk: 'id',
+                sortName: 'id',
+                searchFormVisible:false,
+                showToggle: false,
+                commonSearch: false,
+                showExport: false,
+                columns: [
+                    [
+                        {field: 'id', title: __('ID'),},
+                        {field: 'status', title: __('出入库类型'),custom: { 1: 'danger', 2: 'success'}, searchList: { 1: '采购入库', 2: '订单出库'},formatter: Table.api.formatter.status},
+                        {field: 'customer_name', title: __('入库金额（￥）')},
+                        {field: 'mobile', title: __('入库数量')},
+                        {field: 'mobile', title: __('出库金额（￥）')},
+                        {field: 'mobile', title: __('出库数量')}
+                    ]
+                ]
+            });
+
+            // 为表格绑定事件
+            Table.api.bindevent(table);
         },
 
         api: {

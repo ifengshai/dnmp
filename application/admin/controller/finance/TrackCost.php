@@ -10,5 +10,8 @@ use think\Request;
 
 class TrackCost extends Backend
 {
-    
+    public function index()
+    {
+        return $this->view->fetch();
+    }
 }

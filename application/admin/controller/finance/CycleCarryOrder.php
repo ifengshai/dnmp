@@ -10,5 +10,12 @@ use think\Request;
 
 class CycleCarryOrder extends Backend
 {
-    
+    public function index()
+    {
+        return $this->view->fetch();
+    }
+    public function detail()
+    {
+        return $this->view->fetch();
+    }
 }
