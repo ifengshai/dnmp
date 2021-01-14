@@ -46,8 +46,9 @@ class Ding extends Controller
     {
         $userId = '045127074321643707';
         $user = $this->app->user->get($userId);
-        dump($user);die;
-        Admin::userAdd($user); 
+        dump($user);
+        die;
+        Admin::userAdd($user);
         // $user=$this->app->attendance->schedules('2020-06-07');
         $dinguserlist = '1965280658937204,246806095338604104,203462064629067860,294026503134238817,224632105739221648,1700124228692306,115402543935694805,103733210730389629,225802421126255952,285168290324340480,251768502236303778';
         $time = 1592150400;
@@ -97,7 +98,7 @@ class Ding extends Controller
     public function register()
     {
         $params = [
-            'call_back_tag' => ['user_add_org', 'user_modify_org', 'user_leave_org', 'org_dept_create', 'org_dept_modify', 'org_dept_remove'],
+            'call_back_tag' => ['user_add_org', 'user_modify_org', 'user_leave_org', 'org_dept_create', 'org_dept_modify', 'org_dept_remove', 'bpms_task_change'],
             'url' => 'https://mojing.nextmar.com/api/ding/receive',
         ];
         $this->app->callback->register($params);
@@ -111,7 +112,7 @@ class Ding extends Controller
     public function update()
     {
         $params = [
-            'call_back_tag' => ['user_add_org', 'user_modify_org', 'user_leave_org', 'org_dept_create', 'org_dept_modify', 'org_dept_remove'],
+            'call_back_tag' => ['user_add_org', 'user_modify_org', 'user_leave_org', 'org_dept_create', 'org_dept_modify', 'org_dept_remove', 'bpms_task_change'],
             'url' => 'https://mojing.nextmar.com/api/ding/receive',
         ];
         $this->app->callback->update($params);
@@ -187,6 +188,13 @@ class Ding extends Controller
                         Department::deptDelete($deptId);
                     }
                     file_put_contents('/www/wwwroot/mojing/runtime/log/Ding.txt', json_encode($payload), FILE_APPEND);
+                    break;
+                case 'bpms_task_change':
+                    //审批任务事件(开始、结束、转交)
+                    /**
+                     * @todo 修改审批任务为完成状态
+                     */
+                    file_put_contents('/www/wwwroot/mojing/runtime/log/Ding.log', 'bpms_task_change---------------' . serialize($payload) . "\n\n", FILE_APPEND);
                     break;
             }
         });
@@ -285,7 +293,8 @@ class Ding extends Controller
         $userId = '165829435336546371';
         $user = $this->app->user->get($userId);
         Admin::userAdd($user);
-        echo 'ok';exit;
+        echo 'ok';
+        exit;
         //        $this->setDepartment();
         //        exit;
         //        $params = send_ding_message(['040740464839840580'], '收到需求2', '钱海信用卡支付后重复发送确认订单的邮件');
@@ -538,7 +547,7 @@ class Ding extends Controller
                 break;
         }
         if ($send_ids && $msg) {
-            
+
             return self::cc_ding(
                 $send_ids,
                 '【' . self::siteType($demand->site_type) . '】【' . self::demandType($demand->type) . '】' . $msg,
@@ -596,7 +605,7 @@ class Ding extends Controller
                         $send_ids = Auth::getUsersId('demand/develop_demand/review_status_develop'); // 所有有权限点击[通过]按钮的人
                         $msg = '一个任务已开发完成,等待您的确认';
                         //需求开发完成时，钉钉推送创建人和提出人
-                        $user_all = explode(',',$demand->duty_user_id);
+                        $user_all = explode(',', $demand->duty_user_id);
                         $user_all[] = $demand->create_person_id;
                         Ding::cc_ding(array_merge(array_filter($user_all)), '任务ID:' . $demand->id . '+任务已开发完成', $demand->title);
                     } elseif ($demand->type == 1) { //BUG 类型`
@@ -660,7 +669,7 @@ class Ding extends Controller
                 break;
         }
         if ($send_ids && $msg) {
-            
+
             if (is_array($send_ids)) {
                 //排除谢梦飞账号
                 if (in_array(80, $send_ids)) {
@@ -676,7 +685,7 @@ class Ding extends Controller
                 }
                 // file_put_contents('/www/wwwroot/mojing/runtime/log/sku.log', json_encode($send_ids) . "\r\n", FILE_APPEND);
             }
-            
+
             return self::cc_ding(
                 $send_ids,
                 '【开发组' . self::demandType($demand->type) . '】' . $msg,
