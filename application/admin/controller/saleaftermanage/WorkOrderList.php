@@ -4541,7 +4541,7 @@ EOF;
         ini_set('memory_limit', '1024M');
 
         $map['create_time'] =['between',['2020-01-01 00:00:00','2020-12-31 23:59:59']];
-        $map['id'] = ['lt',23490];
+        $map['id'] = ['lt',14383];
 //        $map['work_status'] = array('in', '2,3,5');
 //        0: '已取消', 1: '新建', 2: '待审核', 4: '审核拒绝', 3: '待处理', 5: '部分处理', 6: '已处理'
         $list = $this->model
@@ -4781,7 +4781,7 @@ EOF;
 //            '承接详情', '工单回复备注', '订单支付时间', '补发订单号'
         ];
         $path = "/uploads/";
-        $fileName = '工单数据2020-005导出';
+        $fileName = '工单数据2020-006导出';
         Excel::writeCsv($csv, $headlist, $path . $fileName);
     }
 
