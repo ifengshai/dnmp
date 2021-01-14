@@ -4545,7 +4545,8 @@ EOF;
 //        0: '已取消', 1: '新建', 2: '待审核', 4: '审核拒绝', 3: '待处理', 5: '部分处理', 6: '已处理'
         $list = $this->model
             ->where($map)
-            ->limit(100)
+            ->order('id desc')
+            ->limit(10000)
             ->select();
         $list = collection($list)->toArray();
 
