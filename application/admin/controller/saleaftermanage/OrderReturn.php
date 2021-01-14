@@ -67,6 +67,7 @@ class OrderReturn extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
+
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->with(['saleAfterIssue'])
@@ -313,6 +314,10 @@ class OrderReturn extends Backend
             $customer_name  = $input_name =  trim($request->post('customer_name'));
             //获取客户电话
             $customer_phone = trim($request->post('customer_phone'));
+            //去除客户电话特殊符号
+            if ($customer_phone){
+                $customer_phone = preg_replace('/\D/', '', $customer_phone);
+            }
             //获取运单号
             $track_number   = trim($request->post('track_number'));
             //获取交易号

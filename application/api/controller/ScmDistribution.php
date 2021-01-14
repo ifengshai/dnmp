@@ -346,7 +346,7 @@ class ScmDistribution extends Scm
             ->select();
         //获取库位号
         $coding = $this->_stock_house
-            ->where(['id' => $item_process_info['temporary_house_id']])
+            ->where(['id' => $item_process_info['abnormal_house_id']])
             ->value('coding');
         if ($check_work_order) {
             foreach ($check_work_order as $val) {
@@ -667,6 +667,9 @@ class ScmDistribution extends Scm
             ])
             ->select();
         if ($check_work_order) {
+            $codings = $this->_stock_house
+                ->where(['id' => $item_process_info['abnormal_house_id']])
+                ->value('coding');
             foreach ($check_work_order as $val) {
                 (3 == $val['measure_choose_id'] //主单取消措施未处理
                     ||
@@ -678,7 +681,7 @@ class ScmDistribution extends Scm
                 && $this->error(__("子订单存在工单"."<br><b>$coding</b>"), [], 405);
 
                 if ($val['measure_choose_id'] == 21) {
-                    $this->error(__("子订单存在工单"."<br><b>$coding</b>"), [], 405);
+                    $this->error(__("子订单存在工单"."<br><b>$codings</b>"), [], 405);
                 }
             }
         }

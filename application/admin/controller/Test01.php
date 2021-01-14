@@ -5,6 +5,7 @@ namespace app\admin\controller;
 use app\admin\model\itemmanage\ItemPlatformSku;
 use app\admin\model\order\order\NewOrderItemProcess;
 use app\common\controller\Backend;
+use fast\Excel;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use think\Db;
 
@@ -201,33 +202,33 @@ class Test01 extends Backend
 
     public function test99()
     {
-      //查询未生成子单号的数据
-      $list = $this->orderprocess->where('LENGTH(trim(item_order_number))=0')->order('id desc')->limit(10000)->select();
-      $list = collection($list)->toArray();
-      foreach ($list as $v) {
-          $res = $this->order->where(['entity_id' => $v['magento_order_id'], 'site' => $v['site']])->field('id,increment_id')->find();
-          $data = $this->orderitemprocess->where(['magento_order_id' => $v['magento_order_id'], 'site' => $v['site']])->select();
-          $item_params = [];
-          foreach ($data as $key => $val) {
-              $item_params[$key]['id'] = $val['id'];
-              $str = '';
-              if ($key < 9) {
-                  $str = '0' . ($key + 1);
-              } else {
-                  $str = $key + 1;
-              }
+        //查询未生成子单号的数据
+        $list = $this->orderprocess->where('LENGTH(trim(item_order_number))=0')->order('id desc')->limit(10000)->select();
+        $list = collection($list)->toArray();
+        foreach ($list as $v) {
+            $res = $this->order->where(['entity_id' => $v['magento_order_id'], 'site' => $v['site']])->field('id,increment_id')->find();
+            $data = $this->orderitemprocess->where(['magento_order_id' => $v['magento_order_id'], 'site' => $v['site']])->select();
+            $item_params = [];
+            foreach ($data as $key => $val) {
+                $item_params[$key]['id'] = $val['id'];
+                $str = '';
+                if ($key < 9) {
+                    $str = '0' . ($key + 1);
+                } else {
+                    $str = $key + 1;
+                }
 
-              $item_params[$key]['item_order_number'] = $res->increment_id . '-' . $str;
-              $item_params[$key]['order_id'] = $res->id ?? 0;
-          }
-          //更新数据
-          if ($item_params) $this->orderitemprocess->saveAll($item_params);
+                $item_params[$key]['item_order_number'] = $res->increment_id . '-' . $str;
+                $item_params[$key]['order_id'] = $res->id ?? 0;
+            }
+            //更新数据
+            if ($item_params) $this->orderitemprocess->saveAll($item_params);
 
-          echo $v['id'] . "\n";
-          usleep(10000);
-      }
+            echo $v['id'] . "\n";
+            usleep(10000);
+        }
 
-      echo "ok";
+        echo "ok";
     }
 
     public function test101()
@@ -490,7 +491,7 @@ class Test01 extends Backend
         $spreadsheet->setActiveSheetIndex(0)->setTitle('SKU明细');
         $spreadsheet->setActiveSheetIndex(0);
         $num = 0;
-        foreach ($arr as $k=>$v){
+        foreach ($arr as $k => $v) {
             $spreadsheet->getActiveSheet()->setCellValue('A' . ($num * 1 + 2), $v['sku']);
             $spreadsheet->getActiveSheet()->setCellValue('B' . ($num * 1 + 2), $v['total']);
             $spreadsheet->getActiveSheet()->setCellValue('C' . ($num * 1 + 2), $v['whole_platform_order_num']);
@@ -509,7 +510,7 @@ class Test01 extends Backend
             'borders' => [
                 'allBorders' => [
                     'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
-                    'color'       => ['argb' => 'FF000000'], // 设置border颜色
+                    'color' => ['argb' => 'FF000000'], // 设置border颜色
                 ],
             ],
         ];
@@ -519,7 +520,7 @@ class Test01 extends Backend
         $spreadsheet->getActiveSheet()->getStyle('A1:Q' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         $spreadsheet->setActiveSheetIndex(0);
         $format = 'xlsx';
-        $savename = 'voogueme站'.$createat[0] .'至'.$createat[3] .'SKU销售情况';
+        $savename = 'voogueme站' . $createat[0] . '至' . $createat[3] . 'SKU销售情况';
         if ($format == 'xls') {
             //输出Excel03版本
             header('Content-Type:application/vnd.ms-excel');
@@ -536,6 +537,7 @@ class Test01 extends Backend
         $writer = new $class($spreadsheet);
         $writer->save('php://output');
     }
+
     public function export_n_data()
     {
         $sku_list = Db::name('datacenter_sku_import_test')->where('id', '>=', 100)->where('id', '<=', 199)->select();
@@ -552,7 +554,7 @@ class Test01 extends Backend
             $sku = $item_platform->where('sku', $sku)->where('platform_type', $order_platform)->value('platform_sku') ? $item_platform->where('sku', $sku)->where('platform_type', $order_platform)->value('platform_sku') : $sku;
 
             $model = Db::connect('database.db_nihao');
-            $coatiing_price =[];
+            $coatiing_price = [];
 
             $model->table('sales_flat_order')->query("set time_zone='+8:00'");
             $model->table('sales_flat_order_item')->query("set time_zone='+8:00'");
@@ -682,7 +684,7 @@ class Test01 extends Backend
         $spreadsheet->setActiveSheetIndex(0)->setTitle('SKU明细');
         $spreadsheet->setActiveSheetIndex(0);
         $num = 0;
-        foreach ($arr as $k=>$v){
+        foreach ($arr as $k => $v) {
             $spreadsheet->getActiveSheet()->setCellValue('A' . ($num * 1 + 2), $v['sku']);
             $spreadsheet->getActiveSheet()->setCellValue('B' . ($num * 1 + 2), $v['total']);
             $spreadsheet->getActiveSheet()->setCellValue('C' . ($num * 1 + 2), $v['whole_platform_order_num']);
@@ -701,7 +703,7 @@ class Test01 extends Backend
             'borders' => [
                 'allBorders' => [
                     'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
-                    'color'       => ['argb' => 'FF000000'], // 设置border颜色
+                    'color' => ['argb' => 'FF000000'], // 设置border颜色
                 ],
             ],
         ];
@@ -711,7 +713,7 @@ class Test01 extends Backend
         $spreadsheet->getActiveSheet()->getStyle('A1:Q' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         $spreadsheet->setActiveSheetIndex(0);
         $format = 'xlsx';
-        $savename = 'nihao站'.$createat[0] .'至'.$createat[3] .'SKU销售情况';
+        $savename = 'nihao站' . $createat[0] . '至' . $createat[3] . 'SKU销售情况';
         if ($format == 'xls') {
             //输出Excel03版本
             header('Content-Type:application/vnd.ms-excel');
@@ -731,10 +733,10 @@ class Test01 extends Backend
 
     public function hedankuwei()
     {
-        $res = Db::name('work_order_list')->where('id','in',['54838'])->setField('assign_user_id',117);
+        $res = Db::name('work_order_list')->where('id', 'in', ['54838'])->setField('assign_user_id', 117);
         die;
-        $list = Db::name('hedan_kuwei')->where('id','>',0)->select();
-        foreach ($list as $k=>$v){
+        $list = Db::name('hedan_kuwei')->where('id', '>', 0)->select();
+        foreach ($list as $k => $v) {
             $list[$k]['type'] = 2;
             $list[$k]['createtime'] = '2020-12-22 20:03:31';
             $list[$k]['create_person'] = 'Admin';
@@ -753,13 +755,13 @@ class Test01 extends Backend
         $time_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $data . "'")];
         $z_sku_list = Db::connect('database.db_zeelool')
             ->table('sales_flat_order_item')
-            ->where('sku', 'like', 'ZOP049594-01'.'%')
+            ->where('sku', 'like', 'ZOP049594-01' . '%')
             ->where($time_where1)
             ->sum('qty_ordered');
 
 
         $map['sku'] = ['like', 'ZOP049594-01' . '%'];
-        $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+        $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
         $map['a.order_type'] = ['=', 1];
         $time_where[] = ['exp', Db::raw("DATE_FORMAT(a.created_at, '%Y-%m-%d') = '" . $data . "'")];
         //某个sku当天的订单数
@@ -775,7 +777,7 @@ class Test01 extends Backend
         $this->zeelool = new \app\admin\model\order\order\Zeelool;
         $createat = explode(' ', '2020-12-01 00:00:00 - 2020-12-31 23:59:59');
         $map['sku'] = ['=', 'ZOP049594-01'];
-        $map['a.created_at'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3]  . ' ' . $createat[4]]];
+        $map['a.created_at'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]]];
         $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
         $res = $this->zeelool
             ->where($map)
@@ -793,7 +795,7 @@ class Test01 extends Backend
         Db::connect('database.db_zeelool')->table('sales_flat_order')->query("set time_zone='+8:00'");
         $z_sku_list = Db::name('datacenter_sku_day')
             ->where(['site' => 1])
-            ->where('day_date','between',['2020-12-06','2020-12-31'])
+            ->where('day_date', 'between', ['2020-12-06', '2020-12-31'])
             // ->where('glass_num','>',0)
             ->field('id,day_date,platform_sku')
             // ->limit(2000)
@@ -817,18 +819,18 @@ class Test01 extends Backend
             // dump(Db::connect('database.db_zeelool')->getLastSql());
             // $z_sku_list[$k]['glass_num'] = 1099;
             // $glass_num = 1099;
-            $res = Db::name('datacenter_sku_day')->where('id',$v['id'])->setField('glass_num',$glass_num);
+            $res = Db::name('datacenter_sku_day')->where('id', $v['id'])->setField('glass_num', $glass_num);
             $map = [];
             $time_where = [];
             // dump(Db::name('datacenter_sku_day')->getLastSql());
-                // ->where('platform_sku',$v['platform_sku'])
-                // ->where('day_date',$v['day_date'])
-                // ->update(['glass_num'=>$glass_num]);
-            if ($res){
-                echo 'sku:'.$v['platform_sku'].$v['day_date'].'更新成功'. "\n";
+            // ->where('platform_sku',$v['platform_sku'])
+            // ->where('day_date',$v['day_date'])
+            // ->update(['glass_num'=>$glass_num]);
+            if ($res) {
+                echo 'sku:' . $v['platform_sku'] . $v['day_date'] . '更新成功' . "\n";
                 echo '<br>';
-            }else{
-                echo 'sku:'.$v['platform_sku'].$v['day_date'].'更新失败'. "\n";
+            } else {
+                echo 'sku:' . $v['platform_sku'] . $v['day_date'] . '更新失败' . "\n";
                 echo '<br>';
             }
         }
@@ -838,16 +840,86 @@ class Test01 extends Backend
 
     public function export_8_month_not_complete_son_order()
     {
+        set_time_limit(0);
+        ini_set('memory_limit', '512M');
         $new_order_item = new NewOrderItemProcess();
         $list = $new_order_item->alias('a')
             ->join(['fa_order_process' => 'b'], 'a.order_id=b.order_id')
             ->join(['fa_order' => 'c'], 'b.order_id=c.id')
-            ->where('c.status','=','processing')
-            ->where('c.created_at','>',1596211200)
-            ->where('b.delivery_time','=','')
+            ->where('c.status', '=', 'processing')
+            ->where('c.created_at', '>', 1596211200)
+            ->where('b.delivery_time', 'EXP', 'IS NULL')
             ->field('a.item_order_number,a.order_prescription_type,c.payment_time')
+            // ->limit(500)
             ->select();
-        dump($new_order_item->getLastSql());
-        dump($list);
+        $list = collection($list)->toArray();
+        foreach ($list as $key => $value) {
+            $csv[$key]['item_order_number'] = $value['item_order_number'];
+            $timediff = $this->timediff(1610093513,$value['payment_time']);
+            //状态
+            switch ($value['order_prescription_type']) {
+                case 1:
+                    $work_status = '仅镜架';
+                    if ($timediff > 24) {
+                        $csv[$key]['is_time_out'] = '超时';
+                    } else {
+                        $csv[$key]['is_time_out'] = '未超时';
+                    }
+                    break;
+                case 2:
+                    $work_status = '现货处方镜';
+                    if ($timediff > 72) {
+                        $csv[$key]['is_time_out'] = '超时';
+                    } else {
+                        $csv[$key]['is_time_out'] = '未超时';
+                    }
+                    break;
+                case 3:
+                    $work_status = '定制处方镜';
+                    if ($timediff > 168) {
+                        $csv[$key]['is_time_out'] = '超时';
+                    } else {
+                        $csv[$key]['is_time_out'] = '未超时';
+                    }
+                    break;
+                case 4:
+                    $work_status = '其他';
+                    $csv[$key]['is_time_out'] = '';
+                    break;
+                default:
+                    $work_status = '0待处理';
+                    $csv[$key]['is_time_out'] = '';
+                    break;
+            }
+            $csv[$key]['order_prescription_type'] = $work_status;
+        }
+        // dump($csv);
+        // die();
+        $headlist = [
+            '子订单号', '子单加工类型', '是否超时'
+        ];
+        $path = "/uploads/ship_uploads/";
+        $fileName = '导出订单加工数据1 2021-01-08';
+        Excel::writeCsv($csv, $headlist, $path . $fileName);
     }
+
+    /**
+     * 计算两个时间戳之间相差的日时分秒
+     * @param $begin_time 开始时间戳
+     * @param $end_time 结束时间戳
+     * @return array
+     */
+    function timediff($start_time, $end_time)
+    {
+        if (strtotime($start_time) > strtotime($end_time)) list($start_time, $end_time) = array($end_time, $start_time);
+
+        $sec = $start_time - $end_time;
+        $sec = round($sec / 60);
+        $min = str_pad($sec % 60, 2, 0, STR_PAD_LEFT);
+        $hours_min = floor($sec / 60);
+        $min != 0 && $hours_min .= '.' . $min;
+        return $hours_min;
+    }
+
+
 }

@@ -40,15 +40,15 @@ class SelfApi extends Api
         $order_number = $this->request->request('order_number'); //订单号
         $site = $this->request->request('site'); //站点
         if (!$order_id) {
-            $this->error(__('缺少订单id参数'));
+            $this->error(__('缺少订单id参数'), [], 400);
         }
 
         if (!$order_number) {
-            $this->error(__('缺少订单号参数'));
+            $this->error(__('缺少订单号参数'), [], 400);
         }
 
         if (!$site) {
-            $this->error(__('缺少站点参数'));
+            $this->error(__('缺少站点参数'), [], 400);
         }
 
         //判断如果子节点大于等于0时  不插入
@@ -78,7 +78,7 @@ class SelfApi extends Api
             'node_type' => 0
         ])->count();
         if ($count > 0) {
-            $this->error('已存在');
+            $this->error('已存在', [], 400);
         }
 
         $res_node_detail = (new OrderNodeDetail())->allowField(true)->save([
@@ -93,7 +93,7 @@ class SelfApi extends Api
         if (false !== $res_node && false !== $res_node_detail) {
             $this->success('创建成功', [], 200);
         } else {
-            $this->error('创建失败');
+            $this->error('创建失败', [], 400);
         }
     }
 
@@ -112,23 +112,19 @@ class SelfApi extends Api
         $site = $this->request->request('site'); //站点
         $status = $this->request->request('status'); //站点
         if (!$order_id) {
-            $this->error(__('缺少订单id参数'));
+            $this->error(__('缺少订单id参数'), [], 400);
         }
 
         if (!$order_number) {
-            $this->error(__('缺少订单号参数'));
+            $this->error(__('缺少订单号参数'), [], 400);
         }
 
         if (!$site) {
-            $this->error(__('缺少站点参数'));
+            $this->error(__('缺少站点参数'), [], 400);
         }
 
         if (!$status) {
-            $this->error(__('缺少状态参数'));
-        }
-
-        if (!in_array($status, ['processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal', 'payment_review'])) {
-            $this->error(__('非支付成功状态'));
+            $this->error(__('缺少状态参数'), [], 400);
         }
 
         //判断如果子节点大于等于1时  不更新
@@ -154,7 +150,7 @@ class SelfApi extends Api
             'node_type' => 1
         ])->count();
         if ($count > 0) {
-            $this->error('已存在');
+            $this->error('已存在', [], 400);
         }
 
         $res_node_detail = (new OrderNodeDetail())->allowField(true)->save([
@@ -169,7 +165,7 @@ class SelfApi extends Api
         if (false !== $res_node && false !== $res_node_detail) {
             $this->success('创建成功', [], 200);
         } else {
-            $this->error('创建失败');
+            $this->error('创建失败', [], 400);
         }
     }
 
@@ -191,34 +187,38 @@ class SelfApi extends Api
         $shipment_data_type = $this->request->request('shipment_data_type'); //渠道名称
         $track_number = $this->request->request('track_number'); //快递单号
         if (!$order_id) {
-            $this->error(__('缺少订单id参数'));
+            $this->error(__('缺少订单id参数'), [], 400);
         }
 
         if (!$order_number) {
-            $this->error(__('缺少订单号参数'));
+            $this->error(__('缺少订单号参数'), [], 400);
         }
 
         if (!$site) {
-            $this->error(__('缺少站点参数'));
+            $this->error(__('缺少站点参数'), [], 400);
         }
 
         if (!$title) {
-            $this->error(__('缺少运营商参数'));
+            $this->error(__('缺少运营商参数'), [], 400);
         }
 
         if (!$track_number) {
-            $this->error(__('缺少快递单号参数'));
+            $this->error(__('缺少快递单号参数'), [], 400);
+        }
+
+        if (!$shipment_data_type) {
+            $this->error(__('缺少渠道名称'), [], 400);
         }
 
         //查询节点主表记录
         $row = (new OrderNode())->where(['order_number' => $order_number])->find();
         if (!$row) {
-            $this->error(__('订单记录不存在'));
+            $this->error(__('订单记录不存在'), [], 400);
         }
 
         //如果已发货 则不再更新发货时间
         if ($row->order_node >= 2 && $row->node_type >= 7) {
-            $this->error(__('订单节点已存在'));
+            $this->error(__('订单节点已存在'), [], 400);
         }
        
         //更新节点主表
@@ -255,7 +255,7 @@ class SelfApi extends Api
         $track = $this->regitster17Track($shipment_reg);
 
         if (count($track['data']['rejected']) > 0) {
-            $this->error('物流接口注册失败！！');
+            $this->error('物流接口注册失败！！', [], $track['data']['rejected']['error']['code']);
         }
         $this->success('提交成功', [], 200);
     }
@@ -563,7 +563,7 @@ class SelfApi extends Api
         //校验参数
         $work_order_id = $this->request->request('work_order_id'); //魔晶工单id
         if (!$work_order_id) {
-            $this->error(__('缺少工单号参数'));
+            $this->error(__('缺少工单号参数'), [], 400);
         }
         //根据工单id查询工单
         $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
@@ -593,7 +593,7 @@ class SelfApi extends Api
             $workorder->where('id', $list['id'])->update($data);
             Db::name('work_order_recept')->where(['work_id' => $list['id'], 'measure_id' => $measure_id])->update(['recept_status' => 1, 'finish_time' => $date, 'note' => '补差价支付成功']);
         } else {
-            $this->error(__('未查询到数据'));
+            $this->error(__('未查询到数据'), [], 400);
         }
         $this->success('成功', [], 200);
     }

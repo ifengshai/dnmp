@@ -186,9 +186,9 @@ class ItWebDemand extends Backend
                     $usersId = array_merge($usersId, [$adminId]);
                     foreach ($usersId as $k => $v) {
                         if ($k == 0) {
-                            $meWhere .= " and locate({$v},test_group_person_id)";
+                            $meWhere .= " and locate({$v},test_user_id)";
                         } else {
-                            $meWhere .= " or locate({$v},test_group_person_id)";
+                            $meWhere .= " or locate({$v},test_user_id)";
                         }
                     }
                 }
@@ -202,9 +202,9 @@ class ItWebDemand extends Backend
                     $usersId = array_merge($usersId, [$adminId]);
                     foreach ($usersId as $k => $v) {
                         if ($k == 0) {
-                            $meWhere .= " and locate({$v},web_group_person_id)";
+                            $meWhere .= " and locate({$v},web_designer_user_id)";
                         } else {
-                            $meWhere .= " or locate({$v},web_group_person_id)";
+                            $meWhere .= " or locate({$v},web_designer_user_id)";
                         }
                     }
                 }
@@ -218,9 +218,9 @@ class ItWebDemand extends Backend
                     $usersId = array_merge($usersId, [$adminId]);
                     foreach ($usersId as $k => $v) {
                         if ($k == 0) {
-                            $meWhere .= " and locate({$v},app_group_person_id)";
+                            $meWhere .= " and locate({$v},app_user_id)";
                         } else {
-                            $meWhere .= " or locate({$v},app_group_person_id)";
+                            $meWhere .= " or locate({$v},app_user_id)";
                         }
                     }
                 }
@@ -239,6 +239,7 @@ class ItWebDemand extends Backend
                 //是否为测试
                 $testAuthUserIds = array_merge(Auth::getGroupUserId(config('demand.test_group_id')) ?: [], Auth::getGroupUserId(config('demand.test_group_person_id')) ?: []);
                 $map['status'] = ['eq', 3];
+                $map['develop_finish_status'] = ['in',[1,2,3]];
                 if (in_array($adminId, $authUserIds)) {
                     $map['pm_audit_status'] = ['in', [1, 2,3,4]];
                     $map['status'] = ['eq', 3];
@@ -740,9 +741,9 @@ class ItWebDemand extends Backend
                     $usersId = array_merge($usersId, [$adminId]);
                     foreach ($usersId as $k => $v) {
                         if ($k == 0) {
-                            $meWhere .= " and locate({$v},test_group_person_id)";
+                            $meWhere .= " and locate({$v},test_user_id)";
                         } else {
-                            $meWhere .= " or locate({$v},test_group_person_id)";
+                            $meWhere .= " or locate({$v},test_user_id)";
                         }
                     }
                 }
@@ -756,9 +757,9 @@ class ItWebDemand extends Backend
                     $usersId = array_merge($usersId, [$adminId]);
                     foreach ($usersId as $k => $v) {
                         if ($k == 0) {
-                            $meWhere .= " and locate({$v},web_group_person_id)";
+                            $meWhere .= " and locate({$v},web_designer_user_id)";
                         } else {
-                            $meWhere .= " or locate({$v},web_group_person_id)";
+                            $meWhere .= " or locate({$v},web_designer_user_id)";
                         }
                     }
                 }
@@ -772,9 +773,9 @@ class ItWebDemand extends Backend
                     $usersId = array_merge($usersId, [$adminId]);
                     foreach ($usersId as $k => $v) {
                         if ($k == 0) {
-                            $meWhere .= " and locate({$v},app_group_person_id)";
+                            $meWhere .= " and locate({$v},app_user_id)";
                         } else {
-                            $meWhere .= " or locate({$v},app_group_person_id)";
+                            $meWhere .= " or locate({$v},app_user_id)";
                         }
                     }
                 }
