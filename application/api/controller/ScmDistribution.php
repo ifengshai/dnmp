@@ -346,7 +346,7 @@ class ScmDistribution extends Scm
             ->select();
         //获取库位号
         $coding = $this->_stock_house
-            ->where(['id' => $item_process_info['abnormal_house_id']])
+            ->where(['id' => $item_process_info['temporary_house_id']])
             ->value('coding');
         if ($check_work_order) {
             foreach ($check_work_order as $val) {
@@ -667,9 +667,6 @@ class ScmDistribution extends Scm
             ])
             ->select();
         if ($check_work_order) {
-            $codings = $this->_stock_house
-                ->where(['id' => $item_process_info['abnormal_house_id']])
-                ->value('coding');
             foreach ($check_work_order as $val) {
                 (3 == $val['measure_choose_id'] //主单取消措施未处理
                     ||
@@ -681,7 +678,7 @@ class ScmDistribution extends Scm
                 && $this->error(__("子订单存在工单"."<br><b>$coding</b>"), [], 405);
 
                 if ($val['measure_choose_id'] == 21) {
-                    $this->error(__("子订单存在工单"."<br><b>$codings</b>"), [], 405);
+                    $this->error(__("子订单存在工单"."<br><b>$coding</b>"), [], 405);
                 }
             }
         }
@@ -1379,10 +1376,10 @@ class ScmDistribution extends Scm
         $hedan_codeing = $this->_stock_house->field('id,coding,subarea')->where('id', $order_process_info['store_house_id'])->value('coding');
         $codeing = $store_house_is['coding'];
         //检测是否有工单未处理
-        $check_work_order = $this->_work_order_measure
-            ->alias('a')
+        $check_work_order = $this->_work_order_list
+            ->alias('b')
             ->field('a.item_order_number,a.measure_choose_id')
-            ->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')
+            ->join(['fa_work_order_list' => 'a'], 'a.work_id=b.id')
             ->where([
                 'a.operation_type' => 0,
                 'b.platform_order' => $order_info['increment_id'],
