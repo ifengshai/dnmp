@@ -1375,10 +1375,10 @@ class ScmDistribution extends Scm
         $hedan_codeing = $this->_stock_house->field('id,coding,subarea')->where('id', $order_process_info['store_house_id'])->value('coding');
         $codeing = $store_house_is['coding'];
         //检测是否有工单未处理
-        $check_work_order = $this->_work_order_measure
-            ->alias('a')
+        $check_work_order = $this->_work_order_list
+            ->alias('b')
             ->field('a.item_order_number,a.measure_choose_id')
-            ->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')
+            ->join(['fa_work_order_measure' => 'a'], 'a.work_id=b.id')
             ->where([
                 'a.operation_type' => 0,
                 'b.platform_order' => $order_info['increment_id'],
@@ -1386,17 +1386,21 @@ class ScmDistribution extends Scm
             ])
             ->select();
         if ($check_work_order) {
-            foreach ($check_work_order as $val) {
-
+            foreach ($check_work_order as $key => $value) {
+                if ($value['item_order_number'] == $item_order_number) {//判断是否是当前工单含有未完成的工单，是的话提示语包含库位
+                    $this->error(__("子订单存在工单"."<br><b>$codeing</b>"), [], 405);
+                }
+            }
+            foreach ($check_work_order as $val) { 
                 (3 == $val['measure_choose_id'] //主单取消措施未处理
                     ||
-                    $val['item_order_number'] == $item_order_number //子单措施未处理:更改镜框18、更改镜片19、取消20
+                    !empty($val['item_order_number']) //子单措施未处理:更改镜框18、更改镜片19、取消20
                 )
-
                 // && $this->error(__('有工单未处理，无法操作'), [], 405);
-                && $this->error(__("子订单存在工单"."<br><b>$codeing</b>"), [], 405);
+
+                && $this->error(__("子订单存在工单"), [], 405);
                 if ($val['measure_choose_id'] == 21) {
-                    $this->error(__("子订单存在工单"."<br><b>$codeing</b>"), [], 405);
+                    $this->error(__("子订单存在工单"), [], 405);
                 }
             }
         }
