@@ -1379,7 +1379,7 @@ class ScmDistribution extends Scm
         $check_work_order = $this->_work_order_list
             ->alias('b')
             ->field('a.item_order_number,a.measure_choose_id')
-            ->join(['fa_work_order_list' => 'a'], 'a.work_id=b.id')
+            ->join(['fa_work_order_measure' => 'a'], 'a.work_id=b.id')
             ->where([
                 'a.operation_type' => 0,
                 'b.platform_order' => $order_info['increment_id'],
