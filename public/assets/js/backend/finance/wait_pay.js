@@ -6,12 +6,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
             Table.api.init({
                 searchFormVisible: true,
                 extend: {
-                    index_url: 'finance/wait_pay/index' + location.search,
-                    add_url: 'customer/wholesale_customer/add',
-                    edit_url: 'customer/wholesale_customer/edit',
-                    del_url: 'customer/wholesale_customer/del',
-                    import_url: 'customer/wholesale_customer/import',
-                    table: 'wholesale_customer',
+                    index_url: 'finance/wait_pay/index' + location.search
                 }
             });
 
@@ -25,121 +20,28 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                 columns: [
                     [
                         {checkbox: true},
-                        {field: 'id', title: __('付款申请单号'),},
-                        {field: 'email', title: __('供应商名称')},
-                        {field: 'mobile', title: __('审核人'), visible: false},
-                        {field: 'customer_name', title: __('创建人')},
-                        {field: 'mobile', title: __('创建时间')},
-                        {
-                            field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
-                                {
-                                    name: 'edit',
-                                    text: '',
-                                    title: __('Edit'),
-                                    classname: 'btn btn-xs btn-success btn-dialog',
-                                    icon: 'fa fa-pencil',
-                                    url: 'customer/wholesale_customer/edit',
-                                    extend: 'data-area = \'["80%","70%"]\'',
-                                    callback: function (data) {
-                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
-                                    },
-                                    visible: function (row) {
-                                        if (Config.customer_edit == 1) {//有权限 或者创建人为当前人
-                                            return true;
-                                        } else {
-                                            return false;
-                                        }
-                                    }
-                                },
-                                {
-                                    name: 'del',
-                                    text: __(''),
-                                    title: __('删除'),
-                                    icon: 'fa fa-trash',
-                                    classname: 'btn btn-xs btn-danger btn-magic btn-ajax',
-                                    url: 'customer/wholesale_customer/del',
-                                    confirm: '是否删除?',
-                                    success: function (data, ret) {
-                                        table.bootstrapTable('refresh', {});
-                                    },
-                                    error: function (data, ret) {
-                                        Layer.alert(ret.msg);
-                                        return false;
-                                    },
-                                    visible: function (row) {
-                                        if (Config.customer_del == 1) {//有权限 或者创建人为当前人
-                                            return true;
-                                        } else {
-                                            return false;
-                                        }
-                                    }
-                                },
-                                 {
-                                  name: 'detail',
-                                  text: '详情',
-                                  title: __('查看详情'),
-                                  extend: 'data-area = \'["80%","70%"]\'',
-                                  classname: 'btn btn-xs btn-primary btn-dialog',
-                                  icon: 'fa fa-list',
-                                  url: 'customer/wholesale_customer/detail',
-                                  callback: function (data) {
-                                      Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
-                                  },
-                                  visible: function (row) {
-                                      //返回true时按钮显示,返回false隐藏
-                                      return true;
-                                  }
-                              },
-
-                                ],
-                            formatter: Table.api.formatter.operate
-                        }
+                        {field: 'id', title: __('序号'),operate:false},
+                        {field: 'order_number', title: __('付款申请单号'),},
+                        {field: 'supplier_name', title: __('供应商名称'),operate:'like'},
+                        {field: 'userid', title: __('审核人'), visible: false},
+                        {field: 'create_person', title: __('创建人')},
+                        {field: 'create_time', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime},
                     ]
                 ]
             });
-
-            // 为表格绑定事件
-            Table.api.bindevent(table);
-
-            // 导入按钮事件
-            Upload.api.plupload($('.btn-import'), function (data, ret) {
-                Fast.api.ajax({
-                    url: 'customer/wholesale_customer/import',
-                    data: { file: data.url },
-                }, function (data, ret) {
-                    layer.msg('导入成功！！', { time: 3000, icon: 6 }, function () {
-                        location.reload();
-                    });
-
-                });
-            });
-
-
-            //批量导出xls
-            $('.btn-batch-export-xls').click(function () {
+            $('#add').click(function () {
                 var ids = Table.api.selectedids(table);
                 if (ids.length > 0) {
-                    window.open(Config.moduleurl + '/customer/wholesale_customer/batch_export_xls?ids=' + ids, '_blank');
+                    window.open(Config.moduleurl + '/finance/pay_order/add?ids=' + ids, '_blank');
                 } else {
-                    var options = table.bootstrapTable('getOptions');
-                    var search = options.queryParams({});
-                    var filter = search.filter;
-                    var op = search.op;
-                    window.open(Config.moduleurl + '/customer/wholesale_customer/batch_export_xls?filter=' + filter + '&op=' + op, '_blank');
+                    layer.msg('请选择付款申请单号');
+                    return false;
                 }
 
             });
+            // 为表格绑定事件
+            Table.api.bindevent(table);
         },
-        add: function () {
-            Controller.api.bindevent();
-        },
-        edit: function () {
-            Controller.api.bindevent();
-        },
-        detail: function () {
-            Controller.api.bindevent();
-        },
-
         api: {
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));

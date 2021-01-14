@@ -26,8 +26,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                     [
                         {checkbox: true},
                         {field: 'id', title: __('ID'),operate:false},
-                        {field: 'email', title: __('SKU')},
-                        {field: 'mobile', title: __('库存金额'),operate:false},
+                        {field: 'sku', title: __('SKU')},
+                        {field: 'price', title: __('库存金额'),operate:false},
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
                                  {
