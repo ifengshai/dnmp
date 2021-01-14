@@ -4549,7 +4549,7 @@ EOF;
             ,create_user_name,after_user_id,create_time,complete_time,replenish_money,replenish_increment_id,coupon_describe,integral,refund_money,replacement_order
             ')
             ->order('id desc')
-            ->limit(8000)
+            ->limit(1000)
             ->select();
         $list = collection($list)->toArray();
 
