@@ -1588,6 +1588,9 @@ class Distribution extends Backend
         $values['distribution_status'] = 9;
         $values['updated_at'] = time();
         $model->table('fa_order_item_process')->where($where)->update($values);
+        $cat['combine_status'] =1;
+        $cat['store_house_id'] =0;
+        $model->table('fa_order_process')->where($where)->update($cat);
 
         //记录配货日志
         $admin = (object)session('admin');
