@@ -20,6 +20,7 @@ use fast\Random;
 use think\Controller;
 use EasyDingTalk\Application;
 use think\Db;
+use think\Request;
 
 class Ding extends Controller
 {
@@ -35,6 +36,182 @@ class Ding extends Controller
         }
     }
 
+
+
+
+
+
+    /**
+     * 测试审批流程--示例
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/06/01 17:35:27
+     */
+    public function initiate_approval_bak()
+    {
+
+        // $list = $this->app->callback->list();
+        // dump($list);die;
+
+        $userId = '071829462027950349';
+        $params['agent_id'] = config('ding.agent_id');
+        $params['process_code'] = config('ding.process_code');
+        //发起人
+        $params['originator_user_id'] = $userId;
+        //发起人部门id
+        $params['dept_id'] = 143678442;
+        //审批人userid 多审批人依次传入
+        $params['approvers'] = '285501046927507550,0550643549844645,056737345633028055';
+        //抄送人
+        $params['cc_list'] = '071829462027950349';
+        //抄送节点
+        $params['cc_position'] = 'FINISH';
+        //表单参数
+        $params['form_component_values'] = [
+            [
+                'name' => '采购方式',
+                'value' => '线上采购',
+            ],
+            [
+                'name' => '采购产品类型',
+                'value' => '镜框',
+            ],
+            [
+                'name' => '付款类型',
+                'value' => '预付款',
+            ],
+            [
+                'name' => '供应商名称',
+                'value' => '临海市森邦眼镜源头厂家',
+            ],
+            [
+                'name' => '付款比例',
+                'value' => '30%',
+            ],
+            [
+                'name' => '币种',
+                'value' => '人民币',
+            ],
+            [
+                'name' => '付款比例',
+                'value' => '30%',
+            ],
+            [
+                'name' => '采购事由',
+                'value' => [
+                    [
+                        [
+                            'name' => '采购单号',
+                            'value' => 'PO20210113135657295686',
+                        ],
+                        [
+                            'name' => '采购品名',
+                            'value' => '镜架',
+                        ],
+                        [
+                            'name' => '数量',
+                            'value' => '20',
+                        ],
+                        [
+                            'name' => '金额（元）',
+                            'value' => '100',
+                        ]
+                    ],
+                    [
+                        [
+                            'name' => '采购单号',
+                            'value' => 'PO20210113134633462344',
+                        ],
+                        [
+                            'name' => '采购品名',
+                            'value' => '镜架',
+                        ],
+                        [
+                            'name' => '数量',
+                            'value' => '20',
+                        ],
+                        [
+                            'name' => '金额（元）',
+                            'value' => '500',
+                        ]
+                    ]
+                ]
+            ],
+            [
+                'name' => '付款总金额',
+                'value' => '600',
+            ],
+            [
+                'name' => '收款方名称',
+                'value' => '测试名称',
+            ],
+            [
+                'name' => '收款方账户',
+                'value' => '测试账户',
+            ],
+            [
+                'name' => '收款方开户行',
+                'value' => '测试开户行',
+            ],
+
+        ];
+
+        $res = $this->app->process->create($params);
+        dump($res);
+    }
+
+
+
+    /**
+     * 获取钉盘space_id
+     *
+     * @Description
+     * @author wpl
+     * @since 2021/01/13 17:05:17 
+     * @return void
+     */
+    public function test_detail()
+    {
+        $userId = '071829462027950349';
+        $agentId = config('ding.agent_id');
+        // $res = $this->app->process->get('43bab35a-169d-4eb6-8b95-4c908076489e');
+        $res = $this->app->process->cspaceInfo($userId, $agentId);
+        dump($res);
+        die;
+    }
+
+    /**
+     * 上传附件
+     *
+     * @Description
+     * @author wpl
+     * @since 2021/01/13 18:23:54 
+     * @return void
+     */
+    public function ding_upload_file()
+    {
+        //上传文件
+        $filesize = 10892;
+        $agentId = config('ding.agent_id');
+        $fileList = $this->app->file->uploadSingle(['C:\Users\Administrator\Desktop\test.docx'], $filesize, $agentId);
+
+        //获取钉盘space_id
+        $userId = '071829462027950349';
+        $agentId = config('ding.agent_id');
+        $spaceList = $this->app->process->cspaceInfo($userId, $agentId);
+
+
+        //保存文件到钉盘
+        $media_id = $fileList['media_id'];
+        $space_id = $spaceList['result']['space_id'];
+        $filename = 'test';
+        $res = $this->app->file->saveFile($media_id, $agentId, $space_id, $filename);
+        dump($res);
+    }
+
+
+
     /**
      * 人员遗漏，手动补充
      *
@@ -46,8 +223,9 @@ class Ding extends Controller
     {
         $userId = '045127074321643707';
         $user = $this->app->user->get($userId);
-        dump($user);die;
-        Admin::userAdd($user); 
+        dump($user);
+        die;
+        Admin::userAdd($user);
         // $user=$this->app->attendance->schedules('2020-06-07');
         $dinguserlist = '1965280658937204,246806095338604104,203462064629067860,294026503134238817,224632105739221648,1700124228692306,115402543935694805,103733210730389629,225802421126255952,285168290324340480,251768502236303778';
         $time = 1592150400;
@@ -67,6 +245,46 @@ class Ding extends Controller
         exit;
         //Admin::userAdd($user);
     }
+
+
+
+
+    /*****************************start***********************************/
+
+    /**
+     * 测试审批流程
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/06/01 17:35:27
+     */
+    protected function initiate_approval($params)
+    {
+
+        $params['agent_id'] = config('ding.agent_id');
+        $params['process_code'] = config('ding.process_code');
+        //发起人
+        $params['originator_user_id'] = $params['originator_user_id'];
+        //发起人部门id
+        $params['dept_id'] = $params['dept_id'];
+        //审批人userid 多审批人依次传入
+        $params['approvers'] = $params['approvers'];
+        //抄送人
+        $params['cc_list'] = $params['cc_list'];
+        //抄送节点
+        $params['cc_position'] = 'FINISH';
+        //表单参数
+        $params['form_component_values'] = $params['form_component_values'];
+        //发起审批
+        $res = $this->app->process->create($params);
+        if ($res['errcode'] == 0) {
+            $this->success('发起成功');
+        } else {
+            $this->error($res['errmsg']);
+        }
+    }
+
+
     /**
      * 批量查询客服休息用户id
      *
@@ -97,7 +315,7 @@ class Ding extends Controller
     public function register()
     {
         $params = [
-            'call_back_tag' => ['user_add_org', 'user_modify_org', 'user_leave_org', 'org_dept_create', 'org_dept_modify', 'org_dept_remove'],
+            'call_back_tag' => ['user_add_org', 'user_modify_org', 'user_leave_org', 'org_dept_create', 'org_dept_modify', 'org_dept_remove', 'bpms_task_change', 'bpms_instance_change'],
             'url' => 'https://mojing.nextmar.com/api/ding/receive',
         ];
         $this->app->callback->register($params);
@@ -111,7 +329,7 @@ class Ding extends Controller
     public function update()
     {
         $params = [
-            'call_back_tag' => ['user_add_org', 'user_modify_org', 'user_leave_org', 'org_dept_create', 'org_dept_modify', 'org_dept_remove'],
+            'call_back_tag' => ['user_add_org', 'user_modify_org', 'user_leave_org', 'org_dept_create', 'org_dept_modify', 'org_dept_remove', 'bpms_task_change', 'bpms_instance_change'],
             'url' => 'https://mojing.nextmar.com/api/ding/receive',
         ];
         $this->app->callback->update($params);
@@ -187,6 +405,20 @@ class Ding extends Controller
                         Department::deptDelete($deptId);
                     }
                     file_put_contents('/www/wwwroot/mojing/runtime/log/Ding.txt', json_encode($payload), FILE_APPEND);
+                    break;
+                case 'bpms_task_change':
+                    //审批任务事件(开始、结束、转交)
+                    /**
+                     * @todo 修改审批任务为完成状态
+                     */
+                    file_put_contents('/www/wwwroot/mojing/runtime/log/Ding.log', 'bpms_task_change---------------' . serialize($payload) . "\n\n", FILE_APPEND);
+                    break;
+                case 'bpms_instance_change':
+                    //审批任务事件(开始、结束、转交)
+                    /**
+                     * @todo 修改审批任务为完成状态
+                     */
+                    file_put_contents('/www/wwwroot/mojing/runtime/log/Ding.log', 'bpms_instance_change---------------' . serialize($payload) . "\n\n", FILE_APPEND);
                     break;
             }
         });
@@ -285,7 +517,8 @@ class Ding extends Controller
         $userId = '165829435336546371';
         $user = $this->app->user->get($userId);
         Admin::userAdd($user);
-        echo 'ok';exit;
+        echo 'ok';
+        exit;
         //        $this->setDepartment();
         //        exit;
         //        $params = send_ding_message(['040740464839840580'], '收到需求2', '钱海信用卡支付后重复发送确认订单的邮件');
@@ -538,7 +771,7 @@ class Ding extends Controller
                 break;
         }
         if ($send_ids && $msg) {
-            
+
             return self::cc_ding(
                 $send_ids,
                 '【' . self::siteType($demand->site_type) . '】【' . self::demandType($demand->type) . '】' . $msg,
@@ -596,7 +829,7 @@ class Ding extends Controller
                         $send_ids = Auth::getUsersId('demand/develop_demand/review_status_develop'); // 所有有权限点击[通过]按钮的人
                         $msg = '一个任务已开发完成,等待您的确认';
                         //需求开发完成时，钉钉推送创建人和提出人
-                        $user_all = explode(',',$demand->duty_user_id);
+                        $user_all = explode(',', $demand->duty_user_id);
                         $user_all[] = $demand->create_person_id;
                         Ding::cc_ding(array_merge(array_filter($user_all)), '任务ID:' . $demand->id . '+任务已开发完成', $demand->title);
                     } elseif ($demand->type == 1) { //BUG 类型`
@@ -660,7 +893,7 @@ class Ding extends Controller
                 break;
         }
         if ($send_ids && $msg) {
-            
+
             if (is_array($send_ids)) {
                 //排除谢梦飞账号
                 if (in_array(80, $send_ids)) {
@@ -676,7 +909,7 @@ class Ding extends Controller
                 }
                 // file_put_contents('/www/wwwroot/mojing/runtime/log/sku.log', json_encode($send_ids) . "\r\n", FILE_APPEND);
             }
-            
+
             return self::cc_ding(
                 $send_ids,
                 '【开发组' . self::demandType($demand->type) . '】' . $msg,
