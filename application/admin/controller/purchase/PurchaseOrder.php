@@ -382,6 +382,8 @@ class PurchaseOrder extends Backend
         if (!$row) {
             $this->error(__('No Results were found'));
         }
+
+        
         //判断状态是否为新建
         if (!in_array($row['purchase_status'], [0, 1, 2, 5]) && $row['purchase_type'] == 1) {
             $this->error('只有新建状态才能编辑！！', url('index'));
