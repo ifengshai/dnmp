@@ -397,7 +397,7 @@ class WorkOrderList extends Model
     public function getAddress($increment_id, $item_order_number='')
     {
         //获取地址信息
-        $order_field = 'id,site,customer_email as email,customer_firstname as firstname,customer_lastname as lastname,order_type,country_id,region,region_id,city,street,postcode,telephone';
+        $order_field = 'id,site,customer_email as email,firstname,lastname,order_type,country_id,region,region_id,city,street,postcode,telephone';
         $_new_order = new NewOrder();
         $address = $_new_order
             ->where('increment_id', $increment_id)
