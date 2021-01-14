@@ -37,7 +37,7 @@ class Ding extends Controller
     }
 
 
-  
+
 
 
 
@@ -48,8 +48,11 @@ class Ding extends Controller
      * @author wpl
      * @since 2020/06/01 17:35:27
      */
-    protected function initiate_approval_bak($params)
+    public function initiate_approval_bak()
     {
+
+        // $list = $this->app->callback->list();
+        // dump($list);die;
 
         $userId = '071829462027950349';
         $params['agent_id'] = config('ding.agent_id');
@@ -155,10 +158,7 @@ class Ding extends Controller
         ];
 
         $res = $this->app->process->create($params);
-        if ($res['errcode'] == 0) {
-            return true;
-        }
-        return false;
+        dump($res);
     }
 
 
@@ -195,7 +195,7 @@ class Ding extends Controller
         $filesize = 10892;
         $agentId = config('ding.agent_id');
         $fileList = $this->app->file->uploadSingle(['C:\Users\Administrator\Desktop\test.docx'], $filesize, $agentId);
-       
+
         //获取钉盘space_id
         $userId = '071829462027950349';
         $agentId = config('ding.agent_id');
@@ -251,7 +251,7 @@ class Ding extends Controller
 
     /*****************************start***********************************/
 
-      /**
+    /**
      * 测试审批流程
      *
      * @Description
@@ -282,10 +282,9 @@ class Ding extends Controller
         } else {
             $this->error($res['errmsg']);
         }
-       
     }
 
-    
+
     /**
      * 批量查询客服休息用户id
      *
@@ -316,7 +315,7 @@ class Ding extends Controller
     public function register()
     {
         $params = [
-            'call_back_tag' => ['user_add_org', 'user_modify_org', 'user_leave_org', 'org_dept_create', 'org_dept_modify', 'org_dept_remove'],
+            'call_back_tag' => ['user_add_org', 'user_modify_org', 'user_leave_org', 'org_dept_create', 'org_dept_modify', 'org_dept_remove', 'bpms_task_change', 'bpms_instance_change'],
             'url' => 'https://mojing.nextmar.com/api/ding/receive',
         ];
         $this->app->callback->register($params);
@@ -330,7 +329,7 @@ class Ding extends Controller
     public function update()
     {
         $params = [
-            'call_back_tag' => ['user_add_org', 'user_modify_org', 'user_leave_org', 'org_dept_create', 'org_dept_modify', 'org_dept_remove', 'bpms_task_change'],
+            'call_back_tag' => ['user_add_org', 'user_modify_org', 'user_leave_org', 'org_dept_create', 'org_dept_modify', 'org_dept_remove', 'bpms_task_change', 'bpms_instance_change'],
             'url' => 'https://mojing.nextmar.com/api/ding/receive',
         ];
         $this->app->callback->update($params);
@@ -412,7 +411,14 @@ class Ding extends Controller
                     /**
                      * @todo 修改审批任务为完成状态
                      */
-                    file_put_contents('/www/wwwroot/mojing/runtime/log/Ding.log', 'bpms_task_change---------------'. serialize($payload) . "\n\n", FILE_APPEND);
+                    file_put_contents('/www/wwwroot/mojing/runtime/log/Ding.log', 'bpms_task_change---------------' . serialize($payload) . "\n\n", FILE_APPEND);
+                    break;
+                case 'bpms_instance_change':
+                    //审批任务事件(开始、结束、转交)
+                    /**
+                     * @todo 修改审批任务为完成状态
+                     */
+                    file_put_contents('/www/wwwroot/mojing/runtime/log/Ding.log', 'bpms_instance_change---------------' . serialize($payload) . "\n\n", FILE_APPEND);
                     break;
             }
         });
