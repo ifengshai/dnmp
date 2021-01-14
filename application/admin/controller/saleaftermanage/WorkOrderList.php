@@ -4546,7 +4546,7 @@ EOF;
         $list = $this->model
             ->where($map)
             ->order('id desc')
-            ->limit(10000)
+            ->limit(8000)
             ->select();
         $list = collection($list)->toArray();
 
@@ -4565,14 +4565,14 @@ EOF;
         } else {
             $info = [];
         }
-        //求出所有的承接详情
-        $this->recept = new \app\admin\model\saleaftermanage\WorkOrderRecept;
-        $receptInfo = $this->recept->fetchReceptRecord($arr);
-        if ($receptInfo) {
-            $receptInfo = collection($receptInfo)->toArray();
-        } else {
-            $receptInfo = [];
-        }
+//        //求出所有的承接详情
+//        $this->recept = new \app\admin\model\saleaftermanage\WorkOrderRecept;
+//        $receptInfo = $this->recept->fetchReceptRecord($arr);
+//        if ($receptInfo) {
+//            $receptInfo = collection($receptInfo)->toArray();
+//        } else {
+//            $receptInfo = [];
+//        }
 //        //求出所有的回复
 //        $noteInfo = $this->work_order_note->fetchNoteRecord($arr);
 //        if ($noteInfo) {
@@ -4623,18 +4623,18 @@ EOF;
             }
 
 
-            //级别
-            switch ($value['work_level']) {
-                case 1:
-                    $work_level = '低';
-                    break;
-                case  2:
-                    $work_level = '中';
-                    break;
-                case  3:
-                    $work_level = '高';
-                    break;
-            }
+//            //级别
+//            switch ($value['work_level']) {
+//                case 1:
+//                    $work_level = '低';
+//                    break;
+//                case  2:
+//                    $work_level = '中';
+//                    break;
+//                case  3:
+//                    $work_level = '高';
+//                    break;
+//            }
 
 
             switch ($value['work_platform']) {
@@ -4758,6 +4758,7 @@ EOF;
 //            }
 //            $csv[$key]['payment_time'] = $value['payment_time']; //订单支付时间
             $csv[$key]['replacement_order'] = $value['replacement_order'];//补发订单号
+            $csv[$key]['id'] = $value['id'];//补发订单号
 
         }
 
@@ -4769,7 +4770,7 @@ EOF;
 //            '对应商品sku', '问题大分类', '问题类型', '工单问题描述', '工单图片',
             '对应商品sku', '问题大分类', '问题类型', '工单问题描述',
 //            '工单创建人', '工单是否需要审核', '实际审核人', '审核人备注', '新建状态时间',
-            '工单创建人',  '新建状态时间,','工单完成时间','补差价的金额','优惠券描述','积分','退款金额','措施','补发订单号',
+            '工单创建人',  '新建状态时间,','工单完成时间','补差价的金额','优惠券描述','积分','退款金额','措施','补发订单号','id'
 //            '开始走流程时间', '工单审核时间', '经手人处理时间', '工单完成时间', '补差价的金额',
 //            '补差价的订单号', '优惠券类型', '优惠券描述', '优惠券', '积分',
 //            '退回物流单号', '退款金额', '退款百分比', '措施', '措施详情',
