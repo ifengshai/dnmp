@@ -4545,6 +4545,9 @@ EOF;
 //        0: '已取消', 1: '新建', 2: '待审核', 4: '审核拒绝', 3: '待处理', 5: '部分处理', 6: '已处理'
         $list = $this->model
             ->where($map)
+            ->field('id,work_platform,work_type,platform_order,order_pay_currency,order_sku,work_status,problem_type_id,problem_type_content,problem_description
+            ,create_user_name,after_user_id,create_time,complete_time,replenish_money,replenish_increment_id,coupon_describe,integral,refund_money,replacement_order
+            ')
             ->order('id desc')
             ->limit(8000)
             ->select();
