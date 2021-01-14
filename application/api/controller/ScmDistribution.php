@@ -1386,6 +1386,7 @@ class ScmDistribution extends Scm
                 'b.work_status' => ['in', [1, 2, 3, 5]]
             ])
             ->select();
+            print_r($check_work_order);die;
         if ($check_work_order) {
             $codeing_flag = 0;
             foreach ($check_work_order as $key => $value) {
