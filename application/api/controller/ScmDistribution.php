@@ -1371,7 +1371,7 @@ class ScmDistribution extends Scm
             ->where('order_id', $item_process_info['order_id'])
             ->field('order_id,store_house_id')
             ->find();
-        $store_house_is = $this->_stock_house->field('id,coding,subarea')->where('id', $item_process_info['temporary_house_id'])->find();
+        $store_house_is = $this->_stock_house->field('id,coding,subarea')->where('id', $item_process_info['abnormal_house_id'])->find();
         $hedan_codeing = $this->_stock_house->field('id,coding,subarea')->where('id', $order_process_info['store_house_id'])->value('coding');
         $codeing = $store_house_is['coding'];
         //检测是否有工单未处理
@@ -1388,7 +1388,6 @@ class ScmDistribution extends Scm
         if ($check_work_order) {
             $codeing_flag = 0;
             foreach ($check_work_order as $key => $value) {
-                $codeing = $store_house_is['coding'];
                 if ($value['item_order_number'] == $item_order_number) {//判断是否是当前工单含有未完成的工单，是的话提示语包含库位
                     $this->error(__("子订单存在工单"."<br><b>$codeing</b>"), [], 405);
                 }
