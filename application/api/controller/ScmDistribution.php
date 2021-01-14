@@ -1259,6 +1259,21 @@ class ScmDistribution extends Scm
 
                 //质检拒绝：镜架报损，扣减可用库存、配货占用、总库存、虚拟仓库存
                 if (2 == $reason) {
+                    //获取工单更改镜框最新信息
+                    $change_sku = $this->_work_order_change_sku
+                        ->alias('a')
+                        ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
+                        ->where([
+                            'a.change_type' => 1,
+                            'a.item_order_number' => $item_order_number,
+                            'b.operation_type' => 1
+                        ])
+                        ->order('a.id', 'desc')
+                        ->group('a.item_order_number')
+                        ->value('a.change_sku');
+                    if (!empty($change_sku)) {//存在已完成的更改镜片的工单，替换更改的sku
+                        $item_process_info['sku'] = $change_sku;
+                    }
                     //仓库sku、库存
                     $platform_info = $this->_item_platform_sku
                         ->field('sku,stock')
