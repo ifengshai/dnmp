@@ -1389,7 +1389,7 @@ class ScmDistribution extends Scm
             $codeing_flag = 0;
             foreach ($check_work_order as $key => $value) {
                 $codeing = $store_house_is['coding'];
-                if ($val['item_order_number'] == $item_order_number) {//判断是否是当前工单含有未完成的工单，是的话提示语包含库位
+                if ($value['item_order_number'] == $item_order_number) {//判断是否是当前工单含有未完成的工单，是的话提示语包含库位
                     $this->error(__("子订单存在工单"."<br><b>$codeing</b>"), [], 405);
                 }
             }
