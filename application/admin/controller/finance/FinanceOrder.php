@@ -3,12 +3,25 @@
 namespace app\admin\controller\finance;
 
 use app\common\controller\Backend;
-use think\Cache;
-use think\Controller;
-use think\Db;
-use think\Request;
+
 
 class FinanceOrder extends Backend
 {
-    
+    public function _initialize()
+    {
+        parent::_initialize();
+        $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform();
+    }
+    public function index()
+    {
+        //查询对应平台权限
+        $magentoplatformarr = $this->magentoplatform->getAuthSite();
+        foreach ($magentoplatformarr as $key=>$val){
+            if(!in_array($val['name'],['zeelool','voogueme','nihao'])){
+                unset($magentoplatformarr[$key]);
+            }
+        }
+        $this->view->assign('magentoplatformarr',$magentoplatformarr);
+        return $this->view->fetch();
+    }
 }

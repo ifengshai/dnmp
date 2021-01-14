@@ -6,7 +6,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
             Table.api.init({
                 searchFormVisible: true,
                 extend: {
-                    index_url: 'finance/settle_order/index' + location.search,
+                    index_url: 'finance/track_cost/index' + location.search,
                 }
             });
 
@@ -21,32 +21,31 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                     [
                         {checkbox: true},
                         {field: 'id', title: __('ID'),operate:false},
-                        {field: 'id', title: __('结算单号'),},
-                        {field: 'email', title: __('供应商名称')},
-                        {field: 'email', title: __('供应商账期')},
-                        {field: 'email', title: __('结算金额')},
-                        {field: 'email', title: __('采购负责人')},
-                        {field: 'status', title: __('状态'),custom: { 1: 'danger', 2: 'success', 3: 'orange', 4: 'warning', 5: 'purple', 6: 'primary' , 7: 'primary'}, searchList: { 1: '新建', 2: '待审核', 3: '待对账', 4: '待财务确认', 5: '已完成',6:'已拒绝' ,7:'已取消'},formatter: Table.api.formatter.status},
-                        {field: 'id', title: __('结算类型'),visible:false},
+                        {field: 'id', title: __('订单号'),},
+                        {field: 'status', title: __('平台'),custom: { 1: 'danger', 2: 'success', 3: 'blue'}, searchList: { 1: 'zeelool', 2: 'voogueme', 3: 'nihao'},formatter: Table.api.formatter.status},
+                        {field: 'mobile', title: __('邮费')},
+                        {field: 'createtime', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime},
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
-                                 {
-                                  name: 'detail',
-                                  text: '详情',
-                                  title: __('查看详情'),
-                                  extend: 'data-area = \'["80%","70%"]\'',
-                                  classname: 'btn btn-xs btn-primary btn-dialog',
-                                  icon: 'fa fa-list',
-                                  url: 'customer/wholesale_customer/detail',
-                                  callback: function (data) {
-                                      Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
-                                  },
-                                  visible: function (row) {
-                                      //返回true时按钮显示,返回false隐藏
-                                      return true;
-                                  }
-                              },
-
+                                {
+                                    name: 'edit',
+                                    text: '',
+                                    title: __('更改'),
+                                    classname: 'btn btn-xs btn-success btn-dialog',
+                                    icon: 'fa fa-pencil',
+                                    url: 'customer/wholesale_customer/edit',
+                                    extend: 'data-area = \'["80%","70%"]\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        if (Config.customer_edit == 1) {//有权限 或者创建人为当前人
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                    }
+                                },
                                 ],
                             formatter: Table.api.formatter.operate
                         }
@@ -56,6 +55,19 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
 
             // 为表格绑定事件
             Table.api.bindevent(table);
+
+            // 导入按钮事件
+            Upload.api.plupload($('.btn-import'), function (data, ret) {
+                Fast.api.ajax({
+                    url: 'customer/wholesale_customer/import',
+                    data: { file: data.url },
+                }, function (data, ret) {
+                    layer.msg('导入成功！！', { time: 3000, icon: 6 }, function () {
+                        location.reload();
+                    });
+
+                });
+            });
 
 
             //批量导出xls

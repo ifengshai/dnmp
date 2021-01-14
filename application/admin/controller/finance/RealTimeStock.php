@@ -14,4 +14,8 @@ class RealTimeStock extends Backend
     {
         return $this->view->fetch();
     }
+    public function detail()
+    {
+        return $this->view->fetch();
+    }
 }
