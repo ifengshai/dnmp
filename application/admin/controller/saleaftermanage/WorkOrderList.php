@@ -52,7 +52,7 @@ class WorkOrderList extends Backend
      * @var \app\admin\model\saleaftermanage\WorkOrderList
      */
     protected $model = null;
-    protected $noNeedLogin = ['batch_export_xls_array'];
+    protected $noNeedLogin = ['batch_export_xls_array','batch_export_xls_array_copy'];
 
     public function _initialize()
     {
@@ -4541,16 +4541,16 @@ EOF;
         ini_set('memory_limit', '1024M');
 
         $map['create_time'] =['between',['2020-01-01 00:00:00','2020-12-31 23:59:59']];
-        $map['id'] = ['lt',31537];
+//        $map['id'] = ['lt',5212];
 //        $map['work_status'] = array('in', '2,3,5');
 //        0: '已取消', 1: '新建', 2: '待审核', 4: '审核拒绝', 3: '待处理', 5: '部分处理', 6: '已处理'
         $list = $this->model
             ->where($map)
-            ->field('id,work_platform,work_type,platform_order,order_pay_currency,order_sku,work_status,problem_type_id,problem_type_content,problem_description
+            ->field('id,work_platform,base_grand_total,email,work_type,platform_order,order_pay_currency,order_sku,work_status,problem_type_id,problem_type_content,problem_description
             ,create_user_name,after_user_id,create_time,complete_time,replenish_money,replenish_increment_id,coupon_describe,integral,refund_money,replacement_order
             ')
             ->order('id desc')
-            ->limit(8000)
+            ->limit(11000)
             ->select();
         $list = collection($list)->toArray();
 
@@ -4781,7 +4781,44 @@ EOF;
 //            '承接详情', '工单回复备注', '订单支付时间', '补发订单号'
         ];
         $path = "/uploads/";
-        $fileName = '工单数据2020-004导出';
+        $fileName = '工单数据2020-001导出';
+        Excel::writeCsv($csv, $headlist, $path . $fileName);
+    }
+
+    public function batch_export_xls_array_copy()
+    {
+
+
+        set_time_limit(0);
+        ini_set('memory_limit', '1024M');
+
+        $map['create_time'] =['between',['2020-01-01 00:00:00','2020-12-31 23:59:59']];
+//        $map['id'] = ['lt',5212];
+//        $map['work_status'] = array('in', '2,3,5');
+//        0: '已取消', 1: '新建', 2: '待审核', 4: '审核拒绝', 3: '待处理', 5: '部分处理', 6: '已处理'
+        $list = $this->model
+            ->where($map)
+            ->field('id,base_grand_total,email')
+            ->order('id desc')
+            ->select();
+        $list = collection($list)->toArray();
+
+
+
+
+        foreach ($list as $key => $value) {
+
+            $csv[$key]['email'] = $value['email'];  //客户邮箱
+            $csv[$key]['base_grand_total'] = $value['base_grand_total']; //订单金额
+            $csv[$key]['id'] = $value['id']; //订单金额
+
+        }
+
+        $headlist = [
+            '客户邮箱', '订单金额','id'
+        ];
+        $path = "/uploads/";
+        $fileName = '工单数据2020-单独字段导出';
         Excel::writeCsv($csv, $headlist, $path . $fileName);
     }
 

@@ -239,6 +239,7 @@ class ItWebDemand extends Backend
                 //是否为测试
                 $testAuthUserIds = array_merge(Auth::getGroupUserId(config('demand.test_group_id')) ?: [], Auth::getGroupUserId(config('demand.test_group_person_id')) ?: []);
                 $map['status'] = ['eq', 3];
+                $map['develop_finish_status'] = ['in',[1,2,3]];
                 if (in_array($adminId, $authUserIds)) {
                     $map['pm_audit_status'] = ['in', [1, 2,3,4]];
                     $map['status'] = ['eq', 3];
