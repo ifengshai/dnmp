@@ -1386,21 +1386,23 @@ class ScmDistribution extends Scm
             ])
             ->select();
         if ($check_work_order) {
-            foreach ($check_work_order as $val) {
-                $codeing = '';
-                if ($val['item_order_number'] == $item_order_number) {
-                    $codeing = $store_house_is['coding'];
+            $codeing_flag = 0;
+            foreach ($check_work_order as $key => $value) {
+                $codeing = $store_house_is['coding'];
+                if ($val['item_order_number'] == $item_order_number) {//判断是否是当前工单含有未完成的工单，是的话提示语包含库位
+                    $this->error(__("子订单存在工单"."<br><b>$codeing</b>"), [], 405);
                 }
-
+            }
+            foreach ($check_work_order as $val) { 
                 (3 == $val['measure_choose_id'] //主单取消措施未处理
                     ||
                     !empty($val['item_order_number']) //子单措施未处理:更改镜框18、更改镜片19、取消20
                 )
                 // && $this->error(__('有工单未处理，无法操作'), [], 405);
 
-                && $this->error(__("子订单存在工单"."<br><b>$codeing</b>"), [], 405);
+                && $this->error(__("子订单存在工单"), [], 405);
                 if ($val['measure_choose_id'] == 21) {
-                    $this->error(__("子订单存在工单"."<br><b>$codeing</b>"), [], 405);
+                    $this->error(__("子订单存在工单"), [], 405);
                 }
             }
         }
