@@ -21,6 +21,8 @@ use think\Controller;
 use EasyDingTalk\Application;
 use think\Db;
 use think\Request;
+use app\admin\model\financepurchase\FinancePurchaseLog;
+use app\admin\model\financepurchase\FinancePurchase;
 
 class Ding extends Controller
 {
@@ -51,8 +53,8 @@ class Ding extends Controller
     public function initiate_approval_bak()
     {
 
-        // $list = $this->app->callback->list();
-        // dump($list);die;
+        //  $list = $this->app->callback->list();
+        //  dump($list);die;
 
         $userId = '071829462027950349';
         $params['agent_id'] = config('ding.agent_id');
@@ -154,6 +156,10 @@ class Ding extends Controller
                 'name' => '收款方开户行',
                 'value' => '测试开户行',
             ],
+            [
+                'name' => '备注',
+                'value' => '备注',
+            ]
 
         ];
 
@@ -278,9 +284,9 @@ class Ding extends Controller
         //发起审批
         $res = $this->app->process->create($params);
         if ($res['errcode'] == 0) {
-            $this->success('发起成功');
+            return $res;
         } else {
-            $this->error($res['errmsg']);
+            return false;
         }
     }
 
@@ -411,14 +417,27 @@ class Ding extends Controller
                     /**
                      * @todo 修改审批任务为完成状态
                      */
+                    if ($payload['type'] == 'finish') {
+                        //审核日志
+                        FinancePurchaseLog::create([
+                            'process_instance_id' => $payload['processInstanceId'],
+                            'check_time' => $payload['finishTime'],
+                            'title' => $payload['title'],
+                            'result' => $payload['result'],
+                            'userid' => $payload['staffId']
+                        ]);
+                        
+                        //判断审核状态 审核拒绝
+                        if ($payload['result'] == 'refuse') {
+                            FinancePurchase::where(['process_instance_id' => $payload['process_instance_id']])->update(['status' => 3]);
+                            //最后一步判断如果为王剑审核通过改为完成
+                        } elseif($payload['result'] == 'agree' && $payload['staffId'] == '0647044715938022') {
+                            FinancePurchase::where(['process_instance_id' => $payload['process_instance_id']])->update(['status' => 4]);
+                        }   
+
+                    }
+
                     file_put_contents('/www/wwwroot/mojing/runtime/log/Ding.log', 'bpms_task_change---------------' . serialize($payload) . "\n\n", FILE_APPEND);
-                    break;
-                case 'bpms_instance_change':
-                    //审批任务事件(开始、结束、转交)
-                    /**
-                     * @todo 修改审批任务为完成状态
-                     */
-                    file_put_contents('/www/wwwroot/mojing/runtime/log/Ding.log', 'bpms_instance_change---------------' . serialize($payload) . "\n\n", FILE_APPEND);
                     break;
             }
         });
