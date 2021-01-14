@@ -4810,11 +4810,12 @@ EOF;
 
             $csv[$key]['email'] = $value['email'];  //客户邮箱
             $csv[$key]['base_grand_total'] = $value['base_grand_total']; //订单金额
+            $csv[$key]['id'] = $value['id']; //订单金额
 
         }
 
         $headlist = [
-            '客户邮箱', '订单金额'
+            '客户邮箱', '订单金额','id'
         ];
         $path = "/uploads/";
         $fileName = '工单数据2020-单独字段导出';
