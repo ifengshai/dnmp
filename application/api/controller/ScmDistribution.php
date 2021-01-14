@@ -2114,10 +2114,28 @@ class ScmDistribution extends Scm
 
                     //扣减占用库存、配货占用、总库存、虚拟仓库存
                     foreach ($item_info as $key => $value) {
+                        /**************工单更换镜框******************/
+                        //查询更改镜框最新信息
+                        $change_sku = $this->_work_order_change_sku
+                            ->alias('a')
+                            ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
+                            ->where([
+                                'a.change_type' => 1,
+                                'a.item_order_number' => $value['item_order_number'],
+                                'b.operation_type' => 1
+                            ])
+                            ->order('a.id', 'desc')
+                            ->value('a.change_sku');
+                        if ($change_sku) {
+                            $sku = $change_sku;
+                        } else {
+                            $sku = $value['sku'];
+                        }
+                        /********************************/
                         //仓库sku、库存
                         $platform_info = $this->_item_platform_sku
                             ->field('sku,stock')
-                            ->where(['platform_sku' => $value['sku'], 'platform_type' => $value['site']])
+                            ->where(['platform_sku' => $sku, 'platform_type' => $value['site']])
                             ->find();
                         $true_sku = $platform_info['sku'];
 
