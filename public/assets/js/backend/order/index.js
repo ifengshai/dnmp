@@ -195,6 +195,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
         detail: function () {
             Controller.api.bindevent();
         },
+
         api: {
 
             formatter: {

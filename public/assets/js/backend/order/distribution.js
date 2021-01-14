@@ -131,12 +131,21 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                         {
                             field: 'status', title: __('订单状态'), addClass: 'selectpicker', data: 'multiple',
                             searchList: {
-                                "processing": __('processing'),
+                                "canceled": __('canceled'),
+                                "closed": __('closed'),
+                                "complete": __('complete'),
+                                "creditcard_failed": __('creditcard_failed'),
+                                "creditcard_pending": __('creditcard_pending'),
+                                "delivered": __('delivered'),
+                                "fraud": __('fraud'),
                                 "free_processing": __('free_processing'),
-                                "paypal_reversed": __('paypal_reversed'),
-                                "creditcard_proccessing": __('creditcard_proccessing'),
+                                "holded": __('holded'),
+                                "payment_review": __('payment_review'),
                                 "paypal_canceled_reversal": __('paypal_canceled_reversal'),
-                                'complete': __('complete')
+                                "paypal_reversed": __('paypal_reversed'),
+                                "pending": __('pending'),
+                                "processing": __('processing'),
+                                "unpaid": __('unpaid')
                             }, operate: 'IN',
                             formatter: Table.api.formatter.status
                         },
@@ -191,8 +200,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                 14: __('客户退件')
                             }
                         },
+
+
+
                         { field: 'stock_house_num', title: __('库位号'), operate: 'LIKE' },
-                        { field: 'shelf_number', title: __('货架号'), visible: false, searchList: {1: 'A', 2: 'B', 3: 'C', 4: 'D', 5: 'E', 6: 'F', 7: 'G', 8: 'H', 9: 'I', 10: 'J', 11: 'K', 12: 'L', 13: 'M', 14: 'N', 15: 'O', 16: 'P', 17: 'Q', 18: 'R', 19: 'S', 20: 'T', 21: 'U', 22: 'V', 23: 'W', 24: 'X', 25: 'Y', 26: 'Z'}},
+                        { field: 'shelf_number', title: __('货架号'), visible: false, searchList: {'A': 'A', 'B': 'B', 'C': 'C', 'D': 'D', 'E': 'E', 'F': 'F', 'G': 'G', 'H': 'H', 'I': 'I', 'J': 'J', 'K': 'K', 'L': 'L', 'M': 'M', 'N': 'N', 'O': 'O', 'P': 'P', 'Q': 'Q', 'R': 'R', 'S': 'S', 'T': 'T', 'U': 'U', 'V': 'V', 'W': 'W', 'X': 'X', 'Y': 'Y', 'Z': 'Z'}},
                         { field: 'a.created_at', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange',visible:false},
                         { field: 'created_at', title: __('创建时间'), operate: false},
 
@@ -431,29 +443,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
             //批量标记异常
             $('.btn-sign-abnormals').click(function () {
                 var ids = Table.api.selectedids(table);
-                Layer.confirm(
-                    __('确定要为这%s条子订单标记异常么?', ids.length),
-                    { icon: 3, title: __('Warning'), shadeClose: true },
-                    function (index) {
-                        alert(ids);
-                        /*Layer.close(index);
-                        Backend.api.ajax({
-                            url: Config.moduleurl + '/order/distribution/sign-abnormals',
-                            data: { id_params: ids },
-                            type: 'post'
-                        }, function (data, ret) {
-                            if (data.url) {
-                                //跳转添加工单页面
-                                Fast.api.open(data.url, __('创建工单'), {
-                                    area: ["100%", "100%"],
-                                    end: function () {
-                                        table.bootstrapTable('refresh');
-                                    }
-                                });
-                            }
-                        });*/
-                    }
-                );
+                Backend.api.open(Config.moduleurl + '/order/distribution/sign_abnormals/ids/' + ids, __('批量标记异常'), { area: ['50%', '50%'] });
             });
 
             //取消异常
@@ -479,6 +469,17 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
         },
         handle_abnormal: function () {
             Controller.api.bindevent();
+        },
+        sign_abnormals: function () {
+            Controller.api.bindevent();
+            $('#abnormal').change(function () {
+                var flag = $('#abnormal').val();
+                if (flag == 3) {
+                    $('#status').show();
+                }else{
+                    $('#status').hide();
+                }
+            })
         },
         api: {
             formatter: {
