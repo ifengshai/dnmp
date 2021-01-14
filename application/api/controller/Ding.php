@@ -196,6 +196,13 @@ class Ding extends Controller
                      */
                     file_put_contents('/www/wwwroot/mojing/runtime/log/Ding.log', 'bpms_task_change---------------' . serialize($payload) . "\n\n", FILE_APPEND);
                     break;
+                case 'bpms_instance_change':
+                    //审批任务事件(开始、结束、转交)
+                    /**
+                     * @todo 修改审批任务为完成状态
+                     */
+                    file_put_contents('/www/wwwroot/mojing/runtime/log/Ding.log', 'bpms_instance_change---------------' . serialize($payload) . "\n\n", FILE_APPEND);
+                    break;
             }
         });
 
