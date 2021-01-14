@@ -1360,6 +1360,7 @@ class ScmDistribution extends Scm
             ->where('item_order_number', $item_order_number)
             ->field('id,distribution_status,sku,order_id,temporary_house_id,abnormal_house_id,abnormal_house_id')
             ->find();
+        $item_process_info['distribution_status'] == 0 && $this->error(__('子订单已取消'), [], 403);
         //查询订单号
         $order_info = $this->_new_order
             ->field('increment_id,status')
