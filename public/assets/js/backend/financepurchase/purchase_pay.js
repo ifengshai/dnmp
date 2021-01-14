@@ -1,5 +1,4 @@
 define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefined, Backend, Table, Form) {
-
     var Controller = {
         index: function () {
             // 初始化表格参数配置
@@ -13,14 +12,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     // table: 'user',
                 }
             });
-
             var table = $("#table");
-
             // 初始化表格
             table.bootstrapTable({
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
                 pk: 'id',
                 // sortName: 'id',
+                searchList:true,
                 columns: [
                     [
                         {checkbox: true},
@@ -43,7 +41,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'create_time', title: __('创建时间'), formatter: Table.api.formatter.datetime, operate: 'RANGE', addclass: 'datetimerange', sortable: true},
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
-
                                 {
                                     name: 'detail',
                                     text: '详情',
@@ -72,7 +69,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function (row) {
-                                        // alert(row.status)
                                         //返回true时按钮显示,返回false隐藏
                                         if (row.status == 0) {
                                             return true;
@@ -86,7 +82,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     ]
                 ]
             });
-
             // 为表格绑定事件
             Table.api.bindevent(table);
         },
@@ -99,6 +94,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         api: {
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
+                //付款类型
+                $(document).on('click', '#pay_type', function () {
+                    var val = $(this).val();
+                    if (val != 3) {
+                        $('.deposit_amount').removeClass('hidden');
+                    } else {
+                        $('.deposit_amount').addClass('hidden');
+                    }
+                })
             }
         }
     };
