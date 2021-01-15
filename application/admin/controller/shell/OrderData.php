@@ -367,6 +367,12 @@ class OrderData extends Backend
                                     $options['qty'] = $v['goods_count'];
                                     $options['base_row_total'] = $v['original_total_price'];
                                     $options['product_id'] = $v['goods_id'];
+                                    $options['frame_regural_price'] = $v['goods_original_price'];
+                                    $options['frame_price'] = $v['goods_price'];
+                                    $options['index_price'] = $v['lens_price'];
+                                    $options['frame_color'] = $v['goods_color'];
+                                    $options['goods_type'] = $v['goods_type'];
+                                   
                                     $order_prescription_type = $options['order_prescription_type'];
                                     unset($options['order_prescription_type']);
                                     if ($options) {
