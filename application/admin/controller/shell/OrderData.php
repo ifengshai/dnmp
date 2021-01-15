@@ -252,6 +252,32 @@ class OrderData extends Backend
                                 $this->orderprocess->saveAll($order_params);
                             }
 
+
+                            //批发站主表
+                            if ($payload['type'] == 'UPDATE' && $payload['table'] == 'orders') {
+                                $order_params = [];
+                                foreach ($payload['data'] as $k => $v) {
+                                    $params = [];
+                                    $params['increment_id'] = $v['order_no'];
+                                    $params['status'] = $v['order_status'] ?: '';
+                                    $params['store_id'] = $v['source'];
+                                    $params['base_grand_total'] = $v['actual_amount_paid'];
+                                    $params['total_qty_ordered'] = $v['goods_quantity'];
+                                    $params['base_currency_code'] = $v['base_currency'];
+                                    $params['order_currency_code'] = $v['now_currency'];
+                                    $params['shipping_method'] = $v['freight_type'];
+                                    $params['shipping_title'] = $v['freight_description'];
+                                    $params['customer_email'] = $v['email'];
+                                    $params['base_to_order_rate'] = $v['rate'];
+                                    $params['base_shipping_amount'] = $v['freight_price'];
+                                    $params['updated_at'] = strtotime($v['updated_at']) + 28800;
+                                    if (isset($v['payment_time'])) {
+                                        $params['payment_time'] = strtotime($v['payment_time']) + 28800;
+                                    }
+                                    $this->order->where(['entity_id' => $v['entity_id'], 'site' => $site])->update($params);
+                                }
+                            }
+
                             //批发站地址表插入时或更新时更新主表地址
                             if (($payload['type'] == 'UPDATE' || $payload['type'] == 'INSERT') && $payload['table'] == 'orders_addresses') {
                                 foreach ($payload['data'] as $k => $v) {
