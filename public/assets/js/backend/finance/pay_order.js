@@ -8,10 +8,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                 extend: {
                     index_url: 'finance/pay_order/index' + location.search,
                     add_url: 'finance/pay_order/add',
-                    edit_url: 'customer/wholesale_customer/edit',
-                    del_url: 'customer/wholesale_customer/del',
-                    import_url: 'customer/wholesale_customer/import',
-                    table: 'wholesale_customer',
+                    edit_url: 'finance/pay_order/edit',
                 }
             });
 
@@ -25,29 +22,29 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                 columns: [
                     [
                         {checkbox: true},
-                        {field: 'id', title: __('付款单号'),},
-                        {field: 'email', title: __('供应商名称')},
+                        {field: 'id', title: __('序号'),},
+                        {field: 'pay_number', title: __('付款单号'),},
+                        {field: 'supplier_name', title: __('供应商名称')},
                         {field: 'status', title: __('状态'),custom: { 1: 'danger', 2: 'success', 3: 'orange', 4: 'warning', 5: 'purple', 6: 'primary' , 7: 'primary'}, searchList: { 1: '新建', 2: '待审核', 3: '待付款', 4: '待上传发票', 5: '已完成',6:'已拒绝' ,7:'已取消'},formatter: Table.api.formatter.status},
-                        {field: 'customer_name', title: __('创建人')},
-                        {field: 'mobile', title: __('创建时间')},
-                        {field: 'mobile', title: __('审批人')},
+                        {field: 'create_user', title: __('创建人')},
+                        {field: 'create_time', title: __('创建时间')},
+                        {field: 'check_user', title: __('审批人')},
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
                                 {
                                     name: 'edit',
-                                    text: '',
-                                    title: __('Edit'),
+                                    text: __('编辑'),
+                                    title: __('编辑'),
                                     classname: 'btn btn-xs btn-success btn-dialog',
-                                    icon: 'fa fa-pencil',
                                     url: 'finance/pay_order/edit',
-                                    extend: 'data-area = \'["80%","70%"]\'',
+                                    extend: 'data-area = \'["50%","50%"]\'',
                                     callback: function (data) {
-                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function (row) {
-                                        if (Config.customer_edit == 1) {//有权限 或者创建人为当前人
+                                        console.log(Config.now_user);
+                                        if(row.status == 1 && Config.now_user == row.create_user){
                                             return true;
-                                        } else {
+                                        }else{
                                             return false;
                                         }
                                     }
@@ -70,17 +67,82 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                               },
                               {
                                 name: 'pay',
-                                text: '',
+                                text: __('付款'),
                                 title: __('付款'),
-                                classname: 'btn btn-xs btn-success btn-dialog',
-                                icon: 'fa fa-pencil',
-                                url: 'finance/pay_order/pay',
-                                extend: 'data-area = \'["80%","70%"]\'',
+                                classname: 'btn btn-xs btn-danger btn-ajax',
+                                url: 'finance/pay_order/setStatus?status=4',
+                                extend: 'data-area = \'["100%","100%"]\'',
+                                confirm: '确定要付款吗',
+                                success: function (data, ret) {
+                                    table.bootstrapTable('refresh');
+                                },
                                 callback: function (data) {
-                                    Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                 },
                                 visible: function (row) {
-                                    if (Config.customer_edit == 1) {//有权限 或者创建人为当前人
+                                    if (row.status == 3) {
+                                        return true;
+                                    } else {
+                                        return false;
+                                    }
+                                }
+                            },
+                            {
+                                name: 'check',
+                                text: __('审核'),
+                                title: __('审核'),
+                                classname: 'btn btn-xs btn-danger btn-ajax',
+                                url: 'finance/pay_order/setStatus?status=3',
+                                extend: 'data-area = \'["100%","100%"]\'',
+                                confirm: '确定要审核通过吗',
+                                success: function (data, ret) {
+                                    table.bootstrapTable('refresh');
+                                },
+                                callback: function (data) {
+                                },
+                                visible: function (row) {
+                                    if (row.status == 2) {
+                                        return true;
+                                    } else {
+                                        return false;
+                                    }
+                                }
+                            },
+                            {
+                                name: 'refuse',
+                                text: __('拒绝'),
+                                title: __('拒绝'),
+                                classname: 'btn btn-xs btn-danger btn-ajax',
+                                url: 'finance/pay_order/setStatus?status=6',
+                                extend: 'data-area = \'["100%","100%"]\'',
+                                confirm: '确定要拒绝吗',
+                                success: function (data, ret) {
+                                    table.bootstrapTable('refresh');
+                                },
+                                callback: function (data) {
+                                },
+                                visible: function (row) {
+                                if (row.status != 5) {
+                                        return true;
+                                    } else {
+                                        return false;
+                                    }
+                                }
+                            },
+                            {
+                                name: 'cancel',
+                                text: __('取消'),
+                                title: __('取消'),
+                                classname: 'btn btn-xs btn-danger btn-ajax',
+                                url: 'finance/pay_order/setStatus?status=7',
+                                extend: 'data-area = \'["100%","100%"]\'',
+                                confirm: '确定要取消吗',
+                                success: function (data, ret) {
+                                    table.bootstrapTable('refresh');
+                                },
+                                callback: function (data) {
+                                },
+                                visible: function (row) {
+                                    if (row.status != 5) {
                                         return true;
                                     } else {
                                         return false;
@@ -89,7 +151,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                             },
                             {
                                 name: 'upload',
-                                text: '',
+                                text: '上传发票',
                                 title: __('上传发票'),
                                 classname: 'btn btn-xs btn-success btn-dialog',
                                 icon: 'fa fa-pencil',
@@ -99,7 +161,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                                     Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                 },
                                 visible: function (row) {
-                                    if (Config.customer_edit == 1) {//有权限 或者创建人为当前人
+                                    if (row.status == 4) {
                                         return true;
                                     } else {
                                         return false;
@@ -112,38 +174,30 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                     ]
                 ]
             });
-
+            //上传文件
+            $(document).on('click', '.pluploads', function () {
+                var _this = $(this);
+                var url = _this.parent().parent().parent().find('.unqualified_images').val();
+                Fast.api.open(
+                    'finance/pay_order/upload?img_url=' + url, '上传文件', {
+                    callback: function (data) {
+                        _this.parent().parent().parent().find('.unqualified_images').val(data.unqualified_images);
+                    }
+                }
+                )
+            })
             // 为表格绑定事件
             Table.api.bindevent(table);
-
-            // 导入按钮事件
-            Upload.api.plupload($('.btn-import'), function (data, ret) {
-                Fast.api.ajax({
-                    url: 'customer/wholesale_customer/import',
-                    data: { file: data.url },
-                }, function (data, ret) {
-                    layer.msg('导入成功！！', { time: 3000, icon: 6 }, function () {
-                        location.reload();
-                    });
-
-                });
+        },
+        upload: function () {
+            Controller.api.bindevent(function (data, ret) {
+                //这里是表单提交处理成功后的回调函数，接收来自php的返回数据
+                Fast.api.close(data);//这里是重点
+                return false;
             });
 
+            $('.unqualified_images').change();
 
-            //批量导出xls
-            $('.btn-batch-export-xls').click(function () {
-                var ids = Table.api.selectedids(table);
-                if (ids.length > 0) {
-                    window.open(Config.moduleurl + '/customer/wholesale_customer/batch_export_xls?ids=' + ids, '_blank');
-                } else {
-                    var options = table.bootstrapTable('getOptions');
-                    var search = options.queryParams({});
-                    var filter = search.filter;
-                    var op = search.op;
-                    window.open(Config.moduleurl + '/customer/wholesale_customer/batch_export_xls?filter=' + filter + '&op=' + op, '_blank');
-                }
-
-            });
         },
         add: function () {
             $(document).on('click', '#save', function () {
@@ -184,6 +238,41 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
             Controller.api.bindevent();
         },
         edit: function () {
+            $(document).on('click', '#save', function () {
+                $("#status").val(1);
+                if(!$("#reality_pay_amount").val()){
+                    layer.msg("实际付款金额不能为空");
+                    return false;
+                }
+                if(!$("#rate").val()){
+                    layer.msg("汇率不能为空");
+                    return false;
+                }
+                if(!$("#pay_amount").val()){
+                    layer.msg("付款金额不能为空");
+                    return false;
+                }
+                $("#add-form").submit();
+            });
+            $(document).on('click', '#reset', function () {
+                $("#status").val(1);
+            });
+            $(document).on('click', '#submit', function () {
+                if(!$("#reality_pay_amount").val()){
+                    layer.msg("实际付款金额不能为空");
+                    return false;
+                }
+                if(!$("#rate").val()){
+                    layer.msg("汇率不能为空");
+                    return false;
+                }
+                if(!$("#pay_amount").val()){
+                    layer.msg("付款金额不能为空");
+                    return false;
+                }
+                $("#status").val(2);
+                $("#add-form").submit();
+            });
             Controller.api.bindevent();
         },
         detail: function () {
