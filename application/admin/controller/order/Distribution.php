@@ -2090,7 +2090,9 @@ class Distribution extends Backend
                 unset($status_arr[5]);
                 break;
         }
-
+        if ($item_info['distribution_status'] == 3) {
+            $status_arr[2] = '待配货';
+        }
         //核实地址
         if($abnormal_info['type'] == 13){
             $status_arr = [];
@@ -2129,7 +2131,7 @@ class Distribution extends Backend
                     $check_status = [4, 5, 6];
                     break;
                 case 2:
-                    $check_status = [4, 5, 6];
+                    $check_status = [3,4, 5, 6];
                     break;
                 case 3:
                     $check_status = [4, 5, 6];
@@ -2196,6 +2198,21 @@ class Distribution extends Backend
 
                 //回滚至待配货扣减可用库存、虚拟仓库存、配货占用、总库存
                 if (2 == $status) {
+                    //获取工单更改镜框最新信息
+                    $change_sku = $this->_work_order_change_sku
+                        ->alias('a')
+                        ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
+                        ->where([
+                            'a.change_type' => 1,
+                            'a.item_order_number' => $item_info['item_order_number'],
+                            'b.operation_type' => 1
+                        ])
+                        ->order('a.id', 'desc')
+                        ->group('a.item_order_number')
+                        ->value('a.change_sku');
+                    if (!empty($change_sku)) {//存在已完成的更改镜片的工单，替换更改的sku
+                        $item_info['sku'] = $change_sku;
+                    }
                     //仓库sku、库存
                     $platform_info = $this->_item_platform_sku
                         ->field('sku,stock')
