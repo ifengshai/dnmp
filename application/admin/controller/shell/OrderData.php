@@ -396,7 +396,7 @@ class OrderData extends Backend
                                     if ($options) {
                                         $options_id = $this->orderitemoption->insertGetId($options);
                                         $data = []; //子订单表数据
-                                        for ($i = 0; $i < $v['qty_ordered']; $i++) {
+                                        for ($i = 0; $i < $v['goods_count']; $i++) {
                                             $data[$i]['item_id'] = $v['id'];
                                             $data[$i]['magento_order_id'] = $v['order_id'];
                                             $data[$i]['site'] = $site;
