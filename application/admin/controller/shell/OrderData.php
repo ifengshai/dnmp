@@ -392,8 +392,8 @@ class OrderData extends Backend
                                     $options['base_row_total'] = $v['original_total_price'];
                                     $options['product_id'] = $v['goods_id'];
                                     $options['frame_regural_price'] = $v['goods_original_price'];
-                                    $options['frame_price'] = $v['goods_price'];
-                                    $options['index_price'] = $v['lens_price'];
+                                    $options['frame_price'] = $v['goods_total_price'];
+                                    $options['index_price'] = $v['lens_total_price'];
                                     $options['frame_color'] = $v['goods_color'];
                                     $options['goods_type'] = $v['goods_type'];
                                    
