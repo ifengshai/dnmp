@@ -406,6 +406,8 @@ class OrderData extends Backend
                                             $data[$i]['created_at'] = strtotime($v['created_at']) + 28800;
                                             $data[$i]['updated_at'] = strtotime($v['updated_at']) + 28800;
                                         }
+                                        dump(11111111111111111111111111111111);
+                                        dump($data);
                                         $this->orderitemprocess->insertAll($data);
                                     }
                                 }
