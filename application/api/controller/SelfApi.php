@@ -562,16 +562,21 @@ class SelfApi extends Api
     {
         //校验参数
         $work_order_id = $this->request->request('work_order_id'); //魔晶工单id
+        $order_number = $this->request->request('order_number'); //补差价单号
         if (!$work_order_id) {
             $this->error(__('缺少工单号参数'), [], 400);
+        }
+        if (!$order_number) {
+            $this->error(__('缺少补差价单号参数'), [], 400);
         }
         //根据工单id查询工单
         $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
         $list = $workorder->where(['id' => $work_order_id])->field('create_user_id,id')->find();
         if ($list) {
+            $workorder->where(['id' => $work_order_id])->update(['replenish_increment_id' => $order_number]);
             //Ding::cc_ding($list['create_user_id'], '', '工单ID:' . $list['id'] . '😎😎😎😎补差价订单支付成功需要你处理😎😎😎😎', '补差价订单支付成功需要你处理');
             //判断查询的工单中有没有其他措施
-            $measure_choose_id = Db::name('work_order_measure')->where('work_id', $list['id'])->column('measure_choose_id');
+            /*$measure_choose_id = Db::name('work_order_measure')->where('work_id', $list['id'])->column('measure_choose_id');
             if (count($measure_choose_id) == 1 && in_array(8, $measure_choose_id)) {
                 //如果只有一个补差价，就更改主表的状态
                 $workorder->where('id', $list['id'])->update(['work_status' => 6]);
@@ -591,7 +596,7 @@ class SelfApi extends Api
                 $data['complete_time'] = date('Y-m-d H:i:s');
             }
             $workorder->where('id', $list['id'])->update($data);
-            Db::name('work_order_recept')->where(['work_id' => $list['id'], 'measure_id' => $measure_id])->update(['recept_status' => 1, 'finish_time' => $date, 'note' => '补差价支付成功']);
+            Db::name('work_order_recept')->where(['work_id' => $list['id'], 'measure_id' => $measure_id])->update(['recept_status' => 1, 'finish_time' => $date, 'note' => '补差价支付成功']);*/
         } else {
             $this->error(__('未查询到数据'), [], 400);
         }
