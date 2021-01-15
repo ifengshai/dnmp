@@ -146,6 +146,41 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
             });
         },
         add: function () {
+            $(document).on('click', '#save', function () {
+                $("#status").val(1);
+                if(!$("#reality_pay_amount").val()){
+                    layer.msg("实际付款金额不能为空");
+                    return false;
+                }
+                if(!$("#rate").val()){
+                    layer.msg("汇率不能为空");
+                    return false;
+                }
+                if(!$("#pay_amount").val()){
+                    layer.msg("付款金额不能为空");
+                    return false;
+                }
+                $("#add-form").submit();
+            });
+            $(document).on('click', '#reset', function () {
+                $("#status").val(1);
+            });
+            $(document).on('click', '#submit', function () {
+                if(!$("#reality_pay_amount").val()){
+                    layer.msg("实际付款金额不能为空");
+                    return false;
+                }
+                if(!$("#rate").val()){
+                    layer.msg("汇率不能为空");
+                    return false;
+                }
+                if(!$("#pay_amount").val()){
+                    layer.msg("付款金额不能为空");
+                    return false;
+                }
+                $("#status").val(2);
+                $("#add-form").submit();
+            });
             Controller.api.bindevent();
         },
         edit: function () {
