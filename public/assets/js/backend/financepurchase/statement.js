@@ -4,12 +4,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             // 初始化表格参数配置
             Table.api.init({
                 extend: {
-                    index_url: 'financepurchase/purchase_pay/index',
-                    add_url: 'financepurchase/purchase_pay/add',
-                    edit_url: 'financepurchase/purchase_pay/edit',
-                    // del_url: 'user/user/del',
-                    // multi_url: 'user/user/multi',
-                    // table: 'user',
+                    index_url: 'financepurchase/statement/index',
+                    add_url: 'financepurchase/statement/add',
+                    edit_url: 'financepurchase/statement/edit',
                 }
             });
             var table = $("#table");
@@ -23,7 +20,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     [
                         // {checkbox: true},
                         {field: 'id', title: __('Id')},
-                        {field: 'order_number', title: __('付款申请单号'), operate: 'LIKE'},
+                        // {field: 'order_number', title: __('付款申请单号'), operate: 'LIKE'},
+                        {field: 'statement_number', title: __('结算单号'), operate: 'LIKE'},
                         {field: 'supplier_name', title: __('供应商名称'), operate: 'LIKE'},
                         {
                             field: 'pay_type', title: __('付款类型'), custom: { 0: 'success', 1: 'yellow', 2: 'blue', 3: 'danger'},
@@ -76,43 +74,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                             return false;
                                         }
                                     }
-                                },
-                                {
-                                    name: 'cancel',
-                                    text: '取消',
-                                    title: '取消',
-                                    classname: 'btn btn-xs btn-danger btn-cancel',
-                                    icon: 'fa fa-remove',
-                                    url: 'financepurchase/purchase_pay/cancel',
-                                    callback: function (data) {
-                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
-                                    },
-                                    visible: function (row) {
-                                        //返回true时按钮显示,返回false隐藏
-                                        if (row.status == 0) {
-                                            return true;
-                                        } else {
-                                            return false;
-                                        }
-
-                                    }
-                                },
+                                }
                             ], formatter: Table.api.formatter.operate
                         }
                     ]
                 ]
             });
-            //审核取消
-            $(document).on('click', '.btn-cancel', function (e) {
-                e.preventDefault();
-                var url = $(this).attr('href');
-                Backend.api.ajax({
-                    url: url,
-                    data: {status: 5}
-                }, function (data, ret) {
-                    table.bootstrapTable('refresh');
-                });
-            })
             // 为表格绑定事件
             Table.api.bindevent(table);
         },
@@ -210,7 +177,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         return false;
                     }
                 })
-
             }
         }
     };

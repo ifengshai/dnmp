@@ -2,7 +2,6 @@
 
 namespace app\admin\controller\financepurchase;
 
-use app\admin\model\financepurchase\FinancePurchase;
 use app\admin\model\purchase\PurchaseOrder;
 use app\api\controller\Ding;
 use app\common\controller\Backend;
@@ -14,7 +13,7 @@ use think\exception\PDOException;
 use think\exception\ValidateException;
 use think\Request;
 
-class PurchasePay extends Backend
+class Statement extends Backend
 {
     protected $noNeedRight = [];
 
@@ -23,17 +22,17 @@ class PurchasePay extends Backend
     public function _initialize()
     {
         parent::_initialize();
-        $this->model = new FinancePurchase();
+        $this->model = new \app\admin\model\financepurchase\Statement();
         $this->purchase_order = new PurchaseOrder();
         $this->supplier = new \app\admin\model\purchase\Supplier;
     }
 
     /**
-     * 采购付款申请单列表
+     * 结算单列表
      * Created by Phpstorm.
      * User: jhh
-     * Date: 2021/1/13
-     * Time: 14:03:39
+     * Date: 2021/1/15
+     * Time: 11:11:07
      */
     public function index()
     {
@@ -182,42 +181,9 @@ class PurchasePay extends Backend
             }
             $this->success('添加成功！！', url('PurchasePay/index'));
         }
-        $label = input('label');
-        //采购单页面过来的创建付款申请单
-        if ($label == 'purchase') {
-            $ids = $ids ? $ids : input('ids');
-            $purchase_order = $this->purchase_order->where('id', $ids)->find();
-            $purchase_order['purchase_type'] = $purchase_order['purchase_type'] == 1 ? '线下采购' : '线上采购';
-            $this->assign('purchase_order', $purchase_order);
-            $puchase_detail = Db::name('purchase_order_item')->where('purchase_id', $purchase_order['id'])->find();
-            $this->assign('purchase_detail', $puchase_detail);
-            //查询采购单对应的供应商信息
-            $data = $this->supplier->where('id', $purchase_order['supplier_id'])->find();
-            switch ($data['period']) {
-                case 1:
-                    $data['period'] = '1个月';
-                    break;
-                case 2:
-                    $data['period'] = '2个月';
-                    break;
-                case 3:
-                    $data['period'] = '3个月';
-                    break;
-            }
-            switch ($data['currency']) {
-                case 1:
-                    $data['currency'] = '人民币';
-                    break;
-                case 2:
-                    $data['currency'] = '美元';
-                    break;
-            }
-            $this->assign('supplier', $data);
-        }
-        //生成付款申请单编号
-        $order_number = 'PR' . date('YmdHis') . rand(100, 999) . rand(100, 999);
+        //生成结算单号
+        $order_number = 'JS' . date('YmdHis') . rand(100, 999) . rand(100, 999);
         $this->assign('order_number', $order_number);
-        $this->assignconfig('newdatetime', date('Y-m-d H:i:s'));
         return $this->view->fetch();
     }
 
@@ -392,31 +358,5 @@ class PurchasePay extends Backend
             $data1['data'] = $data;
         }
         $this->success('', '', $data1);
-    }
-
-    /**
-     * 取消
-     * Created by Phpstorm.
-     * User: jhh
-     * Date: 2021/1/15
-     * Time: 11:14:20
-     */
-    public function cancel($ids = null)
-    {
-        if (!$ids) {
-            $this->error('缺少参数！！');
-        }
-        $row = $this->model->get($ids);
-        if ($row['status'] !== 0) {
-            $this->error('只有新建状态才能取消！！');
-        }
-        $map['id'] = ['in', $ids];
-        $data['status'] = input('status');
-        $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
-        if ($res !== false) {
-            $this->success();
-        } else {
-            $this->error('取消失败！！');
-        }
     }
 }
