@@ -250,7 +250,7 @@ class OrderData extends Backend
                                     if (isset($v['payment_time'])) {
                                         $params['payment_time'] = strtotime($v['payment_time']) + 28800;
                                     }
-                                    $this->order->where(['entity_id' => $v['entity_id'], 'site' => $site])->update($params);
+                                    $this->order->where(['entity_id' => $v['id'], 'site' => $site])->update($params);
                                 }
                             }
 
