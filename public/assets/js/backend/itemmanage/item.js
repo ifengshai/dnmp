@@ -898,6 +898,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                     { field: 'zeelool_es_stock', title: __('Zeelool_es'), operate: false },
                     { field: 'zeelool_de_stock', title: __('Zeelool_de'), operate: false },
                     { field: 'zeelool_jp_stock', title: __('Zeelool_jp'), operate: false },
+                    { field: 'voogmechic_stock', title: __('Voogmechic'), operate: false },
 
                     { field: 'occupy_stock', title: __('订单占用库存'), operate: false },
                     { field: 'distribution_occupy_stock', title: __('配货占用库存'), operate: false },
