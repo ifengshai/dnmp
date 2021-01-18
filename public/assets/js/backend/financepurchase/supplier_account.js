@@ -6,10 +6,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 extend: {
                     index_url: 'financepurchase/supplier_account/index',
                     add_url: 'financepurchase/supplier_account/add',
-                    edit_url: 'financepurchase/supplier_account/edit',
-                    // del_url: 'user/user/del',
-                    // multi_url: 'user/user/multi',
-                    // table: 'user',
+                    // edit_url: 'financepurchase/supplier_account/edit',
                 }
             });
             var table = $("#table");
@@ -26,11 +23,17 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'supplier_name', title: __('供应商名称'), operate: 'LIKE'},
                         {
                             field: 'status', title: __('供应商账期'), custom: { 0: 'success', 1: 'yellow', 2: 'blue', 3: 'danger'},
-                            searchList: { 0: '无账期', 1: '一个月', 2: '两个月', 3: '三个月', 4: '四个月', 5: '五个月'},
+                            searchList: { 0: '无账期', 1: '一个月', 2: '两个月', 3: '三个月'},
                             formatter: Table.api.formatter.status
                         },
+                        {field: 'now_wait_total', title: __('本期待结算金额（¥）'),operate:false},
+                        {field: 'all_wait_total', title: __('总待结算金额（¥）'),operate:false},
                         {field: 'purchase_person', title: __('采购负责人'), operate: 'LIKE'},
-                        {field: 'create_time', title: __('创建时间'), formatter: Table.api.formatter.datetime, operate: 'RANGE', addclass: 'datetimerange', sortable: true},
+                        {
+                            field: 'statement_status', title: __('状态'), custom: { 0: 'success', 1: 'danger'},
+                            searchList: { 0: '本期已结算', 1: '本期未结算'},
+                            formatter: Table.api.formatter.status
+                        },
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
                                 {
@@ -54,67 +57,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     ]
                 ]
             });
-            //审核取消
-            $(document).on('click', '.btn-cancel', function (e) {
-                e.preventDefault();
-                var url = $(this).attr('href');
-                Backend.api.ajax({
-                    url: url,
-                    data: {status: 5}
-                }, function (data, ret) {
-                    table.bootstrapTable('refresh');
-                });
-            })
             // 为表格绑定事件
             Table.api.bindevent(table);
         },
         add: function () {
             Controller.api.bindevent();
-            //获取采购单信息
-            $(document).on('change', '#purchase_number', function () {
-                var purchase_number = $(this).val();
-                var pay_type = $('#pay_type').val();
-                var _this = $(this);
-                if (pay_type == 0) {
-                    Layer.alert('请先选择付款类型');
-                    return false;
-                }
-                Backend.api.ajax({
-                    url: 'financepurchase/purchase_pay/getPurchaseDetail',
-                    data: {purchase_number: purchase_number,pay_type:pay_type}
-                }, function (data, ret) {
-                    //渲染基本信息
-                    $('#purchase_type').val(data.purchase_order.purchase_type)
-                    $('#purchase_number').val(data.purchase_order.purchase_number)
-                    $('#purchase_name').val(data.purchase_order.purchase_name)
-                    $('#supplier_name').val(data.data.supplier_name)
-                    $('#supplier_time').val(data.data.period)
-                    $('#linkname').val(data.data.linkname)
-                    $('#opening_bank_address').val(data.data.opening_bank)
-                    $('#bank_account').val(data.data.bank_account)
-                    $('#base_currency_code').val(data.data.currency)
-                    //渲染采购事由
-                    $('#id').val(data.purchase_detail.id)
-                    $('#name').val(data.purchase_detail.sku)
-                    $('#number').val(data.purchase_order.purchase_number)
-                    $('#type').val(data.purchase_detail.type)
-                    $('#num').val(data.purchase_detail.purchase_num)
-                    $('#single').val(data.purchase_detail.purchase_price)
-                    $('#money').val(data.purchase_detail.purchase_total)
-                    $('#purchase_total').val(data.purchase_order.purchase_total)
-                    $('#supplier_id').val(data.data.id)
-                    $('#purchase_id').val(data.purchase_order.id)
-                    if (pay_type == 1) {
-                        $('#pay_grand_total').val(($('#purchase_total').val() * 0.3).toFixed(2));
-                    }else if(pay_type == 2){
-                        $('#pay_grand_total').val($('#purchase_total').val());
-                        $('#pay_rate').val(1);
-                    }
-                }, function (data, ret) {
-                    Fast.api.error(ret.msg);
-                });
-
-            })
         },
         edit: function () {
             Controller.api.bindevent();
@@ -122,47 +69,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         api: {
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
-                //付款类型
-                $(document).on('change', '#pay_type', function () {
-                    var val = $(this).val();
-                    //预付款
-                    if (val == 1) {
-                        $('#pay_rate').val('0.3');
-                        $('#fuikuanbili').removeClass('hidden');
-                        $('#purchase_text').html('采购单号:');
-                        purchase_total = ($('#purchase_total').val() * 0.3).toFixed(2);
-                        $('#pay_grand_total').val(purchase_total);
-                    } else if(val == 3) {
-                        $('#purchase_text').html('结算单号:');
-                        $('#fuikuanbili').addClass('hidden');
-                    } else {//全款预付
-                        $('#fuikuanbili').addClass('hidden');
-                        $('#purchase_text').html('采购单号:');
-                        $('#pay_rate').val('1');
-                        purchase_total = $('#purchase_total').val()
-                        $('#pay_grand_total').val(purchase_total);
-                    }
-                });
-                //保存 跟提交审核做校验 付款类型不能为空
-                $(document).on('click', '.btn-save', function () {
-                    $('#status').val(0);
-                    //付款类型
-                    var pay_type = $('#pay_type').val();
-                    if (pay_type == 0) {
-                        Layer.alert('请先选择付款类型');
-                        return false;
-                    }
-                })
-                $(document).on('click', '.btn-save1', function () {
-                    //提交审核传状态为1
-                    $('#status').val(1);
-                    var pay_type = $('#pay_type').val();
-                    if (pay_type == 0) {
-                        Layer.alert('请先选择付款类型');
-                        return false;
-                    }
-                })
-
             }
         }
     };
