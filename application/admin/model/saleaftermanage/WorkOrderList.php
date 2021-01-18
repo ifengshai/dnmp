@@ -26,6 +26,7 @@ use GuzzleHttp\Client;
 use app\admin\controller\warehouse\Inventory;
 use app\admin\model\order\order\NewOrder;
 use app\admin\model\order\order\NewOrderItemProcess;
+use app\admin\model\saleaftermanage\WorkOrderChangeSku;
 
 class WorkOrderList extends Model
 {
@@ -223,7 +224,8 @@ class WorkOrderList extends Model
         if (!empty($order_item_list)) {
             foreach ($order_item_list as $key => $value) {
                 //获取更改镜框最新信息
-                $change_sku = $this->_work_order_change_sku
+                $work_order_change_sku = new WorkOrderChangeSku();
+                $change_sku = $work_order_change_sku
                     ->alias('a')
                     ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
                     ->where([
