@@ -59,6 +59,7 @@ class Item extends Backend
         $this->view->assign('brandList', (new ItemBrand())->getBrandList());
         $this->view->assign('AllFrameColor', $this->itemAttribute->getFrameColor());
         $this->view->assign('AllDecorationColor', $this->itemAttribute->getFrameColor(3));
+        $this->view->assign('AllProductSize', config('FRAME_SIZE'));
         $num = $this->model->getOriginSku();
         $idStr = sprintf("%06d", $num);
         $this->assign('IdStr', $idStr);
@@ -742,6 +743,8 @@ class Item extends Backend
         $this->view->assign("row", $row);
         return $this->view->fetch();
     }
+
+
     public function edit($ids = null)
     {
         $row = $this->model->get($ids, 'itemAttribute');
@@ -1066,7 +1069,7 @@ class Item extends Backend
             }
             $item_platform = new \app\admin\model\itemmanage\ItemPlatformSku();
             //如果选择的是全部
-            if ($platform_type == 100){
+            if ($platform_type == 100) {
                 unset($filter['platform_type']);
                 unset($map['platform_type']);
                 $this->request->get(['filter' => json_encode($filter)]);
@@ -1100,11 +1103,10 @@ class Item extends Backend
                     $v['zeelool_jp_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 11])->value('stock');
                 }
                 unset($v);
-
-            }else{
+            } else {
                 //如果选择的是站点 那么主表变为映射关系表
                 if ($filter['sku']) {
-                    $map['a.sku'] = ['LIKE','%'.$filter['sku'].'%'];
+                    $map['a.sku'] = ['LIKE', '%' . $filter['sku'] . '%'];
                     unset($filter['sku']);
                 }
                 $this->request->get(['filter' => json_encode($filter)]);
@@ -1170,7 +1172,7 @@ class Item extends Backend
     public function goods_stock_list1()
     {
         $platform = (new MagentoPlatform())->getNewAuthSite();
-        empty($platform) && $this->error('您没有权限访问','general/profile?ref=addtabs');
+        empty($platform) && $this->error('您没有权限访问', 'general/profile?ref=addtabs');
 
         //设置过滤方法
         $this->request->filter(['strip_tags']);
@@ -1213,24 +1215,24 @@ class Item extends Backend
 
             //获取各站点虚拟库存
             $site_sku_arr = [];
-            foreach($platform as $k => $pv){
-                if($k == 100 || ($k != $website_type && $website_type != 100)){
+            foreach ($platform as $k => $pv) {
+                if ($k == 100 || ($k != $website_type && $website_type != 100)) {
                     continue;
                 }
-                $site_sku = $item_platform->where(['platform_type' => $k])->column('stock','sku');
+                $site_sku = $item_platform->where(['platform_type' => $k])->column('stock', 'sku');
                 $site_sku_arr[$k] = $site_sku;
             }
 
             //查询各站SKU虚拟库存
             foreach ($list as &$v) {
-                if($website_type == 100){
-                    foreach($platform as $k => $pv){
-                        if($k == 100){
+                if ($website_type == 100) {
+                    foreach ($platform as $k => $pv) {
+                        if ($k == 100) {
                             continue;
                         }
-                        $v[$pv.'_stock'] = $site_sku_arr[$k][$v['sku']];
+                        $v[$pv . '_stock'] = $site_sku_arr[$k][$v['sku']];
                     }
-                }else{
+                } else {
                     $v['fictitious_stock'] = $site_sku_arr[$website_type][$v['sku']];
                 }
             }
@@ -1242,8 +1244,8 @@ class Item extends Backend
         }
 
         $magento_platform = [];
-        foreach($platform as $k => $pv){
-            $magento_platform[] = ['id'=>$k,'name'=>$pv];
+        foreach ($platform as $k => $pv) {
+            $magento_platform[] = ['id' => $k, 'name' => $pv];
         }
 
         //取第一个key为默认站点
@@ -1520,15 +1522,15 @@ class Item extends Backend
 
                 //查询同步的平台
                 $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
-                $magento_platform = new \app\admin\model\platformmanage\MagentoPlatform();
                 $platformArr = $platform->where(['sku' => $row['sku'], 'is_upload' => 2])->select();
                 $error_num = [];
                 $uploadItemArr = [];
                 foreach ($platformArr as $k => $v) {
-                    // $magentoArr = $magento_platform->where('id', '=', $v['platform_type'])->find();
                     //审核通过把SKU同步到有映射关系的平台
-                    $uploadItemArr['skus']  = [$v['platform_sku']];
+                    $uploadItemArr['sku']  = $v['platform_sku'];
                     $uploadItemArr['site']  = $v['platform_type'];
+                    //判断是否为戒指
+                    $uploadItemArr['type']  = $row['category_id'] == 53 ? 1 : 2;
                     $soap_res = Soap::createProduct($uploadItemArr);
                     if (!$soap_res) {
                         $error_num[] = $v['platform_type'];
@@ -1676,7 +1678,14 @@ class Item extends Backend
                         // $magentoArr = $magento_platform->where('id', '=', $v['platform_type'])->find();
                         //审核通过把SKU同步到有映射关系的平台
 
-                        $uploadItemArr['skus']  = [$v['platform_sku']];
+                        if ($v['platform_type'] == 12) {
+                            $uploadItemArr['skus']  = [
+                                'sku' => $v['platform_sku'],
+                                'type' => $val['category_id'] == 53 ? 1 : 2
+                            ];
+                        } else {
+                            $uploadItemArr['skus']  = [$v['platform_sku']];
+                        }
                         $uploadItemArr['site']  = $v['platform_type'];
                         $soap_res = Soap::createProduct($uploadItemArr);
                         if ($soap_res) {

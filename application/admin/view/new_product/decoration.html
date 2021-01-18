@@ -52,10 +52,10 @@
                 <td>
                     <div class="col-xs-12 col-sm-12">
                         <select id="c-frame_texture" data-rule="required" class="form-control"
-                            name="row[frame_piece][]">
+                            name="row[frame_size][]">
                             <option value="">请选择</option>
-                            {foreach $AllFramePiece as $k => $vo}
-                            <option value="{$k}" {:$row['frame_piece'] === $k ? 'selected' : '' }>{$vo}</option>
+                            {foreach $AllProductSize as $k => $vo}
+                            <option value="{$k}" {:$row['frame_size'] === $k ? 'selected' : '' }>{$vo}</option>
                             {/foreach}
                         </select>
                     </div>
@@ -117,9 +117,9 @@
             <td>
                 <div class="col-xs-12 col-sm-12">
                     <select id="c-frame_texture" data-rule="required" class="form-control "
-                        name="row[frame_piece][]">
+                        name="row[frame_size][]">
                         <option value="">请选择</option>
-                        {foreach $AllFramePiece as $k => $vo}
+                        {foreach $AllProductSize as $k => $vo}
                         <option value="{$k}">{$vo}</option>
                         {/foreach}
                     </select>

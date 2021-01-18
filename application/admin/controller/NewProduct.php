@@ -49,7 +49,7 @@ class NewProduct extends Backend
         $this->view->assign('categoryList', $this->category->categoryList());
         $this->view->assign('brandList', (new ItemBrand())->getBrandList());
         $this->view->assign('AllFrameColor', $this->itemAttribute->getFrameColor());
-        $this->view->assign('AllFramePiece', config('FRAME_PIECE'));
+        $this->view->assign('AllProductSize', config('FRAME_SIZE'));
         $this->item = new \app\admin\model\itemmanage\Item;
         $num = $this->item->getOriginSku();
         $idStr = sprintf("%06d", $num);
@@ -220,13 +220,13 @@ class NewProduct extends Backend
                 $supplierSku = $params['supplier_sku'];
                 $price = $params['price'];
                 $skuId = $params['skuid'];
-                $frame_piece = $params['frame_piece'] ?: [];
+                $frame_size = $params['frame_size'] ?: [];
                 //区分是镜架还是配饰
                 $item_type = $params['item_type'];
                 $data = $itemAttribute = [];
                 if (3 == $item_type) { //配饰
 
-                    if (count(array_filter($frame_piece)) != count(array_unique(array_filter($frame_piece)))) {
+                    if (count(array_filter($frame_size)) != count(array_unique(array_filter($frame_size)))) {
                         $this->error('尺寸不能重复');
                     }
 
@@ -299,13 +299,13 @@ class NewProduct extends Backend
                                     $textureEncode = '';
                                 }
 
-                                if ($frame_piece[$k] == 0) {
+                                if ($frame_size[$k] == 0) {
                                     $data['sku'] = $textureEncode . $params['origin_sku'] . '-66';
                                 } else {
-                                    if ($frame_piece[$k] < 10) {
-                                        $data['sku'] = $textureEncode . $params['origin_sku'] . '-0' . $frame_piece[$k];
+                                    if ($frame_size[$k] < 10) {
+                                        $data['sku'] = $textureEncode . $params['origin_sku'] . '-0' . $frame_size[$k];
                                     } else {
-                                        $data['sku'] = $textureEncode . $params['origin_sku'] . '-' . $frame_piece[$k];
+                                        $data['sku'] = $textureEncode . $params['origin_sku'] . '-' . $frame_size[$k];
                                     }
                                 }
                                 $count = Db::name('new_product')->where(['sku' => $data['sku']])->count();
@@ -325,7 +325,7 @@ class NewProduct extends Backend
                                 $itemAttribute['accessory_color'] = $itemColor[$k];
                                 $itemAttribute['frame_remark'] = $params['frame_remark'];
                                 $itemAttribute['frame_images'] = $params['frame_images'];
-                                $itemAttribute['frame_piece'] = $frame_piece[$k] ?: 0;
+                                $itemAttribute['frame_size'] = $frame_size[$k] ?: 0;
 
                                 $res = Db::name('new_product_attribute')->insert($itemAttribute);
                                 if (!$res) {
