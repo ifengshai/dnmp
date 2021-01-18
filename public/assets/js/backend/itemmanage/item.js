@@ -1,13 +1,13 @@
 define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-table-jump-to'], function ($, undefined, Backend, Table, Form) {
-    function viewTable(table,show,hide){
-        if(show.length > 0){
-            $.each(show,function(index,value){
-                table.bootstrapTable('showColumn',value);
+    function viewTable(table, show, hide) {
+        if (show.length > 0) {
+            $.each(show, function (index, value) {
+                table.bootstrapTable('showColumn', value);
             });
         }
-        if(hide.length > 0){
-            $.each(hide,function(index,value){
-                table.bootstrapTable('hideColumn',value);
+        if (hide.length > 0) {
+            $.each(hide, function (index, value) {
+                table.bootstrapTable('hideColumn', value);
             });
         }
     }
@@ -333,7 +333,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                     }
                 );
             });
-			//批量导出xls 
+            //批量导出xls 
             $('.btn-batch-export-xls').click(function () {
                 var ids = Table.api.selectedids(table);
                 if (ids.length > 0) {
@@ -345,7 +345,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                     var op = search.op;
                     window.open(Config.moduleurl + '/itemmanage/item/batch_export_xls?filter=' + filter + '&op=' + op, '_blank');
                 }
-                
+
             });
         },
         add: function () {
@@ -370,10 +370,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 $(document).on('click', '.btn-add', function () {
                     var item_type = $('#item_type').val();
                     $(".selectpicker").selectpicker('refresh');
-                    if(3 == item_type){
+                    if (3 == item_type) {
                         var content = $('#table-content2 table tbody').html();
                         $('.caigou table tbody').append(content);
-                    }else{
+                    } else {
                         var content = $('#table-content table tbody').html();
                         $('.caigou table tbody').append(content);
                     }
@@ -551,7 +551,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                         '<tr>' +
                                         '<th>商品名称</th>' +
                                         '<th>商品颜色</th>' +
-                                        '<th>商品进价</th>'+
+                                        '<th>商品进价</th>' +
                                         '<th>操作</th>' +
                                         '</tr>';
                                     for (var j = 0, len = resultData.itemArr.length; j < len; j++) {
@@ -562,7 +562,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                         Str += '<select  id="c-color" data-rule="required" class="form-control " name="row[color][]" disabled="disabled">';
                                         Str += '<option value="' + newItem.frame_color + '">' + newItem.frame_color_value + '</option>';
                                         Str += '</select></td>';
-                                        Str += '<td><input id="c-name" class="form-control" name="row[price][] type="text" value="'+ newItem.price +'" disabled="disabled"></td>';
+                                        Str += '<td><input id="c-name" class="form-control" name="row[price][] type="text" value="' + newItem.price + '" disabled="disabled"></td>';
                                         Str += '<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a></td>';
                                         Str += '</tr>';
                                     }
@@ -573,10 +573,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                 });
                             }
                             $(".selectpicker").selectpicker('refresh');
-                        }else if((resultData != false) && (resultData.type >= 3)){
+                        } else if ((resultData != false) && (resultData.type >= 3)) {
                             console.log(resultData);
                             //console.log(resultData.accessory_texture);
-                            $("#c-frame_texture").find("option[value="+resultData.accessory_texture+"]").prop("selected", true);
+                            $("#c-frame_texture").find("option[value=" + resultData.accessory_texture + "]").prop("selected", true);
                             $('#item-count').val(resultData.itemCount);
                             if (resultData.origin_sku) {
                                 $(".addition").remove();
@@ -592,7 +592,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                         '<tr>' +
                                         '<th>商品名称</th>' +
                                         '<th>商品颜色</th>' +
-                                        '<th>商品进价</th>'+
+                                        '<th>商品进价</th>' +
                                         '<th>操作</th>' +
                                         '</tr>';
                                     for (var j = 0, len = resultData.itemArr.length; j < len; j++) {
@@ -603,7 +603,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                         Str += '<select  id="c-color" data-rule="required" class="form-control " name="row[color][]" disabled="disabled">';
                                         Str += '<option value="' + newItem.accessory_color + '">' + newItem.accessory_color + '</option>';
                                         Str += '</select></td>';
-                                        Str += '<td><input id="c-name" class="form-control" name="row[price][] type="text" value="'+ newItem.price +'" disabled="disabled"></td>';
+                                        Str += '<td><input id="c-name" class="form-control" name="row[price][] type="text" value="' + newItem.price + '" disabled="disabled"></td>';
                                         Str += '<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a></td>';
                                         Str += '</tr>';
                                     }
@@ -613,8 +613,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                     return Str;
                                 });
                             }
-                            $(".selectpicker").selectpicker('refresh');                            
-                        }else{
+                            $(".selectpicker").selectpicker('refresh');
+                        } else {
                             Layer.alert('旧商品SKU信息暂时没有同步...请耐心等待');
                         }
                         return false;
@@ -878,7 +878,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                     },
                     { field: 'id', title: __('Id'), operate: false },
                     { field: 'sku', title: __('Sku'), operate: 'like' },
-                    { field: 'name', title: __('Name'),visible: false },
+                    { field: 'name', title: __('Name'), visible: false },
                     { field: 'stock', title: __('总库存'), operate: false },
                     {
                         field: '', title: __('仓库实时库存'), operate: false,
@@ -930,78 +930,17 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                         ]
                     }
                 ]
-                    // [
-                //         { checkbox: true },
-                //         {
-                //             field: '', title: __('序号'), formatter: function (value, row, index) {
-                //                 var options = table.bootstrapTable('getOptions');
-                //                 var pageNumber = options.pageNumber;
-                //                 var pageSize = options.pageSize;
-                //                 return (pageNumber - 1) * pageSize + 1 + index;
-                //             }, operate: false
-                //         },
-                //         { field: 'id', title: __('Id'), operate: false },
-                //         { field: 'sku', title: __('Sku'), operate: 'like' },
-                //         // { field: 'name', title: __('Name') },
-                //
-                //         { field: 'stock', title: __('总库存'), operate: false },
-                //         {
-                //             field: '', title: __('仓库实时库存'), operate: false, formatter: function (value, row) {
-                //                 return row.stock - row.distribution_occupy_stock;
-                //             }
-                //         },
-                //         { field: 'available_stock', title: __('可用库存'), operate: false },
-                //         { field: 'plat_stock', title: __('虚拟仓库存'), operate: false },
-                //         // { field: 'zeelool_stock', title: __('虚拟仓库存Zeelool'), operate: false },
-                //         // { field: 'voogueme_stock', title: __('虚拟仓库存Voogueme'), operate: false },
-                //         // { field: 'nihao_stock', title: __('虚拟仓库存Nihao'), operate: false },
-                //         // { field: 'meeloog_stock', title: __('虚拟仓库存Meeloog'), operate: false },
-                //         // { field: 'wesee_stock', title: __('虚拟仓库存Wesee'), operate: false },
-                //         // { field: 'amazon_stock', title: __('虚拟仓库存Amazon'), operate: false },
-                //         // { field: 'zeelool_es_stock', title: __('虚拟仓库存Zeelool_es'), operate: false },
-                //         // { field: 'zeelool_de_stock', title: __('虚拟仓库存Zeelool_de'), operate: false },
-                //         // { field: 'zeelool_jp_stock', title: __('虚拟仓库存Zeelool_jp'), operate: false },
-                //         // { field: 'distribution_occupy_stock', title: __('配货占用库存'), operate: false },
-                //
-                //         // { field: 'occupy_stock', title: __('订单占用库存'), operate: false },
-                //         { field: 'sample_num', title: __('留样库存'), operate: false },
-                //
-                //         { field: 'on_way_stock', title: __('在途库存'), operate: false },
-                //         { field: 'wait_instock_num', title: __('待入库数量'), operate: false },
-                //         { field: 'is_open', title: __('SKU启用状态'), searchList: { 1: '启用', 2: '禁用', 3: '回收站' }, formatter: Table.api.formatter.status },
-                //         {
-                //             field: 'operate', title: __('操作'), table: table, formatter: Table.api.formatter.operate,
-                //             buttons: [
-                //                 {
-                //                     name: 'detail',
-                //                     text: '详情',
-                //                     title: __('查看详情'),
-                //                     extend: 'data-area = \'["100%","100%"]\'',
-                //                     classname: 'btn btn-xs btn-primary btn-dialog',
-                //                     icon: 'fa fa-list',
-                //                     url: Config.moduleurl + '/itemmanage/item/goods_stock_detail',
-                //                     callback: function (data) {
-                //                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
-                //                     },
-                //                     visible: function (row) {
-                //                         //返回true时按钮显示,返回false隐藏+
-                //                         return true;
-                //                     }
-                //                 }
-                //             ]
-                //         }
-                //     ]
-                // ]
+
 
             });
 
             // 为表格绑定事件
             Table.api.bindevent(table);
 
-            var all_arr = ['zeelool_stock','occupy_stock','distribution_occupy_stock','voogueme_stock','nihao_stock','meeloog_stock','wesee_stock','amazon_stock','zeelool_es_stock','zeelool_de_stock','zeelool_jp_stock','on_way_stock'];
-            var site_arr = ['plat_stock','plat_on_way_stock'];
+            var all_arr = ['zeelool_stock', 'occupy_stock', 'distribution_occupy_stock', 'voogueme_stock', 'nihao_stock', 'meeloog_stock', 'wesee_stock', 'amazon_stock', 'zeelool_es_stock', 'zeelool_de_stock', 'zeelool_jp_stock', 'on_way_stock', 'voogmechic_stock'];
+            var site_arr = ['plat_stock', 'plat_on_way_stock'];
 
-            viewTable(table,Config.label == 100 ? all_arr : site_arr,Config.label == 100 ? site_arr : all_arr);
+            viewTable(table, Config.label == 100 ? all_arr : site_arr, Config.label == 100 ? site_arr : all_arr);
 
             //选项卡切换
             $('.panel-heading a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
@@ -1016,7 +955,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                     params.op = JSON.stringify(op);
                     return params;
                 };
-                viewTable(table,value == 100 ? all_arr : site_arr,value == 100 ? site_arr : all_arr);
+                viewTable(table, value == 100 ? all_arr : site_arr, value == 100 ? site_arr : all_arr);
                 table.bootstrapTable('refresh', {});
             });
         },
@@ -1144,7 +1083,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function (row) {
-                                            return true;
+                                        return true;
                                     }
                                 },
                                 {
@@ -1159,7 +1098,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function (row) {
-                                            return true;
+                                        return true;
                                     }
                                 },
                             ]
@@ -1278,10 +1217,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 }
             });
         },
-    edit_presell: function(){
-        Controller.api.bindevent();
-        Form.api.bindevent($("form[role=form]"));
-    }  
+        edit_presell: function () {
+            Controller.api.bindevent();
+            Form.api.bindevent($("form[role=form]"));
+        }
     };
     return Controller;
 });
