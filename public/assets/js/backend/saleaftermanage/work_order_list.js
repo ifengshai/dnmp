@@ -2955,7 +2955,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         //判断更换处方的状态，如果显示的话把数据带出来，如果隐藏则不显示镜架数据 end
                     }
                 });
-                
+                //修改地址-State/Province联动补充Region内容
+                $(document).on('change', '#c-region2', function () {
+                    var region = $("#c-region2 option:selected").text();
+                    $('#c-region12').val(region);
+                });
 
             },
         }
