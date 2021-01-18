@@ -2957,8 +2957,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     }
                 });
                 //修改地址-State/Province联动补充Region内容
-                $(document).on('click', '#c-region2 option', function () {
-                    alert($(this).html());
+                $(document).on('click', '#c-region2', function () {
+                    alert($(this).text());
                 });
 
             },
