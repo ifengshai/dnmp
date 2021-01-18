@@ -220,7 +220,7 @@ class NewProduct extends Backend
                 $supplierSku = $params['supplier_sku'];
                 $price = $params['price'];
                 $skuId = $params['skuid'];
-                $frame_piece = $params['frame_piece'];
+                $frame_piece = $params['frame_piece'] ?: [];
                 //区分是镜架还是配饰
                 $item_type = $params['item_type'];
                 $data = $itemAttribute = [];
@@ -325,7 +325,7 @@ class NewProduct extends Backend
                                 $itemAttribute['accessory_color'] = $itemColor[$k];
                                 $itemAttribute['frame_remark'] = $params['frame_remark'];
                                 $itemAttribute['frame_images'] = $params['frame_images'];
-                                $itemAttribute['frame_piece'] = $frame_piece[$k];
+                                $itemAttribute['frame_piece'] = $frame_piece[$k] ?: 0;
 
                                 $res = Db::name('new_product_attribute')->insert($itemAttribute);
                                 if (!$res) {
