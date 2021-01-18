@@ -220,7 +220,7 @@ class WorkOrderList extends Model
             ->where($order_item_where)
             ->column('sku','item_order_number')
         ;
-        if (empty($order_item_list)) {
+        if (!empty($order_item_list)) {
             foreach ($order_item_list as $key => $value) {
                 //获取更改镜框最新信息
                 $change_sku = $this->_work_order_change_sku
