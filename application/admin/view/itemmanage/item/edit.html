@@ -12,8 +12,8 @@
         border-color: rgba(188, 188, 188, 1);
         border-radius: 6px;
         padding: 10px;
-        width: 73%;
-        margin-left: 10%;
+        width: 70%;
+        margin-left: 13%;
         margin-bottom: 10px;
     }
 
@@ -301,9 +301,7 @@
         <div class='caigou ajax-add'>
             <p style="font-size: 16px;text-align: center;"><b>产品信息</b></p>
             <div style="margin-bottom:20px;">
-                <div id="toolbar" class="toolbar">
-                    <a href="javascript:;" class="btn btn-success btn-add" title="增加"><i class="fa fa-plus"></i> 增加</a>
-                </div>
+               
                 <table id="caigou-table">
                     <tr>
                         <th>商品名称</th>
@@ -312,7 +310,6 @@
                         <th>商品尺寸</th>
                         {/if}
                         <th>单价</th>
-                        <th>操作</th>
                     </tr>
                     <tr>
                         <td><input id="c-name" data-rule="required"  class="form-control" name="row[name][]" type="text" value="{$row.name}"></td>
@@ -329,18 +326,17 @@
                         {if $row['category_id'] == 53}
                         <td>
                             <div class="col-xs-12 col-sm-12">
-                                <select id="c-frame_texture" data-rule="required" class="form-control" name="row[frame_size][]">
+                                <select id="c-frame_texture" data-rule="required" class="form-control" disabled>
                                     <option value="">请选择</option>
                                     {foreach $AllProductSize as $k => $vo}
-                                    <option value="{$k}" {:$row['itemAttribute']['frame_size']===$k ? 'selected' : '' }>{$vo}</option>
+                                    <option value="{$k}" {:$row['itemAttribute']['frame_size']==$k ? 'selected' : '' }>{$vo}</option>
                                     {/foreach}
                                 </select>
                             </div>
                         </td>
                         {/if}
                         <td><input  data-rule="required"  class="form-control c-price" name="row[price][]" type="text" value="{$row.price}"></td>
-                        <td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>
-                            删除</a></td>
+                       
                     </tr>
     
                 </table>
