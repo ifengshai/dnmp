@@ -220,7 +220,24 @@ class WorkOrderList extends Model
             ->where($order_item_where)
             ->column('sku','item_order_number')
         ;
-
+        if (empty($order_item_list)) {
+            foreach ($order_item_list as $key => $value) {
+                //获取更改镜框最新信息
+                $change_sku = $this->_work_order_change_sku
+                    ->alias('a')
+                    ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
+                    ->where([
+                        'a.change_type' => 1,
+                        'a.item_order_number' => $key,
+                        'b.operation_type' => 1
+                    ])
+                    ->order('a.id', 'desc')
+                    ->value('a.change_sku');
+                if ($change_sku) {
+                    $order_item_list[$key] = $change_sku;
+                }
+            }
+        }
         $sku_data = $_new_order_item_process
             ->where(['order_id'=>$result['id']])
             ->group('sku')
