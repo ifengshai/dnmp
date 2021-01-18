@@ -3,7 +3,6 @@
 namespace app\admin\controller\finance;
 
 use app\common\controller\Backend;
-use think\Cache;
 use think\Db;
 
 class PayOrder extends Backend
@@ -11,6 +10,8 @@ class PayOrder extends Backend
     public function _initialize()
     {
         $this->financepurchase = new \app\admin\model\financepurchase\FinancePurchase;
+        $this->payorder = new \app\admin\model\financepurchase\FinancePayorder;
+        $this->payorder_item = new \app\admin\model\financepurchase\FinancePayorderItem;
         $this->supplier = new \app\admin\model\purchase\Supplier;
         return parent::_initialize();
 
@@ -20,7 +21,72 @@ class PayOrder extends Backend
      * */
     public function index()
     {
-        
+        //设置过滤方法
+        $this->request->filter(['strip_tags']);
+        if ($this->request->isAjax()) {
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
+            }
+            $filter = json_decode($this->request->get('filter'), true);
+            if($filter['pay_number']){
+                //付款申请单号
+                $map['p.pay_number'] = $filter['pay_number'];
+            }
+            if($filter['supplier_name']){
+                //供应商名称
+                $map['s.supplier_name'] = ['like','%'.$filter['supplier_name'].'%'];
+            }
+            if($filter['status']){
+                //状态
+                $map['p.status'] = $filter['status'];
+            }
+            if($filter['create_user']){
+                //审核人
+                $map['p.create_user'] = $filter['create_user'];
+            }
+            if($filter['check_user']){
+                //创建人
+                $map['p.check_user'] = $filter['check_user'];
+            }
+            //创建时间
+            if($filter['create_time']){
+                $createat = explode(' ', $filter['create_time']);
+                $start = strtotime($createat[0].' '.$createat[1]);
+                $end = strtotime($createat[3].' '.$createat[4]);
+                $map['p.create_time'] = ['between', [$start,$end]];
+            }
+            unset($filter['pay_number']);
+            unset($filter['status']);
+            unset($filter['create_user']);
+            unset($filter['check_user']);
+            unset($filter['create_time']);
+            unset($filter['one_time-operate']);
+            $this->request->get(['filter' => json_encode($filter)]);
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $sort = 'p.id';
+            $total = $this->payorder
+                ->alias('p')
+                ->join('fa_supplier s','p.supply_id=s.id','left')
+                ->where($where)
+                ->where($map)
+                ->order($sort, $order)
+                ->count();
+            $list = $this->payorder
+                ->alias('p')
+                ->join('fa_supplier s','p.supply_id=s.id','left')
+                ->field('p.id,s.supplier_name,p.pay_number,p.status,p.create_user,p.check_user,FROM_UNIXTIME(p.create_time) create_time')
+                ->where($where)
+                ->where($map)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();
+            $list = collection($list)->toArray();
+            $result = array("total" => $total, "rows" => $list);
+            return json($result);
+        }
+        $now_user = session('admin.nickname');
+        $this->assignconfig('now_user', $now_user);
         return $this->view->fetch();
     }
     /*
@@ -90,6 +156,130 @@ class PayOrder extends Backend
         $this->view->assign(compact('pay_number','supplier', 'settle', 'prepay','total1','total2','total','count1','count2','ids'));
         return $this->view->fetch();
     }
+    /*
+     * 详情
+     * */
+    public function detail(){
+        $id = input('ids');
+        $supplier = $this->supplier->where('id',$id)->field('id,supplier_name,currency,period,opening_bank,bank_account,recipient_name')->select();
+        //获取付款单信息
+        $pay_order = $this->payorder->where('id',$id)->find();
+        //获取付款单子单结算信息
+        $settle = $this->payorder_item->where(['pay_id'=>$id,'pay_type'=>3])->select();
+        $total1= 0;
+        $count1 = 0;
+        foreach ($settle as $k=>$v){
+            $total1 += $v['wait_statement_total'];
+            $count1++;
+        }
+        //获取付款单子单预付信息
+        $prepay = $this->payorder_item->where(['pay_id'=>$id])->where('pay_type','<>',3)->select();
+        $total2= 0;
+        $count2 = 0;
+        foreach ($prepay as $k1=>$v1){
+            $total2 += $v1['pay_grand_total'];
+            $count2++;
+        }
+        $total = $total1+$total2;
+        $this->view->assign(compact('pay_order','supplier', 'settle', 'prepay','total1','total2','total','count1','count2'));
+        return $this->view->fetch();
+    }
+    /*
+     * 编辑
+     * */
+    public function edit($ids = ''){
+        $id = input('ids');
+        //获取付款单信息
+        $pay_order = $this->payorder->where('id',$id)->find();
+        if ($this->request->isAjax()) {
+            $params = $this->request->post("row/a");
+            $ids = $params['ids'];
+            unset($params['ids']);
+            unset($params['currency']);
+            Db::name('finance_payorder')->where('id',$ids)->update($params);
+            $this->success('编辑成功！！', '','');
+        }
+        $this->view->assign(compact('pay_order','now_user'));
+        return $this->view->fetch();
+    }
+    /*
+     * 更改状态
+     * */
+    public function setStatus($ids = ''){
+        $status = input('status');
+        $row = $this->payorder->get($ids);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+        if (request()->isAjax()) {
+            $params['status'] = $status;
+            $result = $row->allowField(true)->save($params);
+            if($status == 6 || $status == 7){
+                //在待付款单中显示
+                $purchase_id = $this->payorder_item->where('pay_id',$ids)->column('purchase_id');
+                $purchase_id = implode(',',$purchase_id);
+                $this->financepurchase->where('id','in',$purchase_id)->update(['is_show'=>1]);
+            }
+            if (false !== $result) {
+                $this->success('操作成功！！');
+            } else {
+                $this->error('操作失败！！');
+            }
+        }
+        $this->error('404 not found');
+    }
+    /**
+     * 上传
+     */
+    public function upload()
+    {
+        if ($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+            $this->success('', '', $params);
+        }
+        return $this->view->fetch();
+    }
+    public function getItemData()
+    {
+        if ($this->request->isAjax()) {
+            $id = input('id');
+            $batch = new \app\admin\model\purchase\PurchaseBatch();
+            $item = $batch->alias('a')->where('a.id', $id)
+                ->field('b.sku,b.arrival_num,c.supplier_sku,c.purchase_num,a.purchase_id,d.supplier_id,d.replenish_id')
+                ->join(['fa_purchase_batch_item' => 'b'], 'a.id=b.purchase_batch_id')
+                ->join(['fa_purchase_order_item' => 'c'], 'c.purchase_id=a.purchase_id and b.sku=c.sku')
+                ->join(['fa_purchase_order' => 'd'], 'd.id=a.purchase_id')
+                ->select();
+            //查询质检数量
+            $skus = array_column($item, 'sku');
+            //查询质检信息
+            $check_map['Check.purchase_id'] = $id;
+            $check_map['type'] = 1;
+            $check = new \app\admin\model\warehouse\Check;
+            $list = $check->hasWhere('checkItem', ['sku' => ['in', $skus]])
+                ->where($check_map)
+                ->field('sku,sum(arrivals_num) as check_num')
+                ->group('sku')
+                ->select();
+            $list = collection($list)->toArray();
+            //重组数组
+            $check_item = [];
+            foreach ($list as $k => $v) {
+                @$check_item[$v['sku']]['check_num'] = $v['check_num'];
+            }
+
+            foreach ($item as $k => $v) {
+                $item[$k]['check_num'] = @$check_item[$v['sku']]['check_num'] ?? 0;
+            }
+
+            if ($item) {
+                $this->success('', '', $item);
+            } else {
+                $this->error();
+            }
+        }
+    }
+    //获取付款申请单信息
     public function getPayinfo($ids = 0){
         //供应商id
         $supplier_id = $this->financepurchase->where('id','in',$ids)->value('supplier_id');

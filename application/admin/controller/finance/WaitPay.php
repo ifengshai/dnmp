@@ -32,7 +32,7 @@ class WaitPay extends Backend
             }
             if($filter['supplier_name']){
                 //供应商名称
-                $map['s.supplier_name'] = $filter['supplier_name'];
+                $map['s.supplier_name'] = ['like','%'.$filter['supplier_name'].'%'];
             }
             if($filter['userid']){
                 //审核人
