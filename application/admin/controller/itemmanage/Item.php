@@ -49,6 +49,7 @@ class Item extends Backend
         $this->view->assign('brandList', (new ItemBrand())->getBrandList());
         $this->view->assign('AllFrameColor', $this->itemAttribute->getFrameColor());
         $this->view->assign('AllDecorationColor', $this->itemAttribute->getFrameColor(3));
+        $this->view->assign('AllProductSize', config('FRAME_SIZE'));
         $num = $this->model->getOriginSku();
         $idStr = sprintf("%06d", $num);
         $this->assign('IdStr', $idStr);
@@ -732,6 +733,8 @@ class Item extends Backend
         $this->view->assign("row", $row);
         return $this->view->fetch();
     }
+
+
     public function edit($ids = null)
     {
         $row = $this->model->get($ids, 'itemAttribute');
@@ -776,6 +779,7 @@ class Item extends Backend
                                 $itemAttribute['accessory_color'] = $itemColor[$k];
                                 $itemAttribute['accessory_texture'] = $params['frame_texture'];
                                 $itemAttribute['frame_remark'] = $params['frame_remark'];
+                                $itemAttribute['frame_size'] = $params['frame_size'];
                                 $itemAttr = Db::connect('database.db_stock')->name('item_attribute')->where('item_id', '=', $row['id'])->update($itemAttribute);
                             }
                             Db::commit();

@@ -319,7 +319,7 @@ return [
 
 
     //饰品尺寸
-    'FRAME_PIECE' => [
+    'FRAME_SIZE' => [
         '可调节',
         3,
         3.5,

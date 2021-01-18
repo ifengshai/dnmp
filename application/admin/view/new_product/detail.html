@@ -360,8 +360,8 @@
                             <select id="c-frame_texture" data-rule="required" class="form-control"
                                  disabled>
                                 <option value="">请选择</option>
-                                {foreach $AllFramePiece as $k => $vo}
-                                <option value="{$k}" {:$row['newproductattribute']['frame_piece']===$k ? 'selected' : '' }>{$vo}</option>
+                                {foreach $AllProductSize as $k => $vo}
+                                <option value="{$k}" {:$row['newproductattribute']['frame_size']===$k ? 'selected' : '' }>{$vo}</option>
                                 {/foreach}
                             </select>
                         </div>
