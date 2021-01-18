@@ -1528,10 +1528,17 @@ class Item extends Backend
                 $uploadItemArr = [];
                 foreach ($platformArr as $k => $v) {
                     //审核通过把SKU同步到有映射关系的平台
-                    $uploadItemArr['sku']  = $v['platform_sku'];
-                    $uploadItemArr['site']  = $v['platform_type'];
-                    //判断是否为戒指
-                    $uploadItemArr['type']  = $row['category_id'] == 53 ? 1 : 2;
+                    if ($v['platform_type'] == 12) {
+                        $uploadItemArr['skus'][0]  = [
+                            'sku' =>  $v['platform_sku'],
+                            'type' =>  $row['category_id'] == 53 ? 1 : 2
+                        ];
+                        $uploadItemArr['sku']  = $v['platform_sku'];
+                        $uploadItemArr['site']  = $v['platform_type'];
+                    } else {
+                        $uploadItemArr['skus']  = [$v['platform_sku']];
+                    }
+
                     $soap_res = Soap::createProduct($uploadItemArr);
                     if (!$soap_res) {
                         $error_num[] = $v['platform_type'];
@@ -1680,10 +1687,12 @@ class Item extends Backend
                         //审核通过把SKU同步到有映射关系的平台
 
                         if ($v['platform_type'] == 12) {
-                            $uploadItemArr['skus']  = [
+                            $uploadItemArr['skus'][0]  = [
                                 'sku' => $v['platform_sku'],
                                 'type' => $val['category_id'] == 53 ? 1 : 2
                             ];
+                            $uploadItemArr['sku']  = $v['platform_sku'];
+                            $uploadItemArr['type']  = $val['category_id'] == 53 ? 1 : 2;
                         } else {
                             $uploadItemArr['skus']  = [$v['platform_sku']];
                         }
