@@ -9,6 +9,7 @@ use think\Db;
 use SchGroup\SeventeenTrack\Connectors\TrackingConnector;
 use app\admin\model\DistributionLog;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use fast\Excel;
 
 class Test extends Backend
 {
@@ -2441,5 +2442,40 @@ class Test extends Backend
             $params[$k]['wait_instock_num'] = $purchase_num;
         }
         $item->saveAll($params);
+    }
+
+    /**
+     * 导出数据
+     */
+    public function derive_data()
+    {
+        $itemplatform = new \app\admin\model\itemmanage\ItemPlatformSku();
+        $list = $itemplatform->alias('a')->field('a.*,b.purchase_price')->join(['fa_item' => 'b'], 'a.sku=b.sku')->where(['b.is_del' => 1, 'b.is_open' => 1, 'b.category_id' => ['<>', 43], 'platform_type' => ['in', [1, 2, 3]]])->select();
+     
+
+        //总虚拟库存
+        $allstock = $itemplatform->alias('a')->join(['fa_item' => 'b'], 'a.sku=b.sku')->where(['b.is_del' => 1, 'b.is_open' => 1, 'b.category_id' => ['<>', 43], 'platform_type' => ['in', [1, 2, 3]]])->sum('a.stock');
+      
+        $data = [];
+        foreach ($list as $k => $v) {
+            $data[$k]['sku'] = $v['sku'];
+            $data[$k]['platform_sku'] = $v['platform_sku'];
+            //站点判断
+            $str = '';
+            if ($v['platform_type'] == 1) {
+                $str = 'zeelool';
+            } else if ($v['platform_type'] == 2) {
+                $str = 'voogueme';
+            } else if ($v['platform_type'] == 3) {
+                $str = 'nihao';
+            }
+            $data[$k]['platform_type'] = $str;
+            $percent = round($v['stock'] / $allstock, 2);
+            $data[$k]['money'] = ($v['stock'] * $v['purchase_price']) * $percent;
+            $data[$k]['percent'] =  $percent * 100 . '%';
+        }
+        $header = 'sku,平台sku,站点,sku占用金额,sku占用库存比例';
+        $filename = '数据导出.csv';
+        Excel::create_csv($data, $header, $filename);
     }
 }
