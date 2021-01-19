@@ -2449,6 +2449,7 @@ class Test extends Backend
      */
     public function derive_data()
     {
+        
         $itemplatform = new \app\admin\model\itemmanage\ItemPlatformSku();
         $list = $itemplatform->alias('a')->field('a.*,b.purchase_price')->join(['fa_item' => 'b'], 'a.sku=b.sku')->where(['b.is_del' => 1, 'b.is_open' => 1, 'b.category_id' => ['<>', 43], 'platform_type' => ['in', [1, 2, 3]]])->select();
         //总虚拟库存
@@ -2472,7 +2473,7 @@ class Test extends Backend
                 $str = 'nihao';
             }
             $data[$k]['platform_type'] = $str;
-            $percent = round($v['stock'] / $allstock[$v['sku']], 2);
+            $percent = $allstock[$v['sku']] > 0 ? round($v['stock'] / $allstock[$v['sku']], 2) : 0;
             $data[$k]['stock'] = $v['stock'];
             $data[$k]['allstock'] = $allstock[$v['sku']];
             $data[$k]['purchase_price'] = $v['purchase_price'];
