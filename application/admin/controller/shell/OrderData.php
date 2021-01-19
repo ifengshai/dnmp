@@ -372,7 +372,7 @@ class OrderData extends Backend
                                     $options['index_price'] = $v['lens_total_price'];
                                     $options['frame_color'] = $v['goods_color'];
                                     $options['goods_type'] = $v['goods_type'];
-                                   
+
                                     $order_prescription_type = $options['order_prescription_type'];
                                     unset($options['order_prescription_type']);
                                     if ($options) {
@@ -1517,10 +1517,113 @@ class OrderData extends Backend
 
 
 
-
-
-
     ################################################处理旧数据脚本##########################################################################
+
+
+
+
+    /**
+     * 批发站主表
+     *
+     * @Description
+     * @author wpl
+     * @since 2021/01/19 09:37:37 
+     * @param [type] $site
+     * @return void
+     */
+    public function wesee_old_order()
+    {
+        $site = 5;
+        $list = Db::connect('database.db_wesee_temp')->table('orders')->where('id>1875')->select();
+
+        $order_params = [];
+        foreach ($list as $k => $v) {
+            $count = $this->order->where('site=' . $site . ' and entity_id=' . $v['id'])->count();
+            if ($count > 0) {
+                continue;
+            }
+            $params = [];
+            $params['entity_id'] = $v['id'];
+            $params['site'] = $site;
+            $params['increment_id'] = $v['order_no'];
+            $params['status'] = $v['order_status'] ?: '';
+            $params['store_id'] = $v['source'];
+            $params['base_grand_total'] = $v['actual_amount_paid'];
+            $params['total_qty_ordered'] = $v['goods_quantity'];
+            $params['base_currency_code'] = $v['base_currency'];
+            $params['order_currency_code'] = $v['now_currency'];
+            $params['shipping_method'] = $v['freight_type'];
+            $params['shipping_title'] = $v['freight_description'];
+            $params['customer_email'] = $v['email'];
+            $params['base_to_order_rate'] = $v['rate'];
+            $params['base_shipping_amount'] = $v['freight_price'];
+            $params['created_at'] = strtotime($v['created_at']) + 28800;
+            $params['updated_at'] = strtotime($v['updated_at']) + 28800;
+            if (isset($v['payment_time'])) {
+                $params['payment_time'] = strtotime($v['payment_time']) + 28800;
+            }
+
+            //插入订单主表
+            $order_id = $this->order->insertGetId($params);
+            $order_params[$k]['site'] = $site;
+            $order_params[$k]['order_id'] = $order_id;
+            $order_params[$k]['entity_id'] = $v['id'];
+            $order_params[$k]['increment_id'] = $v['order_no'];
+
+            echo $v['entity_id'] . "\n";
+            usleep(10000);
+        }
+        //插入订单处理表
+        if ($order_params) $this->orderprocess->saveAll($order_params);
+        echo "ok";
+    }
+
+
+     /**
+     * 地址处理
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/11/02 18:31:12 
+     * @return void
+     */
+    public function wesee_order_address_data($site)
+    {
+        $site = 5;
+        $list = Db::connect('database.db_wesee_temp')->table('orders')->where('id>1875')->select();
+        $params = [];
+        foreach ($list as $k => $v) {
+            $params[$k]['id'] = $v['id'];
+            $params[$k]['firstname'] = $res[$v['entity_id']]['firstname'];
+            $params[$k]['lastname'] = $res[$v['entity_id']]['lastname'];
+            // $params[$k]['city'] = $res[$v['entity_id']]['city'];
+            // $params[$k]['street'] = $res[$v['entity_id']]['street'];
+            // $params[$k]['postcode'] = $res[$v['entity_id']]['postcode'];
+            // $params[$k]['telephone'] = $res[$v['entity_id']]['telephone'];
+        }
+        $this->order->saveAll($params);
+        echo $site . 'ok';
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     /**
      * 处理主单旧数据
@@ -1535,6 +1638,8 @@ class OrderData extends Backend
         $this->zeelool_old_order(1);
         // $this->zeelool_old_order(5);
     }
+
+
     protected function zeelool_old_order($site)
     {
         if ($site == 1) {
