@@ -50,23 +50,9 @@
 </style>
 <form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
     <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">付款币种:</label>
-        <div class="col-xs-12 col-sm-3">
-            <input class="form-control" readonly value="{$supplier.currency}" type="text">
-        </div>
-        <label class="control-label col-xs-12 col-sm-2">实际付款金额:</label>
-        <div class="col-xs-12 col-sm-3">
-            <input class="form-control" name="row[reality_pay_amount]" id="reality_pay_amount" value="{$pay_order.reality_pay_amount}" type="text">
-        </div>
-    </div>
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">汇率:</label>
-        <div class="col-xs-12 col-sm-3">
-            <input class="form-control" name="row[rate]" id="rate" value="{$pay_order.rate}" type="text">
-        </div>
-        <label class="control-label col-xs-12 col-sm-2">付款金额（￥）:</label>
-        <div class="col-xs-12 col-sm-3">
-            <input class="form-control" name="row[pay_amount]" id="pay_amount" value="{$pay_order.pay_amount}" type="text">
+        <label class="control-label col-xs-12 col-sm-2">备注:</label>
+        <div class="col-xs-12 col-sm-8">
+            <textarea class="form-control" id="desc" rows="5" name="row[desc]" cols="50">{$pay_order.desc}</textarea>
         </div>
     </div>
     <hr>

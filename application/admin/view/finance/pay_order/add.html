@@ -87,28 +87,14 @@
         <div class="col-xs-12 col-sm-3">
             <input class="form-control" readonly name="row[currency]" value="{$supplier.currency}" type="text">
         </div>
-        <label class="control-label col-xs-12 col-sm-2">实际付款金额:</label>
-        <div class="col-xs-12 col-sm-3">
-            <input class="form-control" id="reality_pay_amount" name="row[reality_pay_amount]" type="text">
-        </div>
     </div>
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">汇率:</label>
-        <div class="col-xs-12 col-sm-3">
-            <input class="form-control" id="rate" name="row[rate]" value="" type="text">
-        </div>
-        <label class="control-label col-xs-12 col-sm-2">付款金额（￥）:</label>
-        <div class="col-xs-12 col-sm-3">
-            <input class="form-control" id="pay_amount" name="row[pay_amount]" value="" type="text">
-        </div>
-    </div>
-
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">备注:</label>
         <div class="col-xs-12 col-sm-8">
-            <textarea class="form-control " rows="5" name="row[desc]" cols="50"></textarea>
+            <textarea class="form-control" id="desc" rows="5" name="row[desc]" cols="50"></textarea>
         </div>
     </div>
+    <input type="hidden" name="row[pay_amount]" value="{$total}" type="text">
     <hr>
     <div class='pay' style="width: 80%;margin-left: 10%;">
         <div style="margin-bottom: 20px;">
