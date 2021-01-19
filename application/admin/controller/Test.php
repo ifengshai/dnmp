@@ -2459,10 +2459,7 @@ class Test extends Backend
         $data = [];
         foreach ($list as $k => $v) {
             $data[$k]['sku'] = $v['sku'];
-            $data[$k]['platform_sku'] = $v['platform_sku'];
-
-
-
+            
             //站点判断
             $str = '';
             if ($v['platform_type'] == 1) {
@@ -2473,7 +2470,8 @@ class Test extends Backend
                 $str = 'nihao';
             }
             $data[$k]['platform_type'] = $str;
-            $percent = $allstock[$v['sku']] > 0 ? round($v['stock'] / $allstock[$v['sku']], 2) : 0;
+            $data[$k]['platform_sku'] = $v['platform_sku'];
+            $percent = $allstock[$v['sku']] > 0 ? round($v['stock'] / $allstock[$v['sku']], 4) : 0;
             $data[$k]['stock'] = $v['stock'];
             $data[$k]['allstock'] = $allstock[$v['sku']];
             $data[$k]['purchase_price'] = $v['purchase_price'];
