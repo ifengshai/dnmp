@@ -1666,7 +1666,7 @@ class Item extends Backend
     {
         if ($this->request->isAjax()) {
             $map['id'] = ['in', $ids];
-            $row = $this->model->where($map)->field('id,item_status,sku')->select();
+            $row = $this->model->where($map)->field('id,item_status,sku,category_id')->select();
             foreach ($row as $v) {
                 if ($v['item_status'] != 2) {
                     $this->error('只有待审核状态才能操作！！');
