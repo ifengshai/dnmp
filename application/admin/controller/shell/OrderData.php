@@ -287,7 +287,7 @@ class OrderData extends Backend
                                         $params['country_id'] = $v['country'];
                                         $params['region'] = $v['region'];
                                         $params['city'] = $v['city'];
-                                        $params['street'] = $v['street'] . $v['address'];
+                                        $params['street'] = $v['street'];
                                         $params['postcode'] = $v['postcode'];
                                         $params['telephone'] = $v['telephone'];
                                         $params['customer_firstname'] = $v['firstname'];
