@@ -78,7 +78,6 @@ class PurchaseOrder extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
-
             //自定义sku搜索
             $map['purchase_order.is_in_stock'] = 0;
             $filter = json_decode($this->request->get('filter'), true);
@@ -88,7 +87,6 @@ class PurchaseOrder extends Backend
                 $map['purchase_order.id'] = ['in', $ids];
                 unset($filter['sku']);
             }
-
             //列表默认不显示是退货入库的采购单
             if ($filter['is_in_stock']) {
                 $map['purchase_order.is_in_stock'] = $filter['is_in_stock'];
@@ -102,7 +100,6 @@ class PurchaseOrder extends Backend
                 ->where($map)
                 ->order($sort, $order)
                 ->count();
-
             $list = $this->model
                 ->with(['supplier'])
                 ->where($where)
@@ -111,10 +108,31 @@ class PurchaseOrder extends Backend
                 ->limit($offset, $limit)
                 ->select();
             $list = collection($list)->toArray();
-
-
+            //判断能否创建付款申请单 要先看有没有批次
+            foreach ($list as $k=>$v){
+                //有批次 每个批次都创建过付款申请单的 并且不是已取消状态的 不能再继续创建付款申请单
+                if ($v['is_batch'] == 1){
+                    $all_batch_num = Db::name('logistics_info')->where('purchase_id',$v['id'])->count();
+                    $all_purchase_pay = Db::name('finance_purchase')->where('purchase_id',$v['id'])->where('status','<',4)->count();
+                    if ($all_batch_num == $all_purchase_pay){
+                        //不能创建
+                        $list[$k]['can_create_pay'] = 0;
+                    }else{
+                        //能创建
+                        $list[$k]['can_create_pay'] = 1;
+                    }
+                }else{//无批次 创建过付款申请单 并且不是已取消状态阿德 不能在继续创建付款申请单
+                    $purchase_pay = Db::name('finance_purchase')->where('purchase_id',$v['id'])->where('status','<',4)->find();
+                    if (!empty($purchase_pay)){
+                        //不能创建
+                        $list[$k]['can_create_pay'] = 0;
+                    }else{
+                        //能创建
+                        $list[$k]['can_create_pay'] = 1;
+                    }
+                }
+            }
             $result = array("total" => $total, "rows" => $list);
-
             return json($result);
         }
         return $this->view->fetch();

@@ -1,0 +1,189 @@
+<style>
+    .pay {
+        padding: 10px;
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .pay #pay-table {
+        width: 100%;
+        height: 130px;
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        text-align: center;
+
+    }
+
+    .pay #pay-table tr {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        line-height: 50px;
+    }
+
+    .pay #pay-table tr th {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        text-align: center;
+        font-size: 14px;
+    }
+
+    .pay #pay-table tr td {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+    }
+
+    .pay #pay-table tr td input {
+
+        width: 150px;
+    }
+</style>
+<form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">付款单号:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input class="form-control" readonly value="{$pay_number}" name="row[pay_number]" type="text">
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">供应商名称:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input class="form-control" readonly value="{$supplier.supplier_name}" type="text">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">供应商账期:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input class="form-control" readonly value="{$supplier.period}" type="text">
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">收款方名称:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input class="form-control" readonly value="{$supplier.recipient_name}" type="text">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">收款方开户行:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input class="form-control" readonly value="{$supplier.opening_bank}" type="text">
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">收款方账户:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input class="form-control" readonly value="{$supplier.bank_account}" type="text">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">付款币种:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input class="form-control" readonly name="row[currency]" value="{$supplier.currency}" type="text">
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">实际付款金额:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input class="form-control" id="reality_pay_amount" name="row[reality_pay_amount]" type="text">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">汇率:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input class="form-control" id="rate" name="row[rate]" value="" type="text">
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">付款金额（￥）:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input class="form-control" id="pay_amount" name="row[pay_amount]" value="" type="text">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">备注:</label>
+        <div class="col-xs-12 col-sm-8">
+            <textarea class="form-control " rows="5" name="row[desc]" cols="50"></textarea>
+        </div>
+    </div>
+    <hr>
+    <div class='pay' style="width: 80%;margin-left: 10%;">
+        <div style="margin-bottom: 20px;">
+            <table id="pay-table" class="purchase-table">
+                {if $settle}
+                <tr>
+                    <th rowspan="{$count1+2}">结算金额</th>
+                    <th>序号</td>
+                    <th>采购单号</td>
+                    <th>采购批次ID</td>
+                    <th>已支付金额</td>
+                    <th>批次入库金额</td>
+                    <th>扣款</td>
+                    <th>扣款原因</td>
+                    <th>总待结算金额</td>
+                </tr>
+                {foreach $settle as $k=>$val}
+                <tr>
+                    <td>{$k+1}</td>
+                    <td>{$val.purchase_number}</td>
+                    <td>{$val.purchase_batch_id}</td>
+                    <td>{$val.now_before_total}</td>
+                    <td>{$val.instock_total}</td>
+                    <td>{$val.deduction_total}</td>
+                    <td>{$val.deduction_reason}</td>
+                    <td>{$val.wait_statement_total}</td>
+                </tr>
+                {/foreach}
+                <tr>
+                    <td colspan="7" style="text-align: right">待结算款金额合计：</td>
+                    <td>{$total1}</td>
+                </tr>
+                {/if}
+                {if $prepay}
+                <tr>
+                    <th rowspan="{$count2+2}">预付信息</th>
+                    <th>序号</td>
+                    <th colspan="2">采购单号</td>
+                    <th colspan="2">采购单金额</td>
+                    <th colspan="2">预付款比例</td>
+                    <th>预付款金额</td>
+                </tr>
+                {foreach $prepay as $key=>$value}
+                <tr>
+                    <td>{$key+1}</td>
+                    <td colspan="2">{$value.purchase_number}</td>
+                    <td colspan="2">{$value.purchase_total}</td>
+                    <td colspan="2">{$value.pay_rate}</td>
+                    <td>{$value.pay_grand_total}</td>
+                </tr>
+                {/foreach}
+                <tr>
+                    <td colspan="7" style="text-align: right">预付款金额合计：</td>
+                    <td>{$total2}</td>
+                </tr>
+                {/if}
+                {if $settle || $prepay}
+                <tr>
+                    <td colspan="8" style="text-align: right">合计应收：</td>
+                    <td>{$total}</td>
+                </tr>
+                {/if}
+            </table>
+        </div>
+    </div>
+    <hr>
+    <div class="form-group layer-footer">
+        <label class="control-label col-xs-12 col-sm-2"></label>
+        <div class="col-xs-12 col-sm-8">
+            <input type="hidden" id="status" name="row[status]" value="1">
+            <input type="hidden" id="supply_id" name="row[supply_id]" value="{$supplier.id}">
+            <input type="hidden" id="ids" name="row[ids]" value="{$ids}">
+            <button type="button" id="save" class="btn btn-success btn-embossed">{:__('OK')}</button>
+            <button type="button" id="cancel" class="btn btn-default btn-embossed">{:__('取消')}</button>
+            <button type="button" id="submit" class="btn btn-success btn-status btn-embossed">提交</button>
+        </div>
+    </div>
+</form>
