@@ -112,7 +112,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                 9 : 'Zeelool_es',
                                 10 : 'Zeelool_de',
                                 11 : 'Zeelool_jp',
-                                12 : 'Voogueme_acc',
+                                12 : 'Voogmechic',
                             }, operate: 'IN',
                             formatter: Table.api.formatter.status
                         },
