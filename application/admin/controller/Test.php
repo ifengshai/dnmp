@@ -2451,14 +2451,16 @@ class Test extends Backend
     {
         $itemplatform = new \app\admin\model\itemmanage\ItemPlatformSku();
         $list = $itemplatform->alias('a')->field('a.*,b.purchase_price')->join(['fa_item' => 'b'], 'a.sku=b.sku')->where(['b.is_del' => 1, 'b.is_open' => 1, 'b.category_id' => ['<>', 43], 'platform_type' => ['in', [1, 2, 3]]])->select();
-
+        //总虚拟库存
+        $allstock = $itemplatform->alias('a')
+        ->join(['fa_item' => 'b'], 'a.sku=b.sku')
+        ->where(['b.is_del' => 1, 'b.is_open' => 1, 'b.category_id' => ['<>', 43]])->group('a.sku')->column('sum(a.stock)','a.sku');
         $data = [];
         foreach ($list as $k => $v) {
             $data[$k]['sku'] = $v['sku'];
             $data[$k]['platform_sku'] = $v['platform_sku'];
 
-            //总虚拟库存
-            $allstock = $itemplatform->alias('a')->join(['fa_item' => 'b'], 'a.sku=b.sku')->where(['b.is_del' => 1, 'b.is_open' => 1, 'b.category_id' => ['<>', 43], 'sku' => $v['sku']])->sum('a.stock');
+
 
             //站点判断
             $str = '';
@@ -2470,9 +2472,9 @@ class Test extends Backend
                 $str = 'nihao';
             }
             $data[$k]['platform_type'] = $str;
-            $percent = round($v['stock'] / $allstock, 2);
+            $percent = round($v['stock'] / $allstock[$v['sku']], 2);
             $data[$k]['stock'] = $v['stock'];
-            $data[$k]['allstock'] = $allstock;
+            $data[$k]['allstock'] = $allstock[$v['sku']];
             $data[$k]['purchase_price'] = $v['purchase_price'];
             $data[$k]['money'] = ($v['stock'] * $v['purchase_price']) * $percent;
             $data[$k]['percent'] =  $percent * 100 . '%';
