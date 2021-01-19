@@ -2451,16 +2451,15 @@ class Test extends Backend
     {
         $itemplatform = new \app\admin\model\itemmanage\ItemPlatformSku();
         $list = $itemplatform->alias('a')->field('a.*,b.purchase_price')->join(['fa_item' => 'b'], 'a.sku=b.sku')->where(['b.is_del' => 1, 'b.is_open' => 1, 'b.category_id' => ['<>', 43], 'platform_type' => ['in', [1, 2, 3]]])->select();
-     
 
-        //总虚拟库存
-        $allstock = $itemplatform->alias('a')->join(['fa_item' => 'b'], 'a.sku=b.sku')->where(['b.is_del' => 1, 'b.is_open' => 1, 'b.category_id' => ['<>', 43], 'platform_type' => ['in', [1, 2, 3]]])->sum('a.stock');
-      
         $data = [];
         foreach ($list as $k => $v) {
             $data[$k]['sku'] = $v['sku'];
             $data[$k]['platform_sku'] = $v['platform_sku'];
-           
+
+            //总虚拟库存
+            $allstock = $itemplatform->alias('a')->join(['fa_item' => 'b'], 'a.sku=b.sku')->where(['b.is_del' => 1, 'b.is_open' => 1, 'b.category_id' => ['<>', 43], 'sku' => $v['sku']])->sum('a.stock');
+
             //站点判断
             $str = '';
             if ($v['platform_type'] == 1) {
@@ -2474,10 +2473,11 @@ class Test extends Backend
             $percent = round($v['stock'] / $allstock, 2);
             $data[$k]['stock'] = $v['stock'];
             $data[$k]['allstock'] = $allstock;
+            $data[$k]['purchase_price'] = $v['purchase_price'];
             $data[$k]['money'] = ($v['stock'] * $v['purchase_price']) * $percent;
             $data[$k]['percent'] =  $percent * 100 . '%';
         }
-        $header = 'sku,站点,平台sku,虚拟库存,总虚拟库存,sku占用金额,sku占用库存比例';
+        $header = 'sku,站点,平台sku,虚拟库存,总虚拟库存,采购单价,sku占用金额,sku占用库存比例';
         $filename = '数据导出.csv';
         Excel::create_csv($data, $header, $filename);
     }
