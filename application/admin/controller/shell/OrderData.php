@@ -1584,7 +1584,7 @@ class OrderData extends Backend
      * @since 2020/11/02 18:31:12 
      * @return void
      */
-    public function wesee_order_address_data($site)
+    public function wesee_order_address_data()
     {
         $site = 5;
         $list = Db::connect('database.db_wesee_temp')->table('orders_addresses')->where('order_id>1875 and order_id<1916')->where('type=1')->select();
