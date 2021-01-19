@@ -2460,6 +2460,7 @@ class Test extends Backend
         foreach ($list as $k => $v) {
             $data[$k]['sku'] = $v['sku'];
             $data[$k]['platform_sku'] = $v['platform_sku'];
+           
             //站点判断
             $str = '';
             if ($v['platform_type'] == 1) {
@@ -2471,10 +2472,12 @@ class Test extends Backend
             }
             $data[$k]['platform_type'] = $str;
             $percent = round($v['stock'] / $allstock, 2);
+            $data[$k]['stock'] = $v['stock'];
+            $data[$k]['allstock'] = $allstock;
             $data[$k]['money'] = ($v['stock'] * $v['purchase_price']) * $percent;
             $data[$k]['percent'] =  $percent * 100 . '%';
         }
-        $header = 'sku,平台sku,站点,sku占用金额,sku占用库存比例';
+        $header = 'sku,站点,平台sku,虚拟库存,总虚拟库存,sku占用金额,sku占用库存比例';
         $filename = '数据导出.csv';
         Excel::create_csv($data, $header, $filename);
     }
