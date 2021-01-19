@@ -1519,9 +1519,6 @@ class OrderData extends Backend
 
     ################################################处理旧数据脚本##########################################################################
 
-
-
-
     /**
      * 批发站主表
      *
@@ -1534,7 +1531,7 @@ class OrderData extends Backend
     public function wesee_old_order()
     {
         $site = 5;
-        $list = Db::connect('database.db_wesee_temp')->table('orders')->where('id>1875')->select();
+        $list = Db::connect('database.db_wesee_temp')->table('orders')->where('id>1875 and id<1916')->select();
 
         $order_params = [];
         foreach ($list as $k => $v) {
@@ -1579,7 +1576,7 @@ class OrderData extends Backend
     }
 
 
-     /**
+    /**
      * 地址处理
      *
      * @Description
@@ -1590,28 +1587,82 @@ class OrderData extends Backend
     public function wesee_order_address_data($site)
     {
         $site = 5;
-        $list = Db::connect('database.db_wesee_temp')->table('orders')->where('id>1875')->select();
+        $list = Db::connect('database.db_wesee_temp')->table('orders_addresses')->where('order_id>1875 and order_id<1916')->where('type=1')->select();
         $params = [];
         foreach ($list as $k => $v) {
-            $params[$k]['id'] = $v['id'];
-            $params[$k]['firstname'] = $res[$v['entity_id']]['firstname'];
-            $params[$k]['lastname'] = $res[$v['entity_id']]['lastname'];
-            // $params[$k]['city'] = $res[$v['entity_id']]['city'];
-            // $params[$k]['street'] = $res[$v['entity_id']]['street'];
-            // $params[$k]['postcode'] = $res[$v['entity_id']]['postcode'];
-            // $params[$k]['telephone'] = $res[$v['entity_id']]['telephone'];
+            $params = [];
+            if ($v['type'] == 1) {
+                $params['country_id'] = $v['country'];
+                $params['region'] = $v['region'];
+                $params['city'] = $v['city'];
+                $params['street'] = $v['street'] . $v['address'];
+                $params['postcode'] = $v['postcode'];
+                $params['telephone'] = $v['telephone'];
+                $params['customer_firstname'] = $v['firstname'];
+                $params['customer_lastname'] = $v['lastname'];
+                $params['firstname'] = $v['firstname'];
+                $params['lastname'] = $v['lastname'];
+                $params['updated_at'] = strtotime($v['updated_at']) + 28800;
+                $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update($params);
+            }
         }
-        $this->order->saveAll($params);
         echo $site . 'ok';
     }
 
 
+     /**
+     * 地址处理
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/11/02 18:31:12 
+     * @return void
+     */
+    public function wesee_order_item_data()
+    {
+        $site = 5;
+        $list = Db::connect('database.db_wesee_temp')
+        ->table('orders_items')->alias('a')
+        ->join(['orders_prescriptions' => 'b'],'a.orders_prescriptions_id=b.id')
+        ->where('order_id>1875 and order_id<1916')->select();
+        foreach ($list as $k => $v) {
+            $options = [];
+            //处方解析 不同站不同字段
+            $options =  $this->wesee_prescription_analysis($v['prescription']);
+            $options['item_id'] = $v['id'];
+            $options['site'] = $site;
+            $options['magento_order_id'] = $v['order_id'];
+            $options['sku'] = $v['goods_sku'];
+            $options['qty'] = $v['goods_count'];
+            $options['base_row_total'] = $v['original_total_price'];
+            $options['product_id'] = $v['goods_id'];
+            $options['frame_regural_price'] = $v['goods_original_price'];
+            $options['frame_price'] = $v['goods_total_price'];
+            $options['index_price'] = $v['lens_total_price'];
+            $options['frame_color'] = $v['goods_color'];
+            $options['goods_type'] = $v['goods_type'];
 
+            $order_prescription_type = $options['order_prescription_type'];
+            unset($options['order_prescription_type']);
+            if ($options) {
+                $options_id = $this->orderitemoption->insertGetId($options);
+                $data = []; //子订单表数据
+                for ($i = 0; $i < $v['goods_count']; $i++) {
+                    $data[$i]['item_id'] = $v['id'];
+                    $data[$i]['magento_order_id'] = $v['order_id'];
+                    $data[$i]['site'] = $site;
+                    $data[$i]['option_id'] = $options_id;
+                    $data[$i]['sku'] = $v['goods_sku'];
+                    $data[$i]['order_prescription_type'] = $order_prescription_type;
+                    $data[$i]['created_at'] = strtotime($v['created_at']) + 28800;
+                    $data[$i]['updated_at'] = strtotime($v['updated_at']) + 28800;
+                }
+                $this->orderitemprocess->insertAll($data);
+            }
+        }
+        echo $site . 'ok';
 
-
-
-
-
+    }
 
 
 
