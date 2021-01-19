@@ -70,7 +70,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                                 text: __('付款'),
                                 title: __('付款'),
                                 classname: 'btn btn-xs btn-danger btn-ajax',
-                                url: 'finance/pay_order/setStatus?status=4',
+                                url: 'finance/pay_order/pay',
                                 extend: 'data-area = \'["100%","100%"]\'',
                                 confirm: '确定要付款吗',
                                 success: function (data, ret) {
@@ -121,7 +121,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                                 callback: function (data) {
                                 },
                                 visible: function (row) {
-                                if (row.status != 5) {
+                                if (row.status != 5 && row.status != 6 && row.status != 7) {
                                         return true;
                                     } else {
                                         return false;
@@ -142,7 +142,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                                 callback: function (data) {
                                 },
                                 visible: function (row) {
-                                    if (row.status != 5) {
+                                    if (row.status != 5 && row.status != 6 && row.status != 7) {
                                         return true;
                                     } else {
                                         return false;
@@ -157,6 +157,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                                 icon: 'fa fa-pencil',
                                 url: 'finance/pay_order/upload',
                                 extend: 'data-area = \'["80%","70%"]\'',
+                                success: function (data, ret) {
+                                    table.bootstrapTable('refresh');
+                                },
                                 callback: function (data) {
                                     Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                 },
@@ -202,74 +205,28 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
         add: function () {
             $(document).on('click', '#save', function () {
                 $("#status").val(1);
-                if(!$("#reality_pay_amount").val()){
-                    layer.msg("实际付款金额不能为空");
-                    return false;
-                }
-                if(!$("#rate").val()){
-                    layer.msg("汇率不能为空");
-                    return false;
-                }
-                if(!$("#pay_amount").val()){
-                    layer.msg("付款金额不能为空");
-                    return false;
-                }
                 $("#add-form").submit();
+                window.location.href=Config.moduleurl+'/finance/pay_order/index?ref=addtabs';
             });
-            $(document).on('click', '#reset', function () {
-                $("#status").val(1);
+            $(document).on('click', '#cancel', function () {
+                Fast.api.close();
             });
             $(document).on('click', '#submit', function () {
-                if(!$("#reality_pay_amount").val()){
-                    layer.msg("实际付款金额不能为空");
-                    return false;
-                }
-                if(!$("#rate").val()){
-                    layer.msg("汇率不能为空");
-                    return false;
-                }
-                if(!$("#pay_amount").val()){
-                    layer.msg("付款金额不能为空");
-                    return false;
-                }
                 $("#status").val(2);
                 $("#add-form").submit();
+                window.location.href=Config.moduleurl+'/finance/pay_order/index?ref=addtabs';
             });
             Controller.api.bindevent();
         },
         edit: function () {
             $(document).on('click', '#save', function () {
                 $("#status").val(1);
-                if(!$("#reality_pay_amount").val()){
-                    layer.msg("实际付款金额不能为空");
-                    return false;
-                }
-                if(!$("#rate").val()){
-                    layer.msg("汇率不能为空");
-                    return false;
-                }
-                if(!$("#pay_amount").val()){
-                    layer.msg("付款金额不能为空");
-                    return false;
-                }
                 $("#add-form").submit();
             });
-            $(document).on('click', '#reset', function () {
+            $(document).on('click', '#cancel', function () {
                 $("#status").val(1);
             });
             $(document).on('click', '#submit', function () {
-                if(!$("#reality_pay_amount").val()){
-                    layer.msg("实际付款金额不能为空");
-                    return false;
-                }
-                if(!$("#rate").val()){
-                    layer.msg("汇率不能为空");
-                    return false;
-                }
-                if(!$("#pay_amount").val()){
-                    layer.msg("付款金额不能为空");
-                    return false;
-                }
                 $("#status").val(2);
                 $("#add-form").submit();
             });
