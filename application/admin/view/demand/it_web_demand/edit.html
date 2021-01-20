@@ -142,12 +142,12 @@
             </span>
         </div>
         <div class="input_item" >
-            <label class="input_tiem_label">开发难度 ：</label>
+            <label class="input_tiem_label">开发难度：</label>
             <span class="input_tiem_span">
                 {:Form::select('row[development_difficulty]', config('demand.development_difficulty'), $row['development_difficulty'], ['class'=>'selectpicker select_input', 'data-rule'=>'required','title'=>'请选择'])}
             </span>
         </div>
-        {if $type == 'pm_audit'}
+<!--        if $type == 'pm_audit  和产品沟通过 任务周期任何状态下都可修改-->
         <div class="input_item">
             <label class="input_tiem_label">优先级：</label>
             <span class="input_tiem_span">
@@ -167,7 +167,7 @@
                 {/if}
           </span>
         </div>
-        {/if}
+<!--        /if-->
 
 <!--        {if $demand_type == 2}-->
 <!--        <input type="hidden" name="row[demand_type]" value="{$demand_type}">-->
