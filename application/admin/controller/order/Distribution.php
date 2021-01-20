@@ -131,6 +131,13 @@ class Distribution extends Backend
      */
     protected $_work_order_change_sku = null;
 
+    /**
+     * 商品条形码模型对象
+     * @var object
+     * @access protected
+     */
+    protected $_product_bar_code_item = null;
+
     public function _initialize()
     {
         parent::_initialize();
@@ -147,6 +154,7 @@ class Distribution extends Backend
         $this->_work_order_list = new WorkOrderList();
         $this->_work_order_measure = new WorkOrderMeasure();
         $this->_work_order_change_sku = new WorkOrderChangeSku();
+        $this->_product_bar_code_item = new ProductBarCodeItem();
     }
 
     /**

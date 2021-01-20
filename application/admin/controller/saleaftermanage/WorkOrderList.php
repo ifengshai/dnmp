@@ -2626,7 +2626,7 @@ class WorkOrderList extends Backend
                     $res['prescriptions'][0]['od_bd_r'] = $change_lens[0]['od_bd_r'];
                     $res['prescriptions'][0]['os_bd_r'] = $change_lens[0]['os_bd_r'];
                     //获取更改镜框最新信息
-                    $change_sku = $work_order_change_sku
+                    $change_sku = $_work_order_change_sku
                         ->alias('a')
                         ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
                         ->where([
