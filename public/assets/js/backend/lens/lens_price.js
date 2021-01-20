@@ -7,6 +7,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 extend: {
                     index_url: 'lens/lens_price/index' + location.search,
                     add_url: 'lens/lens_price/add',
+                    import_url: 'lens/lens_price/import',
                     edit_url: 'lens/lens_price/edit',
                     del_url: 'lens/lens_price/del',
                     multi_url: 'lens/lens_price/multi',
