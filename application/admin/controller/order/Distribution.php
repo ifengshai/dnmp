@@ -25,6 +25,7 @@ use app\admin\model\order\order\NewOrderProcess;
 use app\admin\model\StockLog;
 use app\admin\model\order\order\LensData;
 use app\admin\model\saleaftermanage\WorkOrderMeasure;
+use app\admin\model\warehouse\ProductBarCodeItem;
 
 /**
  * 配货列表
