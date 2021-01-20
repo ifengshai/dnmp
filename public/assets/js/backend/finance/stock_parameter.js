@@ -20,11 +20,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                 columns: [
                     [
                         {checkbox: true},
-                        {field: 'id', title: __('ID'),},
-                        {field: 'createtime', title: __('日期'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime},
-                        {field: 'mobile', title: __('入库金额（￥）'), visible: false},
-                        {field: 'customer_name', title: __('出库金额（￥）')},
-                        {field: 'mobile', title: __('余额（￥）')},
+                        {field: 'id', title: __('ID'),operate:false},
+                        {field: 'day_date', title: __('日期'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime},
+                        {field: 'instock_total', title: __('入库金额（￥）'),operate:false},
+                        {field: 'outstock_total', title: __('出库金额（￥）'),operate:false},
+                        {field: 'rest_total', title: __('余额（￥）'),operate:false},
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
                                  {
@@ -34,7 +34,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                                   extend: 'data-area = \'["80%","70%"]\'',
                                   classname: 'btn btn-xs btn-primary btn-dialog',
                                   icon: 'fa fa-list',
-                                  url: 'customer/wholesale_customer/detail',
+                                  url: 'finance/stock_parameter/detail',
                                   callback: function (data) {
                                       Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
                                   },
@@ -57,9 +57,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
         detail: function () {
             // 初始化表格参数配置
             Table.api.init({
-                searchFormVisible: true,
+                commonSearch: false,
+                search: false,
+                showExport: false,
+                showColumns: false,
+                showToggle: false,
+                pagination: false,
                 extend: {
-                    index_url: 'finance/stock_parameter/detail' + location.search,
+                    index_url: 'finance/stock_parameter/detail' + location.search+'&ids=' + Config.ids,
                 }
             });
 
@@ -77,11 +82,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                 columns: [
                     [
                         {field: 'id', title: __('ID'),},
-                        {field: 'status', title: __('出入库类型'),custom: { 1: 'danger', 2: 'success'}, searchList: { 1: '采购入库', 2: '订单出库'},formatter: Table.api.formatter.status},
-                        {field: 'customer_name', title: __('入库金额（￥）')},
-                        {field: 'mobile', title: __('入库数量')},
-                        {field: 'mobile', title: __('出库金额（￥）')},
-                        {field: 'mobile', title: __('出库数量')}
+                        {field: 'type', title: __('出入库类型'), searchList: { 1: '采购入库', 2:'出库单出库',3: '订单出库'},formatter: Table.api.formatter.status},
+                        {field: 'instock_total', title: __('入库金额（￥）')},
+                        {field: 'instock_num', title: __('入库数量')},
+                        {field: 'outstock_total', title: __('出库金额（￥）')},
+                        {field: 'outstock_count', title: __('出库数量')}
                     ]
                 ]
             });
