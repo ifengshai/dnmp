@@ -2135,8 +2135,8 @@ class PurchaseOrder extends Backend
             $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 1 + 2), $value['purchase_total']);
             $spreadsheet->getActiveSheet()->setCellValueExplicit("R" . ($key * 1 + 2), $value['1688_number'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
             $spreadsheet->getActiveSheet()->setCellValue("S" . ($key * 1 + 2), $value['type']);
-            $spreadsheet->getActiveSheet()->setCellValue("U" . ($key * 1 + 2), $readly_logistics_info['time']);
-            $spreadsheet->getActiveSheet()->setCellValue("T" . ($key * 1 + 2), $value['effect_time']);
+            $spreadsheet->getActiveSheet()->setCellValue("T" . ($key * 1 + 2), $readly_logistics_info['time']);
+            $spreadsheet->getActiveSheet()->setCellValue("U" . ($key * 1 + 2), $value['effect_time']);
         }
 
         //设置宽度
