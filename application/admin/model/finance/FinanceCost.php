@@ -50,8 +50,8 @@ class FinanceCost extends Model
         $params['action_type'] = 1;
         $params['createtime'] = time();
         //订单收入增加
-        $this->insert($params);
-        $this->get_complete_workorder($order_detail);//处理存在补价，退件，退款工单的核算
+        $res = $this->insert($params);
+        $this->process_complete_workorder($order_detail);//处理存在补价，退件，退款工单的核算
     }
 
     /**
@@ -63,27 +63,27 @@ class FinanceCost extends Model
      */
     public function process_complete_workorder($order_detail = null)
     {
-        $work_order_list = app\admin\model\saleaftermanage\WorkOrderList();
+        $work_order_list = new \app\admin\model\saleaftermanage\WorkOrderList();
         $change_sku = $work_order_list//查询补价，退件，退款的工单
             ->alias('a')
             ->join(['fa_work_order_measure' => 'b'], 'a.id=b.work_id')
             ->where([
-                'a.measure_choose_id' => ['in',[2,8,15]],
+                'a.platform_order' => $order_detail['increment_id'],
+                'b.measure_choose_id' => ['in',[2,8,15]],
                 'b.operation_type' => 1
             ])
-            ->select('a.change_sku');
+            ->select();
         $change_sku = collection($change_sku)->toArray();
         if (!empty($change_sku)) {//如果有补价，退件，退款增加成本核算
-            $measure_choose_id = array_column($change_sku, 'measure_choose_id');
             foreach ($change_sku as $key => $value) {
                 $params = [];
                 switch ($value['measure_choose_id']) {
                     case 2://退款措施
-                        if ($income_amount < $order_detail['base_grand_total']) {//判断是否是部分退款
+                        if ($value['refund_money'] < $order_detail['base_grand_total']) {//判断是否是部分退款
                             $bill_type = 6;//部分退款
                             $action_type = 2;//冲减
                             $income_amount = $value['refund_money'];//收入金额(退款金额)
-                        }else if($income_amount == $order_detail['base_grand_total']){
+                        }else if($value['refund_money'] == $order_detail['base_grand_total']){
                             $bill_type = 4;//退货退款
                             $action_type = 2;//冲减
                             $income_amount = $order_detail['base_grand_total'];//收入金额(退件)
@@ -139,7 +139,7 @@ class FinanceCost extends Model
         $params['site'] = $order_detail['site'];//站点
         $params['order_type'] = $order_detail['order_type'];//
         $params['order_money'] = $order_detail['base_grand_total'];//订单金额
-        $params['income_amount'] = $work_order_info['refund_money'];//收入金额
+        $params['income_amount'] = $order_detail['base_grand_total'];//收入金额
         $params['order_currency_code'] = $order_detail['order_currency_code'];//币种
         $params['payment_time'] = $order_detail['payment_time'];//支付时间
         $params['payment_method'] = $order_detail['payment_method'];//支付方式

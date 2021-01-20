@@ -38,6 +38,7 @@ use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\Reader\Xls;
 use PhpOffice\PhpSpreadsheet\Reader\Csv;
 use app\admin\model\AuthGroup;
+use app\admin\model\finance\FinanceCost;
 
 /**
  * 售后工单列管理
@@ -3121,6 +3122,13 @@ class WorkOrderList extends Backend
                     $result = $this->model->handleRecept($receptInfo['id'], $receptInfo['work_id'], $receptInfo['measure_id'], $receptInfo['recept_group_id'], $params['success'], $params['note'], $receptInfo['is_auto_complete']);
                 }
                 if ($result !== false) {
+                    //措施表
+                    $_work_order_measure = new WorkOrderMeasure();
+                    $measure_choose_id = $_work_order_measure->where('id',$receptInfo['measure_id'])->value('measure_choose_id');
+                    if (3 == $measure_choose_id) { //主单取消收入核算冲减
+                        $FinanceCost = new FinanceCost();
+                        $FinanceCost->cancel_order_subtract($receptInfo['work_id']);
+                    }
                     $this->success();
                 } else {
                     $this->error(__('No rows were updated'));

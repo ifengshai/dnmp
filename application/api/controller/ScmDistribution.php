@@ -2230,9 +2230,6 @@ class ScmDistribution extends Scm
                     ->allowField(true)
                     ->isUpdate(true, ['item_order_number' => ['in', $item_order_numbers]])
                     ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2]);
-                //审单触发收入核算
-                $FinanceCost = new FinanceCost();
-                $FinanceCost->order_income($order_id);
             }
 
             //保存库存日志
@@ -2307,7 +2304,11 @@ class ScmDistribution extends Scm
                 }
             }
         }
-
+        if (1 == $check_status) {
+            //审单触发收入核算
+            $FinanceCost = new FinanceCost();
+            $FinanceCost->order_income($order_id);
+        }
         $this->success($msg . '成功', [], 200);
     }
 
