@@ -1161,13 +1161,16 @@ DOC;
     /**
      * https断掉的数据更新
      * @return [type] [description]
+     * 1---zeelool
+     * 2---voogueme
+     * 3---nihaooptical
      */
     public function asyncTicketHttps()
     {
-        $ticketIds = (new Notice(request(), ['type' => 'nihaooptical']))->asyncUpdate();
+        $ticketIds = (new Notice(request(), ['type' => 'zeelool']))->asyncUpdate();
 
         //判断是否存在
-        $nowTicketsIds = $this->model->where("type",3)->column('ticket_id');
+        $nowTicketsIds = $this->model->where("type",1)->column('ticket_id');
 
         //求交集的更新
 
@@ -1176,15 +1179,15 @@ DOC;
         $diffs = array_diff($ticketIds, $nowTicketsIds);
         //更新
 
-        //$intersects = array('80293','82512','83675');
-        //$diffs = array('84301','84303');
+        //$intersects = array('142871','142869');//测试是否更新
+        //$diffs = array('144352','144349');//测试是否新增
         foreach($intersects as $intersect){
-            (new Notice(request(), ['type' => 'nihaooptical','id' => $intersect]))->update();
+            (new Notice(request(), ['type' => 'zeelool','id' => $intersect]))->update();
             echo $intersect.'is ok'."\n";
         }
         //新增
         foreach($diffs as $diff){
-            (new Notice(request(), ['type' => 'nihaooptical','id' => $diff]))->create();
+            (new Notice(request(), ['type' => 'zeelool','id' => $diff]))->create();
             echo $diff.'ok'."\n";
         }
         echo 'all ok';

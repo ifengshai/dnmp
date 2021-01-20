@@ -9,6 +9,7 @@ use think\Db;
 use SchGroup\SeventeenTrack\Connectors\TrackingConnector;
 use app\admin\model\DistributionLog;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use fast\Excel;
 
 class Test extends Backend
 {
@@ -2442,5 +2443,50 @@ class Test extends Backend
             $params[$k]['wait_instock_num'] = $purchase_num;
         }
         $item->saveAll($params);
+    }
+
+    /**
+     * 导出数据
+     */
+    public function derive_data()
+    {
+        set_time_limit(0);
+        $itemplatform = new \app\admin\model\itemmanage\ItemPlatformSku();
+        $list = $itemplatform->alias('a')->field('a.*,b.purchase_price')->join(['fa_item' => 'b'], 'a.sku=b.sku')->where(['b.is_del' => 1, 'b.is_open' => 1, 'b.category_id' => ['<>', 43], 'platform_type' => ['in', [1, 2, 3]]])->select();
+
+        //总虚拟库存
+        $allstock = $itemplatform->alias('a')
+        ->join(['fa_item' => 'b'], 'a.sku=b.sku')
+        ->where(['b.is_del' => 1, 'b.is_open' => 1, 'b.category_id' => ['<>', 43]])->group('a.sku')->column('sum(a.stock)','a.sku');
+
+        $purchase_barcode_item = new \app\admin\model\warehouse\ProductBarCodeItem();
+        $data = [];
+        foreach ($list as $k => $v) {
+            //计算sku库存总金额
+           $allprice =  $purchase_barcode_item->alias('a')->where(['a.sku' => $v['sku']])->join(['fa_purchase_order_item' => 'b'],'a.purchase_id=b.purchase_id and a.sku=b.sku')->sum('purchase_price');
+
+            $data[$k]['sku'] = $v['sku'];
+            
+            //站点判断
+            $str = '';
+            if ($v['platform_type'] == 1) {
+                $str = 'zeelool';
+            } else if ($v['platform_type'] == 2) {
+                $str = 'voogueme';
+            } else if ($v['platform_type'] == 3) {
+                $str = 'nihao';
+            }
+            $data[$k]['platform_type'] = $str;
+            $data[$k]['platform_sku'] = $v['platform_sku'];
+            $percent = $allstock[$v['sku']] > 0 ? round($v['stock'] / $allstock[$v['sku']], 4) : 0;
+            $data[$k]['stock'] = $v['stock'];
+            $data[$k]['allstock'] = $allstock[$v['sku']];
+            $data[$k]['purchase_price'] = $allprice;
+            $data[$k]['money'] = $allprice * $percent;
+            $data[$k]['percent'] =  $percent * 100 . '%';
+        }
+        $header = 'sku,站点,平台sku,虚拟库存,总虚拟库存,sku库存总金额,sku占用金额,sku占用库存比例';
+        $filename = '数据导出.csv';
+        Excel::create_csv($data, $header, $filename);
     }
 }

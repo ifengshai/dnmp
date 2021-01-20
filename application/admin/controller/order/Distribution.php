@@ -1583,16 +1583,24 @@ class Distribution extends Backend
             '400426702',
             '400427440',
             '400421813',]];
-        $data = Db::table('fa_order')->where($map)->field('id')->select();
+        $model = Db::connect('database.db_mojing_order');
+        $data = $model->table('fa_order')->where($map)->field('id')->select();
         $result = array_reduce($data, function ($result, $value) {
             return array_merge($result, array_values($value));
         }, array());
-        dump($result);die();
-
+        $where['order_id'] = ['in',$result];
+        $values['distribution_status'] = 9;
+        $values['updated_at'] = time();
+        $model->table('fa_order_item_process')->where($where)->update($values);
+        $cat['combine_status'] =1;
+        $cat['store_house_id'] =0;
+        $cat['check_status'] =1;
+        $cat['check_time'] =time();
+        $model->table('fa_order_process')->where($where)->update($cat);
 
         //记录配货日志
         $admin = (object)session('admin');
-        DistributionLog::record($admin, '100181408', 7, '标记打印完成');
+        DistributionLog::record($admin, '100181408', 7, '将100181408,400409680,100180688,100179774,400414709, 400425817,500016847,130079900,300044713等部分订单配货状态改为已合单');
     }
 
 
