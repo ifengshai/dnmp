@@ -414,7 +414,7 @@ class OrderData extends Backend
                                             $data[$i]['magento_order_id'] = $v['order_id'];
                                             $data[$i]['site'] = $site;
                                             $data[$i]['option_id'] = $options_id;
-                                            $data[$i]['sku'] = $v['goods_sku'];
+                                            $data[$i]['sku'] = $options['sku'];
                                             $data[$i]['order_prescription_type'] = $order_prescription_type;
                                             $data[$i]['created_at'] = strtotime($v['created_at']) + 28800;
                                             $data[$i]['updated_at'] = strtotime($v['updated_at']) + 28800;
