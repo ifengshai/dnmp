@@ -1179,8 +1179,8 @@ DOC;
         $diffs = array_diff($ticketIds, $nowTicketsIds);
         //更新
 
-        //$intersects = array('142871','142869');
-        //$diffs = array('144352','144349');
+        //$intersects = array('142871','142869');//测试是否更新
+        //$diffs = array('144352','144349');//测试是否新增
         foreach($intersects as $intersect){
             (new Notice(request(), ['type' => 'voogueme','id' => $intersect]))->update();
             echo $intersect.'is ok'."\n";
