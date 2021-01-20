@@ -253,9 +253,6 @@
             {/if}
 
                 {if $row['pm_audit_status'] == 3 && $row['develop_finish_status'] == 3 }
-                    <button type="submit" value="edit" class="btn btn-sub" style='background-color: #333333;width: 150px;color: white;font-size: 14px;font-weight: 700;float: right;' disabled>{:__('已提交')}</button>
-                {else}
-
                     {if $pm_status || $admin_id == $row['entry_user_id']}
                         <button type="submit" value="edit" class="btn btn-sub" style='background-color: #333333;width: 150px;color: white;font-size: 14px;font-weight: 700;float: right;'>{:__('修  改')}</button>
                     {else}
