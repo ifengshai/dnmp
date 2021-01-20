@@ -1521,6 +1521,35 @@ class OrderData extends Backend
 
     ################################################处理旧数据脚本##########################################################################
 
+
+    /**
+     * 批发站主表
+     *
+     * @Description
+     * @author wpl
+     * @since 2021/01/19 09:37:37 
+     * @param [type] $site
+     * @return void
+     */
+    public function wesee_old_order_paymethod()
+    {
+        $site = 5;
+        $list = Db::connect('database.db_wesee_temp')->table('orders')->where('id>1875')->select();
+        foreach ($list as $k => $v) {
+          
+            $params = [];
+      
+            $params['payment_method'] = $v['payment_type'];
+          
+            //插入订单主表
+            $this->order->where(['site' => 5,'entity_id' => $v['id']])->update($params);
+    
+        }
+       
+        echo "ok";
+    }
+
+
     /**
      * 批发站主表
      *
@@ -1533,7 +1562,7 @@ class OrderData extends Backend
     public function wesee_old_order()
     {
         $site = 5;
-        $list = Db::connect('database.db_wesee_temp')->table('orders')->where('id>1875 and id<1916')->select();
+        $list = Db::connect('database.db_wesee_temp')->table('orders')->where('id>1875')->select();
 
         $order_params = [];
         foreach ($list as $k => $v) {
