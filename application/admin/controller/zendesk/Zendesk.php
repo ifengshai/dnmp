@@ -1179,7 +1179,7 @@ DOC;
         $diffs = array_diff($ticketIds, $nowTicketsIds);
         //更新
 
-        //$intersects = array('80293','82512','83675');
+        $intersects = array('142871','142869');
         $diffs = array('144352','144349');
         foreach($intersects as $intersect){
             (new Notice(request(), ['type' => 'voogueme','id' => $intersect]))->update();
