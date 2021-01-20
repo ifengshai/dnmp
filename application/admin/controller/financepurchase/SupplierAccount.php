@@ -217,6 +217,7 @@ class SupplierAccount extends Backend
      */
     public function table2()
     {
+        $statement = new \app\admin\model\financepurchase\Statement();
         //设置过滤方法
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
@@ -225,12 +226,12 @@ class SupplierAccount extends Backend
                 return $this->selectpage();
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-            $total = $this->model
+            $total = $statement
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
 
-            $list = $this->model
+            $list = $statement
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)

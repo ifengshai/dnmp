@@ -80,6 +80,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
             //绑定事件
             $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
                 var panel = $($(this).attr("href"));
+                var value = $($(this).data("value"));
+                console.log(value)
                 if (panel.size() > 0) {
                     Controller.table[panel.attr("id")].call(this);
                     $(this).on('click', function (e) {
@@ -92,6 +94,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
 
             //必须默认触发shown.bs.tab事件
             $('ul.nav-tabs li.active a[data-toggle="tab"]').trigger("shown.bs.tab");
+
         },
         table: {
             first: function () {
@@ -109,9 +112,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                             {field: 'id', title: 'ID'},
                             {field: 'purchase_number', title: __('采购单号')},
                             {field: 'purchase_name', title: __('采购单名称')},
-                            {field: 'pay_type', title: __('付款类型'),custom: {0: 'success', 1: 'yellow', 2: 'blue', 3: 'danger'},
+                            {
+                                field: 'pay_type',
+                                title: __('付款类型'),
+                                custom: {0: 'success', 1: 'yellow', 2: 'blue', 3: 'danger'},
                                 searchList: {1: '预付款', 2: '全款预付', 3: '尾款'},
-                                formatter: Table.api.formatter.status},
+                                formatter: Table.api.formatter.status
+                            },
                             {field: 'purchase_batch', title: __('采购批次')},
                             {field: 'purchase_price', title: __('采购单价')},
                             {field: 'arrival_num', title: __('采购批次数量')},
@@ -152,7 +159,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                             {field: 'statement_number', title: __('结算单号')},
                             {field: 'wait_statement_total', title: __('结算金额')},
                             {field: 'account_statement', title: __('结算账期时间')},
-                            {field: 'status', title: __('状态'),
+                            {
+                                field: 'status', title: __('状态'),
                                 custom: {0: 'success', 1: 'yellow', 2: 'blue', 3: 'danger'},
                                 searchList: {0: '新建', 1: '待审核', 2: '审核拒绝', 3: '待对账', 4: '待财务确认', 5: '已取消', 6: '已完成'},
                                 formatter: Table.api.formatter.status
@@ -183,7 +191,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                     }
                                 ],
                                 formatter: Table.api.formatter.operate
-                            }                        ]
+                            }]
                     ]
                 });
 
