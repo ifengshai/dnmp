@@ -363,8 +363,7 @@ class OrderData extends Backend
                                     if ($site == 5) {
                                         $options =  $this->wesee_prescription_analysis($orders_prescriptions_params[$v['orders_prescriptions_id']]['prescription']);
                                     }
-                                    unset($orders_prescriptions_params[$v['orders_prescriptions_id']]);
-
+                                    
                                     $options['item_id'] = $v['id'];
                                     $options['site'] = $site;
                                     $options['magento_order_id'] = $v['order_id'];
@@ -378,6 +377,7 @@ class OrderData extends Backend
                                     $options['frame_color'] = $v['goods_color'];
                                     $options['goods_type'] = $v['goods_type'];
                                     $options['prescription_type'] = $orders_prescriptions_params[$v['orders_prescriptions_id']]['name'];
+                                    unset($orders_prescriptions_params[$v['orders_prescriptions_id']]);
 
                                     $order_prescription_type = $options['order_prescription_type'];
                                     unset($options['order_prescription_type']);
@@ -416,11 +416,12 @@ class OrderData extends Backend
                                     if ($site == 5) {
                                         $options =  $this->wesee_prescription_analysis($orders_prescriptions_params[$v['orders_prescriptions_id']]['prescription']);
                                     }
-                                    unset($orders_prescriptions_params[$v['orders_prescriptions_id']]);
+                                   
                                     $options['sku'] = $this->getTrueSku($v['goods_sku']);
                                     $options['qty'] = $v['goods_count'];
                                     $options['base_row_total'] = $v['original_total_price'];
                                     $options['prescription_type'] = $orders_prescriptions_params[$v['orders_prescriptions_id']]['name'];
+                                    unset($orders_prescriptions_params[$v['orders_prescriptions_id']]);
                                     $order_prescription_type = $options['order_prescription_type'];
                                     unset($options['order_prescription_type']);
                                     if ($options) {
