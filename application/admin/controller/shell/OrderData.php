@@ -211,6 +211,7 @@ class OrderData extends Backend
                                     $params['customer_email'] = $v['email'];
                                     $params['base_to_order_rate'] = $v['rate'];
                                     $params['base_shipping_amount'] = $v['freight_price'];
+                                    $params['payment_method'] = $v['payment_type'];
                                     $params['created_at'] = strtotime($v['created_at']) + 28800;
                                     $params['updated_at'] = strtotime($v['updated_at']) + 28800;
                                     if (isset($v['payment_time'])) {
@@ -245,6 +246,7 @@ class OrderData extends Backend
                                     $params['shipping_title'] = $v['freight_description'];
                                     $params['customer_email'] = $v['email'];
                                     $params['base_to_order_rate'] = $v['rate'];
+                                    $params['payment_method'] = $v['payment_type'];
                                     $params['base_shipping_amount'] = $v['freight_price'];
                                     $params['updated_at'] = strtotime($v['updated_at']) + 28800;
                                     if (isset($v['payment_time'])) {
