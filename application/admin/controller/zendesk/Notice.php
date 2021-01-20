@@ -361,7 +361,7 @@ class Notice extends Controller
         $tags = join(',', $tags);
         //开始插入相关数据
         //开启事务
-        Db::startTrans();
+        //Db::startTrans();
         try {
             //根据用户的id获取用户的信息
             $user = $this->client->crasp()->findUser(['id' => $ticket->requester_id]);
@@ -1281,7 +1281,7 @@ class Notice extends Controller
      */
     public function asyncUpdate()
     {
-        $params = 'type:ticket updated_at>=2021-01-19T23:59:00Z updated_at<=2021-01-20T23:59:00Z order_by:updated_at sort:asc';
+        $params = 'type:ticket updated_at>=2021-01-19T10:00:00Z updated_at<=2021-01-19T23:59:00Z order_by:updated_at sort:asc';
         //Get all tickets
         $tickets = $this->client->search()->find($params);
 
