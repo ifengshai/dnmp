@@ -1154,6 +1154,8 @@ class ItWebDemand extends Backend
                     $add['importance'] = $params['importance'];
                     $add['degree_of_urgency'] = $params['degree_of_urgency'];
                     $add['development_difficulty'] = $params['development_difficulty'];
+                    $add['node_time'] = $params['node_time'];
+                    $add['priority'] = $params['priority'];
                     if (!empty($params['important_reasons'])){
                         $add['important_reasons'] = implode(',', $params['important_reasons']);
                     }
