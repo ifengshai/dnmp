@@ -1,0 +1,76 @@
+<form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Lens_number')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-lens_number" class="form-control" name="row[lens_number]" type="text">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Lens_name')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-lens_name" class="form-control" name="row[lens_name]" type="text">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Sph_start')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-sph_start" class="form-control" name="row[sph_start]" type="text">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Sph_end')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-sph_end" class="form-control" name="row[sph_end]" type="text">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Cyl_start')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-cyl_start" class="form-control" name="row[cyl_start]" type="text">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Cyl_end')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-cyl_end" class="form-control" name="row[cyl_end]" type="text">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Add_start')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-add_start" class="form-control" name="row[add_start]" type="text">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Add_end')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-add_end" class="form-control" name="row[add_end]" type="text">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Price')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-price" class="form-control" step="0.01" name="row[price]" type="number">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Type')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-type" data-rule="required" class="form-control" name="row[type]" type="number" value="1">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Create_person')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-create_person" class="form-control" name="row[create_person]" type="text">
+        </div>
+    </div>
+    <div class="form-group layer-footer">
+        <label class="control-label col-xs-12 col-sm-2"></label>
+        <div class="col-xs-12 col-sm-8">
+            <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
+            <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>
