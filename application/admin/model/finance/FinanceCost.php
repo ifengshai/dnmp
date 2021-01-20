@@ -74,7 +74,7 @@ class FinanceCost extends Model
         $params['order_currency_code'] = $order_detail['order_currency_code'];
         $params['payment_time'] = $order_detail['payment_time'];
         $params['payment_method'] = $order_detail['payment_method'];
-        $params['frame_cost'] = $this->order_frame_cost($order_id);
+        $params['frame_cost'] = $this->order_frame_cost($order_id, $order_detail['increment_id']);
         $params['lens_cost'] = $this->order_lens_cost($order_id);
         $params['action_type'] = $order_detail['payment_method'];
         $params['createtime'] = time();
@@ -86,39 +86,49 @@ class FinanceCost extends Model
      *
      * @Description
      * @author wpl
-     * @since 2021/01/19 16:31:21 
+     * @since 2021/01/19 18:20:45 
+     * @param [type] $order_id     订单id
+     * @param [type] $order_number 订单号
      * @return void
      */
-    protected function order_frame_cost($order_id = null)
+    protected function order_frame_cost($order_id = null, $order_number = null)
     {
-
-        $order = new \app\admin\model\order\order\NewOrder();
+        $product_barcode_item = new \app\admin\model\warehouse\ProductBarCodeItem();
         $order_item_process = new \app\admin\model\order\order\NewOrderItemProcess();
         //查询订单子单号
         $item_order_number = $order_item_process->where(['order_id' => $order_id])->column('item_order_number');
 
+        //判断是否有工单
+        $worklist = new \app\admin\model\saleaftermanage\WorkOrderList();
+
+        //查询更改类型为赠品
+        $goods_number = $worklist->alias('a')
+            ->join(['fa_work_order_change_sku' => 'b', 'a.id=b.work_id'])
+            ->where(['platform_order' => $order_number, 'work_status' => 7, 'change_type' => 4])
+            ->column('goods_number');
+        $workcost = 0;
+        if ($goods_number) {
+            //计算成本
+            $workdata = $product_barcode_item->field('purchase_price,actual_purchase_price')
+                ->where(['code' => ['in', $goods_number]])
+                ->join(['fa_purchase_order_item' => 'b'], 'a.purchase_id=b.purchase_id and a.sku=b.sku')
+                ->select();
+            foreach ($workdata as $k => $v) {
+                $workcost += $v['actual_purchase_price'] > 0 ?: $v['purchase_price'];
+            }
+        }
+
         //根据子单号查询条形码绑定关系
-        $product_barcode_item = new \app\admin\model\warehouse\ProductBarCodeItem();
-        $list = $product_barcode_item->where(['item_order_number' => ['in', $item_order_number]])->select();
+        $list = $product_barcode_item->field('purchase_price,actual_purchase_price')
+            ->where(['item_order_number' => ['in', $item_order_number]])
+            ->join(['fa_purchase_order_item' => 'b'], 'a.purchase_id=b.purchase_id and a.sku=b.sku')
+            ->select();
         $list = collection($list)->toArray();
-        $purchase_id = array_column($list, 'purchase_id');
-
-        //查询SKU采购成本及实际成本
-        $purchase_item = new \app\admin\model\purchase\PurchaseOrderItem();
-        $item_list = $purchase_item->where(['purchase_id' => ['in', $purchase_id]])->select();
-        $cost = [];
-        foreach($item_list as $k => $v) {
-            //采购单价
-            $cost[$v['purchase_id']][$v['sku']]['purchase_price'] = $v['purchase_price'];
-            //实际采购成本
-            $cost[$v['purchase_id']][$v['sku']]['actual_purchase_price'] = $v['actual_purchase_price'];
-        }
+        $allcost = 0;
         foreach ($list as $k => $v) {
-            
+            $allcost += $v['actual_purchase_price'] > 0 ?: $v['purchase_price'];
         }
-
-
-        return $num;
+        return $allcost + $workcost;
     }
 
     /**
