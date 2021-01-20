@@ -710,6 +710,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             }, operate: false, visible: false
                         },
                         {field: 'id', title: __('Id'), operate: false},
+                        {field: 'website_type', title: __('站点'), operate: false},
                         {field: 'sku', title: __('sku'), operate: 'LIKE'},
                         {field: 'num', title: __('总需求数量'), operate: false},
                         {

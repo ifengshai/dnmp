@@ -413,7 +413,17 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 }, function (data, ret) {
                     Fast.api.error(ret.msg);
                 });
-
+            })
+            $(document).on('change','#factory_type',function (){
+                var fac_val = $('#factory_type').val();
+                console.log(fac_val)
+                if (fac_val ==0){
+                    $('#is_first').show();
+                    $('#customized_procurement').show();
+                }else{
+                    $('#is_first').hide();
+                    $('#customized_procurement').hide();
+                }
             })
 
             $(document).on('click', '.btn-addplus', function () {
@@ -578,6 +588,18 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
             $(document).on('click', '.btn-arrival-del', function () {
                 $(this).parent().remove();
                 z--;
+            })
+
+            $(document).on('change','#factory_type',function (){
+                var fac_val = $('#factory_type').val();
+                console.log(fac_val)
+                if (fac_val ==0){
+                    $('#is_first').show();
+                    $('#customized_procurement').show();
+                }else{
+                    $('#is_first').hide();
+                    $('#customized_procurement').hide();
+                }
             })
 
             $(document).on('click', '.btn-addplus', function () {
