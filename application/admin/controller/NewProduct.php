@@ -1892,7 +1892,7 @@ class NewProduct extends Backend
                 ->where('is_show', 0)
                 ->where('a.replenish_id<>0')
                 ->where($map)
-                ->group('d.id')
+                ->group('d.id,a.type')
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 // ->getLastSql();
