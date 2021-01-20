@@ -425,6 +425,8 @@ class Zendesk extends Backend
         }
         //获取主的ticket
         $ticket = $this->model->where('id', $ids)->find();
+
+
         $siteName = 'zeelool';
         if($ticket->type == 2){
             $siteName = 'voogueme';
@@ -649,7 +651,9 @@ class Zendesk extends Backend
             ->where('customer_email',$ticket->email)
             ->order('entity_id desc')
             ->limit(5)
-            ->select();        
+            ->select();
+
+//        dump(collection($orders)->toArray());die();
         $btn = input('btn',0);
 
         //查询魔晶账户

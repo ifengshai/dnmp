@@ -144,6 +144,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
             })
             // 启动和暂停按钮
             $(document).on("click", ".btn-start", function () {
+
                 var url = $(this).data('url');
                 $.post(url,{},function(data){
                     if(data.code == 1) {
@@ -316,7 +317,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                 })
                 return false;
             });
-
             $(document).on('change','.macro-apply',function(){
                 var id = $(this).val();
                 var ticket_id = $('.ticket_id').val();
@@ -386,6 +386,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                     }
                 };
                 Fast.api.open('saleaftermanage/work_order_list/add?order_number=' +order_number, '分配', options);
+            });
+
+            //上面的修改承接人
+            $(document).on("click", ".batch-edit-recipient", function () {
+                var ids =$(this).data("value");
+                Backend.api.open('zendesk/zendesk/batch_edit_recipient?ids='+ids, '修改承接人',{area: ['50%', '45%'] });
             });
         },
         signvalue:function(){
