@@ -2086,7 +2086,7 @@ class PurchaseOrder extends Backend
             ->setCellValue("J1", "创建人");
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("K1", "创建时间");
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("L1", "生产周期");
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("M1", "预计到货时间");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("M1", "预计出货时间");
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("N1", "实际到货时间");
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("O1", "是否新品采购");
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("P1", "是否留样采购");
