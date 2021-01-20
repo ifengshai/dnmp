@@ -1161,6 +1161,9 @@ DOC;
     /**
      * https断掉的数据更新
      * @return [type] [description]
+     * 1---zeelool
+     * 2---voogueme
+     * 3---nihaooptical
      */
     public function asyncTicketHttps()
     {
