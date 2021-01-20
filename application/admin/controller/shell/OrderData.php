@@ -214,6 +214,7 @@ class OrderData extends Backend
                                     $params['payment_method'] = $v['payment_type'];
                                     $params['created_at'] = strtotime($v['created_at']) + 28800;
                                     $params['updated_at'] = strtotime($v['updated_at']) + 28800;
+                                    $params['last_trans_id'] = $v['payment_order_no'];
                                     if (isset($v['payment_time'])) {
                                         $params['payment_time'] = strtotime($v['payment_time']) + 28800;
                                     }
@@ -249,6 +250,7 @@ class OrderData extends Backend
                                     $params['payment_method'] = $v['payment_type'];
                                     $params['base_shipping_amount'] = $v['freight_price'];
                                     $params['updated_at'] = strtotime($v['updated_at']) + 28800;
+                                    $params['last_trans_id'] = $v['payment_order_no'];
                                     if (isset($v['payment_time'])) {
                                         $params['payment_time'] = strtotime($v['payment_time']) + 28800;
                                     }
@@ -348,7 +350,8 @@ class OrderData extends Backend
                             //批发站处方表更新
                             if ($payload['type'] == 'INSERT' && $payload['table'] == 'orders_prescriptions') {
                                 foreach ($payload['data'] as $k => $v) {
-                                    $orders_prescriptions_params[$v['id']] = $v['prescription'];
+                                    $orders_prescriptions_params[$v['id']]['prescription'] = $v['prescription'];
+                                    $orders_prescriptions_params[$v['id']]['name'] = $v['name'];
                                 }
                             }
 
@@ -358,7 +361,7 @@ class OrderData extends Backend
                                     $options = [];
                                     //处方解析 不同站不同字段
                                     if ($site == 5) {
-                                        $options =  $this->wesee_prescription_analysis($orders_prescriptions_params[$v['orders_prescriptions_id']]);
+                                        $options =  $this->wesee_prescription_analysis($orders_prescriptions_params[$v['orders_prescriptions_id']]['prescription']);
                                     }
                                     unset($orders_prescriptions_params[$v['orders_prescriptions_id']]);
 
@@ -374,6 +377,7 @@ class OrderData extends Backend
                                     $options['index_price'] = $v['lens_total_price'];
                                     $options['frame_color'] = $v['goods_color'];
                                     $options['goods_type'] = $v['goods_type'];
+                                    $options['prescription_type'] = $orders_prescriptions_params[$v['orders_prescriptions_id']]['name'];
                                    
                                     $order_prescription_type = $options['order_prescription_type'];
                                     unset($options['order_prescription_type']);
@@ -399,7 +403,8 @@ class OrderData extends Backend
                             //批发站处方表更新
                             if ($payload['type'] == 'UPDATE' && $payload['table'] == 'orders_prescriptions') {
                                 foreach ($payload['data'] as $k => $v) {
-                                    $orders_prescriptions_params[$v['id']] = $v['prescription'];
+                                    $orders_prescriptions_params[$v['id']]['prescription'] = $v['prescription'];
+                                    $orders_prescriptions_params[$v['id']]['name'] = $v['name'];
                                 }
                             }
 
@@ -409,12 +414,13 @@ class OrderData extends Backend
                                     $options = [];
                                     //处方解析 不同站不同字段
                                     if ($site == 5) {
-                                        $options =  $this->wesee_prescription_analysis($orders_prescriptions_params[$v['orders_prescriptions_id']]);
+                                        $options =  $this->wesee_prescription_analysis($orders_prescriptions_params[$v['orders_prescriptions_id']]['prescription']);
                                     }
                                     unset($orders_prescriptions_params[$v['orders_prescriptions_id']]);
                                     $options['sku'] = $v['goods_sku'];
                                     $options['qty'] = $v['goods_count'];
                                     $options['base_row_total'] = $v['original_total_price'];
+                                    $options['prescription_type'] = $orders_prescriptions_params[$v['orders_prescriptions_id']]['name'];
                                     $order_prescription_type = $options['order_prescription_type'];
                                     unset($options['order_prescription_type']);
                                     if ($options) {
