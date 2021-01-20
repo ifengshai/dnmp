@@ -77,10 +77,10 @@ class LensPrice extends Backend
     }
 
 
-     /**
+    /**
      * 导入
      */
-    protected function import()
+    public function import()
     {
         $file = $this->request->request('file');
         if (!$file) {
@@ -137,8 +137,7 @@ class LensPrice extends Backend
             }
         }
 
-        //加载文件
-        $insert = [];
+        $template = [];
         try {
             if (!$PHPExcel = $reader->load($filePath)) {
                 $this->error(__('Unknown data format'));
@@ -155,58 +154,43 @@ class LensPrice extends Backend
                 }
             }
 
+            $values = [];
             for ($currentRow = 2; $currentRow <= $allRow; $currentRow++) {
-                $values = [];
                 for ($currentColumn = 1; $currentColumn <= $maxColumnNumber; $currentColumn++) {
                     $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getValue();
-                    $values[] = is_null($val) ? '' : $val;
-                }
-                $row = [];
-                $temp = array_combine($fields, $values);
-                foreach ($temp as $k => $v) {
-                    if (isset($fieldArr[$k]) && $k !== '') {
-                        $row[$fieldArr[$k]] = $v;
-                    }
-                }
-                if ($row) {
-                    $insert[] = $row;
+                    $values[$currentRow][] = is_null($val) ? '' : $val;
                 }
             }
         } catch (Exception $exception) {
             $this->error($exception->getMessage());
         }
-        if (!$insert) {
-            $this->error(__('No rows were updated'));
+
+        if (!$values) {
+            $this->error('未更新任何行');
         }
 
-        try {
-            //是否包含admin_id字段
-            $has_admin_id = false;
-            foreach ($fieldArr as $name => $key) {
-                if ($key == 'admin_id') {
-                    $has_admin_id = true;
-                    break;
-                }
-            }
-            if ($has_admin_id) {
-                $auth = Auth::instance();
-                foreach ($insert as &$val) {
-                    if (!isset($val['admin_id']) || empty($val['admin_id'])) {
-                        $val['admin_id'] = $auth->isLogin() ? $auth->id : 0;
-                    }
-                }
-            }
-            $this->model->saveAll($insert);
-        } catch (PDOException $exception) {
-            $msg = $exception->getMessage();
-            if (preg_match("/.+Integrity constraint violation: 1062 Duplicate entry '(.+)' for key '(.+)'/is", $msg, $matches)) {
-                $msg = "导入失败，包含【{$matches[1]}】的记录已存在";
-            };
-            $this->error($msg);
-        } catch (\Exception $e) {
-            $this->error($e->getMessage());
+        $data = [];
+        foreach ($values as $k => $v) {
+            $data[$k]['lens_number'] = $v[0];
+            $data[$k]['lens_name'] = $v[1];
+            $sph = explode('~', $v[2]);
+            $cyl = explode('~', $v[3]);
+            $add = explode('~', $v[4]);
+            $data[$k]['sph_start'] = $sph[0];
+            $data[$k]['sph_end'] = $sph[1];
+            $data[$k]['cyl_start'] = $cyl[0];
+            $data[$k]['cyl_end'] = $cyl[1];
+            $data[$k]['add_start'] = $add[0];
+            $data[$k]['add_end'] = $add[1];
+            $data[$k]['price'] = $v[5];
+            $data[$k]['type'] = $v[6] == '定制' ? 2 : 1;
+            $data[$k]['createtime'] = time();
+            $data[$k]['create_person'] = session('admin.nickname');
         }
-
+        if ($data) {
+            $lensprice = new \app\admin\model\lens\LensPrice();
+            $lensprice->saveAll(array_values($data));
+        }
         $this->success();
     }
 }
