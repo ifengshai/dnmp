@@ -156,6 +156,7 @@ class NewProductReplenishOrder extends Backend
             $replenish_order_list = $this->list->where(['replenish_order_id'=>$v['id'],'replenish_id'=>$v['replenish_id']])->find();
             if (!$replenish_order_list){
                 $big_supplier =  Db::name('supplier_sku')->where(['sku'=>$v['sku'],'label'=>1])->find();
+
                 $arrr['replenish_id'] = $v['replenish_id'];
                 $arrr['replenish_order_id'] = $v['id'];
                 $arrr['sku'] = $v['sku'];
@@ -482,6 +483,7 @@ class NewProductReplenishOrder extends Backend
             $id = $ids;
         }
         $replenish = $this->replenish->where('id', $id)->find();
+
         switch ($replenish['status']) {
             case 1:
                 $replenish['name'] = '待分配';
@@ -514,11 +516,13 @@ class NewProductReplenishOrder extends Backend
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->list
+//                ->alias('l')
+//                ->join(['fa_new_product_replenish_order'=>'o','l.replenish_order_id = o.id'])
+//                ->join(['fa_new_product_mapping'=>'m','o.sku = m.sku and  o.replenishment_num = m.replenish_num'])
                 ->where($map)
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
-
             $list = $this->list
                 ->where($map)
                 ->where($where)
@@ -527,10 +531,43 @@ class NewProductReplenishOrder extends Backend
                 ->select();
 
             $list = collection($list)->toArray();
+//            dump($list);die();
 
             foreach ($list as $k => $v) {
                 $new_product_replenish_order = Db::name('new_product_replenish_order')->where('id', $v['replenish_order_id'])->value('replenishment_num');
+                //通过sku和实际补货需求数量获取 补货需求清单中的站点
+                $website_type =  Db::name('new_product_mapping')->where('replenish_num', $new_product_replenish_order)->where('sku',$v['sku'])->value('website_type');
+                switch ($website_type){
+                    case 1:
+                        $website_type = 'Zeelool';
+                        break;
+                    case 2:
+                        $website_type = 'Voogueme';
+                        break;
+                    case 3:
+                        $website_type = 'Nihao';
+                        break;
+                    case 4:
+                        $website_type = 'Meeloog';
+                        break;
+                    case 5:
+                        $website_type = 'Weseeoptical';
+                        break;
+                    case 9:
+                        $website_type = 'Zeelool_de';
+                        break;
+                    case 10:
+                        $website_type = 'Zeelool_es';
+                        break;
+                    case 11:
+                        $website_type = 'Zeelool_jp';
+                        break;
+                    case 12:
+                        $website_type = 'Voogmehic';
+                        break;
+                }
                 $list[$k]['num'] = $new_product_replenish_order;
+                $list[$k]['website_type'] = $website_type;
             }
             $result = array("total" => $total, "rows" => $list);
 

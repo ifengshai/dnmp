@@ -17,7 +17,6 @@
     }
 
     .caigou #caigou-table tr {
-
         border-width: 1px;
         border-style: solid;
         border-color: rgba(188, 188, 188, 1);
@@ -26,7 +25,6 @@
     }
 
     .caigou #caigou-table tr th {
-
         border-width: 1px;
         border-style: solid;
         border-color: rgba(188, 188, 188, 1);
@@ -36,7 +34,6 @@
     }
 
     .caigou #caigou-table tr td {
-
         border-width: 1px;
         border-style: solid;
         border-color: rgba(188, 188, 188, 1);
@@ -44,40 +41,21 @@
     }
 
     .caigou #caigou-table tr td input {
-
         width: 150px;
     }
 </style>
 <form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
-
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">采购单号:</label>
         <div class="col-xs-12 col-sm-3">
             <input id="c-purchase_number" class="form-control" readonly name="row[purchase_number]"
-                value="{$purchase_number}" type="text">
+                   value="{$purchase_number}" type="text">
         </div>
         <label class="control-label col-xs-12 col-sm-2">采购单名称:</label>
         <div class="col-xs-12 col-sm-3">
             <input id="c-purchase_name" class="form-control" name="row[purchase_name]" type="text">
         </div>
     </div>
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">到货时间:</label>
-        <div class="col-xs-12 col-sm-3">
-            <input id="c-arrival_time" class="form-control datetimepicker arrival_time"
-                data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[arrival_time]" type="text"
-                value="{:date('Y-m-d H:i:s')}">
-        </div>
-        <label class="control-label col-xs-12 col-sm-2">大货/现货:</label>
-        <div class="col-xs-12 col-sm-3">
-            <select name="row[type]" class="form-control">
-                <option value="">请选择</option>
-                <option value="1">现货</option>
-                <option value="2">大货</option>
-            </select>
-        </div>
-    </div>
-    
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">是否为新品采购单:</label>
         <div class="col-xs-12 col-sm-3">
@@ -87,7 +65,31 @@
                 <option value="0">否</option>
             </select>
         </div>
+        <label class="control-label col-xs-12 col-sm-2" >工厂类型:</label>
+        <div class="col-xs-12 col-sm-3">
+            <select name="row[factory_type]" class="form-control" id="factory_type">
+                <option value="0">工厂</option>
+                <option value="1">贸易</option>
+            </select>
+        </div>
+    </div>
 
+    <div class="form-group">
+
+        <label class="control-label col-xs-12 col-sm-2">大货/现货:</label>
+        <div class="col-xs-12 col-sm-3">
+            <select name="row[type]" class="form-control">
+                <option value="">请选择</option>
+                <option value="1">现货</option>
+                <option value="2">大货</option>
+            </select>
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">1688单号:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-1688_number" class="form-control"  name="row[1688_number]" value="" type="text">
+        </div>
+    </div>
+    <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">是否为留样采购单:</label>
         <div class="col-xs-12 col-sm-3">
             <select name="row[is_sample]" class="form-control">
@@ -96,22 +98,34 @@
                 <option value="0">否</option>
             </select>
         </div>
-    </div>
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">1688单号:</label>
-        <div class="col-xs-12 col-sm-3">
-            <input id="c-1688_number" class="form-control"  name="row[1688_number]" value="" type="text">
-        </div>
-        <label class="control-label col-xs-12 col-sm-2">工厂类型:</label>
-        <div class="col-xs-12 col-sm-3">
-            <select name="row[factory_type]" class="form-control">
-                <option value="0">工厂</option>
-                <option value="1">贸易</option>
+        <label class="control-label col-xs-12 col-sm-2" id="is_first">是否首次定做采购:</label>
+        <div class="col-xs-12 col-sm-3" id="customized_procurement">
+            <select name="row[customized_procurement]" class="form-control">
+                <option value="">请选择</option>
+                <option value="1">是</option>
+                <option value="0">否</option>
             </select>
         </div>
     </div>
+
     <div class="form-group">
-     
+        <label class="control-label col-xs-12 col-sm-2">预计出货时间:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-arrival_time" class="form-control datetimepicker arrival_time"
+                   data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[arrival_time]" type="text"
+                   value="{:date('Y-m-d H:i:s')}">
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">订单生效时间:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-arrival_time" class="form-control datetimepicker arrival_time"
+                   data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[effect_time]" type="text"
+                   value="{:date('Y-m-d H:i:s')}">
+        </div>
+    </div>
+
+
+    <div class="form-group">
+
         <label class="control-label col-xs-12 col-sm-2">采购备注:</label>
         <div class="col-xs-12 col-sm-8">
             <textarea id="c-purchase_remark" class="form-control " rows="5" name="row[purchase_remark]"
@@ -251,7 +265,7 @@
 <!--                            删除</a></td>-->
                 </tr>
                 {/foreach}
-                
+
                 {else/}
                 <tr>
                     <td>

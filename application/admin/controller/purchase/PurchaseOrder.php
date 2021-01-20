@@ -124,6 +124,7 @@ class PurchaseOrder extends Backend
             $params = $this->request->post("row/a");
             if ($params) {
                 $params = $this->preExcludeFields($params);
+
                 if ($params['product_total'] == 0) {
                     $this->error('商品总额不能为0');
                 }
@@ -167,7 +168,6 @@ class PurchaseOrder extends Backend
                             }
                         }
                     }
-
                     $result = $this->model->allowField(true)->save($params);
 
                     //添加采购单商品信息
@@ -1854,6 +1854,7 @@ class PurchaseOrder extends Backend
             ->select();
         $list = collection($list)->toArray();
 
+
         //查询供应商
         $supplier = new \app\admin\model\purchase\Supplier();
         $supplier_data = $supplier->getSupplierData();
@@ -2007,7 +2008,7 @@ class PurchaseOrder extends Backend
 
         list($where) = $this->buildparams();
         $list = $this->model->alias('purchase_order')
-            ->field('receiving_time,purchase_number,purchase_name,supplier_name,sku,supplier_sku,is_new_product,is_sample,product_total,purchase_freight,purchase_num,purchase_price,purchase_remark,b.purchase_total,purchase_order.create_person,purchase_order.createtime,arrival_time,receiving_time,1688_number')
+            ->field('effect_time,type,logistics_info,receiving_time,purchase_number,purchase_name,supplier_name,sku,supplier_sku,is_new_product,is_sample,product_total,purchase_freight,purchase_num,purchase_price,purchase_remark,b.purchase_total,purchase_order.create_person,purchase_order.createtime,arrival_time,receiving_time,1688_number')
             ->join(['fa_purchase_order_item' => 'b'], 'b.purchase_id=purchase_order.id')
             ->join(['fa_supplier' => 'c'], 'c.id=purchase_order.supplier_id')
             ->where($where)
@@ -2045,6 +2046,9 @@ class PurchaseOrder extends Backend
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("P1", "是否留样采购");
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("Q1", "总计");
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("R1", "1688单号");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("S1", "是否大货");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("T1", "揽件时间");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("U1", "订单生效时间");
 
         foreach ($list as $key => $value) {
             $spreadsheet->getActiveSheet()->setCellValueExplicit("A" . ($key * 1 + 2), $value['purchase_number'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
@@ -2066,15 +2070,27 @@ class PurchaseOrder extends Backend
             } else {
                 $is_new_product = '否';
             }
+            if ($value['type'] == 1) {
+                $value['type'] = '否';
+            } else {
+                $value['type'] = '是';
+            }
             if ($value['is_sample'] == 1) {
                 $is_sample = '是';
             } else {
                 $is_sample = '否';
             }
+
+            //反序列化处理物流返回信息
+            $logistics_info = unserialize($value['logistics_info']);
+            $readly_logistics_info = $logistics_info['lastResult']['data'][count($logistics_info)-2];
             $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 1 + 2), $is_new_product);
             $spreadsheet->getActiveSheet()->setCellValue("P" . ($key * 1 + 2), $is_sample);
             $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 1 + 2), $value['purchase_total']);
             $spreadsheet->getActiveSheet()->setCellValueExplicit("R" . ($key * 1 + 2), $value['1688_number'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $spreadsheet->getActiveSheet()->setCellValue("S" . ($key * 1 + 2), $value['type']);
+            $spreadsheet->getActiveSheet()->setCellValue("U" . ($key * 1 + 2), $readly_logistics_info['time']);
+            $spreadsheet->getActiveSheet()->setCellValue("T" . ($key * 1 + 2), $value['effect_time']);
         }
 
         //设置宽度
@@ -2096,6 +2112,9 @@ class PurchaseOrder extends Backend
         $spreadsheet->getActiveSheet()->getColumnDimension('P')->setWidth(30);
         $spreadsheet->getActiveSheet()->getColumnDimension('Q')->setWidth(30);
         $spreadsheet->getActiveSheet()->getColumnDimension('R')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('S')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('T')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('U')->setWidth(30);
 
         //设置边框
         $border = [
@@ -2113,7 +2132,7 @@ class PurchaseOrder extends Backend
         $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
         $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
 
-        $spreadsheet->getActiveSheet()->getStyle('A1:R' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle('A1:U' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         $spreadsheet->setActiveSheetIndex(0);
 
         $format = 'xlsx';
