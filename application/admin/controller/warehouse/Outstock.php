@@ -576,8 +576,7 @@ class Outstock extends Backend
                             'number_type' => 4,
                         ]);
                     }
-                    //先入先出逻辑
-                    //                $this->item->setPurchaseOrder($list);
+                   
                 }else{
                     //审核拒绝解除条形码绑定关系
                     $_product_bar_code_item = new ProductBarCodeItem();

@@ -76,7 +76,7 @@ class FinanceCost extends Model
         $params['payment_method'] = $order_detail['payment_method'];
         $params['frame_cost'] = $this->order_frame_cost($order_id, $order_detail['increment_id']);
         $params['lens_cost'] = $this->order_lens_cost($order_id);
-        $params['action_type'] = $order_detail['payment_method'];
+        $params['action_type'] = 1;
         $params['createtime'] = time();
         return $this->allowField(true)->save($params);
     }
@@ -142,5 +142,50 @@ class FinanceCost extends Model
     protected function order_lens_cost($order_id = null)
     {
         return $num;
+    }
+
+    /**
+     * 出库单镜框成本
+     *
+     * @Description
+     * @author wpl
+     * @since 2021/01/19 16:31:21 
+     * @return void
+     */
+    public function outstock_cost($out_stock_id = null, $out_stock_number = null)
+    {
+        $params['type'] = 2;
+        $params['bill_type'] = 8;
+        $params['order_number'] = $out_stock_number;
+        $params['frame_cost'] = $this->outstock_frame_cost($out_stock_id);
+        $params['action_type'] = 1;
+        $params['createtime'] = time();
+        return $this->allowField(true)->save($params);
+    }
+
+    /**
+     * 出库单镜架成本计算
+     *
+     * @Description
+     * @author wpl
+     * @since 2021/01/19 18:20:45 
+     * @param [type] $order_id     订单id
+     * @param [type] $order_number 订单号
+     * @return void
+     */
+    protected function outstock_frame_cost($out_stock_id = null)
+    {
+        $product_barcode_item = new \app\admin\model\warehouse\ProductBarCodeItem();
+        //根据子单号查询条形码绑定关系
+        $list = $product_barcode_item->field('purchase_price,actual_purchase_price')
+            ->where(['out_stock_id' => $out_stock_id])
+            ->join(['fa_purchase_order_item' => 'b'], 'a.purchase_id=b.purchase_id and a.sku=b.sku')
+            ->select();
+        $list = collection($list)->toArray();
+        $allcost = 0;
+        foreach ($list as $k => $v) {
+            $allcost += $v['actual_purchase_price'] > 0 ?: $v['purchase_price'];
+        }
+        return $allcost;
     }
 }
