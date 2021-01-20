@@ -137,6 +137,13 @@ class Distribution extends Backend
      */
     protected $_work_order_change_sku = null;
 
+    /**
+     * 商品条形码模型对象
+     * @var object
+     * @access protected
+     */
+    protected $_product_bar_code_item = null;
+
     public function _initialize()
     {
         parent::_initialize();
@@ -153,6 +160,7 @@ class Distribution extends Backend
         $this->_work_order_list = new WorkOrderList();
         $this->_work_order_measure = new WorkOrderMeasure();
         $this->_work_order_change_sku = new WorkOrderChangeSku();
+        $this->_product_bar_code_item = new ProductBarCodeItem();
     }
 
     /**
@@ -2179,6 +2187,13 @@ class Distribution extends Backend
 
                 $this->model->where(['id' => $ids])->update($save_data);
 
+                //回退到待配货、待打印标签，解绑条形码
+                if (3 > $status) {
+                    $this->_product_bar_code_item
+                        ->allowField(true)
+                        ->isUpdate(true, ['item_order_number' => $item_info['item_order_number']])
+                        ->save(['item_order_number' => '']);
+                }
                 //标记处理异常状态及时间
                 $this->_distribution_abnormal->where(['id' => $abnormal_info['id']])->update(['status' => 2, 'do_time' => time(), 'do_person' => $admin->nickname]);
 
