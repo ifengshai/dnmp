@@ -214,6 +214,7 @@ class OrderData extends Backend
                                     $params['payment_method'] = $v['payment_type'];
                                     $params['created_at'] = strtotime($v['created_at']) + 28800;
                                     $params['updated_at'] = strtotime($v['updated_at']) + 28800;
+                                    $params['last_trans_id'] = $v['payment_order_no'];
                                     if (isset($v['payment_time'])) {
                                         $params['payment_time'] = strtotime($v['payment_time']) + 28800;
                                     }
@@ -249,6 +250,7 @@ class OrderData extends Backend
                                     $params['payment_method'] = $v['payment_type'];
                                     $params['base_shipping_amount'] = $v['freight_price'];
                                     $params['updated_at'] = strtotime($v['updated_at']) + 28800;
+                                    $params['last_trans_id'] = $v['payment_order_no'];
                                     if (isset($v['payment_time'])) {
                                         $params['payment_time'] = strtotime($v['payment_time']) + 28800;
                                     }
@@ -348,7 +350,8 @@ class OrderData extends Backend
                             //批发站处方表更新
                             if ($payload['type'] == 'INSERT' && $payload['table'] == 'orders_prescriptions') {
                                 foreach ($payload['data'] as $k => $v) {
-                                    $orders_prescriptions_params[$v['id']] = $v['prescription'];
+                                    $orders_prescriptions_params[$v['id']]['prescription'] = $v['prescription'];
+                                    $orders_prescriptions_params[$v['id']]['name'] = $v['name'];
                                 }
                             }
 
@@ -358,14 +361,14 @@ class OrderData extends Backend
                                     $options = [];
                                     //处方解析 不同站不同字段
                                     if ($site == 5) {
-                                        $options =  $this->wesee_prescription_analysis($orders_prescriptions_params[$v['orders_prescriptions_id']]);
+                                        $options =  $this->wesee_prescription_analysis($orders_prescriptions_params[$v['orders_prescriptions_id']]['prescription']);
                                     }
                                     unset($orders_prescriptions_params[$v['orders_prescriptions_id']]);
 
                                     $options['item_id'] = $v['id'];
                                     $options['site'] = $site;
                                     $options['magento_order_id'] = $v['order_id'];
-                                    $options['sku'] = $v['goods_sku'];
+                                    $options['sku'] = $this->getTrueSku($v['goods_sku']);
                                     $options['qty'] = $v['goods_count'];
                                     $options['base_row_total'] = $v['original_total_price'];
                                     $options['product_id'] = $v['goods_id'];
@@ -374,6 +377,7 @@ class OrderData extends Backend
                                     $options['index_price'] = $v['lens_total_price'];
                                     $options['frame_color'] = $v['goods_color'];
                                     $options['goods_type'] = $v['goods_type'];
+                                    $options['prescription_type'] = $orders_prescriptions_params[$v['orders_prescriptions_id']]['name'];
 
                                     $order_prescription_type = $options['order_prescription_type'];
                                     unset($options['order_prescription_type']);
@@ -399,7 +403,8 @@ class OrderData extends Backend
                             //批发站处方表更新
                             if ($payload['type'] == 'UPDATE' && $payload['table'] == 'orders_prescriptions') {
                                 foreach ($payload['data'] as $k => $v) {
-                                    $orders_prescriptions_params[$v['id']] = $v['prescription'];
+                                    $orders_prescriptions_params[$v['id']]['prescription'] = $v['prescription'];
+                                    $orders_prescriptions_params[$v['id']]['name'] = $v['name'];
                                 }
                             }
 
@@ -409,12 +414,13 @@ class OrderData extends Backend
                                     $options = [];
                                     //处方解析 不同站不同字段
                                     if ($site == 5) {
-                                        $options =  $this->wesee_prescription_analysis($orders_prescriptions_params[$v['orders_prescriptions_id']]);
+                                        $options =  $this->wesee_prescription_analysis($orders_prescriptions_params[$v['orders_prescriptions_id']]['prescription']);
                                     }
                                     unset($orders_prescriptions_params[$v['orders_prescriptions_id']]);
-                                    $options['sku'] = $v['goods_sku'];
+                                    $options['sku'] = $this->getTrueSku($v['goods_sku']);
                                     $options['qty'] = $v['goods_count'];
                                     $options['base_row_total'] = $v['original_total_price'];
+                                    $options['prescription_type'] = $orders_prescriptions_params[$v['orders_prescriptions_id']]['name'];
                                     $order_prescription_type = $options['order_prescription_type'];
                                     unset($options['order_prescription_type']);
                                     if ($options) {
@@ -1517,6 +1523,26 @@ class OrderData extends Backend
 
 
 
+    /**
+     * 批发站 匹配到s，r结尾的sku
+     *
+     * @param $sku
+     * @date  2020/12/23 18:01
+     */
+    protected function getTrueSku($sku)
+    {
+        $sku = trim($sku);
+        $temp_arr = explode('-', $sku);
+        if (count($temp_arr) >= 2) {
+            $first = rtrim($temp_arr[0], 'S');
+            $first = rtrim($first, 'R');
+            $second = $temp_arr[1];
+            $sku = $first . '-' . $second;
+        }
+
+        return $sku;
+    }
+
 
 
     ################################################处理旧数据脚本##########################################################################
@@ -1536,16 +1562,16 @@ class OrderData extends Backend
         $site = 5;
         $list = Db::connect('database.db_wesee_temp')->table('orders')->where('id>1875')->select();
         foreach ($list as $k => $v) {
-          
+
             $params = [];
-      
+
             $params['payment_method'] = $v['payment_type'];
-          
+            $params['last_trans_id'] = $v['payment_order_no'];
+
             //插入订单主表
-            $this->order->where(['site' => 5,'entity_id' => $v['id']])->update($params);
-    
+            $this->order->where(['site' => 5, 'entity_id' => $v['id']])->update($params);
         }
-       
+
         echo "ok";
     }
 
@@ -1641,7 +1667,7 @@ class OrderData extends Backend
     }
 
 
-     /**
+    /**
      * 地址处理
      *
      * @Description
@@ -1653,46 +1679,17 @@ class OrderData extends Backend
     {
         $site = 5;
         $list = Db::connect('database.db_wesee_temp')
-        ->table('orders_items')->alias('a')
-        ->join(['orders_prescriptions' => 'b'],'a.orders_prescriptions_id=b.id')
-        ->where('order_id>1875 and order_id<1916')->select();
+            ->table('orders_items')->alias('a')
+            ->join(['orders_prescriptions' => 'b'], 'a.orders_prescriptions_id=b.id')
+            ->where('order_id>1875')->select();
         foreach ($list as $k => $v) {
             $options = [];
             //处方解析 不同站不同字段
-            $options =  $this->wesee_prescription_analysis($v['prescription']);
-            $options['item_id'] = $v['id'];
-            $options['site'] = $site;
-            $options['magento_order_id'] = $v['order_id'];
-            $options['sku'] = $v['goods_sku'];
-            $options['qty'] = $v['goods_count'];
-            $options['base_row_total'] = $v['original_total_price'];
-            $options['product_id'] = $v['goods_id'];
-            $options['frame_regural_price'] = $v['goods_original_price'];
-            $options['frame_price'] = $v['goods_total_price'];
-            $options['index_price'] = $v['lens_total_price'];
-            $options['frame_color'] = $v['goods_color'];
-            $options['goods_type'] = $v['goods_type'];
-
-            $order_prescription_type = $options['order_prescription_type'];
-            unset($options['order_prescription_type']);
-            if ($options) {
-                $options_id = $this->orderitemoption->insertGetId($options);
-                $data = []; //子订单表数据
-                for ($i = 0; $i < $v['goods_count']; $i++) {
-                    $data[$i]['item_id'] = $v['id'];
-                    $data[$i]['magento_order_id'] = $v['order_id'];
-                    $data[$i]['site'] = $site;
-                    $data[$i]['option_id'] = $options_id;
-                    $data[$i]['sku'] = $v['goods_sku'];
-                    $data[$i]['order_prescription_type'] = $order_prescription_type;
-                    $data[$i]['created_at'] = strtotime($v['created_at']) + 28800;
-                    $data[$i]['updated_at'] = strtotime($v['updated_at']) + 28800;
-                }
-                $this->orderitemprocess->insertAll($data);
-            }
+            // $options =  $this->wesee_prescription_analysis($v['prescription']);
+            $options['prescription_type'] = $v['name'];
+            $this->orderitemoption->where(['item_id' => $v['id'], 'site' => 5, 'magento_order_id' => $v['order_id']])->update($options);
         }
         echo $site . 'ok';
-
     }
 
 
