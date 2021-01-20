@@ -361,7 +361,7 @@ class Notice extends Controller
         $tags = join(',', $tags);
         //开始插入相关数据
         //开启事务
-        //Db::startTrans();
+        Db::startTrans();
         try {
             //根据用户的id获取用户的信息
             $user = $this->client->crasp()->findUser(['id' => $ticket->requester_id]);
