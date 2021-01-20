@@ -26,6 +26,7 @@ use GuzzleHttp\Client;
 use app\admin\controller\warehouse\Inventory;
 use app\admin\model\order\order\NewOrder;
 use app\admin\model\order\order\NewOrderItemProcess;
+use app\admin\model\finance\FinanceCost;
 
 class WorkOrderList extends Model
 {
@@ -1240,6 +1241,11 @@ class WorkOrderList extends Model
 
             //标记措施表更改类型
             WorkOrderMeasure::where(['id' => $measure_id])->update(['sku_change_type' => 3]);
+            //主单取消收入核算冲减
+            if (3 == $measure_choose_id) {
+                $FinanceCost = new FinanceCost();
+                $FinanceCost->cancel_order_subtract($work_id);
+            }
         }
     }
 

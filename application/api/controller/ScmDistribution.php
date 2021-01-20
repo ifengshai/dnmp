@@ -21,6 +21,7 @@ use app\admin\model\order\order\NewOrderProcess;
 use app\admin\model\warehouse\ProductBarCodeItem;
 use app\admin\model\order\order\LensData;
 use app\admin\model\saleaftermanage\WorkOrderList;
+use app\admin\model\finance\FinanceCost;
 
 /**
  * 供应链配货接口类
@@ -2185,13 +2186,13 @@ class ScmDistribution extends Scm
                         ->field('stock,occupy_stock,distribution_occupy_stock')
                         ->find();
 
-                    //扣减占用库存、配货占用、总库存
+                    /*//扣减占用库存、配货占用、总库存
                     $this->_item
                         ->where(['sku' => $true_sku])
                         ->dec('occupy_stock', 1)
                         ->dec('distribution_occupy_stock', 1)
                         ->dec('stock', 1)
-                        ->update();
+                        ->update();*/
 
                     //记录库存日志
                     $log_data[] = [
@@ -2229,6 +2230,9 @@ class ScmDistribution extends Scm
                     ->allowField(true)
                     ->isUpdate(true, ['item_order_number' => ['in', $item_order_numbers]])
                     ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2]);
+                //审单触发收入核算
+                $FinanceCost = new FinanceCost();
+                $FinanceCost->order_income($order_id);
             }
 
             //保存库存日志
