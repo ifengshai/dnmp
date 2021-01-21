@@ -2268,6 +2268,7 @@ class Distribution extends Backend
                     if (!empty($change_sku)) {//存在已完成的更改镜片的工单，替换更改的sku
                         $item_info['sku'] = $change_sku;
                     }
+                    print_r($item_info['sku']);
                     //仓库sku、库存
                     $platform_info = $this->_item_platform_sku
                         ->field('sku,stock')
