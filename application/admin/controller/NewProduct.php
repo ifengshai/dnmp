@@ -2327,7 +2327,7 @@ class NewProduct extends Backend
      *
      */
     public function cat_import_data(){
-        $data = Db::table('Sheet1')->select();
+        $data = Db::table('Sheet3')->select();
         $list = collection($data)->toArray();
         Db::startTrans();
         try {
@@ -2355,6 +2355,7 @@ class NewProduct extends Backend
                     $itemAttribute['attribute_type'] = 3;
                     $itemAttribute['accessory_texture'] = $value['材质'];
                     $itemAttribute['accessory_color'] = $value['商品颜色'];
+                    $itemAttribute['frame_size'] = $value['尺寸'];
                     //添加商品属性表
                     $res = Db::name('new_product_attribute')->insert($itemAttribute);
                     if (!$res) {
@@ -2380,7 +2381,7 @@ class NewProduct extends Backend
                     Db::name('supplier_sku')->insert($supplier_data);
 
                     //添加对应平台映射关系
-                    $skuParams['platform_type'] = 12;
+                    $skuParams['platform_type'] = 4;
                     $skuParams['sku'] = $value['SKU'];
                     $skuParams['platform_sku'] = $value['SKU'];
                     $skuParams['name'] = $value['商品名称'];
@@ -2389,19 +2390,19 @@ class NewProduct extends Backend
                     $add['presell_residue_num'] = $skuParams['presell_residue_num'] = 100;
                     $add['presell_create_time'] = $skuParams['presell_start_time'] = '2021-01-21 00:00:00';
                     $add['presell_end_time'] = $skuParams['presell_end_time'] =  '2022-01-21 00:00:00';
-                    $magento_platform = new \app\admin\model\platformManage\MagentoPlatform();
-                    $prefix = $magento_platform->getMagentoPrefix($skuParams['platform_type']);
-                    //判断前缀是否存在
-                    if (false == $prefix) {
-                        return false;
-                    }
-                    //监测平台sku是否存在
-                    $itemPlatfromSku = new  ItemPlatformSku();
-                    $platformSkuExists = $itemPlatfromSku->getTrueSku($prefix .  $skuParams['site']['sku'],  $skuParams['site']['site']);
-                    if ($platformSkuExists) {
-                        return false;
-                    }
-                    $skuParams['platform_sku'] = $prefix . $skuParams['sku'];
+//                    $magento_platform = new \app\admin\model\platformManage\MagentoPlatform();
+//                    $prefix = $magento_platform->getMagentoPrefix($skuParams['platform_type']);
+//                    //判断前缀是否存在
+//                    if (false == $prefix) {
+//                        return false;
+//                    }
+//                    //监测平台sku是否存在
+//                    $itemPlatfromSku = new  ItemPlatformSku();
+//                    $platformSkuExists = $itemPlatfromSku->getTrueSku($prefix .  $skuParams['site']['sku'],  $skuParams['site']['site']);
+//                    if ($platformSkuExists) {
+//                        return false;
+//                    }
+
                     $skuParams['platform_frame_is_rimless'] = '';
                     $skuParams['create_person'] = session('admin.nickname') ? session('admin.nickname') : 'Admin';
                     $skuParams['create_time'] = date("Y-m-d H:i:s", time());
