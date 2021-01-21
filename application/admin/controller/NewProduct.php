@@ -1768,8 +1768,10 @@ class NewProduct extends Backend
         $where['a.origin_sku'] = ['like', '%' . 'RN' . '%'];
         $list = $this->model
             ->alias('a')
+
             ->join(['fa_new_product_attribute'=>'b'],'a.id = b.item_id')
-            ->field('a.*,b.accessory_color,b.accessory_texture')
+            ->join(['fa_supplier' => 'c'], 'a.supplier_id=c.id')
+            ->field('a.*,b.accessory_color,b.accessory_texture,c.supplier_name')
             ->where($where)->select();
         $list = collection($list)->toArray();
 
