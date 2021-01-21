@@ -394,19 +394,6 @@ class Distribution extends Backend
                 ->where(['item_process_id' => ['in', array_column($list, 'id')], 'status' => 1])
                 ->column('work_id', 'item_process_id');
 
-            //获取工单更改镜框最新信息
-            $change_sku = $this->_work_order_change_sku
-                ->alias('a')
-                ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
-                ->where([
-                    'a.change_type' => 1,
-                    'a.item_order_number' => ['in', array_column($list, 'item_order_number')],
-                    'b.operation_type' => 1
-                ])
-                ->order('a.id', 'desc')
-                ->limit(1)
-                ->column('a.change_sku', 'a.item_order_number');
-
             foreach ($list as $key => $value) {
                 $stock_house_num = '-';
                 if (!empty($value['temporary_house_id']) && 3 == $label) {
@@ -436,8 +423,20 @@ class Distribution extends Backend
                 //判断是否显示工单按钮
                 $list[$key]['task_info'] = in_array($value['item_order_number'], $item_order_numbers) ? 1 : 0;
 
-                if ($change_sku[$value['item_order_number']]) {
-                    $list[$key]['sku'] = $change_sku[$value['item_order_number']];
+                //获取工单更改镜框最新信息
+                $change_sku = $this->_work_order_change_sku
+                    ->alias('a')
+                    ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
+                    ->where([
+                        'a.change_type' => 1,
+                        'a.item_order_number' => $value['item_order_number'],
+                        'b.operation_type' => 1
+                    ])
+                    ->order('a.id', 'desc')
+                    ->limit(1)
+                    ->value('a.change_sku');
+                if ($change_sku) {
+                    $list[$key]['sku'] = $change_sku;
                 }
             }
 
