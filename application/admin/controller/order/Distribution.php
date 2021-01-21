@@ -2274,6 +2274,7 @@ class Distribution extends Backend
                         ->field('sku,stock')
                         ->where(['platform_sku' => $item_info['sku'], 'platform_type' => $item_info['site']])
                         ->find();
+                    print_r($platform_info);
                     $true_sku = $platform_info['sku'];
                     print_r($true);die;
                     //检验库存
