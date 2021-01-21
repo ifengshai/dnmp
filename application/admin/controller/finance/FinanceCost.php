@@ -8,8 +8,13 @@ use think\Controller;
 use think\Db;
 use think\Request;
 
-class CostCheck extends Backend
+class FinanceCost extends Backend
 {
+    public function _initialize()
+    {
+        parent::_initialize();
+        $this->model = new \app\admin\model\finance\FinanceCost();
+    }
     /*
      * 成本核算
      * */
@@ -18,7 +23,6 @@ class CostCheck extends Backend
     }
     public function table1()
     {
-        $this->model = model('Attachment');
         //设置过滤方法
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
