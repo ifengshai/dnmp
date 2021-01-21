@@ -2274,7 +2274,7 @@ class Distribution extends Backend
                         ->where(['platform_sku' => $item_info['sku'], 'platform_type' => $item_info['site']])
                         ->find();
                     $true_sku = $platform_info['sku'];
-                    print_r($true_sku);die;
+                    
                     //检验库存
                     $stock_arr = $this->_item
                         ->where(['sku' => $true_sku])
@@ -2295,7 +2295,7 @@ class Distribution extends Backend
                         ->dec('stock', 1)
                         ->update();
 
-                    //记录库存日志
+                    /*//记录库存日志
                     $this->_stock_log->setData([
                         'type' => 2,
                         'site' => $item_info['site'],
@@ -2315,7 +2315,7 @@ class Distribution extends Backend
                         'fictitious_change' => -1,
                         'create_person' => session('admin.nickname'),
                         'create_time' => time()
-                    ]);
+                    ]);*/
 
                     $remark .= ',扣减可用库存、虚拟仓库存、配货占用库存、总库存';
                 }
