@@ -402,6 +402,7 @@ class OrderData extends Backend
 
                             //批发站处方表更新
                             if ($payload['type'] == 'UPDATE' && $payload['table'] == 'orders_prescriptions') {
+
                                 foreach ($payload['data'] as $k => $v) {
                                     $orders_prescriptions_params[$v['id']]['prescription'] = $v['prescription'];
                                     $orders_prescriptions_params[$v['id']]['name'] = $v['name'];
@@ -965,13 +966,6 @@ class OrderData extends Backend
         $arr['od_bd_r'] = $options_params['od_bd_r'];
         $arr['os_bd_r'] = $options_params['os_bd_r'];
 
-        //判断是否为成品老花镜
-        if ($options['degrees'] && !$arr['index_type']) {
-            $arr['od_sph'] = $options['degrees'];
-            $arr['os_sph'] = $options['degrees'];
-            $arr['index_type'] = '1.61 Index Standard  Reading Glasses - Non Prescription';
-            $arr['index_name'] = '1.61 Index Standard  Reading Glasses - Non Prescription';
-        }
 
         /**
          * 判断定制现片逻辑
@@ -1686,7 +1680,7 @@ class OrderData extends Backend
         foreach ($list as $k => $v) {
             $options = [];
             //处方解析 不同站不同字段
-            // $options =  $this->wesee_prescription_analysis($v['prescription']);
+            $options =  $this->wesee_prescription_analysis($v['prescription']);
             $options['prescription_type'] = $v['name'];
             $this->orderitemoption->where(['item_id' => $v['id'], 'site' => 5, 'magento_order_id' => $v['order_id']])->update($options);
         }
