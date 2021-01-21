@@ -8,9 +8,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     index_url: 'lens/lens_price/index' + location.search,
                     add_url: 'lens/lens_price/add',
                     import_url: 'lens/lens_price/import',
-                    edit_url: 'lens/lens_price/edit',
-                    del_url: 'lens/lens_price/del',
-                    multi_url: 'lens/lens_price/multi',
+                    // edit_url: 'lens/lens_price/edit',
+                    // del_url: 'lens/lens_price/del',
+                    // multi_url: 'lens/lens_price/multi',
                     table: 'lens_price',
                 }
             });
@@ -37,7 +37,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         },
                         { field: 'createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
                         { field: 'create_person', title: __('Create_person') },
-                        { field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate }
+                        // { field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate }
                     ]
                 ]
             });

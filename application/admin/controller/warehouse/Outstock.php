@@ -105,7 +105,7 @@ class Outstock extends Backend
         ini_set('memory_limit', '512M');
 
         $ids = input('id_params');
-        if (!empty($ids)){
+        if (!empty($ids)) {
             $item_map['s.out_stock_id'] = ['in', $ids];
         }
         $list = $this->model
@@ -515,14 +515,12 @@ class Outstock extends Backend
         if ($res != false) {
             /**
              * @todo 审核通过扣减库存逻辑
-             */
-            (new StockLog())->startTrans();
+             */ (new StockLog())->startTrans();
             $platform->startTrans();
             $item->startTrans();
             Db::startTrans();
             try {
                 if ($data['status'] == 2) {
-                    //                dump(collection($list)->toArray());die;
 
                     //出库扣减库存
                     $stock_data = [];
@@ -575,9 +573,15 @@ class Outstock extends Backend
                             //'关联单号类型：1订单号 2子订单号 3入库单 4出库单 5盘点单 6调拨单'
                             'number_type' => 4,
                         ]);
+
+                        //排除盘点出库
+                        if ($v['type_id'] != 1) {
+                            //计算出库成本 
+                            $financecost = new \app\admin\model\finance\FinanceCost();
+                            $financecost->outstock_cost($v['out_stock_id'], $v['out_stock_number']);
+                        }
                     }
-                   
-                }else{
+                } else {
                     //审核拒绝解除条形码绑定关系
                     $_product_bar_code_item = new ProductBarCodeItem();
                     $_product_bar_code_item
@@ -886,8 +890,8 @@ class Outstock extends Backend
                 case 'zeelool_es':
                     $out_label = 9;
                     break;
-                // case 'zeelool_jp':
-                //     $label = 1;
+                    // case 'zeelool_jp':
+                    //     $label = 1;
                 case 'zeelool_de':
                     $out_label = 10;
                     break;
@@ -944,5 +948,4 @@ class Outstock extends Backend
             $this->error($e->getMessage());
         }
     }
-
 }

@@ -66,7 +66,10 @@ class LensPrice extends Backend
             $list = collection($list)->toArray();
 
             foreach ($list as $k => &$v) {
-                $v['options'] = 'SPH:' . $v['sph_start'] . '~' . $v['sph_end'] . ' ' . 'CYL:' . $v['cyl_start'] . '~' . $v['cyl_end'] . ' ' . 'ADD:' . $v['add_start'] . '~' . $v['add_end'];
+                $sph = $v['sph_start'] || $v['sph_end'] ? 'SPH:' . $v['sph_start'] . '~' . $v['sph_end'] : '';
+                $cyl = $v['cyl_start'] || $v['cyl_end'] ? 'CYL:' . $v['cyl_start'] . '~' . $v['cyl_end'] : '';
+                $add = $v['add_start'] || $v['add_end'] ? 'ADD:' . $v['add_start'] . '~' . $v['add_end'] : '';
+                $v['options'] = $sph . ' ' . $cyl . ' ' . $add;
             }
             unset($v);
             $result = array("total" => $total, "rows" => $list);
@@ -137,7 +140,7 @@ class LensPrice extends Backend
             }
         }
 
-        $template = [];
+        $template = ['镜片编码', '镜片类型', 'SPH', 'CYL', 'ADD', '镜片价格', '现片/定制'];
         try {
             if (!$PHPExcel = $reader->load($filePath)) {
                 $this->error(__('Unknown data format'));
@@ -152,6 +155,9 @@ class LensPrice extends Backend
                     $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getValue();
                     $fields[] = $val;
                 }
+            }
+            if ($template != $fields) {
+                $this->error('模板不正确');
             }
 
             $values = [];
@@ -171,6 +177,9 @@ class LensPrice extends Backend
 
         $data = [];
         foreach ($values as $k => $v) {
+            if (!$v[0]) {
+                continue;
+            }
             $data[$k]['lens_number'] = $v[0];
             $data[$k]['lens_name'] = $v[1];
             $sph = explode('~', $v[2]);
