@@ -54,8 +54,7 @@ class NewOrderProcess extends Model
         //过滤补差价单
         $map['b.order_type'] = ['<>', 5];
         $map['b.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete','delivered']];
-//        return $this->alias('a')->where($map)->join(['fa_order' => 'b'], 'a.order_id=b.id')->field('b.increment_id,b.status,b.created_at,b.site')->select();
-        return $this->alias('a')->where($map)->join(['fa_order' => 'b'], 'a.order_id=b.id')->group('b.site')->column('count(1)', 'b.site');
+        return $this->alias('a')->where($map)->join(['fa_order' => 'b'], 'a.order_id=b.id')->field('b.increment_id,b.status,b.created_at,b.site')->select();
     }
 
 
