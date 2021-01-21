@@ -125,51 +125,53 @@
                     <th>待结算金额</td>
                 </tr>
                 {if $list}
-                {foreach $list as $v}
+                {foreach $list as $k=>$v}
                 <tr>
                     <td>
-                        <input id="c-id" class="form-control id" readonly name="list[{$v.id}][in_stock_id]" type="text"
-                               value="{$v.id}">
+                        <input id="c-id" class="form-control id" readonly name="list[{$k}][in_stock_id]" type="text" value="{$v.id}">
                     </td>
+                    <input id="c-purchase_id" class="form-control purchase_id hidden" readonly name="list[{$k}][purchase_id]" type="text" value="{$v.purchase_id}">
+                    <input id="c-batch_id" class="form-control batch_id hidden" readonly name="list[{$k}][batch_id]" type="text" value="{$v.batch_id}">
                     <td>
-                        <input id="c-purchase_number" class="form-control purchase_number" readonly name="list[{$v.id}][purchase_number]" type="text"
+                        <input id="c-purchase_number" class="form-control purchase_number" readonly name="list[{$k}][purchase_number]" type="text"
                                value="{$v.purchase_number}">
                     </td>
-                    <td><input id="c-purchase_name" class="form-control purchase_name" readonly name="list[{$v.id}][purchase_name]"
+                    <td><input id="c-purchase_name" class="form-control purchase_name" readonly name="list[{$k}][purchase_name]"
                                type="text" value="{$v.purchase_name}"></td>
-                    <td><input id="c-pay_type" class="form-control pay_type" readonly name="list[{$v.id}][pay_type]"
+                    <td><input id="c-pay_type" class="form-control pay_type" readonly name="list[{$k}][pay_type]"
                                type="text" value="{$v.pay_type}"></td>
-                    <td><input id="c-purchase_batch" class="form-control purchase_batch" readonly name="list[{$v.id}][purchase_batch]"
+                    <td><input id="c-purchase_batch" class="form-control purchase_batch" readonly name="list[{$k}][purchase_batch]"
                                type="text" value="{$v.purchase_batch}"></td>
-                    <td><input id="c-arrival_num" class="form-control arrival_num" readonly name="list[{$v.id}][arrival_num]"
+                    <td><input id="c-arrival_num" class="form-control arrival_num" readonly name="list[{$k}][arrival_num]"
                                type="text" value="{$v.arrival_num}"></td>
-                    <td><input id="c-wait_pay" class="form-control wait_pay" readonly name="list[{$v.id}][wait_pay]"
+                    <td><input id="c-wait_pay" class="form-control wait_pay" readonly name="list[{$k}][wait_pay]"
                                type="text" value="{$v.wait_pay}"></td>
-                    <td><input id="c-now_wait_pay" class="form-control now_wait_pay" readonly name="list[{$v.id}][now_wait_pay]"
+                    <td><input id="c-now_wait_pay" class="form-control now_wait_pay" readonly name="list[{$k}][now_wait_pay]"
                                type="text" value="{$v.now_wait_pay}"></td>
-                    <td><input id="c-purchase_freight" class="form-control purchase_freight" readonly name="list[{$v.id}][purchase_freight]"
+                    <td><input id="c-purchase_freight" class="form-control purchase_freight" readonly name="list[{$k}][purchase_freight]"
                                type="text" value="{$v.purchase_freight}"></td>
-                    <td><input id="c-quantity_num" class="form-control quantity_num" readonly name="list[{$v.id}][quantity_num]"
+                    <td><input id="c-quantity_num" class="form-control quantity_num" readonly name="list[{$k}][quantity_num]"
                                type="text" value="{$v.quantity_num}"></td>
-                    <td><input id="c-in_stock_money" class="form-control in_stock_money" readonly name="list[{$v.id}][in_stock_money]"
+                    <td><input id="c-in_stock_money" class="form-control in_stock_money" readonly name="list[{$k}][in_stock_money]"
                                type="text" value="{$v.in_stock_money}"></td>
-                    <td><input id="c-unqualified_num" class="form-control unqualified_num" readonly name="list[{$v.id}][unqualified_num]"
+                    <td><input id="c-unqualified_num" class="form-control unqualified_num" readonly name="list[{$k}][unqualified_num]"
                                type="text" value="{$v.unqualified_num}"></td>
-                    <td><input id="c-unqualified_num_money" class="form-control unqualified_num_money" readonly name="list[{$v.id}][unqualified_num_money]"
+                    <td><input id="c-unqualified_num_money" class="form-control unqualified_num_money" readonly name="list[{$k}][unqualified_num_money]"
                                type="text" value="{$v.unqualified_num_money}"></td>
                     <td>
-                        <select id="c-kou_reason" name="list[{$v.id}][kou_reason]" class="form-control">
+                        <select id="c-kou_reason" name="list[{$k}][kou_reason]" class="form-control">
+                            <option value="0">选择</option>
                             <option value="1">扣款原因1</option>
                             <option value="2">扣款原因2</option>
                             <option value="3">扣款原因3</option>
                         </select>
                     </td>
                     <td>
-                        <input id="c-kou_money" class="form-control kou_money" name="list[{$v.id}][kou_money]" type="text" value="">
+                        <input id="c-kou_money" class="form-control kou_money" name="list[{$k}][kou_money]" readonly type="text" value="" data-rule="integer">
                     </td>
-                    <td><input id="c-period" class="form-control period" readonly name="list[{$v.id}][period]"
+                    <td><input id="c-period" class="form-control period" readonly name="list[{$k}][period]"
                                type="text" value="{$v.period}"></td>
-                    <td><input id="c-all_money" class="form-control all_money" readonly name="list[{$v.id}][all_money]"
+                    <td><input id="c-all_money" class="form-control all_money" readonly name="list[{$k}][all_money]"
                                type="text" value="{$v.all_money}"></td>
                 </tr>
                 {/foreach}
@@ -180,19 +182,6 @@
     </div>
     <hr>
     <div class="panel-body">
-<!--        <div id="myTabContent" class="tab-content">-->
-<!--            <div class="tab-pane fade active in" id="one">-->
-<!--                <div class="widget-body no-padding">-->
-<!--                    <div id="toolbar" class="toolbar">-->
-<!--                        <a href="javascript:;" class="btn btn-primary btn-refresh" title="{:__('Refresh')}">-->
-<!--                            <i class="fa fa-refresh"></i>-->
-<!--                        </a>-->
-<!--                    </div>-->
-<!--                    <table id="table" class="table table-striped table-bordered table-hover table-nowrap" width="100%">-->
-<!--                    </table>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--        </div>-->
         <div class="form-group" style="float: right">
             <label class="control-label col-xs-12 col-sm-5">待结算合计（￥）:</label>
             <div class="col-xs-12 col-sm-7">
