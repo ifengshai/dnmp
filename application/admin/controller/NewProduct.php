@@ -1758,6 +1758,109 @@ class NewProduct extends Backend
         $writer->save('php://output');
     }
 
+
+    public function batch_export_xls_copy()
+    {
+
+        set_time_limit(0);
+        ini_set('memory_limit', '512M');
+
+        $where['a.origin_sku'] = ['like', '%' . 'RN' . '%'];
+        $list = $this->model
+            ->alias('a')
+            ->join(['fa_new_product_attribute'=>'b'],'a.id = b.item_id')
+            ->field('a.*,b.accessory_color,b.accessory_texture')
+            ->where($where)->select();
+        $list = collection($list)->toArray();
+
+        //从数据库查询需要的数据
+        $spreadsheet = new Spreadsheet();
+
+        //常规方式：利用setCellValue()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "SKU")
+            ->setCellValue("B1", "供应商SKU")
+            ->setCellValue("C1", "供应商名称");   //利用setCellValues()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "单价")
+            ->setCellValue("E1", "选品状态")
+            ->setCellValue("F1", "商品名称")
+            ->setCellValue("G1", "商品颜色")
+            ->setCellValue("H1", "材质");
+
+        foreach ($list as $key => $value) {
+            $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), $value['sku']);
+            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['supplier_sku']);
+            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['supplier_name']);
+            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['price']);
+            if ($value['item_status'] == 1) {
+                $status = '待选品';
+            } elseif ($value['item_status'] == 2) {
+                $status = '选品通过';
+            } elseif ($value['item_status'] == 3) {
+                $status = '选品拒绝';
+            } elseif ($value['item_status'] == 4) {
+                $status = '取消';
+            } else {
+                $status = '新建';
+            }
+
+
+            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $status);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['name']);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['accessory_color']);
+            $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['accessory_texture']);
+        }
+
+        //设置宽度
+        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(40);
+        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(20);
+
+        //设置边框
+        $border = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
+                    'color' => ['argb' => 'FF000000'], // 设置border颜色
+                ],
+            ],
+        ];
+
+        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+
+
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
+        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
+
+        $spreadsheet->getActiveSheet()->getStyle('A1:H' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->setActiveSheetIndex(0);
+
+        $format = 'xlsx';
+        $savename = '选品数据RN' . date("YmdHis", time());;
+
+        if ($format == 'xls') {
+            //输出Excel03版本
+            header('Content-Type:application/vnd.ms-excel');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
+        } elseif ($format == 'xlsx') {
+            //输出07Excel版本
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
+        }
+
+        //输出名称
+        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
+        //禁止缓存
+        header('Cache-Control: max-age=0');
+        $writer = new $class($spreadsheet);
+
+        $writer->save('php://output');
+    }
+
     //运营补货需求购物车删除（真删除）
     public function replenish_cart_del($ids = "")
     {
