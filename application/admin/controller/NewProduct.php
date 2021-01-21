@@ -2388,7 +2388,7 @@ class NewProduct extends Backend
                     $add['presell_residue_num'] = $skuParams['presell_residue_num'] = 100;
                     $add['presell_create_time'] = $skuParams['presell_start_time'] = '2021-01-21 00:00:00';
                     $add['presell_end_time'] = $skuParams['presell_end_time'] =  '2022-01-21 00:00:00';
-                    $result = (new \app\admin\model\itemmanage\ItemPlatformSku())->addPlatformSku($skuParams);
+                    $result = (new \app\admin\model\itemmanage\ItemPlatformSku())->addPlatformSku_copy($skuParams);
                     //添加stock库商品表信息
                     $Stock =  Db::connect('database.db_stock');
                     $add['item_status'] = 3;

@@ -61,6 +61,39 @@ class ItemPlatformSku extends Model
         $result = $this->allowField(true)->isUpdate(false)->data($arr)->save();
         return $result ? $result : false;
     }
+    public function addPlatformSku_copy($row)
+    {
+        //查询前缀
+        $magento_platform = new \app\admin\model\platformManage\MagentoPlatform();
+        $prefix = $magento_platform->getMagentoPrefix($row['site']);
+        //判断前缀是否存在
+        if (false == $prefix) {
+            return false;
+        }
+        //监测平台sku是否存在
+        $platformSkuExists = $this->getTrueSku($prefix . $row['sku'], $row['site']);
+        if ($platformSkuExists) {
+            return false;
+        }
+        $arr['presell_status'] = $row['presell_status'];
+        $arr['presell_residue_num'] = $row['presell_residue_num'];
+        $arr['presell_create_time'] = $row['presell_start_time'];
+        $arr['presell_end_time'] = $row['presell_end_time'];
+        $arr['sku'] = $row['sku'];
+        $arr['platform_sku'] = $prefix . $row['sku'];
+        $arr['name'] = $row['name'];
+        $arr['platform_type'] = $row['site'];
+        $arr['outer_sku_status'] = 2;
+        if ($arr['platform_type'] == 8){
+            $arr['outer_sku_status'] = 1;
+        }
+        $arr['create_person'] = session('admin.nickname') ? session('admin.nickname') : 'Admin';
+        $arr['create_time'] = date("Y-m-d H:i:s", time());
+        $arr['platform_frame_is_rimless'] = $row['frame_is_rimless'];
+        $arr['category_id'] = $row['category_id'];
+        $result = $this->allowField(true)->isUpdate(false)->data($arr)->save();
+        return $result ? $result : false;
+    }
     /***
      * 查找平台SKU
      */
