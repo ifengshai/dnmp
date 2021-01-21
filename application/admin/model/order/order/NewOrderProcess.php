@@ -40,6 +40,27 @@ class NewOrderProcess extends Model
         $map['b.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete','delivered']];
         return $this->alias('a')->where($map)->join(['fa_order' => 'b'], 'a.order_id=b.id')->group('b.site')->column('count(1)', 'b.site');
     }
+    /**
+     * 统计未发货订单数据信息
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/25 14:50:55
+     * @return void
+     */
+    public function undeliveredOrderMessage($map = [])
+    {
+        $map['a.check_status'] = 0;
+        //过滤补差价单
+        $map['b.order_type'] = ['<>', 5];
+        $map['b.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete','delivered']];
+//        return $this->alias('a')->where($map)->join(['fa_order' => 'b'], 'a.order_id=b.id')->field('b.increment_id,b.status,b.created_at,b.site')->select();
+        return $this->alias('a')->where($map)->join(['fa_order' => 'b'], 'a.order_id=b.id')->group('b.site')->column('count(1)', 'b.site');
+    }
+
+
+
+
 
     /**
      * 统计未发货订单SKU副数
