@@ -497,6 +497,7 @@ class Index extends Backend
         }
         $neworderprocess = new \app\admin\model\order\order\NewOrderProcess();
         $undeliveredOrder = $neworderprocess->undeliveredOrder($map);
+        dump($undeliveredOrder);die();
         //统计时间段内未发货订单
         $zeeloolUnorderNum = $undeliveredOrder[1];
         $vooguemeUnorderNum = $undeliveredOrder[2];
