@@ -1269,7 +1269,7 @@ class ScmDistribution extends Scm
                             'b.operation_type' => 1
                         ])
                         ->order('a.id', 'desc')
-                        ->group('a.item_order_number')
+                        ->limit(1)
                         ->value('a.change_sku');
                     if (!empty($change_sku)) {//存在已完成的更改镜片的工单，替换更改的sku
                         $item_process_info['sku'] = $change_sku;
