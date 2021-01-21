@@ -77,7 +77,7 @@ class ItemPlatformSku extends Model
         }
         $arr['presell_status'] = $row['presell_status'];
         $arr['presell_residue_num'] = $row['presell_residue_num'];
-        $add['presell_create_time'] = $row['presell_start_time'];
+        $arr['presell_create_time'] = $row['presell_start_time'];
         $arr['presell_end_time'] = $row['presell_end_time'];
         $arr['sku'] = $row['sku'];
         $arr['platform_sku'] = $prefix . $row['sku'];
