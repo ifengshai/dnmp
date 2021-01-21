@@ -404,7 +404,7 @@ class Distribution extends Backend
                     'b.operation_type' => 1
                 ])
                 ->order('a.id', 'desc')
-                ->group('a.item_order_number')
+                ->limit(1)
                 ->column('a.change_sku', 'a.item_order_number');
 
             foreach ($list as $key => $value) {
