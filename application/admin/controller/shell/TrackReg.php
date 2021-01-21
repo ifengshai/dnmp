@@ -2417,4 +2417,6 @@ class TrackReg extends Backend
         $info['rest_total'] = $end_rest;
         $this->stockparameter->where('id',$stockId)->update($info);
     }
+
+
 }
