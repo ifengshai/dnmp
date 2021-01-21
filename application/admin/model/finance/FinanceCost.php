@@ -167,7 +167,7 @@ class FinanceCost extends Model
             return [];
         }
         $params['type'] = 2;
-        $params['bill_type'] = 1;
+        $params['bill_type'] = 8;
         $params['order_number'] = $order_detail['increment_id'];
         $params['site'] = $order_detail['site'];
         $params['order_type'] = $order_detail['order_type'];
@@ -318,7 +318,7 @@ class FinanceCost extends Model
     public function outstock_cost($out_stock_id = null, $out_stock_number = null)
     {
         $params['type'] = 2;
-        $params['bill_type'] = 8;
+        $params['bill_type'] = 9;
         $params['order_number'] = $out_stock_number;
         $params['frame_cost'] = $this->outstock_frame_cost($out_stock_id);
         $params['action_type'] = 1;
