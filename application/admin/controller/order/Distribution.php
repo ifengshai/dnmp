@@ -2265,7 +2265,6 @@ class Distribution extends Backend
                         ->order('a.id', 'desc')
                         ->group('a.item_order_number')
                         ->value('a.change_sku');
-                        print_r($change_sku);die;
                     if (!empty($change_sku)) {//存在已完成的更改镜片的工单，替换更改的sku
                         $item_info['sku'] = $change_sku;
                     }
@@ -2275,7 +2274,7 @@ class Distribution extends Backend
                         ->where(['platform_sku' => $item_info['sku'], 'platform_type' => $item_info['site']])
                         ->find();
                     $true_sku = $platform_info['sku'];
-
+                    print_r($true);die;
                     //检验库存
                     $stock_arr = $this->_item
                         ->where(['sku' => $true_sku])
