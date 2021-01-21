@@ -5,6 +5,7 @@ namespace app\admin\controller\datacenter;
 use app\common\controller\Backend;
 use think\Db;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use function Aws\filter;
 
 /**
  * 数据中心
@@ -555,6 +556,140 @@ class Index extends Backend
         $this->view->assign('skuRes', $skuRes);
         return $this->view->fetch();
     }
+
+    /**
+     * 导出所有未发货的订单信息
+     */
+    public function export_not_shipped(){
+        set_time_limit(0);
+        ini_set('memory_limit', '512M');
+
+        $map['b.created_at'] = ['between', [1606752000, 1609430399]];
+        $neworderprocess = new \app\admin\model\order\order\NewOrderProcess();
+        $undeliveredOrder = $neworderprocess->undeliveredOrderMessage($map);
+        $list = collection($undeliveredOrder)->toArray();
+        $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
+
+        //从数据库查询需要的数据
+        $spreadsheet = new Spreadsheet();
+
+        //常规方式：利用setCellValue()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "订单号")
+            ->setCellValue("B1", "订单状态")
+            ->setCellValue("C1", "下单时间");   //利用setCellValues()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "站点")
+            ->setCellValue("E1", "是否有工单")
+            ->setCellValue("F1", "工单类型")
+            ->setCellValue("G1", "创建人");
+        foreach ($list as $key => $value) {
+
+            $swhere['platform_order'] = $value['increment_id'];
+            $swhere['work_platform'] = 1;
+            $swhere['work_status'] = ['not in', [0, 4, 6]];
+            $work_type = $workorder->where($swhere)->field('work_type,create_user_name')->find();
+            if (!empty($work_type)){
+                $value['work'] = '是';
+                if ($work_type->work_type == 1){
+                    $value['work_status'] = '客服工单';
+                }else{
+                    $value['work_status'] = '仓库工单';
+                }
+                $value['create_user_name'] =$work_type->create_user_name;
+            }else{
+                $value['work'] = '否';
+                $value['work_status'] = '无';
+                $value['create_user_name'] = '无';
+            }
+            $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), $value['increment_id']);
+            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['status']);
+            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), date('Y-m-d H:i:s',$value['created_at']));
+            switch ($value['site']){
+                case 1:
+                    $value['site'] = 'zeelool';
+                    break;
+                case 2:
+                    $value['site'] = 'voogueme';
+                    break;
+                case 3:
+                    $value['site'] = 'nihao';
+                    break;
+                case 4:
+                    $value['site'] = 'meeloog';
+                    break;
+                case 5:
+                    $value['site'] = 'wesee';
+                    break;
+                case 9:
+                    $value['site'] = 'zeelool_es';
+                    break;
+                case 10:
+                    $value['site'] = 'zeelool_de';
+                    break;
+                case 11:
+                    $value['site'] = 'zeelool_jp';
+                    break;
+                case 12:
+                    $value['site'] = 'voogmechic';
+                    break;
+            }
+
+            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['site']);
+            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['work']);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['work_status']);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['create_user_name']);
+
+        }
+        //设置宽度
+        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(40);
+        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(20);
+        //设置边框
+        $border = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
+                    'color' => ['argb' => 'FF000000'], // 设置border颜色
+                ],
+            ],
+        ];
+
+        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+
+
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
+        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
+
+        $spreadsheet->getActiveSheet()->getStyle('A1:H' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->setActiveSheetIndex(0);
+
+        $format = 'xlsx';
+        $savename = '物流未发货订单' . date("YmdHis", time());;
+
+        if ($format == 'xls') {
+            //输出Excel03版本
+            header('Content-Type:application/vnd.ms-excel');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
+        } elseif ($format == 'xlsx') {
+            //输出07Excel版本
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
+        }
+
+        //输出名称
+        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
+        //禁止缓存
+        header('Cache-Control: max-age=0');
+        $writer = new $class($spreadsheet);
+
+        $writer->save('php://output');
+
+    }
+
 
     /**
      * 根据处方范围统计SKU副数
