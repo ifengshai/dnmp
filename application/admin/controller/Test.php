@@ -41,6 +41,13 @@ class Test extends Backend
 
     public function test001()
     {
+        $str = '-3.50';
+        echo (float) $str;die;
+
+
+
+
+
         $track_number = '9400111108296818283602';
         $order_number = '100171868';
         //根据物流单号查询发货物流渠道

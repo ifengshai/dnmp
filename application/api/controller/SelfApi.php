@@ -10,7 +10,7 @@ use GuzzleHttp\Client;
 use think\Db;
 use SchGroup\SeventeenTrack\Connectors\TrackingConnector;
 use app\admin\model\StockLog;
-
+use app\admin\model\finance\FinanceCost;
 
 /**
  * 系统接口

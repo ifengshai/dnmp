@@ -223,6 +223,28 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                         }
                                     }
                                 },
+                                {
+                                    name: 'pay',
+                                    text: '创建付款申请单',
+                                    title: '创建付款申请单',
+                                    extend: 'data-area = \'["100%", "100%"]\' data-shade = \'[0.3, "#393D49"]\'',
+                                    icon: 'fa fa-plus',
+                                    classname: 'btn btn-xs btn-info btn-dialog',
+                                    icon: 'fa fa-remove',
+                                    url: 'financepurchase/purchase_pay/add/label/purchase',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        if (row.can_create_pay == 1) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+
+                                    }
+                                },
                                 /* {
                                     name: 'check',
                                     text: '去质检',
