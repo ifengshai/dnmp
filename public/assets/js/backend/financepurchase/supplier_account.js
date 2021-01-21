@@ -76,12 +76,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
         detail: function () {
             // 初始化表格参数配置
             Table.api.init();
-
             //绑定事件
             $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
                 var panel = $($(this).attr("href"));
-                var value = $($(this).data("value"));
-                console.log(value)
                 if (panel.size() > 0) {
                     Controller.table[panel.attr("id")].call(this);
                     $(this).on('click', function (e) {
@@ -91,9 +88,28 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 //移除绑定的事件
                 $(this).unbind('shown.bs.tab');
             });
-
             //必须默认触发shown.bs.tab事件
             $('ul.nav-tabs li.active a[data-toggle="tab"]').trigger("shown.bs.tab");
+            $(document).on('click', '.panel-heading a[data-toggle="tab"]', function () {
+                var value = $(this).data('value');
+                if (value == 2){
+                    $('#is_show').addClass('hide');
+                }else{
+                    $('#is_show').removeClass('hide');
+                }
+            });
+            var table1 = $("#table1");
+            //发起结算
+            $(document).on('click', ".btn-logistics", function () {
+                var ids = Table.api.selectedids(table1);
+                if (ids.length > 0) {
+                    var url = 'financepurchase/statement/add?ids=' + ids + '&supplier_id=' + Config.supplier_id;
+                    Fast.api.open(url, __('创建结算单'), {area: ['100%', '100%']});
+                    return false;
+                } else {
+                    Layer.alert('请选择待结算的采购批次')
+                }
+            });
 
         },
         table: {
@@ -109,32 +125,33 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                     columns: [
                         [
                             {field: 'state', checkbox: true},
-                            {field: 'id', title: 'ID'},
-                            {field: 'purchase_number', title: __('采购单号')},
-                            {field: 'purchase_name', title: __('采购单名称')},
+                            {field: 'id', title: 'ID', operate: false},
+                            {field: 'purchase_number', title: __('采购单号'), operate: false},
+                            {field: 'purchase_name', title: __('采购单名称'), operate: false},
                             {
                                 field: 'pay_type',
                                 title: __('付款类型'),
                                 custom: {0: 'success', 1: 'yellow', 2: 'blue', 3: 'danger'},
                                 searchList: {1: '预付款', 2: '全款预付', 3: '尾款'},
-                                formatter: Table.api.formatter.status
+                                formatter: Table.api.formatter.status, operate: false
                             },
-                            {field: 'purchase_batch', title: __('采购批次')},
-                            {field: 'purchase_price', title: __('采购单价')},
-                            {field: 'arrival_num', title: __('采购批次数量')},
-                            {field: 'wait_pay', title: __('预付金额')},
-                            {field: 'now_wait_pay', title: __('已支付预付金额')},
-                            {field: 'quantity_num', title: __('入库数量')},
-                            {field: 'in_stock_money', title: __('入库金额')},
-                            {field: 'unqualified_num', title: __('退货数量')},
-                            {field: 'unqualified_num_money', title: __('退货金额')},
-                            {field: 'period', title: __('结算周期')},
+                            {field: 'purchase_batch', title: __('采购批次'), operate: false},
+                            {field: 'purchase_price', title: __('采购单价'), operate: false},
+                            {field: 'arrival_num', title: __('采购批次数量'), operate: false},
+                            {field: 'wait_pay', title: __('预付金额'), operate: false},
+                            {field: 'now_wait_pay', title: __('已支付预付金额'), operate: false},
+                            {field: 'quantity_num', title: __('入库数量'), operate: false},
+                            {field: 'in_stock_money', title: __('入库金额'), operate: false},
+                            {field: 'unqualified_num', title: __('退货数量'), operate: false},
+                            {field: 'unqualified_num_money', title: __('退货金额'), operate: false},
+                            {field: 'period', title: __('结算周期'), formatter: Table.api.formatter.datetime, operate: 'RANGE', addclass: 'datetimerange', sortable: true},
                         ]
                     ]
                 });
 
                 // 为表格1绑定事件
                 Table.api.bindevent(table1);
+
             },
             second: function () {
                 // 表格2

@@ -10,7 +10,7 @@
             <label class="control-label col-xs-12 col-sm-2">供应商账期:</label>
             <div class="col-xs-12 col-sm-2">
                 <input id="supplier_period" class="form-control" readonly name="row[supplier_period]"
-                       value="{$supplier.supplier_period}" type="text">
+                       value="{$supplier.period}" type="text">
             </div>
             <label class="control-label col-xs-12 col-sm-2">本期待结算金额:</label>
             <div class="col-xs-12 col-sm-2">
@@ -27,8 +27,8 @@
     <div class="panel-heading">
         {:build_heading()}
         <ul class="nav nav-tabs">
-            <li class="active"><a href="#first" data-toggle="tab">待结算明细</a></li>
-            <li><a href="#second" data-toggle="tab">结算记录</a></li>
+            <li class="active"><a href="#first" data-toggle="tab" data-value="1">待结算明细</a></li>
+            <li><a href="#second" data-toggle="tab" data-value="2">结算记录</a></li>
         </ul>
     </div>
     <div class="panel-body">
@@ -49,10 +49,11 @@
             </div>
         </div>
     </div>
-    <div class="form-group new-form-group">
+    <div class="form-group new-form-group" id="is_show">
         <div class="col-xs-8 new-col-xs-8">
-            <input type="button" class="btn btn-success" id="sku_submit" value="发起结算">
-            <input type="button" class="btn btn-default reset" id="sku_reset" value="取消">
+<!--            <input type="button" class="btn btn-success btn-primary  btn-dialog" id="submit_statement" value="发起结算">-->
+            <a href="javascript:;" class="btn btn-success btn-logistics {:$auth->check('financepurchase/purchase_pay/add') ?'':'hide'}" title="发起结算">发起结算</a>
+            <input type="button" class="btn btn-default reset" id="submit_cancel" value="取消">
         </div>
     </div>
 </div>
