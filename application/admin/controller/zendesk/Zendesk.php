@@ -646,12 +646,20 @@ class Zendesk extends Backend
         }else{
             $orderModel = new \app\admin\model\order\order\Nihao;
         }
-
         $orders = $orderModel
             ->where('customer_email',$ticket->email)
             ->order('entity_id desc')
             ->limit(5)
             ->select();
+
+        $orders = collection($orders)->toArray();
+        dump($orders);
+        foreach ($orders as $key=>$ite){
+            $model =  Db::connect('database.db_mojing_order');
+            $find_value = $model->table('fa_order')->where('increment_id',$ite['increment_id'])->select();
+            dump($find_value);die();
+
+        }
 
 //        dump(collection($orders)->toArray());die();
         $btn = input('btn',0);

@@ -283,9 +283,12 @@
             <div class="box box-primary">
 
                 <div class="box-body box-profile"
-                     {if condition="$ticket->type eq 1"} style="background-color: #3498DB"
-                     {elseif condition="$ticket->type eq 2"/}style="background-color: #F39C12"
-                     {elseif condition="$ticket->type eq 3"/} style="background-color: #E74C3C"
+                     {if condition="$ticket->type eq 1"}
+                        style="background-color: #3498DB"
+                     {elseif condition="$ticket->type eq 2"/}
+                        style="background-color: #F39C12"
+                     {elseif condition="$ticket->type eq 3"/}
+                        style="background-color: #E74C3C"
                      {/if}>
                     <img class="profile-user-img  img-circle" src="/assets/img/avatar.png" alt="User profile picture" style="margin:0;!important;">
                         <h3 style="margin-top: -48px;margin-left: 127px" > <font color="#F5F9FF">{$ticket->username}</font></h3>
@@ -337,21 +340,21 @@
                         </tr>
                         {foreach name="orders" item="vo"}
                         <tr>
-                            <td><a href="{$orderUrl}{$vo->entity_id}" target="_blank">{$vo->increment_id}</a></td>
-                            <td>{$vo->created_at|strtotime|date='d/m/Y',###}</td>
-                            <td>{$vo->order_currency_code}{$vo->grand_total|substr=0,-2}</td>
-                            <td>{$vo->status}</td>
-                            {if condition="$vo->status eq 'complete'"}
-                                <td>{$vo->increment_id}</td>
+                            <td><a href="{$orderUrl}{$vo->entity_id}" target="_blank">{$vo['increment_id']}</a></td>
+                            <td>{$vo['created_at']|strtotime|date='d/m/Y',###}</td>
+                            <td>{$vo['order_currency_code']}{$vo['grand_total']|substr=0,-2}</td>
+                            <td>{$vo['status']}</td>
+                            {if condition="$vo['status'] eq 'complete'"}
+                                <td>{$vo['increment_id']}</td>
                             {/if}
-                            {if condition="$vo->status eq 'processing'"}
-                            <td>配货记录</td>
+                            {if condition="$vo['status'] eq 'processing'"}
+                            <td><font style="color: #3C8DBC">配货记录</font></td>
                             {/if}
 
 
                         </tr>
                         {/foreach}
-                        <tr><td  style="width: 100px;text-align: center;"><a class="" href="{:url('saleaftermanage/order_return/search',['type' => $rows.type,'email' => $ticket->email])}&ref=addtabs" target="_blank">查看用户信息</a></td></tr>
+<!--                        <tr><td  style="width: 100px;text-align: center;"><a class="" href="{:url('saleaftermanage/order_return/search',['type' => $rows.type,'email' => $ticket->email])}&ref=addtabs" target="_blank">查看用户信息</a></td></tr>-->
                     </table>
                 </div>
                 <!-- /.box-body -->
