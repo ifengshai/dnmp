@@ -2,6 +2,7 @@
 
 namespace app\admin\controller;
 
+use app\admin\model\itemmanage\ItemPlatformSku;
 use app\common\controller\Backend;
 use think\Log;
 use think\Request;
@@ -2377,24 +2378,41 @@ class NewProduct extends Backend
                     $add['product_cycle'] = $supplier_data['product_cycle'] = $value['生产周期'];
                     $supplier_data['supplier_sku'] = $value['供应商SKU'];
                     Db::name('supplier_sku')->insert($supplier_data);
+
                     //添加对应平台映射关系
-                    $skuParams['site'] = 12;
+                    $skuParams['platform_type'] = 12;
                     $skuParams['sku'] = $value['SKU'];
                     $skuParams['platform_sku'] = $value['SKU'];
-                    $skuParams['frame_is_rimless'] = '';
                     $skuParams['name'] = $value['商品名称'];
                     $skuParams['category_id'] = 53;
                     $add['presell_status'] = $skuParams['presell_status'] = 1;
                     $add['presell_residue_num'] = $skuParams['presell_residue_num'] = 100;
                     $add['presell_create_time'] = $skuParams['presell_start_time'] = '2021-01-21 00:00:00';
                     $add['presell_end_time'] = $skuParams['presell_end_time'] =  '2022-01-21 00:00:00';
-                    $result = (new \app\admin\model\itemmanage\ItemPlatformSku())->addPlatformSku_copy($skuParams);
+                    $magento_platform = new \app\admin\model\platformManage\MagentoPlatform();
+                    $prefix = $magento_platform->getMagentoPrefix($skuParams['platform_type']);
+                    //判断前缀是否存在
+                    if (false == $prefix) {
+                        return false;
+                    }
+                    //监测平台sku是否存在
+                    $itemPlatfromSku = new  ItemPlatformSku();
+                    $platformSkuExists = $itemPlatfromSku->getTrueSku($prefix .  $skuParams['site']['sku'],  $skuParams['site']['site']);
+                    if ($platformSkuExists) {
+                        return false;
+                    }
+                    $skuParams['platform_sku'] = $prefix . $skuParams['sku'];
+                    $skuParams['platform_frame_is_rimless'] = '';
+                    $skuParams['create_person'] = session('admin.nickname') ? session('admin.nickname') : 'Admin';
+                    $skuParams['create_time'] = date("Y-m-d H:i:s", time());
                     //添加stock库商品表信息
                     $Stock =  Db::connect('database.db_stock');
+                    $Stock->table('fa_item_platform_sku')->insert($skuParams);
                     $add['item_status'] = 3;
                     unset($add['link']);
                     unset($add['supplier_id']);
                     unset($add['supplier_sku']);
+
                     $Stock->table('fa_item')->insert($add);
                     unset($add);
                     $itemAttribute['frame_texture'] = 0;
