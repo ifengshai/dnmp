@@ -1,7 +1,8 @@
 <div class="form-group ajax-add">
     <label class="control-label col-xs-12 col-sm-2">{:__('供应商')}:</label>
     <div class="col-xs-12 col-sm-3">
-        <select  id="supplier_id" data-rule="required" class="form-control selectpicker"  data-live-search='true' name="row[supplier_id]">
+        <select id="supplier_id" data-rule="required" class="form-control selectpicker" data-live-search='true'
+            name="row[supplier_id]">
             <option value="">请选择</option>
             {foreach name="AllSupplier" item="vo"}
             <option value="{$key}">{$vo}</option>
@@ -14,7 +15,7 @@
         <input id="c-link" data-rule="required" class="form-control" label='2' name="row[link]" type="text" value="">
     </div>
     <button type="button" class="btn btn-success btn-embossed btn-caiji">{:__('采集')}</button>
-   
+
 </div>
 <input id="item-count" class="ajax-add" name="row[item_count]" type="hidden" value="{$row.itemCount}" />
 <div class='caigou ajax-add addition'>
@@ -27,45 +28,73 @@
             <tr>
                 <th>商品名称</th>
                 <th>商品颜色</th>
+                {if $categoryId == 53}
+                <th>商品尺寸</th>
+                {/if}
                 <th>供应商SKU</th>
                 <th>单价</th>
                 <th>操作</th>
             </tr>
             <tr>
-                <td><input id="c-name" data-rule="required"  class="form-control c-name" name="row[name][]" value="{$row.name}" type="text"></td>
+                <td><input id="c-name" data-rule="required" class="form-control c-name" name="row[name][]"
+                        value="{$row.name}" type="text"></td>
                 <td>
                     <div class="col-xs-12 col-sm-12">
-                    <select  id="c-color" data-rule="required" class="form-control c-color" name="row[color][]">
-                        {foreach name="AllFrameColor" item="vo"}
-                        <option value="{$vo}">{$vo}</option>
-                        {/foreach}
-                    </select>
+                        <select id="c-color" data-rule="required" class="form-control c-color" name="row[color][]">
+                            <option value="">请选择</option>
+                            {foreach name="AllFrameColor" item="vo"}
+                            <option value="{$vo}">{$vo}</option>
+                            {/foreach}
+                        </select>
                     </div>
                 </td>
-                <td><input  data-rule="required"  class="form-control c-supplier_sku" name="row[supplier_sku][]" type="text"></td>
-                <td><input  data-rule="required"  class="form-control c-price" name="row[price][]" value="{$row.price}" type="text"></td>
+                {if $categoryId == 53}
+                <td>
+                    <div class="col-xs-12 col-sm-12">
+                        <select id="c-frame_texture" data-rule="required" class="form-control"
+                            name="row[frame_size][]">
+                            <option value="">请选择</option>
+                            {foreach $AllProductSize as $k => $vo}
+                            <option value="{$k}" {:$row['frame_size'] === $k ? 'selected' : '' }>{$vo}</option>
+                            {/foreach}
+                        </select>
+                    </div>
+                </td>
+                {/if}
+                <td><input data-rule="required" class="form-control c-supplier_sku" name="row[supplier_sku][]"
+                        type="text"></td>
+                <td><input data-rule="required" class="form-control c-price" name="row[price][]" value="{$row.price}"
+                        type="text"></td>
                 <td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>
-                    删除</a></td>
+                        删除</a></td>
             </tr>
 
         </table>
     </div>
 </div>
 <div class="form-group ajax-add">
-        <input id = "item_type" type="hidden" name="row[item_type]" value="3"/>
-        <label class="control-label col-xs-12 col-sm-2">{:__('Frame_texture')}:</label>
-        <div class="col-xs-12 col-sm-3">
-            <select  id="c-frame_texture" data-rule="required" class="form-control selectpicker" name="row[frame_texture]">
-                {foreach name="AllTexture" item="vo"}
-                <option value="{$vo}" {:$row['accessory_texture'] == $vo ? 'selected' : ''}>{$vo}</option>
-                {/foreach}
-            </select>
-        </div>
+    <input id="item_type" type="hidden" name="row[item_type]" value="3" />
+    <label class="control-label col-xs-12 col-sm-2">{:__('Frame_texture')}:</label>
+    <div class="col-xs-12 col-sm-3">
+        <select id="c-frame_texture" data-rule="required" class="form-control selectpicker" name="row[frame_texture]">
+            {foreach name="AllTexture" item="vo"}
+            <option value="{$vo}" {:$row['accessory_texture']==$vo ? 'selected' : '' }>{$vo}</option>
+            {/foreach}
+        </select>
+    </div>
+
+</div>
+
+<div class="form-group ajax-add">
+    <input id="item_type" type="hidden" name="row[item_type]" value="3" />
+
+
 </div>
 <div class="form-group ajax-add redact">
     <label class="control-label col-xs-12 col-sm-2">{:__('Frame_remark')}:</label>
     <div class="col-xs-12 col-sm-8">
-        <textarea id="c-problem_desc" class="form-control editor" rows="5" name="row[frame_remark]" cols="50"></textarea>
+        <textarea id="c-problem_desc" class="form-control editor" rows="5" name="row[frame_remark]"
+            cols="50"></textarea>
     </div>
 </div>
 <div class="form-group upload-photo">
@@ -80,4 +109,41 @@
         </div>
         <ul class="row list-inline plupload-preview" id="p-upload_photos"></ul>
     </div>
+</div>
+
+
+<div id="table-content" style="display: none;">
+    <table>
+        <tr>
+            <td><input data-rule="required" class="form-control c-name" name="row[name][]" type="text"></td>
+            <td>
+                <div class="col-xs-12 col-sm-12">
+                    <select id="c-color" data-rule="required" class="form-control c-color" name="row[color][]">
+                        <option value="">请选择</option>
+                        {foreach name="AllFrameColor" item="vo"}
+                        <option value="{$vo}">{$vo}</option>
+                        {/foreach}
+                    </select>
+                </div>
+            </td>
+            {if $categoryId == 53}
+            <td>
+                <div class="col-xs-12 col-sm-12">
+                    <select id="c-frame_texture" data-rule="required" class="form-control "
+                        name="row[frame_size][]">
+                        <option value="">请选择</option>
+                        {foreach $AllProductSize as $k => $vo}
+                        <option value="{$k}">{$vo}</option>
+                        {/foreach}
+                    </select>
+                </div>
+            </td>
+            {/if}
+            <td><input data-rule="required" class="form-control c-supplier_sku" name="row[supplier_sku][]" type="text">
+            </td>
+            <td><input data-rule="required" class="form-control c-price" name="row[price][]" type="text"></td>
+            <td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>
+                    删除</a></td>
+        </tr>
+    </table>
 </div>

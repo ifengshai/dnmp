@@ -147,6 +147,7 @@ class Distribution extends Backend
         $this->_work_order_list = new WorkOrderList();
         $this->_work_order_measure = new WorkOrderMeasure();
         $this->_work_order_change_sku = new WorkOrderChangeSku();
+        $this->_product_bar_code_item = new \app\admin\model\warehouse\ProductBarCodeItem();
     }
 
     /**
@@ -276,10 +277,14 @@ class Distribution extends Backend
                 unset($filter['increment_id']);
             }
 
-            //子单批量
-            $filter_item_order_number = explode(' ', $filter['item_order_number']);
-            if (count($filter_item_order_number) > 1) {
-                $map['a.item_order_number'] = ['in', $filter_item_order_number];
+            if ($filter['item_order_number']) {
+                $ex_fil_arr = explode(' ', $filter['item_order_number']);
+                if (count($ex_fil_arr) > 1) {
+                    $map['a.item_order_number'] = ['in', $ex_fil_arr];
+                } else {
+                    $map['a.item_order_number'] = ['like', $filter['item_order_number'] . '%'];
+                }
+
                 unset($filter['item_order_number']);
             }
 
@@ -1277,16 +1282,17 @@ class Distribution extends Backend
                 }
             }
 
-            //            if ($value['pdcheck'] == 'on') {
             $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 2 + 2), $value['pd_r']);
             $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 2 + 3), $value['pd_l']);
-            //            } else {
             $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 2 + 2), $value['pd']);
             $spreadsheet->getActiveSheet()->mergeCells("M" . ($key * 2 + 2) . ":M" . ($key * 2 + 3));
-            //            }
 
-            //查询镜框尺寸
-            $tmp_bridge = $this->get_frame_lens_width_height_bridge($value['product_id'], $value['site']);
+            //过滤饰品站
+            if ($value['site'] != 12) {
+                //查询镜框尺寸
+                $tmp_bridge = $this->get_frame_lens_width_height_bridge($value['product_id'], $value['site']);
+            }
+
             $lens_name = $lens_list[$value['lens_number']] ?: $value['web_lens_name'];
             $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 2 + 2), $lens_name);
             $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 2 + 2), $tmp_bridge['lens_width']);
@@ -1991,6 +1997,14 @@ class Distribution extends Backend
             //子订单状态回滚
             $this->model->where(['id' => ['in', $ids]])->update($save_data);
 
+            //回退到待配货，解绑条形码
+            if (2 == $status) {
+                $this->_product_bar_code_item
+                    ->allowField(true)
+                    ->isUpdate(true, ['item_order_number' => ['in', $item_order_numbers]])
+                    ->save(['item_order_number' => '']);
+            }
+
             //记录日志
             DistributionLog::record($admin, array_column($item_list, 'id'), 6, $status_arr[$reason]['name']);
 
@@ -2220,6 +2234,14 @@ class Distribution extends Backend
 
                 $this->model->where(['id' => $ids])->update($save_data);
 
+                //回退到待配货、待打印标签，解绑条形码
+                if (3 > $status) {
+                    $this->_product_bar_code_item
+                        ->allowField(true)
+                        ->isUpdate(true, ['item_order_number' => $item_info['item_order_number']])
+                        ->save(['item_order_number' => '']);
+                }
+
                 //标记处理异常状态及时间
                 $this->_distribution_abnormal->where(['id' => $abnormal_info['id']])->update(['status' => 2, 'do_time' => time(), 'do_person' => $admin->nickname]);
 
@@ -2414,7 +2436,7 @@ class Distribution extends Backend
             // 2 => [
             //     'name' => 'voogueme',
             //     'obj' => new \app\admin\model\order\printlabel\Voogueme,
-            // ],
+            // ], 
             3 => [
                 'name' => 'nihao',
                 'obj' => new \app\admin\model\order\printlabel\Nihao,

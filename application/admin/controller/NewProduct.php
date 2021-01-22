@@ -50,6 +50,7 @@ class NewProduct extends Backend
         $this->view->assign('categoryList', $this->category->categoryList());
         $this->view->assign('brandList', (new ItemBrand())->getBrandList());
         $this->view->assign('AllFrameColor', $this->itemAttribute->getFrameColor());
+        $this->view->assign('AllProductSize', config('FRAME_SIZE'));
         $this->item = new \app\admin\model\itemmanage\Item;
         $num = $this->item->getOriginSku();
         $idStr = sprintf("%06d", $num);
@@ -84,8 +85,8 @@ class NewProduct extends Backend
             }
             //如果切换站点清除默认值
             $filter = json_decode($this->request->get('filter'), true);
-            if (!empty($filter['sku'])){
-                if (preg_match("/\s/", $filter['sku'])){
+            if (!empty($filter['sku'])) {
+                if (preg_match("/\s/", $filter['sku'])) {
                     $map['sku'] = ['in', preg_split("/\s+/", $filter['sku'])];
                     unset($filter['sku']);
                     $this->request->get(['filter' => json_encode($filter)]);
@@ -220,10 +221,15 @@ class NewProduct extends Backend
                 $supplierSku = $params['supplier_sku'];
                 $price = $params['price'];
                 $skuId = $params['skuid'];
+                $frame_size = $params['frame_size'] ?: [];
                 //区分是镜架还是配饰
                 $item_type = $params['item_type'];
                 $data = $itemAttribute = [];
                 if (3 == $item_type) { //配饰
+
+                    if (count(array_filter($frame_size)) != count(array_unique(array_filter($frame_size)))) {
+                        $this->error('尺寸不能重复');
+                    }
 
                     if (!$params['supplier_id']) {
                         $this->error('供应商不能为空');
@@ -247,7 +253,7 @@ class NewProduct extends Backend
                     }
 
                     //如果是后来添加的
-                    if (!empty($params['origin_skus']) && $params['item_count'] >= 1) { //正常情况
+                    if (!empty($params['origin_skus']) && $params['item_count'] >= 1 && $params['category_id'] != 53) { //正常情况
                         $count = $params['item_count'];
                         $row = Db::connect('database.db_stock')->name('item')->where(['sku' => $params['origin_skus']])->field('id,sku')->find();
                         $attributeWhere = [];
@@ -258,9 +264,9 @@ class NewProduct extends Backend
                             $this->error('追加的商品SKU不能添加之前的颜色');
                         }
                         $params['origin_sku'] = substr($params['origin_skus'], 0, strpos($params['origin_skus'], '-'));
-                    } elseif (empty($params['origin_skus']) && $params['item_count'] >= 1) { //去掉原始sku情况
+                    } elseif (empty($params['origin_skus']) && $params['item_count'] >= 1 && $params['category_id'] != 53) { //去掉原始sku情况
                         $this->error(__('Make sure the original sku code exists'));
-                    } elseif (!empty($params['origin_skus']) && $params['item_count'] < 1) { //原始sku失败情况
+                    } elseif (!empty($params['origin_skus']) && $params['item_count'] < 1 && $params['category_id'] != 53) { //原始sku失败情况
                         $this->error(__('Make sure the original sku code is the correct sku code'));
                     }
 
@@ -272,7 +278,7 @@ class NewProduct extends Backend
 
                     Db::startTrans();
                     try {
-                        foreach ($itemName as $k => $v) {
+                        foreach (array_filter($itemName) as $k => $v) {
                             $data['name'] = $v;
                             $data['category_id'] = $params['category_id'];
                             $data['item_status'] = $params['item_status'];
@@ -284,9 +290,29 @@ class NewProduct extends Backend
                             $data['create_time'] = date("Y-m-d H:i:s", time());
                             $data['link'] = $params['link'];
                             //后来添加的商品数据
-                            if (!empty($params['origin_skus'])) {
+                            if (!empty($params['origin_skus']) && $params['category_id'] != 53) {
                                 $data['sku'] = $params['origin_sku'] . '-' . sprintf("%02d", $count + 1);
                                 ++$count;
+                            } elseif ($params['category_id'] == 53) {
+                                //如果存在原始SKU
+                                if ($params['origin_skus']) {
+                                    $params['origin_sku'] = substr($params['origin_skus'], 0, strpos($params['origin_skus'], '-'));
+                                    $textureEncode = '';
+                                }
+
+                                if ($frame_size[$k] == 0) {
+                                    $data['sku'] = $textureEncode . $params['origin_sku'] . '-66';
+                                } else {
+                                    if ($frame_size[$k] < 10) {
+                                        $data['sku'] = $textureEncode . $params['origin_sku'] . '-0' . $frame_size[$k];
+                                    } else {
+                                        $data['sku'] = $textureEncode . $params['origin_sku'] . '-' . $frame_size[$k];
+                                    }
+                                }
+                                $count = Db::name('new_product')->where(['sku' => $data['sku']])->count();
+                                if ($count > 0) {
+                                    throw new  Exception('此SKU尺寸已存在');
+                                }
                             } else {
                                 $data['sku'] = $textureEncode . $params['origin_sku'] . '-' . sprintf("%02d", $k + 1);
                             }
@@ -300,6 +326,7 @@ class NewProduct extends Backend
                                 $itemAttribute['accessory_color'] = $itemColor[$k];
                                 $itemAttribute['frame_remark'] = $params['frame_remark'];
                                 $itemAttribute['frame_images'] = $params['frame_images'];
+                                $itemAttribute['frame_size'] = $frame_size[$k] ?: 0;
 
                                 $res = Db::name('new_product_attribute')->insert($itemAttribute);
                                 if (!$res) {
@@ -669,6 +696,7 @@ class NewProduct extends Backend
                 //获取供应商
                 $allSupplier = (new Supplier())->getSupplierData();
                 $this->assign('AllSupplier', $allSupplier);
+                $this->assign('categoryId', $categoryId);
                 $data = $this->fetch('decoration');
             } else {
                 $data = $this->fetch('attribute');
@@ -774,6 +802,7 @@ class NewProduct extends Backend
                 $this->assign('AllFrameColor', $result['colorResult'] ?? []);
                 $this->assign('row', $row ?? []);
                 $this->assign('AllSupplier', $allSupplier);
+                $this->assign('categoryId', $categoryId);
                 $data = $this->fetch('decoration');
             } else {
                 $data = $this->fetch('attribute');
@@ -893,7 +922,7 @@ class NewProduct extends Backend
                 $skuParams['frame_is_rimless'] = $row['frame_is_rimless'];
                 $skuParams['name'] = $row['name'];
                 $skuParams['category_id'] = $row['category_id'];
-               
+
                 $result = (new \app\admin\model\itemmanage\ItemPlatformSku())->addPlatformSku($skuParams);
                 $this->success('审核成功');
             } else {
@@ -913,14 +942,15 @@ class NewProduct extends Backend
      * 批量审核通过
      */
 
-    public function passaudits(){
+    public function passaudits()
+    {
         $ids  = input('param.ids');
 
         if ($this->request->isAjax()) {
 
             $site = input('site');
             //查询所选择的数据
-            $where['new_product.id'] =   ['in',$ids];
+            $where['new_product.id'] =   ['in', $ids];
             $row = $this->model->where($where)->with(['newproductattribute'])->select();
 
             if (!$row) {
@@ -929,11 +959,11 @@ class NewProduct extends Backend
             $row = collection($row)->toArray();
 
             $test = array();
-            foreach ($row  as $key=>$item){
-                if ($item['item_status'] !=1 && $item['item_status'] !=2){
-                    $this->error($item['sku'].'数据状态不能同步');
+            foreach ($row  as $key => $item) {
+                if ($item['item_status'] != 1 && $item['item_status'] != 2) {
+                    $this->error($item['sku'] . '数据状态不能同步');
                 }
-                $test[$key] =$item['id'];
+                $test[$key] = $item['id'];
 
                 $map['id'] = $item['id'];
                 $map['item_status'] = 1;
@@ -975,12 +1005,11 @@ class NewProduct extends Backend
                 }
             }
             $this->success('审核成功');
-
-        }else{
+        } else {
             if ($ids)
-            $where['id'] = ['in',$ids];
+                $where['id'] = ['in', $ids];
             $find = $this->model->where($where)->field('sku')->select();
-            $sku = implode(',',array_column($find,'sku'));
+            $sku = implode(',', array_column($find, 'sku'));
             //查询对应平台
             $magentoplatformarr = $this->magentoplatformarr;
             $magentoplatformarr = array_column($this->magentoplatform->getAuthSite(), 'name', 'id');
@@ -1192,7 +1221,7 @@ class NewProduct extends Backend
                 $v['purchase_price'] = $stock[$v['sku']]['purchase_price'];
                 if (in_array($v['sku'], $skus)) {
                     $v['start_replenish_num'] = 50;
-                }else{
+                } else {
                     $v['start_replenish_num'] = 300;
                 }
             }
@@ -1541,13 +1570,13 @@ class NewProduct extends Backend
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->where($where)
-                ->where('type',1)
+                ->where('type', 1)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
                 ->where($where)
-                ->where('type',1)
+                ->where('type', 1)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
@@ -1570,14 +1599,14 @@ class NewProduct extends Backend
     protected function notSatisfiedOrderQuantity()
     {
         $this->mapping = new \app\admin\model\NewProductMapping();
-        $list = $this->mapping->where(['is_show'=>1,'type'=>1])->field('type,sku,sum(replenish_num) as replenish_num,website_type')->group('sku,type')->select();
+        $list = $this->mapping->where(['is_show' => 1, 'type' => 1])->field('type,sku,sum(replenish_num) as replenish_num,website_type')->group('sku,type')->select();
 
         //查询板材类sku
         $this->item = new \app\admin\model\itemmanage\Item();
         $skus = $this->item->getTextureSku();
 
         //统计同款补货量
-        $rows = $this->mapping->where(['is_show'=>1,'type'=>1])->field("substring_index(sku, '-', 1) as origin_sku,sum(replenish_num) as replenish_num")->group('origin_sku,type')->select();
+        $rows = $this->mapping->where(['is_show' => 1, 'type' => 1])->field("substring_index(sku, '-', 1) as origin_sku,sum(replenish_num) as replenish_num")->group('origin_sku,type')->select();
         $rows = collection($rows)->toArray();
         $spus = [];
         foreach ($rows as $k => $v) {
@@ -1592,14 +1621,14 @@ class NewProduct extends Backend
                 if ($v['replenish_num'] < 50) {
                     $data[$k]['sku'] = $v['sku'];
                     //各个站的sku统计的数量
-                    $data[$k]['z_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>1,'type'=>1])->value('replenish_num') ?: 0;
-                    $data[$k]['v_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>2,'type'=>1])->value('replenish_num') ?: 0;
-                    $data[$k]['nihao_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>3,'type'=>1])->value('replenish_num') ?: 0;
-                    $data[$k]['m_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>4,'type'=>1])->value('replenish_num') ?: 0;
-                    $data[$k]['w_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>5,'type'=>1])->value('replenish_num') ?: 0;
-                    $data[$k]['a_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>8,'type'=>1])->value('replenish_num') ?: 0;
-                    $data[$k]['z_es_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>9,'type'=>1])->value('replenish_num') ?: 0;
-                    $data[$k]['z_de_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>10,'type'=>1])->value('replenish_num') ?: 0;
+                    $data[$k]['z_sku_num'] = $this->mapping->where(['is_show' => 1, 'sku' => $v['sku'], 'website_type' => 1, 'type' => 1])->value('replenish_num') ?: 0;
+                    $data[$k]['v_sku_num'] = $this->mapping->where(['is_show' => 1, 'sku' => $v['sku'], 'website_type' => 2, 'type' => 1])->value('replenish_num') ?: 0;
+                    $data[$k]['nihao_sku_num'] = $this->mapping->where(['is_show' => 1, 'sku' => $v['sku'], 'website_type' => 3, 'type' => 1])->value('replenish_num') ?: 0;
+                    $data[$k]['m_sku_num'] = $this->mapping->where(['is_show' => 1, 'sku' => $v['sku'], 'website_type' => 4, 'type' => 1])->value('replenish_num') ?: 0;
+                    $data[$k]['w_sku_num'] = $this->mapping->where(['is_show' => 1, 'sku' => $v['sku'], 'website_type' => 5, 'type' => 1])->value('replenish_num') ?: 0;
+                    $data[$k]['a_sku_num'] = $this->mapping->where(['is_show' => 1, 'sku' => $v['sku'], 'website_type' => 8, 'type' => 1])->value('replenish_num') ?: 0;
+                    $data[$k]['z_es_sku_num'] = $this->mapping->where(['is_show' => 1, 'sku' => $v['sku'], 'website_type' => 9, 'type' => 1])->value('replenish_num') ?: 0;
+                    $data[$k]['z_de_sku_num'] = $this->mapping->where(['is_show' => 1, 'sku' => $v['sku'], 'website_type' => 10, 'type' => 1])->value('replenish_num') ?: 0;
                     $data[$k]['type'] = $v['type'];
                     $data[$k]['replenish_num'] = $v['replenish_num'];
                 }
@@ -1607,14 +1636,14 @@ class NewProduct extends Backend
                 $spu = substr($v['sku'], 0, strrpos($v['sku'], '-'));
                 if ($spus[$spu] < 300) {
                     $data[$k]['sku'] = $v['sku'];
-                    $data[$k]['z_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>1,'type'=>1])->value('replenish_num') ?: 0;
-                    $data[$k]['v_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>2,'type'=>1])->value('replenish_num') ?: 0;
-                    $data[$k]['nihao_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>3,'type'=>1])->value('replenish_num') ?: 0;
-                    $data[$k]['m_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>4,'type'=>1])->value('replenish_num') ?: 0;
-                    $data[$k]['w_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>5,'type'=>1])->value('replenish_num') ?: 0;
-                    $data[$k]['a_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>8,'type'=>1])->value('replenish_num') ?: 0;
-                    $data[$k]['z_es_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>9,'type'=>1])->value('replenish_num') ?: 0;
-                    $data[$k]['z_de_sku_num'] = $this->mapping->where(['is_show'=>1,'sku'=>$v['sku'],'website_type'=>10,'type'=>1])->value('replenish_num') ?: 0;
+                    $data[$k]['z_sku_num'] = $this->mapping->where(['is_show' => 1, 'sku' => $v['sku'], 'website_type' => 1, 'type' => 1])->value('replenish_num') ?: 0;
+                    $data[$k]['v_sku_num'] = $this->mapping->where(['is_show' => 1, 'sku' => $v['sku'], 'website_type' => 2, 'type' => 1])->value('replenish_num') ?: 0;
+                    $data[$k]['nihao_sku_num'] = $this->mapping->where(['is_show' => 1, 'sku' => $v['sku'], 'website_type' => 3, 'type' => 1])->value('replenish_num') ?: 0;
+                    $data[$k]['m_sku_num'] = $this->mapping->where(['is_show' => 1, 'sku' => $v['sku'], 'website_type' => 4, 'type' => 1])->value('replenish_num') ?: 0;
+                    $data[$k]['w_sku_num'] = $this->mapping->where(['is_show' => 1, 'sku' => $v['sku'], 'website_type' => 5, 'type' => 1])->value('replenish_num') ?: 0;
+                    $data[$k]['a_sku_num'] = $this->mapping->where(['is_show' => 1, 'sku' => $v['sku'], 'website_type' => 8, 'type' => 1])->value('replenish_num') ?: 0;
+                    $data[$k]['z_es_sku_num'] = $this->mapping->where(['is_show' => 1, 'sku' => $v['sku'], 'website_type' => 9, 'type' => 1])->value('replenish_num') ?: 0;
+                    $data[$k]['z_de_sku_num'] = $this->mapping->where(['is_show' => 1, 'sku' => $v['sku'], 'website_type' => 10, 'type' => 1])->value('replenish_num') ?: 0;
                     $data[$k]['type'] = $v['type'];
                     $data[$k]['replenish_num'] = $v['replenish_num'];
                 }
@@ -1913,7 +1942,7 @@ class NewProduct extends Backend
 
             //如果切换站点清除默认值
             $filter = json_decode($this->request->get('filter'), true);
-            if($filter['website_type']){
+            if ($filter['website_type']) {
                 $platform_type = $filter['website_type'];
                 unset($map['website_type']);
                 if (100 == $filter['website_type']) {
@@ -1925,7 +1954,7 @@ class NewProduct extends Backend
             //sku
             if ($filter['sku']) {
                 //改为模糊搜索
-                $map['a.sku'] = ['LIKE','%'.trim($filter['sku'].'%')];
+                $map['a.sku'] = ['LIKE', '%' . trim($filter['sku'] . '%')];
                 unset($filter['sku']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
@@ -1996,10 +2025,10 @@ class NewProduct extends Backend
             }
 
             foreach ($list as &$v) {
-                $purchase_detail = Db::name('purchase_order')->where(['purchase_name'=>$v['sku']])->find();
-                if (!$purchase_detail){
+                $purchase_detail = Db::name('purchase_order')->where(['purchase_name' => $v['sku']])->find();
+                if (!$purchase_detail) {
                     unset($v);
-                }else{
+                } else {
                     $v['purchase_num'] = $check_list[$v['purchase_id']][$v['sku']]['purchase_num'];
                     $v['arrivals_num'] = $check_list[$v['purchase_id']][$v['sku']]['arrivals_num'];
                     $v['quantity_num'] = $check_list[$v['purchase_id']][$v['sku']]['quantity_num'];
@@ -2080,7 +2109,7 @@ class NewProduct extends Backend
                 $arrivals_num = $check_list['arrivals_num'] ?: 0;
                 $wait_arrival_num = $v['wait_arrival_num'];
                 $instock_num = $in_stock_item->where(['in_stock_id' => $in_stock_list['id'], 'sku' => $v['sku']])->value('in_stock_num');
-                if(100 != $platform_type){
+                if (100 != $platform_type) {
                     $rate = $in_stock_item->where(['replenish_id' => $v['replenish_id'], 'sku' => $v['sku'], 'website_type' => $platform_type])->value('rate');
                     $quantity_num = round($quantity_num * $rate);
                     $arrivals_num = round($arrivals_num * $rate);
@@ -2195,10 +2224,10 @@ class NewProduct extends Backend
 
             //获取表格中sku集合
             $sku_arr = [];
-            foreach ($data as $k=>$v) {
+            foreach ($data as $k => $v) {
                 //获取sku
                 $sku = trim($v[0]);
-                empty($sku) && $this->error(__('导入失败,第 '.($k+1).' 行SKU为空！'));
+                empty($sku) && $this->error(__('导入失败,第 ' . ($k + 1) . ' 行SKU为空！'));
                 $sku_arr[] = $sku;
             }
 
@@ -2221,8 +2250,8 @@ class NewProduct extends Backend
             //获取sku所属分类列表
             $list = $_item
                 ->where(['sku' => ['in', $sku_arr]])
-                ->where('is_del',1)
-                ->where('is_open',1)
+                ->where('is_del', 1)
+                ->where('is_open', 1)
                 ->field('sku,category_id')
                 ->select();
             $category_arr = array_column(collection($list)->toArray(), 'category_id', 'sku');
@@ -2237,26 +2266,26 @@ class NewProduct extends Backend
                 $sku = trim($v[0]);
 
                 //校验sku是否重复
-                isset($params[$sku]) && $this->error(__('导入失败,商品 '.$sku.' 重复！'));
+                isset($params[$sku]) && $this->error(__('导入失败,商品 ' . $sku . ' 重复！'));
 
                 //获取类型
                 $type_name = trim($v[1]);
-                !isset($type_arr[$type_name]) && $this->error('导入失败,商品 '.$sku.' 类型错误！');
+                !isset($type_arr[$type_name]) && $this->error('导入失败,商品 ' . $sku . ' 类型错误！');
 
                 //校验池子中商品是否有相同sku
                 // isset($mapping_arr[$sku]) && $mapping_arr[$sku] == $type_arr[$type_name] && $this->error(__('导入失败,商品 '.$sku.' 已在补货列表中！'));
                 //有重复数据的时候以导入的数据为准，覆盖掉系统中重复的数据，没有重复的数据还留在系统中
-                isset($mapping_arr[$sku]) && $mapping_arr[$sku] == $type_arr[$type_name] && $this->model->where(['website_type'=>$label,'sku'=>$sku,'type'=>$type_arr[$type_name]])->delete();
+                isset($mapping_arr[$sku]) && $mapping_arr[$sku] == $type_arr[$type_name] && $this->model->where(['website_type' => $label, 'sku' => $sku, 'type' => $type_arr[$type_name]])->delete();
 
                 //校验商品是否存在
-                !in_array($sku,$platform_arr) && $this->error(__('导入失败,商品 '.$sku.' 不存在！'));
+                !in_array($sku, $platform_arr) && $this->error(__('导入失败,商品 ' . $sku . ' 不存在！'));
 
                 //获取商品分类
                 $category_id = isset($category_arr[$sku]) ? $category_arr[$sku] : 0;
 
                 //获取补货量
                 $replenish_num = (int)$v[2];
-                empty($replenish_num) && $this->error(__('导入失败,商品 '.$sku.' 补货数量不能为空！'));
+                empty($replenish_num) && $this->error(__('导入失败,商品 ' . $sku . ' 补货数量不能为空！'));
 
                 $params[$sku] = [
                     'website_type' => $label,
@@ -2275,7 +2304,7 @@ class NewProduct extends Backend
         }
     }
 
-    
+
 
     //已跑完
     // public function transfer_wesee_amazon()

@@ -141,6 +141,8 @@ class OrderData extends Backend
                                     break;
                                 case 'morefun':
                                     $site = 5;
+                                case 'voogueme_acc':
+                                    $site = 12;
                                     break;
                             }
                             //主表
@@ -455,6 +457,8 @@ class OrderData extends Backend
                                         $options =  $this->zeelool_de_prescription_analysis($v['product_options']);
                                     } elseif ($site == 11) {
                                         $options =  $this->zeelool_jp_prescription_analysis($v['product_options']);
+                                    } elseif ($site == 12) {
+                                        $options =  $this->voogueme_acc_prescription_analysis($v['product_options']);
                                     }
 
                                     $options['item_id'] = $v['item_id'];
@@ -505,6 +509,8 @@ class OrderData extends Backend
                                         $options =  $this->zeelool_de_prescription_analysis($v['product_options']);
                                     } elseif ($site == 11) {
                                         $options =  $this->zeelool_jp_prescription_analysis($v['product_options']);
+                                    } elseif ($site == 12) {
+                                        $options =  $this->voogueme_acc_prescription_analysis($v['product_options']);
                                     }
 
                                     $options['sku'] = $v['sku'];
@@ -1247,6 +1253,35 @@ class OrderData extends Backend
         $arr['od_bd_r'] = $options_params['od_bd_r'];
         $arr['os_bd_r'] = $options_params['os_bd_r'];
 
+        /**
+         * 判断定制现片逻辑
+         * 1、渐进镜 Progressive
+         * 2、偏光镜 镜片类型包含Polarized
+         * 3、染色镜 镜片类型包含Lens with Color Tint 或 Tinted 或 Color Tint
+         * 4、当cyl<=-4或cyl>=4 或 sph < -8或 sph>8
+         */
+
+        //判断加工类型
+        $result = $this->set_processing_type($arr);
+        $arr = array_merge($arr, $result);
+        return $arr;
+    }
+
+
+    /**
+     * 饰品站 处方解析逻辑
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/10/28 10:16:53 
+     * @return void
+     */
+    protected function voogueme_acc_prescription_analysis($data)
+    {
+        $options = unserialize($data);
+        //镜片类型
+        $arr['ring_size'] = $options['info_buyRequest']['tmplens']['ring_size'] ?: '';
+        
         /**
          * 判断定制现片逻辑
          * 1、渐进镜 Progressive
