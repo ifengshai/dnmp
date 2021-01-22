@@ -13,6 +13,7 @@ use think\exception\ValidateException;
 class LogisticsStatistic extends Backend
 {
     protected $model = null;
+    protected  $noNeedLogin = ['export_not_shipped'];
 
     /**
      *初始化方法
