@@ -202,4 +202,8 @@ class Dashboard extends Backend
     public function zeelool_jp()
     {
     }
+    public function voogmechic()
+    {
+    }
+    
 }
