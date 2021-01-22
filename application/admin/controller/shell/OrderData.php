@@ -1718,14 +1718,16 @@ class OrderData extends Backend
         $list = Db::connect('database.db_wesee_temp')
             ->table('orders_items')->alias('a')
             ->join(['orders_prescriptions' => 'b'], 'a.orders_prescriptions_id=b.id')
-            ->where('order_id>1875')->select();
+            ->where('order_id>1800')->select();
         foreach ($list as $k => $v) {
             $options = [];
             //处方解析 不同站不同字段
-            // $options =  $this->wesee_prescription_analysis($v['prescription']);
+            $options =  $this->wesee_prescription_analysis($v['prescription']);
             $options['prescription_type'] = $v['name'];
+            unset($options['order_prescription_type']);
             $this->orderitemoption->where(['item_id' => $v['id'], 'site' => 5, 'magento_order_id' => $v['order_id']])->update($options);
         }
+
         echo $site . 'ok';
     }
 
