@@ -820,7 +820,7 @@ class DataMarket extends Backend
                 unset($key);
             }
         }
-        
+
         $timeout_count = $arr1[0]['a'] + $arr2[0]['a'] + $arr3[0]['a'];
 
         dump($arr1);
