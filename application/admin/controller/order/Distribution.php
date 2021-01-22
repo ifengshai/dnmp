@@ -196,11 +196,11 @@ class Distribution extends Backend
                 }
             }
             if ($filter) {
-
                 if ($filter['status']) {
                     $map['b.status'] = ['in', $filter['status']];
                 }else{
-                    if ($label !==0){
+
+                    if ($label !=='0'){
                         $map['b.status'] = ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal']];
                     }
                 }
@@ -313,7 +313,6 @@ class Distribution extends Backend
             if ($item_process_ids) {
                 $map['a.id'] = ['in', $item_process_ids];
             }
-
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
 
             $total = $this->model
