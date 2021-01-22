@@ -195,7 +195,7 @@ class Distribution extends Backend
                 if ($filter['status']) {
                     $map['b.status'] = ['in', $filter['status']];
                 }else{
-                    if ($label !==0){
+                    if ($label !=='0'){
                         $map['b.status'] = ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal']];
                     }
                 }
