@@ -369,7 +369,8 @@ class LogisticsStatistic extends Backend
         ini_set('memory_limit', '512M');
 
         $map['delivery_time'] = ['between', ['2020-12-01 00:00:00', '2020-12-31 23:59:59']];
-        $list = Db::table('fa_order_node')->where($map)->where('track_number is  null')->column('order_number');
+        $map['node_type'] = ['neq',40];
+        $list = Db::table('fa_order_node')->where($map)->column('order_number');
         dump($list);die();
 
         //从数据库查询需要的数据
