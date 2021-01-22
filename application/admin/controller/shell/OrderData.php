@@ -322,7 +322,6 @@ class OrderData extends Backend
                                 foreach ($payload['data'] as $k => $v) {
                                     $params = [];
                                     if ($v['address_type'] == 'shipping') {
-
                                         $params['country_id'] = $v['country_id'];
                                         $params['region'] = $v['region'];
                                         $params['region_id'] = $v['region_id'];
@@ -365,7 +364,7 @@ class OrderData extends Backend
                                     if ($site == 5) {
                                         $options =  $this->wesee_prescription_analysis($orders_prescriptions_params[$v['orders_prescriptions_id']]['prescription']);
                                     }
-                                    
+
                                     $options['item_id'] = $v['id'];
                                     $options['site'] = $site;
                                     $options['magento_order_id'] = $v['order_id'];
@@ -404,7 +403,7 @@ class OrderData extends Backend
 
                             //批发站处方表更新
                             if ($payload['type'] == 'UPDATE' && $payload['table'] == 'orders_prescriptions') {
-                                
+
                                 foreach ($payload['data'] as $k => $v) {
                                     $orders_prescriptions_params[$v['id']]['prescription'] = $v['prescription'];
                                     $orders_prescriptions_params[$v['id']]['name'] = $v['name'];
@@ -419,7 +418,7 @@ class OrderData extends Backend
                                     if ($site == 5) {
                                         $options =  $this->wesee_prescription_analysis($orders_prescriptions_params[$v['orders_prescriptions_id']]['prescription']);
                                     }
-                                   
+
                                     $options['sku'] = $this->getTrueSku($v['goods_sku']);
                                     $options['qty'] = $v['goods_count'];
                                     $options['base_row_total'] = $v['original_total_price'];
@@ -1281,7 +1280,7 @@ class OrderData extends Backend
         $options = unserialize($data);
         //镜片类型
         $arr['ring_size'] = $options['info_buyRequest']['tmplens']['ring_size'] ?: '';
-        
+
         /**
          * 判断定制现片逻辑
          * 1、渐进镜 Progressive
@@ -1751,18 +1750,15 @@ class OrderData extends Backend
      */
     public function process_order_data_temp()
     {
-        $this->zeelool_old_order(1);
+        $this->zeelool_old_order(12);
         // $this->zeelool_old_order(5);
     }
 
 
     protected function zeelool_old_order($site)
     {
-        if ($site == 1) {
-            $list = $this->zeelool->where(['entity_id' => 557772])->select();
-        } elseif ($site == 5) {
-            $id = $this->order->where('site=' . $site . ' and entity_id < 1375')->max('entity_id');
-            $list = $this->wesee->where(['entity_id' => ['between', [$id, 1375]]])->limit(3000)->select();
+        if ($site == 12) {
+            $list = Db::connect('database.db_voogueme_acc')->table('sales_flat_order')->select();
         }
 
         $list = collection($list)->toArray();
@@ -1780,9 +1776,11 @@ class OrderData extends Backend
             $params['status'] = $v['status'] ?: '';
             $params['store_id'] = $v['store_id'];
             $params['base_grand_total'] = $v['base_grand_total'];
-            $params['total_item_count'] = $v['total_qty_ordered'];
+            $params['total_item_count'] = $v['total_item_count'];
+            $params['total_qty_ordered'] = $v['total_qty_ordered'];
             $params['order_type'] = $v['order_type'];
             $params['base_currency_code'] = $v['base_currency_code'];
+            $params['order_currency_code'] = $v['order_currency_code'];
             $params['shipping_method'] = $v['shipping_method'];
             $params['shipping_title'] = $v['shipping_description'];
             $params['country_id'] = $v['country_id'];
@@ -1796,18 +1794,21 @@ class OrderData extends Backend
             $params['customer_lastname'] = $v['customer_lastname'];
             $params['taxno'] = $v['taxno'];
             $params['base_to_order_rate'] = $v['base_to_order_rate'];
-            $params['mw_rewardpoint_discount'] = $v['mw_rewardpoint_discount'];
             $params['mw_rewardpoint'] = $v['mw_rewardpoint'];
+            $params['mw_rewardpoint_discount'] = $v['mw_rewardpoint_discount'];
             $params['base_shipping_amount'] = $v['base_shipping_amount'];
             $params['created_at'] = strtotime($v['created_at']) + 28800;
             $params['updated_at'] = strtotime($v['updated_at']) + 28800;
+            if (isset($v['payment_time'])) {
+                $params['payment_time'] = strtotime($v['payment_time']) + 28800;
+            }
+
             //插入订单主表
             $order_id = $this->order->insertGetId($params);
             $order_params[$k]['site'] = $site;
             $order_params[$k]['order_id'] = $order_id;
             $order_params[$k]['entity_id'] = $v['entity_id'];
             $order_params[$k]['increment_id'] = $v['increment_id'];
-
             echo $v['entity_id'] . "\n";
             usleep(10000);
         }
@@ -1820,14 +1821,25 @@ class OrderData extends Backend
 
     public function order_address_data_shell()
     {
-        $this->order_address_data(1);
-        $this->order_address_data(2);
-        $this->order_address_data(3);
-        $this->order_address_data(4);
-        $this->order_address_data(5);
-        $this->order_address_data(9);
-        $this->order_address_data(10);
-        $this->order_address_data(11);
+        $list = Db::connect('database.db_voogueme_acc')->table('sales_flat_order_address')->where(['address_type' => 'shipping'])->select();
+
+        foreach ($list as $k => $v) { 
+            $params = [];
+            if ($v['address_type'] == 'shipping') {
+                $params['country_id'] = $v['country_id'];
+                $params['region'] = $v['region'];
+                $params['region_id'] = $v['region_id'];
+                $params['city'] = $v['city'];
+                $params['street'] = $v['street'];
+                $params['postcode'] = $v['postcode'];
+                $params['telephone'] = $v['telephone'];
+                $params['firstname'] = $v['firstname'];
+                $params['lastname'] = $v['lastname'];
+                $params['updated_at'] = strtotime($v['updated_at']) + 28800;
+                $this->order->where(['entity_id' => $v['parent_id'], 'site' => 12])->update($params);
+            }
+        }
+        
     }
 
     /**
@@ -1859,6 +1871,8 @@ class OrderData extends Backend
             $res = Db::connect('database.db_zeelool_de')->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_id]])->column('lastname,firstname', 'parent_id');
         } elseif ($site == 11) {
             $res = Db::connect('database.db_zeelool_jp')->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_id]])->column('lastname,firstname', 'parent_id');
+        } elseif ($site == 12) {
+            $res = Db::connect('database.db_voogueme_acc')->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_id]])->column('lastname,firstname', 'parent_id');
         }
         $params = [];
         foreach ($list as $k => $v) {
@@ -1942,15 +1956,15 @@ class OrderData extends Backend
      */
     public function order_item_data_shell()
     {
-        $this->order_item_shell(1);
+        $this->order_item_shell(12);
     }
 
     protected function order_item_shell($site)
     {
         ini_set('memory_limit', '2280M');
-        if ($site == 1) {
+        if ($site == 12) {
             // $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 929673')->max('item_id');
-            $list = Db::connect('database.db_zeelool')->table('sales_flat_order_item')->where(['item_id' => ['>', 929673]])->where(['item_id' => ['<', 1026606]])->select();
+            $list = Db::connect('database.db_voogueme_acc')->table('sales_flat_order_item')->select();
         }
 
         // elseif ($site == 2) {
@@ -1999,6 +2013,8 @@ class OrderData extends Backend
                 $options =  $this->zeelool_de_prescription_analysis($v['product_options']);
             } elseif ($site == 11) {
                 $options =  $this->zeelool_jp_prescription_analysis($v['product_options']);
+            } elseif ($site == 12) {
+                $options =  $this->voogueme_acc_prescription_analysis($v['product_options']);
             }
 
             $options['item_id'] = $v['item_id'];
@@ -2041,14 +2057,8 @@ class OrderData extends Backend
      */
     public function order_payment_data_shell()
     {
-        $this->order_payment_data(1);
-        $this->order_payment_data(2);
-        $this->order_payment_data(3);
-        $this->order_payment_data(4);
-        $this->order_payment_data(5);
-        $this->order_payment_data(9);
-        $this->order_payment_data(10);
-        $this->order_payment_data(11);
+
+        $this->order_payment_data(12);
     }
 
     /**
@@ -2080,12 +2090,15 @@ class OrderData extends Backend
             $res = Db::connect('database.db_zeelool_de')->table('sales_flat_order_payment')->where(['parent_id' => ['in', $entity_id]])->column('last_trans_id', 'parent_id');
         } elseif ($site == 11) {
             $res = Db::connect('database.db_zeelool_jp')->table('sales_flat_order_payment')->where(['parent_id' => ['in', $entity_id]])->column('last_trans_id', 'parent_id');
+        } elseif ($site == 11) {
+            $res = Db::connect('database.db_voogueme_acc')->table('sales_flat_order_payment')->where(['parent_id' => ['in', $entity_id]])->column('last_trans_id,method', 'parent_id');
         }
         if ($res) {
             $params = [];
             foreach ($list as $k => $v) {
                 $params[$k]['id'] = $v['id'];
-                $params[$k]['last_trans_id'] = $res[$v['entity_id']] ?: 0;
+                $params[$k]['last_trans_id'] = $res[$v['entity_id']]['last_trans_id'] ?: 0;
+                $params[$k]['payment_method'] = $res[$v['entity_id']]['method'];
             }
             $this->order->saveAll($params);
             echo $site . 'ok';
