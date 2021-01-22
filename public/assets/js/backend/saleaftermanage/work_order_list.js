@@ -60,7 +60,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         {
                             field: 'order_sku',
                             title: __('Order_sku'),
-                            operate: 'like',
+                            operate: false,
                             visible: true,
                             formatter: function (value, rows) {
                                 var all_user_name = '';
