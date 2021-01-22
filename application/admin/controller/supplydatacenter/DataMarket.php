@@ -786,18 +786,14 @@ class DataMarket extends Backend
 
         $where['p.delivery_time'] = ['between',[$start,$end]];
         $where['p.site'] = ['<>',4];
-//        $map1['p.order_prescription_type'] = 1;
-//        $map2['p.order_prescription_type'] = 2;
-//        $map3['p.order_prescription_type'] = 3;
+
         $where['o.status'] = ['in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
         $sql1 = $this->process->alias('p')
             ->join('fa_order o','p.increment_id = o.increment_id')
             ->field('p.delivery_time,p.order_prescription_type,o.payment_time,o.increment_id,o.status')
-//            ->field('(p.delivery_time-o.payment_time)/3600 AS total,')
-            ->where($where)->group('p.order_id')->buildSql();
-        $arr = $this->process->table([$sql1=>'t2'])->select();
-        $list  = collection($arr)->toArray();
-        dump($list);
+            ->where($where)->group('p.order_id')->select();
+        $list  = collection($sql1)->toArray();
+        dump(count($list));die();
         foreach ($list as $key=>$item){
             $va = ($item['delivery_time'] - $item['payment_time'])/3600;
             if ($item['order_prescription_type'] ==1){
