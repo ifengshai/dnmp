@@ -21,6 +21,15 @@ class FinanceCost extends Backend
     public function index(){
         return $this->view->fetch();
     }
+
+    /**
+     * 收入
+     *
+     * @Description
+     * @author gyh
+     * @since 2021/01/21 15:24:14 
+     * @return void
+     */
     public function table1()
     {
         //设置过滤方法
@@ -49,9 +58,17 @@ class FinanceCost extends Backend
         return $this->view->fetch('index');
     }
 
-    public function table2()
+
+     /**
+     * 成本
+     *
+     * @Description
+     * @author gyh
+     * @since 2021/01/21 15:24:14 
+     * @return void
+     */
+    public function cost()
     {
-        $this->model = model('AdminLog');
         //设置过滤方法
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
@@ -62,11 +79,13 @@ class FinanceCost extends Backend
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->where($where)
+                ->where('type=2')
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
                 ->where($where)
+                ->where('type=2')
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
