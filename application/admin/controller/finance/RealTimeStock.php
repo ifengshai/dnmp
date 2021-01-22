@@ -21,14 +21,8 @@ class RealTimeStock extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
-            $filter = json_decode($this->request->get('filter'), true);
             $map['sku'] = ['<>',''];
             $map['library_status'] = 1;
-            if($filter['sku']){
-                $map['sku'] = $filter['sku'];
-            }
-            unset($filter['sku']);
-            $this->request->get(['filter' => json_encode($filter)]);
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->item
                 ->where($where)
@@ -54,7 +48,7 @@ class RealTimeStock extends Backend
                 foreach ($prices as $price){
                     $amount += $price['actual_purchase_price'] != 0 ? $price['actual_purchase_price'] : $price['purchase_price'];
                 }
-                $list[$key]['total'] = $amount;
+                $list[$key]['total'] = round($amount,2);
             }
             $result = array("total" => $total, "rows" => $list);
             return json($result);
@@ -65,6 +59,7 @@ class RealTimeStock extends Backend
         foreach ($purchase as $vv){
             $amount += $vv['actual_purchase_price'] != 0 ? $vv['actual_purchase_price'] : $vv['purchase_price'];
         }
+        $amount = round($amount,2);
         $this->view->assign('amount',$amount);
         return $this->view->fetch();
     }
@@ -82,7 +77,8 @@ class RealTimeStock extends Backend
             foreach ($list as $k=>$val){
                 $i++;
                 $list[$k]['id'] = $i;
-                $list[$k]['total'] = $val['actual_purchase_price'] != 0 ? $val['actual_purchase_price'] : $val['purchase_price'];
+                $total = $val['actual_purchase_price'] != 0 ? $val['actual_purchase_price'] : $val['purchase_price'];
+                $list[$k]['total'] = round($total,2);
             }
             $result = array("total" => count($list), "rows" => $list);
             return json($result);
