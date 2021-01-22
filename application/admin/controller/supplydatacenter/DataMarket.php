@@ -793,7 +793,7 @@ class DataMarket extends Backend
         $sql1 = $this->process->alias('p')
             ->join('fa_order o','p.increment_id = o.increment_id')
             ->field('p.delivery_time,o.payment_time,o.increment_id,o.status')
-//            ->field('(p.delivery_time-o.payment_time)/3600 AS total,o.increment_id,o.status')
+//            ->field('(p.delivery_time-o.payment_time)/3600 AS total,')
             ->where($where)->where($map1)->group('p.order_id')->buildSql();
         $arr1 = $this->process->table([$sql1=>'t2'])->select();
         $arr1  = collection($arr1)->toArray();
@@ -820,12 +820,24 @@ class DataMarket extends Backend
                 unset($key);
             }
         }
-
+        foreach ($arr2 as $key=>$value){
+            $va = ($value['delivery_time'] - $value['payment_time'])/3600;
+            if ($va<72){
+                unset($key);
+            }
+        }
+        foreach ($arr3 as $key=>$value){
+            $va = ($value['delivery_time'] - $value['payment_time'])/3600;
+            if ($va<168){
+                unset($key);
+            }
+        }
         $timeout_count = $arr1[0]['a'] + $arr2[0]['a'] + $arr3[0]['a'];
 
-        dump($arr1);
-        dump($arr2);
-        dump($arr3);die();
+        dump(count($arr1));
+        dump(count($arr2));
+        dump(count($arr3));
+       die();
 
         dump($timeout_count);die();
 
