@@ -8,44 +8,43 @@
                     <div class="form-group">
                         <label class="control-label col-xs-12 col-sm-2">结算单号:</label>
                         <div class="col-xs-12 col-sm-3">
-                            <input id="c-purchase_number" class="form-control" readonly value="" type="text">
+                            <input class="form-control" readonly value="{$statement.statement_number}" type="text">
                         </div>
                         <label class="control-label col-xs-12 col-sm-2">供应商名称:</label>
                         <div class="col-xs-12 col-sm-3">
-                            <input id="c-purchase_name" class="form-control" readonly type="text">
+                            <input class="form-control" readonly value="{$supply.supplier_name}" type="text">
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="control-label col-xs-12 col-sm-2">供应商账期:</label>
                         <div class="col-xs-12 col-sm-3">
-                            <input id="c-purchase_number" class="form-control" readonly value="" type="text">
+                            <input class="form-control" readonly value="{$statement.account_statement}" type="text">
                         </div>
                         <label class="control-label col-xs-12 col-sm-2">收款方名称:</label>
                         <div class="col-xs-12 col-sm-3">
-                            <input id="c-purchase_name" class="form-control" readonly type="text">
+                            <input class="form-control" readonly value="{$supply.recipient_name}" type="text">
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="control-label col-xs-12 col-sm-2">收款方开户行:</label>
                         <div class="col-xs-12 col-sm-3">
-                            <input id="c-purchase_number" class="form-control" readonly value="" type="text">
+                            <input class="form-control" readonly value="{$supply.opening_bank}" type="text">
                         </div>
                         <label class="control-label col-xs-12 col-sm-2">收款方账户:</label>
                         <div class="col-xs-12 col-sm-3">
-                            <input id="c-purchase_name" class="form-control" readonly type="text">
+                            <input class="form-control" readonly value="{$supply.bank_account}" type="text">
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="control-label col-xs-12 col-sm-2">币种:</label>
                         <div class="col-xs-12 col-sm-3">
-                            <input id="c-purchase_number" class="form-control" readonly value="" type="text">
+                            <input class="form-control" readonly value="{$supply.currency}" type="text">
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="control-label col-xs-12 col-sm-2">备注:</label>
                         <div class="col-xs-12 col-sm-8">
-            <textarea id="c-purchase_remark" class="form-control " rows="5" name="row[purchase_remark]"
-                      cols="50"></textarea>
+                            <textarea class="form-control " rows="5" cols="50">{$statement.remark}</textarea>
                         </div>
                     </div>
                 </div>
@@ -79,6 +78,26 @@
                         <th>扣款原因</th>
                         <th>结算账期时间</th>
                     </tr>
+                    {foreach $items as $item}
+                    <tr>
+                        <th>{$item.id}</th>
+                        <th>{$item.purchase_number}</th>
+                        <th>{$item.purchase_name}</th>
+                        <th>{if $statement.status == 1}预付款{elseif $statement.status == 2}全款预付{else/}尾款{/if}</th>
+                        <th>{$item.purchase_batch}</th>
+                        <th>{$item.before_total}</th>
+                        <th>{$item.now_pay_total}</th>
+                        <th>{$item.wait_statement_total}</th>
+                        <th>{$item.freight}</th>
+                        <th>{$item.instock_num}</th>
+                        <th>{$item.instock_total}</th>
+                        <th>{$item.return_num}</th>
+                        <th>{$item.return_total}</th>
+                        <th>{$item.deduction_total}</th>
+                        <th>{$item.deduction_reason}</th>
+                        <th>{$item.period}</th>
+                    </tr>
+                    {/foreach}
                 </table>
             </div>
         </div>

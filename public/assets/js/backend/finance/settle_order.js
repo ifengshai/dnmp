@@ -21,23 +21,23 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                     [
                         {checkbox: true},
                         {field: 'id', title: __('ID'),operate:false},
-                        {field: 'id', title: __('结算单号'),},
-                        {field: 'email', title: __('供应商名称')},
-                        {field: 'email', title: __('供应商账期')},
-                        {field: 'email', title: __('结算金额')},
-                        {field: 'email', title: __('采购负责人')},
-                        {field: 'status', title: __('状态'),custom: { 1: 'danger', 2: 'success', 3: 'orange', 4: 'warning', 5: 'purple', 6: 'primary' , 7: 'primary'}, searchList: { 1: '新建', 2: '待审核', 3: '待对账', 4: '待财务确认', 5: '已完成',6:'已拒绝' ,7:'已取消'},formatter: Table.api.formatter.status},
-                        {field: 'id', title: __('结算类型'),visible:false},
+                        {field: 'statement_number', title: __('结算单号'),},
+                        {field: 'supplier_name', title: __('供应商名称')},
+                        {field: 'account_statement', title: __('供应商账期')},
+                        {field: 'wait_statement_total', title: __('结算金额'),operate:false},
+                        {field: 'purchase_person', title: __('采购负责人')},
+                        {field: 'status', title: __('状态'),custom: { 0: 'danger',1: 'success', 2: 'danger', 3: 'orange', 4: 'warning', 5: 'purple', 6: 'primary'}, searchList: { 0: '新建', 1: '待审核',2:'审核拒绝', 3: '待对账', 4: '待财务确认', 5: '已取消',6:'已完成'},formatter: Table.api.formatter.status},
+                        {field: 'pay_type', title: __('结算类型'), searchList: { 1: '预付款',2:'全款预付', 3: '尾款'},formatter: Table.api.formatter.status},
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
                                  {
                                   name: 'detail',
                                   text: '详情',
                                   title: __('查看详情'),
-                                  extend: 'data-area = \'["80%","70%"]\'',
+                                  extend: 'data-area = \'["100%","100%"]\'',
                                   classname: 'btn btn-xs btn-primary btn-dialog',
                                   icon: 'fa fa-list',
-                                  url: 'customer/wholesale_customer/detail',
+                                  url: 'finance/settle_order/detail',
                                   callback: function (data) {
                                       Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
                                   },
@@ -53,25 +53,18 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                     ]
                 ]
             });
-
+            //审核通过
+            $(document).on('click', '.btn-confirm', function () {
+                var ids = Table.api.selectedids(table);
+                Backend.api.ajax({
+                    url: Config.moduleurl + '/finance/settle_order/confirm',
+                    data: { ids: ids}
+                }, function (data, ret) {
+                    table.bootstrapTable('refresh');
+                });
+            })
             // 为表格绑定事件
             Table.api.bindevent(table);
-
-
-            //批量导出xls
-            $('.btn-batch-export-xls').click(function () {
-                var ids = Table.api.selectedids(table);
-                if (ids.length > 0) {
-                    window.open(Config.moduleurl + '/customer/wholesale_customer/batch_export_xls?ids=' + ids, '_blank');
-                } else {
-                    var options = table.bootstrapTable('getOptions');
-                    var search = options.queryParams({});
-                    var filter = search.filter;
-                    var op = search.op;
-                    window.open(Config.moduleurl + '/customer/wholesale_customer/batch_export_xls?filter=' + filter + '&op=' + op, '_blank');
-                }
-
-            });
         },
         add: function () {
             Controller.api.bindevent();
@@ -82,7 +75,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
         detail: function () {
             Controller.api.bindevent();
         },
-
         api: {
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
