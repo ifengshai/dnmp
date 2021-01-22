@@ -800,7 +800,7 @@ class DataMarket extends Backend
         $sql1 = $this->process->alias('p')
             ->join('fa_order o','p.increment_id = o.increment_id')
             ->field('p.delivery_time,p.order_prescription_type,o.payment_time,o.increment_id,o.status')
-            ->where($where)->group('p.order_id')->select(false);
+            ->where($where)->group('p.order_id')->select();
         $list  = collection($sql1)->toArray();
 
         foreach ($list as $key=>$item){
