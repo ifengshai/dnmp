@@ -2133,6 +2133,7 @@ class ScmDistribution extends Scm
                                 'b.operation_type' => 1
                             ])
                             ->order('a.id', 'desc')
+                            ->limit(1)
                             ->value('a.change_sku');
                         if ($change_sku) {
                             $sku = $change_sku;
@@ -2205,6 +2206,7 @@ class ScmDistribution extends Scm
                             'b.operation_type' => 1
                         ])
                         ->order('a.id', 'desc')
+                        ->limit(1)
                         ->value('a.change_sku');
                     if ($change_sku) {
                         $sku = $change_sku;
