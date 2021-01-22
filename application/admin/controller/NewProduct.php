@@ -2414,7 +2414,7 @@ class NewProduct extends Backend
                     unset($add['supplier_id']);
                     unset($add['supplier_sku']);
 
-                    $Stock->table('fa_item')->insert($add);
+//                    $Stock->table('fa_item')->insert($add);
                     unset($add);
                     $itemAttribute['frame_texture'] = 0;
                     $Stock->table('fa_item_attribute')->insert($itemAttribute);
