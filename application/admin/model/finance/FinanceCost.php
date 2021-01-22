@@ -307,14 +307,28 @@ class FinanceCost extends Model
         $cost = 0;
         foreach ($order_prescription as $k => $v) {
             foreach ($lens_list as $key => $val) {
-                //右眼
-                if ($v['lens_number'] == $val['lens_number'] && ((float) $v['od_sph'] >= (float) $val['sph_start'] && (float) $v['od_sph'] <= (float) $val['sph_end']) && ((float) $v['od_cyl'] >= (float) $val['cyl_start'] && (float) $v['od_cyl'] <= (float) $val['cyl_end'])) {
-                    $cost += $val['price'];
+                if ($v['od_cyl'] == '-0.25') {
+                    //右眼
+                    if ($v['lens_number'] == $val['lens_number'] && ((float) $v['od_sph'] >= (float) $val['sph_start'] && (float) $v['od_sph'] <= (float) $val['sph_end']) && ((float) $v['od_cyl'] == (float) $val['cyl_end'] && (float) $v['od_cyl'] == (float) $val['cyl_end'])) {
+                        $work_cost += $val['price'];
+                    }
+                } else {
+                    //右眼
+                    if ($v['lens_number'] == $val['lens_number'] && ((float) $v['od_sph'] >= (float) $val['sph_start'] && (float) $v['od_sph'] <= (float) $val['sph_end']) && ((float) $v['od_cyl'] >= (float) $val['cyl_start'] && (float) $v['od_cyl'] <= (float) $val['cyl_end'])) {
+                        $work_cost += $val['price'];
+                    }
                 }
 
-                //左眼
-                if ($v['lens_number'] == $val['lens_number'] && ((float) $v['os_sph'] >= (float) $val['sph_start'] && (float) $v['os_sph'] <= (float) $val['sph_end']) && ((float) $v['os_cyl'] >= (float) $val['cyl_start'] && (float) $v['os_cyl'] <= (float) $val['cyl_end'])) {
-                    $cost += $val['price'];
+                if ($v['os_cyl'] == '-0.25') {
+                    //左眼
+                    if ($v['lens_number'] == $val['lens_number'] && ((float) $v['os_sph'] >= (float) $val['sph_start'] && (float) $v['os_sph'] <= (float) $val['sph_end']) && ((float) $v['os_cyl'] == (float) $val['cyl_start'] && (float) $v['os_cyl'] == (float) $val['cyl_end'])) {
+                        $work_cost += $val['price'];
+                    }
+                } else {
+                    //左眼
+                    if ($v['lens_number'] == $val['lens_number'] && ((float) $v['os_sph'] >= (float) $val['sph_start'] && (float) $v['os_sph'] <= (float) $val['sph_end']) && ((float) $v['os_cyl'] >= (float) $val['cyl_start'] && (float) $v['os_cyl'] <= (float) $val['cyl_end'])) {
+                        $work_cost += $val['price'];
+                    }
                 }
             }
         }
