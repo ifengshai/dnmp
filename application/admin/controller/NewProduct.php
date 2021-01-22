@@ -2381,7 +2381,7 @@ class NewProduct extends Backend
                     Db::name('supplier_sku')->insert($supplier_data);
 
                     //添加对应平台映射关系
-                    $skuParams['platform_type'] = 4;
+                    $skuParams['platform_type'] = 12;
                     $skuParams['sku'] = $value['SKU'];
                     $skuParams['platform_sku'] = $value['SKU'];
                     $skuParams['name'] = $value['商品名称'];
