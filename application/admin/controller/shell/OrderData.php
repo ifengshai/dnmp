@@ -1724,9 +1724,10 @@ class OrderData extends Backend
             //处方解析 不同站不同字段
             $options =  $this->wesee_prescription_analysis($v['prescription']);
             $options['prescription_type'] = $v['name'];
+            unset($options['order_prescription_type']);
             $this->orderitemoption->where(['item_id' => $v['id'], 'site' => 5, 'magento_order_id' => $v['order_id']])->update($options);
         }
-        
+
         echo $site . 'ok';
     }
 
