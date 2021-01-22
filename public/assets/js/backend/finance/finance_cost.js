@@ -52,7 +52,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'upload'], function (
                                 }, operate: 'IN',
                                 formatter: Table.api.formatter.status
                             },
-                            {field: 'order_type', title: __('订单类型'),custom: { 1: 'success', 2: 'orange', 3: 'danger', 4: 'warning', 5: 'purple'}, searchList: { 1: '普通订单', 2: '批发', 3: '网红单', 4: '补发',5: '补差价'},formatter: Table.api.formatter.status},
+                            {field: 'order_type', title: __('订单类型'),custom: { 1: 'success', 2: 'orange', 3: 'danger', 4: 'warning', 5: 'purple', 9: 'warning'}, searchList: { 1: '普通订单', 2: '批发', 3: '网红单', 4: '补发',5: '补差价',9: 'vip订单'},formatter: Table.api.formatter.status},
                             {field: 'order_money', title: __('订单金额'),operate:false},
                             {field: 'income_amount', title: __('收入金额'),operate:false},
                             {field: 'order_currency_code', title: __('币种')},

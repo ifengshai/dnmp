@@ -51,7 +51,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                                 }, operate: 'IN',
                                 formatter: Table.api.formatter.status
                             },
-                            {field: 'order_type', title: __('订单类型'),custom: { 1: 'success', 2: 'orange', 3: 'danger', 4: 'warning'}, searchList: { 1: '普通订单', 2: '批发', 3: '网红单', 4: '补发单'},formatter: Table.api.formatter.status},
+                            {field: 'order_type', title: __('订单类型'),custom: { 1: 'success', 2: 'orange', 3: 'danger', 4: 'warning', 9: 'warning'}, searchList: { 1: '普通订单', 2: '批发', 3: '网红单', 4: '补发单', 9: 'vip订单'},formatter: Table.api.formatter.status},
                             {field: 'order_money', title: __('订单总金额'),operate:false},
                             {field: 'frame_cost', title: __('镜架成本'),operate:false},
                             {field: 'fi_actual_payment_fee',title: __('物流成本'),operate:false},

@@ -946,13 +946,13 @@ class SelfApi extends Api
         $params['bill_type'] = 2;//单据类型
         $params['order_number'] = $order_detail['order_number'];//订单号
         $params['site'] = $order_detail['site'];//站点
-        $params['order_type'] = $order_detail['order_type'];//
+        $params['order_type'] = 9;//
         $params['order_money'] = $order_detail['base_grand_total'];//订单金额
         $params['income_amount'] = $work_order_info['refund_money'];//收入金额
         $params['order_currency_code'] = $order_detail['order_currency_code'];//币种
         $params['payment_time'] = $order_detail['payment_time'];//支付时间
         $params['payment_method'] = $order_detail['payment_method'];//支付方式
-        $params['action_type'] = 2;//动作类型：1增加；2冲减；
+        $params['action_type'] = 1;//动作类型：1增加；2冲减；
         $params['createtime'] = time();
         $FinanceCost = new FinanceCost();
         $res = $FinanceCost->insert($params);//vip订单-增加
