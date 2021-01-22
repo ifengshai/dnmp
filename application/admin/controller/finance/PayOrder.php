@@ -173,6 +173,7 @@ class PayOrder extends Backend
         $supplier = $this->supplier->where('id',$id)->field('id,supplier_name,currency,period,opening_bank,bank_account,recipient_name')->select();
         //获取付款单信息
         $pay_order = $this->payorder->where('id',$id)->find();
+        $imgs = explode(',',$pay_order['invoice']);
         //获取付款单子单结算信息
         $settle = $this->payorder_item->where(['pay_id'=>$id,'pay_type'=>3])->select();
         $total1= 0;
@@ -190,7 +191,7 @@ class PayOrder extends Backend
             $count2++;
         }
         $total = $total1+$total2;
-        $this->view->assign(compact('pay_order','supplier', 'settle', 'prepay','total1','total2','total','count1','count2'));
+        $this->view->assign(compact('pay_order','supplier', 'settle', 'prepay','total1','total2','total','count1','count2','imgs'));
         return $this->view->fetch();
     }
     /*

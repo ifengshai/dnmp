@@ -83,7 +83,7 @@
                         <th>{$item.id}</th>
                         <th>{$item.purchase_number}</th>
                         <th>{$item.purchase_name}</th>
-                        <th>{if $statement.status == 1}预付款{elseif $statement.status == 2}全款预付{else/}尾款{/if}</th>
+                        <th>{if $statement.pay_type == 1}预付款{elseif $statement.pay_type == 2}全款预付{else/}尾款{/if}</th>
                         <th>{$item.purchase_batch}</th>
                         <th>{$item.before_total}</th>
                         <th>{$item.now_pay_total}</th>
