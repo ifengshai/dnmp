@@ -948,7 +948,7 @@ class SelfApi extends Api
         $params['site'] = $order_detail['site'];//站点
         $params['order_type'] = 9;//
         $params['order_money'] = $order_detail['base_grand_total'];//订单金额
-        $params['income_amount'] = $work_order_info['refund_money'];//收入金额
+        $params['income_amount'] = $order_detail['base_grand_total'];//收入金额
         $params['order_currency_code'] = $order_detail['order_currency_code'];//币种
         $params['payment_time'] = $order_detail['payment_time'];//支付时间
         $params['payment_method'] = $order_detail['payment_method'];//支付方式
