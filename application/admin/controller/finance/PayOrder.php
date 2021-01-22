@@ -262,7 +262,7 @@ class PayOrder extends Backend
                     if($out_count != 0){
                         //如果有出库数据，需要添加冲减暂估结算金额和增加成本核算数据
                         $arr1['type'] = 2;   //类型：成本
-                        $arr1['bill_type'] = 14;    //单据类型：暂估结算金额
+                        $arr1['bill_type'] = 10;    //单据类型：暂估结算金额
                         $arr1['frame_cost'] = round($result['count']*$purchase_order['purchase_price'],2);    //镜架成本：剩余预估单价*剩余数量
                         $arr1['action_type'] = 2;  //动作类型：冲减
                         $arr1['order_currency_code'] = 'CNY';  //币种
@@ -270,7 +270,7 @@ class PayOrder extends Backend
                         Db::name('fa_finance_cost')->insert($arr1);
                         //增加成本核算记录
                         $arr2['type'] = 2;   //类型：成本
-                        $arr2['bill_type'] = 15;    //单据类型：实际结算金额
+                        $arr2['bill_type'] = 8;    //单据类型：实际结算金额
                         $arr2['frame_cost'] = round($result['count']*$purchase_order['actual_purchase_price'],2);    //镜架成本：剩余实际单价*剩余数量
                         $arr2['action_type'] = 1;  //动作类型：增加
                         $arr2['order_currency_code'] = 'CNY';  //币种
