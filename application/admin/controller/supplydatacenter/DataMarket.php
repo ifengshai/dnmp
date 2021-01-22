@@ -820,7 +820,7 @@ class DataMarket extends Backend
                 }
             }
         }
-
+        $list = array_values($list);
         $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
 
         //从数据库查询需要的数据
@@ -855,7 +855,7 @@ class DataMarket extends Backend
             }
             $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), $value['increment_id']);
             $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['status']);
-            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), date('Y-m-d H:i:s',$value['created_at']));
+            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), date('Y-m-d H:i:s',$value['delivery_time']));
             $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['work']);
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['work_status']);
 
