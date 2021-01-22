@@ -242,13 +242,11 @@ class Distribution extends Backend
                             ->where([
                                 'a.shelf_number' => ['eq', $filter['shelf_number']],
                             ])
-                            ->field('b.sku')->select();
-                    $shelf_number = collection($shelf_number)->toArray();
-
-                    $result = array_reduce($shelf_number, function ($result, $value) {
-                        return array_merge($result, array_values($value));
-                    }, array());
-                    $map['a.sku'] = ['in', $result];
+                            ->column('b.sku');
+                    //平台SKU表替换sku
+                    $sku = Db::connect('database.db_stock');
+                    $sku_array = $sku->table('fa_item_platform_sku')->where(['sku'=>['in',$shelf_number]])->column('platform_sku');
+                    $map['a.sku'] = ['in', $sku_array];
                 }
                 unset($filter['shelf_number']);
             }
