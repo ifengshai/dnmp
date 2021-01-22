@@ -156,7 +156,7 @@ class LensPrice extends Backend
                     $fields[] = $val;
                 }
             }
-            if ($template != $fields) {
+            if ($template != array_filter($fields)) {
                 $this->error('模板不正确');
             }
 
