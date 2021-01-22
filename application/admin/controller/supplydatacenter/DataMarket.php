@@ -799,7 +799,9 @@ class DataMarket extends Backend
         $sql3 = $this->process->alias('p')->join('fa_order o','p.increment_id = o.increment_id')->field('(p.delivery_time-o.payment_time)/3600 AS total')->where($where)->where($map3)->group('p.order_id')->buildSql();
         $arr3 = $this->process->table([$sql3=>'t2'])->field('sum( IF ( total > 168, 1, 0) ) AS a,sum( IF ( total <= 168, 1, 0) ) AS b')->select();
         $timeout_count = $arr1[0]['a'] + $arr2[0]['a'] + $arr3[0]['a'];
-
+        dump($arr1);
+        dump($arr2);
+        dump($arr3);
 
         dump($timeout_count);die();
 
