@@ -28,14 +28,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'upload'], function (
                 // 表格1
                 var table1 = $("#table1");
                 table1.bootstrapTable({
-                    url: 'finance/finance_cost/table1',
+                    url: 'finance/finance_cost/income',
                     toolbar: '#toolbar1',
                     sortName: 'createtime',
                     columns: [
                         [
                             {checkbox: true, },
                             {field: 'id', title: 'ID',operate:false},
-                            {field: 'bill_type', title: __('关联单据类型'),custom: { 1: 'success', 2: 'success', 3: 'success', 4: 'danger', 5: 'danger', 6: 'danger' , 7: 'danger'}, searchList: { 1: '订单', 2: 'VIP订单', 3: '工单补差价', 4: '退货退款', 5: '订单取消',6:'部分退款' ,7:'Vip退款' ,8:'出库单出库'},formatter: Table.api.formatter.status},
+                            { field: 'bill_type', title: __('关联单据类型'), custom: { 1: 'danger', 2: 'success', 3: 'orange', 4: 'warning', 5: 'purple', 6: 'primary', 7: 'primary', 8: 'primary', 9: 'primary', 10: 'primary' }, searchList: { 1: '订单', 2: 'VIP订单', 3: '工单补差价', 4: '退货退款', 5: '订单取消', 6: '部分退款', 7: 'Vip退款', 8: '订单出库', 9: '出库单出库', 10: '冲减暂估' }, formatter: Table.api.formatter.status },
                             {field: 'order_number', title: '订单号'},
                             {
                                 field: 'site', title: __('站点'), addClass: 'selectpicker', data: 'multiple',
