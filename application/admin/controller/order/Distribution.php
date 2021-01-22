@@ -2137,7 +2137,7 @@ class Distribution extends Backend
                     $check_status = [4, 5, 6];
                     break;
                 case 2:
-                    $check_status = [3,4, 5, 6];
+                    $check_status = [4, 5, 6];
                     break;
                 case 3:
                     $check_status = [4, 5, 6];
