@@ -3,9 +3,17 @@
 namespace app\admin\controller\finance;
 
 use app\common\controller\Backend;
+use think\Db;
 
 class SettleOrder extends Backend
 {
+    public function _initialize()
+    {
+        $this->statementitem = new \app\admin\model\financepurchase\StatementItem;
+        $this->statement = new \app\admin\model\financepurchase\Statement;
+        $this->supplier = new \app\admin\model\purchase\Supplier;
+        return parent::_initialize();
+    }
     /*
     * 结算单列表
     * */
@@ -19,49 +27,77 @@ class SettleOrder extends Backend
                 return $this->selectpage();
             }
             $filter = json_decode($this->request->get('filter'), true);
-            $map['sku'] = ['<>', ''];
-            $map['library_status'] = 1;
-            if ($filter['sku']) {
-                $map['sku'] = $filter['sku'];
+            $map['wait_statement_total'] = ['<', 0];
+            $map['status'] = 4;
+            if ($filter['supplier_name']) {
+                 //供应商名称
+                $supply_id = Db::name('supplier')->where('supplier_name',$filter['supplier_name'])->value('id');
+                $map['supplier_id'] = $supply_id ? $supply_id : 0;
             }
-            unset($filter['sku']);
+            if ($filter['purchase_person']) {
+                //采购负责人
+                $supply_id = Db::name('supplier')->where('purchase_person',$filter['purchase_person'])->value('id');
+                $map['supplier_id'] = $supply_id ? $supply_id : 0;
+            }
+            unset($filter['supplier_name']);
+            unset($filter['purchase_person']);
             $this->request->get(['filter' => json_encode($filter)]);
+
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-            $total = $this->item
+
+            $total = $this->statement
                 ->where($where)
                 ->where($map)
-                ->group('sku')
                 ->order($sort, $order)
                 ->count();
-            $list = $this->item
+            $list = $this->statement
                 ->where($where)
                 ->where($map)
-                ->group('sku')
                 ->order($sort, $order)
                 ->limit($offset, $limit)
-                ->field('sku')
+                ->field('id,statement_number,supplier_id,wait_statement_total,account_statement,status,pay_type')
                 ->select();
             $list = collection($list)->toArray();
-            $i = 0;
-            foreach ($list as $key => $item) {
-                $i++;
-                $list[$key]['id'] = $i;
-                $prices = $this->item->alias('i')->join('fa_purchase_order_item p', 'p.purchase_id=i.purchase_id')->where('i.sku', $item['sku'])->where('i.library_status', 1)->field('i.id,purchase_price,actual_purchase_price')->select();
-                $amount = 0;
-                foreach ($prices as $price) {
-                    $amount += $price['actual_purchase_price'] != 0 ? $price['actual_purchase_price'] : $price['purchase_price'];
-                }
-                $list[$key]['total'] = $amount;
+            foreach ($list as $k=>$v){
+                $supply = $this->supplier->where('id',$v['supplier_id'])->field('supplier_name,purchase_person')->find();
+                $list[$k]['supplier_name'] = $supply['supplier_name'];
+                $list[$k]['purchase_person'] = $supply['purchase_person'];
             }
             $result = array("total" => $total, "rows" => $list);
             return json($result);
         }
+        return $this->view->fetch();
     }
     /*
      * 详情
      * */
-    public function detail()
+    public function detail($ids = null)
     {
+        $ids = input('ids');
+        if (!$ids) {
+            $this->error(__('No Results were found'));
+        }
+        //主表数据
+        $statement = $this->statement->where('id',$ids)->find();
+        $supply = $this->supplier->where('id',$statement['supplier_id'])->field('supplier_name,recipient_name,opening_bank,bank_account,currency')->find();
+        $items = $this->statementitem->where('statement_id',$ids)->select();
+        $this->view->assign(compact('statement', 'supply', 'items'));
         return $this->view->fetch();
+    }
+    /*
+     * 财务确认
+     * */
+    public function confirm(){
+        $ids = $this->request->post("ids/a");
+        if (!$ids) {
+            $this->error('缺少参数！！');
+        }
+        $map['id'] = ['in', $ids];
+        $row = $this->statement->where($map)->update(['status'=>6]);
+        if ($row !== false) {
+            $this->success('操作成功！！');
+        } else {
+            $this->error('操作失败！！');
+        }
     }
 }

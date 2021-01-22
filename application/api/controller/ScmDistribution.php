@@ -2346,7 +2346,7 @@ class ScmDistribution extends Scm
         if (1 == $check_status) {
             //审单触发收入核算
             $FinanceCost = new FinanceCost();
-            // $FinanceCost->order_income($order_id);
+            $FinanceCost->order_income($order_id);
 
             //计算出库成本 
             $FinanceCost->order_cost($order_id);
