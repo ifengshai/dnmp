@@ -816,6 +816,7 @@ class DataMarket extends Backend
         $arr3  = collection($arr3)->toArray();
         foreach ($arr1 as $key=>$value){
             $va = ($value['delivery_time'] - $value['payment_time'])/3600;
+            dump($va);die();
             if ($va<24){
                 unset($key);
             }
