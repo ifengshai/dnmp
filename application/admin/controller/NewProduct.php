@@ -2402,7 +2402,7 @@ class NewProduct extends Backend
                     if ($platformSkuExists) {
                         return false;
                     }
-
+                    $skuParams['platform_sku'] = $prefix . $value['SKU'];
                     $skuParams['platform_frame_is_rimless'] = '';
                     $skuParams['create_person'] = $value['创建人'];
                     $skuParams['create_time'] = date("Y-m-d H:i:s", time());
