@@ -801,16 +801,19 @@ class DataMarket extends Backend
             $va = ($item['delivery_time'] - $item['payment_time'])/3600;
             if ($item['order_prescription_type'] ==1){
                 if ($va < 24){
+                    echo 111;die();
                     unset($key);
                 }
             }
             if ($item['order_prescription_type'] ==2){
                 if ($va < 72){
+                    echo 222;die();
                     unset($key);
                 }
             }
             if ($item['order_prescription_type'] ==3){
                 if ($va < 168){
+                    echo 333;die();
                     unset($key);
                 }
             }
