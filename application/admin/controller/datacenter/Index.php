@@ -563,11 +563,10 @@ class Index extends Backend
         set_time_limit(0);
         ini_set('memory_limit', '512M');
 
-//        $map['b.created_at'] = ['between', [1606752000, 1609430399]];
+        $map['b.created_at'] = ['between', [1598889600, 1612108799]];
         $neworderprocess = new \app\admin\model\order\order\NewOrderProcess();
-        $undeliveredOrder = $neworderprocess->undeliveredOrder();
-        dump($undeliveredOrder);die();
-//        $undeliveredOrder = $neworderprocess->undeliveredOrderMessage($map);
+
+        $undeliveredOrder = $neworderprocess->undeliveredOrderMessage($map);
 
         $list = collection($undeliveredOrder)->toArray();
         $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
