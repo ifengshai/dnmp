@@ -2405,7 +2405,7 @@ class NewProduct extends Backend
      *
      */
     public function cat_import_data(){
-        $data = Db::table('Sheet1')->select();
+        $data = Db::table('Sheet3')->select();
         $list = collection($data)->toArray();
         Db::startTrans();
         try {
