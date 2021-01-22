@@ -159,7 +159,7 @@ class FinanceCost extends Model
      * @since 2021/01/19 16:31:21 
      * @return void
      */
-    public function order_cost($order_id = null, $type = 0)
+    public function order_cost($order_id = null)
     {
         $order = new \app\admin\model\order\order\NewOrder();
         $order_detail = $order->get($order_id);
@@ -167,7 +167,7 @@ class FinanceCost extends Model
             return [];
         }
         $params['type'] = 2;
-        $params['bill_type'] = $type;
+        $params['bill_type'] = 8;
         $params['order_number'] = $order_detail['increment_id'];
         $params['site'] = $order_detail['site'];
         $params['order_type'] = $order_detail['order_type'];
@@ -177,7 +177,7 @@ class FinanceCost extends Model
         $params['payment_time'] = $order_detail['payment_time'];
         $params['payment_method'] = $order_detail['payment_method'];
         $params['frame_cost'] = $this->order_frame_cost($order_id, $order_detail['increment_id']);
-        $params['lens_cost'] = $this->order_lens_cost($order_id);
+        $params['lens_cost'] = $this->order_lens_cost($order_id, $order_detail['increment_id']);
         $params['action_type'] = 1;
         $params['createtime'] = time();
         return $this->allowField(true)->save($params);
@@ -205,13 +205,13 @@ class FinanceCost extends Model
 
         //查询更改类型为赠品
         $goods_number = $worklist->alias('a')
-            ->join(['fa_work_order_change_sku' => 'b', 'a.id=b.work_id'])
+            ->join(['fa_work_order_change_sku' => 'b'], 'a.id=b.work_id')
             ->where(['platform_order' => $order_number, 'work_status' => 7, 'change_type' => 4])
-            ->column('goods_number');
+            ->column('b.goods_number');
         $workcost = 0;
         if ($goods_number) {
             //计算成本
-            $workdata = $product_barcode_item->field('purchase_price,actual_purchase_price')
+            $workdata = $product_barcode_item->alias('a')->field('purchase_price,actual_purchase_price')
                 ->where(['code' => ['in', $goods_number]])
                 ->join(['fa_purchase_order_item' => 'b'], 'a.purchase_id=b.purchase_id and a.sku=b.sku')
                 ->select();
@@ -221,7 +221,7 @@ class FinanceCost extends Model
         }
 
         //根据子单号查询条形码绑定关系
-        $list = $product_barcode_item->field('purchase_price,actual_purchase_price')
+        $list = $product_barcode_item->alias('a')->field('purchase_price,actual_purchase_price')
             ->where(['item_order_number' => ['in', $item_order_number]])
             ->join(['fa_purchase_order_item' => 'b'], 'a.purchase_id=b.purchase_id and a.sku=b.sku')
             ->select();
@@ -241,14 +241,49 @@ class FinanceCost extends Model
      * @since 2021/01/19 16:31:21 
      * @return void
      */
-    protected function order_lens_cost($order_id = null)
+    protected function order_lens_cost($order_id = null, $order_number = null)
     {
+
+        //判断是否有工单
+        $worklist = new \app\admin\model\saleaftermanage\WorkOrderList();
+
+        //查询更改类型为更改镜片
+        $work_data = $worklist->alias('a')->field('b.od_sph,b.os_sph,b.od_cyl,b.os_cyl,b.os_add,b.od_add,b.lens_number,b.item_order_number')
+            ->join(['fa_work_order_change_sku' => 'b'], 'a.id=b.work_id')
+            ->where(['platform_order' => $order_number, 'work_status' => 7, 'change_type' => 2])
+            ->select();
+        $work_data = collection($work_data)->toArray();
+        //工单计算镜片成本
+        if ($work_data) {
+            $where['item_order_number'] = ['not in', array_column($work_data, 'item_order_number')];
+            $lens_number = array_column($work_data, 'lens_number');
+            //查询镜片编码对应价格
+            $lens_price = new \app\admin\model\lens\LensPrice();
+            $lens_list = $lens_price->where(['lens_number' => ['in', $lens_number]])->select();
+            $work_cost = 0;
+            foreach ($work_data as $k => $v) {
+                foreach ($lens_list as $key => $val) {
+                    //右眼
+                    if ($v['lens_number'] == $val['lens_number'] && ((float) $v['od_sph'] >= (float) $val['sph_start'] && (float) $v['od_sph'] <= (float) $val['sph_end']) && ((float) $v['od_cyl'] >= (float) $val['cyl_start'] && (float) $v['od_cyl'] <= (float) $val['cyl_end'])) {
+                        $work_cost += $val['price'];
+                    }
+
+                    //左眼
+                    if ($v['lens_number'] == $val['lens_number'] && ((float) $v['os_sph'] >= (float) $val['sph_start'] && (float) $v['os_sph'] <= (float) $val['sph_end']) && ((float) $v['os_cyl'] >= (float) $val['cyl_start'] && (float) $v['os_cyl'] <= (float) $val['cyl_end'])) {
+                        $work_cost += $val['price'];
+                    }
+                }
+            }
+        }
+
         //查询处方数据
         $order_item_process = new \app\admin\model\order\order\NewOrderItemProcess();
         $order_prescription = $order_item_process->alias('a')->field('b.od_sph,b.os_sph,b.od_cyl,b.os_cyl,b.os_add,b.od_add,b.lens_number')
             ->where(['a.order_id' => $order_id, 'distribution_status' => 9])
+            ->where($where)
             ->join(['fa_order_item_option' => 'b'], 'a.option_id=b.id')
             ->select();
+
         $order_prescription = collection($order_prescription)->toArray();
         $lens_number = array_column($order_prescription, 'lens_number');
         //查询镜片编码对应价格
@@ -269,7 +304,7 @@ class FinanceCost extends Model
             }
         }
 
-        return $cost;
+        return $cost + $work_cost;
     }
 
     /**
@@ -283,7 +318,7 @@ class FinanceCost extends Model
     public function outstock_cost($out_stock_id = null, $out_stock_number = null)
     {
         $params['type'] = 2;
-        $params['bill_type'] = 8;
+        $params['bill_type'] = 9;
         $params['order_number'] = $out_stock_number;
         $params['frame_cost'] = $this->outstock_frame_cost($out_stock_id);
         $params['action_type'] = 1;

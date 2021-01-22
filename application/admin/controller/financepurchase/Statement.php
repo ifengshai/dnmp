@@ -2,7 +2,11 @@
 
 namespace app\admin\controller\financepurchase;
 
+use app\admin\model\financepurchase\StatementItem;
+use app\admin\model\itemmanage\ItemPlatformSku;
 use app\admin\model\purchase\PurchaseOrder;
+use app\admin\model\StockLog;
+use app\admin\model\warehouse\Instock;
 use app\api\controller\Ding;
 use app\common\controller\Backend;
 use think\Cache;
@@ -11,6 +15,7 @@ use think\Db;
 use think\Exception;
 use think\exception\PDOException;
 use think\exception\ValidateException;
+use think\Hook;
 use think\Request;
 
 class Statement extends Backend
@@ -25,13 +30,15 @@ class Statement extends Backend
         $this->model = new \app\admin\model\financepurchase\Statement();
         $this->purchase_order = new PurchaseOrder();
         $this->supplier = new \app\admin\model\purchase\Supplier;
+        $this->statement = new \app\admin\model\financepurchase\Statement();
+        $this->statement_detail = new StatementItem();
     }
 
     /**
      * 结算单列表
      * Created by Phpstorm.
      * User: jhh
-     * Date: 2021/1/15
+     * Date: 2021/1/20
      * Time: 11:11:07
      */
     public function index()
@@ -59,8 +66,15 @@ class Statement extends Backend
                 ->limit($offset, $limit)
                 ->select();
             $list = collection($list)->toArray();
-            foreach ($list as $k=>$v){
-                $list[$k]['supplier_name'] = $this->supplier->where('id',$v['supplier_id'])->value('supplier_name');
+            foreach ($list as $k => $v) {
+                $supplier = $this->supplier->where('id', $v['supplier_id'])->find();
+                $list[$k]['supplier_name'] = $supplier['supplier_name'];
+                if ($supplier['period'] == 0){
+                    $list[$k]['period'] = '无账期';
+                }else{
+                    $list[$k]['period'] = $supplier['period'].'个月';
+                }
+                $list[$k]['purchase_person'] = $supplier['purchase_person'];
             }
             $result = array("total" => $total, "rows" => $list);
             return json($result);
@@ -69,102 +83,63 @@ class Statement extends Backend
     }
 
     /**
-     * 添加采购付款生清单
-     * 有两个入口一个从采购列表过来 一个从当前页面添加
-     * 当前页面添加需要手动输入采购单号
+     * 添加结算单
+     * 有两个入口一个从结算单列表手动添加 一个从待结算列表页面添加
      * Created by Phpstorm.
      * User: jhh
-     * Date: 2021/1/13
+     * Date: 2021/1/20
      * Time: 19:03:09
      */
     public function add($ids = null)
     {
+        $ids = input('ids');
+        $supplier_id = input('supplier_id');
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
-            $reason = $this->request->post("reason/a");
+            $list = $this->request->post("list/a");
             if ($params) {
                 $params = $this->preExcludeFields($params);
-                // dump($params);die;
+                // dump($params);
+                // dump($list);
+                // die;
                 Db::startTrans();
                 try {
-                    //校验是否存在未完成的付款申请单
-                    if ($params['pay_type'] == 1 || $params['pay_type'] == 2){
-                        $finance_pirchase = $this->model->where('purchase_id',$params['purchase_id'])->where('status','in',[0,1,2])->find();
-                    }else{
-                        $finance_pirchase = $this->model->where('order_number',$params['order_number'])->where('status','in',[0,1,2])->find();
-                    }
-                    if (!empty($finance_pirchase)){
-                        $this->error('当前单号存在未完成的付款申请单，请检查后重试');
-                    }
-                    $insert['order_number'] = $params['order_number'];
-                    $insert['pay_type'] = $params['pay_type'];
-                    $insert['pay_rate'] = $params['pay_rate'];
-                    switch ($insert['pay_type']) {
-                        case 1:
-                            $pay_type = '预付款';
-                            break;
-                        case 2:
-                            $pay_type = '全款预付';
-                            break;
-                        case 3:
-                            $pay_type = '尾款';
-                            break;
-                    }
-                    $insert['status'] = $params['status'];
-                    $insert['purchase_id'] = $params['purchase_id'];
-                    $insert['supplier_id'] = $params['supplier_id'];
-                    $insert['order_number'] = $params['order_number'];
-                    $insert['pay_grand_total'] = $params['pay_grand_total'];
-                    $insert['base_currency_code'] = $params['base_currency_code'];
-                    $insert['create_time'] = time();
-                    $insert['create_person'] = session('admin.nickname');
-                    //采购单信息
-                    $purchase_order = $this->purchase_order->where('id',$insert['purchase_id'])->find();
-                    //提交审核 需要创建钉钉审批单
-                    if ($insert['status'] == 1) {
-                        $initiate_approval = new Ding();
-                        //当前用户信息
-                        $admin = Db::name('admin')->where('id',session('admin.id'))->find();
-                        // $arr['originator_user_id'] = $admin['userid'];
-                        // $arr['dept_id'] = $admin['department_id'];
-                        // //任萍 王涛 王剑
-                        // $arr['approvers'] = '1007304767660594,0221135665945008,0647044715938022';
-                        // //抄送 屈金金
-                        // $arr['cc_list'] = '204112301323897192';
-                        $arr['originator_user_id'] = '071829462027950349';
-                        $arr['dept_id'] = '143678442';
-                        $arr['approvers'] = '285501046927507550,0550643549844645,056737345633028055';
-                        $arr['cc_list'] = '071829462027950349';
+                    $statemet = [];
+                    $statemet['statement_number'] = $params['order_number'];
+                    $statemet['status'] = $params['status'];
+                    $statemet['pay_type'] = 1;
+                    $statemet['supplier_id'] = $params['supplier_id'];
+                    $statemet['base_currency_code'] = $params['base_currency_code'];
+                    $statemet['wait_statement_total'] = $params['product_total'];
+                    $statemet['create_time'] = time();
+                    $statemet['create_person'] = session('admin.nickname');
+                    $statemet_id = Db::name('finance_statement')->insertGetId($statemet);
 
-                        $arr['form_component_values'] = [
-                            ['name' => '采购方式', 'value' =>$purchase_order['purchase_type'] == 1 ? '线下采购' : '线上采购'],
-                            ['name' => '采购产品类型', 'value' => '镜框'],
-                            ['name' => '付款类型', 'value' => $pay_type],
-                            ['name' => '供应商名称', 'value' => $params['supplier_name']],
-                            ['name' => '币种', 'value' => $params['base_currency_code']],
-                            ['name' => '付款比例', 'value' => $params['pay_rate'] * 100 .'%'],
-                            ['name' => '采购事由', 'value' => [
-                                [
-                                    ['name' => '采购单号', 'value' => $params['purchase_number']],
-                                    ['name' => '采购品名', 'value' => '镜架'],
-                                    ['name' => '数量', 'value' => $reason['num']],
-                                    ['name' => '金额（元）', 'value' => $reason['money']]
-                                ]
-                            ]],
-                            ['name' => '付款总金额', 'value' => $params['pay_grand_total']],
-                            ['name' => '收款方名称', 'value' => $params['linkname']],
-                            ['name' => '收款方账户', 'value' => $params['bank_account']],
-                            ['name' => '收款方开户行', 'value' => $params['opening_bank_address']],
-                        ];
-                        // dump($arr);die;
-                        // $res = $initiate_approval->initiate_approval($arr);
-                        if ($res['errcode'] != 0) {
-                            throw new Exception('发起审批失败');
-                        }
+                    $arr = [];
+                    foreach ($list as $k => $v) {
+                        $arr[$k]['statement_id'] = $statemet_id;
+                        $arr[$k]['purchase_id'] = $v['purchase_id'];
+                        $arr[$k]['purchase_batch'] = $v['purchase_batch'];
+                        $arr[$k]['purchase_batch_id'] = $v['batch_id'];
+                        $arr[$k]['supplier_id'] = $params['supplier_id'];
+                        $arr[$k]['before_total'] = $v['wait_pay'];
+                        $arr[$k]['now_before_total'] = $v['now_wait_pay'];
+                        $arr[$k]['now_pay_total'] = $v['now_wait_pay'];
+                        $arr[$k]['wait_statement_total'] = $v['all_money'];
+                        $arr[$k]['freight'] = $v['purchase_freight'];
+                        $arr[$k]['instock_num'] = $v['quantity_num'];
+                        $arr[$k]['instock_total'] = $v['in_stock_money'];
+                        $arr[$k]['return_num'] = $v['unqualified_num'];
+                        $arr[$k]['return_total'] = $v['unqualified_num_money'];
+                        $arr[$k]['deduction_total'] = empty($v['kou_money']) ? 0 : $v['kou_money'];
+                        $arr[$k]['deduction_reason'] = $v['deduction_reason'];
+                        $arr[$k]['arrival_num'] = $v['arrival_num'];
+                        $arr[$k]['pay_type'] = $v['pay_type'];
+                        $arr[$k]['purchase_name'] = $v['purchase_name'];
+                        $arr[$k]['period'] = $v['period'];
+                        $arr[$k]['purchase_number'] = $v['purchase_number'];
                     }
-                    $insert['process_instance_id'] = $res['process_instance_id'];
-                    // dump($insert);die;
-                    Db::name('finance_purchase')->insertGetId($insert);
+                    Db::name('finance_statement_item')->insertAll($arr);
                     Db::commit();
                 } catch (ValidateException $e) {
                     Db::rollback();
@@ -181,14 +156,116 @@ class Statement extends Backend
             }
             $this->success('添加成功！！', url('PurchasePay/index'));
         }
+        $instock = new Instock();
+        $supplier_id = 1;
+        //供应商详细信息
+        $supplier = Db::name('supplier')->where('id', $supplier_id)->find();
+        $list = $instock
+            ->alias('a')
+            ->join('check_order b', 'a.check_id = b.id', 'left')
+            ->join('check_order_item f', 'f.check_id = b.id')
+            ->join('purchase_order c', 'b.purchase_id = c.id', 'left')
+            ->join('purchase_order_item d', 'd.purchase_id = c.id')
+            ->join('in_stock_item e', 'a.id = e.in_stock_id')
+            ->where('b.supplier_id', $supplier_id)
+            ->where('a.id', 'in', $ids)
+            ->where('a.status', 2)//已审核通过的入库单
+            ->field('c.purchase_number,a.id,d.purchase_price,c.purchase_freight,f.quantity_num,a.in_stock_number,b.check_order_number,b.purchase_id,b.batch_id,c.purchase_name,c.pay_type,e.in_stock_num,f.arrivals_num,f.quantity_num,f.unqualified_num')
+            ->select();
+        $all = 0;
+        foreach ($list as $k => $v) {
+            //批次 第几批的
+            $list[$k]['purchase_batch'] = Db::name('purchase_batch')->where('id', $v['batch_id'])->value('batch');
+            //入库金额 质检合格数量*采购单价
+            $list[$k]['in_stock_money'] = number_format($v['purchase_price'] * $v['quantity_num'], 2, '.', '');
+            //退货金额 质检不合格数量*采购单价
+            $list[$k]['unqualified_num_money'] = number_format($v['purchase_price'] * $v['unqualified_num'], 2, '.', '');
+            //预付金额 已支付预付金额
+            $list[$k]['wait_pay'] = Db::name('finance_purchase')->where('purchase_id', $v['purchase_id'])->value('pay_grand_total');
+            $list[$k]['now_wait_pay'] = $list[$k]['wait_pay'];
+            $data = [];
+            $map = [];
+            if ($v['batch_id'] == 0) {
+                $map['purchase_id'] = ['=', $v['purchase_id']];
+                //采购数量无批次 应该是采购单数量
+                $list[$k]['arrival_num'] = Db::name('purchase_order_item')->where('purchase_id', $v['purchase_id'])->value('purchase_num');
+                switch ($v['pay_type']) {
+                    case 1:
+                        //无批次预付款 待结算金额公式=入库金额+运费-已支付预付金额
+                        $list[$k]['all_money'] = $list[$k]['in_stock_money'] + $v['purchase_freight'] - $list[$k]['now_wait_pay'];
+                        break;
+                    case 2:
+                        //无批次全款预付 待结算金额 = 入库金额 - 已支付预付金额
+                        $list[$k]['all_money'] = $list[$k]['in_stock_money'] + $v['purchase_freight'] - $list[$k]['now_wait_pay'];
+                        break;
+                    default:
+                        //货到付款的 待结算金额 = 入库金额 + 运费
+                        $list[$k]['all_money'] = $list[$k]['in_stock_money'] + $v['purchase_freight'];
+                }
+            } else {
+                $map['purchase_id'] = ['=', $v['purchase_id']];
+                $map['batch_id'] = ['=', $v['batch_id']];
+                //采购数量有批次 应该是采购批次的数量
+                $list[$k]['arrival_num'] = Db::name('purchase_batch_item')->where('purchase_batch_id', $v['batch_id'])->value('arrival_num');
+                //采购批次是第一批 待结算金额 = 采购批次入库数量*采购单价-预付款金额
+                if ($list[$k]['purchase_batch'] == 1) {
+                    $list[$k]['all_money'] = $list[$k]['in_stock_money'] - $list[$k]['now_wait_pay'];
+                } else {
+                    //不是第一批 批次待结算金额=采购批次入库数量*采购单价
+                    $list[$k]['all_money'] = $list[$k]['in_stock_money'];
+                }
+            }
+            //采购单物流单详情
+            $row = Db::name('logistics_info')->where($map)->field('logistics_number,logistics_company_no')->find();
+            //物流单快递100接口
+            if ($row['logistics_number']) {
+                $arr = explode(',', $row['logistics_number']);
+                //物流公司编码
+                $company = explode(',', $row['logistics_company_no']);
+                foreach ($arr as $kk => $vv) {
+                    try {
+                        //快递单号
+                        $param['express_id'] = trim($vv);
+                        $param['code'] = trim($company[$kk]);
+                        $data[$kk] = Hook::listen('express_query', $param)[0];
+                    } catch (\Exception $e) {
+                        $this->error($e->getMessage());
+                    }
+                }
+            }
+            //拿物流单接口返回的倒数第二条数据的时间作为揽件的时间 并且加一个月后的月底作为当前采购单批次的 结算周期
+            if (!empty($data[0])) {
+                $list[$k]['period'] = date("Y-m-t", strtotime($data[0]['data'][count($data[0]['data']) - 2]['time'] . '+' . $supplier['period'] . 'month'));
+            } else {
+                $list[$k]['period'] = '获取不到物流单详情';
+            }
+            switch ($v['pay_type']) {
+                case 1:
+                    $list[$k]['pay_type'] = '预付款';
+                    break;
+                case 2:
+                    $list[$k]['pay_type'] = '全款预付';
+                    break;
+                case 3:
+                    $list[$k]['pay_type'] = '尾款';
+                    break;
+            }
+            $all += $list[$k]['all_money'];
+        }
+        $supplier['period'] = $supplier['period'] == 0 ? '无账期' : $supplier['period'] . '个月';
+        $this->assignconfig('supplier_id', $ids);
+        $this->assign('supplier', $supplier);
+        $this->assign('list', $list);
+        $this->assign('all', $all);
         //生成结算单号
         $order_number = 'JS' . date('YmdHis') . rand(100, 999) . rand(100, 999);
         $this->assign('order_number', $order_number);
+        $this->assignconfig('ids', $ids);
         return $this->view->fetch();
     }
 
     /**
-     * 编辑采购付款申请单
+     * 编辑结算单
      * Created by Phpstorm.
      * User: jhh
      * Date: 2021/1/13
@@ -202,16 +279,16 @@ class Statement extends Backend
         }
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
+            $list = $this->request->post("list/a");
             if ($params) {
                 $params = $this->preExcludeFields($params);
-                $result = false;
                 Db::startTrans();
                 try {
-                    $update['status'] = $params['status'];
-                    $update['pay_type'] = $params['pay_type'];
-                    $update['pay_rate'] = $params['pay_rate'];
-                    $update['pay_grand_total'] = $params['pay_grand_total'];
-                    $result = Db::name('finance_purchase')->where('order_number',$params['order_number'])->update($update);
+                    //更新主表待结算总金额
+                    Db::name('finance_statement')->where('id', $ids)->update(['wait_statement_total' => $params['product_total'], 'status' => $params['status']]);
+                    foreach ($list as $k => $v) {
+                        Db::name('finance_statement_item')->where('id', $v['in_stock_id'])->update(['deduction_total' => $v['kou_money'], 'deduction_reason' => $v['deduction_reason']]);
+                    }
                     Db::commit();
                 } catch (ValidateException $e) {
                     Db::rollback();
@@ -223,49 +300,40 @@ class Statement extends Backend
                     Db::rollback();
                     $this->error($e->getMessage());
                 }
-                if ($result !== false) {
-                    $this->success();
-                } else {
-                    $this->error(__('No rows were updated'));
-                }
+            } else {
+                $this->error(__('Parameter %s can not be empty', ''));
             }
-            $this->error(__('Parameter %s can not be empty', ''));
+            $this->success('提交成功！！', url('PurchasePay/index'));
+
         }
-        $purchase_order = $this->purchase_order->where('id', $row['purchase_id'])->find();
-        $purchase_order['purchase_type'] = $purchase_order['purchase_type'] == 1 ? '线下采购' : '线上采购';
-        $puchase_detail = Db::name('purchase_order_item')->where('purchase_id', $purchase_order['id'])->find();
-        //查询采购单对应的供应商信息
-        $data = $this->supplier->where('id', $purchase_order['supplier_id'])->find();
-        switch ($data['period']) {
-            case 1:
-                $data['period'] = '1个月';
-                break;
-            case 2:
-                $data['period'] = '2个月';
-                break;
-            case 3:
-                $data['period'] = '3个月';
-                break;
+        $supplier_id = $row['supplier_id'];
+        $supplier_id = 1;
+        //供应商详细信息
+        $supplier = Db::name('supplier')->where('id', $supplier_id)->find();
+        $supplier['period'] = $supplier['period'] == 0 ? '无账期' : $supplier['period'] . '个月';
+        $list = Db::name('finance_statement_item')->where('statement_id', $row['id'])->select();
+        foreach ($list as $k => $v) {
+            switch ($v['pay_type']) {
+                case 1:
+                    $list[$k]['pay_type'] = '预付款';
+                    break;
+                case 2:
+                    $list[$k]['pay_type'] = '全款预付';
+                    break;
+                case 3:
+                    $list[$k]['pay_type'] = '尾款';
+                    break;
+            }
         }
-        switch ($data['currency']) {
-            case 1:
-                $data['currency'] = '人民币';
-                break;
-            case 2:
-                $data['currency'] = '美元';
-                break;
-        }
-        $this->assign('purchase_order', $purchase_order);
-        $this->assign('purchase_detail', $puchase_detail);
-        $this->assign('order_number', $row['order_number']);
-        $this->assign('supplier', $data);
+        // dump($list);
+        $this->assign('supplier', $supplier);
+        $this->assign('list', $list);
         $this->assign('row', $row);
-        $this->view->assign("row", $row);
         return $this->view->fetch();
     }
 
     /**
-     * 采购付款申请单详情
+     * 结算单详情
      * Created by Phpstorm.
      * User: jhh
      * Date: 2021/1/13
@@ -277,86 +345,227 @@ class Statement extends Backend
         if (!$row) {
             $this->error(__('No Results were found'));
         }
-        $purchase_order = $this->purchase_order->where('id', $row['purchase_id'])->find();
-        $purchase_order['purchase_type'] = $purchase_order['purchase_type'] == 1 ? '线下采购' : '线上采购';
-        $puchase_detail = Db::name('purchase_order_item')->where('purchase_id', $purchase_order['id'])->find();
-        //查询采购单对应的供应商信息
-        $data = $this->supplier->where('id', $purchase_order['supplier_id'])->find();
-        switch ($data['period']) {
-            case 1:
-                $data['period'] = '1个月';
-                break;
-            case 2:
-                $data['period'] = '2个月';
-                break;
-            case 3:
-                $data['period'] = '3个月';
-                break;
+        if ($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+            $list = $this->request->post("list/a");
+            if ($params) {
+                $params = $this->preExcludeFields($params);
+                Db::startTrans();
+                try {
+                    //更新主表待结算总金额
+                    Db::name('finance_statement')->where('id', $ids)->update(['wait_statement_total' => $params['product_total'], 'status' => $params['status']]);
+                    foreach ($list as $k => $v) {
+                        Db::name('finance_statement_item')->where('id', $v['in_stock_id'])->update(['deduction_total' => $v['kou_money'], 'deduction_reason' => $v['deduction_reason']]);
+                    }
+                    Db::commit();
+                } catch (ValidateException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (PDOException $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                } catch (Exception $e) {
+                    Db::rollback();
+                    $this->error($e->getMessage());
+                }
+            } else {
+                $this->error(__('Parameter %s can not be empty', ''));
+            }
+            $this->success('提交成功！！', url('PurchasePay/index'));
+
         }
-        switch ($data['currency']) {
-            case 1:
-                $data['currency'] = '人民币';
-                break;
-            case 2:
-                $data['currency'] = '美元';
-                break;
+        $supplier_id = $row['supplier_id'];
+        $supplier_id = 1;
+        //供应商详细信息
+        $supplier = Db::name('supplier')->where('id', $supplier_id)->find();
+        $supplier['period'] = $supplier['period'] == 0 ? '无账期' : $supplier['period'] . '个月';
+        $list = Db::name('finance_statement_item')->where('statement_id', $row['id'])->select();
+        foreach ($list as $k => $v) {
+            switch ($v['pay_type']) {
+                case 1:
+                    $list[$k]['pay_type'] = '预付款';
+                    break;
+                case 2:
+                    $list[$k]['pay_type'] = '全款预付';
+                    break;
+                case 3:
+                    $list[$k]['pay_type'] = '尾款';
+                    break;
+            }
         }
-        $this->assign('purchase_order', $purchase_order);
-        $this->assign('purchase_detail', $puchase_detail);
-        $this->assign('order_number', $row['order_number']);
-        $this->assign('supplier', $data);
+        // dump($list);
+        $this->assign('supplier', $supplier);
+        $this->assign('list', $list);
         $this->assign('row', $row);
-        $this->view->assign("row", $row);
         return $this->view->fetch();
     }
 
-    /**
-     * 添加页面获取采购单 供应商各种信息
-     * Created by Phpstorm.
-     * User: jhh
-     * Date: 2021/1/14
-     * Time: 17:24:43
-     */
-    public function getPurchaseDetail()
+    //审核
+    public function setStatus()
     {
-        //采购单页面过来的创建付款申请单
-        $ids = input('purchase_number');
-        $pay_type = input('pay_type');
-        //选择尾款付款类型 关联结算单
-        if ($pay_type == 3) {
-
-        } else {//选择预付款或者全款预付 关联采购单
-            $purchase_order = $this->purchase_order->where('purchase_number', $ids)->find();
-            if (!$purchase_order) {
-                $this->error('请输入正确的采购单号！！');
-            }
-            $purchase_order['purchase_type'] = $purchase_order['purchase_type'] == 1 ? '线下采购' : '线上采购';
-            $puchase_detail = Db::name('purchase_order_item')->where('purchase_id', $purchase_order['id'])->find();
-            //查询采购单对应的供应商信息
-            $data = $this->supplier->where('id', $purchase_order['supplier_id'])->find();
-            switch ($data['period']) {
-                case 1:
-                    $data['period'] = '1个月';
-                    break;
-                case 2:
-                    $data['period'] = '2个月';
-                    break;
-                case 3:
-                    $data['period'] = '3个月';
-                    break;
-            }
-            switch ($data['currency']) {
-                case 1:
-                    $data['currency'] = '人民币';
-                    break;
-                case 2:
-                    $data['currency'] = '美元';
-                    break;
-            }
-            $data1['purchase_order'] = $purchase_order;
-            $data1['purchase_detail'] = $puchase_detail;
-            $data1['data'] = $data;
+        $ids = $this->request->post("ids/a");
+        $status = $this->request->post("status");
+        // dump($ids);
+        // dump($status);die;
+        if (!$ids) {
+            $this->error('缺少参数！！');
         }
-        $this->success('', '', $data1);
+        $map['id'] = ['in', $ids];
+        $row = $this->model->where($map)->select();
+        foreach ($row as $v) {
+            if ($v['status'] !== 1) {
+                $this->error('只有待审核状态才能操作！！');
+            }
+        }
+        Db::startTrans();
+        try {
+            //更新主表状态
+            Db::name('finance_statement')->where('id', 'in', $ids)->update(['status' => $status]);
+
+            Db::commit();
+        } catch (ValidateException $e) {
+            Db::rollback();
+            $this->error($e->getMessage());
+        } catch (PDOException $e) {
+            Db::rollback();
+            $this->error($e->getMessage());
+        } catch (Exception $e) {
+            Db::rollback();
+            $this->error($e->getMessage());
+        }
+        $this->success();
+    }
+
+    //对账
+    public function setStatuss()
+    {
+        $ids = $this->request->post("ids/a");
+        if (!$ids) {
+            $this->error('缺少参数！！');
+        }
+        $map['id'] = ['in', $ids];
+        $row = $this->model->where($map)->select();
+        foreach ($row as $v) {
+            if ($v['status'] !== 3) {
+                $this->error('只有待对账状态才能操作！！');
+            }
+        }
+        Db::startTrans();
+        try {
+            foreach ($row as $v) {
+                if ($v['wait_statement_total'] > 0) {
+                    $status = 6;
+                } else {
+                    $status = 4;
+                }
+                //更新主表状态
+                Db::name('finance_statement')->where('id', $v['id'])->update(['status' => $status]);
+            }
+
+            Db::commit();
+        } catch (ValidateException $e) {
+            Db::rollback();
+            $this->error($e->getMessage());
+        } catch (PDOException $e) {
+            Db::rollback();
+            $this->error($e->getMessage());
+        } catch (Exception $e) {
+            Db::rollback();
+            $this->error($e->getMessage());
+        }
+        $this->success();
+    }
+
+    //创建结算单中间采购批次信息表
+    public function table1()
+    {
+        $ids = input('ids');
+        //设置过滤方法
+        $this->request->filter(['strip_tags']);
+        if ($this->request->isAjax()) {
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
+            }
+            $instock = new Instock();
+            $supplier_id = 1;
+            //供应商详细信息
+            $supplier = Db::name('supplier')->where('id', $supplier_id)->field('period,currency')->find();
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $total = $instock
+                ->alias('a')
+                ->join('check_order b', 'a.check_id = b.id', 'left')
+                ->join('check_order_item f', 'f.check_id = b.id')
+                ->join('purchase_order c', 'b.purchase_id = c.id', 'left')
+                ->join('purchase_order_item d', 'd.purchase_id = c.id')
+                ->join('in_stock_item e', 'a.id = e.in_stock_id')
+                ->where('b.supplier_id', $supplier_id)
+                ->where('a.id', 'in', $ids)
+                ->where('a.status', 2)//已审核通过的入库单
+                ->count();
+            $list = $instock
+                ->alias('a')
+                ->join('check_order b', 'a.check_id = b.id', 'left')
+                ->join('check_order_item f', 'f.check_id = b.id')
+                ->join('purchase_order c', 'b.purchase_id = c.id', 'left')
+                ->join('purchase_order_item d', 'd.purchase_id = c.id')
+                ->join('in_stock_item e', 'a.id = e.in_stock_id')
+                ->where('b.supplier_id', $supplier_id)
+                ->where('a.id', 'in', $ids)
+                ->where('a.status', 2)//已审核通过的入库单
+                ->field('c.purchase_number,a.id,d.purchase_price,f.quantity_num,a.in_stock_number,b.check_order_number,b.purchase_id,b.batch_id,c.purchase_name,c.pay_type,e.in_stock_num,f.arrivals_num,f.quantity_num,f.unqualified_num')
+                ->select();
+            foreach ($list as $k => $v) {
+                //批次 第几批的
+                $list[$k]['purchase_batch'] = Db::name('purchase_batch')->where('id', $v['batch_id'])->value('batch');
+                //入库金额 质检合格数量*采购单价
+                $list[$k]['in_stock_money'] = number_format($v['purchase_price'] * $v['quantity_num'], 2, '.', '');
+                //退货金额 质检不合格数量*采购单价
+                $list[$k]['unqualified_num_money'] = number_format($v['purchase_price'] * $v['unqualified_num'], 2, '.', '');
+                //预付金额 已支付预付金额
+                $list[$k]['wait_pay'] = Db::name('finance_purchase')->where('purchase_id', $v['purchase_id'])->value('pay_grand_total');
+                $list[$k]['now_wait_pay'] = $list[$k]['wait_pay'];
+                $data = [];
+                $map = [];
+                if ($v['batch_id'] == 0) {
+                    $map['purchase_id'] = ['=', $v['purchase_id']];
+                    //采购数量无批次 应该是采购单数量
+                    $list[$k]['arrival_num'] = Db::name('purchase_order_item')->where('purchase_id', $v['purchase_id'])->value('purchase_num');
+                } else {
+                    $map['purchase_id'] = ['=', $v['purchase_id']];
+                    $map['batch_id'] = ['=', $v['batch_id']];
+                    //采购数量有批次 应该是采购批次的数量
+                    $list[$k]['arrival_num'] = Db::name('purchase_batch_item')->where('purchase_batch_id', $v['batch_id'])->value('arrival_num');
+                }
+                //采购单物流单详情
+                $row = Db::name('logistics_info')->where($map)->field('logistics_number,logistics_company_no')->find();
+                //物流单快递100接口
+                if ($row['logistics_number']) {
+                    $arr = explode(',', $row['logistics_number']);
+                    //物流公司编码
+                    $company = explode(',', $row['logistics_company_no']);
+                    foreach ($arr as $kk => $vv) {
+                        try {
+                            //快递单号
+                            $param['express_id'] = trim($vv);
+                            $param['code'] = trim($company[$kk]);
+                            $data[$kk] = Hook::listen('express_query', $param)[0];
+                        } catch (\Exception $e) {
+                            $this->error($e->getMessage());
+                        }
+                    }
+                }
+                //拿物流单接口返回的倒数第二条数据的时间作为揽件的时间 并且加一个月后的月底作为当前采购单批次的 结算周期
+                if (!empty($data[0])) {
+                    $list[$k]['period'] = date("Y-m-t", strtotime($data[0]['data'][count($data[0]['data']) - 2]['time'] . '+' . $supplier['period'] . 'month'));
+                } else {
+                    $list[$k]['period'] = '获取不到物流单详情';
+                }
+            }
+            $result = array("total" => $total, "rows" => $list);
+
+            return json($result);
+        }
+        return $this->view->fetch('index');
     }
 }
