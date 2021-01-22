@@ -2432,6 +2432,7 @@ class NewProduct extends Backend
                     $itemAttribute['attribute_type'] = 3;
                     $itemAttribute['accessory_texture'] = $value['材质'];
                     $itemAttribute['accessory_color'] = $value['商品颜色'];
+                    $itemAttribute['frame_size'] = $value['尺寸'];
                     //添加商品属性表
                     $res = Db::name('new_product_attribute')->insert($itemAttribute);
                     if (!$res) {
@@ -2457,7 +2458,7 @@ class NewProduct extends Backend
                     Db::name('supplier_sku')->insert($supplier_data);
 
                     //添加对应平台映射关系
-                    $skuParams['platform_type'] = 12;
+                    $skuParams['platform_type'] = 4;
                     $skuParams['sku'] = $value['SKU'];
                     $skuParams['platform_sku'] = $value['SKU'];
                     $skuParams['name'] = $value['商品名称'];
@@ -2478,9 +2479,9 @@ class NewProduct extends Backend
                     if ($platformSkuExists) {
                         return false;
                     }
-                    $skuParams['platform_sku'] = $prefix . $skuParams['sku'];
+                    $skuParams['platform_sku'] = $prefix . $value['SKU'];
                     $skuParams['platform_frame_is_rimless'] = '';
-                    $skuParams['create_person'] = session('admin.nickname') ? session('admin.nickname') : 'Admin';
+                    $skuParams['create_person'] = $value['创建人'];
                     $skuParams['create_time'] = date("Y-m-d H:i:s", time());
                     //添加stock库商品表信息
                     $Stock =  Db::connect('database.db_stock');
@@ -2490,7 +2491,7 @@ class NewProduct extends Backend
                     unset($add['supplier_id']);
                     unset($add['supplier_sku']);
 
-                    $Stock->table('fa_item')->insert($add);
+//                    $Stock->table('fa_item')->insert($add);
                     unset($add);
                     $itemAttribute['frame_texture'] = 0;
                     $Stock->table('fa_item_attribute')->insert($itemAttribute);
