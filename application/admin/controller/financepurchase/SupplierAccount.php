@@ -50,19 +50,134 @@ class SupplierAccount extends Backend
                 ->where($map)
                 ->order($sort, $order)
                 ->count();
-            $list = $this->supplier
+            $lists = $this->supplier
                 ->where($where)
                 ->where($map)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
-            $list = collection($list)->toArray();
-            foreach ($list as $k => $v) {
-                $list[$k]['now_wait_total'] = 1;
-                $list[$k]['all_wait_total'] = 1;
-                $list[$k]['statement_status'] = 1;
+            $lists = collection($lists)->toArray();
+            foreach ($lists as $kkk => $vv) {
+                $instock = new Instock();
+                $supplier_id = 1;
+                $supplier_id = $vv['id'];
+                //供应商详细信息
+                $supplier = Db::name('supplier')->where('id', $supplier_id)->find();
+                $list = $instock
+                    ->alias('a')
+                    ->join('check_order b', 'a.check_id = b.id', 'left')
+                    ->join('check_order_item f', 'f.check_id = b.id')
+                    ->join('purchase_order c', 'b.purchase_id = c.id', 'left')
+                    ->join('purchase_order_item d', 'd.purchase_id = c.id')
+                    ->join('in_stock_item e', 'a.id = e.in_stock_id')
+                    ->where('b.supplier_id', $supplier_id)
+                    // ->where('a.id', 'in', $ids)
+                    ->where('a.status', 2)//已审核通过的入库单
+                    ->field('c.purchase_number,a.id,d.purchase_price,c.purchase_freight,f.quantity_num,a.in_stock_number,b.check_order_number,b.purchase_id,b.batch_id,c.purchase_name,c.pay_type,e.in_stock_num,f.arrivals_num,f.quantity_num,f.unqualified_num')
+                    ->select();
+                $wait_pay_money = 0;
+                $now = date('Y-m-t', time());
+                $all = 0;
+                foreach ($list as $k => $v) {
+                    //批次 第几批的
+                    $list[$k]['purchase_batch'] = Db::name('purchase_batch')->where('id', $v['batch_id'])->value('batch');
+                    //入库金额 质检合格数量*采购单价
+                    $list[$k]['in_stock_money'] = number_format($v['purchase_price'] * $v['quantity_num'], 2, '.', '');
+                    //退货金额 质检不合格数量*采购单价
+                    $list[$k]['unqualified_num_money'] = number_format($v['purchase_price'] * $v['unqualified_num'], 2, '.', '');
+                    //预付金额 已支付预付金额
+                    $list[$k]['wait_pay'] = Db::name('finance_purchase')->where('purchase_id', $v['purchase_id'])->value('pay_grand_total');
+                    $list[$k]['now_wait_pay'] = $list[$k]['wait_pay'];
+                    $data = [];
+                    $map = [];
+                    if ($v['batch_id'] == 0) {
+                        $map['purchase_id'] = ['=', $v['purchase_id']];
+                        //采购数量无批次 应该是采购单数量
+                        $list[$k]['arrival_num'] = Db::name('purchase_order_item')->where('purchase_id', $v['purchase_id'])->value('purchase_num');
+                        switch ($v['pay_type']) {
+                            case 1:
+                                //无批次预付款 待结算金额公式=入库金额 +运费-已支付预付金额
+                                $list[$k]['all_money'] = $list[$k]['in_stock_money'] + $v['purchase_freight'] - $list[$k]['now_wait_pay'];
+                                break;
+                            case 2:
+                                //无批次全款预付 待结算金额 = 入库金额 +运费 - 已支付预付金额
+                                $list[$k]['all_money'] = $list[$k]['in_stock_money'] + $v['purchase_freight'] - $list[$k]['now_wait_pay'];
+                                break;
+                            default:
+                                //货到付款的 待结算金额 = 入库金额 + 运费
+                                $list[$k]['all_money'] = $list[$k]['in_stock_money'] + $v['purchase_freight'];
+                        }
+                    } else {
+                        $map['purchase_id'] = ['=', $v['purchase_id']];
+                        $map['batch_id'] = ['=', $v['batch_id']];
+                        //采购数量有批次 应该是采购批次的数量
+                        $list[$k]['arrival_num'] = Db::name('purchase_batch_item')->where('purchase_batch_id', $v['batch_id'])->value('arrival_num');
+                        //采购批次是第一批 待结算金额 = 采购批次入库数量*采购单价-预付款金额
+                        if ($list[$k]['purchase_batch'] == 1) {
+                            $list[$k]['all_money'] = $list[$k]['in_stock_money'] - $list[$k]['now_wait_pay'];
+                        } else {
+                            //不是第一批 批次待结算金额 = 采购批次入库数量*采购单价
+                            $list[$k]['all_money'] = $list[$k]['in_stock_money'];
+                        }
+                    }
+                    //采购单物流单详情
+                    $row = Db::name('logistics_info')->where($map)->field('logistics_number,logistics_company_no')->find();
+                    //物流单快递100接口
+                    if ($row['logistics_number']) {
+                        $arr = explode(',', $row['logistics_number']);
+                        //物流公司编码
+                        $company = explode(',', $row['logistics_company_no']);
+                        foreach ($arr as $kk => $vv) {
+                            try {
+                                //快递单号
+                                $param['express_id'] = trim($vv);
+                                $param['code'] = trim($company[$kk]);
+                                $data[$kk] = Hook::listen('express_query', $param)[0];
+                            } catch (\Exception $e) {
+                                $this->error($e->getMessage());
+                            }
+                        }
+                    }
+                    if (!empty($data[0]['data'])){
+                        //拿物流单接口返回的倒数第二条数据的时间作为揽件的时间 并且加一个月后的月底作为当前采购单批次的 结算周期
+                        if (!empty(strtotime(array_slice($data[0]['data'],-1,1)[0]['time']))) {
+                            $list[$k]['period'] = date("Y-m-t", strtotime(array_slice($data[0]['data'],-1,1)[0]['time'] . '+' . $supplier['period'] . 'month'));
+                        } else {
+                            $list[$k]['period'] = '获取不到物流单详情';
+                        }
+                    }else{
+                        $list[$k]['period'] = '获取不到物流单详情';
+                    }
+
+                    switch ($v['pay_type']) {
+                        case 1:
+                            $list[$k]['pay_type'] = '预付款';
+                            break;
+                        case 2:
+                            $list[$k]['pay_type'] = '全款预付';
+                            break;
+                        case 3:
+                            $list[$k]['pay_type'] = '尾款';
+                            break;
+                    }
+                    //所有的待结算的总和是所有的待结算
+                    $all += $list[$k]['all_money'];
+                    if ($list[$k]['period'] <= $now){
+                        //结算账期是本月底的算入本期待结算
+                        $wait_pay_money += $list[$k]['all_money'];
+                    }
+                }
+                $lists[$kkk]['now_wait_total'] = $wait_pay_money;
+                $lists[$kkk]['all_wait_total'] = $all;
+                if ($wait_pay_money == 0){
+                    $lists[$kkk]['statement_status'] = 0;
+                }else{
+                    $lists[$kkk]['statement_status'] = 1;
+                }
+
             }
-            $result = array("total" => $total, "rows" => $list);
+            // dump($lists);die;
+            $result = array("total" => $total, "rows" => $lists);
             return json($result);
         }
         return $this->view->fetch();
@@ -119,8 +234,114 @@ class SupplierAccount extends Backend
         $ids = input('ids');
         $supplier = Db::name('supplier')->where('id', $ids)->find();
         $supplier['period'] = $supplier['period'] == 0 ? '无账期':$supplier['period'] . '个月';
+        $instock = new Instock();
+        $supplier_id = 1;
+        //供应商详细信息
+        $supplier = Db::name('supplier')->where('id', $supplier_id)->find();
+        $list = $instock
+            ->alias('a')
+            ->join('check_order b', 'a.check_id = b.id', 'left')
+            ->join('check_order_item f', 'f.check_id = b.id')
+            ->join('purchase_order c', 'b.purchase_id = c.id', 'left')
+            ->join('purchase_order_item d', 'd.purchase_id = c.id')
+            ->join('in_stock_item e', 'a.id = e.in_stock_id')
+            ->where('b.supplier_id', $supplier_id)
+            // ->where('a.id', 'in', $ids)
+            ->where('a.status', 2)//已审核通过的入库单
+            ->field('c.purchase_number,a.id,d.purchase_price,c.purchase_freight,f.quantity_num,a.in_stock_number,b.check_order_number,b.purchase_id,b.batch_id,c.purchase_name,c.pay_type,e.in_stock_num,f.arrivals_num,f.quantity_num,f.unqualified_num')
+            ->select();
+        $wait_pay_money = 0;
+        $now = date('Y-m-t', time());
+        $all = 0;
+        foreach ($list as $k => $v) {
+            //批次 第几批的
+            $list[$k]['purchase_batch'] = Db::name('purchase_batch')->where('id', $v['batch_id'])->value('batch');
+            //入库金额 质检合格数量*采购单价
+            $list[$k]['in_stock_money'] = number_format($v['purchase_price'] * $v['quantity_num'], 2, '.', '');
+            //退货金额 质检不合格数量*采购单价
+            $list[$k]['unqualified_num_money'] = number_format($v['purchase_price'] * $v['unqualified_num'], 2, '.', '');
+            //预付金额 已支付预付金额
+            $list[$k]['wait_pay'] = Db::name('finance_purchase')->where('purchase_id', $v['purchase_id'])->value('pay_grand_total');
+            $list[$k]['now_wait_pay'] = $list[$k]['wait_pay'];
+            $data = [];
+            $map = [];
+            if ($v['batch_id'] == 0) {
+                $map['purchase_id'] = ['=', $v['purchase_id']];
+                //采购数量无批次 应该是采购单数量
+                $list[$k]['arrival_num'] = Db::name('purchase_order_item')->where('purchase_id', $v['purchase_id'])->value('purchase_num');
+                switch ($v['pay_type']) {
+                    case 1:
+                        //无批次预付款 待结算金额公式=入库金额 +运费-已支付预付金额
+                        $list[$k]['all_money'] = $list[$k]['in_stock_money'] + $v['purchase_freight'] - $list[$k]['now_wait_pay'];
+                        break;
+                    case 2:
+                        //无批次全款预付 待结算金额 = 入库金额 +运费 - 已支付预付金额
+                        $list[$k]['all_money'] = $list[$k]['in_stock_money'] + $v['purchase_freight'] - $list[$k]['now_wait_pay'];
+                        break;
+                    default:
+                        //货到付款的 待结算金额 = 入库金额 + 运费
+                        $list[$k]['all_money'] = $list[$k]['in_stock_money'] + $v['purchase_freight'];
+                }
+            } else {
+                $map['purchase_id'] = ['=', $v['purchase_id']];
+                $map['batch_id'] = ['=', $v['batch_id']];
+                //采购数量有批次 应该是采购批次的数量
+                $list[$k]['arrival_num'] = Db::name('purchase_batch_item')->where('purchase_batch_id', $v['batch_id'])->value('arrival_num');
+                //采购批次是第一批 待结算金额 = 采购批次入库数量*采购单价-预付款金额
+                if ($list[$k]['purchase_batch'] == 1) {
+                    $list[$k]['all_money'] = $list[$k]['in_stock_money'] - $list[$k]['now_wait_pay'];
+                } else {
+                    //不是第一批 批次待结算金额 = 采购批次入库数量*采购单价
+                    $list[$k]['all_money'] = $list[$k]['in_stock_money'];
+                }
+            }
+            //采购单物流单详情
+            $row = Db::name('logistics_info')->where($map)->field('logistics_number,logistics_company_no')->find();
+            //物流单快递100接口
+            if ($row['logistics_number']) {
+                $arr = explode(',', $row['logistics_number']);
+                //物流公司编码
+                $company = explode(',', $row['logistics_company_no']);
+                foreach ($arr as $kk => $vv) {
+                    try {
+                        //快递单号
+                        $param['express_id'] = trim($vv);
+                        $param['code'] = trim($company[$kk]);
+                        $data[$kk] = Hook::listen('express_query', $param)[0];
+                    } catch (\Exception $e) {
+                        $this->error($e->getMessage());
+                    }
+                }
+            }
+            //拿物流单接口返回的倒数第二条数据的时间作为揽件的时间 并且加一个月后的月底作为当前采购单批次的 结算周期
+            if (!empty(strtotime(array_slice($data[0]['data'],-1,1)[0]['time']))) {
+                $list[$k]['period'] = date("Y-m-t", strtotime(array_slice($data[0]['data'],-1,1)[0]['time'] . '+' . $supplier['period'] . 'month'));
+            } else {
+                $list[$k]['period'] = '获取不到物流单详情';
+            }
+            switch ($v['pay_type']) {
+                case 1:
+                    $list[$k]['pay_type'] = '预付款';
+                    break;
+                case 2:
+                    $list[$k]['pay_type'] = '全款预付';
+                    break;
+                case 3:
+                    $list[$k]['pay_type'] = '尾款';
+                    break;
+            }
+            //所有的待结算的总和是所有的待结算
+            $all += $list[$k]['all_money'];
+            if ($list[$k]['period'] <= $now){
+                //结算账期是本月底的算入本期待结算
+                $wait_pay_money += $list[$k]['all_money'];
+            }
+        }
+        $all_wait_pay_money = $all;
         $this->assignconfig('supplier_id', $ids);
         $this->assign('supplier', $supplier);
+        $this->assign('wait_pay_money', $wait_pay_money);
+        $this->assign('all_wait_pay_money', $all_wait_pay_money);
         return $this->view->fetch();
     }
 
@@ -164,7 +385,7 @@ class SupplierAccount extends Backend
                 ->join('in_stock_item e', 'a.id = e.in_stock_id')
                 ->where('b.supplier_id', $supplier_id)
                 ->where('a.status', 2)//已审核通过的入库单
-                ->field('c.purchase_number,a.id,d.purchase_price,f.quantity_num,a.in_stock_number,b.check_order_number,b.purchase_id,b.batch_id,c.purchase_name,c.pay_type,e.in_stock_num,f.arrivals_num,f.quantity_num,f.unqualified_num')
+                ->field('c.purchase_number,a.id,d.purchase_price,c.purchase_freight,f.quantity_num,a.in_stock_number,b.check_order_number,b.purchase_id,b.batch_id,c.purchase_name,c.pay_type,e.in_stock_num,f.arrivals_num,f.quantity_num,f.unqualified_num')
                 ->select();
             foreach ($list as $k => $v) {
                 //批次 第几批的
@@ -206,9 +427,13 @@ class SupplierAccount extends Backend
                         }
                     }
                 }
+                // dump(array_slice($data[0]['data'],-1,1));
+                // dump(array_slice($data[0]['data'],-1,1)[0]['time']);
                 //拿物流单接口返回的倒数第二条数据的时间作为揽件的时间 并且加一个月后的月底作为当前采购单批次的 结算周期
-                if (!empty($data[0])) {
-                    $list[$k]['period'] = date("Y-m-t", strtotime($data[0]['data'][count($data[0]['data']) - 2]['time'] . '+' . $supplier['period'] . 'month'));
+                // if (!empty($data[0]['data'][count($data[0]['data']) - 2]['time'])) {
+                if (!empty(strtotime(array_slice($data[0]['data'],-1,1)[0]['time']))) {
+                    // $list[$k]['period'] = date("Y-m-t", strtotime($data[0]['data'][count($data[0]['data']) - 2]['time'] . '+' . $supplier['period'] . 'month'));
+                    $list[$k]['period'] = date("Y-m-t", strtotime(array_slice($data[0]['data'],-1,1)[0]['time'] . '+' . $supplier['period'] . 'month'));
                 } else {
                     $list[$k]['period'] = '获取不到物流单详情';
                 }
