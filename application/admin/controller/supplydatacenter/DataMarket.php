@@ -814,6 +814,13 @@ class DataMarket extends Backend
 //            ->field('sum( IF ( total > 168, 1, 0) ) AS a,sum( IF ( total <= 168, 1, 0) ) AS b')
             ->select();
         $arr3  = collection($arr3)->toArray();
+        foreach ($arr1 as $key=>$value){
+            $va = ($value['delivery_time'] - $value['payment_time'])/3600;
+            if ($va<24){
+                unset($key);
+            }
+        }
+        
         $timeout_count = $arr1[0]['a'] + $arr2[0]['a'] + $arr3[0]['a'];
 
         dump($arr1);
