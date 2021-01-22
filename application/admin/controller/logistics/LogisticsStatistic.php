@@ -370,87 +370,31 @@ class LogisticsStatistic extends Backend
 
         $map['delivery_time'] = ['between', ['2020-12-01 00:00:00', '2020-12-31 23:59:59']];
         $map['node_type'] = ['neq',40];
-        $list = Db::table('fa_order_node')->where($map)->column('order_number');
-        dump($list);die();
+
+        $value_array = Db::table('fa_order_node')->where($map)->field('track_number,order_number')->select();
+        $value_array = collection($value_array)->toArray();
+        foreach ($value_array as $key=>$item){
+            $where['increment_id'] = ['eq',$item['order_number']];
+            $created_at = Db::connect('database.db_mojing_order')->table('fa_order')->where($where)->value('created_at');
+            $value_array[$key]['created_at']  = date('Y-m-d H:i:s',$created_at);
+        }
 
         //从数据库查询需要的数据
         $spreadsheet = new Spreadsheet();
 
         //常规方式：利用setCellValue()填充数据
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "订单号")
-            ->setCellValue("B1", "订单状态")
-            ->setCellValue("C1", "下单时间");   //利用setCellValues()填充数据
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "站点")
-            ->setCellValue("E1", "是否有工单")
-            ->setCellValue("F1", "工单类型")
-            ->setCellValue("G1", "创建人");
-        foreach ($list as $key => $value) {
-
-            $swhere['platform_order'] = $value['increment_id'];
-            $swhere['work_platform'] = 1;
-            $swhere['work_status'] = ['not in', [0, 4, 6]];
-            $work_type = $workorder->where($swhere)->field('work_type,create_user_name')->find();
-            if (!empty($work_type)){
-                $value['work'] = '是';
-                if ($work_type->work_type == 1){
-                    $value['work_status'] = '客服工单';
-                }else{
-                    $value['work_status'] = '仓库工单';
-                }
-                $value['create_user_name'] =$work_type->create_user_name;
-            }else{
-                $value['work'] = '否';
-                $value['work_status'] = '无';
-                $value['create_user_name'] = '无';
-            }
-            $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), $value['increment_id']);
-            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['status']);
-            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), date('Y-m-d H:i:s',$value['created_at']));
-            switch ($value['site']){
-                case 1:
-                    $value['site'] = 'zeelool';
-                    break;
-                case 2:
-                    $value['site'] = 'voogueme';
-                    break;
-                case 3:
-                    $value['site'] = 'nihao';
-                    break;
-                case 4:
-                    $value['site'] = 'meeloog';
-                    break;
-                case 5:
-                    $value['site'] = 'wesee';
-                    break;
-                case 9:
-                    $value['site'] = 'zeelool_es';
-                    break;
-                case 10:
-                    $value['site'] = 'zeelool_de';
-                    break;
-                case 11:
-                    $value['site'] = 'zeelool_jp';
-                    break;
-                case 12:
-                    $value['site'] = 'voogmechic';
-                    break;
-            }
-
-            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['site']);
-            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['work']);
-            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['work_status']);
-            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['create_user_name']);
-
+            ->setCellValue("B1", "运单号")
+            ->setCellValue("C1", "订单创建时间");
+        foreach ($value_array as $key => $value) {
+            $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), $value['order_number']);
+            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['track_number']);
+            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['created_at']);
         }
         //设置宽度
         $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(40);
-        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(20);
-        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(20);
-        $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(20);
-        $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(20);
-        $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(20);
         //设置边框
         $border = [
             'borders' => [
@@ -467,11 +411,11 @@ class LogisticsStatistic extends Backend
         $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
         $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
 
-        $spreadsheet->getActiveSheet()->getStyle('A1:H' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle('A1:C' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         $spreadsheet->setActiveSheetIndex(0);
 
         $format = 'xlsx';
-        $savename = '物流未发货订单' . date("YmdHis", time());;
+        $savename = '仓库导出数据' . date("YmdHis", time());;
 
         if ($format == 'xls') {
             //输出Excel03版本
