@@ -2208,6 +2208,7 @@ class ScmDistribution extends Scm
                         ->order('a.id', 'desc')
                         ->limit(1)
                         ->value('a.change_sku');
+
                     if ($change_sku) {
                         $sku = $change_sku;
                     } else {
@@ -2224,13 +2225,13 @@ class ScmDistribution extends Scm
                         ->field('stock,occupy_stock,distribution_occupy_stock')
                         ->find();
 
-                    /*//扣减占用库存、配货占用、总库存
+                    //扣减占用库存、配货占用、总库存
                     $this->_item
                         ->where(['sku' => $true_sku])
                         ->dec('occupy_stock', 1)
                         ->dec('distribution_occupy_stock', 1)
                         ->dec('stock', 1)
-                        ->update();*/
+                        ->update();
 
                     //记录库存日志
                     $log_data[] = [
