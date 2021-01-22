@@ -3,6 +3,7 @@
 namespace app\admin\controller\logistics;
 
 use app\common\controller\Backend;
+use fast\Excel;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use think\Cache;
 use think\Db;
@@ -367,74 +368,23 @@ class LogisticsStatistic extends Backend
     public function export_not_shipped(){
         set_time_limit(0);
         ini_set('memory_limit', '512M');
-
         $map['delivery_time'] = ['between', ['2020-12-01 00:00:00', '2020-12-31 23:59:59']];
         $map['node_type'] = ['neq',40];
 
-        $value_array = Db::table('fa_order_node')->where($map)->field('track_number,order_number')->select();
+        $value_array = Db::table('fa_order_node')->where($map)->field('track_number,order_number')->limit(10)->select();
         $value_array = collection($value_array)->toArray();
         foreach ($value_array as $key=>$item){
+            $value_array[$key]['track_number']  = $item['track_number']."\t";
             $where['increment_id'] = ['eq',$item['order_number']];
             $created_at = Db::connect('database.db_mojing_order')->table('fa_order')->where($where)->value('created_at');
             $value_array[$key]['created_at']  = date('Y-m-d H:i:s',$created_at);
         }
-
-        //从数据库查询需要的数据
-        $spreadsheet = new Spreadsheet();
-
-        //常规方式：利用setCellValue()填充数据
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "订单号")
-            ->setCellValue("B1", "运单号")
-            ->setCellValue("C1", "订单创建时间");
-        foreach ($value_array as $key => $value) {
-            $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), $value['order_number']);
-            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['track_number']);
-            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['created_at']);
-        }
-        //设置宽度
-        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(20);
-        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(20);
-        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(40);
-        //设置边框
-        $border = [
-            'borders' => [
-                'allBorders' => [
-                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
-                    'color' => ['argb' => 'FF000000'], // 设置border颜色
-                ],
-            ],
+        $headlist = [
+           '运单号',  '订单号', '订单创建时间',
         ];
-
-        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
-
-
-        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
-        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
-
-        $spreadsheet->getActiveSheet()->getStyle('A1:C' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-        $spreadsheet->setActiveSheetIndex(0);
-
-        $format = 'xlsx';
-        $savename = '仓库导出数据' . date("YmdHis", time());;
-
-        if ($format == 'xls') {
-            //输出Excel03版本
-            header('Content-Type:application/vnd.ms-excel');
-            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
-        } elseif ($format == 'xlsx') {
-            //输出07Excel版本
-            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
-        }
-
-        //输出名称
-        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
-        //禁止缓存
-        header('Cache-Control: max-age=0');
-        $writer = new $class($spreadsheet);
-
-        $writer->save('php://output');
-
+        $path = "/uploads/";
+        $fileName = '仓库需要导出数据';
+        Excel::writeCsv($value_array, $headlist, $path . $fileName);
     }
 
 
