@@ -802,7 +802,7 @@ class DataMarket extends Backend
             ->field('p.delivery_time,p.order_prescription_type,o.payment_time,o.increment_id,o.status')
             ->where($where)->group('p.order_id')->select(false);
         $list  = collection($sql1)->toArray();
-       
+
         foreach ($list as $key=>$item){
             $va = ($item['delivery_time'] - $item['payment_time'])/3600;
             if ($item['order_prescription_type'] ==1){
