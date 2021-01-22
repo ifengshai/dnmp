@@ -781,15 +781,19 @@ class DataMarket extends Backend
     public function export_not_shipped(){
         set_time_limit(0);
         ini_set('memory_limit', '512M');
-        $start_time = '1611158400';
-        $end_time = '1611244799';
-        $where['check_status'] = 1;
-        $where['check_time'] = ['between',[$start_time,$end_time]];
-        $uncompleted_where['is_tracking'] = ['<>',5];
-        $map = [];
-        $map[] = ['exp', Db::raw("check_time+3600*24*15<unix_timestamp(now())")];
-        $count = $this->process->where($where)->where($uncompleted_where)->where($map)->count();
-        dump($count);die();
+        $start = '1611158400';
+        $end = '1611244799';
+
+        $where['p.delivery_time'] = ['between',[$start,$end]];
+        $where['p.site'] = ['<>',4];
+        $where['o.status'] = ['in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+        $sql1 = $this->process->alias('p')->join('fa_order o','p.increment_id = o.increment_id')->field('(p.delivery_time-o.payment_time)/3600 AS total')->where($where)->group('p.order_id')->buildSql();
+        $arr1 = $this->process->table([$sql1=>'t2'])->field('sum( IF ( total > 24, 1, 0) ) AS a,sum( IF ( total <= 24, 1, 0) ) AS b')->count();
+
+
+
+
+        dump($arr1);die();
 
 //        $map['b.created_at'] = ['between', [1606752000, 1609430399]];
         $neworderprocess = new \app\admin\model\order\order\NewOrderProcess();
