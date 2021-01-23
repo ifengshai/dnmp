@@ -372,7 +372,7 @@ class LogisticsStatistic extends Backend
         $map['delivery_time'] = ['between', ['2020-12-01 00:00:00', '2020-12-31 23:59:59']];
         $map['node_type'] = ['neq',40];
 
-        $value_array = Db::table('fa_order_node')->where($map)->field('track_number,order_number,node_type')->limit(10)->select();
+        $value_array = Db::table('fa_order_node')->where($map)->field('track_number,order_number,node_type')->select();
         $value_array = collection($value_array)->toArray();
         foreach ($value_array as $key=>$item){
             switch ($item['node_type']){
