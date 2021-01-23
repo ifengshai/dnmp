@@ -3924,7 +3924,7 @@ EOF;
         //从数据库查询需要的数据
         $spreadsheet = new Spreadsheet();
         //常规方式：利用setCellValue()填充数据
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "工单平台")
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "工单平台001")
             ->setCellValue("B1", "工单类型")
             ->setCellValue("C1", "平台订单号");   //利用setCellValues()填充数据
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "订单支付的货币类型")
@@ -4305,7 +4305,7 @@ EOF;
         //从数据库查询需要的数据
         $spreadsheet = new Spreadsheet();
         //常规方式：利用setCellValue()填充数据
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "工单平台")
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "工单平台002")
             ->setCellValue("B1", "工单类型")
             ->setCellValue("C1", "平台订单号");   //利用setCellValues()填充数据
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "客户邮箱")
@@ -4497,7 +4497,7 @@ EOF;
             $spreadsheet->getActiveSheet()->setCellValue("AQ" . ($key * 1 + 2), $value['replacement_order']);
         }
 
-       
+
         //设置边框
         $border = [
             'borders' => [
