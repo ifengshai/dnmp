@@ -379,7 +379,7 @@ class FinanceCost extends Model
     {
         $product_barcode_item = new \app\admin\model\warehouse\ProductBarCodeItem();
         //根据子单号查询条形码绑定关系
-        $list = $product_barcode_item->field('purchase_price,actual_purchase_price')
+        $list = $product_barcode_item->alias('a')->field('purchase_price,actual_purchase_price')
             ->where(['out_stock_id' => $out_stock_id])
             ->join(['fa_purchase_order_item' => 'b'], 'a.purchase_id=b.purchase_id and a.sku=b.sku')
             ->select();
