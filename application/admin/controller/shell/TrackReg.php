@@ -2435,7 +2435,7 @@ class TrackReg extends Backend
         //查询上个月成本核算
         $month = date('Y-m-01');
         $fisrttime = strtotime("$month -1 month");
-        $endtime = strtotime("$month") - 1;
+        $endtime = strtotime("$month +1 month") - 1;
         $financecost = new \app\admin\model\finance\FinanceCost();
         $count = $financecost->where(['createtime' => ['between', [$fisrttime, $endtime]], 'is_carry_forward' => 0])->count();
         if ($count < 1) {
