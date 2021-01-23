@@ -13,7 +13,7 @@ use think\exception\ValidateException;
 class LogisticsStatistic extends Backend
 {
     protected $model = null;
-    protected  $noNeedLogin = ['export_not_shipped'];
+    protected $noNeedLogin = ['export_not_shipped'];
 
     /**
      *初始化方法
@@ -181,7 +181,7 @@ class LogisticsStatistic extends Backend
         $where['node_type'] = 40;
         //7天妥投时间
         $serven_time_out = config('logistics.delievered_time_out')['serven'];
-        $ten_time_out    = config('logistics.delievered_time_out')['ten'];
+        $ten_time_out = config('logistics.delievered_time_out')['ten'];
         //14天妥投时间
         $fourteen_time_out = config('logistics.delievered_time_out')['fourteen'];
         //20天妥投时间
@@ -230,14 +230,14 @@ class LogisticsStatistic extends Backend
                             $serven_num++;
                         } elseif (($serven_time_out < $distance_time) && ($distance_time <= $ten_time_out)) {
                             $ten_num++;
-                        } elseif(($ten_time_out < $distance_time) && ($distance_time <= $fourteen_time_out)){
+                        } elseif (($ten_time_out < $distance_time) && ($distance_time <= $fourteen_time_out)) {
                             $fourteen_num++;
                         } elseif (($fourteen_time_out < $distance_time) && ($distance_time <= $twenty_time_out)) {
                             $twenty_num++;
                         } else {
                             $gtTwenty_num++;
                         }
-                    } 
+                    }
                 }
 
                 $arr['send_order_num'][$k] = $rs[$v['shipment_data_type']] = $send_order_num;
@@ -365,23 +365,17 @@ class LogisticsStatistic extends Backend
     }
 
 
-
-    public function export_not_shipped(){
+    public function export_not_shipped()
+    {
         set_time_limit(0);
         ini_set('memory_limit', '512M');
-        $map['delivery_time'] = ['between', ['2020-12-01 00:00:00', '2020-12-31 23:59:59']];
-        $map['node_type'] = ['neq',40];
 
-        $value_array = Db::table('fa_order_node')->where($map)->field('track_number,order_number')->select();
-        $value_array = collection($value_array)->toArray();
-        foreach ($value_array as $key=>$item){
-            $value_array[$key]['track_number']  = $item['track_number']."\t";
-            $where['increment_id'] = ['eq',$item['order_number']];
-            $created_at = Db::connect('database.db_mojing_order')->table('fa_order')->where($where)->value('created_at');
-            $value_array[$key]['created_at']  = date('Y-m-d H:i:s',$created_at);
-        }
+        $created_at = Db::connect('database.db_mojing_order')->table('excel_one')->select();
+        $created_at = collection($created_at)->toArray();
+        dump($created_at);die();
+
         $headlist = [
-           '运单号',  '订单号', '订单创建时间',
+            '运单号', '订单号', '订单创建时间',
         ];
         $path = "/uploads/";
         $fileName = '仓库需要导出数据';
@@ -389,5 +383,4 @@ class LogisticsStatistic extends Backend
     }
 
 
-   
 }
