@@ -135,7 +135,8 @@ class PayOrder extends Backend
                     $arr1 = [];
                     $arr1['pay_id'] = $pay_id;
                     $arr1['pay_type'] = 3;
-                    $arr1['purchase_id'] = $vv1['id'];
+                    $arr1['purchase_id'] = $vv1['finance_purcahse_id'];
+                    $arr1['purchase_order_id'] = $vv1['purchase_id'];
                     $arr1['purchase_order'] = $vv1['purchase_number'];
                     $arr1['purchase_batch_id'] = $vv1['purchase_batch_id'];
                     $arr1['now_before_total'] = $vv1['now_before_total'];
@@ -160,7 +161,7 @@ class PayOrder extends Backend
                     Db::name('finance_payorder_item')->insert($arr2);
                 }
             }
-            $this->success('添加成功！！', '',url('index'));
+            //$this->success('添加成功！！', '',url('index'));
         }
         $this->view->assign(compact('pay_number','supplier', 'settle', 'prepay','total1','total2','total','count1','count2','ids'));
         return $this->view->fetch();
@@ -173,7 +174,7 @@ class PayOrder extends Backend
         $supplier = $this->supplier->where('id',$id)->field('id,supplier_name,currency,period,opening_bank,bank_account,recipient_name')->select();
         //获取付款单信息
         $pay_order = $this->payorder->where('id',$id)->find();
-        $imgs = explode(',',$pay_order['invoice']);
+        $imgs = array_filter(explode(',',$pay_order['invoice']));
         //获取付款单子单结算信息
         $settle = $this->payorder_item->where(['pay_id'=>$id,'pay_type'=>3])->select();
         $total1= 0;
@@ -342,7 +343,7 @@ class PayOrder extends Backend
         $settle_where['s.finance_purcahse_id'] = ['in',$ids];
         $settle_where['s.supplier_id'] = $supplier_id;
         //结算信息
-        $settle = $this->statement->alias('s')->join('fa_finance_statement_item i','i.statement_id=s.id','left')->join('fa_purchase_order o','o.id=i.purchase_id','left')->field('i.id,o.purchase_number,i.purchase_batch_id,i.now_before_total,i.instock_total,i.deduction_total,i.deduction_total,i.wait_statement_total')->where($settle_where)->select();
+        $settle = $this->statement->alias('s')->join('fa_finance_statement_item i','i.statement_id=s.id','left')->field('s.finance_purcahse_id,i.id,i.purchase_number,i.purchase_batch_id,i.now_before_total,i.instock_total,i.deduction_total,i.deduction_total,i.deduction_reason,i.wait_statement_total,i.purchase_id')->where($settle_where)->select();
         $total1 = 0;  //结算待结算金额合计
         $count1 = 0;
         foreach ($settle as $val){
@@ -350,7 +351,7 @@ class PayOrder extends Backend
             $count1++;
         }
         //预付信息
-        $prepay = $this->financepurchase->alias('p')->join('fa_purchase_order o','o.id=p.purchase_id','left')->field('p.id,o.purchase_number,o.purchase_total,p.pay_rate,p.pay_grand_total,p.pay_type')->where('p.pay_type','in','1,2')->where('p.supplier_id',$supplier_id)->select();
+        $prepay = $this->financepurchase->alias('p')->join('fa_purchase_order o','o.id=p.purchase_id','left')->field('p.id,o.purchase_number,o.purchase_total,p.pay_rate,p.pay_grand_total,p.pay_type')->where('p.pay_type','in','1,2')->where('p.id','in',$ids)->where('p.supplier_id',$supplier_id)->select();
         $total2 = 0;  //预付预付款金额合计
         $count2 = 0;
         foreach ($prepay as $v){
