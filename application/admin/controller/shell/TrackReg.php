@@ -2433,7 +2433,7 @@ class TrackReg extends Backend
         $fisrttime = strtotime("$month -1 month");
         $endtime = strtotime("$month") - 1;
         $financecost = new \app\admin\model\finance\FinanceCost();
-        $count = $financecost->where(['createtime' => ['between', [$fisrttime, $endtime]], 'is_carry_forward' => 0])->count();
+        $count = $financecost->where(['createtime' => ['between', [$fisrttime, $endtime]], 'is_carry_forward' => 0, 'bill_type' => ['<>', 9]])->count();
         if ($count < 1) {
             echo "无结果";
             die;

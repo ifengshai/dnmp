@@ -74,6 +74,26 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                             return false;
                                         }
                                     }
+                                },
+                                {
+                                    name: 'pay',
+                                    text: '创建付款申请单',
+                                    title: __('创建付款申请单'),
+                                    classname: 'btn btn-xs btn-success btn-dialog',
+                                    icon: 'fa fa-pencil',
+                                    url: 'financepurchase/purchase_pay/add/label/statement',
+                                    extend: 'data-area = \'["100%","100%"]\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        if (row.status == 6 && row.wait_statement_total > 0) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                    }
                                 }
                             ],
                             formatter: Table.api.formatter.operate

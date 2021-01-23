@@ -185,10 +185,23 @@ class LensPrice extends Backend
             $sph = explode('~', $v[2]);
             $cyl = explode('~', $v[3]);
             $add = explode('~', $v[4]);
-            $data[$k]['sph_start'] = $sph[0];
-            $data[$k]['sph_end'] = $sph[1];
-            $data[$k]['cyl_start'] = $cyl[0];
-            $data[$k]['cyl_end'] = $cyl[1];
+
+            if ($sph[1] < $sph[0]) {
+                $data[$k]['sph_start'] = $sph[1];
+                $data[$k]['sph_end'] = $sph[0];
+            } else {
+                $data[$k]['sph_start'] = $sph[0];
+                $data[$k]['sph_end'] = $sph[1];
+            }
+
+            if ($cyl[1] < $cyl[0]) {
+                $data[$k]['cyl_start'] = $cyl[1];
+                $data[$k]['cyl_end'] = $cyl[0];
+            } else {
+                $data[$k]['cyl_start'] = $cyl[0];
+                $data[$k]['cyl_end'] = $cyl[1];
+            }
+            
             $data[$k]['add_start'] = $add[0];
             $data[$k]['add_end'] = $add[1];
             $data[$k]['price'] = $v[5];
