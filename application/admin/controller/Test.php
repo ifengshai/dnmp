@@ -2205,7 +2205,7 @@ class Test extends Backend
         foreach ($list as $k => $v) {
 
             Db::table('fa_purchase_order_item')->where(['purchase_order_number' => $v['purchase_number'], 'sku' => $v['sku']])->update(['replenish_list_id' => $v['buhuo_item_id']]);
-            Db::table('fa_purchase_order')->where(['purchase_order_number' => $v['purchase_number']])->update(['replenish_id' => $v['buhuo_id']]);
+            Db::table('fa_purchase_order')->where(['purchase_number' => $v['purchase_number']])->update(['replenish_id' => $v['buhuo_id']]);
 
             $res = Db::table('fa_purchase_order_item')->where(['purchase_order_number' => $v['purchase_number'], 'sku' => $v['sku']])->find();
             Db::table('fa_new_product_replenish_list')->where(['id' => $v['buhuo_item_id']])->update(['real_dis_num' => $res['purchase_num'], 'status' => 2]);
