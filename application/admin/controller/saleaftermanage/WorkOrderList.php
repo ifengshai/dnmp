@@ -3924,7 +3924,7 @@ EOF;
         //从数据库查询需要的数据
         $spreadsheet = new Spreadsheet();
         //常规方式：利用setCellValue()填充数据
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "工单平台001")
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "工单平台")
             ->setCellValue("B1", "工单类型")
             ->setCellValue("C1", "平台订单号");   //利用setCellValues()填充数据
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "订单支付的货币类型")
@@ -4305,7 +4305,7 @@ EOF;
         //从数据库查询需要的数据
         $spreadsheet = new Spreadsheet();
         //常规方式：利用setCellValue()填充数据
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "工单平台002")
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "工单平台")
             ->setCellValue("B1", "工单类型")
             ->setCellValue("C1", "平台订单号");   //利用setCellValues()填充数据
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "客户邮箱")
@@ -4343,7 +4343,8 @@ EOF;
             ->setCellValue("AJ1", "承接详情")
             ->setCellValue("AK1", "工单回复备注")
             ->setCellValue("AP1", "订单支付时间")
-            ->setCellValue("AQ1", "补发订单号");
+            ->setCellValue("AQ1", "补发订单号")
+            ->setCellValue("AR1", "子单号集结");
         $spreadsheet->setActiveSheetIndex(0)->setTitle('工单数据');
         foreach ($list as $key => $value) {
             if ($value['after_user_id']) {
@@ -4495,6 +4496,7 @@ EOF;
             }
             $spreadsheet->getActiveSheet()->setCellValue("AP" . ($key * 1 + 2), $value['payment_time']);
             $spreadsheet->getActiveSheet()->setCellValue("AQ" . ($key * 1 + 2), $value['replacement_order']);
+            $spreadsheet->getActiveSheet()->setCellValue("AR" . ($key * 1 + 2), $value['order_item_numbers']);
         }
 
 
@@ -4514,7 +4516,7 @@ EOF;
         $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
         $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
 
-        $spreadsheet->getActiveSheet()->getStyle('A1:P' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle('A1:AR' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
 
         $spreadsheet->setActiveSheetIndex(0);
