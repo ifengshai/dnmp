@@ -43,11 +43,6 @@ class DataMarket extends Backend
      */
     public function index()
     {
-
-        //物流妥投概况
-        $logistics_completed_overview = $this->logistics_completed_overview();
-
-
         if ($this->request->isAjax()) {
             $params = $this->request->param();
             if(!$params['time_str']){
@@ -660,8 +655,7 @@ class DataMarket extends Backend
                     $arr2 = $this->process->table([$sql2=>'t2'])->field('sum( IF ( total > 72, 1, 0) ) AS a,sum( IF ( total <= 72, 1, 0) ) AS b')->select(false);
 
                     $sql3 = $this->process->alias('p')->join('fa_order o','p.increment_id = o.increment_id')->field('(p.delivery_time-o.payment_time)/3600 AS total')->where($where)->where($map3)->group('p.order_id')->buildSql();
-                    $arr3 = $this->process->table([$sql3=>'t2'])->field('sum( IF ( total > 168, 1, 0) ) AS a,sum( IF ( total <= 168, 1, 0) ) AS b')->select(false);
-
+                    $arr3 = $this->process->table([$sql3=>'t2'])->field('sum( IF ( total > 168, 1, 0) ) AS a,sum( IF ( total <= 168, 1, 0) ) AS b')->select();
                     $timeout_count = $arr1[0]['a'] + $arr2[0]['a'] + $arr3[0]['a'];
                     $untimeout_count = $arr1[0]['b'] + $arr2[0]['b'] + $arr3[0]['b'];
                     $arr[$key]['timeout_count'] = $timeout_count;
@@ -797,27 +791,82 @@ class DataMarket extends Backend
         $sql1 = $this->process->alias('p')
             ->join('fa_order o','p.increment_id = o.increment_id')
             ->field('p.delivery_time,p.order_prescription_type,o.payment_time,o.increment_id,o.status')
-            ->where($where)->group('p.order_id')->select();
+            ->where($where)->group('p.order_id')->select(false);
+        dump($sql1);die();
         $list  = collection($sql1)->toArray();
+        dump(count($list));die();
         foreach ($list as $key=>$item){
             $va = ($item['delivery_time'] - $item['payment_time'])/3600;
             if ($item['order_prescription_type'] ==1){
                 if ($va < 24){
-                    unset($list[$key]);
+                    unset($key);
                 }
             }
             if ($item['order_prescription_type'] ==2){
                 if ($va < 72){
-                    unset($list[$key]);
+                    unset($key);
                 }
             }
             if ($item['order_prescription_type'] ==3){
                 if ($va < 168){
-                    unset($list[$key]);
+                    unset($key);
                 }
             }
         }
-        $list = array_values($list);
+        dump($list);
+        dump(count($list));
+        die();
+//        $sql2 = $this->process->alias('p')
+//            ->join('fa_order o','p.increment_id = o.increment_id')
+//            ->field('p.delivery_time,o.payment_time,o.increment_id,o.status')
+//            ->where($where)->where($map2)->group('p.order_id')->buildSql();
+//        $arr2 = $this->process->table([$sql2=>'t2'])
+////            ->field('sum( IF ( total > 72, 1, 0) ) AS a,sum( IF ( total <= 72, 1, 0) ) AS b')
+//            ->select();
+//        $arr2  = collection($arr2)->toArray();
+//        $sql3 = $this->process->alias('p')
+//            ->join('fa_order o','p.increment_id = o.increment_id')
+//            ->field('p.delivery_time,o.payment_time,o.increment_id,o.status')
+//            ->where($where)->where($map3)->group('p.order_id')->buildSql();
+//        $arr3 = $this->process->table([$sql3=>'t2'])
+////            ->field('sum( IF ( total > 168, 1, 0) ) AS a,sum( IF ( total <= 168, 1, 0) ) AS b')
+//            ->select();
+//        $arr3  = collection($arr3)->toArray();
+//        foreach ($arr1 as $key=>$value){
+//            $va = ($value['delivery_time'] - $value['payment_time'])/3600;
+//            dump($va);die();
+//            if ($va<24){
+//                unset($key);
+//            }
+//        }
+//        foreach ($arr2 as $key=>$value){
+//            $va = ($value['delivery_time'] - $value['payment_time'])/3600;
+//            if ($va<72){
+//                unset($key);
+//            }
+//        }
+//        foreach ($arr3 as $key=>$value){
+//            $va = ($value['delivery_time'] - $value['payment_time'])/3600;
+//            if ($va<168){
+//                unset($key);
+//            }
+//        }
+        $timeout_count = $arr1[0]['a'] + $arr2[0]['a'] + $arr3[0]['a'];
+
+        dump(count($arr1));
+        dump(count($arr2));
+        dump(count($arr3));
+       die();
+
+        dump($timeout_count);die();
+
+//        $map['b.created_at'] = ['between', [1606752000, 1609430399]];
+        $neworderprocess = new \app\admin\model\order\order\NewOrderProcess();
+        $undeliveredOrder = $neworderprocess->undeliveredOrder();
+        dump($undeliveredOrder);die();
+//        $undeliveredOrder = $neworderprocess->undeliveredOrderMessage($map);
+
+        $list = collection($undeliveredOrder)->toArray();
         $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
 
         //从数据库查询需要的数据
@@ -826,13 +875,11 @@ class DataMarket extends Backend
         //常规方式：利用setCellValue()填充数据
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "订单号")
             ->setCellValue("B1", "订单状态")
-            ->setCellValue("C1", "下单时间")  //利用setCellValues()填充数据
-            ->setCellValue("D1", "是否有工单")
-            ->setCellValue("E1", "工单类型");
-//        $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "站点")
-//            ->setCellValue("E1", "是否有工单")''
-////            ->setCellValue("F1", "工单类型")
-////            ->setCellValue("G1", "创建人");
+            ->setCellValue("C1", "下单时间");   //利用setCellValues()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "站点")
+            ->setCellValue("E1", "是否有工单")
+            ->setCellValue("F1", "工单类型")
+            ->setCellValue("G1", "创建人");
         foreach ($list as $key => $value) {
 
             $swhere['platform_order'] = $value['increment_id'];
@@ -846,16 +893,49 @@ class DataMarket extends Backend
                 }else{
                     $value['work_status'] = '仓库工单';
                 }
+                $value['create_user_name'] =$work_type->create_user_name;
             }else{
                 $value['work'] = '否';
                 $value['work_status'] = '无';
+                $value['create_user_name'] = '无';
             }
             $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), $value['increment_id']);
             $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['status']);
-            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), date('Y-m-d H:i:s',$value['delivery_time']));
-            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['work']);
-            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['work_status']);
+            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), date('Y-m-d H:i:s',$value['created_at']));
+            switch ($value['site']){
+                case 1:
+                    $value['site'] = 'zeelool';
+                    break;
+                case 2:
+                    $value['site'] = 'voogueme';
+                    break;
+                case 3:
+                    $value['site'] = 'nihao';
+                    break;
+                case 4:
+                    $value['site'] = 'meeloog';
+                    break;
+                case 5:
+                    $value['site'] = 'wesee';
+                    break;
+                case 9:
+                    $value['site'] = 'zeelool_es';
+                    break;
+                case 10:
+                    $value['site'] = 'zeelool_de';
+                    break;
+                case 11:
+                    $value['site'] = 'zeelool_jp';
+                    break;
+                case 12:
+                    $value['site'] = 'voogmechic';
+                    break;
+            }
 
+            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['site']);
+            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['work']);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['work_status']);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['create_user_name']);
 
         }
         //设置宽度
@@ -864,7 +944,9 @@ class DataMarket extends Backend
         $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(40);
         $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(20);
-
+        $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(20);
         //设置边框
         $border = [
             'borders' => [
@@ -881,11 +963,11 @@ class DataMarket extends Backend
         $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
         $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
 
-        $spreadsheet->getActiveSheet()->getStyle('A1:E' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle('A1:H' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         $spreadsheet->setActiveSheetIndex(0);
 
         $format = 'xlsx';
-        $savename = '供应链大屏数据' . date("YmdHis", time());;
+        $savename = '物流未发货订单' . date("YmdHis", time());;
 
         if ($format == 'xls') {
             //输出Excel03版本
