@@ -365,6 +365,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                     })
                 }
             });
+
+            $(document).on("click", ".batch-log-recipient", function () {
+                var ids = $(this).data('value');
+                Backend.api.open('zendesk/zendesk/order_detail?ids='+ids, '订单节点',{area: ['50%', '45%'] });
+            });
+
+
+
+
             $(document).on('click','.change-ticket',function(){
                 var title = $(this).data('title');
                 var status = $(this).data('status');
