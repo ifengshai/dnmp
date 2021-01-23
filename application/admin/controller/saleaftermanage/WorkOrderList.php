@@ -4342,9 +4342,9 @@ EOF;
             ->setCellValue("AI1", "措施详情")
             ->setCellValue("AJ1", "承接详情")
             ->setCellValue("AK1", "工单回复备注")
-            ->setCellValue("AP1", "订单支付时间")
-            ->setCellValue("AQ1", "补发订单号")
-            ->setCellValue("AR1", "子单号集结");
+            ->setCellValue("AL1", "订单支付时间")
+            ->setCellValue("AM1", "补发订单号")
+            ->setCellValue("AN1", "子单号集结");
         $spreadsheet->setActiveSheetIndex(0)->setTitle('工单数据');
         foreach ($list as $key => $value) {
             if ($value['after_user_id']) {
@@ -4490,13 +4490,13 @@ EOF;
             //回复
             if ($noteInfo && array_key_exists($value['id'], $noteInfo)) {
                 $value['note'] = $noteInfo[$value['id']];
-                $spreadsheet->getActiveSheet()->setCellValue("AO" . ($key * 1 + 2), $value['note']);
+                $spreadsheet->getActiveSheet()->setCellValue("AK" . ($key * 1 + 2), $value['note']);
             } else {
-                $spreadsheet->getActiveSheet()->setCellValue("AO" . ($key * 1 + 2), '');
+                $spreadsheet->getActiveSheet()->setCellValue("AK" . ($key * 1 + 2), '');
             }
-            $spreadsheet->getActiveSheet()->setCellValue("AP" . ($key * 1 + 2), $value['payment_time']);
-            $spreadsheet->getActiveSheet()->setCellValue("AQ" . ($key * 1 + 2), $value['replacement_order']);
-            $spreadsheet->getActiveSheet()->setCellValue("AR" . ($key * 1 + 2), $value['order_item_numbers']);
+            $spreadsheet->getActiveSheet()->setCellValue("AL" . ($key * 1 + 2), $value['payment_time']);
+            $spreadsheet->getActiveSheet()->setCellValue("AM" . ($key * 1 + 2), $value['replacement_order']);
+            $spreadsheet->getActiveSheet()->setCellValue("AN" . ($key * 1 + 2), $value['order_item_numbers']);
         }
 
 
@@ -4516,7 +4516,7 @@ EOF;
         $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
         $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
 
-        $spreadsheet->getActiveSheet()->getStyle('A1:AR' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle('A1:AN' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
 
         $spreadsheet->setActiveSheetIndex(0);
