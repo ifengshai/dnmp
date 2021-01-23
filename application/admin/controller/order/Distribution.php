@@ -25,6 +25,7 @@ use app\admin\model\order\order\NewOrderProcess;
 use app\admin\model\StockLog;
 use app\admin\model\order\order\LensData;
 use app\admin\model\saleaftermanage\WorkOrderMeasure;
+use app\admin\model\warehouse\ProductBarCodeItem;
 
 /**
  * 配货列表
@@ -131,6 +132,13 @@ class Distribution extends Backend
      */
     protected $_work_order_change_sku = null;
 
+    /**
+     * 商品条形码模型对象
+     * @var object
+     * @access protected
+     */
+    protected $_product_bar_code_item = null;
+
     public function _initialize()
     {
         parent::_initialize();
@@ -147,7 +155,7 @@ class Distribution extends Backend
         $this->_work_order_list = new WorkOrderList();
         $this->_work_order_measure = new WorkOrderMeasure();
         $this->_work_order_change_sku = new WorkOrderChangeSku();
-        $this->_product_bar_code_item = new \app\admin\model\warehouse\ProductBarCodeItem();
+        $this->_product_bar_code_item = new ProductBarCodeItem();
     }
 
     /**
@@ -388,18 +396,6 @@ class Distribution extends Backend
                 ->where(['item_process_id' => ['in', array_column($list, 'id')], 'status' => 1])
                 ->column('work_id', 'item_process_id');
 
-            //获取工单更改镜框最新信息
-            $change_sku = $this->_work_order_change_sku
-                ->alias('a')
-                ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
-                ->where([
-                    'a.change_type' => 1,
-                    'a.item_order_number' => ['in', array_column($list, 'item_order_number')],
-                    'b.operation_type' => 1
-                ])
-                ->order('a.id', 'desc')
-                ->group('a.item_order_number')
-                ->column('a.change_sku', 'a.item_order_number');
 
             foreach ($list as $key => $value) {
                 $stock_house_num = '-';
@@ -430,8 +426,20 @@ class Distribution extends Backend
                 //判断是否显示工单按钮
                 $list[$key]['task_info'] = in_array($value['item_order_number'], $item_order_numbers) ? 1 : 0;
 
-                if ($change_sku[$value['item_order_number']]) {
-                    $list[$key]['sku'] = $change_sku[$value['item_order_number']];
+                //获取工单更改镜框最新信息
+                $change_sku = $this->_work_order_change_sku
+                    ->alias('a')
+                    ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
+                    ->where([
+                        'a.change_type' => 1,
+                        'a.item_order_number' => $value['item_order_number'],
+                        'b.operation_type' => 1
+                    ])
+                    ->order('a.id', 'desc')
+                    ->limit(1)
+                    ->value('a.change_sku');
+                if ($change_sku) {
+                    $list[$key]['sku'] = $change_sku;
                 }
             }
 
@@ -2142,7 +2150,9 @@ class Distribution extends Backend
                 unset($status_arr[5]);
                 break;
         }
-
+        if ($item_info['distribution_status'] == 3) {
+            $status_arr[2] = '待配货';
+        }
         //核实地址
         if($abnormal_info['type'] == 13){
             $status_arr = [];
@@ -2248,6 +2258,21 @@ class Distribution extends Backend
 
                 //回滚至待配货扣减可用库存、虚拟仓库存、配货占用、总库存
                 if (2 == $status) {
+                    //获取工单更改镜框最新信息
+                    $change_sku = $this->_work_order_change_sku
+                        ->alias('a')
+                        ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
+                        ->where([
+                            'a.change_type' => 1,
+                            'a.item_order_number' => $item_info['item_order_number'],
+                            'b.operation_type' => 1
+                        ])
+                        ->order('a.id', 'desc')
+                        ->limit(1)
+                        ->value('a.change_sku');
+                    if (!empty($change_sku)) {//存在已完成的更改镜片的工单，替换更改的sku
+                        $item_info['sku'] = $change_sku;
+                    }
                     //仓库sku、库存
                     $platform_info = $this->_item_platform_sku
                         ->field('sku,stock')
