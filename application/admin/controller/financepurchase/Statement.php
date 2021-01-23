@@ -134,7 +134,18 @@ class Statement extends Backend
                         $arr[$k]['deduction_total'] = empty($v['kou_money']) ? 0 : $v['kou_money'];
                         $arr[$k]['deduction_reason'] = $v['deduction_reason'];
                         $arr[$k]['arrival_num'] = $v['arrival_num'];
-                        $arr[$k]['pay_type'] = $v['pay_type'];
+                        switch ($v['pay_type']) {
+                            case '预付款':
+                                $pay_type = 1;
+                                break;
+                            case '全款预付':
+                                $pay_type = 2;
+                                break;
+                            case '尾款':
+                                $pay_type = 3;
+                                break;
+                        }
+                        $arr[$k]['pay_type'] = $pay_type;
                         $arr[$k]['purchase_name'] = $v['purchase_name'];
                         $arr[$k]['period'] = $v['period'];
                         $arr[$k]['purchase_number'] = $v['purchase_number'];
@@ -191,11 +202,11 @@ class Statement extends Backend
                 $list[$k]['arrival_num'] = Db::name('purchase_order_item')->where('purchase_id', $v['purchase_id'])->value('purchase_num');
                 switch ($v['pay_type']) {
                     case 1:
-                        //无批次预付款 待结算金额公式=入库金额+运费-已支付预付金额
+                        //无批次预付款 待结算金额公式=入库金额 +运费-已支付预付金额
                         $list[$k]['all_money'] = $list[$k]['in_stock_money'] + $v['purchase_freight'] - $list[$k]['now_wait_pay'];
                         break;
                     case 2:
-                        //无批次全款预付 待结算金额 = 入库金额 - 已支付预付金额
+                        //无批次全款预付 待结算金额 = 入库金额 +运费 - 已支付预付金额
                         $list[$k]['all_money'] = $list[$k]['in_stock_money'] + $v['purchase_freight'] - $list[$k]['now_wait_pay'];
                         break;
                     default:
@@ -211,7 +222,7 @@ class Statement extends Backend
                 if ($list[$k]['purchase_batch'] == 1) {
                     $list[$k]['all_money'] = $list[$k]['in_stock_money'] - $list[$k]['now_wait_pay'];
                 } else {
-                    //不是第一批 批次待结算金额=采购批次入库数量*采购单价
+                    //不是第一批 批次待结算金额 = 采购批次入库数量*采购单价
                     $list[$k]['all_money'] = $list[$k]['in_stock_money'];
                 }
             }
@@ -456,6 +467,7 @@ class Statement extends Backend
                 if ($v['wait_statement_total'] > 0) {
                     $status = 6;
                 } else {
+                    //结算金额为负的话 要计算采购单成本
                     $status = 4;
                 }
                 //更新主表状态

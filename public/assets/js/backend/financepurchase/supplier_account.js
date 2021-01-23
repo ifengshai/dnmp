@@ -141,10 +141,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                             {field: 'wait_pay', title: __('预付金额'), operate: false},
                             {field: 'now_wait_pay', title: __('已支付预付金额'), operate: false},
                             {field: 'quantity_num', title: __('入库数量'), operate: false},
+                            {field: 'purchase_freight', title: __('运费'), operate: false},
                             {field: 'in_stock_money', title: __('入库金额'), operate: false},
                             {field: 'unqualified_num', title: __('退货数量'), operate: false},
                             {field: 'unqualified_num_money', title: __('退货金额'), operate: false},
-                            {field: 'period', title: __('结算周期'), formatter: Table.api.formatter.datetime, operate: 'RANGE', addclass: 'datetimerange', sortable: true},
+                            {field: 'period', title: __('结算周期'), formatter: Table.api.formatter.datetime, operate: 'RANGE', addclass: 'datetimerange'},
                         ]
                     ]
                 });
@@ -190,13 +191,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                 table: table2,
                                 events: Table.api.events.operate,
                                 buttons: [
-                                    {
+                                     {
                                         name: 'detail',
                                         text: '查看结算单详情',
-                                        title: __('结算单详情'),
+                                        title: __('查看结算单详情'),
                                         classname: 'btn btn-xs  btn-primary  btn-dialog',
                                         icon: 'fa fa-list',
-                                        url: 'financepurchase/supplier_account/detail',
+                                        url: 'financepurchase/statement/detail',
                                         extend: 'data-area = \'["100%","100%"]\'',
                                         callback: function (data) {
                                             Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
@@ -205,7 +206,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                             //返回true时按钮显示,返回false隐藏
                                             return true;
                                         }
-                                    }
+                                    },
                                 ],
                                 formatter: Table.api.formatter.operate
                             }]
