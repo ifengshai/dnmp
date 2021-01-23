@@ -52,7 +52,7 @@ class WorkOrderList extends Backend
      * @var \app\admin\model\saleaftermanage\WorkOrderList
      */
     protected $model = null;
-    protected $noNeedLogin = ['batch_export_xls_array'];
+    protected $noNeedLogin = ['batch_export_xls_array','batch_export_xls_array_copy'];
 
     public function _initialize()
     {
@@ -214,7 +214,7 @@ class WorkOrderList extends Backend
                 ->limit($offset, $limit)
                 ->select();
             $list = collection($list)->toArray();
-
+            $fa_order = new NewOrder();
             //用户
             $user_list = $this->users;
             foreach ($list as $k => $v) {
@@ -275,6 +275,7 @@ class WorkOrderList extends Backend
                 } else {
                     $list[$k]['has_recept'] = 1;
                 }
+                $list[$k]['order_status'] = $fa_order->where('increment_id',$list[$k]['platform_order'])->value('status');
             }
             $result = array("total" => $total, "rows" => $list);
 
@@ -1054,21 +1055,40 @@ class WorkOrderList extends Backend
                     $count = $this->model->where(['platform_order' => $platform_order, 'work_status' => ['in', [1, 2, 3, 5]]])->count();
                     0 < $count && $this->error("此订单存在未处理完成的工单");
 
+                    $flag = 0;
+                    if (is_array($item_order_info)) {
+                        $item_choose = array_column($item_order_info , 'item_choose');
+                        if (!empty($item_choose)) {
+                            foreach ($item_choose as $key => $value) {
+                                if (!empty($item_choose[$key][0])) {
+                                     $flag = 1;
+                                }
+                            }
+                        }
+                    }
+
                     //判断订单状态
                     $_new_order_process = new NewOrderProcess();
                     $check_status = $_new_order_process
                         ->where('increment_id', $platform_order)
                         ->value('check_status');
 
-                    //已审单，包含主单取消、子单措施不能创建工单
-                    1 == $check_status
-                    &&
-                    (
-                        in_array(3, $measure_choose_id)
-                        ||
-                        !empty($item_order_info)
-                    )
-                    && $this->error("已审单，不能创建工单");
+                    $_new_order = new NewOrder();
+                    $new_order_status = $_new_order
+                        ->where('increment_id', $platform_order)
+                        ->value('status');
+                    //processing状态的判断审单状态
+                    if ('processing' == $new_order_status) {
+                        //已审单，包含主单取消、子单措施不能创建工单
+                        1 == $check_status
+                        &&
+                        (
+                            in_array(3, $measure_choose_id)
+                            ||
+                            $flag
+                        )
+                        && $this->error("已审单，不能创建工单");
+                    }
 
                     //指定问题类型校验sku下拉框是否勾选
                     in_array($params['problem_type_id'],[8,10,11,56,13,14,15,16,18,22,59])
@@ -1241,10 +1261,18 @@ class WorkOrderList extends Backend
                 //检测子订单措施
                 if ($item_order_info) {
                     $item_order_info = array_filter($item_order_info);
+                    //查询所有子单数量
+                    $_new_order_process = new NewOrderProcess();
+                    $order_id = $_new_order_process->where('increment_id', $platform_order)->value('order_id');
+                    $_new_order_item_process = new NewOrderItemProcess();
+                    $count_item_num = $_new_order_item_process->where('order_id', $order_id)->count();
+
                     1 > count($item_order_info) && $this->error("子订单号错误");
                     foreach ($item_order_info as $key => &$item) {
                         $item['item_choose'] = array_unique(array_filter($item['item_choose']));
-                        empty($item['item_choose']) && $this->error("请选择子订单：{$key} 的实施措施");
+                        if ($count_item_num != count($item_order_info)) {
+                            empty($item['item_choose']) && $this->error("请选择子订单：{$key} 的实施措施");
+                        }
                         $all_choose_ids = array_unique(array_merge($all_choose_ids, $item['item_choose']));
 
                         //获取子单之前处理成功的措施类型
@@ -1262,7 +1290,7 @@ class WorkOrderList extends Backend
                         if (in_array(18, $item['item_choose'])) {
                             //检测之前是否处理过子单措施
                             array_intersect([1, 2, 3], $change_type) && $this->error("子订单：{$key} 措施已处理，不能取消");
-                        } elseif (in_array(19, $item['item_choose'])) {//更改镜框
+                        } /*elseif (in_array(19, $item['item_choose'])) {//更改镜框
                             //检测之前是否处理过更改镜框措施
                             in_array(1, $change_type) && $this->error("子订单：{$key} 措施已处理，不能重复创建");
 
@@ -1273,7 +1301,7 @@ class WorkOrderList extends Backend
                         } elseif (in_array(20, $item['item_choose'])) {//更改镜片
                             //检测之前是否处理过更改镜片措施
                             in_array(2, $change_type) && $this->error("子订单：{$key} 措施已处理，不能重复创建");
-                        }
+                        }*/
                     }
                     unset($item);
                 }
@@ -2055,10 +2083,18 @@ class WorkOrderList extends Backend
                 //检测子订单措施
                 if ($item_order_info) {
                     $item_order_info = array_filter($item_order_info);
+                    //查询所有子单数量
+                    $_new_order_process = new NewOrderProcess();
+                    $order_id = $_new_order_process->where('increment_id', $platform_order)->value('order_id');
+                    $_new_order_item_process = new NewOrderItemProcess();
+                    $count_item_num = $_new_order_item_process->where('order_id', $order_id)->count();
+
                     1 > count($item_order_info) && $this->error("子订单号错误");
                     foreach ($item_order_info as $key => &$item) {
                         $item['item_choose'] = array_unique(array_filter($item['item_choose']));
-                        empty($item['item_choose']) && $this->error("请选择子订单：{$key} 的实施措施");
+                        if ($count_item_num != count($item_order_info)) {
+                            empty($item['item_choose']) && $this->error("请选择子订单：{$key} 的实施措施");
+                        }
                         $all_choose_ids = array_unique(array_merge($all_choose_ids, $item['item_choose']));
 
                         //获取子单之前处理成功的措施类型
@@ -2085,10 +2121,10 @@ class WorkOrderList extends Backend
                             !$item['change_frame']['change_sku'] && $this->error("子订单：{$key} 的新sku不能为空");
                             $back_data = $this->skuIsStock([$item['change_frame']['change_sku']], $params['work_platform'], [1]);
                             !$back_data['result'] && $this->error($back_data['msg']);
-                        } elseif (in_array(20, $item['item_choose'])) {//更改镜片
+                        } /*elseif (in_array(20, $item['item_choose'])) {//更改镜片
                             //检测之前是否处理过更改镜片措施
                             in_array(2, $change_type) && $this->error("子订单：{$key} 措施已处理，不能重复创建");
-                        }
+                        }*/
                     }
                     unset($item);
                 }
@@ -2544,6 +2580,65 @@ class WorkOrderList extends Backend
             try {
                 //获取地址、处方等信息
                 $res = $this->model->getAddress($incrementId, $item_order_number);
+
+                //获取更改镜片最新处方信息
+                $_work_order_change_sku = new WorkOrderChangeSku();
+                $change_lens = $_work_order_change_sku
+                    ->alias('a')
+                    ->field('a.od_sph,a.od_cyl,a.od_axis,a.od_add,a.pd_r,a.od_pv,a.od_bd,a.od_pv_r,a.od_bd_r,a.os_sph,a.os_cyl,a.os_axis,a.os_add,a.pd_l,a.os_pv,a.os_bd,a.os_pv_r,a.os_bd_r,a.lens_number,a.recipe_type as prescription_type,prescription_option')
+                    ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
+                    ->where([
+                        'a.change_type' => 2,
+                        'a.item_order_number' => $item_order_number,
+                        'b.operation_type' => 1
+                    ])
+                    ->order('a.id', 'desc')
+                    ->find();
+                $change_lens = collection([$change_lens])->toArray();
+                if ($change_lens[0]) {//之前更改过处方，获取最新的处方
+                    $prescription_option = unserialize($change_lens[0]['prescription_option']);
+                    //替换处方信息
+                    $res['prescriptions'][0]['prescription_type'] = $prescription_option['prescription_type'];
+                    $res['prescriptions'][0]['index_id'] = $prescription_option['lens_id'];
+                    $res['prescriptions'][0]['index_type'] = $prescription_option['lens_type'];
+                    $res['prescriptions'][0]['coating_id'] = $prescription_option['coating_id'];
+                    $res['prescriptions'][0]['color_id'] = $prescription_option['color_id'];
+                    $res['prescriptions'][0]['od_sph'] = $change_lens[0]['od_sph'];
+                    $res['prescriptions'][0]['os_sph'] = $change_lens[0]['os_sph'];
+                    $res['prescriptions'][0]['od_cyl'] = $change_lens[0]['od_cyl'];
+                    $res['prescriptions'][0]['os_cyl'] = $change_lens[0]['os_cyl'];
+                    $res['prescriptions'][0]['od_axis'] = $change_lens[0]['od_axis'];
+                    $res['prescriptions'][0]['os_axis'] = $change_lens[0]['os_axis'];
+                    if (!empty($change_lens[0]['pd_r']) && empty($change_lens[0]['pd_l'])) {
+                        $res['prescriptions'][0]['pd'] = $change_lens[0]['pd_r'];
+                    }
+                    $res['prescriptions'][0]['pd_l'] = $change_lens[0]['pd_l'];
+                    $res['prescriptions'][0]['pd_r'] = $change_lens[0]['pd_r'];
+                    $res['prescriptions'][0]['os_add'] = $change_lens[0]['os_add'];
+                    $res['prescriptions'][0]['od_add'] = $change_lens[0]['od_add'];
+                    $res['prescriptions'][0]['od_pv'] = $change_lens[0]['od_pv'];
+                    $res['prescriptions'][0]['os_pv'] = $change_lens[0]['os_pv'];
+                    $res['prescriptions'][0]['od_pv_r'] = $change_lens[0]['od_pv_r'];
+                    $res['prescriptions'][0]['os_pv_r'] = $change_lens[0]['os_pv_r'];
+                    $res['prescriptions'][0]['od_bd'] = $change_lens[0]['od_bd'];
+                    $res['prescriptions'][0]['os_bd'] = $change_lens[0]['os_bd'];
+                    $res['prescriptions'][0]['od_bd_r'] = $change_lens[0]['od_bd_r'];
+                    $res['prescriptions'][0]['os_bd_r'] = $change_lens[0]['os_bd_r'];
+                    //获取更改镜框最新信息
+                    $change_sku = $_work_order_change_sku
+                        ->alias('a')
+                        ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
+                        ->where([
+                            'a.change_type' => 1,
+                            'a.item_order_number' => $item_order_number,
+                            'b.operation_type' => 1
+                        ])
+                        ->order('a.id', 'desc')
+                        ->value('a.change_sku');
+                    if ($change_sku) {
+                        $res['prescriptions'][0]['sku'] = $change_sku;
+                    }
+                }
                 $lens = $this->model->getReissueLens($siteType, $res['prescriptions'], 2, $item_order_number);
             } catch (\Exception $e) {
                 $this->error($e->getMessage());
@@ -4504,11 +4599,17 @@ EOF;
         set_time_limit(0);
         ini_set('memory_limit', '1024M');
 
-//        $map['work_platform'] =2;
+        $map['create_time'] =['between',['2020-01-01 00:00:00','2020-12-31 23:59:59']];
+//        $map['id'] = ['lt',5212];
 //        $map['work_status'] = array('in', '2,3,5');
 //        0: '已取消', 1: '新建', 2: '待审核', 4: '审核拒绝', 3: '待处理', 5: '部分处理', 6: '已处理'
         $list = $this->model
-            ->limit(10)
+            ->where($map)
+            ->field('id,work_platform,base_grand_total,email,work_type,platform_order,order_pay_currency,order_sku,work_status,problem_type_id,problem_type_content,problem_description
+            ,create_user_name,after_user_id,create_time,complete_time,replenish_money,replenish_increment_id,coupon_describe,integral,refund_money,replacement_order
+            ')
+            ->order('id desc')
+            ->limit(11000)
             ->select();
         $list = collection($list)->toArray();
 
@@ -4527,21 +4628,21 @@ EOF;
         } else {
             $info = [];
         }
-        //求出所有的承接详情
-        $this->recept = new \app\admin\model\saleaftermanage\WorkOrderRecept;
-        $receptInfo = $this->recept->fetchReceptRecord($arr);
-        if ($receptInfo) {
-            $receptInfo = collection($receptInfo)->toArray();
-        } else {
-            $receptInfo = [];
-        }
-        //求出所有的回复
-        $noteInfo = $this->work_order_note->fetchNoteRecord($arr);
-        if ($noteInfo) {
-            $noteInfo = collection($noteInfo)->toArray();
-        } else {
-            $noteInfo = [];
-        }
+//        //求出所有的承接详情
+//        $this->recept = new \app\admin\model\saleaftermanage\WorkOrderRecept;
+//        $receptInfo = $this->recept->fetchReceptRecord($arr);
+//        if ($receptInfo) {
+//            $receptInfo = collection($receptInfo)->toArray();
+//        } else {
+//            $receptInfo = [];
+//        }
+//        //求出所有的回复
+//        $noteInfo = $this->work_order_note->fetchNoteRecord($arr);
+//        if ($noteInfo) {
+//            $noteInfo = collection($noteInfo)->toArray();
+//        } else {
+//            $noteInfo = [];
+//        }
         //根据平台sku求出商品sku
         $itemPlatFormSku = new \app\admin\model\itemmanage\ItemPlatformSku();
         //求出配置里面信息
@@ -4559,9 +4660,6 @@ EOF;
             if ($value['operation_user_id']) {
                 $value['operation_user_id'] = $users[$value['operation_user_id']];
             }
-
-
-
 
             switch ($value['work_status']) {
                 case 1:
@@ -4588,18 +4686,18 @@ EOF;
             }
 
 
-            //级别
-            switch ($value['work_level']) {
-                case 1:
-                    $work_level = '低';
-                    break;
-                case  2:
-                    $work_level = '中';
-                    break;
-                case  3:
-                    $work_level = '高';
-                    break;
-            }
+//            //级别
+//            switch ($value['work_level']) {
+//                case 1:
+//                    $work_level = '低';
+//                    break;
+//                case  2:
+//                    $work_level = '中';
+//                    break;
+//                case  3:
+//                    $work_level = '高';
+//                    break;
+//            }
 
 
             switch ($value['work_platform']) {
@@ -4655,9 +4753,6 @@ EOF;
             } else {
                 $csv[$key]['true_sku_string'] = '暂无';
             }
-
-
-
 
             //对应的问题类型大的分类
             $one_category = '';
@@ -4726,17 +4821,10 @@ EOF;
 //            }
 //            $csv[$key]['payment_time'] = $value['payment_time']; //订单支付时间
             $csv[$key]['replacement_order'] = $value['replacement_order'];//补发订单号
+            $csv[$key]['id'] = $value['id'];//补发订单号
 
         }
 
-
-        //单平台、工单类型、平台订单号、、工单状态、
-        //客户邮箱、订单金额、订单支付的货币类型、订单中的sku、对应商品sku
-        //问题大分类、问题类型、工单问题描述、工单创建人、新建状态时间 、
-        //工单完成时间、补差价的金额、优惠券描述、积分、退款金额、
-        //措施、补发订单号
-
-        //
         $headlist = [
 //            '工单平台', '工单类型', '工单状态', '工单级别', '平台订单号',
             '工单平台', '工单类型', '工单状态', '平台订单号',
@@ -4745,16 +4833,54 @@ EOF;
 //            '对应商品sku', '问题大分类', '问题类型', '工单问题描述', '工单图片',
             '对应商品sku', '问题大分类', '问题类型', '工单问题描述',
 //            '工单创建人', '工单是否需要审核', '实际审核人', '审核人备注', '新建状态时间',
-            '工单创建人',  '新建状态时间,','工单完成时间','补差价的金额','优惠券描述','积分','退款金额','措施','补发订单号',
+            '工单创建人',  '新建状态时间,','工单完成时间','补差价的金额','优惠券描述','积分','退款金额','措施','补发订单号','id'
 //            '开始走流程时间', '工单审核时间', '经手人处理时间', '工单完成时间', '补差价的金额',
 //            '补差价的订单号', '优惠券类型', '优惠券描述', '优惠券', '积分',
 //            '退回物流单号', '退款金额', '退款百分比', '措施', '措施详情',
 //            '承接详情', '工单回复备注', '订单支付时间', '补发订单号'
         ];
         $path = "/uploads/";
-        $fileName = '工单数据V站备份导出 - 12-21';
+        $fileName = '工单数据2020-001导出';
         Excel::writeCsv($csv, $headlist, $path . $fileName);
     }
+
+    public function batch_export_xls_array_copy()
+    {
+
+
+        set_time_limit(0);
+        ini_set('memory_limit', '1024M');
+
+        $map['create_time'] =['between',['2020-01-01 00:00:00','2020-12-31 23:59:59']];
+//        $map['id'] = ['lt',5212];
+//        $map['work_status'] = array('in', '2,3,5');
+//        0: '已取消', 1: '新建', 2: '待审核', 4: '审核拒绝', 3: '待处理', 5: '部分处理', 6: '已处理'
+        $list = $this->model
+            ->where($map)
+            ->field('id,base_grand_total,email')
+            ->order('id desc')
+            ->select();
+        $list = collection($list)->toArray();
+
+
+
+
+        foreach ($list as $key => $value) {
+
+            $csv[$key]['email'] = $value['email'];  //客户邮箱
+            $csv[$key]['base_grand_total'] = $value['base_grand_total']; //订单金额
+            $csv[$key]['id'] = $value['id']; //订单金额
+
+        }
+
+        $headlist = [
+            '客户邮箱', '订单金额','id'
+        ];
+        $path = "/uploads/";
+        $fileName = '工单数据2020-单独字段导出';
+        Excel::writeCsv($csv, $headlist, $path . $fileName);
+    }
+
 
     /**
      * 导出工单

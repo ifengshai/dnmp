@@ -593,9 +593,20 @@ class ItemPlatformSku extends Backend
             if ($itemPlatformRow['is_upload'] == 1) { //商品已经上传，无需再次上传
                 $this->error(__('The product has been uploaded, there is no need to upload again'));
             }
-           
+            //查询商品分类
+            $item = new \app\admin\model\itemmanage\Item();
+            $res = $item->where(['sku' => $itemPlatformRow['sku'],'is_open' => 1,'is_del' => 1])->find();
             //审核通过把SKU同步到有映射关系的平台
-            $uploadItemArr['skus']  = [$itemPlatformRow['platform_sku']];
+            if ($itemPlatformRow['platform_id'] == 12) {
+                $uploadItemArr['skus'][0]  = [
+                    'sku' =>  $itemPlatformRow['platform_sku'],
+                    'type' =>  $res->category_id == 53 ? 1 : 2
+                ];
+                $uploadItemArr['sku']  = $itemPlatformRow['platform_sku'];
+                $uploadItemArr['type']  = $res->category_id == 53 ? 1 : 2;
+            } else {
+                $uploadItemArr['skus']  = [$itemPlatformRow['platform_sku']];
+            }
             $uploadItemArr['site'] = $itemPlatformRow['platform_id'];
             $soap_res = Soap::createProduct($uploadItemArr);
             if ($soap_res) {

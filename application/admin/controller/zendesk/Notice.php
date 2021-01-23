@@ -361,7 +361,7 @@ class Notice extends Controller
         $tags = join(',', $tags);
         //开始插入相关数据
         //开启事务
-        //Db::startTrans();
+        Db::startTrans();
         try {
             //根据用户的id获取用户的信息
             $user = $this->client->crasp()->findUser(['id' => $ticket->requester_id]);
@@ -441,12 +441,12 @@ class Notice extends Controller
                     'update_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $comment->created_at))+8*3600)),
                 ]);
             }
-            //Db::commit();
+            Db::commit();
             //写入附表
         } catch (Exception $e) {
-//            Db::rollback();
+            Db::rollback();
             file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.log', $id . "\r\n", FILE_APPEND);
-            //echo $e->getMessage();
+            echo $e->getMessage();
         }
         return 'success';
     }
@@ -1281,7 +1281,7 @@ class Notice extends Controller
      */
     public function asyncUpdate()
     {
-        $params = 'type:ticket updated_at>=2020-09-24T00:00:00Z updated_at<=2020-09-24T12:59:00Z order_by:updated_at sort:asc';
+        $params = 'type:ticket updated_at>=2021-01-19T23:59:00Z updated_at<=2021-01-20T23:59:00Z order_by:updated_at sort:asc';
         //Get all tickets
         $tickets = $this->client->search()->find($params);
 

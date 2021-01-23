@@ -346,8 +346,10 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
         }
 
         //获取支付信息
-        $pay = $this->zeelool->getPayDetail($row->site, $row->entity_id);
-
+        if ($row->site != 5) {
+            $pay = $this->zeelool->getPayDetail($row->site, $row->entity_id);
+        }
+       
         //订单明细数据
         $item = $this->orderitemoption->where('order_id', $ids)->select();
         $items = collection($item)->toArray();

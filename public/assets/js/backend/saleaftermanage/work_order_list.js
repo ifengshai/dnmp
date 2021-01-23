@@ -76,7 +76,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         },
                         { field: 'coupon_str', title: __('优惠券') },
                         { field: 'replacement_order', title: __('补发订单号') },
-                        { field: 'order_status', title: __('订单状态'), custom: { 1: 'success', 2: 'orange', 3: 'danger' }, searchList: { 1: '低', 2: '中', 3: '高' }, formatter: Table.api.formatter.status },
+                        { field: 'work_level', title: __('Work_level'), custom: { 1: 'success', 2: 'orange', 3: 'danger' }, searchList: { 1: '低', 2: '中', 3: '高' }, formatter: Table.api.formatter.status },
                         {
                             field: 'problem_type_content',
                             title: __('Problem_type_content'),
@@ -389,12 +389,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
             });
 
 
-            //批量打印标签
+            //批量打印标签    
             $('.btn-batch-printed').click(function () {
                 var ids = Table.api.selectedids(table);
                 window.open('work_order_list/batch_print_label/ids/' + ids, '_blank');
             });
-            //批量导出xls
+            //批量导出xls 
             $('.btn-batch-export-xls').click(function () {
                 var ids = Table.api.selectedids(table);
                 if (ids.length > 0) {
@@ -616,13 +616,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             for(var j = 0;j<choose_group.length;j++){
                                 input_content += '<input type="hidden" name="row[order_recept][appoint_group][' + id + '][]" value="' + group_id + '"/>';
                                 input_content += '<input type="hidden" name="row[order_recept][appoint_ids][' + id + '][]" value="' + choose_group[j] + '"/>';
-                                input_content += '<input type="hidden" name="row[order_recept][appoint_users][' + id + '][]" value="' + Config.users[choose_group[j]] + '"/>';
+                                input_content += '<input type="hidden" name="row[order_recept][appoint_users][' + id + '][]" value="' + Config.users[choose_group[j]] + '"/>';                            
                             }
                         }else{
                             count = 1;
                             input_content += '<input type="hidden" name="row[order_recept][appoint_group][' + id + '][]" value="0"/>';
                             input_content += '<input type="hidden" name="row[order_recept][appoint_ids][' + id + '][]" value="' + Config.userid + '"/>';
-                            input_content += '<input type="hidden" name="row[order_recept][appoint_users][' + id + '][]" value="' + Config.users[Config.userid] + '"/>';
+                            input_content += '<input type="hidden" name="row[order_recept][appoint_users][' + id + '][]" value="' + Config.users[Config.userid] + '"/>';                            
                         }
                         //获取是否需要审核
                         var step_is_check = $('#step' + id + '-is_check').val();
@@ -685,7 +685,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             // }
                         }
                     }
-
+                    
                     //判断如果为处理任务时
                     /*if (Config.ids) {
                         if (problem_type_id == 1) {
@@ -713,9 +713,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             for(var n=0;n<Config.workOrderConfigValue.group[arr[i]].length;n++){
                                 appoint_users.push(Config.workOrderConfigValue.group[arr[i]][n]);
                             }
-
+                            
                         }
-
+                        
                     }
 
                     if(count == 1){
@@ -723,7 +723,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     }else{
                          if(appoint_users[Config.userid]){
                             delOne(Config.userid,appoint_users);
-                        }
+                        }                         
                     }
                     if(checkID.length>0 && appoint_users.length === 0){
                         if(!appoint_users[Config.userid]){
@@ -732,7 +732,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     }else if(checkID.length === 0){
                         if(appoint_users[Config.userid]){
                             delOne(Config.userid,appoint_users);
-                        }
+                        } 
                     }
                     //循环根据承接人id获取对应人名称
                     appoint_users = array_filter(appoint_users);
@@ -1119,7 +1119,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         $('#step' + choose_problem_step[j].step_id + '-appoint_group').val((choose_problem_step[j].extend_group_id));
                     }else{
                         $('#step' + choose_problem_step[j].step_id + '-appoint_group').val(0);
-                    }
+                    }    
                 }
                 //id大于5 默认措施4
                 // if (id > 4) {
@@ -1201,9 +1201,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         for(var n=0;n<Config.workOrderConfigValue.group[arr[i]].length;n++){
                             appoint_users.push(Config.workOrderConfigValue.group[arr[i]][n]);
                         }
-
+                        
                     }
-
+                    
                 }
                 //console.log(appoint_users);
                 //循环根据承接人id获取对应人名称
@@ -1249,7 +1249,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 itemSelectpicker(2);
             }
 
-
+            
             //子单措施选择联动
 
 
@@ -1289,7 +1289,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     //修改地址
                     changeOrderAddress();
                 }
-            })
+            }) 
 
 
             //点击事件 #todo::需判断仓库或者客服
@@ -1315,7 +1315,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         var content = '';
                         for(i=0;i<data.length;i++){
                             //$('#all_after_user').html(Config.users[data[i]]);
-                            content += Config.users[data[i]]+' ';
+                            content += Config.users[data[i]]+' ';   
                         }
                         $('#all_after_user').html(content);
                     },function(data,ret){
@@ -1364,7 +1364,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             $('#step' + choose_problem_step[j].step_id + '-appoint_group').val((choose_problem_step[j].extend_group_id));
                         }else{
                             $('#step' + choose_problem_step[j].step_id + '-appoint_group').val(0);
-                        }
+                        }    
                     }
                     var checkID = [];//定义一个空数组
                     $("input[name='row[measure_choose_id][]']:checked").each(function (i) {
@@ -1458,14 +1458,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             for(var j = 0;j<choose_group.length;j++){
                                 input_content += '<input type="hidden" name="row[order_recept][appoint_group][' + id + '][]" value="' + group_id + '"/>';
                                 input_content += '<input type="hidden" name="row[order_recept][appoint_ids][' + id + '][]" value="' + choose_group[j] + '"/>';
-                                input_content += '<input type="hidden" name="row[order_recept][appoint_users][' + id + '][]" value="' + Config.users[choose_group[j]] + '"/>';
+                                input_content += '<input type="hidden" name="row[order_recept][appoint_users][' + id + '][]" value="' + Config.users[choose_group[j]] + '"/>';                            
                             }
                         }else{
                             count =1;
                             input_content += '<input type="hidden" name="row[order_recept][appoint_group][' + id + '][]" value="0"/>';
                             input_content += '<input type="hidden" name="row[order_recept][appoint_ids][' + id + '][]" value="' + Config.userid + '"/>';
-                            input_content += '<input type="hidden" name="row[order_recept][appoint_users][' + id + '][]" value="' + Config.users[Config.userid] + '"/>';
-                        }
+                            input_content += '<input type="hidden" name="row[order_recept][appoint_users][' + id + '][]" value="' + Config.users[Config.userid] + '"/>';                            
+                        }                        
                         //编辑页面的修改地址
                         if(id == 13){
                             changeOrderAddress();
@@ -1529,16 +1529,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             for(var n=0;n<Config.workOrderConfigValue.group[arr[i]].length;n++){
                                 appoint_users.push(Config.workOrderConfigValue.group[arr[i]][n]);
                             }
-
+                            
                         }
-
+                        
                     }
                     if(count == 1){
                         appoint_users.push(Config.userid);
                     }else{
                          if(appoint_users[Config.userid]){
                             delOne(Config.userid,appoint_users);
-                        }
+                        }                         
                     }
                     //判断如果为补价 优惠券 积分 追加自己id为承接人
                     // var self = ["8","9","10"];
@@ -1548,7 +1548,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     // }else{
                     //     if(appoint_users[Config.userid]){
                     //         delOne(Config.userid,appoint_users);
-                    //     }
+                    //     }   
                     // }
                     //循环根据承接人id获取对应人名称
                     for (var j = 0; j < appoint_users.length; j++) {
@@ -1587,7 +1587,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         if (!section_item_content_html) {itemSelectpicker(2);}
                         $('#section_item_content').show();
                     }
-                    //判断是否取消主订单，若取消将子单号下拉框锁住，取消选中将解开 end
+                    //判断是否取消主订单，若取消将子单号下拉框锁住，取消选中将解开 end                
                 }
             });
             var lens_click_data_add_edit;
@@ -1771,7 +1771,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     if (prescription.pd == '' || prescription.pd == 0) {
                         prescription_div.find('input[name="row[replacement][pd_r][]"]').val(prescription.pd_r);
                         prescription_div.find('input[name="row[replacement][pd_l][]"]').val(prescription.pd_l);
-
+                        
                     } else {
                         prescription_div.find('input[name="row[replacement][pd_r][]"]').val(prescription.pd);
                         //prescription_div.find('input[name="row[replacement][pd_l][]"]').attr('disabled',true);
@@ -1965,7 +1965,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         if (2 != Config.work_type) {
                             $('#order_item_numbers').val('');
                         }
-
+    
                     }
                     $('.status').val(1);
                 })
@@ -2125,7 +2125,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             $('#step' + choose_problem_step[j].step_id + '-appoint_group').val((choose_problem_step[j].extend_group_id));
                         }else{
                             $('#step' + choose_problem_step[j].step_id + '-appoint_group').val(0);
-                        }
+                        }    
                     }
                     if (Config.measureList) {
                         var id = Config.problem_type_id;
@@ -2185,7 +2185,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 //         var secondNode = $('.step' + id + '-' + checkIDss[m]);
                                 //     }
                                 // }
-                                var secondNode = $('.step' + checkIDss[m] + '-' + checkIDss[m]);
+                                var secondNode = $('.step' + checkIDss[m] + '-' + checkIDss[m]); 
                                 console.log(secondNode);
                                 if (secondNode.is(':hidden')) {
                                     secondNode.show();
@@ -2230,14 +2230,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     for(var j = 0;j<choose_group.length;j++){
                                         input_content += '<input type="hidden" name="row[order_recept][appoint_group][' + id + '][]" value="' + group_id + '"/>';
                                         input_content += '<input type="hidden" name="row[order_recept][appoint_ids][' + id + '][]" value="' + choose_group[j] + '"/>';
-                                        input_content += '<input type="hidden" name="row[order_recept][appoint_users][' + id + '][]" value="' + Config.users[choose_group[j]] + '"/>';
+                                        input_content += '<input type="hidden" name="row[order_recept][appoint_users][' + id + '][]" value="' + Config.users[choose_group[j]] + '"/>';                            
                                     }
                                 }else{
                                     count =1;
                                     input_content += '<input type="hidden" name="row[order_recept][appoint_group][' + id + '][]" value="0"/>';
                                     input_content += '<input type="hidden" name="row[order_recept][appoint_ids][' + id + '][]" value="' + Config.userid + '"/>';
-                                    input_content += '<input type="hidden" name="row[order_recept][appoint_users][' + id + '][]" value="' + Config.users[Config.userid] + '"/>';
-                                }
+                                    input_content += '<input type="hidden" name="row[order_recept][appoint_users][' + id + '][]" value="' + Config.users[Config.userid] + '"/>';                            
+                                }                                
 
                                 //获取是否需要审核
                                 if ($('#step' + id + '-is_check').val() > 0) {
@@ -2265,9 +2265,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     for(var n=0;n<Config.workOrderConfigValue.group[arr[i]].length;n++){
                                         appoint_users.push(Config.workOrderConfigValue.group[arr[i]][n]);
                                     }
-
+                                    
                                 }
-
+                                
                             }
                             // if(count == 1){
                             //     appoint_users.push(Config.userid);
@@ -2275,7 +2275,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             // }else{
                             //      if(appoint_users[Config.create_user_id]){
                             //         delOne(Config.userid,appoint_users);
-                            //     }
+                            //     }                         
                             // }
                             // if(checkID.length>0 && appoint_users.length === 0){
                             //     if(!appoint_users[Config.userid]){
@@ -2284,14 +2284,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             // }else if(checkID.length === 0){
                             //     if(appoint_users[Config.userid]){
                             //         delOne(Config.userid,appoint_users);
-                            //     }
+                            //     } 
                             // }
                             if(count == 1){
                                 appoint_users.push(Config.create_user_id);
                             }else{
                                  if(appoint_users[Config.create_user_id]){
                                     delOne(Config.create_user_id,appoint_users);
-                                }
+                                }                         
                             }
                             if(checkID.length>0 && appoint_users.length === 0){
                                 if(!appoint_users[Config.create_user_id]){
@@ -2300,7 +2300,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             }else if(checkID.length === 0){
                                 if(appoint_users[Config.create_user_id]){
                                     delOne(Config.create_user_id,appoint_users);
-                                }
+                                } 
                             }
 
                             //循环根据承接人id获取对应人名称
@@ -2311,7 +2311,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             }
 
                             var users = array_filter(username);
-
+                            
                             $('#appoint_group_users').html(users.join(','));
                             $('#recept_person_id').val(appoint_users.join(','));
                         }
@@ -2331,7 +2331,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             if(!checkIDss.includes(15)){
                                 changeOrder(work_id, 2);
                             }
-
+                            
                         }*/
                         //判断更换处方的状态，如果显示的话把数据带出来，如果隐藏则不显示镜架数据 end
                         //判断补发订单的状态，如果显示的话把数据带出来，如果隐藏则不显示补发数据 start
@@ -2477,7 +2477,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 lens_click_data_edit = '<div class="margin-top:10px;">' + json.lensform.html + '<div class="form-group-child4_del" style="width: 96%;padding-right: 0px;"><a href="javascript:;" style="width: 50%;" class="btn btn-danger btn-del-lens" title="删除"><i class="fa fa-trash"></i>删除</a></div></div>';
 
                                 $('.selectpicker ').selectpicker('refresh');
-                                //Controller.api.bindevent();
+                                //Controller.api.bindevent();            
                             } else if (2 == change_type) { //更换镜架信息
                                 $('#lens_contents'+item_order_number).html(json.lens.html);
                                 $('.selectpicker').selectpicker('refresh');
@@ -2522,13 +2522,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 for(var j = 0;j<choose_group.length;j++){
                                     item_input_content += '<input type="hidden" name="row[item_order_info]['+ item_order_number +'][appoint_group][' + id + '][]" value="' + group_id + '"/>';
                                     item_input_content += '<input type="hidden" name="row[item_order_info]['+ item_order_number +'][appoint_ids][' + id + '][]" value="' + choose_group[j] + '"/>';
-                                    item_input_content += '<input type="hidden" name="row[item_order_info]['+ item_order_number +'][appoint_users][' + id + '][]" value="' + Config.users[choose_group[j]] + '"/>';
+                                    item_input_content += '<input type="hidden" name="row[item_order_info]['+ item_order_number +'][appoint_users][' + id + '][]" value="' + Config.users[choose_group[j]] + '"/>';                            
                                 }
                             }else{
                                 count = 1;
                                 item_input_content += '<input type="hidden" name="row[item_order_info]['+ item_order_number +'][appoint_group][' + id + '][]" value="0"/>';
                                 item_input_content += '<input type="hidden" name="row[item_order_info]['+ item_order_number +'][appoint_ids][' + id + '][]" value="' + Config.userid + '"/>';
-                                item_input_content += '<input type="hidden" name="row[item_order_info]['+ item_order_number +'][appoint_users][' + id + '][]" value="' + Config.users[Config.userid] + '"/>';
+                                item_input_content += '<input type="hidden" name="row[item_order_info]['+ item_order_number +'][appoint_users][' + id + '][]" value="' + Config.users[Config.userid] + '"/>';                            
                             }
                             //获取是否需要审核
                             var step_is_check = $('#item_step' + id + '-is_check').val();
@@ -2554,7 +2554,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         //追加到元素之后
                         $("#item_input-hidden").append(item_input_content);
                         $("#cancelorder_input-hidden").append(cancelorder_html);
-
+                        
 
                         var arr = array_filter(item_appoint_group.split(','));
                         //循环根据承接组Key获取对应承接人id
@@ -2564,9 +2564,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 for(var n=0;n<Config.workOrderConfigValue.group[arr[i]].length;n++){
                                     item_appoint_users.push(Config.workOrderConfigValue.group[arr[i]][n]);
                                 }
-
+                                
                             }
-
+                            
                         }
 
                         if(count == 1){
@@ -2574,7 +2574,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         }else{
                              if(item_appoint_users[Config.userid]){
                                 delOne(Config.userid,item_appoint_users);
-                            }
+                            }                         
                         }
                         if(checkID.length>0 && item_appoint_users.length === 0){
                             if(!item_appoint_users[Config.userid]){
@@ -2583,7 +2583,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         }else if(checkID.length === 0){
                             if(item_appoint_users[Config.userid]){
                                 delOne(Config.userid,item_appoint_users);
-                            }
+                            } 
                         }
                         //循环根据承接人id获取对应人名称
                         item_appoint_users = array_filter(item_appoint_users);
@@ -2780,7 +2780,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 $(document).on('click', '.problem_type', function () {
                     var is_order_item = $('#is_order_item').val();
                     if (2 != Config.work_type && 1 != is_order_item) {itemSelectpicker(1,$(this));}
-
+                    
                 });*/
                 //下拉框选择子单联动
                 $(document).on('change', '.item_order_selectpicker', function () {
@@ -2824,13 +2824,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 for(var j = 0;j<choose_group.length;j++){
                                     item_input_content += '<input type="hidden" name="row[item_order_info]['+ use_flag +'][appoint_group][' + id + '][]" value="' + group_id + '"/>';
                                     item_input_content += '<input type="hidden" name="row[item_order_info]['+ use_flag +'][appoint_ids][' + id + '][]" value="' + choose_group[j] + '"/>';
-                                    item_input_content += '<input type="hidden" name="row[item_order_info]['+ use_flag +'][appoint_users][' + id + '][]" value="' + Config.users[choose_group[j]] + '"/>';
+                                    item_input_content += '<input type="hidden" name="row[item_order_info]['+ use_flag +'][appoint_users][' + id + '][]" value="' + Config.users[choose_group[j]] + '"/>';                            
                                 }
                             }else{
                                 count = 1;
                                 item_input_content += '<input type="hidden" name="row[item_order_info]['+ use_flag +'][appoint_group][' + id + '][]" value="0"/>';
                                 item_input_content += '<input type="hidden" name="row[item_order_info]['+ use_flag +'][appoint_ids][' + id + '][]" value="' + Config.userid + '"/>';
-                                item_input_content += '<input type="hidden" name="row[item_order_info]['+ use_flag +'][appoint_users][' + id + '][]" value="' + Config.users[Config.userid] + '"/>';
+                                item_input_content += '<input type="hidden" name="row[item_order_info]['+ use_flag +'][appoint_users][' + id + '][]" value="' + Config.users[Config.userid] + '"/>';                            
                             }
                             //获取是否需要审核
                             var step_is_check = $('#item_step' + id + '-is_check').val();
@@ -2889,9 +2889,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 for(var n=0;n<Config.workOrderConfigValue.group[arr[i]].length;n++){
                                     item_appoint_users.push(Config.workOrderConfigValue.group[arr[i]][n]);
                                 }
-
+                                
                             }
-
+                            
                         }
 
                         if(count == 1){
@@ -2899,7 +2899,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         }else{
                              if(item_appoint_users[Config.userid]){
                                 delOne(Config.userid,item_appoint_users);
-                            }
+                            }                         
                         }
                         if(checkID.length>0 && item_appoint_users.length === 0){
                             if(!item_appoint_users[Config.userid]){
@@ -2908,7 +2908,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         }else if(checkID.length === 0){
                             if(item_appoint_users[Config.userid]){
                                 delOne(Config.userid,item_appoint_users);
-                            }
+                            } 
                         }
                         //循环根据承接人id获取对应人名称
                         item_appoint_users = array_filter(item_appoint_users);

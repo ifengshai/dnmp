@@ -26,6 +26,7 @@ use GuzzleHttp\Client;
 use app\admin\controller\warehouse\Inventory;
 use app\admin\model\order\order\NewOrder;
 use app\admin\model\order\order\NewOrderItemProcess;
+use app\admin\model\saleaftermanage\WorkOrderChangeSku;
 
 class WorkOrderList extends Model
 {
@@ -220,7 +221,25 @@ class WorkOrderList extends Model
             ->where($order_item_where)
             ->column('sku','item_order_number')
         ;
-
+        if (!empty($order_item_list)) {
+            foreach ($order_item_list as $key => $value) {
+                //获取更改镜框最新信息
+                $work_order_change_sku = new WorkOrderChangeSku();
+                $change_sku = $work_order_change_sku
+                    ->alias('a')
+                    ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
+                    ->where([
+                        'a.change_type' => 1,
+                        'a.item_order_number' => $key,
+                        'b.operation_type' => 1
+                    ])
+                    ->order('a.id', 'desc')
+                    ->value('a.change_sku');
+                if ($change_sku) {
+                    $order_item_list[$key] = $change_sku;
+                }
+            }
+        }
         $sku_data = $_new_order_item_process
             ->where(['order_id'=>$result['id']])
             ->group('sku')
@@ -397,7 +416,7 @@ class WorkOrderList extends Model
     public function getAddress($increment_id, $item_order_number='')
     {
         //获取地址信息
-        $order_field = 'id,site,customer_email as email,customer_firstname as firstname,customer_lastname as lastname,order_type,country_id,region,region_id,city,street,postcode,telephone';
+        $order_field = 'id,site,customer_email as email,firstname,lastname,order_type,country_id,region,region_id,city,street,postcode,telephone';
         $_new_order = new NewOrder();
         $address = $_new_order
             ->where('increment_id', $increment_id)

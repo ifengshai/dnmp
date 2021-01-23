@@ -815,7 +815,7 @@ class ScmWarehouse extends Scm
         $list = $this->_in_stock
             ->alias('a')
             ->where($where)
-            ->field('a.id,a.check_id,a.in_stock_number,b.check_order_number,a.createtime,a.status')
+            ->field('a.id,a.check_id,a.in_stock_number,b.check_order_number,a.createtime,a.status,a.type_id')
             ->join(['fa_check_order' => 'b'], 'a.check_id=b.id', 'left')
 //            ->join(['fa_check_order_item' => 'c'], 'a.check_id=c.check_id', 'left')
             ->group('a.id')
@@ -832,6 +832,11 @@ class ScmWarehouse extends Scm
                 $list[$key]['check_in'] = 1;//是否有质检单 1有 0没有
             } else {
                 $list[$key]['check_in'] = 0;//是否有质检单 1有 0没有
+            }
+            //退货入库
+            if ($list[$key]['type_id'] == 3) {
+                $list[$key]['check_in'] = 0;
+                $list[$key]['check_id'] = 0;
             }
             $list[$key]['show_edit'] = 0 == $value['status'] ? 1 : 0;//编辑按钮
             $list[$key]['cancel_show'] = 0 == $value['status'] ? 1 : 0;//取消按钮
@@ -973,13 +978,14 @@ class ScmWarehouse extends Scm
 
                 //更新数据
                 $result = $this->_in_stock->allowField(true)->save($_in_stock_data, ['id' => $in_stock_id]);
-
                 //添加入库商品信息
                 if ($result !== false) {
                     $where_code = [];
+                    $where_code_sku = [];
                     foreach (array_filter($item_sku) as $k => $v) {
                         $item_save['purchase_id'] = $purchase_id;//采购单id
                         $item_save['in_stock_num'] = $v['in_stock_num'];//入库数量
+                        $item_save['price'] = $v['price'];//退货入库采购单单价
                         $item_save['sample_num'] = $check_data[$v['sku']] ?: 0;//留样数量
                         //修改入库单子表
                         $where = ['sku' => $v['sku'], 'in_stock_id' => $in_stock_id];
@@ -989,6 +995,7 @@ class ScmWarehouse extends Scm
                         foreach ($v['sku_agg'] as $k_code => $v_code) {
                             if (!empty($v_code['code'])) {
                                 $where_code[] = $v_code['code'];
+                                $where_code_sku[$v_code['code']] = $v['sku'];
                             }
                         }
                         //入库单移除条形码
@@ -1000,7 +1007,19 @@ class ScmWarehouse extends Scm
                         }
                     }
                     //入库单绑定条形码执行
-                    $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => ['in', $where_code]])->save(['in_stock_id' => $in_stock_id]);
+                    if ($where_code) {
+                        $save_code_data = [];
+                        if ($type_id == 3) {//退货入库绑定sku和商品条形码
+                            foreach ($where_code_sku as $key => $value) {
+                                $save_code_data['in_stock_id'] = $in_stock_id;
+                                $save_code_data['sku'] = $where_code_sku[$key];
+                                $this->_product_bar_code_item->where(['code' => $key])->update($save_code_data);
+                            }
+                        }else{
+                            $save_code_data['in_stock_id'] = $in_stock_id;
+                            $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => ['in', $where_code]])->save($save_code_data);
+                        }
+                    }
                 }
             } else {
                 //无入库单ID，新建入库单
@@ -1008,6 +1027,7 @@ class ScmWarehouse extends Scm
                 //检测条形码是否已绑定
                 $where['in_stock_id'] = ['>', 0];
                 foreach ($item_sku as $key => $value) {
+
                     $sku_code = array_column($value['sku_agg'], 'code');
                     if (count($value['sku_agg']) != count(array_unique($sku_code))) {
                         throw new Exception('条形码有重复，请检查');
@@ -1033,6 +1053,7 @@ class ScmWarehouse extends Scm
                 $params['createtime'] = date('Y-m-d H:i:s', time());
                 if ($platform_id) {
                     $params['platform_id'] = $platform_id;
+
                     foreach (array_filter($item_sku) as $k => $v) {
                         $sku_platform = $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $params['platform_id']])->find();
                         if (!$sku_platform) {
@@ -1046,25 +1067,38 @@ class ScmWarehouse extends Scm
                     if ($result !== false) {
                         $data = [];
                         $where_code = [];
+                        $where_code_sku = [];
                         foreach (array_filter($item_sku) as $k => $v) {
                             $data[$k]['sku'] = $v['sku'];
                             $data[$k]['in_stock_num'] = $v['in_stock_num'];//入库数量
+                            $data[$k]['price'] = $v['price'];//退货入库采购单单价
                             $data[$k]['in_stock_id'] = $this->_in_stock->id;
+                            if ($type_id == 3) {
+                                $data[$k]['price'] = $v['price'];
+                            }
 
                             //入库单绑定条形码数组组装
                             foreach ($v['sku_agg'] as $k_code => $v_code) {
                                 if (!empty($v_code['code'])) {
                                     $where_code[] = $v_code['code'];
+                                    $where_code_sku[$v_code['code']] = $v['sku'];
                                 }
                             }
                         }
-
+                        
                         //入库单绑定条形码执行
                         if ($where_code) {
-                            $this->_product_bar_code_item
-                                ->allowField(true)
-                                ->isUpdate(true, ['code' => ['in', $where_code]])
-                                ->save(['in_stock_id' => $this->_in_stock->id]);
+                            $save_code_data = [];
+                            if ($type_id == 3) {//退货入库绑定sku和商品条形码
+                                foreach ($where_code_sku as $key => $value) {
+                                    $save_code_data['in_stock_id'] = $this->_in_stock->id;
+                                    $save_code_data['sku'] = $where_code_sku[$key];
+                                    $this->_product_bar_code_item->where(['code' => $key])->update($save_code_data);
+                                }
+                            }else{
+                                $save_code_data['in_stock_id'] = $this->_in_stock->id;
+                                $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => ['in', $where_code]])->save($save_code_data);
+                            }
                         }
 
                         //批量添加
@@ -1102,6 +1136,7 @@ class ScmWarehouse extends Scm
                             $data[$k]['sku'] = $v['sku'];
                             $data[$k]['purchase_id'] = $purchase_id;//采购单id
                             $data[$k]['in_stock_num'] = $v['in_stock_num'];//入库数量
+                            $data[$k]['price'] = $v['price'];//退货入库采购单价
                             $data[$k]['in_stock_id'] = $this->_in_stock->id;//入库单ID
                             $data[$k]['sample_num'] = $check_data[$v['sku']] ?: 0;//留样数量
 
@@ -1159,6 +1194,33 @@ class ScmWarehouse extends Scm
 
     }
 
+    //生成退货入库采购单质检单
+    public function generate_purchase_check($item_sku){
+        $gen_check = new \app\admin\model\warehouse\Check;
+        $gen_check_item = new \app\admin\model\warehouse\CheckItem;
+        $gen_purchase_order = new \app\admin\model\purchase\PurchaseOrder;
+        $gen_purchase_order_item = new \app\admin\model\purchase\PurchaseOrderItem;
+        //生成采购单
+        $purchase_number = 'PO' . date('YmdHis') . rand(100, 999) . rand(100, 999);
+        $purchase_data = ['purchase_number'=>$purchase_number,'purchase_name'=>'退货入库','purchase_status'=>10,'check_status'=>2,'is_in_stock'=>1,'stock_status'=>2,'createtime'=>date('Y-m-d H:i:s')];
+
+        $purchase = $gen_purchase_order->insertGetId($purchase_data);
+        //生成质检单
+        $check_order_number = 'QC' . date('YmdHis') . rand(100, 999) . rand(100, 999);
+        $check_data = ['check_order_number'=>$check_order_number,'type'=>2,'purchase_id'=>$purchase,'status'=>2,'is_in_stock'=>1,'is_stock'=>1,'createtime'=>date('Y-m-d H:i:s')];
+        $check = $gen_check->insertGetId($check_data);
+
+        //生成子数据
+        foreach ($item_sku as $key => $value) {
+            $check_item_data = ['check_id'=>$check,'sku'=>$value['sku'],'purchase_num'=>$value['in_stock_num'],'check_num'=>$value['in_stock_num'],'purchase_id'=>$purchase];
+            $gen_check_item->insert($check_item_data);
+            $purchase_order_item_data = ['purchase_id'=>$purchase,'sku'=>$value['sku'],'purchase_order_number'=>$value['in_stock_num'],'purchase_num'=>$value['in_stock_num'],'purchase_price'=>$value['price'],'purchase_total'=>$value['price']*$value['in_stock_num'],'instock_num'=>$value['in_stock_num']];
+            $gen_purchase_order_item->insert($purchase_order_item_data);
+        }
+
+        return ['purchase_id'=>$purchase , 'check_id'=>$check];
+    }
+
     /**
      * 新建入库单页面--ok
      *
@@ -1186,6 +1248,7 @@ class ScmWarehouse extends Scm
             //入库单所需数据
             $info['check_id'] = $check_id;
             $info['check_order_number'] = $check_data['check_order_number'];
+            $info['check_order_number'] = $check_data['check_order_number'];
             //有关联质检单ID，则入库类型只取第一条数据：采购入库
             //            $in_stock_type = $in_stock_type[0];
             $in_stock_type_list[] = $in_stock_type[0];
@@ -1193,7 +1256,7 @@ class ScmWarehouse extends Scm
             //获取质检单商品数据
             $item_list = $this->_check_item
                 ->where(['check_id' => $check_id])
-                ->field('sku,quantity_num,sample_num')
+                ->field('sku,quantity_num,sample_num,arrivals_num')
                 ->select();
             $item_list = collection($item_list)->toArray();
             //获取条形码数据
@@ -1252,7 +1315,7 @@ class ScmWarehouse extends Scm
 
         $item_list = $this->_in_stock_item
             ->where(['in_stock_id' => $in_stock_id])
-            ->field('sku,in_stock_num')
+            ->field('sku,in_stock_num,price')
             ->select();
         empty($item_list) && $this->error(__('入库单子单数据异常'), [], 515);
 
@@ -1282,7 +1345,7 @@ class ScmWarehouse extends Scm
         }
 
         $info = [];
-        if ($check_order_info) {
+        if ($check_order_info && $_in_stock_info['type_id'] != 3) {
             //存在质检单号，则入库类型只取第一条数据：采购入库
             $in_stock_type_list[] = $in_stock_type[0];
             foreach ($item_list as $key => $value) {
@@ -1503,6 +1566,18 @@ class ScmWarehouse extends Scm
                         $is_purchase = 11;
                         $item_platform_sku = $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $v['platform_id']])->find();
                         $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $v['platform_id']])->setInc('stock', $v['in_stock_num']);
+                        //退货入库生成采购单质检单
+                        if ($v['type_id'] == 3 && $k == 0) {
+                            $item_sku = $this->_in_stock_item->where(['in_stock_id' => $in_stock_id])->select();
+                            $item_sku = collection($item_sku)->toArray();
+                            $generate_purchase_check = $this->generate_purchase_check($item_sku);
+                            //更新质检单信息
+                            $this->_in_stock->allowField(true)->isUpdate(true, ['id' => $in_stock_id])->save(['check_id' => $generate_purchase_check['check_id']]);
+                            $this->_product_bar_code_item
+                                ->allowField(true)
+                                ->isUpdate(true, ['in_stock_id' => $in_stock_id])
+                                ->save(['check_id' => $generate_purchase_check['check_id'],'purchase_id' => $generate_purchase_check['purchase_id']]);
+                        }
                         (new StockLog())->setData([
                             'type' => 2,
                             'site' => $v['platform_id'],
@@ -2508,6 +2583,21 @@ class ScmWarehouse extends Scm
         }
 
         $this->success($msg, ['info' => ''], 200);
+    }
+
+    //判断条形码是否绑定过sku
+    public function is_empty_code(){
+        $code = $this->request->request('code');
+        empty($code) && $this->error(__('条形码不能为空'), [], 403);
+
+        //检测条形码是否存在
+        $check_quantity = $this->_product_bar_code_item
+            ->field('code,sku')
+            ->where(['code' => $code])
+            ->find();
+        !empty($check_quantity['sku']) && $this->error(__('条形码不可用'), [], 405);
+
+        $this->success('扫码成功', [], 200);
     }
 
 }

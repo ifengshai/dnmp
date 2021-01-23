@@ -157,6 +157,7 @@ class ItemPlatformSku extends Model
         $resultItem['item_attr_name']   = $resultPlatform['item_attr_name'];
         $resultItem['item_type']        = $resultPlatform['item_type'];
         $resultItem['upload_field']     = $resultPlatform['upload_field'];
+        $resultItem['sku']              = $resultItem['sku'];
         return $resultItem;
     }
     /**
