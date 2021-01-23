@@ -469,7 +469,7 @@ END '节点状态'
 FROM
 	fa_order_process AS ldo
 	LEFT JOIN fa_order fao ON ldo.order_id = fao.id
-	LEFT JOIN database.mojing.fa_order_node fon ON ldo.site = fon.site 
+	LEFT JOIN database.fa_order_node fon ON ldo.site = fon.site 
 	AND ldo.increment_id = fon.order_number 
 WHERE
 	fon.delivery_time BETWEEN '2020-12-01 00:00:00' 
