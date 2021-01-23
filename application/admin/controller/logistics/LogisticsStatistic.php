@@ -370,7 +370,7 @@ class LogisticsStatistic extends Backend
         set_time_limit(0);
         ini_set('memory_limit', '512M');
 
-        $created_at = Db::connect('database.db_mojing_order')->table('excel_one')->select();
+        $created_at = Db::connect('database.db_mojing_order')->table('excel_one')->limit(500)->select();
         $created_at = collection($created_at)->toArray();
         dump($created_at);die();
 
