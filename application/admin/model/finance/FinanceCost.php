@@ -246,12 +246,12 @@ class FinanceCost extends Model
 
         //判断是否有工单
         $worklist = new \app\admin\model\saleaftermanage\WorkOrderList();
-
+        $workchangesku = new \app\admin\model\saleaftermanage\WorkOrderChangeSku();
+        $work_id = $worklist->where(['platform_order' => $order_number, 'work_status' => 7])->order('id desc')->value('id');
         //查询更改类型为更改镜片
-        $work_data = $worklist->alias('a')->field('b.od_sph,b.os_sph,b.od_cyl,b.os_cyl,b.os_add,b.od_add,b.lens_number,b.item_order_number')
-            ->join(['fa_work_order_change_sku' => 'b'], 'a.id=b.work_id')
-            ->where(['platform_order' => $order_number, 'work_status' => 7, 'change_type' => 2])
-            ->select();
+        $work_data = $workchangesku->where(['work_id' => $work_id, 'change_type' => 2])
+        ->field('b.od_sph,b.os_sph,b.od_cyl,b.os_cyl,b.os_add,b.od_add,b.lens_number,b.item_order_number')
+        ->select();
         $work_data = collection($work_data)->toArray();
         //工单计算镜片成本
         if ($work_data) {
