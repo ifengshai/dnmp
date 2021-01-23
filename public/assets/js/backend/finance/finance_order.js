@@ -35,10 +35,25 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                         [
                             {checkbox: true, },
                             {field: 'id', title: __('ID'),visible: true,sortable: true,operate:false},
-                            {field: 'order_number', title: __('订单号'),visible: true},
-                            {field: 'site', title: __('平台'),custom: { 1: 'danger', 2: 'success', 3: 'blue'}, searchList: { 1: 'zeelool', 2: 'voogueme', 3: 'nihao'},formatter: Table.api.formatter.status},
-                            {field: 'order_type', title: __('订单类型'),custom: { 1: 'success', 2: 'orange', 3: 'danger'}, searchList: { 1: '普通订单', 2: '批发', 3: '网红单'},formatter: Table.api.formatter.status},
-                            {field: 'order_money', title: __('订单总金额'),operate:false},
+                            {field: 'order_number', title: '订单号'},
+                            {
+                                field: 'site', title: __('站点'), addClass: 'selectpicker', data: 'multiple',
+                                searchList: {
+                                    1: 'Zeelool',
+                                    2: 'Voogueme',
+                                    3: 'Nihao',
+                                    4: 'Meeloog',
+                                    5: 'Wesee',
+                                    8: 'Amazon',
+                                    9: 'Zeelool_es',
+                                    10: 'Zeelool_de',
+                                    11: 'Zeelool_jp'
+                                }, operate: 'IN',
+                                formatter: Table.api.formatter.status
+                            },
+                            {field: 'order_type', title: __('订单类型'),custom: { 1: 'success', 2: 'orange', 3: 'danger', 4: 'warning', 9: 'warning'}, searchList: { 1: '普通订单', 2: '批发', 3: '网红单', 4: '补发单', 9: 'vip订单'},formatter: Table.api.formatter.status},
+                            {field: 'order_money', title: __('支付金额'),operate:false},
+                            {field: 'income_amount', title: __('订单总金额'),operate:false},
                             {field: 'frame_cost', title: __('镜架成本'),operate:false},
                             {field: 'fi_actual_payment_fee',title: __('物流成本'),operate:false},
                             /*{field: 'coupon_order_num',title: __('售后成本'),operate:false},*/

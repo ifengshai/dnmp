@@ -30,7 +30,7 @@ class FinanceCost extends Backend
      * @since 2021/01/21 15:24:14 
      * @return void
      */
-    public function table1()
+    public function income()
     {
         //设置过滤方法
         $this->request->filter(['strip_tags']);
@@ -42,11 +42,13 @@ class FinanceCost extends Backend
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->where($where)
+                ->where('type=1')
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
                 ->where($where)
+                ->where('type=1')
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
