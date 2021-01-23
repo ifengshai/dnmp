@@ -436,5 +436,56 @@ class LogisticsStatistic extends Backend
     }
 
 
+    public function test_one(){
+        $sql = "SELECT
+	fao.increment_id,
+	ldo.shipment_num,
+	FROM_UNIXTIME( fao.created_at + 28800, '%Y-%m-%d %H:%i:%s' ) AS '下单时间',
+	fao.country_id,
+	agent_way_title,
+	ldo.track_number,
+	ldo.exception_msg,
+	FROM_UNIXTIME( ldo.complete_time + 28800, '%Y-%m-%d %H:%i:%s' ) AS '发货时间',
+CASE fon.node_type 
+	WHEN 0 THEN
+	'下单' 
+	WHEN 1 THEN
+	'支付' 
+	WHEN 8 THEN
+	'上网' 
+	WHEN 10 THEN
+	'运输中' 
+	WHEN 11 THEN
+	'到达' 
+	WHEN 7 THEN
+	'已出库' 
+	WHEN 3 THEN
+	'配镜架' 
+	WHEN 40 THEN
+	'妥投' 
+	WHEN 35 THEN
+	'异常' ELSE fon.node_type 
+END '节点状态' 
+FROM
+	fa_order_process AS ldo
+	LEFT JOIN fa_order fao ON ldo.order_id = fao.id
+	LEFT JOIN mojing.fa_order_node fon ON ldo.site = fon.site 
+	AND ldo.increment_id = fon.order_number 
+WHERE
+	fon.delivery_time BETWEEN '2020-12-01 00:00:00' 
+	AND '2020-12-31 23:59:59' 
+	AND fon.node_type <> 40 
+ORDER BY
+	complete_time DESC;";
+
+        $list = Db::connect('database.db_mojing_order')->query($sql);
+        dump($list);die();
+
+
+
+    }
+
+
+
 
 }
