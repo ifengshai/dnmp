@@ -4497,51 +4497,7 @@ EOF;
             $spreadsheet->getActiveSheet()->setCellValue("AQ" . ($key * 1 + 2), $value['replacement_order']);
         }
 
-        //设置宽度
-        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(30);
-        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(12);
-        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(30);
-        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(12);
-        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(30);
-        $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(12);
-        $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(40);
-        $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(40);
-        $spreadsheet->getActiveSheet()->getColumnDimension('I')->setWidth(20);
-        $spreadsheet->getActiveSheet()->getColumnDimension('J')->setWidth(20);
-        $spreadsheet->getActiveSheet()->getColumnDimension('K')->setWidth(14);
-        $spreadsheet->getActiveSheet()->getColumnDimension('L')->setWidth(16);
-        $spreadsheet->getActiveSheet()->getColumnDimension('M')->setWidth(16);
-        $spreadsheet->getActiveSheet()->getColumnDimension('N')->setWidth(50);
-        $spreadsheet->getActiveSheet()->getColumnDimension('N')->setWidth(50);
-        $spreadsheet->getActiveSheet()->getColumnDimension('O')->setWidth(50);
-        $spreadsheet->getActiveSheet()->getColumnDimension('P')->setWidth(20);
-        $spreadsheet->getActiveSheet()->getColumnDimension('Q')->setWidth(20);
-        $spreadsheet->getActiveSheet()->getColumnDimension('R')->setWidth(20);
-        $spreadsheet->getActiveSheet()->getColumnDimension('S')->setWidth(20);
-        $spreadsheet->getActiveSheet()->getColumnDimension('T')->setWidth(20);
-        $spreadsheet->getActiveSheet()->getColumnDimension('U')->setWidth(20);
-        $spreadsheet->getActiveSheet()->getColumnDimension('V')->setWidth(20);
-        $spreadsheet->getActiveSheet()->getColumnDimension('W')->setWidth(20);
-        $spreadsheet->getActiveSheet()->getColumnDimension('X')->setWidth(20);
-        $spreadsheet->getActiveSheet()->getColumnDimension('Y')->setWidth(20);
-        $spreadsheet->getActiveSheet()->getColumnDimension('Z')->setWidth(20);
-        $spreadsheet->getActiveSheet()->getColumnDimension('AA')->setWidth(20);
-        $spreadsheet->getActiveSheet()->getColumnDimension('AB')->setWidth(20);
-        $spreadsheet->getActiveSheet()->getColumnDimension('AC')->setWidth(20);
-        $spreadsheet->getActiveSheet()->getColumnDimension('AD')->setWidth(20);
-        $spreadsheet->getActiveSheet()->getColumnDimension('AE')->setWidth(20);
-        $spreadsheet->getActiveSheet()->getColumnDimension('AF')->setWidth(20);
-        $spreadsheet->getActiveSheet()->getColumnDimension('AG')->setWidth(20);
-        $spreadsheet->getActiveSheet()->getColumnDimension('AH')->setWidth(20);
-        $spreadsheet->getActiveSheet()->getColumnDimension('AI')->setWidth(20);
-        $spreadsheet->getActiveSheet()->getColumnDimension('AJ')->setWidth(20);
-        $spreadsheet->getActiveSheet()->getColumnDimension('AK')->setWidth(20);
-        $spreadsheet->getActiveSheet()->getColumnDimension('AL')->setWidth(100);
-        $spreadsheet->getActiveSheet()->getColumnDimension('AM')->setWidth(200);
-        $spreadsheet->getActiveSheet()->getColumnDimension('AN')->setWidth(200);
-        $spreadsheet->getActiveSheet()->getColumnDimension('AO')->setWidth(200);
-        $spreadsheet->getActiveSheet()->getColumnDimension('AP')->setWidth(400);
-        $spreadsheet->getActiveSheet()->getColumnDimension('AQ')->setWidth(400);
+       
         //设置边框
         $border = [
             'borders' => [
