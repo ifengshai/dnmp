@@ -246,12 +246,12 @@ class FinanceCost extends Model
 
         //判断是否有工单
         $worklist = new \app\admin\model\saleaftermanage\WorkOrderList();
-
+        $workchangesku = new \app\admin\model\saleaftermanage\WorkOrderChangeSku();
+        $work_id = $worklist->where(['platform_order' => $order_number, 'work_status' => 7])->order('id desc')->value('id');
         //查询更改类型为更改镜片
-        $work_data = $worklist->alias('a')->field('b.od_sph,b.os_sph,b.od_cyl,b.os_cyl,b.os_add,b.od_add,b.lens_number,b.item_order_number')
-            ->join(['fa_work_order_change_sku' => 'b'], 'a.id=b.work_id')
-            ->where(['platform_order' => $order_number, 'work_status' => 7, 'change_type' => 2])
-            ->select();
+        $work_data = $workchangesku->where(['work_id' => $work_id, 'change_type' => 2])
+        ->field('b.od_sph,b.os_sph,b.od_cyl,b.os_cyl,b.os_add,b.od_add,b.lens_number,b.item_order_number')
+        ->select();
         $work_data = collection($work_data)->toArray();
         //工单计算镜片成本
         if ($work_data) {
@@ -307,14 +307,28 @@ class FinanceCost extends Model
         $cost = 0;
         foreach ($order_prescription as $k => $v) {
             foreach ($lens_list as $key => $val) {
-                //右眼
-                if ($v['lens_number'] == $val['lens_number'] && ((float) $v['od_sph'] >= (float) $val['sph_start'] && (float) $v['od_sph'] <= (float) $val['sph_end']) && ((float) $v['od_cyl'] >= (float) $val['cyl_start'] && (float) $v['od_cyl'] <= (float) $val['cyl_end'])) {
-                    $cost += $val['price'];
+                if ($v['od_cyl'] == '-0.25') {
+                    //右眼
+                    if ($v['lens_number'] == $val['lens_number'] && ((float) $v['od_sph'] >= (float) $val['sph_start'] && (float) $v['od_sph'] <= (float) $val['sph_end']) && ((float) $v['od_cyl'] == (float) $val['cyl_end'] && (float) $v['od_cyl'] == (float) $val['cyl_end'])) {
+                        $work_cost += $val['price'];
+                    }
+                } else {
+                    //右眼
+                    if ($v['lens_number'] == $val['lens_number'] && ((float) $v['od_sph'] >= (float) $val['sph_start'] && (float) $v['od_sph'] <= (float) $val['sph_end']) && ((float) $v['od_cyl'] >= (float) $val['cyl_start'] && (float) $v['od_cyl'] <= (float) $val['cyl_end'])) {
+                        $work_cost += $val['price'];
+                    }
                 }
 
-                //左眼
-                if ($v['lens_number'] == $val['lens_number'] && ((float) $v['os_sph'] >= (float) $val['sph_start'] && (float) $v['os_sph'] <= (float) $val['sph_end']) && ((float) $v['os_cyl'] >= (float) $val['cyl_start'] && (float) $v['os_cyl'] <= (float) $val['cyl_end'])) {
-                    $cost += $val['price'];
+                if ($v['os_cyl'] == '-0.25') {
+                    //左眼
+                    if ($v['lens_number'] == $val['lens_number'] && ((float) $v['os_sph'] >= (float) $val['sph_start'] && (float) $v['os_sph'] <= (float) $val['sph_end']) && ((float) $v['os_cyl'] == (float) $val['cyl_start'] && (float) $v['os_cyl'] == (float) $val['cyl_end'])) {
+                        $work_cost += $val['price'];
+                    }
+                } else {
+                    //左眼
+                    if ($v['lens_number'] == $val['lens_number'] && ((float) $v['os_sph'] >= (float) $val['sph_start'] && (float) $v['os_sph'] <= (float) $val['sph_end']) && ((float) $v['os_cyl'] >= (float) $val['cyl_start'] && (float) $v['os_cyl'] <= (float) $val['cyl_end'])) {
+                        $work_cost += $val['price'];
+                    }
                 }
             }
         }
