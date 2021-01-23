@@ -203,7 +203,7 @@ class Distribution extends Backend
                 if ($filter['status']) {
                     $map['b.status'] = ['in', $filter['status']];
                 }else{
-                    if ($label !==0){
+                    if ($label !=='0'){
                         $map['b.status'] = ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal']];
                     }
                 }
@@ -250,13 +250,11 @@ class Distribution extends Backend
                             ->where([
                                 'a.shelf_number' => ['eq', $filter['shelf_number']],
                             ])
-                            ->field('b.sku')->select();
-                    $shelf_number = collection($shelf_number)->toArray();
-
-                    $result = array_reduce($shelf_number, function ($result, $value) {
-                        return array_merge($result, array_values($value));
-                    }, array());
-                    $map['a.sku'] = ['in', $result];
+                            ->column('b.sku');
+                    //平台SKU表替换sku
+                    $sku = Db::connect('database.db_stock');
+                    $sku_array = $sku->table('fa_item_platform_sku')->where(['sku'=>['in',$shelf_number]])->column('platform_sku');
+                    $map['a.sku'] = ['in', $sku_array];
                 }
                 unset($filter['shelf_number']);
             }
@@ -285,10 +283,14 @@ class Distribution extends Backend
                 unset($filter['increment_id']);
             }
 
-            //子单批量
-            $filter_item_order_number = explode(' ', $filter['item_order_number']);
-            if (count($filter_item_order_number) > 1) {
-                $map['a.item_order_number'] = ['in', $filter_item_order_number];
+            if ($filter['item_order_number']) {
+                $ex_fil_arr = explode(' ', $filter['item_order_number']);
+                if (count($ex_fil_arr) > 1) {
+                    $map['a.item_order_number'] = ['in', $ex_fil_arr];
+                } else {
+                    $map['a.item_order_number'] = ['like', $filter['item_order_number'] . '%'];
+                }
+
                 unset($filter['item_order_number']);
             }
 
@@ -393,6 +395,7 @@ class Distribution extends Backend
             $abnormal_data = $this->_distribution_abnormal
                 ->where(['item_process_id' => ['in', array_column($list, 'id')], 'status' => 1])
                 ->column('work_id', 'item_process_id');
+
 
             foreach ($list as $key => $value) {
                 $stock_house_num = '-';
@@ -1732,6 +1735,9 @@ class Distribution extends Backend
                 )
 
                     && $this->error('子单号：' . $val['item_order_number'] . '有工单未处理');
+                if ($val['measure_choose_id'] == 21){
+                    $this->error(__('有工单存在暂缓措施未处理，无法操作'), [], 405);
+                }
             }
         }
 
@@ -2267,7 +2273,6 @@ class Distribution extends Backend
                     if (!empty($change_sku)) {//存在已完成的更改镜片的工单，替换更改的sku
                         $item_info['sku'] = $change_sku;
                     }
-
                     //仓库sku、库存
                     $platform_info = $this->_item_platform_sku
                         ->field('sku,stock')

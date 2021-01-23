@@ -793,7 +793,13 @@ class SaleAfterTask extends Model
                 } elseif ($order_platform == 11) {
                     $result[$k]['item'] = ZeeloolJpPrescriptionDetailHelper::get_one_by_increment_id($v['increment_id']);
                 }
-
+                if (!empty($result[$k]['item'][$k]['sku'])){
+                    foreach ($result[$k]['item'] as $key=>$value){
+                        $result[$k]['item'][$k]['order_number'] = Db::connect('database.db_mojing_order')->table('fa_order')->where('id',$value['order_id'])->value('increment_id');
+                        $result[$k]['item'][$k]['stock'] = Db::connect('database.db_stock')->table('fa_item_platform_sku')
+                            ->where('sku',$value['sku'])->where('platform_type',$order_platform)->value('stock');
+                    }
+                }
                 //订单地址表
                 $address = Db::connect($db)->table('sales_flat_order_address')->where(['parent_id' => $v['entity_id']])->field('address_type,telephone,postcode,street,city,region,country_id,firstname,lastname')->select();
                 $result[$k]['address'] = $address;

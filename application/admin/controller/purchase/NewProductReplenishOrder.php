@@ -553,6 +553,9 @@ class NewProductReplenishOrder extends Backend
                     case 5:
                         $website_type = 'Weseeoptical';
                         break;
+                    case 8:
+                        $website_type = 'Amazon';
+                        break;
                     case 9:
                         $website_type = 'Zeelool_de';
                         break;

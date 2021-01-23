@@ -342,6 +342,26 @@ class OrderReturn extends Backend
             //求出用户的所有订单信息
             $customer = (new SaleAfterTask())->getCustomerEmail($order_platform, $increment_id, $customer_name, $customer_phone, $track_number, $transaction_id, $customer_email);
 
+            if ($customer){
+                foreach ($customer as $key=>$item){
+                    //客户签收时间
+                    $customer[$key]['signing_time'] = Db::table('fa_order_node')->where('order_number',$item['increment_id'])->value('signing_time');
+                    //查询物流渠道，头程单号，订单商品数量
+                    $mojing_order = Db::connect('database.db_mojing_order');
+                    $morder_other_value = $mojing_order->table('fa_order_process')->alias('pro')
+                        ->join("fa_order fao",'pro.order_id = fao.id','left')
+                        ->where('pro.increment_id',$item['increment_id'])
+                        ->field('pro.agent_way_title,pro.shipping_num_temp,fao.total_qty_ordered')
+                        ->find();
+                    if ($morder_other_value){
+                        $morder_other_value = collection($morder_other_value)->toArray();
+                    }
+                    $customer[$key]['agent_way_title'] = $morder_other_value['agent_way_title'];
+                    $customer[$key]['shipping_num_temp'] = $morder_other_value['shipping_num_temp'];
+                    $customer[$key]['total_qty_ordered'] = $morder_other_value['total_qty_ordered'];
+                }
+            }
+
 
             if (!$customer) {
                 return json(['code' => 0,'msg' => '找不到订单信息，请重新尝试']);
@@ -491,6 +511,7 @@ class OrderReturn extends Backend
                     }
                 }
             }
+//            dump($customer);die();
             $this->view->assign('infoSynergyTaskResult', $infoSynergyTaskResult);
             // $this->view->assign('workOrderListResult', $workOrderListResult);
             $this->view->assign('saleAfterTaskResult', $saleAfterTaskResult);

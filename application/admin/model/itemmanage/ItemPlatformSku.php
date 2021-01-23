@@ -61,8 +61,10 @@ class ItemPlatformSku extends Model
         $result = $this->allowField(true)->isUpdate(false)->data($arr)->save();
         return $result ? $result : false;
     }
+
     public function addPlatformSku_copy($row)
     {
+
         //查询前缀
         $magento_platform = new \app\admin\model\platformManage\MagentoPlatform();
         $prefix = $magento_platform->getMagentoPrefix($row['site']);
@@ -91,9 +93,11 @@ class ItemPlatformSku extends Model
         $arr['create_time'] = date("Y-m-d H:i:s", time());
         $arr['platform_frame_is_rimless'] = $row['frame_is_rimless'];
         $arr['category_id'] = $row['category_id'];
+
         $result = $this->allowField(true)->isUpdate(false)->data($arr)->save();
         return $result ? $result : false;
     }
+
     /***
      * 查找平台SKU
      */

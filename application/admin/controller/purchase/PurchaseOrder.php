@@ -2092,7 +2092,7 @@ class PurchaseOrder extends Backend
             ->setCellValue("J1", "创建人");
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("K1", "创建时间");
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("L1", "生产周期");
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("M1", "预计到货时间");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("M1", "预计出货时间");
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("N1", "实际到货时间");
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("O1", "是否新品采购");
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("P1", "是否留样采购");
@@ -2141,8 +2141,8 @@ class PurchaseOrder extends Backend
             $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 1 + 2), $value['purchase_total']);
             $spreadsheet->getActiveSheet()->setCellValueExplicit("R" . ($key * 1 + 2), $value['1688_number'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
             $spreadsheet->getActiveSheet()->setCellValue("S" . ($key * 1 + 2), $value['type']);
-            $spreadsheet->getActiveSheet()->setCellValue("U" . ($key * 1 + 2), $readly_logistics_info['time']);
-            $spreadsheet->getActiveSheet()->setCellValue("T" . ($key * 1 + 2), $value['effect_time']);
+            $spreadsheet->getActiveSheet()->setCellValue("T" . ($key * 1 + 2), $readly_logistics_info['time']);
+            $spreadsheet->getActiveSheet()->setCellValue("U" . ($key * 1 + 2), $value['effect_time']);
         }
 
         //设置宽度
