@@ -351,7 +351,7 @@ class OrderReturn extends Backend
                     $morder_other_value = $mojing_order->table('fa_order_process')->alias('pro')
                         ->join("fa_order fao",'pro.order_id = fao.id','left')
                         ->where('pro.increment_id',$item['increment_id'])
-                        ->field('pro.agent_way_title,pro.shipping_num_temp,fao.total_qty_ordered')
+                        ->field('pro.agent_way_title,pro.shipment_num,fao.total_qty_ordered')
                         ->find();
                     if ($morder_other_value){
                         $morder_other_value = collection($morder_other_value)->toArray();
