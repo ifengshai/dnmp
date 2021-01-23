@@ -432,7 +432,7 @@ class LogisticsStatistic extends Backend
         ];
         $path = "/uploads/";
         $fileName = '仓库需要导出的数据-T';
-        Excel::writeCsv($value_array, $headlist, $path . $fileName);
+        Excel::writeCsv($csv, $headlist, $path . $fileName);
     }
 
 
