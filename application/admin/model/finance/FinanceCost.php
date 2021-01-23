@@ -271,7 +271,9 @@ class FinanceCost extends Model
                         }
                     } else {
                         //右眼
-                        if ($v['lens_number'] == $val['lens_number'] && ((float) $v['od_sph'] >= (float) $val['sph_start'] && (float) $v['od_sph'] <= (float) $val['sph_end']) && ((float) $v['od_cyl'] >= (float) $val['cyl_start'] && (float) $v['od_cyl'] <= (float) $val['cyl_end'])) {
+                        if ($v['lens_number'] == $val['lens_number'] && ((float) $v['od_sph'] == 0) && (float) $v['od_cyl'] == 0) {
+                            $work_cost += 0;
+                        } elseif ($v['lens_number'] == $val['lens_number'] && ((float) $v['od_sph'] >= (float) $val['sph_start'] && (float) $v['od_sph'] <= (float) $val['sph_end']) && ((float) $v['od_cyl'] >= (float) $val['cyl_start'] && (float) $v['od_cyl'] <= (float) $val['cyl_end'])) {
                             $work_cost += $val['price'];
                         }
                     }
@@ -283,7 +285,9 @@ class FinanceCost extends Model
                         }
                     } else {
                         //左眼
-                        if ($v['lens_number'] == $val['lens_number'] && ((float) $v['os_sph'] >= (float) $val['sph_start'] && (float) $v['os_sph'] <= (float) $val['sph_end']) && ((float) $v['os_cyl'] >= (float) $val['cyl_start'] && (float) $v['os_cyl'] <= (float) $val['cyl_end'])) {
+                        if ($v['lens_number'] == $val['lens_number'] && ((float) $v['os_sph'] == 0) && (float) $v['os_cyl'] == 0) {
+                            $work_cost += 0;
+                        } elseif ($v['lens_number'] == $val['lens_number'] && ((float) $v['os_sph'] >= (float) $val['sph_start'] && (float) $v['os_sph'] <= (float) $val['sph_end']) && ((float) $v['os_cyl'] >= (float) $val['cyl_start'] && (float) $v['os_cyl'] <= (float) $val['cyl_end'])) {
                             $work_cost += $val['price'];
                         }
                     }
