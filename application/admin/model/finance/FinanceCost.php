@@ -250,7 +250,7 @@ class FinanceCost extends Model
         $work_id = $worklist->where(['platform_order' => $order_number, 'work_status' => 7])->order('id desc')->value('id');
         //查询更改类型为更改镜片
         $work_data = $workchangesku->where(['work_id' => $work_id, 'change_type' => 2])
-        ->field('b.od_sph,b.os_sph,b.od_cyl,b.os_cyl,b.os_add,b.od_add,b.lens_number,b.item_order_number')
+        ->field('od_sph,os_sph,od_cyl,os_cyl,os_add,od_add,lens_number,item_order_number')
         ->select();
         $work_data = collection($work_data)->toArray();
         //工单计算镜片成本

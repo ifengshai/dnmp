@@ -56,7 +56,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'upload'], function (
                             {field: 'order_money', title: __('订单金额'),operate:false},
                             {field: 'income_amount', title: __('收入金额'),operate:false},
                             {field: 'order_currency_code', title: __('币种')},
-                            {field: 'is_carry_forward', title: __('是否结转'),custom: { 1: 'danger', 0: 'success'}, searchList: { 1: '已结转', 0: '未结转'},formatter: Table.api.formatter.status},
+                            {field: 'is_carry_forward', title: __('是否结转'),custom: { 1: 'success', 0: 'danger'}, searchList: { 1: '已结转', 0: '未结转'},formatter: Table.api.formatter.status},
                             {field: 'action_type', title: __('增加/冲减'),custom: { 1: 'success', 2: 'danger'}, searchList: { 1: '增加', 2: '冲减'},formatter: Table.api.formatter.status},
                             {field: 'payment_time', title: __('订单支付时间'),operate:false,formatter: Table.api.formatter.datetime},
                             {field: 'payment_method', title: __('支付方式'),operate:false},
