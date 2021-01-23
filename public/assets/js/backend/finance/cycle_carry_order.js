@@ -97,7 +97,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'upload'], function (
                             formatter: Table.api.formatter.status
                         },
                         { field: 'order_currency_code', title: __('币种'), operate: false },
-                        { field: 'order_type', title: __('订单类型'), custom: { 1: 'blue', 2: 'blue', 3: 'blue', 4: 'blue', 5: 'blue', 6: 'blue', 10: 'blue' }, searchList: { 1: '普通订单', 2: '批发单', 3: '网红单', 4: '补发单', 5: '补差价', 6: '一件代发', 10: '货到付款' }, formatter: Table.api.formatter.status },
+                        { field: 'order_type', title: __('订单类型'), custom: { 1: 'blue', 2: 'blue', 3: 'blue', 4: 'blue', 5: 'blue', 6: 'blue', 10: 'blue' }, searchList: { 1: '普通订单', 2: '批发单', 3: '网红单', 4: '补发单', 5: '补差价', 6: '一件代发',9:'VIP订单', 10: '货到付款' }, formatter: Table.api.formatter.status },
                         { field: 'order_money', title: __('订单金额'), operate: false },
                         { field: 'frame_cost', title: __('镜架成本'), operate: false },
                         { field: 'lens_cost', title: __('镜片成本'), operate: false },
