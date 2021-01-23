@@ -13,7 +13,7 @@ use think\exception\ValidateException;
 class LogisticsStatistic extends Backend
 {
     protected $model = null;
-    protected $noNeedLogin = ['export_not_shipped'];
+    protected  $noNeedLogin = ['export_not_shipped'];
 
     /**
      *初始化方法
@@ -181,7 +181,7 @@ class LogisticsStatistic extends Backend
         $where['node_type'] = 40;
         //7天妥投时间
         $serven_time_out = config('logistics.delievered_time_out')['serven'];
-        $ten_time_out = config('logistics.delievered_time_out')['ten'];
+        $ten_time_out    = config('logistics.delievered_time_out')['ten'];
         //14天妥投时间
         $fourteen_time_out = config('logistics.delievered_time_out')['fourteen'];
         //20天妥投时间
@@ -230,7 +230,7 @@ class LogisticsStatistic extends Backend
                             $serven_num++;
                         } elseif (($serven_time_out < $distance_time) && ($distance_time <= $ten_time_out)) {
                             $ten_num++;
-                        } elseif (($ten_time_out < $distance_time) && ($distance_time <= $fourteen_time_out)) {
+                        } elseif(($ten_time_out < $distance_time) && ($distance_time <= $fourteen_time_out)){
                             $fourteen_num++;
                         } elseif (($fourteen_time_out < $distance_time) && ($distance_time <= $twenty_time_out)) {
                             $twenty_num++;
@@ -365,22 +365,76 @@ class LogisticsStatistic extends Backend
     }
 
 
-    public function export_not_shipped()
-    {
+
+    public function export_not_shipped(){
         set_time_limit(0);
         ini_set('memory_limit', '512M');
+        $map['delivery_time'] = ['between', ['2020-12-01 00:00:00', '2020-12-31 23:59:59']];
+        $map['node_type'] = ['neq',40];
 
-        $created_at = Db::connect('database.db_mojing_order')->table('excel_one')->limit(500)->select();
-        $created_at = collection($created_at)->toArray();
-        dump($created_at);die();
+        $value_array = Db::table('fa_order_node')->where($map)->field('track_number,order_number,node_type')->limit(10)->select();
+        $value_array = collection($value_array)->toArray();
+        foreach ($value_array as $key=>$item){
+            switch ($item['node_type']){
+                case  0:
+                    $item['node_type'] = '下单';
+                    break;
+                case  1:
+                    $item['node_type'] = '支付';
+                    break;
+                case  8:
+                    $item['node_type'] = '上网';
+                    break;
+                case  10:
+                    $item['node_type'] = '运输中';
+                    break;
+                case  11:
+                    $item['node_type'] = '到达';
+                    break;
+                case  7:
+                    $item['node_type'] = '已出库';
+                    break;
+                case  3:
+                    $item['node_type'] = '配镜架';
+                    break;
+                case  40:
+                    $item['node_type'] = '妥投';
+                    break;
+                case  35:
+                    $item['node_type'] = '异常';
+                    break;
+            }
 
+            $value_array[$key]['track_number']  = $item['track_number']."\t";
+            $where['fao.increment_id'] = ['eq',$item['order_number']];
+            $created_at = Db::connect('database.db_mojing_order')->table('fa_order')
+                ->alias('fao')
+                ->join(['fa_order_process'=>'ldo'],'fao.id= ldo.order_id')
+                ->where($where)->field('fao.increment_id,ldo.shipment_num,fao.created_at,fao.country_id,ldo.agent_way_title,ldo.track_number,ldo.exception_msg,ldo.package_no')
+                ->select();
+            $created_at = collection($created_at)->toArray();
+            //下单时间
+            $csv[$key]['country_id']  = $created_at[0]['country_id'];
+            $csv[$key]['agent_way_title']  = $created_at[0]['agent_way_title'];
+            $csv[$key]['package_no']  = $created_at[0]['package_no'];
+            $csv[$key]['track_number']  = $item['track_number']."\t";
+            $csv[$key]['order_number']  = $item['order_number'];
+            $csv[$key]['exception_msg']  = $created_at[0]['exception_msg'];
+            $csv[$key]['node_type']  = $item['node_type'];
+            $csv[$key]['shipment_num']  = $created_at[0]['shipment_num'];
+            $csv[$key]['created_at']  = date('Y-m-d H:i:s',$created_at[0]['created_at']+28800);
+
+        }
         $headlist = [
-            '运单号', '订单号', '订单创建时间',
+           '国家',  '物流方式', '包裹号',
+           '运单号',  '平台订单号', '异常信息',
+           '订单状态',  '头程单号',
         ];
         $path = "/uploads/";
-        $fileName = '仓库需要导出数据';
+        $fileName = '仓库需要导出的数据-T';
         Excel::writeCsv($value_array, $headlist, $path . $fileName);
     }
+
 
 
 }
