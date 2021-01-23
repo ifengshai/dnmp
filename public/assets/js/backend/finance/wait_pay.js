@@ -32,7 +32,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
             $('#add').click(function () {
                 var ids = Table.api.selectedids(table);
                 if (ids.length > 0) {
-                    window.open(Config.moduleurl + '/finance/pay_order/add?ids=' + ids, '_blank');
+                    Backend.api.ajax({
+                        url: Config.moduleurl + '/finance/wait_pay/supplier',
+                        data: { ids: ids}
+                    }, function (data, ret) {
+                        if(data == 1){
+                            layer.msg('必须选择同一供应商进行创建');
+                        }else{
+                            window.open(Config.moduleurl + '/finance/pay_order/add?ids=' + ids, '_blank');
+                        }
+                    });
                 } else {
                     layer.msg('请选择付款申请单号');
                     return false;

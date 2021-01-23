@@ -102,10 +102,10 @@ class PayOrder extends Backend
      * 创建付款单
      * */
     public function add(){
-        //付款单号生成
-        $pay_number = 'FK' . date('YmdHis') . rand(100000, 999999);
         $params = $this->request->param();
         $ids = $params['ids'];
+        //付款单号生成
+        $pay_number = 'FK' . date('YmdHis') . rand(100000, 999999);
         $data = $this->getPayinfo($ids);
         $supplier = $data['supplier'];
         $settle = $data['settle'];
@@ -125,6 +125,7 @@ class PayOrder extends Backend
             //添加付款单主表数据
             $params['create_user'] = session('admin.nickname'); //创建人
             $params['create_time'] = time();   //创建时间
+            $params['supply_id'] = $supplier['id'];   //供应商id
             $pay_id = Db::name('finance_payorder')->insertGetId($params);
             //更改付款申请单中显示状态
             $this->financepurchase->where('id','in',$ids)->update(['is_show'=>2]);
@@ -154,6 +155,7 @@ class PayOrder extends Backend
                     $arr2['pay_id'] = $pay_id;
                     $arr2['pay_type'] = $vv2['pay_type'];
                     $arr2['purchase_id'] = $vv2['id'];
+                    $arr2['purchase_order_id'] = $vv2['purchase_id'];
                     $arr2['purchase_order'] = $vv2['purchase_number'];
                     $arr2['purchase_total'] = $vv2['purchase_total'];
                     $arr2['pay_rate'] = $vv2['pay_rate'];
@@ -161,7 +163,7 @@ class PayOrder extends Backend
                     Db::name('finance_payorder_item')->insert($arr2);
                 }
             }
-            //$this->success('添加成功！！', '',url('index'));
+            $this->success('添加成功！！', '',url('index'));
         }
         $this->view->assign(compact('pay_number','supplier', 'settle', 'prepay','total1','total2','total','count1','count2','ids'));
         return $this->view->fetch();
@@ -171,7 +173,7 @@ class PayOrder extends Backend
      * */
     public function detail(){
         $id = input('ids');
-        $supplier = $this->supplier->where('id',$id)->field('id,supplier_name,currency,period,opening_bank,bank_account,recipient_name')->select();
+        $supplier = $this->supplier->where('id',$id)->field('id,supplier_name,currency,period,opening_bank,bank_account,recipient_name')->find();
         //获取付款单信息
         $pay_order = $this->payorder->where('id',$id)->find();
         $imgs = array_filter(explode(',',$pay_order['invoice']));
@@ -218,9 +220,11 @@ class PayOrder extends Backend
      * */
     public function pay($ids = ''){
         $id = input('ids');
+        //更改状态
+        $this->payorder->where('id',$id)->update(['status'=>4]);
         /**************************************计算采购成本start**********************************/
         //判断采购单id
-        $purchase_order_ids = $this->payorder_item->where('pay_type',3)->where('pay_id',$id)->column('purchase_order_id');
+        $purchase_order_ids = $this->payorder_item->where('pay_type',3)->where('pay_id',$id)->group('purchase_order_id')->column('purchase_order_id');
         foreach ($purchase_order_ids as $v){
             //采购单总批次
             $batch_count = $this->batch->where('purchase_id',$v)->count();
@@ -338,7 +342,7 @@ class PayOrder extends Backend
         //供应商id
         $supplier_id = $this->financepurchase->where('id','in',$ids)->value('supplier_id');
         //供应商信息
-        $supplier = $this->supplier->where('id',$supplier_id)->field('id,supplier_name,currency,period,opening_bank,bank_account,recipient_name')->select();
+        $supplier = $this->supplier->where('id',$supplier_id)->field('id,supplier_name,currency,period,opening_bank,bank_account,recipient_name')->find();
         $settle_where['s.pay_type'] = 3;
         $settle_where['s.finance_purcahse_id'] = ['in',$ids];
         $settle_where['s.supplier_id'] = $supplier_id;
@@ -351,7 +355,7 @@ class PayOrder extends Backend
             $count1++;
         }
         //预付信息
-        $prepay = $this->financepurchase->alias('p')->join('fa_purchase_order o','o.id=p.purchase_id','left')->field('p.id,o.purchase_number,o.purchase_total,p.pay_rate,p.pay_grand_total,p.pay_type')->where('p.pay_type','in','1,2')->where('p.id','in',$ids)->where('p.supplier_id',$supplier_id)->select();
+        $prepay = $this->financepurchase->alias('p')->join('fa_purchase_order o','o.id=p.purchase_id','left')->field('p.id,o.purchase_number,o.purchase_total,p.pay_rate,p.pay_grand_total,p.pay_type,p.purchase_id')->where('p.pay_type','in','1,2')->where('p.id','in',$ids)->where('p.supplier_id',$supplier_id)->select();
         $total2 = 0;  //预付预付款金额合计
         $count2 = 0;
         foreach ($prepay as $v){

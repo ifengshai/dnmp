@@ -69,4 +69,21 @@ class WaitPay extends Backend
         }
         return $this->view->fetch();
     }
+    /*
+     * 判断创建付款单时是否为同一个供应商
+     * */
+    public function supplier(){
+        if ($this->request->isAjax()) {
+            $params = $this->request->param();
+            $ids = $params['ids'];
+            //判断供应商是否一致
+            $supplier_ids = $this->financepurchase->where('id','in',$ids)->column('supplier_id');
+            if(count(array_unique($supplier_ids)) != 1){
+                $status = 1;
+            }else{
+                $status = 0;
+            }
+            return json(['code' => 1, 'data' => $status]);
+        }
+    }
 }
