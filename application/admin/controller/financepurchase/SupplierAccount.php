@@ -63,6 +63,7 @@ class SupplierAccount extends Backend
                 $supplier_id = $vv['id'];
                 //供应商详细信息
                 $supplier = Db::name('supplier')->where('id', $supplier_id)->find();
+                $check_order_ids = Db::name('check_order')->where('supplier_id',$supplier_id)->column('id');
                 $list = $instock
                     ->alias('a')
                     ->join('check_order b', 'a.check_id = b.id', 'left')
@@ -73,6 +74,7 @@ class SupplierAccount extends Backend
                     ->where('b.supplier_id', $supplier_id)
                     // ->where('a.id', 'in', $ids)
                     ->where('a.status', 2)//已审核通过的入库单
+                    ->where('a.check_id','in',$check_order_ids)//已审核通过的入库单
                     ->field('c.purchase_number,a.id,d.purchase_price,c.purchase_freight,f.quantity_num,a.in_stock_number,b.check_order_number,b.purchase_id,b.batch_id,c.purchase_name,c.pay_type,e.in_stock_num,f.arrivals_num,f.quantity_num,f.unqualified_num')
                     ->select();
                 $wait_pay_money = 0;
@@ -237,8 +239,8 @@ class SupplierAccount extends Backend
         $instock = new Instock();
         // $supplier_id = 1;
         $supplier_id = $supplier['id'];
+        $check_order_ids = Db::name('check_order')->where('supplier_id',$supplier_id)->column('id');
         //供应商详细信息
-        $supplier = Db::name('supplier')->where('id', $supplier_id)->find();
         $list = $instock
             ->alias('a')
             ->join('check_order b', 'a.check_id = b.id', 'left')
@@ -249,8 +251,12 @@ class SupplierAccount extends Backend
             ->where('b.supplier_id', $supplier_id)
             // ->where('a.id', 'in', $ids)
             ->where('a.status', 2)//已审核通过的入库单
+            ->where('a.check_id','in',$check_order_ids)//已审核通过的入库单
             ->field('c.purchase_number,a.id,d.purchase_price,c.purchase_freight,f.quantity_num,a.in_stock_number,b.check_order_number,b.purchase_id,b.batch_id,c.purchase_name,c.pay_type,e.in_stock_num,f.arrivals_num,f.quantity_num,f.unqualified_num')
             ->select();
+        // dump($instock->getLastSql());
+        // dump($list);
+        // die;
         $wait_pay_money = 0;
         $now = date('Y-m-t', time());
         $all = 0;
@@ -371,6 +377,8 @@ class SupplierAccount extends Backend
             $supplier_id = input('supplier_id');
             //供应商详细信息
             $supplier = Db::name('supplier')->where('id', $supplier_id)->field('period,currency')->find();
+            //所有的质检单
+            $check_order_ids = Db::name('check_order')->where('supplier_id',$supplier_id)->column('id');
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $instock
                 ->alias('a')
@@ -381,6 +389,7 @@ class SupplierAccount extends Backend
                 ->join('in_stock_item e', 'a.id = e.in_stock_id')
                 ->where('b.supplier_id', $supplier_id)
                 ->where('a.status', 2)//已审核通过的入库单
+                ->where('a.check_id','in',$check_order_ids)//已审核通过的入库单
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
@@ -393,6 +402,7 @@ class SupplierAccount extends Backend
                 ->join('in_stock_item e', 'a.id = e.in_stock_id')
                 ->where('b.supplier_id', $supplier_id)
                 ->where('a.status', 2)//已审核通过的入库单
+                ->where('a.check_id','in',$check_order_ids)//已审核通过的入库单
                 ->field('c.purchase_number,a.id,d.purchase_price,c.purchase_freight,f.quantity_num,a.in_stock_number,b.check_order_number,b.purchase_id,b.batch_id,c.purchase_name,c.pay_type,e.in_stock_num,f.arrivals_num,f.quantity_num,f.unqualified_num')
                 ->where($where)
                 ->order($sort, $order)
