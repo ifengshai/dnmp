@@ -472,7 +472,7 @@ class PurchaseOrder extends Backend
                         $batch_arrival_time = $this->request->post("batch_arrival_time/a");
 
                         $batch_id = $this->request->post("batch_id/a");
-                        $batch_sku = $this->request->post("batch_sku/a");
+                        $batch_sku = array_values($this->request->post("batch_sku/a"));
                         $batch_item_id = $this->request->post("batch_item_id/a");
 
                         //判断是否有分批数据
