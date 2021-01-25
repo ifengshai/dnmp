@@ -4331,10 +4331,13 @@ EOF;
                     $number_sku = implode(',',array_reduce($cat,'array_merge',[]));
                 }
             }
-            $list[$key]['number_sku']  = implode('',$number_sku);
-
+            if ($number_sku){
+                $list[$key]['number_sku']  = implode('',$number_sku);
+            }
         }
-        dump($list);die();
+        dump($number_sku);
+        dump($list);
+        die();
 
         //查询用户id对应姓名
         $admin = new \app\admin\model\Admin();
