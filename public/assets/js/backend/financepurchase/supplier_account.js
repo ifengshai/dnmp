@@ -117,10 +117,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 // 表格1
                 var table1 = $("#table1");
                 table1.bootstrapTable({
-                    url: 'financepurchase/supplier_account/table1',
+                    url: 'financepurchase/supplier_account/table1?supplier_id='+ Config.supplier_id,
                     searchFormVisible: true,
                     toolbar: '#toolbar1',
-                    sortName: 'id',
+                    sortName: 'a.id',
                     search: false,
                     columns: [
                         [

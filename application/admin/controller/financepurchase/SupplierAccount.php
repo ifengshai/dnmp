@@ -235,7 +235,8 @@ class SupplierAccount extends Backend
         $supplier = Db::name('supplier')->where('id', $ids)->find();
         $supplier['period'] = $supplier['period'] == 0 ? '无账期':$supplier['period'] . '个月';
         $instock = new Instock();
-        $supplier_id = 1;
+        // $supplier_id = 1;
+        $supplier_id = $supplier['id'];
         //供应商详细信息
         $supplier = Db::name('supplier')->where('id', $supplier_id)->find();
         $list = $instock
@@ -367,7 +368,7 @@ class SupplierAccount extends Backend
                 return $this->selectpage();
             }
             $instock = new Instock();
-            $supplier_id = 1;
+            $supplier_id = input('supplier_id');
             //供应商详细信息
             $supplier = Db::name('supplier')->where('id', $supplier_id)->field('period,currency')->find();
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
@@ -380,6 +381,8 @@ class SupplierAccount extends Backend
                 ->join('in_stock_item e', 'a.id = e.in_stock_id')
                 ->where('b.supplier_id', $supplier_id)
                 ->where('a.status', 2)//已审核通过的入库单
+                ->where($where)
+                ->order($sort, $order)
                 ->count();
             $list = $instock
                 ->alias('a')
@@ -391,6 +394,9 @@ class SupplierAccount extends Backend
                 ->where('b.supplier_id', $supplier_id)
                 ->where('a.status', 2)//已审核通过的入库单
                 ->field('c.purchase_number,a.id,d.purchase_price,c.purchase_freight,f.quantity_num,a.in_stock_number,b.check_order_number,b.purchase_id,b.batch_id,c.purchase_name,c.pay_type,e.in_stock_num,f.arrivals_num,f.quantity_num,f.unqualified_num')
+                ->where($where)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
                 ->select();
             foreach ($list as $k => $v) {
                 //批次 第几批的
