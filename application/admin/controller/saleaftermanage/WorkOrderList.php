@@ -2839,6 +2839,7 @@ class WorkOrderList extends Backend
      */
     public function detail($ids = null)
     {
+
         //获取工单配置信息
         $workOrderConfigValue = $this->workOrderConfigValue;
 
@@ -2869,6 +2870,7 @@ class WorkOrderList extends Backend
 
         //子订单措施及数据
         $order_data = $this->model->getOrderItem($row->platform_order, $row->order_item_numbers, $row->work_type, $row);
+
         if(!empty($order_data['item_order_info'])){
             $this->assignconfig('item_order_info', $order_data['item_order_info']);
             unset($order_data['item_order_info']);
@@ -4267,6 +4269,62 @@ EOF;
             ->where($map)
             ->select();
         $list = collection($list)->toArray();
+
+        foreach ($list as $key=>$item){
+            $_new_order = new NewOrder();
+            $result_id = $_new_order
+                ->where('increment_id', $item['platform_order'])
+                ->value('id');
+            $order_item_where['order_id'] = $result_id;
+            if(!empty($item['order_item_numbers']) && 2 == $item['work_type']){
+                if(empty($work)){
+                    $select_number = explode(',',$item['order_item_numbers']);
+                }
+                $order_item_where['item_order_number'] = ['in',$item['order_item_numbers']];
+            }
+            $_new_order_item_process = new NewOrderItemProcess();
+            $order_item_list = $_new_order_item_process
+                ->where($order_item_where)
+                ->column('sku','item_order_number')
+            ;
+
+            if (!empty($order_item_list)) {
+                foreach ($order_item_list as $ke => $value) {
+                    //获取更改镜框最新信息
+                    $work_order_change_sku = new WorkOrderChangeSku();
+                    $change_sku = $work_order_change_sku
+                        ->alias('a')
+                        ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
+                        ->where([
+                            'a.change_type' => 1,
+                            'a.item_order_number' => $ke,
+                            'b.operation_type' => 1
+                        ])
+                        ->order('a.id', 'desc')
+                        ->value('a.change_sku');
+                    if ($change_sku) {
+                        $order_item_list[$ke] = $change_sku;
+                    }
+                }
+            }
+            if (!empty($item['order_sku'])){
+                $order_sku = explode(',',$item['order_sku']);
+                foreach($order_sku as $ct=>$val){
+                    if(strpos($val,'/') !== false){
+                        $sku_str = explode('/',$val)[1];
+                    }else{
+                        $sku_str = $val;
+                    }
+                    if (in_array($sku_str,$order_item_list)){
+                        $cat[$ct]['number'] = array_search($sku_str,$order_item_list);
+                        $cat[$ct]['sku'] = $sku_str;
+                    }
+                }
+            }
+            $list[$key]['number_sku'] = implode(',',array_reduce($cat,'array_merge',[]));
+        }
+
+
         //查询用户id对应姓名
         $admin = new \app\admin\model\Admin();
         $users = $admin->where('status', 'normal')->column('nickname', 'id');
@@ -4342,8 +4400,10 @@ EOF;
             ->setCellValue("AI1", "措施详情")
             ->setCellValue("AJ1", "承接详情")
             ->setCellValue("AK1", "工单回复备注")
-            ->setCellValue("AP1", "订单支付时间")
-            ->setCellValue("AQ1", "补发订单号");
+            ->setCellValue("AL1", "订单支付时间")
+            ->setCellValue("AM1", "补发订单号")
+            ->setCellValue("AN1", "子单号/SKU")
+        ;
         $spreadsheet->setActiveSheetIndex(0)->setTitle('工单数据');
         foreach ($list as $key => $value) {
             if ($value['after_user_id']) {
@@ -4489,12 +4549,13 @@ EOF;
             //回复
             if ($noteInfo && array_key_exists($value['id'], $noteInfo)) {
                 $value['note'] = $noteInfo[$value['id']];
-                $spreadsheet->getActiveSheet()->setCellValue("AO" . ($key * 1 + 2), $value['note']);
+                $spreadsheet->getActiveSheet()->setCellValue("AK" . ($key * 1 + 2), $value['note']);
             } else {
-                $spreadsheet->getActiveSheet()->setCellValue("AO" . ($key * 1 + 2), '');
+                $spreadsheet->getActiveSheet()->setCellValue("AK" . ($key * 1 + 2), '');
             }
-            $spreadsheet->getActiveSheet()->setCellValue("AP" . ($key * 1 + 2), $value['payment_time']);
-            $spreadsheet->getActiveSheet()->setCellValue("AQ" . ($key * 1 + 2), $value['replacement_order']);
+            $spreadsheet->getActiveSheet()->setCellValue("AL" . ($key * 1 + 2), $value['payment_time']);
+            $spreadsheet->getActiveSheet()->setCellValue("AM" . ($key * 1 + 2), $value['replacement_order']);
+            $spreadsheet->getActiveSheet()->setCellValue("AN" . ($key * 1 + 2), $value['number_sku']);
         }
 
         //设置宽度
@@ -4538,10 +4599,10 @@ EOF;
         $spreadsheet->getActiveSheet()->getColumnDimension('AK')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('AL')->setWidth(100);
         $spreadsheet->getActiveSheet()->getColumnDimension('AM')->setWidth(200);
-        $spreadsheet->getActiveSheet()->getColumnDimension('AN')->setWidth(200);
-        $spreadsheet->getActiveSheet()->getColumnDimension('AO')->setWidth(200);
-        $spreadsheet->getActiveSheet()->getColumnDimension('AP')->setWidth(400);
-        $spreadsheet->getActiveSheet()->getColumnDimension('AQ')->setWidth(400);
+//        $spreadsheet->getActiveSheet()->getColumnDimension('AN')->setWidth(200);
+//        $spreadsheet->getActiveSheet()->getColumnDimension('AO')->setWidth(200);
+//        $spreadsheet->getActiveSheet()->getColumnDimension('AP')->setWidth(400);
+//        $spreadsheet->getActiveSheet()->getColumnDimension('AQ')->setWidth(400);
         //设置边框
         $border = [
             'borders' => [
@@ -4558,7 +4619,7 @@ EOF;
         $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
         $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
 
-        $spreadsheet->getActiveSheet()->getStyle('A1:P' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle('A1:AM' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
 
         $spreadsheet->setActiveSheetIndex(0);
