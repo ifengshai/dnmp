@@ -4302,19 +4302,15 @@ EOF;
 
 //                $list[$key]['son_number']  = implode('/',array_keys($order_item_list));
 //                $list[$key]['son_sku']  = implode('/',array_values($order_item_list));
-              
-                $list[$key]['son_number'] = implode(',',$son_number_array);
+              if (!empty($son_number_array)){
+                  $list[$key]['son_number'] = implode(',',$son_number_array);
+              }
+
                 unset($order_item_list);
                 unset($son_number_array);
             }
 
-            //获取子订单措施、镜框、镜片数据
-            if($list['order_item_numbers']){
-                $item_order_info = [];
-                $select_number = explode(',',$list['order_item_numbers']);
-                foreach($select_number as $value){
 
-            }}
 
 
 
