@@ -4290,25 +4290,28 @@ EOF;
 
             if (!empty($order_item_list)){
                 $list[$key]['son_number']  = implode('/',array_keys($order_item_list));
+                $list[$key]['son_sku']  = implode('/',array_values($order_item_list));
+                unset($order_item_list);
             }
-            if (!empty($item['order_sku'])){
-                $order_sku = explode(',',$item['order_sku']);
-                foreach($order_sku as $ct=>$val){
-                    if(strpos($val,'/') !== false){
-                        $sku_str = explode('/',$val)[1];
-                    }else{
-                        $sku_str = $val;
-                    }
-                    if (in_array($sku_str,$order_item_list)){
-                        $cat[$ct]['number'] = array_search($sku_str,$order_item_list);
-                        $cat[$ct]['sku'] = $sku_str;
-                    }
-                    $number_sku[$ct] = implode(':',array_reduce($cat,'array_merge',[]));
-                }
-                if ($number_sku){
-                    $list[$key]['number_sku']  = implode('/',$number_sku);
-                }
-            }
+
+//            if (!empty($item['order_sku'])){
+//                $order_sku = explode(',',$item['order_sku']);
+//                foreach($order_sku as $ct=>$val){
+//                    if(strpos($val,'/') !== false){
+//                        $sku_str = explode('/',$val)[1];
+//                    }else{
+//                        $sku_str = $val;
+//                    }
+//                    if (in_array($sku_str,$order_item_list)){
+//                        $cat[$ct]['number'] = array_search($sku_str,$order_item_list);
+//                        $cat[$ct]['sku'] = $sku_str;
+//                    }
+//                    $number_sku[$ct] = implode(':',array_reduce($cat,'array_merge',[]));
+//                }
+//                if ($number_sku){
+//                    $list[$key]['number_sku']  = implode('/',$number_sku);
+//                }
+//            }
 
 
         }
@@ -4390,8 +4393,8 @@ EOF;
             ->setCellValue("AK1", "工单回复备注")
             ->setCellValue("AL1", "订单支付时间")
             ->setCellValue("AM1", "补发订单号")
-            ->setCellValue("AN1", "子单号")
-            ->setCellValue("AO1", "子单号/SKU")
+            ->setCellValue("AN1", "子单号/SKU");
+
         ;
         $spreadsheet->setActiveSheetIndex(0)->setTitle('工单数据');
         foreach ($list as $key => $value) {
@@ -4544,8 +4547,8 @@ EOF;
             }
             $spreadsheet->getActiveSheet()->setCellValue("AL" . ($key * 1 + 2), $value['payment_time']);
             $spreadsheet->getActiveSheet()->setCellValue("AM" . ($key * 1 + 2), $value['replacement_order']);
-            $spreadsheet->getActiveSheet()->setCellValue("AN" . ($key * 1 + 2), $value['son_number']);
-            $spreadsheet->getActiveSheet()->setCellValue("AO" . ($key * 1 + 2), $value['number_sku']);
+            $spreadsheet->getActiveSheet()->setCellValue("AN" . ($key * 1 + 2), $value['son_number'].'/'.$value['son_sku']);
+
         }
 
         //设置宽度
@@ -4590,7 +4593,7 @@ EOF;
         $spreadsheet->getActiveSheet()->getColumnDimension('AL')->setWidth(100);
         $spreadsheet->getActiveSheet()->getColumnDimension('AM')->setWidth(200);
         $spreadsheet->getActiveSheet()->getColumnDimension('AN')->setWidth(200);
-        $spreadsheet->getActiveSheet()->getColumnDimension('AO')->setWidth(200);
+//        $spreadsheet->getActiveSheet()->getColumnDimension('AO')->setWidth(200);
 //        $spreadsheet->getActiveSheet()->getColumnDimension('AP')->setWidth(400);
 //        $spreadsheet->getActiveSheet()->getColumnDimension('AQ')->setWidth(400);
         //设置边框
@@ -4609,7 +4612,7 @@ EOF;
         $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
         $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
 
-        $spreadsheet->getActiveSheet()->getStyle('A1:AO' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle('A1:AN' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
 
         $spreadsheet->setActiveSheetIndex(0);
