@@ -4289,9 +4289,17 @@ EOF;
             ;
 
             if (!empty($order_item_list)){
-                $list[$key]['son_number']  = implode('/',array_keys($order_item_list));
-                $list[$key]['son_sku']  = implode('/',array_values($order_item_list));
+                $son_number = array_keys($order_item_list);
+                $son_sku = array_values($order_item_list);
+                foreach ($son_number as $e=>$v){
+                    $son_number_array[] = $v.'/'.$son_sku[$e];
+                }
+//                $list[$key]['son_number']  = implode('/',array_keys($order_item_list));
+//                $list[$key]['son_sku']  = implode('/',array_values($order_item_list));
+
+                $list[$key]['son_number'] = implode(',',$son_number_array);
                 unset($order_item_list);
+                unset($son_number_array);
             }
 
 //            if (!empty($item['order_sku'])){
