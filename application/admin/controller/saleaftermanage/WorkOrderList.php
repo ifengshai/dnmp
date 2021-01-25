@@ -4328,18 +4328,16 @@ EOF;
                         $cat[$ct]['number'] = array_search($sku_str,$order_item_list);
                         $cat[$ct]['sku'] = $sku_str;
                     }
-                    $number_sku = implode(',',array_reduce($cat,'array_merge',[]));
+                    $number_sku[$ct] = implode(',',array_reduce($cat,'array_merge',[]));
                 }
             }
-            dump($number_sku);
-           
-            die();
+
             if ($number_sku){
                 $list[$key]['number_sku']  = implode('',$number_sku);
             }
         }
 
-
+        dump($list);die();
         //查询用户id对应姓名
         $admin = new \app\admin\model\Admin();
         $users = $admin->where('status', 'normal')->column('nickname', 'id');
