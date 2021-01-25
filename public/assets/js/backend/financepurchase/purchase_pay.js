@@ -15,6 +15,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
                 pk: 'id',
                 searchList:true,
+                commonSearch: true,
+                search: false,
+                searchFormVisible: true,
+                showExport: false,
+                showColumns: false,
+                showToggle: false,
                 columns: [
                     [
                         {checkbox: true},
@@ -23,11 +29,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'supplier_name', title: __('供应商名称'), operate: 'LIKE'},
                         {
                             field: 'pay_type', title: __('付款类型'), custom: { 0: 'success', 1: 'yellow', 2: 'blue', 3: 'danger'},
-                            searchList: { 0: '新建', 1: '预付款', 2: '全款预付', 3: '尾款'},
+                            searchList: {1: '预付款', 2: '全款预付', 3: '尾款'},
                             formatter: Table.api.formatter.status
                         },
-                        {field: 'pay_grand_total', title: __('付款金额（￥）'), visible: false},
-                        {field: 'base_currency_code', title: __('付款币种'), visible: false},
+                        {field: 'pay_grand_total', title: __('付款金额（￥）'), operate:false},
+                        {field: 'base_currency_code', title: __('付款币种')},
                         {
                             field: 'status', title: __('状态'), custom: { 0: 'success', 1: 'yellow', 2: 'blue', 3: 'danger'},
                             searchList: { 0: '新建', 1: '待审核', 2: '审核通过', 3: '审核拒绝', 4: '已完成', 5: '已取消'},

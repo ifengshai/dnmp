@@ -3,7 +3,7 @@
 namespace app\admin\controller\finance;
 
 use app\common\controller\Backend;
-
+use think\Db;
 
 class WaitPay extends Backend
 {
@@ -26,21 +26,10 @@ class WaitPay extends Backend
                 return $this->selectpage();
             }
             $filter = json_decode($this->request->get('filter'), true);
-            if($filter['order_number']){
-                //付款申请单号
-                $map['p.order_number'] = $filter['order_number'];
-            }
-            if($filter['supplier_name']){
-                //供应商名称
-                $map['s.supplier_name'] = ['like','%'.$filter['supplier_name'].'%'];
-            }
-            if($filter['userid']){
-                //审核人
-                $map['l.userid'] = $filter['userid'];
-            }
-            if($filter['create_person']){
+            if($filter['nickname']){
                 //创建人
-                $map['p.create_person'] = $filter['create_person'];
+                $ids = Db::name('finance_purchase_log')->alias('l')->join('fa_admin a','a.id=l.userid')->where('a.nickname',$filter['nickname'])->column('l.process_instance_id');
+                $map['p.process_instance_id'] = ['in',$ids];
             }
             //创建时间
             if($filter['create_time']){
@@ -49,13 +38,9 @@ class WaitPay extends Backend
                 $end = strtotime($createat[3].' '.$createat[4]);
                 $map['p.create_time'] = ['between', [$start,$end]];
             }
-
             $map['p.status'] = 4;
             $map['p.is_show'] = 1;
-            unset($filter['order_number']);
-            unset($filter['supplier_name']);
-            unset($filter['userid']);
-            unset($filter['create_person']);
+            unset($filter['nickname']);
             unset($filter['create_time']);
             unset($filter['one_time-operate']);
             $this->request->get(['filter' => json_encode($filter)]);
@@ -64,7 +49,6 @@ class WaitPay extends Backend
             $total = $this->financepurchase
                 ->alias('p')
                 ->join('fa_supplier s','s.id=p.supplier_id','left')
-                ->join('fa_finance_purchase_log l','p.process_instance_id=l.process_instance_id','left')
                 ->field('p.id,s.supplier_name,p.order_number,p.create_time,l.userid,p.create_person')
                 ->where($where)
                 ->where($map)
@@ -73,8 +57,7 @@ class WaitPay extends Backend
             $list = $this->financepurchase
                 ->alias('p')
                 ->join('fa_supplier s','s.id=p.supplier_id','left')
-                ->join('fa_finance_purchase_log l','p.process_instance_id=l.process_instance_id','left')
-                ->field('p.id,s.supplier_name,p.order_number,FROM_UNIXTIME(p.create_time) create_time,l.userid,p.create_person')
+                ->field('p.id,s.supplier_name,p.order_number,FROM_UNIXTIME(p.create_time) create_time,p.create_person')
                 ->where($where)
                 ->where($map)
                 ->order($sort, $order)
@@ -85,5 +68,22 @@ class WaitPay extends Backend
             return json($result);
         }
         return $this->view->fetch();
+    }
+    /*
+     * 判断创建付款单时是否为同一个供应商
+     * */
+    public function supplier(){
+        if ($this->request->isAjax()) {
+            $params = $this->request->param();
+            $ids = $params['ids'];
+            //判断供应商是否一致
+            $supplier_ids = $this->financepurchase->where('id','in',$ids)->column('supplier_id');
+            if(count(array_unique($supplier_ids)) != 1){
+                $status = 1;
+            }else{
+                $status = 0;
+            }
+            return json(['code' => 1, 'data' => $status]);
+        }
     }
 }
