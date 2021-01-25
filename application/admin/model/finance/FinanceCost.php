@@ -367,6 +367,7 @@ class FinanceCost extends Model
         $params['order_number'] = $out_stock_number;
         $params['frame_cost'] = $this->outstock_frame_cost($out_stock_id);
         $params['action_type'] = 1;
+        $params['order_currency_code'] = 'cny';
         $params['createtime'] = time();
         return $this->allowField(true)->save($params);
     }
