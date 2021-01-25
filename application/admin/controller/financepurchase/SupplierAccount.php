@@ -57,12 +57,9 @@ class SupplierAccount extends Backend
                 ->limit($offset, $limit)
                 ->select();
             $lists = collection($lists)->toArray();
-            foreach ($lists as $kkk => $vv) {
+            foreach ($lists as $kkk => $vvv) {
                 $instock = new Instock();
-                $supplier_id = 1;
-                $supplier_id = $vv['id'];
-                //供应商详细信息
-                $supplier = Db::name('supplier')->where('id', $supplier_id)->find();
+                $supplier_id = $vvv['id'];
                 $check_order_ids = Db::name('check_order')->where('supplier_id',$supplier_id)->column('id');
                 $list = $instock
                     ->alias('a')
@@ -72,7 +69,6 @@ class SupplierAccount extends Backend
                     ->join('purchase_order_item d', 'd.purchase_id = c.id')
                     ->join('in_stock_item e', 'a.id = e.in_stock_id')
                     ->where('b.supplier_id', $supplier_id)
-                    // ->where('a.id', 'in', $ids)
                     ->where('a.status', 2)//已审核通过的入库单
                     ->where('a.check_id','in',$check_order_ids)//已审核通过的入库单
                     ->field('c.purchase_number,a.id,d.purchase_price,c.purchase_freight,f.quantity_num,a.in_stock_number,b.check_order_number,b.purchase_id,b.batch_id,c.purchase_name,c.pay_type,e.in_stock_num,f.arrivals_num,f.quantity_num,f.unqualified_num')
@@ -143,7 +139,7 @@ class SupplierAccount extends Backend
                     if (!empty($data[0]['data'])){
                         //拿物流单接口返回的倒数第二条数据的时间作为揽件的时间 并且加一个月后的月底作为当前采购单批次的 结算周期
                         if (!empty(strtotime(array_slice($data[0]['data'],-1,1)[0]['time']))) {
-                            $list[$k]['period'] = date("Y-m-t", strtotime(array_slice($data[0]['data'],-1,1)[0]['time'] . '+' . $supplier['period'] . 'month'));
+                            $list[$k]['period'] = date("Y-m-t", strtotime(array_slice($data[0]['data'],-1,1)[0]['time'] . '+' . $vvv['period'] . 'month'));
                         } else {
                             $list[$k]['period'] = '获取不到物流单详情';
                         }
@@ -373,6 +369,11 @@ class SupplierAccount extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
+            $filter = json_decode($this->request->get('filter'), true);
+            if ($filter['period']){
+                unset($filter['period']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
             $instock = new Instock();
             $supplier_id = input('supplier_id');
             //供应商详细信息
@@ -480,6 +481,7 @@ class SupplierAccount extends Backend
     public function table2()
     {
         $statement = new \app\admin\model\financepurchase\Statement();
+        $supplier_id = input('supplier_id');
         //设置过滤方法
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
@@ -491,12 +493,14 @@ class SupplierAccount extends Backend
             $total = $statement
                 ->where($where)
                 ->order($sort, $order)
+                ->where('supplier_id',$supplier_id)
                 ->count();
 
             $list = $statement
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
+                ->where('supplier_id',$supplier_id)
                 ->select();
 
             $result = array("total" => $total, "rows" => $list);

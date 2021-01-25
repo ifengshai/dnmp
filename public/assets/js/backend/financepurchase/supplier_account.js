@@ -15,7 +15,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
                 pk: 'id',
                 // sortName: 'id',
-                searchList: true,
+                searchList:true,
+                commonSearch: true,
+                search: false,
+                searchFormVisible: true,
+                showExport: false,
+                showColumns: false,
+                showToggle: false,
                 columns: [
                     [
                         // {checkbox: true},
@@ -121,7 +127,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                     searchFormVisible: true,
                     toolbar: '#toolbar1',
                     sortName: 'a.id',
+                    searchList:true,
+                    commonSearch: true,
                     search: false,
+                    showExport: false,
+                    showColumns: false,
+                    showToggle: false,
                     columns: [
                         [
                             {field: 'state', checkbox: true},
@@ -158,7 +169,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 // 表格2
                 var table2 = $("#table2");
                 table2.bootstrapTable({
-                    url: 'financepurchase/supplier_account/table2',
+                    url: 'financepurchase/supplier_account/table2?supplier_id='+ Config.supplier_id,
                     extend: {
                         index_url: '',
                         add_url: '',
@@ -167,24 +178,29 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                         multi_url: '',
                         table: '',
                     },
-                    searchFormVisible: true,
                     toolbar: '#toolbar2',
                     sortName: 'id',
+                    searchList:true,
+                    commonSearch: true,
                     search: false,
+                    searchFormVisible: true,
+                    showExport: false,
+                    showColumns: false,
+                    showToggle: false,
                     columns: [
                         [
-                            {field: 'id', title: 'ID'},
-                            {field: 'statement_number', title: __('结算单号')},
-                            {field: 'wait_statement_total', title: __('结算金额')},
-                            {field: 'account_statement', title: __('结算账期时间')},
+                            {field: 'id', title: 'ID', operate: false},
+                            {field: 'statement_number', title: __('结算单号'), operate: false},
+                            {field: 'wait_statement_total', title: __('结算金额'), operate: false},
+                            {field: 'account_statement', title: __('结算账期时间'), formatter: Table.api.formatter.datetime, operate: 'RANGE', addclass: 'datetimerange'},
                             {
                                 field: 'status', title: __('状态'),
                                 custom: {0: 'success', 1: 'yellow', 2: 'blue', 3: 'danger'},
                                 searchList: {0: '新建', 1: '待审核', 2: '审核拒绝', 3: '待对账', 4: '待财务确认', 5: '已取消', 6: '已完成'},
-                                formatter: Table.api.formatter.status
+                                formatter: Table.api.formatter.status, operate: false
                             },
-                            {field: 'create_person', title: __('创建人')},
-                            {field: 'create_time', title: __('创建时间')},
+                            {field: 'create_person', title: __('创建人'), operate: false},
+                            {field: 'create_time', title: __('创建时间'), operate: false},
                             {
                                 field: 'operate',
                                 title: __('Operate'),

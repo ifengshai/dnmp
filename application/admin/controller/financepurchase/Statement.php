@@ -75,6 +75,12 @@ class Statement extends Backend
                     $list[$k]['period'] = $supplier['period'].'个月';
                 }
                 $list[$k]['purchase_person'] = $supplier['purchase_person'];
+                $statement = Db::name('finance_purchase')->where('pay_type',3)->where('purchase_id',$v['id'])->where('status','in',[0,1,2,3,4,6]);
+                if (!empty($statement)){
+                    $list[$k]['can_create'] = 0;
+                }else{
+                    $list[$k]['can_create'] = 1;
+                }
             }
             $result = array("total" => $total, "rows" => $list);
             return json($result);
@@ -122,9 +128,9 @@ class Statement extends Backend
                         $arr[$k]['purchase_batch'] = $v['purchase_batch'];
                         $arr[$k]['purchase_batch_id'] = $v['batch_id'];
                         $arr[$k]['supplier_id'] = $params['supplier_id'];
-                        $arr[$k]['before_total'] = $v['wait_pay'];
-                        $arr[$k]['now_before_total'] = $v['now_wait_pay'];
-                        $arr[$k]['now_pay_total'] = $v['now_wait_pay'];
+                        $arr[$k]['before_total'] = $v['wait_pay'] ? $v['wait_pay']:0;
+                        $arr[$k]['now_before_total'] = $v['now_wait_pay']? $v['now_wait_pay']:0;
+                        $arr[$k]['now_pay_total'] = $v['now_wait_pay']? $v['now_wait_pay']:0;
                         $arr[$k]['wait_statement_total'] = $v['all_money'];
                         $arr[$k]['freight'] = $v['purchase_freight'];
                         $arr[$k]['instock_num'] = $v['quantity_num'];
@@ -150,6 +156,7 @@ class Statement extends Backend
                         $arr[$k]['period'] = $v['period'];
                         $arr[$k]['purchase_number'] = $v['purchase_number'];
                     }
+                    // dump($arr);die;
                     Db::name('finance_statement_item')->insertAll($arr);
                     Db::commit();
                 } catch (ValidateException $e) {
@@ -168,7 +175,7 @@ class Statement extends Backend
             $this->success('添加成功！！', url('PurchasePay/index'));
         }
         $instock = new Instock();
-        $supplier_id = 1;
+        // $supplier_id = 1;
         //供应商详细信息
         $supplier = Db::name('supplier')->where('id', $supplier_id)->find();
         $list = $instock
@@ -261,7 +268,7 @@ class Statement extends Backend
                     $list[$k]['pay_type'] = '尾款';
                     break;
             }
-            dump($list[$k]['all_money']);
+            // dump($list[$k]['all_money']);
             $all += $list[$k]['all_money'];
         }
         $supplier['period'] = $supplier['period'] == 0 ? '无账期' : $supplier['period'] . '个月';
