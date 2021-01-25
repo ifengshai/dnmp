@@ -495,6 +495,7 @@ class PurchaseOrder extends Backend
                                 }
                                 $i++;
                                 $list = [];
+                                $arrival_num = array_values($arrival_num); //数组默认首位下标不是0 需要转一下
                                 foreach ($batch_sku[$k] as $key => $val) {
                                     if (!$val || !$arrival_num[$k][$key]) {
                                         continue;
