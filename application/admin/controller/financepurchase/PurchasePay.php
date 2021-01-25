@@ -404,16 +404,18 @@ class PurchasePay extends Backend
 
                         if ($params['pay_type'] == 3) {
                             foreach ($reason as $kk => $vv) {
-                                $item = new Item();
-                                $category_id = $item->where('sku',$vv['name'])->value('category_id');
-                                $type = $this->category($category_id);
-                                $reasons[$kk] = [
-                                    ['name' => '采购单号', 'value' => $vv['number']],
-                                    // ['name' => '采购品名', 'value' => '镜架'],
-                                    ['name' => '采购品名', 'value' => $vv['name']],
-                                    ['name' => '数量', 'value' => $vv['num']],
-                                    ['name' => '金额（元）', 'value' => $vv['money']]
-                                ];
+                                if (is_array($vv)) {
+                                    $item = new Item();
+                                    $category_id = $item->where('sku', $vv['name'])->value('category_id');
+                                    $type = $this->category($category_id);
+                                    $reasons[$kk] = [
+                                        ['name' => '采购单号', 'value' => $vv['number']],
+                                        // ['name' => '采购品名', 'value' => '镜架'],
+                                        ['name' => '采购品名', 'value' => $vv['name']],
+                                        ['name' => '数量', 'value' => $vv['num']],
+                                        ['name' => '金额（元）', 'value' => $vv['money']]
+                                    ];
+                                }
                             }
                             $arr['form_component_values'] = [
                                 ['name' => '采购方式', 'value' => $purchase_order['purchase_type'] == 1 ? '线下采购' : '线上采购'],
