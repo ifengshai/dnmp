@@ -8,7 +8,6 @@ use app\admin\model\order\order\LensData;
 use app\admin\model\order\order\NewOrder;
 use app\admin\model\order\order\NewOrderItemProcess;
 use app\admin\model\order\order\NewOrderProcess;
-use app\admin\model\order\order\Order;
 use app\admin\model\saleaftermanage\WorkOrderNote;
 use app\admin\model\warehouse\StockHouse;
 use app\common\controller\Backend;
@@ -39,7 +38,6 @@ use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\Reader\Xls;
 use PhpOffice\PhpSpreadsheet\Reader\Csv;
 use app\admin\model\AuthGroup;
-use app\admin\model\finance\FinanceCost;
 
 /**
  * 售后工单列管理
@@ -1074,7 +1072,7 @@ class WorkOrderList extends Backend
                     $check_status = $_new_order_process
                         ->where('increment_id', $platform_order)
                         ->value('check_status');
-                    
+
                     $_new_order = new NewOrder();
                     $new_order_status = $_new_order
                         ->where('increment_id', $platform_order)
@@ -1091,7 +1089,6 @@ class WorkOrderList extends Backend
                         )
                         && $this->error("已审单，不能创建工单");
                     }
-                    
 
                     //指定问题类型校验sku下拉框是否勾选
                     in_array($params['problem_type_id'],[8,10,11,56,13,14,15,16,18,22,59])
@@ -1119,6 +1116,7 @@ class WorkOrderList extends Backend
                 } else {
                     //校验工单措施
                     empty($measure_choose_id) && empty($item_order_info) && $this->error("请选择实施措施");
+
                     //工单是否存在
                     $row = $this->model->get($ids);
                     !$row && $this->error(__('No Results were found'));
@@ -1292,15 +1290,15 @@ class WorkOrderList extends Backend
                         if (in_array(18, $item['item_choose'])) {
                             //检测之前是否处理过子单措施
                             array_intersect([1, 2, 3], $change_type) && $this->error("子订单：{$key} 措施已处理，不能取消");
-                        } elseif (in_array(19, $item['item_choose'])) {//更改镜框
-                            /*//检测之前是否处理过更改镜框措施
-                            in_array(1, $change_type) && $this->error("子订单：{$key} 措施已处理，不能重复创建");*/
+                        } /*elseif (in_array(19, $item['item_choose'])) {//更改镜框
+                            //检测之前是否处理过更改镜框措施
+                            in_array(1, $change_type) && $this->error("子订单：{$key} 措施已处理，不能重复创建");
 
                             //更改镜框校验库存
                             !$item['change_frame']['change_sku'] && $this->error("子订单：{$key} 的新sku不能为空");
-                            /*$back_data = $this->skuIsStock([$item['change_frame']['change_sku']], $params['work_platform'], [1]);
-                            !$back_data['result'] && $this->error($back_data['msg']);*/
-                        } /*elseif (in_array(20, $item['item_choose'])) {//更改镜片
+                            $back_data = $this->skuIsStock([$item['change_frame']['change_sku']], $params['work_platform'], [1]);
+                            !$back_data['result'] && $this->error($back_data['msg']);
+                        } elseif (in_array(20, $item['item_choose'])) {//更改镜片
                             //检测之前是否处理过更改镜片措施
                             in_array(2, $change_type) && $this->error("子订单：{$key} 措施已处理，不能重复创建");
                         }*/
@@ -3184,13 +3182,6 @@ class WorkOrderList extends Backend
                     $result = $this->model->handleRecept($receptInfo['id'], $receptInfo['work_id'], $receptInfo['measure_id'], $receptInfo['recept_group_id'], $params['success'], $params['note'], $receptInfo['is_auto_complete']);
                 }
                 if ($result !== false) {
-                    //措施表
-                    $_work_order_measure = new WorkOrderMeasure();
-                    $measure_choose_id = $_work_order_measure->where('id',$receptInfo['measure_id'])->value('measure_choose_id');
-                    if (3 == $measure_choose_id) { //主单取消收入核算冲减
-                        $FinanceCost = new FinanceCost();
-                        $FinanceCost->cancel_order_subtract($receptInfo['work_id']);
-                    }
                     $this->success();
                 } else {
                     $this->error(__('No rows were updated'));
@@ -4297,24 +4288,8 @@ EOF;
                 ->column('sku','item_order_number')
             ;
 
-            if (!empty($order_item_list)) {
-                foreach ($order_item_list as $ke => $value) {
-                    //获取更改镜框最新信息
-                    $work_order_change_sku = new WorkOrderChangeSku();
-                    $change_sku = $work_order_change_sku
-                        ->alias('a')
-                        ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
-                        ->where([
-                            'a.change_type' => 1,
-                            'a.item_order_number' => $ke,
-                            'b.operation_type' => 1
-                        ])
-                        ->order('a.id', 'desc')
-                        ->value('a.change_sku');
-                    if ($change_sku) {
-                        $order_item_list[$ke] = $change_sku;
-                    }
-                }
+            if ($order_item_list){
+                $list[$key]['son_number']  = implode('/',array_keys($order_item_list));
             }
             if (!empty($item['order_sku'])){
                 $order_sku = explode(',',$item['order_sku']);
@@ -4328,7 +4303,7 @@ EOF;
                         $cat[$ct]['number'] = array_search($sku_str,$order_item_list);
                         $cat[$ct]['sku'] = $sku_str;
                     }
-                    $number_sku[$ct] = implode(',',array_reduce($cat,'array_merge',[]));
+                    $number_sku[$ct] = implode(':',array_reduce($cat,'array_merge',[]));
                 }
             }
 
@@ -4336,7 +4311,7 @@ EOF;
                 $list[$key]['number_sku']  = implode('/',$number_sku);
             }
         }
-        
+
         //查询用户id对应姓名
         $admin = new \app\admin\model\Admin();
         $users = $admin->where('status', 'normal')->column('nickname', 'id');
@@ -4414,7 +4389,8 @@ EOF;
             ->setCellValue("AK1", "工单回复备注")
             ->setCellValue("AL1", "订单支付时间")
             ->setCellValue("AM1", "补发订单号")
-            ->setCellValue("AN1", "子单号/SKU")
+            ->setCellValue("AN1", "子单号")
+            ->setCellValue("AO1", "子单号/SKU")
         ;
         $spreadsheet->setActiveSheetIndex(0)->setTitle('工单数据');
         foreach ($list as $key => $value) {
@@ -4568,6 +4544,7 @@ EOF;
             $spreadsheet->getActiveSheet()->setCellValue("AL" . ($key * 1 + 2), $value['payment_time']);
             $spreadsheet->getActiveSheet()->setCellValue("AM" . ($key * 1 + 2), $value['replacement_order']);
             $spreadsheet->getActiveSheet()->setCellValue("AN" . ($key * 1 + 2), $value['number_sku']);
+            $spreadsheet->getActiveSheet()->setCellValue("AO" . ($key * 1 + 2), $value['number_sku']);
         }
 
         //设置宽度
@@ -4611,8 +4588,8 @@ EOF;
         $spreadsheet->getActiveSheet()->getColumnDimension('AK')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('AL')->setWidth(100);
         $spreadsheet->getActiveSheet()->getColumnDimension('AM')->setWidth(200);
-//        $spreadsheet->getActiveSheet()->getColumnDimension('AN')->setWidth(200);
-//        $spreadsheet->getActiveSheet()->getColumnDimension('AO')->setWidth(200);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AN')->setWidth(200);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AO')->setWidth(200);
 //        $spreadsheet->getActiveSheet()->getColumnDimension('AP')->setWidth(400);
 //        $spreadsheet->getActiveSheet()->getColumnDimension('AQ')->setWidth(400);
         //设置边框
@@ -4631,7 +4608,7 @@ EOF;
         $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
         $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
 
-        $spreadsheet->getActiveSheet()->getStyle('A1:AM' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle('A1:AO' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
 
         $spreadsheet->setActiveSheetIndex(0);
