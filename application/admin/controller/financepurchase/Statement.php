@@ -132,7 +132,7 @@ class Statement extends Backend
                         $arr[$k]['return_num'] = $v['unqualified_num'];
                         $arr[$k]['return_total'] = $v['unqualified_num_money'];
                         $arr[$k]['deduction_total'] = empty($v['kou_money']) ? 0 : $v['kou_money'];
-                        $arr[$k]['deduction_reason'] = $v['deduction_reason'];
+                        $arr[$k]['deduction_reason'] = $v['kou_reason'];
                         $arr[$k]['arrival_num'] = $v['arrival_num'];
                         switch ($v['pay_type']) {
                             case '预付款':
@@ -218,9 +218,9 @@ class Statement extends Backend
                 $map['batch_id'] = ['=', $v['batch_id']];
                 //采购数量有批次 应该是采购批次的数量
                 $list[$k]['arrival_num'] = Db::name('purchase_batch_item')->where('purchase_batch_id', $v['batch_id'])->value('arrival_num');
-                //采购批次是第一批 待结算金额 = 采购批次入库数量*采购单价-预付款金额
+                //采购批次是第一批 待结算金额 = 采购批次入库数量*采购单价-预付款金额 + 运费
                 if ($list[$k]['purchase_batch'] == 1) {
-                    $list[$k]['all_money'] = $list[$k]['in_stock_money'] - $list[$k]['now_wait_pay'];
+                    $list[$k]['all_money'] = $list[$k]['in_stock_money'] + $v['purchase_freight'] - $list[$k]['now_wait_pay'];
                 } else {
                     //不是第一批 批次待结算金额 = 采购批次入库数量*采购单价
                     $list[$k]['all_money'] = $list[$k]['in_stock_money'];
@@ -261,6 +261,7 @@ class Statement extends Backend
                     $list[$k]['pay_type'] = '尾款';
                     break;
             }
+            dump($list[$k]['all_money']);
             $all += $list[$k]['all_money'];
         }
         $supplier['period'] = $supplier['period'] == 0 ? '无账期' : $supplier['period'] . '个月';
@@ -298,7 +299,7 @@ class Statement extends Backend
                     //更新主表待结算总金额
                     Db::name('finance_statement')->where('id', $ids)->update(['wait_statement_total' => $params['product_total'], 'status' => $params['status']]);
                     foreach ($list as $k => $v) {
-                        Db::name('finance_statement_item')->where('id', $v['in_stock_id'])->update(['deduction_total' => $v['kou_money'], 'deduction_reason' => $v['deduction_reason']]);
+                        Db::name('finance_statement_item')->where('id', $v['in_stock_id'])->update(['deduction_total' => $v['kou_money'], 'deduction_reason' => $v['kou_reason']]);
                     }
                     Db::commit();
                 } catch (ValidateException $e) {

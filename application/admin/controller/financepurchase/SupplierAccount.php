@@ -289,7 +289,7 @@ class SupplierAccount extends Backend
                 $list[$k]['arrival_num'] = Db::name('purchase_batch_item')->where('purchase_batch_id', $v['batch_id'])->value('arrival_num');
                 //采购批次是第一批 待结算金额 = 采购批次入库数量*采购单价-预付款金额
                 if ($list[$k]['purchase_batch'] == 1) {
-                    $list[$k]['all_money'] = $list[$k]['in_stock_money'] - $list[$k]['now_wait_pay'];
+                    $list[$k]['all_money'] = $list[$k]['in_stock_money'] + $v['purchase_freight'] - $list[$k]['now_wait_pay'];
                 } else {
                     //不是第一批 批次待结算金额 = 采购批次入库数量*采购单价
                     $list[$k]['all_money'] = $list[$k]['in_stock_money'];
@@ -314,9 +314,14 @@ class SupplierAccount extends Backend
                 }
             }
             //拿物流单接口返回的倒数第二条数据的时间作为揽件的时间 并且加一个月后的月底作为当前采购单批次的 结算周期
-            if (!empty(strtotime(array_slice($data[0]['data'],-1,1)[0]['time']))) {
-                $list[$k]['period'] = date("Y-m-t", strtotime(array_slice($data[0]['data'],-1,1)[0]['time'] . '+' . $supplier['period'] . 'month'));
-            } else {
+            if (!empty($data[0]['data'])){
+                //拿物流单接口返回的倒数第二条数据的时间作为揽件的时间 并且加一个月后的月底作为当前采购单批次的 结算周期
+                if (!empty(strtotime(array_slice($data[0]['data'],-1,1)[0]['time']))) {
+                    $list[$k]['period'] = date("Y-m-t", strtotime(array_slice($data[0]['data'],-1,1)[0]['time'] . '+' . $supplier['period'] . 'month'));
+                } else {
+                    $list[$k]['period'] = '获取不到物流单详情';
+                }
+            }else{
                 $list[$k]['period'] = '获取不到物流单详情';
             }
             switch ($v['pay_type']) {
@@ -431,10 +436,14 @@ class SupplierAccount extends Backend
                 // dump(array_slice($data[0]['data'],-1,1)[0]['time']);
                 //拿物流单接口返回的倒数第二条数据的时间作为揽件的时间 并且加一个月后的月底作为当前采购单批次的 结算周期
                 // if (!empty($data[0]['data'][count($data[0]['data']) - 2]['time'])) {
-                if (!empty(strtotime(array_slice($data[0]['data'],-1,1)[0]['time']))) {
-                    // $list[$k]['period'] = date("Y-m-t", strtotime($data[0]['data'][count($data[0]['data']) - 2]['time'] . '+' . $supplier['period'] . 'month'));
-                    $list[$k]['period'] = date("Y-m-t", strtotime(array_slice($data[0]['data'],-1,1)[0]['time'] . '+' . $supplier['period'] . 'month'));
-                } else {
+                if (!empty($data[0]['data'])){
+                    //拿物流单接口返回的倒数第二条数据的时间作为揽件的时间 并且加一个月后的月底作为当前采购单批次的 结算周期
+                    if (!empty(strtotime(array_slice($data[0]['data'],-1,1)[0]['time']))) {
+                        $list[$k]['period'] = date("Y-m-t", strtotime(array_slice($data[0]['data'],-1,1)[0]['time'] . '+' . $supplier['period'] . 'month'));
+                    } else {
+                        $list[$k]['period'] = '获取不到物流单详情';
+                    }
+                }else{
                     $list[$k]['period'] = '获取不到物流单详情';
                 }
             }

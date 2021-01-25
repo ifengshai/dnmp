@@ -90,7 +90,9 @@ class PurchasePay extends Backend
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             $reason = $this->request->post("reason/a");
-            // dump($reason);die;
+            // dump($params);
+            // dump($reason);
+            // die;
             if ($params) {
                 $params = $this->preExcludeFields($params);
                 Db::startTrans();
@@ -120,6 +122,7 @@ class PurchasePay extends Backend
                             break;
                     }
                     $insert['status'] = $params['status'];
+                    $insert['remark'] = $params['remark'];
                     $insert['purchase_id'] = $params['purchase_id'];
                     $insert['supplier_id'] = $params['supplier_id'];
                     $insert['order_number'] = $params['order_number'];
@@ -218,7 +221,13 @@ class PurchasePay extends Backend
                     }
                     $insert['process_instance_id'] = $res['process_instance_id'];
                     // dump($insert);die;
-                    Db::name('finance_purchase')->insertGetId($insert);
+                    $finance_purchase_id = Db::name('finance_purchase')->insertGetId($insert);
+                    $label = input('label');
+                    //结算单页面过来的创建付款申请单 需要更新结算的付款申请单id字段
+                    if ($label == 'statement') {
+                        $ids = input('ids');
+                        Db::name('finance_statement')->where('id',$ids)->update(['finance_purcahse_id'=>$finance_purchase_id]);
+                    }
                     Db::commit();
                 } catch (ValidateException $e) {
                     Db::rollback();
@@ -243,6 +252,11 @@ class PurchasePay extends Backend
             $purchase_order['purchase_type'] = $purchase_order['purchase_type'] == 1 ? '线下采购' : '线上采购';
             $this->assign('purchase_order', $purchase_order);
             $puchase_detail = Db::name('purchase_order_item')->where('purchase_id', $purchase_order['id'])->find();
+            // dump($puchase_detail);die;
+            // $item = new Item();
+            // $category_id = $item->where('sku',$puchase_detail['sku'])->value('category_id');
+            // $type = $this->category($category_id);
+            // $puchase_detail['type'] = $type;
             $this->assign('purchase_detail', $puchase_detail);
             //查询采购单对应的供应商信息
             $data = $this->supplier->where('id', $purchase_order['supplier_id'])->find();
@@ -283,10 +297,19 @@ class PurchasePay extends Backend
             $puchase_detail = Db::name('finance_statement_item')->where('statement_id', $statement['id'])->select();
             foreach ($puchase_detail as $k => $v) {
                 $puchase_details = Db::name('purchase_order_item')->where('purchase_id', $v['purchase_id'])->find();
+                $item = new Item();
+                $category_id = $item->where('sku',$puchase_details['sku'])->value('category_id');
+                $type = $this->category($category_id);
+                $puchase_detail[$k]['type'] = $type;
+                // dump($type);die;
                 $puchase_detail[$k]['sku'] = $puchase_details['sku'];
                 $puchase_detail[$k]['purchase_num'] = $puchase_details['purchase_num'];
                 $puchase_detail[$k]['purchase_price'] = $puchase_details['purchase_price'];
+                if ($v['purchase_batch'] !== 1){
+                    $puchase_detail[$k]['freight'] = 0.00;
+                }
             }
+            // dump($puchase_detail);
             $this->assign('statement', $statement);
             $this->assign('purchase_detail', $puchase_detail);
             switch ($data['period']) {
@@ -468,9 +491,16 @@ class PurchasePay extends Backend
             $puchase_detail = Db::name('finance_statement_item')->where('statement_id', $statement['id'])->select();
             foreach ($puchase_detail as $k => $v) {
                 $puchase_details = Db::name('purchase_order_item')->where('purchase_id', $v['purchase_id'])->find();
+                $item = new Item();
+                $category_id = $item->where('sku',$puchase_details['sku'])->value('category_id');
+                $type = $this->category($category_id);
+                $puchase_detail[$k]['type'] = $type;
                 $puchase_detail[$k]['sku'] = $puchase_details['sku'];
                 $puchase_detail[$k]['purchase_num'] = $puchase_details['purchase_num'];
                 $puchase_detail[$k]['purchase_price'] = $puchase_details['purchase_price'];
+                if ($v['purchase_batch'] !== 1){
+                    $puchase_detail[$k]['freight'] = 0.00;
+                }
             }
             $this->assign('statement', $statement);
             $this->assign('purchase_detail', $puchase_detail);
@@ -550,9 +580,17 @@ class PurchasePay extends Backend
             $puchase_detail = Db::name('finance_statement_item')->where('statement_id', $statement['id'])->select();
             foreach ($puchase_detail as $k => $v) {
                 $puchase_details = Db::name('purchase_order_item')->where('purchase_id', $v['purchase_id'])->find();
+                $item = new Item();
+                $category_id = $item->where('sku',$puchase_details['sku'])->value('category_id');
+                $type = $this->category($category_id);
+                $puchase_detail[$k]['type'] = $type;
                 $puchase_detail[$k]['sku'] = $puchase_details['sku'];
                 $puchase_detail[$k]['purchase_num'] = $puchase_details['purchase_num'];
                 $puchase_detail[$k]['purchase_price'] = $puchase_details['purchase_price'];
+
+                if ($v['purchase_batch'] != 1){
+                    $puchase_detail[$k]['freight'] = 0.00;
+                }
             }
             $this->assign('statement', $statement);
             $this->assign('purchase_detail', $puchase_detail);
