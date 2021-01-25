@@ -4287,9 +4287,10 @@ EOF;
                 ->where($order_item_where)
                 ->column('sku','item_order_number')
             ;
-           $a = array_keys($order_item_list);
-           dump($a);
-           die();
+
+            if ($order_item_list){
+                $list[$key]['son_number']  = implode('/',array_keys($order_item_list));
+            }
             if (!empty($item['order_sku'])){
                 $order_sku = explode(',',$item['order_sku']);
                 foreach($order_sku as $ct=>$val){
@@ -4310,7 +4311,7 @@ EOF;
                 $list[$key]['number_sku']  = implode('/',$number_sku);
             }
         }
-        dump($list);die();
+
         //查询用户id对应姓名
         $admin = new \app\admin\model\Admin();
         $users = $admin->where('status', 'normal')->column('nickname', 'id');
@@ -4388,7 +4389,8 @@ EOF;
             ->setCellValue("AK1", "工单回复备注")
             ->setCellValue("AL1", "订单支付时间")
             ->setCellValue("AM1", "补发订单号")
-            ->setCellValue("AN1", "子单号/SKU")
+            ->setCellValue("AN1", "子单号")
+            ->setCellValue("AO1", "子单号/SKU")
         ;
         $spreadsheet->setActiveSheetIndex(0)->setTitle('工单数据');
         foreach ($list as $key => $value) {
@@ -4542,6 +4544,7 @@ EOF;
             $spreadsheet->getActiveSheet()->setCellValue("AL" . ($key * 1 + 2), $value['payment_time']);
             $spreadsheet->getActiveSheet()->setCellValue("AM" . ($key * 1 + 2), $value['replacement_order']);
             $spreadsheet->getActiveSheet()->setCellValue("AN" . ($key * 1 + 2), $value['number_sku']);
+            $spreadsheet->getActiveSheet()->setCellValue("AO" . ($key * 1 + 2), $value['number_sku']);
         }
 
         //设置宽度
@@ -4585,8 +4588,8 @@ EOF;
         $spreadsheet->getActiveSheet()->getColumnDimension('AK')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('AL')->setWidth(100);
         $spreadsheet->getActiveSheet()->getColumnDimension('AM')->setWidth(200);
-//        $spreadsheet->getActiveSheet()->getColumnDimension('AN')->setWidth(200);
-//        $spreadsheet->getActiveSheet()->getColumnDimension('AO')->setWidth(200);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AN')->setWidth(200);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AO')->setWidth(200);
 //        $spreadsheet->getActiveSheet()->getColumnDimension('AP')->setWidth(400);
 //        $spreadsheet->getActiveSheet()->getColumnDimension('AQ')->setWidth(400);
         //设置边框
@@ -4605,7 +4608,7 @@ EOF;
         $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
         $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
 
-        $spreadsheet->getActiveSheet()->getStyle('A1:AM' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle('A1:AO' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
 
         $spreadsheet->setActiveSheetIndex(0);
