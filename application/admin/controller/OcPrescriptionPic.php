@@ -73,30 +73,30 @@ class OcPrescriptionPic extends Backend
             $WhereOrder = '  ORDER BY  created_at desc';
             if ($filter['site']){
                 if ($filter['site'] ==1){
-                    $count = "SELECT COUNT(1) FROM zeelool.oc_prescription_pic where".$WhereSql;
+                    $count = "SELECT COUNT(1) FROM zeelool_test.oc_prescription_pic where".$WhereSql;
                     $sql  = "SELECT zeelool.oc_prescription_pic.id AS id,zeelool.oc_prescription_pic.email AS email,zeelool.oc_prescription_pic.query AS query,
                                 zeelool.oc_prescription_pic.pic AS pic ,zeelool.oc_prescription_pic.status AS status,zeelool.oc_prescription_pic.handler_name AS handler_name,
                                 zeelool.oc_prescription_pic.created_at AS created_at,zeelool.oc_prescription_pic.completion_time AS completion_time,
-                                zeelool.oc_prescription_pic.remarks AS remarks,1 as site FROM zeelool.oc_prescription_pic where".$WhereSql. $WhereOrder. " limit  ". $offset.','.$limit;
+                                zeelool.oc_prescription_pic.remarks AS remarks,1 as site FROM zeelool_test.oc_prescription_pic where".$WhereSql. $WhereOrder. " limit  ". $offset.','.$limit;
                 }else{
-                    $count = "SELECT COUNT(1) FROM voogueme.oc_prescription_pic where".$WhereSql;
+                    $count = "SELECT COUNT(1) FROM voogueme_acc.oc_prescription_pic where".$WhereSql;
                     $sql  = "SELECT voogueme.oc_prescription_pic.id AS id,voogueme.oc_prescription_pic.email AS email,voogueme.oc_prescription_pic.query AS query,
                                 voogueme.oc_prescription_pic.pic AS pic ,voogueme.oc_prescription_pic.status AS status,voogueme.oc_prescription_pic.handler_name AS handler_name,
                                 voogueme.oc_prescription_pic.created_at AS created_at,voogueme.oc_prescription_pic.completion_time AS completion_time,
-                                voogueme.oc_prescription_pic.remarks AS remarks ,2 as site FROM voogueme.oc_prescription_pic where".$WhereSql. $WhereOrder. " limit  ". $offset.','.$limit;
+                                voogueme.oc_prescription_pic.remarks AS remarks ,2 as site FROM voogueme_acc.oc_prescription_pic where".$WhereSql. $WhereOrder. " limit  ". $offset.','.$limit;
                 }
                 $count = $model->query($count);
                 $total = $count[0]['COUNT(1)'];
             }else{
-                $count = "SELECT COUNT(1) FROM zeelool.oc_prescription_pic where".$WhereSql." union all  SELECT COUNT(1) FROM voogueme.oc_prescription_pic where".$WhereSql;
+                $count = "SELECT COUNT(1) FROM zeelool_test.oc_prescription_pic where".$WhereSql." union all  SELECT COUNT(1) FROM voogueme.oc_prescription_pic where".$WhereSql;
                 $sql  = "SELECT zeelool.oc_prescription_pic.id AS id,zeelool.oc_prescription_pic.email AS email,zeelool.oc_prescription_pic.query AS query,
                                 zeelool.oc_prescription_pic.pic AS pic ,zeelool.oc_prescription_pic.status AS status,zeelool.oc_prescription_pic.handler_name AS handler_name,
                                 zeelool.oc_prescription_pic.created_at AS created_at,zeelool.oc_prescription_pic.completion_time AS completion_time,
-                                zeelool.oc_prescription_pic.remarks AS remarks,1 as site FROM zeelool.oc_prescription_pic where".$WhereSql." union all  
+                                zeelool.oc_prescription_pic.remarks AS remarks,1 as site FROM zeelool_test.oc_prescription_pic where".$WhereSql." union all  
                          SELECT voogueme.oc_prescription_pic.id AS id,voogueme.oc_prescription_pic.email AS email,voogueme.oc_prescription_pic.query AS query,
                                 voogueme.oc_prescription_pic.pic AS pic ,voogueme.oc_prescription_pic.status AS status,voogueme.oc_prescription_pic.handler_name AS handler_name,
                                 voogueme.oc_prescription_pic.created_at AS created_at,voogueme.oc_prescription_pic.completion_time AS completion_time,
-                                voogueme.oc_prescription_pic.remarks AS remarks,2 as site FROM voogueme.oc_prescription_pic where".$WhereSql. $WhereOrder." limit  ". $offset.','.$limit;
+                                voogueme.oc_prescription_pic.remarks AS remarks,2 as site FROM voogueme_acc.oc_prescription_pic where".$WhereSql. $WhereOrder." limit  ". $offset.','.$limit;
                 $count = $model->query($count);
                 $total = $count[0]['COUNT(1)']  + $count[1]['COUNT(1)'];
             }
