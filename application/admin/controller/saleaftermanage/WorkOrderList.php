@@ -4331,7 +4331,7 @@ EOF;
                     $number_sku = implode(',',array_reduce($cat,'array_merge',[]));
                 }
             }
-            $list[$key]['number_sku']  = implode($number_sku);
+            $list[$key]['number_sku']  = implode('',$number_sku);
 
         }
         dump($list);die();
