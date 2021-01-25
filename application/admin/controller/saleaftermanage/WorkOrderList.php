@@ -4291,16 +4291,33 @@ EOF;
             if (!empty($order_item_list)){
                 $son_number = array_keys($order_item_list);
                 $son_sku = array_values($order_item_list);
-                foreach ($son_number as $e=>$v){
-                    $son_number_array[] = $v.'/'.$son_sku[$e];
-                }
+
+                if($item['order_item_numbers']){
+                    $select_number = explode(',',$item['order_item_numbers']);
+                    foreach($select_number as $e=>$v){
+                        if($v == $son_number[$e]){
+                            $son_number_array[] = $v.'/'.$son_sku[$e];
+                        }
+                    }}
+
 //                $list[$key]['son_number']  = implode('/',array_keys($order_item_list));
 //                $list[$key]['son_sku']  = implode('/',array_values($order_item_list));
-
+              
                 $list[$key]['son_number'] = implode(',',$son_number_array);
                 unset($order_item_list);
                 unset($son_number_array);
             }
+
+            //获取子订单措施、镜框、镜片数据
+            if($list['order_item_numbers']){
+                $item_order_info = [];
+                $select_number = explode(',',$list['order_item_numbers']);
+                foreach($select_number as $value){
+
+            }}
+
+
+
 
 //            if (!empty($item['order_sku'])){
 //                $order_sku = explode(',',$item['order_sku']);
