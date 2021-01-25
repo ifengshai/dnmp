@@ -1091,6 +1091,7 @@ class ItWebDemand extends Backend
                     $add['pm_audit_status'] = $params['pm_audit_status'];
                     $add['pm_audit_status_time'] = date('Y-m-d H:i', time());
                 } else {
+
                     if ($params['pm_audit_status']) {
                         //产品提交
                         $row = $this->model->get($params['id']);
@@ -1129,6 +1130,7 @@ class ItWebDemand extends Backend
                         empty($params['node_time']) && $this->error('任务周期不能为空');
                         $add['priority'] = $params['priority'];
                         $add['node_time'] = $params['node_time'];
+                        $add['product_remarks'] = $params['product_remarks'];
                         //老版本计算周期方法，摒弃掉
 //                      $time_data = $this->start_time($params['priority'], $params['node_time']);
 //                      $add['start_time'] = $time_data['start_time'];
