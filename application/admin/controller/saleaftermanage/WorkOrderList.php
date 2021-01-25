@@ -4330,7 +4330,10 @@ EOF;
                     }
                 }
             }
-            $list[$key]['number_sku'] = implode(',',array_reduce($cat,'array_merge',[]));
+            if ($cat){
+                $list[$key]['number_sku'] = implode(',',array_reduce($cat,'array_merge',[]));
+            }
+
         }
 
 
