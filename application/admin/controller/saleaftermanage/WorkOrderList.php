@@ -4333,11 +4333,10 @@ EOF;
             }
 
             if ($number_sku){
-                $list[$key]['number_sku']  = implode('',$number_sku);
+                $list[$key]['number_sku']  = implode('/',$number_sku);
             }
         }
-
-        dump($list);die();
+        
         //查询用户id对应姓名
         $admin = new \app\admin\model\Admin();
         $users = $admin->where('status', 'normal')->column('nickname', 'id');
