@@ -39,7 +39,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                         {field: 'purchase_person', title: __('采购负责人'), operate: 'LIKE'},
                         {
                             field: 'statement_status', title: __('状态'), custom: {0: 'success', 1: 'danger'},
-                            searchList: {0: '本期已结算', 1: '本期未结算'},
+                            searchList: {1: '本期已结算', 2: '本期未结算'},
                             formatter: Table.api.formatter.status
                         },
                         {
