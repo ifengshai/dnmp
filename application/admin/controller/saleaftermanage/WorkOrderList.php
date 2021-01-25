@@ -4328,10 +4328,10 @@ EOF;
                         $cat[$ct]['number'] = array_search($sku_str,$order_item_list);
                         $cat[$ct]['sku'] = $sku_str;
                     }
-                    $list[$key]['number_sku'][$ct] = implode(',',array_reduce($cat,'array_merge',[]));
+                    $number_sku = implode(',',array_reduce($cat,'array_merge',[]));
                 }
             }
-
+            $list[$key]['number_sku']  = implode($number_sku);
 
         }
         dump($list);die();
