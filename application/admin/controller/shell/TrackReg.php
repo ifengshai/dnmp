@@ -2338,6 +2338,7 @@ class TrackReg extends Backend
         /*************出库单出库start**************/
         $bar_where['out_stock_time'] = ['between', [$start, $end]];
         $bar_where['out_stock_id'] = ['<>', 0];
+        $bar_where['library_status'] = 2;
         //判断冲减前的出库单出库数量和金额
         $bars = $this->item->where($bar_where)->group('barcode_id')->column('barcode_id');
         foreach ($bars as $bar) {
@@ -2378,6 +2379,7 @@ class TrackReg extends Backend
         $bar_where1['out_stock_time'] = ['between', [$start, $end]];
         $bar_where1['out_stock_id'] = 0;
         $bar_where1['item_order_number'] = ['<>', ''];
+        $bar_where1['i.library_status'] = 2;
         //判断冲减前的出库单出库数量和金额
         $bars1 = $this->item->alias('i')->join('fa_purchase_order_item p','i.purchase_id=p.purchase_id')->where($bar_where1)->field('i.out_stock_id,i.purchase_id,i.out_stock_time,p.actual_purchase_price,p.purchase_price')->select();
         if (count($bars1) != 0) {
