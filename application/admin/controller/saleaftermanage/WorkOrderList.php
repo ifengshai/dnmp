@@ -4328,15 +4328,13 @@ EOF;
                         $cat[$ct]['number'] = array_search($sku_str,$order_item_list);
                         $cat[$ct]['sku'] = $sku_str;
                     }
+                    $list[$key]['number_sku'][$ct] = implode(',',array_reduce($cat,'array_merge',[]));
                 }
             }
-            dump($cat);die();
-            if ($cat){
-                $list[$key]['number_sku'] = implode(',',array_reduce($cat,'array_merge',[]));
-            }
+
 
         }
-
+        dump($list);die();
 
         //查询用户id对应姓名
         $admin = new \app\admin\model\Admin();
