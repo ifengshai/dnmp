@@ -4287,26 +4287,9 @@ EOF;
                 ->where($order_item_where)
                 ->column('sku','item_order_number')
             ;
-
-            if (!empty($order_item_list)) {
-                foreach ($order_item_list as $ke => $value) {
-                    //获取更改镜框最新信息
-                    $work_order_change_sku = new WorkOrderChangeSku();
-                    $change_sku = $work_order_change_sku
-                        ->alias('a')
-                        ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
-                        ->where([
-                            'a.change_type' => 1,
-                            'a.item_order_number' => $ke,
-                            'b.operation_type' => 1
-                        ])
-                        ->order('a.id', 'desc')
-                        ->value('a.change_sku');
-                    if ($change_sku) {
-                        $order_item_list[$ke] = $change_sku;
-                    }
-                }
-            }
+           $a = array_keys($order_item_list);
+           dump($a);
+           die();
             if (!empty($item['order_sku'])){
                 $order_sku = explode(',',$item['order_sku']);
                 foreach($order_sku as $ct=>$val){
@@ -4319,12 +4302,15 @@ EOF;
                         $cat[$ct]['number'] = array_search($sku_str,$order_item_list);
                         $cat[$ct]['sku'] = $sku_str;
                     }
+                    $number_sku[$ct] = implode(':',array_reduce($cat,'array_merge',[]));
                 }
             }
-            $list[$key]['number_sku'] = implode(',',array_reduce($cat,'array_merge',[]));
+
+            if ($number_sku){
+                $list[$key]['number_sku']  = implode('/',$number_sku);
+            }
         }
-
-
+        dump($list);die();
         //查询用户id对应姓名
         $admin = new \app\admin\model\Admin();
         $users = $admin->where('status', 'normal')->column('nickname', 'id');
