@@ -4294,11 +4294,12 @@ EOF;
                 foreach ($son_number as $e=>$v){
                     $son_number_array[] = $v.'/'.$son_sku[$e];
                 }
-
 //                $list[$key]['son_number']  = implode('/',array_keys($order_item_list));
 //                $list[$key]['son_sku']  = implode('/',array_values($order_item_list));
-                unset($order_item_list);
+
                 $list[$key]['son_number'] = implode(',',$son_number_array);
+                unset($order_item_list);
+                unset($son_number_array);
             }
 
 //            if (!empty($item['order_sku'])){
@@ -4322,7 +4323,7 @@ EOF;
 
 
         }
-      
+
         //查询用户id对应姓名
         $admin = new \app\admin\model\Admin();
         $users = $admin->where('status', 'normal')->column('nickname', 'id');
