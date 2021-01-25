@@ -4288,7 +4288,7 @@ EOF;
                 ->column('sku','item_order_number')
             ;
 
-            if ($order_item_list){
+            if (!empty($order_item_list)){
                 $list[$key]['son_number']  = implode('/',array_keys($order_item_list));
             }
             if (!empty($item['order_sku'])){
@@ -4305,11 +4305,12 @@ EOF;
                     }
                     $number_sku[$ct] = implode(':',array_reduce($cat,'array_merge',[]));
                 }
+                if ($number_sku){
+                    $list[$key]['number_sku']  = implode('/',$number_sku);
+                }
             }
 
-            if ($number_sku){
-                $list[$key]['number_sku']  = implode('/',$number_sku);
-            }
+
         }
 
         //查询用户id对应姓名
@@ -4543,7 +4544,7 @@ EOF;
             }
             $spreadsheet->getActiveSheet()->setCellValue("AL" . ($key * 1 + 2), $value['payment_time']);
             $spreadsheet->getActiveSheet()->setCellValue("AM" . ($key * 1 + 2), $value['replacement_order']);
-            $spreadsheet->getActiveSheet()->setCellValue("AN" . ($key * 1 + 2), $value['number_sku']);
+            $spreadsheet->getActiveSheet()->setCellValue("AN" . ($key * 1 + 2), $value['son_number']);
             $spreadsheet->getActiveSheet()->setCellValue("AO" . ($key * 1 + 2), $value['number_sku']);
         }
 
