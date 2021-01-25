@@ -75,7 +75,7 @@ class Statement extends Backend
                     $list[$k]['period'] = $supplier['period'].'个月';
                 }
                 $list[$k]['purchase_person'] = $supplier['purchase_person'];
-                $statement = Db::name('finance_purchase')->where('pay_type',3)->where('purchase_id',$v['id'])->where('status','in',[0,1,2,3,4,6]);
+                $statement = Db::name('finance_purchase')->where('pay_type',3)->where('purchase_id',$v['id'])->where('status','in',[0,1,2,3,4,6])->find();
                 if (!empty($statement)){
                     $list[$k]['can_create'] = 0;
                 }else{
