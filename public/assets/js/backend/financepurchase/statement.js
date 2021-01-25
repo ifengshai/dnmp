@@ -88,7 +88,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
-                                        if (row.status == 6 && row.wait_statement_total > 0) {
+                                        if (row.status == 6 && row.wait_statement_total > 0 && row.can_create == 1) {
                                             return true;
                                         } else {
                                             return false;

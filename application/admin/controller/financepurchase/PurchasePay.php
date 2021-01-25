@@ -252,11 +252,13 @@ class PurchasePay extends Backend
             $purchase_order['purchase_type'] = $purchase_order['purchase_type'] == 1 ? '线下采购' : '线上采购';
             $this->assign('purchase_order', $purchase_order);
             $puchase_detail = Db::name('purchase_order_item')->where('purchase_id', $purchase_order['id'])->find();
-            // dump($puchase_detail);die;
-            // $item = new Item();
-            // $category_id = $item->where('sku',$puchase_detail['sku'])->value('category_id');
-            // $type = $this->category($category_id);
-            // $puchase_detail['type'] = $type;
+            //获取当前sku的分类
+            $item = new Item();
+            $category_id = $item->where('sku',$puchase_detail['sku'])->value('category_id');
+            if (!empty($category_id)){
+                $type = $this->category($category_id);
+                $puchase_detail['type'] = $type;
+            }
             $this->assign('purchase_detail', $puchase_detail);
             //查询采购单对应的供应商信息
             $data = $this->supplier->where('id', $purchase_order['supplier_id'])->find();

@@ -2331,8 +2331,8 @@ class TrackReg extends Backend
         $start_time = strtotime($start);
         $end_time = strtotime($end);
         $exist_where['create_time'] = ['between', [$start_time, $end_time]];
-        $is_exist = Db::name('finance_cost_error')->where($exist_where)->field('id,create_time,purchase_id,total')->find();
-        $end_date = date('Y-m-d H:i:s', $is_exist['create_time']);
+        $is_exist = Db::name('finance_cost_error')->where($exist_where)->field('id,create_time,purchase_id,total')->select();
+
         $outstock_total1 = 0;   //出库单出库
         $outstock_total2 = 0;   //订单出库
         /*************出库单出库start**************/
@@ -2350,24 +2350,29 @@ class TrackReg extends Backend
             $sum_count = 0;
             $sum_total = 0;
             foreach ($bar_items as $item) {
-                if ($is_exist['id'] && $item['purchase_id'] == $is_exist['purchase_id']) {
-                    if ($item['out_stock_time'] >= $end_date) {
-                        //使用成本计算
-                        $total = $item['actual_purchase_price'];
-                    } else {
-                        //使用预估计算
-                        $total = $item['purchase_price'];
-                    }
-                } else {
-                    //没有冲减数据，直接拿预估成本计算
-                    if ($item['actual_purchase_price'] != 0) {
-                        $total = $item['actual_purchase_price'];   //有成本价拿成本价计算
-                    } else {
-                        $total = $item['purchase_price'];   //没有成本价拿预估价计算
+                if(count(array_unique($is_exist)) != 0){
+                    foreach($is_exist as $value){
+                        if ($item['purchase_id'] == $value['purchase_id']) {
+                            $end_date = date('Y-m-d H:i:s', $value['create_time']);
+                            if ($item['out_stock_time'] >= $end_date) {
+                                //使用成本计算
+                                $total = $item['actual_purchase_price'];
+                            } else {
+                                //使用预估计算
+                                $total = $item['purchase_price'];
+                            }
+                        } else {
+                            //没有冲减数据，直接拿预估成本计算
+                            if ($item['actual_purchase_price'] != 0) {
+                                $total = $item['actual_purchase_price'];   //有成本价拿成本价计算
+                            } else {
+                                $total = $item['purchase_price'];   //没有成本价拿预估价计算
+                            }
+                        }
+                        $sum_total += $total;
+                        $sum_count++;
                     }
                 }
-                $sum_total += $total;
-                $sum_count++;
             }
             $flag['outstock_count'] = $sum_count;
             $flag['outstock_total'] = $sum_total;
@@ -2387,23 +2392,28 @@ class TrackReg extends Backend
             $flag1['stock_id'] = $stockId;
             $flag1['type'] = 3;
             foreach ($bars1 as $bar1) {
-                if ($is_exist['id'] &&  $bar1['purchase_id'] == $is_exist['purchase_id']) {
-                    if ($bar1['out_stock_time'] >= $end_date) {
-                        //使用成本计算
-                        $total1 = $bar1['actual_purchase_price'];
-                    } else {
-                        //使用预估计算
-                        $total1 = $bar1['purchase_price'];
-                    }
-                } else {
-                    //没有冲减数据，直接拿预估成本计算
-                    if ($bar1['actual_purchase_price']  != 0) {
-                        $total1 = $bar1['actual_purchase_price'];   //有成本价拿成本价计算
-                    } else {
-                        $total1 = $bar1['purchase_price'];   //没有成本价拿预估价计算
+                if(count(array_unique($is_exist)) != 0){
+                    foreach($is_exist as $value){
+                        if ($bar1['purchase_id'] == $value['purchase_id']) {
+                            $end_date = date('Y-m-d H:i:s', $value['create_time']);
+                            if ($bar1['out_stock_time'] >= $end_date) {
+                                //使用成本计算
+                                $total1 = $bar1['actual_purchase_price'];
+                            } else {
+                                //使用预估计算
+                                $total1 = $bar1['purchase_price'];
+                            }
+                        } else {
+                            //没有冲减数据，直接拿预估成本计算
+                            if ($bar1['actual_purchase_price']  != 0) {
+                                $total1 = $bar1['actual_purchase_price'];   //有成本价拿成本价计算
+                            } else {
+                                $total1 = $bar1['purchase_price'];   //没有成本价拿预估价计算
+                            }
+                        }
+                        $outstock_total2 += $total1;
                     }
                 }
-                $outstock_total2 += $total1;
             }
             $flag1['outstock_count'] = count($bars1);
             $flag1['outstock_total'] = $outstock_total2;
