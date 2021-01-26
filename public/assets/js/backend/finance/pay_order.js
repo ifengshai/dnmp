@@ -21,7 +21,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                 sortName: 'id',
                 columns: [
                     [
-                        {field: 'id', title: __('序号'),},
+                        {field: 'id', title: __('序号'),operate:false},
                         {field: 'pay_number', title: __('付款单号'),},
                         {field: 'supplier_name', title: __('供应商名称')},
                         {field: 'status', title: __('状态'),custom: { 1: 'danger', 2: 'success', 3: 'orange', 4: 'warning', 5: 'purple', 6: 'primary' , 7: 'primary'}, searchList: { 1: '新建', 2: '待审核', 3: '待付款', 4: '待上传发票', 5: '已完成',6:'已拒绝' ,7:'已取消'},formatter: Table.api.formatter.status},
