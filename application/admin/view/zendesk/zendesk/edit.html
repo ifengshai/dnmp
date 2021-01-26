@@ -70,7 +70,7 @@
                         <div class="box-body">
 
                             <div class="user-block pull-left">
-                                <a style="position: absolute;top: -5px;left: 6%"><h2> <font style="color: #4564A7">#{$ticket->ticket_id}</font></h2></a>
+                                <a style="position: absolute;top: -5px;left: 10%"><h2 style="font-size: 20px"> <font style="color: #4E6E98">#{$ticket->ticket_id}</font></h2></a>
                                 <span class="username">
                                   <span href="#"><input id="c-subject" data-rule="required" value="{$ticket->subject}" class="form-control ticket-subject" name="row[subject]" type="text" style="margin-left:38px"></span>
                                 </span>
@@ -90,12 +90,12 @@
                             {$ticket->comment}
                         </div>
                         {/if}
-                        <div class="form-group">
-                            <label class="control-label col-xs-12 col-sm-2">{:__('ticket id')}：</label>
-                            <div class="col-xs-12 col-sm-8">
-                                <input class="form-control" size="35" name="" type="text" value="{$ticket->ticket_id}" disabled>
-                            </div>
-                        </div>
+<!--                        <div class="form-group">-->
+<!--                            <label class="control-label col-xs-12 col-sm-2">{:__('ticket id')}：</label>-->
+<!--                            <div class="col-xs-12 col-sm-8">-->
+<!--                                <input class="form-control" size="35" name="" type="text" value="{$ticket->ticket_id}" disabled>-->
+<!--                            </div>-->
+<!--                        </div>-->
                         <div class="form-group">
                             <label class="control-label col-xs-12 col-sm-2">{:__('CCs')}：</label>
                             <div class="col-xs-12 col-sm-8">
@@ -200,19 +200,19 @@
                                 </select>
                             </div>
                         </div>
+
+                        <div class="form-group layer-footer">
+                            <div class="col-xs-12 col-sm-8" style="width:300px;margin-left: 16.5%;margin-top: 1%">
+                                <a href="javascript:;" class="btn btn-primary btn-add create_ticket" title="{:__('创建工单')}" style="width: 50%;height: 35px">{:__('创建工单')} </a>
+                            </div>
+                        </div>
                         {if condition="$ticket->status != 5"}
                         <div class="form-group layer-footer">
-                            <div class="col-xs-12 col-sm-8">
-                                <button type="submit" style="margin-left:530px;" class="btn btn-success btn-embossed disabled">发送邮件</button>
+                            <div class="col-xs-12 col-sm-8" style="margin-left: 53.5%;width: 300px;margin-top: -5%">
+                                <button type="submit" style="margin-left:80%;width: 50%;height: 34px" class="btn btn-success btn-embossed disabled">发送邮件</button>
                             </div>
                         </div>
-                        {/if}
-                        <div class="form-group layer-footer">
-                            <div class="col-xs-12 col-sm-8" style="margin: 0 auto;margin-left: 30%;margin-top: -3.899%">
-                                <a href="javascript:;" class="btn btn-primary btn-add create_ticket" title="{:__('创建工单')}">{:__('创建工单')} </a>
-                            </div>
-                        </div>
-                                                        <!-- /.box-body -->
+                        {/if}                              <!-- /.box-body -->
                     </div>
                     <br />
                     <div class="tab-content">
