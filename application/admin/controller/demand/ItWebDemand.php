@@ -1090,6 +1090,7 @@ class ItWebDemand extends Backend
                     $add['pm_audit_status'] = $params['pm_audit_status'];
                     $add['pm_audit_status_time'] = date('Y-m-d H:i', time());
                 } else {
+
                     if ($params['pm_audit_status']) {
                         //产品提交
                         $row = $this->model->get($params['id']);
@@ -1108,34 +1109,39 @@ class ItWebDemand extends Backend
 //                                }
 //                            }
 //                        } else {
-                            if ($row['priority'] != $params['priority'] || $row['node_time'] != $params['node_time'] || $row['site_type'] != $add['site_type']) {
-                                $add['web_designer_group'] = 0;
-                                $add['web_designer_complexity'] = null;
-                                $add['web_designer_expect_time'] = null;
-                                $add['phper_group'] = 0;
-                                $add['phper_complexity'] = null;
-                                $add['phper_expect_time'] = null;
-                                $add['app_group'] = 0;
-                                $add['app_complexity'] = null;
-                                $add['app_expect_time'] = null;
-                                $add['develop_finish_status'] = 1;
-                            }
+                        if ($row['priority'] != $params['priority'] || $row['node_time'] != $params['node_time'] || $row['site_type'] != $add['site_type']) {
+                            $add['web_designer_group'] = 0;
+                            $add['web_designer_complexity'] = null;
+                            $add['web_designer_expect_time'] = null;
+                            $add['phper_group'] = 0;
+                            $add['phper_complexity'] = null;
+                            $add['phper_expect_time'] = null;
+                            $add['app_group'] = 0;
+                            $add['app_complexity'] = null;
+                            $add['app_expect_time'] = null;
+                            $add['develop_finish_status'] = 1;
+                        }
 //                        }
-                       if ($params['pm_audit_status'] ==3){
-                           $add['status'] = 3;
-                       }
+                        if ($params['pm_audit_status'] ==3){
+                            $add['status'] = 3;
+                        }
+                        empty($params['importance']) && $this->error('请选择重要程度');
+                        empty($params['degree_of_urgency']) && $this->error('请选择紧急程度');
+                        empty($params['development_difficulty']) && $this->error('请选择开发难度');
                         empty($params['priority']) && $this->error('请选择优先级');
                         empty($params['node_time']) && $this->error('任务周期不能为空');
                         $add['priority'] = $params['priority'];
                         $add['node_time'] = $params['node_time'];
+
                         //老版本计算周期方法，摒弃掉
 //                      $time_data = $this->start_time($params['priority'], $params['node_time']);
 //                      $add['start_time'] = $time_data['start_time'];
 //                      $add['end_time'] = $time_data['end_time'];
+                        $add['node_time'] = $params['node_time'];
                         $add['pm_audit_status'] = $params['pm_audit_status'];
                         $add['pm_audit_status_time'] = date('Y-m-d H:i', time());
                     }
-                        if($params[''])
+                    $add['product_remarks'] = $params['product_remarks'];
                     $add['type'] = $params['type'];
                     $add['site'] = $params['site'];
                     //非空
@@ -1154,13 +1160,12 @@ class ItWebDemand extends Backend
                     $add['importance'] = $params['importance'];
                     $add['degree_of_urgency'] = $params['degree_of_urgency'];
                     $add['development_difficulty'] = $params['development_difficulty'];
-                    $add['node_time'] = $params['node_time'];
+
                     $add['priority'] = $params['priority'];
                     if (!empty($params['important_reasons'])){
                         $add['important_reasons'] = implode(',', $params['important_reasons']);
                     }
                 }
-
                 $res = $this->model->allowField(true)->save($add, ['id' => $params['id']]);
                 if ($res) {
                     //Ding::dingHook(__FUNCTION__, $this ->model ->get($params['id']));
