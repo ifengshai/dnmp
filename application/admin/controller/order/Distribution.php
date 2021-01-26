@@ -248,7 +248,7 @@ class Distribution extends Backend
                             ->alias('a')
                             ->join(['fa_store_sku' => 'b'], 'a.id=b.store_id')
                             ->where([
-                                'a.shelf_number' => ['eq', $filter['shelf_number']],
+                                'a.shelf_number' => ['in', $filter['shelf_number']],
                             ])
                             ->column('b.sku');
                     //平台SKU表替换sku
