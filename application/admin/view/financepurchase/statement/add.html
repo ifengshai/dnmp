@@ -171,11 +171,14 @@
                     </td>
                     <td><input id="c-period" class="form-control period" readonly name="list[{$k}][period]"
                                type="text" value="{$v.period}"></td>
-                    <td><input id="c-all_money" class="form-control all_money" readonly name="list[{$k}][all_money]"
+                    <td><input id="c-all_money" class="form-control all_money change_money" readonly name="list[{$k}][all_money]"
+                               type="text" value="{$v.all_money}"></td>
+                    <td hidden><input id="c-all_money1" class="form-control all_money" readonly name="list[{$k}][all_money1]"
                                type="text" value="{$v.all_money}"></td>
                 </tr>
                 {/foreach}
                 {/if}
+                <input type="hidden" name="old_val" id="old_val" value="">
             </table>
         </div>
 
@@ -186,6 +189,8 @@
             <label class="control-label col-xs-12 col-sm-5">待结算合计（￥）:</label>
             <div class="col-xs-12 col-sm-7">
                 <input id="c-product_total" class="form-control total" readonly step="0.01" name="row[product_total]"
+                       type="number" value="{$all}">
+                <input id="c-product_total1" step="0.01" name="row[product_total1]" type="hidden"
                        type="number" value="{$all}">
             </div>
         </div>
