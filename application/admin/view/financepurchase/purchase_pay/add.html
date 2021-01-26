@@ -63,10 +63,10 @@
             </div>
             <label class="control-label col-xs-12 col-sm-2">付款类型:</label>
             <div class="col-xs-12 col-sm-3">
-                <select name="row[pay_type]" class="form-control" id="pay_type">
+                <select name="row[pay_type]" class="form-control" id="pay_type" readonly disabled="disabled">
                     <option value="0">请选择</option>
-                    <option value="1" {:$row['pay_type']==1 ? 'selected' : '' }>预付款</option>
-                    <option value="2" {:$row['pay_type']==2 ? 'selected' : '' }>全款预付</option>
+                    <option value="1" {:$purchase_order['pay_type']==1 ? 'selected' : '' }>预付款</option>
+                    <option value="2" {:$purchase_order['pay_type']==2 ? 'selected' : '' }>全款预付</option>
                     <option value="3" {if !empty($purchase_order['purchase_number']) } hidden {/if} >尾款</option>
                 </select>
             </div>
@@ -208,7 +208,7 @@
         </div>
         <label class="control-label col-xs-12 col-sm-2">付款总金额:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="pay_grand_total" class="form-control form-empty" readonly name="row[pay_grand_total]" value="" type="text">
+            <input id="pay_grand_total" class="form-control form-empty" readonly name="row[pay_grand_total]" value="{$all}" type="text">
         </div>
     </div>
     </div>
