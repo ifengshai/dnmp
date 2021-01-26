@@ -1,7 +1,7 @@
 define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump-to', 'template'], function ($, undefined, Backend, Table, Form, Template) {
-    function viewTable(table,value){
+    function viewTable(table, value) {
         //隐藏、显示列
-        -1 != $.inArray(value,[3,7,8]) ? table.bootstrapTable('showColumn','stock_house_num') : table.bootstrapTable('hideColumn','stock_house_num');
+        -1 != $.inArray(value, [3, 7, 8]) ? table.bootstrapTable('showColumn', 'stock_house_num') : table.bootstrapTable('hideColumn', 'stock_house_num');
 
         //隐藏、显示搜索及按钮
         $('#stock_house_num').parents('.form-group').hide();
@@ -11,37 +11,37 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
         $('select[name="work_type"]').parents('.form-group').hide();
         $('select[name="shelf_number"]').parents('.form-group').hide();
         $('.btn-distribution').addClass('hide');
-        if(0 == value){
+        if (0 == value) {
             $('select[name="abnormal"]').parents('.form-group').show();
             $('.btn-batch-export-xls').removeClass('hide');
             $('.btn-batch-printed').removeClass('hide');
-        }else if(1 == value){
+        } else if (1 == value) {
             $('.btn-batch-printed').removeClass('hide');
             $('.btn-tag-printed').removeClass('hide');
             $('.btn-batch-export-xlsz').removeClass('hide');
             $('select[name="shelf_number"]').parents('.form-group').show();
-        }else if(2 == value){
+        } else if (2 == value) {
             $('.btn-batch-printed').removeClass('hide');
             $('.btn-product').removeClass('hide');
-        }else if(3 == value){
+        } else if (3 == value) {
             $('#stock_house_num').parents('.form-group').show();
             $('.btn-batch-printed').removeClass('hide');
             $('.btn-sign-abnormals').removeClass('hide');
             $('.btn-lens').removeClass('hide');
-        }else if(4 == value){
+        } else if (4 == value) {
             $('.btn-batch-printed').removeClass('hide');
             $('.btn-machining').removeClass('hide');
-        }else if(5 == value){
+        } else if (5 == value) {
             $('.btn-batch-printed').removeClass('hide');
             $('.btn-logo').removeClass('hide');
 
-        }else if(6 == value){
+        } else if (6 == value) {
             $('.btn-finish-adopt').removeClass('hide');
             $('.btn-finish-refuse').removeClass('hide');
-        }else if(7 == value){
+        } else if (7 == value) {
             $('#stock_house_num').parents('.form-group').show();
             // $('.btn-join-complete').removeClass('hide');
-        }else if(8 == value){
+        } else if (8 == value) {
             $('select[name="abnormal"]').parents('.form-group').show();
             $('select[name="work_status"]').parents('.form-group').show();
             $('select[name="work_type"]').parents('.form-group').show();
@@ -81,7 +81,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                         {
                             field: '', title: __('序号'), operate: false,
                             formatter: function (value, row, index) {
-                                return index+1;
+                                return index + 1;
                             }
                         },
                         { field: 'increment_id', title: __('订单号'), operate: 'LIKE' },
@@ -103,29 +103,29 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                         {
                             field: 'site', title: __('站点'), addClass: 'selectpicker', data: 'multiple',
                             searchList: {
-                                1 : 'Zeelool',
-                                2 : 'Voogueme',
-                                3 : 'Nihao',
-                                4 : 'Meeloog',
-                                5 : 'Wesee',
-                                8 : 'Amazon',
-                                9 : 'Zeelool_es',
-                                10 : 'Zeelool_de',
-                                11 : 'Zeelool_jp',
-                                12 : 'Voogueme_acc',
+                                1: 'Zeelool',
+                                2: 'Voogueme',
+                                3: 'Nihao',
+                                4: 'Meeloog',
+                                5: 'Wesee',
+                                8: 'Amazon',
+                                9: 'Zeelool_es',
+                                10: 'Zeelool_de',
+                                11: 'Zeelool_jp',
+                                12: 'Voogueme_acc',
                             }, operate: 'IN',
                             formatter: Table.api.formatter.status
                         },
                         {
                             field: 'order_prescription_type', title: __('加工类型'), addClass: 'selectpicker', data: 'multiple', operate: 'IN',
-                            custom: { 0: 'gray',1: 'green', 2: 'green', 3: 'green', 4: 'green' },
-                            searchList: { 0: '待处理',1: '仅镜架', 2: '现货处方镜', 3: '定制处方镜', 4: '其他'},
+                            custom: { 0: 'gray', 1: 'green', 2: 'green', 3: 'green', 4: 'green' },
+                            searchList: { 0: '待处理', 1: '仅镜架', 2: '现货处方镜', 3: '定制处方镜', 4: '其他' },
                             formatter: Table.api.formatter.status
                         },
                         {
                             field: 'order_type', title: __('订单类型'), addClass: 'selectpicker', data: 'multiple',
                             custom: { 1: 'blue', 2: 'blue', 3: 'blue', 4: 'blue', 5: 'blue' },
-                            searchList: { 1: '普通订单', 2: '批发单', 3: '网红单', 4: '补发单', 5: '补差价', 6: '一件代发',10:'货到付款' }, operate: 'IN',
+                            searchList: { 1: '普通订单', 2: '批发单', 3: '网红单', 4: '补发单', 5: '补差价', 6: '一件代发', 10: '货到付款' }, operate: 'IN',
                             formatter: Table.api.formatter.status
                         },
                         {
@@ -172,17 +172,17 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                 2: __('待审核'),
                                 3: __('待处理'),
                                 5: __('部分处理')
-                            }, operate: 'IN',visible:false 
+                            }, operate: 'IN', visible: false
                         },
                         {
                             field: 'work_type', title: __('工单类型'),
                             searchList: {
                                 1: __('客服工单'),
                                 2: __('仓库工单')
-                            },visible:false 
+                            }, visible: false
                         },
                         {
-                            field: 'abnormal', title: __('处理异常'), addClass: 'selectpicker', data: 'multiple', visible:false, operate: 'IN',
+                            field: 'abnormal', title: __('处理异常'), addClass: 'selectpicker', data: 'multiple', visible: false, operate: 'IN',
                             searchList: {
                                 1: __('缺货'),
                                 2: __('商品条码贴错'),
@@ -204,9 +204,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
 
 
                         { field: 'stock_house_num', title: __('库位号'), operate: 'LIKE' },
-                        { field: 'shelf_number', title: __('货架号'), visible: false, searchList: {'A': 'A', 'B': 'B', 'C': 'C', 'D': 'D', 'E': 'E', 'F': 'F', 'G': 'G', 'H': 'H', 'I': 'I', 'J': 'J', 'K': 'K', 'L': 'L', 'M': 'M', 'N': 'N', 'O': 'O', 'P': 'P', 'Q': 'Q', 'R': 'R', 'S': 'S', 'T': 'T', 'U': 'U', 'V': 'V', 'W': 'W', 'X': 'X', 'Y': 'Y', 'Z': 'Z'}},
-                        { field: 'a.created_at', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange',visible:false},
-                        { field: 'created_at', title: __('创建时间'), operate: false},
+                        { field: 'shelf_number', title: __('货架号'), visible: false, addClass: 'selectpicker', data: 'multiple', operate: 'IN', searchList: { 'A': 'A', 'B': 'B', 'C': 'C', 'D': 'D', 'E': 'E', 'F': 'F', 'G': 'G', 'H': 'H', 'I': 'I', 'J': 'J', 'K': 'K', 'L': 'L', 'M': 'M', 'N': 'N', 'O': 'O', 'P': 'P', 'Q': 'Q', 'R': 'R', 'S': 'S', 'T': 'T', 'U': 'U', 'V': 'V', 'W': 'W', 'X': 'X', 'Y': 'Y', 'Z': 'Z' } },
+                        { field: 'a.created_at', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange', visible: false },
+                        { field: 'created_at', title: __('创建时间'), operate: false },
 
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate,
@@ -224,9 +224,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
-                                        if(row.handle_abnormal > 0){
+                                        if (row.handle_abnormal > 0) {
                                             return true;
-                                        }else{
+                                        } else {
                                             return false;
                                         }
                                     }
@@ -273,7 +273,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
             Table.api.bindevent(table);
 
             //根据菜单隐藏或显示对应列及按钮
-            viewTable(table,Config.label);
+            viewTable(table, Config.label);
 
             //选项卡切换
             $('.panel-heading a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
@@ -289,7 +289,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                 Config.label = value;
 
                 //根据菜单隐藏或显示对应列及按钮
-                viewTable(table,Config.label);
+                viewTable(table, Config.label);
 
                 table.bootstrapTable('refresh', {});
                 return false;
@@ -387,16 +387,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                         title: __('Warning'),
                         shadeClose: true,
                         content: '<div class="layui-form-item">' +
-                        '<label class="layui-form-label">拒绝原因</label>' +
-                        '<div class="layui-input-block">' +
-                        '<select id="reason" lay-filter="range">' +
-                        '<option value="1">加工调整</option>' +
-                        '<option value="2">镜架报损</option>' +
-                        '<option value="3">镜片报损</option>' +
-                        '<option value="4">logo调整</option>' +
-                        '</select>' +
-                        '</div>' +
-                        '</div>'
+                            '<label class="layui-form-label">拒绝原因</label>' +
+                            '<div class="layui-input-block">' +
+                            '<select id="reason" lay-filter="range">' +
+                            '<option value="1">加工调整</option>' +
+                            '<option value="2">镜架报损</option>' +
+                            '<option value="3">镜片报损</option>' +
+                            '<option value="4">logo调整</option>' +
+                            '</select>' +
+                            '</div>' +
+                            '</div>'
                     },
                     function (index) {
                         Layer.close(index);
@@ -417,7 +417,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
             $('.btn-creat-work-order').click(function () {
                 var ids = Table.api.selectedids(table);
                 Layer.confirm(
-                    __('确定要%s创建工单吗?', ids.length?'为这'+ids.length+'条记录':''),
+                    __('确定要%s创建工单吗?', ids.length ? '为这' + ids.length + '条记录' : ''),
                     { icon: 3, title: __('Warning'), shadeClose: true },
                     function (index) {
                         Layer.close(index);
@@ -476,7 +476,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                 var flag = $('#abnormal').val();
                 if (flag == 3) {
                     $('#status').show();
-                }else{
+                } else {
                     $('#status').hide();
                 }
             })
