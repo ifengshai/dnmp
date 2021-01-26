@@ -60,7 +60,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'upload'], function (
                             {field: 'action_type', title: __('增加/冲减'),custom: { 1: 'success', 2: 'danger'}, searchList: { 1: '增加', 2: '冲减'},formatter: Table.api.formatter.status},
                             {field: 'payment_time', title: __('订单支付时间'),operate:false,formatter: Table.api.formatter.datetime},
                             {field: 'payment_method', title: __('支付方式'),operate:false},
-                            {field: 'createtime', title: __('创建时间'),formatter: Table.api.formatter.datetime},
+                            {field: 'createtime', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange',formatter: Table.api.formatter.datetime},
                         ]
                     ]
                 });
