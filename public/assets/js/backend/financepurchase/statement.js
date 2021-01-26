@@ -144,24 +144,34 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         },
         add: function () {
             Controller.api.bindevent();
-            $(document).on('change', '#c-kou_reason', function () {
-                var val = $(this).val();
-
-                if (val == 0) {
-                    $(this).parent().parent().find('#c-kou_money').attr("readonly", "readonly");
-                    $(this).parent().parent().find('#c-kou_money').removeAttr("data-rule");
-                } else {
-                    $(this).parent().parent().find('#c-kou_money').attr("data-rule", "required");
-                    $(this).parent().parent().find('#c-kou_money').attr("data-rule", "integer");
-                    $(this).parent().parent().find('#c-kou_money').removeAttr("readonly");
-                }
-            });
-            $(document).on('change', '#c-kou_money', function () {
-                var val = $(this).val();
-                $(this).parent().parent().find('#c-all_money').val($('#c-all_money').val() - val);
-                $(this).attr("readonly", "readonly");
-                $('#c-product_total').val($('#c-product_total').val() - val)
-            });
+            // $(document).on('change', '#c-kou_reason', function () {
+            //
+            //     var val = $(this).val();
+            //     var  new_val = $('#old_val').val();
+            //     if (new_val >0){
+            //         if (new_val > val){
+            //             val
+            //         }
+            //     }
+            //     if (val == 0) {
+            //         $(this).parent().parent().find('#c-kou_money').attr("readonly", "readonly");
+            //         $(this).parent().parent().find('#c-kou_money').removeAttr("data-rule");
+            //     } else {
+            //         $(this).parent().parent().find('#c-kou_money').attr("data-rule", "required");
+            //         $(this).parent().parent().find('#c-kou_money').attr("data-rule", "integer");
+            //         $(this).parent().parent().find('#c-kou_money').removeAttr("readonly");
+            //     }
+            //     $(this).parent().parent().find('#c-kou_money').val(0);
+            //     $(this).parent().parent().find('#c-all_money').val($(this).parent().parent().find('#c-all_money1').val());
+            //     $('#c-product_total').val($('#c-product_total1').val())
+            // });
+            // $(document).on('change', '#c-kou_money', function () {
+            //     var val = $(this).val();
+            //     $(this).parent().parent().find('#c-all_money').val($(this).parent().parent().find('#c-all_money').val() - val);
+            //     $(this).attr("readonly", "readonly");
+            //     $('#c-product_total').val($('#c-product_total').val() - val)
+            //     $('#old_val').val(val)
+            // });
         },
 
         edit: function () {
