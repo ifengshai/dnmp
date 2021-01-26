@@ -212,12 +212,12 @@ class PurchasePay extends Backend
                                     [
                                     ['name' => '采购品名', 'value' => $reason['name']],
                                     ['name' => '采购单号', 'value' => $params['purchase_number']],
-                                    ['name' => '采购批次', 'value' => '无'],
+                                    ['name' => '采购批次', 'value' => '0'],
                                     ['name' => '商品分类', 'value' => $type],
                                     ['name' => '采购数量', 'value' => $reason['num']],
                                     ['name' => '采购单价', 'value' => $reason['single']],
-                                    ['name' => '入库数量', 'value' => '无'],
-                                    ['name' => '扣款', 'value' =>'无'],
+                                    ['name' => '入库数量', 'value' => '0'],
+                                    ['name' => '扣款', 'value' =>'0'],
                                     ['name' => '金额', 'value' => $reason['money']],
                                     ['name' => '运费', 'value' => $reason['freight']]
                                     ]
