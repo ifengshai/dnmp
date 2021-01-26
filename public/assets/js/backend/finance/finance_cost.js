@@ -35,7 +35,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'upload'], function (
                         [
                             {checkbox: true, },
                             {field: 'id', title: 'ID',operate:false},
-                            { field: 'bill_type', title: __('关联单据类型'), custom: { 1: 'success', 2: 'danger', 3: 'orange', 4: 'warning', 5: 'purple', 6: 'primary', 7: 'primary', 8: 'primary', 9: 'primary', 10: 'primary' }, searchList: { 1: '订单', 2: 'VIP订单', 3: '工单补差价', 4: '退货退款', 5: '订单取消', 6: '部分退款', 7: 'Vip退款', 8: '订单出库', 9: '出库单出库', 10: '冲减暂估' }, formatter: Table.api.formatter.status },
+                            { field: 'bill_type', title: __('关联单据类型'), custom: { 1: 'success', 2: 'danger', 3: 'orange', 4: 'warning', 5: 'purple', 6: 'primary', 7: 'primary', 8: 'primary', 9: 'primary', 10: 'primary', 11: 'primary' }, searchList: { 1: '订单', 2: 'VIP订单', 3: '工单补差价', 4: '退货退款', 5: '订单取消', 6: '部分退款', 7: 'Vip退款', 8: '订单出库', 9: '出库单出库', 10: '订单冲减暂估', 11: '出库单冲减暂估' }, formatter: Table.api.formatter.status },
                             {field: 'order_number', title: '订单号'},
                             {
                                 field: 'site', title: __('站点'), addClass: 'selectpicker', data: 'multiple',
@@ -78,7 +78,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'upload'], function (
                     columns: [
                         [
                             { field: 'id', title: 'ID', operate: false },
-                            { field: 'bill_type', title: __('关联单据类型'), custom: { 1: 'success', 2: 'danger', 3: 'orange', 4: 'warning', 5: 'purple', 6: 'primary', 7: 'primary', 8: 'primary', 9: 'primary', 10: 'primary' }, searchList: { 1: '订单', 2: 'VIP订单', 3: '工单补差价', 4: '退货退款', 5: '订单取消', 6: '部分退款', 7: 'Vip退款', 8: '订单出库', 9: '出库单出库', 10: '冲减暂估' }, formatter: Table.api.formatter.status },
+                            { field: 'bill_type', title: __('关联单据类型'), custom: { 1: 'success', 2: 'danger', 3: 'orange', 4: 'warning', 5: 'purple', 6: 'primary', 7: 'primary', 8: 'primary', 9: 'primary', 10: 'primary', 11: 'primary' }, searchList: { 1: '订单', 2: 'VIP订单', 3: '工单补差价', 4: '退货退款', 5: '订单取消', 6: '部分退款', 7: 'Vip退款', 8: '订单出库', 9: '出库单出库', 10: '订单冲减暂估', 11: '出库单冲减暂估' }, formatter: Table.api.formatter.status },
                             { field: 'order_number', title: __('关联单号') },
                             { field: 'frame_cost', title: __('镜架成本'), operate: false },
                             { field: 'lens_cost', title: __('镜片成本'), operate: false },
