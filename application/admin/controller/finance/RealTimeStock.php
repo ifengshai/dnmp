@@ -43,7 +43,7 @@ class RealTimeStock extends Backend
             foreach ($list as $key=>$item){
                 $i++;
                 $list[$key]['id'] = $i;
-                $prices = $this->item->alias('i')->join('fa_purchase_order_item p','p.purchase_id=i.purchase_id')->where('i.sku',$item['sku'])->where('i.library_status',1)->field('i.id,purchase_price,actual_purchase_price')->select();
+                $prices = $this->item->alias('i')->join('fa_purchase_order_item p','p.purchase_id=i.purchase_id')->where('i.sku',$item['sku'])->where('i.library_status',1)->where('p.sku',$item['sku'])->field('i.id,purchase_price,actual_purchase_price')->select();
                 $amount = 0;
                 foreach ($prices as $price){
                     $amount += $price['actual_purchase_price'] != 0 ? $price['actual_purchase_price'] : $price['purchase_price'];
