@@ -136,6 +136,19 @@ class PurchaseOrder extends Backend
             $params = $this->request->post("row/a");
             if ($params) {
                 $params = $this->preExcludeFields($params);
+                if (empty($params['pay_type'])) {
+                    $this->error('必须选择采购单付款类型');
+                }else{
+                    if ($params['pay_type'] == 1){
+                        if (empty($params['pay_rate'])){
+                            $this->error('选择预付款必须选择预付款比例');
+                        }
+                    }else{
+                        if (!empty($params['pay_rate'])){
+                            $this->error('不选择预付款不能选择预付款比例');
+                        }
+                    }
+                }
                 if ($params['product_total'] == 0) {
                     $this->error('商品总额不能为0');
                 }
@@ -411,6 +424,19 @@ class PurchaseOrder extends Backend
             $params = $this->request->post("row/a");
             if ($params) {
                 $params = $this->preExcludeFields($params);
+                if (empty($params['pay_type'])) {
+                    $this->error('必须选择采购单付款类型');
+                }else{
+                    if ($params['pay_type'] == 1){
+                        if (empty($params['pay_rate'])){
+                            $this->error('选择预付款必须选择预付款比例');
+                        }
+                    }else{
+                        if (!empty($params['pay_rate'])){
+                            $this->error('不选择预付款不能选择预付款比例');
+                        }
+                    }
+                }
                 $result = false;
                 Db::startTrans();
                 try {
