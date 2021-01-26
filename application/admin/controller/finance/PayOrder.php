@@ -383,12 +383,16 @@ class PayOrder extends Backend
         }
         if (request()->isAjax()) {
             $params['status'] = $status;
+            if($status == 3){
+                //审核通过
+                $params['check_user'] = session('admin.nickname');
+            }
             $result = $row->allowField(true)->save($params);
-            if($status == 6 || $status == 7){
+            if($status == 6 || $status == 7) {
                 //在待付款单中显示
-                $purchase_id = $this->payorder_item->where('pay_id',$ids)->column('purchase_id');
-                $purchase_id = implode(',',$purchase_id);
-                $this->financepurchase->where('id','in',$purchase_id)->update(['is_show'=>1]);
+                $purchase_id = $this->payorder_item->where('pay_id', $ids)->column('purchase_id');
+                $purchase_id = implode(',', $purchase_id);
+                $this->financepurchase->where('id', 'in', $purchase_id)->update(['is_show' => 1]);
             }
             if (false !== $result) {
                 $this->success('操作成功！！');
