@@ -200,7 +200,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                 formatter: Table.api.formatter.status, operate: false
                             },
                             {field: 'create_person', title: __('创建人'), operate: false},
-                            {field: 'create_time', title: __('创建时间'), operate: false},
+                            {field: 'create_time', title: __('创建时间'), operate: false,formatter: Table.api.formatter.datetime, operate: 'RANGE', addclass: 'datetimerange', sortable: true},
                             {
                                 field: 'operate',
                                 title: __('Operate'),
