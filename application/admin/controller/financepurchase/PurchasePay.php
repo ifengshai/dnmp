@@ -209,16 +209,16 @@ class PurchasePay extends Backend
                                 ['name' => '付款比例', 'value' => $params['pay_rate'] * 100 . '%'],
                                 ['name' => '采购事由', 'value' => [
                                     [
-                                    ['name' => '采购品名', 'value' => $reason['name']],
-                                    ['name' => '采购单号', 'value' => $params['purchase_number']],
-                                    ['name' => '采购批次', 'value' => '0'],
-                                    ['name' => '商品分类', 'value' => $type],
-                                    ['name' => '采购数量', 'value' => $reason['num']],
-                                    ['name' => '采购单价', 'value' => $reason['single']],
-                                    ['name' => '入库数量', 'value' => '0'],
-                                    ['name' => '扣款', 'value' =>'0'],
-                                    ['name' => '金额', 'value' => $reason['money']],
-                                    ['name' => '运费', 'value' => $reason['freight']]
+                                        ['name' => '采购品名', 'value' => $reason['name']],
+                                        ['name' => '采购单号', 'value' => $params['purchase_number']],
+                                        ['name' => '采购批次', 'value' => '0'],
+                                        ['name' => '商品分类', 'value' => $type],
+                                        ['name' => '采购数量', 'value' => $reason['num']],
+                                        ['name' => '采购单价', 'value' => $reason['single']],
+                                        ['name' => '入库数量', 'value' => '0'],
+                                        ['name' => '扣款', 'value' =>'0'],
+                                        ['name' => '金额', 'value' => $reason['money']],
+                                        ['name' => '运费', 'value' => $reason['freight']]
                                     ]
                                 ]],
                                 ['name' => '付款总金额', 'value' => $params['pay_grand_total']],
@@ -296,7 +296,16 @@ class PurchasePay extends Backend
                     $data['currency'] = '美元';
                     break;
             }
+            switch ($purchase_order['pay_type']) {
+                case 1:
+                    $all = number_format(($puchase_detail['purchase_total'] + $purchase_order['purchase_freight']) * 0.3,2,".","");
+                    break;
+                case 2:
+                    $all = number_format($puchase_detail['purchase_total'] + $purchase_order['purchase_freight'],2,".","");
+                    break;
+            }
             $this->assign('supplier', $data);
+            $this->assign('all', $all);
             //生成付款申请单编号
             $order_number = 'PR' . date('YmdHis') . rand(100, 999) . rand(100, 999);
             $this->assign('order_number', $order_number);
