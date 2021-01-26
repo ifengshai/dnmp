@@ -75,6 +75,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj', 'custom
             Controller.api.bindevent();
         },
         warehouse_data: function () {
+            $('#export').click(function () {
+                var time_str = $('#create_time').val();
+                window.location.href=Config.moduleurl+'/datacenter/index/export_not_shipped?time_str='+time_str;
+            });
             Controller.api.formatter.daterangepicker($("form[role=form1]"));
         },
         top_sale_list: function () {
