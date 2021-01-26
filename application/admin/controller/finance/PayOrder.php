@@ -326,7 +326,7 @@ class PayOrder extends Backend
                         foreach ($outorder as $rr2=>$ss2){
                             //如果有出库数据，需要添加冲减暂估结算金额和增加成本核算数据
                             $arr3['type'] = 2;   //类型：成本
-                            $arr3['bill_type'] = 10;    //单据类型：暂估结算金额
+                            $arr3['bill_type'] = 11;    //单据类型：暂估结算金额
                             $arr3['frame_cost'] = round($ss2['count']*$purchase_order['purchase_price'],2);    //镜架成本：剩余预估单价*剩余数量
                             $arr3['order_number'] = $ss2['out_stock_number'];  //出库单号
                             $arr3['out_stock_id'] = $ss2['id'];  //出库单id
@@ -336,7 +336,7 @@ class PayOrder extends Backend
                             Db::name('finance_cost')->insert($arr3);
                             //增加成本核算记录
                             $arr4['type'] = 2;   //类型：成本
-                            $arr4['bill_type'] = 8;    //单据类型：实际结算金额
+                            $arr4['bill_type'] = 9;    //单据类型：实际结算金额
                             $arr4['frame_cost'] = round($ss2['count']*$purchase_order['actual_purchase_price'],2);    //镜架成本：剩余实际单价*剩余数量
                             $arr4['order_number'] = $ss2['out_stock_number'];  //出库单号
                             $arr4['out_stock_id'] = $ss2['id'];  //出库单id
