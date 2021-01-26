@@ -140,6 +140,7 @@ class Statement extends Backend
                         $arr[$k]['deduction_total'] = empty($v['kou_money']) ? 0 : $v['kou_money'];
                         $arr[$k]['deduction_reason'] = $v['kou_reason'];
                         $arr[$k]['arrival_num'] = $v['arrival_num'];
+                        $arr[$k]['in_stock_id'] = $v['in_stock_id'];
                         switch ($v['pay_type']) {
                             case '预付款':
                                 $pay_type = 1;
@@ -326,7 +327,7 @@ class Statement extends Backend
 
         }
         $supplier_id = $row['supplier_id'];
-        $supplier_id = 1;
+        // $supplier_id = 1;
         //供应商详细信息
         $supplier = Db::name('supplier')->where('id', $supplier_id)->find();
         $supplier['period'] = $supplier['period'] == 0 ? '无账期' : $supplier['period'] . '个月';
