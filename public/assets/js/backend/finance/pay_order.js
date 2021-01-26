@@ -36,7 +36,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                                     title: __('编辑'),
                                     classname: 'btn btn-xs btn-success btn-dialog',
                                     url: 'finance/pay_order/edit',
-                                    extend: 'data-area = \'["50%","50%"]\'',
+                                    extend: 'data-area = \'["80%","70%"]\'',
                                     callback: function (data) {
                                     },
                                     visible: function (row) {
