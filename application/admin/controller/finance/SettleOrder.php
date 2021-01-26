@@ -79,7 +79,7 @@ class SettleOrder extends Backend
         }
         //主表数据
         $statement = $this->statement->where('id',$ids)->find();
-        $supply = $this->supplier->where('id',$statement['supplier_id'])->field('supplier_name,recipient_name,opening_bank,bank_account,currency')->find();
+        $supply = $this->supplier->where('id',$statement['supplier_id'])->field('supplier_name,recipient_name,opening_bank,bank_account,currency,period')->find();
         $items = $this->statementitem->where('statement_id',$ids)->select();
         $this->view->assign(compact('statement', 'supply', 'items'));
         return $this->view->fetch();
