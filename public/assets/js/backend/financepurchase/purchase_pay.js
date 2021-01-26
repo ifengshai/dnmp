@@ -15,6 +15,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
                 pk: 'id',
                 searchList:true,
+                commonSearch: true,
+                search: false,
+                searchFormVisible: true,
+                showExport: false,
+                showColumns: false,
+                showToggle: false,
                 columns: [
                     [
                         {checkbox: true},
@@ -23,11 +29,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'supplier_name', title: __('供应商名称'), operate: 'LIKE'},
                         {
                             field: 'pay_type', title: __('付款类型'), custom: { 0: 'success', 1: 'yellow', 2: 'blue', 3: 'danger'},
-                            searchList: { 0: '新建', 1: '预付款', 2: '全款预付', 3: '尾款'},
+                            searchList: {1: '预付款', 2: '全款预付', 3: '尾款'},
                             formatter: Table.api.formatter.status
                         },
-                        {field: 'pay_grand_total', title: __('付款金额（￥）'), visible: false},
-                        {field: 'base_currency_code', title: __('付款币种'), visible: false},
+                        {field: 'pay_grand_total', title: __('付款金额（￥）'), operate:false},
+                        {field: 'base_currency_code', title: __('付款币种')},
                         {
                             field: 'status', title: __('状态'), custom: { 0: 'success', 1: 'yellow', 2: 'blue', 3: 'danger'},
                             searchList: { 0: '新建', 1: '待审核', 2: '审核通过', 3: '审核拒绝', 4: '已完成', 5: '已取消'},
@@ -214,33 +220,33 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
                 //付款类型
-                $(document).on('change', '#pay_type', function () {
-                    var val = $(this).val();
-                    //预付款
-                    if (val == 1) {
-                        $('#pay_rate').val('0.3');
-                        $('#fuikuanbili').removeClass('hidden');
-                        $('#purchase_text').html('采购单号:');
-                        purchase_total = ($('#purchase_total').val() * 0.3).toFixed(2);
-                        $('#pay_grand_total').val(purchase_total);
-                        $('#purchase_number').removeAttr("readonly", "readonly");
-                    } else if(val == 3) {//尾款
-                        $(".form-empty").val('')//置空所有input
-                        $('#purchase_text').html('结算单号:');
-                        $('#fuikuanbili').addClass('hidden');
-                        $('#caigoufangshi').addClass('hidden');
-                        $('#purchase_number').removeAttr("readonly", "readonly");
-                    } else if (val == 2) {//全款预付
-                        $('#fuikuanbili').addClass('hidden');
-                        $('#purchase_text').html('采购单号:');
-                        $('#pay_rate').val('1');
-                        purchase_total = $('#purchase_total').val()
-                        $('#pay_grand_total').val(purchase_total);
-                        $('#purchase_number').removeAttr("readonly", "readonly");
-                    }else{
-                        $('#purchase_number').attr("readonly", "readonly");
-                    }
-                });
+                // $(document).on('change', '#pay_type', function () {
+                //     var val = $(this).val();
+                //     //预付款
+                //     if (val == 1) {
+                //         $('#pay_rate').val('0.3');
+                //         $('#fuikuanbili').removeClass('hidden');
+                //         $('#purchase_text').html('采购单号:');
+                //         purchase_total = ($('#purchase_total').val() * 0.3).toFixed(2);
+                //         $('#pay_grand_total').val(purchase_total);
+                //         $('#purchase_number').removeAttr("readonly", "readonly");
+                //     } else if(val == 3) {//尾款
+                //         $(".form-empty").val('')//置空所有input
+                //         $('#purchase_text').html('结算单号:');
+                //         $('#fuikuanbili').addClass('hidden');
+                //         $('#caigoufangshi').addClass('hidden');
+                //         $('#purchase_number').removeAttr("readonly", "readonly");
+                //     } else if (val == 2) {//全款预付
+                //         $('#fuikuanbili').addClass('hidden');
+                //         $('#purchase_text').html('采购单号:');
+                //         $('#pay_rate').val('1');
+                //         purchase_total = $('#purchase_total').val()
+                //         $('#pay_grand_total').val(purchase_total);
+                //         $('#purchase_number').removeAttr("readonly", "readonly");
+                //     }else{
+                //         $('#purchase_number').attr("readonly", "readonly");
+                //     }
+                // });
                 //保存 跟提交审核做校验 付款类型不能为空
                 $(document).on('click', '.btn-save', function () {
                     $('#status').val(0);

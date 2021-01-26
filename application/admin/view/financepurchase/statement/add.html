@@ -128,34 +128,34 @@
                 {foreach $list as $k=>$v}
                 <tr>
                     <td>
-                        <input id="c-id" class="form-control id" readonly name="list[{$k}][in_stock_id]" type="text" value="{$v.id}">
+                        <input id="c-id" class="form-control id" readonly name="list[{$k}][in_stock_id]" type="text" value="{$v.id}" style="width: 80px">
                     </td>
                     <input id="c-purchase_id" class="form-control purchase_id hidden" readonly name="list[{$k}][purchase_id]" type="text" value="{$v.purchase_id}">
                     <input id="c-batch_id" class="form-control batch_id hidden" readonly name="list[{$k}][batch_id]" type="text" value="{$v.batch_id}">
                     <td>
                         <input id="c-purchase_number" class="form-control purchase_number" readonly name="list[{$k}][purchase_number]" type="text"
-                               value="{$v.purchase_number}">
+                               value="{$v.purchase_number}" style="width: 180px">
                     </td>
                     <td><input id="c-purchase_name" class="form-control purchase_name" readonly name="list[{$k}][purchase_name]"
-                               type="text" value="{$v.purchase_name}"></td>
+                               type="text" value="{$v.purchase_name}"  style="width: 180px"></td>
                     <td><input id="c-pay_type" class="form-control pay_type" readonly name="list[{$k}][pay_type]"
                                type="text" value="{$v.pay_type}"></td>
                     <td><input id="c-purchase_batch" class="form-control purchase_batch" readonly name="list[{$k}][purchase_batch]"
-                               type="text" value="{$v.purchase_batch}"></td>
+                               type="text" value="{$v.purchase_batch}" style="width: 60px"></td>
                     <td><input id="c-arrival_num" class="form-control arrival_num" readonly name="list[{$k}][arrival_num]"
-                               type="text" value="{$v.arrival_num}"></td>
+                               type="text" value="{$v.arrival_num}" ></td>
                     <td><input id="c-wait_pay" class="form-control wait_pay" readonly name="list[{$k}][wait_pay]"
                                type="text" value="{$v.wait_pay}"></td>
                     <td><input id="c-now_wait_pay" class="form-control now_wait_pay" readonly name="list[{$k}][now_wait_pay]"
                                type="text" value="{$v.now_wait_pay}"></td>
                     <td><input id="c-purchase_freight" class="form-control purchase_freight" readonly name="list[{$k}][purchase_freight]"
-                               type="text" value="{$v.purchase_freight}"></td>
+                               type="text" value="{$v.purchase_freight}" style="width: 60px"></td>
                     <td><input id="c-quantity_num" class="form-control quantity_num" readonly name="list[{$k}][quantity_num]"
-                               type="text" value="{$v.quantity_num}"></td>
+                               type="text" value="{$v.quantity_num}" style="width: 80px"></td>
                     <td><input id="c-in_stock_money" class="form-control in_stock_money" readonly name="list[{$k}][in_stock_money]"
                                type="text" value="{$v.in_stock_money}"></td>
                     <td><input id="c-unqualified_num" class="form-control unqualified_num" readonly name="list[{$k}][unqualified_num]"
-                               type="text" value="{$v.unqualified_num}"></td>
+                               type="text" value="{$v.unqualified_num}" style="width: 80px"></td>
                     <td><input id="c-unqualified_num_money" class="form-control unqualified_num_money" readonly name="list[{$k}][unqualified_num_money]"
                                type="text" value="{$v.unqualified_num_money}"></td>
                     <td>

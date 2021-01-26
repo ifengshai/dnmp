@@ -3,6 +3,8 @@
 namespace app\admin\controller\financepurchase;
 
 use app\admin\model\financepurchase\FinancePurchase;
+use app\admin\model\itemmanage\Item;
+use app\admin\model\itemmanage\ItemCategory;
 use app\admin\model\purchase\PurchaseOrder;
 use app\api\controller\Ding;
 use app\common\controller\Backend;
@@ -44,9 +46,14 @@ class PurchasePay extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
-            $filter = json_decode($this->request->get('filter'), true);
             $map = [];
-
+            $filter = json_decode($this->request->get('filter'), true);
+            if ($filter['supplier_name']){
+                $supplier = Db::name('supplier')->where('supplier_name','like','%' . trim($filter['supplier_name']) . '%')->value('id');
+                $map['supplier_id'] = ['=',$supplier];
+                unset($filter['supplier_name']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->where($where)
@@ -83,11 +90,11 @@ class PurchasePay extends Backend
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             $reason = $this->request->post("reason/a");
+            // dump($params);
+            // dump($reason);
+            // die;
             if ($params) {
                 $params = $this->preExcludeFields($params);
-                // dump($params);
-                // dump($reason);
-                // die;
                 Db::startTrans();
                 try {
                     //校验是否存在未完成的付款申请单
@@ -108,13 +115,16 @@ class PurchasePay extends Backend
                             $pay_type = '预付款';
                             break;
                         case 2:
-                            $pay_type = '全款预付';
+                            $pay_type = '全款';
                             break;
                         case 3:
                             $pay_type = '尾款';
                             break;
+                        default:
+                            $pay_type = '其他';
                     }
                     $insert['status'] = $params['status'];
+                    $insert['remark'] = $params['remark'];
                     $insert['purchase_id'] = $params['purchase_id'];
                     $insert['supplier_id'] = $params['supplier_id'];
                     $insert['order_number'] = $params['order_number'];
@@ -143,23 +153,37 @@ class PurchasePay extends Backend
                         // $arr['approvers'] = '1007304767660594,0221135665945008,0647044715938022';
                         // //抄送 屈金金
                         // $arr['cc_list'] = '204112301323897192';
-                        $arr['originator_user_id'] = '071829462027950349';
+                        $arr['originator_user_id'] = '285501046927507550';
                         $arr['dept_id'] = '143678442';
-                        $arr['approvers'] = '285501046927507550,0550643549844645,056737345633028055';
+                        // $arr['approvers'] = '285501046927507550,0550643549844645,056737345633028055';
+                        $arr['approvers'] = '285501046927507550,066842141526868909,095453484824626315';
+                        //刘超 红亚 玉晓
+                        $arr['approvers'] = '0704513051687725,310818292339015332,111525355037914674';
                         $arr['cc_list'] = '071829462027950349';
 
                         if ($params['pay_type'] == 3) {
                             foreach ($reason as $kk => $vv) {
-                                $reasons[$kk] = [
-                                    ['name' => '采购单号', 'value' => $vv['number']],
-                                    ['name' => '采购品名', 'value' => '镜架'],
-                                    ['name' => '数量', 'value' => $vv['num']],
-                                    ['name' => '金额（元）', 'value' => $vv['money']]
-                                ];
+                                if (is_array($vv)){
+                                    $item = new Item();
+                                    $category_id = $item->where('sku',$vv['name'])->value('category_id');
+                                    $type = $this->category($category_id);
+                                    $reasons[$kk] = [
+                                        ['name' => '采购品名', 'value' => $vv['name']],
+                                        ['name' => '采购单号', 'value' => $vv['number']],
+                                        ['name' => '采购批次', 'value' => 1],
+                                        ['name' => '商品分类', 'value' => $type],
+                                        ['name' => '采购数量', 'value' => $vv['num']],
+                                        ['name' => '采购单价', 'value' => $vv['num']],
+                                        ['name' => '入库数量', 'value' => $vv['num']],
+                                        ['name' => '扣款', 'value' => $vv['num']],
+                                        ['name' => '金额', 'value' => $vv['money']],
+                                        ['name' => '运费', 'value' => $vv['money']]
+                                    ];
+                                }
                             }
                             $arr['form_component_values'] = [
                                 ['name' => '采购方式', 'value' => $purchase_order['purchase_type'] == 1 ? '线下采购' : '线上采购'],
-                                ['name' => '采购产品类型', 'value' => '镜框'],
+                                ['name' => '采购产品类型', 'value' => $type],
                                 ['name' => '付款类型', 'value' => $pay_type],
                                 ['name' => '供应商名称', 'value' => $params['supplier_name']],
                                 ['name' => '币种', 'value' => $currency],
@@ -173,6 +197,9 @@ class PurchasePay extends Backend
                                 ['name' => '收款方开户行', 'value' => $params['opening_bank_address']],
                             ];
                         } else {
+                            $item = new Item();
+                            $category_id = $item->where('sku',$reason['name'])->value('category_id');
+                            $type = $this->category($category_id);
                             $arr['form_component_values'] = [
                                 ['name' => '采购方式', 'value' => $purchase_order['purchase_type'] == 1 ? '线下采购' : '线上采购'],
                                 ['name' => '采购产品类型', 'value' => '镜框'],
@@ -182,10 +209,16 @@ class PurchasePay extends Backend
                                 ['name' => '付款比例', 'value' => $params['pay_rate'] * 100 . '%'],
                                 ['name' => '采购事由', 'value' => [
                                     [
+                                        ['name' => '采购品名', 'value' => $reason['name']],
                                         ['name' => '采购单号', 'value' => $params['purchase_number']],
-                                        ['name' => '采购品名', 'value' => '镜架'],
-                                        ['name' => '数量', 'value' => $reason['num']],
-                                        ['name' => '金额（元）', 'value' => $reason['money']]
+                                        ['name' => '采购批次', 'value' => '0'],
+                                        ['name' => '商品分类', 'value' => $type],
+                                        ['name' => '采购数量', 'value' => $reason['num']],
+                                        ['name' => '采购单价', 'value' => $reason['single']],
+                                        ['name' => '入库数量', 'value' => '0'],
+                                        ['name' => '扣款', 'value' =>'0'],
+                                        ['name' => '金额', 'value' => $reason['money']],
+                                        ['name' => '运费', 'value' => $reason['freight']]
                                     ]
                                 ]],
                                 ['name' => '付款总金额', 'value' => $params['pay_grand_total']],
@@ -196,14 +229,20 @@ class PurchasePay extends Backend
                         }
 
                         // dump($arr);die;
-                        // $res = $initiate_approval->initiate_approval($arr);
+                        $res = $initiate_approval->initiate_approval($arr);
                         if ($res['errcode'] != 0) {
                             throw new Exception('发起审批失败');
                         }
                     }
                     $insert['process_instance_id'] = $res['process_instance_id'];
                     // dump($insert);die;
-                    Db::name('finance_purchase')->insertGetId($insert);
+                    $finance_purchase_id = Db::name('finance_purchase')->insertGetId($insert);
+                    $label = input('label');
+                    //结算单页面过来的创建付款申请单 需要更新结算的付款申请单id字段
+                    if ($label == 'statement') {
+                        $ids = input('ids');
+                        Db::name('finance_statement')->where('id',$ids)->update(['finance_purcahse_id'=>$finance_purchase_id]);
+                    }
                     Db::commit();
                 } catch (ValidateException $e) {
                     Db::rollback();
@@ -228,6 +267,13 @@ class PurchasePay extends Backend
             $purchase_order['purchase_type'] = $purchase_order['purchase_type'] == 1 ? '线下采购' : '线上采购';
             $this->assign('purchase_order', $purchase_order);
             $puchase_detail = Db::name('purchase_order_item')->where('purchase_id', $purchase_order['id'])->find();
+            //获取当前sku的分类
+            $item = new Item();
+            $category_id = $item->where('sku',$puchase_detail['sku'])->value('category_id');
+            if (!empty($category_id)){
+                $type = $this->category($category_id);
+                $puchase_detail['type'] = $type;
+            }
             $this->assign('purchase_detail', $puchase_detail);
             //查询采购单对应的供应商信息
             $data = $this->supplier->where('id', $purchase_order['supplier_id'])->find();
@@ -250,7 +296,16 @@ class PurchasePay extends Backend
                     $data['currency'] = '美元';
                     break;
             }
+            switch ($purchase_order['pay_type']) {
+                case 1:
+                    $all = number_format(($puchase_detail['purchase_total'] + $purchase_order['purchase_freight']) * 0.3,2,".","");
+                    break;
+                case 2:
+                    $all = number_format($puchase_detail['purchase_total'] + $purchase_order['purchase_freight'],2,".","");
+                    break;
+            }
             $this->assign('supplier', $data);
+            $this->assign('all', $all);
             //生成付款申请单编号
             $order_number = 'PR' . date('YmdHis') . rand(100, 999) . rand(100, 999);
             $this->assign('order_number', $order_number);
@@ -268,10 +323,19 @@ class PurchasePay extends Backend
             $puchase_detail = Db::name('finance_statement_item')->where('statement_id', $statement['id'])->select();
             foreach ($puchase_detail as $k => $v) {
                 $puchase_details = Db::name('purchase_order_item')->where('purchase_id', $v['purchase_id'])->find();
+                $item = new Item();
+                $category_id = $item->where('sku',$puchase_details['sku'])->value('category_id');
+                $type = $this->category($category_id);
+                $puchase_detail[$k]['type'] = $type;
+                // dump($type);die;
                 $puchase_detail[$k]['sku'] = $puchase_details['sku'];
                 $puchase_detail[$k]['purchase_num'] = $puchase_details['purchase_num'];
                 $puchase_detail[$k]['purchase_price'] = $puchase_details['purchase_price'];
+                if ($v['purchase_batch'] !== 1){
+                    $puchase_detail[$k]['freight'] = 0.00;
+                }
             }
+            // dump($puchase_detail);
             $this->assign('statement', $statement);
             $this->assign('purchase_detail', $puchase_detail);
             switch ($data['period']) {
@@ -311,6 +375,7 @@ class PurchasePay extends Backend
         }
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
+            $reason = $this->request->post("reason/a");
             if ($params) {
                 $params = $this->preExcludeFields($params);
                 $result = false;
@@ -319,7 +384,121 @@ class PurchasePay extends Backend
                     $update['status'] = $params['status'];
                     $update['pay_type'] = $params['pay_type'];
                     $update['pay_rate'] = $params['pay_rate'];
+                    $update['remark'] = $params['remark'];
                     $update['pay_grand_total'] = $params['pay_grand_total'];
+                    switch ($params['pay_type']) {
+                        case 1:
+                            $pay_type = '预付款';
+                            break;
+                        case 2:
+                            $pay_type = '全款预付';
+                            break;
+                        case 3:
+                            $pay_type = '尾款';
+                            break;
+                    }
+                    switch ($params['base_currency_code']) {
+                        case 'CNY':
+                            $currency = '人民币';
+                            break;
+                        case 'USD':
+                            $currency = '美元';
+                            break;
+                    }
+                    //采购单信息
+                    $purchase_order = $this->purchase_order->where('id', $params['purchase_id'])->find();
+                    //提交审核 需要创建钉钉审批单
+                    if ($params['status'] == 1) {
+                        $initiate_approval = new Ding();
+                        //当前用户信息
+                        $admin = Db::name('admin')->where('id', session('admin.id'))->find();
+                        // $arr['originator_user_id'] = $admin['userid'];
+                        // $arr['dept_id'] = $admin['department_id'];
+                        // //任萍 王涛 王剑
+                        // $arr['approvers'] = '1007304767660594,0221135665945008,0647044715938022';
+                        // //抄送 屈金金
+                        // $arr['cc_list'] = '204112301323897192';
+                        $arr['originator_user_id'] = '071829462027950349';
+                        $arr['dept_id'] = '143678442';
+                        // $arr['approvers'] = '285501046927507550,0550643549844645,056737345633028055';
+                        //刘超 红亚 玉晓
+                        $arr['approvers'] = '0704513051687725,310818292339015332,111525355037914674';
+                        $arr['cc_list'] = '071829462027950349';
+
+                        if ($params['pay_type'] == 3) {
+                            foreach ($reason as $kk => $vv) {
+                                if (is_array($vv)){
+                                    $item = new Item();
+                                    $category_id = $item->where('sku',$vv['name'])->value('category_id');
+                                    $type = $this->category($category_id);
+                                    $reasons[$kk] = [
+                                        ['name' => '采购品名', 'value' => $vv['name']],
+                                        ['name' => '采购单号', 'value' => $vv['number']],
+                                        ['name' => '采购批次', 'value' => 1],
+                                        ['name' => '商品分类', 'value' => $type],
+                                        ['name' => '采购数量', 'value' => $vv['num']],
+                                        ['name' => '采购单价', 'value' => $vv['num']],
+                                        ['name' => '入库数量', 'value' => $vv['num']],
+                                        ['name' => '扣款', 'value' => $vv['num']],
+                                        ['name' => '金额', 'value' => $vv['money']],
+                                        ['name' => '运费', 'value' => $vv['money']]
+                                    ];
+                                }
+                            }
+                            $arr['form_component_values'] = [
+                                ['name' => '采购方式', 'value' => $purchase_order['purchase_type'] == 1 ? '线下采购' : '线上采购'],
+                                ['name' => '采购产品类型', 'value' => $type],
+                                ['name' => '付款类型', 'value' => $pay_type],
+                                ['name' => '供应商名称', 'value' => $params['supplier_name']],
+                                ['name' => '币种', 'value' => $currency],
+                                ['name' => '付款比例', 'value' => '100%'],
+                                ['name' => '采购事由', 'value' =>
+                                    $reasons
+                                ],
+                                ['name' => '付款总金额', 'value' => $params['pay_grand_total']],
+                                ['name' => '收款方名称', 'value' => $params['linkname']],
+                                ['name' => '收款方账户', 'value' => $params['bank_account']],
+                                ['name' => '收款方开户行', 'value' => $params['opening_bank_address']],
+                            ];
+                        } else {
+                            $item = new Item();
+                            $category_id = $item->where('sku',$reason['name'])->value('category_id');
+                            $type = $this->category($category_id);
+                            $arr['form_component_values'] = [
+                                ['name' => '采购方式', 'value' => $purchase_order['purchase_type'] == 1 ? '线下采购' : '线上采购'],
+                                ['name' => '采购产品类型', 'value' => '镜框'],
+                                ['name' => '付款类型', 'value' => $pay_type],
+                                ['name' => '供应商名称', 'value' => $params['supplier_name']],
+                                ['name' => '币种', 'value' => $currency],
+                                ['name' => '付款比例', 'value' => $params['pay_rate'] * 100 . '%'],
+                                ['name' => '采购事由', 'value' => [
+                                    [
+                                        ['name' => '采购品名', 'value' => $reason['name']],
+                                        ['name' => '采购单号', 'value' => $params['purchase_number']],
+                                        ['name' => '采购批次', 'value' => '0'],
+                                        ['name' => '商品分类', 'value' => $type],
+                                        ['name' => '采购数量', 'value' => $reason['num']],
+                                        ['name' => '采购单价', 'value' => $reason['single']],
+                                        ['name' => '入库数量', 'value' => '0'],
+                                        ['name' => '扣款', 'value' =>'0'],
+                                        ['name' => '金额', 'value' => $reason['money']],
+                                        ['name' => '运费', 'value' => $reason['freight']]
+                                    ]
+                                ]],
+                                ['name' => '付款总金额', 'value' => $params['pay_grand_total']],
+                                ['name' => '收款方名称', 'value' => $params['linkname']],
+                                ['name' => '收款方账户', 'value' => $params['bank_account']],
+                                ['name' => '收款方开户行', 'value' => $params['opening_bank_address']],
+                            ];
+                        }
+
+                        // dump($arr);die;
+                        $res = $initiate_approval->initiate_approval($arr);
+                        if ($res['errcode'] != 0) {
+                            throw new Exception('发起审批失败');
+                        }
+                    }
+                    $update['process_instance_id'] = $res['process_instance_id'];
                     $result = Db::name('finance_purchase')->where('order_number', $params['order_number'])->update($update);
                     Db::commit();
                 } catch (ValidateException $e) {
@@ -350,9 +529,16 @@ class PurchasePay extends Backend
             $puchase_detail = Db::name('finance_statement_item')->where('statement_id', $statement['id'])->select();
             foreach ($puchase_detail as $k => $v) {
                 $puchase_details = Db::name('purchase_order_item')->where('purchase_id', $v['purchase_id'])->find();
+                $item = new Item();
+                $category_id = $item->where('sku',$puchase_details['sku'])->value('category_id');
+                $type = $this->category($category_id);
+                $puchase_detail[$k]['type'] = $type;
                 $puchase_detail[$k]['sku'] = $puchase_details['sku'];
                 $puchase_detail[$k]['purchase_num'] = $puchase_details['purchase_num'];
                 $puchase_detail[$k]['purchase_price'] = $puchase_details['purchase_price'];
+                if ($v['purchase_batch'] !== 1){
+                    $puchase_detail[$k]['freight'] = 0.00;
+                }
             }
             $this->assign('statement', $statement);
             $this->assign('purchase_detail', $puchase_detail);
@@ -369,6 +555,7 @@ class PurchasePay extends Backend
             }
             $this->assign('supplier', $data);
             $this->assign('id', $ids);
+            $this->assign('row', $row);
             $this->assign('order_number', $row['order_number']);
             return $this->view->fetch('edit_statement');
         }else{
@@ -431,9 +618,17 @@ class PurchasePay extends Backend
             $puchase_detail = Db::name('finance_statement_item')->where('statement_id', $statement['id'])->select();
             foreach ($puchase_detail as $k => $v) {
                 $puchase_details = Db::name('purchase_order_item')->where('purchase_id', $v['purchase_id'])->find();
+                $item = new Item();
+                $category_id = $item->where('sku',$puchase_details['sku'])->value('category_id');
+                $type = $this->category($category_id);
+                $puchase_detail[$k]['type'] = $type;
                 $puchase_detail[$k]['sku'] = $puchase_details['sku'];
                 $puchase_detail[$k]['purchase_num'] = $puchase_details['purchase_num'];
                 $puchase_detail[$k]['purchase_price'] = $puchase_details['purchase_price'];
+
+                if ($v['purchase_batch'] != 1){
+                    $puchase_detail[$k]['freight'] = 0.00;
+                }
             }
             $this->assign('statement', $statement);
             $this->assign('purchase_detail', $puchase_detail);
@@ -614,5 +809,17 @@ class PurchasePay extends Backend
             $this->error($e->getMessage());
         }
         $this->success();
+    }
+
+
+    public function category($category_id)
+    {
+        $item_category = new ItemCategory();
+        $sku_category = $item_category->where('id',$category_id)->find();
+        if ($sku_category['pid'] !== 0){
+            $this->category($sku_category['pid']);
+        }else{
+            return $sku_category['name'];
+        }
     }
 }

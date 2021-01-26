@@ -40,19 +40,59 @@ class Test extends Backend
 
     public function test001()
     {
-        $str = '-3.50';
-        echo (float) $str;die;
+        //查询镜片编码对应价格
+        $lens_price = new \app\admin\model\lens\LensPrice();
+        $lens_list = $lens_price->where(['lens_number' => ['in', ['22100000']]])->select();
+        $lens_list = collection($lens_list)->toArray();
+        $cost = 0;
+        $order_prescription = [
+            [
+                'od_sph' => '-2.25',
+                'os_sph' => '-2.00',
+                'od_cyl' => '-0.50',
+                'os_cyl' => '-0.25',
+                'lens_number' => '22100000'
+            ]
+        ];
 
+        dump($lens_list);
+        foreach ($order_prescription as $k => $v) {
+            foreach ($lens_list as $key => $val) {
+                if ($v['od_cyl'] == '-0.25') {
+                    //右眼
+                    if ($v['lens_number'] == $val['lens_number'] && ((float) $v['od_sph'] >= (float) $val['sph_start'] && (float) $v['od_sph'] <= (float) $val['sph_end']) && ((float) $v['od_cyl'] == (float) $val['cyl_end'] && (float) $v['od_cyl'] == (float) $val['cyl_end'])) {
+                        $cost += $val['price'];
+                    }  elseif ($v['lens_number'] == $val['lens_number'] && ((float) $v['od_sph'] >= (float) $val['sph_start'] && (float) $v['od_sph'] <= (float) $val['sph_end']) && ((float) $v['od_cyl'] >= (float) $val['cyl_start'] && (float) $v['od_cyl'] <= (float) $val['cyl_end'])) {
+                        $cost += $val['price'];
+                    }
+                } else {
+                    //右眼
+                    if ($v['lens_number'] == $val['lens_number'] && ((float) $v['od_sph'] == 0) && (float) $v['od_cyl'] == 0) {
+                        $cost += 0;
+                    } elseif ($v['lens_number'] == $val['lens_number'] && ((float) $v['od_sph'] >= (float) $val['sph_start'] && (float) $v['od_sph'] <= (float) $val['sph_end']) && ((float) $v['od_cyl'] >= (float) $val['cyl_start'] && (float) $v['od_cyl'] <= (float) $val['cyl_end'])) {
+                        $cost += $val['price'];
+                    }
+                }
 
+                if ($v['os_cyl'] == '-0.25') {
+                    //左眼
+                    if ($v['lens_number'] == $val['lens_number'] && ((float) $v['os_sph'] >= (float) $val['sph_start'] && (float) $v['os_sph'] <= (float) $val['sph_end']) && ((float) $v['os_cyl'] == (float) $val['cyl_end'] && (float) $v['os_cyl'] == (float) $val['cyl_end'])) {
+                        $cost += $val['price'];
+                    } elseif ($v['lens_number'] == $val['lens_number'] && ((float) $v['os_sph'] >= (float) $val['sph_start'] && (float) $v['os_sph'] <= (float) $val['sph_end']) && ((float) $v['os_cyl'] >= (float) $val['cyl_start'] && (float) $v['os_cyl'] <= (float) $val['cyl_end'])) {
+                        $cost += $val['price'];
+                    }
+                } else {
+                    //左眼
+                    if ($v['lens_number'] == $val['lens_number'] && ((float) $v['os_sph'] == 0) && (float) $v['os_cyl'] == 0) {
+                        $cost += 0;
+                    } elseif ($v['lens_number'] == $val['lens_number'] && ((float) $v['os_sph'] >= (float) $val['sph_start'] && (float) $v['os_sph'] <= (float) $val['sph_end']) && ((float) $v['os_cyl'] >= (float) $val['cyl_start'] && (float) $v['os_cyl'] <= (float) $val['cyl_end'])) {
+                        $cost += $val['price'];
+                    }
+                }
+            }
+        }
 
-
-
-        $track_number = '9400111108296818283602';
-        $order_number = '100171868';
-        //根据物流单号查询发货物流渠道
-        $shipment_data_type = Db::connect('database.db_delivery')->table('ld_deliver_order')->where(['track_number' => $track_number, 'increment_id' => $order_number])->value('agent_way_title');
-
-        dump($shipment_data_type);
+        echo $cost;
         die;
     }
 

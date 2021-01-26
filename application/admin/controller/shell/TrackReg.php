@@ -2331,95 +2331,117 @@ class TrackReg extends Backend
         $start_time = strtotime($start);
         $end_time = strtotime($end);
         $exist_where['create_time'] = ['between', [$start_time, $end_time]];
-        $is_exist = Db::name('finance_cost_error')->where($exist_where)->field('id,create_time,purchase_id')->find();
-        $end_date = date('Y-m-d H:i:s', $is_exist['create_time']);
+        $is_exist = Db::name('finance_cost_error')->where($exist_where)->field('id,create_time,purchase_id,total')->select();
+
         $outstock_total1 = 0;   //出库单出库
         $outstock_total2 = 0;   //订单出库
-        if ($is_exist['id']) {
-            /*************出库单出库start**************/
-            $bar_where['out_stock_time'] = ['between', [$start, $end]];
-            $bar_where['out_stock_id'] = ['<>', 0];
-            //判断冲减前的出库单出库数量和金额
-            $bars = $this->item->where($bar_where)->group('barcode_id')->value('barcode_id');
-            foreach ($bars as $bar) {
-                $flag = [];
-                $flag['stock_id'] = $stockId;
-                $flag['bar_id'] = $bar;
-                $flag['type'] = 2;
-                $bar_items = $this->item->field('out_stock_id,purchase_id,out_stock_time')->where('barcode_id', $bar)->select();
-                $sum_count = 0;
-                $sum_total = 0;
-                foreach ($bar_items as $item) {
-                    if ($item['purchase_id'] == $is_exist['purchase_id']) {
-                        if ($item['out_stock_time'] >= $end_date) {
-                            //使用成本计算
-                            $total = Db::name('fa_purchase_order_item')->where('purchase_id', $item['purchase_id'])->value('actual_purchase_price');
+        /*************出库单出库start**************/
+        $bar_where['out_stock_time'] = ['between', [$start, $end]];
+        $bar_where['out_stock_id'] = ['<>', 0];
+        $bar_where['library_status'] = 2;
+        //判断冲减前的出库单出库数量和金额
+        $bars = $this->item->where($bar_where)->group('barcode_id')->column('barcode_id');
+        foreach ($bars as $bar) {
+            $flag = [];
+            $flag['stock_id'] = $stockId;
+            $flag['bar_id'] = $bar;
+            $flag['type'] = 2;
+            $bar_items = $this->item->alias('i')->join('fa_purchase_order_item p','i.purchase_id=p.purchase_id')->field('i.out_stock_id,i.purchase_id,i.out_stock_time,p.actual_purchase_price,p.purchase_price')->where($bar_where)->where('barcode_id', $bar)->select();
+            $sum_count = 0;
+            $sum_total = 0;
+            foreach ($bar_items as $item) {
+                if(count(array_unique($is_exist)) != 0){
+                    foreach($is_exist as $value){
+                        if ($item['purchase_id'] == $value['purchase_id']) {
+                            $end_date = date('Y-m-d H:i:s', $value['create_time']);
+                            if ($item['out_stock_time'] >= $end_date) {
+                                //使用成本计算
+                                $total = $item['actual_purchase_price'];
+                            } else {
+                                //使用预估计算
+                                $total = $item['purchase_price'];
+                            }
                         } else {
-                            //使用预估计算
-                            $total = Db::name('fa_purchase_order_item')->where('purchase_id', $item['purchase_id'])->value('purchase_price');
-                        }
-                    } else {
-                        //没有冲减数据，直接拿预估成本计算
-                        $price = Db::name('fa_purchase_order_item')->where('purchase_id', $item['purchase_id'])->field('purchase_price,actual_purchase_price')->find();
-                        if ($price['actual_purchase_price']) {
-                            $total = $price['actual_purchase_price'];   //有成本价拿成本价计算
-                        } else {
-                            $total = $price['purchase_price'];   //没有成本价拿预估价计算
-                        }
-                    }
-                    $sum_total += $total;
-                    $sum_count++;
-                }
-                $flag['outstock_count'] = $sum_count;
-                $flag['outstock_total'] = $sum_total;
-                $outstock_total1 += $sum_total;
-                Db::name('finance_stock_parameter_item')->insert($flag);
-            }
-            /*************出库单出库end**************/
-            /*************订单出库start**************/
-            $bar_where1['out_stock_time'] = ['between', [$start, $end]];
-            $bar_where1['out_stock_id'] = 0;
-            $bar_where1['item_order_number'] = ['<>', ''];
-            //判断冲减前的出库单出库数量和金额
-            $bars1 = $this->item->where($bar_where1)->field('out_stock_id,purchase_id,out_stock_time')->select();
-            if (count($bars1) != 0) {
-                $flag1 = [];
-                $flag1['stock_id'] = $stockId;
-                $flag1['type'] = 3;
-                foreach ($bars1 as $bar1) {
-                    if ($bar1['purchase_id'] == $is_exist['purchase_id']) {
-                        if ($bar1['out_stock_time'] >= $end_date) {
-                            //使用成本计算
-                            $total1 = Db::name('fa_purchase_order_item')->where('purchase_id', $bar1['purchase_id'])->value('actual_purchase_price');
-                        } else {
-                            //使用预估计算
-                            $total1 = Db::name('fa_purchase_order_item')->where('purchase_id', $bar1['purchase_id'])->value('purchase_price');
-                        }
-                    } else {
-                        //没有冲减数据，直接拿预估成本计算
-                        $price1 = Db::name('fa_purchase_order_item')->where('purchase_id', $bar1['purchase_id'])->field('purchase_price,actual_purchase_price')->find();
-                        if ($price1['actual_purchase_price']) {
-                            $total1 = $price['actual_purchase_price'];   //有成本价拿成本价计算
-                        } else {
-                            $total1 = $price['purchase_price'];   //没有成本价拿预估价计算
+                            //没有冲减数据，直接拿预估成本计算
+                            if ($item['actual_purchase_price'] != 0) {
+                                $total = $item['actual_purchase_price'];   //有成本价拿成本价计算
+                            } else {
+                                $total = $item['purchase_price'];   //没有成本价拿预估价计算
+                            }
                         }
                     }
-                    $outstock_total2 += $total1;
+                }else{
+                    //没有冲减数据，直接拿预估成本计算
+                    if ($item['actual_purchase_price'] != 0) {
+                        $total = $item['actual_purchase_price'];   //有成本价拿成本价计算
+                    } else {
+                        $total = $item['purchase_price'];   //没有成本价拿预估价计算
+                    }
                 }
-                $flag1['outstock_count'] = count($bars1);
-                $flag1['outstock_total'] = $outstock_total2;
-                Db::name('finance_stock_parameter_item')->insert($flag1);
+                $sum_total += $total;
+                $sum_count++;
             }
-
-            /*************订单出库end**************/
+            $flag['outstock_count'] = $sum_count;
+            $flag['outstock_total'] = $sum_total;
+            $outstock_total1 += $sum_total;
+            Db::name('finance_stock_parameter_item')->insert($flag);
         }
+        /*************出库单出库end**************/
+        /*************订单出库start**************/
+        $bar_where1['out_stock_time'] = ['between', [$start, $end]];
+        $bar_where1['out_stock_id'] = 0;
+        $bar_where1['item_order_number'] = ['<>', ''];
+        $bar_where1['i.library_status'] = 2;
+        //判断冲减前的出库单出库数量和金额
+        $bars1 = $this->item->alias('i')->join('fa_purchase_order_item p','i.purchase_id=p.purchase_id')->where($bar_where1)->field('i.out_stock_id,i.purchase_id,i.out_stock_time,p.actual_purchase_price,p.purchase_price')->select();
+        if (count($bars1) != 0) {
+            $flag1 = [];
+            $flag1['stock_id'] = $stockId;
+            $flag1['type'] = 3;
+            foreach ($bars1 as $bar1) {
+                if(count(array_unique($is_exist)) != 0){
+                    foreach($is_exist as $value){
+                        if ($bar1['purchase_id'] == $value['purchase_id']) {
+                            $end_date = date('Y-m-d H:i:s', $value['create_time']);
+                            if ($bar1['out_stock_time'] >= $end_date) {
+                                //使用成本计算
+                                $total1 = $bar1['actual_purchase_price'];
+                            } else {
+                                //使用预估计算
+                                $total1 = $bar1['purchase_price'];
+                            }
+                        } else {
+                            //没有冲减数据，直接拿预估成本计算
+                            if ($bar1['actual_purchase_price']  != 0) {
+                                $total1 = $bar1['actual_purchase_price'];   //有成本价拿成本价计算
+                            } else {
+                                $total1 = $bar1['purchase_price'];   //没有成本价拿预估价计算
+                            }
+                        }
+                    }
+                }else{
+                    //没有冲减数据，直接拿预估成本计算
+                    if ($bar1['actual_purchase_price']  != 0) {
+                        $total1 = $bar1['actual_purchase_price'];   //有成本价拿成本价计算
+                    } else {
+                        $total1 = $bar1['purchase_price'];   //没有成本价拿预估价计算
+                    }
+                }
+                $outstock_total2 += $total1;
+            }
+            $flag1['outstock_count'] = count($bars1);
+            $flag1['outstock_total'] = $outstock_total2;
+            Db::name('finance_stock_parameter_item')->insert($flag1);
+        }
+        /*************订单出库end**************/
         //查询最新一条的余额
-        $rest_total = $this->stockparameter->order('id', 'desc')->value('rest_total');
-        $end_rest = round($rest_total + $instock_total - $outstock_total1 - $outstock_total2, 2);
+        $rest_total = $this->stockparameter->order('id', 'desc')->field('rest_total')->limit(1,1)->select();
+        $end_rest = round($is_exist['total'] + $rest_total[0]['rest_total'] + $instock_total - $outstock_total1 - $outstock_total2, 2);
         $info['instock_total'] = $instock_total;
         $info['outstock_total'] = round($outstock_total1 + $outstock_total2, 2);
         $info['rest_total'] = $end_rest;
         $this->stockparameter->where('id', $stockId)->update($info);
+        echo "all is ok";
     }
 
     /**
@@ -2437,7 +2459,7 @@ class TrackReg extends Backend
         $fisrttime = strtotime("$month -1 month");
         $endtime = strtotime("$month") - 1;
         $financecost = new \app\admin\model\finance\FinanceCost();
-        $count = $financecost->where(['createtime' => ['between', [$fisrttime, $endtime]], 'is_carry_forward' => 0])->count();
+        $count = $financecost->where(['createtime' => ['between', [$fisrttime, $endtime]], 'is_carry_forward' => 0, 'bill_type' => ['<>', 9]])->count();
         if ($count < 1) {
             echo "无结果";
             die;

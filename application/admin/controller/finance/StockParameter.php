@@ -60,7 +60,26 @@ class StockParameter extends Backend
         }
         if ($this->request->isAjax()) {
             $ids = $this->request->get('ids');
+            $start = $this->stockparameter->where('id',$ids)->value('day_date');
             $list = $this->stockparameteritem->where('stock_id',$ids)->select();
+            $list = collection($list)->toArray();
+            //查询冲减数据
+            $start_time = strtotime($start);
+            $end_time = strtotime($start.' 23:59:59');
+            $exist_where['create_time'] = ['between', [$start_time, $end_time]];
+            $is_exist = Db::name('finance_cost_error')->where($exist_where)->select();
+            if($is_exist){
+                foreach ($is_exist as $item){
+                    $data = array();
+                    $data['type'] = 4;
+                    $data['instock_num'] = $item['count'];
+                    $data['instock_total'] = $item['total'];
+                    $list[] = $data;
+                }
+            }
+            foreach ($list as $key=>$value){
+                $list[$key]['id'] = $key+1;
+            }
             $result = array("total" => count($list), "rows" => $list);
             return json($result);
         }

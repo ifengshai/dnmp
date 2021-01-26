@@ -21,7 +21,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                 sortName: 'id',
                 columns: [
                     [
-                        {checkbox: true},
                         {field: 'id', title: __('序号'),},
                         {field: 'pay_number', title: __('付款单号'),},
                         {field: 'supplier_name', title: __('供应商名称')},
@@ -121,7 +120,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                                 callback: function (data) {
                                 },
                                 visible: function (row) {
-                                if (row.status != 5 && row.status != 6 && row.status != 7) {
+                                if (row.status == 2) {
                                         return true;
                                     } else {
                                         return false;
@@ -142,7 +141,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                                 callback: function (data) {
                                 },
                                 visible: function (row) {
-                                    if (row.status != 5 && row.status != 6 && row.status != 7) {
+                                    if (row.status == 1) {
                                         return true;
                                     } else {
                                         return false;

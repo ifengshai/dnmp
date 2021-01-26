@@ -82,7 +82,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                 columns: [
                     [
                         {field: 'id', title: __('ID'),},
-                        {field: 'type', title: __('出入库类型'), searchList: { 1: '采购入库', 2:'出库单出库',3: '订单出库'},formatter: Table.api.formatter.status},
+                        {field: 'type', title: __('出入库类型'), searchList: { 1: '采购入库', 2:'出库单出库',3: '订单出库',4:'冲减'},formatter: Table.api.formatter.status},
                         {field: 'instock_total', title: __('入库金额（￥）')},
                         {field: 'instock_num', title: __('入库数量')},
                         {field: 'outstock_total', title: __('出库金额（￥）')},

@@ -14,16 +14,22 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             table.bootstrapTable({
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
                 pk: 'id',
-                searchList: true,
+                searchList:true,
+                commonSearch: true,
+                search: false,
+                searchFormVisible: true,
+                showExport: false,
+                showColumns: false,
+                showToggle: false,
                 columns: [
                     [
                         {checkbox: true},
                         {field: 'id', title: __('Id')},
                         {field: 'statement_number', title: __('结算单号'), operate: 'LIKE'},
-                        {field: 'supplier_name', title: __('供应商名称'), operate: 'LIKE'},
-                        {field: 'period', title: __('供应商账期'), operate: 'LIKE'},
+                        {field: 'supplier_name', title: __('供应商名称'), operate: false},
+                        {field: 'period', title: __('供应商账期'), operate: false},
                         {field: 'wait_statement_total', title: __('结算金额'), operate: 'LIKE'},
-                        {field: 'purchase_person', title: __('采购负责人'), operate: 'LIKE'},
+                        {field: 'purchase_person', title: __('采购负责人'), operate: false},
                         {
                             field: 'status',
                             title: __('状态'),
@@ -88,7 +94,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
-                                        if (row.status == 6 && row.wait_statement_total > 0) {
+                                        if (row.status == 6 && row.wait_statement_total > 0 && row.can_create == 1) {
                                             return true;
                                         } else {
                                             return false;
