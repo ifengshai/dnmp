@@ -33,6 +33,8 @@ class FinanceOrder extends Backend
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->finance_cost
                 ->where($where)
+                ->where(['bill_type' => ['neq',9]])
+                ->where(['bill_type' => ['neq',11]])
                 ->order($sort, $order)
                 ->group('order_number')
                 ->count();
@@ -40,6 +42,7 @@ class FinanceOrder extends Backend
             $list = $this->finance_cost
                 ->where($where)
                 ->where(['bill_type' => ['neq',9]])
+                ->where(['bill_type' => ['neq',11]])
                 ->order($sort, $order)
                 ->group('order_number')
                 ->limit($offset, $limit)
