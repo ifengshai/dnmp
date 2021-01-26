@@ -54,7 +54,7 @@ class RealTimeStock extends Backend
             return json($result);
         }
         //库存总金额
-        $purchase = $this->item->alias('i')->join('fa_purchase_order_item p','p.purchase_id=i.purchase_id')->where('i.sku','<>','')->where('i.library_status',1)->field('sum(purchase_price) purchase_price,sum(actual_purchase_price) actual_purchase_price')->group('p.purchase_order_number')->select();
+        $purchase = $this->item->alias('i')->join('fa_purchase_order_item p','p.purchase_id=i.purchase_id and p.sku=i.sku')->where('i.sku','<>','')->where('i.library_status',1)->field('sum(purchase_price) purchase_price,sum(actual_purchase_price) actual_purchase_price')->group('p.purchase_order_number')->select();
         $amount = 0;
         foreach ($purchase as $vv){
             $amount += $vv['actual_purchase_price'] != 0 ? $vv['actual_purchase_price'] : $vv['purchase_price'];
