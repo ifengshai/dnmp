@@ -122,7 +122,7 @@
         <div class="form-group">
             <label class="control-label col-xs-12 col-sm-2">付款类型:</label>
             <div class="col-xs-12 col-sm-3">
-                <select name="row[pay_type]" class="form-control" id="pay_type">
+                <select name="row[pay_type]" class="form-control" id="pay_type" readonly disabled="disabled">
                     <option value="1" {:$row['pay_type']==1 ? 'selected' : '' }>预付款</option>
                     <option value="2" {:$row['pay_type']==2 ? 'selected' : '' }>全款预付</option>
                     <option value="3" {if !empty($purchase_order['purchase_number']) } hidden {/if} {:$row['pay_type']==3 ? 'selected' : '' }>尾款</option>
@@ -146,7 +146,7 @@
         </div>
     </div>
     <hr>
-    <div class='caigou' style="width: 80%;margin-left: 10%;">
+    <div class='caigou' style="width: 80%;margin-left: 3%;">
         <p style="font-size: 16px;text-align: left;"><b>采购事由</b></p>
         <div style="margin-bottom: 20px;">
             <table id="caigou-table" class="purchase-table">

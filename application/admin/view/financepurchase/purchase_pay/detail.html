@@ -138,9 +138,15 @@
                 </div>
             </div>
         </div>
+        <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2">备注:</label>
+            <div class="col-xs-12 col-sm-8">
+                <textarea class="form-control" id="desc" rows="8" name="row[remark]" cols="50">{$row.remark}</textarea>
+            </div>
+        </div>
     </div>
     <hr>
-    <div class='caigou' style="width: 80%;margin-left: 10%;">
+    <div class='caigou' style="width: 80%;margin-left: 3%;">
         <p style="font-size: 16px;text-align: left;"><b>采购事由</b></p>
         <div style="margin-bottom: 20px;">
             <table id="caigou-table" class="purchase-table">
@@ -151,43 +157,56 @@
                     </td>
                     <th>采购单号
                     </td>
+                    <th>采购批次
+                    </td>
                     <th>商品分类
                     </td>
                     <th>采购数量（个）
                     </td>
                     <th>采购单价（元）
                     </td>
+                    <th>入库数量
+                    </td>
+                    <th>扣款
+                    </td>
                     <th>金额（元）
+                    </td>
+                    <th>运费
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        <input id="id" class="form-control" readonly name="reason[id]" type="text"
-                               value="{$purchase_detail.id}">
+                        <input id="id" class="form-control form-empty" readonly name="reason[id]" type="text" value="{$purchase_detail.id}">
                     </td>
                     <td>
-                        <input id="name" class="form-control" readonly name="reason[name]" type="text"
-                               value="{$purchase_detail.sku}">
+                        <input id="name" class="form-control form-empty" readonly name="reason[name]" type="text" value="{$purchase_detail.sku}">
                     </td>
                     <td>
-                        <input id="number" class="form-control" readonly name="reason[number]" type="text"
-                               value="{$purchase_detail.purchase_order_number}" style="width:180px;">
+                        <input id="number" class="form-control form-empty" readonly name="reason[number]" type="text" value="{$purchase_detail.purchase_order_number}" style="width:180px;">
                     </td>
                     <td>
-                        <input id="type" class="form-control" readonly name="reason[type]" type="text"
-                               value="{$purchase_detail.type}">
+                        <input id="batch" class="form-control form-empty" readonly name="reason[batch]" type="text" value="">
                     </td>
                     <td>
-                        <input id="num" class="form-control" readonly name="reason[num]" type="text"
-                               value="{$purchase_detail.purchase_num}">
+                        <input id="type" class="form-control form-empty" readonly name="reason[type]" type="text" value="{$purchase_detail.type}">
                     </td>
                     <td>
-                        <input id="single" class="form-control" readonly name="reason[single]" type="text"
-                               value="{$purchase_detail.purchase_price}">
+                        <input id="num" class="form-control form-empty" readonly name="reason[num]" type="text" value="{$purchase_detail.purchase_num}">
                     </td>
                     <td>
-                        <input id="money" class="form-control" readonly name="reason[money]" type="text"
-                               value="{$purchase_detail.purchase_total}">
+                        <input id="single" class="form-control form-empty" readonly name="reason[single]" type="text" value="{$purchase_detail.purchase_price}">
+                    </td>
+                    <td>
+                        <input id="in_number" class="form-control form-empty" readonly name="reason[in_number]" type="text" value="" style="width:180px;">
+                    </td>
+                    <td>
+                        <input id="kou_money" class="form-control form-empty" readonly name="reason[kou_money]" type="text" value="" style="width:180px;">
+                    </td>
+                    <td>
+                        <input id="money" class="form-control form-empty" readonly name="reason[money]" type="text" value="{$purchase_detail.purchase_total}">
+                    </td>
+                    <td>
+                        <input id="freight" class="form-control form-empty" readonly name="reason[freight]" type="text" value="{$purchase_order.purchase_freight}" style="width:180px;">
                     </td>
                 </tr>
             </table>
