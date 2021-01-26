@@ -134,8 +134,12 @@ class PurchaseOrder extends Backend
     {
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
+
             if ($params) {
                 $params = $this->preExcludeFields($params);
+                if (empty($params['supplier_id']) || empty($params['supplier_address'])){
+                    $this->error('必须选择供应商信息');
+                }
                 if (empty($params['pay_type'])) {
                     $this->error('必须选择采购单付款类型');
                 }else{
