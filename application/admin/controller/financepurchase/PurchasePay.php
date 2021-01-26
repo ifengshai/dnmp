@@ -90,9 +90,9 @@ class PurchasePay extends Backend
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             $reason = $this->request->post("reason/a");
-            // dump($params);
-            // dump($reason);
-            // die;
+            dump($params);
+            dump($reason);
+            die;
             if ($params) {
                 $params = $this->preExcludeFields($params);
                 Db::startTrans();

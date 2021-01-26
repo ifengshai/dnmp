@@ -63,7 +63,7 @@
             </div>
             <label class="control-label col-xs-12 col-sm-2">付款类型:</label>
             <div class="col-xs-12 col-sm-3">
-                <select name="row[pay_type]" class="form-control" id="pay_type" readonly disabled="disabled">
+                <select name="row[pay_type]" class="form-control" id="pay_type" readonly style="pointer-events: none;">
                     <option value="0">请选择</option>
                     <option value="1" {:$purchase_order['pay_type']==1 ? 'selected' : '' }>预付款</option>
                     <option value="2" {:$purchase_order['pay_type']==2 ? 'selected' : '' }>全款预付</option>
