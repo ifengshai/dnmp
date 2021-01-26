@@ -1126,19 +1126,23 @@ class ItWebDemand extends Backend
                        if ($params['pm_audit_status'] ==3){
                            $add['status'] = 3;
                        }
+                        empty($params['importance']) && $this->error('请选择重要程度');
+                        empty($params['degree_of_urgency']) && $this->error('请选择紧急程度');
+                        empty($params['development_difficulty']) && $this->error('请选择开发难度');
                         empty($params['priority']) && $this->error('请选择优先级');
                         empty($params['node_time']) && $this->error('任务周期不能为空');
                         $add['priority'] = $params['priority'];
                         $add['node_time'] = $params['node_time'];
-                        $add['product_remarks'] = $params['product_remarks'];
+
                         //老版本计算周期方法，摒弃掉
 //                      $time_data = $this->start_time($params['priority'], $params['node_time']);
 //                      $add['start_time'] = $time_data['start_time'];
 //                      $add['end_time'] = $time_data['end_time'];
+                        $add['node_time'] = $params['node_time'];
                         $add['pm_audit_status'] = $params['pm_audit_status'];
                         $add['pm_audit_status_time'] = date('Y-m-d H:i', time());
                     }
-                        if($params[''])
+                    $add['product_remarks'] = $params['product_remarks'];
                     $add['type'] = $params['type'];
                     $add['site'] = $params['site'];
                     //非空
@@ -1157,7 +1161,7 @@ class ItWebDemand extends Backend
                     $add['importance'] = $params['importance'];
                     $add['degree_of_urgency'] = $params['degree_of_urgency'];
                     $add['development_difficulty'] = $params['development_difficulty'];
-                    $add['node_time'] = $params['node_time'];
+
                     $add['priority'] = $params['priority'];
                     if (!empty($params['important_reasons'])){
                         $add['important_reasons'] = implode(',', $params['important_reasons']);
@@ -1189,9 +1193,6 @@ class ItWebDemand extends Backend
         $this->view->assign('admin_id', session('admin.id'));
         return $this->view->fetch();
     }
-
-
-
 
     /**
      * 逻辑删除
