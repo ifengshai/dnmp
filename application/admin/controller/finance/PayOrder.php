@@ -174,7 +174,6 @@ class PayOrder extends Backend
      * */
     public function detail(){
         $id = input('ids');
-        $supplier = $this->supplier->where('id',$id)->field('id,supplier_name,currency,period,opening_bank,bank_account,recipient_name')->find();
         //获取付款单信息
         $pay_order = $this->payorder->where('id',$id)->find();
         $imgs = array_filter(explode(',',$pay_order['invoice']));
@@ -195,6 +194,7 @@ class PayOrder extends Backend
             $count2++;
         }
         $total = $total1+$total2;
+        $supplier = $this->supplier->where('id',$pay_order['supply_id'])->field('id,supplier_name,currency,period,opening_bank,bank_account,recipient_name')->find();
         $this->view->assign(compact('pay_order','supplier', 'settle', 'prepay','total1','total2','total','count1','count2','imgs'));
         return $this->view->fetch();
     }
@@ -203,8 +203,6 @@ class PayOrder extends Backend
      * */
     public function edit($ids = ''){
         $id = input('ids');
-        $supplier = $this->supplier->where('id',$id)->field('id,supplier_name,currency,period,opening_bank,bank_account,recipient_name')->find();
-
         //获取付款单信息
         $pay_order = $this->payorder->where('id',$id)->find();
         //获取付款单子单结算信息
@@ -225,6 +223,7 @@ class PayOrder extends Backend
             $count2++;
         }
         $total = $total1+$total2;
+        $supplier = $this->supplier->where('id',$pay_order['supply_id'])->field('id,supplier_name,currency,period,opening_bank,bank_account,recipient_name')->find();
         if ($this->request->isAjax()) {
             $params = $this->request->post("row/a");
             $ids = $params['ids'];
