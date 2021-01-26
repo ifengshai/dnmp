@@ -51,6 +51,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'fast', 'bootstrap-ta
                             formatter: Controller.api.formatter.supplier_type_pattern
                         },
                         {field: 'create_person', title: __('Create_person')},
+                        {field: 'period', title: __('账期'), operate: false},
+                        {field: 'currency', title: __('币种'), operate: false},
                         {field: 'createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange'},
                         {
                             field: 'status',
