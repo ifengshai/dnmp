@@ -9,6 +9,7 @@ use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Reader\Csv;
 use PhpOffice\PhpSpreadsheet\Reader\Xls;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use think\Collection;
 use think\Db;
 use think\Exception;
@@ -737,5 +738,164 @@ class TransferOrder extends Backend
                 $this->error();
             }
         }
+    }
+
+
+    /**
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
+     * 导出调拨单数据
+     * 只导出亚马逊站点的数据
+     */
+    public function export_xls_transfer_order(){
+        set_time_limit(0);
+        ini_set('memory_limit', '512M');
+        $list = Db::table('fa_transfer_order')
+            ->select(function($query){
+                $query->where('call_out_site',8)
+                    ->whereOr('call_in_site',8);
+            });
+        $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
+
+        //从数据库查询需要的数据
+        $spreadsheet = new Spreadsheet();
+
+        //常规方式：利用setCellValue()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "调拨单号")
+            ->setCellValue("B1", "调拨时间")
+            ->setCellValue("C1", "SKU");   //利用setCellValues()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "调出站点")
+            ->setCellValue("E1", "调入站点")
+            ->setCellValue("F1", "数量")
+            ->setCellValue("G1", "创建人");
+        foreach ($list as $key => $value) {
+            //获取sku  对应数量
+            $find_other_value  = Db::table('fa_transfer_order_item')->where('transfer_order_id',$value['id'])->field('sku,num')->find();
+            if ($find_other_value){
+                $value['sku'] = $find_other_value['sku'];
+                $value['num'] = $find_other_value['num'];
+            }
+            switch ($value['call_out_site']){
+                case 1:
+                    $value['call_out_site'] = 'zeelool';
+                    break;
+                case 2:
+                    $value['call_out_site'] = 'voogueme';
+                    break;
+                case 3:
+                    $value['call_out_site'] = 'nihao';
+                    break;
+                case 4:
+                    $value['call_out_site'] = 'meeloog';
+                    break;
+                case 5:
+                    $value['call_out_site'] = 'wesee';
+                    break;
+                case 8:
+                    $value['call_out_site'] = 'amazon';
+                    break;
+                case 9:
+                    $value['call_out_site'] = 'zeelool_es';
+                    break;
+                case 10:
+                    $value['call_out_site'] = 'zeelool_de';
+                    break;
+                case 11:
+                    $value['call_out_site'] = 'zeelool_jp';
+                    break;
+                case 12:
+                    $value['call_out_site'] = 'voogmechic';
+                    break;
+            }
+            switch ($value['call_in_site']){
+                case 1:
+                    $value['call_in_site'] = 'zeelool';
+                    break;
+                case 2:
+                    $value['call_in_site'] = 'voogueme';
+                    break;
+                case 3:
+                    $value['call_in_site'] = 'nihao';
+                    break;
+                case 4:
+                    $value['call_in_site'] = 'meeloog';
+                    break;
+                case 5:
+                    $value['call_in_site'] = 'wesee';
+                    break;
+                case 8:
+                    $value['call_in_site'] = 'amazon';
+                    break;
+                case 9:
+                    $value['call_in_site'] = 'zeelool_es';
+                    break;
+                case 10:
+                    $value['call_in_site'] = 'zeelool_de';
+                    break;
+                case 11:
+                    $value['call_in_site'] = 'zeelool_jp';
+                    break;
+                case 12:
+                    $value['call_in_site'] = 'voogmechic';
+                    break;
+            }
+
+            $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), $value['transfer_order_number']);
+            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['updatetime']);
+            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['sku']);
+            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['call_out_site']);
+            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['call_in_site']);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['num']);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['create_person']);
+
+        }
+        //设置宽度
+        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(40);
+        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(20);
+        //设置边框
+        $border = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
+                    'color' => ['argb' => 'FF000000'], // 设置border颜色
+                ],
+            ],
+        ];
+
+        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+
+
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
+        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
+
+        $spreadsheet->getActiveSheet()->getStyle('A1:G' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->setActiveSheetIndex(0);
+
+        $format = 'xlsx';
+        $savename = '调拨单数据' . date("YmdHis", time());;
+
+        if ($format == 'xls') {
+            //输出Excel03版本
+            header('Content-Type:application/vnd.ms-excel');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
+        } elseif ($format == 'xlsx') {
+            //输出07Excel版本
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
+        }
+
+        //输出名称
+        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
+        //禁止缓存
+        header('Cache-Control: max-age=0');
+        $writer = new $class($spreadsheet);
+
+        $writer->save('php://output');
+
     }
 }
