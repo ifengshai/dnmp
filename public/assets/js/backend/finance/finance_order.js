@@ -52,13 +52,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                                 formatter: Table.api.formatter.status
                             },
                             {field: 'order_type', title: __('订单类型'),custom: { 1: 'success', 2: 'orange', 3: 'danger', 4: 'warning', 9: 'warning'}, searchList: { 1: '普通订单', 2: '批发', 3: '网红单', 4: '补发单', 9: 'vip订单'},formatter: Table.api.formatter.status},
-                            {field: 'order_money', title: __('支付金额'),operate:false},
-                            {field: 'income_amount', title: __('订单总金额'),operate:false},
-                            {field: 'frame_cost', title: __('镜架成本'),operate:false},
-                            {field: 'fi_actual_payment_fee',title: __('物流成本'),operate:false},
+                            {field: 'order_money', title: __('支付金额'),operate:false,formatter: Controller.api.float_format},
+                            {field: 'income_amount', title: __('订单总金额'),operate:false,formatter: Controller.api.float_format},
+                            {field: 'frame_cost', title: __('镜架成本'),operate:false,formatter: Controller.api.float_format},
+                            {field: 'lens_cost',title: __('镜片成本'),operate:false,formatter: Controller.api.float_format},
+                            {field: 'fi_actual_payment_fee',title: __('物流成本'),operate:false,formatter: Controller.api.float_format},
                             /*{field: 'coupon_order_num',title: __('售后成本'),operate:false},*/
                             {field: 'order_currency_code',title: __('币种'),operate:false},
-                            {field: 'lens_cost',title: __('镜片成本'),operate:false},
                             /*{field: 'recommend_register_num',title: __('营销成本'),operate:false},
                             {field: 'recommend_register_num',title: __('售后退款'),operate:false},*/
                             {field: 'payment_time', title: __('支付时间'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
@@ -74,6 +74,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
         api: {
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
+            },
+            float_format: function (value, row, index) {
+                if (value) {
+                    return parseFloat(value).toFixed(2);
+                }
             }
         }
     };
