@@ -35,7 +35,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'upload'], function (
                         [
                             {checkbox: true, },
                             {field: 'id', title: 'ID',operate:false},
-                            { field: 'bill_type', title: __('关联单据类型'), custom: { 1: 'success', 2: 'danger', 3: 'orange', 4: 'warning', 5: 'purple', 6: 'primary', 7: 'primary', 8: 'primary', 9: 'primary', 10: 'primary' }, searchList: { 1: '订单', 2: 'VIP订单', 3: '工单补差价', 4: '退货退款', 5: '订单取消', 6: '部分退款', 7: 'Vip退款', 8: '订单出库', 9: '出库单出库', 10: '冲减暂估' }, formatter: Table.api.formatter.status },
+                            { field: 'bill_type', title: __('关联单据类型'), custom: { 1: 'success', 2: 'danger', 3: 'orange', 4: 'warning', 5: 'purple', 6: 'primary', 7: 'primary', 8: 'primary', 9: 'primary', 10: 'primary', 11: 'primary' }, searchList: { 1: '订单', 2: 'VIP订单', 3: '工单补差价', 4: '退货退款', 5: '订单取消', 6: '部分退款', 7: 'Vip退款', 8: '订单出库', 9: '出库单出库', 10: '订单冲减暂估', 11: '出库单冲减暂估' }, formatter: Table.api.formatter.status },
                             {field: 'order_number', title: '订单号'},
                             {
                                 field: 'site', title: __('站点'), addClass: 'selectpicker', data: 'multiple',
@@ -53,14 +53,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'upload'], function (
                                 formatter: Table.api.formatter.status
                             },
                             {field: 'order_type', title: __('订单类型'),custom: { 1: 'success', 2: 'orange', 3: 'danger', 4: 'warning', 5: 'purple', 9: 'warning'}, searchList: { 1: '普通订单', 2: '批发', 3: '网红单', 4: '补发',5: '补差价',9: 'vip订单'},formatter: Table.api.formatter.status},
-                            {field: 'order_money', title: __('订单金额'),operate:false},
-                            {field: 'income_amount', title: __('收入金额'),operate:false},
+                            {field: 'order_money', title: __('订单金额'),operate:false,formatter: Controller.api.float_format},
+                            {field: 'income_amount', title: __('收入金额'),operate:false,formatter: Controller.api.float_format},
                             {field: 'order_currency_code', title: __('币种')},
                             {field: 'is_carry_forward', title: __('是否结转'),custom: { 1: 'success', 0: 'danger'}, searchList: { 1: '已结转', 0: '未结转'},formatter: Table.api.formatter.status},
                             {field: 'action_type', title: __('增加/冲减'),custom: { 1: 'success', 2: 'danger'}, searchList: { 1: '增加', 2: '冲减'},formatter: Table.api.formatter.status},
                             {field: 'payment_time', title: __('订单支付时间'),operate:false,formatter: Table.api.formatter.datetime},
                             {field: 'payment_method', title: __('支付方式'),operate:false},
-                            {field: 'createtime', title: __('创建时间'),formatter: Table.api.formatter.datetime},
+                            {field: 'createtime', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange',formatter: Table.api.formatter.datetime},
                         ]
                     ]
                 });
@@ -78,10 +78,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'upload'], function (
                     columns: [
                         [
                             { field: 'id', title: 'ID', operate: false },
-                            { field: 'bill_type', title: __('关联单据类型'), custom: { 1: 'success', 2: 'danger', 3: 'orange', 4: 'warning', 5: 'purple', 6: 'primary', 7: 'primary', 8: 'primary', 9: 'primary', 10: 'primary' }, searchList: { 1: '订单', 2: 'VIP订单', 3: '工单补差价', 4: '退货退款', 5: '订单取消', 6: '部分退款', 7: 'Vip退款', 8: '订单出库', 9: '出库单出库', 10: '冲减暂估' }, formatter: Table.api.formatter.status },
+                            { field: 'bill_type', title: __('关联单据类型'), custom: { 1: 'success', 2: 'danger', 3: 'orange', 4: 'warning', 5: 'purple', 6: 'primary', 7: 'primary', 8: 'primary', 9: 'primary', 10: 'primary', 11: 'primary' }, searchList: { 1: '订单', 2: 'VIP订单', 3: '工单补差价', 4: '退货退款', 5: '订单取消', 6: '部分退款', 7: 'Vip退款', 8: '订单出库', 9: '出库单出库', 10: '订单冲减暂估', 11: '出库单冲减暂估' }, formatter: Table.api.formatter.status },
                             { field: 'order_number', title: __('关联单号') },
-                            { field: 'frame_cost', title: __('镜架成本'), operate: false },
-                            { field: 'lens_cost', title: __('镜片成本'), operate: false },
+                            { field: 'frame_cost', title: __('镜架成本'), operate: false,formatter: Controller.api.float_format },
+                            { field: 'lens_cost', title: __('镜片成本'), operate: false,formatter: Controller.api.float_format },
                             { field: 'is_carry_forward', title: __('是否结转'),  searchList: { 1: '已结转', 0: '未结转' }, formatter: Table.api.formatter.status },
                             { field: 'createtime', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange',  formatter: Table.api.formatter.datetime },
                         ]
@@ -95,6 +95,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'upload'], function (
         api: {
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
+            },
+            float_format: function (value, row, index) {
+                if (value) {
+                    return parseFloat(value).toFixed(2);
+                }
             }
         }
     };

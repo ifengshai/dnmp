@@ -394,7 +394,7 @@ class Statement extends Backend
 
         }
         $supplier_id = $row['supplier_id'];
-        $supplier_id = 1;
+        // $supplier_id = 1;
         //供应商详细信息
         $supplier = Db::name('supplier')->where('id', $supplier_id)->find();
         $supplier['period'] = $supplier['period'] == 0 ? '无账期' : $supplier['period'] . '个月';

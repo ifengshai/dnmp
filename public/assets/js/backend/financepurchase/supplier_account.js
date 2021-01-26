@@ -28,7 +28,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                         {field: 'id', title: __('Id')},
                         {field: 'supplier_name', title: __('供应商名称'), operate: 'LIKE'},
                         {
-                            field: 'status',
+                            field: 'period',
                             title: __('供应商账期'),
                             custom: {0: 'success', 1: 'yellow', 2: 'blue', 3: 'danger'},
                             searchList: {0: '无账期', 1: '一个月', 2: '两个月', 3: '三个月'},
@@ -39,7 +39,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                         {field: 'purchase_person', title: __('采购负责人'), operate: 'LIKE'},
                         {
                             field: 'statement_status', title: __('状态'), custom: {0: 'success', 1: 'danger'},
-                            searchList: {0: '本期已结算', 1: '本期未结算'},
+                            searchList: {1: '本期已结算', 2: '本期未结算'},
                             formatter: Table.api.formatter.status
                         },
                         {

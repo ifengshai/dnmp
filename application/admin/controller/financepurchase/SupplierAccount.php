@@ -41,6 +41,11 @@ class SupplierAccount extends Backend
                 return $this->selectpage();
             }
             $filter = json_decode($this->request->get('filter'), true);
+            if ($filter['statement_status']){
+                $statement_status = $filter['statement_status'];
+                unset($filter['statement_status']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
             $map = [];
             $map['status'] = ['=', 1];
 
@@ -139,12 +144,12 @@ class SupplierAccount extends Backend
                     if (!empty($data[0]['data'])){
                         //拿物流单接口返回的倒数第二条数据的时间作为揽件的时间 并且加一个月后的月底作为当前采购单批次的 结算周期
                         if (!empty(strtotime(array_slice($data[0]['data'],-1,1)[0]['time']))) {
-                            $list[$k]['period'] = date("Y-m-t", strtotime(array_slice($data[0]['data'],-1,1)[0]['time'] . '+' . $vvv['period'] . 'month'));
+                            $list[$k]['periods'] = date("Y-m-t", strtotime(array_slice($data[0]['data'],-1,1)[0]['time'] . '+' . $vvv['period'] . 'month'));
                         } else {
-                            $list[$k]['period'] = '获取不到物流单详情';
+                            $list[$k]['periods'] = '获取不到物流单详情';
                         }
                     }else{
-                        $list[$k]['period'] = '获取不到物流单详情';
+                        $list[$k]['periods'] = '获取不到物流单详情';
                     }
 
                     switch ($v['pay_type']) {
@@ -160,7 +165,7 @@ class SupplierAccount extends Backend
                     }
                     //所有的待结算的总和是所有的待结算
                     $all += $list[$k]['all_money'];
-                    if ($list[$k]['period'] <= $now){
+                    if ($list[$k]['periods'] <= $now){
                         //结算账期是本月底的算入本期待结算
                         $wait_pay_money += $list[$k]['all_money'];
                     }
@@ -168,12 +173,18 @@ class SupplierAccount extends Backend
                 $lists[$kkk]['now_wait_total'] = $wait_pay_money;
                 $lists[$kkk]['all_wait_total'] = $all;
                 if ($wait_pay_money == 0){
-                    $lists[$kkk]['statement_status'] = 0;
-                }else{
                     $lists[$kkk]['statement_status'] = 1;
+                }else{
+                    $lists[$kkk]['statement_status'] = 2;
                 }
-
+                if ($statement_status){
+                    if ($lists[$kkk]['statement_status'] != $statement_status){
+                        unset($lists[$kkk]);
+                    }
+                }
             }
+            // $lists = array_merge($lists);
+            // $total = count($lists);
             // dump($lists);die;
             $result = array("total" => $total, "rows" => $lists);
             return json($result);
@@ -371,6 +382,9 @@ class SupplierAccount extends Backend
             }
             $filter = json_decode($this->request->get('filter'), true);
             if ($filter['period']){
+                $time = explode(' ',$filter['period']);
+                $timeBegin = strtotime($time[0].$time[1]);
+                $timeEnd = strtotime($time[3].$time[4]);
                 unset($filter['period']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
@@ -462,6 +476,11 @@ class SupplierAccount extends Backend
                     }
                 }else{
                     $list[$k]['period'] = '获取不到物流单详情';
+                }
+                if ($timeBegin && $timeEnd){
+                    if (strtotime($list[$k]['period']) < $timeBegin || strtotime($list[$k]['period']) > $timeEnd){
+                        unset($list[$k]);
+                    }
                 }
             }
             $result = array("total" => $total, "rows" => $list);

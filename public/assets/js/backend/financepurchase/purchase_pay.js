@@ -220,33 +220,33 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
                 //付款类型
-                $(document).on('change', '#pay_type', function () {
-                    var val = $(this).val();
-                    //预付款
-                    if (val == 1) {
-                        $('#pay_rate').val('0.3');
-                        $('#fuikuanbili').removeClass('hidden');
-                        $('#purchase_text').html('采购单号:');
-                        purchase_total = ($('#purchase_total').val() * 0.3).toFixed(2);
-                        $('#pay_grand_total').val(purchase_total);
-                        $('#purchase_number').removeAttr("readonly", "readonly");
-                    } else if(val == 3) {//尾款
-                        $(".form-empty").val('')//置空所有input
-                        $('#purchase_text').html('结算单号:');
-                        $('#fuikuanbili').addClass('hidden');
-                        $('#caigoufangshi').addClass('hidden');
-                        $('#purchase_number').removeAttr("readonly", "readonly");
-                    } else if (val == 2) {//全款预付
-                        $('#fuikuanbili').addClass('hidden');
-                        $('#purchase_text').html('采购单号:');
-                        $('#pay_rate').val('1');
-                        purchase_total = $('#purchase_total').val()
-                        $('#pay_grand_total').val(purchase_total);
-                        $('#purchase_number').removeAttr("readonly", "readonly");
-                    }else{
-                        $('#purchase_number').attr("readonly", "readonly");
-                    }
-                });
+                // $(document).on('change', '#pay_type', function () {
+                //     var val = $(this).val();
+                //     //预付款
+                //     if (val == 1) {
+                //         $('#pay_rate').val('0.3');
+                //         $('#fuikuanbili').removeClass('hidden');
+                //         $('#purchase_text').html('采购单号:');
+                //         purchase_total = ($('#purchase_total').val() * 0.3).toFixed(2);
+                //         $('#pay_grand_total').val(purchase_total);
+                //         $('#purchase_number').removeAttr("readonly", "readonly");
+                //     } else if(val == 3) {//尾款
+                //         $(".form-empty").val('')//置空所有input
+                //         $('#purchase_text').html('结算单号:');
+                //         $('#fuikuanbili').addClass('hidden');
+                //         $('#caigoufangshi').addClass('hidden');
+                //         $('#purchase_number').removeAttr("readonly", "readonly");
+                //     } else if (val == 2) {//全款预付
+                //         $('#fuikuanbili').addClass('hidden');
+                //         $('#purchase_text').html('采购单号:');
+                //         $('#pay_rate').val('1');
+                //         purchase_total = $('#purchase_total').val()
+                //         $('#pay_grand_total').val(purchase_total);
+                //         $('#purchase_number').removeAttr("readonly", "readonly");
+                //     }else{
+                //         $('#purchase_number').attr("readonly", "readonly");
+                //     }
+                // });
                 //保存 跟提交审核做校验 付款类型不能为空
                 $(document).on('click', '.btn-save', function () {
                     $('#status').val(0);

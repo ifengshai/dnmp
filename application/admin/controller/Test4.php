@@ -1818,9 +1818,16 @@ class Test4 extends Controller
                                 }
                             }
                         }
-                        $sum_total += $total;
-                        $sum_count++;
+                    }else{
+                        //没有冲减数据，直接拿预估成本计算
+                        if ($item['actual_purchase_price'] != 0) {
+                            $total = $item['actual_purchase_price'];   //有成本价拿成本价计算
+                        } else {
+                            $total = $item['purchase_price'];   //没有成本价拿预估价计算
+                        }
                     }
+                    $sum_total += $total;
+                    $sum_count++;
                 }
                 $flag['outstock_count'] = $sum_count;
                 $flag['outstock_total'] = $sum_total;
@@ -1860,8 +1867,14 @@ class Test4 extends Controller
                                 }
                             }
                         }
-                        $outstock_total2 += $total1;
+                    }else{
+                        if ($bar1['actual_purchase_price']  != 0) {
+                            $total1 = $bar1['actual_purchase_price'];   //有成本价拿成本价计算
+                        } else {
+                            $total1 = $bar1['purchase_price'];   //没有成本价拿预估价计算
+                        }
                     }
+                    $outstock_total2 += $total1;
                 }
                 $flag1['outstock_count'] = count($bars1);
                 $flag1['outstock_total'] = $outstock_total2;

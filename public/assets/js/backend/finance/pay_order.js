@@ -36,7 +36,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                                     title: __('编辑'),
                                     classname: 'btn btn-xs btn-success btn-dialog',
                                     url: 'finance/pay_order/edit',
-                                    extend: 'data-area = \'["50%","50%"]\'',
+                                    extend: 'data-area = \'["80%","70%"]\'',
                                     callback: function (data) {
                                     },
                                     visible: function (row) {
@@ -207,9 +207,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                 $("#add-form").submit();
                 window.location.href=Config.moduleurl+'/finance/pay_order/index?ref=addtabs';
             });
-            $(document).on('click', '#cancel', function () {
-                Fast.api.close();
-            });
             $(document).on('click', '#submit', function () {
                 $("#status").val(2);
                 $("#add-form").submit();
@@ -221,9 +218,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
             $(document).on('click', '#save', function () {
                 $("#status").val(1);
                 $("#add-form").submit();
-            });
-            $(document).on('click', '#cancel', function () {
-                $("#status").val(1);
             });
             $(document).on('click', '#submit', function () {
                 $("#status").val(2);
