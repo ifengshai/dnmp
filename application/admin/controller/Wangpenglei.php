@@ -393,4 +393,43 @@ class Wangpenglei extends Backend
 
     }
 
+
+    /**
+     * 获取前一天有效SKU销量
+     * 记录当天有效SKU
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/07/31 16:52:46 
+     * @return void
+     */
+    public function set_sku_sales_num()
+    {
+        //记录当天上架的SKU 
+        $itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku();
+        $skuSalesNum = new \app\admin\model\SkuSalesNum();
+        $order = new \app\admin\model\order\order\NewOrder();
+        $list = $itemPlatformSku->field('sku,platform_sku,platform_type as site')->where(['outer_sku_status' => 1, 'platform_type' => ['<>', 8]])->select();
+        $list = collection($list)->toArray();
+        //批量插入当天各站点上架sku
+        $skuSalesNum->saveAll($list);
+
+        //查询昨天上架SKU 并统计当天销量
+        $data = $skuSalesNum->whereTime('createtime', 'yesterday')->where('site<>8')->select();
+        $data = collection($data)->toArray();
+        if ($data) {
+            foreach ($data as $k => $v) {
+                if ($v['platform_sku']) {
+                    $params[$k]['sales_num'] = $order->getSkuSalesNum($v['platform_sku'], $v['site']);
+                    $params[$k]['id'] = $v['id'];
+                }
+            }
+            if ($params) {
+                $skuSalesNum->saveAll($params);
+            }
+        }
+
+        echo "ok";
+    }
+
 }

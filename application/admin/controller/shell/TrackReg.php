@@ -403,32 +403,13 @@ class TrackReg extends Backend
         $item = new \app\admin\model\itemmanage\Item();
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku();
         $order = new \app\admin\model\order\order\NewOrder();
+        $skuSalesNum = new \app\admin\model\SkuSalesNum();
         $list = $item->where(['is_open' => 1, 'is_del' => 1, 'category_id' => ['<>', 43]])->column('sku');
         $params = [];
+        $date = date('Y-m-d 00:00:00');
         foreach ($list as $k => $v) {
-            $zeelool_sku = $this->itemplatformsku->getWebSku($v, 1);
-            $voogueme_sku = $this->itemplatformsku->getWebSku($v, 2);
-            $nihao_sku = $this->itemplatformsku->getWebSku($v, 3);
-            $wesee_sku = $this->itemplatformsku->getWebSku($v, 5);
-            $meeloog_sku = $this->itemplatformsku->getWebSku($v, 4);
-            $zeelool_es_sku = $this->itemplatformsku->getWebSku($v, 9);
-            $zeelool_de_sku = $this->itemplatformsku->getWebSku($v, 10);
-            $zeelool_jp_sku = $this->itemplatformsku->getWebSku($v, 11);
-            $voogueme_acc_sku = $this->itemplatformsku->getWebSku($v, 12);
-            $skus = [];
-            $skus = [
-                $zeelool_sku,
-                $voogueme_sku,
-                $nihao_sku,
-                $wesee_sku,
-                $meeloog_sku,
-                $zeelool_es_sku,
-                $zeelool_de_sku,
-                $zeelool_jp_sku,
-                $voogueme_acc_sku
-            ];
-
-            $num = $order->getSkuSalesNum30days($skus);
+            //统计30天有效天数销量
+            $num = $skuSalesNum->where(['sku' => $v['sku'], 'createtime' => ['<', $date]])->limit(30)->order('createtime desc')->sum('sales_num');
             if ($num >= 300) {
                 $params[$k]['grade'] = 'A+';
             } elseif ($num >= 150 && $num < 300) {
