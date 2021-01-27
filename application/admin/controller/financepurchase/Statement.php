@@ -105,9 +105,16 @@ class Statement extends Backend
             $list = $this->request->post("list/a");
             if ($params) {
                 $params = $this->preExcludeFields($params);
-                // dump($params);
-                // dump($list);
-                // die;
+                //涉及到金额计算的 要在后端进行重复校验 以免出现结算单金额错误的情况
+                $kou_money = array_sum(array_column($list,'kou_money'));
+                if (($params['product_total'] + $kou_money) !=$params['product_total1']) {
+                    $this->error(__('金额计算错误，请关闭页面后重试', ''));
+                }
+                foreach ($list as $k => $v) {
+                    if (($v['all_money'] + $v['kou_money']) != $v['all_money1']){
+                        $this->error(__('采购单'.$v['name'].'金额计算错误，请关闭页面后重试', ''));
+                    }
+                }
                 Db::startTrans();
                 try {
                     $statemet = [];
@@ -302,6 +309,16 @@ class Statement extends Backend
             $list = $this->request->post("list/a");
             if ($params) {
                 $params = $this->preExcludeFields($params);
+                //涉及到金额计算的 要在后端进行重复校验 以免出现结算单金额错误的情况
+                $kou_money = array_sum(array_column($list,'kou_money'));
+                if (($params['product_total'] + $kou_money) !=$params['product_total1']) {
+                    $this->error(__('金额计算错误，请关闭页面后重试', ''));
+                }
+                foreach ($list as $k => $v) {
+                    if (($v['all_money'] + $v['kou_money']) != $v['all_money1']){
+                        $this->error(__('采购单'.$v['name'].'金额计算错误，请关闭页面后重试', ''));
+                    }
+                }
                 Db::startTrans();
                 try {
                     //更新主表待结算总金额
@@ -327,11 +344,11 @@ class Statement extends Backend
 
         }
         $supplier_id = $row['supplier_id'];
-        // $supplier_id = 1;
         //供应商详细信息
         $supplier = Db::name('supplier')->where('id', $supplier_id)->find();
         $supplier['period'] = $supplier['period'] == 0 ? '无账期' : $supplier['period'] . '个月';
         $list = Db::name('finance_statement_item')->where('statement_id', $row['id'])->select();
+        $kou_money = array_sum(array_column($list,'deduction_total'));
         foreach ($list as $k => $v) {
             switch ($v['pay_type']) {
                 case 1:
@@ -348,6 +365,7 @@ class Statement extends Backend
         // dump($list);
         $this->assign('supplier', $supplier);
         $this->assign('list', $list);
+        $this->assign('old_all_money', round($kou_money + $row['wait_statement_total'],2));
         $this->assign('row', $row);
         return $this->view->fetch();
     }
