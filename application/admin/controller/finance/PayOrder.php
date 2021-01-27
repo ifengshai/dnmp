@@ -190,6 +190,8 @@ class PayOrder extends Backend
         $total2= 0;
         $count2 = 0;
         foreach ($prepay as $k1=>$v1){
+            $pay_rate = $v1['pay_rate']*100;
+            $prepay[$k1]['pay_rate'] = $pay_rate.'%';
             $total2 += $v1['pay_grand_total'];
             $count2++;
         }
@@ -219,6 +221,8 @@ class PayOrder extends Backend
         $total2= 0;
         $count2 = 0;
         foreach ($prepay as $k1=>$v1){
+            $pay_rate = $v1['pay_rate']*100;
+            $prepay[$k1]['pay_rate'] = $pay_rate.'%';
             $total2 += $v1['pay_grand_total'];
             $count2++;
         }
@@ -447,7 +451,9 @@ class PayOrder extends Backend
         $prepay = $this->financepurchase->alias('p')->join('fa_purchase_order o','o.id=p.purchase_id','left')->field('p.id,o.purchase_number,o.purchase_total,p.pay_rate,p.pay_grand_total,p.pay_type,p.purchase_id')->where('p.pay_type','in','1,2')->where('p.id','in',$ids)->where('p.supplier_id',$supplier_id)->select();
         $total2 = 0;  //预付预付款金额合计
         $count2 = 0;
-        foreach ($prepay as $v){
+        foreach ($prepay as $k=>$v){
+            $pay_rate = $v['pay_rate']*100;
+            $prepay[$k]['pay_rate'] = $pay_rate.'%';
             $total2 += $v['pay_grand_total'];
             $count2++;
         }
