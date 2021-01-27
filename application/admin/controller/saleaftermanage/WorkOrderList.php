@@ -4408,13 +4408,11 @@ EOF;
             ->setCellValue("AE1", "退回物流单号")
             ->setCellValue("AF1", "退款金额")
             ->setCellValue("AG1", "退款百分比")
-            ->setCellValue("AH1", "措施")
-            ->setCellValue("AI1", "措施详情")
-            ->setCellValue("AJ1", "承接详情")
-            ->setCellValue("AK1", "工单回复备注")
-            ->setCellValue("AL1", "订单支付时间")
-            ->setCellValue("AM1", "补发订单号")
-            ->setCellValue("AN1", "子单号/SKU");
+            ->setCellValue("AH1", "措施详情")
+            ->setCellValue("AI1", "工单回复备注")
+            ->setCellValue("AJ1", "订单支付时间")
+            ->setCellValue("AK1", "补发订单号")
+            ->setCellValue("AL1", "子单号/SKU");
 
         ;
         $spreadsheet->setActiveSheetIndex(0)->setTitle('工单数据');
@@ -4540,35 +4538,34 @@ EOF;
             }
             //措施
             if ($info['step'] && array_key_exists($value['id'], $info['step'])) {
-                $spreadsheet->getActiveSheet()->setCellValue("AH" . ($key * 1 + 2), $info['step'][$value['id']]);
+                $spreadsheet->getActiveSheet()->setCellValue("AH" . ($key * 1 + 2), $info['step'][$value['id']].$info['detail'][$value['id']].$value['result']);
             } else {
                 $spreadsheet->getActiveSheet()->setCellValue("AH" . ($key * 1 + 2), '');
             }
-            //措施详情
-            if ($info['detail'] && array_key_exists($value['id'], $info['detail'])) {
-                $spreadsheet->getActiveSheet()->setCellValue("AI" . ($key * 1 + 2), $info['detail'][$value['id']]);
+//            //措施详情
+//            if ($info['detail'] && array_key_exists($value['id'], $info['detail'])) {
+//                $spreadsheet->getActiveSheet()->setCellValue("AI" . ($key * 1 + 2), $info['detail'][$value['id']]);
+//            } else {
+//                $spreadsheet->getActiveSheet()->setCellValue("AI" . ($key * 1 + 2), '');
+//            }
+//            //承接
+//            if ($receptInfo && array_key_exists($value['id'], $receptInfo)) {
+//
+//                $value['result'] = $receptInfo[$value['id']];
+//                $spreadsheet->getActiveSheet()->setCellValue("AJ" . ($key * 1 + 2), $value['result']);
+//            } else {
+//                $spreadsheet->getActiveSheet()->setCellValue("AJ" . ($key * 1 + 2), '');
+//            }
+
+            if ($noteInfo && array_key_exists($value['id'], $noteInfo)) {
+                $value['note'] = $noteInfo[$value['id']];
+                $spreadsheet->getActiveSheet()->setCellValue("AI" . ($key * 1 + 2), $value['note']);
             } else {
                 $spreadsheet->getActiveSheet()->setCellValue("AI" . ($key * 1 + 2), '');
             }
-            //承接
-            if ($receptInfo && array_key_exists($value['id'], $receptInfo)) {
-
-                $value['result'] = $receptInfo[$value['id']];
-                $spreadsheet->getActiveSheet()->setCellValue("AJ" . ($key * 1 + 2), $value['result']);
-            } else {
-                $spreadsheet->getActiveSheet()->setCellValue("AJ" . ($key * 1 + 2), '');
-            }
-
-            //回复
-            if ($noteInfo && array_key_exists($value['id'], $noteInfo)) {
-                $value['note'] = $noteInfo[$value['id']];
-                $spreadsheet->getActiveSheet()->setCellValue("AK" . ($key * 1 + 2), $value['note']);
-            } else {
-                $spreadsheet->getActiveSheet()->setCellValue("AK" . ($key * 1 + 2), '');
-            }
-            $spreadsheet->getActiveSheet()->setCellValue("AL" . ($key * 1 + 2), $value['payment_time']);
-            $spreadsheet->getActiveSheet()->setCellValue("AM" . ($key * 1 + 2), $value['replacement_order']);
-            $spreadsheet->getActiveSheet()->setCellValue("AN" . ($key * 1 + 2), $value['son_number'].'/'.$value['son_sku']);
+            $spreadsheet->getActiveSheet()->setCellValue("AJ" . ($key * 1 + 2), $value['payment_time']);
+            $spreadsheet->getActiveSheet()->setCellValue("AK" . ($key * 1 + 2), $value['replacement_order']);
+            $spreadsheet->getActiveSheet()->setCellValue("AL" . ($key * 1 + 2), $value['son_number'].'/'.$value['son_sku']);
 
         }
 
@@ -4612,8 +4609,8 @@ EOF;
         $spreadsheet->getActiveSheet()->getColumnDimension('AJ')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('AK')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('AL')->setWidth(100);
-        $spreadsheet->getActiveSheet()->getColumnDimension('AM')->setWidth(200);
-        $spreadsheet->getActiveSheet()->getColumnDimension('AN')->setWidth(200);
+//        $spreadsheet->getActiveSheet()->getColumnDimension('AM')->setWidth(200);
+//        $spreadsheet->getActiveSheet()->getColumnDimension('AN')->setWidth(200);
 //        $spreadsheet->getActiveSheet()->getColumnDimension('AO')->setWidth(200);
 //        $spreadsheet->getActiveSheet()->getColumnDimension('AP')->setWidth(400);
 //        $spreadsheet->getActiveSheet()->getColumnDimension('AQ')->setWidth(400);
@@ -4633,7 +4630,7 @@ EOF;
         $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
         $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
 
-        $spreadsheet->getActiveSheet()->getStyle('A1:AN' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle('A1:AL' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
 
         $spreadsheet->setActiveSheetIndex(0);
