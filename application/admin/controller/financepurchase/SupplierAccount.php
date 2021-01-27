@@ -178,8 +178,8 @@ class SupplierAccount extends Backend
                         $wait_pay_money += $list[$k]['all_money'];
                     }
                 }
-                $lists[$kkk]['now_wait_total'] = $wait_pay_money;
-                $lists[$kkk]['all_wait_total'] = $all;
+                $lists[$kkk]['now_wait_total'] = round($wait_pay_money,2);
+                $lists[$kkk]['all_wait_total'] = round($all,2);
                 if ($wait_pay_money == 0) {
                     $lists[$kkk]['statement_status'] = 1;
                 } else {
@@ -374,8 +374,8 @@ class SupplierAccount extends Backend
         $all_wait_pay_money = $all;
         $this->assignconfig('supplier_id', $ids);
         $this->assign('supplier', $supplier);
-        $this->assign('wait_pay_money', $wait_pay_money);
-        $this->assign('all_wait_pay_money', $all_wait_pay_money);
+        $this->assign('wait_pay_money', round($wait_pay_money,2));
+        $this->assign('all_wait_pay_money', round($all_wait_pay_money,2));
         return $this->view->fetch();
     }
 
