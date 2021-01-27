@@ -38,4 +38,34 @@ class NewOrder extends Model
             ['name' => 'Voogueme_acc', 'field' => 'site', 'value' => 12],
         ];
     }
+
+
+     /**
+     * 根据SKU统计订单SKU销量
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/08/01 11:57:38 
+     * @param [type] $sku sku
+     * @param [type] $where 条件
+     * @param [type] $site 站点
+     * @return void
+     */
+    public function getSkuSalesNum($sku, $site)
+    {
+        
+        if ($sku) {
+            $map['b.sku'] = $sku;
+        } else {
+            $map['b.sku'] = ['not like', '%Price%'];
+        }
+        $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete','delivered']];
+        $map['a.created_at'] = ['between', [strtotime("-1 day"), strtotime(date('Y-m-d'))]];
+        $res = $this->where($map)
+            ->alias('a')
+            ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
+            ->sum('b.qty_ordered');
+        return $res;
+    }
+
 }
