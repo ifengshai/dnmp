@@ -125,7 +125,8 @@ class Statement extends Backend
                     $statemet = [];
                     $statemet['statement_number'] = $params['order_number'];
                     $statemet['status'] = $params['status'];
-                    $statemet['pay_type'] = 1;
+                    //结算单应该都是尾款类型的
+                    $statemet['pay_type'] = 3;
                     $statemet['supplier_id'] = $params['supplier_id'];
                     $statemet['base_currency_code'] = $params['base_currency_code'];
                     $statemet['wait_statement_total'] = $params['product_total'];
@@ -153,18 +154,8 @@ class Statement extends Backend
                         $arr[$k]['deduction_reason'] = $v['kou_reason'];
                         $arr[$k]['arrival_num'] = $v['arrival_num'];
                         $arr[$k]['in_stock_id'] = $v['in_stock_id'];
-                        switch ($v['pay_type']) {
-                            case '预付款':
-                                $pay_type = 1;
-                                break;
-                            case '全款预付':
-                                $pay_type = 2;
-                                break;
-                            case '尾款':
-                                $pay_type = 3;
-                                break;
-                        }
-                        $arr[$k]['pay_type'] = $pay_type;
+                        //结算单应该都是尾款类型
+                        $arr[$k]['pay_type'] = 3;
                         $arr[$k]['purchase_name'] = $v['purchase_name'];
                         $arr[$k]['period'] = $v['period'];
                         $arr[$k]['purchase_number'] = $v['purchase_number'];
