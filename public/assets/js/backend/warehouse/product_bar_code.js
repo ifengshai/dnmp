@@ -109,6 +109,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                         {field: 'code', title: __('商品条形码编号'), operate: 'LIKE'},
                         {field: 'sku', title: __('Sku'), operate: 'LIKE'},
                         {field: 'purchase_number', title: __('采购单号'), operate: 'LIKE'},
+                        {field: 'item_order_number', title: __('关联单号'), operate: 'LIKE'},
+                        {field: 'inventory_number', title: __('盘点单号'), operate: 'LIKE'},
+                        {field: 'out_stock_number', title: __('出库单号'), operate: 'LIKE'},
                         {field: 'batch_id', title: __('批次ID')},
                         {field: 'create_person', title: __('创建人')},
                         {
