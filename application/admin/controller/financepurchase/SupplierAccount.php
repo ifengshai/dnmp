@@ -70,7 +70,7 @@ class SupplierAccount extends Backend
                 $instock_ids = Db::name('finance_statement_item')
                     ->alias('a')
                     ->join('finance_statement b', 'a.statement_id = b.id')
-                    ->where('b.status', 'in', [0, 1, 2, 3, 4, 6])
+                    ->where('b.status', 'in', [0, 1, 3, 4, 6])
                     ->where('b.supplier_id', $supplier_id)
                     ->column('a.in_stock_id');
                 $list = $instock
@@ -259,7 +259,7 @@ class SupplierAccount extends Backend
         $instock_ids = Db::name('finance_statement_item')
             ->alias('a')
             ->join('finance_statement b', 'a.statement_id = b.id')
-            ->where('b.status', 'in', [0, 1, 2, 3, 4, 6])
+            ->where('b.status', 'in', [0, 1, 3, 4, 6])
             ->where('b.supplier_id', $supplier_id)
             ->column('a.in_stock_id');
         //供应商详细信息
@@ -410,7 +410,7 @@ class SupplierAccount extends Backend
             $instock_ids = Db::name('finance_statement_item')
                 ->alias('a')
                 ->join('finance_statement b', 'a.statement_id = b.id')
-                ->where('b.status', 'in', [0, 1, 2, 3, 4, 6])
+                ->where('b.status', 'in', [0, 1, 3, 4, 6])
                 ->where('b.supplier_id', $supplier_id)
                 ->column('a.in_stock_id');
 
