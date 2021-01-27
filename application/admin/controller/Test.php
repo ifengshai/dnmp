@@ -2489,4 +2489,12 @@ class Test extends Backend
         $filename = '数据导出.csv';
         Excel::create_csv($data, $header, $filename);
     }
+
+
+    public function test02()
+    {
+        $map['a.created_at'] = ['between', [strtotime(date('Y-m-d',strtotime("-30 day"))), strtotime(date('Y-m-d'))]];
+
+        dump($map);
+    }
 }
