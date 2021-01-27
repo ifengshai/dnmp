@@ -42,7 +42,7 @@ class Wangpenglei extends Backend
         die;
     }
 
-    /**
+     /**
      * 统计配货占用 第二步
      *
      * @Description
@@ -52,21 +52,11 @@ class Wangpenglei extends Backend
      */
     public function set_product_process()
     {
-        $this->zeelool = new \app\admin\model\order\order\Zeelool;
-        $this->voogueme = new \app\admin\model\order\order\Voogueme;
-        $this->nihao = new \app\admin\model\order\order\Nihao;
-        $this->weseeoptical = new \app\admin\model\order\order\Weseeoptical;
-        $this->meeloog = new \app\admin\model\order\order\Meeloog;
-        $this->zeelool_es = new \app\admin\model\order\order\ZeeloolEs();
-        $this->zeelool_de = new \app\admin\model\order\order\ZeeloolDe();
-        $this->zeelool_jp = new \app\admin\model\order\order\ZeeloolJp();
+        $this->orderitemprocess = new \app\admin\model\order\order\NewOrderItemProcess();
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
-
-        $skus = Db::table('fa_zz_temp2')->column('sku');
-
+        $skus = $this->item->where(['is_open' => 1, 'is_del' => 1, 'category_id' => ['<>', 43]])->column('sku');
         foreach ($skus as $k => $v) {
-
             $map = [];
             $zeelool_sku = $this->itemplatformsku->getWebSku($v, 1);
             $voogueme_sku = $this->itemplatformsku->getWebSku($v, 2);
@@ -76,43 +66,36 @@ class Wangpenglei extends Backend
             $zeelool_es_sku = $this->itemplatformsku->getWebSku($v, 9);
             $zeelool_de_sku = $this->itemplatformsku->getWebSku($v, 10);
             $zeelool_jp_sku = $this->itemplatformsku->getWebSku($v, 11);
+            $voogueme_acc_sku = $this->itemplatformsku->getWebSku($v, 12);
+            $skus = [];
+            $skus = [
+                $zeelool_sku,
+                $voogueme_sku,
+                $nihao_sku,
+                $wesee_sku,
+                $meeloog_sku,
+                $zeelool_es_sku,
+                $zeelool_de_sku,
+                $zeelool_jp_sku,
+                $voogueme_acc_sku
+            ];
 
-            $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
-            $map['custom_is_delivery_new'] = 0; //是否提货
-            $map['custom_is_match_frame_new'] = 1; //是否配镜架
-            $map['a.created_at'] = ['between', ['2020-01-01 00:00:00', date('Y-m-d H:i:s')]]; //时间节点
-            $map['sku'] = $zeelool_sku;
-            $zeelool_qty = $this->zeelool->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
-            $map['sku'] = $voogueme_sku;
-            $voogueme_qty = $this->voogueme->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
-            $map['sku'] = $nihao_sku;
-            $nihao_qty = $this->nihao->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
-            $map['sku'] = $wesee_sku;
-            $weseeoptical_qty = $this->weseeoptical->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
-
-            $map['sku'] = $zeelool_es_sku;
-            $zeelool_es_qty = $this->zeelool_es->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
-            $map['sku'] = $zeelool_de_sku;
-            $zeelool_de_qty = $this->zeelool_de->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
-            $map['sku'] = $zeelool_jp_sku;
-            $zeelool_jp_qty = $this->zeelool_jp->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
-
-            $map['sku'] = $meeloog_sku;
-            $map['custom_is_delivery'] = 0; //是否提货
-            $map['custom_is_match_frame'] = 1; //是否配镜架
-            unset($map['custom_is_delivery_new']);
-            unset($map['custom_is_match_frame_new']);
-            $meeloog_qty = $this->meeloog->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
+            $map['a.sku'] = ['in', array_filter($skus)];
+            $map['b.status'] = ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal']];
+            $map['a.distribution_status'] = ['>', 1]; //大于待打印标签
+            $map['c.check_status'] = 0; //未审单计算订单占用
+            $map['b.created_at'] = ['between', [strtotime('2020-01-01 00:00:00'), time()]]; //时间节点
+            $distribution_occupy_stock = $this->orderitemprocess->alias('a')->where($map)
+                ->join(['fa_order' => 'b'], 'a.order_id = b.id')
+                ->join(['fa_order_process' => 'c'], 'a.order_id = c.order_id')
+                ->count(1);
 
             $p_map['sku'] = $v;
-            $data['distribution_occupy_stock'] = $zeelool_qty + $voogueme_qty + $nihao_qty + $weseeoptical_qty + $meeloog_qty + $zeelool_jp_qty + $zeelool_es_qty + $zeelool_de_qty;
-
-            $res = $this->item->where($p_map)->update($data);
-
+            $data['distribution_occupy_stock'] = $distribution_occupy_stock;
+            $this->item->where($p_map)->update($data);
             echo $v . "\n";
             usleep(20000);
         }
-
         echo 'ok';
         die;
     }
@@ -127,18 +110,10 @@ class Wangpenglei extends Backend
      */
     public function set_product_process_order()
     {
-        $this->zeelool = new \app\admin\model\order\order\Zeelool;
-        $this->voogueme = new \app\admin\model\order\order\Voogueme;
-        $this->nihao = new \app\admin\model\order\order\Nihao;
-        $this->weseeoptical = new \app\admin\model\order\order\Weseeoptical;
-        $this->meeloog = new \app\admin\model\order\order\Meeloog;
-        $this->zeelool_es = new \app\admin\model\order\order\ZeeloolEs();
-        $this->zeelool_de = new \app\admin\model\order\order\ZeeloolDe();
-        $this->zeelool_jp = new \app\admin\model\order\order\ZeeloolJp();
+        $this->orderitemprocess = new \app\admin\model\order\order\NewOrderItemProcess();
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
-        $skus = Db::table('fa_zz_temp2')->column('sku');
-
+        $skus = $this->item->where(['is_open' => 1, 'is_del' => 1, 'category_id' => ['<>', 43]])->column('sku');
         foreach ($skus as $k => $v) {
             $map = [];
             $zeelool_sku = $this->itemplatformsku->getWebSku($v, 1);
@@ -149,36 +124,33 @@ class Wangpenglei extends Backend
             $zeelool_es_sku = $this->itemplatformsku->getWebSku($v, 9);
             $zeelool_de_sku = $this->itemplatformsku->getWebSku($v, 10);
             $zeelool_jp_sku = $this->itemplatformsku->getWebSku($v, 11);
+            $voogueme_acc_sku = $this->itemplatformsku->getWebSku($v, 12);
+            $skus = [];
+            $skus = [
+                $zeelool_sku,
+                $voogueme_sku,
+                $nihao_sku,
+                $wesee_sku,
+                $meeloog_sku,
+                $zeelool_es_sku,
+                $zeelool_de_sku,
+                $zeelool_jp_sku,
+                $voogueme_acc_sku
+            ];
 
-            $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
-            $map['custom_is_delivery_new'] = 0; //是否提货
-            $map['a.created_at'] = ['between', ['2020-01-01 00:00:00', date('Y-m-d H:i:s')]]; //时间节点
-            $map['sku'] = $zeelool_sku;
-            $zeelool_qty = $this->zeelool->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
-            $map['sku'] = $voogueme_sku;
-            $voogueme_qty = $this->voogueme->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
-            $map['sku'] = $nihao_sku;
-            $nihao_qty = $this->nihao->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
-            $map['sku'] = $wesee_sku;
-            $weseeoptical_qty = $this->weseeoptical->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
-
-            $map['sku'] = $zeelool_es_sku;
-            $zeelool_es_qty = $this->zeelool_es->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
-            $map['sku'] = $zeelool_de_sku;
-            $zeelool_de_qty = $this->zeelool_de->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
-            $map['sku'] = $zeelool_jp_sku;
-            $zeelool_jp_qty = $this->zeelool_jp->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
-
-            $map['sku'] = $meeloog_sku;
-            $map['custom_is_delivery'] = 0; //是否提货
-            unset($map['custom_is_delivery_new']);
-            $meeloog_qty = $this->meeloog->alias('a')->where($map)->join(['sales_flat_order_item' => 'b'], 'a.entity_id = b.order_id')->sum('qty_ordered');
-
+            $map['a.sku'] = ['in', array_filter($skus)];
+            $map['b.status'] = ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal']];
+            $map['a.distribution_status'] = ['<>', 0]; //排除取消状态
+            $map['c.check_status'] = 0; //未审单计算订单占用
+            $map['b.created_at'] = ['between', [strtotime('2020-01-01 00:00:00'), time()]]; //时间节点
+            $occupy_stock = $this->orderitemprocess->alias('a')->where($map)
+                ->join(['fa_order' => 'b'], 'a.order_id = b.id')
+                ->join(['fa_order_process' => 'c'], 'a.order_id = c.order_id')
+                ->count(1);
 
             $p_map['sku'] = $v;
-            $data['occupy_stock'] = $zeelool_qty + $voogueme_qty + $nihao_qty + $weseeoptical_qty + $meeloog_qty + $zeelool_jp_qty + $zeelool_es_qty + $zeelool_de_qty;
-            $res = $this->item->where($p_map)->update($data);
-
+            $data['occupy_stock'] = $occupy_stock;
+            $this->item->where($p_map)->update($data);
             echo $v . "\n";
             usleep(20000);
         }
