@@ -111,6 +111,11 @@ class Statement extends Backend
                     $this->error(__('金额计算错误，请关闭页面后重试', ''));
                 }
                 foreach ($list as $k => $v) {
+                    if (!empty($v['kou_money'])){
+                        if (empty($v['kou_reason'])){
+                            $this->error(__('有扣款金额不能没有扣款原因', ''));
+                        }
+                    }
                     if (($v['all_money'] + $v['kou_money']) != $v['all_money1']){
                         $this->error(__('采购单'.$v['name'].'金额计算错误，请关闭页面后重试', ''));
                     }
@@ -315,6 +320,11 @@ class Statement extends Backend
                     $this->error(__('金额计算错误，请关闭页面后重试', ''));
                 }
                 foreach ($list as $k => $v) {
+                    if (!empty($v['kou_money'])){
+                        if (empty($v['kou_reason'])){
+                            $this->error(__('有扣款金额不能没有扣款原因', ''));
+                        }
+                    }
                     if (($v['all_money'] + $v['kou_money']) != $v['all_money1']){
                         $this->error(__('采购单'.$v['name'].'金额计算错误，请关闭页面后重试', ''));
                     }
