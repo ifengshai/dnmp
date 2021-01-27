@@ -248,6 +248,7 @@ class PayOrder extends Backend
         foreach ($purchase_order_ids as $v){
             //采购单总批次
             $batch_count = $this->batch->where('purchase_id',$v)->count();
+            $batch_count = $batch_count == 0 ? 1 : $batch_count;
             //付款完成总批次
             $where['i.purchase_order_id'] = $v;
             $where['p.status'] = ['in','4,5'];
