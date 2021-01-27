@@ -450,6 +450,9 @@ class TrackReg extends Backend
             $params[$k]['true_sku'] = $v;
             $params[$k]['num'] = $num;
             $params[$k]['createtime'] = date('Y-m-d H:i:s');
+
+            echo $v . "\n";
+            usleep(20000);
         }
 
         if ($params) {
