@@ -33,16 +33,23 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             formatter: Table.api.formatter.status,
                         },
                         {field: 'id', title: __('Id')},
-                        {field: 'email', title: __('Email'),operate: false},
-
-                        {
-                            field: 'query',
-                            title: __('Query'),
-                            operate:false,
+                        {field: 'email', title: __('Email'),operate: false,
                             events: Controller.api.events.gettitle,
                             cellStyle: formatTableUnit,
                             formatter: Controller.api.formatter.gettitle,
                         },
+                        {field: 'query', title: __('Query'),operate: false,
+                            cellStyle:formatTableUnit
+                        },
+
+                        // {
+                        //     field: 'query',
+                        //     title: __('Query'),
+                        //     operate:false,
+                        //     events: Controller.api.events.gettitle,
+                        //     cellStyle: formatTableUnit,
+                        //     formatter: Controller.api.formatter.gettitle,
+                        // },
                         {
                             field: 'status',
                             title: __('状态'),
