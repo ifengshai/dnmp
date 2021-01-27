@@ -341,14 +341,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                                 formatter: Table.api.formatter.status
                             },
                             {
-                                field: 'degree_of_urgency',
+                                field: 'importance',
                                 title: __('重要程度'),
                                 searchList: { 1: 'S0:不重要', 2: 'S1：不太重要', 3: 'S2：一般', 4: 'S3：比较重要',5:'非常重要' },
                                 custom: { 1: 'green', 2: 'black', 3: 'black', 4: 'yellow', 5: 'red' },
                                 formatter: Table.api.formatter.status
                             },
                             {
-                                field: 'importance',
+                                field: 'degree_of_urgency',
                                 title: __('紧急程度'),
                                 searchList: { 1: 'P0：不紧急', 2: 'P1：正常', 3: 'P2：比较紧急', 4: 'P3：非常紧急' },
                                 custom: { 1: 'green', 2: 'blue', 3: 'black', 4: 'red' },
