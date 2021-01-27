@@ -401,6 +401,7 @@ class TrackReg extends Backend
     public function get_days_sales_num_all()
     {
         $item = new \app\admin\model\itemmanage\Item();
+        $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku();
         $order = new \app\admin\model\order\order\NewOrder();
         $list = $item->where(['is_open' => 1, 'is_del' => 1, 'category_id' => ['<>', 43]])->column('sku');
         $params = [];
