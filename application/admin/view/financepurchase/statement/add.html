@@ -78,7 +78,7 @@
             <label class="control-label col-xs-12 col-sm-2">收款方名称:</label>
             <div class="col-xs-12 col-sm-3">
                 <input id="linkname" class="form-control" readonly name="row[linkname]"
-                       value="{$supplier.linkname}" type="text">
+                       value="{$supplier.recipient_name}" type="text">
             </div>
         </div>
         <div class="form-group">
@@ -101,10 +101,10 @@
         </div>
     </div>
     <hr>
-    <div class='caigou' style="width: 80%;margin-left: 0%;">
+    <div class='caigou' style="width: 100%;margin-left: 0%;">
         <p style="font-size: 16px;text-align: left;"><b>列表</b></p>
-        <div style="margin-bottom: 20px;">
-            <table id="caigou-table" class="purchase-table" style="overflow-x:auto;">
+        <div style="margin-bottom: 20px;overflow-x:auto;width: 100%">
+            <table id="caigou-table" class="purchase-table" >
                 <tr>
                     <th>id</td>
                     <th>采购单号</td>
@@ -143,11 +143,11 @@
                     <td><input id="c-purchase_batch" class="form-control purchase_batch" readonly name="list[{$k}][purchase_batch]"
                                type="text" value="{$v.purchase_batch}" style="width: 60px"></td>
                     <td><input id="c-arrival_num" class="form-control arrival_num" readonly name="list[{$k}][arrival_num]"
-                               type="text" value="{$v.arrival_num}" style="width: 60px"></td>
+                               type="text" value="{$v.arrival_num}" style="width: 70px"></td>
                     <td><input id="c-wait_pay" class="form-control wait_pay" readonly name="list[{$k}][wait_pay]"
                                type="text" value="{$v.wait_pay}" style="width: 80px"></td>
                     <td><input id="c-now_wait_pay" class="form-control now_wait_pay" readonly name="list[{$k}][now_wait_pay]"
-                               type="text" value="{$v.now_wait_pay}" style="width: 80px"></td>
+                               type="text" value="{$v.now_wait_pay}" style="width: 90px"></td>
                     <td><input id="c-purchase_freight" class="form-control purchase_freight" readonly name="list[{$k}][purchase_freight]"
                                type="text" value="{$v.purchase_freight}" style="width: 60px"></td>
                     <td><input id="c-quantity_num" class="form-control quantity_num" readonly name="list[{$k}][quantity_num]"
@@ -196,7 +196,7 @@
         </div>
     </div>
     <hr>
-    <div class="form-group layer-footer">
+    <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2"></label>
         <div class="col-xs-12 col-sm-8">
             <button type="submit" class="btn btn-success btn-embossed btn-save">{:__('OK')}</button>
@@ -204,6 +204,14 @@
             <input type="button" class="btn btn-default reset" id="submit_cancel" value="取消">
         </div>
     </div>
+<!--    <div class="form-group layer-footer">-->
+<!--        <label class="control-label col-xs-12 col-sm-2"></label>-->
+<!--        <div class="col-xs-12 col-sm-8">-->
+<!--            <button type="submit" class="btn btn-success btn-embossed btn-save">{:__('OK')}</button>-->
+<!--            <button type="submit" class="btn btn-success btn-status btn-embossed btn-save1">提交审核</button>-->
+<!--            <input type="button" class="btn btn-default reset" id="submit_cancel" value="取消">-->
+<!--        </div>-->
+<!--    </div>-->
 </form>
 
 
