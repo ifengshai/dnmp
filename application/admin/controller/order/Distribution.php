@@ -779,17 +779,21 @@ class Distribution extends Backend
         $data = array();
         foreach ($list as $k => $v) {
             $item_platform_sku = Db::connect('database.db_stock');
-            $sku = $item_platform_sku->table('fa_item_platform_sku')->where('platform_sku', $v['sku'])->where('platform_type', $v['site'])->value('sku');
-            $data[$sku]['location'] =
-                Db::table('fa_store_sku')
-                ->alias('a')
-                ->join(['fa_store_house' => 'b'], 'a.store_id=b.id')
-                ->where('a.sku', $sku)
-                ->value('b.coding');
-            $data[$sku]['sku'] = $sku;
-            $data[$sku]['number']++;
-        }
+            $sku = $item_platform_sku->table('fa_item_platform_sku')
+                ->alias('pla')
+                ->join(['fa_item' => 'it'], 'pla.sku=it.sku')
+                ->where('pla.platform_sku', $v['sku'])
+                ->where('pla.platform_type', $v['site'])->field('pla.sku,it.real_time_qty')->find();
 
+            $data[$sku['sku']]['location'] =
+                Db::table('fa_store_sku')
+                    ->alias('a')
+                    ->join(['fa_store_house' => 'b'], 'a.store_id=b.id')
+                    ->where('a.sku', $sku['sku'])
+                    ->value('b.coding');
+            $data[$sku['sku']]['sku'] = $sku;
+            $data[$sku['sku']]['number']++;
+        }
         // $b=array();
         // foreach($sku as $v){
         //     $b[]=$v['sku'];
@@ -824,16 +828,20 @@ class Distribution extends Backend
         $spreadsheet
             ->setActiveSheetIndex(0)->setCellValue("A1", "仓库SKU")
             ->setCellValue("B1", "库位号")
-            ->setCellValue("C1", "数量");
+            ->setCellValue("C1", "数量")
+            ->setCellValue("D1", "仓库实时库存")
+        ;
         foreach ($data as $key => $value) {
-            $spreadsheet->getActiveSheet()->setCellValueExplicit("A" . ($key * 1 + 2), $value['sku'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $spreadsheet->getActiveSheet()->setCellValueExplicit("A" . ($key * 1 + 2), $value['sku']['sku'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
             $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['location']);
             $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['number']);
+            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['sku']['real_time_qty']);
         }
         //设置宽度
         $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(20);
 
         //设置边框
         $border = [
@@ -850,7 +858,7 @@ class Distribution extends Backend
         $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
         $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
 
-        $spreadsheet->getActiveSheet()->getStyle('A1:C' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle('A1:D' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         $spreadsheet->setActiveSheetIndex(0);
 
         $format = 'xlsx';
