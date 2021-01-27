@@ -26,11 +26,6 @@ class WaitPay extends Backend
                 return $this->selectpage();
             }
             $filter = json_decode($this->request->get('filter'), true);
-            if($filter['nickname']){
-                //创建人
-                $ids = Db::name('finance_purchase_log')->alias('l')->join('fa_admin a','a.id=l.userid')->where('a.nickname',$filter['nickname'])->column('l.process_instance_id');
-                $map['p.process_instance_id'] = ['in',$ids];
-            }
             //创建时间
             if($filter['create_time']){
                 $createat = explode(' ', $filter['create_time']);
@@ -40,7 +35,6 @@ class WaitPay extends Backend
             }
             $map['p.status'] = 4;
             $map['p.is_show'] = 1;
-            unset($filter['nickname']);
             unset($filter['create_time']);
             unset($filter['one_time-operate']);
             $this->request->get(['filter' => json_encode($filter)]);
@@ -49,7 +43,7 @@ class WaitPay extends Backend
             $total = $this->financepurchase
                 ->alias('p')
                 ->join('fa_supplier s','s.id=p.supplier_id','left')
-                ->field('p.id,s.supplier_name,p.order_number,p.create_time,l.userid,p.create_person')
+                ->field('p.id,s.supplier_name,p.order_number,p.create_time,p.create_person')
                 ->where($where)
                 ->where($map)
                 ->order($sort, $order)
