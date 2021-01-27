@@ -111,7 +111,7 @@ class Statement extends Backend
                     $this->error(__('金额计算错误，请关闭页面后重试', ''));
                 }
                 foreach ($list as $k => $v) {
-                    if (!empty($v['kou_money'])){
+                    if ($v['kou_money'] > 0){
                         if (empty($v['kou_reason'])){
                             $this->error(__('有扣款金额不能没有扣款原因', ''));
                         }
@@ -176,7 +176,7 @@ class Statement extends Backend
             } else {
                 $this->error(__('Parameter %s can not be empty', ''));
             }
-            $this->success('添加成功！！', url('PurchasePay/index'));
+            $this->success('添加成功！！');
         }
         $instock = new Instock();
         // $supplier_id = 1;
@@ -311,7 +311,7 @@ class Statement extends Backend
                     $this->error(__('金额计算错误，请关闭页面后重试', ''));
                 }
                 foreach ($list as $k => $v) {
-                    if (!empty($v['kou_money'])){
+                    if ($v['kou_money'] > 0){
                         if (empty($v['kou_reason'])){
                             $this->error(__('有扣款金额不能没有扣款原因', ''));
                         }
@@ -341,7 +341,7 @@ class Statement extends Backend
             } else {
                 $this->error(__('Parameter %s can not be empty', ''));
             }
-            $this->success('提交成功！！', url('PurchasePay/index'));
+            $this->success('提交成功！！');
 
         }
         $supplier_id = $row['supplier_id'];
