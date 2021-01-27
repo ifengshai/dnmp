@@ -24,7 +24,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                         {field: 'id', title: __('序号'),operate:false},
                         {field: 'order_number', title: __('付款申请单号'),},
                         {field: 'supplier_name', title: __('供应商名称'),operate:'like'},
-                        {field: 'nickname', title: __('审核人'), visible: false},
                         {field: 'create_person', title: __('创建人')},
                         {field: 'create_time', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime},
                     ]
