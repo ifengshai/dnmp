@@ -307,7 +307,7 @@ class PayOrder extends Backend
                             //如果有出库数据，需要添加冲减暂估结算金额和增加成本核算数据
                             $arr1['type'] = 2;   //类型：成本
                             $arr1['bill_type'] = 10;    //单据类型：暂估结算金额
-                            $arr1['frame_cost'] = round($ss1*$purchase_order['purchase_price'],2);    //镜架成本：剩余预估单价*剩余数量
+                            $arr1['frame_cost'] = $cost_order_info['frame_cost'];    //镜架成本：剩余预估单价*剩余数量
                             $arr1['order_number'] = $rr1;  //订单号
                             $arr1['site'] = $cost_order_info['site'];  //站点
                             $arr1['order_type'] = $cost_order_info['order_type'];  //订单类型
@@ -344,10 +344,12 @@ class PayOrder extends Backend
                         //出库单出库
                         $outorder = $this->outstockItem->alias('i')->join('fa_out_stock s','s.id=i.out_stock_id','left')->where('s.purchase_id',$v)->where('status',2)->where('i.sku',$purchase_order['sku'])->group('s.out_stock_number')->field('s.id,s.out_stock_number,sum(i.out_stock_num) count')->select();
                         foreach ($outorder as $rr2=>$ss2){
+                            //获取成本核算中的订单数据
+                            $cost_order_info1 = $this->financecost->where(['out_stock_id' => $ss2['id'], 'type' => 2])->find();
                             //如果有出库数据，需要添加冲减暂估结算金额和增加成本核算数据
                             $arr3['type'] = 2;   //类型：成本
                             $arr3['bill_type'] = 11;    //单据类型：暂估结算金额
-                            $arr3['frame_cost'] = round($ss2['count']*$purchase_order['purchase_price'],2);    //镜架成本：剩余预估单价*剩余数量
+                            $arr3['frame_cost'] = $cost_order_info1['frame_cost'];    //镜架成本：剩余预估单价*剩余数量
                             $arr3['order_number'] = $ss2['out_stock_number'];  //出库单号
                             $arr3['out_stock_id'] = $ss2['id'];  //出库单id
                             $arr3['action_type'] = 2;  //动作类型：冲减
