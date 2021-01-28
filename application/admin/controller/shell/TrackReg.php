@@ -404,33 +404,41 @@ class TrackReg extends Backend
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku();
         $order = new \app\admin\model\order\order\NewOrder();
         $skuSalesNum = new \app\admin\model\SkuSalesNum();
+        $platform = new \app\admin\model\platformmanage\MagentoPlatform();
+        //查询所有站点
+        $siteList = $platform->select();
+
         $list = $item->where(['is_open' => 1, 'is_del' => 1, 'category_id' => ['<>', 43]])->column('sku');
         $params = [];
         $date = date('Y-m-d 00:00:00');
         foreach ($list as $k => $v) {
-            //统计30天有效天数销量
-            $num = $skuSalesNum->where(['sku' => $v['sku'], 'createtime' => ['<', $date]])->limit(30)->order('createtime desc')->sum('sales_num');
-            if ($num >= 300) {
+            $allnum = 0;
+            foreach ($siteList as $val) {
+                //统计30天有效天数销量
+                $num = $skuSalesNum->where(['sku' => $v['sku'], 'createtime' => ['<', $date], 'site' => $val['id']])->limit(30)->order('createtime desc')->sum('sales_num');
+                $allnum + $num;
+            }
+            if ($allnum >= 300) {
                 $params[$k]['grade'] = 'A+';
-            } elseif ($num >= 150 && $num < 300) {
+            } elseif ($allnum >= 150 && $allnum < 300) {
                 $params[$k]['grade'] = 'A';
-            } elseif ($num >= 90 && $num < 150) {
+            } elseif ($allnum >= 90 && $allnum < 150) {
                 $params[$k]['grade'] = 'B';
-            } elseif ($num >= 60 && $num < 90) {
+            } elseif ($allnum >= 60 && $allnum < 90) {
                 $params[$k]['grade'] = 'C+';
-            } elseif ($num >= 30 && $num < 60) {
+            } elseif ($allnum >= 30 && $allnum < 60) {
                 $params[$k]['grade'] = 'C';
-            } elseif ($num >= 15 && $num < 30) {
+            } elseif ($allnum >= 15 && $allnum < 30) {
                 $params[$k]['grade'] = 'D';
-            } elseif ($num >= 1 && $num < 15) {
+            } elseif ($allnum >= 1 && $allnum < 15) {
                 $params[$k]['grade'] = 'E';
             } else {
                 $params[$k]['grade'] = 'F';
             }
-            $params[$k]['counter'] = $num;
+            $params[$k]['counter'] = $allnum;
             $params[$k]['days'] = 30;
             $params[$k]['true_sku'] = $v;
-            $params[$k]['num'] = $num;
+            $params[$k]['num'] = $allnum;
             $params[$k]['createtime'] = date('Y-m-d H:i:s');
 
             echo $v . "\n";

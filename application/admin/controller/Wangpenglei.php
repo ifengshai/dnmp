@@ -42,7 +42,7 @@ class Wangpenglei extends Backend
         die;
     }
 
-     /**
+    /**
      * 统计配货占用 第二步
      *
      * @Description
@@ -382,15 +382,14 @@ class Wangpenglei extends Backend
         $this->ordernodedetail = new \app\admin\model\OrderNodeDetail();
         $list = $this->ordernode->where(['shipment_data_type' => '郭伟峰-广州美国专线'])->select();
         $params = [];
-        foreach($list as $k => $v) {
-            $create_time = $this->ordernodedetail->where(['order_number' => $v['order_number'],'site' => $v['site'],'order_node' => 2,'node_type' => 7])->order('id asc')->value('create_time');
+        foreach ($list as $k => $v) {
+            $create_time = $this->ordernodedetail->where(['order_number' => $v['order_number'], 'site' => $v['site'], 'order_node' => 2, 'node_type' => 7])->order('id asc')->value('create_time');
             $params[$k]['delivery_time'] = $create_time;
             $params[$k]['id'] = $v['id'];
             echo $k . "\n";
         }
         $this->ordernode->saveAll($params);
         echo "ok";
-
     }
 
 
@@ -406,30 +405,31 @@ class Wangpenglei extends Backend
     public function set_sku_sales_num()
     {
         //记录当天上架的SKU 
-        $itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku();
         $skuSalesNum = new \app\admin\model\SkuSalesNum();
         $order = new \app\admin\model\order\order\NewOrder();
-        $list = $itemPlatformSku->field('sku,platform_sku,platform_type as site')->where(['outer_sku_status' => 1, 'platform_type' => ['<>', 8]])->select();
-        $list = collection($list)->toArray();
-        //批量插入当天各站点上架sku
-        $skuSalesNum->saveAll($list);
-
         //查询昨天上架SKU 并统计当天销量
-        $data = $skuSalesNum->whereTime('createtime', 'yesterday')->where('site<>8')->select();
+
+        $start = date('Ymd', strtotime("-2 day"));
+        $end = date('Ymd', strtotime("-1 day"));
+        $where['createtime'] = ['between', [$start, $end]];
+        $data = $skuSalesNum->where($where)->where('site<>8')->select();
         $data = collection($data)->toArray();
         if ($data) {
             foreach ($data as $k => $v) {
+                $time = ['between', [strtotime(date('Y-m-d 00:00:00', strtotime($v['createtime']))), strtotime(date('Y-m-d 23:59:59', strtotime($v['createtime'])))]];
                 if ($v['platform_sku']) {
-                    $params[$k]['sales_num'] = $order->getSkuSalesNum($v['platform_sku'], $v['site']);
+                    $params[$k]['sales_num'] = $order->getSkuSalesNumShell($v['platform_sku'], $v['site'], $time);
                     $params[$k]['id'] = $v['id'];
                 }
+
+                echo $k . "\n";
+                echo $v['sku'] . "\n";
+                usleep(200000);
             }
             if ($params) {
                 $skuSalesNum->saveAll($params);
             }
         }
-
         echo "ok";
     }
-
 }
