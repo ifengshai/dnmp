@@ -2258,7 +2258,7 @@ class Test extends Backend
 
 
     /**
-     * 处理采购单数据
+     * 处理异常补货需求单数据
      *
      * @Description
      * @author wpl
@@ -2267,13 +2267,14 @@ class Test extends Backend
      */
     public function process_purchase_order()
     {
-        $list = Db::table('fa_zzzzzzz_temp')->select();
+        $list = Db::table('fa_zzzzzzz_temp_bak')->select();
         foreach ($list as $k => $v) {
-            $id =  Db::table('fa_new_product_replenish_list')->where(['replenish_id' => $v['buhuo_id'], 'sku' => $v['sku']])->value('id');
-            if ($id) {
-                $res = Db::table('fa_purchase_order_item')->where(['replenish_list_id' => $id])->find();
-                Db::table('fa_new_product_replenish_list')->where(['id' => $id])->update(['real_dis_num' => $res['purchase_num'], 'status' => 2]);
-            }
+
+            Db::table('fa_purchase_order_item')->where(['purchase_order_number' => $v['purchase_number'], 'sku' => $v['sku']])->update(['replenish_list_id' => $v['buhuo_item_id']]);
+            Db::table('fa_purchase_order')->where(['purchase_number' => $v['purchase_number']])->update(['replenish_id' => $v['buhuo_id']]);
+
+            $res = Db::table('fa_purchase_order_item')->where(['purchase_order_number' => $v['purchase_number'], 'sku' => $v['sku']])->find();
+            Db::table('fa_new_product_replenish_list')->where(['id' => $v['buhuo_item_id']])->update(['real_dis_num' => $res['purchase_num'], 'status' => 2]);
             echo $k . "\n";
         }
         echo "ok";
@@ -2500,7 +2501,7 @@ class Test extends Backend
         $item = new \app\admin\model\itemmanage\Item();
         $purchase = new \app\admin\model\purchase\PurchaseOrder();
 
-        $list = $item->where(['is_open' => 1, 'is_del' => 1, 'wait_instock_num' => ['<>', 0]])->select();
+        $list = $item->where(['is_open' => 1, 'is_del' => 1, 'wait_instock_num' => ['<', 0]])->select();
         $params = [];
         foreach ($list as $k => $v) {
             $purchase_num = $purchase->alias('a')->where(['purchase_status' => 7, 'stock_status' => 0, 'b.sku' => $v['sku']])->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')->sum('purchase_num');
@@ -2521,17 +2522,17 @@ class Test extends Backend
 
         //总虚拟库存
         $allstock = $itemplatform->alias('a')
-        ->join(['fa_item' => 'b'], 'a.sku=b.sku')
-        ->where(['b.is_del' => 1, 'b.is_open' => 1, 'b.category_id' => ['<>', 43]])->group('a.sku')->column('sum(a.stock)','a.sku');
+            ->join(['fa_item' => 'b'], 'a.sku=b.sku')
+            ->where(['b.is_del' => 1, 'b.is_open' => 1, 'b.category_id' => ['<>', 43]])->group('a.sku')->column('sum(a.stock)', 'a.sku');
 
         $purchase_barcode_item = new \app\admin\model\warehouse\ProductBarCodeItem();
         $data = [];
         foreach ($list as $k => $v) {
             //计算sku库存总金额
-           $allprice =  $purchase_barcode_item->alias('a')->where(['a.sku' => $v['sku']])->join(['fa_purchase_order_item' => 'b'],'a.purchase_id=b.purchase_id and a.sku=b.sku')->sum('purchase_price');
+            $allprice =  $purchase_barcode_item->alias('a')->where(['a.sku' => $v['sku']])->join(['fa_purchase_order_item' => 'b'], 'a.purchase_id=b.purchase_id and a.sku=b.sku')->sum('purchase_price');
 
             $data[$k]['sku'] = $v['sku'];
-            
+
             //站点判断
             $str = '';
             if ($v['platform_type'] == 1) {
@@ -2553,5 +2554,13 @@ class Test extends Backend
         $header = 'sku,站点,平台sku,虚拟库存,总虚拟库存,sku库存总金额,sku占用金额,sku占用库存比例';
         $filename = '数据导出.csv';
         Excel::create_csv($data, $header, $filename);
+    }
+
+
+    public function test02()
+    {
+        $map['a.created_at'] = ['between', [strtotime(date('Y-m-d',strtotime("-30 day"))), strtotime(date('Y-m-d'))]];
+
+        dump($map);
     }
 }

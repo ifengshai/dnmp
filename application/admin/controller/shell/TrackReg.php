@@ -310,7 +310,7 @@ class TrackReg extends Backend
         //记录当天上架的SKU 
         $itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku();
         $skuSalesNum = new \app\admin\model\SkuSalesNum();
-        $order = new \app\admin\model\order\order\Order();
+        $order = new \app\admin\model\order\order\NewOrder();
         $list = $itemPlatformSku->field('sku,platform_sku,platform_type as site')->where(['outer_sku_status' => 1, 'platform_type' => ['<>', 8]])->select();
         $list = collection($list)->toArray();
         //批量插入当天各站点上架sku
@@ -335,7 +335,7 @@ class TrackReg extends Backend
     }
 
     /**
-     * 统计有效天数日均销量 并按30天预估销量分级
+     * 统计有效天数日均销量 并按30天预估销量分级 - 按站点区分
      *
      * @Description
      * @author wpl
@@ -384,6 +384,73 @@ class TrackReg extends Backend
             $itemPlatformSku->where('id', $v['id'])->update($params);
         }
 
+        echo "ok";
+    }
+
+
+    /**
+     * 每天9点 根据销量计算产品分级
+     * 
+     * 30天有效销量计算产品等级 - 按sku分等级
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/08/01 15:29:23 
+     * @return void
+     */
+    public function get_days_sales_num_all()
+    {
+        $item = new \app\admin\model\itemmanage\Item();
+        $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku();
+        $order = new \app\admin\model\order\order\NewOrder();
+        $skuSalesNum = new \app\admin\model\SkuSalesNum();
+        $platform = new \app\admin\model\platformmanage\MagentoPlatform();
+        //查询所有站点
+        $siteList = $platform->select();
+
+        $list = $item->where(['is_open' => 1, 'is_del' => 1, 'category_id' => ['<>', 43]])->column('sku');
+        $params = [];
+        $date = date('Y-m-d 00:00:00');
+        foreach ($list as $k => $v) {
+            $allnum = 0;
+            foreach ($siteList as $val) {
+                //统计30天有效天数销量
+                $num = $skuSalesNum->where(['sku' => $v, 'createtime' => ['<', $date], 'site' => $val['id']])->limit(30)->order('createtime desc')->sum('sales_num');
+                $allnum += $num;
+            }
+            if ($allnum >= 300) {
+                $params[$k]['grade'] = 'A+';
+            } elseif ($allnum >= 150 && $allnum < 300) {
+                $params[$k]['grade'] = 'A';
+            } elseif ($allnum >= 90 && $allnum < 150) {
+                $params[$k]['grade'] = 'B';
+            } elseif ($allnum >= 60 && $allnum < 90) {
+                $params[$k]['grade'] = 'C+';
+            } elseif ($allnum >= 30 && $allnum < 60) {
+                $params[$k]['grade'] = 'C';
+            } elseif ($allnum >= 15 && $allnum < 30) {
+                $params[$k]['grade'] = 'D';
+            } elseif ($allnum >= 1 && $allnum < 15) {
+                $params[$k]['grade'] = 'E';
+            } else {
+                $params[$k]['grade'] = 'F';
+            }
+            $params[$k]['counter'] = $allnum;
+            $params[$k]['days'] = 30;
+            $params[$k]['true_sku'] = $v;
+            $params[$k]['num'] = $allnum;
+            $params[$k]['createtime'] = date('Y-m-d H:i:s');
+
+            echo $v . "\n";
+            usleep(20000);
+        }
+
+        if ($params) {
+            //清空表
+            Db::execute("truncate table fa_product_grade;");
+            //批量添加
+            Db::table('fa_product_grade')->insertAll($params);
+        }
         echo "ok";
     }
 

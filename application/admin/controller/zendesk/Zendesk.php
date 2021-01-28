@@ -254,7 +254,7 @@ class Zendesk extends Backend
                     //获取签名
                     $sign = Db::name('zendesk_signvalue')->where('site',$type)->value('signvalue');
                     //获取zendesk用户的昵称
-                    $zendesk_nickname = Db::name('zendesk_agents')->where('admin_id',session('admin.id'))->value('nickname');
+                    $zendesk_nickname = Db::name('zendesk_agents')->where('type',$type)->where('admin_id',session('admin.id'))->value('nickname');
                     $zendesk_nickname = $zendesk_nickname ? $zendesk_nickname : $siteName;
                     //替换签名中的昵称
                     if(strpos($sign,'{{agent.name}}')!==false){
@@ -474,7 +474,7 @@ class Zendesk extends Backend
                     //获取签名
                     $sign = Db::name('zendesk_signvalue')->where('site',$ticket->type)->value('signvalue');
                     //获取zendesk用户的昵称
-                    $zendesk_nickname = Db::name('zendesk_agents')->where('admin_id',session('admin.id'))->value('nickname');
+                    $zendesk_nickname = Db::name('zendesk_agents')->where('type',$ticket->type)->where('admin_id',session('admin.id'))->value('nickname');
                     $zendesk_nickname = $zendesk_nickname ? $zendesk_nickname : $siteName;
                     //替换签名中的昵称
                     if(strpos($sign,'{{agent.name}}')!==false){
@@ -595,7 +595,7 @@ class Zendesk extends Backend
                 //获取签名
                 $sign = Db::name('zendesk_signvalue')->where('site',$ticket->type)->value('signvalue');
                 //获取当前评论的用户的昵称
-                $zendesk_nickname = Db::name('zendesk_agents')->where('admin_id',$comment->due_id)->value('nickname');
+                $zendesk_nickname = Db::name('zendesk_agents')->where('type',$ticket->type)->where('admin_id',$comment->due_id)->value('nickname');
                 $zendesk_nickname = $zendesk_nickname ? $zendesk_nickname : $siteName;
                 //替换签名中的昵称
                 if(strpos($sign,'{{agent.name}}')!==false){

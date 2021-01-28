@@ -4325,9 +4325,9 @@ EOF;
 
 //                $list[$key]['son_number']  = implode('/',array_keys($order_item_list));
 //                $list[$key]['son_sku']  = implode('/',array_values($order_item_list));
-              if (!empty($son_number_array)){
-                  $list[$key]['son_number'] = implode(',',$son_number_array);
-              }
+                if (!empty($son_number_array)){
+                    $list[$key]['son_number'] = implode(',',$son_number_array);
+                }
 
                 unset($order_item_list);
                 unset($son_number_array);
@@ -4689,8 +4689,6 @@ EOF;
 
     public function batch_export_xls_array()
     {
-
-
         set_time_limit(0);
         ini_set('memory_limit', '1024M');
 
@@ -4821,6 +4819,7 @@ EOF;
                     $work_platform = 'zeelool';
                     break;
             }
+            $csv[$key]['submit_time'] = $value['submit_time'];//开始走流程时间
             $csv[$key]['work_platform'] = $work_platform; // 工单平台
             $csv[$key]['work_type'] = $value['work_type'] == 1 ? '客服工单' : '仓库工单'; //工单类型
             $csv[$key]['work_status'] = $work_status; //工单状态
@@ -4922,7 +4921,7 @@ EOF;
 
         $headlist = [
 //            '工单平台', '工单类型', '工单状态', '工单级别', '平台订单号',
-            '工单平台', '工单类型', '工单状态', '平台订单号',
+            '开始走流程时间','工单平台', '工单类型', '工单状态', '平台订单号',
 //            '客户邮箱', '订单金额', '订单支付的货币类型', '订单的支付方式', '订单中的sku',
             '客户邮箱', '订单金额', '订单支付的货币类型', '订单中的sku',
 //            '对应商品sku', '问题大分类', '问题类型', '工单问题描述', '工单图片',

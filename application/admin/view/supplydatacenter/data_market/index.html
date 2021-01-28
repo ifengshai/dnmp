@@ -36,6 +36,29 @@
     }
     .title{
         font-size: 18px;
+        height: 194px;
+        text-align: left;
+        color: rgb(127, 127, 127);
+    }
+    .title1{
+        font-size: 18px;
+        line-height: 24px;
+        text-align: left;
+        margin: 10px 0px 0px 10px;
+        color: rgb(127, 127, 127);
+    }
+    .title2{
+        font-size: 18px;
+        color: rgb(127, 127, 127);
+    }
+    .title3{
+        font-size: 18px;
+        height: 143px;
+        text-align: left;
+        color: rgb(127, 127, 127);
+    }
+    .title4{
+        font-size: 18px;
         color: rgb(127, 127, 127);
     }
     .rate_class{
@@ -208,6 +231,14 @@
                 <div class="row">
                     <div class="margin-div" style="text-align: center">
                         <div class="btn btn-div div">
+                            <span tabindex="0" data-bs-toggle="tooltip" title="呆滞库存指各销量级别SKU周转&#10天数超过标准部分的库存数量总&#10和">
+                                <img src="/wenhao.jpg" class="wenhao-class">
+                            </span>
+                            <span class="extend">
+                                <div class="title1">呆滞库存数量（个）<br/><br/><span style="color: red;font-size: 24px">{$stock_overview.dull_stock_count}</span><hr><span style="font-size: 14px;">高：{$stock_overview.dull_stock_count3}<br>中：{$stock_overview.dull_stock_count2}<br>低：{$stock_overview.dull_stock_count1}</span></div>
+                            </span>
+                        </div>
+                        <div class="btn btn-div div">
                             <span class="extend">
                                 <div class="title">库存总数量（个）<br/><span style="color: red;">{$stock_overview.stock_num}</span></div>
                             </span>
@@ -239,6 +270,11 @@
                     <div class="margin-div" style="text-align: center">
                         <div class="btn btn-div div">
                             <span class="extend">
+                                <div class="title1">呆滞库存金额（￥）<br/><br/><span style="color: red;font-size: 24px">{$stock_overview.dull_stock_total}</span><hr><span style="font-size: 14px;">高：{$stock_overview.dull_stock_total3}<br>中：{$stock_overview.dull_stock_total2}<br>低：{$stock_overview.dull_stock_total1}</span></div>
+                            </span>
+                        </div>
+                        <div class="btn btn-div div">
+                            <span class="extend">
                                 <div class="title">库存总金额（￥）<br/><span style="color: red;">{$stock_overview.stock_amount}</span></div>
                             </span>
                         </div>
@@ -263,6 +299,11 @@
             <div class="new-background">
                 <div>
                     <label>仓库指标总览</label>
+                    <label style="float: right;margin-right: 240px">时间：</label>
+                    <span role="form">
+                        <input type="hidden" class="form-control operate" name="one_time-operate" data-name="time_str" value="RANGE" readonly="">
+                        <input type="text" autocomplete="off" class="form-control datetimerange" style="display: inherit;width:30%;float: right" name="time_str"  id="time_str" value="{$time_str}" data-index="14">
+                    </span>
                     <label style="float: right;margin-right: 120px">站点：</label>
                     <select data-rule="required" class="platform-select" id="order_platform">
                         {foreach name="magentoplatformarr" item="vo" key="key"}
@@ -277,27 +318,27 @@
                                 <img src="/wenhao.jpg" class="wenhao-class">
                             </span>
                             <span class="extend">
-                                <div class="title">库存周转率<br/><span style="color: red;" id="turnover_rate">{$stock_measure_overview.turnover_rate}</span></div>
+                                <div class="title2">库存周转率<br/><span style="color: red;" id="turnover_rate">{$stock_measure_overview.turnover_rate}</span></div>
                             </span>
                         </div>
                         <div class="btn btn-div div">
                             <span class="extend">
-                                <div class="title">库存精度<br/><span style="color: red;">{$stock_measure_overview.stock_accuracy}</span></div>
+                                <div class="title2">库存精度<br/><span style="color: red;">{$stock_measure_overview.stock_accuracy}</span></div>
                             </span>
                         </div>
                         <div class="btn btn-div div">
                             <span class="extend">
-                                <div class="title">库销比<br/><span style="color: red;" id="stock_sales_rate">{$stock_measure_overview.stock_sales_rate}</span></div>
+                                <div class="title2">库销比<br/><span style="color: red;" id="stock_sales_rate">{$stock_measure_overview.stock_sales_rate}</span></div>
                             </span>
                         </div>
                         <div class="btn btn-div div">
                             <span class="extend">
-                                <div class="title">缺货率<br/><span style="color: red;">{$stock_measure_overview.stockout_rate}</span></div>
+                                <div class="title2">缺货率<br/><span style="color: red;">{$stock_measure_overview.stockout_rate}</span></div>
                             </span>
                         </div>
                         <div class="btn btn-div div">
                             <span class="extend">
-                                <div class="title">虚拟仓库存周转率<br/><span style="color: red;" id="virtual_turnover_rate"></span></div>
+                                <div class="title2">虚拟仓库存周转率<br/><span style="color: red;" id="virtual_turnover_rate"></span></div>
                             </span>
                         </div>
                     </div>
@@ -309,27 +350,27 @@
                                 <img src="/wenhao.jpg" class="wenhao-class">
                             </span>
                             <span class="extend">
-                                <div class="title">库存周转天数<br/><span style="color: red;" id="turnover_days_rate">{$stock_measure_overview.turnover_days_rate}</span></div>
+                                <div class="title2">库存周转天数<br/><span style="color: red;" id="turnover_days_rate">{$stock_measure_overview.turnover_days_rate}</span></div>
                             </span>
                         </div>
                         <div class="btn btn-div div">
                             <span class="extend">
-                                <div class="title">sku库存精度<br/><span style="color: red;">{$stock_measure_overview.sku_accuracy}</span></div>
+                                <div class="title2">sku库存精度<br/><span style="color: red;">{$stock_measure_overview.sku_accuracy}</span></div>
                             </span>
                         </div>
                         <div class="btn btn-div div">
                             <span class="extend">
-                                <div class="title">月度进销比<br/><span style="color: red;" id="month_in_out_rate">{$stock_measure_overview.month_in_out_rate}</span></div>
+                                <div class="title2">月度进销比<br/><span style="color: red;" id="month_in_out_rate">{$stock_measure_overview.month_in_out_rate}</span></div>
                             </span>
                         </div>
                         <div class="btn btn-div div">
                             <span class="extend">
-                                <div class="title">虚拟仓库存周转天数<br/><span style="color: red;" id="virtual_turnover_days_rate"></span></div>
+                                <div class="title2">虚拟仓库存周转天数<br/><span style="color: red;" id="virtual_turnover_days_rate"></span></div>
                             </span>
                         </div>
                         <div class="btn btn-div div">
                             <span class="extend">
-                                <div class="title">虚拟仓月度进销比<br/><span style="color: red;" id="virtual_month_in_out_rate"></span></div>
+                                <div class="title2">虚拟仓月度进销比<br/><span style="color: red;" id="virtual_month_in_out_rate"></span></div>
                             </span>
                         </div>
                     </div>
@@ -337,7 +378,7 @@
             </div>
             <div class="new-background">
                 <label>库存分级概况</label>
-                <table id="order-info-list" class="altrowstable" width="100%">
+                <table class="altrowstable" width="100%">
                     <thead>
                     <tr>
                         <th>产品销量等级</th>
@@ -346,7 +387,10 @@
                         <th>库存</th>
                         <th>库存占比</th>
                         <th>库存金额（￥）</th>
-                        <th>库销比</th>
+                        <th>参考实时周转天数</th>
+                        <th>呆滞库存</th>
+                        <th>呆滞库存占比</th>
+                        <th>呆滞金额</th>
                     </tr>
                     </thead>
                     <tr>
@@ -356,7 +400,10 @@
                         <td>{$stock_level_overview.a1_stock_num}</td>
                         <td>{$stock_level_overview.a1_stock_percent}</td>
                         <td>{$stock_level_overview.a1_stock_price}</td>
-                        <td id="a1_stock_sales_rate">{$stock_level_sales_rate.a1_stock_sales_rate}</td>
+                        <td>{$stock_level_overview.a1_turnover_day}</td>
+                        <td>{$stock_level_overview.a1_dull_stock}</td>
+                        <td>{$stock_level_overview.a1_dull_stock_rate}</td>
+                        <td>{$stock_level_overview.a1_dull_total}</td>
                     </tr>
                     <tr>
                         <td>A</td>
@@ -365,7 +412,10 @@
                         <td>{$stock_level_overview.a_stock_num}</td>
                         <td>{$stock_level_overview.a_stock_percent}</td>
                         <td>{$stock_level_overview.a_stock_price}</td>
-                        <td id="a_stock_sales_rate">{$stock_level_sales_rate.a_stock_sales_rate}</td>
+                        <td>{$stock_level_overview.a_turnover_day}</td>
+                        <td>{$stock_level_overview.a_dull_stock}</td>
+                        <td>{$stock_level_overview.a_dull_stock_rate}</td>
+                        <td>{$stock_level_overview.a_dull_total}</td>
                     </tr>
                     <tr>
                         <td>B</td>
@@ -374,7 +424,10 @@
                         <td>{$stock_level_overview.b_stock_num}</td>
                         <td>{$stock_level_overview.b_stock_percent}</td>
                         <td>{$stock_level_overview.b_stock_price}</td>
-                        <td id="b_stock_sales_rate">{$stock_level_sales_rate.b_stock_sales_rate}</td>
+                        <td>{$stock_level_overview.b_turnover_day}</td>
+                        <td>{$stock_level_overview.b_dull_stock}</td>
+                        <td>{$stock_level_overview.b_dull_stock_rate}</td>
+                        <td>{$stock_level_overview.b_dull_total}</td>
                     </tr>
                     <tr>
                         <td>C+</td>
@@ -383,7 +436,10 @@
                         <td>{$stock_level_overview.c1_stock_num}</td>
                         <td>{$stock_level_overview.c1_stock_percent}</td>
                         <td>{$stock_level_overview.c1_stock_price}</td>
-                        <td id="c1_stock_sales_rate">{$stock_level_sales_rate.c1_stock_sales_rate}</td>
+                        <td>{$stock_level_overview.c1_turnover_day}</td>
+                        <td>{$stock_level_overview.c1_dull_stock}</td>
+                        <td>{$stock_level_overview.c1_dull_stock_rate}</td>
+                        <td>{$stock_level_overview.c1_dull_total}</td>
                     </tr>
                     <tr>
                         <td>C</td>
@@ -392,7 +448,10 @@
                         <td>{$stock_level_overview.c_stock_num}</td>
                         <td>{$stock_level_overview.c_stock_percent}</td>
                         <td>{$stock_level_overview.c_stock_price}</td>
-                        <td id="c_stock_sales_rate">{$stock_level_sales_rate.c_stock_sales_rate}</td>
+                        <td>{$stock_level_overview.c_turnover_day}</td>
+                        <td>{$stock_level_overview.c_dull_stock}</td>
+                        <td>{$stock_level_overview.c_dull_stock_rate}</td>
+                        <td>{$stock_level_overview.c_dull_total}</td>
                     </tr>
                     <tr>
                         <td>D</td>
@@ -401,7 +460,10 @@
                         <td>{$stock_level_overview.d_stock_num}</td>
                         <td>{$stock_level_overview.d_stock_percent}</td>
                         <td>{$stock_level_overview.d_stock_price}</td>
-                        <td id="d_stock_sales_rate">{$stock_level_sales_rate.d_stock_sales_rate}</td>
+                        <td>{$stock_level_overview.d_turnover_day}</td>
+                        <td>{$stock_level_overview.d_dull_stock}</td>
+                        <td>{$stock_level_overview.d_dull_stock_rate}</td>
+                        <td>{$stock_level_overview.d_dull_total}</td>
                     </tr>
                     <tr>
                         <td>E</td>
@@ -410,7 +472,10 @@
                         <td>{$stock_level_overview.e_stock_num}</td>
                         <td>{$stock_level_overview.e_stock_percent}</td>
                         <td>{$stock_level_overview.e_stock_price}</td>
-                        <td id="e_stock_sales_rate">{$stock_level_sales_rate.e_stock_sales_rate}</td>
+                        <td>{$stock_level_overview.e_turnover_day}</td>
+                        <td>{$stock_level_overview.e_dull_stock}</td>
+                        <td>{$stock_level_overview.e_dull_stock_rate}</td>
+                        <td>{$stock_level_overview.e_dull_total}</td>
                     </tr>
                     <tr>
                         <td>F</td>
@@ -419,10 +484,46 @@
                         <td>{$stock_level_overview.f_stock_num}</td>
                         <td>{$stock_level_overview.f_stock_percent}</td>
                         <td>{$stock_level_overview.f_stock_price}</td>
-                        <td id="f_stock_sales_rate">{$stock_level_sales_rate.f_stock_sales_rate}</td>
+                        <td>{$stock_level_overview.f_turnover_day}</td>
+                        <td>{$stock_level_overview.f_dull_stock}</td>
+                        <td>{$stock_level_overview.f_dull_stock_rate}</td>
+                        <td>{$stock_level_overview.f_dull_total}</td>
                     </tr>
                 </table>
             <div>
+                <div class="new-background">
+                    <label>库存分级概况</label>
+                    <table class="altrowstable" width="100%">
+                        <thead>
+                        <tr>
+                            <th>产品销量等级</th>
+                            <th>呆滞库存</th>
+                            <th>呆滞库存占比</th>
+                            <th>呆滞金额</th>
+                            <th>高风险呆滞库存</th>
+                            <th>高风险呆滞金额</th>
+                            <th>中风险呆滞库存</th>
+                            <th>中风险呆滞金额</th>
+                            <th>低风险呆滞库存</th>
+                            <th>低风险呆滞金额</th>
+                        </tr>
+                        </thead>
+                        {foreach $stock_level_overview2 as $value}
+                        <tr>
+                            <td>{$value.grade}</td>
+                            <td>{$value.dull_stock}</td>
+                            <td>{$value.rate}</td>
+                            <td>{$value.total}</td>
+                            <td>{$value.high_dull_stock}</td>
+                            <td>{$value.high_dull_total}</td>
+                            <td>{$value.center_dull_stock}</td>
+                            <td>{$value.center_dull_total}</td>
+                            <td>{$value.low_dull_stock}</td>
+                            <td>{$value.low_dull_total}</td>
+                        </tr>
+                        {/foreach}
+                    </table>
+                    <div>
                  <div class="new-background">
                     <label>库龄概况</label>
                     <table id="order-info-list" class="altrowstable" width="100%">
@@ -455,57 +556,67 @@
                                 <label class="control-label col-xs-6">采购概况</label>
                             </div>
                             <div class="wrap">
-                                <div class="hLeft">
+
                                     <div class="row">
                                         <div class="margin-div" style="text-align: center">
                                             <div class="btn btn-div div1">
                                             <span class="extend">
-                                                <div class="title">采购总数<br/><span style="color: red;" id="purchase_num">{$purchase_overview.purchase_num}</span></div>
+                                                <div class="title1">采购总数（个）<br/><br/><span style="color: red;font-size: 24px" id="purchase_num">{$purchase_overview.purchase_num}</span><hr><span style="font-size: 14px;">大货：{$purchase_overview.purchase_num_big}<br>现货：{$purchase_overview.purchase_num_now}</span></div>
                                             </span>
                                             </div>
                                             <div class="btn btn-div div1">
                                             <span class="extend">
-                                                <div class="title">采购总金额（￥）<br/><span style="color: red;" id="purchase_amount">{$purchase_overview.purchase_amount}</span></div>
+                                                <div class="title1">采购总金额（￥）<br/><br/><span style="color: red;font-size: 24px" id="purchase_amount">{$purchase_overview.purchase_amount}</span><hr><span style="font-size: 14px;">大货：{$purchase_overview.purchase_amount_big}<br>现货：{$purchase_overview.purchase_amount_now}</span></div>
                                             </span>
                                             </div>
                                             <div class="btn btn-div div1">
                                             <span class="extend">
-                                                <div class="title">采购总SKU数<br/><span style="color: red;" id="purchase_sku_num">{$purchase_overview.purchase_sku_num}</span></div>
+                                                <div class="title1">采购总SKU数（个）<br/><br/><span style="color: red;font-size: 24px" id="purchase_sku_num">{$purchase_overview.purchase_sku_num}</span><hr><span style="font-size: 14px;">大货：{$purchase_overview.purchase_sku_num_big}<br>现货：{$purchase_overview.purchase_sku_num_now}</span></div>
                                             </span>
                                             </div>
                                             <div class="btn btn-div div1">
                                             <span class="extend">
-                                                <div class="title">采购批次到货延时率<br/><span style="color: red;" id="purchase_delay_rate">{$purchase_overview.purchase_delay_rate}</span></div>
+                                                <div class="title1">采购单价（￥）<br/><br/><span style="color: red;font-size: 24px" id="purchase_price">{$purchase_overview.purchase_price}</span><hr><span style="font-size: 14px;">大货：{$purchase_overview.purchase_price_big}<br>现货：{$purchase_overview.purchase_price_now}</span></div>
                                             </span>
                                             </div>
                                             <div class="btn btn-div div1">
                                             <span class="extend">
-                                                <div class="title">采购批次到货合格率<br/><span style="color: red;" id="purchase_qualified_rate">{$purchase_overview.purchase_qualified_rate}</span></div>
+                                                <div class="title3">采购批次到货延时率<br/><span style="color: red;" id="purchase_delay_rate">{$purchase_overview.purchase_delay_rate}</span></div>
                                             </span>
                                             </div>
                                             <div class="btn btn-div div1">
                                             <span class="extend">
-                                                <div class="title">采购单价（￥）<br/><span style="color: red;" id="purchase_price">{$purchase_overview.purchase_price}</span></div>
+                                                <div class="title3">采购批次到货合格率<br/><span style="color: red;" id="purchase_qualified_rate">{$purchase_overview.purchase_qualified_rate}</span></div>
                                             </span>
                                             </div>
                                         </div>
                                     </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="widget-body no-padding">
+                    <div class="new-background">
+                        <div class="row">
+                            <div class="form-group" style="float:left;width: 100%;" >
+                                <label class="control-label col-xs-6">订单发出总览</label>
+                                <label class="control-label col-xs-6">订单发出超时情况</label>
+                            </div>
+                            <div class="wrap">
+                                <div class="hLeft">
+                                    <div class="row">
+                                        <div class="margin-div" style="text-align: center">
+                                            <div id="echart2" style="height:300px;margin: 10px 0px 10px 0px;"></div>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="hRight">
-                                    <div id="echart1" style="height:300px;margin: 10px 0px 10px 0px;"></div>
+                                    <div id="echart3" style="height:300px;margin: 10px 0px 10px 0px;"></div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="new-background">
-                    <label>订单发出总览</label>
-                    <div id="echart2" style="height:500px;margin: 10px 0px 10px 0px;"></div>
-                <div>
-                <div class="new-background">
-                    <label>加工概况</label>
-                    <div id="echart3" style="height:500px;margin: 10px 0px 10px 0px;"></div>
-                <div>
                 <div class="widget-body no-padding">
                     <div class="new-background">
                         <div class="row">
@@ -519,22 +630,22 @@
                                         <div class="margin-div" style="text-align: center">
                                             <div class="btn btn-div div2">
                                             <span class="extend">
-                                                <div class="title">发货数量<br/><span style="color: red;" id="delivery_count">{$logistics_completed_overview.delivery_count}</span></div>
+                                                <div class="title4">发货数量<br/><span style="color: red;" id="delivery_count">{$logistics_completed_overview.delivery_count}</span></div>
                                             </span>
                                             </div>
                                             <div class="btn btn-div div2">
                                             <span class="extend">
-                                                <div class="title">妥投总数量<br/><span style="color: red;" id="completed_count">{$logistics_completed_overview.completed_count}</span></div>
+                                                <div class="title4">妥投总数量<br/><span style="color: red;" id="completed_count">{$logistics_completed_overview.completed_count}</span></div>
                                             </span>
                                             </div>
                                             <div class="btn btn-div div2">
                                             <span class="extend">
-                                                <div class="title">未妥投数量<br/><span style="color: red;" id="uncompleted_count">{$logistics_completed_overview.uncompleted_count}</span></div>
+                                                <div class="title4">未妥投数量<br/><span style="color: red;" id="uncompleted_count">{$logistics_completed_overview.uncompleted_count}</span></div>
                                             </span>
                                             </div>
                                             <div class="btn btn-div div2">
                                             <span class="extend">
-                                                <div class="title">超时未妥投数量<br/><span style="color: red;" id="timeout_uncompleted_count">{$logistics_completed_overview.timeout_uncompleted_count}</span></div>
+                                                <div class="title4">超时未妥投数量<br/><span style="color: red;" id="timeout_uncompleted_count">{$logistics_completed_overview.timeout_uncompleted_count}</span></div>
                                             </span>
                                             </div>
                                         </div>

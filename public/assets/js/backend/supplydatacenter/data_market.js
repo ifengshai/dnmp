@@ -144,110 +144,31 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                     }
                     EchartObj.api.ajax(options, chartOptions)
                 },
-                line_histogram: function (){
-                    //柱状图和折线图的结合
-                    var chartOptions = {
-                        targetId: 'echart1',
-                        downLoadTitle: '图表',
-                        type: 'bar',
-                        bar: {
-                            tooltip: { //提示框组件。
-                                trigger: 'axis', // 触发类型。可选项item:数据项图形触发，主要在散点图，饼图等无类目轴的图表中使用。axis:坐标轴触发，主要在柱状图，折线图等会使用类目轴的图表中使用。
-                                axisPointer: { //坐标轴指示器配置项。
-                                    type: 'shadow' //指示器类型。可选项'line' 直线指示器。'shadow' 阴影指示器。'cross' 十字准星指示器。其实是种简写，表示启用两个正交的轴的 axisPointer。
-                                },
-                                formatter: function (param) { //格式化提示信息
-                                    console.log(param);
-                                    return param[0].name + '<br/>' + param[0].seriesName + '：' + param[0].value + '<br/>' + param[1].seriesName + '：' + param[1].value;
-                                }
-                            },
-                            grid: { //直角坐标系内绘图网格
-                                top: '10%', //grid 组件离容器上侧的距离。
-                                left: '5%', //grid 组件离容器左侧的距离。
-                                right: '10%', //grid 组件离容器右侧的距离。
-                                bottom: '10%', //grid 组件离容器下侧的距离。
-                                containLabel: true //grid 区域是否包含坐标轴的刻度标签。
-                            },
-                            legend: { //图例配置
-                                padding: 5,
-                                top: '2%',
-                                data: ['采购数量', '采购金额']
-                            },
-                            xAxis: [
-                                {
-                                    type: 'category'
-                                }
-                            ],
-                            yAxis: [
-                                {
-                                    type: 'value',
-                                    name: '采购数量',
-                                    axisLabel: {
-                                        formatter: '{value} 个'
-                                    }
-                                },
-                                {
-                                    type: 'value',
-                                    name: '采购金额',
-                                    axisLabel: {
-                                        formatter: '{value} ¥'
-                                    }
-                                }
-                            ],
-                        }
-                    };
-        
-                    var options = {
-                        type: 'post',
-                        url: 'supplydatacenter/data_market/purchase_histogram_line',
-                        data: {
-                            time_str: $("#time_str").val(),
-                        }
-                    }
-                    EchartObj.api.ajax(options, chartOptions)
-                },
-                process_overview: function (){
-                    //柱状图
+                order_timeout_pie: function () {
+                    //妥投时效占比
                     var chartOptions = {
                         targetId: 'echart3',
                         downLoadTitle: '图表',
-                        type: 'bar',
-                        bar:{
-                            grid: { //直角坐标系内绘图网格
-                                top: '20%', //grid 组件离容器上侧的距离。
-                                left: '5%', //grid 组件离容器左侧的距离。
-                                right: '10%', //grid 组件离容器右侧的距离。
-                                bottom: '10%', //grid 组件离容器下侧的距离。
-                                containLabel: true //grid 区域是否包含坐标轴的刻度标签。
-                            },                     
+                        type: 'pie',
+                        pie: {
+
                             tooltip: { //提示框组件。
-                                trigger: 'axis', // 触发类型。可选项item:数据项图形触发，主要在散点图，饼图等无类目轴的图表中使用。axis:坐标轴触发，主要在柱状图，折线图等会使用类目轴的图表中使用。
-                                axisPointer: { //坐标轴指示器配置项。
-                                    type: 'shadow' //指示器类型。可选项'line' 直线指示器。'shadow' 阴影指示器。'cross' 十字准星指示器。其实是种简写，表示启用两个正交的轴的 axisPointer。
-                                },
-                                formatter: function (param) { //格式化提示信息
-                                    console.log(param);
-                                    return param[0].name + '<br/>个数：' + param[0].value;
+                                trigger: 'item',
+                                formatter: function (param) {
+                                    return param.data.name + '<br/>数量：' + param.data.value + '<br/> 占比：' + param.percent.toFixed(2) + '%';
                                 }
-                            },                        
-                            xAxis: {
-                                type: 'value',
-                                //boundaryGap: [0, 0.01]
                             },
-                            yAxis: 
-                            {
-                                type: 'category',
-                            },
-                                              
                         }
-                    };  
+                    };
+
                     var options = {
                         type: 'post',
-                        url: 'supplydatacenter/data_market/process_overview',
+                        url: 'supplydatacenter/data_market/order_timeout_pie',
                         data: {
-                            time_str: $("#time_str").val()
+                            'time_str' :  $("#time_str").val(),
                         }
-                    }                
+
+                    };
                     EchartObj.api.ajax(options, chartOptions)
                 },
                 comleted_time_rate_pie: function () {
@@ -300,15 +221,6 @@ function index_data(){
         $('#stock_sales_rate').html(stock_measure_overview.stock_sales_rate);
         $('#turnover_days_rate').html(stock_measure_overview.turnover_days_rate);
         $('#month_in_out_rate').html(stock_measure_overview.month_in_out_rate);
-        //仓库分级库销比
-        $('#a1_stock_sales_rate').html(stock_level_sales_rate.a1_stock_sales_rate);
-        $('#a_stock_sales_rate').html(stock_level_sales_rate.a_stock_sales_rate);
-        $('#b_stock_sales_rate').html(stock_level_sales_rate.b_stock_sales_rate);
-        $('#c1_stock_sales_rate').html(stock_level_sales_rate.c1_stock_sales_rate);
-        $('#c_stock_sales_rate').html(stock_level_sales_rate.c_stock_sales_rate);
-        $('#d_stock_sales_rate').html(stock_level_sales_rate.d_stock_sales_rate);
-        $('#e_stock_sales_rate').html(stock_level_sales_rate.e_stock_sales_rate);
-        $('#f_stock_sales_rate').html(stock_level_sales_rate.f_stock_sales_rate);
         //采购概况
         $('#purchase_num').html(purchase_overview.purchase_num);
         $('#purchase_amount').html(purchase_overview.purchase_amount);
