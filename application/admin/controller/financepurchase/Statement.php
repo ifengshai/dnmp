@@ -508,13 +508,13 @@ class Statement extends Backend
                             $deduction_total = array_sum(array_column($all_items, 'deduction_total'));
                             $instock_num = array_sum(array_column($all_items, 'instock_num'));
                             if ($all_batch == count($all_items)) {
-                                $actual_purchase_price = round(($instock_total - $deduction_total) / $instock_num ,2);
+                                $actual_purchase_price = round(($instock_total - $deduction_total + $all_items[0]['freight']) / $instock_num ,2);
                                 //更新采购单成本
                                 Db::name('purchase_order_item')->where('purchase_id',$vv['purchase_id'])->update(['actual_purchase_price'=>$actual_purchase_price]);
                             }
                         } else {
                             //无批次直接计算采购成本
-                            $actual_purchase_price = round(($vv['instock_total'] - $vv['deduction_total']) / $vv['instock_num'],2);
+                            $actual_purchase_price = round(($vv['instock_total'] - $vv['deduction_total'] + $vv['freight']) / $vv['instock_num'],2);
                             //更新采购单成本
                             Db::name('purchase_order_item')->where('purchase_id',$vv['purchase_id'])->update(['actual_purchase_price'=>$actual_purchase_price]);
                         }
