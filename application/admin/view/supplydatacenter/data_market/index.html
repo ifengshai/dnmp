@@ -210,23 +210,6 @@
     <div class="panel-body">
         <div class="tab-pane fade active in" id="one">
              <div class="new-background">
-                  <div class="row">
-                        <div class="form-group new-form-group" >
-                            <label class="control-label col-xs-4" >时间：</label>
-                            <div class="col-xs-8 new-col-xs-8" role="form">
-                                <input type="hidden" class="form-control operate" name="one_time-operate" data-name="time_str" value="RANGE" readonly="">
-                                <input type="text" autocomplete="off" class="form-control datetimerange" name="time_str"  id="time_str" value="{$time_str}" data-index="14">
-                            </div>
-                        </div>
-                        <div class="form-group new-form-group">
-                            <div class="col-xs-8 new-col-xs-8">
-                                <input type="button" class="btn btn-success" id="sku_submit" value="提交">
-                                <input type="button" class="btn btn-default reset" id="sku_reset" value="重置">
-                            </div>
-                        </div>
-                  </div>
-             </div>
-             <div class="new-background">
                 <b>库存总览</b>
                 <div class="row">
                     <div class="margin-div" style="text-align: center">
@@ -297,19 +280,27 @@
                 </div>
              </div>
             <div class="new-background">
-                <div>
-                    <label>仓库指标总览</label>
-                    <label style="float: right;margin-right: 240px">时间：</label>
-                    <span role="form">
-                        <input type="hidden" class="form-control operate" name="one_time-operate" data-name="time_str" value="RANGE" readonly="">
-                        <input type="text" autocomplete="off" class="form-control datetimerange" style="display: inherit;width:30%;float: right" name="time_str"  id="time_str" value="{$time_str}" data-index="14">
-                    </span>
-                    <label style="float: right;margin-right: 120px">站点：</label>
-                    <select data-rule="required" class="platform-select" id="order_platform">
-                        {foreach name="magentoplatformarr" item="vo" key="key"}
-                        <option value="{$vo.id}" {if condition="$key == 0"}selected="selected"{/if}>{$vo.name}</option>
-                        {/foreach}
-                    </select>
+                <div style="display: flow-root;">
+                    <div style="float: left;">
+                        <label>仓库指标总览</label>
+                    </div>
+                    <div style="float: right;display: flex;">
+                        <div style="margin-right: 30px;">
+                            <label style="text-align: right;margin-right: 100px;">时间:</label>
+                            <div id="timetime1" role="form" style="float: right;margin-left: -91px;margin-top: -7px;">
+                                <input type="hidden" class="form-control operate" name="one_time-operate" data-name="time_str" value="RANGE" readonly="">
+                                <input type="text" autocomplete="off" class="form-control datetimerange" name="time_str"  id="time_str1" value="{$time_str}" data-index="14">
+                            </div>
+                        </div>
+                        <div>
+                            <label style="float: right;margin-right: 120px">站点：</label>
+                            <select data-rule="required" class="platform-select" id="order_platform">
+                                {foreach name="magentoplatformarr" item="vo" key="key"}
+                                <option value="{$vo.id}" {if condition="$key == 0"}selected="selected"{/if}>{$vo.name}</option>
+                                {/foreach}
+                            </select>
+                        </div>
+                    </div>
                 </div>
                 <div class="row">
                     <div class="margin-div" style="text-align: center">
@@ -508,7 +499,6 @@
                             <th>低风险呆滞金额</th>
                         </tr>
                         </thead>
-                        {foreach $stock_level_overview2 as $value}
                         <tr>
                             <td>{$value.grade}</td>
                             <td>{$value.dull_stock}</td>
@@ -521,7 +511,6 @@
                             <td>{$value.low_dull_stock}</td>
                             <td>{$value.low_dull_total}</td>
                         </tr>
-                        {/foreach}
                     </table>
                     <div>
                  <div class="new-background">
@@ -537,7 +526,7 @@
                             <th>库存金额（￥）</th>
                         </tr>
                         </thead>
-                        {foreach $stock_age_overview as $value}
+
                         <tr>
                             <td>{$value.title}</td>
                             <td>{$value.count}</td>
@@ -546,51 +535,60 @@
                             <td>{$value.stock_percent}%</td>
                             <td>{$value.total}</td>
                         </tr>
-                        {/foreach}
+
                     </table>
                     <div> 
                 <div class="widget-body no-padding">
                     <div class="new-background">
+
                         <div class="row">
                             <div class="form-group" style="float:left;width: 100%;" >
                                 <label class="control-label col-xs-6">采购概况</label>
+                                <div style="float: right;display: flex;">
+                                    <div style="margin-right: 30px;">
+                                        <label style="text-align: right;margin-right: 100px;">时间:</label>
+                                        <div id="timetime2" role="form" style="float: right;margin-left: -91px;margin-top: -7px;">
+                                            <input type="hidden" class="form-control operate" name="one_time-operate" data-name="time_str" value="RANGE" readonly="">
+                                            <input type="text" autocomplete="off" class="form-control datetimerange" name="time_str"  id="time_str2" value="{$time_str}" data-index="14">
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                             <div class="wrap">
-
-                                    <div class="row">
-                                        <div class="margin-div" style="text-align: center">
-                                            <div class="btn btn-div div1">
+                                <div class="row">
+                                    <div class="margin-div" style="text-align: center">
+                                        <div class="btn btn-div div1">
                                             <span class="extend">
                                                 <div class="title1">采购总数（个）<br/><br/><span style="color: red;font-size: 24px" id="purchase_num">{$purchase_overview.purchase_num}</span><hr><span style="font-size: 14px;">大货：{$purchase_overview.purchase_num_big}<br>现货：{$purchase_overview.purchase_num_now}</span></div>
                                             </span>
-                                            </div>
-                                            <div class="btn btn-div div1">
+                                        </div>
+                                        <div class="btn btn-div div1">
                                             <span class="extend">
                                                 <div class="title1">采购总金额（￥）<br/><br/><span style="color: red;font-size: 24px" id="purchase_amount">{$purchase_overview.purchase_amount}</span><hr><span style="font-size: 14px;">大货：{$purchase_overview.purchase_amount_big}<br>现货：{$purchase_overview.purchase_amount_now}</span></div>
                                             </span>
-                                            </div>
-                                            <div class="btn btn-div div1">
+                                        </div>
+                                        <div class="btn btn-div div1">
                                             <span class="extend">
                                                 <div class="title1">采购总SKU数（个）<br/><br/><span style="color: red;font-size: 24px" id="purchase_sku_num">{$purchase_overview.purchase_sku_num}</span><hr><span style="font-size: 14px;">大货：{$purchase_overview.purchase_sku_num_big}<br>现货：{$purchase_overview.purchase_sku_num_now}</span></div>
                                             </span>
-                                            </div>
-                                            <div class="btn btn-div div1">
+                                        </div>
+                                        <div class="btn btn-div div1">
                                             <span class="extend">
                                                 <div class="title1">采购单价（￥）<br/><br/><span style="color: red;font-size: 24px" id="purchase_price">{$purchase_overview.purchase_price}</span><hr><span style="font-size: 14px;">大货：{$purchase_overview.purchase_price_big}<br>现货：{$purchase_overview.purchase_price_now}</span></div>
                                             </span>
-                                            </div>
-                                            <div class="btn btn-div div1">
+                                        </div>
+                                        <div class="btn btn-div div1">
                                             <span class="extend">
                                                 <div class="title3">采购批次到货延时率<br/><span style="color: red;" id="purchase_delay_rate">{$purchase_overview.purchase_delay_rate}</span></div>
                                             </span>
-                                            </div>
-                                            <div class="btn btn-div div1">
+                                        </div>
+                                        <div class="btn btn-div div1">
                                             <span class="extend">
                                                 <div class="title3">采购批次到货合格率<br/><span style="color: red;" id="purchase_qualified_rate">{$purchase_overview.purchase_qualified_rate}</span></div>
                                             </span>
-                                            </div>
                                         </div>
                                     </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -599,19 +597,22 @@
                     <div class="new-background">
                         <div class="row">
                             <div class="form-group" style="float:left;width: 100%;" >
-                                <label class="control-label col-xs-6">订单发出总览</label>
-                                <label class="control-label col-xs-6">订单发出超时情况</label>
-                            </div>
-                            <div class="wrap">
-                                <div class="hLeft">
-                                    <div class="row">
-                                        <div class="margin-div" style="text-align: center">
-                                            <div id="echart2" style="height:300px;margin: 10px 0px 10px 0px;"></div>
+                                <label class="control-label col-xs-6">订单发货及时率</label>
+                                <div style="float: right;display: flex;">
+                                    <div style="margin-right: 30px;">
+                                        <label style="text-align: right;margin-right: 100px;">时间:</label>
+                                        <div id="timetime3" role="form" style="float: right;margin-left: -91px;margin-top: -7px;">
+                                            <input type="hidden" class="form-control operate" name="one_time-operate" data-name="time_str" value="RANGE" readonly="">
+                                            <input type="text" autocomplete="off" class="form-control datetimerange" name="time_str"  id="time_str3" value="{$time_str}" data-index="14">
                                         </div>
                                     </div>
                                 </div>
-                                <div class="hRight">
-                                    <div id="echart3" style="height:300px;margin: 10px 0px 10px 0px;"></div>
+                            </div>
+                            <div class="wrap">
+                                <div class="row">
+                                    <div class="margin-div" style="text-align: center">
+                                        <div id="echart2" style="height:300px;margin: 10px 0px 10px 0px;"></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -623,6 +624,15 @@
                             <div class="form-group" style="float:left;width: 100%;" >
                                 <label class="control-label col-xs-6">物流妥投概况</label>
                                 <label class="control-label col-xs-6">妥投时效占比</label>
+                                <div style="float: right;display: flex;">
+                                    <div style="margin-right: 30px;">
+                                        <label style="text-align: right;margin-right: 100px;">时间:</label>
+                                        <div id="timetime4" role="form" style="float: right;margin-left: -91px;margin-top: -7px;">
+                                            <input type="hidden" class="form-control operate" name="one_time-operate" data-name="time_str" value="RANGE" readonly="">
+                                            <input type="text" autocomplete="off" class="form-control datetimerange" name="time_str"  id="time_str4" value="{$time_str}" data-index="14">
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                             <div class="wrap">
                                 <div class="hLeft">

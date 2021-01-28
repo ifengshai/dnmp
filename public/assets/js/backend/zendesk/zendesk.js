@@ -174,6 +174,21 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                 var ids = Table.api.selectedids(table);
                 Backend.api.open('zendesk/zendesk/batch_edit_recipient?ids='+ids, '修改承接人',{area: ['50%', '45%'] });
             });
+
+            $('.btn-batch-export-xls').click(function () {
+                var ids = Table.api.selectedids(table);
+                if (ids.length > 0) {
+                    window.open(Config.moduleurl + '/zendesk/zendesk/zendesk_export?ids=' + ids, '_blank');
+                } else {
+                    var options = table.bootstrapTable('getOptions');
+                    var search = options.queryParams({});
+                    var filter = search.filter;
+                    var op = search.op;
+                    window.open(Config.moduleurl + '/zendesk/zendesk/zendesk_export?filter=' + filter + '&op=' + op, '_blank');
+                }
+
+            });
+
         },
         add: function () {
             Controller.api.bindevent();
