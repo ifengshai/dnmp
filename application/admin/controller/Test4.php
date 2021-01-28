@@ -1617,10 +1617,13 @@ class Test4 extends Controller
         $where['node_type'] = 40;
         $all_order = $orderNode->where($where)->column('order_number');
         foreach ($all_order as $key=>$value){
-            //更新process表中数据
-            $process->where('increment_id',$value)->update(['is_tracking'=>5]);
-            echo $value." is ok"."\n";
-            usleep(10000);
+            $is_tracking = $process->where('increment_id',$value)->value('is_tracking');
+            if($is_tracking != 5){
+                //更新process表中数据
+                $process->where('increment_id',$value)->update(['is_tracking'=>5]);
+                echo $value." is ok"."\n";
+                usleep(10000);
+            }
         }
     }
     //产品等级销量数据脚本
