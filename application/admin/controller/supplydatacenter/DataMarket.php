@@ -983,8 +983,8 @@ class DataMarket extends Backend
         }
         return $date;
     }
-    //订单发出总览
-    public function order_send_overview(){
+    //订单发货及时率
+    public function order_histogram_line(){
         if ($this->request->isAjax()) {
             $time_str = input('time_str');
             if (!$time_str) {
@@ -992,7 +992,7 @@ class DataMarket extends Backend
                 $end = date('Y-m-d 23:59:59');
                 $time_str = $start . ' - ' . $end;
             }
-            $cache_data = Cache::get('Supplydatacenter_datamarket'  .$time_str. md5(serialize('order_send_overview')));
+            $cache_data = Cache::get('Supplydatacenter_datamarket'  .$time_str. md5(serialize('purchase_histogram_line')));
             if (!$cache_data) {
                 $createat = explode(' ', $time_str);
                 $date = $this->getDateFromRange($createat[0],$createat[3]);
@@ -1003,92 +1003,48 @@ class DataMarket extends Backend
                     $start = strtotime($value);
                     $end = strtotime($value.' 23:59:59');
 
-                    $where['p.delivery_time'] = ['between',[$start,$end]];
-                    $where['p.site'] = ['<>',4];
+                    $where['p.delivery_time'] = $flag['payment_time'] = ['between',[$start,$end]];
                     $map1['p.order_prescription_type'] = 1;
                     $map2['p.order_prescription_type'] = 2;
                     $map3['p.order_prescription_type'] = 3;
-                    $where['o.status'] = ['in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+                    $where['o.status'] = $flag['status'] = ['in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+
+                    //订单数量
+                    $arr[$key]['order_count'] = $this->order->where($flag)->count();
                     $sql1 = $this->process->alias('p')->join('fa_order o','p.increment_id = o.increment_id')->field('(p.delivery_time-o.payment_time)/3600 AS total')->where($where)->where($map1)->group('p.order_id')->buildSql();
-                    $arr1 = $this->process->table([$sql1=>'t2'])->field('sum( IF ( total > 24, 1, 0) ) AS a,sum( IF ( total <= 24, 1, 0) ) AS b')->select();
+                    $count1 = $this->process->table([$sql1=>'t2'])->value('sum( IF ( total <= 24, 1, 0) ) AS a');
 
                     $sql2 = $this->process->alias('p')->join('fa_order o','p.increment_id = o.increment_id')->field('(p.delivery_time-o.payment_time)/3600 AS total')->where($where)->where($map2)->group('p.order_id')->buildSql();
-                    $arr2 = $this->process->table([$sql2=>'t2'])->field('sum( IF ( total > 72, 1, 0) ) AS a,sum( IF ( total <= 72, 1, 0) ) AS b')->select();
+                    $count2 = $this->process->table([$sql2=>'t2'])->value('sum( IF ( total <= 72, 1, 0) ) AS a');
 
                     $sql3 = $this->process->alias('p')->join('fa_order o','p.increment_id = o.increment_id')->field('(p.delivery_time-o.payment_time)/3600 AS total')->where($where)->where($map3)->group('p.order_id')->buildSql();
-                    $arr3 = $this->process->table([$sql3=>'t2'])->field('sum( IF ( total > 168, 1, 0) ) AS a,sum( IF ( total <= 168, 1, 0) ) AS b')->select();
-                    $timeout_count = $arr1[0]['a'] + $arr2[0]['a'] + $arr3[0]['a'];
-                    $untimeout_count = $arr1[0]['b'] + $arr2[0]['b'] + $arr3[0]['b'];
-                    $arr[$key]['timeout_count'] = $timeout_count;
-                    $arr[$key]['untimeout_count'] = $untimeout_count;
+                    $count3 = $this->process->table([$sql3=>'t2'])->value('sum( IF ( total <= 168, 1, 0) ) AS a');
+                    $untimeout_count = $count1 + $count2 + $count3;
+                    $arr[$key]['rate'] = $arr[$key]['order_count'] ? round($untimeout_count/$arr[$key]['order_count'],2) : 0;
                 }
-                Cache::set('Supplydatacenter_datamarket'.$time_str.md5(serialize('order_send_overview')),$arr,7200);
+                Cache::set('Supplydatacenter_datamarket'.$time_str.md5(serialize('purchase_histogram_line')),$arr,7200);
             }else{
                 $arr = $cache_data;
             }
-            $json['xColumnName'] = array_column($arr,'day');
+            //全部采购单
+            $barcloumndata = array_column($arr, 'order_count');
+            $linecloumndata = array_column($arr, 'rate');
+
+            $json['xColumnName'] = array_column($arr, 'day');
             $json['columnData'] = [
                 [
                     'type' => 'bar',
-                    'data' => array_column($arr,'timeout_count'),
-                    'name' => '超时订单',
-                    'stack'=>'订单'
+                    'data' => $barcloumndata,
+                    'name' => '订单数'
                 ],
                 [
-                    'type' => 'bar',
-                    'data' => array_column($arr,'untimeout_count'),
-                    'name' => '未超时订单',
-                    'stack'=>'订单'
+                    'type' => 'line',
+                    'data' => $linecloumndata,
+                    'name' => '及时率',
+                    'yAxisIndex' => 1,
+                    'smooth' => true //平滑曲线
                 ],
-            ];
-            return json(['code' => 1, 'data' => $json]);
-        }
-    }
-    //订单发出超时情况
-    public function order_timeout_pie(){
-        if ($this->request->isAjax()) {
-            $params = $this->request->param();
-            $time_str = $params['time_str'] ? $params['time_str'] : '';
-            if (!$time_str) {
-                $start = date('Y-m-d 00:00:00', strtotime('-30 day'));
-                $end = date('Y-m-d 23:59:59');
-                $time_str = $start . ' - ' . $end;
-            }
-            $cache_data = Cache::get('Supplydatacenter_userdata'.$time_str.md5(serialize('order_timeout_pie')));
-            if(!$cache_data){
-                $createat = explode(' ', $time_str);
-                $where['p.delivery_time'] = ['between',[strtotime($createat[0].' '.$createat[1]),strtotime($createat[3].' '.$createat[4])]];
-                $where['p.site'] = ['<>',4];
-                $map1['p.order_prescription_type'] = 1;
-                $map2['p.order_prescription_type'] = 2;
-                $map3['p.order_prescription_type'] = 3;
-                $where['o.status'] = ['in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
-                $sql1 = $this->process->alias('p')->join('fa_order o','p.increment_id = o.increment_id')->field('(p.delivery_time-o.payment_time)/3600 AS total')->where($where)->where($map1)->group('p.order_id')->buildSql();
-                $data[] = $this->process->table([$sql1=>'t2'])->value('sum( IF ( total > 24, 1, 0) ) AS a');
 
-                $sql2 = $this->process->alias('p')->join('fa_order o','p.increment_id = o.increment_id')->field('(p.delivery_time-o.payment_time)/3600 AS total')->where($where)->where($map2)->group('p.order_id')->buildSql();
-                $data[] = $this->process->table([$sql2=>'t2'])->value('sum( IF ( total > 72, 1, 0) ) AS a');
-
-                $sql3 = $this->process->alias('p')->join('fa_order o','p.increment_id = o.increment_id')->field('(p.delivery_time-o.payment_time)/3600 AS total')->where($where)->where($map3)->group('p.order_id')->buildSql();
-                $data[] = $this->process->table([$sql3=>'t2'])->value('sum( IF ( total > 168, 1, 0) ) AS a');
-                Cache::set('Supplydatacenter_userdata' . $time_str . md5(serialize('order_timeout_pie')), $data, 7200);
-            }else{
-                $data = $cache_data;
-            }
-            $json['column'] = ['仅镜架', '现货处方镜','定制处方镜'];
-            $json['columnData'] = [
-                [
-                    'name' => '仅镜架',
-                    'value' => $data[0],
-                ],
-                [
-                    'name' => '现货处方镜',
-                    'value' => $data[1],
-                ],
-                [
-                    'name' => '定制处方镜',
-                    'value' => $data[2],
-                ],
             ];
             return json(['code' => 1, 'data' => $json]);
         }
