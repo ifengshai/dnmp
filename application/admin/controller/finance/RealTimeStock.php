@@ -71,7 +71,7 @@ class RealTimeStock extends Backend
         }
         if ($this->request->isAjax()) {
             $sku = $this->request->get('sku');
-            $list = $this->item->alias('i')->join('fa_purchase_order_item p','p.purchase_id=i.purchase_id')->where('i.sku',$sku)->where('i.library_status',1)->where('p.sku',$sku)->field('p.purchase_order_number,i.sku,sum(purchase_price) purchase_price,sum(actual_purchase_price) actual_purchase_price,count(*) num')->group('p.purchase_order_number')->select();
+            $list = $this->item->alias('i')->join('fa_purchase_order_item p','p.purchase_id=i.purchase_id')->join('fa_purchase_order o','o.id=i.purchase_id')->where('i.sku',$sku)->where('i.library_status',1)->where('p.sku',$sku)->field('p.purchase_order_number,i.sku,sum(o.purchase_total/purchase_num) purchase_price,sum(actual_purchase_price) actual_purchase_price,count(*) num')->group('p.purchase_order_number')->select();
             $list = collection($list)->toArray();
             $i = 0;
             foreach ($list as $k=>$val){
