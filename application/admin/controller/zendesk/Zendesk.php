@@ -1334,8 +1334,9 @@ DOC;
             ->field("zendesk.id,zendesk.ticket_id,zendesk.type,zendesk.channel,zendesk.email,zendesk.username,zendesk.user_id,zendesk.to_email,zendesk.priority,zendesk.status,zendesk.tags,zendesk.subject,zendesk.raw_subject,zendesk.assignee_id,zendesk.assign_id,zendesk.due_id,zendesk.email_cc,zendesk.rating,zendesk.rating_type,zendesk.comment,zendesk.reason,zendesk.create_time,zendesk.update_time,zendesk.assign_time,zendesk.shell,zendesk.is_hide,zendesk.zendesk_update_time,zendesk.recipient
             ,admin.nickname as 'assign_nickname' ,admin_due.nickname as 'due_nickname'")
             ->order("")
-            ->select();
-        //获取所有tags数据
+            ->select(false);
+        echo  $list;
+         //获取所有tags数据
         $tags_list=(new ZendeskTags())->tags_list();
         $list = collection($list)->toArray();
 
