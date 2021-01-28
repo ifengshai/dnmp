@@ -187,6 +187,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     //提交审核传状态为1
                     $('#status').val(1);
                 })
+
+                $(document).on('click', '#submit_cancel', function () {
+                    Fast.api.close(); // 关闭弹窗
+                    parent.location.reload(); 刷新父级
+                })
             }
         }
     };

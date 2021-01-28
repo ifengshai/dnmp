@@ -12,6 +12,8 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
             Controller.api.formatter.comleted_time_rate_pie();
             $("#sku_submit").click(function () {
                 index_data();
+                purchase_data();
+                track_data();
                 stock_measure_overview_platform();
                 Controller.api.formatter.order_send_overview();
                 Controller.api.formatter.line_histogram();
@@ -21,6 +23,8 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
             $("#sku_reset").click(function () {
                 $("#time_str").val('');
                 index_data();
+                purchase_data();
+                track_data();
                 stock_measure_overview_platform();
                 Controller.api.formatter.order_send_overview();
                 Controller.api.formatter.line_histogram();
@@ -144,33 +148,6 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                     }
                     EchartObj.api.ajax(options, chartOptions)
                 },
-                order_timeout_pie: function () {
-                    //妥投时效占比
-                    var chartOptions = {
-                        targetId: 'echart3',
-                        downLoadTitle: '图表',
-                        type: 'pie',
-                        pie: {
-
-                            tooltip: { //提示框组件。
-                                trigger: 'item',
-                                formatter: function (param) {
-                                    return param.data.name + '<br/>数量：' + param.data.value + '<br/> 占比：' + param.percent.toFixed(2) + '%';
-                                }
-                            },
-                        }
-                    };
-
-                    var options = {
-                        type: 'post',
-                        url: 'supplydatacenter/data_market/order_timeout_pie',
-                        data: {
-                            'time_str' :  $("#time_str").val(),
-                        }
-
-                    };
-                    EchartObj.api.ajax(options, chartOptions)
-                },
                 comleted_time_rate_pie: function () {
                     //妥投时效占比
                     var chartOptions = {
@@ -192,7 +169,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                         type: 'post',
                         url: 'supplydatacenter/data_market/comleted_time_rate',
                         data: {
-                            'time_str' :  $("#time_str").val(),
+                            'time_str' :  $("#time_str4").val(),
                         }
 
                     };
@@ -207,20 +184,31 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
     return Controller;
 });
 function index_data(){
-    var time_str = $('#time_str').val();
+    var time_str = $('#time_str1').val();
     Backend.api.ajax({
         url: 'supplydatacenter/data_market/index',
         data: {time_str: time_str}
     }, function (data, ret) {
         var stock_measure_overview = ret.data.stock_measure_overview;
-        var stock_level_sales_rate = ret.data.stock_level_sales_rate;
-        var purchase_overview = ret.data.purchase_overview;
         var logistics_completed_overview = ret.data.logistics_completed_overview;
         //仓库指标总览
         $('#turnover_rate').html(stock_measure_overview.turnover_rate);
         $('#stock_sales_rate').html(stock_measure_overview.stock_sales_rate);
         $('#turnover_days_rate').html(stock_measure_overview.turnover_days_rate);
         $('#month_in_out_rate').html(stock_measure_overview.month_in_out_rate);
+        return false;
+    }, function (data, ret) {
+        Layer.alert(ret.msg);
+        return false;
+    });
+}
+function purchase_data(){
+    var time_str = $('#time_str2').val();
+    Backend.api.ajax({
+        url: 'supplydatacenter/data_market/purchase_data',
+        data: {time_str: time_str}
+    }, function (data, ret) {
+        var purchase_overview = ret.data.purchase_overview;
         //采购概况
         $('#purchase_num').html(purchase_overview.purchase_num);
         $('#purchase_amount').html(purchase_overview.purchase_amount);
@@ -228,6 +216,19 @@ function index_data(){
         $('#purchase_delay_rate').html(purchase_overview.purchase_delay_rate);
         $('#purchase_qualified_rate').html(purchase_overview.purchase_qualified_rate);
         $('#purchase_price').html(purchase_overview.purchase_price);
+        return false;
+    }, function (data, ret) {
+        Layer.alert(ret.msg);
+        return false;
+    });
+}
+function track_data(){
+    var time_str = $('#time_str4').val();
+    Backend.api.ajax({
+        url: 'supplydatacenter/data_market/index',
+        data: {time_str: time_str}
+    }, function (data, ret) {
+        var logistics_completed_overview = ret.data.logistics_completed_overview;
         //物流妥投概况
         $('#delivery_count').html(logistics_completed_overview.delivery_count);
         $('#completed_count').html(logistics_completed_overview.completed_count);
@@ -241,7 +242,7 @@ function index_data(){
 }
 function stock_measure_overview_platform() {
     var order_platform = $('#order_platform').val();
-    var time_str = $('#time_str').val();
+    var time_str = $('#time_str1').val();
     Backend.api.ajax({
         url: 'supplydatacenter/data_market/stock_measure_overview_platform',
         data: { order_platform: order_platform, time_str: time_str}

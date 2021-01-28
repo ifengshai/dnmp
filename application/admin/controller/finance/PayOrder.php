@@ -18,7 +18,6 @@ class PayOrder extends Backend
         $this->batch = new \app\admin\model\purchase\PurchaseBatch();
         $this->batch_item = new \app\admin\model\purchase\PurchaseBatchItem();
         $this->purchase_item = new \app\admin\model\purchase\PurchaseOrderItem;
-        $this->purchase_order_item = new \app\admin\model\purchase\PurchaseOrderItem;
         $this->item = new \app\admin\model\warehouse\ProductBarCodeItem;
         $this->outstockItem = new \app\admin\model\warehouse\OutStockItem;
         $this->instockItem = new \app\admin\model\warehouse\InstockItem;
@@ -249,6 +248,18 @@ class PayOrder extends Backend
         $id = input('ids');
         //更改状态
         $this->payorder->where('id',$id)->update(['status'=>4]);
+        //获取付款单下所有的采购单id
+        $pay_order_item = $this->payorder_item->where('pay_id',$id)->where('pay_type','in','1,2')->field('purchase_order_id,pay_type')->select();
+        foreach ($pay_order_item as $key=>$value){
+            //判断预付款:修改采购单状态为部分付款
+            if($value['pay_type'] == 1){
+                Db::name('purchase_order')->where('id',$value['purchase_order_id'])->update(['payment_status'=>2]);
+            }
+            //判断全款预付:修改采购单状态为已经付款
+            if($value['pay_type'] == 2){
+                Db::name('purchase_order')->where('id',$value['purchase_order_id'])->update(['payment_status'=>3]);
+            }
+        }
         /**************************************计算采购成本start**********************************/
         //判断采购单id
         $purchase_order_ids = $this->payorder_item->where('pay_type',3)->where('pay_id',$id)->group('purchase_order_id')->column('purchase_order_id');
@@ -262,6 +273,8 @@ class PayOrder extends Backend
             $where['i.pay_type'] = 3;
             $pay_batch_count = $this->payorder_item->alias('i')->join('fa_finance_payorder p','i.pay_id=p.id','left')->where($where)->count();
             if($batch_count == $pay_batch_count){
+                //判断尾款：判断批次若全部完成，修改采购单状态为已经付款
+                Db::name('purchase_order')->where('id',$v)->update(['payment_status'=>3]);
                 //判断结算尾款的采购单是否结算完成，如果完成计算采购成本单价
                 $map['i.purchase_order_id'] = $v;
                 $map['p.status'] = ['in','4,5'];
@@ -275,7 +288,7 @@ class PayOrder extends Backend
                 /**************************************计算采购成本end**********************************/
                 /**************************************计算成本冲减start****************************************/
                 $result = array();
-                $purchase_order = $this->purchase_order_item->where('purchase_id',$v)->find();
+                $purchase_order = $this->purchase_item->where('purchase_id',$v)->find();
                 //实际采购成本和预估成本不一致，冲减差值
                 if($purchase_order['purchase_price'] != $purchase_order['actual_purchase_price']){
                     //计算订单出库数量

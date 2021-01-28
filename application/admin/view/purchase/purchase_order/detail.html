@@ -324,14 +324,14 @@
                 <input id="c-purchase_total" class="form-control purchase_total" readonly step="0.01"
                     name="row[purchase_total]" value="{$row.purchase_total}" type="number">
             </div>
-            <label class="control-label col-xs-12 col-sm-2">{:__('Settlement_method')}:</label>
-            <div class="col-xs-12 col-sm-3">
-                <select name="row[settlement_method]" class="form-control settlement_method" disabled>
-                    <option value="1" {:$row['settlement_method']==1 ? 'selected' : '' }>先付款</option>
-                    <option value="2" {:$row['settlement_method']==2 ? 'selected' : '' }>货到付款</option>
-                    <option value="3" {:$row['settlement_method']==3 ? 'selected' : '' }>付定金，货到付款</option>
-                </select>
-            </div>
+<!--            <label class="control-label col-xs-12 col-sm-2">{:__('Settlement_method')}:</label>-->
+<!--            <div class="col-xs-12 col-sm-3">-->
+<!--                <select name="row[settlement_method]" class="form-control settlement_method" disabled>-->
+<!--                    <option value="1" {:$row['settlement_method']==1 ? 'selected' : '' }>先付款</option>-->
+<!--                    <option value="2" {:$row['settlement_method']==2 ? 'selected' : '' }>货到付款</option>-->
+<!--                    <option value="3" {:$row['settlement_method']==3 ? 'selected' : '' }>付定金，货到付款</option>-->
+<!--                </select>-->
+<!--            </div>-->
 
 
         </div>
