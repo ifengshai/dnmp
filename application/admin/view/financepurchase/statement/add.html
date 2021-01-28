@@ -78,7 +78,7 @@
             <label class="control-label col-xs-12 col-sm-2">收款方名称:</label>
             <div class="col-xs-12 col-sm-3">
                 <input id="linkname" class="form-control" readonly name="row[linkname]"
-                       value="{$supplier.linkname}" type="text">
+                       value="{$supplier.recipient_name}" type="text">
             </div>
         </div>
         <div class="form-group">
@@ -101,10 +101,10 @@
         </div>
     </div>
     <hr>
-    <div class='caigou' style="width: 80%;margin-left: 0%;">
+    <div class='caigou' style="width: 100%;margin-left: 0%;">
         <p style="font-size: 16px;text-align: left;"><b>列表</b></p>
-        <div style="margin-bottom: 20px;">
-            <table id="caigou-table" class="purchase-table">
+        <div style="margin-bottom: 20px;overflow-x:auto;width: 100%">
+            <table id="caigou-table" class="purchase-table" >
                 <tr>
                     <th>id</td>
                     <th>采购单号</td>
@@ -139,21 +139,21 @@
                     <td><input id="c-purchase_name" class="form-control purchase_name" readonly name="list[{$k}][purchase_name]"
                                type="text" value="{$v.purchase_name}"  style="width: 180px"></td>
                     <td><input id="c-pay_type" class="form-control pay_type" readonly name="list[{$k}][pay_type]"
-                               type="text" value="{$v.pay_type}"></td>
+                               type="text" value="{$v.pay_type}" style="width: 60px"></td>
                     <td><input id="c-purchase_batch" class="form-control purchase_batch" readonly name="list[{$k}][purchase_batch]"
                                type="text" value="{$v.purchase_batch}" style="width: 60px"></td>
                     <td><input id="c-arrival_num" class="form-control arrival_num" readonly name="list[{$k}][arrival_num]"
-                               type="text" value="{$v.arrival_num}" ></td>
+                               type="text" value="{$v.arrival_num}" style="width: 70px"></td>
                     <td><input id="c-wait_pay" class="form-control wait_pay" readonly name="list[{$k}][wait_pay]"
-                               type="text" value="{$v.wait_pay}"></td>
+                               type="text" value="{$v.wait_pay}" style="width: 80px"></td>
                     <td><input id="c-now_wait_pay" class="form-control now_wait_pay" readonly name="list[{$k}][now_wait_pay]"
-                               type="text" value="{$v.now_wait_pay}"></td>
+                               type="text" value="{$v.now_wait_pay}" style="width: 90px"></td>
                     <td><input id="c-purchase_freight" class="form-control purchase_freight" readonly name="list[{$k}][purchase_freight]"
                                type="text" value="{$v.purchase_freight}" style="width: 60px"></td>
                     <td><input id="c-quantity_num" class="form-control quantity_num" readonly name="list[{$k}][quantity_num]"
-                               type="text" value="{$v.quantity_num}" style="width: 80px"></td>
+                               type="text" value="{$v.quantity_num}" style="width: 60px"></td>
                     <td><input id="c-in_stock_money" class="form-control in_stock_money" readonly name="list[{$k}][in_stock_money]"
-                               type="text" value="{$v.in_stock_money}"></td>
+                               type="text" value="{$v.in_stock_money}" style="width: 90px"></td>
                     <td><input id="c-unqualified_num" class="form-control unqualified_num" readonly name="list[{$k}][unqualified_num]"
                                type="text" value="{$v.unqualified_num}" style="width: 80px"></td>
                     <td><input id="c-unqualified_num_money" class="form-control unqualified_num_money" readonly name="list[{$k}][unqualified_num_money]"
@@ -167,15 +167,18 @@
                         </select>
                     </td>
                     <td>
-                        <input id="c-kou_money" class="form-control kou_money" name="list[{$k}][kou_money]" readonly type="text" value="" data-rule="integer">
+                        <input id="c-kou_money" class="form-control kou_money" name="list[{$k}][kou_money]" type="number" value="0.00"  initvalue="0.00">
                     </td>
                     <td><input id="c-period" class="form-control period" readonly name="list[{$k}][period]"
                                type="text" value="{$v.period}"></td>
-                    <td><input id="c-all_money" class="form-control all_money" readonly name="list[{$k}][all_money]"
+                    <td><input id="c-all_money" class="form-control all_money change_money" readonly name="list[{$k}][all_money]"
+                               type="text" value="{$v.all_money}"></td>
+                    <td hidden><input id="c-all_money1" class="form-control all_money" readonly name="list[{$k}][all_money1]"
                                type="text" value="{$v.all_money}"></td>
                 </tr>
                 {/foreach}
                 {/if}
+                <input type="hidden" name="old_val" id="old_val" value="">
             </table>
         </div>
 
@@ -187,11 +190,13 @@
             <div class="col-xs-12 col-sm-7">
                 <input id="c-product_total" class="form-control total" readonly step="0.01" name="row[product_total]"
                        type="number" value="{$all}">
+                <input id="c-product_total1" step="0.01" name="row[product_total1]" type="hidden"
+                       type="number" value="{$all}">
             </div>
         </div>
     </div>
     <hr>
-    <div class="form-group layer-footer">
+    <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2"></label>
         <div class="col-xs-12 col-sm-8">
             <button type="submit" class="btn btn-success btn-embossed btn-save">{:__('OK')}</button>
@@ -199,6 +204,14 @@
             <input type="button" class="btn btn-default reset" id="submit_cancel" value="取消">
         </div>
     </div>
+<!--    <div class="form-group layer-footer">-->
+<!--        <label class="control-label col-xs-12 col-sm-2"></label>-->
+<!--        <div class="col-xs-12 col-sm-8">-->
+<!--            <button type="submit" class="btn btn-success btn-embossed btn-save">{:__('OK')}</button>-->
+<!--            <button type="submit" class="btn btn-success btn-status btn-embossed btn-save1">提交审核</button>-->
+<!--            <input type="button" class="btn btn-default reset" id="submit_cancel" value="取消">-->
+<!--        </div>-->
+<!--    </div>-->
 </form>
 
 

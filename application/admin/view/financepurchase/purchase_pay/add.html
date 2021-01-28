@@ -63,7 +63,7 @@
             </div>
             <label class="control-label col-xs-12 col-sm-2">付款类型:</label>
             <div class="col-xs-12 col-sm-3">
-                <select name="row[pay_type]" class="form-control" id="pay_type" readonly disabled="disabled">
+                <select name="row[pay_type]" class="form-control" id="pay_type" readonly style="pointer-events: none;">
                     <option value="0">请选择</option>
                     <option value="1" {:$purchase_order['pay_type']==1 ? 'selected' : '' }>预付款</option>
                     <option value="2" {:$purchase_order['pay_type']==2 ? 'selected' : '' }>全款预付</option>
@@ -102,7 +102,7 @@
             <label class="control-label col-xs-12 col-sm-2">收款方名称:</label>
             <div class="col-xs-12 col-sm-3">
                 <input id="linkname" class="form-control form-empty" readonly name="row[linkname]"
-                       value="{$supplier.linkname}" type="text">
+                       value="{$supplier.recipient_name}" type="text">
             </div>
             <label class="control-label col-xs-12 col-sm-2">收款方开户行:</label>
             <div class="col-xs-12 col-sm-3">
@@ -143,7 +143,7 @@
     <hr>
     <div class='caigou' style="width: 80%;margin-left: 3%;">
         <p style="font-size: 16px;text-align: left;"><b>采购事由</b></p>
-        <div style="margin-bottom: 20px;">
+        <div style="margin-bottom: 20px;overflow-x:auto;width: 100%">
             <table id="caigou-table" class="purchase-table">
                 <tr>
                     <th>序号

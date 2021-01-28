@@ -113,6 +113,9 @@ class PayOrder extends Backend
         $total1 = $data['total1'];
         $count1 = $data['count1'];
         $prepay = $data['prepay'];
+        foreach ($prepay as $k=>$v){
+            $prepay[$k]['pay_rate'] = $v['pay_rate']*100;
+        }
         $total2 = $data['total2'];
         $count2 = $data['count2'];
         $total = $data['total'];
@@ -164,7 +167,7 @@ class PayOrder extends Backend
                     Db::name('finance_payorder_item')->insert($arr2);
                 }
             }
-            $this->success('添加成功！！', '',url('index'));
+            $this->success('添加成功！！');
         }
         $this->view->assign(compact('pay_number','supplier', 'settle', 'prepay','total1','total2','total','count1','count2','ids'));
         return $this->view->fetch();
@@ -174,7 +177,6 @@ class PayOrder extends Backend
      * */
     public function detail(){
         $id = input('ids');
-        $supplier = $this->supplier->where('id',$id)->field('id,supplier_name,currency,period,opening_bank,bank_account,recipient_name')->find();
         //获取付款单信息
         $pay_order = $this->payorder->where('id',$id)->find();
         $imgs = array_filter(explode(',',$pay_order['invoice']));
@@ -191,10 +193,13 @@ class PayOrder extends Backend
         $total2= 0;
         $count2 = 0;
         foreach ($prepay as $k1=>$v1){
+            $pay_rate = $v1['pay_rate']*100;
+            $prepay[$k1]['pay_rate'] = $pay_rate.'%';
             $total2 += $v1['pay_grand_total'];
             $count2++;
         }
         $total = $total1+$total2;
+        $supplier = $this->supplier->where('id',$pay_order['supply_id'])->field('id,supplier_name,currency,period,opening_bank,bank_account,recipient_name')->find();
         $this->view->assign(compact('pay_order','supplier', 'settle', 'prepay','total1','total2','total','count1','count2','imgs'));
         return $this->view->fetch();
     }
@@ -205,15 +210,36 @@ class PayOrder extends Backend
         $id = input('ids');
         //获取付款单信息
         $pay_order = $this->payorder->where('id',$id)->find();
+        //获取付款单子单结算信息
+        $settle = $this->payorder_item->where(['pay_id'=>$id,'pay_type'=>3])->select();
+
+        $total1= 0;
+        $count1 = 0;
+        foreach ($settle as $k=>$v){
+            $total1 += $v['wait_statement_total'];
+            $count1++;
+        }
+        //获取付款单子单预付信息
+        $prepay = $this->payorder_item->where(['pay_id'=>$id])->where('pay_type','<>',3)->select();
+        $total2= 0;
+        $count2 = 0;
+        foreach ($prepay as $k1=>$v1){
+            $pay_rate = $v1['pay_rate']*100;
+            $prepay[$k1]['pay_rate'] = $pay_rate.'%';
+            $total2 += $v1['pay_grand_total'];
+            $count2++;
+        }
+        $total = $total1+$total2;
+        $supplier = $this->supplier->where('id',$pay_order['supply_id'])->field('id,supplier_name,currency,period,opening_bank,bank_account,recipient_name')->find();
         if ($this->request->isAjax()) {
             $params = $this->request->post("row/a");
             $ids = $params['ids'];
-            unset($params['ids']);
-            unset($params['currency']);
-            Db::name('finance_payorder')->where('id',$ids)->update($params);
+            $data['desc'] = $params['desc'];
+            $data['status'] = $params['status'];
+            Db::name('finance_payorder')->where('id',$ids)->update($data);
             $this->success('编辑成功！！', '','');
         }
-        $this->view->assign(compact('pay_order','now_user'));
+        $this->view->assign(compact('pay_order','supplier', 'settle', 'prepay','total1','total2','total','count1','count2'));
         return $this->view->fetch();
     }
     /*
@@ -229,6 +255,7 @@ class PayOrder extends Backend
         foreach ($purchase_order_ids as $v){
             //采购单总批次
             $batch_count = $this->batch->where('purchase_id',$v)->count();
+            $batch_count = $batch_count == 0 ? 1 : $batch_count;
             //付款完成总批次
             $where['i.purchase_order_id'] = $v;
             $where['p.status'] = ['in','4,5'];
@@ -287,7 +314,7 @@ class PayOrder extends Backend
                             //如果有出库数据，需要添加冲减暂估结算金额和增加成本核算数据
                             $arr1['type'] = 2;   //类型：成本
                             $arr1['bill_type'] = 10;    //单据类型：暂估结算金额
-                            $arr1['frame_cost'] = round($ss1*$purchase_order['purchase_price'],2);    //镜架成本：剩余预估单价*剩余数量
+                            $arr1['frame_cost'] = $cost_order_info['frame_cost'];    //镜架成本：剩余预估单价*剩余数量
                             $arr1['order_number'] = $rr1;  //订单号
                             $arr1['site'] = $cost_order_info['site'];  //站点
                             $arr1['order_type'] = $cost_order_info['order_type'];  //订单类型
@@ -324,10 +351,12 @@ class PayOrder extends Backend
                         //出库单出库
                         $outorder = $this->outstockItem->alias('i')->join('fa_out_stock s','s.id=i.out_stock_id','left')->where('s.purchase_id',$v)->where('status',2)->where('i.sku',$purchase_order['sku'])->group('s.out_stock_number')->field('s.id,s.out_stock_number,sum(i.out_stock_num) count')->select();
                         foreach ($outorder as $rr2=>$ss2){
+                            //获取成本核算中的订单数据
+                            $cost_order_info1 = $this->financecost->where(['out_stock_id' => $ss2['id'], 'type' => 2])->find();
                             //如果有出库数据，需要添加冲减暂估结算金额和增加成本核算数据
                             $arr3['type'] = 2;   //类型：成本
                             $arr3['bill_type'] = 11;    //单据类型：暂估结算金额
-                            $arr3['frame_cost'] = round($ss2['count']*$purchase_order['purchase_price'],2);    //镜架成本：剩余预估单价*剩余数量
+                            $arr3['frame_cost'] = $cost_order_info1['frame_cost'];    //镜架成本：剩余预估单价*剩余数量
                             $arr3['order_number'] = $ss2['out_stock_number'];  //出库单号
                             $arr3['out_stock_id'] = $ss2['id'];  //出库单id
                             $arr3['action_type'] = 2;  //动作类型：冲减
@@ -364,12 +393,16 @@ class PayOrder extends Backend
         }
         if (request()->isAjax()) {
             $params['status'] = $status;
+            if($status == 3){
+                //审核通过
+                $params['check_user'] = session('admin.nickname');
+            }
             $result = $row->allowField(true)->save($params);
-            if($status == 6 || $status == 7){
+            if($status == 6 || $status == 7) {
                 //在待付款单中显示
-                $purchase_id = $this->payorder_item->where('pay_id',$ids)->column('purchase_id');
-                $purchase_id = implode(',',$purchase_id);
-                $this->financepurchase->where('id','in',$purchase_id)->update(['is_show'=>1]);
+                $purchase_id = $this->payorder_item->where('pay_id', $ids)->column('purchase_id');
+                $purchase_id = implode(',', $purchase_id);
+                $this->financepurchase->where('id', 'in', $purchase_id)->update(['is_show' => 1]);
             }
             if (false !== $result) {
                 $this->success('操作成功！！');
@@ -421,7 +454,7 @@ class PayOrder extends Backend
         $prepay = $this->financepurchase->alias('p')->join('fa_purchase_order o','o.id=p.purchase_id','left')->field('p.id,o.purchase_number,o.purchase_total,p.pay_rate,p.pay_grand_total,p.pay_type,p.purchase_id')->where('p.pay_type','in','1,2')->where('p.id','in',$ids)->where('p.supplier_id',$supplier_id)->select();
         $total2 = 0;  //预付预付款金额合计
         $count2 = 0;
-        foreach ($prepay as $v){
+        foreach ($prepay as $k=>$v){
             $total2 += $v['pay_grand_total'];
             $count2++;
         }

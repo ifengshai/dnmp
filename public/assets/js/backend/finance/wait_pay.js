@@ -6,7 +6,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
             Table.api.init({
                 searchFormVisible: true,
                 extend: {
-                    index_url: 'finance/wait_pay/index' + location.search
+                    index_url: 'finance/wait_pay/index' + location.search,
+                    add_url: 'finance/wait_pay/add'
                 }
             });
 
@@ -23,15 +24,17 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                         {field: 'id', title: __('序号'),operate:false},
                         {field: 'order_number', title: __('付款申请单号'),},
                         {field: 'supplier_name', title: __('供应商名称'),operate:'like'},
-                        {field: 'nickname', title: __('审核人'), visible: false},
                         {field: 'create_person', title: __('创建人')},
                         {field: 'create_time', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime},
                     ]
                 ]
             });
-            $('#add').click(function () {
+            $(document).on("click", "#add", function () {
                 var ids = Table.api.selectedids(table);
-                if (ids.length > 0) {
+                if (ids.length == 0) {
+                    layer.msg('请选择付款申请单号');
+                    return false;
+                }else{
                     Backend.api.ajax({
                         url: Config.moduleurl + '/finance/wait_pay/supplier',
                         data: { ids: ids}
@@ -39,14 +42,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                         if(data == 1){
                             layer.msg('必须选择同一供应商进行创建');
                         }else{
-                            window.open(Config.moduleurl + '/finance/pay_order/add?ids=' + ids, '_blank');
+                            Backend.api.open('finance/pay_order/add/ids/' + ids, __('创建付款单'), {area: ['80%', '70%']});
                         }
                     });
-                } else {
-                    layer.msg('请选择付款申请单号');
-                    return false;
                 }
-
             });
             // 为表格绑定事件
             Table.api.bindevent(table);

@@ -100,7 +100,7 @@
             <label class="control-label col-xs-12 col-sm-2">收款方名称:</label>
             <div class="col-xs-12 col-sm-3">
                 <input id="linkname" class="form-control form-empty" readonly name="row[linkname]"
-                       value="{$supplier.linkname}" type="text">
+                       value="{$supplier.recipient_name}" type="text">
             </div>
             <label class="control-label col-xs-12 col-sm-2">收款方开户行:</label>
             <div class="col-xs-12 col-sm-3">
@@ -125,7 +125,7 @@
     <hr>
     <div class='caigou' style="width: 80%;margin-left: 3%;">
         <p style="font-size: 16px;text-align: left;"><b>采购事由</b></p>
-        <div style="margin-bottom: 20px;">
+        <div style="margin-bottom: 20px;overflow-x:auto;width: 100%">
             <table id="caigou-table" class="purchase-table">
                 <tr>
                     <th>序号
@@ -182,10 +182,10 @@
                                value="{$vo.purchase_price}">
                     </td>
                     <td>
-                        <input id="in_number" class="form-control form-empty" readonly name="reason[in_number]" type="text" value="{$vo.instock_num}" style="width:180px;">
+                        <input id="in_number" class="form-control form-empty" readonly name="reason[{$k}][in_number]" type="text" value="{$vo.instock_num}" style="width:180px;">
                     </td>
                     <td>
-                        <input id="kou_money" class="form-control form-empty" readonly name="reason[kou_money]" type="text" value="{$vo.deduction_total}" style="width:180px;">
+                        <input id="kou_money" class="form-control form-empty" readonly name="reason[{$k}][kou_money]" type="text" value="{$vo.deduction_total}" style="width:180px;">
                     </td>
                     <td>
                         <input id="money" class="form-control form-empty" readonly name="reason[{$k}][money]" type="text"

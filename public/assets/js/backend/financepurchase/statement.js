@@ -144,45 +144,40 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         },
         add: function () {
             Controller.api.bindevent();
-            $(document).on('change', '#c-kou_reason', function () {
-                var val = $(this).val();
+            // $(document).on('change', '#c-kou_reason', function () {
+            //     var val = $(this).val();
+            //     if (val == 0) {
+            //         $(this).parent().parent().find('#c-kou_money').attr("readonly", "readonly");
+            //         $(this).parent().parent().find('#c-kou_money').removeAttr("data-rule");
+            //     } else {
+            //         $(this).parent().parent().find('#c-kou_money').attr("data-rule", "required");
+            //         $(this).parent().parent().find('#c-kou_money').removeAttr("readonly");
+            //     }
+            // });
 
-                if (val == 0) {
-                    $(this).parent().parent().find('#c-kou_money').attr("readonly", "readonly");
-                    $(this).parent().parent().find('#c-kou_money').removeAttr("data-rule");
-                } else {
-                    $(this).parent().parent().find('#c-kou_money').attr("data-rule", "required");
-                    $(this).parent().parent().find('#c-kou_money').attr("data-rule", "integer");
-                    $(this).parent().parent().find('#c-kou_money').removeAttr("readonly");
-                }
-            });
+            //任意一个扣款金额变化 就重新计算表格中的待结算金额 以及总的待结算金额
             $(document).on('change', '#c-kou_money', function () {
+                var kou_money = 0;
+                $(".kou_money").each(function() {
+                    kou_money += Number($(this).val());
+                });
                 var val = $(this).val();
-                $(this).parent().parent().find('#c-all_money').val($('#c-all_money').val() - val);
-                $(this).attr("readonly", "readonly");
-                $('#c-product_total').val($('#c-product_total').val() - val)
+                $(this).parent().parent().find('#c-all_money').val($(this).parent().parent().find('#c-all_money1').val() - val);
+                $('#c-product_total').val(($('#c-product_total1').val() - kou_money).toFixed(2))
             });
         },
 
         edit: function () {
             Controller.api.bindevent();
-            $(document).on('change', '#c-kou_reason', function () {
-                var val = $(this).val();
-
-                if (val == 0) {
-                    $(this).parent().parent().find('#c-kou_money').attr("readonly", "readonly");
-                    $(this).parent().parent().find('#c-kou_money').removeAttr("data-rule");
-                } else {
-                    $(this).parent().parent().find('#c-kou_money').attr("data-rule", "required");
-                    // $(this).parent().parent().find('#c-kou_money').attr("data-rule", "integer");
-                    $(this).parent().parent().find('#c-kou_money').removeAttr("readonly");
-                }
-            });
+            //任意一个扣款金额变化 就重新计算表格中的待结算金额 以及总的待结算金额
             $(document).on('change', '#c-kou_money', function () {
+                var kou_money = 0;
+                $(".kou_money").each(function() {
+                    kou_money += Number($(this).val());
+                });
                 var val = $(this).val();
-                $(this).parent().parent().find('#c-all_money').val($('#c-all_money').val() - val);
-                $(this).attr("readonly", "readonly");
-                $('#c-product_total').val($('#c-product_total').val() - val)
+                $(this).parent().parent().find('#c-all_money').val($(this).parent().parent().find('#c-all_money1').val() - val);
+                $('#c-product_total').val(($('#c-product_total1').val() - kou_money).toFixed(2))
             });
         },
         api: {

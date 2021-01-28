@@ -69,16 +69,16 @@ class Statement extends Backend
             foreach ($list as $k => $v) {
                 $supplier = $this->supplier->where('id', $v['supplier_id'])->find();
                 $list[$k]['supplier_name'] = $supplier['supplier_name'];
-                if ($supplier['period'] == 0){
+                if ($supplier['period'] == 0) {
                     $list[$k]['period'] = '无账期';
-                }else{
-                    $list[$k]['period'] = $supplier['period'].'个月';
+                } else {
+                    $list[$k]['period'] = $supplier['period'] . '个月';
                 }
                 $list[$k]['purchase_person'] = $supplier['purchase_person'];
-                $statement = Db::name('finance_purchase')->where('pay_type',3)->where('purchase_id',$v['id'])->where('status','in',[0,1,2,3,4,6])->find();
-                if (!empty($statement)){
+                $statement = Db::name('finance_purchase')->where('pay_type', 3)->where('purchase_id', $v['id'])->where('status', 'in', [0, 1, 2, 3, 4, 6])->find();
+                if (!empty($statement)) {
                     $list[$k]['can_create'] = 0;
-                }else{
+                } else {
                     $list[$k]['can_create'] = 1;
                 }
             }
@@ -105,15 +105,28 @@ class Statement extends Backend
             $list = $this->request->post("list/a");
             if ($params) {
                 $params = $this->preExcludeFields($params);
-                // dump($params);
-                // dump($list);
-                // die;
+                //涉及到金额计算的 要在后端进行重复校验 以免出现结算单金额错误的情况
+                $kou_money = array_sum(array_column($list, 'kou_money'));
+                if (($params['product_total'] + $kou_money) != $params['product_total1']) {
+                    $this->error(__('金额计算错误，请关闭页面后重试', ''));
+                }
+                foreach ($list as $k => $v) {
+                    if ($v['kou_money'] > 0) {
+                        if (empty($v['kou_reason'])) {
+                            $this->error(__('有扣款金额不能没有扣款原因', ''));
+                        }
+                    }
+                    if (($v['all_money'] + $v['kou_money']) != $v['all_money1']) {
+                        $this->error(__('采购单' . $v['name'] . '金额计算错误，请关闭页面后重试', ''));
+                    }
+                }
                 Db::startTrans();
                 try {
                     $statemet = [];
                     $statemet['statement_number'] = $params['order_number'];
                     $statemet['status'] = $params['status'];
-                    $statemet['pay_type'] = 1;
+                    //结算单应该都是尾款类型的
+                    $statemet['pay_type'] = 3;
                     $statemet['supplier_id'] = $params['supplier_id'];
                     $statemet['base_currency_code'] = $params['base_currency_code'];
                     $statemet['wait_statement_total'] = $params['product_total'];
@@ -128,9 +141,9 @@ class Statement extends Backend
                         $arr[$k]['purchase_batch'] = $v['purchase_batch'];
                         $arr[$k]['purchase_batch_id'] = $v['batch_id'];
                         $arr[$k]['supplier_id'] = $params['supplier_id'];
-                        $arr[$k]['before_total'] = $v['wait_pay'] ? $v['wait_pay']:0;
-                        $arr[$k]['now_before_total'] = $v['now_wait_pay']? $v['now_wait_pay']:0;
-                        $arr[$k]['now_pay_total'] = $v['now_wait_pay']? $v['now_wait_pay']:0;
+                        $arr[$k]['before_total'] = $v['wait_pay'] ? $v['wait_pay'] : 0;
+                        $arr[$k]['now_before_total'] = $v['now_wait_pay'] ? $v['now_wait_pay'] : 0;
+                        $arr[$k]['now_pay_total'] = $v['now_wait_pay'] ? $v['now_wait_pay'] : 0;
                         $arr[$k]['wait_statement_total'] = $v['all_money'];
                         $arr[$k]['freight'] = $v['purchase_freight'];
                         $arr[$k]['instock_num'] = $v['quantity_num'];
@@ -140,18 +153,9 @@ class Statement extends Backend
                         $arr[$k]['deduction_total'] = empty($v['kou_money']) ? 0 : $v['kou_money'];
                         $arr[$k]['deduction_reason'] = $v['kou_reason'];
                         $arr[$k]['arrival_num'] = $v['arrival_num'];
-                        switch ($v['pay_type']) {
-                            case '预付款':
-                                $pay_type = 1;
-                                break;
-                            case '全款预付':
-                                $pay_type = 2;
-                                break;
-                            case '尾款':
-                                $pay_type = 3;
-                                break;
-                        }
-                        $arr[$k]['pay_type'] = $pay_type;
+                        $arr[$k]['in_stock_id'] = $v['in_stock_id'];
+                        //结算单应该都是尾款类型
+                        $arr[$k]['pay_type'] = 3;
                         $arr[$k]['purchase_name'] = $v['purchase_name'];
                         $arr[$k]['period'] = $v['period'];
                         $arr[$k]['purchase_number'] = $v['purchase_number'];
@@ -172,7 +176,7 @@ class Statement extends Backend
             } else {
                 $this->error(__('Parameter %s can not be empty', ''));
             }
-            $this->success('添加成功！！', url('PurchasePay/index'));
+            $this->success('添加成功！！');
         }
         $instock = new Instock();
         // $supplier_id = 1;
@@ -301,6 +305,21 @@ class Statement extends Backend
             $list = $this->request->post("list/a");
             if ($params) {
                 $params = $this->preExcludeFields($params);
+                //涉及到金额计算的 要在后端进行重复校验 以免出现结算单金额错误的情况
+                $kou_money = array_sum(array_column($list, 'kou_money'));
+                if (($params['product_total'] + $kou_money) != $params['product_total1']) {
+                    $this->error(__('金额计算错误，请关闭页面后重试', ''));
+                }
+                foreach ($list as $k => $v) {
+                    if ($v['kou_money'] > 0) {
+                        if (empty($v['kou_reason'])) {
+                            $this->error(__('有扣款金额不能没有扣款原因', ''));
+                        }
+                    }
+                    if (($v['all_money'] + $v['kou_money']) != $v['all_money1']) {
+                        $this->error(__('采购单' . $v['name'] . '金额计算错误，请关闭页面后重试', ''));
+                    }
+                }
                 Db::startTrans();
                 try {
                     //更新主表待结算总金额
@@ -322,15 +341,15 @@ class Statement extends Backend
             } else {
                 $this->error(__('Parameter %s can not be empty', ''));
             }
-            $this->success('提交成功！！', url('PurchasePay/index'));
+            $this->success('提交成功！！');
 
         }
         $supplier_id = $row['supplier_id'];
-        $supplier_id = 1;
         //供应商详细信息
         $supplier = Db::name('supplier')->where('id', $supplier_id)->find();
         $supplier['period'] = $supplier['period'] == 0 ? '无账期' : $supplier['period'] . '个月';
         $list = Db::name('finance_statement_item')->where('statement_id', $row['id'])->select();
+        $kou_money = array_sum(array_column($list, 'deduction_total'));
         foreach ($list as $k => $v) {
             switch ($v['pay_type']) {
                 case 1:
@@ -347,6 +366,7 @@ class Statement extends Backend
         // dump($list);
         $this->assign('supplier', $supplier);
         $this->assign('list', $list);
+        $this->assign('old_all_money', round($kou_money + $row['wait_statement_total'], 2));
         $this->assign('row', $row);
         return $this->view->fetch();
     }
@@ -464,6 +484,7 @@ class Statement extends Backend
         }
         $map['id'] = ['in', $ids];
         $row = $this->model->where($map)->select();
+        // dump(collection($row)->toArray());die;
         foreach ($row as $v) {
             if ($v['status'] !== 3) {
                 $this->error('只有待对账状态才能操作！！');
@@ -475,12 +496,37 @@ class Statement extends Backend
                 if ($v['wait_statement_total'] > 0) {
                     $status = 6;
                 } else {
-                    //结算金额为负的话 要计算采购单成本
+                    //结算单金额为负的时候 对账要进行成本计算操作
+                    $statement_items = Db::name('finance_statement_item')->where('statement_id', $v['id'])->select();
+                    foreach ($statement_items as $kk => $vv) {
+                        if ($vv['purchase_batch'] > 0) {
+                            //有批次判断所有的批次是否都已结算 都已结算的话计算采购成本
+                            $all_batch = Db::name('purchase_batch')->where('purchase_id', $vv['purchase_id'])->count();
+                            //结算单子表里有几条结算数据
+                            $all_items = Db::name('finance_statement_item')->where('purchase_id', $vv['purchase_id'])->select();
+                            $instock_total = array_sum(array_column($all_items, 'instock_total'));
+                            $deduction_total = array_sum(array_column($all_items, 'deduction_total'));
+                            $instock_num = array_sum(array_column($all_items, 'instock_num'));
+                            if ($all_batch == count($all_items)) {
+                                $actual_purchase_price = round(($instock_total - $deduction_total) / $instock_num ,2);
+                                //更新采购单成本
+                                Db::name('purchase_order_item')->where('purchase_id',$vv['purchase_id'])->update(['actual_purchase_price'=>$actual_purchase_price]);
+                            }
+                        } else {
+                            //无批次直接计算采购成本
+                            $actual_purchase_price = round(($vv['instock_total'] - $vv['deduction_total']) / $vv['instock_num'],2);
+                            //更新采购单成本
+                            Db::name('purchase_order_item')->where('purchase_id',$vv['purchase_id'])->update(['actual_purchase_price'=>$actual_purchase_price]);
+                        }
+                    }
+                    //结算金额为负的话 要计算采购单成本 （所有批次入库数量乘以采购单价 - 扣款金额 ）/ 入库数量
                     $status = 4;
                 }
+                // die;
                 //更新主表状态
                 Db::name('finance_statement')->where('id', $v['id'])->update(['status' => $status]);
             }
+            die;
 
             Db::commit();
         } catch (ValidateException $e) {

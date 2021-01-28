@@ -109,16 +109,18 @@ class PurchasePay extends Backend
 
                     $insert['order_number'] = $params['order_number'];
                     $insert['pay_type'] = $params['pay_type'];
-                    $insert['pay_rate'] = $params['pay_rate'] ? $params['pay_rate'] : '';
                     switch ($insert['pay_type']) {
                         case 1:
                             $pay_type = '预付款';
+                            $insert['pay_rate'] = 0.3;
                             break;
                         case 2:
                             $pay_type = '全款';
+                            $insert['pay_rate'] = 1;
                             break;
                         case 3:
                             $pay_type = '尾款';
+                            $insert['pay_rate'] = 1;
                             break;
                         default:
                             $pay_type = '其他';
@@ -153,14 +155,18 @@ class PurchasePay extends Backend
                         // $arr['approvers'] = '1007304767660594,0221135665945008,0647044715938022';
                         // //抄送 屈金金
                         // $arr['cc_list'] = '204112301323897192';
-                        $arr['originator_user_id'] = '285501046927507550';
+                        $arr['originator_user_id'] = '071829462027950349';
                         $arr['dept_id'] = '143678442';
                         // $arr['approvers'] = '285501046927507550,0550643549844645,056737345633028055';
-                        $arr['approvers'] = '285501046927507550,066842141526868909,095453484824626315';
+                        //江昊辉 樊志刚 张靖威
+                        // $arr['approvers'] = '285501046927507550,066842141526868909,095453484824626315';
+                        //王重阳 江昊辉 张靖威
+                        // $arr['approvers'] = '011240312429620945,285501046927507550,095453484824626315';
                         //刘超 红亚 玉晓
                         $arr['approvers'] = '0704513051687725,310818292339015332,111525355037914674';
                         $arr['cc_list'] = '071829462027950349';
-
+                        // $arr['cc_list'] = '285501046927507550';
+                        //结算单创建采购付款申请单
                         if ($params['pay_type'] == 3) {
                             foreach ($reason as $kk => $vv) {
                                 if (is_array($vv)){
@@ -170,14 +176,14 @@ class PurchasePay extends Backend
                                     $reasons[$kk] = [
                                         ['name' => '采购品名', 'value' => $vv['name']],
                                         ['name' => '采购单号', 'value' => $vv['number']],
-                                        ['name' => '采购批次', 'value' => 1],
+                                        ['name' => '采购批次', 'value' =>  $vv['batch']],
                                         ['name' => '商品分类', 'value' => $type],
                                         ['name' => '采购数量', 'value' => $vv['num']],
-                                        ['name' => '采购单价', 'value' => $vv['num']],
-                                        ['name' => '入库数量', 'value' => $vv['num']],
-                                        ['name' => '扣款', 'value' => $vv['num']],
+                                        ['name' => '采购单价', 'value' => $vv['single']],
+                                        ['name' => '入库数量', 'value' => $vv['in_number']],
+                                        ['name' => '扣款', 'value' => $vv['kou_money']],
                                         ['name' => '金额', 'value' => $vv['money']],
-                                        ['name' => '运费', 'value' => $vv['money']]
+                                        ['name' => '运费', 'value' => $vv['freight']]
                                     ];
                                 }
                             }
@@ -197,7 +203,10 @@ class PurchasePay extends Backend
                                 ['name' => '收款方开户行', 'value' => $params['opening_bank_address']],
                             ];
                         } else {
+                            //采购列表创建采购付款申请单 采购事由只会有一条 就是以整个采购单为维度 不考虑批次 无批次 无入库数量 无入库金额
+                            // 采购事由总金额是采购单总采购金额 付款总金额是采购单总金额加运费乘以付款比例
                             $item = new Item();
+                            //分类拿sku的最上级分类
                             $category_id = $item->where('sku',$reason['name'])->value('category_id');
                             $type = $this->category($category_id);
                             $arr['form_component_values'] = [
@@ -230,7 +239,7 @@ class PurchasePay extends Backend
 
                         // dump($arr);die;
                         $res = $initiate_approval->initiate_approval($arr);
-                        if ($res['errcode'] != 0) {
+                        if ($res['errcode'] != 0 || $res === false) {
                             throw new Exception('发起审批失败');
                         }
                     }
@@ -383,18 +392,20 @@ class PurchasePay extends Backend
                 try {
                     $update['status'] = $params['status'];
                     $update['pay_type'] = $params['pay_type'];
-                    $update['pay_rate'] = $params['pay_rate'];
                     $update['remark'] = $params['remark'];
                     $update['pay_grand_total'] = $params['pay_grand_total'];
                     switch ($params['pay_type']) {
                         case 1:
                             $pay_type = '预付款';
+                            $update['pay_rate'] = 0.3;
                             break;
                         case 2:
                             $pay_type = '全款预付';
+                            $update['pay_rate'] = 1;
                             break;
                         case 3:
                             $pay_type = '尾款';
+                            $update['pay_rate'] = 1;
                             break;
                     }
                     switch ($params['base_currency_code']) {
@@ -434,14 +445,14 @@ class PurchasePay extends Backend
                                     $reasons[$kk] = [
                                         ['name' => '采购品名', 'value' => $vv['name']],
                                         ['name' => '采购单号', 'value' => $vv['number']],
-                                        ['name' => '采购批次', 'value' => 1],
+                                        ['name' => '采购批次', 'value' =>  $vv['batch']],
                                         ['name' => '商品分类', 'value' => $type],
                                         ['name' => '采购数量', 'value' => $vv['num']],
-                                        ['name' => '采购单价', 'value' => $vv['num']],
-                                        ['name' => '入库数量', 'value' => $vv['num']],
-                                        ['name' => '扣款', 'value' => $vv['num']],
+                                        ['name' => '采购单价', 'value' => $vv['single']],
+                                        ['name' => '入库数量', 'value' => $vv['in_number']],
+                                        ['name' => '扣款', 'value' => $vv['kou_money']],
                                         ['name' => '金额', 'value' => $vv['money']],
-                                        ['name' => '运费', 'value' => $vv['money']]
+                                        ['name' => '运费', 'value' => $vv['freight']]
                                     ];
                                 }
                             }
@@ -494,7 +505,7 @@ class PurchasePay extends Backend
 
                         // dump($arr);die;
                         $res = $initiate_approval->initiate_approval($arr);
-                        if ($res['errcode'] != 0) {
+                        if ($res['errcode'] != 0 || $res === false) {
                             throw new Exception('发起审批失败');
                         }
                     }

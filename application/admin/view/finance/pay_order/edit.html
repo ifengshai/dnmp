@@ -49,10 +49,114 @@
     }
 </style>
 <form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">付款单号:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input class="form-control" readonly value="{$pay_order.pay_number}" name="row[pay_number]" type="text">
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">供应商名称:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input class="form-control" readonly value="{$supplier.supplier_name}" type="text">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">供应商账期:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input class="form-control" readonly value="{$supplier.period}" type="text">
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">收款方名称:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input class="form-control" readonly value="{$supplier.recipient_name}" type="text">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">收款方开户行:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input class="form-control" readonly value="{$supplier.opening_bank}" type="text">
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">收款方账户:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input class="form-control" readonly value="{$supplier.bank_account}" type="text">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">付款币种:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input class="form-control" readonly name="row[currency]" value="{$supplier.currency}" type="text">
+        </div>
+    </div>
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">备注:</label>
         <div class="col-xs-12 col-sm-8">
             <textarea class="form-control" id="desc" rows="5" name="row[desc]" cols="50">{$pay_order.desc}</textarea>
+        </div>
+    </div>
+    <hr>
+    <div class='pay' style="width: 80%;margin-left: 10%;">
+        <div style="margin-bottom: 20px;">
+            <table id="pay-table" class="purchase-table">
+                {if $settle}
+                <tr>
+                    <th rowspan="{$count1+2}">结算金额</th>
+                    <th>序号</td>
+                    <th>采购单号</td>
+                    <th>采购批次ID</td>
+                    <th>已支付金额</td>
+                    <th>批次入库金额</td>
+                    <th>扣款</td>
+                    <th>扣款原因</td>
+                    <th>总待结算金额</td>
+                </tr>
+                {foreach $settle as $k=>$val}
+                <tr>
+                    <td>{$k+1}</td>
+                    <td>{$val.purchase_order}</td>
+                    <td>{$val.purchase_batch_id}</td>
+                    <td>{$val.now_before_total}</td>
+                    <td>{$val.instock_total}</td>
+                    <td>{$val.deduction_total}</td>
+                    <td>{$val.deduction_reason}</td>
+                    <td>{$val.wait_statement_total}</td>
+                </tr>
+                {/foreach}
+                <tr>
+                    <td colspan="7" style="text-align: right">待结算款金额合计：</td>
+                    <td>{$total1}</td>
+                </tr>
+                {/if}
+                {if $prepay}
+                <tr>
+                    <th rowspan="{$count2+2}">预付信息</th>
+                    <th>序号</td>
+                    <th colspan="2">采购单号</td>
+                    <th colspan="2">采购单金额</td>
+                    <th colspan="2">预付款比例</td>
+                    <th>预付款金额</td>
+                </tr>
+                {foreach $prepay as $key=>$value}
+                <tr>
+                    <td>{$key+1}</td>
+                    <td colspan="2">{$value.purchase_order}</td>
+                    <td colspan="2">{$value.purchase_total}</td>
+                    <td colspan="2">{$value.pay_rate}</td>
+                    <td>{$value.pay_grand_total}</td>
+                </tr>
+                {/foreach}
+                <tr>
+                    <td colspan="7" style="text-align: right">预付款金额合计：</td>
+                    <td>{$total2}</td>
+                </tr>
+                {/if}
+                {if $settle || $prepay}
+                <tr>
+                    <td colspan="8" style="text-align: right">合计应付：</td>
+                    <td>{$total}</td>
+                </tr>
+                {/if}
+            </table>
         </div>
     </div>
     <hr>
@@ -66,3 +170,4 @@
         </div>
     </div>
 </form>
+
