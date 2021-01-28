@@ -144,7 +144,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                             {
                                 field: 'priority',
                                 title: __('优先级'),
-                                searchList: { '': '-', 1: '低', 2: '低+', 3: '中', 4: '中+', 5: '高',6:'高+' },
+                                searchList: { '': '-',0: '-', 1: '低', 2: '低+', 3: '中', 4: '中+', 5: '高',6:'高+' },
                                 custom: { 1: 'black', 2: 'black', 3: 'black', 4: 'black', 5: 'black' },
                                 formatter: Table.api.formatter.status,
                                 operate: false
@@ -336,7 +336,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                             {
                                 field: 'priority',
                                 title: __('优先级'),
-                                searchList: { '': '-', 1: '低', 2: '低+', 3: '中', 4: '中+', 5: '高',6:'高+' },
+                                searchList: { '': '-', 0:'-',1: '低', 2: '低+', 3: '中', 4: '中+', 5: '高',6:'高+' },
                                 custom: { 1: 'green', 2: 'blue', 3: 'black', 4: 'yellow', 5: 'red' },
                                 formatter: Table.api.formatter.status
                             },

@@ -478,9 +478,7 @@ class Instock extends Backend
                 $this->error('此sku:' . $v['sku'] . '不存在！！');
             }
         }
-        // dump($list);
-        // die;
-
+    
         $new_product_mapp = new \app\admin\model\NewProductMapping();
         $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
         $this->model->startTrans();
@@ -492,6 +490,8 @@ class Instock extends Backend
         $platform->startTrans();
         $this->purchase->startTrans();
         (new StockLog())->startTrans();
+
+        $this->_product_bar_code_item = new \app\admin\model\warehouse\ProductBarCodeItem();
 
         try {
             $data['check_person'] = session('admin.nickname');
@@ -750,7 +750,7 @@ class Instock extends Backend
                         //获得应到货数量
                         $check = new \app\admin\model\warehouse\CheckItem();
                         $should_arrivals_num = $check->where('check_id', $v['check_id'])->value('should_arrival_num');
-                        if (!$should_arrivals_num){
+                        if (!$should_arrivals_num) {
                             $should_arrivals_num = $check->where('check_id', $v['check_id'])->value('purchase_num');
                         }
                         //减少待入库数量 扣减应到货数量
@@ -819,17 +819,21 @@ class Instock extends Backend
                     }
                 }
 
+                //条形码入库时间
+                $this->_product_bar_code_item
+                    ->where(['in_stock_id' => ['in', $ids]])
+                    ->update(['in_stock_time' => date('Y-m-d H:i:s')]);
+
                 //有错误 则回滚数据
                 if (count($error_num) > 0) {
                     throw new Exception("入库失败！！请检查SKU");
                 }
-            }else{
+            } else {
                 //审核拒绝解除条形码绑定关系
                 $_product_bar_code_item = new ProductBarCodeItem();
                 $_product_bar_code_item
-                    ->allowField(true)
-                    ->isUpdate(true, ['in_stock_id' => ['in', $ids]])
-                    ->save(['in_stock_id' => 0]);
+                    ->where(['in_stock_id' => ['in', $ids]])
+                    ->update(['in_stock_id' => 0]);
             }
 
             $this->model->commit();
@@ -1291,8 +1295,8 @@ class Instock extends Backend
                 case 'zeelool_es':
                     $out_label = 9;
                     break;
-                // case 'zeelool_jp':
-                //     $label = 1;
+                    // case 'zeelool_jp':
+                    //     $label = 1;
                 case 'zeelool_de':
                     $out_label = 10;
                     break;
@@ -1342,5 +1346,4 @@ class Instock extends Backend
             $this->error($e->getMessage());
         }
     }
-
 }
