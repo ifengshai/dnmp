@@ -217,7 +217,7 @@ class FinanceCost extends Model
                 ->join(['fa_purchase_order' => 'c'], 'a.purchase_id=c.id')
                 ->select();
             foreach ($workdata as $k => $v) {
-                $workcost += $v['actual_purchase_price'] > 0 ?: $v['purchase_total'] / $v['purchase_num'];
+                $workcost += $v['actual_purchase_price'] > 0 ? $v['actual_purchase_price'] : $v['purchase_total'] / $v['purchase_num'];
             }
         }
 
@@ -228,16 +228,11 @@ class FinanceCost extends Model
             ->join(['fa_purchase_order' => 'c'], 'a.purchase_id=c.id')
             ->select();
         $list = collection($list)->toArray();
-
-
-        file_put_contents('/www/wwwroot/mojing/runtime/log/test.log', $product_barcode_item->getLastSql() . "\r\n", FILE_APPEND);
-        file_put_contents('/www/wwwroot/mojing/runtime/log/test.log', serialize($list) . "\r\n", FILE_APPEND);
         $allcost = 0;
         foreach ($list as $k => $v) {
-            $purchase_price = $v['actual_purchase_price'] > 0 ?: ($v['purchase_total'] / $v['purchase_num']);
+            $purchase_price = $v['actual_purchase_price'] > 0 ? $v['actual_purchase_price'] : ($v['purchase_total'] / $v['purchase_num']);
             $allcost += $purchase_price;
         }
-        file_put_contents('/www/wwwroot/mojing/runtime/log/test.log', $allcost . "\r\n", FILE_APPEND);
         return $allcost + $workcost;
     }
 
@@ -427,7 +422,7 @@ class FinanceCost extends Model
         $list = collection($list)->toArray();
         $allcost = 0;
         foreach ($list as $k => $v) {
-            $allcost += $v['actual_purchase_price'] > 0 ?: $v['purchase_total'] / $v['purchase_num'];
+            $allcost += $v['actual_purchase_price'] > 0 ? $v['actual_purchase_price'] : $v['purchase_total'] / $v['purchase_num'];
         }
         return $allcost;
     }
