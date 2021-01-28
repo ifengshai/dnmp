@@ -2399,6 +2399,7 @@ class TrackReg extends Backend
         $end_time = strtotime($end);
         $exist_where['create_time'] = ['between', [$start_time, $end_time]];
         $is_exist = Db::name('finance_cost_error')->where($exist_where)->field('id,create_time,purchase_id,total')->select();
+        dump($is_exist);exit;
 
         $outstock_total1 = 0;   //出库单出库
         $outstock_total2 = 0;   //订单出库
