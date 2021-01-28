@@ -69,6 +69,22 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
 
                 // 为表格1绑定事件
                 Table.api.bindevent(table1);
+                //批量导出xls
+            $('.btn-batch-export-xls').click(function () {
+                var ids = Table.api.selectedids(table1);
+
+
+                if (ids.length > 0) {
+                    window.open(Config.moduleurl + '/finance/Finance_order/batch_export_xls?ids=' + ids + '&label=' + Config.label, '_blank');
+                } else {
+                    var options = table1.bootstrapTable('getOptions');
+                    var search = options.queryParams({});
+                    var filter = search.filter;
+                    var op = search.op;
+                    window.open(Config.moduleurl + '/finance/Finance_order/batch_export_xls?filter=' + filter + '&op=' + op + '&label=' + Config.label, '_blank');
+                }
+
+            });
             }
         },
         api: {
