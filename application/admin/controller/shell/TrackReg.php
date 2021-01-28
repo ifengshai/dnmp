@@ -2399,7 +2399,6 @@ class TrackReg extends Backend
         $end_time = strtotime($end);
         $exist_where['create_time'] = ['between', [$start_time, $end_time]];
         $is_exist = Db::name('finance_cost_error')->where($exist_where)->field('id,create_time,purchase_id,total')->select();
-        dump($is_exist);exit;
 
         $outstock_total1 = 0;   //出库单出库
         $outstock_total2 = 0;   //订单出库
@@ -2509,6 +2508,12 @@ class TrackReg extends Backend
             $cha_amount += $v['total'];
         }
         $end_rest = round($cha_amount + $rest_total[0]['rest_total'] + $instock_total - $outstock_total1 - $outstock_total2, 2);
+        dump($cha_amount);
+        dump($rest_total[0]['rest_total']);
+        dump($instock_total);
+        dump($outstock_total1);
+        dump($outstock_total2);
+        dump($end_rest);exit;
         $info['instock_total'] = $instock_total;
         $info['outstock_total'] = round($outstock_total1 + $outstock_total2, 2);
         $info['rest_total'] = $end_rest;
