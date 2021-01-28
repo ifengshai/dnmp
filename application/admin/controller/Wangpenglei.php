@@ -432,4 +432,29 @@ class Wangpenglei extends Backend
         }
         echo "ok";
     }
+
+
+    /**
+     * 库龄旧数据
+     *
+     * @Description
+     * @author wpl
+     * @since 2021/01/28 14:35:19 
+     * @return void
+     */
+    public function stock_time()
+    {
+        ini_set('memory_limit', '512M');
+        $product_barcode = new \app\admin\model\warehouse\ProductBarCodeItem();
+        $instock = new \app\admin\model\warehouse\Instock();
+        $list = $product_barcode->where(['library_status' => 1, 'in_stock_id' => ['<>', 0]])->where('in_stock_time is null')->limit(100000)->select();
+        foreach($list as $k => $v) {
+            //查询入库审核时间
+            $check_time = $instock->where(['id' => $v['in_stock_id']])->value('check_time');
+            $product_barcode->where(['id' => $v['id']])->update(['in_stock_time' => $check_time]);
+
+            echo $k . "\n";
+            usleep(50000);
+        }
+    }
 }
