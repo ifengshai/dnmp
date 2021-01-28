@@ -89,6 +89,7 @@ class DataMarket extends Backend
         }
         //呆滞库存数量/金额
         $dull_stock = $this->getProductTurnoverDays();
+        dump($dull_stock);exit;
         $arr['dull_stock_count'] = $dull_stock['count'];
         $arr['dull_stock_count1'] = $dull_stock['count1'];  //低
         $arr['dull_stock_count2'] = $dull_stock['count2'];  //中
