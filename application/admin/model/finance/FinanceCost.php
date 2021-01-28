@@ -422,7 +422,7 @@ class FinanceCost extends Model
         $list = collection($list)->toArray();
         $allcost = 0;
         foreach ($list as $k => $v) {
-            $allcost += $v['actual_purchase_price'] > 0 ?: $v['purchase_total'] / $v['purchase_num'];
+            $allcost += $v['actual_purchase_price'] > 0 ? $v['actual_purchase_price'] : $v['purchase_total'] / $v['purchase_num'];
         }
         return $allcost;
     }
