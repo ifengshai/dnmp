@@ -707,15 +707,19 @@ class Sample extends Backend
 
         $location_id = Db::name('purchase_sample_workorder')->insertGetId($workorder);
         foreach ($data as $k => $v) {
-            $sku['parent_id'] = $location_id;
-            $sku['sku'] = $v[0];
-            $sku['stock'] = $v[1];
-            $result_index = Db::table('fa_purchase_sample_workorder_item')->insert($sku);
-            if (!$result_index) {
-                $this->error('导入失败！！');
-            }
+            $sku[$k]['parent_id'] = $location_id;
+            $sku[$k]['sku'] = $v[0];
+            $sku[$k]['stock'] = $v[1];
+
+        }
+        $result_index = Db::table('fa_purchase_sample_workorder_item')->insertAll($sku);
+        if (!$result_index) {
+            $this->error('导入失败！！');
+        }else{
             $this->success('导入成功');
         }
+
+
     }
 
 
