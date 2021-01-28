@@ -409,8 +409,8 @@ class Wangpenglei extends Backend
         $order = new \app\admin\model\order\order\NewOrder();
         //查询昨天上架SKU 并统计当天销量
 
-        $start = date('Ymd', strtotime("-2 day"));
-        $end = date('Ymd', strtotime("-1 day"));
+        $start = date('Ymd', strtotime("-30 day"));
+        $end = date('Ymd', strtotime("-2 day"));
         $where['createtime'] = ['between', [$start, $end]];
         $data = $skuSalesNum->where($where)->where('site<>8')->select();
         $data = collection($data)->toArray();
@@ -423,8 +423,7 @@ class Wangpenglei extends Backend
                 }
 
                 echo $k . "\n";
-                echo $v['sku'] . "\n";
-                usleep(200000);
+                usleep(50000);
             }
             if ($params) {
                 $skuSalesNum->saveAll($params);
