@@ -113,6 +113,9 @@ class PayOrder extends Backend
         $total1 = $data['total1'];
         $count1 = $data['count1'];
         $prepay = $data['prepay'];
+        foreach ($prepay as $k=>$v){
+            $prepay[$k]['pay_rate'] = $v['pay_rate']*100;
+        }
         $total2 = $data['total2'];
         $count2 = $data['count2'];
         $total = $data['total'];
@@ -164,7 +167,7 @@ class PayOrder extends Backend
                     Db::name('finance_payorder_item')->insert($arr2);
                 }
             }
-            $this->success('添加成功！！', '',url('index'));
+            $this->success('添加成功！！');
         }
         $this->view->assign(compact('pay_number','supplier', 'settle', 'prepay','total1','total2','total','count1','count2','ids'));
         return $this->view->fetch();
@@ -452,8 +455,6 @@ class PayOrder extends Backend
         $total2 = 0;  //预付预付款金额合计
         $count2 = 0;
         foreach ($prepay as $k=>$v){
-            $pay_rate = $v['pay_rate']*100;
-            $prepay[$k]['pay_rate'] = $pay_rate.'%';
             $total2 += $v['pay_grand_total'];
             $count2++;
         }
