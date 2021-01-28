@@ -266,7 +266,7 @@ class PurchasePay extends Backend
             } else {
                 $this->error(__('Parameter %s can not be empty', ''));
             }
-            $this->success('添加成功！！', url('PurchasePay/index'));
+            $this->success('添加成功！！');
         }
         $label = input('label');
         //采购单页面过来的创建付款申请单
@@ -446,7 +446,7 @@ class PurchasePay extends Backend
                                     $reasons[$kk] = [
                                         ['name' => '采购品名', 'value' => $vv['name']],
                                         ['name' => '采购单号', 'value' => $vv['number']],
-                                        ['name' => '采购批次', 'value' =>  $vv['batch']],
+                                        ['name' => '采购批次', 'value' =>  $vv['batch'] ? $vv['batch']:0],
                                         ['name' => '商品分类', 'value' => $type],
                                         ['name' => '采购数量', 'value' => $vv['num']],
                                         ['name' => '采购单价', 'value' => $vv['single']],
