@@ -56,7 +56,6 @@ class DataMarket extends Backend
             }
             //仓库指标总览
             $stock_measure_overview = $this->stock_measure_overview($time_str);
-
             //采购概况
             $purchase_overview = $this->purchase_overview($time_str);
             //物流妥投概况
@@ -67,16 +66,16 @@ class DataMarket extends Backend
         //库存总览
         $stock_overview = $this->stock_overview();
         //仓库指标总览
-        //$stock_measure_overview = $this->stock_measure_overview();
+        $stock_measure_overview = $this->stock_measure_overview();
         //库存分级概况
-        //$stock_level_overview = $this->stock_level_overview();
+        $stock_level_overview = $this->stock_level_overview();
         $stock_level_overview2 = $this->stock_level_overview2();
         //库龄概况
         $stock_age_overview = $this->stock_age_overview();
         //采购概况
-        //$purchase_overview = $this->purchase_overview();
+        $purchase_overview = $this->purchase_overview();
         //物流妥投概况
-        //$logistics_completed_overview = $this->logistics_completed_overview();
+        $logistics_completed_overview = $this->logistics_completed_overview();
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
         foreach ($magentoplatformarr as $key=>$val){
@@ -945,10 +944,16 @@ class DataMarket extends Backend
         $arrive_where['p.purchase_status'] = 7;
         //采购总数
         $arr['purchase_num'] = $this->purchase->alias('p')->where($where)->where($status_where)->join(['fa_purchase_order_item' => 'b'], 'p.id=b.purchase_id')->sum('b.purchase_num');
+        $arr['purchase_num_now'] = $this->purchase->alias('p')->where($where)->where($status_where)->where('p.type',1)->join(['fa_purchase_order_item' => 'b'], 'p.id=b.purchase_id')->sum('b.purchase_num');  //现货
+        $arr['purchase_num_big'] = $this->purchase->alias('p')->where($where)->where($status_where)->where('p.type',2)->join(['fa_purchase_order_item' => 'b'], 'p.id=b.purchase_id')->sum('b.purchase_num');  //大货
         //采购总金额
         $arr['purchase_amount'] = $this->purchase->alias('p')->where($where)->where($status_where)->join(['fa_purchase_order_item' => 'b'], 'p.id=b.purchase_id')->sum('purchase_num*purchase_price');
+        $arr['purchase_amount_now'] = $this->purchase->alias('p')->where($where)->where($status_where)->where('p.type',1)->join(['fa_purchase_order_item' => 'b'], 'p.id=b.purchase_id')->sum('purchase_num*purchase_price');//现货
+        $arr['purchase_amount_big'] = $this->purchase->alias('p')->where($where)->where($status_where)->where('p.type',2)->join(['fa_purchase_order_item' => 'b'], 'p.id=b.purchase_id')->sum('purchase_num*purchase_price');//大货
         //采购总SKU数
         $arr['purchase_sku_num'] = $this->purchase->alias('p')->where($where)->where($status_where)->join(['fa_purchase_order_item' => 'b'], 'p.id=b.purchase_id')->group('sku')->count(1);
+        $arr['purchase_sku_num_now'] = $this->purchase->alias('p')->where($where)->where($status_where)->where('p.type',1)->join(['fa_purchase_order_item' => 'b'], 'p.id=b.purchase_id')->group('sku')->count(1);  //现货
+        $arr['purchase_sku_num_big'] = $this->purchase->alias('p')->where($where)->where($status_where)->where('p.type',2)->join(['fa_purchase_order_item' => 'b'], 'p.id=b.purchase_id')->group('sku')->count(1);  //大货
         //所选时间短内到货总批次
         $sum_batch = $this->purchase->alias('p')->join('fa_purchase_batch b','p.id=b.purchase_id','left')->where($where)->where($arrive_where)->count();
         //所选时间内到货的采购单延迟的批次
@@ -961,53 +966,10 @@ class DataMarket extends Backend
         $arr['purchase_qualified_rate'] = $sum_batch ? round($qualified_num/$sum_batch*100,2).'%' : 0;
         //采购单价
         $arr['purchase_price'] = $arr['purchase_num'] ? round($arr['purchase_amount']/$arr['purchase_num'],2) : 0;
+        $arr['purchase_price_now'] = $arr['purchase_num_now'] ? round($arr['purchase_amount_now']/$arr['purchase_num_now'],2) : 0;  //现货
+        $arr['purchase_price_big'] = $arr['purchase_num_big'] ? round($arr['purchase_amount_big']/$arr['purchase_num_big'],2) : 0;//大货
         Cache::set('Supplydatacenter_datamarket'.$time_str.md5(serialize('purchase_overview')),$arr,7200);
         return $arr;
-    }
-    //采购概况中的折线图柱状图
-    public function purchase_histogram_line(){
-        if ($this->request->isAjax()) {
-            $time_str = input('time_str');
-            if (!$time_str) {
-                $start = date('Y-m-d 00:00:00', strtotime('-6 day'));
-                $end = date('Y-m-d 23:59:59');
-                $time_str = $start . ' - ' . $end;
-            }
-            $cache_data = Cache::get('Supplydatacenter_datamarket'  .$time_str. md5(serialize('purchase_histogram_line')));
-            if (!$cache_data) {
-                $createat = explode(' ', $time_str);
-                $where['create_time'] = ['between', [$createat[0], $createat[3]]];
-                $list = $this->warehouse_model->where($where)
-                    ->field('all_purchase_num,create_date,all_purchase_price')
-                    ->order('create_date asc')
-                    ->select();
-                $warehouse_data = collection($list)->toArray();
-                Cache::set('Supplydatacenter_datamarket'.$time_str.md5(serialize('purchase_histogram_line')),$warehouse_data,7200);
-            }else{
-                $warehouse_data = $cache_data;
-            }
-            //全部采购单
-            $barcloumndata = array_column($warehouse_data, 'all_purchase_num');
-            $linecloumndata = array_column($warehouse_data, 'all_purchase_price');
-
-            $json['xColumnName'] = array_column($warehouse_data, 'create_date');
-            $json['columnData'] = [
-                [
-                    'type' => 'bar',
-                    'data' => $barcloumndata,
-                    'name' => '采购数量'
-                ],
-                [
-                    'type' => 'line',
-                    'data' => $linecloumndata,
-                    'name' => '采购金额',
-                    'yAxisIndex' => 1,
-                    'smooth' => true //平滑曲线
-                ],
-
-            ];
-            return json(['code' => 1, 'data' => $json]);
-        }
     }
     /**
      *  获取指定日期段内每一天的日期
@@ -1094,70 +1056,54 @@ class DataMarket extends Backend
             return json(['code' => 1, 'data' => $json]);
         }
     }
-    //加工概况
-    public function process_overview(){
+    //订单发出超时情况
+    public function order_timeout_pie(){
         if ($this->request->isAjax()) {
             $params = $this->request->param();
-            $time_str = $params['time_str'];
+            $time_str = $params['time_str'] ? $params['time_str'] : '';
             if (!$time_str) {
-                $start = date('Y-m-d 00:00:00', strtotime('-6 day'));
+                $start = date('Y-m-d 00:00:00', strtotime('-30 day'));
                 $end = date('Y-m-d 23:59:59');
                 $time_str = $start . ' - ' . $end;
             }
-            $cache_data = Cache::get('Supplydatacenter_userdata'.$time_str.md5(serialize('process_overview')));
+            $cache_data = Cache::get('Supplydatacenter_userdata'.$time_str.md5(serialize('order_timeout_pie')));
             if(!$cache_data){
                 $createat = explode(' ', $time_str);
+                $where['p.delivery_time'] = ['between',[strtotime($createat[0].' '.$createat[1]),strtotime($createat[3].' '.$createat[4])]];
+                $where['p.site'] = ['<>',4];
+                $map1['p.order_prescription_type'] = 1;
+                $map2['p.order_prescription_type'] = 2;
+                $map3['p.order_prescription_type'] = 3;
+                $where['o.status'] = ['in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+                $sql1 = $this->process->alias('p')->join('fa_order o','p.increment_id = o.increment_id')->field('(p.delivery_time-o.payment_time)/3600 AS total')->where($where)->where($map1)->group('p.order_id')->buildSql();
+                $data[] = $this->process->table([$sql1=>'t2'])->value('sum( IF ( total > 24, 1, 0) ) AS a');
 
-                $start_time = strtotime($createat[0].' '.$createat[1]);
-                $end_time = strtotime($createat[3].' '.$createat[4]);
-                $data1 = $this->getProcess(1,$start_time,$end_time); //打印标签
-                $data2 = $this->getProcess(2,$start_time,$end_time); //配货
-                $data3 = $this->getProcess(3,$start_time,$end_time); //配镜片
-                $data4 = $this->getProcess(4,$start_time,$end_time); //加工
-                $data5 = $this->getProcess(5,$start_time,$end_time); //印logo
-                $data6 = $this->getProcess(7,$start_time,$end_time); //合单
+                $sql2 = $this->process->alias('p')->join('fa_order o','p.increment_id = o.increment_id')->field('(p.delivery_time-o.payment_time)/3600 AS total')->where($where)->where($map2)->group('p.order_id')->buildSql();
+                $data[] = $this->process->table([$sql2=>'t2'])->value('sum( IF ( total > 72, 1, 0) ) AS a');
 
-                $check_where['check_time'] = $combine_where['combine_time'] = ['between',[$start_time,$end_time]];
-                $check_where['check_status'] = 1;
-                $combine_where['combine_status'] = 1;
-                $data7 = $this->process->where($check_where)->count();     //审单
-                $data8 = $this->process->where($combine_where)->count();    //合单
-
-                $arr = array(
-                    $data8, $data7, $data6, $data5, $data4, $data3, $data2, $data1
-                );
-                Cache::set('Supplydatacenter_userdata' . $time_str . md5(serialize('process_overview')), $arr, 7200);
+                $sql3 = $this->process->alias('p')->join('fa_order o','p.increment_id = o.increment_id')->field('(p.delivery_time-o.payment_time)/3600 AS total')->where($where)->where($map3)->group('p.order_id')->buildSql();
+                $data[] = $this->process->table([$sql3=>'t2'])->value('sum( IF ( total > 168, 1, 0) ) AS a');
+                Cache::set('Supplydatacenter_userdata' . $time_str . md5(serialize('order_timeout_pie')), $data, 7200);
             }else{
-                $arr = $cache_data;
+                $data = $cache_data;
             }
-            $data = $arr;
-            $json['firtColumnName'] = ['发货', '审单', '合单', '印logo', '加工', '配镜片', '配货', '打印标签'];
-            $json['columnData'] = [[
-                'type' => 'bar',
-                'barWidth' => '40%',
-                'data' => $data,
-                'name' => '加工概况',
-                'itemStyle' => [
-                    'normal' => [
-                        'label' => [
-                            'show' => true,
-                            'position' => 'right',
-                            'formatter'=>"{c}"."个",
-                            'textStyle'=>[
-                                'color'=> 'black'
-                            ],
-                        ],
-                    ]
-                ]
-            ]];
+            $json['column'] = ['仅镜架', '现货处方镜','定制处方镜'];
+            $json['columnData'] = [
+                [
+                    'name' => '仅镜架',
+                    'value' => $data[0],
+                ],
+                [
+                    'name' => '现货处方镜',
+                    'value' => $data[1],
+                ],
+                [
+                    'name' => '定制处方镜',
+                    'value' => $data[2],
+                ],
+            ];
             return json(['code' => 1, 'data' => $json]);
         }
-    }
-    //统计子单加工流程数量
-    public function getProcess($type,$start,$end){
-        $where['create_time'] = ['between',[$start,$end]];
-        $where['distribution_node'] = $type;
-        return $this->distributionLog->where($where)->count();
     }
     //物流妥投概况
     public function logistics_completed_overview($time_str = ''){

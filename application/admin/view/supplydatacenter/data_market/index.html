@@ -505,101 +505,20 @@
                         </tr>
                         </thead>
                         <tr>
-                            <td>A+</td>
-                            <td>{$stock_level_overview.a1_count}</td>
-                            <td>{$stock_level_overview.a1_percent}</td>
-                            <td>{$stock_level_overview.a1_stock_num}</td>
-                            <td>{$stock_level_overview.a1_stock_percent}</td>
-                            <td>{$stock_level_overview.a1_stock_price}</td>
-                            <td>{$stock_level_sales_rate.a1_stock_sales_rate}</td>
-                            <td>{$stock_level_sales_rate.a1_stock_sales_rate}</td>
-                            <td>{$stock_level_sales_rate.a1_stock_sales_rate}</td>
-                            <td>{$stock_level_sales_rate.a1_stock_sales_rate}</td>
+                            {foreach $stock_level_overview2 as $value}
+                            <td>{$value.grade}</td>
+                            <td>{$value.dull_stock}</td>
+                            <td>{$value.rate}</td>
+                            <td>{$value.total}</td>
+                            <td>{$value.high_dull_stock}</td>
+                            <td>{$value.high_dull_total}</td>
+                            <td>{$value.center_dull_stock}</td>
+                            <td>{$value.center_dull_total}</td>
+                            <td>{$value.low_dull_stock}</td>
+                            <td>{$value.low_dull_total}</td>
+                            {/foreach}
                         </tr>
-                        <tr>
-                            <td>A</td>
-                            <td>{$stock_level_overview.a_count}</td>
-                            <td>{$stock_level_overview.a_percent}</td>
-                            <td>{$stock_level_overview.a_stock_num}</td>
-                            <td>{$stock_level_overview.a_stock_percent}</td>
-                            <td>{$stock_level_overview.a_stock_price}</td>
-                            <td>{$stock_level_sales_rate.a_stock_sales_rate}</td>
-                            <td>{$stock_level_sales_rate.a_stock_sales_rate}</td>
-                            <td>{$stock_level_sales_rate.a_stock_sales_rate}</td>
-                            <td>{$stock_level_sales_rate.a_stock_sales_rate}</td>
-                        </tr>
-                        <tr>
-                            <td>B</td>
-                            <td>{$stock_level_overview.b_count}</td>
-                            <td>{$stock_level_overview.b_percent}</td>
-                            <td>{$stock_level_overview.b_stock_num}</td>
-                            <td>{$stock_level_overview.b_stock_percent}</td>
-                            <td>{$stock_level_overview.b_stock_price}</td>
-                            <td>{$stock_level_sales_rate.b_stock_sales_rate}</td>
-                            <td>{$stock_level_sales_rate.b_stock_sales_rate}</td>
-                            <td>{$stock_level_sales_rate.b_stock_sales_rate}</td>
-                            <td>{$stock_level_sales_rate.b_stock_sales_rate}</td>
-                        </tr>
-                        <tr>
-                            <td>C+</td>
-                            <td>{$stock_level_overview.c1_count}</td>
-                            <td>{$stock_level_overview.c1_percent}</td>
-                            <td>{$stock_level_overview.c1_stock_num}</td>
-                            <td>{$stock_level_overview.c1_stock_percent}</td>
-                            <td>{$stock_level_overview.c1_stock_price}</td>
-                            <td>{$stock_level_sales_rate.c1_stock_sales_rate}</td>
-                            <td>{$stock_level_sales_rate.c1_stock_sales_rate}</td>
-                            <td>{$stock_level_sales_rate.c1_stock_sales_rate}</td>
-                            <td>{$stock_level_sales_rate.c1_stock_sales_rate}</td>
-                        </tr>
-                        <tr>
-                            <td>C</td>
-                            <td>{$stock_level_overview.c_count}</td>
-                            <td>{$stock_level_overview.c_percent}</td>
-                            <td>{$stock_level_overview.c_stock_num}</td>
-                            <td>{$stock_level_overview.c_stock_percent}</td>
-                            <td>{$stock_level_overview.c_stock_price}</td>
-                            <td>{$stock_level_sales_rate.c_stock_sales_rate}</td>
-                            <td>{$stock_level_sales_rate.c_stock_sales_rate}</td>
-                            <td>{$stock_level_sales_rate.c_stock_sales_rate}</td>
-                            <td>{$stock_level_sales_rate.c_stock_sales_rate}</td>
-                        </tr>
-                        <tr>
-                            <td>D</td>
-                            <td>{$stock_level_overview.d_count}</td>
-                            <td>{$stock_level_overview.d_percent}</td>
-                            <td>{$stock_level_overview.d_stock_num}</td>
-                            <td>{$stock_level_overview.d_stock_percent}</td>
-                            <td>{$stock_level_overview.d_stock_price}</td>
-                            <td>{$stock_level_sales_rate.d_stock_sales_rate}</td>
-                            <td>{$stock_level_sales_rate.d_stock_sales_rate}</td>
-                            <td>{$stock_level_sales_rate.d_stock_sales_rate}</td>
-                            <td>{$stock_level_sales_rate.d_stock_sales_rate}</td>
-                        </tr>
-                        <tr>
-                            <td>E</td>
-                            <td>{$stock_level_overview.e_count}</td>
-                            <td>{$stock_level_overview.e_percent}</td>
-                            <td>{$stock_level_overview.e_stock_num}</td>
-                            <td>{$stock_level_overview.e_stock_percent}</td>
-                            <td>{$stock_level_overview.e_stock_price}</td>
-                            <td>{$stock_level_sales_rate.e_stock_sales_rate}</td>
-                            <td>{$stock_level_sales_rate.e_stock_sales_rate}</td>
-                            <td>{$stock_level_sales_rate.e_stock_sales_rate}</td>
-                            <td>{$stock_level_sales_rate.e_stock_sales_rate}</td>
-                        </tr>
-                        <tr>
-                            <td>F</td>
-                            <td>{$stock_level_overview.f_count}</td>
-                            <td>{$stock_level_overview.f_percent}</td>
-                            <td>{$stock_level_overview.f_stock_num}</td>
-                            <td>{$stock_level_overview.f_stock_percent}</td>
-                            <td>{$stock_level_overview.f_stock_price}</td>
-                            <td>{$stock_level_sales_rate.f_stock_sales_rate}</td>
-                            <td>{$stock_level_sales_rate.f_stock_sales_rate}</td>
-                            <td>{$stock_level_sales_rate.f_stock_sales_rate}</td>
-                            <td>{$stock_level_sales_rate.f_stock_sales_rate}</td>
-                        </tr>
+
                     </table>
                     <div>
                  <div class="new-background">
@@ -639,22 +558,22 @@
                                         <div class="margin-div" style="text-align: center">
                                             <div class="btn btn-div div1">
                                             <span class="extend">
-                                                <div class="title1">采购总数（个）<br/><br/><span style="color: red;font-size: 24px" id="purchase_num">{$purchase_overview.purchase_num}</span><hr><span style="font-size: 14px;">大货：1000<br>现货：2000</span></div>
+                                                <div class="title1">采购总数（个）<br/><br/><span style="color: red;font-size: 24px" id="purchase_num">{$purchase_overview.purchase_num}</span><hr><span style="font-size: 14px;">大货：{$purchase_overview.purchase_num_big}<br>现货：{$purchase_overview.purchase_num_now}</span></div>
                                             </span>
                                             </div>
                                             <div class="btn btn-div div1">
                                             <span class="extend">
-                                                <div class="title1">采购总金额（￥）<br/><br/><span style="color: red;font-size: 24px" id="purchase_amount">{$purchase_overview.purchase_amount}</span><hr><span style="font-size: 14px;">大货：1000<br>现货：2000</span></div>
+                                                <div class="title1">采购总金额（￥）<br/><br/><span style="color: red;font-size: 24px" id="purchase_amount">{$purchase_overview.purchase_amount}</span><hr><span style="font-size: 14px;">大货：{$purchase_overview.purchase_amount_big}<br>现货：{$purchase_overview.purchase_amount_now}</span></div>
                                             </span>
                                             </div>
                                             <div class="btn btn-div div1">
                                             <span class="extend">
-                                                <div class="title1">采购总SKU数（个）<br/><br/><span style="color: red;font-size: 24px" id="purchase_sku_num">{$purchase_overview.purchase_sku_num}</span><hr><span style="font-size: 14px;">大货：1000<br>现货：2000</span></div>
+                                                <div class="title1">采购总SKU数（个）<br/><br/><span style="color: red;font-size: 24px" id="purchase_sku_num">{$purchase_overview.purchase_sku_num}</span><hr><span style="font-size: 14px;">大货：{$purchase_overview.purchase_sku_num_big}<br>现货：{$purchase_overview.purchase_sku_num_now}</span></div>
                                             </span>
                                             </div>
                                             <div class="btn btn-div div1">
                                             <span class="extend">
-                                                <div class="title1">采购单价（￥）<br/><br/><span style="color: red;font-size: 24px" id="purchase_price">{$purchase_overview.purchase_price}</span><hr><span style="font-size: 14px;">大货：1000<br>现货：2000</span></div>
+                                                <div class="title1">采购单价（￥）<br/><br/><span style="color: red;font-size: 24px" id="purchase_price">{$purchase_overview.purchase_price}</span><hr><span style="font-size: 14px;">大货：{$purchase_overview.purchase_price_big}<br>现货：{$purchase_overview.purchase_price_now}</span></div>
                                             </span>
                                             </div>
                                             <div class="btn btn-div div1">
