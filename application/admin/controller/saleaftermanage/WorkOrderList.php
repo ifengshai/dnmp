@@ -3125,7 +3125,8 @@ class WorkOrderList extends Backend
                     //措施表
                     $_work_order_measure = new WorkOrderMeasure();
                     $measure_choose_id = $_work_order_measure->where('id',$receptInfo['measure_id'])->value('measure_choose_id');
-                    if (3 == $measure_choose_id) { //主单取消收入核算冲减
+                    if (3 == $measure_choose_id) { 
+                        //主单取消收入核算冲减
                         $FinanceCost = new FinanceCost();
                         $FinanceCost->cancel_order_subtract($receptInfo['work_id']);
                     }
