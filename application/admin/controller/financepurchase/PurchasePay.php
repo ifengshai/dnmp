@@ -524,7 +524,7 @@ class PurchasePay extends Backend
                     $this->error($e->getMessage());
                 }
                 if ($result !== false) {
-                    $this->success();
+                    $this->success('添加成功！！');
                 } else {
                     $this->error(__('No rows were updated'));
                 }

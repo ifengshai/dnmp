@@ -18,7 +18,6 @@ class PayOrder extends Backend
         $this->batch = new \app\admin\model\purchase\PurchaseBatch();
         $this->batch_item = new \app\admin\model\purchase\PurchaseBatchItem();
         $this->purchase_item = new \app\admin\model\purchase\PurchaseOrderItem;
-        $this->purchase_order_item = new \app\admin\model\purchase\PurchaseOrderItem;
         $this->item = new \app\admin\model\warehouse\ProductBarCodeItem;
         $this->outstockItem = new \app\admin\model\warehouse\OutStockItem;
         $this->instockItem = new \app\admin\model\warehouse\InstockItem;
@@ -249,6 +248,18 @@ class PayOrder extends Backend
         $id = input('ids');
         //更改状态
         $this->payorder->where('id',$id)->update(['status'=>4]);
+        //获取付款单下所有的采购单id
+        $pay_order_item = $this->payorder_item->where('pay_id',$id)->where('pay_type','in','1,2')->field('purchase_order_id,pay_type')->select();
+        foreach ($pay_order_item as $key=>$value){
+            //判断预付款:修改采购单状态为部分付款
+            if($value['pay_type'] == 1){
+                Db::name('purchase_order')->where('id',$value['purchase_order_id'])->update(['payment_status'=>2]);
+            }
+            //判断全款预付:修改采购单状态为已经付款
+            if($value['pay_type'] == 2){
+                Db::name('purchase_order')->where('id',$value['purchase_order_id'])->update(['payment_status'=>3]);
+            }
+        }
         /**************************************计算采购成本start**********************************/
         //判断采购单id
         $purchase_order_ids = $this->payorder_item->where('pay_type',3)->where('pay_id',$id)->group('purchase_order_id')->column('purchase_order_id');
@@ -262,6 +273,8 @@ class PayOrder extends Backend
             $where['i.pay_type'] = 3;
             $pay_batch_count = $this->payorder_item->alias('i')->join('fa_finance_payorder p','i.pay_id=p.id','left')->where($where)->count();
             if($batch_count == $pay_batch_count){
+                //判断尾款：判断批次若全部完成，修改采购单状态为已经付款
+                Db::name('purchase_order')->where('id',$v)->update(['payment_status'=>3]);
                 //判断结算尾款的采购单是否结算完成，如果完成计算采购成本单价
                 $map['i.purchase_order_id'] = $v;
                 $map['p.status'] = ['in','4,5'];
@@ -275,7 +288,7 @@ class PayOrder extends Backend
                 /**************************************计算采购成本end**********************************/
                 /**************************************计算成本冲减start****************************************/
                 $result = array();
-                $purchase_order = $this->purchase_order_item->where('purchase_id',$v)->find();
+                $purchase_order = $this->purchase_item->alias('i')->join('fa_purchase_order o','i.purchase_id=o.id')->where('i.purchase_id',$v)->field('round(o.purchase_total/purchase_num,2) purchase_price,actual_purchase_price,i.sku')->find();
                 //实际采购成本和预估成本不一致，冲减差值
                 if($purchase_order['purchase_price'] != $purchase_order['actual_purchase_price']){
                     //计算订单出库数量
@@ -310,7 +323,7 @@ class PayOrder extends Backend
                         }
                         foreach ($result1 as $rr1=>$ss1){
                             //获取成本核算中的订单数据
-                            $cost_order_info = $this->financecost->where(['order_number' => $rr1, 'type' => 2])->find();
+                            $cost_order_info = $this->financecost->where(['order_number' => $rr1, 'type' => 2,'bill_type'=>8])->find();
                             //如果有出库数据，需要添加冲减暂估结算金额和增加成本核算数据
                             $arr1['type'] = 2;   //类型：成本
                             $arr1['bill_type'] = 10;    //单据类型：暂估结算金额
@@ -352,7 +365,7 @@ class PayOrder extends Backend
                         $outorder = $this->outstockItem->alias('i')->join('fa_out_stock s','s.id=i.out_stock_id','left')->where('s.purchase_id',$v)->where('status',2)->where('i.sku',$purchase_order['sku'])->group('s.out_stock_number')->field('s.id,s.out_stock_number,sum(i.out_stock_num) count')->select();
                         foreach ($outorder as $rr2=>$ss2){
                             //获取成本核算中的订单数据
-                            $cost_order_info1 = $this->financecost->where(['out_stock_id' => $ss2['id'], 'type' => 2])->find();
+                            $cost_order_info1 = $this->financecost->where(['out_stock_id' => $ss2['id'], 'type' => 2,'bill_type'=>9])->find();
                             //如果有出库数据，需要添加冲减暂估结算金额和增加成本核算数据
                             $arr3['type'] = 2;   //类型：成本
                             $arr3['bill_type'] = 11;    //单据类型：暂估结算金额
