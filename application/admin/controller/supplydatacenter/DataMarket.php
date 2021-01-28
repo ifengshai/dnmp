@@ -567,42 +567,42 @@ class DataMarket extends Backend
             'a1_count'=>$this->productGrade->where('grade','A+')->count(),
             'a1_stock_num'=>$gradeSkuStock['aa_stock_num'],
             'a1_stock_price'=>$gradeSkuStock['aa_stock_price'],
-            'a1_turnover_day'=>105,
+            'a1_turnover_day'=>120,
 
             'a_count'=>$this->productGrade->where('grade','A')->count(),
             'a_stock_num'=>$gradeSkuStock['a_stock_num'],
             'a_stock_price'=>$gradeSkuStock['a_stock_price'],
-            'a_turnover_day'=>105,
+            'a_turnover_day'=>120,
 
             'b_count'=>$this->productGrade->where('grade','B')->count(),
             'b_stock_num'=>$gradeSkuStock['b_stock_num'],
             'b_stock_price'=>$gradeSkuStock['b_stock_price'],
-            'b_turnover_day'=>90,
+            'b_turnover_day'=>120,
 
             'c1_count'=>$this->productGrade->where('grade','C+')->count(),
             'c1_stock_num'=>$gradeSkuStock['ca_stock_num'],
             'c1_stock_price'=>$gradeSkuStock['ca_stock_price'],
-            'c1_turnover_day'=>90,
+            'c1_turnover_day'=>120,
 
             'c_count'=>$this->productGrade->where('grade','C')->count(),
             'c_stock_num'=>$gradeSkuStock['c_stock_num'],
             'c_stock_price'=>$gradeSkuStock['c_stock_price'],
-            'c_turnover_day'=>75,
+            'c_turnover_day'=>120,
 
             'd_count'=>$this->productGrade->where('grade','D')->count(),
             'd_stock_num'=>$gradeSkuStock['d_stock_num'],
             'd_stock_price'=>$gradeSkuStock['d_stock_price'],
-            'd_turnover_day'=>75,
+            'd_turnover_day'=>120,
 
             'e_count'=>$this->productGrade->where('grade','E')->count(),
             'e_stock_num'=>$gradeSkuStock['e_stock_num'],
             'e_stock_price'=>$gradeSkuStock['e_stock_price'],
-            'e_turnover_day'=>15,
+            'e_turnover_day'=>120,
 
             'f_count'=>$this->productGrade->where('grade','F')->count(),
             'f_stock_num'=>$gradeSkuStock['f_stock_num'],
             'f_stock_price'=>$gradeSkuStock['f_stock_price'],
-            'f_turnover_day'=>15,
+            'f_turnover_day'=>120,
         );
         //获取呆滞库存信息
         $dull_stock = $this->getProductTurnoverDays();
