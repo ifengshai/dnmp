@@ -174,7 +174,7 @@ class Distribution extends Backend
 
             $map = [];
             $WhereSql = 'a.id > 0';
-            //普通状态剔除跟单数据
+            /*//普通状态剔除跟单数据
 
             if (!in_array($label, [0, 8])) {
 
@@ -185,7 +185,7 @@ class Distribution extends Backend
                 }
 
                 $map['a.abnormal_house_id'] = 0;
-            }
+            }*/
 
             //处理异常选项
             $filter = json_decode($this->request->get('filter'), true);
@@ -334,14 +334,13 @@ class Distribution extends Backend
                 ->order('a.create_time', 'desc')
                 ->group('a.item_order_number')
                 ->column('a.item_order_number');
-
             if ($flag && empty($item_order_numbers[0])) {
                 $result = array("total" => 0, "rows" => []);
                 return json($result);
             }
 
-            //跟单
-            if (8 == $label && $item_order_numbers) {
+            if (8 == $label) {
+                //展示子工单的子单
                 $item_process_id_work = $this->model->where(['item_order_number' => ['in', $item_order_numbers]])->column('id');
                 if ($flag) {
                     $item_process_ids = $item_process_id_work;
@@ -452,7 +451,16 @@ class Distribution extends Backend
 
                 //判断是否显示工单按钮
                 $list[$key]['task_info'] = in_array($value['item_order_number'], $item_order_numbers) ? 1 : 0;
-
+                if (8 == $label || 1 == $label || 0 == $label) {
+                    //查询子单的主单是否也含有工单
+                    if ($handle_abnormal == 0 && $list[$key]['task_info'] == 0) {
+                        $platform_order = $this->_new_order_process->where(['order_id' => $list[$key]['order_id']])->value('increment_id');
+                        $work_order_list_task = $this->_work_order_list->where(['work_status' => ['in',[1,2,3,5]],'platform_order' =>$platform_order])->find();
+                        if (!empty($work_order_list_task)) {
+                            $list[$key]['task_info'] = 1;
+                        } 
+                    }
+                }
                 //获取工单更改镜框最新信息
                 $change_sku = $this->_work_order_change_sku
                     ->alias('a')

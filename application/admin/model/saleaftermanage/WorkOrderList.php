@@ -27,6 +27,7 @@ use app\admin\controller\warehouse\Inventory;
 use app\admin\model\order\order\NewOrder;
 use app\admin\model\order\order\NewOrderItemProcess;
 use app\admin\model\saleaftermanage\WorkOrderChangeSku;
+use app\admin\model\warehouse\ProductBarCodeItem;
 
 class WorkOrderList extends Model
 {
@@ -1953,7 +1954,7 @@ class WorkOrderList extends Model
      * @author lsw
      * @since 2020/04/21 10:13:28
      */
-    public function handleRecept($id, $work_id, $measure_id, $recept_group_id, $success, $process_note,$is_auto_complete)
+    public function handleRecept($id, $work_id, $measure_id, $recept_group_id, $success, $process_note,$is_auto_complete,$barcode)
     {
         $work = self::find($work_id);
 
@@ -1989,7 +1990,21 @@ class WorkOrderList extends Model
                     $this->presentAddress($work, $measure_id);
                 }
             }
-
+            //赠品绑定条码
+            if(6 == $measure_choose_id){
+                $product_bar_code_item = new ProductBarCodeItem();
+                $work_order_change_sku = new WorkOrderChangeSku();
+                $gift_sku = $work_order_change_sku->field('id,change_sku,change_number')->where(['work_id' => $work_id,'change_type' => 4])->select();
+                if (!empty($gift_sku)) {
+                    $gift_sku = collection($gift_sku)->toArray();
+                    foreach ($gift_sku as $key => $value) {
+                        for ($i=1; $i <= $value['change_number']; $i++) { 
+                            $product_bar_code_item->where(['code' => $barcode[$value['change_sku'].'_'.$i]])
+                            ->update(['item_order_number' => $work->platform_order, 'library_status' => 2, 'out_stock_time' => date('Y-m-d H:i:s')]);
+                        }
+                    }
+                }
+            }
             //措施不是补发的时候扣减库存，是补发的时候不扣减库存，因为补发的时候库存已经扣减过了
             if ($resultInfo && 1 == $data['recept_status'] && 7 != $measure_choose_id){
                 $this->deductionStock($work_id, $measure_id);
