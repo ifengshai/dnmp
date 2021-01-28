@@ -3130,6 +3130,11 @@ class WorkOrderList extends Backend
                         $FinanceCost = new FinanceCost();
                         $FinanceCost->cancel_order_subtract($receptInfo['work_id']);
                     }
+                    if (15 == $measure_choose_id) { 
+                        //主单取消收入核算冲减
+                        $FinanceCost = new FinanceCost();
+                        $FinanceCost->vip_order_subtract($receptInfo['work_id']);
+                    }
                     $this->success();
                 } else {
                     $this->error(__('No rows were updated'));
