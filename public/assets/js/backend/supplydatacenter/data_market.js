@@ -92,10 +92,10 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                         });
                     }
                 },
-                order_send_overview: function () {
-                    //订单数据概况折线图
+                line_histogram: function (){
+                    //柱状图和折线图的结合
                     var chartOptions = {
-                        targetId: 'echart2',
+                        targetId: 'echart1',
                         downLoadTitle: '图表',
                         type: 'bar',
                         bar: {
@@ -106,8 +106,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                                 },
                                 formatter: function (param) { //格式化提示信息
                                     console.log(param);
-                                    var num = param[0].value+param[1].value;
-                                    return param[0].name + '<br/>' + param[0].seriesName + '：' + param[0].value + '<br/>' + param[1].seriesName + '：' + param[1].value+'<br/>合计：'+num;
+                                    return param[0].name + '<br/>' + param[0].seriesName + '：' + param[0].value + '<br/>' + param[1].seriesName + '：' + param[1].value;
                                 }
                             },
                             grid: { //直角坐标系内绘图网格
@@ -120,7 +119,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                             legend: { //图例配置
                                 padding: 5,
                                 top: '2%',
-                                data: ['超时订单', '未超时订单']
+                                data: ['订单数', '及时率']
                             },
                             xAxis: [
                                 {
@@ -130,18 +129,25 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                             yAxis: [
                                 {
                                     type: 'value',
-                                    name: '订单数量',
+                                    name: '订单数',
                                     axisLabel: {
                                         formatter: '{value} 个'
                                     }
                                 },
+                                {
+                                    type: 'value',
+                                    name: '及时率',
+                                    axisLabel: {
+                                        formatter: '{value} %'
+                                    }
+                                }
                             ],
                         }
                     };
-
+        
                     var options = {
                         type: 'post',
-                        url: 'supplydatacenter/data_market/order_send_overview',
+                        url: 'supplydatacenter/data_market/order_histogram_line',
                         data: {
                             time_str: $("#time_str").val(),
                         }

@@ -1020,7 +1020,7 @@ class DataMarket extends Backend
                     $sql3 = $this->process->alias('p')->join('fa_order o','p.increment_id = o.increment_id')->field('(p.delivery_time-o.payment_time)/3600 AS total')->where($where)->where($map3)->group('p.order_id')->buildSql();
                     $count3 = $this->process->table([$sql3=>'t2'])->value('sum( IF ( total <= 168, 1, 0) ) AS a');
                     $untimeout_count = $count1 + $count2 + $count3;
-                    $arr[$key]['rate'] = $arr[$key]['order_count'] ? round($untimeout_count/$arr[$key]['order_count'],2) : 0;
+                    $arr[$key]['rate'] = $arr[$key]['order_count'] ? round($untimeout_count/$arr[$key]['order_count']*100,2) : 0;
                 }
                 Cache::set('Supplydatacenter_datamarket'.$time_str.md5(serialize('purchase_histogram_line')),$arr,7200);
             }else{
