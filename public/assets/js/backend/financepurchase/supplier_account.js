@@ -236,6 +236,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
         api: {
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
+                $(document).on('click', '#submit_cancel', function () {
+                    Fast.api.close(); // 关闭弹窗
+                    parent.location.reload(); 刷新父级
+                })
             }
         }
     };
