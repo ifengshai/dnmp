@@ -59,8 +59,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'upload'], function (
                                     if (row.action_type == 2) {
                                         return '<b style = "color:red">' + parseFloat(value).toFixed(2) + '</b>';
                                     } else {
-                                        return  parseFloat(value).toFixed(2);
-                                    }  
+                                        return parseFloat(value).toFixed(2);
+                                    }
                                 }
                             },
                             { field: 'order_currency_code', title: __('币种') },
@@ -88,8 +88,24 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'upload'], function (
                             { field: 'id', title: 'ID', operate: false },
                             { field: 'bill_type', title: __('关联单据类型'), custom: { 1: 'success', 2: 'danger', 3: 'orange', 4: 'warning', 5: 'purple', 6: 'primary', 7: 'primary', 8: 'primary', 9: 'primary', 10: 'primary', 11: 'primary' }, searchList: { 1: '订单', 2: 'VIP订单', 3: '工单补差价', 4: '退货退款', 5: '订单取消', 6: '部分退款', 7: 'Vip退款', 8: '订单出库', 9: '出库单出库', 10: '订单冲减暂估', 11: '出库单冲减暂估' }, formatter: Table.api.formatter.status },
                             { field: 'order_number', title: __('关联单号') },
-                            { field: 'frame_cost', title: __('镜架成本'), operate: false, formatter: Controller.api.float_format },
-                            { field: 'lens_cost', title: __('镜片成本'), operate: false, formatter: Controller.api.float_format },
+                            {
+                                field: 'frame_cost', title: __('镜架成本'), operate: false, formatter: function (value, row, index) {
+                                    if (row.action_type == 2) {
+                                        return '<b style = "color:red">' + parseFloat(value).toFixed(2) + '</b>';
+                                    } else {
+                                        return parseFloat(value).toFixed(2);
+                                    }
+                                }
+                            },
+                            {
+                                field: 'lens_cost', title: __('镜片成本'), operate: false, formatter: function (value, row, index) {
+                                    if (row.action_type == 2) {
+                                        return '<b style = "color:red">' + parseFloat(value).toFixed(2) + '</b>';
+                                    } else {
+                                        return parseFloat(value).toFixed(2);
+                                    }
+                                }
+                            },
                             { field: 'is_carry_forward', title: __('是否结转'), searchList: { 1: '已结转', 0: '未结转' }, formatter: Table.api.formatter.status },
                             { field: 'createtime', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
                         ]
