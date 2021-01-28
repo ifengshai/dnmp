@@ -288,7 +288,7 @@ class PayOrder extends Backend
                 /**************************************计算采购成本end**********************************/
                 /**************************************计算成本冲减start****************************************/
                 $result = array();
-                $purchase_order = $this->purchase_item->where('purchase_id',$v)->find();
+                $purchase_order = $this->purchase_item->alias('i')->join('fa_purchase_order o','i.purchase_id=o.id')->where('i.purchase_id',$v)->field('o.purchase_total/purchase_num purchase_price,actual_purchase_price')->find();
                 //实际采购成本和预估成本不一致，冲减差值
                 if($purchase_order['purchase_price'] != $purchase_order['actual_purchase_price']){
                     //计算订单出库数量
