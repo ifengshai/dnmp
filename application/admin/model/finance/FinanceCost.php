@@ -69,7 +69,7 @@ class FinanceCost extends Model
             ->join(['fa_work_order_measure' => 'b'], 'a.id=b.work_id')
             ->where([
                 'a.platform_order' => $order_detail['increment_id'],
-                'b.measure_choose_id' => ['in', [2, 8, 15]],
+                'b.measure_choose_id' => ['in', [2, 8]],
                 'b.operation_type' => 1
             ])
             ->select();
@@ -94,11 +94,11 @@ class FinanceCost extends Model
                         $action_type = 1; //增加
                         $income_amount = $value['replenish_money']; //收入金额(补差价的金额)
                         break;
-                    case 15: //vip退款措施
+                    /*case 15: //vip退款措施
                         $bill_type = 7; //vip退款单据类型
                         $action_type = 2; //冲减
                         $income_amount = $value['refund_money']; //收入金额(退款金额)
-                        break;
+                        break;*/
                 }
                 if (!empty($bill_type)) { //有工单单据需要核算-增加核算数据
                     $params['type'] = 1;
@@ -149,6 +149,33 @@ class FinanceCost extends Model
         $this->insert($params); //主单取消冲减
         $params['action_type'] = 1;
         $this->insert($params); //主单取消增加
+    }
+
+    /**
+     * vip退款-冲减
+     *
+     * @Description
+     * @author gyh
+     * @param $work_id 订单id
+     */
+    public function vip_order_subtract($work_id = null)
+    {
+        $WorkOrderList = new \app\admin\model\saleaftermanage\WorkOrderList;
+        $work_order_info = $WorkOrderList->get($work_id); //获取工单信息
+        $params['type'] = 1;
+        $params['bill_type'] = 7; //单据类型
+        $params['order_number'] = $work_order_info['platform_order']; //订单号
+        $params['site'] = $work_order_info['work_platform']; //站点
+        $params['order_type'] = 9; //vip
+        $params['order_money'] = $work_order_info['refund_money']; //订单金额
+        $params['income_amount'] = $work_order_info['refund_money']; //收入金额
+        $params['order_currency_code'] = $work_order_info['order_pay_currency']; //币种
+        $params['payment_time'] = $work_order_info['payment_time']; //支付时间
+        $params['payment_method'] = $work_order_info['order_pay_method']; //支付方式
+        $params['action_type'] = 2; //动作类型：1增加；2冲减；
+        $params['work_id'] = $work_id; //工单id
+        $params['createtime'] = time();
+        $this->insert($params); //vip退款冲减
     }
 
     /**
