@@ -288,7 +288,7 @@ class PayOrder extends Backend
                 /**************************************计算采购成本end**********************************/
                 /**************************************计算成本冲减start****************************************/
                 $result = array();
-                $purchase_order = $this->purchase_item->alias('i')->join('fa_purchase_order o','i.purchase_id=o.id')->where('i.purchase_id',$v)->field('o.purchase_total/purchase_num purchase_price,actual_purchase_price')->find();
+                $purchase_order = $this->purchase_item->alias('i')->join('fa_purchase_order o','i.purchase_id=o.id')->where('i.purchase_id',$v)->field('round(o.purchase_total/purchase_num,2) purchase_price,actual_purchase_price,i.sku')->find();
                 //实际采购成本和预估成本不一致，冲减差值
                 if($purchase_order['purchase_price'] != $purchase_order['actual_purchase_price']){
                     //计算订单出库数量
@@ -323,7 +323,7 @@ class PayOrder extends Backend
                         }
                         foreach ($result1 as $rr1=>$ss1){
                             //获取成本核算中的订单数据
-                            $cost_order_info = $this->financecost->where(['order_number' => $rr1, 'type' => 2])->find();
+                            $cost_order_info = $this->financecost->where(['order_number' => $rr1, 'type' => 2,'bill_type'=>8])->find();
                             //如果有出库数据，需要添加冲减暂估结算金额和增加成本核算数据
                             $arr1['type'] = 2;   //类型：成本
                             $arr1['bill_type'] = 10;    //单据类型：暂估结算金额
@@ -365,7 +365,7 @@ class PayOrder extends Backend
                         $outorder = $this->outstockItem->alias('i')->join('fa_out_stock s','s.id=i.out_stock_id','left')->where('s.purchase_id',$v)->where('status',2)->where('i.sku',$purchase_order['sku'])->group('s.out_stock_number')->field('s.id,s.out_stock_number,sum(i.out_stock_num) count')->select();
                         foreach ($outorder as $rr2=>$ss2){
                             //获取成本核算中的订单数据
-                            $cost_order_info1 = $this->financecost->where(['out_stock_id' => $ss2['id'], 'type' => 2])->find();
+                            $cost_order_info1 = $this->financecost->where(['out_stock_id' => $ss2['id'], 'type' => 2,'bill_type'=>9])->find();
                             //如果有出库数据，需要添加冲减暂估结算金额和增加成本核算数据
                             $arr3['type'] = 2;   //类型：成本
                             $arr3['bill_type'] = 11;    //单据类型：暂估结算金额
