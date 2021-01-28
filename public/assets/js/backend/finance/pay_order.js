@@ -224,6 +224,21 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
             Controller.api.bindevent();
         },
         detail: function () {
+            var index = 0;
+            $(document).on('click', '#imgs', function(){
+                var src = this.src; //图片地址
+                index = layer.open({
+                    type: 1, //open的类型 1为页面层
+                    title:'发票',
+                    shadeClose: true,  //点击遮罩关闭
+                    shade: "background-color: #000", //遮罩的颜色以及透明度(与官网不同)
+                    content: '<div id="layui-layer-photos" style="width: 100%;"><img src="'+src+'" style="width: 100%;"/></div>' 
+                });
+            });
+            //点击图片关闭大图
+            $(document).on('click', '#layui-layer-photos', function(){
+                layer.close(index);
+            });
             Controller.api.bindevent();
         },
 
