@@ -31,6 +31,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                     url: 'finance/finance_order/index',
                     toolbar: '#toolbar1',
                     sortName: 'createtime',
+                    exportDataType: 'selected', // basic, all, selected
                     columns: [
                         [
                             {checkbox: true, },
