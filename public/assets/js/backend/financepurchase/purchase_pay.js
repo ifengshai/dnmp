@@ -219,6 +219,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         api: {
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
+                // alert(11)
+                $(".btn-submitss").removeClass("disabled");
                 //付款类型
                 // $(document).on('change', '#pay_type', function () {
                 //     var val = $(this).val();
