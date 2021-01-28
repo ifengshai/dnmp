@@ -416,7 +416,7 @@ class TrackReg extends Backend
             foreach ($siteList as $val) {
                 //统计30天有效天数销量
                 $num = $skuSalesNum->where(['sku' => $v['sku'], 'createtime' => ['<', $date], 'site' => $val['id']])->limit(30)->order('createtime desc')->sum('sales_num');
-                $allnum + $num;
+                $allnum += $num;
             }
             if ($allnum >= 300) {
                 $params[$k]['grade'] = 'A+';
