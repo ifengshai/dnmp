@@ -190,7 +190,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
 
                 $(document).on('click', '#submit_cancel', function () {
                     Fast.api.close(); // 关闭弹窗
-                    parent.location.reload(); 刷新父级
+                    parent.location.reload(); //刷新父级
                 })
             }
         }
