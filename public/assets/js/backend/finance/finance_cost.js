@@ -56,10 +56,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'upload'], function (
                             { field: 'order_money', title: __('订单金额'), operate: false, formatter: Controller.api.float_format },
                             {
                                 field: 'income_amount', title: __('收入金额'), operate: false, formatter: function (value, row, index) {
-                                    if (row.action_type == 2) {
+                                    if (row.action_type == 2 && value && typeof(value)!="undefined") {
                                         return '<b style = "color:red">' + parseFloat(value).toFixed(2) + '</b>';
                                     } else {
-                                        if (value) {
+                                        if (value && value && typeof(value)!="undefined") {
                                             return parseFloat(value).toFixed(2);
                                         }
                                     }
@@ -92,10 +92,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'upload'], function (
                             { field: 'order_number', title: __('关联单号') },
                             {
                                 field: 'frame_cost', title: __('镜架成本'), operate: false, formatter: function (value, row, index) {
-                                    if (row.action_type == 2) {
+                                    if (row.action_type == 2 && value && typeof(value)!="undefined") {
                                         return '<b style = "color:red">' + parseFloat(value).toFixed(2) + '</b>';
                                     } else {
-                                        if (value) {
+                                        if (value  && value!= null) {
                                             return parseFloat(value).toFixed(2);
                                         }
                                     }
@@ -103,10 +103,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'upload'], function (
                             },
                             {
                                 field: 'lens_cost', title: __('镜片成本'), operate: false, formatter: function (value, row, index) {
-                                    if (row.action_type == 2) {
+                                    if (row.action_type == 2 && value && typeof(value)!="undefined") {
                                         return '<b style = "color:red">' + parseFloat(value).toFixed(2) + '</b>';
                                     } else {
-                                        if (value) {
+                                        if (value && typeof(value)!="undefined") {
                                             return parseFloat(value).toFixed(2);
                                         }
                                     }
@@ -127,7 +127,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'upload'], function (
                 Form.api.bindevent($("form[role=form]"));
             },
             float_format: function (value, row, index) {
-                return parseFloat(value).toFixed(2);
+                if (value  && value!= null) {
+                    return parseFloat(value).toFixed(2);
+                }
             }
         }
     };
