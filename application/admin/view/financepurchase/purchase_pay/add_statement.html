@@ -182,10 +182,10 @@
                                value="{$vo.purchase_price}">
                     </td>
                     <td>
-                        <input id="in_number" class="form-control form-empty" readonly name="reason[in_number]" type="text" value="{$vo.instock_num}" style="width:180px;">
+                        <input id="in_number" class="form-control form-empty" readonly name="reason[{$k}][in_number]" type="text" value="{$vo.instock_num}" style="width:180px;">
                     </td>
                     <td>
-                        <input id="kou_money" class="form-control form-empty" readonly name="reason[kou_money]" type="text" value="{$vo.deduction_total}" style="width:180px;">
+                        <input id="kou_money" class="form-control form-empty" readonly name="reason[{$k}][kou_money]" type="text" value="{$vo.deduction_total}" style="width:180px;">
                     </td>
                     <td>
                         <input id="money" class="form-control form-empty" readonly name="reason[{$k}][money]" type="text"
