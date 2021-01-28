@@ -973,6 +973,9 @@ class Sample extends Backend
             $this->success();
         }
     }
+
+
+
     /**
      * 出库列表
      *

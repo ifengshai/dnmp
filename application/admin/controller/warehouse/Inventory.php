@@ -684,6 +684,15 @@ class Inventory extends Backend
                     $item_map['is_del'] = 1;
                     if ($v['sku']) {
                         $sku_item = $item->where($item_map)->find();
+                        $value['sku'] = $v['sku'];
+                        //如果可用库存为空 且增加库存数大于0  请求网站接口
+                        if ($sku_item->available_stock == 0 && $v['error_qty'] > 0){
+                            $url  =  config('url.zeelool_url').'magic/product/productArrival';
+                            $this->submission_post($url,$value);
+//                            if ($synchronous['code'] !==200){
+//                                $this->error('数据同步失败');
+//                            }
+                        }
                         $stock = $item->where($item_map)->inc('stock', $v['error_qty'])->inc('available_stock', $v['error_qty'])->update();
                         //插入日志表
                         (new StockLog())->setData([
@@ -924,6 +933,30 @@ class Inventory extends Backend
             $this->error('操作失败！！');
         }
     }
+
+    /**
+     * post方式请求接口
+     *
+     * @Description
+     * @author zjw
+     * @since 
+     * @return
+     */
+    function submission_post($url,$value){
+        $curl = curl_init();
+        curl_setopt($curl, CURLOPT_URL, $url);
+        curl_setopt($curl, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
+        curl_setopt($curl, CURLOPT_HEADER, 0);
+        curl_setopt($curl, CURLOPT_POST, true);
+        curl_setopt($curl, CURLOPT_POSTFIELDS, $value);
+        curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_TIMEOUT, 20);
+        $content =json_decode(curl_exec($curl),true);
+        curl_close($curl);
+        return $content;
+    }
+
 
     /**
      * 取消

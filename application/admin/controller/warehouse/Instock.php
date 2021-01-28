@@ -470,6 +470,7 @@ class Instock extends Backend
             ->select();
         $list = collection($list)->toArray();
         $skus = array_column($list, 'sku');
+
         //查询存在产品库的sku
         $item = new \app\admin\model\itemmanage\Item;
         $skus = $item->where(['sku' => ['in', $skus]])->column('sku');
@@ -502,6 +503,7 @@ class Instock extends Backend
                  * @todo 审核通过增加库存 并添加入库单入库数量
                  */
                 $error_num = [];
+
                 foreach ($list as $k => $v) {
                     $item_map['sku'] = $v['sku'];
                     $item_map['is_del'] = 1;
@@ -509,9 +511,12 @@ class Instock extends Backend
                     //审核通过对虚拟库存的操作
                     //审核通过时按照补货需求比例 划分各站虚拟库存 如果未关联补货需求单则按照当前各站虚拟库存数量实时计算各站比例（弃用）
                     //采购过来的 有采购单的 1、有补货需求单的直接按比例分配 2、没有补货需求单的都给m站
+
+                    //如果存在采购单id
                     if ($v['purchase_id']) {
                         //采购入库
                         $is_purchase = 10;
+                        //如果存在关联补货需求单id
                         if ($v['replenish_id']) {
                             //采购有比例入库
                             $change_type = 16;
@@ -616,7 +621,8 @@ class Instock extends Backend
                                 'number_type' => 3,
                             ]);
                         }
-                    } //不是采购过来的 如果有站点id 说明是指定增加此平台sku
+                    }
+                    //不是采购过来的 如果有站点id 说明是指定增加此平台sku
                     elseif ($v['platform_id']) {
                         //手动入库
                         $change_type = 18;
@@ -746,6 +752,17 @@ class Instock extends Backend
                     //总库存
                     if ($v['sku']) {
                         //增加商品表里的商品库存、可用库存、留样库存
+                        //查看商品可用库存
+                        $available_stock = $item->where($item_map)->value('available_stock');
+                        //如果可用库存为空 且增加库存数大于0  请求网站接口
+                        if ($available_stock == 0 && $v['in_stock_num'] >0){
+                            $value['sku'] = $v['sku'];
+                            $url  =  config('url.zeelool_url').'magic/product/productArrival';
+                            $this->submission_post($url,$value);
+//                            if ($synchronous['code'] !== 200){
+//                                $this->error('数据同步失败');
+//                            }
+                        }
                         $stock_res = $item->where($item_map)->inc('stock', $v['in_stock_num'])->inc('available_stock', $v['in_stock_num'])->inc('sample_num', $v['sample_num'])->update();
                         //获得应到货数量
                         $check = new \app\admin\model\warehouse\CheckItem();
@@ -869,6 +886,31 @@ class Instock extends Backend
             $this->error();
         }
     }
+
+    /**
+     * post方式请求接口
+     *
+     * @Description
+     * @author zjw
+     * @since 
+     * @return
+     */
+    function submission_post($url,$value){
+        $curl = curl_init();
+        curl_setopt($curl, CURLOPT_URL, $url);
+        curl_setopt($curl, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
+        curl_setopt($curl, CURLOPT_HEADER, 0);
+        curl_setopt($curl, CURLOPT_POST, true);
+        curl_setopt($curl, CURLOPT_POSTFIELDS, $value);
+        curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_TIMEOUT, 20);
+        $content =json_decode(curl_exec($curl),true);
+        curl_close($curl);
+        return $content;
+    }
+
+
 
     /**
      * @$item_platform_sku 平台映射关系列表
