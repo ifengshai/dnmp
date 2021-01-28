@@ -283,12 +283,13 @@ class Ding extends Controller
         $params['form_component_values'] = $params['form_component_values'];
         //发起审批
         $res = $this->app->process->create($params);
+        return $res;
         // dump($res);die;
-        if ($res['errcode'] == 0) {
-            return $res;
-        } else {
-            return false;
-        }
+        // if ($res['errcode'] == 0) {
+        //     return $res;
+        // } else {
+        //     return false;
+        // }
     }
 
 

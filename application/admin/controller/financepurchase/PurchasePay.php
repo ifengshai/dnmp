@@ -401,7 +401,7 @@ class PurchasePay extends Backend
                             $update['pay_rate'] = 0.3;
                             break;
                         case 2:
-                            $pay_type = '全款';
+                            $pay_type = '全款1';
                             $update['pay_rate'] = 1;
                             break;
                         case 3:
@@ -507,7 +507,7 @@ class PurchasePay extends Backend
                         // dump($arr);die;
                         $res = $initiate_approval->initiate_approval($arr);
                         if ($res['errcode'] != 0 || $res === false) {
-                            throw new Exception('发起审批失败');
+                            throw new Exception('发起审批失败'.$res['errmsg']);
                         }
                     }
                     $update['process_instance_id'] = $res['process_instance_id'];
