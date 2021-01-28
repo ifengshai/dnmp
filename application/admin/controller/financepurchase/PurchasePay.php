@@ -401,7 +401,7 @@ class PurchasePay extends Backend
                             $update['pay_rate'] = 0.3;
                             break;
                         case 2:
-                            $pay_type = '全款预付';
+                            $pay_type = '全款';
                             $update['pay_rate'] = 1;
                             break;
                         case 3:
@@ -482,7 +482,7 @@ class PurchasePay extends Backend
                                 ['name' => '付款类型', 'value' => $pay_type],
                                 ['name' => '供应商名称', 'value' => $params['supplier_name']],
                                 ['name' => '币种', 'value' => $currency],
-                                ['name' => '付款比例', 'value' => $params['pay_rate'] * 100 . '%'],
+                                ['name' => '付款比例', 'value' => $update['pay_rate'] * 100 . '%'],
                                 ['name' => '采购事由', 'value' => [
                                     [
                                         ['name' => '采购品名', 'value' => $reason['name']],
