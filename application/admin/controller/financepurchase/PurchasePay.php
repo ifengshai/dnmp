@@ -141,6 +141,8 @@ class PurchasePay extends Backend
                         case 'USD':
                             $currency = '美元';
                             break;
+                        default:
+                            $currency = '人民币';
                     }
                     //采购单信息
                     $purchase_order = $this->purchase_order->where('id', $insert['purchase_id'])->find();
@@ -215,7 +217,7 @@ class PurchasePay extends Backend
                                 ['name' => '付款类型', 'value' => $pay_type],
                                 ['name' => '供应商名称', 'value' => $params['supplier_name']],
                                 ['name' => '币种', 'value' => $currency],
-                                ['name' => '付款比例', 'value' => $params['pay_rate'] * 100 . '%'],
+                                ['name' => '付款比例', 'value' => $insert['pay_rate'] * 100 . '%'],
                                 ['name' => '采购事由', 'value' => [
                                     [
                                         ['name' => '采购品名', 'value' => $reason['name']],
@@ -240,7 +242,7 @@ class PurchasePay extends Backend
                         // dump($arr);die;
                         $res = $initiate_approval->initiate_approval($arr);
                         if ($res['errcode'] != 0 || $res === false) {
-                            throw new Exception('发起审批失败');
+                            throw new Exception('发起审批失败'.$res['errmsg']);
                         }
                     }
                     $insert['process_instance_id'] = $res['process_instance_id'];
@@ -401,7 +403,7 @@ class PurchasePay extends Backend
                             $update['pay_rate'] = 0.3;
                             break;
                         case 2:
-                            $pay_type = '全款1';
+                            $pay_type = '全款';
                             $update['pay_rate'] = 1;
                             break;
                         case 3:
