@@ -59,7 +59,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'upload'], function (
                                     if (row.action_type == 2) {
                                         return '<b style = "color:red">' + parseFloat(value).toFixed(2) + '</b>';
                                     } else {
-                                        return parseFloat(value).toFixed(2);
+                                        if (value) {
+                                            return parseFloat(value).toFixed(2);
+                                        }
                                     }
                                 }
                             },
@@ -93,7 +95,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'upload'], function (
                                     if (row.action_type == 2) {
                                         return '<b style = "color:red">' + parseFloat(value).toFixed(2) + '</b>';
                                     } else {
-                                        return parseFloat(value).toFixed(2);
+                                        if (value) {
+                                            return parseFloat(value).toFixed(2);
+                                        }
                                     }
                                 }
                             },
@@ -102,7 +106,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'upload'], function (
                                     if (row.action_type == 2) {
                                         return '<b style = "color:red">' + parseFloat(value).toFixed(2) + '</b>';
                                     } else {
-                                        return parseFloat(value).toFixed(2);
+                                        if (value) {
+                                            return parseFloat(value).toFixed(2);
+                                        }
                                     }
                                 }
                             },
