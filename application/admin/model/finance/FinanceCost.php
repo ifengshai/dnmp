@@ -229,6 +229,9 @@ class FinanceCost extends Model
             ->select();
         $list = collection($list)->toArray();
 
+
+        file_put_contents('/www/wwwroot/mojing/runtime/log/test.log', $product_barcode_item->getLastSql() . "\r\n", FILE_APPEND);
+        file_put_contents('/www/wwwroot/mojing/runtime/log/test.log', serialize($list) . "\r\n", FILE_APPEND);
         $allcost = 0;
         foreach ($list as $k => $v) {
             $allcost += $v['actual_purchase_price'] > 0 ?: $v['purchase_total'] / $v['purchase_num'];
