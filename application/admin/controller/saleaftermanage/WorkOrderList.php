@@ -4681,8 +4681,6 @@ EOF;
 
     public function batch_export_xls_array()
     {
-
-
         set_time_limit(0);
         ini_set('memory_limit', '1024M');
 

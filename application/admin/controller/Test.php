@@ -2501,7 +2501,7 @@ class Test extends Backend
         $item = new \app\admin\model\itemmanage\Item();
         $purchase = new \app\admin\model\purchase\PurchaseOrder();
 
-        $list = $item->where(['is_open' => 1, 'is_del' => 1, 'wait_instock_num' => ['<>', 0]])->select();
+        $list = $item->where(['is_open' => 1, 'is_del' => 1, 'wait_instock_num' => ['<', 0]])->select();
         $params = [];
         foreach ($list as $k => $v) {
             $purchase_num = $purchase->alias('a')->where(['purchase_status' => 7, 'stock_status' => 0, 'b.sku' => $v['sku']])->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')->sum('purchase_num');
@@ -2554,5 +2554,13 @@ class Test extends Backend
         $header = 'sku,站点,平台sku,虚拟库存,总虚拟库存,sku库存总金额,sku占用金额,sku占用库存比例';
         $filename = '数据导出.csv';
         Excel::create_csv($data, $header, $filename);
+    }
+
+
+    public function test02()
+    {
+        $map['a.created_at'] = ['between', [strtotime(date('Y-m-d',strtotime("-30 day"))), strtotime(date('Y-m-d'))]];
+
+        dump($map);
     }
 }

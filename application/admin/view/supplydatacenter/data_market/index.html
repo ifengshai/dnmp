@@ -504,8 +504,8 @@
                             <th>低风险呆滞金额</th>
                         </tr>
                         </thead>
+                        {foreach $stock_level_overview2 as $value}
                         <tr>
-                            {foreach $stock_level_overview2 as $value}
                             <td>{$value.grade}</td>
                             <td>{$value.dull_stock}</td>
                             <td>{$value.rate}</td>
@@ -516,9 +516,8 @@
                             <td>{$value.center_dull_total}</td>
                             <td>{$value.low_dull_stock}</td>
                             <td>{$value.low_dull_total}</td>
-                            {/foreach}
                         </tr>
-
+                        {/foreach}
                     </table>
                     <div>
                  <div class="new-background">
