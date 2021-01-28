@@ -38,10 +38,10 @@
         height: 100%;
     }
     .right_input .input_item{
-         float: left;
-         width: 84%;
-         height: 50px;
-         line-height: 50px;
+        float: left;
+        width: 84%;
+        height: 50px;
+        line-height: 50px;
     }
     .right_input .input_tiem_label{
         width: 12%;
@@ -147,7 +147,7 @@
                 {:Form::select('row[development_difficulty]', config('demand.development_difficulty'), $row['development_difficulty'], ['class'=>'selectpicker select_input', 'title'=>'请选择'])}
             </span>
         </div>
-<!--        if $type == 'pm_audit  和产品沟通过 任务周期任何状态下都可修改-->
+        <!--        if $type == 'pm_audit  和产品沟通过 任务周期任何状态下都可修改-->
         <div class="input_item">
             <label class="input_tiem_label">优先级：</label>
             <span class="input_tiem_span">
@@ -160,7 +160,7 @@
             <label class="input_tiem_label ">任务周期：</label>
             <span class="input_tiem_span" >
 <!--                <input name="row[node_time]" class="select_input" type="text" value="{$row['node_time']}" style="height: 31px;" placeholder="输入整数(单位：天)">-->
-<!--                {:Form::datetimepicker('row[node_time]', '', ['data-rule'=>'required'])}-->
+                <!--                {:Form::datetimepicker('row[node_time]', '', ['data-rule'=>'required'])}-->
                 {if $row['node_time'] !== null}
                   <input  style="width: 60%" class="form-control datetimepicker form-control" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[node_time]" type="text" value="{$row.node_time|datetime}">
                 {else/}
@@ -168,24 +168,24 @@
                 {/if}
           </span>
         </div>
-<!--        /if-->
+        <!--        /if-->
 
-<!--        {if $demand_type == 2}-->
-<!--        <input type="hidden" name="row[demand_type]" value="{$demand_type}">-->
-<!--        <div class="input_item">-->
-<!--            <label class="input_tiem_label ">任务周期：</label>-->
-<!--            <span class="input_tiem_span">-->
-<!--                <input name="row[node_time]" class="select_input" data-rule="required" type="text" value="{$row['node_time']}" style="height: 31px;" placeholder="输入整数(单位：天)">-->
-<!--            </span>-->
-<!--        </div>-->
-<!--        {/if}-->
+        <!--        {if $demand_type == 2}-->
+        <!--        <input type="hidden" name="row[demand_type]" value="{$demand_type}">-->
+        <!--        <div class="input_item">-->
+        <!--            <label class="input_tiem_label ">任务周期：</label>-->
+        <!--            <span class="input_tiem_span">-->
+        <!--                <input name="row[node_time]" class="select_input" data-rule="required" type="text" value="{$row['node_time']}" style="height: 31px;" placeholder="输入整数(单位：天)">-->
+        <!--            </span>-->
+        <!--        </div>-->
+        <!--        {/if}-->
 
-<!--        <div class="input_item">-->
-<!--            <label class="input_tiem_label ">备注：</label>-->
-<!--            <span class="input_tiem_span">-->
-<!--                <textarea style="resize: none; margin-top: 20px;  line-height: 20px; height: 80px;" class="select_input" name="row[remark]">{$row['remark']}</textarea>-->
-<!--            </span>-->
-<!--        </div>-->
+        <!--        <div class="input_item">-->
+        <!--            <label class="input_tiem_label ">备注：</label>-->
+        <!--            <span class="input_tiem_span">-->
+        <!--                <textarea style="resize: none; margin-top: 20px;  line-height: 20px; height: 80px;" class="select_input" name="row[remark]">{$row['remark']}</textarea>-->
+        <!--            </span>-->
+        <!--        </div>-->
 
     </div>
 
@@ -233,33 +233,33 @@
                 {else}
                 <!--<button type="submit" value="del" disabled class="btn btn-sub" style='background-color: #D9001B;width: 60px;color: white;font-size: 14px;font-weight: 700;'>{:__('删除')}</button>-->
                 {/if}
+
             {if $pm_status}
             <button type="submit" value="del" class="btn btn-sub" style='background-color: #D9001B;width: 60px;color: white;font-size: 14px;font-weight: 700;'>{:__('删除')}</button>
             {/if}
 
             {if $row['pm_audit_status'] == 1}
-                {if $pm_status}
-                    <button type="submit" value="pending" class="btn btn-sub" style='background-color: #333333;width: 80px;color: white;font-size: 14px;font-weight: 700;'>{:__('Pending')}</button>
-                    <button type="submit" value="refuse" class="btn btn-sub" style='background-color: #333333;width: 80px;color: white;font-size: 14px;font-weight: 700;'>{:__('拒绝')}</button>
-                {else}
-                    <button type="submit" value="pending"  class="btn btn-sub" style='background-color: #333333;width: 80px;color: white;font-size: 14px;font-weight: 700;'>{:__('Pending')}</button>
-                    <button type="submit" value="refuse" disabled class="btn btn-sub" style='background-color: #333333;width: 80px;color: white;font-size: 14px;font-weight: 700;'>{:__('拒绝')}</button>
-                {/if}
+            {if $pm_status}
+            <button type="submit" value="pending" class="btn btn-sub" style='background-color: #333333;width: 80px;color: white;font-size: 14px;font-weight: 700;'>{:__('Pending')}</button>
+            <button type="submit" value="refuse" class="btn btn-sub" style='background-color: #333333;width: 80px;color: white;font-size: 14px;font-weight: 700;'>{:__('拒绝')}</button>
+            {else}
+            <button type="submit" value="pending"  class="btn btn-sub" style='background-color: #333333;width: 80px;color: white;font-size: 14px;font-weight: 700;'>{:__('Pending')}</button>
+            <button type="submit" value="refuse" disabled class="btn btn-sub" style='background-color: #333333;width: 80px;color: white;font-size: 14px;font-weight: 700;'>{:__('拒绝')}</button>
+            {/if}
             {elseif $row['pm_audit_status'] ==2/}<!--状态pending-->
-                <button type="submit" value="pending" disabled  class="btn btn-sub" style='background-color: #333333;width: 80px;color: white;font-size: 14px;font-weight: 700;'>{:__('Pending')}</button>
-                <button type="submit" value="refuse"  class="btn btn-sub" style='background-color: #333333;width: 80px;color: white;font-size: 14px;font-weight: 700;'>{:__('拒绝')}</button>
+            <button type="submit" value="pending" disabled  class="btn btn-sub" style='background-color: #333333;width: 80px;color: white;font-size: 14px;font-weight: 700;'>{:__('Pending')}</button>
+            <button type="submit" value="refuse"  class="btn btn-sub" style='background-color: #333333;width: 80px;color: white;font-size: 14px;font-weight: 700;'>{:__('拒绝')}</button>
             {else} <!--通过-->
-                <button type="submit" value="pending" disabled  class="btn btn-sub" style='background-color: #333333;width: 80px;color: white;font-size: 14px;font-weight: 700;'>{:__('Pending')}</button>
-                <button type="submit" value="refuse" disabled class="btn btn-sub" style='background-color: #333333;width: 80px;color: white;font-size: 14px;font-weight: 700;'>{:__('拒绝')}</button>
+            <button type="submit" value="pending" disabled  class="btn btn-sub" style='background-color: #333333;width: 80px;color: white;font-size: 14px;font-weight: 700;'>{:__('Pending')}</button>
+            <button type="submit" value="refuse" disabled class="btn btn-sub" style='background-color: #333333;width: 80px;color: white;font-size: 14px;font-weight: 700;'>{:__('拒绝')}</button>
             {/if}
 
             {if $type !== 'pm_audit' && $pm_status || $admin_id == $row['entry_user_id']}<!--需求 任何状态下都可编辑  所以将已完成剔除 -->
-
-                {if $pm_status || $admin_id == $row['entry_user_id']}
-                    <button type="submit" value="edit" class="btn btn-sub" style='background-color: #333333;width: 150px;color: white;font-size: 14px;font-weight: 700;float: right;'>{:__('修  改')}</button>
-                {else}
-                    <button type="submit" value="edit"  class="btn btn-sub" style='background-color: #333333;width: 150px;color: white;font-size: 14px;font-weight: 700;float: right;'>{:__('修  改')}</button>
-                {/if}
+            {if $pm_status || $admin_id == $row['entry_user_id']}
+            <button type="submit" value="edit" class="btn btn-sub" style='background-color: #333333;width: 150px;color: white;font-size: 14px;font-weight: 700;float: right;'>{:__('修  改')}</button>
+            {else}
+            <button type="submit" value="edit"  class="btn btn-sub" style='background-color: #333333;width: 150px;color: white;font-size: 14px;font-weight: 700;float: right;'>{:__('修  改')}</button>
+            {/if}
             {/if}
             {/if}
 
@@ -296,7 +296,6 @@
                 {else}
                     <button type="submit" value="sub" disabled class="btn btn-sub" style='background-color: #169BD5;width: 150px;color: white;font-size: 14px;font-weight: 700;float: right;'>{:__('修  改')}</button>
                 {/if}
-
             {/if}
         </div>
     </div>

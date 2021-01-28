@@ -19,7 +19,7 @@ class Index extends Backend
      * 无需鉴权的方法,但需要登录
      * @var array
      */
-    protected $noNeedRight = [];
+    protected $noNeedRight = ['export_not_shipped'];
 
 
     /**
@@ -563,7 +563,17 @@ class Index extends Backend
         set_time_limit(0);
         ini_set('memory_limit', '512M');
 
-        $map['b.created_at'] = ['between', [1598889600, 1612108799]];
+        $time_str = input('time_str');
+
+        if ($time_str) {
+            $createat = explode(' ', $time_str);
+            $start = strtotime($createat[0].$createat[1]);
+            $end = strtotime($createat[3].$createat[4]);
+        }else{
+            $start = strtotime(date('Y-m-d'));
+            $end = time();
+        }
+        $map['b.created_at'] = ['between', [$start, $end]];
         $neworderprocess = new \app\admin\model\order\order\NewOrderProcess();
 
         $undeliveredOrder = $neworderprocess->undeliveredOrderMessage($map);
