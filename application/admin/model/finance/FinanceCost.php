@@ -134,7 +134,7 @@ class FinanceCost extends Model
         $order = new \app\admin\model\order\order\NewOrder();
         $order_detail = $order->where(['increment_id' => $work_order_info['platform_order']])->find(); //获取订单信息
         $params['type'] = 1;
-        $params['bill_type'] = 7; //单据类型
+        $params['bill_type'] = 5; //单据类型
         $params['order_number'] = $order_detail['increment_id']; //订单号
         $params['site'] = $order_detail['site']; //站点
         $params['order_type'] = $order_detail['order_type']; //
