@@ -2346,7 +2346,7 @@ class TrackReg extends Backend
             $flag['stock_id'] = $stockId;
             $flag['bar_id'] = $bar;
             $flag['type'] = 2;
-            $bar_items = $this->item->alias('i')->join('fa_purchase_order_item p','i.purchase_id=p.purchase_id and i.sku=p.sku')->join('fa_purchase_order o','p.purchase_id=o.id')->field('i.out_stock_id,i.purchase_id,i.out_stock_time,p.actual_purchase_price,round(o.purchase_total/oi.purchase_num,2) purchase_price')->where($bar_where)->where('barcode_id', $bar)->select();
+            $bar_items = $this->item->alias('i')->join('fa_purchase_order_item p','i.purchase_id=p.purchase_id and i.sku=p.sku')->join('fa_purchase_order o','p.purchase_id=o.id')->field('i.out_stock_id,i.purchase_id,i.out_stock_time,p.actual_purchase_price,round(o.purchase_total/p.purchase_num,2) purchase_price')->where($bar_where)->where('barcode_id', $bar)->select();
             $sum_count = 0;
             $sum_total = 0;
             foreach ($bar_items as $item) {
@@ -2393,7 +2393,7 @@ class TrackReg extends Backend
         $bar_where1['item_order_number'] = ['<>', ''];
         $bar_where1['i.library_status'] = 2;
         //判断冲减前的出库单出库数量和金额
-        $bars1 = $this->item->alias('i')->join('fa_purchase_order_item p','i.purchase_id=p.purchase_id and i.sku=p.sku')->join('fa_purchase_order o','p.purchase_id=o.id')->where($bar_where1)->field('i.out_stock_id,i.purchase_id,i.out_stock_time,p.actual_purchase_price,round(o.purchase_total/oi.purchase_num,2) purchase_price')->select();
+        $bars1 = $this->item->alias('i')->join('fa_purchase_order_item p','i.purchase_id=p.purchase_id and i.sku=p.sku')->join('fa_purchase_order o','p.purchase_id=o.id')->where($bar_where1)->field('i.out_stock_id,i.purchase_id,i.out_stock_time,p.actual_purchase_price,round(o.purchase_total/p.purchase_num,2) purchase_price')->select();
         if (count($bars1) != 0) {
             $flag1 = [];
             $flag1['stock_id'] = $stockId;
