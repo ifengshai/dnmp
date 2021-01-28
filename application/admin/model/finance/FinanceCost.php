@@ -170,7 +170,6 @@ class FinanceCost extends Model
         $params['order_money'] = $work_order_info['refund_money']; //订单金额
         $params['income_amount'] = $work_order_info['refund_money']; //收入金额
         $params['order_currency_code'] = $work_order_info['order_pay_currency']; //币种
-        $params['payment_time'] = $work_order_info['payment_time']; //支付时间
         $params['payment_method'] = $work_order_info['order_pay_method']; //支付方式
         $params['action_type'] = 2; //动作类型：1增加；2冲减；
         $params['work_id'] = $work_id; //工单id
