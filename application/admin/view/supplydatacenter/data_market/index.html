@@ -383,7 +383,10 @@
                         <th>库存</th>
                         <th>库存占比</th>
                         <th>库存金额（￥）</th>
-                        <th>库销比</th>
+                        <th>参考实时周转天数</th>
+                        <th>呆滞库存</th>
+                        <th>呆滞库存占比</th>
+                        <th>呆滞金额</th>
                     </tr>
                     </thead>
                     <tr>
@@ -393,7 +396,10 @@
                         <td>{$stock_level_overview.a1_stock_num}</td>
                         <td>{$stock_level_overview.a1_stock_percent}</td>
                         <td>{$stock_level_overview.a1_stock_price}</td>
-                        <td id="a1_stock_sales_rate">{$stock_level_sales_rate.a1_stock_sales_rate}</td>
+                        <td>{$stock_level_overview.a1_turnover_day}</td>
+                        <td>{$stock_level_overview.a1_dull_stock}</td>
+                        <td>{$stock_level_overview.a1_dull_stock_rate}</td>
+                        <td>{$stock_level_overview.a1_dull_total}</td>
                     </tr>
                     <tr>
                         <td>A</td>
@@ -402,7 +408,10 @@
                         <td>{$stock_level_overview.a_stock_num}</td>
                         <td>{$stock_level_overview.a_stock_percent}</td>
                         <td>{$stock_level_overview.a_stock_price}</td>
-                        <td id="a_stock_sales_rate">{$stock_level_sales_rate.a_stock_sales_rate}</td>
+                        <td>{$stock_level_overview.a_turnover_day}</td>
+                        <td>{$stock_level_overview.a_dull_stock}</td>
+                        <td>{$stock_level_overview.a_dull_stock_rate}</td>
+                        <td>{$stock_level_overview.a_dull_total}</td>
                     </tr>
                     <tr>
                         <td>B</td>
@@ -411,7 +420,10 @@
                         <td>{$stock_level_overview.b_stock_num}</td>
                         <td>{$stock_level_overview.b_stock_percent}</td>
                         <td>{$stock_level_overview.b_stock_price}</td>
-                        <td id="b_stock_sales_rate">{$stock_level_sales_rate.b_stock_sales_rate}</td>
+                        <td>{$stock_level_overview.b_turnover_day}</td>
+                        <td>{$stock_level_overview.b_dull_stock}</td>
+                        <td>{$stock_level_overview.b_dull_stock_rate}</td>
+                        <td>{$stock_level_overview.b_dull_total}</td>
                     </tr>
                     <tr>
                         <td>C+</td>
@@ -420,7 +432,10 @@
                         <td>{$stock_level_overview.c1_stock_num}</td>
                         <td>{$stock_level_overview.c1_stock_percent}</td>
                         <td>{$stock_level_overview.c1_stock_price}</td>
-                        <td id="c1_stock_sales_rate">{$stock_level_sales_rate.c1_stock_sales_rate}</td>
+                        <td>{$stock_level_overview.c1_turnover_day}</td>
+                        <td>{$stock_level_overview.c1_dull_stock}</td>
+                        <td>{$stock_level_overview.c1_dull_stock_rate}</td>
+                        <td>{$stock_level_overview.c1_dull_total}</td>
                     </tr>
                     <tr>
                         <td>C</td>
@@ -429,7 +444,10 @@
                         <td>{$stock_level_overview.c_stock_num}</td>
                         <td>{$stock_level_overview.c_stock_percent}</td>
                         <td>{$stock_level_overview.c_stock_price}</td>
-                        <td id="c_stock_sales_rate">{$stock_level_sales_rate.c_stock_sales_rate}</td>
+                        <td>{$stock_level_overview.c_turnover_day}</td>
+                        <td>{$stock_level_overview.c_dull_stock}</td>
+                        <td>{$stock_level_overview.c_dull_stock_rate}</td>
+                        <td>{$stock_level_overview.c_dull_total}</td>
                     </tr>
                     <tr>
                         <td>D</td>
@@ -438,7 +456,10 @@
                         <td>{$stock_level_overview.d_stock_num}</td>
                         <td>{$stock_level_overview.d_stock_percent}</td>
                         <td>{$stock_level_overview.d_stock_price}</td>
-                        <td id="d_stock_sales_rate">{$stock_level_sales_rate.d_stock_sales_rate}</td>
+                        <td>{$stock_level_overview.d_turnover_day}</td>
+                        <td>{$stock_level_overview.d_dull_stock}</td>
+                        <td>{$stock_level_overview.d_dull_stock_rate}</td>
+                        <td>{$stock_level_overview.d_dull_total}</td>
                     </tr>
                     <tr>
                         <td>E</td>
@@ -447,7 +468,10 @@
                         <td>{$stock_level_overview.e_stock_num}</td>
                         <td>{$stock_level_overview.e_stock_percent}</td>
                         <td>{$stock_level_overview.e_stock_price}</td>
-                        <td id="e_stock_sales_rate">{$stock_level_sales_rate.e_stock_sales_rate}</td>
+                        <td>{$stock_level_overview.e_turnover_day}</td>
+                        <td>{$stock_level_overview.e_dull_stock}</td>
+                        <td>{$stock_level_overview.e_dull_stock_rate}</td>
+                        <td>{$stock_level_overview.e_dull_total}</td>
                     </tr>
                     <tr>
                         <td>F</td>
@@ -456,7 +480,10 @@
                         <td>{$stock_level_overview.f_stock_num}</td>
                         <td>{$stock_level_overview.f_stock_percent}</td>
                         <td>{$stock_level_overview.f_stock_price}</td>
-                        <td id="f_stock_sales_rate">{$stock_level_sales_rate.f_stock_sales_rate}</td>
+                        <td>{$stock_level_overview.f_turnover_day}</td>
+                        <td>{$stock_level_overview.f_dull_stock}</td>
+                        <td>{$stock_level_overview.f_dull_stock_rate}</td>
+                        <td>{$stock_level_overview.f_dull_total}</td>
                     </tr>
                 </table>
             <div>

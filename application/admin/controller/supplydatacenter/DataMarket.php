@@ -56,8 +56,7 @@ class DataMarket extends Backend
             }
             //仓库指标总览
             $stock_measure_overview = $this->stock_measure_overview($time_str);
-            //库存分级概览库销比
-            $stock_level_sales_rate = $this->stock_level_sales_rate($time_str);
+
             //采购概况
             $purchase_overview = $this->purchase_overview($time_str);
             //物流妥投概况
@@ -71,7 +70,7 @@ class DataMarket extends Backend
         //$stock_measure_overview = $this->stock_measure_overview();
         //库存分级概况
         //$stock_level_overview = $this->stock_level_overview();
-        //$stock_level_sales_rate = $this->stock_level_sales_rate();
+        $stock_level_overview2 = $this->stock_level_overview2();
         //库龄概况
         $stock_age_overview = $this->stock_age_overview();
         //采购概况
@@ -85,7 +84,7 @@ class DataMarket extends Backend
                 unset($magentoplatformarr[$key]);
             }
         }
-        $this->view->assign(compact('stock_overview','stock_measure_overview','stock_level_overview','stock_level_sales_rate','purchase_overview','logistics_completed_overview','magentoplatformarr','stock_age_overview','time_str'));
+        $this->view->assign(compact('stock_overview','stock_measure_overview','stock_level_overview','stock_level_overview2','stock_level_sales_rate','purchase_overview','logistics_completed_overview','magentoplatformarr','stock_age_overview','time_str'));
         return $this->view->fetch();
     }
     //库存总览
@@ -598,100 +597,226 @@ class DataMarket extends Backend
             'a1_count'=>$this->productGrade->where('grade','A+')->count(),
             'a1_stock_num'=>$gradeSkuStock['aa_stock_num'],
             'a1_stock_price'=>$gradeSkuStock['aa_stock_price'],
+            'a1_turnover_day'=>105,
 
             'a_count'=>$this->productGrade->where('grade','A')->count(),
             'a_stock_num'=>$gradeSkuStock['a_stock_num'],
             'a_stock_price'=>$gradeSkuStock['a_stock_price'],
+            'a_turnover_day'=>105,
 
             'b_count'=>$this->productGrade->where('grade','B')->count(),
             'b_stock_num'=>$gradeSkuStock['b_stock_num'],
             'b_stock_price'=>$gradeSkuStock['b_stock_price'],
+            'b_turnover_day'=>90,
 
             'c1_count'=>$this->productGrade->where('grade','C+')->count(),
             'c1_stock_num'=>$gradeSkuStock['ca_stock_num'],
             'c1_stock_price'=>$gradeSkuStock['ca_stock_price'],
+            'c1_turnover_day'=>90,
 
             'c_count'=>$this->productGrade->where('grade','C')->count(),
             'c_stock_num'=>$gradeSkuStock['c_stock_num'],
             'c_stock_price'=>$gradeSkuStock['c_stock_price'],
+            'c_turnover_day'=>75,
 
             'd_count'=>$this->productGrade->where('grade','D')->count(),
             'd_stock_num'=>$gradeSkuStock['d_stock_num'],
             'd_stock_price'=>$gradeSkuStock['d_stock_price'],
+            'd_turnover_day'=>75,
 
             'e_count'=>$this->productGrade->where('grade','E')->count(),
             'e_stock_num'=>$gradeSkuStock['e_stock_num'],
             'e_stock_price'=>$gradeSkuStock['e_stock_price'],
+            'e_turnover_day'=>15,
 
             'f_count'=>$this->productGrade->where('grade','F')->count(),
             'f_stock_num'=>$gradeSkuStock['f_stock_num'],
             'f_stock_price'=>$gradeSkuStock['f_stock_price'],
+            'f_turnover_day'=>15,
         );
+        //获取呆滞库存信息
+        $dull_stock = $this->getProductTurnoverDays();
+
         $all_num = $arr['a1_count']+$arr['a_count']+$arr['b_count']+$arr['c1_count']+$arr['c_count']+$arr['d_count']+$arr['e_count']+$arr['f_count'];
         $all_stock_num = $arr['a1_stock_num']+$arr['a_stock_num']+$arr['b_stock_num']+$arr['c1_stock_num']+$arr['c_stock_num']+$arr['d_stock_num']+$arr['e_stock_num']+$arr['f_stock_num'];
         $arr['a1_percent'] = $all_num ? round($arr['a1_count']/$all_num*100,2).'%':0;
         $arr['a1_stock_percent'] = $all_stock_num ? round($arr['a1_stock_num']/$all_stock_num*100,2).'%':0;
+        $arr['a1_dull_stock'] = $dull_stock['A+']['stock'];   //呆滞库存
+        $arr['a1_dull_stock_rate'] =$arr['a1_stock_num'] ? round($arr['a1_dull_stock']/$arr['a1_stock_num'],2).'%':0;
+        $arr['a1_dull_total'] = $dull_stock['A+']['total'];   //呆滞金额
+
         $arr['a_percent'] = $all_num ? round($arr['a_count']/$all_num*100,2).'%':0;
         $arr['a_stock_percent'] = $all_stock_num ? round($arr['a_stock_num']/$all_stock_num*100,2).'%':0;
+        $arr['a_dull_stock'] = $dull_stock['A']['stock'];   //呆滞库存
+        $arr['a_dull_stock_rate'] = $arr['a_stock_num'] ? round($arr['a_dull_stock']/$arr['a_stock_num'],2).'%':0;
+        $arr['a_dull_total'] = $dull_stock['A']['total'];   //呆滞金额
 
         $arr['b_percent'] = $all_num ? round($arr['b_count']/$all_num*100,2).'%':0;
         $arr['b_stock_percent'] = $all_stock_num ? round($arr['b_stock_num']/$all_stock_num*100,2).'%':0;
+        $arr['b_dull_stock'] = $dull_stock['B']['stock'];   //呆滞库存
+        $arr['b_dull_stock_rate'] = $arr['b_stock_num'] ? round($arr['b_dull_stock']/$arr['b_stock_num'],2).'%':0;
+        $arr['b_dull_total'] = $dull_stock['B']['total'];   //呆滞金额
 
         $arr['c1_percent'] = $all_num ? round($arr['c1_count']/$all_num*100,2).'%':0;
         $arr['c1_stock_percent'] = $all_stock_num ? round($arr['c1_stock_num']/$all_stock_num*100,2).'%':0;
+        $arr['c1_dull_stock'] = $dull_stock['C+']['stock'];   //呆滞库存
+        $arr['c1_dull_stock_rate'] = $arr['c1_stock_num'] ? round($arr['c1_dull_stock']/$arr['c1_stock_num'],2).'%':0;
+        $arr['c1_dull_total'] = $dull_stock['C+']['total'];   //呆滞金额
+
         $arr['c_percent'] = $all_num ? round($arr['c_count']/$all_num*100,2).'%':0;
         $arr['c_stock_percent'] = $all_stock_num ? round($arr['c_stock_num']/$all_stock_num*100,2).'%':0;
+        $arr['c_dull_stock'] = $dull_stock['C']['stock'];   //呆滞库存
+        $arr['c_dull_stock_rate'] = $arr['c_stock_num'] ? round($arr['c_dull_stock']/$arr['c_stock_num'],2).'%':0;
+        $arr['c_dull_total'] = $dull_stock['C']['total'];   //呆滞金额
 
         $arr['d_percent'] = $all_num ? round($arr['d_count']/$all_num*100,2).'%':0;
         $arr['d_stock_percent'] = $all_stock_num ? round($arr['d_stock_num']/$all_stock_num*100,2).'%':0;
+        $arr['d_dull_stock'] = $dull_stock['D']['stock'];   //呆滞库存
+        $arr['d_dull_stock_rate'] = $arr['d_stock_num'] ? round($arr['d_dull_stock']/$arr['d_stock_num'],2).'%':0;
+        $arr['d_dull_total'] = $dull_stock['D']['total'];   //呆滞金额
 
         $arr['e_percent'] = $all_num ? round($arr['e_count']/$all_num*100,2).'%':0;
         $arr['e_stock_percent'] = $all_stock_num ? round($arr['e_stock_num']/$all_stock_num*100,2).'%':0;
+        $arr['e_dull_stock'] = $dull_stock['E']['stock'];   //呆滞库存
+        $arr['e_dull_stock_rate'] = $arr['e_stock_num'] ? round($arr['e_dull_stock']/$arr['e_stock_num'],2).'%':0;
+        $arr['e_dull_total'] = $dull_stock['E']['total'];   //呆滞金额
 
         $arr['f_percent'] = $all_num ? round($arr['f_count']/$all_num*100,2).'%':0;
         $arr['f_stock_percent'] = $all_stock_num ? round($arr['f_stock_num']/$all_stock_num*100,2).'%':0;
+        $arr['f_dull_stock'] = $dull_stock['F']['stock'];   //呆滞库存
+        $arr['f_dull_stock_rate'] = $arr['f_stock_num'] ? round($arr['f_dull_stock']/$arr['f_stock_num'],2).'%':0;
+        $arr['f_dull_total'] = $dull_stock['F']['total'];   //呆滞金额
         Cache::set('Supplydatacenter_datamarket'.md5(serialize('stock_level_overview')),$arr,7200);
         return $arr;
     }
-    //库存分级库销比
-    public function stock_level_sales_rate($time_str = ''){
-        if(!$time_str){
-            $start = date('Y-m-d 00:00:00', strtotime('-6 day'));
-            $end   = date('Y-m-d 23:59:59');
-            $time_str = $start .' - '.$end;
-        }
-        $cache_data = Cache::get('Supplydatacenter_datamarket'.$time_str. md5(serialize('stock_level_sales_rate')));
+    //库存分级概况
+    public function stock_level_overview2(){
+        $cache_data = Cache::get('Supplydatacenter_datamarket'  . md5(serialize('stock_level_overview2')));
         if ($cache_data) {
             return $cache_data;
         }
-        $arr['a1_stock_sales_rate'] = $this->getStockLevelRate('A+','sales_num_a1',$time_str);
-        $arr['a_stock_sales_rate'] = $this->getStockLevelRate('A','sales_num_a',$time_str);
-        $arr['b_stock_sales_rate'] = $this->getStockLevelRate('B','sales_num_b',$time_str);
-        $arr['c1_stock_sales_rate'] = $this->getStockLevelRate('C+','sales_num_c1',$time_str);
-        $arr['c_stock_sales_rate'] = $this->getStockLevelRate('C','sales_num_c',$time_str);
-        $arr['d_stock_sales_rate'] = $this->getStockLevelRate('D','sales_num_d',$time_str);
-        $arr['e_stock_sales_rate'] = $this->getStockLevelRate('E','sales_num_e',$time_str);
-        $arr['f_stock_sales_rate'] = $this->getStockLevelRate('F','sales_num_f',$time_str);
-        Cache::set('Supplydatacenter_datamarket'.$time_str.md5(serialize('stock_level_sales_rate')),$arr,7200);
-        return $arr;
-    }
-    //库存分级库销比方法
-    public function getStockLevelRate($grade,$field,$time_str = ''){
-        $createat = explode(' ', $time_str);
-        $start = $createat[0];
-        $end = $createat[3];
-        $map['day_date'] = ['between', [$start, $end]];
+        $gradeSkuStock = $this->productGrade->getSkuStock();
+        //计算产品等级的数量
+        $a1_stock_num = $gradeSkuStock['aa_stock_num'];
+        $a_stock_num = $gradeSkuStock['a_stock_num'];
+        $b_stock_num = $gradeSkuStock['b_stock_num'];
+        $c1_stock_num = $gradeSkuStock['ca_stock_num'];
+        $c_stock_num = $gradeSkuStock['c_stock_num'];
+        $d_stock_num = $gradeSkuStock['d_stock_num'];
+        $e_stock_num = $gradeSkuStock['e_stock_num'];
+        $f_stock_num = $gradeSkuStock['f_stock_num'];
 
-        $skus = $this->productGrade->where('grade',$grade)->column('true_sku');
-        $where['sku'] = ['in', $skus];
-        $where['is_del'] = 1;
-        $where['is_open'] = 1;
-        //实时库存
-        $stock_num = $this->model->where($where)->value('sum(stock)-sum(distribution_occupy_stock) as result');
-        $order_sales_num = $this->supply->where($map)->sum($field);
-        //库销比
-        $stock_sales_rate = $order_sales_num ? round($stock_num/$order_sales_num,2) : 0;
-        return $stock_sales_rate;
+        //获取呆滞库存信息
+        $dull_stock = $this->getProductTurnoverDays();
+        $dull_stock_rate1 = $a1_stock_num ? round($dull_stock['A+']['stock']/$a1_stock_num,2).'%' : 0;
+        $dull_stock_rate2 = $a_stock_num ? round($dull_stock['A']['stock']/$a_stock_num,2).'%' : 0;
+        $dull_stock_rate3 = $b_stock_num ? round($dull_stock['B']['stock']/$b_stock_num,2).'%' : 0;
+        $dull_stock_rate4 = $c1_stock_num ? round($dull_stock['C+']['stock']/$c1_stock_num,2).'%' : 0;
+        $dull_stock_rate5 = $c_stock_num ? round($dull_stock['C']['stock']/$c_stock_num,2).'%' : 0;
+        $dull_stock_rate6 = $d_stock_num ? round($dull_stock['D']['stock']/$d_stock_num,2).'%' : 0;
+        $dull_stock_rate7 = $e_stock_num ? round($dull_stock['E']['stock']/$e_stock_num,2).'%' : 0;
+        $dull_stock_rate8 = $f_stock_num ? round($dull_stock['F']['stock']/$f_stock_num,2).'%' : 0;
+        //计算产品等级的数量
+        $arr = array(
+            array(
+                'grade'=>'A+',
+                'dull_stock'=>$dull_stock['A+']['stock'],
+                'rate'=>$dull_stock_rate1,
+                'total'=>$dull_stock['A+']['total'],
+                'high_dull_stock'=>$dull_stock['A+']['stock3'],
+                'high_dull_total'=>$dull_stock['A+']['total3'],
+                'center_dull_stock'=>$dull_stock['A+']['stock2'],
+                'center_dull_total'=>$dull_stock['A+']['total2'],
+                'low_dull_stock'=>$dull_stock['A+']['stock1'],
+                'low_dull_total'=>$dull_stock['A+']['total1'],
+            ),
+            array(
+                'grade'=>'A',
+                'dull_stock'=>$dull_stock['A']['stock'],
+                'rate'=>$dull_stock_rate2,
+                'total'=>$dull_stock['A']['total'],
+                'high_dull_stock'=>$dull_stock['A']['stock3'],
+                'high_dull_total'=>$dull_stock['A']['total3'],
+                'center_dull_stock'=>$dull_stock['A']['stock2'],
+                'center_dull_total'=>$dull_stock['A']['total2'],
+                'low_dull_stock'=>$dull_stock['A']['stock1'],
+                'low_dull_total'=>$dull_stock['A']['total1'],
+            ),
+            array(
+                'grade'=>'B',
+                'dull_stock'=>$dull_stock['B']['stock'],
+                'rate'=>$dull_stock_rate3,
+                'total'=>$dull_stock['B']['total'],
+                'high_dull_stock'=>$dull_stock['B']['stock3'],
+                'high_dull_total'=>$dull_stock['B']['total3'],
+                'center_dull_stock'=>$dull_stock['B']['stock2'],
+                'center_dull_total'=>$dull_stock['B']['total2'],
+                'low_dull_stock'=>$dull_stock['B']['stock1'],
+                'low_dull_total'=>$dull_stock['B']['total1'],
+            ),
+            array(
+                'grade'=>'C+',
+                'dull_stock'=>$dull_stock['C+']['stock'],
+                'rate'=>$dull_stock_rate4,
+                'total'=>$dull_stock['C+']['total'],
+                'high_dull_stock'=>$dull_stock['C+']['stock3'],
+                'high_dull_total'=>$dull_stock['C+']['total3'],
+                'center_dull_stock'=>$dull_stock['C+']['stock2'],
+                'center_dull_total'=>$dull_stock['C+']['total2'],
+                'low_dull_stock'=>$dull_stock['C+']['stock1'],
+                'low_dull_total'=>$dull_stock['C+']['total1'],
+            ),
+            array(
+                'grade'=>'C',
+                'dull_stock'=>$dull_stock['C']['stock'],
+                'rate'=>$dull_stock_rate5,
+                'total'=>$dull_stock['C']['total'],
+                'high_dull_stock'=>$dull_stock['C']['stock3'],
+                'high_dull_total'=>$dull_stock['C']['total3'],
+                'center_dull_stock'=>$dull_stock['C']['stock2'],
+                'center_dull_total'=>$dull_stock['C']['total2'],
+                'low_dull_stock'=>$dull_stock['C']['stock1'],
+                'low_dull_total'=>$dull_stock['C']['total1'],
+            ),
+            array(
+                'grade'=>'D',
+                'dull_stock'=>$dull_stock['D']['stock'],
+                'rate'=>$dull_stock_rate6,
+                'total'=>$dull_stock['D']['total'],
+                'high_dull_stock'=>$dull_stock['D']['stock3'],
+                'high_dull_total'=>$dull_stock['D']['total3'],
+                'center_dull_stock'=>$dull_stock['D']['stock2'],
+                'center_dull_total'=>$dull_stock['D']['total2'],
+                'low_dull_stock'=>$dull_stock['D']['stock1'],
+                'low_dull_total'=>$dull_stock['D']['total1'],
+            ),
+            array(
+                'grade'=>'E',
+                'dull_stock'=>$dull_stock['E']['stock'],
+                'rate'=>$dull_stock_rate7,
+                'total'=>$dull_stock['E']['total'],
+                'high_dull_stock'=>$dull_stock['E']['stock3'],
+                'high_dull_total'=>$dull_stock['E']['total3'],
+                'center_dull_stock'=>$dull_stock['E']['stock2'],
+                'center_dull_total'=>$dull_stock['E']['total2'],
+                'low_dull_stock'=>$dull_stock['E']['stock1'],
+                'low_dull_total'=>$dull_stock['E']['total1'],
+            ),
+            array(
+                'grade'=>'F',
+                'dull_stock'=>$dull_stock['F']['stock'],
+                'rate'=>$dull_stock_rate8,
+                'total'=>$dull_stock['F']['total'],
+                'high_dull_stock'=>$dull_stock['F']['stock3'],
+                'high_dull_total'=>$dull_stock['F']['total3'],
+                'center_dull_stock'=>$dull_stock['F']['stock2'],
+                'center_dull_total'=>$dull_stock['F']['total2'],
+                'low_dull_stock'=>$dull_stock['F']['stock1'],
+                'low_dull_total'=>$dull_stock['F']['total1'],
+            ),
+        );
+        Cache::set('Supplydatacenter_datamarket'.md5(serialize('stock_level_overview2')),$arr,7200);
+        return $arr;
     }
     //库龄概况
     public function stock_age_overview(){

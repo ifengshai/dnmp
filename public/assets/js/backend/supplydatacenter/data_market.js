@@ -300,15 +300,6 @@ function index_data(){
         $('#stock_sales_rate').html(stock_measure_overview.stock_sales_rate);
         $('#turnover_days_rate').html(stock_measure_overview.turnover_days_rate);
         $('#month_in_out_rate').html(stock_measure_overview.month_in_out_rate);
-        //仓库分级库销比
-        $('#a1_stock_sales_rate').html(stock_level_sales_rate.a1_stock_sales_rate);
-        $('#a_stock_sales_rate').html(stock_level_sales_rate.a_stock_sales_rate);
-        $('#b_stock_sales_rate').html(stock_level_sales_rate.b_stock_sales_rate);
-        $('#c1_stock_sales_rate').html(stock_level_sales_rate.c1_stock_sales_rate);
-        $('#c_stock_sales_rate').html(stock_level_sales_rate.c_stock_sales_rate);
-        $('#d_stock_sales_rate').html(stock_level_sales_rate.d_stock_sales_rate);
-        $('#e_stock_sales_rate').html(stock_level_sales_rate.e_stock_sales_rate);
-        $('#f_stock_sales_rate').html(stock_level_sales_rate.f_stock_sales_rate);
         //采购概况
         $('#purchase_num').html(purchase_overview.purchase_num);
         $('#purchase_amount').html(purchase_overview.purchase_amount);
