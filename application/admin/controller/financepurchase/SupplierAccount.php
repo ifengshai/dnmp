@@ -159,7 +159,8 @@ class SupplierAccount extends Backend
                     // } else {
                     //     $list[$k]['periods'] = '获取不到物流单详情';
                     // }
-                    $list[$k]['periods'] = $row['collect_time'];
+                    // $list[$k]['periods'] = $row['collect_time'];
+                    $list[$k]['periods'] = date("Y-m-t",strtotime(($row['collect_time'] . '+' . $vvv['period'] . 'month')));
                     switch ($v['pay_type']) {
                         case 1:
                             $list[$k]['pay_type'] = '预付款';
@@ -353,7 +354,8 @@ class SupplierAccount extends Backend
             // } else {
             //     $list[$k]['period'] = '获取不到物流单详情';
             // }
-            $list[$k]['period'] = $row['collect_time'];
+            // $list[$k]['period'] = $row['collect_time'];
+            $list[$k]['period'] = date("Y-m-t",strtotime(($row['collect_time'] . '+' . $supplier['period'] . 'month')));
             switch ($v['pay_type']) {
                 case 1:
                     $list[$k]['pay_type'] = '预付款';
@@ -473,7 +475,7 @@ class SupplierAccount extends Backend
                     $list[$k]['arrival_num'] = Db::name('purchase_batch_item')->where('purchase_batch_id', $v['batch_id'])->value('arrival_num');
                 }
                 //采购单物流单详情
-                $row = Db::name('logistics_info')->where($map)->field('logistics_number,logistics_company_no')->find();
+                $row = Db::name('logistics_info')->where($map)->field('logistics_number,logistics_company_no,collect_time')->find();
                 //物流单快递100接口
                 // if ($row['logistics_number']) {
                 //     $arr = explode(',', $row['logistics_number']);
@@ -504,7 +506,9 @@ class SupplierAccount extends Backend
                 // } else {
                 //     $list[$k]['period'] = '获取不到物流单详情';
                 // }
-                $list[$k]['period'] = $row['collect_time'];
+
+                $list[$k]['period'] = date("Y-m-t",strtotime(($row['collect_time'] . '+' . $supplier['period'] . 'month')));
+                // dump($list[$k]['period']);
                 if ($timeBegin && $timeEnd) {
                     if (strtotime($list[$k]['period']) < $timeBegin || strtotime($list[$k]['period']) > $timeEnd) {
                         unset($list[$k]);
