@@ -43,70 +43,69 @@ class Test extends Backend
     {
         //查询镜片编码对应价格
         $lens_price = new \app\admin\model\lens\LensPrice();
-        $lens_list = $lens_price->where(['lens_number' => ['in', ['22100000']]])->select();
+        $lens_list = $lens_price->where(['lens_number' => ['in', ['23200001']]])->select();
         $lens_list = collection($lens_list)->toArray();
         $cost = 0;
         $order_prescription = [
             [
-                'od_sph' => '0',
-                'os_sph' => '0',
-                'od_cyl' => '0',
-                'os_cyl' => '0',
-                'lens_number' => '22100000'
-            ],
-            [
-                'od_sph' => '0',
-                'os_sph' => '0',
-                'od_cyl' => '0',
-                'os_cyl' => '0',
-                'lens_number' => '22100000'
+                'od_sph' => '-1.25',
+                'os_sph' => '-1.25',
+                'od_cyl' => '-2.75',
+                'os_cyl' => '0.00',
+                'lens_number' => '23200001'
             ]
         ];
-        
+
         foreach ($order_prescription as $k => $v) {
             $data = [];
             foreach ($lens_list as $key => $val) {
-                $temp_cost = 0;
-                if (in_array($val['lens_number'], $data)) {
-                    continue;
-                }
-
-                if ($v['od_cyl'] == '-0.25') {
-                    //右眼
-                    if ($v['lens_number'] == $val['lens_number'] && ((float) $v['od_sph'] >= (float) $val['sph_start'] && (float) $v['od_sph'] <= (float) $val['sph_end']) && ((float) $v['od_cyl'] == (float) $val['cyl_end'] && (float) $v['od_cyl'] == (float) $val['cyl_end'])) {
-                        $cost += $val['price'];
-                        $temp_cost += $val['price'];
-                    } elseif ($v['lens_number'] == $val['lens_number'] && ((float) $v['od_sph'] >= (float) $val['sph_start'] && (float) $v['od_sph'] <= (float) $val['sph_end']) && ((float) $v['od_cyl'] >= (float) $val['cyl_start'] && (float) $v['od_cyl'] <= (float) $val['cyl_end'])) {
-                        $cost += $val['price'];
-                        $temp_cost += $val['price'];
+                $od_temp_cost = 0;
+                $os_temp_cost = 0;
+                if (!in_array('od' . '-' . $val['lens_number'], $data)) {
+                    if ($v['od_cyl'] == '-0.25') {
+                        //右眼
+                        if ($v['lens_number'] == $val['lens_number'] && ((float) $v['od_sph'] >= (float) $val['sph_start'] && (float) $v['od_sph'] <= (float) $val['sph_end']) && ((float) $v['od_cyl'] == (float) $val['cyl_end'] && (float) $v['od_cyl'] == (float) $val['cyl_end'])) {
+                            $cost += $val['price'];
+                            $od_temp_cost += $val['price'];
+                        } elseif ($v['lens_number'] == $val['lens_number'] && ((float) $v['od_sph'] >= (float) $val['sph_start'] && (float) $v['od_sph'] <= (float) $val['sph_end']) && ((float) $v['od_cyl'] >= (float) $val['cyl_start'] && (float) $v['od_cyl'] <= (float) $val['cyl_end'])) {
+                            $cost += $val['price'];
+                            $od_temp_cost += $val['price'];
+                        }
+                    } else {
+                        //右眼
+                        if ($v['lens_number'] == $val['lens_number'] && ((float) $v['od_sph'] >= (float) $val['sph_start'] && (float) $v['od_sph'] <= (float) $val['sph_end']) && ((float) $v['od_cyl'] >= (float) $val['cyl_start'] && (float) $v['od_cyl'] <= (float) $val['cyl_end'])) {
+                            $cost += $val['price'];
+                            $od_temp_cost += $val['price'];
+                        }
                     }
-                } else {
-                    //右眼
-                    if ($v['lens_number'] == $val['lens_number'] && ((float) $v['od_sph'] >= (float) $val['sph_start'] && (float) $v['od_sph'] <= (float) $val['sph_end']) && ((float) $v['od_cyl'] >= (float) $val['cyl_start'] && (float) $v['od_cyl'] <= (float) $val['cyl_end'])) {
-                        $cost += $val['price'];
-                        $temp_cost += $val['price'];
-                    }
-                }
-
-                if ($v['os_cyl'] == '-0.25') {
-                    //左眼
-                    if ($v['lens_number'] == $val['lens_number'] && ((float) $v['os_sph'] >= (float) $val['sph_start'] && (float) $v['os_sph'] <= (float) $val['sph_end']) && ((float) $v['os_cyl'] == (float) $val['cyl_end'] && (float) $v['os_cyl'] == (float) $val['cyl_end'])) {
-                        $cost += $val['price'];
-                        $temp_cost += $val['price'];
-                    } elseif ($v['lens_number'] == $val['lens_number'] && ((float) $v['os_sph'] >= (float) $val['sph_start'] && (float) $v['os_sph'] <= (float) $val['sph_end']) && ((float) $v['os_cyl'] >= (float) $val['cyl_start'] && (float) $v['os_cyl'] <= (float) $val['cyl_end'])) {
-                        $cost += $val['price'];
-                        $temp_cost += $val['price'];
-                    }
-                } else {
-                    //左眼
-                    if ($v['lens_number'] == $val['lens_number'] && ((float) $v['os_sph'] >= (float) $val['sph_start'] && (float) $v['os_sph'] <= (float) $val['sph_end']) && ((float) $v['os_cyl'] >= (float) $val['cyl_start'] && (float) $v['os_cyl'] <= (float) $val['cyl_end'])) {
-                        $cost += $val['price'];
-                        $temp_cost += $val['price'];
+                    if ($os_temp_cost > 0) {
+                        $data[] = 'od' . '-' . $v['lens_number'];
                     }
                 }
 
-                if ($temp_cost > 0) {
-                    $data[] = $v['lens_number'];
+
+                if (!in_array('os' . '-' . $val['lens_number'], $data)) {
+
+                    if ($v['os_cyl'] == '-0.25') {
+                        //左眼
+                        if ($v['lens_number'] == $val['lens_number'] && ((float) $v['os_sph'] >= (float) $val['sph_start'] && (float) $v['os_sph'] <= (float) $val['sph_end']) && ((float) $v['os_cyl'] == (float) $val['cyl_end'] && (float) $v['os_cyl'] == (float) $val['cyl_end'])) {
+                            $cost += $val['price'];
+                            $os_temp_cost += $val['price'];
+                        } elseif ($v['lens_number'] == $val['lens_number'] && ((float) $v['os_sph'] >= (float) $val['sph_start'] && (float) $v['os_sph'] <= (float) $val['sph_end']) && ((float) $v['os_cyl'] >= (float) $val['cyl_start'] && (float) $v['os_cyl'] <= (float) $val['cyl_end'])) {
+                            $cost += $val['price'];
+                            $os_temp_cost += $val['price'];
+                        }
+                    } else {
+                        //左眼
+                        if ($v['lens_number'] == $val['lens_number'] && ((float) $v['os_sph'] >= (float) $val['sph_start'] && (float) $v['os_sph'] <= (float) $val['sph_end']) && ((float) $v['os_cyl'] >= (float) $val['cyl_start'] && (float) $v['os_cyl'] <= (float) $val['cyl_end'])) {
+                            $cost += $val['price'];
+                            $os_temp_cost += $val['price'];
+                        }
+                    }
+
+                    if ($os_temp_cost > 0) {
+                        $data[] = 'os' . '-' . $v['lens_number'];
+                    }
                 }
             }
         }
