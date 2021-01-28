@@ -57,7 +57,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'upload'], function (
                             {
                                 field: 'income_amount', title: __('收入金额'), operate: false, formatter: function (value, row, index) {
                                     if (row.action_type == 2 && value && typeof(value)!="undefined") {
-                                        return '<b style = "color:red">' + parseFloat(value).toFixed(2) + '</b>';
+                                        return '<b style = "color:red">-' + parseFloat(value).toFixed(2) + '</b>';
                                     } else {
                                         if (value && value && typeof(value)!="undefined") {
                                             return parseFloat(value).toFixed(2);
