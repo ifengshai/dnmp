@@ -340,7 +340,8 @@ class PurchasePay extends Backend
                 $puchase_detail[$k]['sku'] = $puchase_details['sku'];
                 $puchase_detail[$k]['purchase_num'] = $puchase_details['purchase_num'];
                 $puchase_detail[$k]['purchase_price'] = $puchase_details['purchase_price'];
-                if ($v['purchase_batch'] !== 1){
+
+                if (!empty($v['purchase_batch']) && $v['purchase_batch'] != 1){
                     $puchase_detail[$k]['freight'] = 0.00;
                 }
             }
@@ -637,7 +638,7 @@ class PurchasePay extends Backend
                 $puchase_detail[$k]['purchase_num'] = $puchase_details['purchase_num'];
                 $puchase_detail[$k]['purchase_price'] = $puchase_details['purchase_price'];
 
-                if ($v['purchase_batch'] != 1){
+                if (!empty($v['purchase_batch']) && $v['purchase_batch'] != 1){
                     $puchase_detail[$k]['freight'] = 0.00;
                 }
             }
