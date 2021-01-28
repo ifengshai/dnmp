@@ -39,6 +39,7 @@ use PhpOffice\PhpSpreadsheet\Reader\Xls;
 use PhpOffice\PhpSpreadsheet\Reader\Csv;
 use app\admin\model\AuthGroup;
 use app\admin\model\finance\FinanceCost;
+use app\admin\model\warehouse\ProductBarCodeItem;
 
 /**
  * 售后工单列管理
@@ -3196,6 +3197,13 @@ class WorkOrderList extends Backend
                         //主单取消收入核算冲减
                         $FinanceCost = new FinanceCost();
                         $FinanceCost->vip_order_subtract($receptInfo['work_id']);
+                    }
+                    if (19 == $measure_choose_id) {
+                        //更改镜框解绑子单所绑定的条形码
+                        $ProductBarCodeItem = new ProductBarCodeItem();
+                        //查询子单号
+                        $item_order_number = $this->order_change->where(['work_id' => $receptInfo['work_id'],'change_type' => 1])->value('item_order_number');
+                        $ProductBarCodeItem->where(['item_order_number'=>$item_order_number])->update(['item_order_number' => '','library_status' => 1,'out_stock_time'=>'']);
                     }
                     $this->success();
                 } else {
