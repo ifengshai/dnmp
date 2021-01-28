@@ -234,7 +234,7 @@ class FinanceCost extends Model
         file_put_contents('/www/wwwroot/mojing/runtime/log/test.log', serialize($list) . "\r\n", FILE_APPEND);
         $allcost = 0;
         foreach ($list as $k => $v) {
-            $allcost += $v['actual_purchase_price'] > 0 ?: ($v['purchase_total'] / $v['purchase_num']);
+            $allcost += ($v['actual_purchase_price'] > 0 ?: ($v['purchase_total'] / $v['purchase_num']));
         }
         return $allcost + $workcost;
     }
