@@ -345,6 +345,8 @@ class FinanceCost extends Model
                 }
             }
         }
+        file_put_contents('/www/wwwroot/mojing/runtime/log/test.log', $order_id . "\r\n", FILE_APPEND);
+        file_put_contents('/www/wwwroot/mojing/runtime/log/test.log', $order_number . "\r\n", FILE_APPEND);
         file_put_contents('/www/wwwroot/mojing/runtime/log/test.log', serialize($work_data) . "\r\n", FILE_APPEND);
         //查询处方数据
         $order_item_process = new \app\admin\model\order\order\NewOrderItemProcess();
