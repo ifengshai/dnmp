@@ -95,7 +95,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                 line_histogram: function (){
                     //柱状图和折线图的结合
                     var chartOptions = {
-                        targetId: 'echart1',
+                        targetId: 'echart2',
                         downLoadTitle: '图表',
                         type: 'bar',
                         bar: {
