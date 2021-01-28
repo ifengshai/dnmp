@@ -573,7 +573,7 @@ class Sample extends Backend
                 ->where($where)
                 ->where($where_arr)
                 ->where($map)
-                ->order($sort, $order)
+                ->order('id desc')
                 ->limit($offset, $limit)
                 ->select();
 
