@@ -125,7 +125,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                         {
                             field: 'order_type', title: __('订单类型'), addClass: 'selectpicker', data: 'multiple',
                             custom: { 1: 'blue', 2: 'blue', 3: 'blue', 4: 'blue', 5: 'blue' },
-                            searchList: { 1: '普通订单', 2: '批发单', 3: '网红单', 4: '补发单', 5: '补差价', 6: '一件代发',10:'货到付款' }, operate: 'IN',
+                            searchList: { 1: '普通订单', 2: '批发单', 3: '网红单', 4: '补发单', 5: '补差价', 6: '一件代发',10:'货到付款',11:'普通订单'}, operate: 'IN',
                             formatter: Table.api.formatter.status
                         },
                         {
