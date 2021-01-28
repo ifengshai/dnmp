@@ -148,33 +148,6 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                     }
                     EchartObj.api.ajax(options, chartOptions)
                 },
-                order_timeout_pie: function () {
-                    //妥投时效占比
-                    var chartOptions = {
-                        targetId: 'echart3',
-                        downLoadTitle: '图表',
-                        type: 'pie',
-                        pie: {
-
-                            tooltip: { //提示框组件。
-                                trigger: 'item',
-                                formatter: function (param) {
-                                    return param.data.name + '<br/>数量：' + param.data.value + '<br/> 占比：' + param.percent.toFixed(2) + '%';
-                                }
-                            },
-                        }
-                    };
-
-                    var options = {
-                        type: 'post',
-                        url: 'supplydatacenter/data_market/order_timeout_pie',
-                        data: {
-                            'time_str' :  $("#time_str").val(),
-                        }
-
-                    };
-                    EchartObj.api.ajax(options, chartOptions)
-                },
                 comleted_time_rate_pie: function () {
                     //妥投时效占比
                     var chartOptions = {
@@ -196,7 +169,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                         type: 'post',
                         url: 'supplydatacenter/data_market/comleted_time_rate',
                         data: {
-                            'time_str' :  $("#time_str").val(),
+                            'time_str' :  $("#time_str4").val(),
                         }
 
                     };
@@ -269,7 +242,7 @@ function track_data(){
 }
 function stock_measure_overview_platform() {
     var order_platform = $('#order_platform').val();
-    var time_str = $('#time_str').val();
+    var time_str = $('#time_str1').val();
     Backend.api.ajax({
         url: 'supplydatacenter/data_market/stock_measure_overview_platform',
         data: { order_platform: order_platform, time_str: time_str}
