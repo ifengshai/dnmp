@@ -269,7 +269,7 @@ function track_data(){
 }
 function stock_measure_overview_platform() {
     var order_platform = $('#order_platform').val();
-    var time_str = $('#time_str').val();
+    var time_str = $('#time_str1').val();
     Backend.api.ajax({
         url: 'supplydatacenter/data_market/stock_measure_overview_platform',
         data: { order_platform: order_platform, time_str: time_str}

@@ -499,6 +499,7 @@
                             <th>低风险呆滞金额</th>
                         </tr>
                         </thead>
+                        {foreach $stock_level_overview2 as $value}
                         <tr>
                             <td>{$value.grade}</td>
                             <td>{$value.dull_stock}</td>
@@ -511,6 +512,7 @@
                             <td>{$value.low_dull_stock}</td>
                             <td>{$value.low_dull_total}</td>
                         </tr>
+                        {/foreach}
                     </table>
                     <div>
                  <div class="new-background">
@@ -526,7 +528,7 @@
                             <th>库存金额（￥）</th>
                         </tr>
                         </thead>
-
+                        {foreach $stock_age_overview as $value}
                         <tr>
                             <td>{$value.title}</td>
                             <td>{$value.count}</td>
@@ -535,7 +537,7 @@
                             <td>{$value.stock_percent}%</td>
                             <td>{$value.total}</td>
                         </tr>
-
+                        {/foreach}
                     </table>
                     <div> 
                 <div class="widget-body no-padding">
