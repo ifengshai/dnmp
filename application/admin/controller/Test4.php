@@ -1783,7 +1783,7 @@ class Test4 extends Controller
             $start_time = strtotime($start);
             $end_time = strtotime($end);
             $exist_where['create_time'] = ['between', [$start_time, $end_time]];
-            $is_exist = Db::name('finance_cost_error')->where($exist_where)->field('id,create_time,purchase_id')->select();
+            $is_exist = Db::name('finance_cost_error')->where($exist_where)->field('id,create_time,purchase_id,total')->select();
             $outstock_total1 = 0;   //出库单出库
             $outstock_total2 = 0;   //订单出库
             /*************出库单出库start**************/
@@ -1886,7 +1886,11 @@ class Test4 extends Controller
             /*************订单出库end**************/
             //查询最新一条的余额
             $rest_total = $this->stockparameter->order('id', 'desc')->field('rest_total')->limit(1,1)->select();
-            $end_rest = round($rest_total[0]['rest_total'] + $instock_total - $outstock_total1 - $outstock_total2, 2);
+            $cha_amount = 0;
+            foreach ($is_exist as $k=>$v){
+                $cha_amount += $v['total'];
+            }
+            $end_rest = round($rest_total[0]['rest_total'] + $instock_total - $outstock_total1 - $outstock_total2+$cha_amount, 2);
             $info['instock_total'] = $instock_total;
             $info['outstock_total'] = round($outstock_total1 + $outstock_total2, 2);
             $info['rest_total'] = $end_rest;
