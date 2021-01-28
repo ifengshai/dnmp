@@ -526,7 +526,7 @@ class Statement extends Backend
                 //更新主表状态
                 Db::name('finance_statement')->where('id', $v['id'])->update(['status' => $status]);
             }
-            die;
+            // die;
 
             Db::commit();
         } catch (ValidateException $e) {
