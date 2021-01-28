@@ -43,10 +43,10 @@ class RealTimeStock extends Backend
             foreach ($list as $key=>$item){
                 $i++;
                 $list[$key]['id'] = $i;
-                $prices = $this->item->alias('i')->join('fa_purchase_order_item p','p.purchase_id=i.purchase_id')->where('i.sku',$item['sku'])->where('i.library_status',1)->where('p.sku',$item['sku'])->field('i.id,purchase_price,actual_purchase_price')->select();
+                $prices = $this->item->alias('i')->join('fa_purchase_order_item p','p.purchase_id=i.purchase_id')->join('fa_purchase_order o','o.id=i.purchase_id')->where('i.sku',$item['sku'])->where('i.library_status',1)->where('p.sku',$item['sku'])->field('i.id,actual_purchase_price,o.purchase_total,purchase_num')->select();
                 $amount = 0;
                 foreach ($prices as $price){
-                    $amount += $price['actual_purchase_price'] != 0 ? $price['actual_purchase_price'] : $price['purchase_price'];
+                    $amount += $price['actual_purchase_price'] != 0 ? $price['actual_purchase_price'] : round($price['purchase_total'] / $price['purchase_num'],2);
                 }
                 $list[$key]['total'] = round($amount,2);
             }
@@ -54,7 +54,7 @@ class RealTimeStock extends Backend
             return json($result);
         }
         //库存总金额
-        $purchase = $this->item->alias('i')->join('fa_purchase_order_item p','p.purchase_id=i.purchase_id and p.sku=i.sku')->where('i.sku','<>','')->where('i.library_status',1)->field('sum(purchase_price) purchase_price,sum(actual_purchase_price) actual_purchase_price')->group('p.purchase_order_number')->select();
+        $purchase = $this->item->alias('i')->join('fa_purchase_order_item p','p.purchase_id=i.purchase_id and p.sku=i.sku')->join('fa_purchase_order o','o.id=i.purchase_id')->where('i.sku','<>','')->where('i.library_status',1)->field('sum(o.purchase_total/purchase_num) purchase_price,sum(actual_purchase_price) actual_purchase_price')->group('p.purchase_order_number')->select();
         $amount = 0;
         foreach ($purchase as $vv){
             $amount += $vv['actual_purchase_price'] != 0 ? $vv['actual_purchase_price'] : $vv['purchase_price'];
