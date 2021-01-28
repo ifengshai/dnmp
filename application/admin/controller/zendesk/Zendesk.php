@@ -9,6 +9,7 @@ use app\admin\model\zendesk\ZendeskTags;
 use app\admin\model\zendesk\ZendeskAgents;
 use app\admin\model\zendesk\ZendeskComments;
 use app\admin\model\zendesk\ZendeskMailTemplate;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use think\Db;
 use think\Exception;
 use think\exception\PDOException;
@@ -26,6 +27,7 @@ class Zendesk extends Backend
     protected $model = null;
     protected $relationSearch = true;
     protected $noNeedLogin = ['asycTicketsUpdate','asycTicketsVooguemeUpdate','asycTicketsAll','asycTicketsAll2','asycTicketsAll3','asyncTicketHttps'];
+    protected $noNeedRight=['zendesk_export'];
     /**
      * 无需鉴权的方法,但需要登录
      * @var array
@@ -1307,4 +1309,338 @@ DOC;
         $this->assign('issueList',$issueList);
         return $this->view->fetch('edit_recipient');
     }
+
+    /**
+     *  邮件工单列表导出功能
+     *
+     *
+     */
+    public function zendesk_export()
+    {
+
+        set_time_limit(0);
+        ini_set('memory_limit', '512M');
+        $ids = input('ids');
+
+        $map = [];
+        if ($ids) {
+            $map['zendesk.id'] = ['in', $ids];
+        }
+
+        $this->request->filter(['strip_tags']);
+        $tags = ZendeskTags::column('name', 'id');
+        $this->view->assign('tags', $tags);
+
+        //如果发送的来源是Selectpage，则转发到Selectpage
+        if ($this->request->request('keyField')) {
+            return $this->selectpage();
+        }
+        $filter = json_decode($this->request->get('filter'), true);
+
+        $andWhere = '';
+        $me_task = $filter['me_task'];
+        if ($me_task == 1) { //我的所有任务
+            unset($filter['me_task']);
+            $map['zendesk.assign_id'] = session('admin.id');
+        } elseif ($me_task == 2) { //我的待处理任务
+            unset($filter['me_task']);
+            $now_admin_id = session('admin.id');
+            $map[] = ['exp', Db::raw("zendesk.due_id=$now_admin_id")];
+            $map['zendesk.status'] = ['in', [1, 2]];
+            $map['zendesk.is_hide'] = 0;
+            $taskCount = ZendeskTasks::where('admin_id', session('admin.id'))->value('target_count');
+        }
+        //类型筛选
+        if ($filter['status_type']) {
+//                待处理：new;open状态下的工单
+//                新增：update时间为选择时间，new、open状态的工单
+//                已处理：public comment
+//                待分配：没有承接人的工单
+            $status_type = $filter['status_type'];
+            unset($filter['status_type']);
+            switch ($status_type) {
+                case 1:
+                    $map['zendesk.status'] = ['in', [1, 2]];
+                    break;
+                case 2:
+                    $update_time = $filter['zendesk_update_time'] ?? '';
+                    if (!$update_time) {
+                        $this->error('请选择更新时间');
+                    }
+                    $map['zendesk.status'] = ['in', [1, 2]];
+                    break;
+                case 3:
+                    //获取public =1 is_admin=1的zid列表
+                    $zids = ZendeskComments::where(['is_public' => 1, 'is_admin' => 1])->column('zid');
+                    $map['zendesk.id'] = ['in', $zids];
+                    break;
+                case 4:
+                    //获取所有的账号admin_id
+                    $map['zendesk.is_hide'] = 1;
+                    $map['zendesk.status'] = ['in', [1, 2]];
+                    break;
+            }
+        }
+
+        //承接人筛选
+        if ($filter['assign_id']) {
+            $map['zendesk.assign_id'] = $filter['assign_id'];
+            unset($filter['assign_id']);
+        }
+        //处理人筛选
+        if ($filter['due_id']) {
+            $map['zendesk.due_id'] = $filter['due_id'];
+            unset($filter['due_id']);
+        }
+        if ($filter['tags']) {
+            $andWhere = "FIND_IN_SET({$filter['tags']},tags)";
+            unset($filter['tags']);
+        }
+        if ($filter['content']) {
+            $comments = ZendeskComments::where('body', 'like', '%' . $filter['content'] . '%')->column('ticket_id');
+            $tickets = $this->model->where('subject', 'like', '%' . $filter['content'] . '%')->column('ticket_id');
+            $ticket_ids = array_merge($comments, $tickets);
+            $map['zendesk.ticket_id'] = ['in', $ticket_ids];
+            unset($filter['content']);
+        }
+        $this->request->get(['filter' => json_encode($filter)]);
+        list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+        //默认使用
+        $orderSet = 'zendesk_update_time asc';
+        if ($me_task == 2) {
+            $orderSet = 'zendesk_update_time asc';
+        }
+        if ($sort != 'zendesk.id' && $sort) {
+            $orderSet = "{$sort} {$order}";
+        }
+
+        $list = Db::table("fa_zendesk")->alias("zendesk")
+            ->join(['fa_admin' => 'admin'], 'zendesk.assign_id=admin.id')
+            ->join(['fa_admin' => 'admin_due'], 'zendesk.due_id=admin_due.id')
+            ->where($where)
+            ->where($map)
+            ->where($andWhere)
+            ->where('channel', 'in', ['email', 'web', 'chat'])
+            ->field("zendesk.id,zendesk.ticket_id,zendesk.type,zendesk.channel,zendesk.email,zendesk.username,zendesk.user_id,zendesk.to_email,zendesk.priority,zendesk.status,zendesk.tags,zendesk.subject,zendesk.raw_subject,zendesk.assignee_id,zendesk.assign_id,zendesk.due_id,zendesk.email_cc,zendesk.rating,zendesk.rating_type,zendesk.comment,zendesk.reason,zendesk.create_time,zendesk.update_time,zendesk.assign_time,zendesk.shell,zendesk.is_hide,zendesk.zendesk_update_time,zendesk.recipient
+            ,admin.nickname as 'assign_nickname' ,admin_due.nickname as 'due_nickname'")
+            ->order($orderSet)
+            ->select();
+        //获取所有tags数据
+        $tags_list=(new ZendeskTags())->tags_list();
+        $list = collection($list)->toArray();
+
+        $spreadsheet = new Spreadsheet();
+        //常规方式：利用setCellValue()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "站点")
+            ->setCellValue("B1", "Ticket ID")
+            ->setCellValue("C1", "发送人");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "承接人")
+            ->setCellValue("E1", "处理人");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("F1", "Subject")
+            ->setCellValue("G1", "Tags");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("H1", "Status")
+            ->setCellValue("I1", "Priority")
+            ->setCellValue("J1", "渠道");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("K1", "创建时间");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("L1", "更新时间");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("M1", "回复次数");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("N1", "首次响应时长");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("O1", "是否客服发出");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("P1", "kf首次回复时间");
+        foreach ($list as $key => $value) {
+            $arr=explode(",",$value['tags']);
+            $tags_name="";
+            foreach ($arr as $arrK=>$arrV){
+                $tags_name.= $tags_list[$arrV];
+            }
+            $value['tags_name'] = $tags_name;
+
+            switch ($value['type']) {
+                case 1:
+                    $value['site_type'] = 'Zeelool';
+                    break;
+                case 2:
+                    $value['site_type'] = 'Voogueme';
+                    break;
+                case 3:
+                    $value['site_type'] = 'Nihao';
+                    break;
+                case 4:
+                    $value['site_type'] = 'meeloog';
+                    break;
+                case 5:
+                    $value['site_type'] = 'wesee';
+                    break;
+                case 6:
+                    $value['site_type'] = 'Wesee';
+                    break;
+                case 9:
+                    $value['site_type'] = 'zeelool_es';
+                    break;
+                case 10:
+                    $value['site_type'] = 'zeelool_de';
+                    break;
+                case 11:
+                    $value['site_type'] = 'zeelool_jp';
+                    break;
+                default:
+                    $value['site_type'] = '';
+                    break;
+            }
+
+
+            switch ($value['priority']) {
+                case 0:
+                    $value['priority_name'] = '无';
+                    break;
+                case 1:
+                    $value['priority_name'] = 'Low';
+                    break;
+                case 2:
+                    $value['priority_name'] = 'Normal';
+                    break;
+                case 3:
+                    $value['priority_name'] = 'High';
+                    break;
+                case 4:
+                    $value['priority_name'] = 'Urgent';
+                    break;
+                default:
+                    $value['priority_name'] = '';
+                    break;
+            }
+            switch ($value['status']) {
+                case 1:
+                    $value['status_name'] = 'New';
+                    break;
+                case 2:
+                    $value['status_name'] = 'Open';
+                    break;
+                case 3:
+                    $value['status_name'] = 'Pending';
+                    break;
+                case 4:
+                    $value['status_name'] = 'Solved';
+                    break;
+                case 5:
+                    $value['status_name'] = 'Close';
+                    break;
+                default:
+                    $value['status_name'] = '';
+                    break;
+            }
+
+
+            //处理回复数据
+            $comments_map['zid'] = $value['id'];
+            $comments_list=Db::table('fa_zendesk_comments')
+                ->where($comments_map)
+                ->field("is_admin,create_time,is_created")
+                ->order("id  ")
+                ->select();
+
+            //有回复数据时,计算回复数据
+            if (!empty($comments_list)){
+                //回复次数
+                $replies=0;
+                $admin_data=array();
+                foreach ($comments_list as $commentsK=>$commentsV){
+                    if ($commentsV['is_admin']=='1'){
+                        $replies+=1;//客服人员回复次数
+                        array_push($admin_data,$commentsV['create_time']);
+                    }
+                }
+                $is_admin=$comments_list[0]['is_admin']=='1'?'是':'否';
+                //预防没有客服人员回复
+                if (!empty($admin_data)) {
+                    $value['reply_minutes'] = round((strtotime($admin_data[0]) - strtotime($value['create_time'])) / 60, 1);
+                    //客服首次回复时间
+                    $value['fist_time']=$admin_data[0];
+                }
+                $value['replies']=$replies;
+                $value['is_admin']=$is_admin;
+            }
+            $spreadsheet->getActiveSheet()->setCellValueExplicit("A" . ($key * 1 + 2), $value['site_type'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['ticket_id']);
+            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['email']);
+            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['assign_nickname']);
+            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['due_nickname']);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['subject']);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['tags_name']);
+            $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['status_name']);
+            $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), $value['priority_name']);
+            $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 1 + 2), $value['channel']);
+            $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 1 + 2), $value['create_time']);
+            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 1 + 2), $value['update_time']);
+            $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 1 + 2), $value['replies']);
+            $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 1 + 2), $value['reply_minutes']);
+            $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 1 + 2), $value['is_admin']);
+            $spreadsheet->getActiveSheet()->setCellValue("P" . ($key * 1 + 2), $value['fist_time']);
+        }
+
+        //设置宽度
+        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(10);
+        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(10);
+        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(30);
+
+        $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('I')->setWidth(15);
+
+        $spreadsheet->getActiveSheet()->getColumnDimension('J')->setWidth(10);
+        $spreadsheet->getActiveSheet()->getColumnDimension('K')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('L')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('M')->setWidth(10);
+        $spreadsheet->getActiveSheet()->getColumnDimension('N')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('O')->setWidth(10);
+        $spreadsheet->getActiveSheet()->getColumnDimension('P')->setWidth(20);
+
+
+        //设置边框
+        $border = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
+                    'color' => ['argb' => 'FF000000'], // 设置border颜色
+                ],
+            ],
+        ];
+
+        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+
+
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
+        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
+
+        $spreadsheet->getActiveSheet()->getStyle('A1:P' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->setActiveSheetIndex(0);
+
+        $format = 'xlsx';
+        $savename = '邮件工单列表' . date("YmdHis", time());;
+
+        if ($format == 'xls') {
+            //输出Excel03版本
+            header('Content-Type:application/vnd.ms-excel');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
+        } elseif ($format == 'xlsx') {
+            //输出07Excel版本
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
+        }
+
+        //输出名称
+        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
+        //禁止缓存
+        header('Cache-Control: max-age=0');
+        $writer = new $class($spreadsheet);
+
+        $writer->save('php://output');
+    }
+
+
+
+
 }
