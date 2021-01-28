@@ -278,13 +278,13 @@ class FinanceCost extends Model
         $workchangesku = new \app\admin\model\saleaftermanage\WorkOrderChangeSku();
         $work_id = $worklist->where(['platform_order' => $order_number, 'work_status' => 7])->order('id desc')->value('id');
         //查询更改类型为更改镜片
-        $work_data = $workchangesku->where(['work_id' => $work_id, 'change_type' => 2])
+        $work_data = $workchangesku->where(['work_id' => $work_id, 'change_type' => ['in', [2, 4]]])
             ->field('od_sph,os_sph,od_cyl,os_cyl,os_add,od_add,lens_number,item_order_number')
             ->select();
         $work_data = collection($work_data)->toArray();
         //工单计算镜片成本
         if ($work_data) {
-            $where['item_order_number'] = ['not in', array_column($work_data, 'item_order_number')];
+            $where['item_order_number'] = ['not in', array_values(array_column($work_data, 'item_order_number'))];
             $lens_number = array_column($work_data, 'lens_number');
             //查询镜片编码对应价格
             $lens_price = new \app\admin\model\lens\LensPrice();
@@ -345,7 +345,7 @@ class FinanceCost extends Model
                 }
             }
         }
-
+        file_put_contents('/www/wwwroot/mojing/runtime/log/test.log', $work_cost . "\r\n", FILE_APPEND);
         //查询处方数据
         $order_item_process = new \app\admin\model\order\order\NewOrderItemProcess();
         $order_prescription = $order_item_process->alias('a')->field('b.od_sph,b.os_sph,b.od_cyl,b.os_cyl,b.os_add,b.od_add,b.lens_number')
@@ -359,8 +359,10 @@ class FinanceCost extends Model
         //查询镜片编码对应价格
         $lens_price = new \app\admin\model\lens\LensPrice();
         $lens_list = $lens_price->where(['lens_number' => ['in', $lens_number]])->order('price asc')->select();
+        $lens_list = collection($lens_list)->toArray();
         $cost = 0;
-
+        file_put_contents('/www/wwwroot/mojing/runtime/log/test.log', serialize($lens_number) . "\r\n", FILE_APPEND);
+        file_put_contents('/www/wwwroot/mojing/runtime/log/test.log', serialize($lens_list) . "\r\n", FILE_APPEND);
         foreach ($order_prescription as $k => $v) {
             $data = [];
             foreach ($lens_list as $key => $val) {

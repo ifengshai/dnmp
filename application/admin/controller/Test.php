@@ -43,16 +43,16 @@ class Test extends Backend
     {
         //查询镜片编码对应价格
         $lens_price = new \app\admin\model\lens\LensPrice();
-        $lens_list = $lens_price->where(['lens_number' => ['in', ['23200001']]])->select();
+        $lens_list = $lens_price->select();
         $lens_list = collection($lens_list)->toArray();
         $cost = 0;
         $order_prescription = [
             [
-                'od_sph' => '-1.25',
-                'os_sph' => '-1.25',
-                'od_cyl' => '-2.75',
-                'os_cyl' => '0.00',
-                'lens_number' => '23200001'
+                'od_sph' => '+3.00',
+                'os_sph' => '+2.25',
+                'od_cyl' => '-1.00',
+                'os_cyl' => '-0.25',
+                'lens_number' => ''
             ]
         ];
 
