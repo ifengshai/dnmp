@@ -38,6 +38,7 @@ use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\Reader\Xls;
 use PhpOffice\PhpSpreadsheet\Reader\Csv;
 use app\admin\model\AuthGroup;
+use app\admin\model\finance\FinanceCost;
 
 /**
  * 售后工单列管理
