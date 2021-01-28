@@ -404,6 +404,7 @@ class Wangpenglei extends Backend
      */
     public function set_sku_sales_num()
     {
+        ini_set('memory_limit', '512M');
         //记录当天上架的SKU 
         $skuSalesNum = new \app\admin\model\SkuSalesNum();
         $order = new \app\admin\model\order\order\NewOrder();
