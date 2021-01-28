@@ -109,16 +109,18 @@ class PurchasePay extends Backend
 
                     $insert['order_number'] = $params['order_number'];
                     $insert['pay_type'] = $params['pay_type'];
-                    $insert['pay_rate'] = $params['pay_rate'] ? $params['pay_rate'] : '';
                     switch ($insert['pay_type']) {
                         case 1:
                             $pay_type = '预付款';
+                            $insert['pay_rate'] = 0.3;
                             break;
                         case 2:
                             $pay_type = '全款';
+                            $insert['pay_rate'] = 1;
                             break;
                         case 3:
                             $pay_type = '尾款';
+                            $insert['pay_rate'] = 1;
                             break;
                         default:
                             $pay_type = '其他';
@@ -390,18 +392,20 @@ class PurchasePay extends Backend
                 try {
                     $update['status'] = $params['status'];
                     $update['pay_type'] = $params['pay_type'];
-                    $update['pay_rate'] = $params['pay_rate'];
                     $update['remark'] = $params['remark'];
                     $update['pay_grand_total'] = $params['pay_grand_total'];
                     switch ($params['pay_type']) {
                         case 1:
                             $pay_type = '预付款';
+                            $update['pay_rate'] = 0.3;
                             break;
                         case 2:
                             $pay_type = '全款预付';
+                            $update['pay_rate'] = 1;
                             break;
                         case 3:
                             $pay_type = '尾款';
+                            $update['pay_rate'] = 1;
                             break;
                     }
                     switch ($params['base_currency_code']) {
