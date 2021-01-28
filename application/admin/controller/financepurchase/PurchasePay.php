@@ -141,6 +141,8 @@ class PurchasePay extends Backend
                         case 'USD':
                             $currency = '美元';
                             break;
+                        default:
+                            $currency = '人民币';
                     }
                     //采购单信息
                     $purchase_order = $this->purchase_order->where('id', $insert['purchase_id'])->find();
