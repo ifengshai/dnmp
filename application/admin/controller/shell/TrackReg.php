@@ -2508,12 +2508,6 @@ class TrackReg extends Backend
             $cha_amount += $v['total'];
         }
         $end_rest = round($cha_amount + $rest_total[0]['rest_total'] + $instock_total - $outstock_total1 - $outstock_total2, 2);
-        dump($cha_amount);
-        dump($rest_total[0]['rest_total']);
-        dump($instock_total);
-        dump($outstock_total1);
-        dump($outstock_total2);
-        dump($end_rest);exit;
         $info['instock_total'] = $instock_total;
         $info['outstock_total'] = round($outstock_total1 + $outstock_total2, 2);
         $info['rest_total'] = $end_rest;
