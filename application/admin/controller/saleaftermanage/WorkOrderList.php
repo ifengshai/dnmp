@@ -1382,6 +1382,7 @@ class WorkOrderList extends Backend
                 if (100 == $params['order_type']) {
                     $params['base_grand_total'] = $params['refund_money'];
                     $params['grand_total'] = $params['refund_money'];
+                    $params['payment_time'] = date('Y-m-d H:i:s');
                 }
                 $params['recept_person_id'] = $params['recept_person_id'] ?: $admin_id;
 
