@@ -94,7 +94,7 @@ class FinanceCost extends Model
                         $action_type = 1; //增加
                         $income_amount = $value['replenish_money']; //收入金额(补差价的金额)
                         break;
-                    /*case 15: //vip退款措施
+                        /*case 15: //vip退款措施
                         $bill_type = 7; //vip退款单据类型
                         $action_type = 2; //冲减
                         $income_amount = $value['refund_money']; //收入金额(退款金额)
@@ -293,48 +293,54 @@ class FinanceCost extends Model
             foreach ($work_data as $k => $v) {
                 $data = [];
                 foreach ($lens_list as $key => $val) {
-                    $temp_cost = 0;
-                    //如果计算过一次成本 跳过
-                    if (in_array($val['lens_number'], $data)) {
-                        continue;
-                    }
-                    if ($v['od_cyl'] == '-0.25') {
-                        //右眼
-                        if ($v['lens_number'] == $val['lens_number'] && ((float) $v['od_sph'] >= (float) $val['sph_start'] && (float) $v['od_sph'] <= (float) $val['sph_end']) && ((float) $v['od_cyl'] == (float) $val['cyl_end'] && (float) $v['od_cyl'] == (float) $val['cyl_end'])) {
-                            $work_cost += $val['price'];
-                            $temp_cost += $val['price'];
-                        } elseif ($v['lens_number'] == $val['lens_number'] && ((float) $v['od_sph'] >= (float) $val['sph_start'] && (float) $v['od_sph'] <= (float) $val['sph_end']) && ((float) $v['od_cyl'] >= (float) $val['cyl_start'] && (float) $v['od_cyl'] <= (float) $val['cyl_end'])) {
-                            $work_cost += $val['price'];
-                            $temp_cost += $val['price'];
+                    $od_temp_cost = 0;
+                    $os_temp_cost = 0;
+                    //判断子单右眼是否已判断
+                    if (!in_array('od' . '-' . $val['lens_number'], $data)) {
+                        if ($v['od_cyl'] == '-0.25') {
+                            //右眼
+                            if ($v['lens_number'] == $val['lens_number'] && ((float) $v['od_sph'] >= (float) $val['sph_start'] && (float) $v['od_sph'] <= (float) $val['sph_end']) && ((float) $v['od_cyl'] == (float) $val['cyl_end'] && (float) $v['od_cyl'] == (float) $val['cyl_end'])) {
+                                $work_cost += $val['price'];
+                                $od_temp_cost += $val['price'];
+                            } elseif ($v['lens_number'] == $val['lens_number'] && ((float) $v['od_sph'] >= (float) $val['sph_start'] && (float) $v['od_sph'] <= (float) $val['sph_end']) && ((float) $v['od_cyl'] >= (float) $val['cyl_start'] && (float) $v['od_cyl'] <= (float) $val['cyl_end'])) {
+                                $work_cost += $val['price'];
+                                $od_temp_cost += $val['price'];
+                            }
+                        } else {
+                            //右眼
+                            if ($v['lens_number'] == $val['lens_number'] && ((float) $v['od_sph'] >= (float) $val['sph_start'] && (float) $v['od_sph'] <= (float) $val['sph_end']) && ((float) $v['od_cyl'] >= (float) $val['cyl_start'] && (float) $v['od_cyl'] <= (float) $val['cyl_end'])) {
+                                $work_cost += $val['price'];
+                                $od_temp_cost += $val['price'];
+                            }
                         }
-                    } else {
-                        //右眼
-                        if ($v['lens_number'] == $val['lens_number'] && ((float) $v['od_sph'] >= (float) $val['sph_start'] && (float) $v['od_sph'] <= (float) $val['sph_end']) && ((float) $v['od_cyl'] >= (float) $val['cyl_start'] && (float) $v['od_cyl'] <= (float) $val['cyl_end'])) {
-                            $work_cost += $val['price'];
-                            $temp_cost += $val['price'];
-                        }
-                    }
-
-                    if ($v['os_cyl'] == '-0.25') {
-                        //左眼
-                        if ($v['lens_number'] == $val['lens_number'] && ((float) $v['os_sph'] >= (float) $val['sph_start'] && (float) $v['os_sph'] <= (float) $val['sph_end']) && ((float) $v['os_cyl'] == (float) $val['cyl_start'] && (float) $v['os_cyl'] == (float) $val['cyl_end'])) {
-                            $work_cost += $val['price'];
-                            $temp_cost += $val['price'];
-                        } elseif ($v['lens_number'] == $val['lens_number'] && ((float) $v['os_sph'] >= (float) $val['sph_start'] && (float) $v['os_sph'] <= (float) $val['sph_end']) && ((float) $v['os_cyl'] >= (float) $val['cyl_start'] && (float) $v['os_cyl'] <= (float) $val['cyl_end'])) {
-                            $work_cost += $val['price'];
-                            $temp_cost += $val['price'];
-                        }
-                    } else {
-                        //左眼
-                        if ($v['lens_number'] == $val['lens_number'] && ((float) $v['os_sph'] >= (float) $val['sph_start'] && (float) $v['os_sph'] <= (float) $val['sph_end']) && ((float) $v['os_cyl'] >= (float) $val['cyl_start'] && (float) $v['os_cyl'] <= (float) $val['cyl_end'])) {
-                            $work_cost += $val['price'];
-                            $temp_cost += $val['price'];
+                        if ($os_temp_cost > 0) {
+                            $data[] = 'od' . '-' . $v['lens_number'];
                         }
                     }
 
-                    //如果计算过一次成本 记录下来 防止满足两个条件,计算两次
-                    if ($temp_cost > 0) {
-                        $data[] = $v['lens_number'];
+                    //判断子单左眼是否已判断
+                    if (!in_array('os' . '-' . $val['lens_number'], $data)) {
+
+                        if ($v['os_cyl'] == '-0.25') {
+                            //左眼
+                            if ($v['lens_number'] == $val['lens_number'] && ((float) $v['os_sph'] >= (float) $val['sph_start'] && (float) $v['os_sph'] <= (float) $val['sph_end']) && ((float) $v['os_cyl'] == (float) $val['cyl_end'] && (float) $v['os_cyl'] == (float) $val['cyl_end'])) {
+                                $work_cost += $val['price'];
+                                $os_temp_cost += $val['price'];
+                            } elseif ($v['lens_number'] == $val['lens_number'] && ((float) $v['os_sph'] >= (float) $val['sph_start'] && (float) $v['os_sph'] <= (float) $val['sph_end']) && ((float) $v['os_cyl'] >= (float) $val['cyl_start'] && (float) $v['os_cyl'] <= (float) $val['cyl_end'])) {
+                                $work_cost += $val['price'];
+                                $os_temp_cost += $val['price'];
+                            }
+                        } else {
+                            //左眼
+                            if ($v['lens_number'] == $val['lens_number'] && ((float) $v['os_sph'] >= (float) $val['sph_start'] && (float) $v['os_sph'] <= (float) $val['sph_end']) && ((float) $v['os_cyl'] >= (float) $val['cyl_start'] && (float) $v['os_cyl'] <= (float) $val['cyl_end'])) {
+                                $work_cost += $val['price'];
+                                $os_temp_cost += $val['price'];
+                            }
+                        }
+
+                        if ($os_temp_cost > 0) {
+                            $data[] = 'os' . '-' . $v['lens_number'];
+                        }
                     }
                 }
             }
@@ -358,47 +364,54 @@ class FinanceCost extends Model
         foreach ($order_prescription as $k => $v) {
             $data = [];
             foreach ($lens_list as $key => $val) {
-                 //如果计算过一次成本 跳过
-                $temp_cost = 0;
-                if (in_array($val['lens_number'], $data)) {
-                    continue;
-                }
-                if ($v['od_cyl'] == '-0.25') {
-                    //右眼
-                    if ($v['lens_number'] == $val['lens_number'] && ((float) $v['od_sph'] >= (float) $val['sph_start'] && (float) $v['od_sph'] <= (float) $val['sph_end']) && ((float) $v['od_cyl'] == (float) $val['cyl_end'] && (float) $v['od_cyl'] == (float) $val['cyl_end'])) {
-                        $cost += $val['price'];
-                        $temp_cost += $val['price'];
-                    } elseif ($v['lens_number'] == $val['lens_number'] && ((float) $v['od_sph'] >= (float) $val['sph_start'] && (float) $v['od_sph'] <= (float) $val['sph_end']) && ((float) $v['od_cyl'] >= (float) $val['cyl_start'] && (float) $v['od_cyl'] <= (float) $val['cyl_end'])) {
-                        $cost += $val['price'];
-                        $temp_cost += $val['price'];
+                $od_temp_cost = 0;
+                $os_temp_cost = 0;
+                //判断子单右眼是否已判断
+                if (!in_array('od' . '-' . $val['lens_number'], $data)) {
+                    if ($v['od_cyl'] == '-0.25') {
+                        //右眼
+                        if ($v['lens_number'] == $val['lens_number'] && ((float) $v['od_sph'] >= (float) $val['sph_start'] && (float) $v['od_sph'] <= (float) $val['sph_end']) && ((float) $v['od_cyl'] == (float) $val['cyl_end'] && (float) $v['od_cyl'] == (float) $val['cyl_end'])) {
+                            $cost += $val['price'];
+                            $od_temp_cost += $val['price'];
+                        } elseif ($v['lens_number'] == $val['lens_number'] && ((float) $v['od_sph'] >= (float) $val['sph_start'] && (float) $v['od_sph'] <= (float) $val['sph_end']) && ((float) $v['od_cyl'] >= (float) $val['cyl_start'] && (float) $v['od_cyl'] <= (float) $val['cyl_end'])) {
+                            $cost += $val['price'];
+                            $od_temp_cost += $val['price'];
+                        }
+                    } else {
+                        //右眼
+                        if ($v['lens_number'] == $val['lens_number'] && ((float) $v['od_sph'] >= (float) $val['sph_start'] && (float) $v['od_sph'] <= (float) $val['sph_end']) && ((float) $v['od_cyl'] >= (float) $val['cyl_start'] && (float) $v['od_cyl'] <= (float) $val['cyl_end'])) {
+                            $cost += $val['price'];
+                            $od_temp_cost += $val['price'];
+                        }
                     }
-                } else {
-                    //右眼
-                    if ($v['lens_number'] == $val['lens_number'] && ((float) $v['od_sph'] >= (float) $val['sph_start'] && (float) $v['od_sph'] <= (float) $val['sph_end']) && ((float) $v['od_cyl'] >= (float) $val['cyl_start'] && (float) $v['od_cyl'] <= (float) $val['cyl_end'])) {
-                        $cost += $val['price'];
-                        $temp_cost += $val['price'];
+                    if ($os_temp_cost > 0) {
+                        $data[] = 'od' . '-' . $v['lens_number'];
                     }
                 }
 
-                if ($v['os_cyl'] == '-0.25') {
-                    //左眼
-                    if ($v['lens_number'] == $val['lens_number'] && ((float) $v['os_sph'] >= (float) $val['sph_start'] && (float) $v['os_sph'] <= (float) $val['sph_end']) && ((float) $v['os_cyl'] == (float) $val['cyl_end'] && (float) $v['os_cyl'] == (float) $val['cyl_end'])) {
-                        $cost += $val['price'];
-                        $temp_cost += $val['price'];
-                    } elseif ($v['lens_number'] == $val['lens_number'] && ((float) $v['os_sph'] >= (float) $val['sph_start'] && (float) $v['os_sph'] <= (float) $val['sph_end']) && ((float) $v['os_cyl'] >= (float) $val['cyl_start'] && (float) $v['os_cyl'] <= (float) $val['cyl_end'])) {
-                        $cost += $val['price'];
-                        $temp_cost += $val['price'];
+                //判断子单左眼是否已判断
+                if (!in_array('os' . '-' . $val['lens_number'], $data)) {
+
+                    if ($v['os_cyl'] == '-0.25') {
+                        //左眼
+                        if ($v['lens_number'] == $val['lens_number'] && ((float) $v['os_sph'] >= (float) $val['sph_start'] && (float) $v['os_sph'] <= (float) $val['sph_end']) && ((float) $v['os_cyl'] == (float) $val['cyl_end'] && (float) $v['os_cyl'] == (float) $val['cyl_end'])) {
+                            $cost += $val['price'];
+                            $os_temp_cost += $val['price'];
+                        } elseif ($v['lens_number'] == $val['lens_number'] && ((float) $v['os_sph'] >= (float) $val['sph_start'] && (float) $v['os_sph'] <= (float) $val['sph_end']) && ((float) $v['os_cyl'] >= (float) $val['cyl_start'] && (float) $v['os_cyl'] <= (float) $val['cyl_end'])) {
+                            $cost += $val['price'];
+                            $os_temp_cost += $val['price'];
+                        }
+                    } else {
+                        //左眼
+                        if ($v['lens_number'] == $val['lens_number'] && ((float) $v['os_sph'] >= (float) $val['sph_start'] && (float) $v['os_sph'] <= (float) $val['sph_end']) && ((float) $v['os_cyl'] >= (float) $val['cyl_start'] && (float) $v['os_cyl'] <= (float) $val['cyl_end'])) {
+                            $cost += $val['price'];
+                            $os_temp_cost += $val['price'];
+                        }
                     }
-                } else {
-                    //左眼
-                    if ($v['lens_number'] == $val['lens_number'] && ((float) $v['os_sph'] >= (float) $val['sph_start'] && (float) $v['os_sph'] <= (float) $val['sph_end']) && ((float) $v['os_cyl'] >= (float) $val['cyl_start'] && (float) $v['os_cyl'] <= (float) $val['cyl_end'])) {
-                        $cost += $val['price'];
-                        $temp_cost += $val['price'];
+
+                    if ($os_temp_cost > 0) {
+                        $data[] = 'os' . '-' . $v['lens_number'];
                     }
-                }
-                //如果计算过一次成本 记录下来 防止满足两个条件,计算两次
-                if ($temp_cost > 0) {
-                    $data[] = $v['lens_number'];
                 }
             }
         }
