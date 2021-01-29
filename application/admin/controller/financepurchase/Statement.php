@@ -509,7 +509,7 @@ class Statement extends Backend
                                 //更新采购单成本
                                 Db::name('purchase_order_item')->where('purchase_id',$vv['purchase_id'])->update(['actual_purchase_price'=>$actual_purchase_price]);
                                 //入库总数量
-                                $count = $this->instockItem->alias('i')->join('fa_in_stock s','i.in_stock_id=s.id')->join('fa_check_order c','s.check_id=c.id')->where('c.purchase_id',$v)->sum('i.in_stock_num');
+                                $count = $this->instockItem->alias('i')->join('fa_in_stock s','i.in_stock_id=s.id')->join('fa_check_order c','s.check_id=c.id')->where('c.purchase_id',$vv['purchase_id'])->sum('i.in_stock_num');
                                 $purchase_order = Db::name('purchase_order_item')->where('id',$vv['purchase_id'])->find();
                                 //实际采购成本和预估成本不一致，冲减差值
                                 if($purchase_order['purchase_price'] != $purchase_order['actual_purchase_price']){
@@ -620,7 +620,7 @@ class Statement extends Backend
                             //更新采购单成本
                             Db::name('purchase_order_item')->where('purchase_id',$vv['purchase_id'])->update(['actual_purchase_price'=>$actual_purchase_price]);
                             //入库总数量
-                            $count = $this->instockItem->alias('i')->join('fa_in_stock s','i.in_stock_id=s.id')->join('fa_check_order c','s.check_id=c.id')->where('c.purchase_id',$v)->sum('i.in_stock_num');
+                            $count = $this->instockItem->alias('i')->join('fa_in_stock s','i.in_stock_id=s.id')->join('fa_check_order c','s.check_id=c.id')->where('c.purchase_id',$vv['purchase_id'])->sum('i.in_stock_num');
                             $purchase_order = Db::name('purchase_order_item')->where('id',$vv['purchase_id'])->find();
                             //实际采购成本和预估成本不一致，冲减差值
                             if($purchase_order['purchase_price'] != $purchase_order['actual_purchase_price']){
