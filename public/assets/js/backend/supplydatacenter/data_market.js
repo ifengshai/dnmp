@@ -168,7 +168,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                         type: 'post',
                         url: 'supplydatacenter/data_market/order_histogram_line',
                         data: {
-                            time_str: $("#time_str").val(),
+                            time_str: $("#time_str3").val(),
                         }
                     }
                     EchartObj.api.ajax(options, chartOptions)
