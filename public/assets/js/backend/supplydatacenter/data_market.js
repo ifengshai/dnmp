@@ -242,13 +242,13 @@ function purchase_data(){
         $('#purchase_amount_big').html(purchase_overview.purchase_amount_big);
         $('#purchase_amount_now').html(purchase_overview.purchase_amount_now);
         $('#purchase_sku_num').html(purchase_overview.purchase_sku_num);
-        $('#purchase_sku_num_big').html(purchase_overview.purchase_sku_num);
-        $('#purchase_sku_num_now').html(purchase_overview.purchase_sku_num);
+        $('#purchase_sku_num_big').html(purchase_overview.purchase_sku_num_big);
+        $('#purchase_sku_num_now').html(purchase_overview.purchase_sku_num_now);
         $('#purchase_delay_rate').html(purchase_overview.purchase_delay_rate);
         $('#purchase_qualified_rate').html(purchase_overview.purchase_qualified_rate);
         $('#purchase_price').html(purchase_overview.purchase_price);
-        $('#purchase_price_big').html(purchase_overview.purchase_price);
-        $('#purchase_price_now').html(purchase_overview.purchase_price);
+        $('#purchase_price_big').html(purchase_overview.purchase_price_big);
+        $('#purchase_price_now').html(purchase_overview.purchase_price_now);
         return false;
     }, function (data, ret) {
         Layer.alert(ret.msg);
