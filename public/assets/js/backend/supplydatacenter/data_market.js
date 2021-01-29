@@ -214,8 +214,7 @@ function index_data(){
         url: 'supplydatacenter/data_market/index',
         data: {time_str: time_str}
     }, function (data, ret) {
-        var stock_measure_overview = ret.data.stock_measure_overview;
-        var logistics_completed_overview = ret.data.logistics_completed_overview;
+        var stock_measure_overview = ret.data;
         //仓库指标总览
         $('#turnover_rate').html(stock_measure_overview.turnover_rate);
         $('#stock_sales_rate').html(stock_measure_overview.stock_sales_rate);
@@ -234,7 +233,7 @@ function purchase_data(){
         data: {time_str: time_str}
     }, function (data, ret) {
         console.log(ret.data);
-        var purchase_overview = ret.data.purchase_overview;
+        var purchase_overview = ret.data;
         //采购概况
         $('#purchase_num').html(purchase_overview.purchase_num);
         $('#purchase_num_big').html(purchase_overview.purchase_num_big);
@@ -262,7 +261,7 @@ function track_data(){
         url: 'supplydatacenter/data_market/index',
         data: {time_str: time_str}
     }, function (data, ret) {
-        var logistics_completed_overview = ret.data.logistics_completed_overview;
+        var logistics_completed_overview = ret.data;
         //物流妥投概况
         $('#delivery_count').html(logistics_completed_overview.delivery_count);
         $('#completed_count').html(logistics_completed_overview.completed_count);
