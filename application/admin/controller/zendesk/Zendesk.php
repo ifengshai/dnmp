@@ -346,6 +346,7 @@ class Zendesk extends Backend
                             'is_admin' => 1,
                             'due_id' => session('admin.id'),
                             'attachments' => $params['image'],
+                            'mail_template_id' => $params['mail_template_id'],
                             'platform'=>$type
                         ]);
                         ZendeskTasks::whereTime('create_time', 'today')
@@ -553,6 +554,7 @@ class Zendesk extends Backend
                             'is_admin' => 1,
                             'due_id' => session('admin.id'),
                             'attachments' => $params['image'],
+                            'mail_template_id' => $params['mail_template_id'],
                             'platform'=>$ticket->type
                         ]);
                         ZendeskTasks::whereTime('create_time', 'today')
@@ -1337,6 +1339,7 @@ DOC;
             ->select();
          //获取所有tags数据
         $tags_list=(new ZendeskTags())->tags_list();
+        $template_list=(new ZendeskMailTemplate())->template_list();
         $list = collection($list)->toArray();
 
         $spreadsheet = new Spreadsheet();
@@ -1357,11 +1360,15 @@ DOC;
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("N1", "首次响应时长");
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("O1", "是否客服发出");
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("P1", "kf首次回复时间");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("Q1", "回复模板");
         foreach ($list as $key => $value) {
             $arr=explode(",",$value['tags']);
             $tags_name="";
             foreach ($arr as $arrK=>$arrV){
-                $tags_name.= $tags_list[$arrV];
+                $tags_name.= $tags_list[$arrV].',';
+            }
+            if (!empty($tags_name)){
+                $tags_name = rtrim($tags_name, ',');
             }
             $value['tags_name'] = $tags_name;
 
@@ -1445,7 +1452,7 @@ DOC;
             $comments_map['zid'] = $value['id'];
             $comments_list=Db::table('fa_zendesk_comments')
                 ->where($comments_map)
-                ->field("is_admin,create_time,is_created")
+                ->field("is_admin,create_time,is_created,mail_template_id")
                 ->order("id  ")
                 ->select();
 
@@ -1454,11 +1461,13 @@ DOC;
                 //回复次数
                 $replies=0;
                 $admin_data=array();
+                $template_info="";
                 foreach ($comments_list as $commentsK=>$commentsV){
                     if ($commentsV['is_admin']=='1'){
                         $replies+=1;//客服人员回复次数
                         array_push($admin_data,$commentsV['create_time']);
                     }
+                    $template_info.=$template_list[$commentsV['mail_template_id']].",";
                 }
                 $is_admin=$comments_list[0]['is_admin']=='1'?'是':'否';
                 //预防没有客服人员回复
@@ -1467,6 +1476,10 @@ DOC;
                     //客服首次回复时间
                     $value['fist_time']=$admin_data[0];
                 }
+                if (!empty($template_info)){
+                    $template_info = rtrim($template_info, ',');
+                }
+                $value['template_info']=$template_info;
                 $value['replies']=$replies;
                 $value['is_admin']=$is_admin;
             }
@@ -1486,6 +1499,7 @@ DOC;
             $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 1 + 2), $value['reply_minutes']);
             $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 1 + 2), $value['is_admin']);
             $spreadsheet->getActiveSheet()->setCellValue("P" . ($key * 1 + 2), $value['fist_time']);
+            $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 1 + 2), $value['template_info']);
         }
 
         //设置宽度
@@ -1507,6 +1521,7 @@ DOC;
         $spreadsheet->getActiveSheet()->getColumnDimension('N')->setWidth(15);
         $spreadsheet->getActiveSheet()->getColumnDimension('O')->setWidth(10);
         $spreadsheet->getActiveSheet()->getColumnDimension('P')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('Q')->setWidth(50);
 
 
         //设置边框
@@ -1525,7 +1540,7 @@ DOC;
         $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
         $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
 
-        $spreadsheet->getActiveSheet()->getStyle('A1:P' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle('A1:Q' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         $spreadsheet->setActiveSheetIndex(0);
 
         $format = 'xlsx';
