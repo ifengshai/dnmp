@@ -435,12 +435,16 @@ class PayOrder extends Backend
             $params = $this->request->post("row/a");
             $pay_id = $params['id'];
             $arr['invoice'] = $params['unqualified_images'];
-            $arr['status'] = 5;
-            $result = $this->payorder->where('id',$pay_id)->update($arr);
-            if ($result !== false) {
-                $this->success();
-            } else {
-                $this->error(__('No rows were updated'));
+            if($params['unqualified_images']){
+                $arr['status'] = 5;
+                $result = $this->payorder->where('id',$pay_id)->update($arr);
+                if ($result !== false) {
+                    $this->success();
+                } else {
+                    $this->error(__('No rows were updated'));
+                }
+            }else{
+                $this->error(__('请上传发票'));
             }
         }
         $this->view->assign('id',$id);
