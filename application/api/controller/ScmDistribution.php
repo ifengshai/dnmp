@@ -320,7 +320,7 @@ class ScmDistribution extends Scm
         //获取子订单数据
         $item_process_info = $this->_new_order_item_process
             ->where('item_order_number', $item_order_number)
-            ->field('id,option_id,distribution_status,temporary_house_id,abnormal_house_id,order_prescription_type,order_id,customize_status')
+            ->field('id,option_id,distribution_status,temporary_house_id,abnormal_house_id,order_prescription_type,order_id,customize_status,reason,fail_son_reason')
             ->find();
         empty($item_process_info) && $this->error(__('子订单不存在'), [], 403);
 
@@ -465,7 +465,7 @@ class ScmDistribution extends Scm
                 ['id' => 2, 'name' => '商品条码贴错'],
             ],
             3 => [
-                ['id' => 3, 'name' => '核实处方'],
+                ['id' => 3, 'name' => '核实处方','reason'=>[['id'=>1,'name'=>'核实轴位（AXI）'],['id'=>2,'name'=>'核实瞳距（PD）'],['id'=>3,'name'=>'核实处方光度符号'],['id'=>4,'name'=>'核实镜片类型'],['id'=>5,'name'=>'核实处方光度']]],
                 ['id' => 4, 'name' => '镜片缺货'],
                 ['id' => 5, 'name' => '镜片重做'],
                 ['id' => 6, 'name' => '定制片超时']
@@ -482,7 +482,7 @@ class ScmDistribution extends Scm
             6 => [
                 ['id' => 1, 'name' => '加工调整','reason'=>[['id'=>1,'name'=>'划伤'],['id'=>2,'name'=>'断裂'],['id'=>3,'name'=>'杂质'],['id'=>4,'name'=>'黑点'],['id'=>5,'name'=>'掉漆'],['id'=>6,'name'=>'镜架凸起']]],
                 ['id' => 2, 'name' => '镜架报损'],
-                ['id' => 3, 'name' => '镜片报损','reason'=>[1=>'划伤',2=>'轴位错',3=>'左右反',4=>'不变色',5=>'崩边',6=>'配错片']],
+                ['id' => 3, 'name' => '镜片报损','reason'=>[['id'=>1,'name'=>'划伤'],['id'=>2,'name'=>'轴位错'],['id'=>3,'name'=>'左右反'],['id'=>4,'name'=>'不变色'],['id'=>5,'name'=>'崩边'],['id'=>6,'name'=>'配错片']]],
                 ['id' => 4, 'name' => 'logo调整']
             ],
             7 => [
@@ -574,7 +574,58 @@ class ScmDistribution extends Scm
             return $abnormal_list;
         }
 
-        $this->success('', ['abnormal_list' => $abnormal_list, 'option_info' => $option_info], 200);
+        $fail_reason = '';
+        //加工调整 成品质检拒绝原因
+        if ($item_process_info['reason'] == 1){
+            switch ($item_process_info['fail_son_reason']){
+                case 1:
+                    $fail_reason = '划伤';
+                    break;
+                case 2:
+                    $fail_reason = '断裂';
+                    break;
+                case 3:
+                    $fail_reason = '杂质';
+                    break;
+                case 4:
+                    $fail_reason = '黑点';
+                    break;
+                case 5:
+                    $fail_reason = '掉漆';
+                    break;
+                case 6:
+                    $fail_reason = '镜架凸起';
+                    break;
+                default:
+                    $fail_reason = '';
+            }
+        }elseif ($item_process_info['reason'] == 3){
+            switch ($item_process_info['fail_son_reason']){
+                case 1:
+                    $fail_reason = '划伤';
+                    break;
+                case 2:
+                    $fail_reason = '轴位错';
+                    break;
+                case 3:
+                    $fail_reason = '左右反';
+                    break;
+                case 4:
+                    $fail_reason = '不变色';
+                    break;
+                case 5:
+                    $fail_reason = '崩边';
+                    break;
+                case 6:
+                    $fail_reason = '配错片';
+                    break;
+                default:
+                    $fail_reason = '';
+            }
+        }
+
+
+        $this->success('', ['abnormal_list' => $abnormal_list, 'option_info' => $option_info,'fail_reason'=>$fail_reason], 200);
     }
 
     /**
@@ -1213,6 +1264,7 @@ class ScmDistribution extends Scm
             $this->save($item_order_number, 6);
         } else {
             $reason = $this->request->request('reason');
+            $fail_son_reason = $this->request->request('son_reason');
             !in_array($reason, [1, 2, 3, 4]) && $this->error(__('拒绝原因错误'), [], 403);
 
             //获取子订单数据
@@ -1237,6 +1289,8 @@ class ScmDistribution extends Scm
             $this->_product_bar_code_item->startTrans();
             try {
                 $save_data['distribution_status'] = $status;
+                $save_data['fail_son_reason'] = $fail_son_reason;
+                $save_data['reason'] = $reason;
                 //如果回退到待加工步骤之前，清空定制片库位ID及定制片处理状态
                 if (4 > $status) {
                     $save_data['temporary_house_id'] = 0;
