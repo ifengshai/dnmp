@@ -622,12 +622,16 @@ class Statement extends Backend
                             //入库总数量
                             $count = $this->instockItem->alias('i')->join('fa_in_stock s','i.in_stock_id=s.id')->join('fa_check_order c','s.check_id=c.id')->where('c.purchase_id',$vv['purchase_id'])->sum('i.in_stock_num');
                             $purchase_order = Db::name('purchase_order_item')->where('id',$vv['purchase_id'])->find();
+                            dump('入库总数量'.$count);
+                            dump($purchase_order);
                             //实际采购成本和预估成本不一致，冲减差值
                             if($purchase_order['purchase_price'] != $purchase_order['actual_purchase_price']){
                                 //计算订单出库数量
                                 $out_count1 = $this->item->where('purchase_id',$vv['purchase_id'])->where('item_order_number','<>','')->where('sku',$purchase_order['sku'])->where('library_status',2)->count();
+                                dump('订单出库数量'.$out_count1);
                                 //计算出库数量
                                 $out_count2 = $this->outstockItem->alias('i')->join('fa_out_stock s','s.id=i.out_stock_id','left')->where('s.purchase_id',$vv['purchase_id'])->where('status',2)->where('i.sku',$purchase_order['sku'])->sum('out_stock_num');
+                                dump('出库数量'.$out_count2);
                                 $out_count = $out_count1+$out_count2;
                                 $result['purchase_id'] = $vv['purchase_id'];
                                 $result['create_time'] = time();
@@ -637,6 +641,7 @@ class Statement extends Backend
                                 $result['price'] = round($purchase_order['actual_purchase_price']-$purchase_order['purchase_price'],2);
                                 //误差总金额
                                 $result['total'] = round($result['count']*$result['price'],2);
+                                dump($result);
                                 Db::name('finance_cost_error')->insert($result);
                                 /**************************************计算成本冲减end****************************************/
                                 /**************************************成本核算start****************************************/
@@ -691,6 +696,9 @@ class Statement extends Backend
                                         $arr2['createtime'] = time();  //创建时间
                                         $arr2['cycle_id'] = $cost_order_info['cycle_id'];  //关联周期结转单id
                                         Db::name('finance_cost')->insert($arr2);
+                                        dump($order);
+                                        dump($arr1);
+                                        dump($arr2);
                                     }
                                 }
                                 if($out_count2 != 0){
@@ -719,6 +727,9 @@ class Statement extends Backend
                                         $arr4['order_currency_code'] = 'CNY';  //币种
                                         $arr4['createtime'] = time();  //创建时间
                                         Db::name('finance_cost')->insert($arr4);
+                                        dump($outorder);
+                                        dump($arr3);
+                                        dump($arr4);
                                     }
                                 }
                                 /**************************************成本核算end****************************************/
