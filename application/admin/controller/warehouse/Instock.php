@@ -482,11 +482,13 @@ class Instock extends Backend
     
         $new_product_mapp = new \app\admin\model\NewProductMapping();
         $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
-        $this->model->startTrans();
-        $item = new \app\admin\model\itemmanage\Item;
-        $item->startTrans();
+        $item_platform_sku_model = new ItemPlatformSku();
         $purchase = new \app\admin\model\purchase\PurchaseOrderItem;
         $allocated = new \app\admin\model\itemmanage\GoodsStockAllocated;
+        $item = new \app\admin\model\itemmanage\Item;
+
+        $this->model->startTrans();
+        $item->startTrans();
         $purchase->startTrans();
         $platform->startTrans();
         $this->purchase->startTrans();
@@ -756,9 +758,13 @@ class Instock extends Backend
                         $available_stock = $item->where($item_map)->value('available_stock');
                         //如果可用库存为空 且增加库存数大于0  请求网站接口
                         if ($available_stock == 0 && $v['in_stock_num'] >0){
-                            $value['sku'] = $v['sku'];
-                            $url  =  config('url.zeelool_url').'magic/product/productArrival';
-                            $this->submission_post($url,$value);
+                            //换取对应平台sku
+                            $platform_sku = $item_platform_sku_model->where('sku',$v['sku'])->where('platform_type',1)->value('platform_sku');
+                            if ($platform_sku){
+                                $value['sku'] = $platform_sku;
+                                $url  =  config('url.zeelool_url').'magic/product/productArrival';
+                                $this->submission_post($url,$value);
+                            }
 //                            if ($synchronous['code'] !== 200){
 //                                $this->error('数据同步失败');
 //                            }
