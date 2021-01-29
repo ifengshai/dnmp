@@ -654,6 +654,58 @@ class SelfApi extends Api
         }
     }
 
+
+
+    /**
+     * 批量同步商品上下架状态
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/07/23 09:26:56 
+     * @return void
+     */
+    public function batch_set_product_status()
+
+    {
+        $value = $this->request->post();
+        if (!$value['site']){
+            $this->error(__('缺少站点参数'));
+        }
+        foreach ($value['skus'] as $key=>$item){
+            if (!$item['sku']) {
+                $this->error(__('缺少SKU参数'));
+            }
+            if (!$item['status']) {
+                $this->error(__('缺少状态参数'));
+            }
+            $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
+            $list = $platform->where(['platform_type' => $value['site'], 'platform_sku' => $item['sku']])->find();
+            if (!$list) {
+                $this->error(__('未查询到该'.$item['sku'].'记录'));
+            }
+            $res = $platform->allowField(true)->isUpdate(true, ['platform_type' => $value['site'], 'platform_sku' => $item['sku']])->save(['outer_sku_status' => $item['status']]);
+            if (false !== $res) {
+                //如果是上架 则查询此sku是否存在当天有效sku表里
+                if ($item['status'] == 1) {
+                    $count = Db::name('sku_sales_num')->where(['platform_sku' =>  $item['sku'], 'site' =>  $value['site'], 'createtime' => ['between', [date('Y-m-d 00:00:00'), date('Y-m-d 23:59:59')]]])->count();
+                    //如果不存在则插入此sku
+                    if ($count < 1) {
+                        $data['sku'] = $list['sku'];
+                        $data['platform_sku'] = $list['platform_sku'];
+                        $data['site'] =  $value['site'];
+                        Db::name('sku_sales_num')->insert($data);
+                    }
+                }
+
+            } else {
+                $this->error('同步失败');
+            }
+
+        }
+        $this->success('同步成功', [], 200);
+    }
+
+
     /**
      * 扣减库存及虚拟库存
      *
