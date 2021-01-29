@@ -426,7 +426,6 @@ class Distribution extends Backend
             $abnormal_data = $this->_distribution_abnormal
                 ->where(['item_process_id' => ['in', array_column($list, 'id')], 'status' => 1])
                 ->column('work_id', 'item_process_id');
-
             foreach ($list as $key => $value) {
 
                 //查询合单库位id
@@ -436,9 +435,10 @@ class Distribution extends Backend
                     $stock_house_num = $stock_house_data[$value['temporary_house_id']]; //定制片库位号
                 } elseif (!empty($value['abnormal_house_id']) && 8 == $label) {
                     $stock_house_num = $stock_house_data[$value['abnormal_house_id']]; //异常库位号
-                } elseif (!empty($value['store_house_id']) && 7 == $label && in_array($value['distribution_status'], [8, 9])) {
+                } elseif (!empty($store_house_id) && 7 == $label && in_array($value['distribution_status'], [7,8, 9])) {
                     $stock_house_num = $stock_house_data[$store_house_id]; //合单库位号
                 }
+
                 if ($list[$key]['created_at'] == '') {
                     $list[$key]['created_at'] == '暂无';
                 } else {
