@@ -6,19 +6,17 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
             //订单数据概况折线图
             //Controller.api.formatter.line_chart();
             stock_measure_overview_platform();
-            Controller.api.formatter.order_send_overview();
+            Controller.api.formatter.line_chart();
             Controller.api.formatter.line_histogram();
-            Controller.api.formatter.process_overview();
             Controller.api.formatter.comleted_time_rate_pie();
             $("#sku_submit").click(function () {
-                index_data();
-                purchase_data();
-                track_data();
-                stock_measure_overview_platform();
-                Controller.api.formatter.order_send_overview();
-                Controller.api.formatter.line_histogram();
-                Controller.api.formatter.process_overview();
-                Controller.api.formatter.comleted_time_rate_pie();
+                index_data();   //仓库指标总览
+                purchase_data();     //采购概况
+                track_data();   //物流妥投
+                stock_measure_overview_platform();   //仓库和站点有关的指标
+                Controller.api.formatter.line_chart();   //库存变化折线图
+                Controller.api.formatter.line_histogram();   //订单发货及时率
+                Controller.api.formatter.comleted_time_rate_pie();   //妥投占比
             });
             $("#sku_reset").click(function () {
                 $("#time_str").val('');
@@ -26,19 +24,13 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                 purchase_data();
                 track_data();
                 stock_measure_overview_platform();
-                Controller.api.formatter.order_send_overview();
+                Controller.api.formatter.line_chart();
                 Controller.api.formatter.line_histogram();
-                Controller.api.formatter.process_overview();
                 Controller.api.formatter.comleted_time_rate_pie();
             });
             $(document).on('change', '#order_platform', function () {
                 stock_measure_overview_platform();
             });
-            // $(document).on('change', '#order_platform', function () {
-            //     order_data_view();
-            //     Controller.api.formatter.line_chart();
-            //     Controller.api.formatter.line_histogram();
-            // });
         },
         add: function () {
             Controller.api.bindevent();
@@ -91,6 +83,22 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                             });
                         });
                     }
+                },
+                line_chart: function () {
+                    //订单数据概况折线图
+                    var chartOptions = {
+                        targetId: 'echart1',
+                        downLoadTitle: '图表',
+                        type: 'line'
+                    };
+                    var options = {
+                        type: 'post',
+                        url: 'supplydatacenter/data_market/stock_change_line',
+                        data: {
+                            time_str: $("#time_str5").val()
+                        }
+                    }
+                    EchartObj.api.ajax(options, chartOptions)
                 },
                 line_histogram: function (){
                     //柱状图和折线图的结合

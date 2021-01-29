@@ -507,11 +507,12 @@ class PurchaseOrder extends Backend
                         $batch_arrival_time = $this->request->post("batch_arrival_time/a");
 
                         $batch_id = $this->request->post("batch_id/a");
-                        $batch_sku = array_values($this->request->post("batch_sku/a"));
+                        $batch_sku = $this->request->post("batch_sku/a") ?: [];
                         $batch_item_id = $this->request->post("batch_item_id/a");
 
                         //判断是否有分批数据
                         if ($batch_arrival_time && count($batch_arrival_time) > 0) {
+                            $batch_sku = $batch_sku ? array_values($batch_sku) : [];
                             $i = 0;
                             foreach (array_filter($batch_arrival_time) as $k => $v) {
                                 //判断是否存在id 如果存在则为编辑
@@ -530,7 +531,7 @@ class PurchaseOrder extends Backend
                                 }
                                 $i++;
                                 $list = [];
-                                $arrival_num = array_values($arrival_num); //数组默认首位下标不是0 需要转一下
+                                $arrival_num = $arrival_num ? array_values($arrival_num) : []; //数组默认首位下标不是0 需要转一下
                                 foreach ($batch_sku[$k] as $key => $val) {
                                     if (!$val || !$arrival_num[$k][$key]) {
                                         continue;
