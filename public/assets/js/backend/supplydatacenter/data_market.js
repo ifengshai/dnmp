@@ -92,6 +92,23 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                         });
                     }
                 },
+                line_chart: function () {
+                    //订单数据概况折线图
+                    var chartOptions = {
+                        targetId: 'echart1',
+                        downLoadTitle: '图表',
+                        type: 'line'
+                    };
+
+                    var options = {
+                        type: 'post',
+                        url: 'supplydatacenter/data_market/stock_change_line',
+                        data: {
+                            time_str: $("#time_str5").val()
+                        }
+                    }
+                    EchartObj.api.ajax(options, chartOptions)
+                },
                 line_histogram: function (){
                     //柱状图和折线图的结合
                     var chartOptions = {

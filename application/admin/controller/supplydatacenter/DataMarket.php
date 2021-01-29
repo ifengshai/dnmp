@@ -81,6 +81,54 @@ class DataMarket extends Backend
         $this->view->assign(compact('stock_overview','stock_measure_overview','stock_level_overview','stock_level_overview2','stock_level_sales_rate','purchase_overview','logistics_completed_overview','magentoplatformarr','stock_age_overview','time_str'));
         return $this->view->fetch();
     }
+    //库存变化折线图
+    public function stock_change_line()
+    {
+        if ($this->request->isAjax()) {
+            $params = $this->request->param();
+            $order_platform = $params['order_platform'];
+            $time_str = $params['time_str'];
+            //0:销售额  1：订单量
+            $type = $params['type'] ? $params['type'] : 0;
+            if ($order_platform == 1) {
+                $where['site'] = 1;
+                $model = $this->zeeloolOperate;
+            } elseif ($order_platform == 2) {
+                $where['site'] = 2;
+                $model = $this->vooguemeOperate;
+            } elseif ($order_platform == 3) {
+                $where['site'] = 3;
+                $model = $this->nihaoOperate;
+            }
+            if ($time_str) {
+                $createat = explode(' ', $time_str);
+                $where['day_date'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
+            } else {
+                $start = date('Y-m-d', strtotime('-6 day'));
+                $end   = date('Y-m-d 23:59:59');
+                $where['day_date'] = ['between', [$start, $end]];
+            }
+            if ($type == 1) {
+                $name = '订单数';
+                $date_arr = $model->where($where)->column('order_num','day_date');
+            } else {
+                $name = '销售额';
+                $date_arr = $model->where($where)->column('sales_total_money','day_date');
+            }
+            $json['xcolumnData'] = array_keys($date_arr);
+            $json['column'] = [$name];
+            $json['columnData'] = [
+                [
+                    'name' => $name,
+                    'type' => 'line',
+                    'smooth' => true,
+                    'data' => array_values($date_arr)
+                ],
+
+            ];
+            return json(['code' => 1, 'data' => $json]);
+        }
+    }
     //库存总览
     public function stock_overview(){
         $cache_data = Cache::get('Supplydatacenter_datamarket'  . md5(serialize('stock_overview')));
@@ -935,9 +983,9 @@ class DataMarket extends Backend
         $arr['purchase_num_now'] = $this->purchase->alias('p')->where($where)->where($status_where)->where('p.type',1)->join(['fa_purchase_order_item' => 'b'], 'p.id=b.purchase_id')->sum('b.purchase_num');  //现货
         $arr['purchase_num_big'] = $this->purchase->alias('p')->where($where)->where($status_where)->where('p.type',2)->join(['fa_purchase_order_item' => 'b'], 'p.id=b.purchase_id')->sum('b.purchase_num');  //大货
         //采购总金额
-        $arr['purchase_amount'] = $this->purchase->alias('p')->where($where)->where($status_where)->join(['fa_purchase_order_item' => 'b'], 'p.id=b.purchase_id')->sum('purchase_num*purchase_price');
-        $arr['purchase_amount_now'] = $this->purchase->alias('p')->where($where)->where($status_where)->where('p.type',1)->join(['fa_purchase_order_item' => 'b'], 'p.id=b.purchase_id')->sum('purchase_num*purchase_price');//现货
-        $arr['purchase_amount_big'] = $this->purchase->alias('p')->where($where)->where($status_where)->where('p.type',2)->join(['fa_purchase_order_item' => 'b'], 'p.id=b.purchase_id')->sum('purchase_num*purchase_price');//大货
+        $arr['purchase_amount'] = $this->purchase->alias('p')->where($where)->where($status_where)->sum('purchase_total');
+        $arr['purchase_amount_now'] = $this->purchase->alias('p')->where($where)->where($status_where)->where('p.type',1)->sum('purchase_total');//现货
+        $arr['purchase_amount_big'] = $this->purchase->alias('p')->where($where)->where($status_where)->where('p.type',2)->sum('purchase_total');//大货
         //采购总SKU数
         $arr['purchase_sku_num'] = $this->purchase->alias('p')->where($where)->where($status_where)->join(['fa_purchase_order_item' => 'b'], 'p.id=b.purchase_id')->group('sku')->count(1);
         $arr['purchase_sku_num_now'] = $this->purchase->alias('p')->where($where)->where($status_where)->where('p.type',1)->join(['fa_purchase_order_item' => 'b'], 'p.id=b.purchase_id')->group('sku')->count(1);  //现货
