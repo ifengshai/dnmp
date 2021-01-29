@@ -96,15 +96,16 @@ class DataMarket extends Backend
                 $end   = date('Y-m-d 23:59:59');
                 $where['createtime'] = ['between', [$start, $end]];
             }
-            $data = $this->productAllStockLog->where($where)->column("allnum","DATE_FORMAT(createtime,'%Y-%m-%d') day_date");
-            $json['xcolumnData'] = array_keys($data);
+            $data = $this->productAllStockLog->where($where)->field("allnum,DATE_FORMAT(createtime,'%Y-%m-%d') day_date")->select();
+            $data = collection($data)->toArray();
+            $json['xcolumnData'] = array_column($data,'day_date');
             $json['column'] = ['库存'];
             $json['columnData'] = [
                 [
                     'name' => '库存',
                     'type' => 'line',
                     'smooth' => true,
-                    'data' => array_values($data)
+                    'data' => array_column($data,'allnum')
                 ],
             ];
             return json(['code' => 1, 'data' => $json]);
