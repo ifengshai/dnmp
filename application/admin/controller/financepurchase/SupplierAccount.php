@@ -132,35 +132,13 @@ class SupplierAccount extends Backend
                         }
                     }
                     //采购单物流单详情
-                    $row = Db::name('logistics_info')->where($map)->field('logistics_number,logistics_company_no,collect_time')->find();
-                    //物流单快递100接口
-                    // if ($row['logistics_number']) {
-                    //     $arr = explode(',', $row['logistics_number']);
-                    //     //物流公司编码
-                    //     $company = explode(',', $row['logistics_company_no']);
-                    //     foreach ($arr as $kk => $vv) {
-                    //         try {
-                    //             //快递单号
-                    //             $param['express_id'] = trim($vv);
-                    //             $param['code'] = trim($company[$kk]);
-                    //             $data[$kk] = Hook::listen('express_query', $param)[0];
-                    //         } catch (\Exception $e) {
-                    //             $this->error($e->getMessage());
-                    //         }
-                    //     }
-                    // }
-                    // if (!empty($data[0]['data'])) {
-                    //     //拿物流单接口返回的倒数第二条数据的时间作为揽件的时间 并且加一个月后的月底作为当前采购单批次的 结算周期
-                    //     if (!empty(strtotime(array_slice($data[0]['data'], -1, 1)[0]['time']))) {
-                    //         $list[$k]['periods'] = date("Y-m-t", strtotime(array_slice($data[0]['data'], -1, 1)[0]['time'] . '+' . $vvv['period'] . 'month'));
-                    //     } else {
-                    //         $list[$k]['periods'] = '获取不到物流单详情';
-                    //     }
-                    // } else {
-                    //     $list[$k]['periods'] = '获取不到物流单详情';
-                    // }
-                    // $list[$k]['periods'] = $row['collect_time'];
-                    $list[$k]['periods'] = date("Y-m-t",strtotime(($row['collect_time'] . '+' . $vvv['period'] . 'month')));
+                    $row = Db::name('logistics_info')->where($map)->field('logistics_number,logistics_company_no,collect_time,createtime')->find();
+                   
+                    if(!empty($row['collect_time'])){
+                        $list[$k]['periods'] = date("Y-m-t",strtotime(($row['collect_time'] . '+' . $supplier['period'] . 'month')));
+                    }else{
+                        $list[$k]['periods'] = date("Y-m-t",strtotime(($row['createtime'] . '+' . $supplier['period'] . 'month')));
+                    }
                     switch ($v['pay_type']) {
                         case 1:
                             $list[$k]['pay_type'] = '预付款';
@@ -326,36 +304,13 @@ class SupplierAccount extends Backend
                 }
             }
             //采购单物流单详情
-            $row = Db::name('logistics_info')->where($map)->field('logistics_number,logistics_company_no,collect_time')->find();
-            // //物流单快递100接口
-            // if ($row['logistics_number']) {
-            //     $arr = explode(',', $row['logistics_number']);
-            //     //物流公司编码
-            //     $company = explode(',', $row['logistics_company_no']);
-            //     foreach ($arr as $kk => $vv) {
-            //         try {
-            //             //快递单号
-            //             $param['express_id'] = trim($vv);
-            //             $param['code'] = trim($company[$kk]);
-            //             $data[$kk] = Hook::listen('express_query', $param)[0];
-            //         } catch (\Exception $e) {
-            //             $this->error($e->getMessage());
-            //         }
-            //     }
-            // }
-            // //拿物流单接口返回的倒数第二条数据的时间作为揽件的时间 并且加一个月后的月底作为当前采购单批次的 结算周期
-            // if (!empty($data[0]['data'])) {
-            //     //拿物流单接口返回的倒数第二条数据的时间作为揽件的时间 并且加一个月后的月底作为当前采购单批次的 结算周期
-            //     if (!empty(strtotime(array_slice($data[0]['data'], -1, 1)[0]['time']))) {
-            //         $list[$k]['period'] = date("Y-m-t", strtotime(array_slice($data[0]['data'], -1, 1)[0]['time'] . '+' . $supplier['period'] . 'month'));
-            //     } else {
-            //         $list[$k]['period'] = '获取不到物流单详情';
-            //     }
-            // } else {
-            //     $list[$k]['period'] = '获取不到物流单详情';
-            // }
-            // $list[$k]['period'] = $row['collect_time'];
-            $list[$k]['period'] = date("Y-m-t",strtotime(($row['collect_time'] . '+' . $supplier['period'] . 'month')));
+            $row = Db::name('logistics_info')->where($map)->field('logistics_number,logistics_company_no,collect_time,createtime')->find();
+        
+            if(!empty($row['collect_time'])){
+                $list[$k]['period'] = date("Y-m-t",strtotime(($row['collect_time'] . '+' . $supplier['period'] . 'month')));
+            }else{
+                $list[$k]['period'] = date("Y-m-t",strtotime(($row['createtime'] . '+' . $supplier['period'] . 'month')));
+            }
             switch ($v['pay_type']) {
                 case 1:
                     $list[$k]['pay_type'] = '预付款';
@@ -475,40 +430,12 @@ class SupplierAccount extends Backend
                     $list[$k]['arrival_num'] = Db::name('purchase_batch_item')->where('purchase_batch_id', $v['batch_id'])->value('arrival_num');
                 }
                 //采购单物流单详情
-                $row = Db::name('logistics_info')->where($map)->field('logistics_number,logistics_company_no,collect_time')->find();
-                //物流单快递100接口
-                // if ($row['logistics_number']) {
-                //     $arr = explode(',', $row['logistics_number']);
-                //     //物流公司编码
-                //     $company = explode(',', $row['logistics_company_no']);
-                //     foreach ($arr as $kk => $vv) {
-                //         try {
-                //             //快递单号
-                //             $param['express_id'] = trim($vv);
-                //             $param['code'] = trim($company[$kk]);
-                //             $data[$kk] = Hook::listen('express_query', $param)[0];
-                //         } catch (\Exception $e) {
-                //             $this->error($e->getMessage());
-                //         }
-                //     }
-                // }
-                // // dump(array_slice($data[0]['data'],-1,1));
-                // // dump(array_slice($data[0]['data'],-1,1)[0]['time']);
-                // //拿物流单接口返回的倒数第二条数据的时间作为揽件的时间 并且加一个月后的月底作为当前采购单批次的 结算周期
-                // // if (!empty($data[0]['data'][count($data[0]['data']) - 2]['time'])) {
-                // if (!empty($data[0]['data'])) {
-                //     //拿物流单接口返回的倒数第二条数据的时间作为揽件的时间 并且加一个月后的月底作为当前采购单批次的 结算周期
-                //     if (!empty(strtotime(array_slice($data[0]['data'], -1, 1)[0]['time']))) {
-                //         $list[$k]['period'] = date("Y-m-t", strtotime(array_slice($data[0]['data'], -1, 1)[0]['time'] . '+' . $supplier['period'] . 'month'));
-                //     } else {
-                //         $list[$k]['period'] = '获取不到物流单详情';
-                //     }
-                // } else {
-                //     $list[$k]['period'] = '获取不到物流单详情';
-                // }
-
-                $list[$k]['period'] = date("Y-m-t",strtotime(($row['collect_time'] . '+' . $supplier['period'] . 'month')));
-                // dump($list[$k]['period']);
+                $row = Db::name('logistics_info')->where($map)->field('logistics_number,logistics_company_no,collect_time,createtime')->find();
+                if(!empty($row['collect_time'])){
+                    $list[$k]['period'] = date("Y-m-t",strtotime(($row['collect_time'] . '+' . $supplier['period'] . 'month')));
+                }else{
+                    $list[$k]['period'] = date("Y-m-t",strtotime(($row['createtime'] . '+' . $supplier['period'] . 'month')));
+                }
                 if ($timeBegin && $timeEnd) {
                     if (strtotime($list[$k]['period']) < $timeBegin || strtotime($list[$k]['period']) > $timeEnd) {
                         unset($list[$k]);
