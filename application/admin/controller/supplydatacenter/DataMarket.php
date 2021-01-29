@@ -176,7 +176,7 @@ class DataMarket extends Backend
             //该品实时库存
             $real_time_stock = $this->model->where('sku',$value['true_sku'])->where('is_del',1)->where('is_open',1)->value('sum(stock)-sum(distribution_occupy_stock) as result');
             //该品库存金额
-            $sku_amount = $this->item->alias('i')->join('fa_purchase_order_item o','i.purchase_id=o.purchase_id and i.sku=o.sku')->where('i.sku',$value['true_sku'])->where('i.library_status',1)->value('SUM(IF(o.actual_purchase_price != 0,o.actual_purchase_price,o.purchase_price)) as result');
+            $sku_amount = $this->item->alias('i')->join('fa_purchase_order_item o','i.purchase_id=o.purchase_id and i.sku=o.sku')->join('fa_purchase_order p','p.id=o.purchase_id')->where('i.sku',$value['true_sku'])->where('i.library_status',1)->value('SUM(IF(o.actual_purchase_price != 0,o.actual_purchase_price,p.purchase_total/purchase_num)) as result');
             //实际周转天数
             $sku_info  = $this->getSkuSales($value['true_sku']);
             $actual_day = $sku_info['days']!=0 && $sku_info['count']!=0 ? round($real_time_stock/$sku_info['count']/$sku_info['days'],2) : 0;
@@ -325,10 +325,10 @@ class DataMarket extends Backend
             'count1'=>$count1,
             'count2'=>$count2,
             'count3'=>$count3,
-            'total'=>$total,
-            'total1'=>$total1,
-            'total2'=>$total2,
-            'total3'=>$total3,
+            'total'=>round($total,2),
+            'total1'=>round($total1,2),
+            'total2'=>round($total2,2),
+            'total3'=>round($total3,2),
             'A+'=>$arr1,
             'A'=>$arr2,
             'B'=>$arr3,
