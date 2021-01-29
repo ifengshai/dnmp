@@ -416,48 +416,49 @@ class DataMarket extends Backend
         $where['library_status'] = 1;
         $stock = $this->item->where($where)->where('in_stock_time is not null')->count();
         $count = $this->item->where($where)->where('in_stock_time is not null')->count('distinct sku');
-        $map1 = [];
-        $map1[] = ['exp', Db::raw("TIMESTAMPDIFF(MONTH,in_stock_time,now())>=0 and TIMESTAMPDIFF(MONTH,in_stock_time,now())<4")];
-        $stock1 = $this->item->where($where)->where('in_stock_time is not null')->where($map1)->count();
-        $data1 = $this->item->where($where)->where('in_stock_time is not null')->where($map1)->count('distinct sku');
+        //sku数量
+        $sql1 = $this->item->where($where)->where('in_stock_time is not null')->field('distinct sku')->buildSql();
+        $arr_where = [];
+        $arr_where[] = ['exp', Db::raw("sku in " . $sql1)];
 
-        $map2 = [];
-        $map2[] = ['exp', Db::raw("TIMESTAMPDIFF(MONTH,in_stock_time,now())>=4 and TIMESTAMPDIFF(MONTH,in_stock_time,now())<7")];
-        $stock2 = $this->item->where($where)->where('in_stock_time is not null')->where($map2)->count();
-        $data2 = $this->item->where($where)->where('in_stock_time is not null')->where($map2)->count('distinct sku');
+        $sql2 = $this->item->alias('t1')->field('TIMESTAMPDIFF( MONTH, min(in_stock_time), now()) AS total')->where($where)->where($arr_where)->where('in_stock_time is not null')->group('sku')->buildSql();
 
-        $map3 = [];
-        $map3[] = ['exp', Db::raw("TIMESTAMPDIFF(MONTH,in_stock_time,now())>=7 and TIMESTAMPDIFF(MONTH,in_stock_time,now())<10")];
-        $stock3 = $this->item->where($where)->where('in_stock_time is not null')->where($map3)->count();
-        $data3 = $this->item->where($where)->where('in_stock_time is not null')->where($map3)->count('distinct sku');
+        $count_info = $this->item->table([$sql2=>'t2'])->field('sum(IF( total>= 0 AND total< 4, 1, 0 )) AS a,sum(IF( total>= 4 AND total< 7, 1, 0 )) AS b,sum(IF( total>= 7 AND total< 10, 1, 0 )) AS c,sum(IF( total>= 10 AND total< 13, 1, 0 )) AS d')->select();
 
-        $map4 = [];
-        $map4[] = ['exp', Db::raw("TIMESTAMPDIFF(MONTH,in_stock_time,now())>=10 and TIMESTAMPDIFF(MONTH,in_stock_time,now())<13")];
-        $stock4 = $this->item->where($where)->where('in_stock_time is not null')->where($map4)->count();
-        $data4 = $this->item->where($where)->where('in_stock_time is not null')->where($map4)->count('distinct sku');
-
-        $stock5 = $stock - $stock1 - $stock2 - $stock3 - $stock4;
+        $data1 = $count_info[0]['a'];
+        $data2 = $count_info[0]['b'];
+        $data3 = $count_info[0]['c'];
+        $data4 = $count_info[0]['d'];
         $data5 = $count - $data1 - $data2 - $data3 - $data4;
+        //库存
+        $sql3 = $this->item->where($where)->where('in_stock_time is not null')->field('distinct sku')->buildSql();
+        $arr_where = [];
+        $arr_where[] = ['exp', Db::raw("sku in " . $sql3)];
 
-        $total = $this->item->alias('b')->join('fa_purchase_order_item o','b.purchase_id=o.purchase_id')->where($where)->where('in_stock_time is not null')->sum('o.purchase_price');
+        $sql4 = $this->item->alias('t1')->field('TIMESTAMPDIFF( MONTH, min(in_stock_time), now()) AS total,count(*) count')->where($where)->where($arr_where)->where('in_stock_time is not null')->group('sku')->buildSql();
 
-        $flag1 = [];
-        $flag1[] = ['exp', Db::raw("TIMESTAMPDIFF(MONTH,in_stock_time,now())>=0 and TIMESTAMPDIFF(MONTH,in_stock_time,now())<4")];
-        $total1 = $this->item->alias('b')->join('fa_purchase_order_item o','b.purchase_id=o.purchase_id')->where($where)->where('in_stock_time is not null')->where($flag1)->sum('o.purchase_price');
+        $stock_info = $this->item->table([$sql4=>'t2'])->field('sum(IF( total>= 0 AND total< 4, count, 0 )) AS a,sum(IF( total>= 4 AND total< 7, count, 0 )) AS b,sum(IF( total>= 7 AND total< 10, count, 0 )) AS c,sum(IF( total>= 10 AND total< 13, count, 0 )) AS d')->select();
+        $stock1 = $stock_info[0]['a'];
+        $stock2 = $stock_info[0]['b'];
+        $stock3 = $stock_info[0]['c'];
+        $stock4 = $stock_info[0]['d'];
+        $stock5 = $stock - $stock1 - $stock2 - $stock3 - $stock4;
 
-        $flag2 = [];
-        $flag2[] = ['exp', Db::raw("TIMESTAMPDIFF(MONTH,in_stock_time,now())>=4 and TIMESTAMPDIFF(MONTH,in_stock_time,now())<7")];
-        $total2 = $this->item->alias('b')->join('fa_purchase_order_item o','b.purchase_id=o.purchase_id')->where($where)->where('in_stock_time is not null')->where($flag2)->sum('o.purchase_price');
+        $total = $this->item->alias('i')->join('fa_purchase_order_item oi','i.purchase_id=oi.purchase_id and i.sku=oi.sku')->join('fa_purchase_order o','o.id=i.purchase_id')->where($where)->where('in_stock_time is not null')->value('SUM(IF(actual_purchase_price,actual_purchase_price,o.purchase_total/purchase_num)) price');
 
-        $flag3 = [];
-        $flag3[] = ['exp', Db::raw("TIMESTAMPDIFF(MONTH,in_stock_time,now())>=7 and TIMESTAMPDIFF(MONTH,in_stock_time,now())<10")];
-        $total3 = $this->item->alias('b')->join('fa_purchase_order_item o','b.purchase_id=o.purchase_id')->where($where)->where('in_stock_time is not null')->where($flag3)->sum('o.purchase_price');
+        $sql5 = $this->item->where($where)->where('in_stock_time is not null')->field('distinct sku')->buildSql();
+        $arr_where = [];
+        $arr_where[] = ['exp', Db::raw("i.sku in " . $sql5)];
 
-        $flag4 = [];
-        $flag4[] = ['exp', Db::raw("TIMESTAMPDIFF(MONTH,in_stock_time,now())>=10 and TIMESTAMPDIFF(MONTH,in_stock_time,now())<13")];
-        $total4 = $this->item->alias('b')->join('fa_purchase_order_item o','b.purchase_id=o.purchase_id')->where($where)->where('in_stock_time is not null')->where($flag4)->sum('o.purchase_price');
+        $sql6 = $this->item->alias('i')->join('fa_purchase_order_item oi','i.purchase_id=oi.purchase_id and i.sku=oi.sku')->join('fa_purchase_order o','o.id=i.purchase_id')->field('TIMESTAMPDIFF( MONTH, min(in_stock_time), now()) AS total,SUM(IF(actual_purchase_price,actual_purchase_price,o.purchase_total/purchase_num)) price')->where($where)->where($arr_where)->where('in_stock_time is not null')->group('i.sku')->buildSql();
 
-        $total5 = $total - $total1 - $total2 - $total3 - $total4;
+        $total_info = $this->item->table([$sql6=>'t2'])->field('sum(IF( total>= 0 AND total< 4, price, 0 )) AS a,sum(IF( total>= 4 AND total< 7, price, 0 )) AS b,sum(IF( total>= 7 AND total< 10, price, 0 )) AS c,sum(IF( total>= 10 AND total< 13, price, 0 )) AS d')->select();
+        $total1 = round($total_info[0]['a'],2);
+        $total2 = round($total_info[0]['b'],2);
+        $total3 = round($total_info[0]['c'],2);
+        $total4 = round($total_info[0]['d'],2);
+
+        $total5 = round(($total - $total1 - $total2 - $total3 - $total4),2);
 
         $percent1 = $count ? round($data1/$count*100,2) : 0;
         $percent2 = $count ? round($data2/$count*100,2) : 0;
