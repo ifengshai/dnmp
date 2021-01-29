@@ -422,19 +422,16 @@ class Distribution extends Backend
             $stock_house_data = $this->_stock_house
                 ->where(['status' => 1, 'type' => ['>', 1], 'occupy' => ['>', 0]])
                 ->column('coding', 'id');
-
             //获取异常数据
             $abnormal_data = $this->_distribution_abnormal
                 ->where(['item_process_id' => ['in', array_column($list, 'id')], 'status' => 1])
                 ->column('work_id', 'item_process_id');
 
-
             foreach ($list as $key => $value) {
 
                 //查询合单库位id
                 $store_house_id = $this->_new_order_process->where(['order_id' => $value['order_id']])->where('store_house_id is not null')->value('store_house_id');
-
-                $stock_house_num = '-';
+                $stock_house_num = '';
                 if (!empty($value['temporary_house_id']) && 3 == $label) {
                     $stock_house_num = $stock_house_data[$value['temporary_house_id']]; //定制片库位号
                 } elseif (!empty($value['abnormal_house_id']) && 8 == $label) {
@@ -478,7 +475,6 @@ class Distribution extends Backend
                     $list[$key]['sku'] = $change_sku;
                 }
             }
-
             $result = array("total" => $total, "rows" => $list);
             return json($result);
         }
