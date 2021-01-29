@@ -37,6 +37,7 @@ class DataMarket extends Backend
         $this->inventoryitem = new \app\admin\model\warehouse\InventoryItem;
         $this->item = new \app\admin\model\warehouse\ProductBarCodeItem;
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku();
+        $this->productAllStockLog = new \app\admin\model\ProductAllStock();
     }
     /**
      * 显示资源列表
@@ -86,45 +87,25 @@ class DataMarket extends Backend
     {
         if ($this->request->isAjax()) {
             $params = $this->request->param();
-            $order_platform = $params['order_platform'];
             $time_str = $params['time_str'];
-            //0:销售额  1：订单量
-            $type = $params['type'] ? $params['type'] : 0;
-            if ($order_platform == 1) {
-                $where['site'] = 1;
-                $model = $this->zeeloolOperate;
-            } elseif ($order_platform == 2) {
-                $where['site'] = 2;
-                $model = $this->vooguemeOperate;
-            } elseif ($order_platform == 3) {
-                $where['site'] = 3;
-                $model = $this->nihaoOperate;
-            }
             if ($time_str) {
                 $createat = explode(' ', $time_str);
-                $where['day_date'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
+                $where['createtime'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
             } else {
                 $start = date('Y-m-d', strtotime('-6 day'));
                 $end   = date('Y-m-d 23:59:59');
-                $where['day_date'] = ['between', [$start, $end]];
+                $where['createtime'] = ['between', [$start, $end]];
             }
-            if ($type == 1) {
-                $name = '订单数';
-                $date_arr = $model->where($where)->column('order_num','day_date');
-            } else {
-                $name = '销售额';
-                $date_arr = $model->where($where)->column('sales_total_money','day_date');
-            }
-            $json['xcolumnData'] = array_keys($date_arr);
-            $json['column'] = [$name];
+            $data = $this->productAllStockLog->where($where)->column("allnum","DATE_FORMAT(createtime,'%Y-%m-%d') day_date");
+            $json['xcolumnData'] = array_keys($data);
+            $json['column'] = ['库存'];
             $json['columnData'] = [
                 [
-                    'name' => $name,
+                    'name' => '库存',
                     'type' => 'line',
                     'smooth' => true,
-                    'data' => array_values($date_arr)
+                    'data' => array_values($data)
                 ],
-
             ];
             return json(['code' => 1, 'data' => $json]);
         }
