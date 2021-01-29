@@ -356,10 +356,10 @@ class ScmDistribution extends Scm
                 )
 
                 // && $this->error(__('有工单未处理，无法操作'), [], 405);
-                && $this->error(__('子订单存在工单'."<br><b>$coding</b>"), [], 405);
+                && $this->error(__('子订单存在工单' . "<br><b>$coding</b>"), [], 405);
                 if ($val['measure_choose_id'] == 21) {
                     // $this->error(__('有工单存在暂缓措施未处理，无法操作'), [], 405);
-                    $this->error(__("子订单存在工单"."<br><b>$coding</b>"), [], 405);
+                    $this->error(__("子订单存在工单" . "<br><b>$coding</b>"), [], 405);
                 }
             }
         }
@@ -372,7 +372,7 @@ class ScmDistribution extends Scm
         $coding1 = $this->_stock_house
             ->where(['id' => $item_process_info['abnormal_house_id']])
             ->value('coding');
-        $abnormal_id && $this->error(__("子订单存在异常"."<br><b>$coding1</b>"), [], 405);
+        $abnormal_id && $this->error(__("子订单存在异常" . "<br><b>$coding1</b>"), [], 405);
 
         //检测状态
         $status_arr = [
@@ -465,7 +465,7 @@ class ScmDistribution extends Scm
                 ['id' => 2, 'name' => '商品条码贴错'],
             ],
             3 => [
-                ['id' => 3, 'name' => '核实处方','reason'=>[['id'=>1,'name'=>'核实轴位（AXI）'],['id'=>2,'name'=>'核实瞳距（PD）'],['id'=>3,'name'=>'核实处方光度符号'],['id'=>4,'name'=>'核实镜片类型'],['id'=>5,'name'=>'核实处方光度']]],
+                ['id' => 3, 'name' => '核实处方', 'reason' => [['id' => 1, 'name' => '核实轴位（AXI）'], ['id' => 2, 'name' => '核实瞳距（PD）'], ['id' => 3, 'name' => '核实处方光度符号'], ['id' => 4, 'name' => '核实镜片类型'], ['id' => 5, 'name' => '核实处方光度']]],
                 ['id' => 4, 'name' => '镜片缺货'],
                 ['id' => 5, 'name' => '镜片重做'],
                 ['id' => 6, 'name' => '定制片超时']
@@ -480,9 +480,9 @@ class ScmDistribution extends Scm
                 ['id' => 11, 'name' => '镜架印logo报损']
             ],
             6 => [
-                ['id' => 1, 'name' => '加工调整','reason'=>[['id'=>1,'name'=>'划伤'],['id'=>2,'name'=>'断裂'],['id'=>3,'name'=>'杂质'],['id'=>4,'name'=>'黑点'],['id'=>5,'name'=>'掉漆'],['id'=>6,'name'=>'镜架凸起']]],
+                ['id' => 1, 'name' => '加工调整', 'reason' => [['id' => 1, 'name' => '划伤'], ['id' => 2, 'name' => '断裂'], ['id' => 3, 'name' => '杂质'], ['id' => 4, 'name' => '黑点'], ['id' => 5, 'name' => '掉漆'], ['id' => 6, 'name' => '镜架凸起']]],
                 ['id' => 2, 'name' => '镜架报损'],
-                ['id' => 3, 'name' => '镜片报损','reason'=>[['id'=>1,'name'=>'划伤'],['id'=>2,'name'=>'轴位错'],['id'=>3,'name'=>'左右反'],['id'=>4,'name'=>'不变色'],['id'=>5,'name'=>'崩边'],['id'=>6,'name'=>'配错片']]],
+                ['id' => 3, 'name' => '镜片报损', 'reason' => [['id' => 1, 'name' => '划伤'], ['id' => 2, 'name' => '轴位错'], ['id' => 3, 'name' => '左右反'], ['id' => 4, 'name' => '不变色'], ['id' => 5, 'name' => '崩边'], ['id' => 6, 'name' => '配错片']]],
                 ['id' => 4, 'name' => 'logo调整']
             ],
             7 => [
@@ -504,7 +504,7 @@ class ScmDistribution extends Scm
                 $second = 1; //是第二次扫描
 
                 // $msg = "请将子单号{$item_order_number}的商品从定制片暂存架{$coding}库位取出";
-                $msg = "<br><b>$coding</b>"."是否将商品取出";
+                $msg = "<br><b>$coding</b>" . "是否将商品取出";
             } else {
                 //判断是否定制片且未处理状态
                 if (0 == $item_process_info['customize_status'] && 3 == $item_process_info['order_prescription_type']) {
@@ -537,7 +537,7 @@ class ScmDistribution extends Scm
                                 $second = 0; //是第一次扫描
 
                                 // $msg = "请将子单号{$item_order_number}的商品放入定制片暂存架{$coding}库位";
-                                $msg = "请放在暂存架"."<br><b>$coding</b>";
+                                $msg = "请放在暂存架" . "<br><b>$coding</b>";
                             }
 
                             $this->_stock_house->commit();
@@ -561,10 +561,33 @@ class ScmDistribution extends Scm
                     }
                 }
             }
-
+            if ($item_process_info['reason'] == 3) {
+                switch ($item_process_info['fail_son_reason']) {
+                    case 1:
+                        $fail_reason = '划伤';
+                        break;
+                    case 2:
+                        $fail_reason = '轴位错';
+                        break;
+                    case 3:
+                        $fail_reason = '左右反';
+                        break;
+                    case 4:
+                        $fail_reason = '不变色';
+                        break;
+                    case 5:
+                        $fail_reason = '崩边';
+                        break;
+                    case 6:
+                        $fail_reason = '配错片';
+                        break;
+                    default:
+                        $fail_reason = '';
+                }
+            }
             //定制片提示库位号信息
             if ($coding) {
-                $this->success($msg, ['abnormal_list' => $abnormal_list, 'option_info' => $option_info, 'second' => $second], 200);
+                $this->success($msg, ['abnormal_list' => $abnormal_list, 'option_info' => $option_info, 'second' => $second, 'fail_reason' => $fail_reason], 200);
             }
         }
 
@@ -576,8 +599,8 @@ class ScmDistribution extends Scm
 
         $fail_reason = '';
         //加工调整 成品质检拒绝原因
-        if ($item_process_info['reason'] == 1){
-            switch ($item_process_info['fail_son_reason']){
+        if ($item_process_info['reason'] == 1) {
+            switch ($item_process_info['fail_son_reason']) {
                 case 1:
                     $fail_reason = '划伤';
                     break;
@@ -599,33 +622,10 @@ class ScmDistribution extends Scm
                 default:
                     $fail_reason = '';
             }
-        }elseif ($item_process_info['reason'] == 3){
-            switch ($item_process_info['fail_son_reason']){
-                case 1:
-                    $fail_reason = '划伤';
-                    break;
-                case 2:
-                    $fail_reason = '轴位错';
-                    break;
-                case 3:
-                    $fail_reason = '左右反';
-                    break;
-                case 4:
-                    $fail_reason = '不变色';
-                    break;
-                case 5:
-                    $fail_reason = '崩边';
-                    break;
-                case 6:
-                    $fail_reason = '配错片';
-                    break;
-                default:
-                    $fail_reason = '';
-            }
         }
 
 
-        $this->success('', ['abnormal_list' => $abnormal_list, 'option_info' => $option_info,'fail_reason'=>$fail_reason], 200);
+        $this->success('', ['abnormal_list' => $abnormal_list, 'option_info' => $option_info, 'fail_reason' => $fail_reason], 200);
     }
 
     /**
@@ -692,7 +692,7 @@ class ScmDistribution extends Scm
             $coding1 = $this->_stock_house
                 ->where(['id' => $item_process_info['abnormal_house_id']])
                 ->value('coding');
-            $this->error(__("子订单存在异常"."<br><b>$coding1</b>"), [], 405);
+            $this->error(__("子订单存在异常" . "<br><b>$coding1</b>"), [], 405);
         }
 
         //查询订单号
@@ -726,10 +726,10 @@ class ScmDistribution extends Scm
                 )
 
                 // && $this->error(__('有工单未处理，无法操作'), [], 405);
-                && $this->error(__("子订单存在工单"."<br><b>$codings</b>"), [], 405);
+                && $this->error(__("子订单存在工单" . "<br><b>$codings</b>"), [], 405);
 
                 if ($val['measure_choose_id'] == 21) {
-                    $this->error(__("子订单存在工单"."<br><b>$codings</b>"), [], 405);
+                    $this->error(__("子订单存在工单" . "<br><b>$codings</b>"), [], 405);
                 }
             }
         }
@@ -1457,7 +1457,7 @@ class ScmDistribution extends Scm
         if ($check_work_order) {
             foreach ($check_work_order as $key => $value) {
                 if ($value['item_order_number'] == $item_order_number) {//判断是否是当前工单含有未完成的工单，是的话提示语包含库位
-                    $this->error(__("子订单存在工单"."<br><b>$codeing</b>"), [], 405);
+                    $this->error(__("子订单存在工单" . "<br><b>$codeing</b>"), [], 405);
                 }
             }
             foreach ($check_work_order as $val) {
@@ -1481,14 +1481,14 @@ class ScmDistribution extends Scm
         // $abnormal_id && $this->error(__('有异常待处理，无法操作'), [], 405);
         //子单异常库位号
         $codeing1 = $this->_stock_house->field('id,coding,subarea')->where('id', $item_process_info['abnormal_house_id'])->value('coding');
-        $abnormal_id && $this->error(__("子订单存在异常"."<br><b>$codeing1</b>"), [], 405);
+        $abnormal_id && $this->error(__("子订单存在异常" . "<br><b>$codeing1</b>"), [], 405);
 
         empty($item_process_info) && $this->error(__('子订单不存在'), [], 403);
 
 
         //产品婧让改的
         if (!empty($hedan_codeing) && 9 == $item_process_info['distribution_status']) {
-            $this->error(__("请放在合单架"."<br><b>$hedan_codeing</b>"), [], 403);
+            $this->error(__("请放在合单架" . "<br><b>$hedan_codeing</b>"), [], 403);
         } elseif (empty($store_house_is) && 9 == $item_process_info['distribution_status']) {
             $this->error(__('订单合单完成，去审单！'), [], 403);
         }
@@ -1511,7 +1511,7 @@ class ScmDistribution extends Scm
                 //有主单合单库位
                 $store_house_info = $this->_stock_house->field('id,coding,subarea')->where('id', $order_process_info['store_house_id'])->find();
                 // $this->error(__('请将子单号' . $item_order_number . '的商品放入合单架' . $store_house_info['coding'] . '合单库位'), [], 403);
-                $this->error(__("请放在合单架"."<br><b>$hedan_codeing</b>"), [], 403);
+                $this->error(__("请放在合单架" . "<br><b>$hedan_codeing</b>"), [], 403);
             } else {
                 //                $this->_new_order_item_process->allowField(true)->isUpdate(true, ['item_order_number'=>$item_order_number])->save(['distribution_status'=>7]);
                 $this->error(__('合单失败，主单未分配合单库位'), [], 403);
@@ -1608,7 +1608,7 @@ class ScmDistribution extends Scm
             //重复扫描子单号--提示语句
             // $this->error(__('请将子单号' . $item_order_number . '的商品放入合单架' . $store_house_info['coding'] . '库位'), [], 511);
             $codeing = $store_house_info['coding'];
-            $this->error(__("请放在合单架"."<br><b>$codeing</b>"), [], 511);
+            $this->error(__("请放在合单架" . "<br><b>$codeing</b>"), [], 511);
         }
 
         if (!empty($store_house_info['order_id'])) {
