@@ -37,8 +37,12 @@
     .title{
         font-size: 18px;
         height: 194px;
-        text-align: left;
         color: rgb(127, 127, 127);
+    }
+    .amount{
+        color: red;
+        line-height: 112px;
+        font-size: 20px;
     }
     .title1{
         font-size: 18px;
@@ -53,8 +57,7 @@
     }
     .title3{
         font-size: 18px;
-        height: 143px;
-        text-align: left;
+        height: 169px;
         color: rgb(127, 127, 127);
     }
     .title4{
@@ -223,7 +226,7 @@
                         </div>
                         <div class="btn btn-div div">
                             <span class="extend">
-                                <div class="title">库存总数量（个）<br/><span style="color: red;">{$stock_overview.stock_num}</span></div>
+                                <div class="title"><span style="float: left">库存总数量（个）</span><br/><span class="amount">{$stock_overview.stock_num}</span></div>
                             </span>
                         </div>
                         <div class="btn btn-div div">
@@ -231,7 +234,7 @@
                                 <img src="/wenhao.jpg" class="wenhao-class">
                             </span>
                             <span class="extend">
-                                <div class="title">在途库存数量（个）<br/><span style="color: red;">{$stock_overview.onway_stock_num}</span></div>
+                                <div class="title"><span style="float: left">在途库存数量（个）</span><br/><span class="amount">{$stock_overview.onway_stock_num}</span></div>
                             </span>
                         </div>
                         <div class="btn btn-div div">
@@ -239,12 +242,12 @@
                                 <img src="/wenhao.jpg" class="wenhao-class">
                             </span>
                             <span class="extend">
-                                <div class="title">待入库数量（个）<br/><span style="color: red;">{$stock_overview.wait_stock_num}</span></div>
+                                <div class="title"><span style="float: left">待入库数量（个）</span><br/><span class="amount">{$stock_overview.wait_stock_num}</span></div>
                             </span>
                         </div>
                         <div class="btn btn-div div">
                             <span class="extend">
-                                <div class="title">库存单价（￥）<br/><span style="color: red;">{$stock_overview.stock_price}</span></div>
+                                <div class="title"><span style="float: left">库存单价（￥）</span><br/><span class="amount">{$stock_overview.stock_price}</span></div>
                             </span>
                         </div>
                     </div>
@@ -258,22 +261,22 @@
                         </div>
                         <div class="btn btn-div div">
                             <span class="extend">
-                                <div class="title">库存总金额（￥）<br/><span style="color: red;">{$stock_overview.stock_amount}</span></div>
+                                <div class="title"><span style="float: left">库存总金额（￥）</span><br/><span class="amount">{$stock_overview.stock_amount}</span></div>
                             </span>
                         </div>
                         <div class="btn btn-div div">
                             <span class="extend">
-                                <div class="title">在途库存金额（￥）<br/><span style="color: red;">{$stock_overview.onway_stock_amount}</span></div>
+                                <div class="title"><span style="float: left">在途库存金额（￥）</span><br/><span class="amount">{$stock_overview.onway_stock_amount}</span></div>
                             </span>
                         </div>
                         <div class="btn btn-div div">
                             <span class="extend">
-                                <div class="title">待入库金额（￥）<br/><span style="color: red;">{$stock_overview.wait_stock_amount}</span></div>
+                                <div class="title"><span style="float: left">待入库金额（￥）</span><br/><span class="amount">{$stock_overview.wait_stock_amount}</span></div>
                             </span>
                         </div>
                         <div class="btn btn-div div">
                             <span class="extend">
-                                <div class="title">在途库存单价（￥）<br/><span style="color: red;">{$stock_overview.onway_stock_price}</span></div>
+                                <div class="title"><span style="float: left">在途库存单价（￥）</span><br/><span class="amount">{$stock_overview.onway_stock_price}</span></div>
                             </span>
                         </div>
                     </div>
@@ -606,12 +609,12 @@
                                         </div>
                                         <div class="btn btn-div div1">
                                             <span class="extend">
-                                                <div class="title3">采购批次到货延时率<br/><span style="color: red;" id="purchase_delay_rate">{$purchase_overview.purchase_delay_rate}</span></div>
+                                                <div class="title3"><span style="float: left">采购批次到货延时率</span><br/><span class="amount" id="purchase_delay_rate">{$purchase_overview.purchase_delay_rate}</span></div>
                                             </span>
                                         </div>
                                         <div class="btn btn-div div1">
                                             <span class="extend">
-                                                <div class="title3">采购批次到货合格率<br/><span style="color: red;" id="purchase_qualified_rate">{$purchase_overview.purchase_qualified_rate}</span></div>
+                                                <div class="title3"><span style="float: left">采购批次到货合格率</span><br/><span class="amount" id="purchase_qualified_rate">{$purchase_overview.purchase_qualified_rate}</span></div>
                                             </span>
                                         </div>
                                     </div>
