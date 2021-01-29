@@ -417,22 +417,22 @@ class DataMarket extends Backend
         $stock = $this->item->where($where)->where('in_stock_time is not null')->count();
         $count = $this->item->where($where)->where('in_stock_time is not null')->count('distinct sku');
         $map1 = [];
-        $map1[] = ['exp', Db::raw("TIMESTAMPDIFF(MONTH,in_stock_time,now())>=0 and TIMESTAMPDIFF(MONTH,in_stock_time,now())<4")];
+        $map1[] = ['exp', Db::raw("TIMESTAMPDIFF(MONTH,in_stock_time,now())>=0 and TIMESTAMPDIFF(MONTH,in_stock_time,now())<3")];
         $stock1 = $this->item->where($where)->where('in_stock_time is not null')->where($map1)->count();
         $data1 = $this->item->where($where)->where('in_stock_time is not null')->where($map1)->count('distinct sku');
 
         $map2 = [];
-        $map2[] = ['exp', Db::raw("TIMESTAMPDIFF(MONTH,in_stock_time,now())>=4 and TIMESTAMPDIFF(MONTH,in_stock_time,now())<7")];
+        $map2[] = ['exp', Db::raw("TIMESTAMPDIFF(MONTH,in_stock_time,now())>=3 and TIMESTAMPDIFF(MONTH,in_stock_time,now())<6")];
         $stock2 = $this->item->where($where)->where('in_stock_time is not null')->where($map2)->count();
         $data2 = $this->item->where($where)->where('in_stock_time is not null')->where($map2)->count('distinct sku');
 
         $map3 = [];
-        $map3[] = ['exp', Db::raw("TIMESTAMPDIFF(MONTH,in_stock_time,now())>=7 and TIMESTAMPDIFF(MONTH,in_stock_time,now())<10")];
+        $map3[] = ['exp', Db::raw("TIMESTAMPDIFF(MONTH,in_stock_time,now())>=6 and TIMESTAMPDIFF(MONTH,in_stock_time,now())<9")];
         $stock3 = $this->item->where($where)->where('in_stock_time is not null')->where($map3)->count();
         $data3 = $this->item->where($where)->where('in_stock_time is not null')->where($map3)->count('distinct sku');
 
         $map4 = [];
-        $map4[] = ['exp', Db::raw("TIMESTAMPDIFF(MONTH,in_stock_time,now())>=10 and TIMESTAMPDIFF(MONTH,in_stock_time,now())<13")];
+        $map4[] = ['exp', Db::raw("TIMESTAMPDIFF(MONTH,in_stock_time,now())>=9 and TIMESTAMPDIFF(MONTH,in_stock_time,now())<12")];
         $stock4 = $this->item->where($where)->where('in_stock_time is not null')->where($map4)->count();
         $data4 = $this->item->where($where)->where('in_stock_time is not null')->where($map4)->count('distinct sku');
 
