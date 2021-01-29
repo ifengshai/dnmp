@@ -659,6 +659,7 @@ class PurchasePay extends Backend
             }
             $this->assign('supplier', $data);
             $this->assign('order_number', $row['order_number']);
+            $this->assign('row', $row);
             return $this->view->fetch('detail_statement');
         }else {
             $purchase_order = $this->purchase_order->where('id', $row['purchase_id'])->find();
