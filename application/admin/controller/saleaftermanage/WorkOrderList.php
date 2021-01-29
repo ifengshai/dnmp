@@ -2934,7 +2934,10 @@ class WorkOrderList extends Backend
                 10 => 'new_zeeloolde_url',
                 11 => 'new_zeelooljp_url'
             ];
-            $url = config('url.' . $domain_list[$row->work_platform]) . 'price-difference?customer_email=' . $row->email . '&origin_order_number=' . $row->platform_order . '&order_amount=' . $row->replenish_money . '&sign=' . $row->id;
+            //查询币种
+            $order = new \app\admin\model\order\order\NewOrder();
+            $order_currency_code = $order->where(['increment_id' => $row->platform_order])->value('order_currency_code');
+            $url = config('url.' . $domain_list[$row->work_platform]) . 'price-difference?customer_email=' . $row->email . '&origin_order_number=' . $row->platform_order . '&order_amount=' . $row->replenish_money . '&sign=' . $row->id. '&order_currency_code=' . $order_currency_code;
             $this->view->assign('url', $url);
         }
 
