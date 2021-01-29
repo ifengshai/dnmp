@@ -398,7 +398,8 @@ class DataMarket extends Backend
         $date = date('Y-m-d');
         $map['createtime'] = ['<',$date];
         $map['sku'] = $sku;
-        $data['sales_num'] = Db::name('sku_sales_num')->where($map)->where('site',$site)->order('createtime','desc')->limit(30)->sum('sales_num');
+        $map['site'] = $site;
+        $data['sales_num'] = Db::name('sku_sales_num')->where($map)->order('createtime','desc')->limit(30)->sum('sales_num');
         $days = Db::name('sku_sales_num')->where($map)->count();
         $data['days'] = $days>30 ? 30 : $days;
         return $data;
