@@ -280,7 +280,7 @@ class FinanceCost extends Model
         //查询更改类型为赠品
         $goods_number = $worklist->alias('a')
             ->join(['fa_work_order_change_sku' => 'b'], 'a.id=b.work_id')
-            ->where(['platform_order' => $order_number, 'work_status' => 7, 'change_type' => 4])
+            ->where(['platform_order' => $order_number, 'work_status' => 6, 'change_type' => 4])
             ->column('b.goods_number');
         $workcost = 0;
         if ($goods_number) {
@@ -324,7 +324,7 @@ class FinanceCost extends Model
         //判断是否有工单
         $worklist = new \app\admin\model\saleaftermanage\WorkOrderList();
         $workchangesku = new \app\admin\model\saleaftermanage\WorkOrderChangeSku();
-        $work_id = $worklist->where(['platform_order' => $order_number, 'work_status' => 7])->order('id desc')->value('id');
+        $work_id = $worklist->where(['platform_order' => $order_number, 'work_status' => 6])->order('id desc')->value('id');
         //查询更改类型为更改镜片
         $work_data = $workchangesku->where(['work_id' => $work_id, 'change_type' => 2])
             ->field('od_sph,os_sph,od_cyl,os_cyl,os_add,od_add,lens_number,item_order_number')
@@ -361,7 +361,7 @@ class FinanceCost extends Model
                                 $od_temp_cost += $val['price'];
                             }
                         }
-                        if ($os_temp_cost > 0) {
+                        if ($od_temp_cost > 0) {
                             $data[] = 'od' . '-' . $v['lens_number'];
                         }
                     }
@@ -432,7 +432,7 @@ class FinanceCost extends Model
                             $od_temp_cost += $val['price'];
                         }
                     }
-                    if ($os_temp_cost > 0) {
+                    if ($od_temp_cost > 0) {
                         $data[] = 'od' . '-' . $v['lens_number'];
                     }
                 }
