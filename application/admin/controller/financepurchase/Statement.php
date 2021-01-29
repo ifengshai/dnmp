@@ -524,7 +524,7 @@ class Statement extends Backend
                                 Db::name('purchase_order_item')->where('purchase_id',$vv['purchase_id'])->update(['actual_purchase_price'=>$actual_purchase_price]);
                                 //入库总数量
                                 $count = $this->instockItem->alias('i')->join('fa_in_stock s','i.in_stock_id=s.id')->join('fa_check_order c','s.check_id=c.id')->where('c.purchase_id',$vv['purchase_id'])->sum('i.in_stock_num');
-                                $purchase_order = Db::name('purchase_order_item')->where('purchase_id',$vv['purchase_id'])->find();
+                                $purchase_order = $this->purchase_item->alias('i')->join('fa_purchase_order o','i.purchase_id=o.id')->where('i.purchase_id',$vv['purchase_id'])->field('round(o.purchase_total/purchase_num,2) purchase_price,actual_purchase_price,i.sku')->find();
                                 //实际采购成本和预估成本不一致，冲减差值
                                 if($purchase_order['purchase_price'] != $purchase_order['actual_purchase_price']){
                                     //计算订单出库数量
@@ -633,7 +633,7 @@ class Statement extends Backend
                             Db::name('purchase_order_item')->where('purchase_id',$vv['purchase_id'])->update(['actual_purchase_price'=>$actual_purchase_price]);
                             //入库总数量
                             $count = $this->instockItem->alias('i')->join('fa_in_stock s','i.in_stock_id=s.id')->join('fa_check_order c','s.check_id=c.id')->where('c.purchase_id',$vv['purchase_id'])->sum('i.in_stock_num');
-                            $purchase_order = Db::name('purchase_order_item')->where('purchase_id',$vv['purchase_id'])->find();
+                            $purchase_order = $this->purchase_item->alias('i')->join('fa_purchase_order o','i.purchase_id=o.id')->where('i.purchase_id',$vv['purchase_id'])->field('round(o.purchase_total/purchase_num,2) purchase_price,actual_purchase_price,i.sku')->find();
                             //实际采购成本和预估成本不一致，冲减差值
                             if($purchase_order['purchase_price'] != $purchase_order['actual_purchase_price']){
                                 //计算订单出库数量
