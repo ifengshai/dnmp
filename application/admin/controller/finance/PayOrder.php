@@ -364,8 +364,6 @@ class PayOrder extends Backend
                         //出库单出库
                         $outorder = $this->outstockItem->alias('i')->join('fa_out_stock s','s.id=i.out_stock_id','left')->where('s.purchase_id',$v)->where('status',2)->where('i.sku',$purchase_order['sku'])->group('s.out_stock_number')->field('s.id,s.out_stock_number,sum(i.out_stock_num) count')->select();
                         foreach ($outorder as $rr2=>$ss2){
-                            //获取成本核算中的订单数据
-                            $cost_order_info1 = $this->financecost->where(['out_stock_id' => $ss2['id'], 'type' => 2,'bill_type'=>9])->find();
                             //如果有出库数据，需要添加冲减暂估结算金额和增加成本核算数据
                             $arr3['type'] = 2;   //类型：成本
                             $arr3['bill_type'] = 11;    //单据类型：暂估结算金额
