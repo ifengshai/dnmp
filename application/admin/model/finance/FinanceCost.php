@@ -69,7 +69,7 @@ class FinanceCost extends Model
             ->join(['fa_work_order_measure' => 'b'], 'a.id=b.work_id')
             ->where([
                 'a.platform_order' => $order_detail['increment_id'],
-                'b.measure_choose_id' => ['in', [2, 8]],
+                'b.measure_choose_id' => ['in', [2,11,8]],
                 'b.operation_type' => 1
             ])
             ->select();
@@ -83,10 +83,17 @@ class FinanceCost extends Model
                             $bill_type = 6; //部分退款
                             $action_type = 2; //冲减
                             $income_amount = $value['refund_money']; //收入金额(退款金额)
-                        } else if ($value['refund_money'] == $order_detail['base_grand_total']) {
+                        } /*else if ($value['refund_money'] == $order_detail['base_grand_total']) {
                             $bill_type = 4; //退货退款
                             $action_type = 2; //冲减
                             $income_amount = $order_detail['base_grand_total']; //收入金额(退件)
+                        }*/
+                        //是否有退件
+                        $measure_choose_id = array_column($change_sku, 'measure_choose_id');
+                        if (in_array(11, $measure_choose_id)) {
+                            $bill_type = 4; //退货退款
+                            $action_type = 2; //冲减
+                            $income_amount = $value['refund_money']; //收入金额(退件)
                         }
                         break;
                     case 8: //补差价措施
@@ -94,13 +101,14 @@ class FinanceCost extends Model
                         $action_type = 1; //增加
                         $income_amount = $value['replenish_money']; //收入金额(补差价的金额)
                         break;
-                        /*case 15: //vip退款措施
-                        $bill_type = 7; //vip退款单据类型
-                        $action_type = 2; //冲减
-                        $income_amount = $value['refund_money']; //收入金额(退款金额)
-                        break;*/
                 }
-                if (!empty($bill_type)) { //有工单单据需要核算-增加核算数据
+                if ($bill_type == 3 || $bill_type == 4) {
+                    $finance_cost = $this->where(['bill_type'=>$bill_type,'action_type'=>$action_type,'order_number'=>$order_detail['increment_id'],'income_amount'=>$income_amount])->find();
+                }else{
+                    $finance_cost = [];
+                }
+                
+                if (!empty($bill_type) && empty($finance_cost)) { //有工单单据需要核算-增加核算数据
                     $params['type'] = 1;
                     $params['bill_type'] = $bill_type; //单据类型
                     $params['order_number'] = $order_detail['increment_id']; //订单号
@@ -175,6 +183,46 @@ class FinanceCost extends Model
         $params['work_id'] = $work_id; //工单id
         $params['createtime'] = time();
         $this->insert($params); //vip退款冲减
+    }
+
+    /**
+     * 工单：退件-冲减 补差价-增加
+     *
+     * @Description
+     * @author gyh
+     * @param $work_id 订单id
+     */
+    public function return_order_subtract($work_id = null,$bill_type)
+    {
+        $WorkOrderList = new \app\admin\model\saleaftermanage\WorkOrderList;
+        $work_order_info = $WorkOrderList->get($work_id); //获取工单信息
+        $order = new \app\admin\model\order\order\NewOrder();
+        $order_detail = $order->where(['increment_id' => $work_order_info['platform_order']])->find(); //获取订单信息
+        if ($bill_type == 3) {//补价
+            $income_amount = $work_order_info['replenish_money'];
+            $action_type = 1;
+        }
+        if ($bill_type == 4) {//退件
+            $income_amount = $work_order_info['refund_money'];
+            $action_type = 2;
+        }
+        $params['type'] = 1;
+        $params['bill_type'] = $bill_type; //单据类型
+        $params['order_number'] = $order_detail['increment_id']; //订单号
+        $params['site'] = $order_detail['site']; //站点
+        $params['order_type'] = $order_detail['order_type']; //订单类型
+        $params['order_money'] = $order_detail['base_grand_total']; //订单金额
+        $params['income_amount'] = $income_amount; //收入金额
+        $params['order_currency_code'] = $order_detail['order_currency_code']; //币种
+        $params['payment_method'] = $order_detail['payment_method']; //支付方式
+        $params['payment_time'] = $order_detail['payment_time']; //支付时间
+        $params['action_type'] = $action_type; //动作类型：1增加；2冲减；
+        $params['work_id'] = $work_id; //工单id
+        $params['createtime'] = time();
+        $finance_cost = $this->where(['bill_type'=>$bill_type,'action_type'=>$action_type,'order_number'=>$order_detail['increment_id'],'income_amount'=>$income_amount])->find();
+        if (empty($finance_cost)) {
+            $this->insert($params);
+        }
     }
 
     /**
