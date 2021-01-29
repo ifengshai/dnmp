@@ -623,7 +623,8 @@ class Statement extends Backend
                             $count = $this->instockItem->alias('i')->join('fa_in_stock s','i.in_stock_id=s.id')->join('fa_check_order c','s.check_id=c.id')->where('c.purchase_id',$vv['purchase_id'])->sum('i.in_stock_num');
                             $purchase_order = Db::name('purchase_order_item')->where('id',$vv['purchase_id'])->find();
                             dump('入库总数量'.$count);
-                            dump($purchase_order);
+                            halt($purchase_order);
+
                             //实际采购成本和预估成本不一致，冲减差值
                             if($purchase_order['purchase_price'] != $purchase_order['actual_purchase_price']){
                                 //计算订单出库数量
