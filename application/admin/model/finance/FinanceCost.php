@@ -313,7 +313,7 @@ class FinanceCost extends Model
                                 $od_temp_cost += $val['price'];
                             }
                         }
-                        if ($os_temp_cost > 0) {
+                        if ($od_temp_cost > 0) {
                             $data[] = 'od' . '-' . $v['lens_number'];
                         }
                     }
