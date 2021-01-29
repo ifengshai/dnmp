@@ -4,30 +4,41 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
         index: function () {
             Controller.api.formatter.daterangepicker($("div[role=form]"));
             //订单数据概况折线图
-            //Controller.api.formatter.line_chart();
             stock_measure_overview_platform();
             Controller.api.formatter.line_chart();
             Controller.api.formatter.line_histogram();
             Controller.api.formatter.comleted_time_rate_pie();
-            $("#sku_submit").click(function () {
-                index_data();   //仓库指标总览
-                purchase_data();     //采购概况
-                track_data();   //物流妥投
-                stock_measure_overview_platform();   //仓库和站点有关的指标
-                Controller.api.formatter.line_chart();   //库存变化折线图
-                Controller.api.formatter.line_histogram();   //订单发货及时率
-                Controller.api.formatter.comleted_time_rate_pie();   //妥投占比
-            });
-            $("#sku_reset").click(function () {
-                $("#time_str").val('');
-                index_data();
-                purchase_data();
-                track_data();
-                stock_measure_overview_platform();
-                Controller.api.formatter.line_chart();
-                Controller.api.formatter.line_histogram();
-                Controller.api.formatter.comleted_time_rate_pie();
-            });
+            $("#time_str5").on("apply.daterangepicker", function () {
+                setTimeout(() => {
+                    Controller.api.formatter.line_chart();   //库存变化折线图
+                }, 0)
+            })
+
+            $("#time_str1").on("apply.daterangepicker", function () {
+                setTimeout(() => {
+                    index_data();   //仓库指标总览
+                    stock_measure_overview_platform();   //仓库和站点有关的指标
+                }, 0)
+            })
+
+            $("#time_str2").on("apply.daterangepicker", function () {
+                setTimeout(() => {
+                    purchase_data();     //采购概况
+                }, 0)
+            })
+
+            $("#time_str3").on("apply.daterangepicker", function () {
+                setTimeout(() => {
+                    Controller.api.formatter.line_histogram();   //订单发货及时率
+                }, 0)
+            })
+
+            $("#time_str4").on("apply.daterangepicker", function () {
+                setTimeout(() => {
+                    track_data();   //物流妥投
+                    Controller.api.formatter.comleted_time_rate_pie();   //妥投占比
+                }, 0)
+            })
             $(document).on('change', '#order_platform', function () {
                 stock_measure_overview_platform();
             });
