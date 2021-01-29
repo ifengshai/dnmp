@@ -277,8 +277,11 @@ class Distribution extends Backend
                     ->column('id');
                 //查询合单库位号
                 if ($house_type == 2) {
-                    $order_ids = $this->_new_order_process->where(['store_house_id' => ['in', $stock_house_id]])->column('order_id');
-                    $map['a.order_id'] = ['in', $order_ids];
+                    if ($stock_house_id) {
+                        $order_ids = $this->_new_order_process->where(['store_house_id' => ['in', $stock_house_id]])->column('order_id');
+                        $map['a.order_id'] = ['in', $order_ids];
+                    }
+                    
                 } else {
                     $map['a.temporary_house_id|a.abnormal_house_id'] = ['in', $stock_house_id ?: [-1]];
                 }
