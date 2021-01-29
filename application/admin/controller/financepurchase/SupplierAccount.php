@@ -132,7 +132,7 @@ class SupplierAccount extends Backend
                         }
                     }
                     //采购单物流单详情
-                    $row = Db::name('logistics_info')->where($map)->field('logistics_number,logistics_company_no')->find();
+                    $row = Db::name('logistics_info')->where($map)->field('logistics_number,logistics_company_no,collect_time')->find();
                     //物流单快递100接口
                     // if ($row['logistics_number']) {
                     //     $arr = explode(',', $row['logistics_number']);
@@ -326,7 +326,7 @@ class SupplierAccount extends Backend
                 }
             }
             //采购单物流单详情
-            $row = Db::name('logistics_info')->where($map)->field('logistics_number,logistics_company_no')->find();
+            $row = Db::name('logistics_info')->where($map)->field('logistics_number,logistics_company_no,collect_time')->find();
             // //物流单快递100接口
             // if ($row['logistics_number']) {
             //     $arr = explode(',', $row['logistics_number']);
