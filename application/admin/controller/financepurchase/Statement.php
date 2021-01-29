@@ -143,6 +143,7 @@ class Statement extends Backend
                     $statemet['supplier_id'] = $params['supplier_id'];
                     $statemet['base_currency_code'] = $params['base_currency_code'];
                     $statemet['wait_statement_total'] = $params['product_total'];
+                    $statemet['remark'] = $params['remark'];
                     $statemet['create_time'] = time();
                     $statemet['create_person'] = session('admin.nickname');
                     $statemet_id = Db::name('finance_statement')->insertGetId($statemet);
