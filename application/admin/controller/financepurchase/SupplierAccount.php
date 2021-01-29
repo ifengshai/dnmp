@@ -135,9 +135,9 @@ class SupplierAccount extends Backend
                     $row = Db::name('logistics_info')->where($map)->field('logistics_number,logistics_company_no,collect_time,createtime')->find();
                    
                     if(!empty($row['collect_time'])){
-                        $list[$k]['periods'] = date("Y-m-t",strtotime(($row['collect_time'] . '+' . $list[$k]['period'] . 'month')));
+                        $list[$k]['periods'] = date("Y-m-t",strtotime(($row['collect_time'] . '+' . $vvv['period'] . 'month')));
                     }else{
-                        $list[$k]['periods'] = date("Y-m-t",strtotime(($row['createtime'] . '+' . $list[$k]['period'] . 'month')));
+                        $list[$k]['periods'] = date("Y-m-t",strtotime(($row['createtime'] . '+' . $vvv['period'] . 'month')));
                     }
                     switch ($v['pay_type']) {
                         case 1:
