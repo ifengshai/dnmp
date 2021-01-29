@@ -38,9 +38,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                         {field: 'all_wait_total', title: __('总待结算金额（¥）'), operate: false},
                         {field: 'purchase_person', title: __('采购负责人'), operate: 'LIKE'},
                         {
-                            field: 'statement_status', title: __('状态'), custom: {0: 'success', 1: 'danger'},
+                            field: 'statement_status', title: __('状态'), custom: {1: 'blue', 2: 'danger'},
                             searchList: {1: '本期已结算', 2: '本期未结算'},
-                            formatter: Table.api.formatter.status
+                            formatter: Table.api.formatter.status, operate: false
                         },
                         {
                             field: 'operate',
