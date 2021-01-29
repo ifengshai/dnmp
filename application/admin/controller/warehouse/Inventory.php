@@ -653,6 +653,7 @@ class Inventory extends Backend
         $data['check_time'] = date('Y-m-d H:i:s', time());
         $data['check_person'] = session('admin.nickname');
         $item = new \app\admin\model\itemmanage\Item;
+        $item_platform_sku = new ItemPlatformSku();
         $instock = new \app\admin\model\warehouse\Instock;
         $instockItem = new \app\admin\model\warehouse\InstockItem;
         $outstock = new \app\admin\model\warehouse\Outstock;
@@ -687,8 +688,13 @@ class Inventory extends Backend
                         $value['sku'] = $v['sku'];
                         //如果可用库存为空 且增加库存数大于0  请求网站接口
                         if ($sku_item->available_stock == 0 && $v['error_qty'] > 0){
-                            $url  =  config('url.zeelool_url').'magic/product/productArrival';
-                            $this->submission_post($url,$value);
+                            $platform_sku = $item_platform_sku->where('sku',$v['sku'])->where('platform_type',1)->value('platform_sku');
+                            if ($platform_sku){
+                                $value['sku'] = $platform_sku;
+                                $url  =  config('url.zeelool_url').'magic/product/productArrival';
+                                $this->submission_post($url,$value);
+                            }
+
 //                            if ($synchronous['code'] !==200){
 //                                $this->error('数据同步失败');
 //                            }
