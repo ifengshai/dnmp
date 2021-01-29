@@ -446,7 +446,7 @@ class DataMarket extends Backend
 
         $total = $this->item->alias('i')->join('fa_purchase_order_item oi','i.purchase_id=oi.purchase_id and i.sku=oi.sku')->join('fa_purchase_order o','o.id=i.purchase_id')->where($where)->where('in_stock_time is not null')->value('SUM(IF(actual_purchase_price,actual_purchase_price,o.purchase_total/purchase_num)) price');
 
-        $sql5 = $this->item->where($where)->where('in_stock_time is not null')->field('distinct sku')->buildSql();
+        $sql5 = $this->item->alias('i')->where($where)->where('in_stock_time is not null')->field('distinct i.sku')->buildSql();
         $arr_where = [];
         $arr_where[] = ['exp', Db::raw("i.sku in " . $sql5)];
 
