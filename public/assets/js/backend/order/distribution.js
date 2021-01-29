@@ -9,6 +9,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
         $('select[name="abnormal"]').parents('.form-group').hide();
         $('select[name="work_status"]').parents('.form-group').hide();
         $('select[name="work_type"]').parents('.form-group').hide();
+        $('select[name="is_work_order"]').parents('.form-group').hide();
         $('select[name="shelf_number"]').parents('.form-group').hide();
         $('.btn-distribution').addClass('hide');
         if (0 == value) {
@@ -45,6 +46,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
             $('select[name="abnormal"]').parents('.form-group').show();
             $('select[name="work_status"]').parents('.form-group').show();
             $('select[name="work_type"]').parents('.form-group').show();
+            $('select[name="is_work_order"]').parents('.form-group').show();
             $('#stock_house_num').parents('.form-group').show();
             $('.btn-creat-work-order').removeClass('hide');
             $('.btn-cancel-abnormal').removeClass('hide');
@@ -179,6 +181,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             searchList: {
                                 1: __('客服工单'),
                                 2: __('仓库工单')
+                            }, visible: false
+                        },
+                        {
+                            field: 'is_work_order', title: __('工单/异常'),
+                            searchList: {
+                                1: __('工单'),
+                                2: __('异常')
                             }, visible: false
                         },
                         {

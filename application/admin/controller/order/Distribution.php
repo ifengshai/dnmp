@@ -174,7 +174,7 @@ class Distribution extends Backend
 
             $map = [];
             $WhereSql = 'a.id > 0';
-            /*//普通状态剔除跟单数据
+            //普通状态剔除跟单数据
 
             if (!in_array($label, [0, 8])) {
 
@@ -184,8 +184,8 @@ class Distribution extends Backend
                     $map['a.distribution_status'] = $label;
                 }
 
-                $map['a.abnormal_house_id'] = 0;
-            }*/
+                //$map['a.abnormal_house_id'] = 0;
+            }
 
             //处理异常选项
             $filter = json_decode($this->request->get('filter'), true);
@@ -216,6 +216,11 @@ class Distribution extends Backend
 
             //查询子单ID合集
             $item_process_ids = [];
+
+            if ($filter['is_work_order']) {
+                $is_work_order = $filter['is_work_order'];
+                unset($filter['is_work_order']);
+            }
 
             //跟单或筛选异常
 
@@ -322,18 +327,31 @@ class Distribution extends Backend
                 $flag = true;
             }
             $this->request->get(['filter' => json_encode($filter)]);
-            //子单工单未处理
-            $item_order_numbers = $this->_work_order_change_sku
-                ->alias('a')
-                ->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')
-                ->where([
-                    'a.change_type' => ['in', [1, 2, 3]], //1更改镜架  2更改镜片 3取消订单
-                    'b.work_status' => ['in', $work_order_status_map], //工单未处理
-                    'b.work_type' => ['in', $work_order_type]
-                ])
-                ->order('a.create_time', 'desc')
-                ->group('a.item_order_number')
-                ->column('a.item_order_number');
+            
+            if (8 == $label || 1 == $label || 0 == $label) {
+                    //查询子单的主单是否也含有工单
+                    $platform_order = $this->_work_order_list->where([
+                        'work_status' => ['in',$work_order_status_map],
+                        'work_type' => ['in',$work_order_type]
+                    ])->group('platform_order')->column('platform_order');
+                    if (!empty($platform_order)) {
+                      $order_id = $this->_new_order_process->where(['increment_id' => ['in',$platform_order]])->group('order_id')->column('order_id');
+                      $item_order_numbers  = $this->model->where(['order_id' => ['in',$order_id]])->group('item_order_number')->column('item_order_number');
+                    } 
+            }else{
+                //其他tab展示子单工单未处理
+                $item_order_numbers = $this->_work_order_change_sku
+                    ->alias('a')
+                    ->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')
+                    ->where([
+                        'a.change_type' => ['in', [1, 2, 3]], //1更改镜架  2更改镜片 3取消订单
+                        'b.work_status' => ['in', $work_order_status_map], //工单未处理
+                        'b.work_type' => ['in', $work_order_type]
+                    ])
+                    ->order('a.create_time', 'desc')
+                    ->group('a.item_order_number')
+                    ->column('a.item_order_number');
+            }
             if ($flag && empty($item_order_numbers[0])) {
                 $result = array("total" => 0, "rows" => []);
                 return json($result);
@@ -342,13 +360,20 @@ class Distribution extends Backend
             if (8 == $label) {
                 //展示子工单的子单
                 $item_process_id_work = $this->model->where(['item_order_number' => ['in', $item_order_numbers]])->column('id');
-                if ($flag) {
+                if ($flag || $is_work_order == 1) {
                     $item_process_ids = $item_process_id_work;
-                } else {
+                }else if($is_work_order == 2){
+                    //去掉含有工单的
+                    $increment_id_w = $this->_new_order_process->where(['order_id' => ['in',$item_process_ids]])->group('increment_id')->column('increment_id','order_id');
+                    $platform_order_w = $this->_work_order_list->where(['platform_order' => ['in',$increment_id_w]])->group('platform_order')->column('platform_order');
+                    /*print_r($increment_id_w);die;
+                    print_r($order_id);
+                    print_r($item_process_ids);die;*/
+                    $item_process_ids = $item_process_ids;
+                }else {
                     $item_process_ids = array_unique(array_merge($item_process_ids, $item_process_id_work));
                 }
             }
-
             if ($item_process_ids) {
                 $map['a.id'] = ['in', $item_process_ids];
             }
