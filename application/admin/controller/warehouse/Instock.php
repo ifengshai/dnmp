@@ -505,7 +505,8 @@ class Instock extends Backend
                  * @todo 审核通过增加库存 并添加入库单入库数量
                  */
                 $error_num = [];
-
+                 $list[0]['purchase_id'] =1;
+                 $list[0]['replenish_id'] =1;
                 foreach ($list as $k => $v) {
                     $item_map['sku'] = $v['sku'];
                     $item_map['is_del'] = 1;
@@ -535,11 +536,21 @@ class Instock extends Backend
                             //获得应到货数量
                             $check = new \app\admin\model\warehouse\CheckItem();
                             $should_arrivals_num = $check->where('check_id', $v['check_id'])->value('should_arrival_num');
+
                             foreach ($rate_arr as $key => $val) {
+
                                 //最后一个站点 剩余数量分给最后一个站
                                 if (($all_num - $key) == 1) {
                                     //当前sku映射关系详情
                                     $sku_platform = $platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->find();
+                                    //如果站点是Z站 且虚拟仓库存为0
+                                    if ($val['website_type'] ==1){
+                                        if ($sku_platform['stock'] == 0  && $stock_num > 0){
+                                            $value['sku'] = $sku_platform['platform_sku'];
+                                            $url  =  config('url.zeelool_url').'magic/product/productArrival';
+                                            $this->submission_post($url,$value);
+                                        }
+                                    }
                                     //增加站点虚拟仓库存
                                     $platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->setInc('stock', $stock_num);
                                     //入库的时候减少待入库数量
@@ -567,6 +578,15 @@ class Instock extends Backend
                                     $stock_num -= $num;
                                     $should_arrivals_num -= $should_arrivals_num_plat;
                                     $sku_platform = $platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->find();
+                                    //如果站点是Z站 且虚拟仓库存为0
+                                    if ($val['website_type'] ==1){
+                                        if ($sku_platform['stock'] == 0  && $num > 0){
+                                            $value['sku'] = $sku_platform['platform_sku'];
+                                            $url  =  config('url.zeelool_url').'magic/product/productArrival';
+                                            $this->submission_post($url,$value);
+                                        }
+                                    }
+
                                     //增加站点虚拟仓库存
                                     $platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->setInc('stock', $num);
                                     //入库的时候减少待入库数量
@@ -646,6 +666,17 @@ class Instock extends Backend
                             'create_time' => time(),
                             'number_type' => 3,
                         ]);
+                        //如果站点信息等于1 zeelool站点
+                        //虚拟库存为0时  讲信息通知到网站端
+                        if ($v['platform_id'] ==1){
+                            if ($item_platform_sku['stock'] == 0  && $v['in_stock_num'] > 0){
+                                $value['sku'] = $item_platform_sku['platform_sku'];
+                                $url  =  config('url.zeelool_url').'magic/product/productArrival';
+                                $this->submission_post($url,$value);
+                            }
+                        }
+
+
                     } //没有采购单也没有站点id 说明是盘点过来的
                     else {
                         //盘点
@@ -663,9 +694,17 @@ class Instock extends Backend
                             $rate_rate = 1 / $all_num;
                             foreach ($item_platform_sku as $key => $val) {
                                 $item_platform_sku_detail = $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->find();
+                                if ($val['platform_type'] ==1){
+                                    if ($item_platform_sku_detail['stock'] ==0 && $stock_num >0 ){
+                                        $value['sku'] = $item_platform_sku_detail['platform_sku'];
+                                        $url  =  config('url.zeelool_url').'magic/product/productArrival';
+                                        $this->submission_post($url,$value);
+                                    }
+                                }
                                 //最后一个站点 剩余数量分给最后一个站
                                 if (($all_num - $key) == 1) {
                                     $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setInc('stock', $stock_num);
+
                                     //插入日志表
                                     (new StockLog())->setData([
                                         'type' => 2,
@@ -708,6 +747,13 @@ class Instock extends Backend
                             $stock_num = $v['in_stock_num'];
                             foreach ($item_platform_sku as $key => $val) {
                                 $item_platform_sku_detail = $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->find();
+                                if ($val['platform_type'] ==1){
+                                    if ($item_platform_sku_detail['stock'] ==0 && $stock_num >0 ){
+                                        $value['sku'] = $item_platform_sku_detail['platform_sku'];
+                                        $url  =  config('url.zeelool_url').'magic/product/productArrival';
+                                        $this->submission_post($url,$value);
+                                    }
+                                }
                                 //最后一个站点 剩余数量分给最后一个站
                                 if (($all_num - $key) == 1) {
                                     $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setInc('stock', $stock_num);
@@ -754,21 +800,6 @@ class Instock extends Backend
                     //总库存
                     if ($v['sku']) {
                         //增加商品表里的商品库存、可用库存、留样库存
-                        //查看商品可用库存
-                        $available_stock = $item->where($item_map)->value('available_stock');
-                        //如果可用库存为空 且增加库存数大于0  请求网站接口
-                        if ($available_stock == 0 && $v['in_stock_num'] >0){
-                            //换取对应平台sku
-                            $platform_sku = $item_platform_sku_model->where('sku',$v['sku'])->where('platform_type',1)->value('platform_sku');
-                            if ($platform_sku){
-                                $value['sku'] = $platform_sku;
-                                $url  =  config('url.zeelool_url').'magic/product/productArrival';
-                                $this->submission_post($url,$value);
-                            }
-//                            if ($synchronous['code'] !== 200){
-//                                $this->error('数据同步失败');
-//                            }
-                        }
                         $stock_res = $item->where($item_map)->inc('stock', $v['in_stock_num'])->inc('available_stock', $v['in_stock_num'])->inc('sample_num', $v['sample_num'])->update();
                         //获得应到货数量
                         $check = new \app\admin\model\warehouse\CheckItem();

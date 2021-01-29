@@ -25,7 +25,7 @@ class Sample extends Backend
      * @var \app\admin\model\purchase\Sample
      */
     protected $model = null;
-
+    protected $noNeedRight = ['sample_import_xls_copy'];
     public function _initialize()
     {
         parent::_initialize();

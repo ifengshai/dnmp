@@ -686,19 +686,19 @@ class Inventory extends Backend
                     if ($v['sku']) {
                         $sku_item = $item->where($item_map)->find();
                         $value['sku'] = $v['sku'];
-                        //如果可用库存为空 且增加库存数大于0  请求网站接口
-                        if ($sku_item->available_stock == 0 && $v['error_qty'] > 0){
-                            $platform_sku = $item_platform_sku->where('sku',$v['sku'])->where('platform_type',1)->value('platform_sku');
-                            if ($platform_sku){
-                                $value['sku'] = $platform_sku;
-                                $url  =  config('url.zeelool_url').'magic/product/productArrival';
-                                $this->submission_post($url,$value);
-                            }
-
-//                            if ($synchronous['code'] !==200){
-//                                $this->error('数据同步失败');
+//                        //如果可用库存为空 且增加库存数大于0  请求网站接口
+//                        if ($sku_item->available_stock == 0 && $v['error_qty'] > 0){
+//                            $platform_sku = $item_platform_sku->where('sku',$v['sku'])->where('platform_type',1)->value('platform_sku');
+//                            if ($platform_sku){
+//                                $value['sku'] = $platform_sku;
+//                                $url  =  config('url.zeelool_url').'magic/product/productArrival';
+//                                $this->submission_post($url,$value);
 //                            }
-                        }
+//
+////                            if ($synchronous['code'] !==200){
+////                                $this->error('数据同步失败');
+////                            }
+//                        }
                         $stock = $item->where($item_map)->inc('stock', $v['error_qty'])->inc('available_stock', $v['error_qty'])->update();
                         //插入日志表
                         (new StockLog())->setData([
