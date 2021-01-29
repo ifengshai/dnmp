@@ -25,7 +25,7 @@ class Sample extends Backend
      * @var \app\admin\model\purchase\Sample
      */
     protected $model = null;
-
+    protected $noNeedRight = ['sample_import_xls_copy'];
     public function _initialize()
     {
         parent::_initialize();
@@ -96,6 +96,131 @@ class Sample extends Backend
         }
         return $this->view->fetch();
     }
+
+    /**
+     * 导入样品入库单
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/05/23 15:08:22 
+     * @return void
+     */
+    public function sample_import_xls_copy()
+    {
+        set_time_limit(0);
+        $file = $this->request->request('file');
+        if (!$file) {
+            $this->error(__('Parameter %s can not be empty', 'file'));
+        }
+        $filePath = ROOT_PATH . DS . 'public' . DS . $file;
+        if (!is_file($filePath)) {
+            $this->error(__('No results were found'));
+        }
+        //实例化reader
+        $ext = pathinfo($filePath, PATHINFO_EXTENSION);
+        if (!in_array($ext, ['csv', 'xls', 'xlsx'])) {
+            $this->error(__('Unknown data format'));
+        }
+        if ($ext === 'csv') {
+            $file = fopen($filePath, 'r');
+            $filePath = tempnam(sys_get_temp_dir(), 'import_csv');
+            $fp = fopen($filePath, "w");
+            $n = 0;
+            while ($line = fgets($file)) {
+                $line = rtrim($line, "\n\r\0");
+                $encoding = mb_detect_encoding($line, ['utf-8', 'gbk', 'latin1', 'big5']);
+                if ($encoding != 'utf-8') {
+                    $line = mb_convert_encoding($line, 'utf-8', $encoding);
+                }
+                if ($n == 0 || preg_match('/^".*"$/', $line)) {
+                    fwrite($fp, $line . "\n");
+                } else {
+                    fwrite($fp, '"' . str_replace(['"', ','], ['""', '","'], $line) . "\"\n");
+                }
+                $n++;
+            }
+            fclose($file) || fclose($fp);
+
+            $reader = new Csv();
+        } elseif ($ext === 'xls') {
+            $reader = new Xls();
+        } else {
+            $reader = new Xlsx();
+        }
+
+        //导入文件首行类型,默认是注释,如果需要使用字段名称请使用name
+        //$importHeadType = isset($this->importHeadType) ? $this->importHeadType : 'comment';
+        //模板文件列名
+        $listName = ['SKU', '数量'];
+        try {
+            if (!$PHPExcel = $reader->load($filePath)) {
+                $this->error(__('Unknown data format'));
+            }
+            $currentSheet = $PHPExcel->getSheet(0);  //读取文件中的第一个工作表
+            $allColumn = $currentSheet->getHighestDataColumn(); //取得最大的列号
+            $allRow = $currentSheet->getHighestRow(); //取得一共有多少行
+            $maxColumnNumber = Coordinate::columnIndexFromString($allColumn);
+
+            $fields = [];
+            for ($currentRow = 1; $currentRow <= 1; $currentRow++) {
+                for ($currentColumn = 1; $currentColumn <= $maxColumnNumber; $currentColumn++) {
+                    $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getValue();
+                    $fields[] = $val;
+                }
+            }
+
+            //模板文件不正确
+            if ($allRow > 3500) {
+                throw new Exception("表格行数过大");
+            }
+
+            //模板文件不正确
+            if ($listName !== array_filter($fields)) {
+                throw new Exception("模板文件不正确！！");
+            }
+
+            $data = [];
+            for ($currentRow = 2; $currentRow <= $allRow; $currentRow++) {
+                for ($currentColumn = 1; $currentColumn <= $maxColumnNumber; $currentColumn++) {
+                    $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getValue();
+                    $data[$currentRow - 2][$currentColumn - 1] = is_null(trim($val)) ? 0 : trim($val);
+                }
+            }
+        } catch (Exception $exception) {
+            $this->error($exception->getMessage());
+        }
+
+
+        /*********************样品入库逻辑***********************/
+        $sku = array();
+        $no_location = array();
+        $result_index = 0;
+        //入库单号
+        $location_number = 'IN2' . date('YmdHis') . rand(100, 999) . rand(100, 999);
+        $workorder['location_number'] = $location_number;
+        $workorder['status'] = 1;
+        $workorder['create_user'] = session('admin.nickname');
+        $workorder['createtime'] = date('Y-m-d H:i:s', time());
+        $workorder['type'] = 1;
+
+        $location_id = Db::name('purchase_sample_workorder')->insertGetId($workorder);
+        foreach ($data as $k => $v) {
+            $sku[$k]['parent_id'] = $location_id;
+            $sku[$k]['sku'] = $v[0];
+            $sku[$k]['stock'] = $v[1];
+
+        }
+        $result_index = Db::table('fa_purchase_sample_workorder_item')->insertAll($sku);
+        if (!$result_index) {
+            $this->error('导入失败！！');
+        }else{
+            $this->success('导入成功');
+        }
+
+
+    }
+
+
     /**
      * sku和商品的绑定关系
      *
