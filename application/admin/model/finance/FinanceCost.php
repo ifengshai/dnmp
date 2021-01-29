@@ -79,22 +79,22 @@ class FinanceCost extends Model
                 $params = [];
                 switch ($value['measure_choose_id']) {
                     case 2: //退款措施
-                        if ($value['refund_money'] < $order_detail['base_grand_total']) { //判断是否是部分退款
+                        //if ($value['refund_money'] < $order_detail['base_grand_total']) { //判断是否是部分退款
                             $bill_type = 6; //部分退款
                             $action_type = 2; //冲减
                             $income_amount = $value['refund_money']; //收入金额(退款金额)
-                        } /*else if ($value['refund_money'] == $order_detail['base_grand_total']) {
+                        /*} else if ($value['refund_money'] == $order_detail['base_grand_total']) {
                             $bill_type = 4; //退货退款
                             $action_type = 2; //冲减
                             $income_amount = $order_detail['base_grand_total']; //收入金额(退件)
                         }*/
-                        //是否有退件
+                        /*//是否有退件
                         $measure_choose_id = array_column($change_sku, 'measure_choose_id');
                         if (in_array(11, $measure_choose_id)) {
                             $bill_type = 4; //退货退款
                             $action_type = 2; //冲减
                             $income_amount = $value['refund_money']; //收入金额(退件)
-                        }
+                        }*/
                         break;
                     case 8: //补差价措施
                         $bill_type = 3; //补差价工单收入单据类型
@@ -102,7 +102,7 @@ class FinanceCost extends Model
                         $income_amount = $value['replenish_money']; //收入金额(补差价的金额)
                         break;
                 }
-                if ($bill_type == 3 || $bill_type == 4) {
+                if ($bill_type == 3) {
                     $finance_cost = $this->where(['bill_type'=>$bill_type,'action_type'=>$action_type,'order_number'=>$order_detail['increment_id'],'income_amount'=>$income_amount])->find();
                 }else{
                     $finance_cost = [];
@@ -220,7 +220,16 @@ class FinanceCost extends Model
         $params['work_id'] = $work_id; //工单id
         $params['createtime'] = time();
         $finance_cost = $this->where(['bill_type'=>$bill_type,'action_type'=>$action_type,'order_number'=>$order_detail['increment_id'],'income_amount'=>$income_amount])->find();
-        if (empty($finance_cost)) {
+        //补差价审单没完成不写入收入核算，审单的时候写入
+        $flag = 1;
+        if ($bill_type == 3) {
+            $NewOrderProcess = new \app\admin\model\order\order\NewOrderProcess();
+            $check_status = $NewOrderProcess->where(['increment_id' => $order_detail['increment_id']])->value('check_status');
+            if ($check_status != 1) {
+                $flag = 0;
+            }
+        }
+        if (empty($finance_cost) && $flag) {
             $this->insert($params);
         }
     }
