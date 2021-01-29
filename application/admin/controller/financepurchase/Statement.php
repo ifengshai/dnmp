@@ -65,6 +65,19 @@ class Statement extends Backend
             }
             $filter = json_decode($this->request->get('filter'), true);
             $map = [];
+            if ($filter['supplier_name']){
+                $supplier = Db::name('supplier')->where('supplier_name','like','%' . trim($filter['supplier_name']) . '%')->value('id');
+                $map['supplier_id'] = ['=',$supplier];
+                unset($filter['supplier_name']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
+            if ($filter['purchase_person']){
+                $supplier = Db::name('supplier')->where('purchase_person','like','%' . trim($filter['purchase_person']) . '%')->column('id');
+                $map['supplier_id'] = ['in',$supplier];
+                unset($filter['purchase_person']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
+
 
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
