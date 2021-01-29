@@ -151,23 +151,17 @@ class PurchasePay extends Backend
                         $initiate_approval = new Ding();
                         //当前用户信息
                         $admin = Db::name('admin')->where('id', session('admin.id'))->find();
-                        // $arr['originator_user_id'] = $admin['userid'];
-                        // $arr['dept_id'] = $admin['department_id'];
-                        // //任萍 王涛 王剑
-                        // $arr['approvers'] = '1007304767660594,0221135665945008,0647044715938022';
+                        $arr['originator_user_id'] = $admin['userid'];
+                        $arr['dept_id'] = $admin['department_id'];
+                        if ($params['pay_grand_total'] >= 300000){
+                            // //任萍 王涛 陈见 王剑 李亚方
+                            $arr['approvers'] = '1007304767660594,0221135665945008,405544201227897,0647044715938022,171603353926064429';
+                        }else{
+                            // //任萍 王涛 王剑 李亚方
+                            $arr['approvers'] = '1007304767660594,0221135665945008,0647044715938022,171603353926064429';
+                        }
                         // //抄送 屈金金
-                        // $arr['cc_list'] = '204112301323897192';
-                        $arr['originator_user_id'] = '071829462027950349';
-                        $arr['dept_id'] = '143678442';
-                        // $arr['approvers'] = '285501046927507550,0550643549844645,056737345633028055';
-                        //江昊辉 樊志刚 张靖威
-                        // $arr['approvers'] = '285501046927507550,066842141526868909,095453484824626315';
-                        //王重阳 江昊辉 张靖威
-                        // $arr['approvers'] = '011240312429620945,285501046927507550,095453484824626315';
-                        //刘超 红亚 玉晓
-                        $arr['approvers'] = '0704513051687725,310818292339015332,111525355037914674';
-                        $arr['cc_list'] = '071829462027950349';
-                        // $arr['cc_list'] = '285501046927507550';
+                        $arr['cc_list'] = '204112301323897192';
                         //结算单创建采购付款申请单
                         if ($params['pay_type'] == 3) {
                             foreach ($reason as $kk => $vv) {
@@ -179,7 +173,7 @@ class PurchasePay extends Backend
                                         ['name' => '采购品名', 'value' => $vv['name']],
                                         ['name' => '采购单号', 'value' => $vv['number']],
                                         ['name' => '采购批次', 'value' =>  $vv['batch'] ? $vv['batch']:0],
-                                        ['name' => '商品分类', 'value' => $type],
+                                        ['name' => '商品分类', 'value' => $type ? $type:'镜框'],
                                         ['name' => '采购数量', 'value' => $vv['num']],
                                         ['name' => '采购单价', 'value' => $vv['single']],
                                         ['name' => '入库数量', 'value' => $vv['in_number']],
@@ -191,7 +185,7 @@ class PurchasePay extends Backend
                             }
                             $arr['form_component_values'] = [
                                 ['name' => '采购方式', 'value' => $purchase_order['purchase_type'] == 1 ? '线下采购' : '线上采购'],
-                                ['name' => '采购产品类型', 'value' => $type],
+                                // ['name' => '采购产品类型', 'value' => $type],
                                 ['name' => '付款类型', 'value' => $pay_type],
                                 ['name' => '供应商名称', 'value' => $params['supplier_name']],
                                 ['name' => '币种', 'value' => $currency],
@@ -213,7 +207,7 @@ class PurchasePay extends Backend
                             $type = $this->category($category_id);
                             $arr['form_component_values'] = [
                                 ['name' => '采购方式', 'value' => $purchase_order['purchase_type'] == 1 ? '线下采购' : '线上采购'],
-                                ['name' => '采购产品类型', 'value' => '镜框'],
+                                // ['name' => '采购产品类型', 'value' => '镜框'],
                                 ['name' => '付款类型', 'value' => $pay_type],
                                 ['name' => '供应商名称', 'value' => $params['supplier_name']],
                                 ['name' => '币种', 'value' => $currency],
@@ -223,7 +217,7 @@ class PurchasePay extends Backend
                                         ['name' => '采购品名', 'value' => $reason['name']],
                                         ['name' => '采购单号', 'value' => $params['purchase_number']],
                                         ['name' => '采购批次', 'value' => '0'],
-                                        ['name' => '商品分类', 'value' => $type],
+                                        ['name' => '商品分类', 'value' => $type ? $type:'镜框'],
                                         ['name' => '采购数量', 'value' => $reason['num']],
                                         ['name' => '采购单价', 'value' => $reason['single']],
                                         ['name' => '入库数量', 'value' => '0'],
@@ -410,6 +404,8 @@ class PurchasePay extends Backend
                             $pay_type = '尾款';
                             $update['pay_rate'] = 1;
                             break;
+                        default:
+                            $pay_type = '其他';
                     }
                     switch ($params['base_currency_code']) {
                         case 'CNY':
@@ -418,6 +414,8 @@ class PurchasePay extends Backend
                         case 'USD':
                             $currency = '美元';
                             break;
+                        default:
+                            $currency = '人民币';
                     }
                     //采购单信息
                     $purchase_order = $this->purchase_order->where('id', $params['purchase_id'])->find();
@@ -426,18 +424,23 @@ class PurchasePay extends Backend
                         $initiate_approval = new Ding();
                         //当前用户信息
                         $admin = Db::name('admin')->where('id', session('admin.id'))->find();
-                        // $arr['originator_user_id'] = $admin['userid'];
-                        // $arr['dept_id'] = $admin['department_id'];
-                        // //任萍 王涛 王剑
-                        // $arr['approvers'] = '1007304767660594,0221135665945008,0647044715938022';
+                        $arr['originator_user_id'] = $admin['userid'];
+                        $arr['dept_id'] = $admin['department_id'];
+                        if ($params['pay_grand_total'] >= 300000){
+                            // //任萍 王涛 陈见 王剑 李亚方
+                            $arr['approvers'] = '1007304767660594,0221135665945008,405544201227897,0647044715938022,171603353926064429';
+                        }else{
+                            // //任萍 王涛 王剑 李亚方
+                            $arr['approvers'] = '1007304767660594,0221135665945008,0647044715938022,171603353926064429';
+                        }
                         // //抄送 屈金金
-                        // $arr['cc_list'] = '204112301323897192';
-                        $arr['originator_user_id'] = '071829462027950349';
-                        $arr['dept_id'] = '143678442';
+                        $arr['cc_list'] = '204112301323897192';
+                        // $arr['originator_user_id'] = '071829462027950349';
+                        // $arr['dept_id'] = '143678442';
                         // $arr['approvers'] = '285501046927507550,0550643549844645,056737345633028055';
                         //刘超 红亚 玉晓
-                        $arr['approvers'] = '0704513051687725,310818292339015332,111525355037914674';
-                        $arr['cc_list'] = '071829462027950349';
+                        // $arr['approvers'] = '0704513051687725,310818292339015332,111525355037914674';
+                        // $arr['cc_list'] = '071829462027950349';
 
                         if ($params['pay_type'] == 3) {
                             foreach ($reason as $kk => $vv) {
@@ -449,7 +452,7 @@ class PurchasePay extends Backend
                                         ['name' => '采购品名', 'value' => $vv['name']],
                                         ['name' => '采购单号', 'value' => $vv['number']],
                                         ['name' => '采购批次', 'value' =>  $vv['batch'] ? $vv['batch']:0],
-                                        ['name' => '商品分类', 'value' => $type],
+                                        ['name' => '商品分类', 'value' => $type ? $type:'镜框'],
                                         ['name' => '采购数量', 'value' => $vv['num']],
                                         ['name' => '采购单价', 'value' => $vv['single']],
                                         ['name' => '入库数量', 'value' => $vv['in_number']],
@@ -461,7 +464,7 @@ class PurchasePay extends Backend
                             }
                             $arr['form_component_values'] = [
                                 ['name' => '采购方式', 'value' => $purchase_order['purchase_type'] == 1 ? '线下采购' : '线上采购'],
-                                ['name' => '采购产品类型', 'value' => $type],
+                                // ['name' => '采购产品类型', 'value' => $type],
                                 ['name' => '付款类型', 'value' => $pay_type],
                                 ['name' => '供应商名称', 'value' => $params['supplier_name']],
                                 ['name' => '币种', 'value' => $currency],
@@ -480,7 +483,7 @@ class PurchasePay extends Backend
                             $type = $this->category($category_id);
                             $arr['form_component_values'] = [
                                 ['name' => '采购方式', 'value' => $purchase_order['purchase_type'] == 1 ? '线下采购' : '线上采购'],
-                                ['name' => '采购产品类型', 'value' => '镜框'],
+                                // ['name' => '采购产品类型', 'value' => '镜框'],
                                 ['name' => '付款类型', 'value' => $pay_type],
                                 ['name' => '供应商名称', 'value' => $params['supplier_name']],
                                 ['name' => '币种', 'value' => $currency],
@@ -490,7 +493,7 @@ class PurchasePay extends Backend
                                         ['name' => '采购品名', 'value' => $reason['name']],
                                         ['name' => '采购单号', 'value' => $params['purchase_number']],
                                         ['name' => '采购批次', 'value' => '0'],
-                                        ['name' => '商品分类', 'value' => $type],
+                                        ['name' => '商品分类', 'value' => $type ? $type:'镜框'],
                                         ['name' => '采购数量', 'value' => $reason['num']],
                                         ['name' => '采购单价', 'value' => $reason['single']],
                                         ['name' => '入库数量', 'value' => '0'],
