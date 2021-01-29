@@ -233,14 +233,23 @@ function purchase_data(){
         url: 'supplydatacenter/data_market/purchase_data',
         data: {time_str: time_str}
     }, function (data, ret) {
+        console.log(ret.data);
         var purchase_overview = ret.data.purchase_overview;
         //采购概况
         $('#purchase_num').html(purchase_overview.purchase_num);
+        $('#purchase_num_big').html(purchase_overview.purchase_num_big);
+        $('#purchase_num_now').html(purchase_overview.purchase_num_now);
         $('#purchase_amount').html(purchase_overview.purchase_amount);
+        $('#purchase_amount_big').html(purchase_overview.purchase_amount_big);
+        $('#purchase_amount_now').html(purchase_overview.purchase_amount_now);
         $('#purchase_sku_num').html(purchase_overview.purchase_sku_num);
+        $('#purchase_sku_num_big').html(purchase_overview.purchase_sku_num);
+        $('#purchase_sku_num_now').html(purchase_overview.purchase_sku_num);
         $('#purchase_delay_rate').html(purchase_overview.purchase_delay_rate);
         $('#purchase_qualified_rate').html(purchase_overview.purchase_qualified_rate);
         $('#purchase_price').html(purchase_overview.purchase_price);
+        $('#purchase_price_big').html(purchase_overview.purchase_price);
+        $('#purchase_price_now').html(purchase_overview.purchase_price);
         return false;
     }, function (data, ret) {
         Layer.alert(ret.msg);
