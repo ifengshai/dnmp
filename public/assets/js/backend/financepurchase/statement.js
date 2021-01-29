@@ -26,10 +26,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {checkbox: true},
                         {field: 'id', title: __('Id')},
                         {field: 'statement_number', title: __('结算单号'), operate: 'LIKE'},
-                        {field: 'supplier_name', title: __('供应商名称'), operate: false},
+                        {field: 'supplier_name', title: __('供应商名称')},
                         {field: 'period', title: __('供应商账期'), operate: false},
                         {field: 'wait_statement_total', title: __('结算金额'), operate: 'LIKE'},
-                        {field: 'purchase_person', title: __('采购负责人'), operate: false},
+                        {field: 'purchase_person', title: __('采购负责人')},
                         {
                             field: 'status',
                             title: __('状态'),
