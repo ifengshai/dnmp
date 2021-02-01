@@ -512,7 +512,7 @@ class Instock extends Backend
                 $error_num = [];
                  $list[0]['purchase_id'] =1;
                  $list[0]['replenish_id'] =1;
-
+                dump($list);die();
                 foreach ($list as $k => $v) {
                     $item_map['sku'] = $v['sku'];
                     $item_map['is_del'] = 1;
