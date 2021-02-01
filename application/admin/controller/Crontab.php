@@ -3759,6 +3759,8 @@ class Crontab extends Backend
         if (false === $model) {
             return false;
         }
+
+        echo 1122333 . "\n";
         $today = date('Y-m-d 23:59:59');
         $model->table('sales_flat_order')->query("set time_zone='+8:00'");
         $model->table('sales_flat_quote')->query("set time_zone='+8:00'");
@@ -3808,6 +3810,11 @@ class Crontab extends Backend
         $lastyear_order_success_data = $model->table('sales_flat_order')->where($lastyear_where)->where($order_where)->where($order_success_where)->count();
         //总共支付成功数
         $total_order_success_data = $model->table('sales_flat_order')->where($order_where)->where($order_success_where)->count();
+
+
+        echo 445566 . "\n";
+
+
         //昨天购物车总数
         $quote_where['base_grand_total'] = ['>', 0];
         $yesterday_shoppingcart_total_data = $model->table('sales_flat_quote')->where($yestime_where)->where($quote_where)->count();
