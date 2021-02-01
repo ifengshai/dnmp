@@ -3731,7 +3731,7 @@ class Crontab extends Backend
         //求出平台
         $platform = $this->request->get('platform', 1);
 
-        echo $platform;die;
+       
         if (!$platform) {
             return false;
         }
@@ -3761,9 +3761,13 @@ class Crontab extends Backend
                 $model = false;
                 break;
         }
+
+       dump($model);die;
         if (false === $model) {
             return false;
         }
+
+
 
         echo 1122333 . "\n";
         $today = date('Y-m-d 23:59:59');
