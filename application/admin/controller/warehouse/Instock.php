@@ -595,8 +595,6 @@ class Instock extends Backend
                                 $this->error('sku：' . $v['sku'] . '没有同步meeloog站，请先同步');
                             }
                             $platform->where(['sku' => $v['sku'], 'platform_type' => $item_platform_sku['platform_type']])->setInc('stock', $v['in_stock_num']);
-
-                            
                             //入库的时候减少待入库数量
                             //  $platform->where(['sku' => $v['sku'], 'platform_type' => 4])->setDec('wait_instock_num', $v['in_stock_num']);
 
