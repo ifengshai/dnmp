@@ -29,7 +29,7 @@ class Crontab extends Backend
     }
 
 
-    protected $order_status =  "and status in ('processing','complete','creditcard_proccessing','free_processing','paypal_canceled_reversal','paypal_reversed') and order_type =1";
+    protected $order_status =  "and status in ('processing','complete','creditcard_proccessing','free_processing','paypal_canceled_reversal','paypal_reversed','delivered') and order_type =1";
 
 
     /**
@@ -2741,7 +2741,7 @@ class Crontab extends Backend
         $stime = date("Y-m-d 00:00:00", strtotime("-1 day"));
         $etime = date("Y-m-d 23:59:59", strtotime("-1 day"));
         $map['created_at'] = $date['created_at'] = $update['updated_at'] =  ['between', [$stime, $etime]];
-        $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
+        $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete','delivered']];
         $map['order_type'] = 1;
         $zeelool_count = $zeelool_model->table('sales_flat_order')->where($map)->count(1);
         $zeelool_total = $zeelool_model->table('sales_flat_order')->where($map)->sum('base_grand_total');
@@ -3846,7 +3846,7 @@ class Crontab extends Backend
         $order_where = [];
         $order_where['o.order_type'] = 1;
         $order_success_where = [];
-        $order_success_where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        $order_success_where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
         $yes_date = date("Y-m-d", strtotime("-1 day"));
         $yestime_where = [];
         $yestime_where[] = ['exp', Db::raw("DATE_FORMAT(o.created_at, '%Y-%m-%d') = '" . $yes_date . "'")];
