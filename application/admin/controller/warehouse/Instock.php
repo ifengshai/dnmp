@@ -524,7 +524,7 @@ class Instock extends Backend
 
                     //如果存在采购单id
                     if ($v['purchase_id']) {
-
+                        echo 111;die();
                         //采购入库
                         $is_purchase = 10;
                         //如果存在关联补货需求单id
@@ -662,7 +662,7 @@ class Instock extends Backend
                     }
                     //不是采购过来的 如果有站点id 说明是指定增加此平台sku
                     elseif ($v['platform_id']) {
-                        echo 111;die();
+                        echo 222;die();
                         //手动入库
                         $change_type = 18;
                         //出入库
@@ -699,7 +699,7 @@ class Instock extends Backend
 
                     } //没有采购单也没有站点id 说明是盘点过来的
                     else {
-
+                        echo 333;die();
                         //盘点
                         $change_type = 20;
                         //盘点
