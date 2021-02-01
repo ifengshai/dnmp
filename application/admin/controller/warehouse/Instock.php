@@ -474,7 +474,7 @@ class Instock extends Backend
             ->field('a.*,b.id as bid,b.in_stock_num,b.in_stock_id,b.no_stock_num,b.purchase_id,b.sample_num,b.price')
             ->select();
         $list = collection($list)->toArray();
-
+        dump($list);die();
         $skus = array_column($list, 'sku');
 
         //查询存在产品库的sku
@@ -513,7 +513,7 @@ class Instock extends Backend
                 $error_num = [];
                  $list[0]['purchase_id'] =1;
                  $list[0]['replenish_id'] =1;
-                dump($list);die();
+
                 foreach ($list as $k => $v) {
                     $item_map['sku'] = $v['sku'];
                     $item_map['is_del'] = 1;
