@@ -1808,6 +1808,7 @@ class ScmDistribution extends Scm
         $start_time = $this->request->request('start_time');
         $end_time = $this->request->request('end_time');
         $site = $this->request->request('site');
+        $shelf_number = $this->request->request('shelf_number');
         $order_prescription_type = $this->request->request('order_prescription_type');//订单处方分类 1 仅镜架 2 现货处方镜 3 定制处方镜 ',
         $page = $this->request->request('page');
         $page_size = $this->request->request('page_size');
@@ -1848,6 +1849,9 @@ class ScmDistribution extends Scm
                 $where['order_prescription_type'] = ['=', $order_prescription_type];
             }else{
                 $where['order_prescription_type'] = ['in', [2,3]];
+            }
+            if ($shelf_number) {
+                $where['shelf_number'] = ['=', $shelf_number];
             }
             $list = $this->_new_order_process
                 ->where($where)
