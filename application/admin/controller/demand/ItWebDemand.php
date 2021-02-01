@@ -379,8 +379,8 @@ class ItWebDemand extends Backend
 
     public function batch_export_xls(){
         $where['is_del'] =['eq',1];
-        $where['demand_type'] =['eq',2];
-        $where['web_designer_group'] =['eq',1];
+        $where['demand_type'] =['eq',1];
+        $where['phper_group'] =['eq',1];
         $where['create_time'] = ['between',['2021-01-01 00:00:00','2021-01-31 23:59:59']];
 //        $field = 'id,site,entry_user_id,type,functional_module,title,create_time,pm_audit_status_time,web_designer_user_id,app_user_id,phper_user_id,node_time
 //        develop_finish_time,web_designer_complexity,web_designer_group,web_remarks,pm_audit_status,pm_confirm_time,copy_to_user_id';
@@ -609,7 +609,7 @@ class ItWebDemand extends Backend
             $spreadsheet->getActiveSheet()->setCellValue("R" . ($key * 1 + 2), $value['app_user_name']);
 
 
-            
+
         }
 
         //设置宽度
@@ -644,7 +644,7 @@ class ItWebDemand extends Backend
         $spreadsheet->setActiveSheetIndex(0);
 
         $format = 'xlsx';
-        $savename = '2021年一月份网站前端RDC需求' . date("YmdHis", time());
+        $savename = '2021年一月份网站后端需求列表' . date("YmdHis", time());
 
         if ($format == 'xls') {
             //输出Excel03版本
