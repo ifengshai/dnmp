@@ -523,7 +523,7 @@ class Instock extends Backend
                     //采购过来的 有采购单的 1、有补货需求单的直接按比例分配 2、没有补货需求单的都给m站
 
                     //如果存在采购单id
-                    if ($v['purchase_id']) {
+                    if (empty($v['purchase_id'])) {
                         echo 111;die();
                         //采购入库
                         $is_purchase = 10;
