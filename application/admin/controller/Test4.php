@@ -1629,7 +1629,7 @@ class Test4 extends Controller
     //产品等级销量数据脚本
     public function product_level_salesnum(){
         //查询时间
-        $date_time = $this->zeelool->query("SELECT DATE_FORMAT(created_at, '%Y-%m-%d') AS date_time FROM `sales_flat_order` where created_at between '2018-01-01' and '2020-12-31' GROUP BY DATE_FORMAT(created_at, '%Y%m%d') order by DATE_FORMAT(created_at, '%Y%m%d') asc");
+        $date_time = $this->zeelool->query("SELECT DATE_FORMAT(created_at, '%Y-%m-%d') AS date_time FROM `sales_flat_order` where created_at between '2021-01-27' and '2021-01-30' GROUP BY DATE_FORMAT(created_at, '%Y%m%d') order by DATE_FORMAT(created_at, '%Y%m%d') asc");
         foreach ($date_time as $val) {
             $is_exist = Db::name('datacenter_day_supply')->where('day_date', $val['date_time'])->value('id');
             if (!$is_exist) {
