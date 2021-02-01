@@ -3767,7 +3767,6 @@ class Crontab extends Backend
             return false;
         }
 
-        echo 1122333 . "\n";
         $today = date('Y-m-d 23:59:59');
         $model->table('sales_flat_order')->query("set time_zone='+8:00'");
         $model->table('sales_flat_quote')->query("set time_zone='+8:00'");
@@ -3818,10 +3817,6 @@ class Crontab extends Backend
         //总共支付成功数
         $total_order_success_data = $model->table('sales_flat_order')->where($order_where)->where($order_success_where)->count();
 
-
-        echo 445566 . "\n";die;
-
-
         //昨天购物车总数
         $quote_where['base_grand_total'] = ['>', 0];
         $yesterday_shoppingcart_total_data = $model->table('sales_flat_quote')->where($yestime_where)->where($quote_where)->count();
@@ -3857,7 +3852,7 @@ class Crontab extends Backend
         $total_shoppingcart_new_data  = $total_shoppingcart_total_data;
 
 
-        echo 1111111 . "\n";
+        echo 1111111 . "\n";die;
         //2020-11-25 更换仪表盘页面新增购物车转化率(%)的计算方法 start
         //昨天支付成功数 从新增购物车中成功支付数
         $order_where = [];
