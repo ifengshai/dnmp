@@ -2122,6 +2122,7 @@ class WorkOrderList extends Backend
 
                             //更改镜框校验库存
                             !$item['change_frame']['change_sku'] && $this->error("子订单：{$key} 的新sku不能为空");
+                            $item['change_frame']['change_sku'] = trim($item['change_frame']['change_sku']);
                             $back_data = $this->skuIsStock([$item['change_frame']['change_sku']], $params['work_platform'], [1]);
                             !$back_data['result'] && $this->error($back_data['msg']);
                         } /*elseif (in_array(20, $item['item_choose'])) {//更改镜片
@@ -2957,6 +2958,14 @@ class WorkOrderList extends Backend
 
         //处理
         if (3 == $operateType) {
+            //查询赠品sku
+            $gift_status = 0;
+            $gift_sku = $this->order_change->field('id,change_sku,change_number')->where(['work_id' => $ids,'change_type' => 4])->select();
+            if (!empty($gift_sku)) {
+                $gift_status = 1;
+            }
+            $this->view->assign('gift_status', $gift_status);
+            $this->view->assign('gift_sku', $gift_sku);
             return $this->view->fetch('saleaftermanage/work_order_list/process');
         }
 
@@ -3185,7 +3194,33 @@ class WorkOrderList extends Backend
                             }
                         }
                     }
-                    $result = $this->model->handleRecept($receptInfo['id'], $receptInfo['work_id'], $receptInfo['measure_id'], $receptInfo['recept_group_id'], $params['success'], $params['note'], $receptInfo['is_auto_complete']);
+                    //赠品绑定条码
+                    $_work_order_measure = new WorkOrderMeasure();
+                    $measure_choose_id = $_work_order_measure->where('id',$receptInfo['measure_id'])->value('measure_choose_id');
+                    if(6 == $measure_choose_id){
+                        $barcode = $params['barcode'];
+                        $product_bar_code_item = new ProductBarCodeItem();
+                        $work_order_change_sku = new WorkOrderChangeSku();
+                        $gift_sku = $work_order_change_sku->field('id,change_sku,change_number')->where(['work_id' => $receptInfo['work_id'],'change_type' => 4])->select();
+                        if (!empty($gift_sku)) {
+                            $gift_sku = collection($gift_sku)->toArray();
+                            foreach ($gift_sku as $key => $value) {
+                                for ($i=1; $i <= $value['change_number']; $i++) { 
+                                    if (empty($barcode[$value['change_sku'].'_'.$i])) {
+                                        $this->error("序号为".$i."的sku(".$value['change_sku'].")，条形码不能为空");
+                                    }
+                                    $bar_code_info = $product_bar_code_item->where(['code' => $barcode[$value['change_sku'].'_'.$i]])->find();
+                                    if ($bar_code_info['library_status'] == 2) {
+                                        $this->error("序号为".$i."的sku(".$value['change_sku'].")，在库状态为否");
+                                    }
+                                    if ($bar_code_info['sku'] != $value['change_sku']) {
+                                        $this->error("序号为".$i."的sku(".$value['change_sku'].")，条形码所绑定的sku与赠品sku不一致");
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    $result = $this->model->handleRecept($receptInfo['id'], $receptInfo['work_id'], $receptInfo['measure_id'], $receptInfo['recept_group_id'], $params['success'], $params['note'], $receptInfo['is_auto_complete'], $params['barcode']);
                 }
                 if ($result !== false) {
                     //措施表

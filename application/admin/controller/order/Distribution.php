@@ -179,12 +179,12 @@ class Distribution extends Backend
             if (!in_array($label, [0, 8])) {
 
                 if (7 == $label) {
-                    $map['a.distribution_status'] = [['>', 6], ['<', 9]];
+                    $map['a.distribution_status'] = [['>', 6], ['<=', 9]];
                 } else {
                     $map['a.distribution_status'] = $label;
                 }
 
-                $map['a.abnormal_house_id'] = 0;
+                //$map['a.abnormal_house_id'] = 0;
             }
 
             //处理异常选项
@@ -216,6 +216,11 @@ class Distribution extends Backend
 
             //查询子单ID合集
             $item_process_ids = [];
+
+            if ($filter['is_work_order']) {
+                $is_work_order = $filter['is_work_order'];
+                unset($filter['is_work_order']);
+            }
 
             //跟单或筛选异常
 
@@ -332,34 +337,48 @@ class Distribution extends Backend
                 $flag = true;
             }
             $this->request->get(['filter' => json_encode($filter)]);
-            //子单工单未处理
-            $item_order_numbers = $this->_work_order_change_sku
-                ->alias('a')
-                ->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')
-                ->where([
-                    'a.change_type' => ['in', [1, 2, 3]], //1更改镜架  2更改镜片 3取消订单
-                    'b.work_status' => ['in', $work_order_status_map], //工单未处理
-                    'b.work_type' => ['in', $work_order_type]
-                ])
-                ->order('a.create_time', 'desc')
-                ->group('a.item_order_number')
-                ->column('a.item_order_number');
-
+            
+            if (8 == $label || 1 == $label || 0 == $label) {
+                    //查询子单的主单是否也含有工单
+                    $platform_order = $this->_work_order_list->where([
+                        'work_status' => ['in',$work_order_status_map],
+                        'work_type' => ['in',$work_order_type]
+                    ])->group('platform_order')->column('platform_order');
+                    if (!empty($platform_order)) {
+                      $order_id = $this->_new_order_process->where(['increment_id' => ['in',$platform_order]])->group('order_id')->column('order_id');
+                      $item_order_numbers  = $this->model->where(['order_id' => ['in',$order_id]])->group('item_order_number')->column('item_order_number');
+                    } 
+            }else{
+                //其他tab展示子单工单未处理
+                $item_order_numbers = $this->_work_order_change_sku
+                    ->alias('a')
+                    ->join(['fa_work_order_list' => 'b'], 'a.work_id=b.id')
+                    ->where([
+                        'a.change_type' => ['in', [1, 2, 3]], //1更改镜架  2更改镜片 3取消订单
+                        'b.work_status' => ['in', $work_order_status_map], //工单未处理
+                        'b.work_type' => ['in', $work_order_type]
+                    ])
+                    ->order('a.create_time', 'desc')
+                    ->group('a.item_order_number')
+                    ->column('a.item_order_number');
+            }
             if ($flag && empty($item_order_numbers[0])) {
                 $result = array("total" => 0, "rows" => []);
                 return json($result);
             }
 
-            //跟单
-            if (8 == $label && $item_order_numbers) {
+            if (8 == $label) {
+                //展示子工单的子单
                 $item_process_id_work = $this->model->where(['item_order_number' => ['in', $item_order_numbers]])->column('id');
-                if ($flag) {
+                if ($flag || $is_work_order == 1) {
                     $item_process_ids = $item_process_id_work;
-                } else {
+                }else if($is_work_order == 2){
+                    $item_process_ids = $item_process_ids;
+                    $map['a.item_order_number'] = ['not in', $item_order_numbers];
+                }else {
                     $item_process_ids = array_unique(array_merge($item_process_ids, $item_process_id_work));
                 }
             }
-
             if ($item_process_ids) {
                 $map['a.id'] = ['in', $item_process_ids];
             }
@@ -461,7 +480,16 @@ class Distribution extends Backend
 
                 //判断是否显示工单按钮
                 $list[$key]['task_info'] = in_array($value['item_order_number'], $item_order_numbers) ? 1 : 0;
-
+                /*if (8 == $label || 1 == $label || 0 == $label) {
+                    //查询子单的主单是否也含有工单
+                    if ($handle_abnormal == 0 && $list[$key]['task_info'] == 0) {
+                        $platform_order = $this->_new_order_process->where(['order_id' => $list[$key]['order_id']])->value('increment_id');
+                        $work_order_list_task = $this->_work_order_list->where(['work_status' => ['in',[1,2,3,5]],'platform_order' =>$platform_order])->find();
+                        if (!empty($work_order_list_task)) {
+                            $list[$key]['task_info'] = 1;
+                        } 
+                    }
+                }*/
                 //获取工单更改镜框最新信息
                 $change_sku = $this->_work_order_change_sku
                     ->alias('a')
@@ -2104,6 +2132,16 @@ class Distribution extends Backend
                         ->dec('stock', 1)
                         ->update();
 
+                    //扣减总库存自动生成一条出库单 审核通过 分类为成品质检报损
+                    $outstock['out_stock_number'] = 'OUT' . date('YmdHis') . rand(100, 999) . rand(100, 999);
+                    $outstock['type_id'] = 2;
+                    $outstock['remark'] = 'PDA质检拒绝：镜架报损自动生成出库单';
+                    $outstock['status'] = 2;
+                    $outstock['create_person'] = session('admin.nickname');
+                    $outstock['createtime'] = date('Y-m-d H:i:s', time());
+                    $outstock['platform_id'] = $value['site'];
+                    $this->_outstock->insert($outstock);
+
                     //扣减虚拟仓库存
                     $this->_item_platform_sku
                         ->where(['sku' => $true_sku, 'platform_type' => $value['site']])
@@ -2278,6 +2316,7 @@ class Distribution extends Backend
             $this->_distribution_abnormal->startTrans();
             $this->_item_platform_sku->startTrans();
             $this->_item->startTrans();
+            $this->_outstock->startTrans();
             $this->_stock_log->startTrans();
             try {
                 //异常库位占用数量-1
@@ -2364,6 +2403,17 @@ class Distribution extends Backend
                         ->dec('stock', 1)
                         ->update();
 
+                    //扣减总库存自动生成一条出库单 审核通过 分类为成品质检报损
+                    $outstock['out_stock_number'] = 'OUT' . date('YmdHis') . rand(100, 999) . rand(100, 999);
+                    //加工报损
+                    $outstock['type_id'] = 4;
+                    $outstock['remark'] = '回滚至待配货自动生成出库单';
+                    $outstock['status'] = 2;
+                    $outstock['create_person'] = session('admin.nickname');
+                    $outstock['createtime'] = date('Y-m-d H:i:s', time());
+                    $outstock['platform_id'] = $item_info['site'];
+                    $this->_outstock->insert($outstock);
+
                     //记录库存日志
                     $this->_stock_log->setData([
                         'type' => 2,
@@ -2396,12 +2446,14 @@ class Distribution extends Backend
                 $this->_distribution_abnormal->commit();
                 $this->_item_platform_sku->commit();
                 $this->_item->commit();
+                $this->_outstock->commit();
                 $this->_stock_log->commit();
             } catch (PDOException $e) {
                 $this->model->rollback();
                 $this->_distribution_abnormal->rollback();
                 $this->_item_platform_sku->rollback();
                 $this->_item->rollback();
+                $this->_outstock->rollback();
                 $this->_stock_log->rollback();
                 $this->error($e->getMessage());
             } catch (Exception $e) {
@@ -2409,6 +2461,7 @@ class Distribution extends Backend
                 $this->_distribution_abnormal->rollback();
                 $this->_item_platform_sku->rollback();
                 $this->_item->rollback();
+                $this->_outstock->rollback();
                 $this->_stock_log->rollback();
                 $this->error($e->getMessage());
             }

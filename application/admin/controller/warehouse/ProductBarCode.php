@@ -33,6 +33,8 @@ class ProductBarCode extends Backend
         parent::_initialize();
         $this->model = new \app\admin\model\warehouse\ProductBarCode;
         $this->item = new \app\admin\model\warehouse\ProductBarCodeItem;
+        $this->outstock = new \app\admin\model\warehouse\Outstock;
+        $this->inventory = new \app\admin\model\warehouse\Inventory;
     }
 
     /**
@@ -305,6 +307,10 @@ EOF;
             foreach ($list as $k=>$val){
                 $in_stock_time = (new Instock())->where('id', $val['in_stock_id'])->value('check_time');
                 $list[$k]['purchase_number'] = $purchase_list[$val['purchase_id']];
+                //获取出库单号
+                $list[$k]['out_stock_number'] = $this->outstock->where(['id' => $val['out_stock_id']])->value('out_stock_number');
+                //获取盘点单号
+                $list[$k]['inventory_number'] = $this->inventory->where(['id' => $val['inventory_id']])->value('number');
                 $list[$k]['check_time'] = $in_stock_time;
             }
 
