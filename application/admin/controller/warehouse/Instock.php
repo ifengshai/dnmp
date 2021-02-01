@@ -685,6 +685,7 @@ class Instock extends Backend
                         //如果站点信息等于1 zeelool站点
                         //虚拟库存为0时  讲信息通知到网站端
                         if ($v['platform_id'] ==1){
+                            dump($item_platform_sku);die();
                             Log::write("第三次");
                             Log::write($item_platform_sku);
                             if ($item_platform_sku->stock == 0  && $v['in_stock_num'] > 0){
@@ -697,7 +698,7 @@ class Instock extends Backend
 
                     } //没有采购单也没有站点id 说明是盘点过来的
                     else {
-                       
+
                         //盘点
                         $change_type = 20;
                         //盘点
