@@ -6,6 +6,7 @@ use app\admin\model\platformmanage\MagentoPlatform;
 use app\admin\model\saleaftermanage\WorkOrderChangeSku;
 use app\admin\model\saleaftermanage\WorkOrderMeasure;
 use app\admin\model\StockLog;
+use app\admin\model\warehouse\Outstock;
 use think\Exception;
 use think\exception\PDOException;
 use think\exception\ValidateException;
@@ -137,6 +138,7 @@ class ScmDistribution extends Scm
         $this->_work_order_change_sku = new WorkOrderChangeSku();
         $this->_lens_data = new LensData();
         $this->_work_order_list = new WorkOrderList();
+        $this->_outstock = new Outstock();
     }
 
     /**
@@ -1284,6 +1286,7 @@ class ScmDistribution extends Scm
 
             $this->_new_order_item_process->startTrans();
             $this->_item->startTrans();
+            $this->_outstock->startTrans();
             $this->_item_platform_sku->startTrans();
             $this->_stock_log->startTrans();
             $this->_product_bar_code_item->startTrans();
@@ -1349,6 +1352,17 @@ class ScmDistribution extends Scm
                         ->dec('stock', 1)
                         ->update();
 
+                    //扣减总库存自动生成一条出库单 审核通过 分类为成品质检报损
+                    $outstock['out_stock_number'] = 'OUT' . date('YmdHis') . rand(100, 999) . rand(100, 999);
+                    //质检报损
+                    $outstock['type_id'] = 2;
+                    $outstock['remark'] = 'PDA质检拒绝：镜架报损自动生成出库单';
+                    $outstock['status'] = 2;
+                    $outstock['create_person'] = session('admin.nickname');
+                    $outstock['createtime'] = date('Y-m-d H:i:s', time());
+                    $outstock['platform_id'] = $item_process_info['site'];
+                    $this->_outstock->insert($outstock);
+
                     //扣减虚拟仓库存
                     $this->_item_platform_sku
                         ->where(['sku' => $true_sku, 'platform_type' => $item_process_info['site']])
@@ -1383,12 +1397,14 @@ class ScmDistribution extends Scm
 
                 $this->_new_order_item_process->commit();
                 $this->_item->commit();
+                $this->_outstock->commit();
                 $this->_item_platform_sku->commit();
                 $this->_stock_log->commit();
                 $this->_product_bar_code_item->commit();
             } catch (ValidateException $e) {
                 $this->_new_order_item_process->rollback();
                 $this->_item->rollback();
+                $this->_outstock->rollback();
                 $this->_item_platform_sku->rollback();
                 $this->_stock_log->rollback();
                 $this->_product_bar_code_item->rollback();
@@ -1396,6 +1412,7 @@ class ScmDistribution extends Scm
             } catch (PDOException $e) {
                 $this->_new_order_item_process->rollback();
                 $this->_item->rollback();
+                $this->_outstock->rollback();
                 $this->_item_platform_sku->rollback();
                 $this->_stock_log->rollback();
                 $this->_product_bar_code_item->rollback();
@@ -1403,6 +1420,7 @@ class ScmDistribution extends Scm
             } catch (Exception $e) {
                 $this->_new_order_item_process->rollback();
                 $this->_item->rollback();
+                $this->_outstock->rollback();
                 $this->_item_platform_sku->rollback();
                 $this->_stock_log->rollback();
                 $this->_product_bar_code_item->rollback();
@@ -2218,6 +2236,17 @@ class ScmDistribution extends Scm
                                 ->dec('distribution_occupy_stock', 1)
                                 ->dec('stock', 1)
                                 ->update();
+
+                            //扣减总库存自动生成一条出库单 审核通过 分类为成品质检报损
+                            $outstock['out_stock_number'] = 'OUT' . date('YmdHis') . rand(100, 999) . rand(100, 999);
+                            //属于加工报损
+                            $outstock['type_id'] = 4;
+                            $outstock['remark'] = 'PDA审单-配错镜框-报损出库自动生成出库单';
+                            $outstock['status'] = 2;
+                            $outstock['create_person'] = session('admin.nickname');
+                            $outstock['createtime'] = date('Y-m-d H:i:s', time());
+                            $outstock['platform_id'] = $value['site'];
+                            $this->_outstock->insert($outstock);
 
                             //扣减虚拟仓库存
                             $this->_item_platform_sku

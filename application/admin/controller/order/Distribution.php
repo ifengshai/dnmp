@@ -2122,6 +2122,16 @@ class Distribution extends Backend
                         ->dec('stock', 1)
                         ->update();
 
+                    //扣减总库存自动生成一条出库单 审核通过 分类为成品质检报损
+                    $outstock['out_stock_number'] = 'OUT' . date('YmdHis') . rand(100, 999) . rand(100, 999);
+                    $outstock['type_id'] = 2;
+                    $outstock['remark'] = 'PDA质检拒绝：镜架报损自动生成出库单';
+                    $outstock['status'] = 2;
+                    $outstock['create_person'] = session('admin.nickname');
+                    $outstock['createtime'] = date('Y-m-d H:i:s', time());
+                    $outstock['platform_id'] = $value['site'];
+                    $this->_outstock->insert($outstock);
+
                     //扣减虚拟仓库存
                     $this->_item_platform_sku
                         ->where(['sku' => $true_sku, 'platform_type' => $value['site']])
@@ -2296,6 +2306,7 @@ class Distribution extends Backend
             $this->_distribution_abnormal->startTrans();
             $this->_item_platform_sku->startTrans();
             $this->_item->startTrans();
+            $this->_outstock->startTrans();
             $this->_stock_log->startTrans();
             try {
                 //异常库位占用数量-1
@@ -2382,6 +2393,17 @@ class Distribution extends Backend
                         ->dec('stock', 1)
                         ->update();
 
+                    //扣减总库存自动生成一条出库单 审核通过 分类为成品质检报损
+                    $outstock['out_stock_number'] = 'OUT' . date('YmdHis') . rand(100, 999) . rand(100, 999);
+                    //加工报损
+                    $outstock['type_id'] = 4;
+                    $outstock['remark'] = '回滚至待配货自动生成出库单';
+                    $outstock['status'] = 2;
+                    $outstock['create_person'] = session('admin.nickname');
+                    $outstock['createtime'] = date('Y-m-d H:i:s', time());
+                    $outstock['platform_id'] = $item_info['site'];
+                    $this->_outstock->insert($outstock);
+
                     //记录库存日志
                     $this->_stock_log->setData([
                         'type' => 2,
@@ -2414,12 +2436,14 @@ class Distribution extends Backend
                 $this->_distribution_abnormal->commit();
                 $this->_item_platform_sku->commit();
                 $this->_item->commit();
+                $this->_outstock->commit();
                 $this->_stock_log->commit();
             } catch (PDOException $e) {
                 $this->model->rollback();
                 $this->_distribution_abnormal->rollback();
                 $this->_item_platform_sku->rollback();
                 $this->_item->rollback();
+                $this->_outstock->rollback();
                 $this->_stock_log->rollback();
                 $this->error($e->getMessage());
             } catch (Exception $e) {
@@ -2427,6 +2451,7 @@ class Distribution extends Backend
                 $this->_distribution_abnormal->rollback();
                 $this->_item_platform_sku->rollback();
                 $this->_item->rollback();
+                $this->_outstock->rollback();
                 $this->_stock_log->rollback();
                 $this->error($e->getMessage());
             }
