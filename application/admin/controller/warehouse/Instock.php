@@ -510,7 +510,7 @@ class Instock extends Backend
                 $error_num = [];
                  $list[0]['purchase_id'] =1;
                  $list[0]['replenish_id'] =1;
-                 dump($list);die();
+
                 foreach ($list as $k => $v) {
                     $item_map['sku'] = $v['sku'];
                     $item_map['is_del'] = 1;
@@ -521,10 +521,12 @@ class Instock extends Backend
 
                     //如果存在采购单id
                     if ($v['purchase_id']) {
+                        echo 111;
                         //采购入库
                         $is_purchase = 10;
                         //如果存在关联补货需求单id
                         if ($v['replenish_id']) {
+                            echo 222;die();
                             //采购有比例入库
                             $change_type = 16;
                             //查询各站补货需求量占比
@@ -620,6 +622,7 @@ class Instock extends Backend
                                 }
                             }
                         } else {
+                            echo  333;die();
                             //采购没有比例入库
                             $change_type = 17;
                             //记录没有采购比例直接入库的sku
@@ -655,6 +658,7 @@ class Instock extends Backend
                     }
                     //不是采购过来的 如果有站点id 说明是指定增加此平台sku
                     elseif ($v['platform_id']) {
+                        echo 444;die();
                         //手动入库
                         $change_type = 18;
                         //出入库
@@ -690,6 +694,7 @@ class Instock extends Backend
 
                     } //没有采购单也没有站点id 说明是盘点过来的
                     else {
+                        echo 555;die();
                         //盘点
                         $change_type = 20;
                         //盘点
