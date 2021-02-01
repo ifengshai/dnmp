@@ -3,6 +3,7 @@
 namespace app\admin\controller\order;
 
 use app\admin\model\DistributionLog;
+use app\admin\model\order\Order;
 use app\admin\model\saleaftermanage\WorkOrderChangeSku;
 use app\admin\model\saleaftermanage\WorkOrderList;
 use app\common\controller\Backend;
@@ -1426,12 +1427,18 @@ class Distribution extends Backend
         //标记打印状态
         $this->model->startTrans();
         try {
+            $distribution_value = $this->model->where(['id' => ['in', $ids]])->field('magento_order_id,item_order_number,site')->select();
+            $distribution_value = collection($distribution_value)->toArray();
+            foreach ($distribution_value as $key=>$value){
+                Order::rulesto_adjust($value['magento_order_id'],$value['item_order_number'],$value['site'],1,2);
+            }
             //标记状态
             $this->model->where(['id' => ['in', $ids]])->update(['distribution_status' => 2]);
 
             //记录配货日志
             $admin = (object)session('admin');
             DistributionLog::record($admin, $ids, 1, '标记打印完成');
+            Order::rulesto_adjust();
 
             $this->model->commit();
         } catch (PDOException $e) {
