@@ -1430,6 +1430,7 @@ class Distribution extends Backend
             $distribution_value = $this->model->where(['id' => ['in', $ids]])->field('magento_order_id,item_order_number,site')->select();
             $distribution_value = collection($distribution_value)->toArray();
             foreach ($distribution_value as $key=>$value){
+                $value['item_order_number'] =  substr($value['item_order_number'],0,strpos($value['item_order_number'], '-'));
                 Order::rulesto_adjust($value['magento_order_id'],$value['item_order_number'],$value['site'],1,2);
             }
             //标记状态
