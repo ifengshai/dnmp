@@ -3723,9 +3723,6 @@ class Crontab extends Backend
      */
     public function update_ashboard_data_two()
     {
-
-
-        
         ini_set('memory_limit', '1512M');
         set_time_limit(0);
         //求出平台
@@ -3850,9 +3847,6 @@ class Crontab extends Backend
         $lastyear_shoppingcart_new_data = $model->table('sales_flat_quote')->where($lastyear_where1)->where($quote_where)->count();
         //总共新增购物车总数
         $total_shoppingcart_new_data  = $total_shoppingcart_total_data;
-
-
-        echo 1111111 . "\n";die;
         //2020-11-25 更换仪表盘页面新增购物车转化率(%)的计算方法 start
         //昨天支付成功数 从新增购物车中成功支付数
         $order_where = [];
@@ -3873,9 +3867,6 @@ class Crontab extends Backend
             ->where($order_success_where)
             ->count();
 
-
-        echo 22222 . "\n";
-
         //过去7天从新增购物车中成功支付数
         $seven_start = date("Y-m-d", strtotime("-7 day"));
         $seven_end = date("Y-m-d 23:59:59", strtotime("-1 day"));
@@ -3891,9 +3882,6 @@ class Crontab extends Backend
             ->where($order_where)
             ->where($order_success_where)
             ->count();
-
-        
-            echo 333333 . "\n";
 
         //过去30天从新增购物车中成功支付数
         $thirty_start = date("Y-m-d", strtotime("-30 day"));
@@ -3926,8 +3914,6 @@ class Crontab extends Backend
             ->where($order_where)
             ->where($order_success_where)
             ->count();
-
-            echo 444444 . "\n";
         //上月从新增购物车中成功支付数
         $lastmonth_start = date('Y-m-01', strtotime("$today -1 month"));
         $lastmonth_end = date('Y-m-t 23:59:59', strtotime("$today -1 month"));
@@ -3943,8 +3929,6 @@ class Crontab extends Backend
             ->where($order_where)
             ->where($order_success_where)
             ->count();
-
-            echo 555555 . "\n";
         //今年从新增购物车中成功支付数
         $thisyear_start = date("Y", time()) . "-1" . "-1"; //本年开始
         $thisyear_end = $today;
@@ -3960,9 +3944,6 @@ class Crontab extends Backend
             ->where($order_where)
             ->where($order_success_where)
             ->count();
-
-
-            echo 6666666 . "\n";
 
 
         //上年从新增购物车中成功支付数
@@ -3981,8 +3962,6 @@ class Crontab extends Backend
             ->where($order_success_where)
             ->count();
 
-            echo 777777 . "\n";
-
 
         //总共从新增购物车中成功支付数
         $total_order_success_data1 = $model->table('sales_flat_order')
@@ -3992,9 +3971,6 @@ class Crontab extends Backend
             ->where($order_where)
             ->where($order_success_where)
             ->count();
-
-
-        die;
         //2020-11-25 更换仪表盘页面新增购物车转化率(%)的计算方法 end
 
         //昨天购物车转化率data
