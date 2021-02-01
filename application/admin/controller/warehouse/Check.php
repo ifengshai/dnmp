@@ -280,6 +280,10 @@ class Check extends Backend
                     if (count(array_filter($sku)) < 1) {
                         $this->error('sku不能为空！！');
                     }
+                    $supplier = Db::name('supplier')->where('id',$row['supplier_id'])->find();
+                    if ($supplier['supplier_type_pattern'] == 2){
+                        empty($this->request->post("unqualified_images/a")) && $this->error('供应商是贸易商时图片必填！！');
+                    }
                     //是否错发 如果选择则以选择的为准
                     $batch_type = input('batch_type');
                     if ($batch_type == 1) {

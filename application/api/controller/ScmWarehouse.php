@@ -1315,7 +1315,7 @@ class ScmWarehouse extends Scm
 
         $item_list = $this->_in_stock_item
             ->where(['in_stock_id' => $in_stock_id])
-            ->field('sku,in_stock_num,price')
+            ->field('id,sku,in_stock_num,price')
             ->select();
         empty($item_list) && $this->error(__('入库单子单数据异常'), [], 515);
 
@@ -1372,6 +1372,20 @@ class ScmWarehouse extends Scm
         $info['item_list'] = $item_list;
 
         $this->success('', ['info' => $info], 200);
+    }
+
+    public function in_stock_edit_delete_sku()
+    {
+        $in_stock_item_id = $this->request->request('in_stock_item_id');
+        empty($in_stock_item_id) && $this->error(__('入库单子项ID不能为空'), [], 514);
+        $item_list = $this->_in_stock_item
+            ->where(['id' => $in_stock_item_id])
+            ->delete();
+        if ($item_list){
+            $this->success('删除成功', '', 200);
+        }else{
+            $this->success('删除失败', '', 515);
+        }
     }
 
     /**
