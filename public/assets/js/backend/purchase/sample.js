@@ -143,6 +143,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                     edit_url: 'purchase/sample/sample_workorder_edit',
                     del_url: 'purchase/sample/sample_workorder_del',
                     multi_url: 'purchase/sample/sample_workorder_multi',
+                    import_url: 'purchase/sample/sample_import_xls_copy',
                     table: 'purchase_sample_workorder',
                 }
             });
