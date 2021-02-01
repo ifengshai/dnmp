@@ -3723,6 +3723,9 @@ class Crontab extends Backend
      */
     public function update_ashboard_data_two()
     {
+
+
+        echo 111;die;
         ini_set('memory_limit', '1512M');
         set_time_limit(0);
         //求出平台
