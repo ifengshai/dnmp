@@ -1852,7 +1852,8 @@ class ScmDistribution extends Scm
                 $where['order_prescription_type'] = ['in', [2,3]];
             }
             if ($shelf_number) {
-                $where['shelf_number'] = ['=', $shelf_number];
+                $shelf_number_arr = $this->_stock_house->where(['shelf_number' => $shelf_number])->column('shelf_number');
+                $where['store_house_id'] = ['in', $shelf_number_arr];
             }
             $list = $this->_new_order_process
                 ->where($where)
