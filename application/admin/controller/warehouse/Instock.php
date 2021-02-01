@@ -474,7 +474,7 @@ class Instock extends Backend
             ->field('a.*,b.id as bid,b.sku,b.in_stock_num,b.in_stock_id,b.no_stock_num,b.purchase_id,b.sample_num,b.price')
             ->select();
         $list = collection($list)->toArray();
-        dump($list);
+
         $skus = array_column($list, 'sku');
 
         //查询存在产品库的sku
