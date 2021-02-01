@@ -139,6 +139,7 @@ class FinanceOrder extends Backend
                 $list[$key]['fi_actual_payment_fee'] = $model->table('ld_delivery_order_finance')->where(['increment_id' => $value['order_number']])->value('fi_actual_payment_fee');
 
                 $list[$key]['createtime'] = date('Y-m-d H:i:s', $value['createtime']);
+                $list[$key]['payment_time'] = date('Y-m-d H:i:s', $value['payment_time']);
             }
         //从数据库查询需要的数据
         $spreadsheet = new Spreadsheet();
