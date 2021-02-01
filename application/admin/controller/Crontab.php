@@ -3762,12 +3762,10 @@ class Crontab extends Backend
                 break;
         }
 
-       dump($model);die;
+
         if (false === $model) {
             return false;
         }
-
-
 
         echo 1122333 . "\n";
         $today = date('Y-m-d 23:59:59');
@@ -3821,7 +3819,7 @@ class Crontab extends Backend
         $total_order_success_data = $model->table('sales_flat_order')->where($order_where)->where($order_success_where)->count();
 
 
-        echo 445566 . "\n";
+        echo 445566 . "\n";die;
 
 
         //昨天购物车总数
