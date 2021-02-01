@@ -179,7 +179,7 @@ class Distribution extends Backend
             if (!in_array($label, [0, 8])) {
 
                 if (7 == $label) {
-                    $map['a.distribution_status'] = [['>', 6], ['<', 9]];
+                    $map['a.distribution_status'] = [['>', 6], ['<=', 9]];
                 } else {
                     $map['a.distribution_status'] = $label;
                 }
@@ -363,13 +363,8 @@ class Distribution extends Backend
                 if ($flag || $is_work_order == 1) {
                     $item_process_ids = $item_process_id_work;
                 }else if($is_work_order == 2){
-                    //去掉含有工单的
-                    $increment_id_w = $this->_new_order_process->where(['order_id' => ['in',$item_process_ids]])->group('increment_id')->column('increment_id','order_id');
-                    $platform_order_w = $this->_work_order_list->where(['platform_order' => ['in',$increment_id_w]])->group('platform_order')->column('platform_order');
-                    /*print_r($increment_id_w);die;
-                    print_r($order_id);
-                    print_r($item_process_ids);die;*/
                     $item_process_ids = $item_process_ids;
+                    $map['a.item_order_number'] = ['not in', $item_order_numbers];
                 }else {
                     $item_process_ids = array_unique(array_merge($item_process_ids, $item_process_id_work));
                 }
@@ -476,7 +471,7 @@ class Distribution extends Backend
 
                 //判断是否显示工单按钮
                 $list[$key]['task_info'] = in_array($value['item_order_number'], $item_order_numbers) ? 1 : 0;
-                if (8 == $label || 1 == $label || 0 == $label) {
+                /*if (8 == $label || 1 == $label || 0 == $label) {
                     //查询子单的主单是否也含有工单
                     if ($handle_abnormal == 0 && $list[$key]['task_info'] == 0) {
                         $platform_order = $this->_new_order_process->where(['order_id' => $list[$key]['order_id']])->value('increment_id');
@@ -485,7 +480,7 @@ class Distribution extends Backend
                             $list[$key]['task_info'] = 1;
                         } 
                     }
-                }
+                }*/
                 //获取工单更改镜框最新信息
                 $change_sku = $this->_work_order_change_sku
                     ->alias('a')

@@ -28,6 +28,7 @@ use app\admin\model\order\order\NewOrder;
 use app\admin\model\order\order\NewOrderItemProcess;
 use app\admin\model\saleaftermanage\WorkOrderChangeSku;
 use app\admin\model\warehouse\ProductBarCodeItem;
+use app\admin\model\itemmanage\ItemPlatformSku;
 
 class WorkOrderList extends Model
 {
@@ -2005,6 +2006,15 @@ class WorkOrderList extends Model
                     }
                 }
             }
+            //更改镜框/或镜片子单定制片库位和状态处理（镜框不需要回退，之前处理库存的时候回退过）
+            if (19 == $measure_choose_id || 20 == $measure_choose_id) {
+                $this->back_frame_and_lens($measure_choose_id,$work_id,$work->work_platform);
+            }
+            //子单取消处理完成后要判断订单中剩余子订单是否都是合单中状态
+            if (18 == $measure_choose_id) {
+                $item_order_number = $_work_order_measure->where('id',$measure_id)->value('item_order_number');
+                $this->other_item_order_auto($work->work_platform,$item_order_number);
+            }
             //措施不是补发的时候扣减库存，是补发的时候不扣减库存，因为补发的时候库存已经扣减过了
             if ($resultInfo && 1 == $data['recept_status'] && 7 != $measure_choose_id){
                 $this->deductionStock($work_id, $measure_id);
@@ -2524,5 +2534,129 @@ class WorkOrderList extends Model
         }
 
         return $arr;
+    }
+    /*
+     * 更改镜片和镜框回退状态
+     * */
+    public function back_frame_and_lens($measure_choose_id,$work_id,$platform_order){
+        $work_order_change_sku = new WorkOrderChangeSku();
+        if ($measure_choose_id == 19) {//镜架
+            $info = $work_order_change_sku->field('id,item_order_number')->where(['work_id' => $work_id,'change_type' => 1])->select();
+            $distribution_status = 2;
+        }
+        
+        if ($measure_choose_id == 20) {//镜片
+            $info = $work_order_change_sku->field('id,item_order_number')->where(['work_id' => $work_id,'change_type' => 2])->select();
+            $distribution_status = 3;
+        }
+
+        foreach ($info as $key => $value) {
+            $this->clear_house_id($value['item_order_number']);//清理掉定制片暂存库位
+            $_new_order_process = new NewOrderItemProcess();
+            $product_bar_code_item = new ProductBarCodeItem();
+            $distribution_status_now = $_new_order_process->where(['item_order_number' => $item_order_number])->value('distribution_status');
+            if ($distribution_status_now > $distribution_status) {//在待配镜片或者带配货之后
+                //回退到待配货，解绑条形码
+                if (2 == $distribution_status) {
+                    $product_bar_code_item
+                        ->where(['item_order_number' => $value['item_order_number']])
+                        ->update(['item_order_number' => '']);
+                }
+                //回退到待配镜片
+                if (3 == $distribution_status) {//回退待配镜片
+                    $_new_order_process->where(['item_order_number' => $value['item_order_number']])->update(['distribution_status' => 3]);
+                }
+            }
+        }
+        $this->other_item_order_process($platform_order,array_column($info, 'item_order_number'));//其余子单处理
+    }
+
+    /*
+     * 清理掉定制片暂存库位
+     * */
+    public function clear_house_id($item_order_number){
+        $_new_order_process = new NewOrderItemProcess();
+        $item_process_info = $_new_order_process->where(['item_order_number' => $item_order_number])->find();
+        if ($item_process_info['temporary_house_id']) {
+            //获取库位号
+            $coding = $this->_stock_house
+            ->where(['id' => $item_process_info['temporary_house_id']])
+            ->value('coding');
+            //子订单释放定制片库位号
+            $result = $_new_order_process
+                ->allowField(true)
+                ->isUpdate(true, ['item_order_number' => $item_order_number])
+                ->save(['temporary_house_id' => 0, 'customize_status' => 2]);
+            if ($result != false) {
+                //定制片库位占用数量-1
+                $_stock_house = new StockHouse();
+                $res = $_stock_house
+                    ->where(['id' => $item_process_info['temporary_house_id']])
+                    ->setDec('occupy', 1);
+                DistributionLog::record($this->auth, $item_process_info['id'], 0, "子单号{$item_order_number}，释放定制片库位号：{$coding}");
+            }
+        }
+        
+    }
+
+    /*
+     * 订单的其余子单的状态，如果状态是合单完成时需要将状态变为合单中，如果没有合单库位号需要分配一个
+     * */
+    public function other_item_order_process($increment_id,$item_order_number){
+        $_new_order_process = new NewOrderProcess();
+        $_new_order_item_process = new NewOrderItemProcess();
+        $all_item_order_number = $_new_order_process->alias('a')//所有子单
+            ->where('a.increment_id', $increment_id)
+            ->join(['fa_order_item_process' => 'b'], 'a.order_id=b.order_id')
+            ->column('b.item_order_number');
+        $item_order_number_diff = array_diff($all_item_order_number,$item_order_number);//其余子单
+        if (!empty($item_order_number_diff)) {
+            foreach ($item_order_number_diff as $key => $value) {
+                $distribution_status = $_new_order_item_process->where(['item_order_number' => $value])->value('distribution_status');
+                if ($distribution_status = 9) {//合单完成的改成合单中
+                    $_new_order_item_process->where(['item_order_number' => $value])->update(['distribution_status' => 8]);
+                }
+            }
+            $store_house_id = $_new_order_process->where(['increment_id' => $increment_id])->value('store_house_id');//库位号
+            $order_id = $_new_order_process->where(['increment_id' => $increment_id])->value('order_id');//order_id
+            if (!$store_house_id) {//没有库位号分配库位号
+                $_stock_house = new StockHouse();
+                $fictitious_time = time();
+                $store_house_info = $_stock_house->field('id,coding,subarea')->where(['status' => 1, 'type' => 2, 'occupy' => 0, 'fictitious_occupy_time' => ['<', $fictitious_time]])->find();
+                //绑定预占用库存和有效时间
+                $_stock_house->where(['id' => $store_house_info['id']])->update(['fictitious_occupy_time' => $fictitious_time + 600, 'order_id' => $order_id]);
+                //绑定合单库位
+                $_new_order_process->where(['increment_id' => $increment_id])->update(['store_house_id' => $store_house_info['id']]);
+            }
+        }
+    }
+
+
+    public function other_item_order_auto($increment_id,$item_order_number){
+        $_new_order_process = new NewOrderProcess();
+        $_new_order_item_process = new NewOrderItemProcess();
+        $all_item_order_number = $_new_order_process->alias('a')//所有子单
+            ->where('a.increment_id', $increment_id)
+            ->join(['fa_order_item_process' => 'b'], 'a.order_id=b.order_id')
+            ->column('b.item_order_number');
+        $item_order_number_diff = array_diff($all_item_order_number,[$item_order_number]);//其余子单
+        //查询是否其他子单为合单中
+        $flag = 1;
+        foreach ($item_order_number_diff as $key => $value) {
+           $distribution_status = $_new_order_item_process->where(['item_order_number' => $value])->value('distribution_status');
+           if ($distribution_status != 9) {
+               $flag = 0;
+           }
+        }
+        if ($flag) {
+            $order_id = $_new_order_process->where(['increment_id' => $increment_id])->value('order_id');//order_id
+            $_new_order_item_process
+                ->where(['order_id' => $order_id, 'distribution_status' => ['neq', 0]])
+                ->update(['distribution_status' => 9]);
+            $_new_order_process
+                ->where(['order_id' => $order_id])
+                ->update(['combine_status' => 1, 'check_status' => 0, 'combine_time' => time()]);
+        }
+        $this->clear_house_id($item_order_number);//清理掉定制片暂存库位
     }
 }

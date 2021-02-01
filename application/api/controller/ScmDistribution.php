@@ -1474,7 +1474,15 @@ class ScmDistribution extends Scm
             //未合单，首次扫描
             if (!$order_process_info['store_house_id']) {
                 //主单中无库位号，首个子单进入时，分配一个合单库位给PDA，暂不占用根据是否确认放入合单架占用或取消
-                $store_house_info = $this->_stock_house->field('id,coding,subarea')->where(['status' => 1, 'type' => 2, 'occupy' => 0, 'fictitious_occupy_time' => ['<', $fictitious_time]])->find();
+                $store_house_where = ['status' => 1, 'type' => 2, 'occupy' => 0, 'fictitious_occupy_time' => ['<', $fictitious_time]];
+                $store_house_info = $this->_stock_house->field('id,coding,subarea')->where($store_house_where)->find();
+                if ($order_process_info['order_prescription_type'] == 1) {//仅镜架优先分配B开头的货架
+                    $store_house_where['shelf_number'] == 'B';
+                    $store_house_info_b = $this->_stock_house->field('id,coding,subarea')->where($store_house_where)->find();
+                    if (!empty($store_house_info_b)) {
+                        $store_house_info = $store_house_info_b;
+                    }
+                }
                 empty($store_house_info) && $this->error(__('合单失败，合单库位已用完，请添加后再操作'), [], 403);
                 //绑定预占用库存和有效时间
                 $this->_stock_house->where(['id' => $store_house_info['id']])->update(['fictitious_occupy_time' => $fictitious_time + 600, 'order_id' => $item_process_info['order_id']]);
@@ -1728,6 +1736,7 @@ class ScmDistribution extends Scm
         $start_time = $this->request->request('start_time');
         $end_time = $this->request->request('end_time');
         $site = $this->request->request('site');
+        $order_prescription_type = $this->request->request('order_prescription_type');//订单处方分类 1 仅镜架 2 现货处方镜 3 定制处方镜 ',
         $page = $this->request->request('page');
         $page_size = $this->request->request('page_size');
         empty($page) && $this->error(__('Page can not be empty'), [], 520);
@@ -1763,11 +1772,17 @@ class ScmDistribution extends Scm
             if ($site) {
                 $where['site'] = ['=', $site];
             }
+            if ($order_prescription_type == 1) {
+                $where['order_prescription_type'] = ['=', $order_prescription_type];
+            }else{
+                $where['order_prescription_type'] = ['in', [2,3]];
+            }
             $list = $this->_new_order_process
                 ->where($where)
                 ->field('order_id,store_house_id,combine_time')
                 ->group('order_id')
                 ->limit($offset, $limit)
+                ->order('order_prescription_type')
                 ->select();
             foreach (array_filter($list) as $k => $v) {
                 $list[$k]['coding'] = $this->_stock_house->where('id', $v['store_house_id'])->value('coding');
