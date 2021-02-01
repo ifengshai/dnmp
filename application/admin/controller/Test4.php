@@ -1923,6 +1923,8 @@ class Test4 extends Controller
         $arr8 = array();
         $grades = Db::name('product_grade')->field('true_sku,grade')->select();
         foreach ($grades as $key=>$value){
+            $this->model = new \app\admin\model\itemmanage\Item;
+            $this->item = new \app\admin\model\warehouse\ProductBarCodeItem;
             //该品实时库存
             $real_time_stock = $this->model->where('sku',$value['true_sku'])->where('is_del',1)->where('is_open',1)->value('sum(stock)-sum(distribution_occupy_stock) as result');
             //该品库存金额
