@@ -414,8 +414,10 @@ class TrackReg extends Backend
         foreach ($list as $k => $v) {
             $allnum = 0;
             foreach ($siteList as $val) {
+
+                $sql = $skuSalesNum->field('sales_num')->where(['sku' => $v, 'createtime' => ['<', $date], 'site' => $val['id']])->limit(30)->order('createtime desc')->buildSql();
+                $num = Db::table($sql . ' a')->sum('a.sales_num');
                 //统计30天有效天数销量
-                $num = $skuSalesNum->where(['sku' => $v, 'createtime' => ['<', $date], 'site' => $val['id']])->limit(30)->order('createtime desc')->sum('sales_num');
                 $allnum += $num;
             }
             if ($allnum >= 300) {
