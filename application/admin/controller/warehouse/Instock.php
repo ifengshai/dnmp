@@ -520,7 +520,6 @@ class Instock extends Backend
                     //采购过来的 有采购单的 1、有补货需求单的直接按比例分配 2、没有补货需求单的都给m站
                     //如果存在采购单id
                     if (!empty($v['purchase_id'])) {
-                        echo 111;die();
                         //采购入库
                         $is_purchase = 10;
                         //如果存在关联补货需求单id
@@ -658,7 +657,6 @@ class Instock extends Backend
                     }
                     //不是采购过来的 如果有站点id 说明是指定增加此平台sku
                     elseif ($v['platform_id']) {
-                        echo 222;
                         //手动入库
                         $change_type = 18;
                         //出入库
@@ -682,7 +680,7 @@ class Instock extends Backend
                         //如果站点信息等于1 zeelool站点
                         //虚拟库存为0时  讲信息通知到网站端
                         if ($v['platform_id'] ==1){
-                            dump($item_platform_sku);die();
+
                             Log::write("第三次");
                             Log::write($item_platform_sku);
                             if ($item_platform_sku->stock == 0  && $v['in_stock_num'] > 0){
@@ -691,11 +689,8 @@ class Instock extends Backend
                                 $this->submission_post($url,$value);
                             }
                         }
-
-
                     } //没有采购单也没有站点id 说明是盘点过来的
                     else {
-                        echo 333;die();
                         //盘点
                         $change_type = 20;
                         //盘点
