@@ -511,9 +511,6 @@ class Instock extends Backend
                  * @todo 审核通过增加库存 并添加入库单入库数量
                  */
                 $error_num = [];
-                 $list[0]['purchase_id'] =1;
-                 $list[0]['replenish_id'] =1;
-
                 foreach ($list as $k => $v) {
                     $item_map['sku'] = $v['sku'];
                     $item_map['is_del'] = 1;
@@ -521,7 +518,6 @@ class Instock extends Backend
                     //审核通过对虚拟库存的操作
                     //审核通过时按照补货需求比例 划分各站虚拟库存 如果未关联补货需求单则按照当前各站虚拟库存数量实时计算各站比例（弃用）
                     //采购过来的 有采购单的 1、有补货需求单的直接按比例分配 2、没有补货需求单的都给m站
-                    dump($v['purchase_id']);
                     //如果存在采购单id
                     if (!empty($v['purchase_id'])) {
                         echo 111;die();
@@ -662,7 +658,7 @@ class Instock extends Backend
                     }
                     //不是采购过来的 如果有站点id 说明是指定增加此平台sku
                     elseif ($v['platform_id']) {
-                        echo 222;die();
+                        echo 222;
                         //手动入库
                         $change_type = 18;
                         //出入库
