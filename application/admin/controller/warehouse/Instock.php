@@ -456,6 +456,7 @@ class Instock extends Backend
         }
         $map['id'] = ['in', $ids];
         $row = $this->model->where($map)->select();
+        dump($row);die();
         foreach ($row as $v) {
             if ($v['status'] !== 1) {
                 $this->error('只有待审核状态才能操作！！');
@@ -535,7 +536,7 @@ class Instock extends Backend
                                 // ->order('rate asc')
                                 ->field('rate,website_type')
                                 ->select();
-                            dump($rate_arr);die();
+
                             // dump(collection($rate_arr)->toArray());die;
                             //根据入库数量插入各站虚拟仓库存
                             $all_num = count($rate_arr);
