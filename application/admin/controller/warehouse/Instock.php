@@ -526,7 +526,7 @@ class Instock extends Backend
                         $is_purchase = 10;
                         //如果存在关联补货需求单id
                         if ($v['replenish_id']) {
-                            echo 222;die();
+
                             //采购有比例入库
                             $change_type = 16;
                             //查询各站补货需求量占比
@@ -535,6 +535,7 @@ class Instock extends Backend
                                 // ->order('rate asc')
                                 ->field('rate,website_type')
                                 ->select();
+                            dump($rate_arr);die();
                             // dump(collection($rate_arr)->toArray());die;
                             //根据入库数量插入各站虚拟仓库存
                             $all_num = count($rate_arr);
