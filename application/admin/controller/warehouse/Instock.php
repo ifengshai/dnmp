@@ -471,6 +471,7 @@ class Instock extends Backend
         $list = $this->model->alias('a')
             ->join(['fa_in_stock_item' => 'b'], 'a.id=b.in_stock_id')
             ->where(['b.in_stock_id' => ['in', $ids]])
+            ->field('a.*,b.id as bid,b.in_stock_num,b.in_stock_id,b.no_stock_num,b.purchase_id,b.sample_num,b.price')
             ->select();
         $list = collection($list)->toArray();
 
