@@ -3924,6 +3924,8 @@ class Crontab extends Backend
             ->where($order_where)
             ->where($order_success_where)
             ->count();
+
+        echo $model->table('sales_flat_order')->getLastSql();die;
         //今年从新增购物车中成功支付数
         $thisyear_start = date("Y", time()) . "-1" . "-1"; //本年开始
         $thisyear_end = $today;
