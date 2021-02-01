@@ -3725,11 +3725,13 @@ class Crontab extends Backend
     {
 
 
-        echo 111;die;
+        
         ini_set('memory_limit', '1512M');
         set_time_limit(0);
         //求出平台
         $platform = $this->request->get('platform', 1);
+
+        echo $platform;die;
         if (!$platform) {
             return false;
         }
