@@ -1629,16 +1629,15 @@ class ScmWarehouse extends Scm
                             'number_type' => 3,
                         ]);
 
-                        if ($v['platform_id'] ==1){
-
-                            \Think\Log::write("第三次");
-                            \Think\Log::write($item_platform_sku);
-                            if ($item_platform_sku['stock'] == 0  && $v['in_stock_num'] > 0){
-                                $value['sku'] = $item_platform_sku['platform_sku'];
-                                $url  =  config('url.zeelool_url').'magic/product/productArrival';
-                                $this->submission_post($url,$value);
-                            }
-                        }
+//                        if ($v['platform_id'] ==1 && $v['type_id'] !== 3 && $k == 0){
+//                            \Think\Log::write("第三次");
+//                            \Think\Log::write($item_platform_sku);
+//                            if ($item_platform_sku['stock'] == 0  && $v['in_stock_num'] > 0){
+//                                $value['sku'] = $item_platform_sku['platform_sku'];
+//                                $url  =  config('url.zeelool_url').'magic/product/productArrival';
+//                                $this->submission_post($url,$value);
+//                            }
+//                        }
 
                     } //没有采购单也没有站点id 说明是盘点过来的
                     else {
@@ -1658,15 +1657,15 @@ class ScmWarehouse extends Scm
                             foreach ($item_platform_sku as $key => $val) {
                                 $item_platform_sku_detail = $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->find();
 
-                                if ($val['platform_type'] ==1){
-                                    \Think\Log::write("第四次");
-                                    \Think\Log::write($item_platform_sku_detail);
-                                    if ($item_platform_sku_detail['stock'] ==0 && $stock_num >0 ){
-                                        $value['sku'] = $item_platform_sku_detail['platform_sku'];
-                                        $url  =  config('url.zeelool_url').'magic/product/productArrival';
-                                        $this->submission_post($url,$value);
-                                    }
-                                }
+//                                if ($val['platform_type'] ==1){
+//                                    \Think\Log::write("第四次");
+//                                    \Think\Log::write($item_platform_sku_detail);
+//                                    if ($item_platform_sku_detail['stock'] ==0 && $stock_num >0 ){
+//                                        $value['sku'] = $item_platform_sku_detail['platform_sku'];
+//                                        $url  =  config('url.zeelool_url').'magic/product/productArrival';
+//                                        $this->submission_post($url,$value);
+//                                    }
+//                                }
                                 //最后一个站点 剩余数量分给最后一个站
                                 if (($all_num - $key) == 1) {
                                     $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setInc('stock', $stock_num);
@@ -1713,15 +1712,15 @@ class ScmWarehouse extends Scm
                             foreach ($item_platform_sku as $key => $val) {
                                 $item_platform_sku_detail = $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->find();
                                 //最后一个站点 剩余数量分给最后一个站
-                                if ($val['platform_type'] ==1){
-                                    \Think\Log::write("第五次");
-                                    \Think\Log::write($item_platform_sku_detail);
-                                    if ($item_platform_sku_detail['stock'] ==0 && $stock_num >0 ){
-                                        $value['sku'] = $item_platform_sku_detail['platform_sku'];
-                                        $url  =  config('url.zeelool_url').'magic/product/productArrival';
-                                        $this->submission_post($url,$value);
-                                    }
-                                }
+//                                if ($val['platform_type'] ==1){
+//                                    \Think\Log::write("第五次");
+//                                    \Think\Log::write($item_platform_sku_detail);
+//                                    if ($item_platform_sku_detail['stock'] ==0 && $stock_num >0 ){
+//                                        $value['sku'] = $item_platform_sku_detail['platform_sku'];
+//                                        $url  =  config('url.zeelool_url').'magic/product/productArrival';
+//                                        $this->submission_post($url,$value);
+//                                    }
+//                                }
 
                                 if (($all_num - $key) == 1) {
                                     $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setInc('stock', $stock_num);
