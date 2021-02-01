@@ -456,7 +456,7 @@ class Instock extends Backend
         }
         $map['id'] = ['in', $ids];
         $row = $this->model->where($map)->select();
-        dump($row);die();
+
         foreach ($row as $v) {
             if ($v['status'] !== 1) {
                 $this->error('只有待审核状态才能操作！！');
@@ -473,6 +473,7 @@ class Instock extends Backend
             ->where(['b.in_stock_id' => ['in', $ids]])
             ->select();
         $list = collection($list)->toArray();
+        dump($list);die();
         $skus = array_column($list, 'sku');
 
         //查询存在产品库的sku
