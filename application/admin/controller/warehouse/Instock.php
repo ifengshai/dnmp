@@ -471,10 +471,10 @@ class Instock extends Backend
         $list = $this->model->alias('a')
             ->join(['fa_in_stock_item' => 'b'], 'a.id=b.in_stock_id')
             ->where(['b.in_stock_id' => ['in', $ids]])
-            ->field('a.*,b.id as bid,b.in_stock_num,b.in_stock_id,b.no_stock_num,b.purchase_id,b.sample_num,b.price')
+            ->field('a.*,b.id as bid,b.sku,b.in_stock_num,b.in_stock_id,b.no_stock_num,b.purchase_id,b.sample_num,b.price')
             ->select();
         $list = collection($list)->toArray();
-        dump($list);die();
+
         $skus = array_column($list, 'sku');
 
         //查询存在产品库的sku
@@ -662,7 +662,7 @@ class Instock extends Backend
                     }
                     //不是采购过来的 如果有站点id 说明是指定增加此平台sku
                     elseif ($v['platform_id']) {
-
+                        echo 111;die();
                         //手动入库
                         $change_type = 18;
                         //出入库
