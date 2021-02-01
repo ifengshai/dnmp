@@ -275,7 +275,17 @@ class Distribution extends Backend
                         'type' => $house_type
                     ])
                     ->column('id');
-                $map['a.temporary_house_id|a.abnormal_house_id|c.store_house_id'] = ['in', $stock_house_id ?: [-1]];
+                //查询合单库位号
+                if ($house_type == 2) {
+                    if ($stock_house_id) {
+                        $order_ids = $this->_new_order_process->where(['store_house_id' => ['in', $stock_house_id]])->column('order_id');
+                        $map['a.order_id'] = ['in', $order_ids];
+                    }
+                    
+                } else {
+                    $map['a.temporary_house_id|a.abnormal_house_id'] = ['in', $stock_house_id ?: [-1]];
+                }
+
                 unset($filter['stock_house_num']);
             }
 
@@ -359,7 +369,6 @@ class Distribution extends Backend
             $total = $this->model
                 ->alias('a')
                 ->join(['fa_order' => 'b'], 'a.order_id=b.id')
-                ->join(['fa_order_process' => 'c'], 'a.order_id=c.order_id')
                 ->where($where)
                 ->where($map)
                 ->order($sort, $order)
@@ -368,9 +377,8 @@ class Distribution extends Backend
 
             $list = $this->model
                 ->alias('a')
-                ->field('a.id,a.order_id,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.total_qty_ordered,b.site,b.order_type,b.status,a.distribution_status,a.temporary_house_id,a.abnormal_house_id,a.created_at,c.store_house_id')
+                ->field('a.id,a.order_id,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.total_qty_ordered,b.site,b.order_type,b.status,a.distribution_status,a.temporary_house_id,a.abnormal_house_id,a.created_at')
                 ->join(['fa_order' => 'b'], 'a.order_id=b.id')
-                ->join(['fa_order_process' => 'c'], 'a.order_id=c.order_id')
                 ->where($where)
                 ->where($map)
                 ->order($sort, $order)
@@ -417,22 +425,23 @@ class Distribution extends Backend
             $stock_house_data = $this->_stock_house
                 ->where(['status' => 1, 'type' => ['>', 1], 'occupy' => ['>', 0]])
                 ->column('coding', 'id');
-
             //获取异常数据
             $abnormal_data = $this->_distribution_abnormal
                 ->where(['item_process_id' => ['in', array_column($list, 'id')], 'status' => 1])
                 ->column('work_id', 'item_process_id');
-
-
             foreach ($list as $key => $value) {
-                $stock_house_num = '-';
+
+                //查询合单库位id
+                $store_house_id = $this->_new_order_process->where(['order_id' => $value['order_id']])->where('store_house_id is not null')->value('store_house_id');
+                $stock_house_num = '';
                 if (!empty($value['temporary_house_id']) && 3 == $label) {
                     $stock_house_num = $stock_house_data[$value['temporary_house_id']]; //定制片库位号
                 } elseif (!empty($value['abnormal_house_id']) && 8 == $label) {
                     $stock_house_num = $stock_house_data[$value['abnormal_house_id']]; //异常库位号
-                } elseif (!empty($value['store_house_id']) && 7 == $label && in_array($value['distribution_status'], [8, 9])) {
-                    $stock_house_num = $stock_house_data[$value['store_house_id']]; //合单库位号
+                } elseif (!empty($store_house_id) && 7 == $label && in_array($value['distribution_status'], [7,8, 9])) {
+                    $stock_house_num = $stock_house_data[$store_house_id]; //合单库位号
                 }
+
                 if ($list[$key]['created_at'] == '') {
                     $list[$key]['created_at'] == '暂无';
                 } else {
@@ -469,7 +478,6 @@ class Distribution extends Backend
                     $list[$key]['sku'] = $change_sku;
                 }
             }
-
             $result = array("total" => $total, "rows" => $list);
             return json($result);
         }
@@ -787,10 +795,10 @@ class Distribution extends Backend
 
             $data[$sku['sku']]['location'] =
                 Db::table('fa_store_sku')
-                    ->alias('a')
-                    ->join(['fa_store_house' => 'b'], 'a.store_id=b.id')
-                    ->where('a.sku', $sku['sku'])
-                    ->value('b.coding');
+                ->alias('a')
+                ->join(['fa_store_house' => 'b'], 'a.store_id=b.id')
+                ->where('a.sku', $sku['sku'])
+                ->value('b.coding');
             $data[$sku['sku']]['sku'] = $sku;
             $data[$sku['sku']]['number']++;
         }
@@ -829,8 +837,7 @@ class Distribution extends Backend
             ->setActiveSheetIndex(0)->setCellValue("A1", "仓库SKU")
             ->setCellValue("B1", "库位号")
             ->setCellValue("C1", "数量")
-            ->setCellValue("D1", "仓库实时库存")
-        ;
+            ->setCellValue("D1", "仓库实时库存");
         foreach ($data as $key => $value) {
             $spreadsheet->getActiveSheet()->setCellValueExplicit("A" . ($key * 1 + 2), $value['sku']['sku'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
             $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['location']);
