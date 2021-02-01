@@ -1466,7 +1466,15 @@ class ScmWarehouse extends Scm
                                 //最后一个站点 剩余数量分给最后一个站
                                 if (($all_num - $key) == 1) {
                                     //当前sku映射关系详情
-                                    $sku_platform = $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->find();
+                                    $sku_platform =  $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->find();
+                                    //如果站点是Z站 且虚拟仓库存为0
+                                    if ($val['website_type'] ==1){
+                                        if ($sku_platform['stock'] == 0  && $stock_num > 0){
+                                            $value['sku'] = $sku_platform['platform_sku'];
+                                            $url  =  config('url.zeelool_url').'magic/product/productArrival';
+                                            $this->submission_post($url,$value);
+                                        }
+                                    }
                                     //增加站点虚拟仓库存
                                     $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->setInc('stock', $stock_num);
                                     //入库的时候减少待入库数量
@@ -1496,6 +1504,13 @@ class ScmWarehouse extends Scm
                                     $stock_num -= $num;
                                     $should_arrivals_num -= $should_arrivals_num_plat;
                                     $sku_platform = $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->find();
+                                    if ($val['website_type'] ==1){
+                                        if ($sku_platform['stock'] == 0  && $num > 0){
+                                            $value['sku'] = $sku_platform['platform_sku'];
+                                            $url  =  config('url.zeelool_url').'magic/product/productArrival';
+                                            $this->submission_post($url,$value);
+                                        }
+                                    }
                                     //增加站点虚拟仓库存
                                     $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->setInc('stock', $num);
                                     //入库的时候减少待入库数量
@@ -1592,6 +1607,17 @@ class ScmWarehouse extends Scm
                             'create_time' => time(),
                             'number_type' => 3,
                         ]);
+
+//                        if ($v['platform_id'] ==1 && $v['type_id'] !== 3 && $k == 0){
+//                            \Think\Log::write("第三次");
+//                            \Think\Log::write($item_platform_sku);
+//                            if ($item_platform_sku['stock'] == 0  && $v['in_stock_num'] > 0){
+//                                $value['sku'] = $item_platform_sku['platform_sku'];
+//                                $url  =  config('url.zeelool_url').'magic/product/productArrival';
+//                                $this->submission_post($url,$value);
+//                            }
+//                        }
+
                     } //没有采购单也没有站点id 说明是盘点过来的
                     else {
                         //盘点
@@ -1609,6 +1635,16 @@ class ScmWarehouse extends Scm
                             $rate_rate = 1 / $all_num;
                             foreach ($item_platform_sku as $key => $val) {
                                 $item_platform_sku_detail = $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->find();
+
+//                                if ($val['platform_type'] ==1){
+//                                    \Think\Log::write("第四次");
+//                                    \Think\Log::write($item_platform_sku_detail);
+//                                    if ($item_platform_sku_detail['stock'] ==0 && $stock_num >0 ){
+//                                        $value['sku'] = $item_platform_sku_detail['platform_sku'];
+//                                        $url  =  config('url.zeelool_url').'magic/product/productArrival';
+//                                        $this->submission_post($url,$value);
+//                                    }
+//                                }
                                 //最后一个站点 剩余数量分给最后一个站
                                 if (($all_num - $key) == 1) {
                                     $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setInc('stock', $stock_num);
@@ -1655,6 +1691,16 @@ class ScmWarehouse extends Scm
                             foreach ($item_platform_sku as $key => $val) {
                                 $item_platform_sku_detail = $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->find();
                                 //最后一个站点 剩余数量分给最后一个站
+//                                if ($val['platform_type'] ==1){
+//                                    \Think\Log::write("第五次");
+//                                    \Think\Log::write($item_platform_sku_detail);
+//                                    if ($item_platform_sku_detail['stock'] ==0 && $stock_num >0 ){
+//                                        $value['sku'] = $item_platform_sku_detail['platform_sku'];
+//                                        $url  =  config('url.zeelool_url').'magic/product/productArrival';
+//                                        $this->submission_post($url,$value);
+//                                    }
+//                                }
+
                                 if (($all_num - $key) == 1) {
                                     $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setInc('stock', $stock_num);
                                     //插入日志表
@@ -1846,7 +1892,35 @@ class ScmWarehouse extends Scm
 
     }
 
+
     /**
+     * post方式请求接口
+     *
+     * @Description
+     * @author zjw
+     * @since 
+     * @return
+     */
+    function submission_post($url,$value)
+    {
+        $curl = curl_init();
+        curl_setopt($curl, CURLOPT_URL, $url);
+        curl_setopt($curl, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
+        curl_setopt($curl, CURLOPT_HEADER, 0);
+        curl_setopt($curl, CURLOPT_POST, true);
+        curl_setopt($curl, CURLOPT_POSTFIELDS, $value);
+        curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_TIMEOUT, 20);
+        $content = json_decode(curl_exec($curl), true);
+        curl_close($curl);
+        return $content;
+
+    }
+
+
+
+        /**
      * 盘点单列表--ok
      *
      * @参数 string query  查询内容
