@@ -1852,7 +1852,7 @@ class ScmDistribution extends Scm
                 $where['order_prescription_type'] = ['in', [2,3]];
             }
             if ($shelf_number) {
-                $shelf_number_arr = $this->_stock_house->where(['shelf_number' => $shelf_number])->column('id');
+                $shelf_number_arr = $this->_stock_house->where(['type' => 2,'subarea' => $shelf_number])->column('id');
                 if ($query && $where['store_house_id'] != -1) {
                     $shelf_number_arr_intersect = array_intersect($where['store_house_id'],$shelf_number_arr);
                 }
