@@ -1821,7 +1821,7 @@ class ScmDistribution extends Scm
         $where = [];
         if (1 == $type) {
             $where['combine_status'] = 1; //合单完成状态
-            $where['store_house_id'] = ['>', 0];
+            //$where['store_house_id'] = ['>', 0];
             //合单待取出列表，主单为合单完成状态且子单都已合单
             if ($query) {
                 //线上不允许跨库联合查询，拆分，wang导与产品静确认去除SKU搜索
@@ -1865,6 +1865,7 @@ class ScmDistribution extends Scm
             //print_r($where);die;
             $list = $this->_new_order_process
                 ->where($where)
+                ->where(['store_house_id'=>['>',0]])
                 ->field('order_id,store_house_id,combine_time')
                 ->group('order_id')
                 ->limit($offset, $limit)
