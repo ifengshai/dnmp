@@ -13,6 +13,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                     edit_url: 'warehouse/instock/edit',
                     // del_url: 'warehouse/instock/del',
                     import_url: 'warehouse/instock/import',
+                    import_url: 'test01/import',
 
                     multi_url: 'warehouse/instock/multi',
                     table: 'in_stock',
