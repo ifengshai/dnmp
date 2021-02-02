@@ -4,19 +4,10 @@ namespace app\admin\controller;
 
 use app\admin\model\itemmanage\ItemPlatformSku;
 use app\admin\model\order\order\NewOrderItemProcess;
-use app\admin\model\purchase\Supplier;
-use app\admin\model\warehouse\ProductBarCodeItem;
 use app\common\controller\Backend;
 use fast\Excel;
-use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
-use PhpOffice\PhpSpreadsheet\Reader\Csv;
-use PhpOffice\PhpSpreadsheet\Reader\Xls;
-use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use think\Db;
-use think\Exception;
-use think\exception\PDOException;
-use think\exception\ValidateException;
 
 class Test01 extends Backend
 {
@@ -864,7 +855,7 @@ class Test01 extends Backend
         $list = collection($list)->toArray();
         foreach ($list as $key => $value) {
             $csv[$key]['item_order_number'] = $value['item_order_number'];
-            $timediff = $this->timediff(1610093513, $value['payment_time']);
+            $timediff = $this->timediff(1610093513,$value['payment_time']);
             //状态
             switch ($value['order_prescription_type']) {
                 case 1:
@@ -930,99 +921,5 @@ class Test01 extends Backend
         return $hours_min;
     }
 
-    public function import()
-    {
-        $this->model = new Supplier();
-
-        //校验参数空值
-        $file = $this->request->request('file');
-        !$file && $this->error(__('Parameter %s can not be empty', 'file'));
-
-        //校验文件路径
-        $filePath = ROOT_PATH . DS . 'public' . DS . $file;
-        !is_file($filePath) && $this->error(__('No results were found'));
-
-        //实例化reader
-        $ext = pathinfo($filePath, PATHINFO_EXTENSION);
-        !in_array($ext, ['csv', 'xls', 'xlsx']) && $this->error(__('Unknown data format'));
-        if ('csv' === $ext) {
-            $file = fopen($filePath, 'r');
-            $filePath = tempnam(sys_get_temp_dir(), 'import_csv');
-            $fp = fopen($filePath, "w");
-            $n = 0;
-            while ($line = fgets($file)) {
-                $line = rtrim($line, "\n\r\0");
-                $encoding = mb_detect_encoding($line, ['utf-8', 'gbk', 'latin1', 'big5']);
-                if ($encoding != 'utf-8') {
-                    $line = mb_convert_encoding($line, 'utf-8', $encoding);
-                }
-                if (0 == $n || preg_match('/^".*"$/', $line)) {
-                    fwrite($fp, $line . "\n");
-                } else {
-                    fwrite($fp, '"' . str_replace(['"', ','], ['""', '","'], $line) . "\"\n");
-                }
-                $n++;
-            }
-            fclose($file) || fclose($fp);
-
-            $reader = new Csv();
-        } elseif ('xls' === $ext) {
-            $reader = new Xls();
-        } else {
-            $reader = new Xlsx();
-        }
-
-        $this->model->startTrans();
-        //模板文件列名
-        try {
-            if (!$PHPExcel = $reader->load($filePath)) {
-                $this->error(__('Unknown data format'));
-            }
-            $currentSheet = $PHPExcel->getSheet(0);  //读取文件中的第一个工作表
-            $allColumn = $currentSheet->getHighestDataColumn(); //取得最大的列号
-            $allRow = $currentSheet->getHighestRow(); //取得一共有多少行
-            $maxColumnNumber = Coordinate::columnIndexFromString($allColumn);
-
-            $fields = [];
-            for ($currentRow = 1; $currentRow <= 1; $currentRow++) {
-                for ($currentColumn = 1; $currentColumn <= 11; $currentColumn++) {
-                    $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getValue();
-                    if (!empty($val)) {
-                        $fields[] = $val;
-                    }
-                }
-            }
-
-            //校验模板文件格式
-            // $listName = ['供应商', '供应商', '账期', '币种', '收款方名称', '收款方账户', '收款方开户行'];
-            // $listName !== $fields && $this->error(__('模板文件格式错误！'));
-
-            $data = [];
-            for ($currentRow = 2; $currentRow <= $allRow; $currentRow++) {
-                for ($currentColumn = 1; $currentColumn <= $maxColumnNumber; $currentColumn++) {
-                    $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getCalculatedValue();
-                    $data[$currentRow - 2][$currentColumn - 1] = is_null($val) ? '' : $val;
-                }
-            }
-            empty($data) && $this->error('表格数据为空！');
-            foreach ($data as $k => $v) {
-                if ($k < 45){
-                    $this->model->where('supplier_name', $v[0])->update(['period' => $v[2], 'recipient_name' => trim($v[4])]);
-                }
-
-            }
-            $this->model->commit();
-        } catch (ValidateException $e) {
-            $this->model->rollback();
-            $this->error($e->getMessage(), [], 444);
-        } catch (PDOException $e) {
-            $this->model->rollback();
-            $this->error($e->getMessage(), [], 444);
-        } catch (Exception $e) {
-            $this->model->rollback();
-            $this->error($e->getMessage(), [], 444);
-        }
-        $this->success('导入成功！');
-    }
 
 }
