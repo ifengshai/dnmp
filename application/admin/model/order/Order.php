@@ -36,7 +36,7 @@ class Order extends Model
      * 网站物流接口调整
      *$order_id 订单id   $order_number  订单号  $site 站点   $status 状态 $order_node订单大节点 $node_type 订单小节点
      */
-    public function rulesto_adjust($order_id=null,$order_number=null,$site=null,$node,$status=null,$order_node,$node_type=null)
+    public function rulesto_adjust($order_id=null,$order_number=null,$site=null,$order_node=null,$node_type=null)
     {
 
             //判断如果子节点大于等于1时  不更新
@@ -62,7 +62,7 @@ class Order extends Model
                     break;
                 //配货完成
                 case 3:
-                    $content = 'Order is under processing.';
+                    $content = 'Frame(s) is/are ready, waiting for lenses.';
                     break;
                 //配镜片完成
                 case 4:
@@ -97,16 +97,26 @@ class Order extends Model
                     $content = 'Order leave warehouse, waiting for being picked up.';
                     break;
             }
-            $res_node_detail = (new OrderNodeDetail())->allowField(true)->save([
-                'order_number' => $order_number,
-                'order_id' => $order_id,
-                'content' => $content,
-                'site' => $site,
-                'create_time' => date('Y-m-d H:i:s'),
-                'order_node' => 0,
-                'node_type' => $node_type
-            ]);
+          //查看是否有存在记录
+            $detail_count = (new OrderNodeDetail())->where('order_number',$order_number)
+                ->where('order_id',$order_id)
+                ->where('order_node',$order_node)
+                ->where('node_type',$node_type)
+                ->count();
 
+            //如果没有存在 则添加一条记录
+            if ($detail_count < 1 ){
+                $OrderNodeDetail = new OrderNodeDetail();
+                $OrderNodeDetail->order_number = $order_number;
+                $OrderNodeDetail->order_id = $order_id;
+                $OrderNodeDetail->content = $content;
+                $OrderNodeDetail->site = $site;
+                $OrderNodeDetail->handle_user_id = session('admin.id');
+                $OrderNodeDetail->create_time = date('Y-m-d H:i:s');
+                $OrderNodeDetail->order_node = $order_node;
+                $OrderNodeDetail->node_type =$node_type;
+                $OrderNodeDetail->save();
+            }
 
     }
 

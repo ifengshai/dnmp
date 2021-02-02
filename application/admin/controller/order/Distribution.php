@@ -1429,9 +1429,10 @@ class Distribution extends Backend
         try {
             $distribution_value = $this->model->where(['id' => ['in', $ids]])->field('magento_order_id,item_order_number,site')->select();
             $distribution_value = collection($distribution_value)->toArray();
+
             foreach ($distribution_value as $key=>$value){
                 $value['item_order_number'] =  substr($value['item_order_number'],0,strpos($value['item_order_number'], '-'));
-                Order::rulesto_adjust($value['magento_order_id'],$value['item_order_number'],$value['site'],1,2);
+                Order::rulesto_adjust($value['magento_order_id'],$value['item_order_number'],$value['site'],2,2);
             }
             //标记状态
             $this->model->where(['id' => ['in', $ids]])->update(['distribution_status' => 2]);
@@ -1439,7 +1440,6 @@ class Distribution extends Backend
             //记录配货日志
             $admin = (object)session('admin');
             DistributionLog::record($admin, $ids, 1, '标记打印完成');
-            Order::rulesto_adjust();
 
             $this->model->commit();
         } catch (PDOException $e) {
@@ -1711,10 +1711,11 @@ class Distribution extends Backend
 
         //检测配货状态
         $item_list = $this->model
-            ->field('id,site,distribution_status,order_id,option_id,sku,item_order_number,order_prescription_type')
+            ->field('id,site,distribution_status,magento_order_id,order_id,option_id,sku,item_order_number,order_prescription_type')
             ->where(['id' => ['in', $ids]])
             ->select();
         $item_list = collection($item_list)->toArray();
+
         $order_ids = [];
         $option_ids = [];
         $item_order_numbers = [];
@@ -1855,6 +1856,7 @@ class Distribution extends Backend
                         if ($option_list[$value['option_id']]['is_print_logo']) {
                             $save_status = 5; //待印logo
                         } else {
+
                             if ($total_list[$value['order_id']]['total_qty_ordered'] > 1) {
                                 $save_status = 7;
                             } else {
@@ -1890,6 +1892,10 @@ class Distribution extends Backend
 
                 //操作成功记录
                 DistributionLog::record($admin, $value['id'], $check_status, $status_arr[$check_status] . '完成');
+                //节点记录
+                //将订单号截取处理
+                $value['item_order_number'] =  substr($value['item_order_number'],0,strpos($value['item_order_number'], '-'));
+                Order::rulesto_adjust($value['magento_order_id'],$value['item_order_number'],$value['site'],2,3);
             }
 
             $this->_item->commit();

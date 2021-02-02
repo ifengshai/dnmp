@@ -291,7 +291,8 @@
                         style="background-color: #E74C3C"
                      {/if}>
                     <img class="profile-user-img  img-circle" src="/assets/img/avatar.png" alt="User profile picture" style="margin:0;!important;">
-                        <h3 style="margin-top: -48px;margin-left: 127px" > <font color="#F5F9FF">{$ticket->username}</font></h3>
+
+                        <h3 style="margin-top: -48px;margin-left: 127px" > <font color="#F5F9FF">{$ticket->username}</font>  {if condition="$is_vip  eq 1"}&nbsp <img src="/uploads/imgshow/vip.png" alt="">{/if}</h3>
                         <h5 style="margin-top: 10px;margin-left: 127px"> <font color="#F5F9FF">{$ticket->email}</font></h5>
                         <h5 style="margin-top: 10px;margin-left: 386px"> <font color="#F5F9FF">
                             <a style="color:#F5F9FF "  href="{:url('saleaftermanage/order_return/search',['type' => $rows.type,'email' => $ticket->email])}&ref=addtabs" target="_blank">查看用户信息</a></font></h5>
@@ -330,7 +331,7 @@
                 </div>
                 <!-- /.box-header -->
                 <div class="box-body table-responsive no-padding">
-                    <table class="table table-hover order_info">
+                    <table class="table table-hover order_info" id="lanren">
                         <tr>
                             <th>Number</th>
                             <th>Date</th>
@@ -352,8 +353,10 @@
                             {/if}
                         </tr>
                         {/foreach}
-<!--                        <tr><td  style="width: 100px;text-align: center;"><a class="" href="{:url('saleaftermanage/order_return/search',['type' => $rows.type,'email' => $ticket->email])}&ref=addtabs" target="_blank">查看用户信息</a></td></tr>-->
-                    </table>
+                   </table>
+                    <a href="##"  class="load_more" style="width: 100px;text-align: center;" class="load_more"  data-value="2"  data-area="{$ticket->email}"   data-action="{$ticket->type}"> <h5>查看更多</h5></a>
+
+
                 </div>
                 <!-- /.box-body -->
             </div>
@@ -361,6 +364,10 @@
         </div>
         <!-- /.col -->
     </div>
+
+
+
+
     <!-- /.row -->
     <div class="modal fade in" id="modal-default" style="padding-right: 17px;">
         <div class="modal-dialog">
