@@ -2092,7 +2092,7 @@ class ScmDistribution extends Scm
         if ($check_status == 2) {
             $check_refuse = $this->request->request('check_refuse'); //check_refuse   1SKU缺失  2 配错镜框
             empty($check_refuse) && $this->error(__('审单拒绝原因不能为空'), [], 403);
-            !in_array($check_refuse, [1, 2, 999]) && $this->error(__('审单拒绝原因错误'), [], 403);
+            !in_array($check_refuse, [1, 2,3, 999]) && $this->error(__('审单拒绝原因错误'), [], 403);
             if (2 == $check_refuse||3 == $check_refuse) {
                 $item_order_numbers = $this->request->request('item_order_numbers');
                 $item_order_numbers = explode(',', $item_order_numbers);
