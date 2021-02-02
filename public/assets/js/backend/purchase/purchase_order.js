@@ -237,7 +237,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
-                                        if (row.can_create_pay == 1 && row.purchase_status == 2  && row.pay_type !=3 && row.id > 16410) {
+                                        // if (row.can_create_pay == 1 && row.purchase_status == 2  && row.pay_type !=3 && row.id > 16410) {
+                                        if (row.can_create_pay == 1 && row.purchase_status == 2  && row.pay_type !=3) {
                                             return true;
                                         } else {
                                             return false;

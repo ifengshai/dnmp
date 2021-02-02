@@ -6,6 +6,7 @@ use app\admin\model\platformmanage\MagentoPlatform;
 use app\admin\model\saleaftermanage\WorkOrderChangeSku;
 use app\admin\model\saleaftermanage\WorkOrderMeasure;
 use app\admin\model\StockLog;
+use app\admin\model\warehouse\Outstock;
 use think\Exception;
 use think\exception\PDOException;
 use think\exception\ValidateException;
@@ -138,6 +139,7 @@ class ScmDistribution extends Scm
         $this->_work_order_change_sku = new WorkOrderChangeSku();
         $this->_lens_data = new LensData();
         $this->_work_order_list = new WorkOrderList();
+        $this->_outstock = new Outstock();
     }
 
     /**
@@ -1285,6 +1287,7 @@ class ScmDistribution extends Scm
 
             $this->_new_order_item_process->startTrans();
             $this->_item->startTrans();
+            $this->_outstock->startTrans();
             $this->_item_platform_sku->startTrans();
             $this->_stock_log->startTrans();
             $this->_product_bar_code_item->startTrans();
@@ -1350,6 +1353,17 @@ class ScmDistribution extends Scm
                         ->dec('stock', 1)
                         ->update();
 
+                    //扣减总库存自动生成一条出库单 审核通过 分类为成品质检报损
+                    $outstock['out_stock_number'] = 'OUT' . date('YmdHis') . rand(100, 999) . rand(100, 999);
+                    //质检报损
+                    $outstock['type_id'] = 2;
+                    $outstock['remark'] = 'PDA质检拒绝：镜架报损自动生成出库单';
+                    $outstock['status'] = 2;
+                    $outstock['create_person'] = session('admin.nickname');
+                    $outstock['createtime'] = date('Y-m-d H:i:s', time());
+                    $outstock['platform_id'] = $item_process_info['site'];
+                    $this->_outstock->insert($outstock);
+
                     //扣减虚拟仓库存
                     $this->_item_platform_sku
                         ->where(['sku' => $true_sku, 'platform_type' => $item_process_info['site']])
@@ -1384,12 +1398,14 @@ class ScmDistribution extends Scm
 
                 $this->_new_order_item_process->commit();
                 $this->_item->commit();
+                $this->_outstock->commit();
                 $this->_item_platform_sku->commit();
                 $this->_stock_log->commit();
                 $this->_product_bar_code_item->commit();
             } catch (ValidateException $e) {
                 $this->_new_order_item_process->rollback();
                 $this->_item->rollback();
+                $this->_outstock->rollback();
                 $this->_item_platform_sku->rollback();
                 $this->_stock_log->rollback();
                 $this->_product_bar_code_item->rollback();
@@ -1397,6 +1413,7 @@ class ScmDistribution extends Scm
             } catch (PDOException $e) {
                 $this->_new_order_item_process->rollback();
                 $this->_item->rollback();
+                $this->_outstock->rollback();
                 $this->_item_platform_sku->rollback();
                 $this->_stock_log->rollback();
                 $this->_product_bar_code_item->rollback();
@@ -1404,6 +1421,7 @@ class ScmDistribution extends Scm
             } catch (Exception $e) {
                 $this->_new_order_item_process->rollback();
                 $this->_item->rollback();
+                $this->_outstock->rollback();
                 $this->_item_platform_sku->rollback();
                 $this->_stock_log->rollback();
                 $this->_product_bar_code_item->rollback();
@@ -1529,7 +1547,15 @@ class ScmDistribution extends Scm
             //未合单，首次扫描
             if (!$order_process_info['store_house_id']) {
                 //主单中无库位号，首个子单进入时，分配一个合单库位给PDA，暂不占用根据是否确认放入合单架占用或取消
-                $store_house_info = $this->_stock_house->field('id,coding,subarea')->where(['status' => 1, 'type' => 2, 'occupy' => 0, 'fictitious_occupy_time' => ['<', $fictitious_time]])->find();
+                $store_house_where = ['status' => 1, 'type' => 2, 'occupy' => 0, 'fictitious_occupy_time' => ['<', $fictitious_time]];
+                $store_house_info = $this->_stock_house->field('id,coding,subarea')->where($store_house_where)->find();
+                if ($order_process_info['order_prescription_type'] == 1) {//仅镜架优先分配B开头的货架
+                    $store_house_where['shelf_number'] == 'B';
+                    $store_house_info_b = $this->_stock_house->field('id,coding,subarea')->where($store_house_where)->find();
+                    if (!empty($store_house_info_b)) {
+                        $store_house_info = $store_house_info_b;
+                    }
+                }
                 empty($store_house_info) && $this->error(__('合单失败，合单库位已用完，请添加后再操作'), [], 403);
                 //绑定预占用库存和有效时间
                 $this->_stock_house->where(['id' => $store_house_info['id']])->update(['fictitious_occupy_time' => $fictitious_time + 600, 'order_id' => $item_process_info['order_id']]);
@@ -1783,6 +1809,8 @@ class ScmDistribution extends Scm
         $start_time = $this->request->request('start_time');
         $end_time = $this->request->request('end_time');
         $site = $this->request->request('site');
+        $shelf_number = $this->request->request('shelf_number');
+        $order_prescription_type = $this->request->request('order_prescription_type');//订单处方分类 1 仅镜架 2 现货处方镜 3 定制处方镜 ',
         $page = $this->request->request('page');
         $page_size = $this->request->request('page_size');
         empty($page) && $this->error(__('Page can not be empty'), [], 520);
@@ -1818,11 +1846,21 @@ class ScmDistribution extends Scm
             if ($site) {
                 $where['site'] = ['=', $site];
             }
+            if ($order_prescription_type == 1) {
+                $where['order_prescription_type'] = ['=', $order_prescription_type];
+            }else{
+                $where['order_prescription_type'] = ['in', [2,3]];
+            }
+            if ($shelf_number) {
+                $shelf_number_arr = $this->_stock_house->where(['shelf_number' => $shelf_number])->column('shelf_number');
+                $where['store_house_id'] = ['in', $shelf_number_arr];
+            }
             $list = $this->_new_order_process
                 ->where($where)
                 ->field('order_id,store_house_id,combine_time')
                 ->group('order_id')
                 ->limit($offset, $limit)
+                ->order('order_prescription_type')
                 ->select();
             foreach (array_filter($list) as $k => $v) {
                 $list[$k]['coding'] = $this->_stock_house->where('id', $v['store_house_id'])->value('coding');
@@ -2046,7 +2084,7 @@ class ScmDistribution extends Scm
             $check_refuse = $this->request->request('check_refuse'); //check_refuse   1SKU缺失  2 配错镜框
             empty($check_refuse) && $this->error(__('审单拒绝原因不能为空'), [], 403);
             !in_array($check_refuse, [1, 2, 999]) && $this->error(__('审单拒绝原因错误'), [], 403);
-            if (2 == $check_refuse) {
+            if (2 == $check_refuse||3 == $check_refuse) {
                 $item_order_numbers = $this->request->request('item_order_numbers');
                 $item_order_numbers = explode(',', $item_order_numbers);
                 empty($item_order_numbers) && $this->error(__('请选择子单号'), [], 403);
@@ -2059,9 +2097,14 @@ class ScmDistribution extends Scm
                     $msg_info_r = '退回至待合单';
                     break;
                 case 2:
-                    $param['check_remark'] = '配错镜框';
-                    $msg_info_l = '配错镜框，';
-                    $msg_info_r = '退回至待配货';
+                    $param['check_remark'] = '配错镜框-报损出库';
+                    $msg_info_l = '配错镜框，报损出库';
+                    $msg_info_r = '配错镜框-报损出库,退回至待配货';
+                    break;
+                case 3:
+                    $param['check_remark'] = '配错镜框-重新配货';
+                    $msg_info_l = '配错镜框，重新配货';
+                    $msg_info_r = '配错镜框-重新配货,退回至待配货';
                     break;
                 case 999:
                     $param['check_remark'] = '标记异常';
@@ -2164,82 +2207,161 @@ class ScmDistribution extends Scm
                             'temporary_house_id' => 0,
                             'customize_status' => 0
                         ]);
+                    //审单拒绝-报损出库,所选SKU退回待配货，条码出库，其余子订单回到待合单。扣减总库存、可用库存、虚拟库存，配货占用库存
+                    if (2==$check_refuse){
+                        //条码出库
+                        $this->_product_bar_code_item
+                            ->allowField(true)
+                            ->isUpdate(true, ['item_order_number' => ['in', $item_order_numbers]])
+                            ->save(['out_stock_time'=>date('Y-m-d H:i:s'),'library_status' => 2]);
 
-                    //回退到待配货，解绑条形码
-                    $this->_product_bar_code_item
-                        ->allowField(true)
-                        ->isUpdate(true, ['item_order_number' => ['in', $item_order_numbers]])
-                        ->save(['out_stock_time' => null, 'library_status' => 1, 'item_order_number' => '']);
 
-                    //扣减占用库存、配货占用、总库存、虚拟仓库存
-                    foreach ($item_info as $key => $value) {
-                        /**************工单更换镜框******************/
-                        //查询更改镜框最新信息
-                        $change_sku = $this->_work_order_change_sku
-                            ->alias('a')
-                            ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
-                            ->where([
-                                'a.change_type' => 1,
-                                'a.item_order_number' => $value['item_order_number'],
-                                'b.operation_type' => 1
-                            ])
-                            ->order('a.id', 'desc')
-                            ->limit(1)
-                            ->value('a.change_sku');
-                        if ($change_sku) {
-                            $sku = $change_sku;
-                        } else {
-                            $sku = $value['sku'];
+                        //扣减占用库存、配货占用、总库存、虚拟仓库存
+                        foreach ($item_info as $key => $value) {
+                            /**************工单更换镜框******************/
+                            //查询更改镜框最新信息
+                            $change_sku = $this->_work_order_change_sku
+                                ->alias('a')
+                                ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
+                                ->where([
+                                    'a.change_type' => 1,
+                                    'a.item_order_number' => $value['item_order_number'],
+                                    'b.operation_type' => 1
+                                ])
+                                ->order('a.id', 'desc')
+                                ->limit(1)
+                                ->value('a.change_sku');
+                            if ($change_sku) {
+                                $sku = $change_sku;
+                            } else {
+                                $sku = $value['sku'];
+                            }
+                            /********************************/
+                            //仓库sku、库存
+                            $platform_info = $this->_item_platform_sku
+                                ->field('sku,stock')
+                                ->where(['platform_sku' => $sku, 'platform_type' => $value['site']])
+                                ->find();
+                            $true_sku = $platform_info['sku'];
+
+                            //检验库存
+                            $stock_arr = $this->_item
+                                ->where(['sku' => $true_sku])
+                                ->field('stock,occupy_stock,distribution_occupy_stock')
+                                ->find();
+
+                            //扣减可用库存、配货占用、总库存
+                            $this->_item
+                                ->where(['sku' => $true_sku])
+                                ->dec('available_stock', 1)
+                                ->dec('distribution_occupy_stock', 1)
+                                ->dec('stock', 1)
+                                ->update();
+
+                            //扣减总库存自动生成一条出库单 审核通过 分类为成品质检报损
+                            $outstock['out_stock_number'] = 'OUT' . date('YmdHis') . rand(100, 999) . rand(100, 999);
+                            //属于加工报损
+                            $outstock['type_id'] = 4;
+                            $outstock['remark'] = 'PDA审单-配错镜框-报损出库自动生成出库单';
+                            $outstock['status'] = 2;
+                            $outstock['create_person'] = session('admin.nickname');
+                            $outstock['createtime'] = date('Y-m-d H:i:s', time());
+                            $outstock['platform_id'] = $value['site'];
+                            $this->_outstock->insert($outstock);
+
+                            //扣减虚拟仓库存
+                            $this->_item_platform_sku
+                                ->where(['sku' => $true_sku, 'platform_type' => $value['site']])
+                                ->dec('stock', 1)
+                                ->update();
+
+                            //记录库存日志
+                            $log_data[] = [
+                                'type' => 2,
+                                'site' => $value['site'],
+                                'modular' => 4,
+                                'change_type' => 7,
+                                'source' => 2,
+                                'sku' => $true_sku,
+                                'number_type' => 2,
+                                'order_number' => $value['item_order_number'],
+                                'occupy_stock_before' => $stock_arr['occupy_stock'],
+                                'occupy_stock_change' => -1,
+                                'distribution_stock_before' => $stock_arr['distribution_occupy_stock'],
+                                'distribution_stock_change' => -1,
+                                'stock_before' => $stock_arr['stock'],
+                                'stock_change' => -1,
+                                'fictitious_before' => $platform_info['stock'],
+                                'fictitious_change' => -1,
+                                'create_person' => $create_person,
+                                'create_time' => time()
+                            ];
                         }
-                        /********************************/
-                        //仓库sku、库存
-                        $platform_info = $this->_item_platform_sku
-                            ->field('sku,stock')
-                            ->where(['platform_sku' => $sku, 'platform_type' => $value['site']])
-                            ->find();
-                        $true_sku = $platform_info['sku'];
+                    }elseif(3==$check_refuse){//审单拒绝-重新配货，所选SKU回退到待配货，条码解除绑定关系,其余子订单退回待合单。扣减配货占用库存。
+                        //回退到待配货，解绑条形码
+                        $this->_product_bar_code_item
+                            ->allowField(true)
+                            ->isUpdate(true, ['item_order_number' => ['in', $item_order_numbers]])
+                            ->save(['out_stock_time' => null, 'library_status' => 1, 'item_order_number' => '']);
+                        foreach ($item_info as $key => $value) {
+                            /**************工单更换镜框******************/
+                            //查询更改镜框最新信息
+                            $change_sku = $this->_work_order_change_sku
+                                ->alias('a')
+                                ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
+                                ->where([
+                                    'a.change_type' => 1,
+                                    'a.item_order_number' => $value['item_order_number'],
+                                    'b.operation_type' => 1
+                                ])
+                                ->order('a.id', 'desc')
+                                ->limit(1)
+                                ->value('a.change_sku');
+                            if ($change_sku) {
+                                $sku = $change_sku;
+                            } else {
+                                $sku = $value['sku'];
+                            }
+                            /********************************/
+                            //仓库sku、库存
+                            $platform_info = $this->_item_platform_sku
+                                ->field('sku,stock')
+                                ->where(['platform_sku' => $sku, 'platform_type' => $value['site']])
+                                ->find();
+                            $true_sku = $platform_info['sku'];
 
-                        //检验库存
-                        $stock_arr = $this->_item
-                            ->where(['sku' => $true_sku])
-                            ->field('stock,occupy_stock,distribution_occupy_stock')
-                            ->find();
+                            //检验库存
+                            $stock_arr = $this->_item
+                                ->where(['sku' => $true_sku])
+                                ->field('stock,occupy_stock,distribution_occupy_stock')
+                                ->find();
 
-                        //扣减可用库存、配货占用、总库存
-                        $this->_item
-                            ->where(['sku' => $true_sku])
-                            ->dec('available_stock', 1)
-                            ->dec('distribution_occupy_stock', 1)
-                            ->dec('stock', 1)
-                            ->update();
+                            //扣减配货占用
+                            $this->_item
+                                ->where(['sku' => $true_sku])
+                                ->dec('distribution_occupy_stock', 1)
+                                ->update();
 
-                        //扣减虚拟仓库存
-                        $this->_item_platform_sku
-                            ->where(['sku' => $true_sku, 'platform_type' => $value['site']])
-                            ->dec('stock', 1)
-                            ->update();
-
-                        //记录库存日志
-                        $log_data[] = [
-                            'type' => 2,
-                            'site' => $value['site'],
-                            'modular' => 4,
-                            'change_type' => 7,
-                            'source' => 2,
-                            'sku' => $true_sku,
-                            'number_type' => 2,
-                            'order_number' => $value['item_order_number'],
-                            'occupy_stock_before' => $stock_arr['occupy_stock'],
-                            'occupy_stock_change' => -1,
-                            'distribution_stock_before' => $stock_arr['distribution_occupy_stock'],
-                            'distribution_stock_change' => -1,
-                            'stock_before' => $stock_arr['stock'],
-                            'stock_change' => -1,
-                            'fictitious_before' => $platform_info['stock'],
-                            'fictitious_change' => -1,
-                            'create_person' => $create_person,
-                            'create_time' => time()
-                        ];
+                            //记录库存日志
+                            $log_data[] = [
+                                'type' => 2,
+                                'site' => $value['site'],
+                                'modular' => 4,
+                                'change_type' => 7,
+                                'source' => 2,
+                                'sku' => $true_sku,
+                                'number_type' => 2,
+                                'order_number' => $value['item_order_number'],
+                                'occupy_stock_before' => $stock_arr['occupy_stock'],
+                                'distribution_stock_before' => $stock_arr['distribution_occupy_stock'],
+                                'distribution_stock_change' => -1,
+                                'stock_before' => $stock_arr['stock'],
+                                'fictitious_before' => $platform_info['stock'],
+                                'fictitious_change' => -1,
+                                'create_person' => $create_person,
+                                'create_time' => time()
+                            ];
+                        }
                     }
                 }
             } else {

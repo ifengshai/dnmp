@@ -62,27 +62,35 @@ class Order extends Model
                 case 2:
                     $content = 'Order is under processing.';
                     break;
+               //配镜片完成
                 case 3:
                     $content = 'Lenses are matched, waiting for manufacturing.';
                     break;
+                //加工完成-需要印logo
                 case 4:
                     $content = 'Lenses manufacturing completed, waiting for LOGO customizing.';
                     break;
+                //加工完成-不需要印logo
                 case 5:
                     $content = 'Lenses manufacturing completed, waiting for quality inspection.';
                     break;
+                    //印logo完成
                 case 6:
                     $content = 'LOGO customizing completed, waiting for quality inspection.';
                     break;
+                    //质检完成
                 case 7:
                     $content = 'Quality Inspection completed, waiting for packaging.';
                     break;
+                    //合单完成
                 case 8:
                     $content = 'Packaging completed, waiting for order review.';
                     break;
+                    //审单完成
                 case 9:
                     $content = 'Order reviewing completed, waiting for dispatch.';
                     break;
+                    //已出库
                 case 10:
                     $content = 'Order leave warehouse, waiting for being picked up.';
                     break;
@@ -91,11 +99,11 @@ class Order extends Model
             $res_node_detail = (new OrderNodeDetail())->allowField(true)->save([
                 'order_number' => $order_number,
                 'order_id' => $order_id,
-                'content' => 'Your payment has been successful.',
+                'content' => $content,
                 'site' => $site,
                 'create_time' => date('Y-m-d H:i:s'),
                 'order_node' => 0,
-                'node_type' => 1
+                'node_type' => $node_type
             ]);
             if (false !== $res_node && false !== $res_node_detail) {
                 $this->success('创建成功', [], 200);

@@ -680,13 +680,35 @@
                                 <button type="submit" class="btn btn-danger btn-process-status-error"  data-id="{$vo.id}">{:__('处理失败')}</button>
                             {/if}
                         </td>
-
                     </tr>
                     {/foreach}
+
                     <input type='hidden' name="row[success]" class="process-status" value="1">
                     <input type='hidden' name="row[recept_id]" class="process-recept-id" value="">
                     <input type='hidden' name="row[note]" class="process-recept-note" value="">
                 </table>
+            </div>
+            <!-- 赠品条形码 -->
+            <div style="margin-left: 53px;padding-top: 200px;">
+                    {if condition="$gift_status == 1"}
+                    <p style="width: 15%;">{:__('赠品条形码')}：</p>
+                       <table class="caigou-table-sku"  style="background-color: white;">
+                        <tr style="height: 30px;">
+                            <th>序号</th>
+                            <th>赠品sku</th>
+                            <th>条形码</th>
+                        </tr>
+                            {foreach name="gift_sku" item="vo" key="key"}
+                                {for start="0" end="$vo.change_number"}
+                                    <tr>
+                                        <td>{$i+1}</td>
+                                        <td>{$vo.change_sku}</td>
+                                        <td><input type="text" class="form-control process-note" name="row[barcode][{$vo.change_sku}_{$i+1}]"  value=""></td>
+                                    </tr>
+                                {/for}
+                            {/foreach}
+                        </table>         
+                    {/if}
             </div>
         </div>
     </div>
