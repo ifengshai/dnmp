@@ -194,9 +194,9 @@ class PurchasePay extends Backend
                                     $reasons
                                 ],
                                 ['name' => '付款总金额', 'value' => $params['pay_grand_total']],
-                                ['name' => '收款方名称', 'value' => $params['linkname']],
-                                ['name' => '收款方账户', 'value' => $params['bank_account']],
-                                ['name' => '收款方开户行', 'value' => $params['opening_bank_address']],
+                                ['name' => '收款方名称', 'value' => $params['linkname'] ? $params['linkname']:'无'],
+                                ['name' => '收款方账户', 'value' => $params['bank_account'] ? $params['bank_account']:0],
+                                ['name' => '收款方开户行', 'value' => $params['opening_bank_address'] ? $params['opening_bank_address'] : '无'],
                             ];
                         } else {
                             //采购列表创建采购付款申请单 采购事由只会有一条 就是以整个采购单为维度 不考虑批次 无批次 无入库数量 无入库金额
@@ -227,9 +227,9 @@ class PurchasePay extends Backend
                                     ]
                                 ]],
                                 ['name' => '付款总金额', 'value' => $params['pay_grand_total']],
-                                ['name' => '收款方名称', 'value' => $params['linkname']],
-                                ['name' => '收款方账户', 'value' => $params['bank_account']],
-                                ['name' => '收款方开户行', 'value' => $params['opening_bank_address']],
+                                ['name' => '收款方名称', 'value' => $params['linkname'] ? $params['linkname']:'无'],
+                                ['name' => '收款方账户', 'value' => $params['bank_account'] ? $params['bank_account']:0],
+                                ['name' => '收款方开户行', 'value' => $params['opening_bank_address'] ? $params['opening_bank_address'] : '无'],
                             ];
                         }
 
@@ -473,9 +473,9 @@ class PurchasePay extends Backend
                                     $reasons
                                 ],
                                 ['name' => '付款总金额', 'value' => $params['pay_grand_total']],
-                                ['name' => '收款方名称', 'value' => $params['linkname']],
-                                ['name' => '收款方账户', 'value' => $params['bank_account']],
-                                ['name' => '收款方开户行', 'value' => $params['opening_bank_address']],
+                                ['name' => '收款方名称', 'value' => $params['linkname'] ? $params['linkname']:'无'],
+                                ['name' => '收款方账户', 'value' => $params['bank_account'] ? $params['bank_account']:0],
+                                ['name' => '收款方开户行', 'value' => $params['opening_bank_address'] ? $params['opening_bank_address']:'无'],
                             ];
                         } else {
                             $item = new Item();
@@ -503,9 +503,9 @@ class PurchasePay extends Backend
                                     ]
                                 ]],
                                 ['name' => '付款总金额', 'value' => $params['pay_grand_total']],
-                                ['name' => '收款方名称', 'value' => $params['linkname']],
-                                ['name' => '收款方账户', 'value' => $params['bank_account']],
-                                ['name' => '收款方开户行', 'value' => $params['opening_bank_address']],
+                                ['name' => '收款方名称', 'value' => $params['linkname'] ? $params['linkname']:'无'],
+                                ['name' => '收款方账户', 'value' => $params['bank_account'] ? $params['bank_account']:0],
+                                ['name' => '收款方开户行', 'value' => $params['opening_bank_address'] ? $params['opening_bank_address']:'无'],
                             ];
                         }
 
