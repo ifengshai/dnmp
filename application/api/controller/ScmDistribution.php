@@ -1456,7 +1456,7 @@ class ScmDistribution extends Scm
 
         $order_process_info = $this->_new_order_process
             ->where('order_id', $item_process_info['order_id'])
-            ->field('order_id,store_house_id')
+            ->field('order_id,store_house_id,order_prescription_type')
             ->find();
         $store_house_is = $this->_stock_house->field('id,coding,subarea')->where('id', $item_process_info['abnormal_house_id'])->find();
         $hedan_codeing = $this->_stock_house->field('id,coding,subarea')->where('id', $order_process_info['store_house_id'])->value('coding');
