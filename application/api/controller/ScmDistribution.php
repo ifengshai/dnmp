@@ -1866,7 +1866,7 @@ class ScmDistribution extends Scm
             $list = $this->_new_order_process
                 ->where($where)
                 ->where(['store_house_id'=>['>',0]])
-                ->field('order_id,store_house_id,combine_time')
+                ->field('order_id,store_house_id,combine_time,order_prescription_type')
                 ->group('order_id')
                 ->limit($offset, $limit)
                 ->order('order_prescription_type')
