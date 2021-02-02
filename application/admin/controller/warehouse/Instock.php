@@ -1467,6 +1467,7 @@ class Instock extends Backend
                     $params[$sku] = [
                         'in_stock_num' => $replenish_num,
                         'sku' => $sku,
+                        'price' => trim($v[5]),
                         'in_stock_id' => $transfer_order_id,
                     ];
                 }

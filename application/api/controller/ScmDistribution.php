@@ -1848,17 +1848,17 @@ class ScmDistribution extends Scm
             }
             if ($order_prescription_type == 1) {
                 $where['order_prescription_type'] = ['=', $order_prescription_type];
-            }else{
+            }else if($order_prescription_type == 2){
                 $where['order_prescription_type'] = ['in', [2,3]];
             }
             if ($shelf_number) {
-                $shelf_number_arr = $this->_stock_house->where(['shelf_number' => $shelf_number])->column('shelf_number');
-                if (!empty($where['store_house_id']) && $where['store_house_id'] != -1) {
+                $shelf_number_arr = $this->_stock_house->where(['shelf_number' => $shelf_number])->column('id');
+                if ($query && $where['store_house_id'] != -1) {
                     $shelf_number_arr_intersect = array_intersect($where['store_house_id'],$shelf_number_arr);
                 }
-                if (!empty($shelf_number_arr)) {
+                if (!empty($shelf_number_arr_intersect)) {
                     $where['store_house_id'] = ['in', $shelf_number_arr_intersect];
-                }else{
+                }elseif(!empty($shelf_number_arr)){
                     $where['store_house_id'] = ['in', $shelf_number_arr];
                 }
             }
