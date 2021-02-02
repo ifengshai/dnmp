@@ -346,7 +346,7 @@ class Distribution extends Backend
                     ])->group('platform_order')->column('platform_order');
                     if (!empty($platform_order)) {
                       $order_id = $this->_new_order_process->where(['increment_id' => ['in',$platform_order]])->group('order_id')->column('order_id');
-                      $item_order_numbers  = $this->model->where(['order_id' => ['in',$order_id]])->group('item_order_number')->column('item_order_number');
+                      $item_order_numbers  = $this->model->where(['order_id' => ['in',$order_id]])->order('created_at', 'desc')->group('item_order_number')->column('item_order_number');
                     } 
             }else{
                 //其他tab展示子单工单未处理
