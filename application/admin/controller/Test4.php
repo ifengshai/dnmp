@@ -1629,7 +1629,7 @@ class Test4 extends Controller
     //产品等级销量数据脚本
     public function product_level_salesnum(){
         //查询时间
-        $date_time = $this->zeelool->query("SELECT DATE_FORMAT(created_at, '%Y-%m-%d') AS date_time FROM `sales_flat_order` where created_at between '2018-01-01' and '2020-12-31' GROUP BY DATE_FORMAT(created_at, '%Y%m%d') order by DATE_FORMAT(created_at, '%Y%m%d') asc");
+        $date_time = $this->zeelool->query("SELECT DATE_FORMAT(created_at, '%Y-%m-%d') AS date_time FROM `sales_flat_order` where created_at between '2021-01-22' and '2021-01-23' GROUP BY DATE_FORMAT(created_at, '%Y%m%d') order by DATE_FORMAT(created_at, '%Y%m%d') asc");
         foreach ($date_time as $val) {
             $is_exist = Db::name('datacenter_day_supply')->where('day_date', $val['date_time'])->value('id');
             if (!$is_exist) {
@@ -1654,19 +1654,7 @@ class Test4 extends Controller
     public function getSalesnum($site,$date){
         $this->order = new \app\admin\model\order\order\NewOrder();
         $this->productGrade = new \app\admin\model\ProductGrade();
-        switch ($site){
-            case '1':
-                $field = 'zeelool_sku';
-                break;
-            case '2':
-                $field = 'voogueme_sku';
-                break;
-            case '3':
-                $field = 'nihao_sku';
-                break;
-            default:
-                break;
-        }
+        $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         //所选时间段内有销量的平台sku
         $start = $date;
         $end = $date.' 23:59:59';
@@ -1685,8 +1673,9 @@ class Test4 extends Controller
         $grade7 = 0;
         $grade8 = 0;
         foreach ($order as $key=>$value){
+            $sku = $this->itemplatformsku->getTrueSku($value['sku'], $site);
             //查询该品的等级
-            $grade = $this->productGrade->where($field,$value['sku'])->value('grade');
+            $grade = $this->productGrade->where('true_sku',$sku)->value('grade');
             switch ($grade){
                 case 'A+':
                     $grade1 += $value['count'];

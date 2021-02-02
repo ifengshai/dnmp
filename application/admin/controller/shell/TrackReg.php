@@ -414,8 +414,10 @@ class TrackReg extends Backend
         foreach ($list as $k => $v) {
             $allnum = 0;
             foreach ($siteList as $val) {
+
+                $sql = $skuSalesNum->field('sales_num')->where(['sku' => $v, 'createtime' => ['<', $date], 'site' => $val['id']])->limit(30)->order('createtime desc')->buildSql();
+                $num = Db::table($sql . ' a')->sum('a.sales_num');
                 //统计30天有效天数销量
-                $num = $skuSalesNum->where(['sku' => $v, 'createtime' => ['<', $date], 'site' => $val['id']])->limit(30)->order('createtime desc')->sum('sales_num');
                 $allnum += $num;
             }
             if ($allnum >= 300) {
@@ -1392,19 +1394,7 @@ class TrackReg extends Backend
     {
         $this->order = new \app\admin\model\order\order\NewOrder();
         $this->productGrade = new \app\admin\model\ProductGrade();
-        switch ($site) {
-            case '1':
-                $field = 'zeelool_sku';
-                break;
-            case '2':
-                $field = 'voogueme_sku';
-                break;
-            case '3':
-                $field = 'nihao_sku';
-                break;
-            default:
-                break;
-        }
+        $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         //所选时间段内有销量的平台sku
         $start = date('Y-m-d', strtotime("-1 day"));
         $end = date('Y-m-d 23:59:59', strtotime("-1 day"));
@@ -1423,8 +1413,9 @@ class TrackReg extends Backend
         $grade7 = 0;
         $grade8 = 0;
         foreach ($order as $key => $value) {
+            $sku = $this->itemplatformsku->getTrueSku($value['sku'], $site);
             //查询该品的等级
-            $grade = $this->productGrade->where($field, $value['sku'])->value('grade');
+            $grade = $this->productGrade->where('true_sku',$sku)->value('grade');
             switch ($grade) {
                 case 'A+':
                     $grade1 += $value['count'];
