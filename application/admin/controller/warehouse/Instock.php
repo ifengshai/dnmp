@@ -1246,7 +1246,7 @@ class Instock extends Backend
 
             //校验模板文件格式
             // $listName = ['商品SKU', '类型', '补货需求数量'];
-            $listName = ['入库分类', '平台', 'SKU', '入库数量'];
+            $listName = ['入库分类', '平台', 'SKU', '入库数量','商品条码'];
 
             $listName !== $fields && $this->error(__('模板文件格式错误！'));
 
