@@ -1787,24 +1787,6 @@ class ItWebDemand extends Backend
         }
     }
 
-    //临时脚本,变更网站端需求管理node_time时间,规则,start_time+priority 天数
-    public function it_web_demand_node_time(){
-        $where['node_time']='0000-00-00 00:00:00';
-
-
-        $data_list=$this->model
-            ->where($where)
-            ->field("id,start_time,priority,node_time")
-            ->select();
-        foreach ($data_list as $k=>$v){
-            $start_time=$v['start_time'];
-            $priority=$v['priority'];
-            $node_time=date("Y-m-d H:i:s",strtotime("+$priority day",strtotime($start_time)));
-            $params['node_time']=$node_time;
-            $this->model->allowField(true)->save($params, ['id' => $v['id']]);
-        }
-    }
-
 
 }
 
