@@ -1795,7 +1795,6 @@ class ItWebDemand extends Backend
         $data_list=$this->model
             ->where($where)
             ->field("id,start_time,priority,node_time")
-            ->limit(100)
             ->select();
         foreach ($data_list as $k=>$v){
             $start_time=$v['start_time'];
