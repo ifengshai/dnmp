@@ -1821,7 +1821,7 @@ class ScmDistribution extends Scm
         $where = [];
         if (1 == $type) {
             $where['combine_status'] = 1; //合单完成状态
-            $where['store_house_id'] = ['>', 0];
+            //$where['store_house_id'] = ['>', 0];
             //合单待取出列表，主单为合单完成状态且子单都已合单
             if ($query) {
                 //线上不允许跨库联合查询，拆分，wang导与产品静确认去除SKU搜索
@@ -1865,6 +1865,7 @@ class ScmDistribution extends Scm
             //print_r($where);die;
             $list = $this->_new_order_process
                 ->where($where)
+                ->where(['store_house_id'=>['>',0]])
                 ->field('order_id,store_house_id,combine_time')
                 ->group('order_id')
                 ->limit($offset, $limit)
@@ -2091,7 +2092,7 @@ class ScmDistribution extends Scm
         if ($check_status == 2) {
             $check_refuse = $this->request->request('check_refuse'); //check_refuse   1SKU缺失  2 配错镜框
             empty($check_refuse) && $this->error(__('审单拒绝原因不能为空'), [], 403);
-            !in_array($check_refuse, [1, 2, 999]) && $this->error(__('审单拒绝原因错误'), [], 403);
+            !in_array($check_refuse, [1, 2,3, 999]) && $this->error(__('审单拒绝原因错误'), [], 403);
             if (2 == $check_refuse||3 == $check_refuse) {
                 $item_order_numbers = $this->request->request('item_order_numbers');
                 $item_order_numbers = explode(',', $item_order_numbers);
