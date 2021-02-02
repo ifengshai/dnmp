@@ -1400,7 +1400,7 @@ class ScmWarehouse extends Scm
             //入库单子表的sku与条形码有绑定 先解除绑定
             $barcode = $this->_product_bar_code_item
                 ->where(['in_stock_id' => $instock_id['instock_id'], 'sku' => $instock_id['sku']])
-                ->update(['in_stock_id' => '']);
+                ->update(['in_stock_id' => 0]);
             $this->_in_stock_item->commit();
             $this->_product_bar_code_item->commit();
         } catch (ValidateException $e) {
