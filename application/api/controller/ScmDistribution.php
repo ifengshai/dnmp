@@ -1821,7 +1821,7 @@ class ScmDistribution extends Scm
         $where = [];
         if (1 == $type) {
             $where['combine_status'] = 1; //合单完成状态
-            $where['store_house_id'] = ['>', 0];
+            //$where['store_house_id'] = ['>', 0];
             //合单待取出列表，主单为合单完成状态且子单都已合单
             if ($query) {
                 //线上不允许跨库联合查询，拆分，wang导与产品静确认去除SKU搜索
@@ -1848,21 +1848,25 @@ class ScmDistribution extends Scm
             }
             if ($order_prescription_type == 1) {
                 $where['order_prescription_type'] = ['=', $order_prescription_type];
-            }else{
+            }else if($order_prescription_type == 2){
                 $where['order_prescription_type'] = ['in', [2,3]];
             }
             if ($shelf_number) {
-                $shelf_number_arr = $this->_stock_house->where(['shelf_number' => $shelf_number])->column('shelf_number');
-                if (!empty($where['store_house_id']) && $where['store_house_id'] != -1) {
-                    $shelf_number_arr = array_intersect($where['store_house_id'],$shelf_number_arr);
+                $shelf_number_arr = $this->_stock_house->where(['type' => 2,'subarea' => $shelf_number])->column('id');
+                if ($query && $where['store_house_id'] != -1) {
+                    $shelf_number_arr_intersect = array_intersect($where['store_house_id'],$shelf_number_arr);
                 }
-                if (!empty($shelf_number_arr)) {
+                if (!empty($shelf_number_arr_intersect)) {
+                    $where['store_house_id'] = ['in', $shelf_number_arr_intersect];
+                }elseif(!empty($shelf_number_arr)){
                     $where['store_house_id'] = ['in', $shelf_number_arr];
                 }
             }
+            //print_r($where);die;
             $list = $this->_new_order_process
                 ->where($where)
-                ->field('order_id,store_house_id,combine_time')
+                ->where(['store_house_id'=>['>',0]])
+                ->field('order_id,store_house_id,combine_time,order_prescription_type')
                 ->group('order_id')
                 ->limit($offset, $limit)
                 ->order('order_prescription_type')
@@ -2088,7 +2092,7 @@ class ScmDistribution extends Scm
         if ($check_status == 2) {
             $check_refuse = $this->request->request('check_refuse'); //check_refuse   1SKU缺失  2 配错镜框
             empty($check_refuse) && $this->error(__('审单拒绝原因不能为空'), [], 403);
-            !in_array($check_refuse, [1, 2, 999]) && $this->error(__('审单拒绝原因错误'), [], 403);
+            !in_array($check_refuse, [1, 2,3, 999]) && $this->error(__('审单拒绝原因错误'), [], 403);
             if (2 == $check_refuse||3 == $check_refuse) {
                 $item_order_numbers = $this->request->request('item_order_numbers');
                 $item_order_numbers = explode(',', $item_order_numbers);

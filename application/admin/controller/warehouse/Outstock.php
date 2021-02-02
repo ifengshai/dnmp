@@ -200,8 +200,6 @@ class Outstock extends Backend
     }
 
 
-
-
     /**
      * 添加
      */
@@ -581,6 +579,8 @@ class Outstock extends Backend
                             $financecost->outstock_cost($v['out_stock_id'], $v['out_stock_number']);
                         }
                     }
+                    //先入先出逻辑
+                    //                $this->item->setPurchaseOrder($list);
                 } else {
                     //审核拒绝解除条形码绑定关系
                     $_product_bar_code_item = new ProductBarCodeItem();
@@ -954,6 +954,7 @@ class Outstock extends Backend
         $this->model = new \app\admin\model\warehouse\Outstock();
         $_item = new \app\admin\model\warehouse\OutStockItem();
         $_platform = new \app\admin\model\itemmanage\ItemPlatformSku();
+        $this->_product_bar_code_item = new ProductBarCodeItem();
 
         //校验参数空值
         $file = $this->request->request('file');
@@ -994,6 +995,10 @@ class Outstock extends Backend
         }
 
         //模板文件列名
+        $this->model->startTrans();
+        $_item->startTrans();
+        $this->_product_bar_code_item->startTrans();
+        //模板文件列名
         try {
             if (!$PHPExcel = $reader->load($filePath)) {
                 $this->error(__('Unknown data format'));
@@ -1014,7 +1019,7 @@ class Outstock extends Backend
             }
 
             //校验模板文件格式
-            $listName = ['商品条码'];
+            $listName = ['出库分类', '平台', '商品条码'];
 
             $listName !== $fields && $this->error(__('模板文件格式错误！'));
 
@@ -1031,14 +1036,15 @@ class Outstock extends Backend
             $sku_arr = [];
             foreach ($data as $k => $v) {
                 //获取sku
-                $sku = trim($v[1]);
+                $sku = trim($v[2]);
                 empty($sku) && $this->error(__('导入失败,第 ' . ($k + 1) . ' 行商品条码为空！'));
                 $sku_arr[] = $sku;
             }
 
-            $sku_code = array_column($data, '1');
+            $sku_code = array_column($data, '2');
+
             //检测条形码是否重复
-            if (count($data) != count(array_unique($sku_code)))  $this->error(__(' 条形码有重复，请检查'));
+            if (count($data) != count(array_unique($sku_code))) $this->error(__(' 条形码有重复，请检查'));
 
             //获取出库平台
             $out_plat = $data[0][1];
@@ -1073,51 +1079,76 @@ class Outstock extends Backend
                     $this->error(__('请检查表格中调出仓的名称'));
             };
 
-            //插入一条数据到出库单主表
+            $instock_type = Db::name('out_stock_type')->where('is_del', 1)->field('id,name')->select();
+            $instock_type = array_column(collection($instock_type)->toArray(), 'id', 'name');
+
+            //插入一条数据到入库单主表
             $transfer_order['out_stock_number'] = 'OUT' . date('YmdHis') . rand(100, 999) . rand(100, 999);
-            $transfer_order['type_id'] = 1;
+            $transfer_order['type_id'] = $instock_type[$data[0][0]];
             $transfer_order['status'] = 0;
             $transfer_order['platform_id'] = $out_label;
             $transfer_order['createtime'] = date('Y-m-d H:i:s');
             $transfer_order['create_person'] = session('admin.nickname');
             $transfer_order_id = $this->model->insertGetId($transfer_order);
+            //获取各站点虚拟仓库存
+            $stock_list = $_platform
+                ->where('platform_type', $out_label)
+                ->column('stock', 'sku');
 
-            //批量导入
-            $params = [];
+            $skus = [];
             foreach ($data as $v) {
-                //获取sku
-                $sku = trim($v[2]);
-
-                $sku_plat = $_platform->where(['platform_type' => $out_label, 'sku' => $sku])->find();
-                //校验当前平台是否存在此sku映射关系
-                if (empty($sku_plat)) {
-                    $this->model->where('id', $transfer_order_id)->delete() && $this->error(__('导入失败,商品 ' . $sku . '在' . $out_plat . ' 平台没有映射关系！'));
+                $sku = $this->_product_bar_code_item->where('code', trim($v[2]))->value('sku');
+                $replenish_num = 1;
+                if ($skus[$sku]) {
+                    $skus[$sku]['out_stock_num'] += $replenish_num;
+                } else {
+                    $skus[$sku] = [
+                        'out_stock_num' => $replenish_num,
+                        'sku' => $sku,
+                        'out_stock_id' => $transfer_order_id,
+                    ];
                 }
-
-                //校验sku是否重复
-                isset($params[$sku]) && $this->model->where('id', $transfer_order_id)->delete() && $this->error(__('导入失败,商品 ' . $sku . ' 重复！'));
-
-                //获取出库数量
-                $replenish_num = (int)$v[3];
-                empty($replenish_num) && $this->model->where('id', $transfer_order_id)->delete() && $this->error(__('导入失败,商品 ' . $sku . ' 出库库数量不能为空！'));
-
-
-                //校验出库数量是否大于当前虚拟仓库存量
-                if ($replenish_num > $sku_plat['stock']) {
-                    $this->model->where('id', $transfer_order_id)->delete() && $this->error(__('导入失败,商品 ' . $sku . ' 出库数量大于当前虚拟仓库库存！'));
-                }
-
-                //拼接参数 插入出库单详情表中
-                $params[$sku] = [
-                    'out_stock_num' => $replenish_num,
-                    'sku' => $sku,
-                    'out_stock_id' => $transfer_order_id,
-                ];
             }
+            //校验各站点虚拟仓库存
+            foreach ($skus as $key => $value1) {
+                if (!$stock_list[$value1['sku']]) $this->error('sku: ' . $value1['sku'] . ' 没有同步至对应平台');
+                if ($value1['out_stock_num'] > $stock_list[$value1['sku']]) $this->error('sku: ' . $value1['sku'] . ' 出库数量不能大于虚拟仓库存');
+            }
+            //检测条形码是否已绑定
+            $where['out_stock_id'] = [['>', 0], ['neq', $transfer_order_id]];
 
-            $_item->allowField(true)->saveAll($params) ? $this->success('导入成功！') : $this->error('导入失败！');
+            $where['code'] = ['in', $sku_code];
+            $check_quantity = $this->_product_bar_code_item
+                ->where($where)
+                ->field('code')
+                ->find();
+            if (!empty($check_quantity['code'])) throw new Exception('条形码:' . $check_quantity['code'] . ' 已绑定,请移除');
+
+            $_item->insertAll($skus);
+
+            //绑定条形码
+            foreach ($data as $v) {
+                $this->_product_bar_code_item->where(['code' => trim($v[2])])->update(['out_stock_id' => $transfer_order_id]);
+            }
+            $this->model->commit();
+            $_item->commit();
+            $this->_product_bar_code_item->commit();
+        } catch (ValidateException $e) {
+            $this->model->rollback();
+            $_item->rollback();
+            $this->_product_bar_code_item->rollback();
+            $this->error($e->getMessage(), [], 444);
+        } catch (PDOException $e) {
+            $this->model->rollback();
+            $_item->rollback();
+            $this->_product_bar_code_item->rollback();
+            $this->error($e->getMessage(), [], 444);
         } catch (Exception $e) {
-            $this->error($e->getMessage());
+            $this->model->rollback();
+            $_item->rollback();
+            $this->_product_bar_code_item->rollback();
+            $this->error($e->getMessage(), [], 444);
         }
+        $this->success('导入成功！');
     }
 }
