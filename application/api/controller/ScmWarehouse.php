@@ -1202,25 +1202,21 @@ class ScmWarehouse extends Scm
         $gen_check_item = new \app\admin\model\warehouse\CheckItem;
         $gen_purchase_order = new \app\admin\model\purchase\PurchaseOrder;
         $gen_purchase_order_item = new \app\admin\model\purchase\PurchaseOrderItem;
-
-        //计算总金额
-        $all_total = 0;
+        
         foreach ($item_sku as $key => $value) {
-            $all_total +=  $value['price'] * $value['in_stock_num'];
-        }
+            //计算总金额
+            $all_total =  $value['price'] * $value['in_stock_num'];
+            //生成采购单
+            $purchase_number = 'PO' . date('YmdHis') . rand(100, 999) . rand(100, 999);
+            $purchase_data = ['purchase_number' => $purchase_number, 'purchase_name' => '退货入库', 'purchase_status' => 10, 'check_status' => 2, 'is_in_stock' => 1, 'stock_status' => 2, 'createtime' => date('Y-m-d H:i:s'), 'product_total' => $all_total, 'purchase_total' => $all_total];
 
-        //生成采购单
-        $purchase_number = 'PO' . date('YmdHis') . rand(100, 999) . rand(100, 999);
-        $purchase_data = ['purchase_number' => $purchase_number, 'purchase_name' => '退货入库', 'purchase_status' => 10, 'check_status' => 2, 'is_in_stock' => 1, 'stock_status' => 2, 'createtime' => date('Y-m-d H:i:s'), 'product_total' => $all_total, 'purchase_total' => $all_total,];
+            $purchase = $gen_purchase_order->insertGetId($purchase_data);
+            //生成质检单
+            $check_order_number = 'QC' . date('YmdHis') . rand(100, 999) . rand(100, 999);
+            $check_data = ['check_order_number' => $check_order_number, 'type' => 2, 'purchase_id' => $purchase, 'status' => 2, 'is_in_stock' => 1, 'is_stock' => 1, 'createtime' => date('Y-m-d H:i:s')];
+            $check = $gen_check->insertGetId($check_data);
 
-        $purchase = $gen_purchase_order->insertGetId($purchase_data);
-        //生成质检单
-        $check_order_number = 'QC' . date('YmdHis') . rand(100, 999) . rand(100, 999);
-        $check_data = ['check_order_number' => $check_order_number, 'type' => 2, 'purchase_id' => $purchase, 'status' => 2, 'is_in_stock' => 1, 'is_stock' => 1, 'createtime' => date('Y-m-d H:i:s')];
-        $check = $gen_check->insertGetId($check_data);
-
-        //生成子数据
-        foreach ($item_sku as $key => $value) {
+            //生成子数据
             $check_item_data = ['check_id' => $check, 'sku' => $value['sku'], 'purchase_num' => $value['in_stock_num'], 'check_num' => $value['in_stock_num'], 'purchase_id' => $purchase];
             $gen_check_item->insert($check_item_data);
             $purchase_order_item_data = ['purchase_id' => $purchase, 'sku' => $value['sku'], 'purchase_order_number' => $value['in_stock_num'], 'purchase_num' => $value['in_stock_num'], 'purchase_price' => $value['price'], 'purchase_total' => $value['price'] * $value['in_stock_num'], 'instock_num' => $value['in_stock_num']];
