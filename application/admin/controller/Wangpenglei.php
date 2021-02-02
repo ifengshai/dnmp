@@ -470,6 +470,17 @@ class Wangpenglei extends Backend
     {
         //查询退货入库采购单
         $purchase = new \app\admin\model\purchase\PurchaseOrder();
-        $purchase->
+        $list = $purchase->where(['is_in_stock' => 1])->select();
+        $purchase_item = new \app\admin\model\purchase\PurchaseOrderItem();
+
+        $params = [];
+        foreach($list as $k => $v) {
+            //查询子表商品总价
+           $product_price =  $purchase_item->where(['purchase_id' => $v['purchase_id']])->sum('purchase_price*purchase_num');
+           $params[$k]['id'] = $v['id'];
+           $params[$k]['product_total'] = $product_price;
+           $params[$k]['purchase_total'] = $product_price + $v['purchase_freight'];
+        }
+        $purchase->saveAll($params);
     }
 }
