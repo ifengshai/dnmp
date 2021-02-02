@@ -1852,7 +1852,12 @@ class ScmDistribution extends Scm
             }
             if ($shelf_number) {
                 $shelf_number_arr = $this->_stock_house->where(['shelf_number' => $shelf_number])->column('shelf_number');
-                $where['store_house_id'] = ['in', $shelf_number_arr];
+                if (!empty($where['store_house_id']) && $where['store_house_id'] != -1) {
+                    $shelf_number_arr = array_intersect($where['store_house_id'],$shelf_number_arr);
+                }
+                if (!empty($shelf_number_arr)) {
+                    $where['store_house_id'] = ['in', $shelf_number_arr];
+                }
             }
             $list = $this->_new_order_process
                 ->where($where)
