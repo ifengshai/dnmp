@@ -623,6 +623,17 @@ class Zendesk extends Backend
             ->order('id desc')
             ->limit(5)
             ->select();
+        $recentTickets_count = $this->model
+            ->where(['user_id' => $ticket->user_id, 'type' => $ticket->type])
+            ->where('id', 'neq', $ids)
+            ->field('ticket_id,id,username,subject,status')
+            ->order('id desc')
+            ->count();
+        //查询该用户是否是会员
+        $is_vip = Db::connect('database.db_zeelool')->table('customer_entity')->where('entity_id',$ticket->user_id)->value('is_vip');
+        if (empty($is_vip)){
+            $is_vip = 1;
+        }
         //获取所有的消息模板
 
         $templateAll = ZendeskMailTemplate::where([
@@ -678,10 +689,39 @@ class Zendesk extends Backend
 
         $this->view->assign(compact('tags', 'ticket', 'comments', 'tickets', 'recentTickets', 'templates','orders','btn'));
         $this->view->assign('rows', $row);
+        $this->view->assign('recentTickets_count', $recentTickets_count);
+        $this->view->assign('is_vip', $is_vip);
         // $this->view->assign('username', $username);
         $this->view->assign('orderUrl',config('zendesk.platform_url')[$ticket->type]);
         return $this->view->fetch();
     }
+
+
+    //订单加载更多
+    public function order_toload_more(){
+        $this->view->engine->layout(false);
+        $data = input();
+        if($data['type'] == 1){
+            $orderModel = new \app\admin\model\order\order\Zeelool;
+        }elseif($data['type'] == 2){
+            $orderModel = new \app\admin\model\order\order\Voogueme;
+        }else{
+            $orderModel = new \app\admin\model\order\order\Nihao;
+        }
+        $page = $data['page']?$data['page']:1;
+        $orders = $orderModel
+            ->where('customer_email',$data['email'])
+            ->order('entity_id desc')
+            ->field('increment_id,created_at,order_currency_code,status,entity_id')
+            ->paginate(5)->toArray();
+        $this->assign('orders',$orders['data']);
+        $this->assign('entity_id',$data['entity_id']);
+        $this->view->assign('orderUrl',config('zendesk.platform_url')[$data['type']]);
+        return $this->view->fetch();
+    }
+
+
+
 
     public function order_detail($order_number = null)
     {
