@@ -628,7 +628,7 @@ class Zendesk extends Backend
         //查询该用户是否是会员
         $is_vip = Db::connect('database.db_zeelool')->table('customer_entity')->where('entity_id',$ticket->user_id)->value('is_vip');
         if (empty($is_vip)){
-            $is_vip = 0;
+            $is_vip = 1;
         }
         //获取所有的消息模板
         $templateAll = ZendeskMailTemplate::where([
