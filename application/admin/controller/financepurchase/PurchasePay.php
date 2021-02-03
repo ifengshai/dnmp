@@ -151,17 +151,25 @@ class PurchasePay extends Backend
                         $initiate_approval = new Ding();
                         //当前用户信息
                         $admin = Db::name('admin')->where('id', session('admin.id'))->find();
-                        $arr['originator_user_id'] = $admin['userid'];
-                        $arr['dept_id'] = $admin['department_id'];
-                        if ($params['pay_grand_total'] >= 300000){
-                            // //任萍 王涛 陈见 王剑 李亚方
-                            $arr['approvers'] = '1007304767660594,0221135665945008,405544201227897,0647044715938022,171603353926064429';
-                        }else{
-                            // //任萍 王涛 王剑 李亚方
-                            $arr['approvers'] = '1007304767660594,0221135665945008,0647044715938022,171603353926064429';
-                        }
-                        // //抄送 屈金金
-                        $arr['cc_list'] = '204112301323897192';
+                        // $arr['originator_user_id'] = $admin['userid'];
+                        // $arr['dept_id'] = $admin['department_id'];
+                        // if ($params['pay_grand_total'] >= 300000){
+                        //     // //任萍 王涛 陈见 王剑 李亚方
+                        //     $arr['approvers'] = '1007304767660594,0221135665945008,405544201227897,0647044715938022,171603353926064429';
+                        // }else{
+                        //     // //任萍 王涛 王剑 李亚方
+                        //     $arr['approvers'] = '1007304767660594,0221135665945008,0647044715938022,171603353926064429';
+                        // }
+                        // // //抄送 屈金金
+                        // $arr['cc_list'] = '204112301323897192';
+
+                        $arr['originator_user_id'] = '071829462027950349';
+                        $arr['dept_id'] = '143678442';
+                        $arr['approvers'] = '285501046927507550,0550643549844645,056737345633028055';
+                        //刘超 红亚 玉晓
+                        // $arr['approvers'] = '0704513051687725,310818292339015332,111525355037914674';
+                        $arr['cc_list'] = '071829462027950349';
+
                         //结算单创建采购付款申请单
                         if ($params['pay_type'] == 3) {
                             foreach ($reason as $kk => $vv) {
@@ -424,23 +432,23 @@ class PurchasePay extends Backend
                         $initiate_approval = new Ding();
                         //当前用户信息
                         $admin = Db::name('admin')->where('id', session('admin.id'))->find();
-                        $arr['originator_user_id'] = $admin['userid'];
-                        $arr['dept_id'] = $admin['department_id'];
-                        if ($params['pay_grand_total'] >= 300000){
-                            // //任萍 王涛 陈见 王剑 李亚方
-                            $arr['approvers'] = '1007304767660594,0221135665945008,405544201227897,0647044715938022,171603353926064429';
-                        }else{
-                            // //任萍 王涛 王剑 李亚方
-                            $arr['approvers'] = '1007304767660594,0221135665945008,0647044715938022,171603353926064429';
-                        }
-                        // //抄送 屈金金
-                        $arr['cc_list'] = '204112301323897192';
-                        // $arr['originator_user_id'] = '071829462027950349';
-                        // $arr['dept_id'] = '143678442';
-                        // $arr['approvers'] = '285501046927507550,0550643549844645,056737345633028055';
+                        // $arr['originator_user_id'] = $admin['userid'];
+                        // $arr['dept_id'] = $admin['department_id'];
+                        // if ($params['pay_grand_total'] >= 300000){
+                        //     // //任萍 王涛 陈见 王剑 李亚方
+                        //     $arr['approvers'] = '1007304767660594,0221135665945008,405544201227897,0647044715938022,171603353926064429';
+                        // }else{
+                        //     // //任萍 王涛 王剑 李亚方
+                        //     $arr['approvers'] = '1007304767660594,0221135665945008,0647044715938022,171603353926064429';
+                        // }
+                        // // //抄送 屈金金
+                        // $arr['cc_list'] = '204112301323897192';
+                        $arr['originator_user_id'] = '071829462027950349';
+                        $arr['dept_id'] = '143678442';
+                        $arr['approvers'] = '285501046927507550,0550643549844645,056737345633028055';
                         //刘超 红亚 玉晓
                         // $arr['approvers'] = '0704513051687725,310818292339015332,111525355037914674';
-                        // $arr['cc_list'] = '071829462027950349';
+                        $arr['cc_list'] = '071829462027950349';
 
                         if ($params['pay_type'] == 3) {
                             foreach ($reason as $kk => $vv) {
