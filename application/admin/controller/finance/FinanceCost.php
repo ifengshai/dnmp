@@ -10,6 +10,13 @@ use think\Request;
 
 class FinanceCost extends Backend
 {
+
+    /**
+     * 无需鉴权的方法,但需要登录
+     * @var array
+     */
+    protected $noNeedRight = ['income', 'cost'];
+
     public function _initialize()
     {
         parent::_initialize();
@@ -18,7 +25,8 @@ class FinanceCost extends Backend
     /*
      * 成本核算
      * */
-    public function index(){
+    public function index()
+    {
         return $this->view->fetch();
     }
 
@@ -61,7 +69,7 @@ class FinanceCost extends Backend
     }
 
 
-     /**
+    /**
      * 成本
      *
      * @Description
