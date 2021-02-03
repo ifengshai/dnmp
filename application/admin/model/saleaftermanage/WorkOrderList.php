@@ -2587,7 +2587,7 @@ class WorkOrderList extends Model
             $result = $_new_order_process
                 ->allowField(true)
                 ->isUpdate(true, ['item_order_number' => $item_order_number])
-                ->save(['temporary_house_id' => 0, 'customize_status' => 2]);
+                ->save(['temporary_house_id' => 0, 'customize_status' => 0]);
             if ($result != false) {
                 //定制片库位占用数量-1
                 $res = $_stock_house
