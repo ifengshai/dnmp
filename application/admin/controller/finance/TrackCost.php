@@ -39,6 +39,7 @@ class TrackCost extends Backend
             }
             $map['fi_review_status'] = ['in','0,10'];
             $map['platform_shop_name'] = ['<',20];
+            $map['increment_id'] = ['<>',''];
             $model = Db::connect('database.db_delivery');
             $model->table('ld_delivery_order_finance')->query("set time_zone='+8:00'");
             unset($filter['increment_id']);
