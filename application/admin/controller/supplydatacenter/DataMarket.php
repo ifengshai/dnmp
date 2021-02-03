@@ -154,6 +154,7 @@ class DataMarket extends Backend
         $arr['wait_stock_num'] = $this->model->where($where)->sum('wait_instock_num');
         //待入库金额
         $arr['wait_stock_amount'] = $this->model->where($where)->sum('wait_instock_num*purchase_price');
+        dump($arr);exit;
         Cache::set('Supplydatacenter_datamarket'  . md5(serialize('stock_overview')), $arr, 7200);
         return $arr;
     }
