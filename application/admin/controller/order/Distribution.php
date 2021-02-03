@@ -1799,6 +1799,8 @@ class Distribution extends Backend
         $this->_stock_log->startTrans();
         $this->_new_order_process->startTrans();
         $this->model->startTrans();
+        dump($item_list);
+        dump($check_status);die();
         try {
             //更新状态
             foreach ($item_list as $value) {
@@ -1849,7 +1851,7 @@ class Distribution extends Backend
                         'create_time' => time()
                     ]);
                 } elseif (3 == $check_status) {
-
+                    $node_status = 3;
                     if (in_array($value['order_prescription_type'], [2, 3])) {
                         $save_status = 4;
                     } else {
@@ -1868,13 +1870,21 @@ class Distribution extends Backend
                     // $save_status = 4;
                 } elseif (4 == $check_status) {
                     if ($option_list[$value['option_id']]['is_print_logo']) {
+                        //需要印logo
+                        $node_status = 4;
                         $save_status = 5;
                     } else {
+                        //无需印logo
+                        $node_status = 13;
                         $save_status = 6;
                     }
                 } elseif (5 == $check_status) {
+                    //印logo完成
+                    $node_status = 5;
                     $save_status = 6;
                 } elseif (6 == $check_status) {
+                    //质检完成
+                    $node_status = 6;
                     if ($total_list[$value['order_id']]['total_qty_ordered'] > 1) {
                         $save_status = 7;
                     } else {
