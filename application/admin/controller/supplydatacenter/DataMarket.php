@@ -103,9 +103,6 @@ class DataMarket extends Backend
             }
             $data = $this->productAllStockLog->where($where)->field("allnum,DATE_FORMAT(createtime,'%Y-%m-%d') day_date")->select();
             $data = collection($data)->toArray();
-            dump(array_column($data,'day_date'));
-            dump(array_column($data,'allnum'));
-            dump($data);exit;
             Cache::set('Supplydatacenter_datamarket' .$time_str . md5(serialize('stock_change_line')), $data, 7200);
             $json['xcolumnData'] = array_column($data,'day_date');
             $json['column'] = ['库存'];
