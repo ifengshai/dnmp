@@ -33,6 +33,7 @@ class DataMarket extends Backend
         $this->distributionLog = new \app\admin\model\DistributionLog;
         $this->orderNode = new \app\admin\model\OrderNode;
         $this->supply = new \app\admin\model\supplydatacenter\Supply();
+        $this->dullstock = new \app\admin\model\supplydatacenter\DullStock();
         $this->inventory = new \app\admin\model\warehouse\Inventory;
         $this->inventoryitem = new \app\admin\model\warehouse\InventoryItem;
         $this->item = new \app\admin\model\warehouse\ProductBarCodeItem;
@@ -123,15 +124,16 @@ class DataMarket extends Backend
            return $cache_data;
         }
         //呆滞库存数量/金额
-        $dull_stock = $this->getProductTurnoverDays();
-        $arr['dull_stock_count'] = $dull_stock['count'];
-        $arr['dull_stock_count1'] = $dull_stock['count1'];  //低
-        $arr['dull_stock_count2'] = $dull_stock['count2'];  //中
-        $arr['dull_stock_count3'] = $dull_stock['count3'];  //高
+        $dull_stock = $this->dullstock->where('grade','Z')->order('day_date','desc')->find();
+
+        $arr['dull_stock_count'] = $dull_stock['stock'];
+        $arr['dull_stock_count1'] = $dull_stock['low_stock'];  //低
+        $arr['dull_stock_count2'] = $dull_stock['center_stock'];  //中
+        $arr['dull_stock_count3'] = $dull_stock['high_stock'];  //高
         $arr['dull_stock_total'] = $dull_stock['total'];
-        $arr['dull_stock_total1'] = $dull_stock['total1'];   //低
-        $arr['dull_stock_total2'] = $dull_stock['total2'];   //中
-        $arr['dull_stock_total3'] = $dull_stock['total3'];   //高
+        $arr['dull_stock_total1'] = $dull_stock['low_total'];   //低
+        $arr['dull_stock_total2'] = $dull_stock['center_total'];   //中
+        $arr['dull_stock_total3'] = $dull_stock['high_total'];   //高
         $where['is_open'] = 1;
         $where['is_del'] = 1;
         $where['category_id'] = ['<>',43]; //排除补差价商品
@@ -154,257 +156,6 @@ class DataMarket extends Backend
         Cache::set('Supplydatacenter_datamarket'  . md5(serialize('stock_overview')), $arr, 7200);
         return $arr;
     }
-    public function getProductTurnoverDays(){
-        $count = 0;   //总数量
-        $count1 = 0;   //低
-        $count2 = 0;   //中
-        $count3 = 0;    //高
-        $total = 0;     //总金额
-        $total1 = 0;     //低
-        $total2 = 0;     //中
-        $total3 = 0;     //高
-        $arr1 = array();   //A+
-        $arr2 = array();   //A
-        $arr3 = array();
-        $arr4 = array();
-        $arr5 = array();
-        $arr6 = array();
-        $arr7 = array();
-        $arr8 = array();
-        $grades = Db::name('product_grade')->field('true_sku,grade')->select();
-        foreach ($grades as $key=>$value){
-            //该品实时库存
-            $real_time_stock = $this->model->where('sku',$value['true_sku'])->where('is_del',1)->where('is_open',1)->value('sum(stock)-sum(distribution_occupy_stock) as result');
-            //该品库存金额
-            $sku_amount = $this->item->alias('i')->join('fa_purchase_order_item o','i.purchase_id=o.purchase_id and i.sku=o.sku')->join('fa_purchase_order p','p.id=o.purchase_id')->where('i.sku',$value['true_sku'])->where('i.library_status',1)->value('SUM(IF(o.actual_purchase_price != 0,o.actual_purchase_price,p.purchase_total/purchase_num)) as result');
-            //实际周转天数
-            $sku_info  = $this->getSkuSales($value['true_sku']);
-            $actual_day = $sku_info['days']!=0 && $sku_info['count']!=0 ? round($real_time_stock/$sku_info['count']/$sku_info['days'],2) : 0;
-            if($actual_day >120 && $actual_day<=144){
-                $count += $real_time_stock;
-                $total += $sku_amount;
-                $count1 += $real_time_stock;
-                $total1 += $sku_amount;
-                if($value['grade'] == 'A+'){
-                    $arr1['stock'] += $real_time_stock;
-                    $arr1['total'] += $sku_amount;
-                    $arr1['stock1'] += $real_time_stock;
-                    $arr1['total1'] += $sku_amount;
-                }elseif($value['grade'] == 'A'){
-                    $arr2['stock'] += $real_time_stock;
-                    $arr2['total'] += $sku_amount;
-                    $arr2['stock1'] += $real_time_stock;
-                    $arr2['total1'] += $sku_amount;
-                }elseif($value['grade'] == 'B'){
-                    $arr3['stock'] += $real_time_stock;
-                    $arr3['total'] += $sku_amount;
-                    $arr3['stock1'] += $real_time_stock;
-                    $arr3['total1'] += $sku_amount;
-                }elseif($value['grade'] == 'C+'){
-                    $arr4['stock'] += $real_time_stock;
-                    $arr4['total'] += $sku_amount;
-                    $arr4['stock1'] += $real_time_stock;
-                    $arr4['total1'] += $sku_amount;
-                }elseif($value['grade'] == 'C'){
-                    $arr5['stock'] += $real_time_stock;
-                    $arr5['total'] += $sku_amount;
-                    $arr5['stock1'] += $real_time_stock;
-                    $arr5['total1'] += $sku_amount;
-                }elseif($value['grade'] == 'D'){
-                    $arr6['stock'] += $real_time_stock;
-                    $arr6['total'] += $sku_amount;
-                    $arr6['stock1'] += $real_time_stock;
-                    $arr6['total1'] += $sku_amount;
-                }elseif($value['grade'] == 'E'){
-                    $arr7['stock'] += $real_time_stock;
-                    $arr7['total'] += $sku_amount;
-                    $arr7['stock1'] += $real_time_stock;
-                    $arr7['total1'] += $sku_amount;
-                }else{
-                    $arr8['stock'] += $real_time_stock;
-                    $arr8['total'] += $sku_amount;
-                    $arr8['stock1'] += $real_time_stock;
-                    $arr8['total1'] += $sku_amount;
-                }
-            }elseif($actual_day > 144 && $actual_day<=168){
-                $count += $real_time_stock;
-                $total += $sku_amount;
-                $count2 += $real_time_stock;
-                $total2 += $sku_amount;
-                if($value['grade'] == 'A+'){
-                    $arr1['stock'] += $real_time_stock;
-                    $arr1['total'] += $sku_amount;
-                    $arr1['stock2'] += $real_time_stock;
-                    $arr1['total2'] += $sku_amount;
-                }elseif($value['grade'] == 'A'){
-                    $arr2['stock'] += $real_time_stock;
-                    $arr2['total'] += $sku_amount;
-                    $arr2['stock2'] += $real_time_stock;
-                    $arr2['total2'] += $sku_amount;
-                }elseif($value['grade'] == 'B'){
-                    $arr3['stock'] += $real_time_stock;
-                    $arr3['total'] += $sku_amount;
-                    $arr3['stock2'] += $real_time_stock;
-                    $arr3['total2'] += $sku_amount;
-                }elseif($value['grade'] == 'C+'){
-                    $arr4['stock'] += $real_time_stock;
-                    $arr4['total'] += $sku_amount;
-                    $arr4['stock2'] += $real_time_stock;
-                    $arr4['total2'] += $sku_amount;
-                }elseif($value['grade'] == 'C'){
-                    $arr5['stock'] += $real_time_stock;
-                    $arr5['total'] += $sku_amount;
-                    $arr5['stock2'] += $real_time_stock;
-                    $arr5['total2'] += $sku_amount;
-                }elseif($value['grade'] == 'D'){
-                    $arr6['stock'] += $real_time_stock;
-                    $arr6['total'] += $sku_amount;
-                    $arr6['stock2'] += $real_time_stock;
-                    $arr6['total2'] += $sku_amount;
-                }elseif($value['grade'] == 'E'){
-                    $arr7['stock'] += $real_time_stock;
-                    $arr7['total'] += $sku_amount;
-                    $arr7['stock2'] += $real_time_stock;
-                    $arr7['total2'] += $sku_amount;
-                }else{
-                    $arr8['stock'] += $real_time_stock;
-                    $arr8['total'] += $sku_amount;
-                    $arr8['stock2'] += $real_time_stock;
-                    $arr8['total2'] += $sku_amount;
-                }
-            }elseif($actual_day>168){
-                $count += $real_time_stock;
-                $total += $sku_amount;
-                $count3 += $real_time_stock;
-                $total3 += $sku_amount;
-                if($value['grade'] == 'A+'){
-                    $arr1['stock'] += $real_time_stock;
-                    $arr1['total'] += $sku_amount;
-                    $arr1['stock3'] += $real_time_stock;
-                    $arr1['total3'] += $sku_amount;
-                }elseif($value['grade'] == 'A'){
-                    $arr2['stock'] += $real_time_stock;
-                    $arr2['total'] += $sku_amount;
-                    $arr2['stock3'] += $real_time_stock;
-                    $arr2['total3'] += $sku_amount;
-                }elseif($value['grade'] == 'B'){
-                    $arr3['stock'] += $real_time_stock;
-                    $arr3['total'] += $sku_amount;
-                    $arr3['stock3'] += $real_time_stock;
-                    $arr3['total3'] += $sku_amount;
-                }elseif($value['grade'] == 'C+'){
-                    $arr4['stock'] += $real_time_stock;
-                    $arr4['total'] += $sku_amount;
-                    $arr4['stock3'] += $real_time_stock;
-                    $arr4['total3'] += $sku_amount;
-                }elseif($value['grade'] == 'C'){
-                    $arr5['stock'] += $real_time_stock;
-                    $arr5['total'] += $sku_amount;
-                    $arr5['stock3'] += $real_time_stock;
-                    $arr5['total3'] += $sku_amount;
-                }elseif($value['grade'] == 'D'){
-                    $arr6['stock'] += $real_time_stock;
-                    $arr6['total'] += $sku_amount;
-                    $arr6['stock3'] += $real_time_stock;
-                    $arr6['total3'] += $sku_amount;
-                }elseif($value['grade'] == 'E'){
-                    $arr7['stock'] += $real_time_stock;
-                    $arr7['total'] += $sku_amount;
-                    $arr7['stock3'] += $real_time_stock;
-                    $arr7['total3'] += $sku_amount;
-                }else{
-                    $arr8['stock'] += $real_time_stock;
-                    $arr8['total'] += $sku_amount;
-                    $arr8['stock3'] += $real_time_stock;
-                    $arr8['total3'] += $sku_amount;
-                }
-            }
-        }
-        $result = array(
-            'count'=>$count,
-            'count1'=>$count1,
-            'count2'=>$count2,
-            'count3'=>$count3,
-            'total'=>round($total,2),
-            'total1'=>round($total1,2),
-            'total2'=>round($total2,2),
-            'total3'=>round($total3,2),
-            'A+'=>$arr1,
-            'A'=>$arr2,
-            'B'=>$arr3,
-            'C+'=>$arr4,
-            'C'=>$arr5,
-            'D'=>$arr6,
-            'E'=>$arr7,
-            'F'=>$arr8,
-        );
-        return $result;
-    }
-    //获取sku总销量
-    public function getSkuSales($sku)
-    {
-        $days = array();
-        //zeelool
-        $z_info = $this->getDullStock($sku,1);
-        $sales_num1 = $z_info['sales_num'];
-        $days[] = $z_info['days'];
-        //voogueme
-        $v_info = $this->getDullStock($sku,2);
-        $sales_num2 = $v_info['sales_num'];
-        $days[] = $v_info['days'];
-        //nihao
-        $n_info = $this->getDullStock($sku,3);
-        $sales_num3 = $n_info['sales_num'];
-        $days[] = $n_info['days'];
-        //meeloog
-        $m_info = $this->getDullStock($sku,4);
-        $sales_num4 = $m_info['sales_num'];
-        $days[] = $m_info['days'];
-        //wesee
-        $w_info = $this->getDullStock($sku, 5);
-        $sales_num5 = $w_info['sales_num'];
-        $days[] = $w_info['days'];
-        //amazon
-        $a_info = $this->getDullStock($sku, 8);
-        $sales_num6 = $a_info['sales_num'];
-        $days[] = $a_info['days'];
-        //zeelool_es
-        $e_sku = $this->getDullStock($sku, 9);
-        $sales_num7 = $e_sku['sales_num'];
-        $days[] = $e_sku['days'];
-        //zeelool_de
-        $d_info = $this->getDullStock($sku, 10);
-        $sales_num8 = $d_info['sales_num'];
-        $days[] = $d_info['days'];
-        //zeelool_jp
-        $j_info = $this->getDullStock($sku, 11);
-        $sales_num9 = $j_info['sales_num'];
-        $days[] = $j_info['days'];
-        //voogmechic
-        $c_info = $this->getDullStock($sku, 12);
-        $sales_num10 = $c_info['sales_num'];
-        $days[] = $j_info['days'];
-        $count = $sales_num1+$sales_num2+$sales_num3+$sales_num4+$sales_num5+$sales_num6+$sales_num7+$sales_num8+$sales_num9+$sales_num10;
-        $days = max($days);
-        $data = array(
-            'count'=>$count,
-            'days'=>$days,
-        );
-        return $data;
-    }
-    //查询sku的有效天数的销量和有效天数
-    public function getDullStock($sku,$site)
-    {
-        $date = date('Y-m-d');
-        $map['createtime'] = ['<',$date];
-        $map['sku'] = $sku;
-        $map['site'] = $site;
-        $data['sales_num'] = Db::name('sku_sales_num')->where($map)->order('createtime','desc')->limit(30)->sum('sales_num');
-        $days = Db::name('sku_sales_num')->where($map)->count();
-        $data['days'] = $days>30 ? 30 : $days;
-        return $data;
-    }
-
     //仓库指标总览
     public function stock_measure_overview($time_str = ''){
         if(!$time_str){
@@ -701,128 +452,10 @@ class DataMarket extends Backend
         if ($cache_data) {
             return $cache_data;
         }
-        $gradeSkuStock = $this->productGrade->getSkuStock();
-        //计算产品等级的数量
-        $a1_stock_num = $gradeSkuStock['aa_stock_num'];
-        $a_stock_num = $gradeSkuStock['a_stock_num'];
-        $b_stock_num = $gradeSkuStock['b_stock_num'];
-        $c1_stock_num = $gradeSkuStock['ca_stock_num'];
-        $c_stock_num = $gradeSkuStock['c_stock_num'];
-        $d_stock_num = $gradeSkuStock['d_stock_num'];
-        $e_stock_num = $gradeSkuStock['e_stock_num'];
-        $f_stock_num = $gradeSkuStock['f_stock_num'];
-
         //获取呆滞库存信息
-        $dull_stock = $this->getProductTurnoverDays();
-        $dull_stock_rate1 = $a1_stock_num ? round($dull_stock['A+']['stock']/$a1_stock_num,2).'%' : 0;
-        $dull_stock_rate2 = $a_stock_num ? round($dull_stock['A']['stock']/$a_stock_num,2).'%' : 0;
-        $dull_stock_rate3 = $b_stock_num ? round($dull_stock['B']['stock']/$b_stock_num,2).'%' : 0;
-        $dull_stock_rate4 = $c1_stock_num ? round($dull_stock['C+']['stock']/$c1_stock_num,2).'%' : 0;
-        $dull_stock_rate5 = $c_stock_num ? round($dull_stock['C']['stock']/$c_stock_num,2).'%' : 0;
-        $dull_stock_rate6 = $d_stock_num ? round($dull_stock['D']['stock']/$d_stock_num,2).'%' : 0;
-        $dull_stock_rate7 = $e_stock_num ? round($dull_stock['E']['stock']/$e_stock_num,2).'%' : 0;
-        $dull_stock_rate8 = $f_stock_num ? round($dull_stock['F']['stock']/$f_stock_num,2).'%' : 0;
-        //计算产品等级的数量
-        $arr = array(
-            array(
-                'grade'=>'A+',
-                'dull_stock'=>$dull_stock['A+']['stock'],
-                'rate'=>$dull_stock_rate1,
-                'total'=>$dull_stock['A+']['total'],
-                'high_dull_stock'=>$dull_stock['A+']['stock3'],
-                'high_dull_total'=>$dull_stock['A+']['total3'],
-                'center_dull_stock'=>$dull_stock['A+']['stock2'],
-                'center_dull_total'=>$dull_stock['A+']['total2'],
-                'low_dull_stock'=>$dull_stock['A+']['stock1'],
-                'low_dull_total'=>$dull_stock['A+']['total1'],
-            ),
-            array(
-                'grade'=>'A',
-                'dull_stock'=>$dull_stock['A']['stock'],
-                'rate'=>$dull_stock_rate2,
-                'total'=>$dull_stock['A']['total'],
-                'high_dull_stock'=>$dull_stock['A']['stock3'],
-                'high_dull_total'=>$dull_stock['A']['total3'],
-                'center_dull_stock'=>$dull_stock['A']['stock2'],
-                'center_dull_total'=>$dull_stock['A']['total2'],
-                'low_dull_stock'=>$dull_stock['A']['stock1'],
-                'low_dull_total'=>$dull_stock['A']['total1'],
-            ),
-            array(
-                'grade'=>'B',
-                'dull_stock'=>$dull_stock['B']['stock'],
-                'rate'=>$dull_stock_rate3,
-                'total'=>$dull_stock['B']['total'],
-                'high_dull_stock'=>$dull_stock['B']['stock3'],
-                'high_dull_total'=>$dull_stock['B']['total3'],
-                'center_dull_stock'=>$dull_stock['B']['stock2'],
-                'center_dull_total'=>$dull_stock['B']['total2'],
-                'low_dull_stock'=>$dull_stock['B']['stock1'],
-                'low_dull_total'=>$dull_stock['B']['total1'],
-            ),
-            array(
-                'grade'=>'C+',
-                'dull_stock'=>$dull_stock['C+']['stock'],
-                'rate'=>$dull_stock_rate4,
-                'total'=>$dull_stock['C+']['total'],
-                'high_dull_stock'=>$dull_stock['C+']['stock3'],
-                'high_dull_total'=>$dull_stock['C+']['total3'],
-                'center_dull_stock'=>$dull_stock['C+']['stock2'],
-                'center_dull_total'=>$dull_stock['C+']['total2'],
-                'low_dull_stock'=>$dull_stock['C+']['stock1'],
-                'low_dull_total'=>$dull_stock['C+']['total1'],
-            ),
-            array(
-                'grade'=>'C',
-                'dull_stock'=>$dull_stock['C']['stock'],
-                'rate'=>$dull_stock_rate5,
-                'total'=>$dull_stock['C']['total'],
-                'high_dull_stock'=>$dull_stock['C']['stock3'],
-                'high_dull_total'=>$dull_stock['C']['total3'],
-                'center_dull_stock'=>$dull_stock['C']['stock2'],
-                'center_dull_total'=>$dull_stock['C']['total2'],
-                'low_dull_stock'=>$dull_stock['C']['stock1'],
-                'low_dull_total'=>$dull_stock['C']['total1'],
-            ),
-            array(
-                'grade'=>'D',
-                'dull_stock'=>$dull_stock['D']['stock'],
-                'rate'=>$dull_stock_rate6,
-                'total'=>$dull_stock['D']['total'],
-                'high_dull_stock'=>$dull_stock['D']['stock3'],
-                'high_dull_total'=>$dull_stock['D']['total3'],
-                'center_dull_stock'=>$dull_stock['D']['stock2'],
-                'center_dull_total'=>$dull_stock['D']['total2'],
-                'low_dull_stock'=>$dull_stock['D']['stock1'],
-                'low_dull_total'=>$dull_stock['D']['total1'],
-            ),
-            array(
-                'grade'=>'E',
-                'dull_stock'=>$dull_stock['E']['stock'],
-                'rate'=>$dull_stock_rate7,
-                'total'=>$dull_stock['E']['total'],
-                'high_dull_stock'=>$dull_stock['E']['stock3'],
-                'high_dull_total'=>$dull_stock['E']['total3'],
-                'center_dull_stock'=>$dull_stock['E']['stock2'],
-                'center_dull_total'=>$dull_stock['E']['total2'],
-                'low_dull_stock'=>$dull_stock['E']['stock1'],
-                'low_dull_total'=>$dull_stock['E']['total1'],
-            ),
-            array(
-                'grade'=>'F',
-                'dull_stock'=>$dull_stock['F']['stock'],
-                'rate'=>$dull_stock_rate8,
-                'total'=>$dull_stock['F']['total'],
-                'high_dull_stock'=>$dull_stock['F']['stock3'],
-                'high_dull_total'=>$dull_stock['F']['total3'],
-                'center_dull_stock'=>$dull_stock['F']['stock2'],
-                'center_dull_total'=>$dull_stock['F']['total2'],
-                'low_dull_stock'=>$dull_stock['F']['stock1'],
-                'low_dull_total'=>$dull_stock['F']['total1'],
-            ),
-        );
-        Cache::set('Supplydatacenter_datamarket'.md5(serialize('stock_level_overview2')),$arr,7200);
-        return $arr;
+        $dull_stock = $this->dullstock->where('grade','<>','Z')->order('day_date desc,id asc')->limit(8)->select();
+        Cache::set('Supplydatacenter_datamarket'.md5(serialize('stock_level_overview2')),$dull_stock,7200);
+        return $dull_stock;
     }
     //库龄概况
     public function stock_age_overview(){
