@@ -13,8 +13,19 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                     Controller.api.formatter.line_chart();   //库存变化折线图
                 }, 0)
             })
+            $("#time_str5").on("cancel.daterangepicker", function () {
+                setTimeout(() => {
+                    Controller.api.formatter.line_chart();   //库存变化折线图
+                }, 0)
+            })
 
             $("#time_str1").on("apply.daterangepicker", function () {
+                setTimeout(() => {
+                    index_data();   //仓库指标总览
+                    stock_measure_overview_platform();   //仓库和站点有关的指标
+                }, 0)
+            })
+            $("#time_str1").on("cancel.daterangepicker", function () {
                 setTimeout(() => {
                     index_data();   //仓库指标总览
                     stock_measure_overview_platform();   //仓库和站点有关的指标
@@ -26,14 +37,30 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                     purchase_data();     //采购概况
                 }, 0)
             })
+            $("#time_str2").on("cancel.daterangepicker", function () {
+                setTimeout(() => {
+                    purchase_data();     //采购概况
+                }, 0)
+            })
 
             $("#time_str3").on("apply.daterangepicker", function () {
                 setTimeout(() => {
                     Controller.api.formatter.line_histogram();   //订单发货及时率
                 }, 0)
             })
+            $("#time_str3").on("cancel.daterangepicker", function () {
+                setTimeout(() => {
+                    Controller.api.formatter.line_histogram();   //订单发货及时率
+                }, 0)
+            })
 
             $("#time_str4").on("apply.daterangepicker", function () {
+                setTimeout(() => {
+                    track_data();   //物流妥投
+                    Controller.api.formatter.comleted_time_rate_pie();   //妥投占比
+                }, 0)
+            })
+            $("#time_str4").on("cancel.daterangepicker", function () {
                 setTimeout(() => {
                     track_data();   //物流妥投
                     Controller.api.formatter.comleted_time_rate_pie();   //妥投占比
