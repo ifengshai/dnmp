@@ -121,7 +121,7 @@ class DataMarket extends Backend
     //库存总览
     public function stock_overview(){
         $cache_data = Cache::get('Supplydatacenter_datamarket'  . md5(serialize('stock_overview')));
-        if ($cache_data) {
+        if (!$cache_data) {
            return $cache_data;
         }
         //呆滞库存数量/金额
