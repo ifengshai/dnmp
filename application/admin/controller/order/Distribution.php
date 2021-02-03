@@ -5,6 +5,8 @@ namespace app\admin\controller\order;
 use app\admin\model\DistributionLog;
 use app\admin\model\saleaftermanage\WorkOrderChangeSku;
 use app\admin\model\saleaftermanage\WorkOrderList;
+use app\admin\model\warehouse\Outstock;
+use app\admin\model\warehouse\OutStockItem;
 use app\common\controller\Backend;
 use fast\Excel;
 use think\Request;
