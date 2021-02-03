@@ -219,7 +219,7 @@ class Statement extends Backend
             ->where('b.supplier_id', $supplier_id)
             ->where('a.id', 'in', $ids)
             ->where('a.status', 2)//已审核通过的入库单
-            ->where('c.id', '>', 16410)
+            ->where('c.id', '>', 16475)
             ->field('c.purchase_number,a.id,d.purchase_price,c.purchase_freight,f.quantity_num,a.in_stock_number,b.check_order_number,b.purchase_id,b.batch_id,c.purchase_name,c.pay_type,e.in_stock_num,f.arrivals_num,f.quantity_num,f.unqualified_num')
             ->select();
         $all = 0;
@@ -795,7 +795,7 @@ class Statement extends Backend
                 ->where('b.supplier_id', $supplier_id)
                 ->where('a.id', 'in', $ids)
                 ->where('a.status', 2)//已审核通过的入库单
-                ->where('c.id', '>', 16410)
+                ->where('c.id', '>', 16475)
                 ->field('c.purchase_number,a.id,d.purchase_price,f.quantity_num,a.in_stock_number,b.check_order_number,b.purchase_id,b.batch_id,c.purchase_name,c.pay_type,e.in_stock_num,f.arrivals_num,f.quantity_num,f.unqualified_num')
                 ->select();
             foreach ($list as $k => $v) {
