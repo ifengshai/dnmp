@@ -179,7 +179,7 @@ class Distribution extends Backend
             if (!in_array($label, [0, 8])) {
 
                 if (7 == $label) {
-                    $map['a.distribution_status'] = [['>', 6], ['<=', 9]];
+                    $map['a.distribution_status'] = [['>', 6], ['<', 9]];
                 } else {
                     $map['a.distribution_status'] = $label;
                 }
