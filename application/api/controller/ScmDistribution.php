@@ -2372,7 +2372,6 @@ class ScmDistribution extends Scm
                                 'distribution_stock_change' => -1,
                                 'stock_before' => $stock_arr['stock'],
                                 'fictitious_before' => $platform_info['stock'],
-                                'fictitious_change' => -1,
                                 'create_person' => $create_person,
                                 'create_time' => time()
                             ];
