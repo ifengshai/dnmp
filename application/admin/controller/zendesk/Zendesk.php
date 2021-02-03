@@ -629,11 +629,7 @@ class Zendesk extends Backend
             ->field('ticket_id,id,username,subject,status')
             ->order('id desc')
             ->count();
-        //查询该用户是否是会员
-        $is_vip = Db::connect('database.db_zeelool')->table('customer_entity')->where('entity_id',$ticket->user_id)->value('is_vip');
-        if (empty($is_vip)){
-            $is_vip = 1;
-        }
+
         //获取所有的消息模板
 
         $templateAll = ZendeskMailTemplate::where([
@@ -659,11 +655,21 @@ class Zendesk extends Backend
         //获取当前用户的最新5个的订单
         if($ticket->type == 1){
             $orderModel = new \app\admin\model\order\order\Zeelool;
+            $database = Db::connect('database.db_zeelool');
         }elseif($ticket->type == 2){
             $orderModel = new \app\admin\model\order\order\Voogueme;
+            $database = Db::connect('database.db_voogueme');
         }else{
             $orderModel = new \app\admin\model\order\order\Nihao;
+            $database = Db::connect('database.db_nihao');
         }
+
+        //查询该用户是否是会员
+        $is_vip = $database->table('customer_entity')->where('entity_id',$ticket->user_id)->value('is_vip');
+        if (empty($is_vip)){
+            $is_vip = 0;
+        }
+
         $orders = $orderModel
             ->where('customer_email',$ticket->email)
             ->order('entity_id desc')

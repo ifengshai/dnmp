@@ -197,13 +197,12 @@
                         </div>
 
                         <div class="form-group layer-footer">
-                            <div class="col-xs-12 col-sm-8" style="margin: 0 auto;margin-left: 30%;">
-                                <a href="javascript:;" class="btn btn-primary btn-add create_ticket" title="{:__('创建工单')}">{:__('创建工单')} </a>
+                            <div class="col-xs-12 col-sm-8" style="width: 40%;">
+                                <a href="javascript:;" style="float: right;width: 150px" class="btn btn-primary btn-add create_ticket" title="{:__('创建工单')}">{:__('创建工单')} </a>
                             </div>
-
                             {if condition="$ticket->status != 5"}
-                            <div class="col-xs-12 col-sm-8">
-                                <button type="submit" style="margin-left:530px;" class="btn btn-success btn-embossed disabled">发送邮件</button>
+                            <div class="col-xs-12 col-sm-8" style="width: 40%;float: right;">
+                                <button  type="submit"  class="btn btn-success btn-embossed disabled" style="width: 150px">发送邮件</button>
                             </div>
                             {/if}
                         </div>
