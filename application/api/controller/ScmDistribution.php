@@ -1581,7 +1581,7 @@ class ScmDistribution extends Scm
                 $store_house_where = ['status' => 1, 'type' => 2, 'occupy' => 0, 'fictitious_occupy_time' => ['<', $fictitious_time]];
                 $store_house_info = $this->_stock_house->field('id,coding,subarea')->where($store_house_where)->find();
                 if ($order_process_info['order_prescription_type'] == 1) {//仅镜架优先分配B开头的货架
-                    $store_house_where['shelf_number'] == 'B';
+                    $store_house_where['subarea'] == 'B';
                     $store_house_info_b = $this->_stock_house->field('id,coding,subarea')->where($store_house_where)->find();
                     if (!empty($store_house_info_b)) {
                         $store_house_info = $store_house_info_b;

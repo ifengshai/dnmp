@@ -263,6 +263,7 @@ class Distribution extends Backend
                             'a.status' => 1,
                             'b.is_del' => 1
                         ])
+                        ->order('a.coding')
                         ->column('b.sku');
 
                     //平台SKU表替换sku
