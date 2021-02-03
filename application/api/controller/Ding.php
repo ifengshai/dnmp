@@ -355,6 +355,10 @@ class Ding extends Controller
         $server = $this->app->server;
         $server->push(function ($payload) {
             $type = $payload['EventType'];
+
+            file_put_contents('/www/wwwroot/mojing/runtime/log/Ding.log', 'bpms_task_change---------------' . serialize($payload) . "\n\n", FILE_APPEND);
+
+            
             switch ($type) {
                     //添加用户
                 case 'user_add_org':
