@@ -2007,12 +2007,12 @@ class WorkOrderList extends Model
             }
             //更改镜框/或镜片子单定制片库位和状态处理（镜框不需要回退，之前处理库存的时候回退过）
             if (19 == $measure_choose_id || 20 == $measure_choose_id) {
-                $this->back_frame_and_lens($measure_choose_id,$work_id,$work->work_platform);
+                $this->back_frame_and_lens($measure_choose_id,$work_id,$work->platform_order);
             }
             //子单取消处理完成后要判断订单中剩余子订单是否都是合单中状态
             if (18 == $measure_choose_id) {
                 $item_order_number = $_work_order_measure->where('id',$measure_id)->value('item_order_number');
-                $this->other_item_order_auto($work->work_platform,$item_order_number);
+                $this->other_item_order_auto($work->platform_order,$item_order_number);
             }
             //措施不是补发的时候扣减库存，是补发的时候不扣减库存，因为补发的时候库存已经扣减过了
             if ($resultInfo && 1 == $data['recept_status'] && 7 != $measure_choose_id){
