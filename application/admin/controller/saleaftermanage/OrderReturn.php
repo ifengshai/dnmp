@@ -511,7 +511,7 @@ class OrderReturn extends Backend
                     }
                 }
             }
-//            dump($customer);die();
+
             $this->view->assign('infoSynergyTaskResult', $infoSynergyTaskResult);
             // $this->view->assign('workOrderListResult', $workOrderListResult);
             $this->view->assign('saleAfterTaskResult', $saleAfterTaskResult);

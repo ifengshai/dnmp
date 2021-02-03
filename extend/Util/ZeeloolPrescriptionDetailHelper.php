@@ -43,7 +43,14 @@ class ZeeloolPrescriptionDetailHelper
 		// }
 
 		if ($increment_id) {
-			$querySql = "select sfo.is_new_version,sfoi.original_price,sfoi.base_discount_amount,sfoi.base_row_total,sfo.increment_id,sfo.customer_email,sfo.customer_firstname,sfo.customer_lastname,sfo.store_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.qty_ordered,sfoi.name,sfo.created_at
+			$querySql = "select sfo.is_new_version,sfoi.item_id,
+                                sfoi.original_price,sfoi.base_discount_amount,
+                                sfoi.base_row_total,sfo.increment_id,
+                                sfo.customer_email,sfo.customer_firstname,
+                                sfo.customer_lastname,sfo.store_id,
+                                sfoi.product_options,sfoi.order_id,
+                                sfo.`status`,sfoi.sku,sfoi.qty_ordered
+                                ,sfoi.name,sfo.created_at
 			from sales_flat_order_item sfoi
 			left join sales_flat_order sfo on sfoi.order_id=sfo.entity_id 
 			where sfo.increment_id='{$increment_id}'";
