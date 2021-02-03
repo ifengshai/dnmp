@@ -120,8 +120,7 @@ class DataMarket extends Backend
     }
     //库存总览
     public function stock_overview(){
-        echo 111;exit;
-        $cache_data = Cache::get('Supplydatacenter_datamarket'  . md5(serialize('stock_overview')));
+        $cache_data = Cache::get('Supplydatacenter_datamarket11'  . md5(serialize('stock_overview')));
         if ($cache_data) {
            return $cache_data;
         }
