@@ -2553,7 +2553,7 @@ class WorkOrderList extends Model
             $this->clear_house_id($value['item_order_number']);//清理掉定制片暂存库位
             $_new_order_process = new NewOrderItemProcess();
             $product_bar_code_item = new ProductBarCodeItem();
-            $distribution_status_now = $_new_order_process->where(['item_order_number' => $item_order_number])->value('distribution_status');
+            $distribution_status_now = $_new_order_process->where(['item_order_number' => $value['item_order_number']])->value('distribution_status');
             if ($distribution_status_now > $distribution_status) {//在待配镜片或者带配货之后
                 //回退到待配货，解绑条形码
                 if (2 == $distribution_status) {
