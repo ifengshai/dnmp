@@ -418,7 +418,9 @@ class Zendesk extends Backend
      */
     public function edit($ids = null)
     {
+        $status = input('param.status');
         $row = $this->model->get($ids);
+
         if (!$row) {
             $this->error(__('No Results were found'));
         }
@@ -706,6 +708,7 @@ class Zendesk extends Backend
         $this->view->assign('orders_count', $orders_count);
         $this->view->assign('is_vip', $is_vip);
         $this->view->assign('ids', $ids);
+        $this->view->assign('status', $status);
         // $this->view->assign('username', $username);
         $this->view->assign('orderUrl',config('zendesk.platform_url')[$ticket->type]);
         return $this->view->fetch();
