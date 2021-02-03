@@ -440,12 +440,12 @@ class Ding extends Controller
                         }
                     }
 
-                    file_put_contents('/www/wwwroot/mojing/runtime/log/Ding.log', 'bpms_task_change---------------' . serialize($payload) . "\n\n", FILE_APPEND);
+                    file_put_contents('/www/wwwroot/mojing/runtime/log/Ding.log', 'bpms_instance_change---------------' . serialize($payload) . "\n\n", FILE_APPEND);
                     break;
 
-                // case 'bpms_instance_change':
-                //     file_put_contents('/www/wwwroot/mojing/runtime/log/Ding.log', 'bpms_instance_change---------------' . serialize($payload) . "\n\n", FILE_APPEND);
-                //     break;
+                case 'bpms_task_change':
+                    file_put_contents('/www/wwwroot/mojing/runtime/log/Ding.log', 'bpms_task_change---------------' . serialize($payload) . "\n\n", FILE_APPEND);
+                    break;
             }
         });
 
