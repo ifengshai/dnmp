@@ -453,13 +453,13 @@ class Ding extends Controller
                      */
                     if ($payload['type'] == 'finish') {
                         //审核日志
-                        FinancePurchaseLog::create([
-                            'process_instance_id' => $payload['processInstanceId'],
-                            'check_time' => substr($payload['finishTime'], 0, 10),
-                            'title' => $payload['title'],
-                            'result' => $payload['result'],
-                            'userid' => $payload['staffId']
-                        ]);
+                        // FinancePurchaseLog::create([
+                        //     'process_instance_id' => $payload['processInstanceId'],
+                        //     'check_time' => substr($payload['finishTime'], 0, 10),
+                        //     'title' => $payload['title'],
+                        //     'result' => $payload['result'],
+                        //     'userid' => $payload['staffId']
+                        // ]);
 
                         //判断审核状态 审核拒绝
                         if ($payload['result'] == 'refuse') {
