@@ -302,8 +302,8 @@
         <div class="box-header with-border">
             <h3 class="box-title">Five Most Recent</h3>
         </div>
-        <div class="box-body box-profile">
-            <ul class="list-group list-group-unbordered">
+        <div class="box-body box-profile" id="">
+            <ul class="list-group list-group-unbordered" id="lanren_show">
                 {foreach name="recentTickets" item="vo"}
                 <li class="list-group-item">
                     <!-- <b><a class="change-ticket" data-status="{$vo->status}" data-title="回复【{$vo->ticket_id}】{$vo->subject}" href="{:url('zendesk/zendesk/edit',['ids' => $vo->id,'btn' => 1])}">#{$vo->ticket_id}  {$vo->subject}</a> </b><a class="pull-right">{$vo->status_format}</a> -->
@@ -311,6 +311,10 @@
                 </li>
                 {/foreach}
             </ul>
+            {if condition="$recentTickets_count gt 5"}
+                <a href="##"  class="recent_more" style="width: 100px;text-align: center;" class="load_more"  data-value="2"  data-area="{$ids}"   data-cyl="{$ticket->user_id}"  data-action="{$ticket->type}"> <h5>查看更多</h5></a>
+            {/if}
+
         </div>
         <!-- /.box-body -->
     </div>
@@ -351,7 +355,9 @@
                 </tr>
                 {/foreach}
             </table>
-            <a href="##"  class="load_more" style="width: 100px;text-align: center;" class="load_more"  data-value="2"  data-area="{$ticket->email}"   data-action="{$ticket->type}"> <h5>查看更多</h5></a>
+            {if condition="$orders_count gt 5"}
+                <a href="##"  class="load_more" style="width: 100px;text-align: center;" class="load_more"  data-value="2"  data-area="{$ticket->email}"   data-action="{$ticket->type}"> <h5>查看更多</h5></a>
+            {/if}
 
 
         </div>

@@ -402,6 +402,30 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                 })
                 return false;
             });
+
+            $(document).on('click', '.recent_more', function () {
+                var page =  $(".recent_more").data("value")
+                var user_id =  $(".recent_more").data("cyl")
+                var type =  $(".recent_more").data("action")
+                var ids =  $(".recent_more").data("area")
+                $.ajax({
+                    type: "POST",
+                    url: "zendesk/zendesk/email_toload_more",
+                    dataType: "json",
+                    cache: false,
+                    async: false,
+                    data: {page:page,user_id:user_id,type:type,ids:ids},
+                    success: function (json) {
+                        $('#lanren_show').append(json)
+                        $(".recent_more").data("value",page+1)
+                    },
+                    error: function (json) {
+                        return false;
+                    }
+                })
+                return false;
+            });
+
             $(document).on("click", ".batch-log-recipient", function () {
                 var ids = $(this).data('value');
                 Backend.api.open('zendesk/zendesk/order_detail?ids='+ids, '订单节点',{area: ['50%', '45%'] });
