@@ -1329,13 +1329,103 @@ DOC;
             $map['zendesk.id'] = ['in', $ids];
         }
 
+        $this->request->filter(['strip_tags']);
+        $tags = ZendeskTags::column('name', 'id');
+        $this->view->assign('tags', $tags);
+
+        //如果发送的来源是Selectpage，则转发到Selectpage
+        if ($this->request->request('keyField')) {
+            return $this->selectpage();
+        }
+        $filter = json_decode($this->request->get('filter'), true);
+
+        $andWhere = '';
+        $me_task = $filter['me_task'];
+        if ($me_task == 1) { //我的所有任务
+            unset($filter['me_task']);
+            $map['zendesk.assign_id'] = session('admin.id');
+        } elseif ($me_task == 2) { //我的待处理任务
+            unset($filter['me_task']);
+            $now_admin_id = session('admin.id');
+            $map[] = ['exp', Db::raw("zendesk.due_id=$now_admin_id")];
+            $map['zendesk.status'] = ['in', [1, 2]];
+            $map['zendesk.is_hide'] = 0;
+            $taskCount = ZendeskTasks::where('admin_id', session('admin.id'))->value('target_count');
+        }
+        //类型筛选
+        if ($filter['status_type']) {
+//                待处理：new;open状态下的工单
+//                新增：update时间为选择时间，new、open状态的工单
+//                已处理：public comment
+//                待分配：没有承接人的工单
+            $status_type = $filter['status_type'];
+            unset($filter['status_type']);
+            switch ($status_type) {
+                case 1:
+                    $map['zendesk.status'] = ['in', [1, 2]];
+                    break;
+                case 2:
+                    $update_time = $filter['zendesk_update_time'] ?? '';
+                    if (!$update_time) {
+                        $this->error('请选择更新时间');
+                    }
+                    $map['zendesk.status'] = ['in', [1, 2]];
+                    break;
+                case 3:
+                    //获取public =1 is_admin=1的zid列表
+                    $zids = ZendeskComments::where(['is_public' => 1, 'is_admin' => 1])->column('zid');
+                    $map['zendesk.id'] = ['in', $zids];
+                    break;
+                case 4:
+                    //获取所有的账号admin_id
+                    $map['zendesk.is_hide'] = 1;
+                    $map['zendesk.status'] = ['in', [1, 2]];
+                    break;
+            }
+        }
+
+        //承接人筛选
+        if ($filter['assign_id']) {
+            $map['zendesk.assign_id'] = $filter['assign_id'];
+            unset($filter['assign_id']);
+        }
+        //处理人筛选
+        if ($filter['due_id']) {
+            $map['zendesk.due_id'] = $filter['due_id'];
+            unset($filter['due_id']);
+        }
+        if ($filter['tags']) {
+            $andWhere = "FIND_IN_SET({$filter['tags']},tags)";
+            unset($filter['tags']);
+        }
+        if ($filter['content']) {
+            $comments = ZendeskComments::where('body', 'like', '%' . $filter['content'] . '%')->column('ticket_id');
+            $tickets = $this->model->where('subject', 'like', '%' . $filter['content'] . '%')->column('ticket_id');
+            $ticket_ids = array_merge($comments, $tickets);
+            $map['zendesk.ticket_id'] = ['in', $ticket_ids];
+            unset($filter['content']);
+        }
+        $this->request->get(['filter' => json_encode($filter)]);
+        list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+        //默认使用
+        $orderSet = 'zendesk_update_time asc';
+        if ($me_task == 2) {
+            $orderSet = 'zendesk_update_time asc';
+        }
+        if ($sort != 'zendesk.id' && $sort) {
+            $orderSet = "{$sort} {$order}";
+        }
+
         $list = Db::table("fa_zendesk")->alias("zendesk")
             ->join(['fa_admin' => 'admin'], 'zendesk.assign_id=admin.id','LEFT')
             ->join(['fa_admin' => 'admin_due'], 'zendesk.due_id=admin_due.id','LEFT')
+            ->where($where)
             ->where($map)
+            ->where($andWhere)
+            ->where('channel', 'in', ['email', 'web', 'chat'])
             ->field("zendesk.id,zendesk.ticket_id,zendesk.type,zendesk.channel,zendesk.email,zendesk.username,zendesk.user_id,zendesk.to_email,zendesk.priority,zendesk.status,zendesk.tags,zendesk.subject,zendesk.raw_subject,zendesk.assignee_id,zendesk.assign_id,zendesk.due_id,zendesk.email_cc,zendesk.rating,zendesk.rating_type,zendesk.comment,zendesk.reason,zendesk.create_time,zendesk.update_time,zendesk.assign_time,zendesk.shell,zendesk.is_hide,zendesk.zendesk_update_time,zendesk.recipient
             ,admin.nickname as 'assign_nickname' ,admin_due.nickname as 'due_nickname'")
-            ->order("")
+            ->order($orderSet)
             ->select();
          //获取所有tags数据
         $tags_list=(new ZendeskTags())->tags_list();
