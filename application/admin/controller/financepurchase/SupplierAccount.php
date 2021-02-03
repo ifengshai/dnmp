@@ -84,7 +84,7 @@ class SupplierAccount extends Backend
                     ->where('a.status', 2)//已审核通过的入库单
                     ->where('a.check_id', 'in', $check_order_ids)
                     ->where('a.id', 'not in', $instock_ids)
-                    // ->where('c.id', '>', 16410)
+                    ->where('c.id', '>', 16475)
                     ->field('c.purchase_number,a.id,d.purchase_price,c.purchase_freight,f.quantity_num,a.in_stock_number,b.check_order_number,b.purchase_id,b.batch_id,c.purchase_name,c.pay_type,e.in_stock_num,f.arrivals_num,f.quantity_num,f.unqualified_num')
                     ->select();
                 $wait_pay_money = 0;
@@ -254,7 +254,7 @@ class SupplierAccount extends Backend
             ->where('a.status', 2)//已审核通过的入库单
             ->where('a.check_id', 'in', $check_order_ids)
             ->where('a.id', 'not in', $instock_ids)
-            // ->where('c.id', '>', 16410)
+            ->where('c.id', '>', 16475)
             ->field('c.purchase_number,a.id,d.purchase_price,c.purchase_freight,f.quantity_num,a.in_stock_number,b.check_order_number,b.purchase_id,b.batch_id,c.purchase_name,c.pay_type,e.in_stock_num,f.arrivals_num,f.quantity_num,f.unqualified_num')
             ->select();
         // dump($instock->getLastSql());
@@ -390,7 +390,7 @@ class SupplierAccount extends Backend
                 ->where('a.status', 2)//已审核通过的入库单
                 ->where('a.check_id', 'in', $check_order_ids)//已审核通过的入库单
                 ->where('a.id', 'not in', $instock_ids)
-                // ->where('c.id', '>', 16410)
+                ->where('c.id', '>', 16475)
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
@@ -405,7 +405,7 @@ class SupplierAccount extends Backend
                 ->where('a.status', 2)//已审核通过的入库单
                 ->where('a.check_id', 'in', $check_order_ids)//已审核通过的入库单
                 ->where('a.id', 'not in', $instock_ids)
-                // ->where('c.id', '>', 16410)
+                ->where('c.id', '>', 16475)
                 ->field('c.purchase_number,a.id,d.purchase_price,c.purchase_freight,f.quantity_num,a.in_stock_number,b.check_order_number,b.purchase_id,b.batch_id,c.purchase_name,c.pay_type,e.in_stock_num,f.arrivals_num,f.quantity_num,f.unqualified_num')
                 ->where($where)
                 ->order($sort, $order)
@@ -490,45 +490,5 @@ class SupplierAccount extends Backend
             return json($result);
         }
         return $this->view->fetch('index');
-    }
-
-    //计划任务定时跑物流数据 得到揽收时间存入物流信息表 如果没有揽收时间 就以录入物流单号的时间作为揽收时间为了供应商待结算列表的结算周期使用
-    public function logistics_info()
-    {
-        //采购单物流单详情
-        $rows = Db::name('logistics_info')
-            ->where('createtime','>',date("Y-m-d H:i:s", strtotime("-12 hour")))
-            ->where('createtime','<',date("Y-m-d H:i:s", time()))
-            ->select();
-        // dump($rows);
-        // die;
-        foreach ($rows as $k => $v) {
-            //物流单快递100接口
-            if ($v['logistics_number']) {
-                $arr = explode(',', $v['logistics_number']);
-                //物流公司编码
-                $company = explode(',', $v['logistics_company_no']);
-                foreach ($arr as $kk => $vv) {
-                    try {
-                        //快递单号
-                        $param['express_id'] = trim($vv);
-                        $param['code'] = trim($company[$kk]);
-                        $data[$kk] = Hook::listen('express_query', $param)[0];
-                    } catch (\Exception $e) {
-                        $this->error($e->getMessage());
-                    }
-                }
-            }
-            if (!empty($data[0]['data'])) {
-                //拿物流单接口返回的倒数第二条数据的时间作为揽件的时间 更新物流单的详情
-                $collect_time = date("Y-m-d H:i:s",strtotime(array_slice($data[0]['data'], -1, 1)[0]['time']));
-            }else{
-                $collect_time = $v['createtime'];
-            }
-            // dump($collect_time);
-            $res = Db::name('logistics_info')->where('id',$v['id'])->update(['collect_time'=>$collect_time]);
-            // dump($res);
-        }
-        // die;
     }
 }

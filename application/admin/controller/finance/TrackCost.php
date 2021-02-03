@@ -37,8 +37,9 @@ class TrackCost extends Backend
                 $createat = explode(' ', $filter['created_at']);
                 $map['created_at'] = ['between', [$createat[0].' '.$createat[1],$createat[3].' '.$createat[4]]];
             }
-            $map['fi_review_status'] = ['in','0,10'];
+            $map['fi_review_status'] = ['in','0,10,100'];
             $map['platform_shop_name'] = ['<',20];
+            $map['increment_id'] = ['<>',''];
             $model = Db::connect('database.db_delivery');
             $model->table('ld_delivery_order_finance')->query("set time_zone='+8:00'");
             unset($filter['increment_id']);

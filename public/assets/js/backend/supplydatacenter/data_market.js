@@ -258,7 +258,7 @@ function purchase_data(){
 function track_data(){
     var time_str = $('#time_str4').val();
     Backend.api.ajax({
-        url: 'supplydatacenter/data_market/index',
+        url: 'supplydatacenter/data_market/track_data',
         data: {time_str: time_str}
     }, function (data, ret) {
         var logistics_completed_overview = ret.data;

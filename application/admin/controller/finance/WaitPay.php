@@ -7,6 +7,7 @@ use think\Db;
 
 class WaitPay extends Backend
 {
+    protected $noNeedRight = ['supplier'];
     public function _initialize()
     {
         $this->financepurchase = new \app\admin\model\financepurchase\FinancePurchase;

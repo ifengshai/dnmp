@@ -1000,9 +1000,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
 
                 //多项添加商品名称和颜色
                 $(document).on('click', '.btn-add', function () {
-                  
+                    var c_name_id=$("#c-name").val();
+                    var price_copy_value=$("#price_copy").val();
+                    $('#table-content .c-name').attr('value',c_name_id);
+                    $('#table-content .c-price').attr('value',price_copy_value);
                     var content = $('#table-content table tbody').html();
-                    //console.log(content);
                     $('.caigou table tbody').append(content);
                     $(".selectpicker").selectpicker('refresh');
                 });

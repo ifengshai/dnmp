@@ -74,7 +74,7 @@ class FinanceOrder extends Backend
                 $list_js_income_amount = array_sum(array_column($list_js, 'income_amount'));
                 $list[$key]['income_amount'] = $list_zs_income_amount-$list_js_income_amount;
                 //物流成本
-                $list[$key]['fi_actual_payment_fee'] = $model->table('ld_delivery_order_finance')->where(['increment_id' => $value['order_number']])->value('fi_actual_payment_fee');
+                $list[$key]['fi_actual_payment_fee'] = $model->table('ld_delivery_order_finance')->where(['increment_id' => $value['order_number'],'fi_review_status'=> ['in','0,10,100']])->value('fi_actual_payment_fee');
             }
             $result = array("total" => $total, "rows" => $list);
             return json($result);

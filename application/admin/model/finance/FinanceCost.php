@@ -305,7 +305,7 @@ class FinanceCost extends Model
         }
 
         //根据子单号查询条形码绑定关系
-        $list = $product_barcode_item->alias('a')->field('purchase_price,actual_purchase_price,c.purchase_total,purchase_num')
+        $list = $product_barcode_item->alias('a')->field('purchase_price,actual_purchase_price,c.purchase_total,purchase_num,c.purchase_freight')
             ->where(['item_order_number' => ['in', $item_order_number]])
             ->join(['fa_purchase_order_item' => 'b'], 'a.purchase_id=b.purchase_id and a.sku=b.sku')
             ->join(['fa_purchase_order' => 'c'], 'a.purchase_id=c.id')
@@ -313,7 +313,12 @@ class FinanceCost extends Model
         $list = collection($list)->toArray();
         $allcost = 0;
         foreach ($list as $k => $v) {
-            $purchase_price = $v['actual_purchase_price'] > 0 ? $v['actual_purchase_price'] : ($v['purchase_total'] / $v['purchase_num']);
+            if ($v['purchase_freight'] > 0) {
+                $purchase_price = $v['actual_purchase_price'] > 0 ? $v['actual_purchase_price'] : ($v['purchase_total'] / $v['purchase_num']);
+            } else {
+                $purchase_price = $v['actual_purchase_price'] > 0 ? $v['actual_purchase_price'] : $v['purchase_price'];
+            }
+            
             $allcost += $purchase_price;
         }
         return $allcost + $workcost;

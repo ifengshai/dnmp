@@ -2167,12 +2167,12 @@ class Test4 extends Controller
     public function getDullStock($sku,$site)
     {
         $date = date('Y-m-d');
-        $map['createtime'] = ['<',$date];
+        $map['createtime'] = ['<', $date];
         $map['sku'] = $sku;
         $map['site'] = $site;
-        $data['sales_num'] = Db::name('sku_sales_num')->where($map)->order('createtime','desc')->limit(30)->sum('sales_num');
+        $data['sales_num'] = Db::name('sku_sales_num')->where($map)->order('createtime', 'desc')->limit(30)->sum('sales_num');
         $days = Db::name('sku_sales_num')->where($map)->count();
-        $data['days'] = $days>30 ? 30 : $days;
+        $data['days'] = $days > 30 ? 30 : $days;
         return $data;
     }
 }
