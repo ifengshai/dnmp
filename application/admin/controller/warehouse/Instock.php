@@ -597,7 +597,6 @@ class Instock extends Backend
                                             $this->submission_post($url, $value);
                                         }
                                     }
-
                                     //增加站点虚拟仓库存
                                     $platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->setInc('stock', $num);
                                     //入库的时候减少待入库数量
@@ -655,7 +654,8 @@ class Instock extends Backend
                                 'number_type' => 3,
                             ]);
                         }
-                    } //不是采购过来的 如果有站点id 说明是指定增加此平台sku
+                    }
+                    //不是采购过来的 如果有站点id 说明是指定增加此平台sku
                     elseif ($v['platform_id']) {
                         //手动入库
                         $change_type = 18;
@@ -688,6 +688,7 @@ class Instock extends Backend
                         //                                $this->submission_post($url,$value);
                         //                            }
                         //                        }
+
                     } //没有采购单也没有站点id 说明是盘点过来的
                     else {
                         //盘点
@@ -714,6 +715,7 @@ class Instock extends Backend
                                 //                                        $this->submission_post($url,$value);
                                 //                                    }
                                 //                                }
+
                                 //最后一个站点 剩余数量分给最后一个站
                                 if (($all_num - $key) == 1) {
                                     $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setInc('stock', $stock_num);
@@ -769,6 +771,7 @@ class Instock extends Backend
                                 //                                        $this->submission_post($url,$value);
                                 //                                    }
                                 //                                }
+
                                 //最后一个站点 剩余数量分给最后一个站
                                 if (($all_num - $key) == 1) {
                                     $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setInc('stock', $stock_num);
@@ -942,6 +945,31 @@ class Instock extends Backend
             $this->error();
         }
     }
+
+
+    /**
+     * post方式请求接口
+     *
+     * @Description
+     * @author zjw
+     * @since 
+     * @return
+     */
+    function submission_post($url,$value){
+        $curl = curl_init();
+        curl_setopt($curl, CURLOPT_URL, $url);
+        curl_setopt($curl, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
+        curl_setopt($curl, CURLOPT_HEADER, 0);
+        curl_setopt($curl, CURLOPT_POST, true);
+        curl_setopt($curl, CURLOPT_POSTFIELDS, $value);
+        curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_TIMEOUT, 20);
+        $content =json_decode(curl_exec($curl),true);
+        curl_close($curl);
+        return $content;
+    }
+
 
     /**
      * post方式请求接口

@@ -254,9 +254,12 @@ class Distribution extends Backend
                         ->join(['fa_store_sku' => 'b'], 'a.id=b.store_id')
                         ->where([
                             'a.shelf_number' => ['in', $filter['shelf_number']],
-                            'a.type' => 1
+                            'a.type' => 1,
+                            'a.status' => 1,
+                            'b.is_del' => 1
                         ])
                         ->column('b.sku');
+
                     //平台SKU表替换sku
                     $sku = Db::connect('database.db_stock');
                     $sku_array = $sku->table('fa_item_platform_sku')->where(['sku' => ['in', $shelf_number]])->column('platform_sku');

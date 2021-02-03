@@ -535,15 +535,15 @@
                         {foreach $stock_level_overview2 as $value}
                         <tr>
                             <td>{$value.grade}</td>
-                            <td>{$value.dull_stock}</td>
-                            <td>{$value.rate}</td>
+                            <td>{$value.stock}</td>
+                            <td>{$value.stock_rate}</td>
                             <td>{$value.total}</td>
-                            <td>{$value.high_dull_stock}</td>
-                            <td>{$value.high_dull_total}</td>
-                            <td>{$value.center_dull_stock}</td>
-                            <td>{$value.center_dull_total}</td>
-                            <td>{$value.low_dull_stock}</td>
-                            <td>{$value.low_dull_total}</td>
+                            <td>{$value.high_stock}</td>
+                            <td>{$value.high_total}</td>
+                            <td>{$value.center_stock}</td>
+                            <td>{$value.center_total}</td>
+                            <td>{$value.low_stock}</td>
+                            <td>{$value.low_total}</td>
                         </tr>
                         {/foreach}
                     </table>

@@ -1567,7 +1567,6 @@ class ScmWarehouse extends Scm
                                             $this->submission_post($url,$value);
                                         }
                                     }
-
                                     //增加站点虚拟仓库存
                                     $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->setInc('stock', $num);
                                     //入库的时候减少待入库数量
@@ -1948,8 +1947,6 @@ class ScmWarehouse extends Scm
         }
 
     }
-
-
     /**
      * post方式请求接口
      *
@@ -1973,8 +1970,34 @@ class ScmWarehouse extends Scm
         return $content;
     }
 
-
     /**
+     * post方式请求接口
+     *
+     * @Description
+     * @author zjw
+     * @since 
+     * @return
+     */
+    function submission_post($url,$value)
+    {
+        $curl = curl_init();
+        curl_setopt($curl, CURLOPT_URL, $url);
+        curl_setopt($curl, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
+        curl_setopt($curl, CURLOPT_HEADER, 0);
+        curl_setopt($curl, CURLOPT_POST, true);
+        curl_setopt($curl, CURLOPT_POSTFIELDS, $value);
+        curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_TIMEOUT, 20);
+        $content = json_decode(curl_exec($curl), true);
+        curl_close($curl);
+        return $content;
+
+    }
+
+
+
+        /**
      * 盘点单列表--ok
      *
      * @参数 string query  查询内容
