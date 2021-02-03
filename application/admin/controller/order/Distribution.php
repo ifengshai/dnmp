@@ -2125,7 +2125,12 @@ class Distribution extends Backend
                     $outstock['create_person'] = session('admin.nickname');
                     $outstock['createtime'] = date('Y-m-d H:i:s', time());
                     $outstock['platform_id'] = $value['site'];
-                    $this->_outstock->insert($outstock);
+                    $outstock_id = $this->_outstock->insertGetid($outstock);
+
+                    $outstock_item['sku'] = $true_sku;
+                    $outstock_item['out_stock_num'] = 1;
+                    $outstock_item['out_stock_id'] = $outstock_id;
+                    $this->_outstock_item->insert($outstock_item);
 
                     //扣减虚拟仓库存
                     $this->_item_platform_sku
@@ -2397,7 +2402,12 @@ class Distribution extends Backend
                     $outstock['create_person'] = session('admin.nickname');
                     $outstock['createtime'] = date('Y-m-d H:i:s', time());
                     $outstock['platform_id'] = $item_info['site'];
-                    $this->_outstock->insert($outstock);
+                    $outstock_id = $this->_outstock->insertGetid($outstock);
+
+                    $outstock_item['sku'] = $true_sku;
+                    $outstock_item['out_stock_num'] = 1;
+                    $outstock_item['out_stock_id'] = $outstock_id;
+                    $this->_outstock_item->insert($outstock_item);
 
                     //记录库存日志
                     $this->_stock_log->setData([
