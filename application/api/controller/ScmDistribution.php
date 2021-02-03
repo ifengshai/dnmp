@@ -628,6 +628,30 @@ class ScmDistribution extends Scm
                     $fail_reason = '';
             }
         }
+        if ($item_process_info['reason'] == 3) {
+            switch ($item_process_info['fail_son_reason']) {
+                case 1:
+                    $fail_reason = '划伤';
+                    break;
+                case 2:
+                    $fail_reason = '轴位错';
+                    break;
+                case 3:
+                    $fail_reason = '左右反';
+                    break;
+                case 4:
+                    $fail_reason = '不变色';
+                    break;
+                case 5:
+                    $fail_reason = '崩边';
+                    break;
+                case 6:
+                    $fail_reason = '配错片';
+                    break;
+                default:
+                    $fail_reason = '';
+            }
+        }
 
 
         $this->success('', ['abnormal_list' => $abnormal_list, 'option_info' => $option_info, 'fail_reason' => $fail_reason], 200);
