@@ -418,7 +418,9 @@ class Zendesk extends Backend
      */
     public function edit($ids = null)
     {
+        $status = input('param.status');
         $row = $this->model->get($ids);
+
         if (!$row) {
             $this->error(__('No Results were found'));
         }
@@ -661,14 +663,18 @@ class Zendesk extends Backend
             $database = Db::connect('database.db_voogueme');
         }else{
             $orderModel = new \app\admin\model\order\order\Nihao;
-            $database = Db::connect('database.db_nihao');
+            //网站端nihao站没有会员身份
+            $is_vip = 0;
         }
 
         //查询该用户是否是会员
-        $is_vip = $database->table('customer_entity')->where('entity_id',$ticket->user_id)->value('is_vip');
-        if (empty($is_vip)){
-            $is_vip = 0;
+        if ($database){
+            $is_vip = $database->table('customer_entity')->where('entity_id',$ticket->user_id)->value('is_vip');
+            if (empty($is_vip)){
+                $is_vip = 0;
+            }
         }
+
 
         $orders = $orderModel
             ->where('customer_email',$ticket->email)
@@ -702,6 +708,7 @@ class Zendesk extends Backend
         $this->view->assign('orders_count', $orders_count);
         $this->view->assign('is_vip', $is_vip);
         $this->view->assign('ids', $ids);
+        $this->view->assign('status', $status);
         // $this->view->assign('username', $username);
         $this->view->assign('orderUrl',config('zendesk.platform_url')[$ticket->type]);
         return $this->view->fetch();
