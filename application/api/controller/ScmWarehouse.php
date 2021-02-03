@@ -352,8 +352,7 @@ class ScmWarehouse extends Scm
         $type_list = $this->_out_stock_type
             ->field('id,name')
             ->where('is_del', 1)
-            ->where('id','!=', 2)
-            ->where('id','!=', 4)
+            ->where('id','not in',[2,4])
             ->select();
 
         //站点列表
