@@ -7,6 +7,7 @@ use app\admin\model\saleaftermanage\WorkOrderChangeSku;
 use app\admin\model\saleaftermanage\WorkOrderMeasure;
 use app\admin\model\StockLog;
 use app\admin\model\warehouse\Outstock;
+use app\admin\model\warehouse\OutStockItem;
 use think\Exception;
 use think\exception\PDOException;
 use think\exception\ValidateException;
@@ -139,6 +140,7 @@ class ScmDistribution extends Scm
         $this->_lens_data = new LensData();
         $this->_work_order_list = new WorkOrderList();
         $this->_outstock = new Outstock();
+        $this->_outstock_item = new OutStockItem();
     }
 
     /**
@@ -1361,7 +1363,12 @@ class ScmDistribution extends Scm
                     $outstock['create_person'] = session('admin.nickname');
                     $outstock['createtime'] = date('Y-m-d H:i:s', time());
                     $outstock['platform_id'] = $item_process_info['site'];
-                    $this->_outstock->insert($outstock);
+                    $outstock_id = $this->_outstock->insertGetid($outstock);
+
+                    $outstock_item['sku'] = $true_sku;
+                    $outstock_item['out_stock_num'] = 1;
+                    $outstock_item['out_stock_id'] = $outstock_id;
+                    $this->_outstock_item->insert($outstock_item);
 
                     //扣减虚拟仓库存
                     $this->_item_platform_sku
@@ -2282,7 +2289,12 @@ class ScmDistribution extends Scm
                             $outstock['create_person'] = session('admin.nickname');
                             $outstock['createtime'] = date('Y-m-d H:i:s', time());
                             $outstock['platform_id'] = $value['site'];
-                            $this->_outstock->insert($outstock);
+                            $outstock_id = $this->_outstock->insertGetid($outstock);
+
+                            $outstock_item['sku'] = $true_sku;
+                            $outstock_item['out_stock_num'] = 1;
+                            $outstock_item['out_stock_id'] = $outstock_id;
+                            $this->_outstock_item->insert($outstock_item);
 
                             //扣减虚拟仓库存
                             $this->_item_platform_sku
@@ -2300,12 +2312,14 @@ class ScmDistribution extends Scm
                                 'sku' => $true_sku,
                                 'number_type' => 2,
                                 'order_number' => $value['item_order_number'],
-                                'occupy_stock_before' => $stock_arr['occupy_stock'],
-                                'occupy_stock_change' => -1,
+                                // 'occupy_stock_before' => $stock_arr['occupy_stock'],
+                                // 'occupy_stock_change' => -1,
                                 'distribution_stock_before' => $stock_arr['distribution_occupy_stock'],
                                 'distribution_stock_change' => -1,
                                 'stock_before' => $stock_arr['stock'],
                                 'stock_change' => -1,
+                                'available_stock_before' => $stock_arr['available_stock'],
+                                'available_stock_change' => -1,
                                 'fictitious_before' => $platform_info['stock'],
                                 'fictitious_change' => -1,
                                 'create_person' => $create_person,
