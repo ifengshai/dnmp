@@ -800,7 +800,7 @@ class SaleAfterTask extends Model
                         $result[$k]['item'][$key]['order_number'] = Db::connect('database.db_mojing_order')->table('fa_order')->where('id',$value['order_id'])->value('increment_id');
                         //子订单号
                         $result[$k]['item'][$key]['item_order_number'] = Db::connect('database.db_mojing_order')->table('fa_order_item_process')
-                            ->where('magento_order_id',$value['order_id'])->where('site',$order_platform)->where('item',$value['item'])->value('item_order_number');
+                            ->where('magento_order_id',$value['order_id'])->where('site',$order_platform)->where('item_id',$value['item_id'])->value('item_order_number');
 
                         //虚拟库存
                         $result[$k]['item'][$key]['stock'] = Db::connect('database.db_stock')->table('fa_item_platform_sku')
