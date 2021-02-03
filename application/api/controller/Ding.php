@@ -434,8 +434,8 @@ class Ding extends Controller
                         //判断审核状态 审核拒绝
                         if ($payload['result'] == 'refuse') {
                             FinancePurchase::where(['process_instance_id' => $payload['process_instance_id']])->update(['status' => 3]);
-                            //最后一步判断如果为王剑审核通过改为完成
-                        } elseif($payload['result'] == 'agree' && $payload['staffId'] == '0647044715938022') {
+                            //最后一步判断如果为李亚方审核通过改为完成
+                        } elseif($payload['result'] == 'agree' && $payload['staffId'] == '171603353926064429') {
                             FinancePurchase::where(['process_instance_id' => $payload['process_instance_id']])->update(['status' => 4]);
                         }   
 
