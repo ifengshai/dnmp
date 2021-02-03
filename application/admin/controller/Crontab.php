@@ -29,7 +29,7 @@ class Crontab extends Backend
     }
 
 
-    protected $order_status =  "and status in ('processing','complete','creditcard_proccessing','free_processing','paypal_canceled_reversal','paypal_reversed') and order_type =1";
+    protected $order_status =  "and status in ('processing','complete','creditcard_proccessing','free_processing','paypal_canceled_reversal','paypal_reversed','delivered') and order_type =1";
 
 
     /**
@@ -2741,7 +2741,7 @@ class Crontab extends Backend
         $stime = date("Y-m-d 00:00:00", strtotime("-1 day"));
         $etime = date("Y-m-d 23:59:59", strtotime("-1 day"));
         $map['created_at'] = $date['created_at'] = $update['updated_at'] =  ['between', [$stime, $etime]];
-        $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
+        $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete','delivered']];
         $map['order_type'] = 1;
         $zeelool_count = $zeelool_model->table('sales_flat_order')->where($map)->count(1);
         $zeelool_total = $zeelool_model->table('sales_flat_order')->where($map)->sum('base_grand_total');
@@ -3723,9 +3723,12 @@ class Crontab extends Backend
      */
     public function update_ashboard_data_two()
     {
-        ini_set('memory_limit', '512M');
+        ini_set('memory_limit', '1512M');
+        set_time_limit(0);
         //求出平台
         $platform = $this->request->get('platform', 1);
+
+       
         if (!$platform) {
             return false;
         }
@@ -3755,9 +3758,12 @@ class Crontab extends Backend
                 $model = false;
                 break;
         }
+
+
         if (false === $model) {
             return false;
         }
+
         $today = date('Y-m-d 23:59:59');
         $model->table('sales_flat_order')->query("set time_zone='+8:00'");
         $model->table('sales_flat_quote')->query("set time_zone='+8:00'");
@@ -3807,6 +3813,7 @@ class Crontab extends Backend
         $lastyear_order_success_data = $model->table('sales_flat_order')->where($lastyear_where)->where($order_where)->where($order_success_where)->count();
         //总共支付成功数
         $total_order_success_data = $model->table('sales_flat_order')->where($order_where)->where($order_success_where)->count();
+
         //昨天购物车总数
         $quote_where['base_grand_total'] = ['>', 0];
         $yesterday_shoppingcart_total_data = $model->table('sales_flat_quote')->where($yestime_where)->where($quote_where)->count();
@@ -3840,13 +3847,12 @@ class Crontab extends Backend
         $lastyear_shoppingcart_new_data = $model->table('sales_flat_quote')->where($lastyear_where1)->where($quote_where)->count();
         //总共新增购物车总数
         $total_shoppingcart_new_data  = $total_shoppingcart_total_data;
-
         //2020-11-25 更换仪表盘页面新增购物车转化率(%)的计算方法 start
         //昨天支付成功数 从新增购物车中成功支付数
         $order_where = [];
         $order_where['o.order_type'] = 1;
         $order_success_where = [];
-        $order_success_where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        $order_success_where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
         $yes_date = date("Y-m-d", strtotime("-1 day"));
         $yestime_where = [];
         $yestime_where[] = ['exp', Db::raw("DATE_FORMAT(o.created_at, '%Y-%m-%d') = '" . $yes_date . "'")];
@@ -3938,6 +3944,8 @@ class Crontab extends Backend
             ->where($order_where)
             ->where($order_success_where)
             ->count();
+
+
         //上年从新增购物车中成功支付数
         $lastyear_start = date('Y-01-01 00:00:00', strtotime('last year'));
         $lastyear_end = date('Y-12-31 23:59:59', strtotime('last year'));
@@ -3953,6 +3961,8 @@ class Crontab extends Backend
             ->where($order_where)
             ->where($order_success_where)
             ->count();
+
+
         //总共从新增购物车中成功支付数
         $total_order_success_data1 = $model->table('sales_flat_order')
             ->alias('o')

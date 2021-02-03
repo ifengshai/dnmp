@@ -379,13 +379,13 @@ class Item extends Model
         $where['is_del']  = 1;
         $where['is_open']  = 1;
         $where['category_id']  = ['<>', 43]; //不等于虚拟产品
-        $res = $this->where($where)->field('sku,stock,price')->select();
+        $res = $this->where($where)->field('sku,stock,purchase_price')->select();
         $allprice = 0;
         foreach ($res as $v) {
             if ($arr[$v['sku']]) {
                 $allprice += $v['stock'] * $arr[$v['sku']];
             } else {
-                $allprice += $v['stock'] * $v['price'];
+                $allprice += $v['stock'] * $v['purchase_price'];
             }
         }
         return $allprice;
@@ -460,13 +460,13 @@ class Item extends Model
         $where['category_id']  = ['in', $ids];
         $where['is_del']  = 1;
         $where['is_open']  = 1;
-        $res = $this->where($where)->field('sku,stock,price')->select();
+        $res = $this->where($where)->field('sku,stock,purchase_price')->select();
         $allprice = 0;
         foreach ($res as $v) {
             if ($arr[$v['sku']]) {
                 $allprice += $v['stock'] * $arr[$v['sku']];
             } else {
-                $allprice += $v['stock'] * $v['price'];
+                $allprice += $v['stock'] * $v['purchase_price'];
             }
         }
         return $allprice;
@@ -540,13 +540,13 @@ class Item extends Model
         $where['category_id']  = ['in', $ids];
         $where['is_del']  = 1;
         $where['is_open']  = 1;
-        $res = $this->where($where)->field('sku,stock,price')->select();
+        $res = $this->where($where)->field('sku,stock,purchase_price')->select();
         $allprice = 0;
         foreach ($res as $v) {
             if ($arr[$v['sku']]) {
                 $allprice += $v['stock'] * $arr[$v['sku']];
             } else {
-                $allprice += $v['stock'] * $v['price'];
+                $allprice += $v['stock'] * $v['purchase_price'];
             }
         }
         return $allprice;
@@ -584,13 +584,13 @@ class Item extends Model
 
         $where['is_del']  = 1;
         $where['is_open']  = 1;
-        $res = $this->where($where)->field('sku,sample_num,price')->select();
+        $res = $this->where($where)->field('sku,sample_num,purchase_price')->select();
         $allprice = 0;
         foreach ($res as $v) {
             if ($arr[$v['sku']]) {
                 $allprice += $v['sample_num'] * $arr[$v['sku']];
             } else {
-                $allprice += $v['sample_num'] * $v['price'];
+                $allprice += $v['sample_num'] * $v['purchase_price'];
             }
         }
         return $allprice;

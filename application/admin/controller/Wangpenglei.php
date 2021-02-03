@@ -457,4 +457,30 @@ class Wangpenglei extends Backend
             usleep(50000);
         }
     }
+
+    /**
+     * 退货入库
+     *
+     * @Description
+     * @author wpl
+     * @since 2021/02/02 10:32:10 
+     * @return void
+     */
+    public function return_purchase_order()
+    {
+        //查询退货入库采购单
+        $purchase = new \app\admin\model\purchase\PurchaseOrder();
+        $list = $purchase->where(['is_in_stock' => 1])->select();
+        $purchase_item = new \app\admin\model\purchase\PurchaseOrderItem();
+
+        $params = [];
+        foreach($list as $k => $v) {
+            //查询子表商品总价
+           $product_price =  $purchase_item->where(['purchase_id' => $v['id']])->sum('purchase_price*purchase_num');
+           $params[$k]['id'] = $v['id'];
+           $params[$k]['product_total'] = $product_price;
+           $params[$k]['purchase_total'] = $product_price + $v['purchase_freight'];
+        }
+        $purchase->saveAll($params);
+    }
 }
