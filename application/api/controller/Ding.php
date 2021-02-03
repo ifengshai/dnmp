@@ -430,18 +430,21 @@ class Ding extends Controller
                             'result' => $payload['result'],
                             'userid' => $payload['staffId']
                         ]);
-                        
+
                         //判断审核状态 审核拒绝
                         if ($payload['result'] == 'refuse') {
                             FinancePurchase::where(['process_instance_id' => $payload['process_instance_id']])->update(['status' => 3]);
                             //最后一步判断如果为李亚方审核通过改为完成
-                        } elseif($payload['result'] == 'agree' && $payload['staffId'] == '171603353926064429') {
+                        } elseif ($payload['result'] == 'agree' && $payload['staffId'] == '171603353926064429') {
                             FinancePurchase::where(['process_instance_id' => $payload['process_instance_id']])->update(['status' => 4]);
-                        }   
-
+                        }
                     }
 
                     file_put_contents('/www/wwwroot/mojing/runtime/log/Ding.log', 'bpms_task_change---------------' . serialize($payload) . "\n\n", FILE_APPEND);
+                    break;
+
+                case 'bpms_instance_change':
+                    file_put_contents('/www/wwwroot/mojing/runtime/log/Ding.log', 'bpms_instance_change---------------' . serialize($payload) . "\n\n", FILE_APPEND);
                     break;
             }
         });
