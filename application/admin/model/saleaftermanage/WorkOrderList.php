@@ -2615,6 +2615,7 @@ class WorkOrderList extends Model
                 $distribution_status = $_new_order_item_process->where(['item_order_number' => $value])->value('distribution_status');
                 if ($distribution_status = 9) {//合单完成的改成合单中
                     $_new_order_item_process->where(['item_order_number' => $value])->update(['distribution_status' => 8]);
+                    $_new_order_process->where(['increment_id' => $increment_id])->update(['combine_status' => 0]);
                 }
             }
             $store_house_id = $_new_order_process->where(['increment_id' => $increment_id])->value('store_house_id');//库位号
@@ -2624,7 +2625,7 @@ class WorkOrderList extends Model
                 $fictitious_time = time();
                 $store_house_info = $_stock_house->field('id,coding,subarea')->where(['status' => 1, 'type' => 2, 'occupy' => 0, 'fictitious_occupy_time' => ['<', $fictitious_time]])->find();
                 //绑定预占用库存和有效时间
-                $_stock_house->where(['id' => $store_house_info['id']])->update(['fictitious_occupy_time' => $fictitious_time + 600, 'order_id' => $order_id]);
+                $_stock_house->where(['id' => $store_house_info['id']])->update(['fictitious_occupy_time' => $fictitious_time + 600, 'order_id' => $order_id,'occupy'=>1]);
                 //绑定合单库位
                 $_new_order_process->where(['increment_id' => $increment_id])->update(['store_house_id' => $store_house_info['id']]);
             }
