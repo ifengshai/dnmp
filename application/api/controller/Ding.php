@@ -453,13 +453,13 @@ class Ding extends Controller
                      */
                     if ($payload['type'] == 'finish') {
                         //审核日志
-                        // FinancePurchaseLog::create([
-                        //     'process_instance_id' => $payload['processInstanceId'],
-                        //     'check_time' => substr($payload['finishTime'], 0, 10),
-                        //     'title' => $payload['title'],
-                        //     'result' => $payload['result'],
-                        //     'userid' => $payload['staffId']
-                        // ]);
+                        FinancePurchaseLog::insert([
+                            'process_instance_id' => $payload['processInstanceId'],
+                            'check_time' => substr($payload['finishTime'], 0, 10),
+                            'title' => $payload['title'],
+                            'result' => $payload['result'],
+                            'userid' => $payload['staffId']
+                        ]);
 
                         //判断审核状态 审核拒绝
                         if ($payload['result'] == 'refuse') {
@@ -477,6 +477,19 @@ class Ding extends Controller
 
         $server->serve()->send();
     }
+
+
+    public function test0001()
+    {
+        FinancePurchaseLog::insert([
+            'process_instance_id' => 'af7583ca-33bc-49ad-b34d-94cbeff1be95',
+            'check_time' => substr('1612347878000', 0, 10),
+            'title' => '汪鹏垒提交的采购部付款审批',
+            'result' => 'refuse',
+            'userid' => '285501046927507550'
+        ]);
+    }
+
 
     /**
      * 第一次插入所有的部门详情
