@@ -38,6 +38,8 @@ use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\Reader\Xls;
 use PhpOffice\PhpSpreadsheet\Reader\Csv;
 use app\admin\model\AuthGroup;
+use app\admin\model\finance\FinanceCost;
+use app\admin\model\warehouse\ProductBarCodeItem;
 
 /**
  * 售后工单列管理
@@ -1381,6 +1383,7 @@ class WorkOrderList extends Backend
                 if (100 == $params['order_type']) {
                     $params['base_grand_total'] = $params['refund_money'];
                     $params['grand_total'] = $params['refund_money'];
+                    $params['payment_time'] = date('Y-m-d H:i:s');
                 }
                 $params['recept_person_id'] = $params['recept_person_id'] ?: $admin_id;
 
@@ -2929,7 +2932,10 @@ class WorkOrderList extends Backend
                 10 => 'new_zeeloolde_url',
                 11 => 'new_zeelooljp_url'
             ];
-            $url = config('url.' . $domain_list[$row->work_platform]) . 'price-difference?customer_email=' . $row->email . '&origin_order_number=' . $row->platform_order . '&order_amount=' . $row->replenish_money . '&sign=' . $row->id;
+            //查询币种
+            $order = new \app\admin\model\order\order\NewOrder();
+            $order_currency_code = $order->where(['increment_id' => $row->platform_order])->value('order_currency_code');
+            $url = config('url.' . $domain_list[$row->work_platform]) . 'price-difference?customer_email=' . $row->email . '&origin_order_number=' . $row->platform_order . '&order_amount=' . $row->replenish_money . '&sign=' . $row->id. '&order_currency_code=' . $order_currency_code;
             $this->view->assign('url', $url);
         }
 
@@ -3180,6 +3186,36 @@ class WorkOrderList extends Backend
                     $result = $this->model->handleRecept($receptInfo['id'], $receptInfo['work_id'], $receptInfo['measure_id'], $receptInfo['recept_group_id'], $params['success'], $params['note'], $receptInfo['is_auto_complete']);
                 }
                 if ($result !== false) {
+                    //措施表
+                    $_work_order_measure = new WorkOrderMeasure();
+                    $measure_choose_id = $_work_order_measure->where('id',$receptInfo['measure_id'])->value('measure_choose_id');
+                    if (3 == $measure_choose_id) { 
+                        //主单取消收入核算冲减
+                        $FinanceCost = new FinanceCost();
+                        $FinanceCost->cancel_order_subtract($receptInfo['work_id']);
+                    }
+                    if (15 == $measure_choose_id) { 
+                        //vip退款收入核算冲减
+                        $FinanceCost = new FinanceCost();
+                        $FinanceCost->vip_order_subtract($receptInfo['work_id']);
+                    }
+                    if (19 == $measure_choose_id) {
+                        //更改镜框解绑子单所绑定的条形码
+                        $ProductBarCodeItem = new ProductBarCodeItem();
+                        //查询子单号
+                        $item_order_number = $this->order_change->where(['work_id' => $receptInfo['work_id'],'change_type' => 1])->value('item_order_number');
+                        $ProductBarCodeItem->where(['item_order_number'=>$item_order_number])->update(['item_order_number' => '','library_status' => 1,'out_stock_time'=>'']);
+                    }
+                    if (8 == $measure_choose_id) { 
+                        //补价收入核算增加
+                        $FinanceCost = new FinanceCost();
+                        $FinanceCost->return_order_subtract($receptInfo['work_id'],3);
+                    }
+                    if (11 == $measure_choose_id) { 
+                        //退件退款收入核算冲减
+                        $FinanceCost = new FinanceCost();
+                        $FinanceCost->return_order_subtract($receptInfo['work_id'],4);
+                    }
                     $this->success();
                 } else {
                     $this->error(__('No rows were updated'));

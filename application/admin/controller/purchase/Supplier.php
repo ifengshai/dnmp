@@ -67,6 +67,20 @@ class Supplier extends Backend
                 ->select();
 
             $list = collection($list)->toArray();
+            foreach ($list as $k=>$v){
+                switch ($v['currency']) {
+                    case 'CNY':
+                        $list[$k]['currency'] = '人民币';
+                        break;
+                    case 'USD':
+                        $list[$k]['currency'] = '美元';
+                        break;
+                }
+                if ($v['period'] == 0){
+                    $list[$k]['period'] = '无账期';
+                }
+                $list[$k]['period'] = $v['period'].'个月';
+            }
 
             $result = array("total" => $total, "rows" => $list);
 
