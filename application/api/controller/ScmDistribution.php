@@ -1902,6 +1902,12 @@ class ScmDistribution extends Scm
             if ($site) {
                 $where['b.site'] = ['=', $site];
             }
+            if ($shelf_number) {
+                $shelf_number_arr = $this->_stock_house->where(['type' => 2,'subarea' => $shelf_number])->column('id');
+                if(!empty($shelf_number_arr)){
+                    $where['b.store_house_id'] = ['in', $shelf_number_arr];
+                }
+            }
             $list = $this->_new_order_item_process
                 ->alias('a')
                 ->where($where)
@@ -1909,6 +1915,7 @@ class ScmDistribution extends Scm
                 ->field('b.store_house_id,b.increment_id,b.order_id')
                 ->group('a.item_order_number')
                 ->limit($offset, $limit)
+                ->order('a.order_prescription_type')
                 ->select();
             foreach (array_filter($list) as $k => $v) {
                 $list[$k]['coding'] = $this->_stock_house->where('id', $v['store_house_id'])->value('coding');
@@ -2366,7 +2373,6 @@ class ScmDistribution extends Scm
                                 'distribution_stock_change' => -1,
                                 'stock_before' => $stock_arr['stock'],
                                 'fictitious_before' => $platform_info['stock'],
-//                                'fictitious_change' => -1,
                                 'create_person' => $create_person,
                                 'create_time' => time()
                             ];
