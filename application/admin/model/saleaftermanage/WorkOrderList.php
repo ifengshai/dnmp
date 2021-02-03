@@ -245,6 +245,7 @@ class WorkOrderList extends Model
         $sku_data = $_new_order_item_process
             ->where(['order_id'=>$result['id']])
             ->group('sku')
+            ->order('item_order_number')
             ->column('sku')
         ;
 
