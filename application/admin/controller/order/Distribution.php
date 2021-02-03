@@ -1883,8 +1883,6 @@ class Distribution extends Backend
         $this->_stock_log->startTrans();
         $this->_new_order_process->startTrans();
         $this->model->startTrans();
-        dump($item_list);
-        dump($check_status);die();
         try {
             //更新状态
             foreach ($item_list as $value) {
@@ -1989,7 +1987,7 @@ class Distribution extends Backend
                 //节点记录
                 //将订单号截取处理
                 $value['item_order_number'] =  substr($value['item_order_number'],0,strpos($value['item_order_number'], '-'));
-                Order::rulesto_adjust($value['magento_order_id'],$value['item_order_number'],$value['site'],2,3);
+                Order::rulesto_adjust($value['magento_order_id'],$value['item_order_number'],$value['site'],2,$node_status);
             }
 
             $this->_item->commit();
