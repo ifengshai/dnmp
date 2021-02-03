@@ -1,7 +1,7 @@
 <!-- Main content -->
 <section class="content">
 
-    <div class="row">
+    <div class="row" style="text-align:center">
         <form id="edit-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
             <input type="hidden" class="search-post-type" name="type" value="{$type}">
           <!--  <div class="col-md-2">
@@ -51,20 +51,26 @@
                 &lt;!&ndash; /.box &ndash;&gt;
             </div>-->
             <!-- /.col -->
-            <div class="col-md-8 col-center">
+            <div  style="margin:0 auto !important; border-right: 2px solid #ccc;
+    border-left: 2px solid #ccc;width: 66.66666667%;    position: relative;
+    min-height: 1px;
+    padding-left: 15px;
+    padding-right: 15px;" >
                 <div class="nav-tabs-custom">
                     <div class="box box-solid">
                         <!-- /.box-header -->
                         <div class="box-body">
                             <div class="user-block pull-left">
-                                <img class="img-circle img-bordered-sm" src="/assets/img/avatar.png" alt="User Image" style="margin-left: 27px;">
-                                <span class="username">
+                                <img class="img-circle img-bordered-sm" src="/assets/img/avatar.png" alt="User Image" style="margin-left: 144px;">
+                                <span class="username" style="margin-left:160px !important;">
                                   <span href="#">
                                       <input id="c-subject" data-rule="required" value="" class="form-control ticket-subject" name="row[subject]" type="text" style="width: 450px;margin-left: 37px;">
                                     </span>
                                 </span>
                             </div>
                         </div>
+
+
                         <div class="form-group">
                             <label class="control-label col-xs-12 col-sm-2">{:__('pulbic_type')}</label>
                             <div class="col-xs-12 col-sm-8">
