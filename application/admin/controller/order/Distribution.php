@@ -3,6 +3,7 @@
 namespace app\admin\controller\order;
 
 use app\admin\model\DistributionLog;
+use app\admin\model\order\Order;
 use app\admin\model\saleaftermanage\WorkOrderChangeSku;
 use app\admin\model\saleaftermanage\WorkOrderList;
 use app\admin\model\warehouse\Outstock;
@@ -1794,10 +1795,11 @@ class Distribution extends Backend
 
         //检测配货状态
         $item_list = $this->model
-            ->field('id,site,distribution_status,order_id,option_id,sku,item_order_number,order_prescription_type')
+            ->field('id,site,distribution_status,magento_order_id,order_id,option_id,sku,item_order_number,order_prescription_type')
             ->where(['id' => ['in', $ids]])
             ->select();
         $item_list = collection($item_list)->toArray();
+
         $order_ids = [];
         $option_ids = [];
         $item_order_numbers = [];
@@ -1833,8 +1835,8 @@ class Distribution extends Backend
                     in_array($val['item_order_number'], $item_order_numbers) //子单措施未处理:更改镜框18、更改镜片19、取消20
                 )
 
-                    && $this->error('子单号：' . $val['item_order_number'] . '有工单未处理');
-                if ($val['measure_choose_id'] == 21) {
+                && $this->error('子单号：' . $val['item_order_number'] . '有工单未处理');
+                if ($val['measure_choose_id'] == 21){
                     $this->error(__('有工单存在暂缓措施未处理，无法操作'), [], 405);
                 }
             }
@@ -1881,6 +1883,8 @@ class Distribution extends Backend
         $this->_stock_log->startTrans();
         $this->_new_order_process->startTrans();
         $this->model->startTrans();
+        dump($item_list);
+        dump($check_status);die();
         try {
             //更新状态
             foreach ($item_list as $value) {
@@ -1931,13 +1935,14 @@ class Distribution extends Backend
                         'create_time' => time()
                     ]);
                 } elseif (3 == $check_status) {
-
+                    $node_status = 3;
                     if (in_array($value['order_prescription_type'], [2, 3])) {
                         $save_status = 4;
                     } else {
                         if ($option_list[$value['option_id']]['is_print_logo']) {
                             $save_status = 5; //待印logo
                         } else {
+
                             if ($total_list[$value['order_id']]['total_qty_ordered'] > 1) {
                                 $save_status = 7;
                             } else {
@@ -1949,13 +1954,21 @@ class Distribution extends Backend
                     // $save_status = 4;
                 } elseif (4 == $check_status) {
                     if ($option_list[$value['option_id']]['is_print_logo']) {
+                        //需要印logo
+                        $node_status = 4;
                         $save_status = 5;
                     } else {
+                        //无需印logo
+                        $node_status = 13;
                         $save_status = 6;
                     }
                 } elseif (5 == $check_status) {
+                    //印logo完成
+                    $node_status = 5;
                     $save_status = 6;
                 } elseif (6 == $check_status) {
+                    //质检完成
+                    $node_status = 6;
                     if ($total_list[$value['order_id']]['total_qty_ordered'] > 1) {
                         $save_status = 7;
                     } else {
@@ -1973,6 +1986,10 @@ class Distribution extends Backend
 
                 //操作成功记录
                 DistributionLog::record($admin, $value['id'], $check_status, $status_arr[$check_status] . '完成');
+                //节点记录
+                //将订单号截取处理
+                $value['item_order_number'] =  substr($value['item_order_number'],0,strpos($value['item_order_number'], '-'));
+                Order::rulesto_adjust($value['magento_order_id'],$value['item_order_number'],$value['site'],2,3);
             }
 
             $this->_item->commit();
