@@ -1361,7 +1361,7 @@ class ScmDistribution extends Scm
                     $outstock['type_id'] = 2;
                     $outstock['remark'] = 'PDA质检拒绝：镜架报损自动生成出库单';
                     $outstock['status'] = 2;
-                    $outstock['create_person'] = session('admin.nickname');
+                    $outstock['create_person'] = $this->auth->nickname;
                     $outstock['createtime'] = date('Y-m-d H:i:s', time());
                     $outstock['platform_id'] = $item_process_info['site'];
                     $outstock_id = $this->_outstock->insertGetid($outstock);
@@ -2287,7 +2287,7 @@ class ScmDistribution extends Scm
                             $outstock['type_id'] = 4;
                             $outstock['remark'] = 'PDA审单-配错镜框-报损出库自动生成出库单';
                             $outstock['status'] = 2;
-                            $outstock['create_person'] = session('admin.nickname');
+                            $outstock['create_person'] = $create_person;
                             $outstock['createtime'] = date('Y-m-d H:i:s', time());
                             $outstock['platform_id'] = $value['site'];
                             $outstock_id = $this->_outstock->insertGetid($outstock);

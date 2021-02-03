@@ -2578,7 +2578,8 @@ class WorkOrderList extends Model
         $item_process_info = $_new_order_process->where(['item_order_number' => $item_order_number])->find();
         if ($item_process_info['temporary_house_id']) {
             //获取库位号
-            $coding = $this->_stock_house
+            $_stock_house = new StockHouse();
+            $coding = $_stock_house
             ->where(['id' => $item_process_info['temporary_house_id']])
             ->value('coding');
             //子订单释放定制片库位号
@@ -2588,7 +2589,6 @@ class WorkOrderList extends Model
                 ->save(['temporary_house_id' => 0, 'customize_status' => 2]);
             if ($result != false) {
                 //定制片库位占用数量-1
-                $_stock_house = new StockHouse();
                 $res = $_stock_house
                     ->where(['id' => $item_process_info['temporary_house_id']])
                     ->setDec('occupy', 1);
