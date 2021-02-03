@@ -1694,6 +1694,7 @@ class Test4 extends Controller
                     break;
                 case 'D':
                     $grade6 += $value['count'];
+                    $grade6 += $value['count'];
                     break;
                 case 'E':
                     $grade7 += $value['count'];
@@ -1730,5 +1731,162 @@ class Test4 extends Controller
             echo $value.' is ok'."\n";
             usleep(100000);
         }
+    }
+    /*
+     * 库存台账
+     * */
+    public function stock_parameter(){
+        $this->instock = new \app\admin\model\warehouse\Instock;
+        $this->outstock = new \app\admin\model\warehouse\Outstock;
+        $this->stockparameter = new \app\admin\model\financepurchase\StockParameter;
+        $this->item = new \app\admin\model\warehouse\ProductBarCodeItem;
+        $stimestamp = 1577808000;
+        $etimestamp = 1611504000;
+        // 计算日期段内有多少天
+        $days = ($etimestamp - $stimestamp) / 86400 + 1;
+        // 循环每天日期
+        for ($i = 0; $i < $days; $i++) {
+            $start = date('Y-m-d', $stimestamp + (86400 * $i));
+            $end = $start . ' 23:59:59';
+            //库存主表插入数据
+            $stock_data['day_date'] = $start;
+            $stockId = $this->stockparameter->insertGetId($stock_data);
+            //采购入库数量
+            $instock_where['s.status'] = 2;
+            $instock_where['s.type_id'] = 1;
+            $instock_where['s.check_time'] = ['between', [$start, $end]];
+            $instocks = $this->instock->alias('s')->join('fa_check_order c', 'c.id=s.check_id')->join('fa_purchase_order_item oi', 'c.purchase_id=oi.purchase_id')->join('fa_purchase_order o','oi.purchase_id=o.id')->where($instock_where)->field('s.id,round(o.purchase_total/oi.purchase_num,2) purchase_price')->select();
+            $instock_total = 0; //入库总金额
+            foreach ($instocks as $key => $instock) {
+                $arr = array();
+                $arr['stock_id'] = $stockId;
+                $arr['instock_id'] = $instock['id'];
+                $arr['type'] = 1;
+                $instock_num = Db::name('in_stock_item')->where('in_stock_id', $instock['id'])->sum('in_stock_num');
+                $arr['instock_num'] = $instock_num;
+                $arr['instock_total'] = round($instock['purchase_price'] * $instock_num, 2);
+                $instock_total += $arr['instock_total'];
+                Db::name('finance_stock_parameter_item')->insert($arr);
+            }
+            //判断今天是否有冲减数据
+            $start_time = strtotime($start);
+            $end_time = strtotime($end);
+            $exist_where['create_time'] = ['between', [$start_time, $end_time]];
+            $is_exist = Db::name('finance_cost_error')->where($exist_where)->field('id,create_time,purchase_id,total')->select();
+            $outstock_total1 = 0;   //出库单出库
+            $outstock_total2 = 0;   //订单出库
+            /*************出库单出库start**************/
+            $bar_where['out_stock_time'] = ['between', [$start, $end]];
+            $bar_where['out_stock_id'] = ['<>', 0];
+            $bar_where['library_status'] = 2;
+            //判断冲减前的出库单出库数量和金额
+            $bars = $this->item->where($bar_where)->group('barcode_id')->column('barcode_id');
+            foreach ($bars as $bar) {
+                $flag = [];
+                $flag['stock_id'] = $stockId;
+                $flag['bar_id'] = $bar;
+                $flag['type'] = 2;
+                $bar_items = $this->item->alias('i')->join('fa_purchase_order_item p','i.purchase_id=p.purchase_id and i.sku=p.sku')->join('fa_purchase_order o','p.purchase_id=o.id')->field('i.out_stock_id,i.purchase_id,i.out_stock_time,p.actual_purchase_price,round(o.purchase_total/p.purchase_num,2) purchase_price')->where($bar_where)->where('barcode_id', $bar)->select();
+                $sum_count = 0;
+                $sum_total = 0;
+                foreach ($bar_items as $item) {
+                    if(count(array_unique($is_exist)) != 0){
+                        foreach ($is_exist as $value){
+                            if ($item['purchase_id'] == $value['purchase_id']) {
+                                $end_date = date('Y-m-d H:i:s', $value['create_time']);
+                                if ($item['out_stock_time'] >= $end_date) {
+                                    //使用成本计算
+                                    $total = $item['actual_purchase_price'];
+                                } else {
+                                    //使用预估计算
+                                    $total = $item['purchase_price'];
+                                }
+                            } else {
+                                //没有冲减数据，直接拿预估成本计算
+                                if ($item['actual_purchase_price'] != 0) {
+                                    $total = $item['actual_purchase_price'];   //有成本价拿成本价计算
+                                } else {
+                                    $total = $item['purchase_price'];   //没有成本价拿预估价计算
+                                }
+                            }
+                        }
+                    }else{
+                        //没有冲减数据，直接拿预估成本计算
+                        if ($item['actual_purchase_price'] != 0) {
+                            $total = $item['actual_purchase_price'];   //有成本价拿成本价计算
+                        } else {
+                            $total = $item['purchase_price'];   //没有成本价拿预估价计算
+                        }
+                    }
+                    $sum_total += $total;
+                    $sum_count++;
+                }
+                $flag['outstock_count'] = $sum_count;
+                $flag['outstock_total'] = $sum_total;
+                $outstock_total1 += $sum_total;
+                Db::name('finance_stock_parameter_item')->insert($flag);
+            }
+            /*************出库单出库end**************/
+            /*************订单出库start**************/
+            $bar_where1['out_stock_time'] = ['between', [$start, $end]];
+            $bar_where1['out_stock_id'] = 0;
+            $bar_where1['item_order_number'] = ['<>', ''];
+            $bar_where1['library_status'] = 2;
+            //判断冲减前的出库单出库数量和金额
+            $bars1 = $this->item->alias('i')->join('fa_purchase_order_item p','i.purchase_id=p.purchase_id and i.sku=p.sku')->join('fa_purchase_order o','p.purchase_id=o.id')->where($bar_where1)->field('i.out_stock_id,i.purchase_id,i.out_stock_time,p.actual_purchase_price,round(o.purchase_total/p.purchase_num,2) purchase_price')->select();
+            if (count($bars1) != 0) {
+                $flag1 = [];
+                $flag1['stock_id'] = $stockId;
+                $flag1['type'] = 3;
+                foreach ($bars1 as $bar1) {
+                    if(count(array_unique($is_exist)) != 0) {
+                        foreach ($is_exist as $value) {
+                            if ($bar1['purchase_id'] == $value['purchase_id']) {
+                                $end_date = date('Y-m-d H:i:s', $value['create_time']);
+                                if ($bar1['out_stock_time'] >= $end_date) {
+                                    //使用成本计算
+                                    $total1 = $bar1['actual_purchase_price'];
+                                } else {
+                                    //使用预估计算
+                                    $total1 = $bar1['purchase_price'];
+                                }
+                            } else {
+                                //没有冲减数据，直接拿预估成本计算
+                                if ($bar1['actual_purchase_price']  != 0) {
+                                    $total1 = $bar1['actual_purchase_price'];   //有成本价拿成本价计算
+                                } else {
+                                    $total1 = $bar1['purchase_price'];   //没有成本价拿预估价计算
+                                }
+                            }
+                        }
+                    }else{
+                        if ($bar1['actual_purchase_price']  != 0) {
+                            $total1 = $bar1['actual_purchase_price'];   //有成本价拿成本价计算
+                        } else {
+                            $total1 = $bar1['purchase_price'];   //没有成本价拿预估价计算
+                        }
+                    }
+                    $outstock_total2 += $total1;
+                }
+                $flag1['outstock_count'] = count($bars1);
+                $flag1['outstock_total'] = $outstock_total2;
+                Db::name('finance_stock_parameter_item')->insert($flag1);
+            }
+            /*************订单出库end**************/
+            //查询最新一条的余额
+            $rest_total = $this->stockparameter->order('id', 'desc')->field('rest_total')->limit(1,1)->select();
+            $cha_amount = 0;
+            foreach ($is_exist as $k=>$v){
+                $cha_amount += $v['total'];
+            }
+            $end_rest = round($rest_total[0]['rest_total'] + $instock_total - $outstock_total1 - $outstock_total2+$cha_amount, 2);
+            $info['instock_total'] = $instock_total;
+            $info['outstock_total'] = round($outstock_total1 + $outstock_total2, 2);
+            $info['rest_total'] = $end_rest;
+            $this->stockparameter->where('id', $stockId)->update($info);
+            echo $start.' is ok'."\n";
+            usleep(100000);
+        }
+        echo "all is ok";
     }
 }
