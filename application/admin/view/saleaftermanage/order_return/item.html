@@ -95,7 +95,7 @@
 <div class="order-list-wrap">
     <h2>订单信息列表</h2>
     <div class="table-responsive">
-        <ul class="order-list" style="width: 140%">
+        <ul class="order-list" >
             <li style="width: 100px">订单类型</li>
             <li style="width: 100px">订单号</li>
             <li style="width: 100px">物流渠道</li>
@@ -104,8 +104,8 @@
             <li  style="width: 200px">快递单号</li>
             <li style="width: 100px">快递名称</li>
             <li style="width: 100px">订单状态</li>
-            <li style="width: 45px;">是否<br>更换<br>地址</li>
-            <li style="width: 100px">订单商品数量</li>
+            <li style="width: 45px;">更换<br>地址</li>
+            <li style="width: 100px">商品数量</li>
             <li style="width: 100px"> 支付货币</li>
             <li style="width: 100px">原币种<br>支付金额</li>
             <li style="width: 100px">美金($)<br>支付金额</li>
@@ -116,14 +116,14 @@
             <li style="width: 100px">运费</li>
             <li style="width: 100px">快递方式</li>
             <li style="width: 100px">创建时间</li>
-            <li style="width: 100px">客户签收时间</li>
+            <li style="width: 100px">签收时间</li>
             <li style="width: 100px">操作</li>
         </ul>
 
 
         {foreach name="orderInfoResult" item="orderInfoList"}
 
-        <ul class="order-list"  style="width: 140%">
+        <ul class="order-list"  >
             <li  style="width: 100px"class="normal">{$orderInfoList.order_type}</li>
             <li style="width: 100px">{$orderInfoList.increment_id}</li>
             <li style="width: 100px">{$orderInfoList.agent_way_title}</li>
