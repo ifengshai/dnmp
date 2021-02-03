@@ -260,6 +260,7 @@ class Distribution extends Backend
                             'a.shelf_number' => ['in', $filter['shelf_number']],
                             'a.type' => 1
                         ])
+                        ->order('a.coding')
                         ->column('b.sku');
                     //平台SKU表替换sku
                     $sku = Db::connect('database.db_stock');
