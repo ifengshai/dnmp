@@ -358,7 +358,7 @@ class Ding extends Controller
 
             file_put_contents('/www/wwwroot/mojing/runtime/log/Ding.log', 'bpms_task_change---------------' . serialize($payload) . "\n\n", FILE_APPEND);
 
-            
+
             switch ($type) {
                     //添加用户
                 case 'user_add_org':
@@ -425,6 +425,8 @@ class Ding extends Controller
                     /**
                      * @todo 修改审批任务为完成状态
                      */
+                    file_put_contents('/www/wwwroot/mojing/runtime/log/Ding.log', 'type---------------' . $payload['type'] . "\n\n", FILE_APPEND);
+
                     if ($payload['type'] == 'finish') {
                         //审核日志
                         FinancePurchaseLog::create([
@@ -453,6 +455,9 @@ class Ding extends Controller
                     /**
                      * @todo 修改审批任务为完成状态
                      */
+
+                    file_put_contents('/www/wwwroot/mojing/runtime/log/Ding.log', 'type---------------' . $payload['type'] . "\n\n", FILE_APPEND);
+                    
                     if ($payload['type'] == 'finish') {
                         //审核日志
                         FinancePurchaseLog::create([
