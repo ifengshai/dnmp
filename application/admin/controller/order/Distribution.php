@@ -5,6 +5,8 @@ namespace app\admin\controller\order;
 use app\admin\model\DistributionLog;
 use app\admin\model\saleaftermanage\WorkOrderChangeSku;
 use app\admin\model\saleaftermanage\WorkOrderList;
+use app\admin\model\warehouse\Outstock;
+use app\admin\model\warehouse\OutStockItem;
 use app\common\controller\Backend;
 use fast\Excel;
 use think\Request;
@@ -156,6 +158,8 @@ class Distribution extends Backend
         $this->_work_order_measure = new WorkOrderMeasure();
         $this->_work_order_change_sku = new WorkOrderChangeSku();
         $this->_product_bar_code_item = new ProductBarCodeItem();
+        $this->_outstock = new Outstock();
+        $this->_outstock_item = new OutStockItem();
     }
 
     /**
