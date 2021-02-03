@@ -661,14 +661,18 @@ class Zendesk extends Backend
             $database = Db::connect('database.db_voogueme');
         }else{
             $orderModel = new \app\admin\model\order\order\Nihao;
-            $database = Db::connect('database.db_nihao');
+            //网站端nihao站没有会员身份
+            $is_vip = 0;
         }
 
         //查询该用户是否是会员
-        $is_vip = $database->table('customer_entity')->where('entity_id',$ticket->user_id)->value('is_vip');
-        if (empty($is_vip)){
-            $is_vip = 0;
+        if ($database){
+            $is_vip = $database->table('customer_entity')->where('entity_id',$ticket->user_id)->value('is_vip');
+            if (empty($is_vip)){
+                $is_vip = 0;
+            }
         }
+
 
         $orders = $orderModel
             ->where('customer_email',$ticket->email)

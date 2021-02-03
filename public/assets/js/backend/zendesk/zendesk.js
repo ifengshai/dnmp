@@ -66,6 +66,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                                     text: function(row){
                                         if(row.status == 5){
                                             return '查看';
+
                                         }
                                         return __('Answer');
                                     },
@@ -74,7 +75,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                                     },
                                     classname: 'btn btn-xs btn-success',
                                     icon: '',
-                                    url: 'zendesk/zendesk/edit',
+                                    url: 'zendesk/zendesk/edit/status/{row.status}',
                                     extend: 'data-area = \'["100%","100%"]\' target=\'_blank\'',
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });

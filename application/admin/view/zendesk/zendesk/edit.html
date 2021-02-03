@@ -276,15 +276,23 @@
     </div>
     </form>
     <div class="col-md-3" style="width: 29%;margin-left: 40px">
-        <div class="box box-primary">
+        <div class="box box-primary"
+             {if condition="$ticket->type eq 1"}
+             style="border-top-color: #4267b2"
+             {elseif condition="$ticket->type eq 2"/}
+        style="border-top-color: #f5543b"
+        {elseif condition="$ticket->type eq 3"/}
+        style="border-top-color: #b4a078"
+        {/if}
+        >
 
             <div class="box-body box-profile"
                  {if condition="$ticket->type eq 1"}
-                 style="background-color: #3498DB"
+                 style="background-color: #4267b2"
                  {elseif condition="$ticket->type eq 2"/}
-            style="background-color: #F39C12"
+            style="background-color: #f5543b"
             {elseif condition="$ticket->type eq 3"/}
-            style="background-color: #E74C3C"
+            style="background-color: #b4a078"
             {/if}>
             <img class="profile-user-img  img-circle" src="/assets/img/avatar.png" alt="User profile picture" style="margin:0;!important;">
 
