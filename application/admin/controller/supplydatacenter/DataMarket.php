@@ -392,57 +392,57 @@ class DataMarket extends Backend
             'f_turnover_day'=>120,
         );
         //获取呆滞库存信息
-        $dull_stock = $this->getProductTurnoverDays();
+        $dull_stock = $this->dullstock->where('grade','<>','Z')->order('day_date desc,id asc')->limit(8)->select();
 
         $all_num = $arr['a1_count']+$arr['a_count']+$arr['b_count']+$arr['c1_count']+$arr['c_count']+$arr['d_count']+$arr['e_count']+$arr['f_count'];
         $all_stock_num = $arr['a1_stock_num']+$arr['a_stock_num']+$arr['b_stock_num']+$arr['c1_stock_num']+$arr['c_stock_num']+$arr['d_stock_num']+$arr['e_stock_num']+$arr['f_stock_num'];
         $arr['a1_percent'] = $all_num ? round($arr['a1_count']/$all_num*100,2).'%':0;
         $arr['a1_stock_percent'] = $all_stock_num ? round($arr['a1_stock_num']/$all_stock_num*100,2).'%':0;
-        $arr['a1_dull_stock'] = $dull_stock['A+']['stock'];   //呆滞库存
+        $arr['a1_dull_stock'] = $dull_stock[0]['stock'];   //呆滞库存
         $arr['a1_dull_stock_rate'] =$arr['a1_stock_num'] ? round($arr['a1_dull_stock']/$arr['a1_stock_num'],2).'%':0;
-        $arr['a1_dull_total'] = $dull_stock['A+']['total'];   //呆滞金额
+        $arr['a1_dull_total'] = $dull_stock[0]['total'];   //呆滞金额
 
         $arr['a_percent'] = $all_num ? round($arr['a_count']/$all_num*100,2).'%':0;
         $arr['a_stock_percent'] = $all_stock_num ? round($arr['a_stock_num']/$all_stock_num*100,2).'%':0;
-        $arr['a_dull_stock'] = $dull_stock['A']['stock'];   //呆滞库存
+        $arr['a_dull_stock'] = $dull_stock[1]['stock'];   //呆滞库存
         $arr['a_dull_stock_rate'] = $arr['a_stock_num'] ? round($arr['a_dull_stock']/$arr['a_stock_num'],2).'%':0;
-        $arr['a_dull_total'] = $dull_stock['A']['total'];   //呆滞金额
+        $arr['a_dull_total'] = $dull_stock[1]['total'];   //呆滞金额
 
         $arr['b_percent'] = $all_num ? round($arr['b_count']/$all_num*100,2).'%':0;
         $arr['b_stock_percent'] = $all_stock_num ? round($arr['b_stock_num']/$all_stock_num*100,2).'%':0;
-        $arr['b_dull_stock'] = $dull_stock['B']['stock'];   //呆滞库存
+        $arr['b_dull_stock'] = $dull_stock[2]['stock'];   //呆滞库存
         $arr['b_dull_stock_rate'] = $arr['b_stock_num'] ? round($arr['b_dull_stock']/$arr['b_stock_num'],2).'%':0;
-        $arr['b_dull_total'] = $dull_stock['B']['total'];   //呆滞金额
+        $arr['b_dull_total'] = $dull_stock[2]['total'];   //呆滞金额
 
         $arr['c1_percent'] = $all_num ? round($arr['c1_count']/$all_num*100,2).'%':0;
         $arr['c1_stock_percent'] = $all_stock_num ? round($arr['c1_stock_num']/$all_stock_num*100,2).'%':0;
-        $arr['c1_dull_stock'] = $dull_stock['C+']['stock'];   //呆滞库存
+        $arr['c1_dull_stock'] = $dull_stock[3]['stock'];   //呆滞库存
         $arr['c1_dull_stock_rate'] = $arr['c1_stock_num'] ? round($arr['c1_dull_stock']/$arr['c1_stock_num'],2).'%':0;
-        $arr['c1_dull_total'] = $dull_stock['C+']['total'];   //呆滞金额
+        $arr['c1_dull_total'] = $dull_stock[3]['total'];   //呆滞金额
 
         $arr['c_percent'] = $all_num ? round($arr['c_count']/$all_num*100,2).'%':0;
         $arr['c_stock_percent'] = $all_stock_num ? round($arr['c_stock_num']/$all_stock_num*100,2).'%':0;
-        $arr['c_dull_stock'] = $dull_stock['C']['stock'];   //呆滞库存
+        $arr['c_dull_stock'] = $dull_stock[4]['stock'];   //呆滞库存
         $arr['c_dull_stock_rate'] = $arr['c_stock_num'] ? round($arr['c_dull_stock']/$arr['c_stock_num'],2).'%':0;
-        $arr['c_dull_total'] = $dull_stock['C']['total'];   //呆滞金额
+        $arr['c_dull_total'] = $dull_stock[4]['total'];   //呆滞金额
 
         $arr['d_percent'] = $all_num ? round($arr['d_count']/$all_num*100,2).'%':0;
         $arr['d_stock_percent'] = $all_stock_num ? round($arr['d_stock_num']/$all_stock_num*100,2).'%':0;
-        $arr['d_dull_stock'] = $dull_stock['D']['stock'];   //呆滞库存
+        $arr['d_dull_stock'] = $dull_stock[5]['stock'];   //呆滞库存
         $arr['d_dull_stock_rate'] = $arr['d_stock_num'] ? round($arr['d_dull_stock']/$arr['d_stock_num'],2).'%':0;
-        $arr['d_dull_total'] = $dull_stock['D']['total'];   //呆滞金额
+        $arr['d_dull_total'] = $dull_stock[5]['total'];   //呆滞金额
 
         $arr['e_percent'] = $all_num ? round($arr['e_count']/$all_num*100,2).'%':0;
         $arr['e_stock_percent'] = $all_stock_num ? round($arr['e_stock_num']/$all_stock_num*100,2).'%':0;
-        $arr['e_dull_stock'] = $dull_stock['E']['stock'];   //呆滞库存
+        $arr['e_dull_stock'] = $dull_stock[6]['stock'];   //呆滞库存
         $arr['e_dull_stock_rate'] = $arr['e_stock_num'] ? round($arr['e_dull_stock']/$arr['e_stock_num'],2).'%':0;
-        $arr['e_dull_total'] = $dull_stock['E']['total'];   //呆滞金额
+        $arr['e_dull_total'] = $dull_stock[6]['total'];   //呆滞金额
 
         $arr['f_percent'] = $all_num ? round($arr['f_count']/$all_num*100,2).'%':0;
         $arr['f_stock_percent'] = $all_stock_num ? round($arr['f_stock_num']/$all_stock_num*100,2).'%':0;
-        $arr['f_dull_stock'] = $dull_stock['F']['stock'];   //呆滞库存
+        $arr['f_dull_stock'] = $dull_stock[7]['stock'];   //呆滞库存
         $arr['f_dull_stock_rate'] = $arr['f_stock_num'] ? round($arr['f_dull_stock']/$arr['f_stock_num'],2).'%':0;
-        $arr['f_dull_total'] = $dull_stock['F']['total'];   //呆滞金额
+        $arr['f_dull_total'] = $dull_stock[7]['total'];   //呆滞金额
         Cache::set('Supplydatacenter_datamarket'.md5(serialize('stock_level_overview')),$arr,7200);
         return $arr;
     }
