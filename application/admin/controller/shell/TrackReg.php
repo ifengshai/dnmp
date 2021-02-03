@@ -11,6 +11,7 @@ use app\common\controller\Backend;
 use GuzzleHttp\Client;
 use think\Db;
 use SchGroup\SeventeenTrack\Connectors\TrackingConnector;
+use think\Hook;
 
 class TrackReg extends Backend
 {
@@ -1394,19 +1395,7 @@ class TrackReg extends Backend
     {
         $this->order = new \app\admin\model\order\order\NewOrder();
         $this->productGrade = new \app\admin\model\ProductGrade();
-        switch ($site) {
-            case '1':
-                $field = 'zeelool_sku';
-                break;
-            case '2':
-                $field = 'voogueme_sku';
-                break;
-            case '3':
-                $field = 'nihao_sku';
-                break;
-            default:
-                break;
-        }
+        $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         //所选时间段内有销量的平台sku
         $start = date('Y-m-d', strtotime("-1 day"));
         $end = date('Y-m-d 23:59:59', strtotime("-1 day"));
@@ -1425,8 +1414,9 @@ class TrackReg extends Backend
         $grade7 = 0;
         $grade8 = 0;
         foreach ($order as $key => $value) {
+            $sku = $this->itemplatformsku->getTrueSku($value['sku'], $site);
             //查询该品的等级
-            $grade = $this->productGrade->where($field, $value['sku'])->value('grade');
+            $grade = $this->productGrade->where('true_sku',$sku)->value('grade');
             switch ($grade) {
                 case 'A+':
                     $grade1 += $value['count'];
@@ -2364,5 +2354,236 @@ class TrackReg extends Backend
         $arr['complete_num'] = $zeelool_data->google_target_end(3, $date_time);
         $update = Db::name('datacenter_day')->where(['day_date' => $date_time, 'site' => 3])->update($arr);
         usleep(100000);
+    }
+    /*
+     * 库存台账数据
+     * */
+    public function stock_parameter()
+    {
+        $this->instock = new \app\admin\model\warehouse\Instock;
+        $this->outstock = new \app\admin\model\warehouse\Outstock;
+        $this->stockparameter = new \app\admin\model\financepurchase\StockParameter;
+        $this->item = new \app\admin\model\warehouse\ProductBarCodeItem;
+        $start = date('Y-m-d', strtotime("-1 day"));
+        $end = $start . ' 23:59:59';
+        //库存主表插入数据
+        $stock_data['day_date'] = $start;
+        $stockId = $this->stockparameter->insertGetId($stock_data);
+        //采购入库数量
+        $instock_where['s.status'] = 2;
+        $instock_where['s.type_id'] = 1;
+        $instock_where['s.check_time'] = ['between', [$start, $end]];
+        $instocks = $this->instock->alias('s')->join('fa_check_order c', 'c.id=s.check_id')->join('fa_purchase_order_item oi', 'c.purchase_id=oi.purchase_id')->join('fa_purchase_order o','oi.purchase_id=o.id')->where($instock_where)->field('s.id,round(o.purchase_total/oi.purchase_num,2) purchase_price')->select();
+        $instock_total = 0; //入库总金额
+        foreach ($instocks as $key => $instock) {
+            $arr = array();
+            $arr['stock_id'] = $stockId;
+            $arr['instock_id'] = $instock['id'];
+            $arr['type'] = 1;
+            $instock_num = Db::name('in_stock_item')->where('in_stock_id', $instock['id'])->sum('in_stock_num');
+            $arr['instock_num'] = $instock_num;
+            $arr['instock_total'] = round($instock['purchase_price'] * $instock_num, 2);
+            $instock_total += $arr['instock_total'];
+            Db::name('finance_stock_parameter_item')->insert($arr);
+        }
+        //判断今天是否有冲减数据
+        $start_time = strtotime($start);
+        $end_time = strtotime($end);
+        $exist_where['create_time'] = ['between', [$start_time, $end_time]];
+        $is_exist = Db::name('finance_cost_error')->where($exist_where)->field('id,create_time,purchase_id,total')->select();
+
+        $outstock_total1 = 0;   //出库单出库
+        $outstock_total2 = 0;   //订单出库
+        /*************出库单出库start**************/
+        $bar_where['out_stock_time'] = ['between', [$start, $end]];
+        $bar_where['out_stock_id'] = ['<>', 0];
+        $bar_where['library_status'] = 2;
+        //判断冲减前的出库单出库数量和金额
+        $bars = $this->item->where($bar_where)->group('barcode_id')->column('barcode_id');
+        foreach ($bars as $bar) {
+            $flag = [];
+            $flag['stock_id'] = $stockId;
+            $flag['bar_id'] = $bar;
+            $flag['type'] = 2;
+            $bar_items = $this->item->alias('i')->join('fa_purchase_order_item p','i.purchase_id=p.purchase_id and i.sku=p.sku')->join('fa_purchase_order o','p.purchase_id=o.id')->field('i.out_stock_id,i.purchase_id,i.out_stock_time,p.actual_purchase_price,round(o.purchase_total/p.purchase_num,2) purchase_price')->where($bar_where)->where('barcode_id', $bar)->select();
+            $sum_count = 0;
+            $sum_total = 0;
+            foreach ($bar_items as $item) {
+                if(count(array_unique($is_exist)) != 0){
+                    foreach($is_exist as $value){
+                        if ($item['purchase_id'] == $value['purchase_id']) {
+                            $end_date = date('Y-m-d H:i:s', $value['create_time']);
+                            if ($item['out_stock_time'] >= $end_date) {
+                                //使用成本计算
+                                $total = $item['actual_purchase_price'];
+                            } else {
+                                //使用预估计算
+                                $total = $item['purchase_price'];
+                            }
+                        } else {
+                            //没有冲减数据，直接拿预估成本计算
+                            if ($item['actual_purchase_price'] != 0) {
+                                $total = $item['actual_purchase_price'];   //有成本价拿成本价计算
+                            } else {
+                                $total = $item['purchase_price'];   //没有成本价拿预估价计算
+                            }
+                        }
+                    }
+                }else{
+                    //没有冲减数据，直接拿预估成本计算
+                    if ($item['actual_purchase_price'] != 0) {
+                        $total = $item['actual_purchase_price'];   //有成本价拿成本价计算
+                    } else {
+                        $total = $item['purchase_price'];   //没有成本价拿预估价计算
+                    }
+                }
+                $sum_total += $total;
+                $sum_count++;
+            }
+            $flag['outstock_count'] = $sum_count;
+            $flag['outstock_total'] = $sum_total;
+            $outstock_total1 += $sum_total;
+            Db::name('finance_stock_parameter_item')->insert($flag);
+        }
+        /*************出库单出库end**************/
+        /*************订单出库start**************/
+        $bar_where1['out_stock_time'] = ['between', [$start, $end]];
+        $bar_where1['out_stock_id'] = 0;
+        $bar_where1['item_order_number'] = ['<>', ''];
+        $bar_where1['i.library_status'] = 2;
+        //判断冲减前的出库单出库数量和金额
+        $bars1 = $this->item->alias('i')->join('fa_purchase_order_item p','i.purchase_id=p.purchase_id and i.sku=p.sku')->join('fa_purchase_order o','p.purchase_id=o.id')->where($bar_where1)->field('i.out_stock_id,i.purchase_id,i.out_stock_time,p.actual_purchase_price,round(o.purchase_total/p.purchase_num,2) purchase_price')->select();
+        if (count($bars1) != 0) {
+            $flag1 = [];
+            $flag1['stock_id'] = $stockId;
+            $flag1['type'] = 3;
+            foreach ($bars1 as $bar1) {
+                if(count(array_unique($is_exist)) != 0){
+                    foreach($is_exist as $value){
+                        if ($bar1['purchase_id'] == $value['purchase_id']) {
+                            $end_date = date('Y-m-d H:i:s', $value['create_time']);
+                            if ($bar1['out_stock_time'] >= $end_date) {
+                                //使用成本计算
+                                $total1 = $bar1['actual_purchase_price'];
+                            } else {
+                                //使用预估计算
+                                $total1 = $bar1['purchase_price'];
+                            }
+                        } else {
+                            //没有冲减数据，直接拿预估成本计算
+                            if ($bar1['actual_purchase_price']  != 0) {
+                                $total1 = $bar1['actual_purchase_price'];   //有成本价拿成本价计算
+                            } else {
+                                $total1 = $bar1['purchase_price'];   //没有成本价拿预估价计算
+                            }
+                        }
+                    }
+                }else{
+                    //没有冲减数据，直接拿预估成本计算
+                    if ($bar1['actual_purchase_price']  != 0) {
+                        $total1 = $bar1['actual_purchase_price'];   //有成本价拿成本价计算
+                    } else {
+                        $total1 = $bar1['purchase_price'];   //没有成本价拿预估价计算
+                    }
+                }
+                $outstock_total2 += $total1;
+            }
+            $flag1['outstock_count'] = count($bars1);
+            $flag1['outstock_total'] = $outstock_total2;
+            Db::name('finance_stock_parameter_item')->insert($flag1);
+        }
+        /*************订单出库end**************/
+        //查询最新一条的余额
+        $rest_total = $this->stockparameter->order('id', 'desc')->field('rest_total')->limit(1,1)->select();
+        $cha_amount = 0;  //冲减金额
+        foreach ($is_exist as $k=>$v){
+            $cha_amount += $v['total'];
+        }
+        $end_rest = round($cha_amount + $rest_total[0]['rest_total'] + $instock_total - $outstock_total1 - $outstock_total2, 2);
+        $info['instock_total'] = $instock_total;
+        $info['outstock_total'] = round($outstock_total1 + $outstock_total2, 2);
+        $info['rest_total'] = $end_rest;
+        $this->stockparameter->where('id', $stockId)->update($info);
+        echo "all is ok";
+    }
+
+    /**
+     * 周期结转单脚本
+     *  每月1号早9点自动生成结转单；一条订单成本记录只能存在一个结转单内
+     * @Description
+     * @author wpl
+     * @since 2021/01/21 16:05:48 
+     * @return void
+     */
+    public function cycle_order()
+    {
+        //查询上个月成本核算
+        $month = date('Y-m-01');
+        $fisrttime = strtotime("$month -1 month");
+        $endtime = strtotime("$month") - 1;
+        $financecost = new \app\admin\model\finance\FinanceCost();
+        $count = $financecost->where(['createtime' => ['between', [$fisrttime, $endtime]], 'is_carry_forward' => 0, 'bill_type' => ['<>', 9]])->count();
+        if ($count < 1) {
+            echo "无结果";
+            die;
+        }
+        //生成周期结转单
+        $financecycle = new \app\admin\model\finance\FinanceCycle();
+        $res = $financecycle->allowField(true)->save([
+            'cycle_number' => 'JZ' . date('YmdHis') . rand(100, 999) . rand(100, 999),
+            'createtime' => time()
+        ]);
+
+        if (false !== $res) {
+
+            $financecost->where(['createtime' => ['between', [$fisrttime, $endtime]], 'is_carry_forward' => 0])->update(['is_carry_forward' => 1, 'cycle_id' => $financecycle->id]);
+        }
+
+        echo "ok";
+    }
+
+    //计划任务定时跑物流数据 得到揽收时间存入物流信息表 如果没有揽收时间 就以录入物流单号的时间作为揽收时间为了供应商待结算列表的结算周期使用
+    public function logistics_info()
+    {
+        //采购单物流单详情
+        $rows = Db::name('logistics_info')
+            ->where('createtime','>',date("Y-m-d H:i:s", strtotime("-12 hour")))
+            ->where('createtime','<',date("Y-m-d H:i:s", time()))
+            ->select();
+        // dump($rows);
+        // die;
+        foreach ($rows as $k => $v) {
+            //物流单快递100接口
+            if ($v['logistics_number']) {
+                $arr = explode(',', $v['logistics_number']);
+                //物流公司编码
+                $company = explode(',', $v['logistics_company_no']);
+                foreach ($arr as $kk => $vv) {
+                    try {
+                        //快递单号
+                        $param['express_id'] = trim($vv);
+                        $param['code'] = trim($company[$kk]);
+                        $data[$kk] = Hook::listen('express_query', $param)[0];
+                    } catch (\Exception $e) {
+                        $this->error($e->getMessage());
+                    }
+                }
+            }
+            if (!empty($data[0]['data'])) {
+                //拿物流单接口返回的倒数第二条数据的时间作为揽件的时间 更新物流单的详情
+                $collect_time = date("Y-m-d H:i:s",strtotime(array_slice($data[0]['data'], -1, 1)[0]['time']));
+            }else{
+                $collect_time = $v['createtime'];
+            }
+            // dump($collect_time);
+            $res = Db::name('logistics_info')->where('id',$v['id'])->update(['collect_time'=>$collect_time]);
+            // dump($res);
+        }
+        if ($res){
+            echo "ok". "\n";;
+        }else{
+            echo 'fail'. "\n";;
+        }
+        // die;
     }
 }

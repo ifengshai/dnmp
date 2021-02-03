@@ -3727,6 +3727,8 @@ class Crontab extends Backend
         set_time_limit(0);
         //求出平台
         $platform = $this->request->get('platform', 1);
+
+       
         if (!$platform) {
             return false;
         }
@@ -3756,9 +3758,12 @@ class Crontab extends Backend
                 $model = false;
                 break;
         }
+
+
         if (false === $model) {
             return false;
         }
+
         $today = date('Y-m-d 23:59:59');
         $model->table('sales_flat_order')->query("set time_zone='+8:00'");
         $model->table('sales_flat_quote')->query("set time_zone='+8:00'");
@@ -3808,6 +3813,7 @@ class Crontab extends Backend
         $lastyear_order_success_data = $model->table('sales_flat_order')->where($lastyear_where)->where($order_where)->where($order_success_where)->count();
         //总共支付成功数
         $total_order_success_data = $model->table('sales_flat_order')->where($order_where)->where($order_success_where)->count();
+
         //昨天购物车总数
         $quote_where['base_grand_total'] = ['>', 0];
         $yesterday_shoppingcart_total_data = $model->table('sales_flat_quote')->where($yestime_where)->where($quote_where)->count();
@@ -3841,7 +3847,6 @@ class Crontab extends Backend
         $lastyear_shoppingcart_new_data = $model->table('sales_flat_quote')->where($lastyear_where1)->where($quote_where)->count();
         //总共新增购物车总数
         $total_shoppingcart_new_data  = $total_shoppingcart_total_data;
-
         //2020-11-25 更换仪表盘页面新增购物车转化率(%)的计算方法 start
         //昨天支付成功数 从新增购物车中成功支付数
         $order_where = [];
@@ -3939,6 +3944,8 @@ class Crontab extends Backend
             ->where($order_where)
             ->where($order_success_where)
             ->count();
+
+
         //上年从新增购物车中成功支付数
         $lastyear_start = date('Y-01-01 00:00:00', strtotime('last year'));
         $lastyear_end = date('Y-12-31 23:59:59', strtotime('last year'));
@@ -3954,6 +3961,8 @@ class Crontab extends Backend
             ->where($order_where)
             ->where($order_success_where)
             ->count();
+
+
         //总共从新增购物车中成功支付数
         $total_order_success_data1 = $model->table('sales_flat_order')
             ->alias('o')
