@@ -444,6 +444,30 @@ class Ding extends Controller
                     break;
 
                 case 'bpms_task_change':
+
+                     //审批任务事件(开始、结束、转交)
+                    /**
+                     * @todo 修改审批任务为完成状态
+                     */
+                    if ($payload['type'] == 'finish') {
+                        //审核日志
+                        FinancePurchaseLog::create([
+                            'process_instance_id' => $payload['processInstanceId'],
+                            'check_time' => $payload['finishTime'],
+                            'title' => $payload['title'],
+                            'result' => $payload['result'],
+                            'userid' => $payload['staffId']
+                        ]);
+
+                        //判断审核状态 审核拒绝
+                        if ($payload['result'] == 'refuse') {
+                            FinancePurchase::where(['process_instance_id' => $payload['processInstanceId']])->update(['status' => 3]);
+                            //最后一步判断如果为李亚方审核通过改为完成
+                        } elseif ($payload['result'] == 'agree' && $payload['staffId'] == '171603353926064429') {
+                            FinancePurchase::where(['process_instance_id' => $payload['processInstanceId']])->update(['status' => 4]);
+                        }
+                    }
+
                     file_put_contents('/www/wwwroot/mojing/runtime/log/Ding.log', 'bpms_task_change---------------' . serialize($payload) . "\n\n", FILE_APPEND);
                     break;
             }
