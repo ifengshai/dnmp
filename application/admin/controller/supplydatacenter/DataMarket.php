@@ -755,13 +755,17 @@ class DataMarket extends Backend
         $where['check_status'] = 1;
         $where['check_time'] = ['between',[$start_time,$end_time]];
         $arr['delivery_count'] = $this->process->where($where)->count();  //发货数量
+        $arr['delivery_count'] = $arr['delivery_count'] ? $arr['delivery_count'] : 0;
         $completed_where['is_tracking'] = 5;
         $arr['completed_count'] = $this->process->where($where)->where($completed_where)->count();  //总妥投数量
+        $arr['completed_count'] = $arr['completed_count'] ? $arr['completed_count'] : 0;
         $uncompleted_where['is_tracking'] = ['<>',5];
         $arr['uncompleted_count'] = $this->process->where($where)->where($uncompleted_where)->count();  //未妥投数量
+        $arr['uncompleted_count'] = $arr['uncompleted_count'] ? $arr['uncompleted_count'] : 0;  //未妥投数量
         $map = [];
         $map[] = ['exp', Db::raw("check_time+3600*24*15<unix_timestamp(now())")];
         $arr['timeout_uncompleted_count'] = $this->process->where($where)->where($uncompleted_where)->where($map)->count();  //超时未妥投数量
+        $arr['timeout_uncompleted_count'] = $arr['timeout_uncompleted_count'] ? $arr['timeout_uncompleted_count'] : 0;
         Cache::set('Supplydatacenter_userdata' . $time_str . md5(serialize('logistics_completed_overview')), $arr, 7200);
         return $arr;
     }
