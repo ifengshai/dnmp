@@ -784,33 +784,33 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                         //     formatter: Table.api.formatter.status
                         // },
                         // { field: 'in_stock_num', title: __('入库数量'), operate: false },
-                        {
-                            field: 'operate',
-                            title: __('Operate'),
-                            table: table,
-                            events: Table.api.events.operate,
-                            buttons: [
-
-                                {
-                                    name: 'detail',
-                                    text: '详情',
-                                    title: __('Detail'),
-                                    classname: 'btn btn-xs  btn-primary btn-dialog',
-                                    icon: 'fa fa-list',
-                                    url: 'new_product/productmappingdetail/purchase_id/{purchase_id}/platform_type/{platform_type}',
-                                    extend: 'data-area = \'["60%","60%"]\'',
-                                    callback: function (data) {
-                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
-                                    },
-                                    visible: function (row) {
-                                        //返回true时按钮显示,返回false隐藏
-                                        return true;
-                                    }
-                                },
-
-                            ],
-                            formatter: Table.api.formatter.operate
-                        }
+                        // {
+                        //     field: 'operate',
+                        //     title: __('Operate'),
+                        //     table: table,
+                        //     events: Table.api.events.operate,
+                        //     buttons: [
+                        //
+                        //         {
+                        //             name: 'detail',
+                        //             text: '详情',
+                        //             title: __('Detail'),
+                        //             classname: 'btn btn-xs  btn-primary btn-dialog',
+                        //             icon: 'fa fa-list',
+                        //             url: 'new_product/productmappingdetail/purchase_id/{purchase_id}/platform_type/{platform_type}',
+                        //             extend: 'data-area = \'["60%","60%"]\'',
+                        //             callback: function (data) {
+                        //                 Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                        //             },
+                        //             visible: function (row) {
+                        //                 //返回true时按钮显示,返回false隐藏
+                        //                 return true;
+                        //             }
+                        //         },
+                        //
+                        //     ],
+                        //     formatter: Table.api.formatter.operate
+                        // }
 
                     ]
                 ]
