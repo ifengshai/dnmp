@@ -1394,12 +1394,6 @@ class ScmDistribution extends Scm
                     $outstock_item['out_stock_id'] = $outstock_id;
                     $this->_outstock_item->insert($outstock_item);
 
-                    //条形码出库时间
-                    $this->_product_bar_code_item
-                        ->allowField(true)
-                        ->isUpdate(true, ['out_stock_id' => $outstock_id])
-                        ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2]);
-
                     //扣减虚拟仓库存
                     $this->_item_platform_sku
                         ->where(['sku' => $true_sku, 'platform_type' => $item_process_info['site']])
@@ -2343,12 +2337,6 @@ class ScmDistribution extends Scm
                             $outstock_item['out_stock_num'] = 1;
                             $outstock_item['out_stock_id'] = $outstock_id;
                             $this->_outstock_item->insert($outstock_item);
-
-                            //条形码出库时间
-                            $this->_product_bar_code_item
-                                ->allowField(true)
-                                ->isUpdate(true, ['out_stock_id' => $outstock_id])
-                                ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2]);
 
                             //扣减虚拟仓库存
                             $this->_item_platform_sku
