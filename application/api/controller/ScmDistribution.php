@@ -2025,7 +2025,7 @@ class ScmDistribution extends Scm
                 $result = $this->_new_order_process->allowField(true)->isUpdate(true, ['order_id' => $order_process_info['id']])->save(['store_house_id' => 0]);
                 if ($result != false) {
                     //释放合单库位占用数量
-                    $res = $this->_stock_house->allowField(true)->isUpdate(true, ['id' => $order_process_info['store_house_id']])->save(['occupy' => 0, 'order_id' => 0, 'fictitious_occupy_time' => 0]);
+                    $res = $this->_stock_house->allowField(true)->isUpdate(true, ['id' => $order_process_info['store_house_id']])->save(['occupy' => 0, 'order_id' => 0, 'fictitious_occupy_time' => null]);
                     if ($res != false) {
                         //回退带有异常子单的 合单子单状态
                         if (0 == $order_process_info['combine_status'] && 2 == $type) {
