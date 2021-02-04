@@ -1759,7 +1759,7 @@ class Test4 extends Controller
             //该品实时库存
             $real_time_stock = $this->model->where('sku',$value['true_sku'])->where('is_del',1)->where('is_open',1)->value('sum(stock)-sum(distribution_occupy_stock) as result');
             //该品库存金额
-            $sku_amount = $this->item->alias('i')->join('fa_purchase_order_item o','i.purchase_id=o.purchase_id and i.sku=o.sku')->join('fa_purchase_order p','p.id=o.purchase_id')->where('i.sku',$value['true_sku'])->where('i.library_status',1)->value('SUM(IF(o.actual_purchase_price != 0,o.actual_purchase_price,p.purchase_total/purchase_num)) as result');
+            $sku_amount = $this->item->alias('i')->join('fa_purchase_order_item o','i.purchase_id=o.purchase_id and i.sku=o.sku')->where('i.sku',$value['true_sku'])->where('i.library_status',1)->value('SUM(IF(o.actual_purchase_price != 0,o.actual_purchase_price,o.purchase_price)) as result');
             //实际周转天数
             $sku_info  = $this->getSkuSales($value['true_sku']);
             $actual_day = $sku_info['days']!=0 && $sku_info['count']!=0 ? round($real_time_stock/($sku_info['count']/$sku_info['days']),2) : 0;
@@ -1998,19 +1998,6 @@ class Test4 extends Controller
         $sales_num10 = $c_info['sales_num'];
         $days[] = $j_info['days'];
         $count = $sales_num1+$sales_num2+$sales_num3+$sales_num4+$sales_num5+$sales_num6+$sales_num7+$sales_num8+$sales_num9+$sales_num10;
-        if($sku == 'FP0044-03'){
-            dump($sales_num1);
-            dump($sales_num2);
-            dump($sales_num3);
-            dump($sales_num4);
-            dump($sales_num5);
-            dump($sales_num6);
-            dump($sales_num7);
-            dump($sales_num8);
-            dump($sales_num9);
-            dump($sales_num10);
-            dump($count);exit;
-        }
         $days = max($days);
         $data = array(
             'count'=>$count,
@@ -2203,7 +2190,7 @@ class Test4 extends Controller
             //该品实时库存
             $real_time_stock = $this->model->where('sku',$value['true_sku'])->where('is_del',1)->where('is_open',1)->value('sum(stock)-sum(distribution_occupy_stock) as result');
             //该品库存金额
-            $sku_amount = $this->item->alias('i')->join('fa_purchase_order_item o','i.purchase_id=o.purchase_id and i.sku=o.sku')->join('fa_purchase_order p','p.id=o.purchase_id')->where('i.sku',$value['true_sku'])->where('i.library_status',1)->value('SUM(IF(o.actual_purchase_price != 0,o.actual_purchase_price,p.purchase_total/purchase_num)) as result');
+            $sku_amount = $this->item->alias('i')->join('fa_purchase_order_item o','i.purchase_id=o.purchase_id and i.sku=o.sku')->where('i.sku',$value['true_sku'])->where('i.library_status',1)->value('SUM(IF(o.actual_purchase_price != 0,o.actual_purchase_price,o.purchase_price)) as result');
             //实际周转天数
             $sku_info  = $this->getSkuSales($value['true_sku']);
             $actual_day = $sku_info['days']!=0 && $sku_info['count']!=0 ? round($real_time_stock/($sku_info['count']/$sku_info['days']),2) : 0;
@@ -2214,7 +2201,7 @@ class Test4 extends Controller
             $data['stock'] = $real_time_stock;
             $data['total'] = $sku_amount ? $sku_amount : 0;
             $data['actual_day'] = $actual_day;
-            //Db::name('ceshi')->insert($data);
+            Db::name('ceshi')->insert($data);
             echo $value['true_sku'].' is ok'."\n";
             usleep(10000);
         }
