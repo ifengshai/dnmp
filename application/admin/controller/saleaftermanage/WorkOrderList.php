@@ -3250,7 +3250,8 @@ class WorkOrderList extends Backend
                         $FinanceCost = new FinanceCost();
                         $FinanceCost->vip_order_subtract($receptInfo['work_id']);
                     }
-                    if (19 == $measure_choose_id) {
+
+                    if (19 == $measure_choose_id || 18 == $measure_choose_id) {
                         //更改镜框解绑子单所绑定的条形码
                         $ProductBarCodeItem = new ProductBarCodeItem();
                         //查询子单号
