@@ -1762,7 +1762,7 @@ class Test4 extends Controller
             $sku_amount = $this->item->alias('i')->join('fa_purchase_order_item o','i.purchase_id=o.purchase_id and i.sku=o.sku')->join('fa_purchase_order p','p.id=o.purchase_id')->where('i.sku',$value['true_sku'])->where('i.library_status',1)->value('SUM(IF(o.actual_purchase_price != 0,o.actual_purchase_price,p.purchase_total/purchase_num)) as result');
             //实际周转天数
             $sku_info  = $this->getSkuSales($value['true_sku']);
-            $actual_day = $sku_info['days']!=0 && $sku_info['count']!=0 ? round($real_time_stock/$sku_info['count']/$sku_info['days'],2) : 0;
+            $actual_day = $sku_info['days']!=0 && $sku_info['count']!=0 ? round($real_time_stock/($sku_info['count']/$sku_info['days']),2) : 0;
             if($actual_day >120 && $actual_day<=144){
                 $count += $real_time_stock;
                 $total += $sku_amount;
@@ -2193,7 +2193,7 @@ class Test4 extends Controller
             $sku_amount = $this->item->alias('i')->join('fa_purchase_order_item o','i.purchase_id=o.purchase_id and i.sku=o.sku')->join('fa_purchase_order p','p.id=o.purchase_id')->where('i.sku',$value['true_sku'])->where('i.library_status',1)->value('SUM(IF(o.actual_purchase_price != 0,o.actual_purchase_price,p.purchase_total/purchase_num)) as result');
             //实际周转天数
             $sku_info  = $this->getSkuSales($value['true_sku']);
-            $actual_day = $sku_info['days']!=0 && $sku_info['count']!=0 ? round($real_time_stock/$sku_info['count']/$sku_info['days'],2) : 0;
+            $actual_day = $sku_info['days']!=0 && $sku_info['count']!=0 ? round($real_time_stock/($sku_info['count']/$sku_info['days']),2) : 0;
             $data['sku'] = $value['true_sku'];
             $data['grade'] = $value['grade'];
             $data['sales_num'] = $sku_info['count'];
