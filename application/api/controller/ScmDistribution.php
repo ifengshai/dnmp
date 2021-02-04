@@ -1948,7 +1948,7 @@ class ScmDistribution extends Scm
             if ($shelf_number) {
                 $shelf_number_arr = $this->_stock_house->where(['type' => 2,'subarea' => $shelf_number])->column('id');
                 if ($query && !empty($store_house_id_store)) {
-                    $shelf_number_arr_intersect = array_intersect($where['store_house_id'],$shelf_number_arr);
+                    $shelf_number_arr_intersect = array_intersect($where['b.store_house_id'],$shelf_number_arr);
                 }
                 if (!empty($shelf_number_arr_intersect)) {
                     $where['b.store_house_id'] = ['in', $shelf_number_arr_intersect];
