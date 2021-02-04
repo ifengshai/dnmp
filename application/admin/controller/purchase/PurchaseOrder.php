@@ -740,6 +740,9 @@ class PurchaseOrder extends Backend
                                     $list['type'] = 1;
                                     $list['batch_id'] = $k;
                                 }
+
+                                Log::write("记录row");
+                                Log::write($row);
                                 $list['logistics_number'] = $logistics_number[$k][$key];
                                 $list['logistics_company_no'] = $val;
                                 //若物流单号已经签收的话直接更改采购单的状态为已签收
