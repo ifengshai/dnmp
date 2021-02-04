@@ -2028,7 +2028,7 @@ class Test4 extends Controller
         $this->stockparameter = new \app\admin\model\financepurchase\StockParameter;
         $this->item = new \app\admin\model\warehouse\ProductBarCodeItem;
         $stimestamp = 1577808000;
-        $etimestamp = 1611504000;
+        $etimestamp = 1612281600;
         // 计算日期段内有多少天
         $days = ($etimestamp - $stimestamp) / 86400 + 1;
         // 循环每天日期
