@@ -23,6 +23,8 @@ use app\admin\model\order\order\NewOrderProcess;
 use app\admin\model\warehouse\ProductBarCodeItem;
 use app\admin\model\order\order\LensData;
 use app\admin\model\saleaftermanage\WorkOrderList;
+use app\admin\model\finance\FinanceCost;
+
 
 /**
  * 供应链配货接口类
