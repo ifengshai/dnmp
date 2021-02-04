@@ -41,6 +41,10 @@ class Dashboard extends Backend
         $time = date("Y-m-d", strtotime("-1 day"));
         $map['create_date'] = $time;
         $yestoday = $orderStatistics->where($map)->find();
+        if ($yestoday) {
+            $yestoday->all_sales_money = $yestoday->all_sales_money + ($yestoday->zeelool_de_sales_money * 1.2045) + ($yestoday->zeelool_jp_sales_money * 0.009530);
+            $yestoday->all_sales_num = $yestoday->all_sales_num + ($yestoday->zeelool_de_sales_num) + ($yestoday->zeelool_jp_sales_num);
+        }
 
         //查询最近7天
         $stime = date("Y-m-d", strtotime("-7 day"));
