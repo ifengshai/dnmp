@@ -2295,7 +2295,7 @@ class ScmDistribution extends Scm
                             //检验库存
                             $stock_arr = $this->_item
                                 ->where(['sku' => $true_sku])
-                                ->field('stock,occupy_stock,distribution_occupy_stock')
+                                ->field('stock,occupy_stock,distribution_occupy_stock,available_stock')
                                 ->find();
 
                             //扣减可用库存、配货占用、总库存
