@@ -2656,7 +2656,7 @@ class WorkOrderList extends Model
         $flag = 1;
         foreach ($item_order_number_diff as $key => $value) {
            $distribution_status = $_new_order_item_process->where(['item_order_number' => $value])->value('distribution_status');
-           if ($distribution_status != 9) {
+           if ($distribution_status != 8) {
                $flag = 0;
            }
         }
