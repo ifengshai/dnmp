@@ -1912,7 +1912,7 @@ class ScmDistribution extends Scm
             //异常待处理列表
             if ($query) {
                 //线上不允许跨库联合查询，拆分，由于字段值明显差异，可以分别模糊匹配
-                $store_house_ids = $this->_stock_house->where(['type' => 2, 'coding' => ['like', '%' . $query . '%']])->column('id');
+                $store_house_id_store = $this->_stock_house->where(['type' => 2, 'coding' => ['like', '%' . $query . '%']])->column('id');
                 if ($store_house_id_store) {
                     $where['b.store_house_id'] = ['in', $store_house_id_store];
                 } else {
