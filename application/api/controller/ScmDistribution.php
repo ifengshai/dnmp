@@ -1868,9 +1868,9 @@ class ScmDistribution extends Scm
                  if($store_house_ids) $where['store_house_id'] = ['in', $store_house_ids];*/
                 if ($store_house_id_store) {
                     $where['store_house_id'] = ['in', $store_house_id_store];
-                } else {
+                } /*else {
                     $where['store_house_id'] = -1;
-                }
+                }*/
             }
             if ($start_time && $end_time) {
                 $where['combine_time'] = ['between', [strtotime($start_time), strtotime($end_time)]];
@@ -1885,7 +1885,7 @@ class ScmDistribution extends Scm
             }
             if ($shelf_number) {
                 $shelf_number_arr = $this->_stock_house->where(['type' => 2,'subarea' => $shelf_number])->column('id');
-                if ($query && $where['store_house_id'] != -1) {
+                if ($query && !empty($store_house_id_store)) {
                     $shelf_number_arr_intersect = array_intersect($where['store_house_id'],$shelf_number_arr);
                 }
                 if (!empty($shelf_number_arr_intersect)) {
@@ -1915,8 +1915,9 @@ class ScmDistribution extends Scm
             if ($query) {
                 //线上不允许跨库联合查询，拆分，由于字段值明显差异，可以分别模糊匹配
                 $store_house_ids = $this->_stock_house->where(['type' => 2, 'coding' => ['like', '%' . $query . '%']])->column('id');
-                $item_order_number_store = [];
                 if ($store_house_ids) {
+                    $where['a.id'] = ['in', $item_ids];
+                    $where['b.store_house_id'] = ['in', $store_house_ids];
                     $item_order_number_store = $this->_new_order_item_process
                         ->where(['abnormal_house_id' => ['in', $store_house_ids]])
                         ->column('id');
@@ -1927,17 +1928,25 @@ class ScmDistribution extends Scm
                 $item_ids = array_merge($item_ids, $item_order_number_store);
                 if ($item_ids) {
                     $where['a.id'] = ['in', $item_ids];
-                } else {
+                } /*else {
                     $where['a.id'] = -1;
-                }
+                }*/
             }
             if ($site) {
                 $where['b.site'] = ['=', $site];
             }
+            if ($order_prescription_type == 1) {
+                $where['b.order_prescription_type'] = ['=', $order_prescription_type];
+            }else if($order_prescription_type == 2){
+                $where['b.order_prescription_type'] = ['in', [2,3]];
+            }
             if ($shelf_number) {
                 $shelf_number_arr = $this->_stock_house->where(['type' => 2,'subarea' => $shelf_number])->column('id');
                 if(!empty($shelf_number_arr)){
-                    $where['b.store_house_id'] = ['in', $shelf_number_arr];
+                    if (!empty($store_house_ids)) {
+                        $shelf_number_arr = array_merge($shelf_number_arr, $store_house_ids);
+                        $where['b.store_house_id'] = ['in', $shelf_number_arr];
+                    }
                 }
             }
             $list = $this->_new_order_item_process
