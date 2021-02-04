@@ -2216,7 +2216,7 @@ class Test4 extends Controller
         $start = '2021-01-01';
         $end = '2021-01-31 23:59:59';
         $where['create_time'] = ['between',[$start,$end]];
-        $email = $this->zendesk->where('assign_id  is null or assign_id=0')->where($where)->select();
+        $email = $this->zendesk->where('assign_id  is null or assign_id=0')->where($where)->select(false);
         foreach ($email as $key=>$value){
             //判断是否只有用户发送的邮件
             $count = Db::name('zendesk_comments')->where('zid',$value['id'])->where('is_admin',1)->count();
@@ -2224,7 +2224,7 @@ class Test4 extends Controller
                 $data['zid'] = $value['id'];
                 $data['ticket_id'] = $value['ticket_id'];
                 //判断是否有合并邮件
-                $zemail = Db::name('zendesk_comments')->where('zid',$value['id'])->where('is_admin',1)->field('html_body')->select();
+                $zemail = Db::name('zendesk_comments')->where('zid',$value['id'])->where('is_admin',0)->field('html_body')->select();
                 foreach ($zemail as $k=>$v){
                     $str = strtolower($v['html_body']);
                     if(strpos($str,'merge') !== false){
