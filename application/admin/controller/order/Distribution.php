@@ -2118,13 +2118,13 @@ class Distribution extends Backend
             //子订单状态回滚
             $this->model->where(['id' => ['in', $ids]])->update($save_data);
 
-            //回退到待配货，解绑条形码
+            /*//回退到待配货，解绑条形码
             if (2 == $status) {
                 $this->_product_bar_code_item
                     ->allowField(true)
                     ->isUpdate(true, ['item_order_number' => ['in', $item_order_numbers]])
                     ->save(['item_order_number' => '']);
-            }
+            }*/
 
             //记录日志
             DistributionLog::record($admin, array_column($item_list, 'id'), 6, $status_arr[$reason]['name']);
@@ -2169,6 +2169,12 @@ class Distribution extends Backend
                     $outstock_item['out_stock_num'] = 1;
                     $outstock_item['out_stock_id'] = $outstock_id;
                     $this->_outstock_item->insert($outstock_item);
+
+                    //条码出库
+                    $this->_product_bar_code_item
+                    ->allowField(true)
+                    ->isUpdate(true, ['item_order_number' => ['in', $item_order_numbers]])
+                    ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2,'out_stock_id' => $outstock_id]);
 
                     //扣减虚拟仓库存
                     $this->_item_platform_sku
@@ -2373,13 +2379,13 @@ class Distribution extends Backend
 
                 $this->model->where(['id' => $ids])->update($save_data);
 
-                //回退到待配货、待打印标签，解绑条形码
+                /*//回退到待配货、待打印标签，解绑条形码
                 if (3 > $status) {
                     $this->_product_bar_code_item
                         ->allowField(true)
                         ->isUpdate(true, ['item_order_number' => $item_info['item_order_number']])
                         ->save(['item_order_number' => '']);
-                }
+                }*/
 
                 //标记处理异常状态及时间
                 $this->_distribution_abnormal->where(['id' => $abnormal_info['id']])->update(['status' => 2, 'do_time' => time(), 'do_person' => $admin->nickname]);
@@ -2446,6 +2452,12 @@ class Distribution extends Backend
                     $outstock_item['out_stock_num'] = 1;
                     $outstock_item['out_stock_id'] = $outstock_id;
                     $this->_outstock_item->insert($outstock_item);
+
+                    //条码出库
+                    $this->_product_bar_code_item
+                    ->allowField(true)
+                    ->isUpdate(true, ['item_order_number' => ['in', $item_order_numbers]])
+                    ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2,'out_stock_id' => $outstock_id]);
 
                     //记录库存日志
                     $this->_stock_log->setData([

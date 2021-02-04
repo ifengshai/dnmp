@@ -1334,13 +1334,13 @@ class ScmDistribution extends Scm
                     ->isUpdate(true, ['id' => $item_process_info['id']])
                     ->save($save_data);
 
-                //回退到待配货，解绑条形码
+                /*//回退到待配货，解绑条形码
                 if (2 == $status) {
                     $this->_product_bar_code_item
                         ->allowField(true)
                         ->isUpdate(true, ['item_order_number' => $item_order_number])
                         ->save(['item_order_number' => '']);
-                }
+                }*/
 
                 //质检拒绝：镜架报损，扣减可用库存、配货占用、总库存、虚拟仓库存
                 if (2 == $reason) {
@@ -1395,6 +1395,12 @@ class ScmDistribution extends Scm
                     $outstock_item['out_stock_num'] = 1;
                     $outstock_item['out_stock_id'] = $outstock_id;
                     $this->_outstock_item->insert($outstock_item);
+
+                    //条码出库
+                    $this->_product_bar_code_item
+                    ->allowField(true)
+                    ->isUpdate(true, ['item_order_number' => ['in', $item_order_numbers]])
+                    ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2,'out_stock_id' => $outstock_id]);
 
                     //扣减虚拟仓库存
                     $this->_item_platform_sku
@@ -2275,13 +2281,6 @@ class ScmDistribution extends Scm
                         ]);
                     //审单拒绝-报损出库,所选SKU退回待配货，条码出库，其余子订单回到待合单。扣减总库存、可用库存、虚拟库存，配货占用库存
                     if (2 == $check_refuse) {
-                        //条码出库
-                        $this->_product_bar_code_item
-                            ->allowField(true)
-                            ->isUpdate(true, ['item_order_number' => ['in', $item_order_numbers]])
-                            ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2]);
-
-
                         //扣减占用库存、配货占用、总库存、虚拟仓库存
                         foreach ($item_info as $key => $value) {
                             /**************工单更换镜框******************/
@@ -2340,6 +2339,11 @@ class ScmDistribution extends Scm
                             $outstock_item['out_stock_id'] = $outstock_id;
                             $this->_outstock_item->insert($outstock_item);
 
+                            //条码出库
+                            $this->_product_bar_code_item
+                            ->allowField(true)
+                            ->isUpdate(true, ['item_order_number' => ['in', $item_order_numbers]])
+                            ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2,'out_stock_id' => $outstock_id]);
                             //扣减虚拟仓库存
                             $this->_item_platform_sku
                                 ->where(['sku' => $true_sku, 'platform_type' => $value['site']])
@@ -2425,11 +2429,11 @@ class ScmDistribution extends Scm
                                 'sku' => $true_sku,
                                 'number_type' => 2,
                                 'order_number' => $value['item_order_number'],
-                                'occupy_stock_before' => $stock_arr['occupy_stock'],
+                                // 'occupy_stock_before' => $stock_arr['occupy_stock'],
                                 'distribution_stock_before' => $stock_arr['distribution_occupy_stock'],
                                 'distribution_stock_change' => -1,
-                                'stock_before' => $stock_arr['stock'],
-                                'fictitious_before' => $platform_info['stock'],
+                                // 'stock_before' => $stock_arr['stock'],
+                                // 'fictitious_before' => $platform_info['stock'],
                                 'create_person' => $create_person,
                                 'create_time' => time()
                             ];
