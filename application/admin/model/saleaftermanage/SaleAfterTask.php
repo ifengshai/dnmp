@@ -831,7 +831,7 @@ class SaleAfterTask extends Model
                         $result[$k]['order_type'] = '<span style="color:#e74c3c">补发</span>';
                         break;
                     default:
-                        $result[$k]['order_type'] = '<span style="color:#0073b7">普通订单</span>';
+                        $result[$k]['order_type'] = '<span style="color:#0073b7">普通</span>';
                         break;
                 }
                 $result[$k]['real_papid'] = round(($v['base_total_paid'] + $v['base_total_due']) * $v['base_to_order_rate'], 3);

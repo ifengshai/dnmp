@@ -96,17 +96,17 @@
     <h2>订单信息列表</h2>
     <div class="table-responsive">
         <ul class="order-list" >
-            <li style="width: 76px">订单类型</li>
-            <li style="width: 76px">订单号</li>
+            <li style="width: 38px">类型</li>
+            <li style="width: 100px">订单号</li>
             <li style="width: 76px">物流渠道</li>
             <li style="width: 76px">头程单号</li>
 <!--            <li class="num" style="width: 150px">快递单号</li>-->
             <li  style="width: 76px">快递单号</li>
             <li style="width: 76px">快递名称</li>
-            <li style="width: 76px">订单状态</li>
+            <li style="width: 150px">订单状态</li>
             <li style="width: 45px;">更换<br>地址</li>
-            <li style="width: 76px">商品数量</li>
-            <li style="width: 76px"> 支付货币</li>
+            <li style="width: 38px">数量</li>
+            <li style="width: 38px"> 币种</li>
             <li style="width: 76px">原币种<br>支付金额</li>
             <li style="width: 76px">美金($)<br>支付金额</li>
             <li style="width: 76px">优惠券</li>
@@ -124,8 +124,8 @@
         {foreach name="orderInfoResult" item="orderInfoList"}
 
         <ul class="order-list"  >
-            <li  style="width: 76px"class="normal">{$orderInfoList.order_type}</li>
-            <li style="width: 76px">{$orderInfoList.increment_id}</li>
+            <li  style="width: 38px"class="normal">{$orderInfoList.order_type}</li>
+            <li style="width: 100px">{$orderInfoList.increment_id}</li>
             <li style="width: 76px">{$orderInfoList.agent_way_title}</li>
 <!--            <li class="num">-->
             <li style="width: 76px">
@@ -133,10 +133,10 @@
                     data-id='{$orderInfoList.entity_id}'>{$orderInfoList.track_number}</a></li>
             <li style="width: 76px">{$orderInfoList.shipment_num}</li>
             <li style="width: 76px">{$orderInfoList.title}</li>
-            <li style="width: 76px">{$orderInfoList.status}</li>
+            <li style="width: 150px">{$orderInfoList.status}</li>
             <li style="width: 46px;">{:$orderInfoList['is_modify_address'] == 1 ? '是' : '否'}</li>
-            <li style="width: 76px">{$orderInfoList.total_qty_ordered}</li>
-            <li style="width: 76px">{$orderInfoList.order_currency_code}</li>
+            <li style="width: 38px">{$orderInfoList.total_qty_ordered}</li>
+            <li style="width: 38px">{$orderInfoList.order_currency_code}</li>
             <li style="width: 76px">{:round($orderInfoList.grand_total,2)}</li>
             <li style="width: 76px">{:round($orderInfoList.base_grand_total,2)}</li>
             <li style="width: 76px">{$orderInfoList.coupon_code}</li>
