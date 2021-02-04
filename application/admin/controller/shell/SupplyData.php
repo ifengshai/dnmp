@@ -293,11 +293,13 @@ class SupplyData extends Backend
     //查询sku的有效天数的销量和有效天数
     public function getDullStock($sku,$site)
     {
+        $skuSalesNum = new \app\admin\model\SkuSalesNum();
         $date = date('Y-m-d');
         $map['createtime'] = ['<', $date];
         $map['sku'] = $sku;
         $map['site'] = $site;
-        $data['sales_num'] = Db::name('sku_sales_num')->where($map)->order('createtime', 'desc')->limit(30)->sum('sales_num');
+        $sql = $skuSalesNum->field('sales_num')->where($map)->limit(30)->order('createtime desc')->buildSql();
+        $data['sales_num'] = Db::table($sql.' a')->sum('a.sales_num');
         $days = Db::name('sku_sales_num')->where($map)->count();
         $data['days'] = $days > 30 ? 30 : $days;
         return $data;

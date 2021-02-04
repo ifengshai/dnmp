@@ -663,7 +663,7 @@ class DataMarket extends Backend
                 $end = date('Y-m-d 23:59:59');
                 $time_str = $start . ' - ' . $end;
             }
-            $cache_data = Cache::get('Supplydatacenter_datamarket'  .$time_str. md5(serialize('purchase_histogram_line')));
+            $cache_data = Cache::get('Supplydatacenter_datamarket'  .$time_str. md5(serialize('order_histogram_line')));
             if (!$cache_data) {
                 $createat = explode(' ', $time_str);
                 $date = $this->getDateFromRange($createat[0],$createat[3]);
@@ -693,7 +693,7 @@ class DataMarket extends Backend
                     $untimeout_count = $count1 + $count2 + $count3;
                     $arr[$key]['rate'] = $arr[$key]['order_count'] ? round($untimeout_count/$arr[$key]['order_count']*100,2) : 0;
                 }
-                Cache::set('Supplydatacenter_datamarket'.$time_str.md5(serialize('purchase_histogram_line')),$arr,7200);
+                Cache::set('Supplydatacenter_datamarket'.$time_str.md5(serialize('order_histogram_line')),$arr,7200);
             }else{
                 $arr = $cache_data;
             }
