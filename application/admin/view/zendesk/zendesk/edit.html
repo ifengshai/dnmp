@@ -63,7 +63,7 @@
             <!--                &lt;!&ndash; /.box &ndash;&gt;-->
             <!--            </div>-->
             <!-- /.col -->
-            <div class="col-md-7 col-center" style="width: 66%;margin-bottom: 45px;border-right:0px !important;">
+            <div class="col-md-7 col-center" style="width: 62.4%;margin-bottom: 45px;border-right:0px !important;">
                 <div class="nav-tabs-custom">
                     {if condition="$status neq 5"}
                         <div class="box box-solid">
@@ -73,9 +73,9 @@
                             <div class="user-block pull-left" style="margin-top: 45px">
                                 <a style="position: absolute;top: 37px;left: 6%"><h2> <font style="color: #4564A7">#{$ticket->ticket_id}</font></h2></a>
                                 <span class="username">
-                                  <span href="#"><input id="c-subject" data-rule="required" value="{$ticket->subject}" class="form-control ticket-subject" name="row[subject]" type="text" style="margin-left:38px"></span>
+                                  <span href="#"><input id="c-subject" data-rule="required" value="{$ticket->subject}" class="form-control ticket-subject" name="row[subject]" type="text" style="margin-left:28px"></span>
                                 </span>
-                                <span class="description">{$ticket->zendesk_update_time} · {$ticket->username} {$ticket->email} · {$ticket->channel}</span>
+                                <span class="description" style="margin-left: 93px">{$ticket->zendesk_update_time} · {$ticket->username} {$ticket->email} · {$ticket->channel}</span>
                             </div>
                             <div class="user-block pull-right" style="margin-top: 45px">
                                 <button type="button" class="btn btn-default" data-toggle="modal" data-target="#modal-default">
@@ -92,20 +92,20 @@
                         </div>
                         {/if}
 
-                        <div class="form-group">
+                        <div class="form-group" >
                             <label class="control-label col-xs-12 col-sm-2">{:__('CCs')}：</label>
-                            <div class="col-xs-12 col-sm-8">
+                            <div class="col-xs-12 col-sm-8" style="width: 66%">
                                 <input   class="form-control" id='ccs' name="row[email_cc]" type="text" value="{$rows.email_cc}">
                             </div>
                         </div>
 
                         <div class="form-group">
                             <label class="control-label col-xs-12 col-sm-2">{:__('pulbic_type')}：</label>
-                            <div class="col-xs-12 col-sm-8" style="width: 25%">
+                            <div class="col-xs-12 col-sm-8" style="width: 27.5%">
                                 {:Form::select('row[public_type]', config('zendesk.pulbic_type'), null, ['class'=>'form-control selectpicker', null,'data-live-search' => true,'id'=>'Entry_type_select'])}
                             </div>
                             <label class="control-label col-xs-12 col-sm-2">{:__('Status')}：</label>
-                            <div class="col-xs-12 col-sm-8" style="width: 25%">
+                            <div class="col-xs-12 col-sm-8" style="width: 27.5%">
                                 <select class="form-control ticket-status selectpicker" data-live-search="1" data-rule="required" name="row[status]">
                                     {if condition="$ticket->status ==1"}
                                     <option value="1">new</option>
@@ -131,13 +131,13 @@
                         <!--                        </div>-->
                         <div class="form-group">
                             <label class="control-label col-xs-12 col-sm-2">回复内容：</label>
-                            <div class="col-xs-12 col-sm-9" style="width: 66.5%">
-                                <textarea id="c-content" class="form-control editor ticket-content" rows="5" name="row[content]" cols="50"></textarea>
+                            <div class="col-xs-12 col-sm-9" style="width: 71.5%">
+                                <textarea id="c-content" class="form-control editor ticket-content" rows="5" name="row[content]" cols="50" style="word-break: break-word;"></textarea>
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="c-image" class="control-label col-xs-12 col-sm-2">上传附件：</label>
-                            <div class="col-xs-12 col-sm-8">
+                            <div class="col-xs-12 col-sm-8"  style="width: 74%">
                                 <div class="input-group uploadBox">
                                     <input id="c-image" class="form-control" size="35" name="row[image]" type="text" value="">
                                     <div class="input-group-addon no-border no-padding upload">
@@ -157,7 +157,7 @@
 
                         <div class="form-group">
                             <label class="control-label col-xs-12 col-sm-2">选择模板：</label>
-                            <div class="col-xs-12 col-sm-8">
+                            <div class="col-xs-12 col-sm-8" style="width: 72%">
                                 <select id="Entry_status_select" class="form-control selectpicker macro-apply" data-live-search="true" title="选择模板">
                                     <optgroup label="常用模板">
                                         {foreach name="templates" item="vo" key="key"}
@@ -180,11 +180,11 @@
 
                         <div class="form-group">
                             <label class="control-label col-xs-12 col-sm-2">{:__('标签')}：</label>
-                            <div class="col-xs-12 col-sm-8" style="width: 25%">
+                            <div class="col-xs-12 col-sm-8" style="width: 27.5%">
                                 {:Form::select('row[tags][]', $tags, explode(',',$ticket->tags), ['class'=>'form-control selectpicker ticket-tags', null,'multiple' => true,'data-live-search' => true,'id'=>'Entry_tags_select'])}
                             </div>
                             <label class="control-label col-xs-12 col-sm-2">{:__('优先级')}：</label>
-                            <div class="col-xs-12 col-sm-8" style="width: 25%">
+                            <div class="col-xs-12 col-sm-8" style="width: 27.9%">
                                 <select class="form-control ticket-priority selectpicker" data-live-search="1" data-rule="required" name="row[priority]">-->
                                     {if condition="$ticket->priority == 0"}
                                     <option value="0" {$ticket->priority == 0 ? 'selected' : ''}>- </option>
@@ -198,11 +198,11 @@
                         </div>
 
                         <div class="form-group layer-footer">
-                            <div class="col-xs-12 col-sm-8" style="width: 40%;">
+                            <div class="col-xs-12 col-sm-8" style="width: 32%;">
                                 <a href="javascript:;" style="float: right;width: 150px" class="btn btn-primary btn-add create_ticket" title="{:__('创建工单')}">{:__('创建工单')} </a>
                             </div>
                             {if condition="$ticket->status != 5"}
-                            <div class="col-xs-12 col-sm-8" style="width: 40%;float: right;">
+                            <div class="col-xs-12 col-sm-8" style="width: 26.5%;float: right;">
                                 <button  type="submit"  class="btn btn-success btn-embossed disabled" style="width: 150px">发送邮件</button>
                             </div>
                             {/if}
@@ -277,7 +277,7 @@
             <!-- /.nav-tabs-custom -->
     </div>
     </form>
-    <div class="col-md-3" style="width: 33%;margin-left: 15px">
+    <div class="col-md-3" style="width: 36%;margin-left: 1%">
         <div class="box box-primary" style="height:130px;border-top-color:{if condition="$ticket->type eq 1"}#3c65c8"{elseif condition="$ticket->type eq 2"/}#f5513a"{elseif condition="$ticket->type eq 3"/}#b4a078"{/if}>
             <div class="box-body box-profile"  style="height:130px;background-color:{if condition="$ticket->type eq 1"}#3c65c8"{elseif condition="$ticket->type eq 2"/}#f5513a"{elseif condition="$ticket->type eq 3"/}#b4a078"{/if}>
             <img class="profile-user-img  img-circle"  src="/assets/img/avatar.png" alt="User profile picture" style="width: 74px;margin-top: 17px;margin-left: 29px" >

@@ -544,7 +544,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                 Form.api.bindevent($("form[role=form]"));
                 //抄送人标签输入
                 $('#ccs').tagsInput({
-                    width: 'auto',
+                    width: '109%',
                     defaultText: '输入后回车确认',
                     minInputWidth: 110,
                     height: 'auto',
