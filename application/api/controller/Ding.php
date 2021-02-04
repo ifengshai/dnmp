@@ -416,29 +416,58 @@ class Ding extends Controller
                     }
                     file_put_contents('/www/wwwroot/mojing/runtime/log/Ding.txt', json_encode($payload), FILE_APPEND);
                     break;
+                    // case 'bpms_instance_change':
+                    //     //审批任务事件(开始、结束、转交)
+                    //     /**
+                    //      * @todo 修改审批任务为完成状态
+                    //      */
+                    //     file_put_contents('/www/wwwroot/mojing/runtime/log/Ding.log', 'type---------------' . $payload['type'] . "\n\n", FILE_APPEND);
+
+                    //     if ($payload['type'] == 'finish') {
+                    //         //审核日志
+                    //         FinancePurchaseLog::create([
+                    //             'process_instance_id' => $payload['processInstanceId'],
+                    //             'check_time' =>  substr($payload['finishTime'] , 0 , 11),
+                    //             'title' => $payload['title'],
+                    //             'result' => $payload['result'],
+                    //             'userid' => $payload['staffId']
+                    //         ]);
+
+                    //         //判断审核状态 审核拒绝
+                    //         if ($payload['result'] == 'refuse') {
+                    //             FinancePurchase::where(['process_instance_id' => $payload['processInstanceId']])->update(['status' => 3]);
+                    //             //最后一步判断如果为李亚方审核通过改为完成
+                    //         } elseif ($payload['result'] == 'agree' && $payload['staffId'] == '171603353926064429') {
+                    //             FinancePurchase::where(['process_instance_id' => $payload['processInstanceId']])->update(['status' => 4]);
+                    //         }
+                    //     }
+
+                    //     file_put_contents('/www/wwwroot/mojing/runtime/log/Ding.log', 'bpms_instance_change---------------' . serialize($payload) . "\n\n", FILE_APPEND);
+                    //     break;
+
                 case 'bpms_task_change':
+
                     //审批任务事件(开始、结束、转交)
                     /**
                      * @todo 修改审批任务为完成状态
                      */
                     if ($payload['type'] == 'finish') {
                         //审核日志
-                        FinancePurchaseLog::create([
+                        FinancePurchaseLog::insert([
                             'process_instance_id' => $payload['processInstanceId'],
-                            'check_time' => $payload['finishTime'],
+                            'check_time' => substr($payload['finishTime'], 0, 10),
                             'title' => $payload['title'],
                             'result' => $payload['result'],
                             'userid' => $payload['staffId']
                         ]);
-                        
+
                         //判断审核状态 审核拒绝
                         if ($payload['result'] == 'refuse') {
-                            FinancePurchase::where(['process_instance_id' => $payload['process_instance_id']])->update(['status' => 3]);
-                            //最后一步判断如果为王剑审核通过改为完成
-                        } elseif($payload['result'] == 'agree' && $payload['staffId'] == '0647044715938022') {
-                            FinancePurchase::where(['process_instance_id' => $payload['process_instance_id']])->update(['status' => 4]);
-                        }   
-
+                            FinancePurchase::where(['process_instance_id' => $payload['processInstanceId']])->update(['status' => 3]);
+                            //最后一步判断如果为李亚方审核通过改为完成
+                        } elseif ($payload['result'] == 'agree' && $payload['staffId'] == '171603353926064429') {
+                            FinancePurchase::where(['process_instance_id' => $payload['processInstanceId']])->update(['status' => 4]);
+                        }
                     }
 
                     file_put_contents('/www/wwwroot/mojing/runtime/log/Ding.log', 'bpms_task_change---------------' . serialize($payload) . "\n\n", FILE_APPEND);
@@ -448,6 +477,19 @@ class Ding extends Controller
 
         $server->serve()->send();
     }
+
+
+    public function test0001()
+    {
+        FinancePurchaseLog::insert([
+            'process_instance_id' => 'af7583ca-33bc-49ad-b34d-94cbeff1be95',
+            'check_time' => substr('1612347878000', 0, 10),
+            'title' => '汪鹏垒提交的采购部付款审批',
+            'result' => 'refuse',
+            'userid' => '285501046927507550'
+        ]);
+    }
+
 
     /**
      * 第一次插入所有的部门详情
