@@ -2337,13 +2337,18 @@ class ScmDistribution extends Scm
                 }
             }
         }
-        if (1 == $check_status) {
-            //审单触发收入核算
-            $FinanceCost = new FinanceCost();
-            $FinanceCost->order_income($order_id);
 
-            //计算出库成本 
-            $FinanceCost->order_cost($order_id);
+        try {
+            if (1 == $check_status) {
+                //审单触发收入核算
+                $FinanceCost = new FinanceCost();
+                $FinanceCost->order_income($order_id);
+
+                //计算出库成本
+                $FinanceCost->order_cost($order_id);
+            }
+        } catch (Exception $e) {
+            $this->error(__('审单已通过,成本核算逻辑有误,请联系魔晶'), [], 405);
         }
         $this->success($msg . '成功', [], 200);
     }
