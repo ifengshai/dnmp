@@ -2427,11 +2427,11 @@ class ScmDistribution extends Scm
                                 'sku' => $true_sku,
                                 'number_type' => 2,
                                 'order_number' => $value['item_order_number'],
-                                'occupy_stock_before' => $stock_arr['occupy_stock'],
+                                // 'occupy_stock_before' => $stock_arr['occupy_stock'],
                                 'distribution_stock_before' => $stock_arr['distribution_occupy_stock'],
                                 'distribution_stock_change' => -1,
-                                'stock_before' => $stock_arr['stock'],
-                                'fictitious_before' => $platform_info['stock'],
+                                // 'stock_before' => $stock_arr['stock'],
+                                // 'fictitious_before' => $platform_info['stock'],
                                 'create_person' => $create_person,
                                 'create_time' => time()
                             ];
