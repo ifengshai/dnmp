@@ -249,16 +249,21 @@ class Distribution extends Backend
                             ->alias('a')
                             ->join(['fa_store_sku' => 'b'], 'a.id=b.store_id')
                             ->where([
-                                'a.shelf_number' => ['eq', $filter['shelf_number']],
+                                'a.shelf_number' => ['in', $filter['shelf_number']],
+                                'a.type' => 1,
+                                'a.status' => 1,
+                                'b.is_del' => 1
                             ])
                             ->column('b.sku');
+
                     //平台SKU表替换sku
                     $sku = Db::connect('database.db_stock');
-                    $sku_array = $sku->table('fa_item_platform_sku')->where(['sku'=>['in',$shelf_number]])->column('platform_sku');
+                    $sku_array = $sku->table('fa_item_platform_sku')->where(['sku' => ['in', $shelf_number]])->column('platform_sku');
                     $map['a.sku'] = ['in', $sku_array];
                 }
                 unset($filter['shelf_number']);
             }
+
 
             //筛选库位号
             if ($filter['stock_house_num']) {
