@@ -39,6 +39,7 @@ use PhpOffice\PhpSpreadsheet\Reader\Xls;
 use PhpOffice\PhpSpreadsheet\Reader\Csv;
 use app\admin\model\AuthGroup;
 use app\admin\model\warehouse\ProductBarCodeItem;
+use app\admin\model\itemmanage\ItemPlatformSku;
 
 /**
  * 售后工单列管理
@@ -3194,15 +3195,27 @@ class WorkOrderList extends Backend
                         $barcode = $params['barcode'];
                         $product_bar_code_item = new ProductBarCodeItem();
                         $work_order_change_sku = new WorkOrderChangeSku();
+                        $item_platform_sku = new ItemPlatformSku();
                         $gift_sku = $work_order_change_sku->field('id,change_sku,change_number')->where(['work_id' => $receptInfo['work_id'],'change_type' => 4])->select();
                         if (!empty($gift_sku)) {
                             $gift_sku = collection($gift_sku)->toArray();
                             foreach ($gift_sku as $key => $value) {
                                 for ($i=1; $i <= $value['change_number']; $i++) { 
+                                    //仓库sku
+                                    $platform_info = $item_platform_sku
+                                        ->field('sku,stock')
+                                        ->where(['platform_sku' => $value['change_sku'], 'platform_type' => $row['work_platform']])
+                                        ->find();
+                                    if ($platform_info['sku']) {
+                                         $value['change_sku'] = $platform_info['sku'];
+                                    }
                                     if (empty($barcode[$value['change_sku'].'_'.$i])) {
                                         $this->error("序号为".$i."的sku(".$value['change_sku'].")，条形码不能为空");
                                     }
                                     $bar_code_info = $product_bar_code_item->where(['code' => $barcode[$value['change_sku'].'_'.$i]])->find();
+                                    if (empty($bar_code_info)) {
+                                        $this->error("序号为".$i."的，赠品条形码不存在");
+                                    }
                                     if ($bar_code_info['library_status'] == 2) {
                                         $this->error("序号为".$i."的sku(".$value['change_sku'].")，在库状态为否");
                                     }

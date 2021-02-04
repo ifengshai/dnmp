@@ -1996,10 +1996,20 @@ class WorkOrderList extends Model
             if(6 == $measure_choose_id){
                 $product_bar_code_item = new ProductBarCodeItem();
                 $work_order_change_sku = new WorkOrderChangeSku();
+                $item_platform_sku = new ItemPlatformSku();
                 $gift_sku = $work_order_change_sku->field('id,change_sku,change_number')->where(['work_id' => $work_id,'change_type' => 4])->select();
                 if (!empty($gift_sku)) {
                     $gift_sku = collection($gift_sku)->toArray();
+
                     foreach ($gift_sku as $key => $value) {
+                        //仓库sku
+                        $platform_info = $item_platform_sku
+                            ->field('sku,stock')
+                            ->where(['platform_sku' => $value['change_sku'], 'platform_type' => $row['work_platform']])
+                            ->find();
+                        if ($platform_info['sku']) {
+                             $value['change_sku'] = $platform_info['sku'];
+                        }
                         for ($i=1; $i <= $value['change_number']; $i++) { 
                             $product_bar_code_item->where(['code' => $barcode[$value['change_sku'].'_'.$i]])
                             ->update(['item_order_number' => $work->platform_order, 'library_status' => 2, 'out_stock_time' => date('Y-m-d H:i:s')]);
