@@ -416,6 +416,7 @@ class Zendesk extends Backend
     public function edit($ids = null)
     {
         $row = $this->model->get($ids);
+        $status = input('param.status');
         if (!$row) {
             $this->error(__('No Results were found'));
         }
@@ -695,6 +696,7 @@ class Zendesk extends Backend
         $this->view->assign('rows', $row);
         $this->view->assign('is_vip', $is_vip);
         $this->view->assign('ids', $ids);
+        $this->view->assign('status', $status);
         $this->view->assign('orders_countds', $orders_count);
         $this->view->assign('recentTickets_count', $recentTickets_count);
         // $this->view->assign('username', $username);
