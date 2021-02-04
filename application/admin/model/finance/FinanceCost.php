@@ -494,6 +494,7 @@ class FinanceCost extends Model
         $params['type'] = 2;
         $params['bill_type'] = 9;
         $params['order_number'] = $out_stock_number;
+        $params['out_stock_id'] = $out_stock_id;
         $params['frame_cost'] = $this->outstock_frame_cost($out_stock_id);
         $params['action_type'] = 1;
         $params['order_currency_code'] = 'cny';
@@ -515,7 +516,7 @@ class FinanceCost extends Model
     {
         $product_barcode_item = new \app\admin\model\warehouse\ProductBarCodeItem();
         //根据子单号查询条形码绑定关系
-        $list = $product_barcode_item->alias('a')->field('purchase_price,actual_purchase_price,c.purchase_total,purchase_num')
+        $list = $product_barcode_item->alias('a')->field('purchase_price,actual_purchase_price,c.purchase_total,purchase_num,purchase_freight')
             ->where(['out_stock_id' => $out_stock_id])
             ->join(['fa_purchase_order_item' => 'b'], 'a.purchase_id=b.purchase_id and a.sku=b.sku')
             ->join(['fa_purchase_order' => 'c'], 'a.purchase_id=c.id')
@@ -523,7 +524,11 @@ class FinanceCost extends Model
         $list = collection($list)->toArray();
         $allcost = 0;
         foreach ($list as $k => $v) {
-            $allcost += $v['actual_purchase_price'] > 0 ? $v['actual_purchase_price'] : $v['purchase_total'] / $v['purchase_num'];
+            if ($v['purchase_freight'] > 0) {
+                $allcost += $v['actual_purchase_price'] > 0 ? $v['actual_purchase_price'] : ($v['purchase_total'] / $v['purchase_num']);
+            } else {
+                $allcost += $v['actual_purchase_price'] > 0 ? $v['actual_purchase_price'] : $v['purchase_price'];
+            }
         }
         return $allcost;
     }
