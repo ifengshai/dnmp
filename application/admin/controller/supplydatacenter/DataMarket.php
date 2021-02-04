@@ -449,7 +449,7 @@ class DataMarket extends Backend
     }
     //库存分级概况
     public function stock_level_overview2(){
-        $cache_data = Cache::get('Supplydatacenter_datamarket5555'  . md5(serialize('stock_level_overview2')));
+        $cache_data = Cache::get('Supplydatacenter_datamarket'  . md5(serialize('stock_level_overview2')));
         if ($cache_data) {
             return $cache_data;
         }
