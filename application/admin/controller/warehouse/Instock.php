@@ -1351,7 +1351,7 @@ class Instock extends Backend
 
             //校验模板文件格式
             // $listName = ['商品SKU', '类型', '补货需求数量'];
-            $listName = ['入库分类', '平台', 'SKU', '入库数量', '商品条码'];
+            $listName = ['入库分类', '平台', 'SKU', '入库数量', '商品条码','采购单价'];
 
             $listName !== $fields && $this->error(__('模板文件格式错误！'));
 
@@ -1375,6 +1375,7 @@ class Instock extends Backend
                 $type != '退货入库' && $this->error(__('导入失败,导入仅限退货入库'));
                 $num != 1 && $this->error(__('导入失败,入库数量必须是1'));
                 empty($sku) && $this->error(__('导入失败,第 ' . ($k + 1) . ' 行SKU为空！'));
+                empty(trim($v[4])) && $this->error(__('导入失败,第 ' . ($k + 1) . ' 行采购单价为空！'));
                 $sku_arr[] = $sku;
             }
 
