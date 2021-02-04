@@ -432,7 +432,27 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                 Backend.api.open('zendesk/zendesk/order_detail?ids='+ids, '订单节点',{area: ['50%', '45%'] });
             });
 
-
+            $(document).on('click', '.load_more', function () {
+                var page =  $(".load_more").data("value")
+                var email =  $(".load_more").data("area")
+                var type =  $(".load_more").data("action")
+                $.ajax({
+                    type: "POST",
+                    url: "zendesk/zendesk/order_toload_more",
+                    dataType: "json",
+                    cache: false,
+                    async: false,
+                    data: {page:page,email:email,type:type},
+                    success: function (json) {
+                        $('#lanren').append(json)
+                        $(".load_more").data("value",page+1)
+                    },
+                    error: function (json) {
+                        return false;
+                    }
+                })
+                return false;
+            });
 
 
             $(document).on('click','.change-ticket',function(){

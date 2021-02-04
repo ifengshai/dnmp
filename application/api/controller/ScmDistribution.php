@@ -2,6 +2,7 @@
 
 namespace app\api\controller;
 
+use app\admin\model\order\Order;
 use app\admin\model\platformmanage\MagentoPlatform;
 use app\admin\model\saleaftermanage\WorkOrderChangeSku;
 use app\admin\model\saleaftermanage\WorkOrderMeasure;
@@ -1633,7 +1634,7 @@ class ScmDistribution extends Scm
         //获取子订单数据
         $item_process_info = $this->_new_order_item_process
             ->where('item_order_number', $item_order_number)
-            ->field('id,distribution_status,order_id')
+            ->field('id,distribution_status,order_id,item_id')
             ->find();
         empty($item_process_info) && $this->error(__('子订单不存在'), [], 403);
         !in_array($item_process_info['distribution_status'], [7, 8]) && $this->error(__('子订单当前状态不可合单操作'), [], 403);
@@ -1643,7 +1644,7 @@ class ScmDistribution extends Scm
             ->alias('a')
             ->where('a.id', $item_process_info['order_id'])
             ->join(['fa_order_process' => 'b'], 'a.id=b.order_id', 'left')
-            ->field('a.id,a.increment_id,b.store_house_id')
+            ->field('a.id,a.increment_id,a.site,a.entity_id,b.store_house_id')
             ->find();
         empty($order_process_info) && $this->error(__('主订单不存在'), [], 403);
 
@@ -1713,6 +1714,7 @@ class ScmDistribution extends Scm
             if ($result !== false) {
                 //操作成功记录
                 DistributionLog::record($this->auth, $item_process_info['id'], 7, '子单号：' . $item_order_number . '作为主单号' . $order_process_info['increment_id'] . '的' . $num . '子单合单完成，库位' . $store_house_info['coding']);
+                Order::rulesto_adjust($item_process_info['item_id'],$item_order_number,$item_process_info['site'],2,9);
                 if (!$next) {
                     //最后一个子单且合单完成，更新主单、子单状态为合单完成
                     $this->_new_order_item_process
@@ -2418,6 +2420,7 @@ class ScmDistribution extends Scm
                     }
                 }
             } else {
+                Order::rulesto_adjust($row['entity_id'],$row['increment_id'],$row['site'],2,9);
                 //审单通过，扣减占用库存、配货占用、总库存
                 foreach ($item_info as $key => $value) {
 

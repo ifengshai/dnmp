@@ -239,7 +239,8 @@ class SelfApi extends Api
         (new OrderNodeDetail())->allowField(true)->save([
             'order_number' => $order_number,
             'order_id' => $order_id,
-            'content' => 'Leave warehouse, Waiting for being picked up.',
+//            'content' => 'Leave warehouse, Waiting for being picked up.',
+            'content' => 'Order leave warehouse, waiting for being picked up.',
             'site' => $site,
             'create_time' => date('Y-m-d H:i:s'),
             'order_node' => 2,
