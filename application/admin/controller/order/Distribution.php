@@ -1427,7 +1427,7 @@ class Distribution extends Backend
         //标记打印状态
         $this->model->startTrans();
         try {
-            $distribution_value = $this->model->where(['id' => ['in', $ids]])->field('magento_order_id,item_order_number,site')->select();
+            $distribution_value = $this->model->where(['id' => ['in', $ids]])->field('magento_order_id,order_id, item_order_number,site')->select();
             $distribution_value = collection($distribution_value)->toArray();
 
             foreach ($distribution_value as $key=>$value){
@@ -1905,7 +1905,7 @@ class Distribution extends Backend
                 //节点记录
                 //将订单号截取处理
                 $value['item_order_number'] =  substr($value['item_order_number'],0,strpos($value['item_order_number'], '-'));
-                Order::rulesto_adjust($value['magento_order_id'],$increment_id,$value['site'],2,$node_status);
+                Order::rulesto_adjust($value['magento_order_id'], $value['item_order_number'],$value['site'],2,$node_status);
             }
 
             $this->_item->commit();
