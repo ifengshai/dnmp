@@ -44,6 +44,8 @@ class Dashboard extends Backend
         if ($yestoday) {
             $yestoday->all_sales_money = $yestoday->all_sales_money + ($yestoday->zeelool_de_sales_money * 1.2045) + ($yestoday->zeelool_jp_sales_money * 0.009530);
             $yestoday->all_sales_num = $yestoday->all_sales_num + ($yestoday->zeelool_de_sales_num) + ($yestoday->zeelool_jp_sales_num);
+            $yestoday->zeelool_de_sales_money = $yestoday->zeelool_de_sales_money * 1.2045 ;
+            $yestoday->zeelool_jp_sales_money = $yestoday->zeelool_jp_sales_money * 0.009530;
         }
 
         //查询最近7天
