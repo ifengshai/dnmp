@@ -407,9 +407,7 @@ class FinanceCost extends Model
                 }
             }
         }
-        file_put_contents('/www/wwwroot/mojing/runtime/log/test.log', $order_id . "\r\n", FILE_APPEND);
-        file_put_contents('/www/wwwroot/mojing/runtime/log/test.log', $order_number . "\r\n", FILE_APPEND);
-        file_put_contents('/www/wwwroot/mojing/runtime/log/test.log', serialize($work_data) . "\r\n", FILE_APPEND);
+   
         //查询处方数据
         $order_item_process = new \app\admin\model\order\order\NewOrderItemProcess();
         $order_prescription = $order_item_process->alias('a')->field('b.od_sph,b.os_sph,b.od_cyl,b.os_cyl,b.os_add,b.od_add,b.lens_number')
@@ -425,8 +423,6 @@ class FinanceCost extends Model
         $lens_list = $lens_price->where(['lens_number' => ['in', $lens_number]])->order('price asc')->select();
         $lens_list = collection($lens_list)->toArray();
         $cost = 0;
-        file_put_contents('/www/wwwroot/mojing/runtime/log/test.log', serialize($lens_number) . "\r\n", FILE_APPEND);
-        file_put_contents('/www/wwwroot/mojing/runtime/log/test.log', serialize($lens_list) . "\r\n", FILE_APPEND);
         foreach ($order_prescription as $k => $v) {
             $data = [];
             foreach ($lens_list as $key => $val) {
