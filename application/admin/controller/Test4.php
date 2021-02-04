@@ -2223,6 +2223,7 @@ class Test4 extends Controller
             if($count == 0){
                 $data['zid'] = $value['id'];
                 $data['ticket_id'] = $value['ticket_id'];
+                $data['site'] = $value['type'];
                 //判断是否有合并邮件
                 $zemail = Db::name('zendesk_comments')->where('zid',$value['id'])->where('is_admin',0)->field('html_body')->select();
                 foreach ($zemail as $k=>$v){
