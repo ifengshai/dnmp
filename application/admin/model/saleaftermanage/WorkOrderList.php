@@ -2626,7 +2626,7 @@ class WorkOrderList extends Model
                 $distribution_status = $_new_order_item_process->where(['item_order_number' => $value])->value('distribution_status');
                 if ($distribution_status = 9) {//合单完成的改成合单中
                     $_new_order_item_process->where(['item_order_number' => $value])->update(['distribution_status' => 8]);
-                    $_new_order_process->where(['increment_id' => $increment_id])->update(['combine_status' => 0]);
+                    $_new_order_process->where(['increment_id' => $increment_id])->update(['combine_status' => 0, 'combine_time' => null]);
                 }
             }
             $store_house_id = $_new_order_process->where(['increment_id' => $increment_id])->value('store_house_id');//库位号
