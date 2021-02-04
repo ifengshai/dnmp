@@ -622,7 +622,6 @@ class Zendesk extends Backend
         $recentTickets_count = $this->model
             ->where(['user_id' => $ticket->user_id, 'type' => $ticket->type])
             ->where('id', 'neq', $ids)
-            ->field('ticket_id,id,username,subject,status')
             ->count();
 
 
@@ -673,7 +672,9 @@ class Zendesk extends Backend
             ->field('increment_id,created_at,order_currency_code,status')
             ->limit(5)
             ->select();
-
+        $orders_count = $orderModel
+            ->where('customer_email',$ticket->email)
+            ->count();
         $orders = collection($orders)->toArray();
 //        dump($orders);
 //        foreach ($orders as $key=>$ite){
@@ -693,9 +694,27 @@ class Zendesk extends Backend
         $this->view->assign(compact('tags', 'ticket', 'comments', 'tickets', 'recentTickets', 'templates','orders','btn'));
         $this->view->assign('rows', $row);
         $this->view->assign('is_vip', $is_vip);
+        $this->view->assign('ids', $ids);
+        $this->view->assign('orders_countds', $orders_count);
         $this->view->assign('recentTickets_count', $recentTickets_count);
         // $this->view->assign('username', $username);
         $this->view->assign('orderUrl',config('zendesk.platform_url')[$ticket->type]);
+        return $this->view->fetch();
+    }
+    //邮件加载更多
+    public function email_toload_more(){
+        $this->view->engine->layout(false);
+        $data = input();
+
+        $page = $data['page']?$data['page']:1;
+        //获取该用户最新的5条ticket
+        $recentTickets = $this->model
+            ->where(['user_id' => $data['user_id'], 'type' => $data['type']])
+            ->where('id', 'neq', $data['ids'])
+            ->field('ticket_id,id,username,subject,status')
+            ->paginate(5)->toArray();
+
+        $this->assign('recentTickets',$recentTickets['data']);
         return $this->view->fetch();
     }
 
