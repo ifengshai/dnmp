@@ -3230,6 +3230,13 @@ class WorkOrderList extends Backend
                     $result = $this->model->handleRecept($receptInfo['id'], $receptInfo['work_id'], $receptInfo['measure_id'], $receptInfo['recept_group_id'], $params['success'], $params['note'], $receptInfo['is_auto_complete'], $params['barcode']);
                 }
                 if ($result !== false) {
+                    if (19 == $measure_choose_id || 18 == $measure_choose_id) {
+                        //更改镜框解绑子单所绑定的条形码
+                        $ProductBarCodeItem = new ProductBarCodeItem();
+                        //查询子单号
+                        $item_order_number = $this->order_change->where(['work_id' => $receptInfo['work_id'],'change_type' => 1])->value('item_order_number');
+                        $ProductBarCodeItem->where(['item_order_number'=>$item_order_number])->update(['item_order_number' => '','library_status' => 1,'out_stock_time'=>'','out_stock_id'=>0]);
+                    }
                     $this->success();
                 } else {
                     $this->error(__('No rows were updated'));
