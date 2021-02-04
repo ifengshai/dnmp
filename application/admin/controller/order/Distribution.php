@@ -1898,8 +1898,6 @@ class Distribution extends Backend
                 }
 
                 $this->model->where(['id' => $value['id']])->update(['distribution_status' => $save_status]);
-                //获取订单号
-                $increment_id =  $this->_new_order->where(['id' => ['eq', $value['order_id']]])->value('increment_id');
                 //操作成功记录
                 DistributionLog::record($admin, $value['id'], $check_status, $status_arr[$check_status] . '完成');
                 //节点记录
