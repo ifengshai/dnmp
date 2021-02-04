@@ -851,6 +851,8 @@ class PurchaseOrder extends Backend
                             }
                         }
                     } else {
+                        Log::write("记录row02");
+                        Log::write($logistics_company_no);
                         if (count($ids) > 1) {
                             foreach ($row as $k => $v) {
                                 foreach ($logistics_company_no as $key => $val) {
