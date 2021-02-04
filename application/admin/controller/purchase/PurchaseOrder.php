@@ -23,6 +23,7 @@ use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Reader\Csv;
 use PhpOffice\PhpSpreadsheet\Reader\Xls;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
+use Think\Log;
 
 
 /**
@@ -708,6 +709,9 @@ class PurchaseOrder extends Backend
                         }, array());
                     }
                     $have_logistics = $logistics->whereIn('logistics_number', $result)->where('status', 1)->count();
+                    Log::write("记录条数");
+                    Log::write($have_logistics);
+                    Log::write(count($result));
                     $count_result = count($result);
                     if ($have_logistics == 0) {
                         $purchase_status = 6;

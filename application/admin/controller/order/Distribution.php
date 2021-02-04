@@ -1497,6 +1497,7 @@ class Distribution extends Backend
      * @since 2020/10/28 14:45:39
      * @author lzh
      */
+
     public function tag_printed()
     {
         $ids = input('id_params/a');
@@ -1513,6 +1514,13 @@ class Distribution extends Backend
         //标记打印状态
         $this->model->startTrans();
         try {
+            $distribution_value = $this->model->where(['id' => ['in', $ids]])->field('magento_order_id,order_id, item_order_number,site')->select();
+            $distribution_value = collection($distribution_value)->toArray();
+
+            foreach ($distribution_value as $key=>$value){
+                $value['item_order_number'] =  substr($value['item_order_number'],0,strpos($value['item_order_number'], '-'));
+                Order::rulesto_adjust($value['magento_order_id'],$value['item_order_number'],$value['site'],2,2);
+            }
             //标记状态
             $this->model->where(['id' => ['in', $ids]])->update(['distribution_status' => 2]);
 
@@ -1530,6 +1538,8 @@ class Distribution extends Backend
         }
         $this->success('标记成功!', '', 'success', 200);
     }
+
+
 
     /**
      * 打印标签
