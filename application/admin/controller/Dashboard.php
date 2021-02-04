@@ -139,7 +139,15 @@ class Dashboard extends Backend
         $totalorder = $operation->sum('total_order_num');
 
         //总金额
-        $totalorderamount = $operation->sum('total_sales_money');
+        $totalorderamount = $operation->where(['order_platform' => ['in', [1, 2, 3]]])->sum('total_sales_money');
+
+        //查询德语站
+        $de_total_money = $operation->where(['order_platform' => ['in', [10]]])->sum('total_sales_money');
+
+        //查询日语站
+        $jp_total_money = $operation->where(['order_platform' => ['in', [11]]])->sum('total_sales_money');
+
+        $totalorderamount += ($de_total_money*1.2045) + ($jp_total_money*0.009530);
 
         $this->view->assign([
             'order_num'                 => $zeelool_count + $voogueme_count + $nihao_count + $zeelool_de_count + $zeelool_jp_count, //实时订单总数
