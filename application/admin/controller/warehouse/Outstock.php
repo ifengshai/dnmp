@@ -1140,17 +1140,17 @@ class Outstock extends Backend
             $this->model->rollback();
             $_item->rollback();
             $this->_product_bar_code_item->rollback();
-            $this->error($e->getMessage(), [], 444);
+            $this->error($e->getMessage());
         } catch (PDOException $e) {
             $this->model->rollback();
             $_item->rollback();
             $this->_product_bar_code_item->rollback();
-            $this->error($e->getMessage(), [], 444);
+            $this->error($e->getMessage());
         } catch (Exception $e) {
             $this->model->rollback();
             $_item->rollback();
             $this->_product_bar_code_item->rollback();
-            $this->error($e->getMessage(), [], 444);
+            $this->error($e->getMessage());
         }
         $this->success('导入成功！');
     }
