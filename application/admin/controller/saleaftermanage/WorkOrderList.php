@@ -3208,6 +3208,9 @@ class WorkOrderList extends Backend
                             $gift_sku = collection($gift_sku)->toArray();
                             foreach ($gift_sku as $key => $value) {
                                 for ($i=1; $i <= $value['change_number']; $i++) { 
+                                    if (empty($barcode[$value['change_sku'].'_'.$i])) {
+                                        $this->error("序号为".$i."的sku(".$value['change_sku'].")，条形码不能为空");
+                                    }
                                     //仓库sku
                                     $platform_info = $item_platform_sku
                                         ->field('sku,stock')
@@ -3215,9 +3218,6 @@ class WorkOrderList extends Backend
                                         ->find();
                                     if ($platform_info['sku']) {
                                          $value['change_sku'] = $platform_info['sku'];
-                                    }
-                                    if (empty($barcode[$value['change_sku'].'_'.$i])) {
-                                        $this->error("序号为".$i."的sku(".$value['change_sku'].")，条形码不能为空");
                                     }
                                     $bar_code_info = $product_bar_code_item->where(['code' => $barcode[$value['change_sku'].'_'.$i]])->find();
                                     if (empty($bar_code_info)) {
