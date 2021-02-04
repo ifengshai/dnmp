@@ -853,6 +853,7 @@ class PurchaseOrder extends Backend
                     } else {
                         Log::write("记录row02");
                         Log::write($logistics_company_no);
+                        Log::write($row);
                         if (count($ids) > 1) {
                             foreach ($row as $k => $v) {
                                 foreach ($logistics_company_no as $key => $val) {
@@ -1007,6 +1008,7 @@ class PurchaseOrder extends Backend
                                         //在途库存数量
                                         $stock_num = $val['purchase_num'];
                                         //在途库存分站 更新映射关系表
+                                        Log::write($rate_arr);
                                         foreach ($rate_arr as $key => $vall) {
                                             //最后一个站点 剩余数量分给最后一个站
                                             if (($all_num - $key) == 1) {
