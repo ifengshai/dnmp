@@ -2214,7 +2214,7 @@ class Test4 extends Controller
             $data['stock'] = $real_time_stock;
             $data['total'] = $sku_amount ? $sku_amount : 0;
             $data['actual_day'] = $actual_day;
-            Db::name('ceshi')->insert($data);
+            //Db::name('ceshi')->insert($data);
             echo $value['true_sku'].' is ok'."\n";
             usleep(10000);
         }
