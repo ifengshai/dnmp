@@ -1394,6 +1394,12 @@ class ScmDistribution extends Scm
                     $outstock_item['out_stock_id'] = $outstock_id;
                     $this->_outstock_item->insert($outstock_item);
 
+                    //条形码出库时间
+                    $this->_product_bar_code_item
+                        ->allowField(true)
+                        ->isUpdate(true, ['out_stock_id' => $outstock_id])
+                        ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2]);
+
                     //扣减虚拟仓库存
                     $this->_item_platform_sku
                         ->where(['sku' => $true_sku, 'platform_type' => $item_process_info['site']])
@@ -1867,7 +1873,7 @@ class ScmDistribution extends Scm
                 if ($store_house_id_store) {
                     $where['store_house_id'] = ['in', $store_house_id_store];
                 } else {
-                    $where['store_house_id'] = -1;
+                    $where['store_house_id'] = ['=', -1];
                 }
             }
             if ($start_time && $end_time) {
@@ -1878,24 +1884,24 @@ class ScmDistribution extends Scm
             }
             if ($order_prescription_type == 1) {
                 $where['order_prescription_type'] = ['=', $order_prescription_type];
-            }else if($order_prescription_type == 2){
-                $where['order_prescription_type'] = ['in', [2,3]];
+            } else if ($order_prescription_type == 2) {
+                $where['order_prescription_type'] = ['in', [2, 3]];
             }
             if ($shelf_number) {
-                $shelf_number_arr = $this->_stock_house->where(['type' => 2,'subarea' => $shelf_number])->column('id');
-                if ($query && $where['store_house_id'] != -1) {
-                    $shelf_number_arr_intersect = array_intersect($where['store_house_id'],$shelf_number_arr);
+                $shelf_number_arr = $this->_stock_house->where(['type' => 2, 'subarea' => $shelf_number])->column('id');
+                if ($query && !empty($store_house_id_store)) {
+                    $shelf_number_arr_intersect = array_intersect($where['store_house_id'], $shelf_number_arr);
                 }
                 if (!empty($shelf_number_arr_intersect)) {
                     $where['store_house_id'] = ['in', $shelf_number_arr_intersect];
-                }elseif(!empty($shelf_number_arr)){
+                } elseif (!empty($shelf_number_arr)) {
                     $where['store_house_id'] = ['in', $shelf_number_arr];
                 }
             }
             //print_r($where);die;
             $list = $this->_new_order_process
                 ->where($where)
-                ->where(['store_house_id'=>['>',0]])
+                ->where(['store_house_id' => ['>', 0]])
                 ->field('order_id,store_house_id,combine_time,order_prescription_type')
                 ->group('order_id')
                 ->limit($offset, $limit)
@@ -1912,9 +1918,15 @@ class ScmDistribution extends Scm
             //异常待处理列表
             if ($query) {
                 //线上不允许跨库联合查询，拆分，由于字段值明显差异，可以分别模糊匹配
-                $store_house_ids = $this->_stock_house->where(['type' => 2, 'coding' => ['like', '%' . $query . '%']])->column('id');
-                $item_order_number_store = [];
-                if ($store_house_ids) {
+                $store_house_id_store = $this->_stock_house->where(['type' => 2, 'coding' => ['like', '%' . $query . '%']])->column('id');
+                if ($store_house_id_store) {
+                    $where['b.store_house_id'] = ['in', $store_house_id_store];
+                } else {
+                    $where['b.store_house_id'] = -1;
+                }
+                /*if ($store_house_ids) {
+                    $where['a.id'] = ['in', $item_ids];
+                    $where['b.store_house_id'] = ['in', $store_house_ids];
                     $item_order_number_store = $this->_new_order_item_process
                         ->where(['abnormal_house_id' => ['in', $store_house_ids]])
                         ->column('id');
@@ -1922,19 +1934,31 @@ class ScmDistribution extends Scm
                 $item_ids = $this->_new_order_item_process
                     ->where(['item_order_number' => ['like', $query . '%']])
                     ->column('id');
-                $item_ids = array_merge($item_ids, $item_order_number_store);
+                if (!empty($item_order_number_store)) {
+                        $item_ids = array_merge($item_ids, $item_order_number_store);
+                }
                 if ($item_ids) {
                     $where['a.id'] = ['in', $item_ids];
                 } else {
                     $where['a.id'] = -1;
-                }
+                }*/
             }
             if ($site) {
                 $where['b.site'] = ['=', $site];
             }
+            if ($order_prescription_type == 1) {
+                $where['b.order_prescription_type'] = ['=', $order_prescription_type];
+            } else if ($order_prescription_type == 2) {
+                $where['b.order_prescription_type'] = ['in', [2, 3]];
+            }
             if ($shelf_number) {
                 $shelf_number_arr = $this->_stock_house->where(['type' => 2,'subarea' => $shelf_number])->column('id');
-                if(!empty($shelf_number_arr)){
+                if ($query && !empty($store_house_id_store)) {
+                    $shelf_number_arr_intersect = array_intersect($where['b.store_house_id'],$shelf_number_arr);
+                }
+                if (!empty($shelf_number_arr_intersect)) {
+                    $where['b.store_house_id'] = ['in', $shelf_number_arr_intersect];
+                }elseif(!empty($shelf_number_arr)){
                     $where['b.store_house_id'] = ['in', $shelf_number_arr];
                 }
             }
@@ -2001,7 +2025,7 @@ class ScmDistribution extends Scm
                 $result = $this->_new_order_process->allowField(true)->isUpdate(true, ['order_id' => $order_process_info['id']])->save(['store_house_id' => 0]);
                 if ($result != false) {
                     //释放合单库位占用数量
-                    $res = $this->_stock_house->allowField(true)->isUpdate(true, ['id' => $order_process_info['store_house_id']])->save(['occupy' => 0,'order_id'=>0,'fictitious_occupy_time'=>0]);
+                    $res = $this->_stock_house->allowField(true)->isUpdate(true, ['id' => $order_process_info['store_house_id']])->save(['occupy' => 0, 'order_id' => 0, 'fictitious_occupy_time' => 0]);
                     if ($res != false) {
                         //回退带有异常子单的 合单子单状态
                         if (0 == $order_process_info['combine_status'] && 2 == $type) {
@@ -2129,8 +2153,8 @@ class ScmDistribution extends Scm
         if ($check_status == 2) {
             $check_refuse = $this->request->request('check_refuse'); //check_refuse   1SKU缺失  2 配错镜框
             empty($check_refuse) && $this->error(__('审单拒绝原因不能为空'), [], 403);
-            !in_array($check_refuse, [1, 2,3, 999]) && $this->error(__('审单拒绝原因错误'), [], 403);
-            if (2 == $check_refuse||3 == $check_refuse) {
+            !in_array($check_refuse, [1, 2, 3, 999]) && $this->error(__('审单拒绝原因错误'), [], 403);
+            if (2 == $check_refuse || 3 == $check_refuse) {
                 $item_order_numbers = $this->request->request('item_order_numbers');
                 $item_order_numbers = explode(',', $item_order_numbers);
                 empty($item_order_numbers) && $this->error(__('请选择子单号'), [], 403);
@@ -2254,12 +2278,12 @@ class ScmDistribution extends Scm
                             'customize_status' => 0
                         ]);
                     //审单拒绝-报损出库,所选SKU退回待配货，条码出库，其余子订单回到待合单。扣减总库存、可用库存、虚拟库存，配货占用库存
-                    if (2==$check_refuse){
+                    if (2 == $check_refuse) {
                         //条码出库
                         $this->_product_bar_code_item
                             ->allowField(true)
                             ->isUpdate(true, ['item_order_number' => ['in', $item_order_numbers]])
-                            ->save(['out_stock_time'=>date('Y-m-d H:i:s'),'library_status' => 2]);
+                            ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2]);
 
 
                         //扣减占用库存、配货占用、总库存、虚拟仓库存
@@ -2320,6 +2344,12 @@ class ScmDistribution extends Scm
                             $outstock_item['out_stock_id'] = $outstock_id;
                             $this->_outstock_item->insert($outstock_item);
 
+                            //条形码出库时间
+                            $this->_product_bar_code_item
+                                ->allowField(true)
+                                ->isUpdate(true, ['out_stock_id' => $outstock_id])
+                                ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2]);
+
                             //扣减虚拟仓库存
                             $this->_item_platform_sku
                                 ->where(['sku' => $true_sku, 'platform_type' => $value['site']])
@@ -2350,7 +2380,7 @@ class ScmDistribution extends Scm
                                 'create_time' => time()
                             ];
                         }
-                    }elseif(3==$check_refuse){//审单拒绝-重新配货，所选SKU回退到待配货，条码解除绑定关系,其余子订单退回待合单。扣减配货占用库存。
+                    } elseif (3 == $check_refuse) {//审单拒绝-重新配货，所选SKU回退到待配货，条码解除绑定关系,其余子订单退回待合单。扣减配货占用库存。
                         //回退到待配货，解绑条形码
                         $this->_product_bar_code_item
                             ->allowField(true)

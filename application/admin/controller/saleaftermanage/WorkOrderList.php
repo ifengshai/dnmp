@@ -3201,6 +3201,7 @@ class WorkOrderList extends Backend
                             $gift_sku = collection($gift_sku)->toArray();
                             foreach ($gift_sku as $key => $value) {
                                 for ($i=1; $i <= $value['change_number']; $i++) { 
+                                    $change_sku = $value['change_sku'];
                                     if (empty($barcode[$value['change_sku'].'_'.$i])) {
                                         $this->error("序号为".$i."的sku(".$value['change_sku'].")，条形码不能为空");
                                     }
@@ -3210,17 +3211,17 @@ class WorkOrderList extends Backend
                                         ->where(['platform_sku' => $value['change_sku'], 'platform_type' => $row['work_platform']])
                                         ->find();
                                     if ($platform_info['sku']) {
-                                         $value['change_sku'] = $platform_info['sku'];
+                                         $platform_info_sku = $platform_info['sku'];
                                     }
-                                    $bar_code_info = $product_bar_code_item->where(['code' => $barcode[$value['change_sku'].'_'.$i]])->find();
+                                    $bar_code_info = $product_bar_code_item->where(['code' => $barcode[$change_sku.'_'.$i]])->find();
                                     if (empty($bar_code_info)) {
                                         $this->error("序号为".$i."的，赠品条形码不存在");
                                     }
                                     if ($bar_code_info['library_status'] == 2) {
-                                        $this->error("序号为".$i."的sku(".$value['change_sku'].")，在库状态为否");
+                                        $this->error("序号为".$i."的sku(".$change_sku.")，在库状态为否");
                                     }
-                                    if ($bar_code_info['sku'] != $value['change_sku']) {
-                                        $this->error("序号为".$i."的sku(".$value['change_sku'].")，条形码所绑定的sku与赠品sku不一致");
+                                    if ($bar_code_info['sku'] != $platform_info_sku) {
+                                        $this->error("序号为".$i."的sku(".$change_sku.")，条形码所绑定的sku与赠品sku不一致");
                                     }
                                 }
                             }
