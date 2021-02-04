@@ -1093,6 +1093,9 @@ class Outstock extends Backend
             $skus = [];
             foreach ($data as $v) {
                 $sku = $this->_product_bar_code_item->where('code', trim($v[2]))->value('sku');
+                if (empty($sku)){
+                    $this->error('条形码:' . $v[2] . ' 不存在,请移除');
+                }
                 $replenish_num = 1;
                 if ($skus[$sku]) {
                     $skus[$sku]['out_stock_num'] += $replenish_num;
@@ -1117,7 +1120,7 @@ class Outstock extends Backend
                 ->where($where)
                 ->field('code')
                 ->find();
-            if (!empty($check_quantity['code'])) throw new Exception('条形码:' . $check_quantity['code'] . ' 已绑定,请移除');
+            if (!empty($check_quantity['code'])) $this->error('条形码:' . $check_quantity['code'] . ' 已绑定,请移除');
 
             $_item->insertAll($skus);
 
