@@ -49,7 +49,7 @@ class Dashboard extends Backend
         $last7days = $orderStatistics->where($map)->field('sum(all_sales_money) as all_sales_money,sum(all_sales_num) as all_sales_num,sum(zeelool_de_sales_money) as zeelool_de_sales_money,sum(zeelool_de_sales_num) as zeelool_de_sales_num,sum(zeelool_jp_sales_money) as zeelool_jp_sales_money,sum(zeelool_jp_sales_num) as zeelool_jp_sales_num')->find();
         if ($last7days) {
             $last7days->all_sales_money = $last7days->all_sales_money + ($last7days->zeelool_de_sales_money * 1.2045) + ($last7days->zeelool_jp_sales_money * 0.009530);
-            $last7days->all_sales_num = $last7days->all_sales_num + ($last7days->zeelool_de_sales_num * 1.2045) + ($last7days->zeelool_jp_sales_num * 0.009530);
+            $last7days->all_sales_num = $last7days->all_sales_num + ($last7days->zeelool_de_sales_num) + ($last7days->zeelool_jp_sales_num);
         }
 
         //查询实时订单数
