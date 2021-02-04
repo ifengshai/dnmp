@@ -1799,8 +1799,7 @@ class Distribution extends Backend
         $this->_stock_log->startTrans();
         $this->_new_order_process->startTrans();
         $this->model->startTrans();
-        dump($item_list);
-        dump($check_status);die();
+
         try {
             //更新状态
             foreach ($item_list as $value) {
@@ -1899,13 +1898,14 @@ class Distribution extends Backend
                 }
 
                 $this->model->where(['id' => $value['id']])->update(['distribution_status' => $save_status]);
-
+                //获取订单号
+                $increment_id =  $this->_new_order->where(['id' => ['eq', $value['order_id']]])->value('increment_id');
                 //操作成功记录
                 DistributionLog::record($admin, $value['id'], $check_status, $status_arr[$check_status] . '完成');
                 //节点记录
                 //将订单号截取处理
                 $value['item_order_number'] =  substr($value['item_order_number'],0,strpos($value['item_order_number'], '-'));
-                Order::rulesto_adjust($value['magento_order_id'],$value['item_order_number'],$value['site'],2,3);
+                Order::rulesto_adjust($value['magento_order_id'],$increment_id,$value['site'],2,$node_status);
             }
 
             $this->_item->commit();
