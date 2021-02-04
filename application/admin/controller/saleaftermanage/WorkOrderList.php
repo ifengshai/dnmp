@@ -3235,7 +3235,7 @@ class WorkOrderList extends Backend
                         $ProductBarCodeItem = new ProductBarCodeItem();
                         //查询子单号
                         $item_order_number = $this->order_change->where(['work_id' => $receptInfo['work_id'],'change_type' => 1])->value('item_order_number');
-                        $ProductBarCodeItem->where(['item_order_number'=>$item_order_number])->update(['item_order_number' => '','library_status' => 1,'out_stock_time'=>'','out_stock_id'=>0]);
+                        $ProductBarCodeItem->where(['item_order_number'=>$item_order_number])->update(['item_order_number' => '','library_status' => 1,'out_stock_time' => '','out_stock_id' => 0]);
                     }
                     $this->success();
                 } else {
