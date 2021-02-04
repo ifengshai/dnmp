@@ -255,17 +255,14 @@ class Distribution extends Backend
                 if (1 == $label) {
                     $shelf_number =
                         $this->_stock_house
-                        ->alias('a')
-                        ->join(['fa_store_sku' => 'b'], 'a.id=b.store_id')
-                        ->where([
-                            'a.shelf_number' => ['in', $filter['shelf_number']],
-                            'a.type' => 1,
-                            'a.status' => 1,
-                            'b.is_del' => 1
-                        ])
-                        ->order('a.coding')
-                        ->column('b.sku');
-
+                            ->alias('a')
+                            ->join(['fa_store_sku' => 'b'], 'a.id=b.store_id')
+                            ->where([
+                                'a.shelf_number' => ['in', $filter['shelf_number']],
+                                'a.type' => 1
+                            ])
+                            ->order('a.coding')
+                            ->column('b.sku');
                     //平台SKU表替换sku
                     $sku = Db::connect('database.db_stock');
                     $sku_array = $sku->table('fa_item_platform_sku')->where(['sku' => ['in', $shelf_number]])->column('platform_sku');
@@ -346,18 +343,18 @@ class Distribution extends Backend
                 $flag = true;
             }
             $this->request->get(['filter' => json_encode($filter)]);
-            
+
             if (8 == $label || 1 == $label || 0 == $label) {
-                    //查询子单的主单是否也含有工单
-                    $platform_order = $this->_work_order_list->where([
-                        'work_status' => ['in',$work_order_status_map],
-                        'work_type' => ['in',$work_order_type]
-                    ])->group('platform_order')->column('platform_order');
-                    if (!empty($platform_order)) {
-                      $order_id = $this->_new_order_process->where(['increment_id' => ['in',$platform_order]])->group('order_id')->column('order_id');
-                      $item_order_numbers  = $this->model->where(['order_id' => ['in',$order_id]])->order('created_at', 'desc')->group('item_order_number')->column('item_order_number');
-                    } 
-            }else{
+                //查询子单的主单是否也含有工单
+                $platform_order = $this->_work_order_list->where([
+                    'work_status' => ['in', $work_order_status_map],
+                    'work_type' => ['in', $work_order_type]
+                ])->group('platform_order')->column('platform_order');
+                if (!empty($platform_order)) {
+                    $order_id = $this->_new_order_process->where(['increment_id' => ['in', $platform_order]])->group('order_id')->column('order_id');
+                    $item_order_numbers = $this->model->where(['order_id' => ['in', $order_id]])->order('created_at', 'desc')->group('item_order_number')->column('item_order_number');
+                }
+            } else {
                 //其他tab展示子单工单未处理
                 $item_order_numbers = $this->_work_order_change_sku
                     ->alias('a')
@@ -381,10 +378,10 @@ class Distribution extends Backend
                 $item_process_id_work = $this->model->where(['item_order_number' => ['in', $item_order_numbers]])->column('id');
                 if ($flag || $is_work_order == 1) {
                     $item_process_ids = $item_process_id_work;
-                }else if($is_work_order == 2){
+                } else if ($is_work_order == 2) {
                     $item_process_ids = $item_process_ids;
                     $map['a.item_order_number'] = ['not in', $item_order_numbers];
-                }else {
+                } else {
                     $item_process_ids = array_unique(array_merge($item_process_ids, $item_process_id_work));
                 }
             }
@@ -832,12 +829,12 @@ class Distribution extends Backend
 
             $data[$sku['sku']]['location'] =
                 Db::table('fa_store_sku')
-                ->alias('a')
-                ->join(['fa_store_house' => 'b'], 'a.store_id=b.id')
-                ->where('a.sku', $sku['sku'])
-                ->value('b.coding');
-            $data[$sku['sku']]['sku'] = $sku;
-            $data[$sku['sku']]['number']++;
+                    ->alias('a')
+                    ->join(['fa_store_house' => 'b'], 'a.store_id=b.id')
+                    ->where('a.sku', $sku)
+                    ->value('b.coding');
+            $data[$sku]['sku'] = $sku;
+            $data[$sku]['number']++;
         }
         // $b=array();
         // foreach($sku as $v){
@@ -1716,7 +1713,6 @@ class Distribution extends Backend
     }
 
 
-
     /**
      * 生成新的条形码
      */
@@ -1837,7 +1833,7 @@ class Distribution extends Backend
                 )
 
                 && $this->error('子单号：' . $val['item_order_number'] . '有工单未处理');
-                if ($val['measure_choose_id'] == 21){
+                if ($val['measure_choose_id'] == 21) {
                     $this->error(__('有工单存在暂缓措施未处理，无法操作'), [], 405);
                 }
             }
@@ -2074,7 +2070,7 @@ class Distribution extends Backend
                     ||
                     in_array($val['item_order_number'], $item_order_numbers) //子单措施未处理:更改镜框18、更改镜片19、取消20
                 )
-                    && $this->error('子单号：' . $val['item_order_number'] . '有工单未处理');
+                && $this->error('子单号：' . $val['item_order_number'] . '有工单未处理');
             }
         }
 
@@ -2172,9 +2168,9 @@ class Distribution extends Backend
 
                     //条码出库
                     $this->_product_bar_code_item
-                    ->allowField(true)
-                    ->isUpdate(true, ['item_order_number' => ['in', $item_order_numbers]])
-                    ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2,'out_stock_id' => $outstock_id]);
+                        ->allowField(true)
+                        ->isUpdate(true, ['item_order_number' => ['in', $item_order_numbers]])
+                        ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2, 'out_stock_id' => $outstock_id]);
 
                     //扣减虚拟仓库存
                     $this->_item_platform_sku
@@ -2455,9 +2451,9 @@ class Distribution extends Backend
 
                     //条码出库
                     $this->_product_bar_code_item
-                    ->allowField(true)
-                    ->isUpdate(true, ['item_order_number' => ['in', $item_order_numbers]])
-                    ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2,'out_stock_id' => $outstock_id]);
+                        ->allowField(true)
+                        ->isUpdate(true, ['item_order_number' => $item_info['item_order_number']])
+                        ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2, 'out_stock_id' => $outstock_id]);
 
                     //记录库存日志
                     $this->_stock_log->setData([
