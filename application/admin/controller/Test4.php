@@ -1998,6 +1998,19 @@ class Test4 extends Controller
         $sales_num10 = $c_info['sales_num'];
         $days[] = $j_info['days'];
         $count = $sales_num1+$sales_num2+$sales_num3+$sales_num4+$sales_num5+$sales_num6+$sales_num7+$sales_num8+$sales_num9+$sales_num10;
+        if($sku == 'FP0044-03'){
+            dump($sales_num1);
+            dump($sales_num2);
+            dump($sales_num3);
+            dump($sales_num4);
+            dump($sales_num5);
+            dump($sales_num6);
+            dump($sales_num7);
+            dump($sales_num8);
+            dump($sales_num9);
+            dump($sales_num10);
+            dump($count);exit;
+        }
         $days = max($days);
         $data = array(
             'count'=>$count,
