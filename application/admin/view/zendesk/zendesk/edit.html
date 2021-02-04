@@ -299,7 +299,7 @@
                 {foreach name="recentTickets" item="vo"}
                 <li class="list-group-item">
                     <!-- <b><a class="change-ticket" data-status="{$vo->status}" data-title="回复【{$vo->ticket_id}】{$vo->subject}" href="{:url('zendesk/zendesk/edit',['ids' => $vo->id,'btn' => 1])}">#{$vo->ticket_id}  {$vo->subject}</a> </b><a class="pull-right">{$vo->status_format}</a> -->
-                    <b><a class="" target="_blank"  title="回复【{$vo->ticket_id}】{$vo->subject}" href="{:url('zendesk/zendesk/edit',['ids' => $vo->id,'btn' => 1])}">#{$vo->ticket_id}  {$vo->subject}</a> </b><a class="pull-right">{$vo->status_format}</a>
+                    <b><a class="" target="_blank"  title="回复【{$vo->ticket_id}】{$vo->subject}" href="{:url('zendesk/zendesk/edit',['ids' => $vo->id,'btn' => 1])}" style="font-size: 14.5px" > #{$vo->ticket_id}  {$vo->subject}</a> </b><a class="pull-right">{$vo->status_format}</a>
                 </li>
                 {/foreach}
             </ul>
@@ -334,15 +334,15 @@
                 </tr>
                 {foreach name="orders" item="vo"}
                 <tr>
-                    <td><a href="{$orderUrl}{$vo->entity_id}" target="_blank">{$vo['increment_id']}</a></td>
-                    <td>{$vo['created_at']|strtotime|date='d/m/Y',###}</td>
-                    <td>{$vo['order_currency_code']}{$vo['grand_total']|substr=0,-2}</td>
-                    <td>{$vo['status']}</td>
+                    <td ><a href="{$orderUrl}{$vo->entity_id}" target="_blank" style="font-size: 15px">{$vo['increment_id']}</a></td>
+                    <td style="font-size: 15px"> {$vo['created_at']|strtotime|date='d/m/Y',###}</td>
+                    <td style="font-size: 15px"> {$vo['order_currency_code']}{$vo['grand_total']|substr=0,-2}</h5></td>
+                    <td style="font-size: 15px"> {$vo['status']}</td>
                     {if condition="$vo['status'] eq 'complete'"}
-                    <td>{$vo['increment_id']}</td>
+                    <td style="font-size: 15px"> {$vo['increment_id']}</td>
                     {/if}
                     {if condition="$vo['status'] eq 'processing'"}
-                    <td><font style="color: #3C8DBC"><a  class="batch-log-recipient" data-value="{$vo['increment_id']}">配货记录</a></font></td>
+                    <td ><font style="color: #3C8DBC"><a  class="batch-log-recipient" data-value="{$vo['increment_id']}">配货记录</a></font></td>
                     {/if}
                 </tr>
                 {/foreach}
