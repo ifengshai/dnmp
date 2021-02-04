@@ -132,7 +132,7 @@
                         <div class="form-group">
                             <label class="control-label col-xs-12 col-sm-2">回复内容：</label>
                             <div class="col-xs-12 col-sm-9" style="width: 71.5%">
-                                <textarea id="c-content" class="form-control editor ticket-content" rows="5" name="row[content]" cols="50" style="word-break: break-word;"></textarea>
+                                <textarea id="c-content" class="form-control editor ticket-content" rows="5" name="row[content]" cols="50"></textarea>
                             </div>
                         </div>
                         <div class="form-group">
@@ -234,7 +234,7 @@
                                 <span class="description">{$vo->update_time}</span>
                             </div>
                             <!-- /.user-block -->
-                            <div style="margin:0px 0px 0px 70px;">
+                            <div style="margin:0px 0px 0px 70px;word-break: break-word;">
                                 {$vo->html_body}{if condition="$vo['is_admin'] eq 1"}{$vo->sign}{/if}
                                 {if condition="$vo.attachments"}
                                 <ul class="mailbox-attachments clearfix">
