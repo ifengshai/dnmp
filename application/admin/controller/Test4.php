@@ -2195,6 +2195,7 @@ class Test4 extends Controller
             $sku_info  = $this->getSkuSales($value['true_sku']);
             $actual_day = $sku_info['days']!=0 && $sku_info['count']!=0 ? round($real_time_stock/$sku_info['count']/$sku_info['days'],2) : 0;
             $data['sku'] = $value['true_sku'];
+            $data['grade'] = $value['grade'];
             $data['sales_num'] = $sku_info['count'];
             $data['day'] = $sku_info['days'];
             $data['stock'] = $real_time_stock;
