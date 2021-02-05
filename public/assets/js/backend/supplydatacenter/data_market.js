@@ -4,37 +4,71 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
         index: function () {
             Controller.api.formatter.daterangepicker($("div[role=form]"));
             //订单数据概况折线图
-            //Controller.api.formatter.line_chart();
             stock_measure_overview_platform();
-            Controller.api.formatter.order_send_overview();
+            Controller.api.formatter.line_chart();
             Controller.api.formatter.line_histogram();
-            Controller.api.formatter.process_overview();
             Controller.api.formatter.comleted_time_rate_pie();
-            $("#sku_submit").click(function () {
-                index_data();
-                stock_measure_overview_platform();
-                Controller.api.formatter.order_send_overview();
-                Controller.api.formatter.line_histogram();
-                Controller.api.formatter.process_overview();
-                Controller.api.formatter.comleted_time_rate_pie();
-            });
-            $("#sku_reset").click(function () {
-                $("#time_str").val('');
-                index_data();
-                stock_measure_overview_platform();
-                Controller.api.formatter.order_send_overview();
-                Controller.api.formatter.line_histogram();
-                Controller.api.formatter.process_overview();
-                Controller.api.formatter.comleted_time_rate_pie();
-            });
+            $("#time_str5").on("apply.daterangepicker", function () {
+                setTimeout(() => {
+                    Controller.api.formatter.line_chart();   //库存变化折线图
+                }, 0)
+            })
+            $("#time_str5").on("cancel.daterangepicker", function () {
+                setTimeout(() => {
+                    Controller.api.formatter.line_chart();   //库存变化折线图
+                }, 0)
+            })
+
+            $("#time_str1").on("apply.daterangepicker", function () {
+                setTimeout(() => {
+                    index_data();   //仓库指标总览
+                    stock_measure_overview_platform();   //仓库和站点有关的指标
+                }, 0)
+            })
+            $("#time_str1").on("cancel.daterangepicker", function () {
+                setTimeout(() => {
+                    index_data();   //仓库指标总览
+                    stock_measure_overview_platform();   //仓库和站点有关的指标
+                }, 0)
+            })
+
+            $("#time_str2").on("apply.daterangepicker", function () {
+                setTimeout(() => {
+                    purchase_data();     //采购概况
+                }, 0)
+            })
+            $("#time_str2").on("cancel.daterangepicker", function () {
+                setTimeout(() => {
+                    purchase_data();     //采购概况
+                }, 0)
+            })
+
+            $("#time_str3").on("apply.daterangepicker", function () {
+                setTimeout(() => {
+                    Controller.api.formatter.line_histogram();   //订单发货及时率
+                }, 0)
+            })
+            $("#time_str3").on("cancel.daterangepicker", function () {
+                setTimeout(() => {
+                    Controller.api.formatter.line_histogram();   //订单发货及时率
+                }, 0)
+            })
+
+            $("#time_str4").on("apply.daterangepicker", function () {
+                setTimeout(() => {
+                    track_data();   //物流妥投
+                    Controller.api.formatter.comleted_time_rate_pie();   //妥投占比
+                }, 0)
+            })
+            $("#time_str4").on("cancel.daterangepicker", function () {
+                setTimeout(() => {
+                    track_data();   //物流妥投
+                    Controller.api.formatter.comleted_time_rate_pie();   //妥投占比
+                }, 0)
+            })
             $(document).on('change', '#order_platform', function () {
                 stock_measure_overview_platform();
             });
-            // $(document).on('change', '#order_platform', function () {
-            //     order_data_view();
-            //     Controller.api.formatter.line_chart();
-            //     Controller.api.formatter.line_histogram();
-            // });
         },
         add: function () {
             Controller.api.bindevent();
@@ -88,58 +122,18 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                         });
                     }
                 },
-                order_send_overview: function () {
+                line_chart: function () {
                     //订单数据概况折线图
                     var chartOptions = {
-                        targetId: 'echart2',
+                        targetId: 'echart1',
                         downLoadTitle: '图表',
-                        type: 'bar',
-                        bar: {
-                            tooltip: { //提示框组件。
-                                trigger: 'axis', // 触发类型。可选项item:数据项图形触发，主要在散点图，饼图等无类目轴的图表中使用。axis:坐标轴触发，主要在柱状图，折线图等会使用类目轴的图表中使用。
-                                axisPointer: { //坐标轴指示器配置项。
-                                    type: 'shadow' //指示器类型。可选项'line' 直线指示器。'shadow' 阴影指示器。'cross' 十字准星指示器。其实是种简写，表示启用两个正交的轴的 axisPointer。
-                                },
-                                formatter: function (param) { //格式化提示信息
-                                    console.log(param);
-                                    var num = param[0].value+param[1].value;
-                                    return param[0].name + '<br/>' + param[0].seriesName + '：' + param[0].value + '<br/>' + param[1].seriesName + '：' + param[1].value+'<br/>合计：'+num;
-                                }
-                            },
-                            grid: { //直角坐标系内绘图网格
-                                top: '10%', //grid 组件离容器上侧的距离。
-                                left: '5%', //grid 组件离容器左侧的距离。
-                                right: '10%', //grid 组件离容器右侧的距离。
-                                bottom: '10%', //grid 组件离容器下侧的距离。
-                                containLabel: true //grid 区域是否包含坐标轴的刻度标签。
-                            },
-                            legend: { //图例配置
-                                padding: 5,
-                                top: '2%',
-                                data: ['超时订单', '未超时订单']
-                            },
-                            xAxis: [
-                                {
-                                    type: 'category'
-                                }
-                            ],
-                            yAxis: [
-                                {
-                                    type: 'value',
-                                    name: '订单数量',
-                                    axisLabel: {
-                                        formatter: '{value} 个'
-                                    }
-                                },
-                            ],
-                        }
+                        type: 'line'
                     };
-
                     var options = {
                         type: 'post',
-                        url: 'supplydatacenter/data_market/order_send_overview',
+                        url: 'supplydatacenter/data_market/stock_change_line',
                         data: {
-                            time_str: $("#time_str").val(),
+                            time_str: $("#time_str5").val()
                         }
                     }
                     EchartObj.api.ajax(options, chartOptions)
@@ -147,7 +141,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                 line_histogram: function (){
                     //柱状图和折线图的结合
                     var chartOptions = {
-                        targetId: 'echart1',
+                        targetId: 'echart2',
                         downLoadTitle: '图表',
                         type: 'bar',
                         bar: {
@@ -171,7 +165,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                             legend: { //图例配置
                                 padding: 5,
                                 top: '2%',
-                                data: ['采购数量', '采购金额']
+                                data: ['订单数', '及时率']
                             },
                             xAxis: [
                                 {
@@ -181,16 +175,16 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                             yAxis: [
                                 {
                                     type: 'value',
-                                    name: '采购数量',
+                                    name: '订单数',
                                     axisLabel: {
                                         formatter: '{value} 个'
                                     }
                                 },
                                 {
                                     type: 'value',
-                                    name: '采购金额',
+                                    name: '及时率',
                                     axisLabel: {
-                                        formatter: '{value} ¥'
+                                        formatter: '{value} %'
                                     }
                                 }
                             ],
@@ -199,55 +193,11 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
         
                     var options = {
                         type: 'post',
-                        url: 'supplydatacenter/data_market/purchase_histogram_line',
+                        url: 'supplydatacenter/data_market/order_histogram_line',
                         data: {
-                            time_str: $("#time_str").val(),
+                            time_str: $("#time_str3").val(),
                         }
                     }
-                    EchartObj.api.ajax(options, chartOptions)
-                },
-                process_overview: function (){
-                    //柱状图
-                    var chartOptions = {
-                        targetId: 'echart3',
-                        downLoadTitle: '图表',
-                        type: 'bar',
-                        bar:{
-                            grid: { //直角坐标系内绘图网格
-                                top: '20%', //grid 组件离容器上侧的距离。
-                                left: '5%', //grid 组件离容器左侧的距离。
-                                right: '10%', //grid 组件离容器右侧的距离。
-                                bottom: '10%', //grid 组件离容器下侧的距离。
-                                containLabel: true //grid 区域是否包含坐标轴的刻度标签。
-                            },                     
-                            tooltip: { //提示框组件。
-                                trigger: 'axis', // 触发类型。可选项item:数据项图形触发，主要在散点图，饼图等无类目轴的图表中使用。axis:坐标轴触发，主要在柱状图，折线图等会使用类目轴的图表中使用。
-                                axisPointer: { //坐标轴指示器配置项。
-                                    type: 'shadow' //指示器类型。可选项'line' 直线指示器。'shadow' 阴影指示器。'cross' 十字准星指示器。其实是种简写，表示启用两个正交的轴的 axisPointer。
-                                },
-                                formatter: function (param) { //格式化提示信息
-                                    console.log(param);
-                                    return param[0].name + '<br/>个数：' + param[0].value;
-                                }
-                            },                        
-                            xAxis: {
-                                type: 'value',
-                                //boundaryGap: [0, 0.01]
-                            },
-                            yAxis: 
-                            {
-                                type: 'category',
-                            },
-                                              
-                        }
-                    };  
-                    var options = {
-                        type: 'post',
-                        url: 'supplydatacenter/data_market/process_overview',
-                        data: {
-                            time_str: $("#time_str").val()
-                        }
-                    }                
                     EchartObj.api.ajax(options, chartOptions)
                 },
                 comleted_time_rate_pie: function () {
@@ -271,7 +221,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                         type: 'post',
                         url: 'supplydatacenter/data_market/comleted_time_rate',
                         data: {
-                            'time_str' :  $("#time_str").val(),
+                            'time_str' :  $("#time_str4").val(),
                         }
 
                     };
@@ -286,36 +236,59 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
     return Controller;
 });
 function index_data(){
-    var time_str = $('#time_str').val();
+    var time_str = $('#time_str1').val();
     Backend.api.ajax({
         url: 'supplydatacenter/data_market/index',
         data: {time_str: time_str}
     }, function (data, ret) {
-        var stock_measure_overview = ret.data.stock_measure_overview;
-        var stock_level_sales_rate = ret.data.stock_level_sales_rate;
-        var purchase_overview = ret.data.purchase_overview;
-        var logistics_completed_overview = ret.data.logistics_completed_overview;
+        var stock_measure_overview = ret.data;
         //仓库指标总览
         $('#turnover_rate').html(stock_measure_overview.turnover_rate);
         $('#stock_sales_rate').html(stock_measure_overview.stock_sales_rate);
         $('#turnover_days_rate').html(stock_measure_overview.turnover_days_rate);
         $('#month_in_out_rate').html(stock_measure_overview.month_in_out_rate);
-        //仓库分级库销比
-        $('#a1_stock_sales_rate').html(stock_level_sales_rate.a1_stock_sales_rate);
-        $('#a_stock_sales_rate').html(stock_level_sales_rate.a_stock_sales_rate);
-        $('#b_stock_sales_rate').html(stock_level_sales_rate.b_stock_sales_rate);
-        $('#c1_stock_sales_rate').html(stock_level_sales_rate.c1_stock_sales_rate);
-        $('#c_stock_sales_rate').html(stock_level_sales_rate.c_stock_sales_rate);
-        $('#d_stock_sales_rate').html(stock_level_sales_rate.d_stock_sales_rate);
-        $('#e_stock_sales_rate').html(stock_level_sales_rate.e_stock_sales_rate);
-        $('#f_stock_sales_rate').html(stock_level_sales_rate.f_stock_sales_rate);
+        return false;
+    }, function (data, ret) {
+        Layer.alert(ret.msg);
+        return false;
+    });
+}
+function purchase_data(){
+    var time_str = $('#time_str2').val();
+    Backend.api.ajax({
+        url: 'supplydatacenter/data_market/purchase_data',
+        data: {time_str: time_str}
+    }, function (data, ret) {
+        console.log(ret.data);
+        var purchase_overview = ret.data;
         //采购概况
         $('#purchase_num').html(purchase_overview.purchase_num);
+        $('#purchase_num_big').html(purchase_overview.purchase_num_big);
+        $('#purchase_num_now').html(purchase_overview.purchase_num_now);
         $('#purchase_amount').html(purchase_overview.purchase_amount);
+        $('#purchase_amount_big').html(purchase_overview.purchase_amount_big);
+        $('#purchase_amount_now').html(purchase_overview.purchase_amount_now);
         $('#purchase_sku_num').html(purchase_overview.purchase_sku_num);
+        $('#purchase_sku_num_big').html(purchase_overview.purchase_sku_num_big);
+        $('#purchase_sku_num_now').html(purchase_overview.purchase_sku_num_now);
         $('#purchase_delay_rate').html(purchase_overview.purchase_delay_rate);
         $('#purchase_qualified_rate').html(purchase_overview.purchase_qualified_rate);
         $('#purchase_price').html(purchase_overview.purchase_price);
+        $('#purchase_price_big').html(purchase_overview.purchase_price_big);
+        $('#purchase_price_now').html(purchase_overview.purchase_price_now);
+        return false;
+    }, function (data, ret) {
+        Layer.alert(ret.msg);
+        return false;
+    });
+}
+function track_data(){
+    var time_str = $('#time_str4').val();
+    Backend.api.ajax({
+        url: 'supplydatacenter/data_market/track_data',
+        data: {time_str: time_str}
+    }, function (data, ret) {
+        var logistics_completed_overview = ret.data;
         //物流妥投概况
         $('#delivery_count').html(logistics_completed_overview.delivery_count);
         $('#completed_count').html(logistics_completed_overview.completed_count);
@@ -329,7 +302,7 @@ function index_data(){
 }
 function stock_measure_overview_platform() {
     var order_platform = $('#order_platform').val();
-    var time_str = $('#time_str').val();
+    var time_str = $('#time_str1').val();
     Backend.api.ajax({
         url: 'supplydatacenter/data_market/stock_measure_overview_platform',
         data: { order_platform: order_platform, time_str: time_str}

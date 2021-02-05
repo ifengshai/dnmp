@@ -1979,8 +1979,8 @@ class WorkOrderList extends Model
             $resultInfo = $_work_order_recept->where(['id' => $id])->update($data);
 
             $measure_choose_id = $_work_order_measure->where('id',$measure_id)->value('measure_choose_id');
-            //不是自动处理完成
-            if(1 != $is_auto_complete){
+            //不是自动处理完成 并且处理完成时
+            if(1 != $is_auto_complete && $success == 1){
                 //补发
                 if(7 == $measure_choose_id){
                     $this->createOrder($work->work_platform, $work->id);
@@ -2027,7 +2027,7 @@ class WorkOrderList extends Model
                 $this->other_item_order_auto($work->platform_order,$item_order_number);
             }
             //措施不是补发的时候扣减库存，是补发的时候不扣减库存，因为补发的时候库存已经扣减过了
-            if ($resultInfo && 1 == $data['recept_status'] && 7 != $measure_choose_id){
+            if ($resultInfo && 1 == $data['recept_status'] && 7 != $measure_choose_id && $success == 1){
                 $this->deductionStock($work_id, $measure_id);
             }
 

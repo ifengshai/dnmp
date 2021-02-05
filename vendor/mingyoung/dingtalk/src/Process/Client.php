@@ -76,4 +76,19 @@ class Client extends BaseClient
     {
         return $this->client->postJson('topapi/process/listbyuserid', ['userid' => $userId, 'offset' => $offset, 'size' => $size]);
     }
+
+    /**
+     * 获取审批钉盘空间信息
+     *
+     * @param string|null $userId 
+     * @param int         $agentId
+     *
+     * @return mixed
+     */
+    public function cspaceInfo($userId = null, $agentId = null)
+    {
+        return $this->client->postJson('topapi/processinstance/cspace/info', ['user_id' => $userId, 'agent_id' => $agentId]);
+    }
+
+   
 }

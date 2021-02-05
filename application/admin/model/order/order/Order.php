@@ -49,13 +49,13 @@ class Order extends Model
             $model = new \app\admin\model\order\order\Meeloog();
         } elseif ($site == 5) {
             $model = new \app\admin\model\order\order\Weseeoptical();
-        }  elseif ($site == 9) {
+        } elseif ($site == 9) {
             $model = new \app\admin\model\order\order\ZeeloolEs();
-        }  elseif ($site == 10) {
+        } elseif ($site == 10) {
             $model = new \app\admin\model\order\order\ZeeloolDe();
-        }  elseif ($site == 11) {
+        } elseif ($site == 11) {
             $model = new \app\admin\model\order\order\ZeeloolJp();
-        } 
+        }
 
         if ($sku) {
             $map['b.sku'] = $sku;
@@ -84,7 +84,7 @@ class Order extends Model
      * @param [type] $site 站点
      * @return void
      */
-    public function getSkuSalesNumTest($sku, $where = [],$site)
+    public function getSkuSalesNumTest($sku, $where = [], $site)
     {
         if ($site == 1) {
             $model = $this;
@@ -96,13 +96,13 @@ class Order extends Model
             $model = new \app\admin\model\order\order\Meeloog();
         } elseif ($site == 5) {
             $model = new \app\admin\model\order\order\Weseeoptical();
-        }  elseif ($site == 9) {
+        } elseif ($site == 9) {
             $model = new \app\admin\model\order\order\ZeeloolEs();
-        }  elseif ($site == 10) {
+        } elseif ($site == 10) {
             $model = new \app\admin\model\order\order\ZeeloolDe();
-        }  elseif ($site == 11) {
+        } elseif ($site == 11) {
             $model = new \app\admin\model\order\order\ZeeloolJp();
-        } 
+        }
 
         if ($sku) {
             $map['b.sku'] = $sku;

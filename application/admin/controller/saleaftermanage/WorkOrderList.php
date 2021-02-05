@@ -40,6 +40,8 @@ use PhpOffice\PhpSpreadsheet\Reader\Csv;
 use app\admin\model\AuthGroup;
 use app\admin\model\warehouse\ProductBarCodeItem;
 use app\admin\model\itemmanage\ItemPlatformSku;
+use app\admin\model\finance\FinanceCost;
+
 
 /**
  * 售后工单列管理
@@ -1383,6 +1385,7 @@ class WorkOrderList extends Backend
                 if (100 == $params['order_type']) {
                     $params['base_grand_total'] = $params['refund_money'];
                     $params['grand_total'] = $params['refund_money'];
+                    $params['payment_time'] = date('Y-m-d H:i:s');
                 }
                 $params['recept_person_id'] = $params['recept_person_id'] ?: $admin_id;
 
@@ -2932,7 +2935,10 @@ class WorkOrderList extends Backend
                 10 => 'new_zeeloolde_url',
                 11 => 'new_zeelooljp_url'
             ];
-            $url = config('url.' . $domain_list[$row->work_platform]) . 'price-difference?customer_email=' . $row->email . '&origin_order_number=' . $row->platform_order . '&order_amount=' . $row->replenish_money . '&sign=' . $row->id;
+            //查询币种
+            $order = new \app\admin\model\order\order\NewOrder();
+            $order_currency_code = $order->where(['increment_id' => $row->platform_order])->value('order_currency_code');
+            $url = config('url.' . $domain_list[$row->work_platform]) . 'price-difference?customer_email=' . $row->email . '&origin_order_number=' . $row->platform_order . '&order_amount=' . $row->replenish_money . '&sign=' . $row->id. '&order_currency_code=' . $order_currency_code;
             $this->view->assign('url', $url);
         }
 
@@ -3230,6 +3236,20 @@ class WorkOrderList extends Backend
                     $result = $this->model->handleRecept($receptInfo['id'], $receptInfo['work_id'], $receptInfo['measure_id'], $receptInfo['recept_group_id'], $params['success'], $params['note'], $receptInfo['is_auto_complete'], $params['barcode']);
                 }
                 if ($result !== false) {
+
+                    //措施表
+                    $_work_order_measure = new WorkOrderMeasure();
+                    $measure_choose_id = $_work_order_measure->where('id',$receptInfo['measure_id'])->value('measure_choose_id');
+                    if (3 == $measure_choose_id) { 
+                        //主单取消收入核算冲减
+                        $FinanceCost = new FinanceCost();
+                        $FinanceCost->cancel_order_subtract($receptInfo['work_id']);
+                    }
+                    if (15 == $measure_choose_id) { 
+                        //vip退款收入核算冲减
+                        $FinanceCost = new FinanceCost();
+                        $FinanceCost->vip_order_subtract($receptInfo['work_id']);
+                    }
                     if (19 == $measure_choose_id || 18 == $measure_choose_id) {
                         switch ($measure_choose_id) {
                             case 18://子单取消
@@ -3247,6 +3267,16 @@ class WorkOrderList extends Backend
                         if (!empty($item_order_number)) {
                             $ProductBarCodeItem->where(['item_order_number'=>$item_order_number])->update(['item_order_number' => '','library_status' => 1,'out_stock_time' => '','out_stock_id' => 0]);
                         }
+                    }
+                    if (8 == $measure_choose_id) { 
+                        //补价收入核算增加
+                        $FinanceCost = new FinanceCost();
+                        $FinanceCost->return_order_subtract($receptInfo['work_id'],3);
+                    }
+                    if (11 == $measure_choose_id) { 
+                        //退件退款收入核算冲减
+                        $FinanceCost = new FinanceCost();
+                        $FinanceCost->return_order_subtract($receptInfo['work_id'],4);
                     }
                     $this->success();
                 } else {
@@ -4335,6 +4365,74 @@ EOF;
             ->where($map)
             ->select();
         $list = collection($list)->toArray();
+
+        foreach ($list as $key=>$item){
+            $_new_order = new NewOrder();
+            $result_id = $_new_order
+                ->where('increment_id', $item['platform_order'])
+                ->value('id');
+            $order_item_where['order_id'] = $result_id;
+            if(!empty($item['order_item_numbers']) && 2 == $item['work_type']){
+                if(empty($work)){
+                    $select_number = explode(',',$item['order_item_numbers']);
+                }
+                $order_item_where['item_order_number'] = ['in',$item['order_item_numbers']];
+            }
+            $_new_order_item_process = new NewOrderItemProcess();
+            $order_item_list = $_new_order_item_process
+                ->where($order_item_where)
+                ->column('sku','item_order_number')
+            ;
+
+            if (!empty($order_item_list)){
+                $son_number = array_keys($order_item_list);
+                $son_sku = array_values($order_item_list);
+
+                if($item['order_item_numbers']){
+                    $select_number = explode(',',$item['order_item_numbers']);
+                    foreach($select_number as $e=>$v){
+                        if($v == $son_number[$e]){
+                            $son_number_array[] = $v.'/'.$son_sku[$e];
+                        }
+                    }}
+
+//                $list[$key]['son_number']  = implode('/',array_keys($order_item_list));
+//                $list[$key]['son_sku']  = implode('/',array_values($order_item_list));
+                if (!empty($son_number_array)){
+                    $list[$key]['son_number'] = implode(',',$son_number_array);
+                }
+
+                unset($order_item_list);
+                unset($son_number_array);
+            }
+
+
+
+
+
+
+//            if (!empty($item['order_sku'])){
+//                $order_sku = explode(',',$item['order_sku']);
+//                foreach($order_sku as $ct=>$val){
+//                    if(strpos($val,'/') !== false){
+//                        $sku_str = explode('/',$val)[1];
+//                    }else{
+//                        $sku_str = $val;
+//                    }
+//                    if (in_array($sku_str,$order_item_list)){
+//                        $cat[$ct]['number'] = array_search($sku_str,$order_item_list);
+//                        $cat[$ct]['sku'] = $sku_str;
+//                    }
+//                    $number_sku[$ct] = implode(':',array_reduce($cat,'array_merge',[]));
+//                }
+//                if ($number_sku){
+//                    $list[$key]['number_sku']  = implode('/',$number_sku);
+//                }
+//            }
+
+
+        }
+
         //查询用户id对应姓名
         $admin = new \app\admin\model\Admin();
         $users = $admin->where('status', 'normal')->column('nickname', 'id');
@@ -4406,13 +4504,13 @@ EOF;
             ->setCellValue("AE1", "退回物流单号")
             ->setCellValue("AF1", "退款金额")
             ->setCellValue("AG1", "退款百分比")
-            ->setCellValue("AH1", "措施")
-            ->setCellValue("AI1", "措施详情")
-            ->setCellValue("AJ1", "承接详情")
-            ->setCellValue("AK1", "工单回复备注")
-            ->setCellValue("AL1", "订单支付时间")
-            ->setCellValue("AM1", "补发订单号")
-            ->setCellValue("AN1", "子单号集结");
+            ->setCellValue("AH1", "措施详情")
+            ->setCellValue("AI1", "工单回复备注")
+            ->setCellValue("AJ1", "订单支付时间")
+            ->setCellValue("AK1", "补发订单号")
+            ->setCellValue("AL1", "子单号/SKU");
+
+        ;
         $spreadsheet->setActiveSheetIndex(0)->setTitle('工单数据');
         foreach ($list as $key => $value) {
             if ($value['after_user_id']) {
@@ -4536,38 +4634,82 @@ EOF;
             }
             //措施
             if ($info['step'] && array_key_exists($value['id'], $info['step'])) {
-                $spreadsheet->getActiveSheet()->setCellValue("AH" . ($key * 1 + 2), $info['step'][$value['id']]);
+                $spreadsheet->getActiveSheet()->setCellValue("AH" . ($key * 1 + 2), $info['step'][$value['id']].$info['detail'][$value['id']].$value['result']);
             } else {
                 $spreadsheet->getActiveSheet()->setCellValue("AH" . ($key * 1 + 2), '');
             }
-            //措施详情
-            if ($info['detail'] && array_key_exists($value['id'], $info['detail'])) {
-                $spreadsheet->getActiveSheet()->setCellValue("AI" . ($key * 1 + 2), $info['detail'][$value['id']]);
+//            //措施详情
+//            if ($info['detail'] && array_key_exists($value['id'], $info['detail'])) {
+//                $spreadsheet->getActiveSheet()->setCellValue("AI" . ($key * 1 + 2), $info['detail'][$value['id']]);
+//            } else {
+//                $spreadsheet->getActiveSheet()->setCellValue("AI" . ($key * 1 + 2), '');
+//            }
+//            //承接
+//            if ($receptInfo && array_key_exists($value['id'], $receptInfo)) {
+//
+//                $value['result'] = $receptInfo[$value['id']];
+//                $spreadsheet->getActiveSheet()->setCellValue("AJ" . ($key * 1 + 2), $value['result']);
+//            } else {
+//                $spreadsheet->getActiveSheet()->setCellValue("AJ" . ($key * 1 + 2), '');
+//            }
+
+            if ($noteInfo && array_key_exists($value['id'], $noteInfo)) {
+                $value['note'] = $noteInfo[$value['id']];
+                $spreadsheet->getActiveSheet()->setCellValue("AI" . ($key * 1 + 2), $value['note']);
             } else {
                 $spreadsheet->getActiveSheet()->setCellValue("AI" . ($key * 1 + 2), '');
             }
-            //承接
-            if ($receptInfo && array_key_exists($value['id'], $receptInfo)) {
+            $spreadsheet->getActiveSheet()->setCellValue("AJ" . ($key * 1 + 2), $value['payment_time']);
+            $spreadsheet->getActiveSheet()->setCellValue("AK" . ($key * 1 + 2), $value['replacement_order']);
+            $spreadsheet->getActiveSheet()->setCellValue("AL" . ($key * 1 + 2), $value['son_number'].'/'.$value['son_sku']);
 
-                $value['result'] = $receptInfo[$value['id']];
-                $spreadsheet->getActiveSheet()->setCellValue("AJ" . ($key * 1 + 2), $value['result']);
-            } else {
-                $spreadsheet->getActiveSheet()->setCellValue("AJ" . ($key * 1 + 2), '');
-            }
-
-            //回复
-            if ($noteInfo && array_key_exists($value['id'], $noteInfo)) {
-                $value['note'] = $noteInfo[$value['id']];
-                $spreadsheet->getActiveSheet()->setCellValue("AK" . ($key * 1 + 2), $value['note']);
-            } else {
-                $spreadsheet->getActiveSheet()->setCellValue("AK" . ($key * 1 + 2), '');
-            }
-            $spreadsheet->getActiveSheet()->setCellValue("AL" . ($key * 1 + 2), $value['payment_time']);
-            $spreadsheet->getActiveSheet()->setCellValue("AM" . ($key * 1 + 2), $value['replacement_order']);
-            $spreadsheet->getActiveSheet()->setCellValue("AN" . ($key * 1 + 2), $value['order_item_numbers']);
         }
 
-
+        //设置宽度
+        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(40);
+        $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(40);
+        $spreadsheet->getActiveSheet()->getColumnDimension('I')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('J')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('K')->setWidth(14);
+        $spreadsheet->getActiveSheet()->getColumnDimension('L')->setWidth(16);
+        $spreadsheet->getActiveSheet()->getColumnDimension('M')->setWidth(16);
+        $spreadsheet->getActiveSheet()->getColumnDimension('N')->setWidth(50);
+        $spreadsheet->getActiveSheet()->getColumnDimension('N')->setWidth(50);
+        $spreadsheet->getActiveSheet()->getColumnDimension('O')->setWidth(50);
+        $spreadsheet->getActiveSheet()->getColumnDimension('P')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('Q')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('R')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('S')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('T')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('U')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('V')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('W')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('X')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('Y')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('Z')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AA')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AB')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AC')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AD')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AE')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AF')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AG')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AH')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AI')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AJ')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AK')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AL')->setWidth(100);
+//        $spreadsheet->getActiveSheet()->getColumnDimension('AM')->setWidth(200);
+//        $spreadsheet->getActiveSheet()->getColumnDimension('AN')->setWidth(200);
+//        $spreadsheet->getActiveSheet()->getColumnDimension('AO')->setWidth(200);
+//        $spreadsheet->getActiveSheet()->getColumnDimension('AP')->setWidth(400);
+//        $spreadsheet->getActiveSheet()->getColumnDimension('AQ')->setWidth(400);
         //设置边框
         $border = [
             'borders' => [
@@ -4584,7 +4726,7 @@ EOF;
         $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
         $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
 
-        $spreadsheet->getActiveSheet()->getStyle('A1:AN' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle('A1:AL' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
 
         $spreadsheet->setActiveSheetIndex(0);
@@ -4620,8 +4762,6 @@ EOF;
 
     public function batch_export_xls_array()
     {
-
-
         set_time_limit(0);
         ini_set('memory_limit', '1024M');
 

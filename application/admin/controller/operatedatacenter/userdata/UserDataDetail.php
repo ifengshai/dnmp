@@ -292,6 +292,7 @@ class UserDataDetail extends Backend
                     $index = array_keys($column_name,'point');
                     if($site != 3){
                         $tmpRow[$index[0]] =$web_model->table('mw_reward_point_customer')->where('customer_id',$val['entity_id'])->value('mw_reward_point');  //积分
+                        $tmpRow[$index[0]] = $tmpRow[$index[0]] ? $tmpRow[$index[0]] : 0;
                     }else{
                         $tmpRow[$index[0]] = 0; //积分
                     }

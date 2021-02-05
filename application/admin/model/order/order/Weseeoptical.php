@@ -80,7 +80,7 @@ class Weseeoptical extends Model
         return $result;
     }
     /**
-     * 统计订单SKU销量
+     * 统计订单SKU销量(弃用)
      *
      * @Description
      * @author wpl
@@ -88,7 +88,7 @@ class Weseeoptical extends Model
      * @param [type] $sku 筛选条件
      * @return object
      */
-    public function getOrderSalesNumTop30($sku, $where)
+    public function getOrderSalesNumTop30_OLD($sku, $where)
     {
         if ($sku) {
             $map['sku'] = ['in', $sku];
@@ -106,8 +106,29 @@ class Weseeoptical extends Model
             ->column('round(sum(b.qty_ordered)) as num', 'sku');
         return $res;
     }
+    //新的信息都从mojing_base获取
+    public function getOrderSalesNumTop30($sku, $where)
+    {
+        $where['a.created_at'] = ['between', [strtotime($where['a.created_at'][1][0]),strtotime($where['a.created_at'][1][1])]];
+        if ($sku) {
+            $map['b.sku'] = ['in', $sku];
+        }
+        $map['b.sku'] = ['not like', '%Price%'];
+        $map['b.site'] = ['=',5];
+        $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered']];
+        $res = Db::connect('database.db_mojing_order')->table('fa_order')
+            ->where($map)
+            ->where($where)
+            ->alias('a')
+            ->join(['fa_order_item_option' => 'b'], 'a.id=b.order_id')
+            ->group('sku')
+            ->order('num desc')
+            ->limit(15)
+            ->column('round(sum(b.qty)) as num', 'sku');
+        return $res;
+    }
         /**
-     * 统计订单SKU销量
+     * 统计订单SKU销量(弃用)
      *
      * @Description
      * @author wpl
@@ -115,7 +136,7 @@ class Weseeoptical extends Model
      * @param [type] $sku 筛选条件
      * @return object
      */
-    public function getOrderSalesNum($sku, $where)
+    public function getOrderSalesNumOLD($sku, $where)
     {
         if ($sku) {
             $map['sku'] = ['in', $sku];
@@ -131,6 +152,27 @@ class Weseeoptical extends Model
             ->group('sku')
             ->order('num desc')
             ->column('round(sum(b.qty_ordered)) as num', 'sku');
+        return $res;
+    }
+    //新的信息都从mojing_base获取
+    public function getOrderSalesNum($sku, $where)
+    {
+        $where['a.created_at'] = ['between', [strtotime($where['a.created_at'][1][0]),strtotime($where['a.created_at'][1][1])]];
+        if ($sku) {
+            $map['b.sku'] = ['in', $sku];
+        } else {
+            $map['b.sku'] = ['not like', '%Price%'];
+        }
+        $map['b.site'] = ['=',5];
+        $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered']];
+        $res = Db::connect('database.db_mojing_order')->table('fa_order')
+            ->where($map)
+            ->where($where)
+            ->alias('a')
+            ->join(['fa_order_item_option' => 'b'], 'a.id=b.order_id')
+            ->group('sku')
+            ->order('num desc')
+            ->column('round(sum(b.qty)) as num', 'sku');
         return $res;
     }
     /***
@@ -317,6 +359,20 @@ class Weseeoptical extends Model
      * @since 2020/02/24 14:51:20 
      * @return void
      */
+    public function getOrderIdOLD($map)
+    {
+        if ($map) {
+            $result = Db::connect('database.db_weseeoptical')
+                ->table('sales_flat_order_item')
+                ->alias('a')
+                ->join(['sales_flat_order' => 'b'], 'a.order_id=b.entity_id')
+                ->where($map)
+                ->column('order_id');
+            return $result;
+        }
+        return false;
+    }
+    //新的信息都从mojing_base获取
     public function getOrderId($map)
     {
         if ($map) {

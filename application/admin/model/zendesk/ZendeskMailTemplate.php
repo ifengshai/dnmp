@@ -45,4 +45,17 @@ class ZendeskMailTemplate extends Model
     }
 
 
+    public function template_list()
+    {
+        $info = $this->field('id,template_description')->select();
+        if(!$info){
+            return [];
+        }
+        $arr = [];
+        foreach($info as $v){
+            $arr[$v['id']] = $v['template_description'];
+        }
+        return $arr ? $arr : [];
+    }
+
 }
