@@ -1145,7 +1145,7 @@ class Distribution extends Backend
         $list = $this->model
             ->alias('a')
             ->field('a.id as aid,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.total_qty_ordered,b.site,a.distribution_status,a.created_at,c.*,b.base_grand_total,
-            b.order_currency_code,b.payment_time,b.base_currency_code,b.payment_method,b.status')
+            b.order_currency_code,b.payment_time,b.base_currency_code,b.payment_method,b.status,b.payment_time')
             ->join(['fa_order' => 'b'], 'a.order_id=b.id')
             ->join(['fa_order_item_option' => 'c'], 'a.option_id=c.id')
             ->where($where)
@@ -1154,7 +1154,7 @@ class Distribution extends Backend
             ->select();
         $list = collection($list)->toArray();
 
-
+        dump($list);die();
         //从数据库查询需要的数据
         $spreadsheet = new Spreadsheet();
 
@@ -1255,6 +1255,7 @@ class Distribution extends Backend
 
         //获取镜片编码及名称
         $lens_list = $this->_lens_data->column('lens_name', 'lens_number');
+
         foreach ($list as $key=>$value){
             $data[$value['increment_id']]['id'] = $value['id'];
             $data[$value['increment_id']]['created_at'] = $value['created_at'];
@@ -1281,6 +1282,11 @@ class Distribution extends Backend
             $data[$value['increment_id']]['item_order'][$key]['od_bd'] = $value['od_bd'];
             $data[$value['increment_id']]['item_order'][$key]['od_pv_r'] = $value['od_pv_r'];
             $data[$value['increment_id']]['item_order'][$key]['os_bd_r'] = $value['os_bd_r'];
+            $data[$value['increment_id']]['item_order'][$key]['lens_number'] = $value['lens_number'];
+            $data[$value['increment_id']]['item_order'][$key]['web_lens_name'] = $value['web_lens_name'];
+
+
+
             $data[$value['increment_id']]['base_grand_total'] = $value['base_grand_total'];
             $data[$value['increment_id']]['base_currency_code'] = $value['base_currency_code'];
             $data[$value['increment_id']]['base_grand_total'] = $value['base_grand_total'];
@@ -1381,12 +1387,12 @@ class Distribution extends Backend
 
 
                 //过滤饰品站
-                if ($value['site'] != 12) {
+                if ($v['site'] != 12) {
                     //查询镜框尺寸
-                    $tmp_bridge = $this->get_frame_lens_width_height_bridge($value['product_id'], $v['site']);
+                    $tmp_bridge = $this->get_frame_lens_width_height_bridge($v['product_id'], $v['site']);
                 }
 
-                $lens_name = $lens_list[$value['lens_number']] ?: $value['web_lens_name'];
+                $lens_name = $lens_list[$v['lens_number']] ?: $v['web_lens_name'];
                 $spreadsheet->getActiveSheet()->setCellValue("O" . ($cat), $lens_name);//镜片
                 $spreadsheet->getActiveSheet()->setCellValue("P" . ($cat), $tmp_bridge['lens_width']);//镜框宽度
                 $spreadsheet->getActiveSheet()->setCellValue("Q" . ($cat), $tmp_bridge['lens_height']);//镜框高度
