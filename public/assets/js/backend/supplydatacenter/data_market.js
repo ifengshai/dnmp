@@ -152,7 +152,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                                 },
                                 formatter: function (param) { //格式化提示信息
                                     console.log(param);
-                                    return param[0].name + '<br/>' + param[0].seriesName + '：' + param[0].value + '<br/>' + param[1].seriesName + '：' + param[1].value;
+                                    return param[0].name + '<br/>' + param[0].seriesName + '：' + param[0].value + '<br/>' + param[1].seriesName + '：' + param[1].value + '%<br/>' + param[2].seriesName + '：' + param[2].value+'%';
                                 }
                             },
                             grid: { //直角坐标系内绘图网格
@@ -165,7 +165,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                             legend: { //图例配置
                                 padding: 5,
                                 top: '2%',
-                                data: ['订单数', '及时率']
+                                data: ['订单数', '及时率', '平均及时率']
                             },
                             xAxis: [
                                 {
@@ -183,6 +183,13 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                                 {
                                     type: 'value',
                                     name: '及时率',
+                                    axisLabel: {
+                                        formatter: '{value} %'
+                                    }
+                                },
+                                {
+                                    type: 'value',
+                                    name: '平均及时率',
                                     axisLabel: {
                                         formatter: '{value} %'
                                     }

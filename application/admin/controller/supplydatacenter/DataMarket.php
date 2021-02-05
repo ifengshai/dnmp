@@ -668,12 +668,14 @@ class DataMarket extends Backend
                 $createat = explode(' ', $time_str);
                 $map['day_date'] = ['between',[$createat[0],$createat[3]]];
                 $order_info = Db::name('datacenter_day_order')->where($map)->select();
+                $avg_rate = Db::name('datacenter_day_order')->where($map)->value('round(sum(intime_rate)/count(*),2) as result');
                 $arr = array();
                 foreach ($order_info as $key=>$value){
                     $arr[$key]['day'] = $value['day_date'];
                     //订单数量
                     $arr[$key]['order_count'] = $value['order_num'];
                     $arr[$key]['rate'] = $value['intime_rate'];
+                    $arr[$key]['avg_rate'] = $avg_rate;
                 }
                 Cache::set('Supplydatacenter_datamarket'.$time_str.md5(serialize('order_histogram_line')),$arr,7200);
             }else{
@@ -682,6 +684,7 @@ class DataMarket extends Backend
             //全部采购单
             $barcloumndata = array_column($arr, 'order_count');
             $linecloumndata = array_column($arr, 'rate');
+            $linecloumndata1 = array_column($arr, 'avg_rate');
 
             $json['xColumnName'] = array_column($arr, 'day');
             $json['columnData'] = [
@@ -694,6 +697,13 @@ class DataMarket extends Backend
                     'type' => 'line',
                     'data' => $linecloumndata,
                     'name' => '及时率',
+                    'yAxisIndex' => 1,
+                    'smooth' => true //平滑曲线
+                ],
+                [
+                    'type' => 'line',
+                    'data' => $linecloumndata1,
+                    'name' => '平均及时率',
                     'yAxisIndex' => 1,
                     'smooth' => true //平滑曲线
                 ],
