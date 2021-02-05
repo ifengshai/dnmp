@@ -300,7 +300,7 @@ class OrderReturn extends Backend
         if ($request->isPost()) {
             //获取输入的订单号
             $increment_id = trim($request->post('increment_id'));
-           
+
             //获取输入的平台
             if (!$order_platform) {
                 $order_platform = trim($request->post('order_platform'));
@@ -323,7 +323,7 @@ class OrderReturn extends Backend
             //获取交易号
             $transaction_id   = trim($request->post('transaction_id'));
             if ($order_platform < 1) {
-                
+
                 return json(['code' => 0,'msg' => '请选择正确的订单平台']);
             }
             if ($customer_name) {
@@ -341,6 +341,26 @@ class OrderReturn extends Backend
 
             //求出用户的所有订单信息
             $customer = (new SaleAfterTask())->getCustomerEmail($order_platform, $increment_id, $customer_name, $customer_phone, $track_number, $transaction_id, $customer_email);
+
+            if ($customer){
+                foreach ($customer as $key=>$item){
+                    //客户签收时间
+                    $customer[$key]['signing_time'] = Db::table('fa_order_node')->where('order_number',$item['increment_id'])->value('signing_time');
+                    //查询物流渠道，头程单号，订单商品数量
+                    $mojing_order = Db::connect('database.db_mojing_order');
+                    $morder_other_value = $mojing_order->table('fa_order_process')->alias('pro')
+                        ->join("fa_order fao",'pro.order_id = fao.id','left')
+                        ->where('pro.increment_id',$item['increment_id'])
+                        ->field('pro.agent_way_title,pro.shipment_num,fao.total_qty_ordered')
+                        ->find();
+                    if ($morder_other_value){
+                        $morder_other_value = collection($morder_other_value)->toArray();
+                    }
+                    $customer[$key]['agent_way_title'] = $morder_other_value['agent_way_title'];
+                    $customer[$key]['shipping_num_temp'] = $morder_other_value['shipping_num_temp'];
+                    $customer[$key]['total_qty_ordered'] = $morder_other_value['total_qty_ordered'];
+                }
+            }
 
 
             if (!$customer) {
@@ -491,13 +511,14 @@ class OrderReturn extends Backend
                     }
                 }
             }
+
             $this->view->assign('infoSynergyTaskResult', $infoSynergyTaskResult);
             // $this->view->assign('workOrderListResult', $workOrderListResult);
             $this->view->assign('saleAfterTaskResult', $saleAfterTaskResult);
             $this->view->assign('orderReturnResult', $orderReturnResult);
             $this->view->assign('orderInfoResult', $customer);
 
-        
+
             $this->view->assign('orderPlatformId', $order_platform);
             $this->view->assign('orderPlatform', $orderPlatformList[$order_platform]);
             $this->view->assign('customerInfo', $customerInfo);

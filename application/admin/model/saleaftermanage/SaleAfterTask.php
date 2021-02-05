@@ -794,6 +794,20 @@ class SaleAfterTask extends Model
                     $result[$k]['item'] = ZeeloolJpPrescriptionDetailHelper::get_one_by_increment_id($v['increment_id']);
                 }
 
+
+//                if (!empty($result[$k]['item'][$k]['sku'])){
+                foreach ($result[$k]['item'] as $key=>$value){
+                    $result[$k]['item'][$key]['order_number'] = Db::connect('database.db_mojing_order')->table('fa_order')->where('id',$value['order_id'])->value('increment_id');
+                    //子订单号
+                    $result[$k]['item'][$key]['item_order_number'] = Db::connect('database.db_mojing_order')->table('fa_order_item_process')
+                        ->where('magento_order_id',$value['order_id'])->where('site',$order_platform)->where('item_id',$value['item_id'])->value('item_order_number');
+
+                    //虚拟库存
+                    $result[$k]['item'][$key]['stock'] = Db::connect('database.db_stock')->table('fa_item_platform_sku')
+                        ->where('platform_sku',$value['sku'])->where('platform_type',$order_platform)->value('stock');
+                }
+//                }
+
                 //订单地址表
                 $address = Db::connect($db)->table('sales_flat_order_address')->where(['parent_id' => $v['entity_id']])->field('address_type,telephone,postcode,street,city,region,country_id,firstname,lastname')->select();
                 $result[$k]['address'] = $address;
@@ -817,7 +831,7 @@ class SaleAfterTask extends Model
                         $result[$k]['order_type'] = '<span style="color:#e74c3c">补发</span>';
                         break;
                     default:
-                        $result[$k]['order_type'] = '<span style="color:#0073b7">普通订单</span>';
+                        $result[$k]['order_type'] = '<span style="color:#0073b7">普通</span>';
                         break;
                 }
                 $result[$k]['real_papid'] = round(($v['base_total_paid'] + $v['base_total_due']) * $v['base_to_order_rate'], 3);
