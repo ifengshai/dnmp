@@ -35,7 +35,7 @@ class Order extends Model
      * 网站物流接口调整
      *$order_id 订单id   $order_number  订单号  $site 站点   $status 状态 $order_node订单大节点 $node_type 订单小节点
      */
-    public function rulesto_adjust($order_id=null,$order_number=null,$site=null,$order_node=null,$node_type=null)
+    public  static  function rulesto_adjust($order_id=null,$order_number=null,$site=null,$order_node=null,$node_type=null)
     {
 
             //判断如果子节点大于等于1时  不更新
