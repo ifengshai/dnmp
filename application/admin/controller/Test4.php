@@ -2234,6 +2234,8 @@ class Test4 extends Controller
                         $data['type'] = 0;
                     }
                     if($value['ticket_id'] == 276092){
+                        dump($v);
+                        dump($str);
                         dump($data);exit;
                     }
                     //Db::name('ceshi')->insert($data);
