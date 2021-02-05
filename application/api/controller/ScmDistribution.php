@@ -1394,6 +1394,10 @@ class ScmDistribution extends Scm
                     $outstock_item['out_stock_id'] = $outstock_id;
                     $this->_outstock_item->insert($outstock_item);
 
+                    //计算出库成本
+                    $financecost = new \app\admin\model\finance\FinanceCost();
+                    $financecost->outstock_cost($outstock_id, $outstock['out_stock_number']);
+
                     //条码出库
                     $this->_product_bar_code_item
                     ->allowField(true)
@@ -2336,6 +2340,10 @@ class ScmDistribution extends Scm
                             $outstock_item['out_stock_num'] = 1;
                             $outstock_item['out_stock_id'] = $outstock_id;
                             $this->_outstock_item->insert($outstock_item);
+
+                            //计算出库成本
+                            $financecost = new \app\admin\model\finance\FinanceCost();
+                            $financecost->outstock_cost($outstock_id, $outstock['out_stock_number']);
 
                             //条码出库
                             $this->_product_bar_code_item
