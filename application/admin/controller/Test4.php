@@ -1617,16 +1617,19 @@ class Test4 extends Controller
         $where['node_type'] = 40;
         $all_order = $orderNode->where($where)->column('order_number');
         foreach ($all_order as $key=>$value){
-            //更新process表中数据
-            $process->where('increment_id',$value)->update(['is_tracking'=>5]);
-            echo $value." is ok"."\n";
-            usleep(10000);
+            $is_tracking = $process->where('increment_id',$value)->value('is_tracking');
+            if($is_tracking != 5){
+                //更新process表中数据
+                $process->where('increment_id',$value)->update(['is_tracking'=>5]);
+                echo $value." is ok"."\n";
+                usleep(10000);
+            }
         }
     }
     //产品等级销量数据脚本
     public function product_level_salesnum(){
         //查询时间
-        $date_time = $this->zeelool->query("SELECT DATE_FORMAT(created_at, '%Y-%m-%d') AS date_time FROM `sales_flat_order` where created_at between '2018-01-01' and '2020-12-31' GROUP BY DATE_FORMAT(created_at, '%Y%m%d') order by DATE_FORMAT(created_at, '%Y%m%d') asc");
+        $date_time = $this->zeelool->query("SELECT DATE_FORMAT(created_at, '%Y-%m-%d') AS date_time FROM `sales_flat_order` where created_at between '2021-01-22' and '2021-01-23' GROUP BY DATE_FORMAT(created_at, '%Y%m%d') order by DATE_FORMAT(created_at, '%Y%m%d') asc");
         foreach ($date_time as $val) {
             $is_exist = Db::name('datacenter_day_supply')->where('day_date', $val['date_time'])->value('id');
             if (!$is_exist) {
@@ -1651,19 +1654,7 @@ class Test4 extends Controller
     public function getSalesnum($site,$date){
         $this->order = new \app\admin\model\order\order\NewOrder();
         $this->productGrade = new \app\admin\model\ProductGrade();
-        switch ($site){
-            case '1':
-                $field = 'zeelool_sku';
-                break;
-            case '2':
-                $field = 'voogueme_sku';
-                break;
-            case '3':
-                $field = 'nihao_sku';
-                break;
-            default:
-                break;
-        }
+        $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         //所选时间段内有销量的平台sku
         $start = $date;
         $end = $date.' 23:59:59';
@@ -1682,8 +1673,9 @@ class Test4 extends Controller
         $grade7 = 0;
         $grade8 = 0;
         foreach ($order as $key=>$value){
+            $sku = $this->itemplatformsku->getTrueSku($value['sku'], $site);
             //查询该品的等级
-            $grade = $this->productGrade->where($field,$value['sku'])->value('grade');
+            $grade = $this->productGrade->where('true_sku',$sku)->value('grade');
             switch ($grade){
                 case 'A+':
                     $grade1 += $value['count'];
@@ -1701,6 +1693,7 @@ class Test4 extends Controller
                     $grade5 += $value['count'];
                     break;
                 case 'D':
+                    $grade6 += $value['count'];
                     $grade6 += $value['count'];
                     break;
                 case 'E':
@@ -1737,6 +1730,515 @@ class Test4 extends Controller
             $process->where('order_id',$value)->update(['order_prescription_type'=>$type]);
             echo $value.' is ok'."\n";
             usleep(100000);
+        }
+    }
+    /**
+     * 呆滞数据
+     */
+    public function dull_stock(){
+        $count = 0;   //总数量
+        $count1 = 0;   //低
+        $count2 = 0;   //中
+        $count3 = 0;    //高
+        $total = 0;     //总金额
+        $total1 = 0;     //低
+        $total2 = 0;     //中
+        $total3 = 0;     //高
+        $arr1 = array();   //A+
+        $arr2 = array();   //A
+        $arr3 = array();
+        $arr4 = array();
+        $arr5 = array();
+        $arr6 = array();
+        $arr7 = array();
+        $arr8 = array();
+        $grades = Db::name('product_grade')->field('true_sku,grade')->select();
+        foreach ($grades as $key=>$value){
+            $this->model = new \app\admin\model\itemmanage\Item;
+            $this->item = new \app\admin\model\warehouse\ProductBarCodeItem;
+            //该品实时库存
+            $real_time_stock = $this->model->where('sku',$value['true_sku'])->where('is_del',1)->where('is_open',1)->value('sum(stock)-sum(distribution_occupy_stock) as result');
+            //该品库存金额
+            $sku_amount = $this->item->alias('i')->join('fa_purchase_order_item o','i.purchase_id=o.purchase_id and i.sku=o.sku')->where('i.sku',$value['true_sku'])->where('i.library_status',1)->value('SUM(IF(o.actual_purchase_price != 0,o.actual_purchase_price,o.purchase_price)) as result');
+            //实际周转天数
+            $sku_info  = $this->getSkuSales($value['true_sku']);
+            $actual_day = $sku_info['days']!=0 && $sku_info['count']!=0 ? round($real_time_stock/($sku_info['count']/$sku_info['days']),2) : 0;
+            if($actual_day >120 && $actual_day<=144){
+                $count += $real_time_stock;
+                $total += $sku_amount;
+                $count1 += $real_time_stock;
+                $total1 += $sku_amount;
+                if($value['grade'] == 'A+'){
+                    $arr1['stock'] += $real_time_stock;
+                    $arr1['total'] += $sku_amount;
+                    $arr1['low_stock'] += $real_time_stock;
+                    $arr1['low_total'] += $sku_amount;
+                }elseif($value['grade'] == 'A'){
+                    $arr2['stock'] += $real_time_stock;
+                    $arr2['total'] += $sku_amount;
+                    $arr2['low_stock'] += $real_time_stock;
+                    $arr2['low_total'] += $sku_amount;
+                }elseif($value['grade'] == 'B'){
+                    $arr3['stock'] += $real_time_stock;
+                    $arr3['total'] += $sku_amount;
+                    $arr3['low_stock'] += $real_time_stock;
+                    $arr3['low_total'] += $sku_amount;
+                }elseif($value['grade'] == 'C+'){
+                    $arr4['stock'] += $real_time_stock;
+                    $arr4['total'] += $sku_amount;
+                    $arr4['low_stock'] += $real_time_stock;
+                    $arr4['low_total'] += $sku_amount;
+                }elseif($value['grade'] == 'C'){
+                    $arr5['stock'] += $real_time_stock;
+                    $arr5['total'] += $sku_amount;
+                    $arr5['low_stock'] += $real_time_stock;
+                    $arr5['low_total'] += $sku_amount;
+                }elseif($value['grade'] == 'D'){
+                    $arr6['stock'] += $real_time_stock;
+                    $arr6['total'] += $sku_amount;
+                    $arr6['low_stock'] += $real_time_stock;
+                    $arr6['low_total'] += $sku_amount;
+                }elseif($value['grade'] == 'E'){
+                    $arr7['stock'] += $real_time_stock;
+                    $arr7['total'] += $sku_amount;
+                    $arr7['low_stock'] += $real_time_stock;
+                    $arr7['low_total'] += $sku_amount;
+                }else{
+                    $arr8['stock'] += $real_time_stock;
+                    $arr8['total'] += $sku_amount;
+                    $arr8['low_stock'] += $real_time_stock;
+                    $arr8['low_total'] += $sku_amount;
+                }
+            }elseif($actual_day > 144 && $actual_day<=168){
+                $count += $real_time_stock;
+                $total += $sku_amount;
+                $count2 += $real_time_stock;
+                $total2 += $sku_amount;
+                if($value['grade'] == 'A+'){
+                    $arr1['stock'] += $real_time_stock;
+                    $arr1['total'] += $sku_amount;
+                    $arr1['center_stock'] += $real_time_stock;
+                    $arr1['center_total'] += $sku_amount;
+                }elseif($value['grade'] == 'A'){
+                    $arr2['stock'] += $real_time_stock;
+                    $arr2['total'] += $sku_amount;
+                    $arr2['center_stock'] += $real_time_stock;
+                    $arr2['center_total'] += $sku_amount;
+                }elseif($value['grade'] == 'B'){
+                    $arr3['stock'] += $real_time_stock;
+                    $arr3['total'] += $sku_amount;
+                    $arr3['center_stock'] += $real_time_stock;
+                    $arr3['center_total'] += $sku_amount;
+                }elseif($value['grade'] == 'C+'){
+                    $arr4['stock'] += $real_time_stock;
+                    $arr4['total'] += $sku_amount;
+                    $arr4['center_stock'] += $real_time_stock;
+                    $arr4['center_total'] += $sku_amount;
+                }elseif($value['grade'] == 'C'){
+                    $arr5['stock'] += $real_time_stock;
+                    $arr5['total'] += $sku_amount;
+                    $arr5['center_stock'] += $real_time_stock;
+                    $arr5['center_total'] += $sku_amount;
+                }elseif($value['grade'] == 'D'){
+                    $arr6['stock'] += $real_time_stock;
+                    $arr6['total'] += $sku_amount;
+                    $arr6['center_stock'] += $real_time_stock;
+                    $arr6['center_total'] += $sku_amount;
+                }elseif($value['grade'] == 'E'){
+                    $arr7['stock'] += $real_time_stock;
+                    $arr7['total'] += $sku_amount;
+                    $arr7['center_stock'] += $real_time_stock;
+                    $arr7['center_total'] += $sku_amount;
+                }else{
+                    $arr8['stock'] += $real_time_stock;
+                    $arr8['total'] += $sku_amount;
+                    $arr8['center_stock'] += $real_time_stock;
+                    $arr8['center_total'] += $sku_amount;
+                }
+            }elseif($actual_day>168){
+                $count += $real_time_stock;
+                $total += $sku_amount;
+                $count3 += $real_time_stock;
+                $total3 += $sku_amount;
+                if($value['grade'] == 'A+'){
+                    $arr1['stock'] += $real_time_stock;
+                    $arr1['total'] += $sku_amount;
+                    $arr1['high_stock'] += $real_time_stock;
+                    $arr1['high_total'] += $sku_amount;
+                }elseif($value['grade'] == 'A'){
+                    $arr2['stock'] += $real_time_stock;
+                    $arr2['total'] += $sku_amount;
+                    $arr2['high_stock'] += $real_time_stock;
+                    $arr2['high_total'] += $sku_amount;
+                }elseif($value['grade'] == 'B'){
+                    $arr3['stock'] += $real_time_stock;
+                    $arr3['total'] += $sku_amount;
+                    $arr3['high_stock'] += $real_time_stock;
+                    $arr3['high_total'] += $sku_amount;
+                }elseif($value['grade'] == 'C+'){
+                    $arr4['stock'] += $real_time_stock;
+                    $arr4['total'] += $sku_amount;
+                    $arr4['high_stock'] += $real_time_stock;
+                    $arr4['high_total'] += $sku_amount;
+                }elseif($value['grade'] == 'C'){
+                    $arr5['stock'] += $real_time_stock;
+                    $arr5['total'] += $sku_amount;
+                    $arr5['high_stock'] += $real_time_stock;
+                    $arr5['high_total'] += $sku_amount;
+                }elseif($value['grade'] == 'D'){
+                    $arr6['stock'] += $real_time_stock;
+                    $arr6['total'] += $sku_amount;
+                    $arr6['high_stock'] += $real_time_stock;
+                    $arr6['high_total'] += $sku_amount;
+                }elseif($value['grade'] == 'E'){
+                    $arr7['stock'] += $real_time_stock;
+                    $arr7['total'] += $sku_amount;
+                    $arr7['high_stock'] += $real_time_stock;
+                    $arr7['high_total'] += $sku_amount;
+                }else{
+                    $arr8['stock'] += $real_time_stock;
+                    $arr8['total'] += $sku_amount;
+                    $arr8['high_stock'] += $real_time_stock;
+                    $arr8['high_total'] += $sku_amount;
+                }
+            }
+        }
+        $this->productGrade = new \app\admin\model\ProductGrade();
+        $gradeSkuStock = $this->productGrade->getSkuStock();
+        //计算产品等级的数量
+        $a1_stock_num = $gradeSkuStock['aa_stock_num'];
+        $a_stock_num = $gradeSkuStock['a_stock_num'];
+        $b_stock_num = $gradeSkuStock['b_stock_num'];
+        $c1_stock_num = $gradeSkuStock['ca_stock_num'];
+        $c_stock_num = $gradeSkuStock['c_stock_num'];
+        $d_stock_num = $gradeSkuStock['d_stock_num'];
+        $e_stock_num = $gradeSkuStock['e_stock_num'];
+        $f_stock_num = $gradeSkuStock['f_stock_num'];
+
+        $date_time = date('Y-m-d', strtotime("-1 day"));
+        $arr1['day_date'] = $arr2['day_date'] = $arr3['day_date'] = $arr4['day_date'] = $arr5['day_date'] = $arr6['day_date'] = $arr7['day_date'] = $arr8['day_date'] = $sum['day_date'] = $date_time;
+        $arr1['grade'] = 'A+';
+        $arr1['stock_rate'] = $a1_stock_num ? round($arr1['stock']/$a1_stock_num*100,2) : 0;
+        $arr2['grade'] = 'A';
+        $arr2['stock_rate'] = $a_stock_num ? round($arr2['stock']/$a_stock_num*100,2) : 0;
+        $arr3['grade'] = 'B';
+        $arr3['stock_rate'] = $b_stock_num ? round($arr3['stock']/$b_stock_num*100,2) : 0;
+        $arr4['grade'] = 'C+';
+        $arr4['stock_rate'] = $c1_stock_num ? round($arr4['stock']/$c1_stock_num*100,2) : 0;
+        $arr5['grade'] = 'C';
+        $arr5['stock_rate'] = $c_stock_num ? round($arr5['stock']/$c_stock_num*100,2) : 0;
+        $arr6['grade'] = 'D';
+        $arr6['stock_rate'] = $d_stock_num ? round($arr6['stock']/$d_stock_num*100,2) : 0;
+        $arr7['grade'] = 'E';
+        $arr7['stock_rate'] = $e_stock_num ? round($arr7['stock']/$e_stock_num*100,2) : 0;
+        $arr8['grade'] = 'F';
+        $arr8['stock_rate'] = $f_stock_num ? round($arr8['stock']/$f_stock_num*100,2) : 0;
+        Db::name('supply_dull_stock')->insert($arr1);
+        Db::name('supply_dull_stock')->insert($arr2);
+        Db::name('supply_dull_stock')->insert($arr3);
+        Db::name('supply_dull_stock')->insert($arr4);
+        Db::name('supply_dull_stock')->insert($arr5);
+        Db::name('supply_dull_stock')->insert($arr6);
+        Db::name('supply_dull_stock')->insert($arr7);
+        Db::name('supply_dull_stock')->insert($arr8);
+        $sum['grade'] = 'Z';
+        $sum['stock'] = $count;
+        $sum['total'] = round($total,2);
+        $sum['low_stock'] = $count1;
+        $sum['low_total'] = round($total1,2);
+        $sum['center_stock'] = $count2;
+        $sum['center_total'] = round($total2,2);
+        $sum['high_stock'] = $count3;
+        $sum['high_total'] = round($total3,2);
+        Db::name('supply_dull_stock')->insert($sum);
+        echo 'ALL IS OK';
+    }
+    //获取sku总销量
+    public function getSkuSales($sku)
+    {
+        $days = array();
+        //zeelool
+        $z_info = $this->getDullStock($sku,1);
+        $sales_num1 = $z_info['sales_num'];
+        $days[] = $z_info['days'];
+        //voogueme
+        $v_info = $this->getDullStock($sku,2);
+        $sales_num2 = $v_info['sales_num'];
+        $days[] = $v_info['days'];
+        //nihao
+        $n_info = $this->getDullStock($sku,3);
+        $sales_num3 = $n_info['sales_num'];
+        $days[] = $n_info['days'];
+        //meeloog
+        $m_info = $this->getDullStock($sku,4);
+        $sales_num4 = $m_info['sales_num'];
+        $days[] = $m_info['days'];
+        //wesee
+        $w_info = $this->getDullStock($sku, 5);
+        $sales_num5 = $w_info['sales_num'];
+        $days[] = $w_info['days'];
+        //amazon
+        $a_info = $this->getDullStock($sku, 8);
+        $sales_num6 = $a_info['sales_num'];
+        $days[] = $a_info['days'];
+        //zeelool_es
+        $e_sku = $this->getDullStock($sku, 9);
+        $sales_num7 = $e_sku['sales_num'];
+        $days[] = $e_sku['days'];
+        //zeelool_de
+        $d_info = $this->getDullStock($sku, 10);
+        $sales_num8 = $d_info['sales_num'];
+        $days[] = $d_info['days'];
+        //zeelool_jp
+        $j_info = $this->getDullStock($sku, 11);
+        $sales_num9 = $j_info['sales_num'];
+        $days[] = $j_info['days'];
+        //voogmechic
+        $c_info = $this->getDullStock($sku, 12);
+        $sales_num10 = $c_info['sales_num'];
+        $days[] = $j_info['days'];
+        $count = $sales_num1+$sales_num2+$sales_num3+$sales_num4+$sales_num5+$sales_num6+$sales_num7+$sales_num8+$sales_num9+$sales_num10;
+        $days = max($days);
+        $data = array(
+            'count'=>$count,
+            'days'=>$days,
+        );
+        return $data;
+    }
+    //查询sku的有效天数的销量和有效天数
+    public function getDullStock($sku,$site)
+    {
+        $skuSalesNum = new \app\admin\model\SkuSalesNum();
+        $date = date('Y-m-d');
+        $map['createtime'] = ['<', $date];
+        $map['sku'] = $sku;
+        $map['site'] = $site;
+        $sql = $skuSalesNum->field('sales_num')->where($map)->limit(30)->order('createtime desc')->buildSql();
+        $data['sales_num'] = Db::table($sql.' a')->sum('a.sales_num');
+        $days = Db::name('sku_sales_num')->where($map)->count();
+        $data['days'] = $days > 30 ? 30 : $days;
+        return $data;
+    }
+    /*
+     * 库存台账
+     * */
+    public function stock_parameter(){
+        $this->instock = new \app\admin\model\warehouse\Instock;
+        $this->outstock = new \app\admin\model\warehouse\Outstock;
+        $this->stockparameter = new \app\admin\model\financepurchase\StockParameter;
+        $this->item = new \app\admin\model\warehouse\ProductBarCodeItem;
+        $stimestamp = 1611590400;
+        $etimestamp = 1612281600;
+        // 计算日期段内有多少天
+        $days = ($etimestamp - $stimestamp) / 86400 + 1;
+        // 循环每天日期
+        for ($i = 0; $i < $days; $i++) {
+            $start = date('Y-m-d', $stimestamp + (86400 * $i));
+            $end = $start . ' 23:59:59';
+            //库存主表插入数据
+            $stock_data['day_date'] = $start;
+            $stockId = $this->stockparameter->insertGetId($stock_data);
+            //采购入库数量
+            $instock_where['s.status'] = 2;
+            $instock_where['s.type_id'] = 1;
+            $instock_where['s.check_time'] = ['between', [$start, $end]];
+            $instocks = $this->instock->alias('s')->join('fa_check_order c', 'c.id=s.check_id')->join('fa_purchase_order_item oi', 'c.purchase_id=oi.purchase_id')->join('fa_purchase_order o','oi.purchase_id=o.id')->where($instock_where)->field('s.id,round(o.purchase_total/oi.purchase_num,2) purchase_price')->select();
+            $instock_total = 0; //入库总金额
+            foreach ($instocks as $key => $instock) {
+                $arr = array();
+                $arr['stock_id'] = $stockId;
+                $arr['instock_id'] = $instock['id'];
+                $arr['type'] = 1;
+                $instock_num = Db::name('in_stock_item')->where('in_stock_id', $instock['id'])->sum('in_stock_num');
+                $arr['instock_num'] = $instock_num;
+                $arr['instock_total'] = round($instock['purchase_price'] * $instock_num, 2);
+                $instock_total += $arr['instock_total'];
+                Db::name('finance_stock_parameter_item')->insert($arr);
+            }
+            //判断今天是否有冲减数据
+            $start_time = strtotime($start);
+            $end_time = strtotime($end);
+            $exist_where['create_time'] = ['between', [$start_time, $end_time]];
+            $is_exist = Db::name('finance_cost_error')->where($exist_where)->field('id,create_time,purchase_id,total')->select();
+            $outstock_total1 = 0;   //出库单出库
+            $outstock_total2 = 0;   //订单出库
+            /*************出库单出库start**************/
+            $bar_where['out_stock_time'] = ['between', [$start, $end]];
+            $bar_where['out_stock_id'] = ['<>', 0];
+            $bar_where['library_status'] = 2;
+            //判断冲减前的出库单出库数量和金额
+            $bars = $this->item->where($bar_where)->group('barcode_id')->column('barcode_id');
+            foreach ($bars as $bar) {
+                $flag = [];
+                $flag['stock_id'] = $stockId;
+                $flag['bar_id'] = $bar;
+                $flag['type'] = 2;
+                $bar_items = $this->item->alias('i')->join('fa_purchase_order_item p','i.purchase_id=p.purchase_id and i.sku=p.sku')->join('fa_purchase_order o','p.purchase_id=o.id')->field('i.out_stock_id,i.purchase_id,i.out_stock_time,p.actual_purchase_price,round(o.purchase_total/p.purchase_num,2) purchase_price')->where($bar_where)->where('barcode_id', $bar)->select();
+                $sum_count = 0;
+                $sum_total = 0;
+                foreach ($bar_items as $item) {
+                    if(count(array_unique($is_exist)) != 0){
+                        foreach ($is_exist as $value){
+                            if ($item['purchase_id'] == $value['purchase_id']) {
+                                $end_date = date('Y-m-d H:i:s', $value['create_time']);
+                                if ($item['out_stock_time'] >= $end_date) {
+                                    //使用成本计算
+                                    $total = $item['actual_purchase_price'];
+                                } else {
+                                    //使用预估计算
+                                    $total = $item['purchase_price'];
+                                }
+                            } else {
+                                //没有冲减数据，直接拿预估成本计算
+                                if ($item['actual_purchase_price'] != 0) {
+                                    $total = $item['actual_purchase_price'];   //有成本价拿成本价计算
+                                } else {
+                                    $total = $item['purchase_price'];   //没有成本价拿预估价计算
+                                }
+                            }
+                        }
+                    }else{
+                        //没有冲减数据，直接拿预估成本计算
+                        if ($item['actual_purchase_price'] != 0) {
+                            $total = $item['actual_purchase_price'];   //有成本价拿成本价计算
+                        } else {
+                            $total = $item['purchase_price'];   //没有成本价拿预估价计算
+                        }
+                    }
+                    $sum_total += $total;
+                    $sum_count++;
+                }
+                $flag['outstock_count'] = $sum_count;
+                $flag['outstock_total'] = $sum_total;
+                $outstock_total1 += $sum_total;
+                Db::name('finance_stock_parameter_item')->insert($flag);
+            }
+            /*************出库单出库end**************/
+            /*************订单出库start**************/
+            $bar_where1['out_stock_time'] = ['between', [$start, $end]];
+            $bar_where1['out_stock_id'] = 0;
+            $bar_where1['item_order_number'] = ['<>', ''];
+            $bar_where1['library_status'] = 2;
+            //判断冲减前的出库单出库数量和金额
+            $bars1 = $this->item->alias('i')->join('fa_purchase_order_item p','i.purchase_id=p.purchase_id and i.sku=p.sku')->join('fa_purchase_order o','p.purchase_id=o.id')->where($bar_where1)->field('i.out_stock_id,i.purchase_id,i.out_stock_time,p.actual_purchase_price,round(o.purchase_total/p.purchase_num,2) purchase_price')->select();
+            if (count($bars1) != 0) {
+                $flag1 = [];
+                $flag1['stock_id'] = $stockId;
+                $flag1['type'] = 3;
+                foreach ($bars1 as $bar1) {
+                    if(count(array_unique($is_exist)) != 0) {
+                        foreach ($is_exist as $value) {
+                            if ($bar1['purchase_id'] == $value['purchase_id']) {
+                                $end_date = date('Y-m-d H:i:s', $value['create_time']);
+                                if ($bar1['out_stock_time'] >= $end_date) {
+                                    //使用成本计算
+                                    $total1 = $bar1['actual_purchase_price'];
+                                } else {
+                                    //使用预估计算
+                                    $total1 = $bar1['purchase_price'];
+                                }
+                            } else {
+                                //没有冲减数据，直接拿预估成本计算
+                                if ($bar1['actual_purchase_price']  != 0) {
+                                    $total1 = $bar1['actual_purchase_price'];   //有成本价拿成本价计算
+                                } else {
+                                    $total1 = $bar1['purchase_price'];   //没有成本价拿预估价计算
+                                }
+                            }
+                        }
+                    }else{
+                        if ($bar1['actual_purchase_price']  != 0) {
+                            $total1 = $bar1['actual_purchase_price'];   //有成本价拿成本价计算
+                        } else {
+                            $total1 = $bar1['purchase_price'];   //没有成本价拿预估价计算
+                        }
+                    }
+                    $outstock_total2 += $total1;
+                }
+                $flag1['outstock_count'] = count($bars1);
+                $flag1['outstock_total'] = $outstock_total2;
+                Db::name('finance_stock_parameter_item')->insert($flag1);
+            }
+            /*************订单出库end**************/
+            //查询最新一条的余额
+            $rest_total = $this->stockparameter->order('id', 'desc')->field('rest_total')->limit(1,1)->select();
+            $cha_amount = 0;
+            foreach ($is_exist as $k=>$v){
+                $cha_amount += $v['total'];
+            }
+            $end_rest = round($rest_total[0]['rest_total'] + $instock_total - $outstock_total1 - $outstock_total2+$cha_amount, 2);
+            $info['instock_total'] = $instock_total;
+            $info['outstock_total'] = round($outstock_total1 + $outstock_total2, 2);
+            $info['rest_total'] = $end_rest;
+            $this->stockparameter->where('id', $stockId)->update($info);
+            echo $start.' is ok'."\n";
+            usleep(100000);
+        }
+        echo "all is ok";
+    }
+
+
+
+    /**
+     * 呆滞数据
+     */
+    public function dull_stock1(){
+        $grades = Db::name('product_grade')->field('true_sku,grade')->select();
+        foreach ($grades as $key=>$value){
+            $this->model = new \app\admin\model\itemmanage\Item;
+            $this->item = new \app\admin\model\warehouse\ProductBarCodeItem;
+            //该品实时库存
+            $real_time_stock = $this->model->where('sku',$value['true_sku'])->where('is_del',1)->where('is_open',1)->value('sum(stock)-sum(distribution_occupy_stock) as result');
+            //该品库存金额
+            $sku_amount = $this->item->alias('i')->join('fa_purchase_order_item o','i.purchase_id=o.purchase_id and i.sku=o.sku')->where('i.sku',$value['true_sku'])->where('i.library_status',1)->value('SUM(IF(o.actual_purchase_price != 0,o.actual_purchase_price,o.purchase_price)) as result');
+            //实际周转天数
+            $sku_info  = $this->getSkuSales($value['true_sku']);
+            $actual_day = $sku_info['days']!=0 && $sku_info['count']!=0 ? round($real_time_stock/($sku_info['count']/$sku_info['days']),2) : 0;
+            $data['sku'] = $value['true_sku'];
+            $data['grade'] = $value['grade'];
+            $data['sales_num'] = $sku_info['count'];
+            $data['day'] = $sku_info['days'];
+            $data['stock'] = $real_time_stock;
+            $data['total'] = $sku_amount ? $sku_amount : 0;
+            $data['actual_day'] = $actual_day;
+            Db::name('ceshi')->insert($data);
+            echo $value['true_sku'].' is ok'."\n";
+            usleep(10000);
+        }
+    }
+    /**
+     * 邮件排查没有回复状态为关闭的邮件
+     */
+    public function zendesk_error_assign_email()
+    {
+        $this->zendesk = new \app\admin\model\zendesk\Zendesk;
+        $where['channel'] = ['<>','voice'];
+        $start = '2021-01-01';
+        $end = '2021-01-31 23:59:59';
+        $where['create_time'] = ['between',[$start,$end]];
+        $email = $this->zendesk->where('assign_id  is null or assign_id=0')->where($where)->select();
+        foreach ($email as $key=>$value){
+            //判断是否只有用户发送的邮件
+            $count = Db::name('zendesk_comments')->where('zid',$value['id'])->where('is_admin',1)->count();
+            if($count == 0){
+                $data['zid'] = $value['id'];
+                $data['ticket_id'] = $value['ticket_id'];
+                $data['site'] = $value['type'];
+                //判断是否有合并邮件
+                $zemail = Db::name('zendesk_comments')->where('zid',$value['id'])->where('is_admin',0)->field('html_body')->select();
+                foreach ($zemail as $k=>$v){
+                    $str = strtolower($v['html_body']);
+                    if(strpos($str,'merge') !== false){
+                        $data['type'] = 1;
+                    }else{
+                        $data['type'] = 0;
+                    }
+                    Db::name('ceshi')->insert($data);
+                    echo $value['ticket_id'].' is ok '."\n";
+                    usleep(10000);
+                }
+            }
+
         }
     }
 }

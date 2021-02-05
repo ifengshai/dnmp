@@ -34,10 +34,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                         { field: 'base_grand_total', title: __('订单金额'), operate: false, formatter: Controller.api.formatter.float_format },
                         // { field: 'base_shipping_amount', title: __('邮费'), operate: false, formatter: Controller.api.formatter.float_format },
 
-                        { field: 'order_type', title: __('订单类型'), custom: { 1: 'blue', 2: 'blue', 3: 'blue', 4: 'blue', 5: 'blue', 6: 'blue', 10: 'blue' }, searchList: { 1: '普通订单', 2: '批发单', 3: '网红单', 4: '补发单', 5: '补差价', 6: '一件代发',10:'货到付款' }, formatter: Table.api.formatter.status },
+                        { field: 'order_type', title: __('订单类型'), custom: { 1: 'blue', 2: 'blue', 3: 'blue', 4: 'blue', 5: 'blue', 6: 'blue', 10: 'blue' }, searchList: { 1: '普通订单', 2: '批发单', 3: '网红单', 4: '补发单', 5: '补差价', 6: '一件代发', 7: '手动补单', 10: '货到付款' }, formatter: Table.api.formatter.status },
                         // { field: 'sku', title: __('SKU'), operate: 'like', visible: false },
-                        { field: 'created_at', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange',visible:false },
-                        { field: 'created_at', title: __('创建时间'), operate: false},
+                        { field: 'created_at', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange', visible: false },
+                        { field: 'created_at', title: __('创建时间'), operate: false },
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
                                 {
@@ -54,10 +54,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                     visible: function (row) {
                                         console.log(row)
                                         //返回true时按钮显示,返回false隐藏
-                                        if (row.status !== "pending" && row.site !==9){
-                                            return  true;
-                                        }else{
-                                            return  false;
+                                        if (row.status !== "pending" && row.site !== 9) {
+                                            return true;
+                                        } else {
+                                            return false;
                                         }
                                     }
                                 },
@@ -75,10 +75,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                     visible: function (row) {
                                         console.log(row)
                                         //返回true时按钮显示,返回false隐藏
-                                        if (row.status == "pending" && row.site !==9){
-                                            return  true;
-                                        }else{
-                                            return  false;
+                                        if (row.status == "pending" && row.site !== 9) {
+                                            return true;
+                                        } else {
+                                            return false;
                                         }
                                     }
                                 },
@@ -97,10 +97,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                     visible: function (row) {
                                         console.log(row)
                                         //返回true时按钮显示,返回false隐藏
-                                        if (row.status !== "pending" && row.site ==9){
-                                            return  true;
-                                        }else{
-                                            return  false;
+                                        if (row.status !== "pending" && row.site == 9) {
+                                            return true;
+                                        } else {
+                                            return false;
                                         }
                                     }
                                 },
@@ -118,10 +118,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                     },
                                     visible: function (row) {
                                         console.log(row)
-                                        if (row.status =='pending' && row.site ==9){
+                                        if (row.status == 'pending' && row.site == 9) {
                                             return true;
-                                        }else{
-                                            return  false;
+                                        } else {
+                                            return false;
                                         }
                                         //返回true时按钮显示,返回false隐藏
 

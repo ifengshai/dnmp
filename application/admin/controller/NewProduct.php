@@ -1974,69 +1974,73 @@ class NewProduct extends Backend
                 $this->request->get(['filter' => json_encode($filter)]);
             }
 
-            $check_order_item = new \app\admin\model\warehouse\CheckItem();
-            $in_stock_item = new \app\admin\model\warehouse\InstockItem();
+            // $check_order_item = new \app\admin\model\warehouse\CheckItem();
+            // $in_stock_item = new \app\admin\model\warehouse\InstockItem();
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model->alias('a')
-                ->join(['fa_new_product_replenish' => 'b'], 'a.replenish_id=b.id')
+                ->join(['fa_new_product_replenish' => 'b'], 'a.replenish_id=b.id', 'left')
                 ->join(['fa_new_product_replenish_list' => 'c'], 'a.replenish_id=c.replenish_id and a.sku = c.sku', 'left')
                 ->join(['fa_purchase_order' => 'd'], 'a.replenish_id=d.replenish_id and c.supplier_id = d.supplier_id and d.purchase_name = a.sku', 'left')
                 ->where($where)
                 ->where('is_show', 0)
                 ->where('a.replenish_id<>0')
                 ->where($map)
-                ->group('d.id')
+                // ->group('d.id')
+                // ->group('a.sku')
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model->alias('a')
-                ->field('a.*,sum(a.replenish_num) as replenish_count,b.status,c.real_dis_num,d.purchase_number,d.arrival_time,d.purchase_status,d.check_status,d.stock_status,d.id as purchase_id,sum(c.distribute_num) as distribute_count')
-                ->join(['fa_new_product_replenish' => 'b'], 'a.replenish_id=b.id')
+                // ->field('a.*,sum(a.replenish_num) as replenish_count,b.status,c.real_dis_num,d.purchase_number,d.arrival_time,d.purchase_status,d.check_status,d.stock_status,d.id as purchase_id,sum(c.distribute_num) as distribute_count')
+                ->field('a.sku,a.type,a.create_time,a.replenish_num,b.status,c.real_dis_num,d.purchase_number,d.arrival_time,d.purchase_status,d.id as purchase_id,(c.distribute_num) as distribute_count')
+                ->join(['fa_new_product_replenish' => 'b'], 'a.replenish_id=b.id', 'left')
                 ->join(['fa_new_product_replenish_list' => 'c'], 'a.replenish_id=c.replenish_id and a.sku = c.sku', 'left')
                 ->join(['fa_purchase_order' => 'd'], 'a.replenish_id=d.replenish_id and c.supplier_id = d.supplier_id and d.purchase_name = a.sku', 'left')
                 ->where($where)
                 ->where('is_show', 0)
                 ->where('a.replenish_id<>0')
                 ->where($map)
-                ->group('d.id')
+                // ->group('d.id')
+                // ->group('a.sku')
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 // ->getLastSql();
                 ->select();
+            // dump($this->model->getLastSql());die;
             $list = collection($list)->toArray();
 
-            //根据采购单id 查询质检单
-            $purchase_id = array_column($list, 'purchase_id');
-            $rows = $check_order_item->field("sum(purchase_num) as purchase_num,sum(arrivals_num) as arrivals_num,sum(quantity_num) as quantity_num,purchase_id,sku")->where(['purchase_id' => ['in', $purchase_id]])->group('purchase_id,sku')->select();
-            $rows = collection($rows)->toArray();
-            //重组数组
-            $check_list = [];
-            foreach ($rows as $k => $v) {
-                $check_list[$v['purchase_id']][$v['sku']] = $v;
-            }
-
-            //查询入库数量
-            $in_stock_rows = $in_stock_item->field("sum(in_stock_num) as in_stock_num,purchase_id,sku")->where(['purchase_id' => ['in', $purchase_id]])->group('purchase_id,sku')->select();
-            $in_stock_rows = collection($in_stock_rows)->toArray();
-            //重组数组
-            $in_stock_list = [];
-            foreach ($in_stock_rows as $k => $v) {
-                $in_stock_list[$v['purchase_id']][$v['sku']] = $v;
-            }
-
-            foreach ($list as &$v) {
-                $purchase_detail = Db::name('purchase_order')->where(['purchase_name' => $v['sku']])->find();
-                if (!$purchase_detail) {
-                    unset($v);
-                } else {
-                    $v['purchase_num'] = $check_list[$v['purchase_id']][$v['sku']]['purchase_num'];
-                    $v['arrivals_num'] = $check_list[$v['purchase_id']][$v['sku']]['arrivals_num'];
-                    $v['quantity_num'] = $check_list[$v['purchase_id']][$v['sku']]['quantity_num'];
-                    $v['in_stock_num'] = $in_stock_list[$v['purchase_id']][$v['sku']]['in_stock_num'];
-                }
-                $v['platform_type'] = $platform_type;
-            }
-            unset($v);
+            // //根据采购单id 查询质检单
+            // $purchase_id = array_column($list, 'purchase_id');
+            // $rows = $check_order_item->field("sum(purchase_num) as purchase_num,sum(arrivals_num) as arrivals_num,sum(quantity_num) as quantity_num,purchase_id,sku")->where(['purchase_id' => ['in', $purchase_id]])->group('purchase_id,sku')->select();
+            // $rows = collection($rows)->toArray();
+            // //重组数组
+            // $check_list = [];
+            // foreach ($rows as $k => $v) {
+            //     $check_list[$v['purchase_id']][$v['sku']] = $v;
+            // }
+            //
+            // //查询入库数量
+            // $in_stock_rows = $in_stock_item->field("sum(in_stock_num) as in_stock_num,purchase_id,sku")->where(['purchase_id' => ['in', $purchase_id]])->group('purchase_id,sku')->select();
+            // $in_stock_rows = collection($in_stock_rows)->toArray();
+            // //重组数组
+            // $in_stock_list = [];
+            // foreach ($in_stock_rows as $k => $v) {
+            //     $in_stock_list[$v['purchase_id']][$v['sku']] = $v;
+            // }
+            //
+            // foreach ($list as &$v) {
+            //     $purchase_detail = Db::name('purchase_order')->where(['purchase_name' => $v['sku']])->find();
+            //     if (!$purchase_detail) {
+            //         unset($v);
+            //     } else {
+            //         $v['purchase_num'] = $check_list[$v['purchase_id']][$v['sku']]['purchase_num'];
+            //         $v['arrivals_num'] = $check_list[$v['purchase_id']][$v['sku']]['arrivals_num'];
+            //         $v['quantity_num'] = $check_list[$v['purchase_id']][$v['sku']]['quantity_num'];
+            //         $v['in_stock_num'] = $in_stock_list[$v['purchase_id']][$v['sku']]['in_stock_num'];
+            //     }
+            //     $v['platform_type'] = $platform_type;
+            // }
+            // unset($v);
             $result = array("total" => $total, "rows" => $list);
             return json($result);
         }

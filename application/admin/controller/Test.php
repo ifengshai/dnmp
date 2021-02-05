@@ -41,12 +41,76 @@ class Test extends Backend
 
     public function test001()
     {
-        $track_number = '9400111108296818283602';
-        $order_number = '100171868';
-        //根据物流单号查询发货物流渠道
-        $shipment_data_type = Db::connect('database.db_delivery')->table('ld_deliver_order')->where(['track_number' => $track_number, 'increment_id' => $order_number])->value('agent_way_title');
+        //查询镜片编码对应价格
+        $lens_price = new \app\admin\model\lens\LensPrice();
+        $lens_list = $lens_price->where(['lens_number' => ['in', ['23200001']]])->select();
+        $lens_list = collection($lens_list)->toArray();
+        $cost = 0;
+        $order_prescription = [
+            [
+                'od_sph' => '-1.25',
+                'os_sph' => '-1.25',
+                'od_cyl' => '-2.75',
+                'os_cyl' => '0.00',
+                'lens_number' => '23200001'
+            ]
+        ];
 
-        dump($shipment_data_type);
+        foreach ($order_prescription as $k => $v) {
+            $data = [];
+            foreach ($lens_list as $key => $val) {
+                $od_temp_cost = 0;
+                $os_temp_cost = 0;
+                if (!in_array('od' . '-' . $val['lens_number'], $data)) {
+                    if ($v['od_cyl'] == '-0.25') {
+                        //右眼
+                        if ($v['lens_number'] == $val['lens_number'] && ((float) $v['od_sph'] >= (float) $val['sph_start'] && (float) $v['od_sph'] <= (float) $val['sph_end']) && ((float) $v['od_cyl'] == (float) $val['cyl_end'] && (float) $v['od_cyl'] == (float) $val['cyl_end'])) {
+                            $cost += $val['price'];
+                            $od_temp_cost += $val['price'];
+                        } elseif ($v['lens_number'] == $val['lens_number'] && ((float) $v['od_sph'] >= (float) $val['sph_start'] && (float) $v['od_sph'] <= (float) $val['sph_end']) && ((float) $v['od_cyl'] >= (float) $val['cyl_start'] && (float) $v['od_cyl'] <= (float) $val['cyl_end'])) {
+                            $cost += $val['price'];
+                            $od_temp_cost += $val['price'];
+                        }
+                    } else {
+                        //右眼
+                        if ($v['lens_number'] == $val['lens_number'] && ((float) $v['od_sph'] >= (float) $val['sph_start'] && (float) $v['od_sph'] <= (float) $val['sph_end']) && ((float) $v['od_cyl'] >= (float) $val['cyl_start'] && (float) $v['od_cyl'] <= (float) $val['cyl_end'])) {
+                            $cost += $val['price'];
+                            $od_temp_cost += $val['price'];
+                        }
+                    }
+                    if ($os_temp_cost > 0) {
+                        $data[] = 'od' . '-' . $v['lens_number'];
+                    }
+                }
+
+
+                if (!in_array('os' . '-' . $val['lens_number'], $data)) {
+
+                    if ($v['os_cyl'] == '-0.25') {
+                        //左眼
+                        if ($v['lens_number'] == $val['lens_number'] && ((float) $v['os_sph'] >= (float) $val['sph_start'] && (float) $v['os_sph'] <= (float) $val['sph_end']) && ((float) $v['os_cyl'] == (float) $val['cyl_end'] && (float) $v['os_cyl'] == (float) $val['cyl_end'])) {
+                            $cost += $val['price'];
+                            $os_temp_cost += $val['price'];
+                        } elseif ($v['lens_number'] == $val['lens_number'] && ((float) $v['os_sph'] >= (float) $val['sph_start'] && (float) $v['os_sph'] <= (float) $val['sph_end']) && ((float) $v['os_cyl'] >= (float) $val['cyl_start'] && (float) $v['os_cyl'] <= (float) $val['cyl_end'])) {
+                            $cost += $val['price'];
+                            $os_temp_cost += $val['price'];
+                        }
+                    } else {
+                        //左眼
+                        if ($v['lens_number'] == $val['lens_number'] && ((float) $v['os_sph'] >= (float) $val['sph_start'] && (float) $v['os_sph'] <= (float) $val['sph_end']) && ((float) $v['os_cyl'] >= (float) $val['cyl_start'] && (float) $v['os_cyl'] <= (float) $val['cyl_end'])) {
+                            $cost += $val['price'];
+                            $os_temp_cost += $val['price'];
+                        }
+                    }
+
+                    if ($os_temp_cost > 0) {
+                        $data[] = 'os' . '-' . $v['lens_number'];
+                    }
+                }
+            }
+        }
+
+        echo $cost;
         die;
     }
 
@@ -2435,7 +2499,7 @@ class Test extends Backend
         $item = new \app\admin\model\itemmanage\Item();
         $purchase = new \app\admin\model\purchase\PurchaseOrder();
 
-        $list = $item->where(['is_open' => 1, 'is_del' => 1, 'wait_instock_num' => ['<>', 0]])->select();
+        $list = $item->where(['is_open' => 1, 'is_del' => 1, 'wait_instock_num' => ['<', 0]])->select();
         $params = [];
         foreach ($list as $k => $v) {
             $purchase_num = $purchase->alias('a')->where(['purchase_status' => 7, 'stock_status' => 0, 'b.sku' => $v['sku']])->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')->sum('purchase_num');
@@ -2488,5 +2552,13 @@ class Test extends Backend
         $header = 'sku,站点,平台sku,虚拟库存,总虚拟库存,sku库存总金额,sku占用金额,sku占用库存比例';
         $filename = '数据导出.csv';
         Excel::create_csv($data, $header, $filename);
+    }
+
+
+    public function test02()
+    {
+        $map['a.created_at'] = ['between', [strtotime(date('Y-m-d',strtotime("-30 day"))), strtotime(date('Y-m-d'))]];
+
+        dump($map);
     }
 }
