@@ -2245,4 +2245,29 @@ class Test4 extends Controller
 
         }
     }
+
+    //及时率中订单数
+    public function order_num()
+    {
+        $order = new \app\admin\model\order\order\NewOrder();
+        $where['payment_time'] = ['between',[1523116800,1612375200]];
+        $date_time = $order->field("DATE_FORMAT(created_at, '%Y-%m-%d') AS date_time")->where($where)->group("DATE_FORMAT(created_at, '%Y%m%d')")->order("DATE_FORMAT(created_at, '%Y%m%d') asc")->select();
+        //查询时间
+        foreach ($date_time as $val) {
+            $is_exist = Db::name('datacenter_day_order')->where('day_date', $val['date_time'])->value('id');
+            if (!$is_exist) {
+                $arr = [];
+                $arr['day_date'] = $val['date_time'];
+                //订单数
+                $start = strtotime($val['date_time']);
+                $end = strtotime($val['date_time'].' 23:59:59');
+                $order_where['payment_time'] = ['between',[$start,$end]];
+                $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+                $arr['order_num'] = $order->where($order_where)->count();
+                Db::name('datacenter_day_order')->insert($arr);
+                echo $val['date_time'].' is ok'."\n";
+                usleep(10000);
+            }
+        }
+    }
 }
