@@ -1397,15 +1397,17 @@ class ScmDistribution extends Scm
                     $outstock_item['out_stock_id'] = $outstock_id;
                     $this->_outstock_item->insert($outstock_item);
 
-                    //计算出库成本
-                    $financecost = new \app\admin\model\finance\FinanceCost();
-                    $financecost->outstock_cost($outstock_id, $outstock['out_stock_number']);
+
 
                     //条码出库
                     $this->_product_bar_code_item
                     ->allowField(true)
                     ->isUpdate(true, ['item_order_number' => $item_order_number])
                     ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2,'out_stock_id' => $outstock_id]);
+
+                    //计算出库成本
+                    $financecost = new \app\admin\model\finance\FinanceCost();
+                    $financecost->outstock_cost($outstock_id, $outstock['out_stock_number']);
 
                     //扣减虚拟仓库存
                     $this->_item_platform_sku
@@ -2345,15 +2347,18 @@ class ScmDistribution extends Scm
                             $outstock_item['out_stock_id'] = $outstock_id;
                             $this->_outstock_item->insert($outstock_item);
 
-                            //计算出库成本
-                            $financecost = new \app\admin\model\finance\FinanceCost();
-                            $financecost->outstock_cost($outstock_id, $outstock['out_stock_number']);
+
 
                             //条码出库
                             $this->_product_bar_code_item
                             ->allowField(true)
                             ->isUpdate(true, ['item_order_number' => ['in', $item_order_numbers]])
                             ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2,'out_stock_id' => $outstock_id]);
+
+                            //计算出库成本
+                            $financecost = new \app\admin\model\finance\FinanceCost();
+                            $financecost->outstock_cost($outstock_id, $outstock['out_stock_number']);
+
                             //扣减虚拟仓库存
                             $this->_item_platform_sku
                                 ->where(['sku' => $true_sku, 'platform_type' => $value['site']])
