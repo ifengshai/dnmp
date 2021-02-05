@@ -2250,6 +2250,7 @@ class Test4 extends Controller
     public function order_num()
     {
         $order = new \app\admin\model\order\order\NewOrder();
+        $this->process = new \app\admin\model\order\order\NewOrderProcess;
         $date_time = $order->query("SELECT FROM_UNIXTIME(created_at, '%Y-%m-%d') AS date_time FROM `fa_order` where payment_time between 1515520244 and 1612375200 GROUP BY FROM_UNIXTIME(created_at, '%Y-%m-%d') order by FROM_UNIXTIME(created_at, '%Y-%m-%d') asc");
         //查询时间
         foreach ($date_time as $val) {
@@ -2260,9 +2261,24 @@ class Test4 extends Controller
                 //订单数
                 $start = strtotime($val['date_time']);
                 $end = strtotime($val['date_time'].' 23:59:59');
-                $order_where['payment_time'] = ['between',[$start,$end]];
-                $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
-                $arr['order_num'] = $order->where($order_where)->count();
+                $where['o.payment_time'] = ['between',[$start,$end]];
+                $where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+                $arr['order_num'] = $order->alias('o')->where($where)->count();
+
+                $map1['p.order_prescription_type'] = 1;
+                $map2['p.order_prescription_type'] = 2;
+                $map3['p.order_prescription_type'] = 3;
+
+                $sql1 = $this->process->alias('p')->join('fa_order o','p.increment_id = o.increment_id')->field('(p.delivery_time-o.payment_time)/3600 AS total')->where($where)->where($map1)->group('p.order_id')->buildSql();
+                $count1 = $this->process->table([$sql1=>'t2'])->value('sum( IF ( total <= 24, 1, 0) ) AS a');
+
+                $sql2 = $this->process->alias('p')->join('fa_order o','p.increment_id = o.increment_id')->field('(p.delivery_time-o.payment_time)/3600 AS total')->where($where)->where($map2)->group('p.order_id')->buildSql();
+                $count2 = $this->process->table([$sql2=>'t2'])->value('sum( IF ( total <= 72, 1, 0) ) AS a');
+
+                $sql3 = $this->process->alias('p')->join('fa_order o','p.increment_id = o.increment_id')->field('(p.delivery_time-o.payment_time)/3600 AS total')->where($where)->where($map3)->group('p.order_id')->buildSql();
+                $count3 = $this->process->table([$sql3=>'t2'])->value('sum( IF ( total <= 168, 1, 0) ) AS a');
+                $untimeout_count = $count1 + $count2 + $count3;
+                $arr['intime_rate'] = $arr['order_num'] ? round($untimeout_count/$arr['order_num']*100,2) : 0;
                 Db::name('datacenter_day_order')->insert($arr);
                 echo $val['date_time'].' is ok'."\n";
                 usleep(10000);
