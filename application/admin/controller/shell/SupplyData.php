@@ -308,8 +308,8 @@ class SupplyData extends Backend
     }
     //数据大屏及时率数据
     public function intime_data(){
-        $start_time = date('Y-m-d', strtotime("-30 day"));
-        $end_time = date('Y-m-d', strtotime("-1 day"));
+        $start_time = strtotime(date('Y-m-d', strtotime("-30 day")));
+        $end_time = strtotime(date('Y-m-d', strtotime("-1 day")));
         $date_time = $this->order->query("SELECT FROM_UNIXTIME(created_at, '%Y-%m-%d') AS date_time FROM `fa_order` where payment_time between ".$start_time." and ".$end_time." GROUP BY FROM_UNIXTIME(created_at, '%Y-%m-%d') order by FROM_UNIXTIME(created_at, '%Y-%m-%d') asc");
         //查询时间
         foreach ($date_time as $val) {
