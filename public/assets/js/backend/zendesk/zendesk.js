@@ -73,7 +73,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                                     },
                                     classname: 'btn btn-xs btn-success',
                                     icon: '',
-                                    url: 'zendesk/zendesk/edit',
+                                    url: 'zendesk/zendesk/edit/status/{row.status}',
                                     extend: 'data-area = \'["100%","100%"]\' target=\'_blank\'',
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
@@ -463,7 +463,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                 Form.api.bindevent($("form[role=form]"));
                 //抄送人标签输入
                 $('#ccs').tagsInput({
-                    width: '66%',
+                    width: '109%',
                     defaultText: '输入后回车确认',
                     minInputWidth: 110,
                     height: 'auto',
