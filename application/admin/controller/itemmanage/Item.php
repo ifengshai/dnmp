@@ -16,6 +16,7 @@ use app\admin\model\itemmanage\attribute\ItemAttribute;
 use app\admin\model\itemmanage\Item_presell_log;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use fast\Soap;
+use fast\Excel;
 
 /**
  * 商品管理
@@ -36,7 +37,7 @@ class Item extends Backend
      * 无需鉴权的方法,但需要登录
      * @var array
      */
-    protected $noNeedRight = ['ajaxGetItemCategoryList', 'ajaxItemInfo', 'ajaxCategoryInfo', 'ajaxGetProOrigin', 'ajaxGetLikeOriginSku', 'ajaxGetInfoName'];
+    protected $noNeedRight = ['ajaxGetItemCategoryList', 'ajaxItemInfo', 'ajaxCategoryInfo', 'ajaxGetProOrigin', 'ajaxGetLikeOriginSku', 'ajaxGetInfoName', 'export_csv'];
 
     public function _initialize()
     {
@@ -565,175 +566,6 @@ class Item extends Backend
         }
         return $this->view->fetch();
     }
-    /***
-     * 后来修改编辑商品
-     */
-    public function edit_yuan($ids = null)
-    {
-        $row = $this->model->get($ids, 'itemAttribute');
-        if (!$row) {
-            $this->error(__('No Results were found'));
-        }
-        if (2 == $row['item_status']) {
-            $this->error(__('The goods have been submitted for review and cannot be edited'), 'itemmanage/item');
-        }
-        if (5 == $row['item_status']) {
-            $this->error('此商品已经取消，不能编辑', 'itemmanage/item');
-        }
-        $adminIds = $this->getDataLimitAdminIds();
-        if (is_array($adminIds)) {
-            if (!in_array($row[$this->dataLimitField], $adminIds)) {
-                $this->error(__('You have no permission'));
-            }
-        }
-        if ($this->request->isPost()) {
-            $params = $this->request->post("row/a");
-            if ($params) {
-                $params = $this->preExcludeFields($params);
-                $itemName = $params['name'];
-                $itemColor = $params['color'];
-                $price     = $params['price'];
-                if (count($itemColor) != count(array_unique($itemColor))) {
-                    $this->error('同一款商品的颜色值不能相同');
-                }
-                $item_type = $params['item_type'];
-                $data = $itemAttribute = [];
-                if (3 == $item_type) {
-                    if (is_array($itemName) && !in_array("", $itemName)) {
-
-                        Db::startTrans();
-                        try {
-                            foreach ($itemName as $k => $v) {
-                                $data['name'] = $v;
-                                $data['price']       = $price[$k];
-                                $data['item_status'] = $params['item_status'];
-                                $item = Db::connect('database.db_stock')->name('item')->where('id', '=', $row['id'])->update($data);
-                                $itemAttribute['attribute_type'] = 3;
-                                $itemAttribute['accessory_color'] = $itemColor[$k];
-                                $itemAttribute['accessory_texture'] = $params['frame_texture'];
-                                $itemAttribute['frame_remark'] = $params['frame_remark'];
-                                $itemAttr = Db::connect('database.db_stock')->name('item_attribute')->where('item_id', '=', $row['id'])->update($itemAttribute);
-                            }
-                            Db::commit();
-                        } catch (ValidateException $e) {
-                            Db::rollback();
-                            $this->error($e->getMessage());
-                        } catch (PDOException $e) {
-                            Db::rollback();
-                            $this->error($e->getMessage());
-                        } catch (Exception $e) {
-                            Db::rollback();
-                            $this->error($e->getMessage());
-                        }
-                    } else {
-                        $this->error(__('Please add product name and color'));
-                    }
-                    $this->success();
-                    if (($item !== false) && ($itemAttr !== false)) {
-                        $this->success();
-                    } else {
-                        $this->error(__('No rows were updated'));
-                    }
-                } else {
-                    if (is_array($itemName) && !in_array("", $itemName)) {
-                        Db::startTrans();
-                        try {
-                            foreach ($itemName as $k => $v) {
-                                $data['name'] = $v;
-                                $data['price']       = $price[$k];
-                                $data['item_status'] = $params['item_status'];
-                                $data['frame_is_rimless'] = $params['shape'] == 1 ? 2 : 1;
-                                $item = Db::connect('database.db_stock')->name('item')->where('id', '=', $row['id'])->update($data);
-                                $itemAttribute['attribute_type'] = $params['attribute_type'];
-                                $itemAttribute['glasses_type'] = $params['glasses_type'];
-                                $itemAttribute['frame_height'] = $params['frame_height'];
-                                $itemAttribute['frame_width'] = $params['frame_width'];
-                                $itemAttribute['frame_color'] = $itemColor[$k];
-                                $itemAttribute['frame_weight'] = $params['weight'];
-                                $itemAttribute['frame_length'] = $params['frame_length'];
-                                $itemAttribute['frame_temple_length'] = $params['frame_temple_length'];
-                                $itemAttribute['shape'] = $params['shape'];
-                                $itemAttribute['frame_bridge'] = $params['frame_bridge'];
-                                $itemAttribute['mirror_width'] = $params['mirror_width'];
-                                $itemAttribute['frame_type'] = $params['frame_type'];
-                                $itemAttribute['frame_texture'] = $params['frame_texture'];
-                                $itemAttribute['frame_shape'] = $params['frame_shape'];
-                                $itemAttribute['frame_gender'] = $params['frame_gender'];
-                                $itemAttribute['frame_size'] = $params['frame_size'];
-                                $itemAttribute['frame_is_recipe'] = $params['frame_is_recipe'];
-                                $itemAttribute['frame_piece'] = $params['frame_piece'];
-                                $itemAttribute['frame_is_advance'] = $params['frame_is_advance'];
-                                $itemAttribute['frame_temple_is_spring'] = $params['frame_temple_is_spring'];
-                                $itemAttribute['frame_is_adjust_nose_pad'] = $params['frame_is_adjust_nose_pad'];
-                                $itemAttribute['frame_remark'] = $params['frame_remark'];
-                                $itemAttr = Db::connect('database.db_stock')->name('item_attribute')->where('item_id', '=', $row['id'])->update($itemAttribute);
-                            }
-                            Db::commit();
-                        } catch (ValidateException $e) {
-                            Db::rollback();
-                            $this->error($e->getMessage());
-                        } catch (PDOException $e) {
-                            Db::rollback();
-                            $this->error($e->getMessage());
-                        } catch (Exception $e) {
-                            Db::rollback();
-                            $this->error($e->getMessage());
-                        }
-                    } else {
-                        $this->error(__('Please add product name and color'));
-                    }
-                    $this->success();
-                    if (($item !== false) && ($itemAttr !== false)) {
-                        $this->success();
-                    } else {
-                        $this->error(__('No rows were updated'));
-                    }
-                }
-            }
-            $this->error(__('Parameter %s can not be empty', ''));
-        }
-        $result = $this->category->getAttrCategoryById($row['category_id']);
-        if (3 <= $result) {
-            $info = $this->category->getCategoryTexture($row['category_id']);
-            $this->assign('AllTexture', $info['textureResult']);
-            $this->assign('AllFrameColor', $info['colorResult']);
-        } else {
-            $row['itemAttribute']['frame_size']     = explode(',', $row['itemAttribute']['frame_size']);
-            $row['itemAttribute']['frame_shape']    = explode(',', $row['itemAttribute']['frame_shape']);
-            $row['itemAttribute']['glasses_type']   = explode(',', $row['itemAttribute']['glasses_type']);
-            $row['itemAttribute']['frame_is_adjust_nose_pad'] = explode(',', $row['itemAttribute']['frame_is_adjust_nose_pad']);
-            $allShape = $this->itemAttribute->getAllShape();
-            //获取所有材质
-            $allTexture = $this->itemAttribute->getAllTexture();
-            //获取所有镜架形状
-            $allFrameShape = $this->itemAttribute->getAllFrameShape();
-            //获取所有适合性别
-            $allFrameGender = $this->itemAttribute->getFrameGender();
-            //获取所有型号
-            $allFrameSize  = $this->itemAttribute->getFrameSize();
-            //获取所有眼镜类型
-            $allGlassesType = $this->itemAttribute->getGlassesType();
-            //获取所有采购产地
-            $allOrigin      = $this->itemAttribute->getOrigin();
-            //获取配镜类型
-            $allFrameType   = $this->itemAttribute->getFrameType();
-            //获取是否可调节鼻托类型
-            $allNosePad     = $this->itemAttribute->getAllNosePad();
-            $this->assign('AllFrameType', $allFrameType);
-            $this->assign('AllOrigin', $allOrigin);
-            $this->assign('AllGlassesType', $allGlassesType);
-            $this->assign('AllFrameSize', $allFrameSize);
-            $this->assign('AllFrameGender', $allFrameGender);
-            $this->assign('AllFrameShape', $allFrameShape);
-            $this->assign('AllShape', $allShape);
-            $this->assign('AllTexture', $allTexture);
-            $this->assign('AllNosePad', $allNosePad);
-        }
-        $this->view->assign('template', $this->category->getAttrCategoryById($row['category_id']));
-        $this->view->assign("row", $row);
-        return $this->view->fetch();
-    }
-
 
     public function edit($ids = null)
     {
@@ -1160,94 +992,45 @@ class Item extends Backend
         return $this->view->fetch();
     }
 
-    public function goods_stock_list1()
+    /**
+     * 导出商品库存
+     */
+    public function export_csv()
     {
-        $platform = (new MagentoPlatform())->getNewAuthSite();
-        empty($platform) && $this->error('您没有权限访问', 'general/profile?ref=addtabs');
+        $item_platform = new \app\admin\model\itemmanage\ItemPlatformSku();
+        $list = $this->model
+            ->field('sku,stock,available_stock')
+            ->where(['is_open' => 1, 'is_del' => 1, 'category_id' => ['<>', 43]])
+            ->select();
+        $list = collection($list)->toArray();
 
-        //设置过滤方法
-        $this->request->filter(['strip_tags']);
-        if ($this->request->isAjax()) {
-            //如果发送的来源是Selectpage，则转发到Selectpage
-            if ($this->request->request('keyField')) {
-                return $this->selectpage();
-            }
-
-            //默认站点
-            $website_type = input('label');
-            if ($website_type) {
-                $map['platform_type'] = $website_type;
-            }
-            //如果切换站点清除默认值
-            $filter = json_decode($this->request->get('filter'), true);
-            if ($filter['platform_type']) {
-                unset($map['platform_type']);
-            }
-
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-            $map['is_open'] = 1;
-            $map['is_del'] = 1;
-            $total = $this->model
-                ->where($where)
-                ->where($map)
-                ->order($sort, $order)
-                ->count();
-
-            $list = $this->model
-                ->where($where)
-                ->where($map)
-                ->order($sort, $order)
-                ->limit($offset, $limit)
-                ->select();
-
-            $list = collection($list)->toArray();
-
-            $item_platform = new \app\admin\model\itemmanage\ItemPlatformSku();
-
-            //获取各站点虚拟库存
-            $site_sku_arr = [];
-            foreach ($platform as $k => $pv) {
-                if ($k == 100 || ($k != $website_type && $website_type != 100)) {
-                    continue;
-                }
-                $site_sku = $item_platform->where(['platform_type' => $k])->column('stock', 'sku');
-                $site_sku_arr[$k] = $site_sku;
-            }
-
-            //查询各站SKU虚拟库存
-            foreach ($list as &$v) {
-                if ($website_type == 100) {
-                    foreach ($platform as $k => $pv) {
-                        if ($k == 100) {
-                            continue;
-                        }
-                        $v[$pv . '_stock'] = $site_sku_arr[$k][$v['sku']];
-                    }
-                } else {
-                    $v['fictitious_stock'] = $site_sku_arr[$website_type][$v['sku']];
-                }
-            }
-            unset($v);
-
-            $result = array("total" => $total, "rows" => $list);
-
-            return json($result);
+        //查询各站SKU虚拟库存
+        $skus = array_column($list, 'sku');
+        $item_list = $item_platform->where(['sku' => ['in',$skus]])->select();
+        $item_stock = [];
+        foreach($item_list as $v) {
+            $item_stock[$v['sku']][$v['platform_type']] = $v['stock'];
+        }
+ 
+        foreach ($list as &$v) {
+            $v['zeelool_stock'] = $item_stock[$v['sku']][1];
+            $v['voogueme_stock'] = $item_stock[$v['sku']][2];
+            $v['nihao_stock'] = $item_stock[$v['sku']][3];
+            $v['meeloog_stock'] = $item_stock[$v['sku']][4];
+            $v['wesee_stock'] = $item_stock[$v['sku']][5];
+            $v['amazon_stock'] = $item_stock[$v['sku']][8];
+            $v['zeelool_es_stock'] = $item_stock[$v['sku']][9];
+            $v['zeelool_de_stock'] = $item_stock[$v['sku']][10];
+            $v['zeelool_jp_stock'] = $item_stock[$v['sku']][11];
+            $v['voogmechic_stock'] = $item_stock[$v['sku']][12];
         }
 
-        $magento_platform = [];
-        foreach ($platform as $k => $pv) {
-            $magento_platform[] = ['id' => $k, 'name' => $pv];
-        }
-
-        //取第一个key为默认站点
-        $site = input('site', $magento_platform[0]['id']);
-        $this->assignconfig('label', $site);
-
-        $this->assign('site', $site);
-        $this->assign('magentoplatformarr', $magento_platform);
-
-        return $this->view->fetch();
+        $headlist = ['商品sku', '总库存', '可用库存', '虚拟库存Zeelool', '虚拟库存Zeelool', '虚拟库存Voogueme', '虚拟库存Nihao', '虚拟库存Meeloog', '虚拟库存Wesee', '虚拟库存Amazon', '虚拟库存ZeeloolEs', '虚拟库存ZeeloolDe', '虚拟库存ZeeloolJp', '虚拟库存Voogmechic'];
+        $filename = '商品虚拟库存';
+        Excel::writeCsv($list, $headlist, $filename, true);
+        die;
     }
+
 
     /**
      * 商品库存详情
