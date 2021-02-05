@@ -2226,22 +2226,21 @@ class Test4 extends Controller
                 $data['site'] = $value['type'];
                 //判断是否有合并邮件
                 $zemail = Db::name('zendesk_comments')->where('zid',$value['id'])->where('is_admin',0)->field('html_body')->select();
+                $i = 0;
                 foreach ($zemail as $k=>$v){
                     $str = strtolower($v['html_body']);
                     if(strpos($str,'merged') !== false){
-                        $data['type'] = 1;
-                    }else{
-                        $data['type'] = 0;
+                        $i++;
                     }
-                    if($value['ticket_id'] == 276092){
-                        dump($v);
-                        dump($str);
-                        dump($data);exit;
-                    }
-                    //Db::name('ceshi')->insert($data);
-                    echo $value['ticket_id'].' is ok '."\n";
-                    usleep(10000);
                 }
+                if($i>0){
+                    $data['type'] = 1;
+                }else{
+                    $data['type'] = 0;
+                }
+                Db::name('ceshi')->insert($data);
+                echo $value['ticket_id'].' is ok '."\n";
+                usleep(10000);
             }
 
         }
