@@ -348,7 +348,7 @@ class Distribution extends Backend
             $this->request->get(['filter' => json_encode($filter)]);
 
             if (8 == $label || 1 == $label || 0 == $label) {
-                //查询子单的主单是否也含有工单
+               /* //查询子单的主单是否也含有工单
                 $platform_order = $this->_work_order_list->where([
                     'work_status' => ['in', $work_order_status_map],
                     'work_type' => ['in', $work_order_type]
@@ -356,7 +356,7 @@ class Distribution extends Backend
                 if (!empty($platform_order)) {
                     $order_id = $this->_new_order_process->where(['increment_id' => ['in', $platform_order]])->group('order_id')->column('order_id');
                     $item_order_numbers = $this->model->where(['order_id' => ['in', $order_id]])->order('created_at', 'desc')->group('item_order_number')->column('item_order_number');
-                }
+                }*/
             } else {
                 //其他tab展示子单工单未处理
                 $item_order_numbers = $this->_work_order_change_sku
@@ -489,7 +489,7 @@ class Distribution extends Backend
 
                 //判断是否显示工单按钮
                 $list[$key]['task_info'] = in_array($value['item_order_number'], $item_order_numbers) ? 1 : 0;
-                /*if (8 == $label || 1 == $label || 0 == $label) {
+                if (8 == $label || 1 == $label || 0 == $label) {
                     //查询子单的主单是否也含有工单
                     if ($handle_abnormal == 0 && $list[$key]['task_info'] == 0) {
                         $platform_order = $this->_new_order_process->where(['order_id' => $list[$key]['order_id']])->value('increment_id');
@@ -498,7 +498,7 @@ class Distribution extends Backend
                             $list[$key]['task_info'] = 1;
                         } 
                     }
-                }*/
+                }
                 //获取工单更改镜框最新信息
                 $change_sku = $this->_work_order_change_sku
                     ->alias('a')
