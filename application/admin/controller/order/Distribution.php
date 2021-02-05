@@ -255,14 +255,16 @@ class Distribution extends Backend
                 if (1 == $label) {
                     $shelf_number =
                         $this->_stock_house
-                            ->alias('a')
-                            ->join(['fa_store_sku' => 'b'], 'a.id=b.store_id')
-                            ->where([
-                                'a.shelf_number' => ['in', $filter['shelf_number']],
-                                'a.type' => 1
-                            ])
-                            ->order('a.coding')
-                            ->column('b.sku');
+                        ->alias('a')
+                        ->join(['fa_store_sku' => 'b'], 'a.id=b.store_id')
+                        ->where([
+                            'a.shelf_number' => ['in', $filter['shelf_number']],
+                            'a.type' => 1,
+                            'a.status' => 1,
+                            'b.is_del' => 1
+                        ])
+                        ->column('b.sku');
+
                     //平台SKU表替换sku
                     $sku = Db::connect('database.db_stock');
                     $sku_array = $sku->table('fa_item_platform_sku')->where(['sku' => ['in', $shelf_number]])->column('platform_sku');
@@ -829,12 +831,12 @@ class Distribution extends Backend
 
             $data[$sku['sku']]['location'] =
                 Db::table('fa_store_sku')
-                    ->alias('a')
-                    ->join(['fa_store_house' => 'b'], 'a.store_id=b.id')
-                    ->where('a.sku', $sku)
-                    ->value('b.coding');
-            $data[$sku]['sku'] = $sku;
-            $data[$sku]['number']++;
+                ->alias('a')
+                ->join(['fa_store_house' => 'b'], 'a.store_id=b.id')
+                ->where('a.sku', $sku['sku'])
+                ->value('b.coding');
+            $data[$sku['sku']]['sku'] = $sku;
+            $data[$sku['sku']]['number']++;
         }
         // $b=array();
         // foreach($sku as $v){
@@ -2176,6 +2178,10 @@ class Distribution extends Backend
                     $outstock_item['out_stock_id'] = $outstock_id;
                     $this->_outstock_item->insert($outstock_item);
 
+                    //计算出库成本
+                    $financecost = new \app\admin\model\finance\FinanceCost();
+                    $financecost->outstock_cost($outstock_id, $outstock['out_stock_number']);
+
                     //条码出库
                     $this->_product_bar_code_item
                         ->allowField(true)
@@ -2458,6 +2464,10 @@ class Distribution extends Backend
                     $outstock_item['out_stock_num'] = 1;
                     $outstock_item['out_stock_id'] = $outstock_id;
                     $this->_outstock_item->insert($outstock_item);
+
+                    //计算出库成本
+                    $financecost = new \app\admin\model\finance\FinanceCost();
+                    $financecost->outstock_cost($outstock_id, $outstock['out_stock_number']);
 
                     //条码出库
                     $this->_product_bar_code_item

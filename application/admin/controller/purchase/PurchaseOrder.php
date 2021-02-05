@@ -722,6 +722,7 @@ class PurchaseOrder extends Backend
                             $purchase_status = 9;
                         }
                     }
+
                     // $this->model->where(['id' => $row['id']])->update(['purchase_status'=>$purchase_status]);
 
                     //添加物流单明细表
@@ -746,7 +747,6 @@ class PurchaseOrder extends Backend
                                 $list['logistics_number'] = $logistics_number[$k][$key];
                                 $list['logistics_company_no'] = $val;
                                 //若物流单号已经签收的话直接更改采购单的状态为已签收
-
                                 $have_logistics = $logistics->where(['logistics_number'=>$logistics_number[$k][$key],'status'=>1])->find();
                                 if (!empty($have_logistics)){
                                     $this->model->where(['id' => $row['id']])->update(['purchase_status'=>$purchase_status]);
@@ -867,7 +867,6 @@ class PurchaseOrder extends Backend
                                     $list['order_number'] = $v['purchase_number'];
                                     $list['purchase_id'] = $v['id'];
                                     //若物流单号已经签收的话直接更改采购单的状态为已签收
-
                                     $have_logistics = $logistics->where(['logistics_number'=>$logistics_number[$k],'status'=>1])->find();
                                     if (!empty($have_logistics)){
                                         $this->model->where(['id' => $v['id']])->update(['purchase_status'=>$purchase_status]);
@@ -987,7 +986,6 @@ class PurchaseOrder extends Backend
                                 $list['logistics_number'] = $logistics_number[$k];
                                 $list['logistics_company_no'] = $v;
                                 //若物流单号已经签收的话直接更改采购单的状态为已签收
-
                                 $have_logistics = $logistics->where(['logistics_number'=>$logistics_number[$k],'status'=>1])->find();
                                 if (!empty($have_logistics)){
                                     $this->model->where(['id' => $row['id']])->update(['purchase_status'=>$purchase_status]);

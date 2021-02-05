@@ -1759,10 +1759,10 @@ class Test4 extends Controller
             //该品实时库存
             $real_time_stock = $this->model->where('sku',$value['true_sku'])->where('is_del',1)->where('is_open',1)->value('sum(stock)-sum(distribution_occupy_stock) as result');
             //该品库存金额
-            $sku_amount = $this->item->alias('i')->join('fa_purchase_order_item o','i.purchase_id=o.purchase_id and i.sku=o.sku')->join('fa_purchase_order p','p.id=o.purchase_id')->where('i.sku',$value['true_sku'])->where('i.library_status',1)->value('SUM(IF(o.actual_purchase_price != 0,o.actual_purchase_price,p.purchase_total/purchase_num)) as result');
+            $sku_amount = $this->item->alias('i')->join('fa_purchase_order_item o','i.purchase_id=o.purchase_id and i.sku=o.sku')->where('i.sku',$value['true_sku'])->where('i.library_status',1)->value('SUM(IF(o.actual_purchase_price != 0,o.actual_purchase_price,o.purchase_price)) as result');
             //实际周转天数
             $sku_info  = $this->getSkuSales($value['true_sku']);
-            $actual_day = $sku_info['days']!=0 && $sku_info['count']!=0 ? round($real_time_stock/$sku_info['count']/$sku_info['days'],2) : 0;
+            $actual_day = $sku_info['days']!=0 && $sku_info['count']!=0 ? round($real_time_stock/($sku_info['count']/$sku_info['days']),2) : 0;
             if($actual_day >120 && $actual_day<=144){
                 $count += $real_time_stock;
                 $total += $sku_amount;
@@ -2027,7 +2027,7 @@ class Test4 extends Controller
         $this->outstock = new \app\admin\model\warehouse\Outstock;
         $this->stockparameter = new \app\admin\model\financepurchase\StockParameter;
         $this->item = new \app\admin\model\warehouse\ProductBarCodeItem;
-        $stimestamp = 1577808000;
+        $stimestamp = 1611590400;
         $etimestamp = 1612281600;
         // 计算日期段内有多少天
         $days = ($etimestamp - $stimestamp) / 86400 + 1;
@@ -2175,5 +2175,70 @@ class Test4 extends Controller
             usleep(100000);
         }
         echo "all is ok";
+    }
+
+
+
+    /**
+     * 呆滞数据
+     */
+    public function dull_stock1(){
+        $grades = Db::name('product_grade')->field('true_sku,grade')->select();
+        foreach ($grades as $key=>$value){
+            $this->model = new \app\admin\model\itemmanage\Item;
+            $this->item = new \app\admin\model\warehouse\ProductBarCodeItem;
+            //该品实时库存
+            $real_time_stock = $this->model->where('sku',$value['true_sku'])->where('is_del',1)->where('is_open',1)->value('sum(stock)-sum(distribution_occupy_stock) as result');
+            //该品库存金额
+            $sku_amount = $this->item->alias('i')->join('fa_purchase_order_item o','i.purchase_id=o.purchase_id and i.sku=o.sku')->where('i.sku',$value['true_sku'])->where('i.library_status',1)->value('SUM(IF(o.actual_purchase_price != 0,o.actual_purchase_price,o.purchase_price)) as result');
+            //实际周转天数
+            $sku_info  = $this->getSkuSales($value['true_sku']);
+            $actual_day = $sku_info['days']!=0 && $sku_info['count']!=0 ? round($real_time_stock/($sku_info['count']/$sku_info['days']),2) : 0;
+            $data['sku'] = $value['true_sku'];
+            $data['grade'] = $value['grade'];
+            $data['sales_num'] = $sku_info['count'];
+            $data['day'] = $sku_info['days'];
+            $data['stock'] = $real_time_stock;
+            $data['total'] = $sku_amount ? $sku_amount : 0;
+            $data['actual_day'] = $actual_day;
+            Db::name('ceshi')->insert($data);
+            echo $value['true_sku'].' is ok'."\n";
+            usleep(10000);
+        }
+    }
+    /**
+     * 邮件排查没有回复状态为关闭的邮件
+     */
+    public function zendesk_error_assign_email()
+    {
+        $this->zendesk = new \app\admin\model\zendesk\Zendesk;
+        $where['channel'] = ['<>','voice'];
+        $start = '2021-01-01';
+        $end = '2021-01-31 23:59:59';
+        $where['create_time'] = ['between',[$start,$end]];
+        $email = $this->zendesk->where('assign_id  is null or assign_id=0')->where($where)->select();
+        foreach ($email as $key=>$value){
+            //判断是否只有用户发送的邮件
+            $count = Db::name('zendesk_comments')->where('zid',$value['id'])->where('is_admin',1)->count();
+            if($count == 0){
+                $data['zid'] = $value['id'];
+                $data['ticket_id'] = $value['ticket_id'];
+                $data['site'] = $value['type'];
+                //判断是否有合并邮件
+                $zemail = Db::name('zendesk_comments')->where('zid',$value['id'])->where('is_admin',0)->field('html_body')->select();
+                foreach ($zemail as $k=>$v){
+                    $str = strtolower($v['html_body']);
+                    if(strpos($str,'merge') !== false){
+                        $data['type'] = 1;
+                    }else{
+                        $data['type'] = 0;
+                    }
+                    Db::name('ceshi')->insert($data);
+                    echo $value['ticket_id'].' is ok '."\n";
+                    usleep(10000);
+                }
+            }
+
+        }
     }
 }
