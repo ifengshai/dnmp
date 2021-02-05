@@ -351,6 +351,7 @@ class ScmWarehouse extends Scm
         $type_list = $this->_out_stock_type
             ->field('id,name')
             ->where('is_del', 1)
+            ->where('id','not in',[2,4])
             ->select();
 
         //站点列表
@@ -1318,7 +1319,7 @@ class ScmWarehouse extends Scm
 
         $item_list = $this->_in_stock_item
             ->where(['in_stock_id' => $in_stock_id])
-            ->field('sku,in_stock_num,price')
+            ->field('id,sku,in_stock_num,price')
             ->select();
         empty($item_list) && $this->error(__('入库单子单数据异常'), [], 515);
 
@@ -1374,6 +1375,53 @@ class ScmWarehouse extends Scm
         $info['item_list'] = $item_list;
 
         $this->success('', ['info' => $info], 200);
+    }
+
+    //入库单编辑删除sku
+    public function in_stock_edit_delete_sku()
+    {
+        $in_stock_item_id = $this->request->request('in_stock_item_id');
+        empty($in_stock_item_id) && $this->error(__('入库单子项ID不能为空'), [], 514);
+        $instock_id = $this->_in_stock_item
+            ->where(['id' => $in_stock_item_id])
+            ->find();
+        $all_item_count = $this->_in_stock_item
+            ->where(['in_stock_id' => $instock_id['instock_id']])
+            ->count();
+        if ($all_item_count <= 1) {
+            $this->success('子单数据不能全部为空，请先添加再删除', '', 515);
+        }
+        $this->_in_stock_item->startTrans();
+        $this->_product_bar_code_item->startTrans();
+        try {
+            //删除入库单子表的数据
+            $item_list = $this->_in_stock_item
+                ->where(['id' => $in_stock_item_id])
+                ->delete();
+            //入库单子表的sku与条形码有绑定 先解除绑定
+            $barcode = $this->_product_bar_code_item
+                ->where(['in_stock_id' => $instock_id['instock_id'], 'sku' => $instock_id['sku']])
+                ->update(['in_stock_id' => 0]);
+            $this->_in_stock_item->commit();
+            $this->_product_bar_code_item->commit();
+        } catch (ValidateException $e) {
+            $this->_in_stock_item->rollback();
+            $this->_product_bar_code_item->rollback();
+            $this->error($e->getMessage(), [], 4441);
+        } catch (PDOException $e) {
+            $this->_in_stock_item->rollback();
+            $this->_product_bar_code_item->rollback();
+            $this->error($e->getMessage(), [], 4442);
+        } catch (Exception $e) {
+            $this->_in_stock_item->rollback();
+            $this->_product_bar_code_item->rollback();
+            $this->error($e->getMessage(), [], 4443);
+        }
+        if ($item_list && $barcode) {
+            $this->success('删除成功', '', 200);
+        } else {
+            $this->success('删除失败', '', 515);
+        }
     }
 
     /**

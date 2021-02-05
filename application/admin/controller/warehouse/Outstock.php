@@ -200,8 +200,6 @@ class Outstock extends Backend
     }
 
 
-
-
     /**
      * 添加
      */
@@ -779,7 +777,7 @@ class Outstock extends Backend
      * Date: 2020/9/24
      * Time: 15:11:52
      */
-    public function import()
+    public function import1()
     {
         $this->model = new \app\admin\model\warehouse\Outstock();
         $_item = new \app\admin\model\warehouse\OutStockItem();
@@ -947,5 +945,211 @@ class Outstock extends Backend
         } catch (Exception $e) {
             $this->error($e->getMessage());
         }
+    }
+
+    public function import()
+    {
+        $this->model = new \app\admin\model\warehouse\Outstock();
+        $_item = new \app\admin\model\warehouse\OutStockItem();
+        $_platform = new \app\admin\model\itemmanage\ItemPlatformSku();
+        $this->_product_bar_code_item = new ProductBarCodeItem();
+
+        //校验参数空值
+        $file = $this->request->request('file');
+        !$file && $this->error(__('Parameter %s can not be empty', 'file'));
+
+        //校验文件路径
+        $filePath = ROOT_PATH . DS . 'public' . DS . $file;
+        !is_file($filePath) && $this->error(__('No results were found'));
+
+        //实例化reader
+        $ext = pathinfo($filePath, PATHINFO_EXTENSION);
+        !in_array($ext, ['csv', 'xls', 'xlsx']) && $this->error(__('Unknown data format'));
+        if ('csv' === $ext) {
+            $file = fopen($filePath, 'r');
+            $filePath = tempnam(sys_get_temp_dir(), 'import_csv');
+            $fp = fopen($filePath, "w");
+            $n = 0;
+            while ($line = fgets($file)) {
+                $line = rtrim($line, "\n\r\0");
+                $encoding = mb_detect_encoding($line, ['utf-8', 'gbk', 'latin1', 'big5']);
+                if ($encoding != 'utf-8') {
+                    $line = mb_convert_encoding($line, 'utf-8', $encoding);
+                }
+                if (0 == $n || preg_match('/^".*"$/', $line)) {
+                    fwrite($fp, $line . "\n");
+                } else {
+                    fwrite($fp, '"' . str_replace(['"', ','], ['""', '","'], $line) . "\"\n");
+                }
+                $n++;
+            }
+            fclose($file) || fclose($fp);
+
+            $reader = new Csv();
+        } elseif ('xls' === $ext) {
+            $reader = new Xls();
+        } else {
+            $reader = new Xlsx();
+        }
+
+        //模板文件列名
+        $this->model->startTrans();
+        $_item->startTrans();
+        $this->_product_bar_code_item->startTrans();
+        //模板文件列名
+        try {
+            if (!$PHPExcel = $reader->load($filePath)) {
+                $this->error(__('Unknown data format'));
+            }
+            $currentSheet = $PHPExcel->getSheet(0);  //读取文件中的第一个工作表
+            $allColumn = $currentSheet->getHighestDataColumn(); //取得最大的列号
+            $allRow = $currentSheet->getHighestRow(); //取得一共有多少行
+            $maxColumnNumber = Coordinate::columnIndexFromString($allColumn);
+
+            $fields = [];
+            for ($currentRow = 1; $currentRow <= 1; $currentRow++) {
+                for ($currentColumn = 1; $currentColumn <= 11; $currentColumn++) {
+                    $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getValue();
+                    if (!empty($val)) {
+                        $fields[] = $val;
+                    }
+                }
+            }
+
+            //校验模板文件格式
+            $listName = ['出库分类', '平台', '商品条码'];
+
+            $listName !== $fields && $this->error(__('模板文件格式错误！'));
+
+            $data = [];
+            for ($currentRow = 2; $currentRow <= $allRow; $currentRow++) {
+                for ($currentColumn = 1; $currentColumn <= $maxColumnNumber; $currentColumn++) {
+                    $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getCalculatedValue();
+                    $data[$currentRow - 2][$currentColumn - 1] = is_null($val) ? '' : $val;
+                }
+            }
+            empty($data) && $this->error('表格数据为空！');
+
+            //获取表格中条码集合
+            $sku_arr = [];
+            foreach ($data as $k => $v) {
+                //获取sku
+                $sku = trim($v[2]);
+                empty($sku) && $this->error(__('导入失败,第 ' . ($k + 1) . ' 行商品条码为空！'));
+                $sku_arr[] = $sku;
+            }
+
+            $sku_code = array_column($data, '2');
+
+            //检测条形码是否重复
+            if (count($data) != count(array_unique($sku_code))) $this->error(__(' 条形码有重复，请检查'));
+
+            //获取出库平台
+            $out_plat = $data[0][1];
+            switch (trim($out_plat)) {
+                case 'zeelool':
+                    $out_label = 1;
+                    break;
+                case 'voogueme':
+                    $out_label = 2;
+                    break;
+                case 'nihao':
+                    $out_label = 3;
+                    break;
+                case 'meeloog':
+                    $out_label = 4;
+                    break;
+                case 'wesee':
+                    $out_label = 5;
+                    break;
+                case 'amazon':
+                    $out_label = 8;
+                    break;
+                case 'zeelool_es':
+                    $out_label = 9;
+                    break;
+                // case 'zeelool_jp':
+                //     $label = 1;
+                case 'zeelool_de':
+                    $out_label = 10;
+                    break;
+                default:
+                    $this->error(__('请检查表格中调出仓的名称'));
+            };
+
+            $instock_type = Db::name('out_stock_type')->where('is_del', 1)->field('id,name')->select();
+            $instock_type = array_column(collection($instock_type)->toArray(), 'id', 'name');
+
+            //插入一条数据到入库单主表
+            $transfer_order['out_stock_number'] = 'OUT' . date('YmdHis') . rand(100, 999) . rand(100, 999);
+            $transfer_order['type_id'] = $instock_type[$data[0][0]];
+            $transfer_order['status'] = 0;
+            $transfer_order['platform_id'] = $out_label;
+            $transfer_order['createtime'] = date('Y-m-d H:i:s');
+            $transfer_order['create_person'] = session('admin.nickname');
+            $transfer_order_id = $this->model->insertGetId($transfer_order);
+            //获取各站点虚拟仓库存
+            $stock_list = $_platform
+                ->where('platform_type', $out_label)
+                ->column('stock', 'sku');
+
+            $skus = [];
+            foreach ($data as $v) {
+                $sku = $this->_product_bar_code_item->where('code', trim($v[2]))->value('sku');
+                if (empty($sku)){
+                    $this->error('条形码:' . $v[2] . ' 不存在,请移除');
+                }
+                $replenish_num = 1;
+                if ($skus[$sku]) {
+                    $skus[$sku]['out_stock_num'] += $replenish_num;
+                } else {
+                    $skus[$sku] = [
+                        'out_stock_num' => $replenish_num,
+                        'sku' => $sku,
+                        'out_stock_id' => $transfer_order_id,
+                    ];
+                }
+            }
+            //校验各站点虚拟仓库存
+            foreach ($skus as $key => $value1) {
+                if (!$stock_list[$value1['sku']]) $this->error('sku: ' . $value1['sku'] . ' 没有同步至对应平台');
+                if ($value1['out_stock_num'] > $stock_list[$value1['sku']]) $this->error('sku: ' . $value1['sku'] . ' 出库数量不能大于虚拟仓库存');
+            }
+            //检测条形码是否已绑定
+            $where['out_stock_id'] = [['>', 0], ['neq', $transfer_order_id]];
+
+            $where['code'] = ['in', $sku_code];
+            $check_quantity = $this->_product_bar_code_item
+                ->where($where)
+                ->field('code')
+                ->find();
+            if (!empty($check_quantity['code'])) $this->error('条形码:' . $check_quantity['code'] . ' 已绑定,请移除');
+
+            $_item->insertAll($skus);
+
+            //绑定条形码
+            foreach ($data as $v) {
+                $this->_product_bar_code_item->where(['code' => trim($v[2])])->update(['out_stock_id' => $transfer_order_id]);
+            }
+            $this->model->commit();
+            $_item->commit();
+            $this->_product_bar_code_item->commit();
+        } catch (ValidateException $e) {
+            $this->model->rollback();
+            $_item->rollback();
+            $this->_product_bar_code_item->rollback();
+            $this->error($e->getMessage());
+        } catch (PDOException $e) {
+            $this->model->rollback();
+            $_item->rollback();
+            $this->_product_bar_code_item->rollback();
+            $this->error($e->getMessage());
+        } catch (Exception $e) {
+            $this->model->rollback();
+            $_item->rollback();
+            $this->_product_bar_code_item->rollback();
+            $this->error($e->getMessage());
+        }
+        $this->success('导入成功！');
     }
 }
