@@ -2594,7 +2594,7 @@ class ScmDistribution extends Scm
                 }
             }
         } else {
-            if (999 != $check_refuse && $check_status == 2) {
+            if (999 != $check_refuse) {
                 foreach ($item_ids as $key => $value) {
                     $item_numbers = $this->_new_order_item_process->where(['id' => $value])->column('item_order_number');
                     DistributionLog::record((object)['nickname' => $create_person], [$item_ids[$key]], 8, '主单ID' . $row['order_id'] . $msg . '成功' . $msg_info_l . $item_numbers[0] . $msg_info_r);
