@@ -677,7 +677,8 @@ class ScmDistribution extends Scm
             ->field('id,item_order_number,distribution_status,order_prescription_type,option_id,order_id,site,customize_status,temporary_house_id,abnormal_house_id,magento_order_id')
             ->where('item_order_number', $item_order_number)
             ->find();
-
+        Log::write("我江浩辉,宇宙第一帅");
+        Log::write($item_process_info);
         //获取子订单处方数据
         $item_option_info = $this->_new_order_item_option
             ->field('is_print_logo,sku,index_name')
@@ -910,14 +911,18 @@ class ScmDistribution extends Scm
                 $back_msg = $next_step[$save_status];
             }
             //将订单号截取处理
-            $order_log_order_number =  substr($item_order_number['item_order_number'],0,strpos($item_order_number['item_order_number'], '-'));
-            Log::write("我江浩辉,宇宙第一帅");
+            $order_log_order_number =  substr($item_process_info['item_order_number'],0,strpos($item_process_info['item_order_number'], '-'));
+            Log::write("我江昊辉,宇宙第一帅");
             Log::write($item_process_info['magento_order_id']);
             Log::write($order_log_order_number);
             Log::write($item_process_info['site']);
             Log::write($node_status);
+            $site_array = [1,2,3];
+            if (in_array($item_process_info['site'],$site_array)){
+                Log::write('5555555');
+                Order::rulesto_adjust($item_process_info['magento_order_id'],$order_log_order_number,$item_process_info['site'],2,$node_status);
+            }
 
-//            Order::rulesto_adjust($item_process_info['magento_order_id'],$order_log_order_number,$item_process_info['site'],2,$node_status);
             $this->_item->commit();
             $this->_stock_log->commit();
             $this->_new_order_process->commit();

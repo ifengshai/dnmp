@@ -666,32 +666,16 @@ class DataMarket extends Backend
             $cache_data = Cache::get('Supplydatacenter_datamarket'  .$time_str. md5(serialize('order_histogram_line')));
             if (!$cache_data) {
                 $createat = explode(' ', $time_str);
-                $date = $this->getDateFromRange($createat[0],$createat[3]);
+                $map['day_date'] = ['between',[$createat[0],$createat[3]]];
+                $order_info = Db::name('datacenter_day_order')->where($map)->select();
+                $avg_rate = Db::name('datacenter_day_order')->where($map)->value('round(sum(intime_rate)/count(*),2) as result');
                 $arr = array();
-                foreach ($date as $key=>$value){
-                    $arr[$key]['day'] = $value;
-                    //查询该时间段的订单
-                    $start = strtotime($value);
-                    $end = strtotime($value.' 23:59:59');
-
-                    $where['o.payment_time'] = $flag['payment_time'] = ['between',[$start,$end]];
-                    $map1['p.order_prescription_type'] = 1;
-                    $map2['p.order_prescription_type'] = 2;
-                    $map3['p.order_prescription_type'] = 3;
-                    $where['o.status'] = $flag['status'] = ['in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
-
+                foreach ($order_info as $key=>$value){
+                    $arr[$key]['day'] = $value['day_date'];
                     //订单数量
-                    $arr[$key]['order_count'] = $this->order->where($flag)->count();
-                    $sql1 = $this->process->alias('p')->join('fa_order o','p.increment_id = o.increment_id')->field('(p.delivery_time-o.payment_time)/3600 AS total')->where($where)->where($map1)->group('p.order_id')->buildSql();
-                    $count1 = $this->process->table([$sql1=>'t2'])->value('sum( IF ( total <= 24, 1, 0) ) AS a');
-
-                    $sql2 = $this->process->alias('p')->join('fa_order o','p.increment_id = o.increment_id')->field('(p.delivery_time-o.payment_time)/3600 AS total')->where($where)->where($map2)->group('p.order_id')->buildSql();
-                    $count2 = $this->process->table([$sql2=>'t2'])->value('sum( IF ( total <= 72, 1, 0) ) AS a');
-
-                    $sql3 = $this->process->alias('p')->join('fa_order o','p.increment_id = o.increment_id')->field('(p.delivery_time-o.payment_time)/3600 AS total')->where($where)->where($map3)->group('p.order_id')->buildSql();
-                    $count3 = $this->process->table([$sql3=>'t2'])->value('sum( IF ( total <= 168, 1, 0) ) AS a');
-                    $untimeout_count = $count1 + $count2 + $count3;
-                    $arr[$key]['rate'] = $arr[$key]['order_count'] ? round($untimeout_count/$arr[$key]['order_count']*100,2) : 0;
+                    $arr[$key]['order_count'] = $value['order_num'];
+                    $arr[$key]['rate'] = $value['intime_rate'];
+                    $arr[$key]['avg_rate'] = $avg_rate;
                 }
                 Cache::set('Supplydatacenter_datamarket'.$time_str.md5(serialize('order_histogram_line')),$arr,7200);
             }else{
@@ -700,6 +684,7 @@ class DataMarket extends Backend
             //全部采购单
             $barcloumndata = array_column($arr, 'order_count');
             $linecloumndata = array_column($arr, 'rate');
+            $linecloumndata1 = array_column($arr, 'avg_rate');
 
             $json['xColumnName'] = array_column($arr, 'day');
             $json['columnData'] = [
@@ -712,6 +697,13 @@ class DataMarket extends Backend
                     'type' => 'line',
                     'data' => $linecloumndata,
                     'name' => '及时率',
+                    'yAxisIndex' => 1,
+                    'smooth' => true //平滑曲线
+                ],
+                [
+                    'type' => 'line',
+                    'data' => $linecloumndata1,
+                    'name' => '平均及时率',
                     'yAxisIndex' => 1,
                     'smooth' => true //平滑曲线
                 ],
