@@ -671,28 +671,9 @@ class DataMarket extends Backend
                 $arr = array();
                 foreach ($order_info as $key=>$value){
                     $arr[$key]['day'] = $value['day_date'];
-                    //查询该时间段的订单
-                    $start = strtotime($value['day_date']);
-                    $end = strtotime($value['day_date'].' 23:59:59');
-
-                    $where['o.payment_time'] = ['between',[$start,$end]];
-                    $map1['p.order_prescription_type'] = 1;
-                    $map2['p.order_prescription_type'] = 2;
-                    $map3['p.order_prescription_type'] = 3;
-                    $where['o.status'] = ['in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
-
                     //订单数量
                     $arr[$key]['order_count'] = $value['order_num'];
-                    $sql1 = $this->process->alias('p')->join('fa_order o','p.increment_id = o.increment_id')->field('(p.delivery_time-o.payment_time)/3600 AS total')->where($where)->where($map1)->group('p.order_id')->buildSql();
-                    $count1 = $this->process->table([$sql1=>'t2'])->value('sum( IF ( total <= 24, 1, 0) ) AS a');
-
-                    $sql2 = $this->process->alias('p')->join('fa_order o','p.increment_id = o.increment_id')->field('(p.delivery_time-o.payment_time)/3600 AS total')->where($where)->where($map2)->group('p.order_id')->buildSql();
-                    $count2 = $this->process->table([$sql2=>'t2'])->value('sum( IF ( total <= 72, 1, 0) ) AS a');
-
-                    $sql3 = $this->process->alias('p')->join('fa_order o','p.increment_id = o.increment_id')->field('(p.delivery_time-o.payment_time)/3600 AS total')->where($where)->where($map3)->group('p.order_id')->buildSql();
-                    $count3 = $this->process->table([$sql3=>'t2'])->value('sum( IF ( total <= 168, 1, 0) ) AS a');
-                    $untimeout_count = $count1 + $count2 + $count3;
-                    $arr[$key]['rate'] = $arr[$key]['order_count'] ? round($untimeout_count/$arr[$key]['order_count']*100,2) : 0;
+                    $arr[$key]['rate'] = $value['intime_rate'];
                 }
                 Cache::set('Supplydatacenter_datamarket'.$time_str.md5(serialize('order_histogram_line')),$arr,7200);
             }else{
