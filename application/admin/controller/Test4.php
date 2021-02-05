@@ -2250,8 +2250,7 @@ class Test4 extends Controller
     public function order_num()
     {
         $order = new \app\admin\model\order\order\NewOrder();
-        $where['payment_time'] = ['between',[1515520244,1612375200]];
-        $date_time = $order->field("DATE_FORMAT(FROM_UNIXTIME(created_at), '%Y-%m-%d') AS date_time")->where($where)->group("DATE_FORMAT(FROM_UNIXTIME(created_at), '%Y-%m-%d')")->order("DATE_FORMAT(FROM_UNIXTIME(created_at), '%Y-%m-%d') asc")->select();
+        $date_time = $order->query("SELECT FROM_UNIXTIME(created_at, '%Y-%m-%d') AS date_time FROM `fa_order` where payment_time between 1515520244 and 1612375200 GROUP BY FROM_UNIXTIME(created_at, '%Y-%m-%d') order by FROM_UNIXTIME(created_at, '%Y-%m-%d') asc");
         //查询时间
         foreach ($date_time as $val) {
             $is_exist = Db::name('datacenter_day_order')->where('day_date', $val['date_time'])->value('id');
