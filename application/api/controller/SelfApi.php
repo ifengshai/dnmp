@@ -112,61 +112,64 @@ class SelfApi extends Api
         $site = $this->request->request('site'); //站点
         $status = $this->request->request('status'); //站点
         if (!$order_id) {
-            $this->error(__('缺少订单id参数'), [], 400);
+            $this->error(__('缺少订单id参数'));
         }
 
         if (!$order_number) {
-            $this->error(__('缺少订单号参数'), [], 400);
+            $this->error(__('缺少订单号参数'));
         }
 
         if (!$site) {
-            $this->error(__('缺少站点参数'), [], 400);
+            $this->error(__('缺少站点参数'));
         }
 
         if (!$status) {
-            $this->error(__('缺少状态参数'), [], 400);
+            $this->error(__('缺少状态参数'));
         }
+        if ($status == 'processing'){
+            //判断如果子节点大于等于1时  不更新
+            $order_count = (new OrderNode)->where([
+                'order_number' => $order_number,
+                'order_id' => $order_id,
+                'site' => $site,
+                'node_type' => ['>=', 1]
+            ])->count();
+            if ($order_count < 0) {
+                $res_node = (new OrderNode())->save([
+                    'order_node' => 0,
+                    'node_type' => 1,
+                    'update_time' => date('Y-m-d H:i:s'),
+                ], ['order_id' => $order_id, 'site' => $site]);
+            }
 
-        //判断如果子节点大于等于1时  不更新
-        $order_count = (new OrderNode)->where([
-            'order_number' => $order_number,
-            'order_id' => $order_id,
-            'site' => $site,
-            'node_type' => ['>=', 1]
-        ])->count();
-        if ($order_count < 0) {
-            $res_node = (new OrderNode())->save([
+            $count = (new OrderNodeDetail())->where([
+                'order_number' => $order_number,
+                'order_id' => $order_id,
+                'site' => $site,
                 'order_node' => 0,
-                'node_type' => 1,
-                'update_time' => date('Y-m-d H:i:s'),
-            ], ['order_id' => $order_id, 'site' => $site]);
-        }
+                'node_type' => 1
+            ])->count();
+            if ($count > 0) {
+                $this->error('已存在');
+            }
 
-        $count = (new OrderNodeDetail())->where([
-            'order_number' => $order_number,
-            'order_id' => $order_id,
-            'site' => $site,
-            'order_node' => 0,
-            'node_type' => 1
-        ])->count();
-        if ($count > 0) {
-            $this->error('已存在', [], 400);
+            $res_node_detail = (new OrderNodeDetail())->allowField(true)->save([
+                'order_number' => $order_number,
+                'order_id' => $order_id,
+                'content' => 'Your payment has been successful.',
+                'site' => $site,
+                'create_time' => date('Y-m-d H:i:s'),
+                'order_node' => 0,
+                'node_type' => 1
+            ]);
+            if (false !== $res_node && false !== $res_node_detail) {
+                $this->success('创建成功', [], 200);
+            } else {
+                $this->error('创建失败');
+            }
         }
+        $this->success('创建成功', [], 200);
 
-        $res_node_detail = (new OrderNodeDetail())->allowField(true)->save([
-            'order_number' => $order_number,
-            'order_id' => $order_id,
-            'content' => 'Your payment has been successful.',
-            'site' => $site,
-            'create_time' => date('Y-m-d H:i:s'),
-            'order_node' => 0,
-            'node_type' => 1
-        ]);
-        if (false !== $res_node && false !== $res_node_detail) {
-            $this->success('创建成功', [], 200);
-        } else {
-            $this->error('创建失败', [], 400);
-        }
     }
 
     /**
