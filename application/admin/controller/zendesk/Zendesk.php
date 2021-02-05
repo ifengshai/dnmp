@@ -1541,11 +1541,16 @@ DOC;
             //处理回复数据
             $comments_map['zid'] = $value['id'];
             $comments_list=Db::table('fa_zendesk_comments')
+                ->alias('zendesk_comments')
+                ->join(['fa_admin' => 'admin_due'], 'zendesk_comments.due_id=admin_due.id','LEFT')
                 ->where($comments_map)
-                ->field("is_admin,create_time,is_created,mail_template_id")
-                ->order("id  ")
+                ->field("zendesk_comments.is_admin,zendesk_comments.create_time,zendesk_comments.is_created,zendesk_comments.mail_template_id,zendesk_comments.due_id,admin_due.nickname as 'due_nickname'")//处理人拼接
+                ->order("zendesk_comments.id  ")
                 ->select();
 
+            $due_name=array();
+            //邮件工单处理人+回复处理人
+            array_push($due_name,$value['due_nickname']);
             //有回复数据时,计算回复数据
             if (!empty($comments_list)){
                 //回复次数
@@ -1556,22 +1561,32 @@ DOC;
                     if ($commentsV['is_admin']=='1'){
                         $replies+=1;//客服人员回复次数
                         array_push($admin_data,$commentsV['create_time']);
+                        array_push($due_name,$commentsV['due_nickname']);
                     }
                     $template_info.=$template_list[$commentsV['mail_template_id']].",";
                 }
                 $is_admin=$comments_list[0]['is_admin']=='1'?'是':'否';
-                //预防没有客服人员回复
+                //预防没有客服人员回复,首次回复时间处理
                 if (!empty($admin_data)) {
                     $value['reply_minutes'] = round((strtotime($admin_data[0]) - strtotime($value['create_time'])) / 60, 1);
                     //客服首次回复时间
                     $value['fist_time']=$admin_data[0];
                 }
+
                 if (!empty($template_info)){
                     $template_info = rtrim($template_info, ',');
                 }
+                //回复模板
                 $value['template_info']=$template_info;
                 $value['replies']=$replies;
                 $value['is_admin']=$is_admin;
+            }
+
+            if (!empty($due_name)){
+                //对处理人进行去重复
+                $due_name=array_unique($due_name);
+                $due_name_trim = rtrim(implode(",", $due_name), ',');
+                $value['due_nickname']=$due_name_trim;
             }
             $spreadsheet->getActiveSheet()->setCellValueExplicit("A" . ($key * 1 + 2), $value['site_type'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
             $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['ticket_id']);
@@ -1655,6 +1670,23 @@ DOC;
         $writer->save('php://output');
     }
 
+
+    function uniquArr($array){
+        $result = array();
+        foreach($array as $k=>$val){
+            $code = false;
+            foreach($result as $_val){
+                if($_val['id'] == $val['id']){
+                    $code = true;
+                    break;
+                }
+            }
+            if(!$code){
+                $result[]=$val;
+            }
+        }
+        return $result;
+    }
 
 
 
