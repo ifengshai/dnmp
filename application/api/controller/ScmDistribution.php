@@ -2573,7 +2573,7 @@ class ScmDistribution extends Scm
             $this->error($e->getMessage(), [], 408);
         }
         //打印操作记录
-        if (1 != $check_refuse) {
+        if (1 != $check_refuse && $check_status == 2) {
             if (999 != $check_refuse) {
                 $item_order_numbers = $this->_new_order_item_process->where(['item_order_number' => ['in', $item_order_numbers]])->column('id');
                 $item_order_numbers = collection($item_order_numbers)->toArray();
