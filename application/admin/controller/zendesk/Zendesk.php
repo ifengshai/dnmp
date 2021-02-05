@@ -27,7 +27,7 @@ class Zendesk extends Backend
     protected $model = null;
     protected $relationSearch = true;
     protected $noNeedLogin = ['asycTicketsUpdate','asycTicketsVooguemeUpdate','asycTicketsAll','asycTicketsAll2','asycTicketsAll3','asyncTicketHttps'];
-    protected $noNeedRight=['zendesk_export'];
+    protected $noNeedRight=['zendesk_export,email_toload_more,order_toload_more'];
     /**
      * 无需鉴权的方法,但需要登录
      * @var array
@@ -404,6 +404,7 @@ class Zendesk extends Backend
         $this->view->assign(compact('tags',  'templates','type'));
         return $this->view->fetch();
     }
+
     /**
      * 发送邮件
      * @param null $ids
@@ -416,6 +417,7 @@ class Zendesk extends Backend
     public function edit($ids = null)
     {
         $row = $this->model->get($ids);
+        $status = input('param.status');
         if (!$row) {
             $this->error(__('No Results were found'));
         }
@@ -428,6 +430,8 @@ class Zendesk extends Backend
         }
         //获取主的ticket
         $ticket = $this->model->where('id', $ids)->find();
+
+
         $siteName = 'zeelool';
         if($ticket->type == 2){
             $siteName = 'voogueme';
@@ -472,20 +476,20 @@ class Zendesk extends Backend
                     //获取签名
                     $sign = Db::name('zendesk_signvalue')->where('site',$ticket->type)->value('signvalue');
                     //获取zendesk用户的昵称
-                    $zendesk_nickname = Db::name('zendesk_agents')->where('type',$ticket->type)->where('admin_id',session('admin.id'))->value('nickname');
+                    $zendesk_nickname = Db::name('zendesk_agents')->where('admin_id',session('admin.id'))->value('nickname');
                     $zendesk_nickname = $zendesk_nickname ? $zendesk_nickname : $siteName;
                     //替换签名中的昵称
                     if(strpos($sign,'{{agent.name}}')!==false){
                         $sign = str_replace('{{agent.name}}',$zendesk_nickname,$sign);
-                    }             
+                    }
                     $sign = $sign ? $sign : '';
                     //替换回复内容中的<p>为<span style="display:block">,替换</p>为</span>
                     if(strpos($params['content'],'<p>')!==false){
                         $params['content'] = str_replace('<p>','<span style="display:block">',$params['content']);
-                    } 
+                    }
                     if(strpos($params['content'],'</p>')!==false){
                         $params['content'] = str_replace('</p>','</span>',$params['content']);
-                    } 
+                    }
 
                     $priority = config('zendesk.priority')[$params['priority']];
                     if ($priority) {
@@ -554,7 +558,6 @@ class Zendesk extends Backend
                             'is_admin' => 1,
                             'due_id' => session('admin.id'),
                             'attachments' => $params['image'],
-                            'mail_template_id' => $params['mail_template_id'],
                             'platform'=>$ticket->type
                         ]);
                         ZendeskTasks::whereTime('create_time', 'today')
@@ -594,7 +597,7 @@ class Zendesk extends Backend
                 //获取签名
                 $sign = Db::name('zendesk_signvalue')->where('site',$ticket->type)->value('signvalue');
                 //获取当前评论的用户的昵称
-                $zendesk_nickname = Db::name('zendesk_agents')->where('type',$ticket->type)->where('admin_id',$comment->due_id)->value('nickname');
+                $zendesk_nickname = Db::name('zendesk_agents')->where('admin_id',$comment->due_id)->value('nickname');
                 $zendesk_nickname = $zendesk_nickname ? $zendesk_nickname : $siteName;
                 //替换签名中的昵称
                 if(strpos($sign,'{{agent.name}}')!==false){
@@ -618,8 +621,13 @@ class Zendesk extends Backend
             ->order('id desc')
             ->limit(5)
             ->select();
-        //获取所有的消息模板
+        $recentTickets_count = $this->model
+            ->where(['user_id' => $ticket->user_id, 'type' => $ticket->type])
+            ->where('id', 'neq', $ids)
+            ->count();
 
+
+        //获取所有的消息模板
         $templateAll = ZendeskMailTemplate::where([
             'template_platform' => $ticket->type,
             'template_permission' => 1,
@@ -643,17 +651,42 @@ class Zendesk extends Backend
         //获取当前用户的最新5个的订单
         if($ticket->type == 1){
             $orderModel = new \app\admin\model\order\order\Zeelool;
+            $customer_entity = Db::connect('database.db_zeelool');
         }elseif($ticket->type == 2){
             $orderModel = new \app\admin\model\order\order\Voogueme;
+            $customer_entity = Db::connect('database.db_voogueme');
         }else{
             $orderModel = new \app\admin\model\order\order\Nihao;
+            $is_vip = 0;
+        }
+
+        //查询该用户是否是会员
+        if ($customer_entity){
+            $is_vip = $customer_entity->table('customer_entity')->where('entity_id',$ticket->user_id)->value('is_vip');
+            if (empty($is_vip)){
+                $is_vip = 0;
+            }
         }
 
         $orders = $orderModel
             ->where('customer_email',$ticket->email)
             ->order('entity_id desc')
+            ->field('increment_id,created_at,order_currency_code,status')
             ->limit(5)
-            ->select();        
+            ->select();
+        $orders_count = $orderModel
+            ->where('customer_email',$ticket->email)
+            ->count();
+        $orders = collection($orders)->toArray();
+//        dump($orders);
+//        foreach ($orders as $key=>$ite){
+//            $model =  Db::connect('database.db_mojing_order');
+//            $find_value = $model->table('fa_order')->where('increment_id',$ite['increment_id'])->select();
+//            dump($find_value);die();
+//
+//        }
+
+//        dump(collection($orders)->toArray());die();
         $btn = input('btn',0);
 
         //查询魔晶账户
@@ -662,10 +695,55 @@ class Zendesk extends Backend
 
         $this->view->assign(compact('tags', 'ticket', 'comments', 'tickets', 'recentTickets', 'templates','orders','btn'));
         $this->view->assign('rows', $row);
+        $this->view->assign('is_vip', $is_vip);
+        $this->view->assign('ids', $ids);
+        $this->view->assign('status', $status);
+        $this->view->assign('orders_countds', $orders_count);
+        $this->view->assign('recentTickets_count', $recentTickets_count);
         // $this->view->assign('username', $username);
         $this->view->assign('orderUrl',config('zendesk.platform_url')[$ticket->type]);
         return $this->view->fetch();
     }
+    //邮件加载更多
+    public function email_toload_more(){
+        $this->view->engine->layout(false);
+        $data = input();
+
+        $page = $data['page']?$data['page']:1;
+        //获取该用户最新的5条ticket
+        $recentTickets = $this->model
+            ->where(['user_id' => $data['user_id'], 'type' => $data['type']])
+            ->where('id', 'neq', $data['ids'])
+            ->field('ticket_id,id,username,subject,status')
+            ->paginate(5)->toArray();
+
+        $this->assign('recentTickets',$recentTickets['data']);
+        return $this->view->fetch();
+    }
+
+    //订单加载更多
+    public function order_toload_more(){
+        $this->view->engine->layout(false);
+        $data = input();
+        if($data['type'] == 1){
+            $orderModel = new \app\admin\model\order\order\Zeelool;
+        }elseif($data['type'] == 2){
+            $orderModel = new \app\admin\model\order\order\Voogueme;
+        }else{
+            $orderModel = new \app\admin\model\order\order\Nihao;
+        }
+        $page = $data['page']?$data['page']:1;
+        $orders = $orderModel
+            ->where('customer_email',$data['email'])
+            ->order('entity_id desc')
+            ->field('increment_id,created_at,order_currency_code,status,entity_id')
+            ->paginate(5)->toArray();
+        $this->assign('orders',$orders['data']);
+        $this->assign('entity_id',$data['entity_id']);
+        $this->view->assign('orderUrl',config('zendesk.platform_url')[$data['type']]);
+        return $this->view->fetch();
+    }
+
 
     /**
      * 获取邮箱
