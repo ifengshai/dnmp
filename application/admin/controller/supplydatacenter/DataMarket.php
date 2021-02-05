@@ -672,8 +672,8 @@ class DataMarket extends Backend
                 foreach ($order_info as $key=>$value){
                     $arr[$key]['day'] = $value['day_date'];
                     //查询该时间段的订单
-                    $start = strtotime($value);
-                    $end = strtotime($value.' 23:59:59');
+                    $start = strtotime($value['day_date']);
+                    $end = strtotime($value['day_date'].' 23:59:59');
 
                     $where['o.payment_time'] = ['between',[$start,$end]];
                     $map1['p.order_prescription_type'] = 1;
