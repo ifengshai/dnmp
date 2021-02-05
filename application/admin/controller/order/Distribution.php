@@ -1358,7 +1358,6 @@ class Distribution extends Backend
             $data[$value['increment_id']]['payment_time'] = $value['payment_time'];
         }
 
-        dump($data);
         $cat = '0';
         foreach ($data as  $key => &$value) {
             $num =$cat + 2;
@@ -1406,7 +1405,6 @@ class Distribution extends Backend
             $spreadsheet->getActiveSheet()->setCellValue("F" . ($num), $value['status']);//订单状态
 
             foreach ($value['item_order'] as $k=>$v) {
-                dump($v);die();
                 $cat += 2;
                 $spreadsheet->getActiveSheet()->setCellValue("G" . ($cat), $v['item_order_number']); //子单号
                 $spreadsheet->getActiveSheet()->setCellValue("H" . ($cat), $v['sku']); //sku
@@ -1455,7 +1453,7 @@ class Distribution extends Backend
                 //过滤饰品站
                 if ($v['site'] != 12) {
                     //查询镜框尺寸
-                    $tmp_bridge = $this->get_frame_lens_width_height_bridge($v['product_id'], $v['site']);
+                    $tmp_bridge = $this->get_frame_lens_width_height_bridge($v['product_id'], $value['site']);
                 }
 
                 $lens_name = $lens_list[$v['lens_number']] ?: $v['web_lens_name'];
