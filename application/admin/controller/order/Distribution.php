@@ -1346,23 +1346,23 @@ class Distribution extends Backend
                 $spreadsheet->getActiveSheet()->setCellValue("K" . ($k + 3), (float)$v['os_cyl'] > 0 ? ' +' . number_format($v['os_cyl'] * 1, 2) : ' ' . $v['os_cyl']);//CYL
                 $spreadsheet->getActiveSheet()->setCellValue("L" . ($k + 2), $value['od_axis']);//AXI
                 $spreadsheet->getActiveSheet()->setCellValue("L" . ($k + 3), $value['os_axis']);//AXI
-//                $value['os_add'] = urldecode($value['os_add']);
-//                $value['od_add'] = urldecode($value['od_add']);
-//                if ($value['os_add'] && $value['os_add'] && (float)($value['os_add']) * 1 != 0 && (float)($value['od_add']) * 1 != 0) {
-//                    $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 2 + 2), $value['od_add']);//ADD
-//                    $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 2 + 3), $value['os_add']);//ADD
-//                } else {
-//
-//                    if ($value['os_add'] && (float)$value['os_add'] * 1 != 0) {
-//                        //数值在上一行合并有效，数值在下一行合并后为空
-//                        $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 2 + 2), $value['os_add']);
-//                        $spreadsheet->getActiveSheet()->mergeCells("M" . ($key * 2 + 2) . ":M" . ($key * 2 + 3));
-//                    } else {
-//                        //数值在上一行合并有效，数值在下一行合并后为空
-//                        $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 2 + 2), $value['od_add']);
-//                        $spreadsheet->getActiveSheet()->mergeCells("M" . ($key * 2 + 2) . ":M" . ($key * 2 + 3));
-//                    }
-//                }
+                $value['os_add'] = urldecode($value['os_add']);
+                $value['od_add'] = urldecode($value['od_add']);
+                if ($value['os_add'] && $value['os_add'] && (float)($value['os_add']) * 1 != 0 && (float)($value['od_add']) * 1 != 0) {
+                    $spreadsheet->getActiveSheet()->setCellValue("M" . ($k + 2), $value['od_add']);//ADD
+                    $spreadsheet->getActiveSheet()->setCellValue("M" . ($k + 3), $value['os_add']);//ADD
+                } else {
+
+                    if ($value['os_add'] && (float)$value['os_add'] * 1 != 0) {
+                        //数值在上一行合并有效，数值在下一行合并后为空
+                        $spreadsheet->getActiveSheet()->setCellValue("M" . ($k + 2), $value['os_add']);
+                        $spreadsheet->getActiveSheet()->mergeCells("M" . ($k + 2) . ":M" . ($k + 3));
+                    } else {
+                        //数值在上一行合并有效，数值在下一行合并后为空
+                        $spreadsheet->getActiveSheet()->setCellValue("M" . ($k + 2), $value['od_add']);
+                        $spreadsheet->getActiveSheet()->mergeCells("M" . ($k + 2) . ":M" . ($k + 3));
+                    }
+                }
 
 //            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 2 + 2), $value['item_order_number']); //子单号
 //            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 2 + 2), $value['sku']); //sku
@@ -1370,37 +1370,36 @@ class Distribution extends Backend
 //            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 2), $distribution_status_list[$value['distribution_status']]);//子单号状态
 
 
-//            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 2 + 2), $value['pd_r']);//单PD
-//            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 2 + 3), $value['pd_l']);//单PD
-//                $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 2 + 2), $value['pd']);//PD
-//                $spreadsheet->getActiveSheet()->mergeCells("N" . ($key * 2 + 2) . ":N" . ($key * 2 + 3));//PD
-//
-//                //过滤饰品站
-//                if ($value['site'] != 12) {
-//                    //查询镜框尺寸
-//                    $tmp_bridge = $this->get_frame_lens_width_height_bridge($value['product_id'], $value['site']);
-//                }
-//
-//                $lens_name = $lens_list[$value['lens_number']] ?: $value['web_lens_name'];
-//                $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 2 + 2), $lens_name);//镜片
-//                $spreadsheet->getActiveSheet()->setCellValue("P" . ($key * 2 + 2), $tmp_bridge['lens_width']);//镜框宽度
-//                $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 2 + 2), $tmp_bridge['lens_height']);//镜框高度
-//                $spreadsheet->getActiveSheet()->setCellValue("R" . ($key * 2 + 2), $tmp_bridge['bridge']);//bridge
-//                $spreadsheet->getActiveSheet()->setCellValue("S" . ($key * 2 + 2), $value['prescription_type']);//处方类型
-//                $spreadsheet->getActiveSheet()->setCellValue("T" . ($key * 2 + 2), isset($value['od_pv']) ? $value['od_pv'] : '');//Prism
-//                $spreadsheet->getActiveSheet()->setCellValue("T" . ($key * 2 + 3), isset($value['os_pv']) ? $value['os_pv'] : '');//Prism
-//
-//                $spreadsheet->getActiveSheet()->setCellValue("U" . ($key * 2 + 2), isset($value['od_bd']) ? $value['od_bd'] : '');//Direct
-//                $spreadsheet->getActiveSheet()->setCellValue("U" . ($key * 2 + 3), isset($value['os_bd']) ? $value['os_bd'] : '');//Direct
-//
-//                $spreadsheet->getActiveSheet()->setCellValue("V" . ($key * 2 + 2), isset($value['od_pv_r']) ? $value['od_pv_r'] : '');//Prism
-//                $spreadsheet->getActiveSheet()->setCellValue("V" . ($key * 2 + 3), isset($value['os_pv_r']) ? $value['os_pv_r'] : '');//Prism
-//
-//                $spreadsheet->getActiveSheet()->setCellValue("W" . ($key * 2 + 2), isset($value['od_bd_r']) ? $value['od_bd_r'] : '');//Direct
-//                $spreadsheet->getActiveSheet()->setCellValue("W" . ($key * 2 + 3), isset($value['os_bd_r']) ? $value['os_bd_r'] : '');//Direct
-//            }
+            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 2 + 2), $value['pd_r']);//单PD
+            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 2 + 3), $value['pd_l']);//单PD
+                $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 2 + 2), $value['pd']);//PD
+                $spreadsheet->getActiveSheet()->mergeCells("N" . ($key * 2 + 2) . ":N" . ($key * 2 + 3));//PD
 
+                //过滤饰品站
+                if ($value['site'] != 12) {
+                    //查询镜框尺寸
+                    $tmp_bridge = $this->get_frame_lens_width_height_bridge($value['product_id'], $value['site']);
+                }
+
+                $lens_name = $lens_list[$value['lens_number']] ?: $value['web_lens_name'];
+                $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 2 + 2), $lens_name);//镜片
+                $spreadsheet->getActiveSheet()->setCellValue("P" . ($key * 2 + 2), $tmp_bridge['lens_width']);//镜框宽度
+                $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 2 + 2), $tmp_bridge['lens_height']);//镜框高度
+                $spreadsheet->getActiveSheet()->setCellValue("R" . ($key * 2 + 2), $tmp_bridge['bridge']);//bridge
+                $spreadsheet->getActiveSheet()->setCellValue("S" . ($key * 2 + 2), $value['prescription_type']);//处方类型
+                $spreadsheet->getActiveSheet()->setCellValue("T" . ($key * 2 + 2), isset($value['od_pv']) ? $value['od_pv'] : '');//Prism
+                $spreadsheet->getActiveSheet()->setCellValue("T" . ($key * 2 + 3), isset($value['os_pv']) ? $value['os_pv'] : '');//Prism
+
+                $spreadsheet->getActiveSheet()->setCellValue("U" . ($key * 2 + 2), isset($value['od_bd']) ? $value['od_bd'] : '');//Direct
+                $spreadsheet->getActiveSheet()->setCellValue("U" . ($key * 2 + 3), isset($value['os_bd']) ? $value['os_bd'] : '');//Direct
+
+                $spreadsheet->getActiveSheet()->setCellValue("V" . ($key * 2 + 2), isset($value['od_pv_r']) ? $value['od_pv_r'] : '');//Prism
+                $spreadsheet->getActiveSheet()->setCellValue("V" . ($key * 2 + 3), isset($value['os_pv_r']) ? $value['os_pv_r'] : '');//Prism
+
+                $spreadsheet->getActiveSheet()->setCellValue("W" . ($key * 2 + 2), isset($value['od_bd_r']) ? $value['od_bd_r'] : '');//Direct
+                $spreadsheet->getActiveSheet()->setCellValue("W" . ($key * 2 + 3), isset($value['os_bd_r']) ? $value['os_bd_r'] : '');//Direct
             }
+
 
             $spreadsheet->getActiveSheet()->setCellValue("X" . ($num+1), $value['base_grand_total']);//订单金额
             $spreadsheet->getActiveSheet()->setCellValue("Y" . ($num+1), $value['base_currency_code']);//原币种
