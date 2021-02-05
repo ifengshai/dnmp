@@ -1353,16 +1353,24 @@ class Instock extends Backend
 
             //获取表格中sku集合
             $sku_arr = [];
+            $first_sku = trim($data[0][2]);
+            $first_price = trim($data[0][5]);
             foreach ($data as $k => $v) {
                 //获取sku
                 $sku = trim($v[2]);
+                if ($first_sku != $sku){
+                    $this->error(__('导入失败,必须导入同一个sku'));
+                }
+                if ($first_price != trim($v[4])){
+                    $this->error(__('导入失败,同一个sku采购单价必须相同'));
+                }
                 $type = trim($v[0]);
                 $num = trim($v[3]);
                 $code = trim($v[4]);
                 $type != '退货入库' && $this->error(__('导入失败,导入仅限退货入库'));
                 $num != 1 && $this->error(__('导入失败,入库数量必须是1'));
                 empty($sku) && $this->error(__('导入失败,第 ' . ($k + 1) . ' 行SKU为空！'));
-                empty(trim($v[4])) && $this->error(__('导入失败,第 ' . ($k + 1) . ' 行采购单价为空！'));
+                empty(trim($v[5])) && $this->error(__('导入失败,第 ' . ($k + 1) . ' 行采购单价为空！'));
                 $sku_arr[] = $sku;
             }
 
