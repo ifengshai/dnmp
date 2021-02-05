@@ -771,7 +771,7 @@ class PurchaseOrder extends Backend
                                                     //采购单签收
                                                     'change_type' => 24,
                                                     'sku' => $val['sku'],
-                                                    'public_id' => $v['purchase_id'],
+                                                    'public_id' => $row['id'],
                                                     'source' => 1,
                                                     'on_way_stock_before' => ($item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->value('plat_on_way_stock')) ?: 0,
                                                     'on_way_stock_change' => -$stock_num,
@@ -797,7 +797,7 @@ class PurchaseOrder extends Backend
                                                     //采购单签收
                                                     'change_type' => 24,
                                                     'sku' => $val['sku'],
-                                                    'public_id' => $v['purchase_id'],
+                                                    'public_id' => $row['id'],
                                                     'source' => 1,
                                                     'on_way_stock_before' => ($item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->value('plat_on_way_stock')) ?: 0,
                                                     'on_way_stock_change' => -$num,
@@ -821,7 +821,7 @@ class PurchaseOrder extends Backend
                                             //采购单签收
                                             'change_type' => 24,
                                             'sku' => $val['sku'],
-                                            'public_id' => $v['purchase_id'],
+                                            'public_id' => $row['id'],
                                             'source' => 1,
                                             'on_way_stock_before' => ($item->where(['sku' => $val['sku']])->value('on_way_stock')) ?: 0,
                                             'on_way_stock_change' => -$val['purchase_num'],
@@ -888,7 +888,7 @@ class PurchaseOrder extends Backend
                                                         //采购单签收
                                                         'change_type' => 24,
                                                         'sku' => $val['sku'],
-                                                        'public_id' => $v['purchase_id'],
+                                                        'public_id' => $v['id'],
                                                         'source' => 1,
                                                         'on_way_stock_before' => ($item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->value('plat_on_way_stock')) ?: 0,
                                                         'on_way_stock_change' => -$stock_num,
@@ -914,7 +914,7 @@ class PurchaseOrder extends Backend
                                                         //采购单签收
                                                         'change_type' => 24,
                                                         'sku' => $val['sku'],
-                                                        'public_id' => $v['purchase_id'],
+                                                        'public_id' => $v['id'],
                                                         'source' => 1,
                                                         'on_way_stock_before' => ($item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->value('plat_on_way_stock')) ?: 0,
                                                         'on_way_stock_change' => -$num,
@@ -938,7 +938,7 @@ class PurchaseOrder extends Backend
                                                 //采购单签收
                                                 'change_type' => 24,
                                                 'sku' => $val['sku'],
-                                                'public_id' => $v['purchase_id'],
+                                                'public_id' => $v['id'],
                                                 'source' => 1,
                                                 'on_way_stock_before' => ($item->where(['sku' => $val['sku']])->value('on_way_stock')) ?: 0,
                                                 'on_way_stock_change' => -$val['purchase_num'],
