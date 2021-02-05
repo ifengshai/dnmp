@@ -1320,7 +1320,7 @@ class Distribution extends Backend
             }
         }
 
-
+        dump($list);die();
         //获取镜片编码及名称
         $lens_list = $this->_lens_data->column('lens_name', 'lens_number');
 
