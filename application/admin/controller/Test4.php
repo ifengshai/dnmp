@@ -2228,12 +2228,15 @@ class Test4 extends Controller
                 $zemail = Db::name('zendesk_comments')->where('zid',$value['id'])->where('is_admin',0)->field('html_body')->select();
                 foreach ($zemail as $k=>$v){
                     $str = strtolower($v['html_body']);
-                    if(strpos($str,'merge') !== false){
+                    if(strpos($str,'merged') !== false){
                         $data['type'] = 1;
                     }else{
                         $data['type'] = 0;
                     }
-                    Db::name('ceshi')->insert($data);
+                    if($value['ticket_id'] == 276092){
+                        dump($data);exit;
+                    }
+                    //Db::name('ceshi')->insert($data);
                     echo $value['ticket_id'].' is ok '."\n";
                     usleep(10000);
                 }
