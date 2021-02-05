@@ -1353,9 +1353,6 @@ class Distribution extends Backend
             $data[$value['increment_id']]['item_order'][$key]['lens_number'] = $value['lens_number'];
             $data[$value['increment_id']]['item_order'][$key]['web_lens_name'] = $value['web_lens_name'];
             $data[$value['increment_id']]['item_order'][$key]['product_id'] = $value['product_id'];
-
-
-
             $data[$value['increment_id']]['base_grand_total'] = $value['base_grand_total'];
             $data[$value['increment_id']]['base_currency_code'] = $value['base_currency_code'];
             $data[$value['increment_id']]['base_grand_total'] = $value['base_grand_total'];
@@ -1363,6 +1360,7 @@ class Distribution extends Backend
             $data[$value['increment_id']]['payment_time'] = $value['payment_time'];
         }
 
+        dump($data);
         $cat = '0';
         foreach ($data as  $key => &$value) {
             $num =$cat + 2;
@@ -1410,6 +1408,7 @@ class Distribution extends Backend
             $spreadsheet->getActiveSheet()->setCellValue("F" . ($num), $value['status']);//订单状态
 
             foreach ($value['item_order'] as $k=>$v) {
+                dump($v);die();
                 $cat += 2;
                 $spreadsheet->getActiveSheet()->setCellValue("G" . ($cat), $v['item_order_number']); //子单号
                 $spreadsheet->getActiveSheet()->setCellValue("H" . ($cat), $v['sku']); //sku
