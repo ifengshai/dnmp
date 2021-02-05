@@ -918,6 +918,7 @@ class ScmDistribution extends Scm
             Log::write($order_log_order_number);
             Log::write($item_process_info['site']);
             Log::write($node_status);
+            Log::write($check_status);
             if (!empty($node_status)){
                 $site_array = [1,2,3];
                 if (in_array($item_process_info['site'],$site_array)){
