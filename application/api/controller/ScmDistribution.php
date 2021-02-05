@@ -362,8 +362,8 @@ class ScmDistribution extends Scm
                     $val['item_order_number'] == $item_order_number //子单措施未处理:更改镜框18、更改镜片19、取消20
                 )
 
-                // && $this->error(__('有工单未处理，无法操作'), [], 405);
-                && $this->error(__('子订单存在工单' . "<br><b>$coding</b>"), [], 405);
+                    // && $this->error(__('有工单未处理，无法操作'), [], 405);
+                    && $this->error(__('子订单存在工单' . "<br><b>$coding</b>"), [], 405);
                 if ($val['measure_choose_id'] == 21) {
                     // $this->error(__('有工单存在暂缓措施未处理，无法操作'), [], 405);
                     $this->error(__("子订单存在工单" . "<br><b>$coding</b>"), [], 405);
@@ -756,8 +756,8 @@ class ScmDistribution extends Scm
                     $val['item_order_number'] == $item_order_number //子单措施未处理:更改镜框18、更改镜片19、取消20
                 )
 
-                // && $this->error(__('有工单未处理，无法操作'), [], 405);
-                && $this->error(__("子订单存在工单" . "<br><b>$codings</b>"), [], 405);
+                    // && $this->error(__('有工单未处理，无法操作'), [], 405);
+                    && $this->error(__("子订单存在工单" . "<br><b>$codings</b>"), [], 405);
 
                 if ($val['measure_choose_id'] == 21) {
                     $this->error(__("子订单存在工单" . "<br><b>$codings</b>"), [], 405);
@@ -1397,11 +1397,17 @@ class ScmDistribution extends Scm
                     $outstock_item['out_stock_id'] = $outstock_id;
                     $this->_outstock_item->insert($outstock_item);
 
+
+
                     //条码出库
                     $this->_product_bar_code_item
                     ->allowField(true)
                     ->isUpdate(true, ['item_order_number' => $item_order_number])
                     ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2,'out_stock_id' => $outstock_id]);
+
+                    //计算出库成本
+                    $financecost = new \app\admin\model\finance\FinanceCost();
+                    $financecost->outstock_cost($outstock_id, $outstock['out_stock_number']);
 
                     //扣减虚拟仓库存
                     $this->_item_platform_sku
@@ -1514,7 +1520,7 @@ class ScmDistribution extends Scm
             ->select();
         if ($check_work_order) {
             foreach ($check_work_order as $key => $value) {
-                if ($value['item_order_number'] == $item_order_number) {//判断是否是当前工单含有未完成的工单，是的话提示语包含库位
+                if ($value['item_order_number'] == $item_order_number) { //判断是否是当前工单含有未完成的工单，是的话提示语包含库位
                     $this->error(__("子订单存在工单" . "<br><b>$codeing</b>"), [], 405);
                 }
             }
@@ -2341,11 +2347,18 @@ class ScmDistribution extends Scm
                             $outstock_item['out_stock_id'] = $outstock_id;
                             $this->_outstock_item->insert($outstock_item);
 
+
+
                             //条码出库
                             $this->_product_bar_code_item
                             ->allowField(true)
                             ->isUpdate(true, ['item_order_number' => ['in', $item_order_numbers]])
                             ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2,'out_stock_id' => $outstock_id]);
+
+                            //计算出库成本
+                            $financecost = new \app\admin\model\finance\FinanceCost();
+                            $financecost->outstock_cost($outstock_id, $outstock['out_stock_number']);
+
                             //扣减虚拟仓库存
                             $this->_item_platform_sku
                                 ->where(['sku' => $true_sku, 'platform_type' => $value['site']])
