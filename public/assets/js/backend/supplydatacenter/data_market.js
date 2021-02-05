@@ -187,13 +187,6 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                                         formatter: '{value} %'
                                     }
                                 },
-                                {
-                                    type: 'value',
-                                    name: '平均及时率',
-                                    axisLabel: {
-                                        formatter: '{value} %'
-                                    }
-                                }
                             ],
                         }
                     };
