@@ -490,7 +490,8 @@ class ScmDistribution extends Scm
             6 => [
                 ['id' => 1, 'name' => '加工调整', 'reason' => [['id' => 1, 'name' => '划伤'], ['id' => 2, 'name' => '断裂'], ['id' => 3, 'name' => '杂质'], ['id' => 4, 'name' => '黑点'], ['id' => 5, 'name' => '掉漆'], ['id' => 6, 'name' => '镜架凸起']]],
                 ['id' => 2, 'name' => '镜架报损'],
-                ['id' => 3, 'name' => '镜片报损', 'reason' => [['id' => 1, 'name' => '划伤'], ['id' => 2, 'name' => '轴位错'], ['id' => 3, 'name' => '左右反'], ['id' => 4, 'name' => '不变色'], ['id' => 5, 'name' => '崩边'], ['id' => 6, 'name' => '配错片']]],
+                // ['id' => 3, 'name' => '镜片报损', 'reason' => [['id' => 1, 'name' => '划伤'], ['id' => 2, 'name' => '轴位错'], ['id' => 3, 'name' => '左右反'], ['id' => 4, 'name' => '不变色'], ['id' => 5, 'name' => '崩边'], ['id' => 6, 'name' => '配错片']]],
+                ['id' => 3, 'name' => '镜片报损'],
                 ['id' => 4, 'name' => 'logo调整']
             ],
             7 => [
@@ -677,8 +678,6 @@ class ScmDistribution extends Scm
             ->field('id,item_order_number,distribution_status,order_prescription_type,option_id,order_id,site,customize_status,temporary_house_id,abnormal_house_id,magento_order_id')
             ->where('item_order_number', $item_order_number)
             ->find();
-        Log::write("我江浩辉,宇宙第一帅");
-        Log::write($item_process_info);
         //获取子订单处方数据
         $item_option_info = $this->_new_order_item_option
             ->field('is_print_logo,sku,index_name')
@@ -782,7 +781,8 @@ class ScmDistribution extends Scm
         try {
             //下一步提示信息及状态
             if (2 == $check_status) {
-
+                //配货完成
+                $node_status = 3;
                 /**************工单更换镜框******************/
                 //查询更改镜框最新信息
                 $change_sku = $this->_work_order_change_sku
@@ -853,12 +853,13 @@ class ScmDistribution extends Scm
                     }
                 }
             } elseif (3 == $check_status) {
-                $node_status = 3;
+                //配镜片完成
+                $node_status = 4;
                 $save_status = 4;
             } elseif (4 == $check_status) {
                 if ($item_option_info['is_print_logo']) {
                     //需要印logo
-                    $node_status = 4;
+                    $node_status = 5;
                     $save_status = 5;
                 } else {
                     //无需印logo
@@ -866,12 +867,12 @@ class ScmDistribution extends Scm
                     $save_status = 6;
                 }
             } elseif (5 == $check_status) {
-                //印logo完成
-                $node_status = 5;
+                //印logo完成 质检中
+                $node_status = 6;
                 $save_status = 6;
             } elseif (6 == $check_status) {
-                //质检完成
-                $node_status = 6;
+                //质检完成 已出库
+                $node_status = 7;
                 if ($total_qty_ordered > 1) {
                     $save_status = 7;
                 } else {
@@ -917,10 +918,13 @@ class ScmDistribution extends Scm
             Log::write($order_log_order_number);
             Log::write($item_process_info['site']);
             Log::write($node_status);
-            $site_array = [1,2,3];
-            if (in_array($item_process_info['site'],$site_array)){
-                Log::write('5555555');
-                Order::rulesto_adjust($item_process_info['magento_order_id'],$order_log_order_number,$item_process_info['site'],2,$node_status);
+            Log::write($check_status);
+            if (!empty($node_status)){
+                $site_array = [1,2,3];
+                if (in_array($item_process_info['site'],$site_array)){
+                    Log::write('5555555');
+                    Order::rulesto_adjust($item_process_info['magento_order_id'],$order_log_order_number,$item_process_info['site'],2,$node_status);
+                }
             }
 
             $this->_item->commit();
