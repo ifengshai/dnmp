@@ -1309,8 +1309,8 @@ class Distribution extends Backend
             $value['os_cyl'] = isset($value['os_cyl']) ? urldecode($value['os_cyl']) : '';
             $spreadsheet->getActiveSheet()->setCellValue("A" . ($num+1 ),$value['id']);//id
             $spreadsheet->getActiveSheet()->setCellValue("B" . ($num+1 ), date('Y-m-d', $value['created_at']));//日期
-            $spreadsheet->getActiveSheet()->setCellValue("C" . ($num +1), $value['increment_id']);//订单号
-            $spreadsheet->getActiveSheet()->setCellValue("D" . ($num +1), $site_list[$value['site']]);//站点
+            $spreadsheet->getActiveSheet()->setCellValue("C" . ($num+1), $value['increment_id']);//订单号
+            $spreadsheet->getActiveSheet()->setCellValue("D" . ($num+1), $site_list[$value['site']]);//站点
             switch ($value['order_type']){
                 case 1:
                     $value['order_type'] = '普通订单';
@@ -1331,11 +1331,11 @@ class Distribution extends Backend
                     $value['order_type'] = '一件代发';
                     break;
             }
-            $spreadsheet->getActiveSheet()->setCellValue("E" . ($num+1), $value['order_type']);//订单类型
-            $spreadsheet->getActiveSheet()->setCellValue("F" . ($num+1), $value['status']);//订单状态
+            $spreadsheet->getActiveSheet()->setCellValue("E" . ($num+2), $value['order_type']);//订单类型
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($num+2), $value['status']);//订单状态
 
             foreach ($value['item_order'] as $k=>$v) {
-                $cat += 1;
+                $cat += 2;
                 $spreadsheet->getActiveSheet()->setCellValue("G" . ($k + 2), $v['item_order_number']); //子单号
                 $spreadsheet->getActiveSheet()->setCellValue("H" . ($k + 2), $v['sku']); //sku
                 $spreadsheet->getActiveSheet()->setCellValue("I" . ($k + 2), '右眼');//眼球
@@ -1370,10 +1370,10 @@ class Distribution extends Backend
 //            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 2 + 2), $distribution_status_list[$value['distribution_status']]);//子单号状态
 
 
-            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 2 + 2), $value['pd_r']);//单PD
-            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 2 + 3), $value['pd_l']);//单PD
-                $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 2 + 2), $value['pd']);//PD
-                $spreadsheet->getActiveSheet()->mergeCells("N" . ($key * 2 + 2) . ":N" . ($key * 2 + 3));//PD
+            $spreadsheet->getActiveSheet()->setCellValue("L" . ($k + 2), $value['pd_r']);//单PD
+            $spreadsheet->getActiveSheet()->setCellValue("L" . ($k + 3), $value['pd_l']);//单PD
+                $spreadsheet->getActiveSheet()->setCellValue("N" . ($k + 2), $value['pd']);//PD
+                $spreadsheet->getActiveSheet()->mergeCells("N" . ($k + 2) . ":N" . ($k + 3));//PD
 
                 //过滤饰品站
                 if ($value['site'] != 12) {
@@ -1382,22 +1382,22 @@ class Distribution extends Backend
                 }
 
                 $lens_name = $lens_list[$value['lens_number']] ?: $value['web_lens_name'];
-                $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 2 + 2), $lens_name);//镜片
-                $spreadsheet->getActiveSheet()->setCellValue("P" . ($key * 2 + 2), $tmp_bridge['lens_width']);//镜框宽度
-                $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 2 + 2), $tmp_bridge['lens_height']);//镜框高度
-                $spreadsheet->getActiveSheet()->setCellValue("R" . ($key * 2 + 2), $tmp_bridge['bridge']);//bridge
-                $spreadsheet->getActiveSheet()->setCellValue("S" . ($key * 2 + 2), $value['prescription_type']);//处方类型
-                $spreadsheet->getActiveSheet()->setCellValue("T" . ($key * 2 + 2), isset($value['od_pv']) ? $value['od_pv'] : '');//Prism
-                $spreadsheet->getActiveSheet()->setCellValue("T" . ($key * 2 + 3), isset($value['os_pv']) ? $value['os_pv'] : '');//Prism
+                $spreadsheet->getActiveSheet()->setCellValue("O" . ($k + 2), $lens_name);//镜片
+                $spreadsheet->getActiveSheet()->setCellValue("P" . ($k + 2), $tmp_bridge['lens_width']);//镜框宽度
+                $spreadsheet->getActiveSheet()->setCellValue("Q" . ($k + 2), $tmp_bridge['lens_height']);//镜框高度
+                $spreadsheet->getActiveSheet()->setCellValue("R" . ($k + 2), $tmp_bridge['bridge']);//bridge
+                $spreadsheet->getActiveSheet()->setCellValue("S" . ($k + 2), $value['prescription_type']);//处方类型
+                $spreadsheet->getActiveSheet()->setCellValue("T" . ($k + 2), isset($value['od_pv']) ? $value['od_pv'] : '');//Prism
+                $spreadsheet->getActiveSheet()->setCellValue("T" . ($k + 2), isset($value['os_pv']) ? $value['os_pv'] : '');//Prism
 
-                $spreadsheet->getActiveSheet()->setCellValue("U" . ($key * 2 + 2), isset($value['od_bd']) ? $value['od_bd'] : '');//Direct
-                $spreadsheet->getActiveSheet()->setCellValue("U" . ($key * 2 + 3), isset($value['os_bd']) ? $value['os_bd'] : '');//Direct
+                $spreadsheet->getActiveSheet()->setCellValue("U" . ($k + 2), isset($value['od_bd']) ? $value['od_bd'] : '');//Direct
+                $spreadsheet->getActiveSheet()->setCellValue("U" . ($k + 3), isset($value['os_bd']) ? $value['os_bd'] : '');//Direct
 
-                $spreadsheet->getActiveSheet()->setCellValue("V" . ($key * 2 + 2), isset($value['od_pv_r']) ? $value['od_pv_r'] : '');//Prism
-                $spreadsheet->getActiveSheet()->setCellValue("V" . ($key * 2 + 3), isset($value['os_pv_r']) ? $value['os_pv_r'] : '');//Prism
+                $spreadsheet->getActiveSheet()->setCellValue("V" . ($k + 2), isset($value['od_pv_r']) ? $value['od_pv_r'] : '');//Prism
+                $spreadsheet->getActiveSheet()->setCellValue("V" . ($k + 3), isset($value['os_pv_r']) ? $value['os_pv_r'] : '');//Prism
 
-                $spreadsheet->getActiveSheet()->setCellValue("W" . ($key * 2 + 2), isset($value['od_bd_r']) ? $value['od_bd_r'] : '');//Direct
-                $spreadsheet->getActiveSheet()->setCellValue("W" . ($key * 2 + 3), isset($value['os_bd_r']) ? $value['os_bd_r'] : '');//Direct
+                $spreadsheet->getActiveSheet()->setCellValue("W" . ($k + 2), isset($value['od_bd_r']) ? $value['od_bd_r'] : '');//Direct
+                $spreadsheet->getActiveSheet()->setCellValue("W" . ($k + 3), isset($value['os_bd_r']) ? $value['os_bd_r'] : '');//Direct
             }
 
 
