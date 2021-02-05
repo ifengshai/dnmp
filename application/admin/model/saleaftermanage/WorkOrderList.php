@@ -2019,7 +2019,8 @@ class WorkOrderList extends Model
             }
             //更改镜框/或镜片子单定制片库位和状态处理（镜框不需要回退，之前处理库存的时候回退过）
             if (19 == $measure_choose_id || 20 == $measure_choose_id) {
-                $this->back_frame_and_lens($measure_choose_id,$work_id,$work->platform_order);
+                $item_order_number = $_work_order_measure->where('id',$measure_id)->value('item_order_number');
+                $this->back_frame_and_lens($measure_choose_id,$work_id,$work->platform_order,$item_order_number);
             }
             //子单取消处理完成后要判断订单中剩余子订单是否都是合单中状态
             if (18 == $measure_choose_id) {
@@ -2549,23 +2550,31 @@ class WorkOrderList extends Model
     /*
      * 更改镜片和镜框回退状态
      * */
-    public function back_frame_and_lens($measure_choose_id,$work_id,$platform_order){
+    public function back_frame_and_lens($measure_choose_id,$work_id,$platform_order,$item_order_number){
         $work_order_change_sku = new WorkOrderChangeSku();
         if ($measure_choose_id == 19) {//镜架
-            $info = $work_order_change_sku->field('id,item_order_number')->where(['work_id' => $work_id,'change_type' => 1])->select();
+            $info = $work_order_change_sku->field('id,item_order_number')->where(['work_id' => $work_id,'change_type' => 1,'item_order_number' => $item_order_number])->select();
             $distribution_status = 2;
         }
         
         if ($measure_choose_id == 20) {//镜片
-            $info = $work_order_change_sku->field('id,item_order_number')->where(['work_id' => $work_id,'change_type' => 2])->select();
+            $info = $work_order_change_sku->field('id,item_order_number')->where(['work_id' => $work_id,'change_type' => 2,'item_order_number' => $item_order_number])->select();
             $distribution_status = 3;
         }
 
         foreach ($info as $key => $value) {
-            $this->clear_house_id($value['item_order_number']);//清理掉定制片暂存库位
+            //$this->clear_house_id($value['item_order_number']);//清理掉定制片暂存库位
             $_new_order_process = new NewOrderItemProcess();
             $product_bar_code_item = new ProductBarCodeItem();
             $distribution_status_now = $_new_order_process->where(['item_order_number' => $value['item_order_number']])->value('distribution_status');
+            $order_prescription_type = $_new_order_process->where(['item_order_number' => $value['item_order_number']])->value('order_prescription_type');
+            if ($order_prescription_type == 3) {
+                //子订单释放定制片库位号
+                $result = $_new_order_process
+                    ->allowField(true)
+                    ->isUpdate(true, ['item_order_number' => $value['item_order_number']])
+                    ->save(['temporary_house_id' => 0, 'customize_status' => 0]);
+            }
             if ($distribution_status_now > $distribution_status) {//在待配镜片或者带配货之后
                 //回退到待配货，解绑条形码
                 if (2 == $distribution_status) {
@@ -2657,8 +2666,11 @@ class WorkOrderList extends Model
         $flag = 1;
         foreach ($item_order_number_diff as $key => $value) {
            $distribution_status = $_new_order_item_process->where(['item_order_number' => $value])->value('distribution_status');
+           $order_prescription_type = $_new_order_item_process->where(['item_order_number' => $value])->value('order_prescription_type');
            if ($distribution_status != 8) {
-               $flag = 0;
+                if ($distribution_status != 7 && $order_prescription_type != 1) {
+                    $flag = 0;
+                }
            }
         }
         if ($flag) {
