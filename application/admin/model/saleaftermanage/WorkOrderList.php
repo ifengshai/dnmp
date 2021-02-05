@@ -2668,9 +2668,7 @@ class WorkOrderList extends Model
            $distribution_status = $_new_order_item_process->where(['item_order_number' => $value])->value('distribution_status');
            $order_prescription_type = $_new_order_item_process->where(['item_order_number' => $value])->value('order_prescription_type');
            if ($distribution_status != 8) {
-                if ($distribution_status != 7 && $order_prescription_type != 1) {
-                    $flag = 0;
-                }
+                $flag = 0;
            }
         }
         if ($flag) {
