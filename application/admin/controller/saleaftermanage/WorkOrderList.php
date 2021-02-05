@@ -3231,11 +3231,22 @@ class WorkOrderList extends Backend
                 }
                 if ($result !== false) {
                     if (19 == $measure_choose_id || 18 == $measure_choose_id) {
+                        switch ($measure_choose_id) {
+                            case 18://子单取消
+                                $change_type = 3;
+                                break;
+                            
+                            case 19://更改镜框
+                                $change_type = 1;
+                                break;
+                        }
                         //更改镜框解绑子单所绑定的条形码
                         $ProductBarCodeItem = new ProductBarCodeItem();
                         //查询子单号
-                        $item_order_number = $this->order_change->where(['work_id' => $receptInfo['work_id'],'change_type' => 1])->value('item_order_number');
-                        $ProductBarCodeItem->where(['item_order_number'=>$item_order_number])->update(['item_order_number' => '','library_status' => 1,'out_stock_time' => '','out_stock_id' => 0]);
+                        $item_order_number = $this->order_change->where(['work_id' => $receptInfo['work_id'],'change_type' => $change_type])->value('item_order_number');
+                        if (!empty($item_order_number)) {
+                            $ProductBarCodeItem->where(['item_order_number'=>$item_order_number])->update(['item_order_number' => '','library_status' => 1,'out_stock_time' => '','out_stock_id' => 0]);
+                        }
                     }
                     $this->success();
                 } else {
