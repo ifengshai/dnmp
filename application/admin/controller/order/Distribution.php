@@ -1142,10 +1142,10 @@ class Distribution extends Backend
 
         $sort = 'a.id';
 
+
         $list = $this->model
             ->alias('a')
-            ->field('a.id as aid,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.total_qty_ordered,b.site,a.distribution_status,a.created_at,c.*,b.base_grand_total,
-            b.order_currency_code,b.payment_time,b.base_currency_code,b.payment_method,b.status,b.payment_time')
+            ->field('a.id as aid,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.total_qty_ordered,b.site,a.distribution_status,a.created_at,c.*,b.base_grand_total,b.order_type,b.base_currency_code,b.')
             ->join(['fa_order' => 'b'], 'a.order_id=b.id')
             ->join(['fa_order_item_option' => 'c'], 'a.option_id=c.id')
             ->where($where)
@@ -1154,7 +1154,7 @@ class Distribution extends Backend
             ->select();
         $list = collection($list)->toArray();
 
-        dump($list);die();
+
         //从数据库查询需要的数据
         $spreadsheet = new Spreadsheet();
 
@@ -1253,6 +1253,7 @@ class Distribution extends Backend
             }
         }
 
+
         //获取镜片编码及名称
         $lens_list = $this->_lens_data->column('lens_name', 'lens_number');
 
@@ -1284,6 +1285,7 @@ class Distribution extends Backend
             $data[$value['increment_id']]['item_order'][$key]['os_bd_r'] = $value['os_bd_r'];
             $data[$value['increment_id']]['item_order'][$key]['lens_number'] = $value['lens_number'];
             $data[$value['increment_id']]['item_order'][$key]['web_lens_name'] = $value['web_lens_name'];
+            $data[$value['increment_id']]['item_order'][$key]['product_id'] = $value['product_id'];
 
 
 
