@@ -490,7 +490,8 @@ class ScmDistribution extends Scm
             6 => [
                 ['id' => 1, 'name' => '加工调整', 'reason' => [['id' => 1, 'name' => '划伤'], ['id' => 2, 'name' => '断裂'], ['id' => 3, 'name' => '杂质'], ['id' => 4, 'name' => '黑点'], ['id' => 5, 'name' => '掉漆'], ['id' => 6, 'name' => '镜架凸起']]],
                 ['id' => 2, 'name' => '镜架报损'],
-                ['id' => 3, 'name' => '镜片报损', 'reason' => [['id' => 1, 'name' => '划伤'], ['id' => 2, 'name' => '轴位错'], ['id' => 3, 'name' => '左右反'], ['id' => 4, 'name' => '不变色'], ['id' => 5, 'name' => '崩边'], ['id' => 6, 'name' => '配错片']]],
+                // ['id' => 3, 'name' => '镜片报损', 'reason' => [['id' => 1, 'name' => '划伤'], ['id' => 2, 'name' => '轴位错'], ['id' => 3, 'name' => '左右反'], ['id' => 4, 'name' => '不变色'], ['id' => 5, 'name' => '崩边'], ['id' => 6, 'name' => '配错片']]],
+                ['id' => 3, 'name' => '镜片报损'],
                 ['id' => 4, 'name' => 'logo调整']
             ],
             7 => [
@@ -2625,7 +2626,7 @@ class ScmDistribution extends Scm
                 }
             }
         } else {
-            if (999 != $check_refuse && $check_status == 2) {
+            if (999 != $check_refuse) {
                 foreach ($item_ids as $key => $value) {
                     $item_numbers = $this->_new_order_item_process->where(['id' => $value])->column('item_order_number');
                     DistributionLog::record((object)['nickname' => $create_person], [$item_ids[$key]], 8, '主单ID' . $row['order_id'] . $msg . '成功' . $msg_info_l . $item_numbers[0] . $msg_info_r);
