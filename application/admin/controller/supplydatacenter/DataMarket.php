@@ -666,22 +666,23 @@ class DataMarket extends Backend
             $cache_data = Cache::get('Supplydatacenter_datamarket'  .$time_str. md5(serialize('order_histogram_line')));
             if (!$cache_data) {
                 $createat = explode(' ', $time_str);
-                $date = $this->getDateFromRange($createat[0],$createat[3]);
+                $map['day_date'] = ['between',[$createat[0],$createat[3]]];
+                $order_info = Db::name('datacenter_day_order')->where($map)->select();
                 $arr = array();
-                foreach ($date as $key=>$value){
-                    $arr[$key]['day'] = $value;
+                foreach ($order_info as $key=>$value){
+                    $arr[$key]['day'] = $value['day_date'];
                     //查询该时间段的订单
                     $start = strtotime($value);
                     $end = strtotime($value.' 23:59:59');
 
-                    $where['o.payment_time'] = $flag['payment_time'] = ['between',[$start,$end]];
+                    $where['o.payment_time'] = ['between',[$start,$end]];
                     $map1['p.order_prescription_type'] = 1;
                     $map2['p.order_prescription_type'] = 2;
                     $map3['p.order_prescription_type'] = 3;
-                    $where['o.status'] = $flag['status'] = ['in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+                    $where['o.status'] = ['in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
 
                     //订单数量
-                    $arr[$key]['order_count'] = $this->order->where($flag)->count();
+                    $arr[$key]['order_count'] = $value['order_num'];
                     $sql1 = $this->process->alias('p')->join('fa_order o','p.increment_id = o.increment_id')->field('(p.delivery_time-o.payment_time)/3600 AS total')->where($where)->where($map1)->group('p.order_id')->buildSql();
                     $count1 = $this->process->table([$sql1=>'t2'])->value('sum( IF ( total <= 24, 1, 0) ) AS a');
 
