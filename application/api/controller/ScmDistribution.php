@@ -25,6 +25,7 @@ use app\admin\model\warehouse\ProductBarCodeItem;
 use app\admin\model\order\order\LensData;
 use app\admin\model\saleaftermanage\WorkOrderList;
 use app\admin\model\finance\FinanceCost;
+use Think\Log;
 
 
 /**
@@ -673,7 +674,7 @@ class ScmDistribution extends Scm
 
         //获取子订单数据
         $item_process_info = $this->_new_order_item_process
-            ->field('id,distribution_status,order_prescription_type,option_id,order_id,site,customize_status,temporary_house_id,abnormal_house_id')
+            ->field('id,item_order_number,distribution_status,order_prescription_type,option_id,order_id,site,customize_status,temporary_house_id,abnormal_house_id,magento_order_id')
             ->where('item_order_number', $item_order_number)
             ->find();
 
@@ -851,16 +852,25 @@ class ScmDistribution extends Scm
                     }
                 }
             } elseif (3 == $check_status) {
+                $node_status = 3;
                 $save_status = 4;
             } elseif (4 == $check_status) {
                 if ($item_option_info['is_print_logo']) {
+                    //需要印logo
+                    $node_status = 4;
                     $save_status = 5;
                 } else {
+                    //无需印logo
+                    $node_status = 13;
                     $save_status = 6;
                 }
             } elseif (5 == $check_status) {
+                //印logo完成
+                $node_status = 5;
                 $save_status = 6;
             } elseif (6 == $check_status) {
+                //质检完成
+                $node_status = 6;
                 if ($total_qty_ordered > 1) {
                     $save_status = 7;
                 } else {
@@ -899,7 +909,15 @@ class ScmDistribution extends Scm
                 ];
                 $back_msg = $next_step[$save_status];
             }
+            //将订单号截取处理
+            $order_log_order_number =  substr($item_order_number['item_order_number'],0,strpos($item_order_number['item_order_number'], '-'));
+            Log::write("我江浩辉,宇宙第一帅");
+            Log::write($item_process_info['magento_order_id']);
+            Log::write($order_log_order_number);
+            Log::write($item_process_info['site']);
+            Log::write($node_status);
 
+//            Order::rulesto_adjust($item_process_info['magento_order_id'],$order_log_order_number,$item_process_info['site'],2,$node_status);
             $this->_item->commit();
             $this->_stock_log->commit();
             $this->_new_order_process->commit();
