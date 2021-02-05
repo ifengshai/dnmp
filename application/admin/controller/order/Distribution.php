@@ -1212,7 +1212,7 @@ class Distribution extends Backend
 
         $list = $this->model
             ->alias('a')
-            ->field('a.id as aid,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.status,b.total_qty_ordered,b.site,a.distribution_status,a.created_at,c.*,b.base_grand_total,b.order_type,b.base_currency_code,b.payment_time')
+            ->field('a.id as aid,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.status,b.total_qty_ordered,b.site,a.distribution_status,a.created_at,c.*,b.base_grand_total,b.order_type,b.base_currency_code,b.payment_time,b.payment_method')
             ->join(['fa_order' => 'b'], 'a.order_id=b.id')
             ->join(['fa_order_item_option' => 'c'], 'a.option_id=c.id')
             ->where($where)
