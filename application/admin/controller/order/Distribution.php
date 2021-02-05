@@ -1212,7 +1212,7 @@ class Distribution extends Backend
 
         $list = $this->model
             ->alias('a')
-            ->field('a.id as aid,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.status,b.total_qty_ordered,b.site,a.distribution_status,a.created_at,c.*,b.base_grand_total,b.order_type,b.base_currency_code')
+            ->field('a.id as aid,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.status,b.total_qty_ordered,b.site,a.distribution_status,a.created_at,c.*,b.base_grand_total,b.order_type,b.base_currency_code,b.payment_time')
             ->join(['fa_order' => 'b'], 'a.order_id=b.id')
             ->join(['fa_order_item_option' => 'c'], 'a.option_id=c.id')
             ->where($where)
@@ -1484,11 +1484,11 @@ class Distribution extends Backend
             }
 
 
-            $spreadsheet->getActiveSheet()->setCellValue("X" . ($num), $v['base_grand_total']);//订单金额
-            $spreadsheet->getActiveSheet()->setCellValue("Y" . ($num), $v['base_currency_code']);//原币种
-            $spreadsheet->getActiveSheet()->setCellValue("Z" . ($num), $v['base_grand_total']);//原支付金额
-            $spreadsheet->getActiveSheet()->setCellValue("AA" . ($num), $v['payment_method']);//支付方式
-            $spreadsheet->getActiveSheet()->setCellValue("AB" . ($num),  date('Y-m-d', $v['payment_time']));//订单支付时间
+            $spreadsheet->getActiveSheet()->setCellValue("X" . ($num), $value['base_grand_total']);//订单金额
+            $spreadsheet->getActiveSheet()->setCellValue("Y" . ($num), $value['base_currency_code']);//原币种
+            $spreadsheet->getActiveSheet()->setCellValue("Z" . ($num), $value['base_grand_total']);//原支付金额
+            $spreadsheet->getActiveSheet()->setCellValue("AA" . ($num), $value['payment_method']);//支付方式
+            $spreadsheet->getActiveSheet()->setCellValue("AB" . ($num),  date('Y-m-d', $value['payment_time']));//订单支付时间
 
             //合并单元格
 
