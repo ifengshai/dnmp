@@ -1261,12 +1261,11 @@ class Instock extends Backend
     }
 
     /**
-     * 入库单批量导入
-     *
+     * 入库单批量导入 适应pda最新版本的
      * Created by Phpstorm.
      * User: jhh
-     * Date: 2020/9/24
-     * Time: 14:00:16
+     * Date: 2021/2/5
+     * Time: 14:03:22
      */
     public function import()
     {
@@ -1274,15 +1273,12 @@ class Instock extends Backend
         $_item = new \app\admin\model\warehouse\InstockItem();
         $_platform = new \app\admin\model\itemmanage\ItemPlatformSku();
         $this->_product_bar_code_item = new ProductBarCodeItem();
-
         //校验参数空值
         $file = $this->request->request('file');
         !$file && $this->error(__('Parameter %s can not be empty', 'file'));
-
         //校验文件路径
         $filePath = ROOT_PATH . DS . 'public' . DS . $file;
         !is_file($filePath) && $this->error(__('No results were found'));
-
         //实例化reader
         $ext = pathinfo($filePath, PATHINFO_EXTENSION);
         !in_array($ext, ['csv', 'xls', 'xlsx']) && $this->error(__('Unknown data format'));
@@ -1312,7 +1308,6 @@ class Instock extends Backend
         } else {
             $reader = new Xlsx();
         }
-
         $this->model->startTrans();
         $_item->startTrans();
         $this->_product_bar_code_item->startTrans();
@@ -1335,9 +1330,7 @@ class Instock extends Backend
                     }
                 }
             }
-
             //校验模板文件格式
-            // $listName = ['商品SKU', '类型', '补货需求数量'];
             $listName = ['入库分类', '平台', 'SKU', '入库数量', '商品条码','采购单价'];
 
             $listName !== $fields && $this->error(__('模板文件格式错误！'));
@@ -1350,7 +1343,6 @@ class Instock extends Backend
                 }
             }
             empty($data) && $this->error('表格数据为空！');
-
             //获取表格中sku集合
             $sku_arr = [];
             $first_sku = trim($data[0][2]);
@@ -1373,15 +1365,12 @@ class Instock extends Backend
                 empty(trim($v[5])) && $this->error(__('导入失败,第 ' . ($k + 1) . ' 行采购单价为空！'));
                 $sku_arr[] = $sku;
             }
-
-
             $sku_code = array_column($data, '4');
             $plat = array_column($data, '1');
             //检测条形码是否重复
             if (count($data) != count(array_unique($sku_code)))  $this->error(__(' 条形码有重复，请检查'));
             //校验一个入库单只能有一个站点
             if  (1 != count(array_unique($plat)))  $this->error(__('一个入库单只能有一个站点'));
-
             //检测条形码是否已绑定
             $where['in_stock_id'] = [['>', 0]];
             $where['code'] = ['in', $sku_code];
@@ -1392,7 +1381,6 @@ class Instock extends Backend
             if (!empty($check_quantity['code'])) {
                 $this->error(__('条形码:' . $check_quantity['code'] . ' 已绑定,请移除'));
             }
-
             //获取入库平台
             $out_plat = $data[0][1];
             switch (trim($out_plat)) {
@@ -1425,9 +1413,6 @@ class Instock extends Backend
                 default:
                     $this->error(__('请检查表格中调出仓的名称'));
             };
-            $instock_type = Db::name('in_stock_type')->where('is_del', 1)->field('id,name')->select();
-            $instock_type = array_column(collection($instock_type)->toArray(), 'id', 'name');
-
             //插入一条数据到入库单主表
             $transfer_order['in_stock_number'] = 'IN' . date('YmdHis') . rand(100, 999) . rand(100, 999);
             $transfer_order['type_id'] = 3;
@@ -1436,13 +1421,11 @@ class Instock extends Backend
             $transfer_order['createtime'] = date('Y-m-d H:i:s');
             $transfer_order['create_person'] = session('admin.nickname');
             $transfer_order_id = $this->model->insertGetId($transfer_order);
-
             //批量导入
             $params = [];
             foreach ($data as $v) {
                 //获取sku
                 $sku = trim($v[2]);
-
                 //更新条形码数据库
                 $save_code_data['in_stock_id'] = $transfer_order_id;
                 $save_code_data['sku'] = $sku;
@@ -1450,15 +1433,12 @@ class Instock extends Backend
                 if ($res == false){
                     $this->error(__('导入失败,条码 ' . trim($v[4]) .'更新失败！'));
                 }
-
                 //校验当前平台是否存在此sku映射关系
                 if (empty($_platform->where(['platform_type' => $out_label, 'sku' => $sku])->find())) {
                     $this->model->where('id', $transfer_order_id)->delete() && $this->error(__('导入失败,商品 ' . $sku . '在' . $out_plat . ' 平台没有映射关系！'));
                 }
-
                 //获取入库数量
                 $replenish_num = 1;
-
                 //拼接参数 插入入库单详情表中
                 if ($params[$sku]){
                     $params[$sku]['in_stock_num'] += $replenish_num;
@@ -1470,11 +1450,8 @@ class Instock extends Backend
                         'in_stock_id' => $transfer_order_id,
                     ];
                 }
-
             }
-            // dump($params);die;
             $_item->insertAll($params);
-
             $this->model->commit();
             $_item->commit();
             $this->_product_bar_code_item->commit();
