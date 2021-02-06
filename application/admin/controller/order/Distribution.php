@@ -1866,6 +1866,8 @@ class Distribution extends Backend
             foreach ($item_list as $value) {
                 //下一步状态
                 if (2 == $check_status) {
+                    //配货完成
+                    $node_status = 3;
                     //根据处方类型字段order_prescription_type(现货处方镜、定制处方镜)判断是否需要配镜片
                     if (in_array($value['order_prescription_type'], [2, 3])) {
                         $save_status = 3;
@@ -1911,11 +1913,13 @@ class Distribution extends Backend
                         'create_time' => time()
                     ]);
                 } elseif (3 == $check_status) {
-                    $node_status = 3;
+                    //配镜片完成
+                    $node_status = 4;
                     if (in_array($value['order_prescription_type'], [2, 3])) {
                         $save_status = 4;
                     } else {
                         if ($option_list[$value['option_id']]['is_print_logo']) {
+
                             $save_status = 5; //待印logo
                         } else {
 
@@ -1931,7 +1935,7 @@ class Distribution extends Backend
                 } elseif (4 == $check_status) {
                     if ($option_list[$value['option_id']]['is_print_logo']) {
                         //需要印logo
-                        $node_status = 4;
+                        $node_status = 5;
                         $save_status = 5;
                     } else {
                         //无需印logo
@@ -1939,12 +1943,12 @@ class Distribution extends Backend
                         $save_status = 6;
                     }
                 } elseif (5 == $check_status) {
-                    //印logo完成
-                    $node_status = 5;
+                    //印logo完成 质检中
+                    $node_status = 6;
                     $save_status = 6;
                 } elseif (6 == $check_status) {
-                    //质检完成
-                    $node_status = 6;
+                    //质检完成 已出库
+                    $node_status = 7;
                     if ($total_list[$value['order_id']]['total_qty_ordered'] > 1) {
                         $save_status = 7;
                     } else {
