@@ -715,8 +715,8 @@ class Zendesk extends Backend
             ->where(['user_id' => $data['user_id'], 'type' => $data['type']])
             ->where('id', 'neq', $data['ids'])
             ->field('ticket_id,id,username,subject,status')
+            ->order('id desc')
             ->paginate(5)->toArray();
-
         $this->assign('recentTickets',$recentTickets['data']);
         return $this->view->fetch();
     }
