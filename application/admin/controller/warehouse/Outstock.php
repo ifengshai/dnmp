@@ -1110,7 +1110,7 @@ class Outstock extends Backend
                     ];
                 }
             }
-            dump($skus);die;
+            // dump($skus);die;
             //校验各站点虚拟仓库存
             foreach ($skus as $key => $value1) {
                 if (!$stock_list[$value1['sku']]) $this->error('sku: ' . $value1['sku'] . ' 没有同步至对应平台');
