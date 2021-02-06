@@ -753,7 +753,9 @@ class Zendesk extends Backend
 
         $new_order = new NewOrder();
         $new_order_process = new NewOrderProcess();
-        $order_number = $order_number ?? $this->request->get('ids');
+        if (!$order_number){
+            $this->error('缺少重要参数');
+        }
         Log::write("输出订单号");
         Log::write($order_number);
         $new_order_item_process_id =$new_order->alias('a')
