@@ -41,6 +41,7 @@ class Zendesk extends Backend
     {
         parent::_initialize();
         $this->model = new \app\admin\model\zendesk\Zendesk;
+        $this->ordernodedeltail = new \app\admin\model\order\order\Ordernodedeltail();
         $this->view->assign('getTabList', $this->model->getTabList());
         $this->assignconfig('admin_id', session('admin.id'));
     }
@@ -778,7 +779,7 @@ class Zendesk extends Backend
             ->column('create_time');
 
         //查询订单详情
-        $ruleList = collection($this->ordernodedeltail->where(['order_number' => ['eq', $order_number]])->order('node_type asc')->field('node_type,create_time,handle_user_name,shipment_type,track_number')->select())->toArray();
+        $ruleList = collection($this->ordernodedeltail ->where(['order_number' => ['eq', $order_number]])->order('node_type asc')->field('node_type,create_time,handle_user_name,shipment_type,track_number')->select())->toArray();
 
         $new_ruleList = array_column($ruleList, NULL, 'node_type');
         $key_list = array_keys($new_ruleList);
