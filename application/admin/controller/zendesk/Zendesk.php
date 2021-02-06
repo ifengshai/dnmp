@@ -17,6 +17,7 @@ use think\Exception;
 use think\exception\PDOException;
 use think\exception\ValidateException;
 use League\HTMLToMarkdown\HtmlConverter;
+use Think\Log;
 
 
 /**
@@ -753,7 +754,8 @@ class Zendesk extends Backend
         $new_order = new NewOrder();
         $new_order_process = new NewOrderProcess();
         $order_number = $order_number ?? $this->request->get('ids');
-
+        Log::write("输出订单号");
+        Log::write($order_number);
         $new_order_item_process_id =$new_order->alias('a')
             ->join(['fa_order_item_process' => 'b'], 'a.id=b.order_id')
             ->where('a.increment_id',$order_number)
