@@ -435,7 +435,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                 return false;
             });
             $(document).on('click', ".create_ticket", function () {
-                var order_number=$(".order_info tr:eq(1) td:eq(0)").find('a').html();
+                //var order_number=$(".order_info tr:eq(1) td:eq(0)").find('a').html();
                 var options = {
                     shadeClose: false,
                     shade: [0.3, '#393D49'],
@@ -444,7 +444,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
 
                     }
                 };
-                Fast.api.open('saleaftermanage/work_order_list/add?order_number=' +order_number, '分配', options);
+                Fast.api.open('saleaftermanage/work_order_list/add', '分配', options);
             });
         },
         signvalue:function(){
