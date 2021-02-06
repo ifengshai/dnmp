@@ -1343,6 +1343,9 @@ class Distribution extends Backend
             $data[$value['increment_id']]['item_order'][$key]['prescription_type'] = $value['prescription_type'];
             $data[$value['increment_id']]['item_order'][$key]['od_pv'] = $value['od_pv'];
             $data[$value['increment_id']]['item_order'][$key]['os_pv'] = $value['os_pv'];
+            $data[$value['increment_id']]['item_order'][$key]['pd_r'] = $value['pd_r'];
+            $data[$value['increment_id']]['item_order'][$key]['pd_l'] = $value['pd_l'];
+            $data[$value['increment_id']]['item_order'][$key]['os_pv'] = $value['os_pv'];
             $data[$value['increment_id']]['item_order'][$key]['os_bd'] = $value['os_bd'];
             $data[$value['increment_id']]['item_order'][$key]['od_bd'] = $value['od_bd'];
             $data[$value['increment_id']]['item_order'][$key]['od_pv_r'] = $value['od_pv_r'];
