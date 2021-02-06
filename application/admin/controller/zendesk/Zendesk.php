@@ -749,11 +749,11 @@ class Zendesk extends Backend
 
     public function order_detail($order_number = null)
     {
-        $order_number = input('ids');
+        $order_number = input('param.ids');
 
         $new_order = new NewOrder();
         $new_order_process = new NewOrderProcess();
-        if (!$order_number){
+        if (empty($order_number)){
             $this->error('缺少重要参数');
         }
         Log::write("输出订单号");
