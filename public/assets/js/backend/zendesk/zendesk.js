@@ -1,5 +1,6 @@
 define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','template'], function ($, undefined, Backend, Table, Form , JqTags , Jqui , Template) {
 
+
     var Controller = {
         index: function () {
             // 初始化表格参数配置
@@ -65,6 +66,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                                     text: function(row){
                                         if(row.status == 5){
                                             return '查看';
+
                                         }
                                         return __('Answer');
                                     },
@@ -101,7 +103,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function(row){
-                                            return true;
+                                        return true;
                                     }
                                 }
 
@@ -144,6 +146,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
             })
             // 启动和暂停按钮
             $(document).on("click", ".btn-start", function () {
+
                 var url = $(this).data('url');
                 $.post(url,{},function(data){
                     if(data.code == 1) {
@@ -331,7 +334,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                 })
                 return false;
             });
-
             $(document).on('change','.macro-apply',function(){
                 var id = $(this).val();
                 var ticket_id = $('.ticket_id').val();
@@ -380,16 +382,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                     })
                 }
             });
-            $(document).on('click','.change-ticket',function(){
-                var title = $(this).data('title');
-                var status = $(this).data('status');
-                parent.$(".layui-layer-title")[0].innerText= title;
-                if(status == 5){
-                    parent.$(".layui-layer-footer").hide();
-                }else{
-                    parent.$(".layui-layer-footer").show();
-                }
-            });
             $(document).on('click', '.load_more', function () {
                 var page =  $(".load_more").data("value")
                 var email =  $(".load_more").data("area")
@@ -434,8 +426,47 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                 })
                 return false;
             });
+
+            $(document).on("click", ".batch-log-recipient", function () {
+                var ids = $(this).data('value');
+                Backend.api.open('zendesk/zendesk/order_detail?ids='+ids, '订单节点',{area: ['50%', '45%'] });
+            });
+
+            $(document).on('click', '.load_more', function () {
+                var page =  $(".load_more").data("value")
+                var email =  $(".load_more").data("area")
+                var type =  $(".load_more").data("action")
+                $.ajax({
+                    type: "POST",
+                    url: "zendesk/zendesk/order_toload_more",
+                    dataType: "json",
+                    cache: false,
+                    async: false,
+                    data: {page:page,email:email,type:type},
+                    success: function (json) {
+                        $('#lanren').append(json)
+                        $(".load_more").data("value",page+1)
+                    },
+                    error: function (json) {
+                        return false;
+                    }
+                })
+                return false;
+            });
+
+
+            $(document).on('click','.change-ticket',function(){
+                var title = $(this).data('title');
+                var status = $(this).data('status');
+                parent.$(".layui-layer-title")[0].innerText= title;
+                if(status == 5){
+                    parent.$(".layui-layer-footer").hide();
+                }else{
+                    parent.$(".layui-layer-footer").show();
+                }
+            });
             $(document).on('click', ".create_ticket", function () {
-                //var order_number=$(".order_info tr:eq(1) td:eq(0)").find('a').html();
+                var order_number=$(".order_info tr:eq(1) td:eq(0)").find('a').html();
                 var options = {
                     shadeClose: false,
                     shade: [0.3, '#393D49'],
@@ -444,12 +475,18 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
 
                     }
                 };
-                Fast.api.open('saleaftermanage/work_order_list/add', '分配', options);
+                Fast.api.open('saleaftermanage/work_order_list/add?order_number=' +order_number, '分配', options);
+            });
+
+            //上面的修改承接人
+            $(document).on("click", ".batch-edit-recipient", function () {
+                var ids =$(this).data("value");
+                Backend.api.open('zendesk/zendesk/batch_edit_recipient?ids='+ids, '修改承接人',{area: ['50%', '45%'] });
             });
         },
         signvalue:function(){
             Form.api.bindevent($("form[role=form]"),function(){
-               location.reload();  
+                location.reload();
             });
         },
         edit_recipient:function(){
