@@ -1294,7 +1294,7 @@ class Distribution extends Backend
             ])
             ->order('a.id', 'desc')
             ->group('a.item_order_number')
-            ->column('a.od_sph,a.od_cyl,a.od_axis,a.od_add,a.pd_r,a.od_pv,a.od_bd,a.od_pv_r,a.od_bd_r,a.os_sph,a.os_cyl,a.os_axis,a.os_add,a.pd_l,a.os_pv,a.os_bd,a.os_pv_r,a.os_bd_r,a.lens_number,a.recipe_type as prescription_type', 'a.item_order_number');
+            ->column('a.pdcheck,a.pd,a.od_sph,a.od_cyl,a.od_axis,a.od_add,a.pd_r,a.od_pv,a.od_bd,a.od_pv_r,a.od_bd_r,a.os_sph,a.os_cyl,a.os_axis,a.os_add,a.pd_l,a.os_pv,a.os_bd,a.os_pv_r,a.os_bd_r,a.lens_number,a.recipe_type as prescription_type', 'a.item_order_number');
         if ($change_lens) {
             foreach ($change_lens as $key => $val) {
                 if ($val['pd_l'] && $val['pd_r']) {
@@ -1323,6 +1323,7 @@ class Distribution extends Backend
             $data[$value['increment_id']]['item_order'][$key]['od_add'] = $value['od_add'];
             $data[$value['increment_id']]['item_order'][$key]['os_add'] = $value['os_add'];
             $data[$value['increment_id']]['item_order'][$key]['pd'] = $value['pd'];
+            $data[$value['increment_id']]['item_order'][$key]['pdcheck'] = $value['pdcheck'];
             $data[$value['increment_id']]['item_order'][$key]['product_id'] = $value['product_id'];
             $data[$value['increment_id']]['item_order'][$key]['lens_width'] = $value['lens_width'];
             $data[$value['increment_id']]['item_order'][$key]['lens_height'] = $value['lens_height'];
@@ -1337,6 +1338,8 @@ class Distribution extends Backend
             $data[$value['increment_id']]['item_order'][$key]['od_bd'] = $value['od_bd'];
             $data[$value['increment_id']]['item_order'][$key]['od_pv_r'] = $value['od_pv_r'];
             $data[$value['increment_id']]['item_order'][$key]['os_bd_r'] = $value['os_bd_r'];
+            $data[$value['increment_id']]['item_order'][$key]['od_bd_r'] = $value['od_bd_r'];
+            $data[$value['increment_id']]['item_order'][$key]['os_pv_r'] = $value['os_pv_r'];
             $data[$value['increment_id']]['item_order'][$key]['os_sph'] = $value['os_sph'];
             $data[$value['increment_id']]['item_order'][$key]['od_sph'] = $value['od_sph'];
             $data[$value['increment_id']]['item_order'][$key]['os_cyl'] = $value['os_cyl'];
@@ -1436,7 +1439,7 @@ class Distribution extends Backend
 
 
 
-                if (!empty($v['pd_r']) && !empty($v['pd_l'])) {
+                if ($v['pdcheck'] == 'on') {
                     $spreadsheet->getActiveSheet()->setCellValue("N" . ($cat), $v['pd_r']); //单PD
                     $spreadsheet->getActiveSheet()->setCellValue("N" . ($cat + 1), $v['pd_l']); //单PD
                 } else {
@@ -1511,7 +1514,7 @@ class Distribution extends Backend
         $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(20);
-        $spreadsheet->getActiveSheet()->getColumnDimension('N')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('N')->setWidth(15);
         $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(15);
         $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(15);
         $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(15);
