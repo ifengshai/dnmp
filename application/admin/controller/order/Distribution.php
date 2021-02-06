@@ -348,7 +348,7 @@ class Distribution extends Backend
 
             // if (8 == $label || 1 == $label || 0 == $label) {
             //     //查询子单的主单是否也含有工单
-                
+
             //     // if (!empty($platform_order)) {
             //     //     $order_id = $this->_new_order_process->where(['increment_id' => ['in', $platform_order]])->group('order_id')->column('order_id');
             //     //     $item_order_numbers = $this->model->where(['order_id' => ['in', $order_id]])->order('created_at', 'desc')->group('item_order_number')->column('item_order_number');
@@ -369,12 +369,12 @@ class Distribution extends Backend
                     $map['b.increment_id'] = ['not in', $platform_order];
                 } else {
                     $whereOr = [
-                        'a.id' => ['in',$item_process_ids],
-                        'b.increment_id' => ['in',$platform_order]
+                        'a.id' => ['in', $item_process_ids],
+                        'b.increment_id' => ['in', $platform_order]
                     ];
                 }
             }
-           
+
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
 
             $total = $this->model
@@ -382,7 +382,7 @@ class Distribution extends Backend
                 ->join(['fa_order' => 'b'], 'a.order_id=b.id')
                 ->where($where)
                 ->where($map)
-                ->where(function ($query) use ($whereOr)  {
+                ->where(function ($query) use ($whereOr) {
                     $query->whereOr($whereOr);
                 })
                 ->order($sort, $order)
@@ -395,7 +395,7 @@ class Distribution extends Backend
                 ->join(['fa_order' => 'b'], 'a.order_id=b.id')
                 ->where($where)
                 ->where($map)
-                ->where(function ($query) use ($whereOr)  {
+                ->where(function ($query) use ($whereOr) {
                     $query->whereOr($whereOr);
                 })
                 ->order($sort, $order)
@@ -1308,7 +1308,19 @@ class Distribution extends Backend
         }
         //获取镜片编码及名称
         $lens_list = $this->_lens_data->column('lens_name', 'lens_number');
-        foreach ($list as $key => $value) {
+        foreach ($list as $key => &$value) {
+
+            //更改镜框最新sku
+            if ($change_sku[$value['item_order_number']]) {
+                $value['sku'] = $change_sku[$value['item_order_number']];
+            }
+
+            //更改镜片最新数据
+            if ($change_lens[$value['item_order_number']]) {
+                $value = array_merge($value, $change_lens[$value['item_order_number']]);
+            }
+
+
             $data[$value['increment_id']]['id'] = $value['id'];
             $data[$value['increment_id']]['created_at'] = $value['created_at'];
             $data[$value['increment_id']]['increment_id'] = $value['increment_id'];
@@ -1355,18 +1367,11 @@ class Distribution extends Backend
             $data[$value['increment_id']]['payment_method'] = $value['payment_method'];
             $data[$value['increment_id']]['payment_time'] = $value['payment_time'];
         }
+        unset($value);
         $cat = '0';
         foreach ($data as  $key => &$value) {
             $num = $cat + 2;
-            //更改镜框最新sku
-            if ($change_sku[$value['item_order_number']]) {
-                $value['sku'] = $change_sku[$value['item_order_number']];
-            }
 
-            //更改镜片最新数据
-            if ($change_lens[$value['item_order_number']]) {
-                $value = array_merge($value, $change_lens[$value['item_order_number']]);
-            }
 
             //网站SKU转换仓库SKU
             $value['prescription_type'] = isset($value['prescription_type']) ? $value['prescription_type'] : '';
@@ -1483,11 +1488,11 @@ class Distribution extends Backend
             }
 
 
-            $spreadsheet->getActiveSheet()->setCellValue("X" . ($num), $value['base_grand_total']);//订单金额
-            $spreadsheet->getActiveSheet()->setCellValue("Y" . ($num), $value['base_currency_code']);//原币种
-            $spreadsheet->getActiveSheet()->setCellValue("Z" . ($num), $value['base_grand_total']);//原支付金额
-            $spreadsheet->getActiveSheet()->setCellValue("AA" . ($num), $value['payment_method']);//支付方式
-            $spreadsheet->getActiveSheet()->setCellValue("AB" . ($num),  date('Y-m-d H:i:s', $value['payment_time']));//订单支付时间
+            $spreadsheet->getActiveSheet()->setCellValue("X" . ($num), $value['base_grand_total']); //订单金额
+            $spreadsheet->getActiveSheet()->setCellValue("Y" . ($num), $value['base_currency_code']); //原币种
+            $spreadsheet->getActiveSheet()->setCellValue("Z" . ($num), $value['base_grand_total']); //原支付金额
+            $spreadsheet->getActiveSheet()->setCellValue("AA" . ($num), $value['payment_method']); //支付方式
+            $spreadsheet->getActiveSheet()->setCellValue("AB" . ($num),  date('Y-m-d H:i:s', $value['payment_time'])); //订单支付时间
 
             //合并单元格
 
