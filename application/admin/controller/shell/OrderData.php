@@ -1721,7 +1721,7 @@ class OrderData extends Backend
         $list = Db::connect('database.db_wesee_temp')
             ->table('orders_items')->alias('a')
             ->join(['orders_prescriptions' => 'b'], 'a.orders_prescriptions_id=b.id')
-            ->where('order_id>1800')->select();
+            ->where('order_id>1100 and order_id<1801')->select();
         foreach ($list as $k => $v) {
             $options = [];
             //处方解析 不同站不同字段
