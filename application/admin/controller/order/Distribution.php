@@ -368,8 +368,8 @@ class Distribution extends Backend
                     $map['a.id'] = ['in', $item_process_ids];
                     $map['b.increment_id'] = ['not in', $platform_order];
                 } else {
-                    $whereOr['a.id'] = ['in', $item_process_ids];
-                    $whereOr['b.increment_id'] = ['in', $platform_order];
+                    $arr = array_unique(array_merge($item_process_ids,$platform_order));
+                    $map['a.id|b.increment_id'] = ['in', $arr];
                 }
             }
            
@@ -380,7 +380,6 @@ class Distribution extends Backend
                 ->join(['fa_order' => 'b'], 'a.order_id=b.id')
                 ->where($where)
                 ->where($map)
-                ->whereOr($whereOr)
                 ->order($sort, $order)
                 ->count();
             //combine_time  合单时间  delivery_time 打印时间 check_time审单时间  update_time更新时间  created_at创建时间
@@ -391,7 +390,6 @@ class Distribution extends Backend
                 ->join(['fa_order' => 'b'], 'a.order_id=b.id')
                 ->where($where)
                 ->where($map)
-                ->whereOr($whereOr)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
