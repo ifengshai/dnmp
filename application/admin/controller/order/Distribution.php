@@ -1497,7 +1497,7 @@ class Distribution extends Backend
             $spreadsheet->getActiveSheet()->setCellValue("Y" . ($num), $value['base_currency_code']);//原币种
             $spreadsheet->getActiveSheet()->setCellValue("Z" . ($num), $value['base_grand_total']);//原支付金额
             $spreadsheet->getActiveSheet()->setCellValue("AA" . ($num), $value['payment_method']);//支付方式
-            $spreadsheet->getActiveSheet()->setCellValue("AB" . ($num),  date('Y-m-d', $value['payment_time']));//订单支付时间
+            $spreadsheet->getActiveSheet()->setCellValue("AB" . ($num),  date('Y-m-d H:i:s', $value['payment_time']));//订单支付时间
 
             //合并单元格
 
@@ -1525,7 +1525,7 @@ class Distribution extends Backend
         $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(20);
-        $spreadsheet->getActiveSheet()->getColumnDimension('N')->setWidth(40);
+        $spreadsheet->getActiveSheet()->getColumnDimension('N')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(15);
         $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(15);
         $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(15);
@@ -1541,6 +1541,8 @@ class Distribution extends Backend
         $spreadsheet->getActiveSheet()->getColumnDimension('T')->setWidth(15);
         $spreadsheet->getActiveSheet()->getColumnDimension('U')->setWidth(15);
         $spreadsheet->getActiveSheet()->getColumnDimension('V')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AA')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AB')->setWidth(30);
         //自动换行
         $spreadsheet->getDefaultStyle()->getAlignment()->setWrapText(true);
         $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
