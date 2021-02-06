@@ -641,6 +641,7 @@ class PurchaseOrder extends Backend
      */
     public function logistics($ids = null)
     {
+        $logistics = new \app\admin\model\LogisticsInfo();
         $ids = $ids ?? input($ids);
         $ids = explode(',', $ids);
         if (count($ids) > 1) {
