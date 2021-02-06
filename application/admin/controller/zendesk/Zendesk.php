@@ -2,6 +2,8 @@
 
 namespace app\admin\controller\zendesk;
 
+use app\admin\model\order\order\NewOrder;
+use app\admin\model\order\order\NewOrderProcess;
 use app\admin\model\zendesk\ZendeskPosts;
 use app\admin\model\zendesk\ZendeskTasks;
 use app\common\controller\Backend;
