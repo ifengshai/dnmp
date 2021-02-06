@@ -913,16 +913,9 @@ class ScmDistribution extends Scm
             }
             //将订单号截取处理
             $order_log_order_number =  substr($item_process_info['item_order_number'],0,strpos($item_process_info['item_order_number'], '-'));
-            Log::write("我江昊辉,宇宙第一帅");
-            Log::write($item_process_info['magento_order_id']);
-            Log::write($order_log_order_number);
-            Log::write($item_process_info['site']);
-            Log::write($node_status);
-            Log::write($check_status);
             if (!empty($node_status)){
                 $site_array = [1,2,3];
                 if (in_array($item_process_info['site'],$site_array)){
-                    Log::write('5555555');
                     Order::rulesto_adjust($item_process_info['magento_order_id'],$order_log_order_number,$item_process_info['site'],2,$node_status);
                 }
             }
