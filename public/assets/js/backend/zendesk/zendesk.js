@@ -390,6 +390,50 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                     parent.$(".layui-layer-footer").show();
                 }
             });
+            $(document).on('click', '.load_more', function () {
+                var page =  $(".load_more").data("value")
+                var email =  $(".load_more").data("area")
+                var type =  $(".load_more").data("action")
+                $.ajax({
+                    type: "POST",
+                    url: "zendesk/zendesk/order_toload_more",
+                    dataType: "json",
+                    cache: false,
+                    async: false,
+                    data: {page:page,email:email,type:type},
+                    success: function (json) {
+                        $('#lanren').append(json)
+                        $(".load_more").data("value",page+1)
+                    },
+                    error: function (json) {
+                        return false;
+                    }
+                })
+                return false;
+            });
+
+            $(document).on('click', '.recent_more', function () {
+                var page =  $(".recent_more").data("value")
+                var user_id =  $(".recent_more").data("cyl")
+                var type =  $(".recent_more").data("action")
+                var ids =  $(".recent_more").data("area")
+                $.ajax({
+                    type: "POST",
+                    url: "zendesk/zendesk/email_toload_more",
+                    dataType: "json",
+                    cache: false,
+                    async: false,
+                    data: {page:page,user_id:user_id,type:type,ids:ids},
+                    success: function (json) {
+                        $('#lanren_show').append(json)
+                        $(".recent_more").data("value",page+1)
+                    },
+                    error: function (json) {
+                        return false;
+                    }
+                })
+                return false;
+            });
             $(document).on('click', ".create_ticket", function () {
                 var order_number=$(".order_info tr:eq(1) td:eq(0)").find('a').html();
                 var options = {
