@@ -129,6 +129,9 @@
             </label>
         </div>
 
+
+
+        {if $type == 'pm_audit'}
         <div class="input_item">
             <label class="input_tiem_label">重要程度：</label>
             <span class="input_tiem_span">
@@ -168,6 +171,7 @@
                 {/if}
           </span>
         </div>
+        {/if}
         <!--        /if-->
 
         <!--        {if $demand_type == 2}-->
@@ -237,7 +241,9 @@
             <button type="submit" value="del" class="btn btn-sub" style='background-color: #D9001B;width: 60px;color: white;font-size: 14px;font-weight: 700;'>{:__('删除')}</button>
             {/if}
 
+
             {if $row['pm_audit_status'] == 1}
+            {if $type == 'pm_audit'}
             {if $pm_status}
             <button type="submit" value="pending" class="btn btn-sub" style='background-color: #333333;width: 80px;color: white;font-size: 14px;font-weight: 700;'>{:__('Pending')}</button>
             <button type="submit" value="refuse" class="btn btn-sub" style='background-color: #333333;width: 80px;color: white;font-size: 14px;font-weight: 700;'>{:__('拒绝')}</button>
@@ -251,6 +257,7 @@
             {else} <!--通过-->
             <button type="submit" value="pending" disabled  class="btn btn-sub" style='background-color: #333333;width: 80px;color: white;font-size: 14px;font-weight: 700;'>{:__('Pending')}</button>
             <button type="submit" value="refuse" disabled class="btn btn-sub" style='background-color: #333333;width: 80px;color: white;font-size: 14px;font-weight: 700;'>{:__('拒绝')}</button>
+            {/if}
             {/if}
 
             {if $type !== 'pm_audit' && $pm_status || $admin_id == $row['entry_user_id']}<!--需求 任何状态下都可编辑  所以将已完成剔除 -->

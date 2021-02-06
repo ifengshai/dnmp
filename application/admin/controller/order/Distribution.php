@@ -1347,6 +1347,12 @@ class Distribution extends Backend
             $data[$value['increment_id']]['item_order'][$key]['od_bd'] = $value['od_bd'];
             $data[$value['increment_id']]['item_order'][$key]['od_pv_r'] = $value['od_pv_r'];
             $data[$value['increment_id']]['item_order'][$key]['os_bd_r'] = $value['os_bd_r'];
+            $data[$value['increment_id']]['item_order'][$key]['os_sph'] = $value['os_sph'];
+            $data[$value['increment_id']]['item_order'][$key]['od_sph'] = $value['od_sph'];
+            $data[$value['increment_id']]['item_order'][$key]['os_cyl'] = $value['os_cyl'];
+            $data[$value['increment_id']]['item_order'][$key]['od_cyl'] = $value['od_cyl'];
+            $data[$value['increment_id']]['item_order'][$key]['os_axis'] = $value['os_axis'];
+            $data[$value['increment_id']]['item_order'][$key]['od_axis'] = $value['od_axis'];
             $data[$value['increment_id']]['item_order'][$key]['lens_number'] = $value['lens_number'];
             $data[$value['increment_id']]['item_order'][$key]['web_lens_name'] = $value['web_lens_name'];
             $data[$value['increment_id']]['item_order'][$key]['product_id'] = $value['product_id'];
@@ -1356,7 +1362,6 @@ class Distribution extends Backend
             $data[$value['increment_id']]['payment_method'] = $value['payment_method'];
             $data[$value['increment_id']]['payment_time'] = $value['payment_time'];
         }
-
         $cat = '0';
         foreach ($data as  $key => &$value) {
             $num =$cat + 2;
@@ -1372,10 +1377,7 @@ class Distribution extends Backend
 
             //网站SKU转换仓库SKU
             $value['prescription_type'] = isset($value['prescription_type']) ? $value['prescription_type'] : '';
-            $value['od_sph'] = isset($value['od_sph']) ? urldecode($value['od_sph']) : '';
-            $value['os_sph'] = isset($value['os_sph']) ? urldecode($value['os_sph']) : '';
-            $value['od_cyl'] = isset($value['od_cyl']) ? urldecode($value['od_cyl']) : '';
-            $value['os_cyl'] = isset($value['os_cyl']) ? urldecode($value['os_cyl']) : '';
+
             $spreadsheet->getActiveSheet()->setCellValue("A" . ($num ),$value['id']);//id
             $spreadsheet->getActiveSheet()->setCellValue("B" . ($num ), date('Y-m-d', $value['created_at']));//日期
             $spreadsheet->getActiveSheet()->setCellValue("C" . ($num), $value['increment_id']);//订单号
@@ -1404,6 +1406,10 @@ class Distribution extends Backend
             $spreadsheet->getActiveSheet()->setCellValue("F" . ($num), $value['status']);//订单状态
 
             foreach ($value['item_order'] as $k=>$v) {
+                $v['od_sph'] = isset($v['od_sph']) ? urldecode($v['od_sph']) : '';
+                $v['os_sph'] = isset($v['os_sph']) ? urldecode($v['os_sph']) : '';
+                $v['od_cyl'] = isset($v['od_cyl']) ? urldecode($v['od_cyl']) : '';
+                $v['os_cyl'] = isset($v['os_cyl']) ? urldecode($v['os_cyl']) : '';
                 $cat += 2;
                 $spreadsheet->getActiveSheet()->setCellValue("G" . ($cat), $v['item_order_number']); //子单号
                 $spreadsheet->getActiveSheet()->setCellValue("H" . ($cat), $v['sku']); //sku
