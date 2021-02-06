@@ -1110,10 +1110,13 @@ class Outstock extends Backend
                     ];
                 }
             }
-            dump($skus);die;
+            // dump($skus);die;
             //校验各站点虚拟仓库存
             foreach ($skus as $key => $value1) {
-                if (!$stock_list[$value1['sku']]) $this->error('sku: ' . $value1['sku'] . ' 没有同步至对应平台');
+                // if (!$stock_list[$value1['sku']]) $this->error('sku: ' . $value1['sku'] . ' 没有同步至对应平台');
+                if (empty($_platform->where(['platform_type' => $out_label, 'sku' => $key])->find())){
+                    $this->error(__('导入失败,商品 ' . $key . '在' . $out_plat . ' 平台没有映射关系！'));
+                }
                 if ($value1['out_stock_num'] > $stock_list[$value1['sku']]) $this->error('sku: ' . $value1['sku'] . ' 出库数量不能大于虚拟仓库存');
             }
             //检测条形码是否已绑定
