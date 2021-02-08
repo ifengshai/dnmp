@@ -2,6 +2,7 @@
 
 namespace app\api\controller;
 
+use app\admin\model\order\Order;
 use app\admin\model\platformmanage\MagentoPlatform;
 use app\admin\model\saleaftermanage\WorkOrderChangeSku;
 use app\admin\model\saleaftermanage\WorkOrderMeasure;
@@ -665,16 +666,16 @@ class ScmDistribution extends Scm
      * @return mixed
      * @author lzh
      */
+
     protected function save($item_order_number, $check_status)
     {
         empty($item_order_number) && $this->error(__('子订单号不能为空'), [], 403);
 
         //获取子订单数据
         $item_process_info = $this->_new_order_item_process
-            ->field('id,distribution_status,order_prescription_type,option_id,order_id,site,customize_status,temporary_house_id,abnormal_house_id')
+            ->field('id,item_order_number,distribution_status,order_prescription_type,option_id,order_id,site,customize_status,temporary_house_id,abnormal_house_id,magento_order_id')
             ->where('item_order_number', $item_order_number)
             ->find();
-
         //获取子订单处方数据
         $item_option_info = $this->_new_order_item_option
             ->field('is_print_logo,sku,index_name')
@@ -754,8 +755,8 @@ class ScmDistribution extends Scm
                     $val['item_order_number'] == $item_order_number //子单措施未处理:更改镜框18、更改镜片19、取消20
                 )
 
-                    // && $this->error(__('有工单未处理，无法操作'), [], 405);
-                    && $this->error(__("子订单存在工单" . "<br><b>$codings</b>"), [], 405);
+                // && $this->error(__('有工单未处理，无法操作'), [], 405);
+                && $this->error(__("子订单存在工单" . "<br><b>$codings</b>"), [], 405);
 
                 if ($val['measure_choose_id'] == 21) {
                     $this->error(__("子订单存在工单" . "<br><b>$codings</b>"), [], 405);
@@ -778,7 +779,8 @@ class ScmDistribution extends Scm
         try {
             //下一步提示信息及状态
             if (2 == $check_status) {
-
+                //配货完成
+                $node_status = 3;
                 /**************工单更换镜框******************/
                 //查询更改镜框最新信息
                 $change_sku = $this->_work_order_change_sku
@@ -849,16 +851,26 @@ class ScmDistribution extends Scm
                     }
                 }
             } elseif (3 == $check_status) {
+                //配镜片完成
+                $node_status = 4;
                 $save_status = 4;
             } elseif (4 == $check_status) {
                 if ($item_option_info['is_print_logo']) {
+                    //需要印logo
+                    $node_status = 5;
                     $save_status = 5;
                 } else {
+                    //无需印logo
+                    $node_status = 13;
                     $save_status = 6;
                 }
             } elseif (5 == $check_status) {
+                //印logo完成 质检中
+                $node_status = 6;
                 $save_status = 6;
             } elseif (6 == $check_status) {
+                //质检完成 已出库
+                $node_status = 7;
                 if ($total_qty_ordered > 1) {
                     $save_status = 7;
                 } else {
@@ -896,6 +908,14 @@ class ScmDistribution extends Scm
                     9 => '去合单'
                 ];
                 $back_msg = $next_step[$save_status];
+            }
+            //将订单号截取处理
+            $order_log_order_number =  substr($item_process_info['item_order_number'],0,strpos($item_process_info['item_order_number'], '-'));
+            if (!empty($node_status)){
+                $site_array = [1,2,3];
+                if (in_array($item_process_info['site'],$site_array)){
+                    Order::rulesto_adjust($item_process_info['magento_order_id'],$order_log_order_number,$item_process_info['site'],2,$node_status);
+                }
             }
 
             $this->_item->commit();
@@ -1645,7 +1665,7 @@ class ScmDistribution extends Scm
         //获取子订单数据
         $item_process_info = $this->_new_order_item_process
             ->where('item_order_number', $item_order_number)
-            ->field('id,distribution_status,order_id')
+            ->field('id,distribution_status,order_id,item_id,site')
             ->find();
         empty($item_process_info) && $this->error(__('子订单不存在'), [], 403);
         !in_array($item_process_info['distribution_status'], [7, 8]) && $this->error(__('子订单当前状态不可合单操作'), [], 403);
@@ -1724,6 +1744,7 @@ class ScmDistribution extends Scm
             if ($result !== false) {
                 //操作成功记录
                 DistributionLog::record($this->auth, $item_process_info['id'], 7, '子单号：' . $item_order_number . '作为主单号' . $order_process_info['increment_id'] . '的' . $num . '子单合单完成，库位' . $store_house_info['coding']);
+                Order::rulesto_adjust($item_process_info['item_id'],$item_order_number,$item_process_info['site'],2,9);
                 if (!$next) {
                     //最后一个子单且合单完成，更新主单、子单状态为合单完成
                     $this->_new_order_item_process
@@ -2145,6 +2166,7 @@ class ScmDistribution extends Scm
      */
     public function order_examine()
     {
+
         $order_id = $this->request->request('order_id');
         empty($order_id) && $this->error(__('主订单ID不能为空'), [], 403);
         $check_status = $this->request->request('check_status');
@@ -2452,6 +2474,7 @@ class ScmDistribution extends Scm
                     }
                 }
             } else {
+                Order::rulesto_adjust($row['entity_id'],$row['increment_id'],$row['site'],2,9);
                 //审单通过，扣减占用库存、配货占用、总库存
                 foreach ($item_info as $key => $value) {
 
