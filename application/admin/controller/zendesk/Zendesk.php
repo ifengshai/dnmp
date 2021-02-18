@@ -338,7 +338,7 @@ class Zendesk extends Backend
                     ]);
                     $zid = $zendesk->id;
                     //评论表添加内容,有body时添加评论，修改状态等不添加
-                    if (strip_tags($params['content'])) {
+                    if ($params['content']) {
                         $result = ZendeskComments::create([
                             'ticket_id' => $res['ticket_id'],
                             'comment_id' => $res['comment_id'],
