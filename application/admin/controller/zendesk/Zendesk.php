@@ -822,18 +822,20 @@ class Zendesk extends Backend
     {
         $ticket_id = input('nid');
         $pid = input('pid');
+        //查询原订单的站点
+        $type = $this->model->where('ticket_id',$pid)->value('type');
         if ($ticket_id == $pid) {
             $this->error("You selected the same ticket as source and target: #{$ticket_id}. You cannot merge a ticket into itself.
 Please close this window and try again.");
         }
         //合并到的信息
-        $ticket = $this->model->where('ticket_id', $ticket_id)->field('id,ticket_id,subject')->find();
+        $ticket = $this->model->where('ticket_id', $ticket_id)->where('type',$type)->field('id,ticket_id,subject')->find();
         if (!$ticket) {
             $this->error("You are unable to merge into #{$ticket_id}. Tickets don't find, tickets that are shared with other accounts, and tickets you don't have access to cannot be merged into.
 Please close this window and try again.");
         }
         //合并的最后一条评论
-        $comment = $this->model->where('ticket_id', $pid)->with('lastComment')->find();
+        $comment = $this->model->where('ticket_id', $pid)->where('type',$type)->with('lastComment')->find();
         if (in_array($comment->status,[4,5])) {
             $this->error("You are unable to merge into #{$ticket_id}. Tickets that are Closed, tickets that are shared with other accounts, and tickets you don\'t have access to cannot be merged into.
 Please close this window and try again.");
