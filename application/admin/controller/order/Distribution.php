@@ -1458,7 +1458,7 @@ class Distribution extends Backend
 
 
                 //过滤饰品站
-                if ($v['site'] != 12) {
+                if ($value['site'] != 12) {
                     //查询镜框尺寸
                     $tmp_bridge = $this->get_frame_lens_width_height_bridge($v['product_id'], $value['site']);
                 }
