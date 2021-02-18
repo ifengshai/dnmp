@@ -773,7 +773,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'custom-css',
 
             })
 
-            //增加工单
+            //配货列表
             $(document).on('click', '.machiningBtn', function () {
                 var incrementId = $(this).data('id');
                 var order_platform = $('#order_platform').val();
@@ -781,7 +781,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'custom-css',
                     Toastr.error('缺少参数');
                     return false;
                 }
-                Backend.api.open('saleaftermanage/order_return/machining/?order_number=' + incrementId + '&order_platform=' + order_platform, '配货记录', { area: ["60%", "600px"] });
+                Backend.api.open('saleaftermanage/order_return/order_detail/?order_number=' + incrementId + '&order_platform=' + order_platform, '配货记录', { area: ["60%", "600px"] });
 
             })
 
