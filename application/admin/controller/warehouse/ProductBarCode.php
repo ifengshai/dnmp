@@ -69,8 +69,8 @@ class ProductBarCode extends Backend
                 ->select();
             $list = collection($list)->toArray();
 
-            foreach ($list as $k=>$val){
-                $list[$k]['range'] = $val['start'].'-'.$val['end'];
+            foreach ($list as $k => $val) {
+                $list[$k]['range'] = $val['start'] . '-' . $val['end'];
             }
 
             $result = array("total" => $total, "rows" => $list);
@@ -114,15 +114,15 @@ class ProductBarCode extends Backend
 
                     $params['create_person'] = session('admin.nickname');
                     $params['create_time'] = date('Y-m-d H:i:s');
-                    $params['start'] = sprintf("%09d", $s_num+1);
+                    $params['start'] = sprintf("%09d", $s_num + 1);
                     $params['end'] = sprintf("%09d", $e_num);
                     $result = $this->model->allowField(true)->save($params);
                     $barcode_id = $this->model->id;
 
                     $data = [];
                     for ($i = 1; $i <= $number; $i++) {
-                        $code = substr(date('Ymd'), 2).sprintf("%09d", $s_num+$i);
-                        $data[] = ['code'=>$code,'barcode_id'=>$barcode_id];
+                        $code = substr(date('Ymd'), 2) . sprintf("%09d", $s_num + $i);
+                        $data[] = ['code' => $code, 'barcode_id' => $barcode_id];
                     }
                     $this->item->allowField(true)->saveAll($data);
 
@@ -152,12 +152,12 @@ class ProductBarCode extends Backend
     /**
      * 打印
      */
-    public function print_label($ids = null,$do_type = null)
+    public function print_label($ids = null, $do_type = null)
     {
         //批量打印
-        if(1 == $do_type){
-            $where['barcode_id'] = ['in',$ids];
-        }else{
+        if (1 == $do_type) {
+            $where['barcode_id'] = ['in', $ids];
+        } else {
             //检测打印状态
             $check_status = $this->model->where(['id' => $ids])->value('status');
             1 == $check_status && $this->error('请勿重复打印！');
@@ -170,7 +170,7 @@ class ProductBarCode extends Backend
 
         ob_start();
         $file_header =
-<<<EOF
+            <<<EOF
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <style>
 body{ margin:0; padding:0}
@@ -197,7 +197,7 @@ EOF;
             !file_exists($dir) && mkdir($dir, 0777, true);
 
             //生成条形码
-            $fileName = ROOT_PATH . "public" . DS . "uploads" . DS . "product" . DS . "bar_code" . DS . $value['code'] .".png";
+            $fileName = ROOT_PATH . "public" . DS . "uploads" . DS . "product" . DS . "bar_code" . DS . $value['code'] . ".png";
             $this->generate_barcode($value['code'], $fileName);
 
             //拼接条形码
@@ -273,13 +273,13 @@ EOF;
                 return $this->selectpage();
             }
 
-            $map['check_id'] = ['>',0];
+            $map['check_id'] = ['>', 0];
             $filter = json_decode($this->request->get('filter'), true);
             $_purchase_order = new \app\admin\model\purchase\PurchaseOrder;
             //检测采购单号
             if ($filter['purchase_number']) {
-                $purchase_ids = $_purchase_order->where(['purchase_number'=>['like', '%' . $filter['purchase_number'] . '%']])->column('id');
-                $map['purchase_id'] = ['in',$purchase_ids];
+                $purchase_ids = $_purchase_order->where(['purchase_number' => ['like', '%' . $filter['purchase_number'] . '%']])->column('id');
+                $map['purchase_id'] = ['in', $purchase_ids];
                 unset($filter['purchase_number']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
@@ -301,10 +301,10 @@ EOF;
 
             //获取采购单数据
             $purchase_list = $_purchase_order
-                ->where(['purchase_status'=>[['=',6], ['=',7], 'or']])
-                ->column('purchase_number','id');
+                ->where(['purchase_status' => ['in', [2, 5, 6, 7, 9, 10]]])
+                ->column('purchase_number', 'id');
 
-            foreach ($list as $k=>$val){
+            foreach ($list as $k => $val) {
                 $in_stock_time = (new Instock())->where('id', $val['in_stock_id'])->value('check_time');
                 $list[$k]['purchase_number'] = $purchase_list[$val['purchase_id']];
                 //获取出库单号
@@ -320,5 +320,4 @@ EOF;
         }
         return $this->view->fetch();
     }
-
 }
