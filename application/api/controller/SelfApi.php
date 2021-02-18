@@ -347,7 +347,7 @@ class SelfApi extends Api
         $order_node1 = Db::name('order_node_detail')
             ->where('order_number', $order_number)
             ->where('site', $site)
-            ->where('node_type', '<=', 7)
+            ->where('node_type', 'in', '1,2,3,4,5,6,7,13')
             ->order('create_time desc')
             ->select();
         $order_node2 = Db::name('order_node_courier')
@@ -363,7 +363,7 @@ class SelfApi extends Api
                 $other_order_node1 = Db::name('order_node_detail')
                     ->where('order_number', $val)
                     ->where('site', $site)
-                    ->where('node_type', '<=', 7)
+                    ->where('node_type', 'in', '1,2,3,4,5,6,7,13')
                     ->order('create_time desc')
                     ->select();
                 $other_order_node2 = Db::name('order_node_courier')
