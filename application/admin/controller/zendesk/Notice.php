@@ -164,7 +164,7 @@ class Notice extends Controller
                 //如果是chat或者voice并且有了分配人，那么创建的一个public设置为1，is_admin设置为1，due_id设置为admin_id,目的是为了记录chat和voice的工作量
                 $admin_id = $due_id = ZendeskAgents::where('old_agent_id', $comment->author_id)->value('admin_id');
                 //存在分配人，是chat或者voice，并且不是管理员主动创建的
-                if ($ticket->assignee_id && in_array($zendesk->channel, ['chat', 'voice']) && $ticket->assignee_id != $ticket->requester_id) {
+                if ($ticket->assignee_id && in_array($zendesk->channel, ['chat', 'voice','web']) && $ticket->assignee_id != $ticket->requester_id) {
                     ZendeskComments::create([
                         'ticket_id' => $id,
                         'comment_id' => 0,
@@ -407,7 +407,7 @@ class Notice extends Controller
                 //如果是chat或者voice并且有了分配人，那么创建的一个public设置为1，is_admin设置为1，due_id设置为admin_id,目的是为了记录chat和voice的工作量
                 $admin_id = $due_id = ZendeskAgents::where('old_agent_id', $comment->author_id)->value('admin_id');
                 //存在分配人，是chat或者voice，并且不是管理员主动创建的
-                if ($ticket->assignee_id && in_array($zendesk->channel, ['chat', 'voice']) && $ticket->assignee_id != $ticket->requester_id) {
+                if ($ticket->assignee_id && in_array($zendesk->channel, ['chat', 'voice','web']) && $ticket->assignee_id != $ticket->requester_id) {
                     ZendeskComments::create([
                         'ticket_id' => $id,
                         'comment_id' => 0,
