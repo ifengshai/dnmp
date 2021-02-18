@@ -1050,6 +1050,9 @@ class Distribution extends Backend
                 case 11:
                     $model = Db::connect('database.db_zeelool_jp');
                     break;
+                case 12:
+                    $model = Db::connect('database.db_voogueme_acc');
+                    break;
                 default:
                     break;
             }
@@ -1455,7 +1458,7 @@ class Distribution extends Backend
 
 
                 //过滤饰品站
-                if ($v['site'] != 12) {
+                if ($value['site'] != 12) {
                     //查询镜框尺寸
                     $tmp_bridge = $this->get_frame_lens_width_height_bridge($v['product_id'], $value['site']);
                 }
@@ -1599,9 +1602,9 @@ class Distribution extends Backend
             $distribution_value = $this->model->where(['id' => ['in', $ids]])->field('magento_order_id,order_id, item_order_number,site')->select();
             $distribution_value = collection($distribution_value)->toArray();
 
-            foreach ($distribution_value as $key=>$value){
-                $value['item_order_number'] =  substr($value['item_order_number'],0,strpos($value['item_order_number'], '-'));
-                Order::rulesto_adjust($value['magento_order_id'],$value['item_order_number'],$value['site'],2,2);
+            foreach ($distribution_value as $key => $value) {
+                $value['item_order_number'] =  substr($value['item_order_number'], 0, strpos($value['item_order_number'], '-'));
+                Order::rulesto_adjust($value['magento_order_id'], $value['item_order_number'], $value['site'], 2, 2);
             }
             //标记状态
             $this->model->where(['id' => ['in', $ids]])->update(['distribution_status' => 2]);
@@ -1923,8 +1926,8 @@ class Distribution extends Backend
                     in_array($val['item_order_number'], $item_order_numbers) //子单措施未处理:更改镜框18、更改镜片19、取消20
                 )
 
-                && $this->error('子单号：' . $val['item_order_number'] . '有工单未处理');
-                if ($val['measure_choose_id'] == 21){
+                    && $this->error('子单号：' . $val['item_order_number'] . '有工单未处理');
+                if ($val['measure_choose_id'] == 21) {
                     $this->error(__('有工单存在暂缓措施未处理，无法操作'), [], 405);
                 }
             }
@@ -2080,8 +2083,8 @@ class Distribution extends Backend
                 DistributionLog::record($admin, $value['id'], $check_status, $status_arr[$check_status] . '完成');
                 //节点记录
                 //将订单号截取处理
-                $value['item_order_number'] =  substr($value['item_order_number'],0,strpos($value['item_order_number'], '-'));
-                Order::rulesto_adjust($value['magento_order_id'], $value['item_order_number'],$value['site'],2,$node_status);
+                $value['item_order_number'] =  substr($value['item_order_number'], 0, strpos($value['item_order_number'], '-'));
+                Order::rulesto_adjust($value['magento_order_id'], $value['item_order_number'], $value['site'], 2, $node_status);
             }
 
             $this->_item->commit();
