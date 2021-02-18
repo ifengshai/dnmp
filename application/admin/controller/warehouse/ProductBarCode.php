@@ -122,7 +122,7 @@ class ProductBarCode extends Backend
                     $data = [];
                     for ($i = 1; $i <= $number; $i++) {
                         $code = substr(date('Ymd'), 2) . sprintf("%09d", $s_num + $i);
-                        $data[] = ['code' => $code, 'barcode_id' => $barcode_id];
+                        $data[] = ['code' => $code, 'barcode_id' => $barcode_id, 'create_person' => session('admin.nickname'), 'create_time' => date('Y-m-d H:i:s')];
                     }
                     $this->item->allowField(true)->saveAll($data);
 
@@ -273,7 +273,7 @@ EOF;
                 return $this->selectpage();
             }
 
-            $map['check_id'] = ['>', 0];
+            // $map['check_id'] = ['>', 0];
             $filter = json_decode($this->request->get('filter'), true);
             $_purchase_order = new \app\admin\model\purchase\PurchaseOrder;
             //检测采购单号
