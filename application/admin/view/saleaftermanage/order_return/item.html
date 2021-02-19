@@ -131,7 +131,10 @@
             <li style="width: 5%">
                 <a href="javascript:void(0)" class="track-number"
                    data-id='{$orderInfoList.entity_id}'>{$orderInfoList.shipment_num}</a></li>
-            <li style="width: 7%">{$orderInfoList.track_number}</li>
+
+            <li style="width: 7%"  class="option" >
+                <button type="button" class="logistics"  data-id="{$orderInfoList.entity_id}">{$orderInfoList.track_number}</button>
+            </li>
             <li style="width: 5%">{$orderInfoList.title}</li>
             <li style="width: 8%">{$orderInfoList.status}</li>
             <li style="width: 5%">{:$orderInfoList['is_modify_address'] == 1 ? '是' : '否'}</li>

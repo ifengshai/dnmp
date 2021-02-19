@@ -695,6 +695,33 @@ class OrderReturn extends Backend
         $this->view->assign("new_order_item_process_id2", $new_order_item_process_id2);
         return $this->view->fetch();
     }
+
+
+
+    /**
+     *
+     * 物流节点
+     */
+    public function logistics_node(){
+        $entity_id = input('param.entity_id');
+        $site = input('param.order_platform');
+        //获取订单信息对应的所有物流信息
+        $courier = Db::name('order_node_courier')
+            ->alias('a')
+            ->join(['fa_order_node' => 'b'], 'a.order_id=b.order_id')
+            ->where('a.order_id',$entity_id)->where('a.site',$site)
+            ->order('create_time desc')
+            ->field('a.content,a.create_time,a.site,a.track_number,b.shipment_data_type')
+            ->select();
+        $courier_one  = $courier[0];
+        unset($courier[0]);
+        $courier_two = array_values($courier);
+        $this->assign('courier_one',$courier_one);
+        $this->assign('courier_two',$courier_two);
+        return $this->view->fetch();
+    }
+
+
     
     /***
      * 异步查询模糊订单
