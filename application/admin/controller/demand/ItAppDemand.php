@@ -137,4 +137,11 @@ class ItAppDemand extends Backend
         $this->view->assign('admin_id', session('admin.id'));
         return $this->view->fetch();
     }
+
+    /**
+     * 需求操作
+     */
+    public function operation_show(){
+        return $this->view->fetch();
+    }
 }
