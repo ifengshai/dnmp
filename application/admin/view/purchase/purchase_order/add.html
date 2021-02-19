@@ -90,6 +90,24 @@
         </div>
     </div>
     <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">采购单付款类型:</label>
+        <div class="col-xs-12 col-sm-3">
+            <select name="row[pay_type]" class="form-control">
+                <option value="">请选择</option>
+                <option value="1">预付款</option>
+                <option value="2">全款预付</option>
+                <option value="3">货到付款</option>
+            </select>
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">预付款比例:</label>
+        <div class="col-xs-12 col-sm-3">
+            <select name="row[pay_rate]" class="form-control">
+                <option value="">请选择</option>
+                <option value="1">30%</option>
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">是否为留样采购单:</label>
         <div class="col-xs-12 col-sm-3">
             <select name="row[is_sample]" class="form-control">
@@ -309,14 +327,14 @@
                 <input id="c-purchase_total" class="form-control purchase_total" readonly step="0.01"
                     name="row[purchase_total]" value="" type="number">
             </div>
-            <label class="control-label col-xs-12 col-sm-2">{:__('Settlement_method')}:</label>
-            <div class="col-xs-12 col-sm-3">
-                <select name="row[settlement_method]" class="form-control settlement_method">
-                    <option value="1">先付款</option>
-                    <option value="2">货到付款</option>
-                    <option value="3">付定金，货到付款</option>
-                </select>
-            </div>
+<!--            <label class="control-label col-xs-12 col-sm-2">{:__('Settlement_method')}:</label>-->
+<!--            <div class="col-xs-12 col-sm-3">-->
+<!--                <select name="row[settlement_method]" class="form-control settlement_method">-->
+<!--                    <option value="1">先付款</option>-->
+<!--                    <option value="2">货到付款</option>-->
+<!--                    <option value="3">付定金，货到付款</option>-->
+<!--                </select>-->
+<!--            </div>-->
 
 
         </div>

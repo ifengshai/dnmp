@@ -112,6 +112,7 @@ class NewProduct extends Model
         if (!$result) {
             return false;
         }
+        $result['itemCount'] = 0;
         if (!empty($result['origin_sku'])) {
             //镜架类型
             $where['origin_sku'] = $result['origin_sku'];

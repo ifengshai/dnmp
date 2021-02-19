@@ -1,0 +1,231 @@
+<style>
+    .caigou {
+        padding: 10px;
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .caigou #caigou-table {
+        width: 100%;
+        height: 130px;
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        text-align: center;
+
+    }
+
+    .caigou #caigou-table tr {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        line-height: 50px;
+    }
+
+    .caigou #caigou-table tr th {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        text-align: center;
+        font-size: 14px;
+    }
+
+    .caigou #caigou-table tr td {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+    }
+
+    .caigou #caigou-table tr td input {
+
+        width: 150px;
+    }
+</style>
+<form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+    <div class='caigou' style="width: 80%;margin-left: 10%;">
+        <p style="font-size: 16px;text-align: left;"><b>基本信息</b></p>
+        <input id="supplier_id" class="form-control" readonly name="row[supplier_id]" value="{$supplier.id}"
+               type="hidden">
+        <input id="purchase_id" class="form-control" readonly name="row[purchase_id]" value="{$id}"
+               type="hidden">
+        <input id="purchase_total" class="form-control" readonly name="row[purchase_total]"
+               value="" type="hidden">
+        <input id="status" class="form-control" readonly name="row[status]" value="0" type="hidden">
+        <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2">付款申请单号:</label>
+            <div class="col-xs-12 col-sm-3">
+                <input id="order_number" class="form-control" readonly name="row[order_number]" value="{$order_number}"
+                       type="text">
+            </div>
+            <label class="control-label col-xs-12 col-sm-2">付款类型:</label>
+            <div class="col-xs-12 col-sm-3">
+                <select name="row[pay_type]" class="form-control" id="pay_type">
+                    <option value="3">尾款</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2" id="purchase_text">结算单号:</label>
+            <div class="col-xs-12 col-sm-3">
+                <input id="purchase_number" class="form-control form-empty" readonly name="row[purchase_number]"
+                       value="{$statement.statement_number}" type="text">
+            </div>
+            <label class="control-label col-xs-12 col-sm-2">付款币种:</label>
+            <div class="col-xs-12 col-sm-3">
+                <input id="base_currency_code" class="form-control form-empty" readonly name="row[base_currency_code]"
+                       value="{$supplier.currency}" type="text">
+            </div>
+
+        </div>
+        <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2">供应商名称:</label>
+            <div class="col-xs-12 col-sm-3">
+                <input id="supplier_name" class="form-control form-empty" readonly name="row[supplier_name]"
+                       value="{$supplier.supplier_name}" type="text">
+            </div>
+            <label class="control-label col-xs-12 col-sm-2">供应商账期:</label>
+            <div class="col-xs-12 col-sm-3">
+                <input id="supplier_time" class="form-control form-empty" readonly name="row[supplier_time]"
+                       value="{$supplier.period}" type="text">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2">收款方名称:</label>
+            <div class="col-xs-12 col-sm-3">
+                <input id="linkname" class="form-control form-empty" readonly name="row[linkname]"
+                       value="{$supplier.recipient_name}" type="text">
+            </div>
+            <label class="control-label col-xs-12 col-sm-2">收款方开户行:</label>
+            <div class="col-xs-12 col-sm-3">
+                <input id="opening_bank_address" class="form-control form-empty" name="row[opening_bank_address]"
+                       readonly value="{$supplier.opening_bank}" type="text">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2">收款方账户:</label>
+            <div class="col-xs-12 col-sm-3">
+                <input id="bank_account" class="form-control form-empty" readonly name="row[bank_account]"
+                       value="{$supplier.bank_account}" type="text">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2">备注:</label>
+            <div class="col-xs-12 col-sm-8">
+                <textarea class="form-control" id="desc" rows="8" name="row[remark]" cols="50">{$row.remark}</textarea>
+            </div>
+        </div>
+    </div>
+    <hr>
+    <div class='caigou' style="width: 97%;margin-left: 3%;">
+        <p style="font-size: 16px;text-align: left;"><b>采购事由</b></p>
+        <div style="margin-bottom: 20px;overflow-x:auto;width: 100%">
+            <table id="caigou-table" class="purchase-table">
+                <tr>
+                    <th>序号
+                    </td>
+                    <th>采购品名
+                    </td>
+                    <th>采购单号
+                    </td>
+                    <th>采购批次
+                    </td>
+                    <th>商品分类
+                    </td>
+                    <th>采购数量（个）
+                    </td>
+                    <th>采购单价（元）
+                    </td>
+                    <th>入库数量
+                    </td>
+                    <th>扣款
+                    </td>
+                    <th>金额（元）
+                    </td>
+                    <th>运费
+                    </td>
+                </tr>
+
+                {foreach $purchase_detail as $k=>$vo}
+                <tr>
+                    <td>
+                        <input id="id" class="form-control form-empty" readonly name="reason[{$k}][id]" type="text"
+                               value="{$vo.id}">
+                    </td>
+                    <td>
+                        <input id="name" class="form-control form-empty" readonly name="reason[{$k}][name]" type="text"
+                               value="{$vo.sku}">
+                    </td>
+                    <td>
+                        <input id="number" class="form-control form-empty" readonly name="reason[{$k}][number]" type="text"
+                               value="{$vo.purchase_number}" style="width:180px;">
+                    </td>
+                    <td>
+                        <input id="batch" class="form-control form-empty" readonly name="reason[{$k}][batch]" type="text" value="{$vo.purchase_batch}">
+                    </td>
+                    <td>
+                        <input id="type" class="form-control form-empty" readonly name="reason[{$k}][type]" type="text"
+                               value="{$vo.type}">
+                    </td>
+                    <td>
+                        <input id="num" class="form-control form-empty" readonly name="reason[{$k}][num]" type="text"
+                               value="{$vo.arrival_num}">
+                    </td>
+                    <td>
+                        <input id="single" class="form-control form-empty" readonly name="reason[{$k}][single]" type="text"
+                               value="{$vo.purchase_price}">
+                    </td>
+                    <td>
+                        <input id="in_number" class="form-control form-empty" readonly name="reason[{$k}][in_number]" type="text" value="{$vo.instock_num}" style="width:180px;">
+                    </td>
+                    <td>
+                        <input id="kou_money" class="form-control form-empty" readonly name="reason[{$k}][kou_money]" type="text" value="{$vo.deduction_total}" style="width:180px;">
+                    </td>
+                    <td>
+                        <input id="money" class="form-control form-empty" readonly name="reason[{$k}][money]" type="text"
+                               value="{$vo.wait_statement_total}">
+                    </td>
+                    <td>
+                        <input id="freight" class="form-control form-empty" readonly name="reason[{$k}][freight]" type="text" value="{$vo.freight}" style="width:180px;">
+                    </td>
+                </tr>
+                {/foreach}
+
+            </table>
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">付款总金额:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="pay_grand_total" class="form-control form-empty" readonly name="row[pay_grand_total]"
+                   type="text" value="{$statement.wait_statement_total}">
+        </div>
+    </div>
+    </div>
+    <hr>
+    <div class='caigou' style="width: 80%;margin-left: 10%;">
+        <p style="font-size: 16px;text-align: left;"><b>审批流程</b></p>
+        <br>
+        审批人
+        <br>
+        任萍->王涛->王剑
+        <br>
+        抄送
+        <br>
+        屈金金
+    </div>
+    <hr>
+    <div class="form-group layer-footer">
+        <label class="control-label col-xs-12 col-sm-2"></label>
+        <div class="col-xs-12 col-sm-8">
+            <button type="submit" class="btn btn-success btn-embossed btn-save btn-submitss disabled">{:__('OK')}</button>
+            <button type="submit" class="btn btn-success btn-status btn-embossed btn-save1 btn-submitss disabled">提交审核</button>
+        </div>
+    </div>
+</form>
+
+

@@ -1,5 +1,6 @@
 define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','template'], function ($, undefined, Backend, Table, Form , JqTags , Jqui , Template) {
 
+
     var Controller = {
         index: function () {
             // 初始化表格参数配置
@@ -65,6 +66,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                                     text: function(row){
                                         if(row.status == 5){
                                             return '查看';
+
                                         }
                                         return __('Answer');
                                     },
@@ -73,7 +75,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                                     },
                                     classname: 'btn btn-xs btn-success',
                                     icon: '',
-                                    url: 'zendesk/zendesk/edit',
+                                    url: 'zendesk/zendesk/edit/status/{row.status}',
                                     extend: 'data-area = \'["100%","100%"]\' target=\'_blank\'',
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
@@ -101,7 +103,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function(row){
-                                            return true;
+                                        return true;
                                     }
                                 }
 
@@ -173,6 +175,21 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                 var ids = Table.api.selectedids(table);
                 Backend.api.open('zendesk/zendesk/batch_edit_recipient?ids='+ids, '修改承接人',{area: ['50%', '45%'] });
             });
+
+            $('.btn-batch-export-xls').click(function () {
+                var ids = Table.api.selectedids(table);
+                if (ids.length > 0) {
+                    window.open(Config.moduleurl + '/zendesk/zendesk/zendesk_export?ids=' + ids, '_blank');
+                } else {
+                    var options = table.bootstrapTable('getOptions');
+                    var search = options.queryParams({});
+                    var filter = search.filter;
+                    var op = search.op;
+                    window.open(Config.moduleurl + '/zendesk/zendesk/zendesk_export?filter=' + filter + '&op=' + op, '_blank');
+                }
+
+            });
+
         },
         add: function () {
             Controller.api.bindevent();
@@ -365,9 +382,54 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                     })
                 }
             });
+            $(document).on('click', '.load_more', function () {
+                var page =  $(".load_more").data("value")
+                var email =  $(".load_more").data("area")
+                var type =  $(".load_more").data("action")
+                $.ajax({
+                    type: "POST",
+                    url: "zendesk/zendesk/order_toload_more",
+                    dataType: "json",
+                    cache: false,
+                    async: false,
+                    data: {page:page,email:email,type:type},
+                    success: function (json) {
+                        $('#lanren').append(json)
+                        $(".load_more").data("value",page+1)
+                    },
+                    error: function (json) {
+                        return false;
+                    }
+                })
+                return false;
+            });
+
+            $(document).on('click', '.recent_more', function () {
+                var page =  $(".recent_more").data("value")
+                var user_id =  $(".recent_more").data("cyl")
+                var type =  $(".recent_more").data("action")
+                var ids =  $(".recent_more").data("area")
+                $.ajax({
+                    type: "POST",
+                    url: "zendesk/zendesk/email_toload_more",
+                    dataType: "json",
+                    cache: false,
+                    async: false,
+                    data: {page:page,user_id:user_id,type:type,ids:ids},
+                    success: function (json) {
+                        $('#lanren_show').append(json)
+                        $(".recent_more").data("value",page+1)
+                    },
+                    error: function (json) {
+                        return false;
+                    }
+                })
+                return false;
+            });
 
             $(document).on("click", ".batch-log-recipient", function () {
                 var ids = $(this).data('value');
+                console.log(ids)
                 Backend.api.open('zendesk/zendesk/order_detail?ids='+ids, '订单节点',{area: ['50%', '45%'] });
             });
 
@@ -425,7 +487,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
         },
         signvalue:function(){
             Form.api.bindevent($("form[role=form]"),function(){
-               location.reload();  
+                location.reload();
             });
         },
         edit_recipient:function(){
@@ -483,7 +545,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                 Form.api.bindevent($("form[role=form]"));
                 //抄送人标签输入
                 $('#ccs').tagsInput({
-                    width: 'auto',
+                    width: '109%',
                     defaultText: '输入后回车确认',
                     minInputWidth: 110,
                     height: 'auto',

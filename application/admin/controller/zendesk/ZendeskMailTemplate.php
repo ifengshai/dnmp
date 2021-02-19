@@ -363,7 +363,7 @@ class ZendeskMailTemplate extends Backend
                 ->where(['id' => $id, 'template_platform' => $type])
                 ->find();
             //获取用户的信息
-            $ticket = \app\admin\model\zendesk\Zendesk::where('email',$email)->find();
+            $ticket = \app\admin\model\zendesk\Zendesk::where('email',$email)->where('type',$type)->find();
             //替换模板内容
             $template['template_content'] = str_replace(['{{username}}','{{email}}','{{ticket_id}}'],[$ticket->username,$ticket->email,$ticket->ticket_id],$template['template_content']);
             //tags合并

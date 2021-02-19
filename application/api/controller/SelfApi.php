@@ -10,7 +10,7 @@ use GuzzleHttp\Client;
 use think\Db;
 use SchGroup\SeventeenTrack\Connectors\TrackingConnector;
 use app\admin\model\StockLog;
-
+use app\admin\model\finance\FinanceCost;
 
 /**
  * 系统接口
@@ -350,7 +350,7 @@ class SelfApi extends Api
         $order_node1 = Db::name('order_node_detail')
             ->where('order_number', $order_number)
             ->where('site', $site)
-            ->where('node_type', '<=', 7)
+            ->where('node_type', 'in', '1,2,3,4,5,6,7,13')
             ->order('create_time desc')
             ->select();
         $order_node2 = Db::name('order_node_courier')
@@ -366,7 +366,7 @@ class SelfApi extends Api
                 $other_order_node1 = Db::name('order_node_detail')
                     ->where('order_number', $val)
                     ->where('site', $site)
-                    ->where('node_type', '<=', 7)
+                    ->where('node_type', 'in', '1,2,3,4,5,6,7,13')
                     ->order('create_time desc')
                     ->select();
                 $other_order_node2 = Db::name('order_node_courier')
@@ -427,7 +427,7 @@ class SelfApi extends Api
         $order_data['order_data'] = Db::name('order_node_detail')
             ->where('order_number', $order_number)
             ->where('site', $site)
-            ->where('node_type', '<=', 7)
+            ->where('node_type', 'in', '1,2,3,4,5,6,7,13')
             ->order('create_time desc')
             ->select();
         if ($other_order_number) {
@@ -437,7 +437,7 @@ class SelfApi extends Api
                 $order_data['other_order_data'][$val] = Db::name('order_node_detail')
                     ->where('order_number', $val)
                     ->where('site', $site)
-                    ->where('node_type', '<=', 7)
+                    ->where('node_type', 'in', '1,2,3,4,5,6,7,13')
                     ->order('create_time desc')
                     ->select();
             }
@@ -934,6 +934,37 @@ class SelfApi extends Api
             } else {
                 $this->error('处理失败', [], 400);
             }
+        }
+    }
+
+    /**
+     * vip订单-增加收入核算
+     *
+     * @Description
+     * @author gyh
+     * @param $income_amount 收入金额
+     */
+    public function vip_order_income($work_id = null){
+        $order_detail = $this->request->request();
+        $params['type'] = 1;
+        $params['bill_type'] = 2;//单据类型
+        $params['order_number'] = $order_detail['order_number'];//订单号
+        $params['site'] = $order_detail['site'];//站点
+        $params['order_type'] = 9;//
+        $params['order_money'] = $order_detail['base_grand_total'];//订单金额
+        $params['income_amount'] = $order_detail['base_grand_total'];//收入金额
+        $params['order_currency_code'] = $order_detail['order_currency_code'];//币种
+        $params['payment_time'] = $order_detail['payment_time'];//支付时间
+        $params['payment_method'] = $order_detail['payment_method'];//支付方式
+        $params['action_type'] = 1;//动作类型：1增加；2冲减；
+        $params['createtime'] = time();
+        $FinanceCost = new FinanceCost();
+        $res = $FinanceCost->insert($params);//vip订单-增加
+
+        if (false !== $res) {
+            $this->success('成功', [], 200);
+        } else {
+            $this->error('失败', [], 400);
         }
     }
 }
