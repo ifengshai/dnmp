@@ -377,6 +377,9 @@ class ItWebDemand extends Backend
         return $this->view->fetch();
     }
 
+    /**
+     * 网站端临时数据导出
+     */
     public function batch_export_xls(){
         $where['is_del'] =['eq',1];
         $where['demand_type'] =['eq',2];
