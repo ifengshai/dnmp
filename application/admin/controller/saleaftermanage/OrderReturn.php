@@ -4,6 +4,8 @@ namespace app\admin\controller\saleaftermanage;
 
 use app\admin\model\infosynergytaskmanage\InfoSynergyTask;
 use app\admin\model\infosynergytaskmanage\InfoSynergyTaskCategory;
+use app\admin\model\order\order\NewOrder;
+use app\admin\model\order\order\NewOrderProcess;
 use think\Db;
 use think\Cache;
 use app\common\controller\Backend;
@@ -47,6 +49,7 @@ class OrderReturn extends Backend
     {
         parent::_initialize();
         $this->model = new \app\admin\model\saleaftermanage\OrderReturn;
+        $this->ordernodedeltail = new \app\admin\model\order\order\Ordernodedeltail;
         $this->modelItem = new \app\admin\model\saleaftermanage\OrderReturnItem;
     }
 
@@ -296,6 +299,7 @@ class OrderReturn extends Backend
     {
 
         $order_platform = intval(input('order_platform', 1));
+
         $customer_email = input('email', '');
         if ($request->isPost()) {
             //获取输入的订单号
@@ -518,7 +522,6 @@ class OrderReturn extends Backend
             $this->view->assign('orderReturnResult', $orderReturnResult);
             $this->view->assign('orderInfoResult', $customer);
 
-        
             $this->view->assign('orderPlatformId', $order_platform);
             $this->view->assign('orderPlatform', $orderPlatformList[$order_platform]);
             $this->view->assign('customerInfo', $customerInfo);
@@ -639,7 +642,83 @@ class OrderReturn extends Backend
         return $this->view->fetch();
     }
 
+    /**
+     * @param null $order_number
+     * @return mixed
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     * 配货记录 --新
+     */
+    public function order_detail($order_number = null)
+    {
+    $order_number = input('param.order_number');
 
+    $new_order = new NewOrder();
+    $new_order_process = new NewOrderProcess();
+    $order_number = $order_number ?? $this->request->get('order_number');
+
+    $new_order_item_process_id =$new_order->alias('a')
+    ->join(['fa_order_item_process' => 'b'], 'a.id=b.order_id')
+    ->where('a.increment_id',$order_number)
+    ->field('b.id,b.sku,b.distribution_status')
+    ->select();
+    $new_order_item_process_id2 = array_column($new_order_item_process_id,'sku','id');
+
+    $is_shendan = $new_order_process->where('increment_id',$order_number)->field('check_time,check_status,delivery_time')->find();
+    //子单节点日志
+    foreach ($new_order_item_process_id as $k=>$v){
+    $distribution_log[$v['id']] = Db::name('distribution_log')->where('item_process_id',$v['id'])->select();
+    }
+
+    $new_order_item_process_id1 =array_column($new_order_item_process_id, 'id');
+    $distribution_log_times = Db::name('distribution_log')
+    ->where('item_process_id','in',$new_order_item_process_id1)
+    ->where('distribution_node',1)
+    ->order('create_time asc')
+    ->column('create_time');
+    //查询订单详情
+    $ruleList = collection($this->ordernodedeltail->where('order_number',$order_number)->order('node_type asc')->field('node_type,create_time,handle_user_name,shipment_type,track_number')->select())->toArray();
+
+    $new_ruleList = array_column($ruleList, NULL, 'node_type');
+    $key_list = array_keys($new_ruleList);
+
+    $id = $this->request->get('id');
+    $label = $this->request->get('label', 1);
+
+    $this->view->assign(compact('order_number', 'id', 'label'));
+    $this->view->assign("list", $new_ruleList);
+    $this->view->assign("is_shendan", $is_shendan);
+    $this->view->assign("distribution_log_times", $distribution_log_times);
+    $this->view->assign("distribution_log", $distribution_log);
+    $this->view->assign("key_list", $key_list);
+    $this->view->assign("new_order_item_process_id2", $new_order_item_process_id2);
+    return $this->view->fetch();
+    }
+
+
+    /**
+     *
+     * 物流节点
+     */
+    public function logistics_node(){
+        $entity_id = input('param.entity_id');
+        $site = input('param.order_platform');
+        //获取订单信息对应的所有物流信息
+        $courier = Db::name('order_node_courier')
+            ->alias('a')
+            ->join(['fa_order_node' => 'b'], 'a.order_id=b.order_id')
+            ->where('a.order_id',$entity_id)->where('a.site',$site)
+            ->order('create_time desc')
+            ->field('a.content,a.create_time,a.site,a.track_number,b.shipment_data_type')
+            ->select();
+        $courier_one  = $courier[0];
+        unset($courier[0]);
+        $courier_two = array_values($courier);
+        $this->assign('courier_one',$courier_one);
+        $this->assign('courier_two',$courier_two);
+        return $this->view->fetch();
+    }
     /***
      * 异步查询模糊订单
      * @param Request $request
