@@ -63,6 +63,8 @@ class OcPrescriptionPic extends Backend
             }
             if ($filter['created_at']){
                 $created_at = explode(' - ',$filter['created_at']);
+                $created_at[0] = date("Y-m-d H:i:s",strtotime($created_at[0])+28800);
+                $created_at[1] = date("Y-m-d H:i:s",strtotime($created_at[1])+28800);
                 $WhereSql .= " and created_at between '$created_at[0]' and '$created_at[1]' ";
             }
             if ($filter['completion_time']){
@@ -103,6 +105,7 @@ class OcPrescriptionPic extends Backend
             $list  = $model->query($sql);
 
             foreach ($list as $key=>$item){
+                $list[$key]['created_at'] =   date("Y-m-d H:i:s",strtotime($item['created_at'])+28800);
                 $list[$key]['realy_pk'] = $item['id'].'-'.$item['site'];
                 if ($item['status'] ==1){
                     $list[$key]['status']='未处理';
