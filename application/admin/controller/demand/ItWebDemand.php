@@ -239,9 +239,9 @@ class ItWebDemand extends Backend
                 //是否为测试
                 $testAuthUserIds = array_merge(Auth::getGroupUserId(config('demand.test_group_id')) ?: [], Auth::getGroupUserId(config('demand.test_group_person_id')) ?: []);
                 $map['status'] = ['eq', 3];
-                $map['develop_finish_status'] = ['in',[1,2,3]];
+                $map['develop_finish_status'] = ['in', [1, 2, 3]];
                 if (in_array($adminId, $authUserIds)) {
-                    $map['pm_audit_status'] = ['in', [1, 2,3,4]];
+                    $map['pm_audit_status'] = ['in', [1, 2, 3, 4]];
                     $map['status'] = ['eq', 3];
                 } elseif (in_array($adminId, $testAuthUserIds)) {
                     //测试 未上线都算未完成
@@ -271,7 +271,7 @@ class ItWebDemand extends Backend
                 ->where($task_map)
                 ->order($sort, $order)
                 ->count();
-            if ($val =='priority'){
+            if ($val == 'priority') {
                 $list = $this->model
                     ->where($where)
                     ->where($meWhere)
@@ -280,7 +280,7 @@ class ItWebDemand extends Backend
                     ->order('priority', 'desc')
                     ->limit($offset, $limit)
                     ->select();
-            }else{
+            } else {
                 $list = $this->model
                     ->where($where)
                     ->where($meWhere)
@@ -380,10 +380,11 @@ class ItWebDemand extends Backend
     /**
      * 网站端临时数据导出
      */
-    public function batch_export_xls(){
-        $where['is_del'] =['eq',1];
-        $where['demand_type'] =['eq',2];
-        $where['create_time'] = ['between',['2021-01-01 00:00:00','2021-01-31 23:59:59']];
+    public function batch_export_xls()
+    {
+        $where['is_del'] = ['eq', 1];
+        $where['demand_type'] = ['eq', 2];
+        $where['create_time'] = ['between', ['2021-01-01 00:00:00', '2021-01-31 23:59:59']];
 //        $field = 'id,site,entry_user_id,type,functional_module,title,create_time,pm_audit_status_time,web_designer_user_id,app_user_id,phper_user_id,node_time
 //        develop_finish_time,web_designer_complexity,web_designer_group,web_remarks,pm_audit_status,pm_confirm_time,copy_to_user_id';
         $list = $this->model
@@ -409,9 +410,9 @@ class ItWebDemand extends Backend
                     ->whereIn("id", $web_userid_arr)
                     ->column('nickname', 'id');
 
-                if (!empty($web_users)){
-                    $list[$k]['web_designer_user_name'] = implode(',',$web_users);
-                }else{
+                if (!empty($web_users)) {
+                    $list[$k]['web_designer_user_name'] = implode(',', $web_users);
+                } else {
                     $list[$k]['web_designer_user_name'] = '';
                 }
 
@@ -424,9 +425,9 @@ class ItWebDemand extends Backend
                 $php_users = Db::name("admin")
                     ->whereIn("id", $php_userid_arr)
                     ->column('nickname', 'id');
-                if (!empty($php_users)){
-                    $list[$k]['php_user_name'] = implode(',',$php_users);
-                }else{
+                if (!empty($php_users)) {
+                    $list[$k]['php_user_name'] = implode(',', $php_users);
+                } else {
                     $list[$k]['php_user_name'] = '';
                 }
             }
@@ -438,120 +439,117 @@ class ItWebDemand extends Backend
                 $app_users = Db::name("admin")
                     ->whereIn("id", $app_userid_arr)
                     ->column('nickname', 'id');
-                if (!empty($app_users)){
-                    $list[$k]['app_user_name'] = implode(',',$app_users);
-                }else{
+                if (!empty($app_users)) {
+                    $list[$k]['app_user_name'] = implode(',', $app_users);
+                } else {
                     $list[$k]['app_user_name'] = '';
                 }
             }
             //站点
-            if ($v['site'] ==1){
+            if ($v['site'] == 1) {
                 $list[$k]['site'] = 'zeelool';
-            }elseif ($v['site'] ==2){
+            } elseif ($v['site'] == 2) {
                 $list[$k]['site'] = 'voogueme';
-            }elseif ($v['site'] ==3){
+            } elseif ($v['site'] == 3) {
                 $list[$k]['site'] = 'nihao';
-            }elseif ($v['site'] ==4){
+            } elseif ($v['site'] == 4) {
                 $list[$k]['site'] = 'meeloog';
-            }elseif ($v['site'] ==5){
+            } elseif ($v['site'] == 5) {
                 $list[$k]['site'] = 'wesee';
-            }elseif ($v['site'] ==6){
+            } elseif ($v['site'] == 6) {
                 $list[$k]['site'] = 'rufoo';
-            }elseif ($v['site'] ==7){
+            } elseif ($v['site'] == 7) {
                 $list[$k]['site'] = 'toloog';
-            }elseif ($v['site'] ==8){
+            } elseif ($v['site'] == 8) {
                 $list[$k]['site'] = 'other';
-            }
-            elseif ($v['site'] ==9){
+            } elseif ($v['site'] == 9) {
                 $list[$k]['site'] = 'ZeeloolEs';
-            }
-            elseif ($v['site'] ==10){
+            } elseif ($v['site'] == 10) {
                 $list[$k]['site'] = 'ZeeloolDe';
-            }
-            elseif ($v['site'] ==11){
+            } elseif ($v['site'] == 11) {
                 $list[$k]['site'] = 'ZeeloolJp';
-            }else{
+            } else {
                 $list[$k]['site'] = 'voogmechic';
             }
 //
             //任务类型
-            if ($v['site_type'] ==1){
+            if ($v['site_type'] == 1) {
                 $list[$k]['site_type'] = 'bug';
-            }elseif($v['site_type']==2){
+            } elseif ($v['site_type'] == 2) {
                 $list[$k]['site_type'] = '维护';
-            }elseif($v['site_type']==3){
+            } elseif ($v['site_type'] == 3) {
                 $list[$k]['site_type'] = '优化';
-            }elseif($v['site_type']==4){
+            } elseif ($v['site_type'] == 4) {
                 $list[$k]['site_type'] = '新功能';
-            }else{
+            } else {
                 $list[$k]['site_type'] = '开发';
             }
             //功能模块
-            if ($v['functional_module'] ==1){
+            if ($v['functional_module'] == 1) {
                 $list[$k]['functional_module'] = '购物车';
-            }elseif ($v['functional_module'] ==2){
+            } elseif ($v['functional_module'] == 2) {
                 $list[$k]['functional_module'] = '个人中心';
-            }elseif ($v['functional_module'] ==3){
+            } elseif ($v['functional_module'] == 3) {
                 $list[$k]['functional_module'] = '列表页';
-            }elseif ($v['functional_module'] ==4){
+            } elseif ($v['functional_module'] == 4) {
                 $list[$k]['functional_module'] = '详情页';
-            }elseif ($v['functional_module'] ==5){
+            } elseif ($v['functional_module'] == 5) {
                 $list[$k]['functional_module'] = '首页';
-            }elseif ($v['functional_module'] ==6){
+            } elseif ($v['functional_module'] == 6) {
                 $list[$k]['functional_module'] = '优惠券';
-            }elseif ($v['functional_module'] ==7){
+            } elseif ($v['functional_module'] == 7) {
                 $list[$k]['functional_module'] = '支付页';
-            }elseif ($v['functional_module'] ==8){
+            } elseif ($v['functional_module'] == 8) {
                 $list[$k]['functional_module'] = 'magento后台';
-            }else{
+            } else {
                 $list[$k]['functional_module'] = '活动页';
             }
             //难易程度
-            if ($v['web_designer_complexity'] ==1){
+            if ($v['web_designer_complexity'] == 1) {
                 $list[$k]['web_designer_complexity'] = '简单';
-            }elseif ($v['web_designer_complexity'] ==2){
+            } elseif ($v['web_designer_complexity'] == 2) {
                 $list[$k]['web_designer_complexity'] = '中等';
-            }else{
+            } else {
                 $list[$k]['web_designer_complexity'] = '复杂';
             }
             //是否需要前端
-            if ($v['web_designer_group'] ==0){
+            if ($v['web_designer_group'] == 0) {
                 $list[$k]['web_designer_group'] = '未确认';
-            }elseif ($v['web_designer_group'] ==1){
+            } elseif ($v['web_designer_group'] == 1) {
                 $list[$k]['web_designer_group'] = '需要';
-            }else{
+            } else {
                 $list[$k]['web_designer_group'] = '不需要';
             }
-            if ($v['test_group'] ==0){
+            if ($v['test_group'] == 0) {
                 $list[$k]['test_group'] = '未确认';
-            }elseif ($v['test_group'] ==1){
+            } elseif ($v['test_group'] == 1) {
                 $list[$k]['test_group'] = '需要';
-            }else{
+            } else {
                 $list[$k]['test_group'] = '不需要';
             }
 
             //是否超时
-            if ($v['end_time'] < $v['node_time']){
-                $list[$k]['overtime'] ='否';
-            }else{
-                $list[$k]['overtime'] ='是';
+            if ($v['end_time'] < $v['node_time']) {
+                $list[$k]['overtime'] = '否';
+            } else {
+                $list[$k]['overtime'] = '是';
             }
             //是否拒绝
-            if ($v['web_remarks'] !== null){
-                $list[$k]['web_remarks'] ='是';
-            }else{
-                $list[$k]['web_remarks'] ='否';
+            if ($v['web_remarks'] !== null) {
+                $list[$k]['web_remarks'] = '是';
+            } else {
+                $list[$k]['web_remarks'] = '否';
             }
 
-            if ($v['pm_audit_status'] !== 2){
-                $list[$k]['pm_audit_status'] ='否';
-            }else{
-                $list[$k]['pm_audit_status'] ='是';
+            if ($v['pm_audit_status'] !== 2) {
+                $list[$k]['pm_audit_status'] = '否';
+            } else {
+                $list[$k]['pm_audit_status'] = '是';
             }
-            if ($v['secondary_operation'] !== 2){
-                $list[$k]['pm_audit_status'] ='否';
-            }else{
-                $list[$k]['pm_audit_status'] ='是';
+            if ($v['secondary_operation'] !== 2) {
+                $list[$k]['pm_audit_status'] = '否';
+            } else {
+                $list[$k]['pm_audit_status'] = '是';
             }
         }
 
@@ -611,7 +609,6 @@ class ItWebDemand extends Backend
             $spreadsheet->getActiveSheet()->setCellValue("R" . ($key * 1 + 2), $value['app_user_name']);
 
 
-
         }
 
         //设置宽度
@@ -638,7 +635,7 @@ class ItWebDemand extends Backend
         ];
 
         $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
-        
+
         $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
         $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
 
@@ -808,7 +805,7 @@ class ItWebDemand extends Backend
                 $map['type'] = 5;
             } elseif ($filter['label'] == 5) { //其他任务
                 $map['type'] = ['in', [2, 3, 4]];
-            }elseif ($filter['label'] == 6){
+            } elseif ($filter['label'] == 6) {
                 $val = 'priority';
             }
             unset($filter['label']);
@@ -823,7 +820,7 @@ class ItWebDemand extends Backend
                 ->where($task_map)
                 ->order($sort, $order)
                 ->count();
-            if ($val == 'priority'){
+            if ($val == 'priority') {
                 $list = $this->model
                     ->where($where)
                     ->where($meWhere)
@@ -832,7 +829,7 @@ class ItWebDemand extends Backend
                     ->order($val, $order)
                     ->limit($offset, $limit)
                     ->select();
-            }else{
+            } else {
                 $list = $this->model
                     ->where($where)
                     ->where($meWhere)
@@ -863,7 +860,7 @@ class ItWebDemand extends Backend
                 $list[$k]['test_finish_time'] = $v['test_finish_time'] ? date('m-d H:i', strtotime($v['test_finish_time'])) : '';
                 $list[$k]['all_finish_time'] = $v['all_finish_time'] ? date('m-d H:i', strtotime($v['all_finish_time'])) : '';
 //                $list[$k]['node_time'] = $v['node_time'] ? $v['node_time'] . 'Day' : '-'; //预计时间
-                $list[$k]['node_time'] = $v['node_time'] ? $v['node_time']  : '-'; //预计时间
+                $list[$k]['node_time'] = $v['node_time'] ? $v['node_time'] : '-'; //预计时间
                 //检查权限
                 $list[$k]['demand_pm_status'] = $permissions['demand_pm_status']; //产品确认权限
                 $list[$k]['demand_add'] = $permissions['demand_add']; //新增权限
@@ -1059,7 +1056,7 @@ class ItWebDemand extends Backend
                     $add['create_time'] = date('Y-m-d H:i', time());
                     $add['pm_audit_status'] = 1;
 
-                    if (!empty($data['important_reasons'])){
+                    if (!empty($data['important_reasons'])) {
                         $add['important_reasons'] = implode(',', $data['important_reasons']);
                     }
                     $add['functional_module'] = $data['functional_module'];
@@ -1101,8 +1098,8 @@ class ItWebDemand extends Backend
                         $row = $this->model->get($params['id']);
                         $row = $row->toArray();
                         $add['site_type'] = implode(',', $params['site_type']);
-                        if ($params['title'] !== $params['start_title'] || $params['content'] !== $params['start_content'] || $params['accessory'] !== $params['start_accessory']){
-                            $add['secondary_operation'] =2;
+                        if ($params['title'] !== $params['start_title'] || $params['content'] !== $params['start_content'] || $params['accessory'] !== $params['start_accessory']) {
+                            $add['secondary_operation'] = 2;
                         }
                         //status  状态  1 未激活 2 激活 3 已响应 4 完成 5超时完成
                         //priority  优先级
@@ -1127,7 +1124,7 @@ class ItWebDemand extends Backend
                             $add['develop_finish_status'] = 1;
                         }
 //                        }
-                        if ($params['pm_audit_status'] ==3){
+                        if ($params['pm_audit_status'] == 3) {
                             $add['status'] = 3;
                         }
                         empty($params['importance']) && $this->error('请选择重要程度');
@@ -1150,7 +1147,7 @@ class ItWebDemand extends Backend
                     $add['type'] = $params['type'];
                     $add['site'] = $params['site'];
                     //非空
-                    if (!empty($params['copy_to_user_id'])){
+                    if (!empty($params['copy_to_user_id'])) {
                         $add['copy_to_user_id'] = implode(',', $params['copy_to_user_id']);
                     }
                     $add['title'] = $params['title'];
@@ -1167,21 +1164,47 @@ class ItWebDemand extends Backend
                     $add['development_difficulty'] = $params['development_difficulty'];
 
                     $add['priority'] = $params['priority'];
-                    if (!empty($params['important_reasons'])){
+                    if (!empty($params['important_reasons'])) {
                         $add['important_reasons'] = implode(',', $params['important_reasons']);
                     }
                 }
                 $res = $this->model->allowField(true)->save($add, ['id' => $params['id']]);
                 if ($res) {
-                    //Ding::dingHook(__FUNCTION__, $this ->model ->get($params['id']));
+                    //如果产品通过审核  并且该需求需要app协助
+
+                    if ($params['pm_audit_status'] == 3 && in_array('3',$params['site_type'])) {
+                        //将该需求存储到app表
+                        $app_add['it_web_demand_id'] = $params['id'];//对应it_web表id
+                        $app_add['site'] = $params['site'];//站点
+                        $app_add['functional_module'] = $params['functional_module'];//功能模块
+                        $app_add['type'] = $params['type'];//类型
+                        if (!empty($params['important_reasons'])) {
+                            $app_add['important_reasons'] = implode(',', $params['important_reasons']);//重要原因
+                        }
+                        $app_add['importance'] = $params['importance'];//重要程度
+                        $app_add['degree_of_urgency'] = $params['degree_of_urgency'];//紧急程度
+                        $app_add['development_difficulty'] = $params['development_difficulty'];//开发难度
+                        $app_add['priority'] = $params['priority'];//优先级
+                        $app_add['node_time'] = $params['node_time'];//预期时间
+                        $app_add['title'] = $params['title'];//标题
+                        $app_add['content'] = $params['content'];//内容
+                        $app_add['product_remarks'] = $params['product_remarks'];//备注
+                        $app_add['accessory'] = $params['accessory'];//附件
+                        $app_add['entry_user_id'] = $params['entry_user_id'];//提出人id
+                        $app_add['create_time'] = date('Y-m-d H:i:s', time());//创建时间
+                        if (!empty($params['copy_to_user_id'])) {
+                            $app_add['copy_to_user_id'] = implode(',', $params['copy_to_user_id']);//抄送人
+                        }
+                        Db::name('it_app_demand')->insert($app_add);
+                        //Ding::dingHook(__FUNCTION__, $this ->model ->get($params['id']));
+                    }
                     $this->success('成功');
                 } else {
                     $this->error('失败');
                 }
+                $this->error(__('Parameter %s can not be empty', ''));
             }
-            $this->error(__('Parameter %s can not be empty', ''));
         }
-
         $row = $this->model->get($ids);
         $row = $row->toArray();
         $row['site_type_arr'] = explode(',', $row['site_type']);
@@ -1199,7 +1222,12 @@ class ItWebDemand extends Backend
     }
 
 
-
+    /**
+     * app端需求列表
+     */
+    public function app_demand_list(){
+        return $this->view->fetch();
+    }
 
     /**
      * 逻辑删除
@@ -1367,8 +1395,8 @@ class ItWebDemand extends Backend
                     //确认后 钉钉通知
                     $row = $this->model->get(['id' => $params['id']]);
                     $info = $row->toArray();
-                    if ($params['web_status'] == 1 || $params['php_status'] == 1 || $params['app_status'] == 1){
-                       Ding::cc_ding($info['entry_user_id'], '任务ID:' . $params['id'] . '+任务已被确认', $row['title'], $this->request->domain() . url('index') . '?ref=addtabs');
+                    if ($params['web_status'] == 1 || $params['php_status'] == 1 || $params['app_status'] == 1) {
+                        Ding::cc_ding($info['entry_user_id'], '任务ID:' . $params['id'] . '+任务已被确认', $row['title'], $this->request->domain() . url('index') . '?ref=addtabs');
                     }
                     //判断是否达到下一个阶段的状态
                     $develop_finish_status = array();
@@ -1434,7 +1462,7 @@ class ItWebDemand extends Backend
             $updateValue['develop_finish_status'] = 4;
             if ($params['status'] == 1) {
                 $updateValue['web_remarks'] = $params['remarks'];
-                $updateValue['web_designer_group'] =2;
+                $updateValue['web_designer_group'] = 2;
 
             } elseif ($params['status'] == 2) {
                 $updateValue['phper_remarks'] = $params['remarks'];
@@ -1447,7 +1475,7 @@ class ItWebDemand extends Backend
             if ($save) {
                 $row = $this->model->get(['id' => $params['ids']]);
                 $info = $row->toArray();
-                Ding::cc_ding($info['entry_user_id'],  '任务ID:' .  $params['ids'] . '任务已被拒绝,', '任务标题：'.$info['title'].',拒绝原因：'.$params['remarks'], $this->request->domain() . url('index') . '?ref=addtabs');
+                Ding::cc_ding($info['entry_user_id'], '任务ID:' . $params['ids'] . '任务已被拒绝,', '任务标题：' . $info['title'] . ',拒绝原因：' . $params['remarks'], $this->request->domain() . url('index') . '?ref=addtabs');
                 $this->success('成功');
             } else {
                 $this->success('失败');
@@ -1468,7 +1496,7 @@ class ItWebDemand extends Backend
             if ($params) {
                 //查看该需求是否被确认过
                 $row = $this->model->get(['id' => $params['id']])->toArray();
-                if ($row['web_designer_group'] ==0 && $row['phper_group'] ==0 && $row['app_group'] ==0){
+                if ($row['web_designer_group'] == 0 && $row['phper_group'] == 0 && $row['app_group'] == 0) {
                     $this->error('开发还未确认，暂时无法操作');
                 }
                 $update = array();
@@ -1553,23 +1581,23 @@ class ItWebDemand extends Backend
                         Ding::cc_ding($usersIds, '任务ID:' . $params['id'] . '+测试未通过', $row['title'], $this->request->domain() . url('index') . '?ref=addtabs');
                     } elseif ($label == 3) { //任务上线 通知提出人
                         //任务上线 通知提出人 + 抄送人
-                        if (!empty($row['copy_to_user_id'])){
-                            $copy_to_user_id = explode(',',$row['copy_to_user_id']);
-                            if (in_array($row['entry_user_id'],$copy_to_user_id)){
+                        if (!empty($row['copy_to_user_id'])) {
+                            $copy_to_user_id = explode(',', $row['copy_to_user_id']);
+                            if (in_array($row['entry_user_id'], $copy_to_user_id)) {
                                 $recipient = $copy_to_user_id;
-                            }else{
+                            } else {
                                 $copy_to_user_id[] = $row['entry_user_id'];
-                                $recipient =$copy_to_user_id;
+                                $recipient = $copy_to_user_id;
                             }
                             Ding::cc_ding($recipient, '任务ID:' . $params['id'] . '+任务已上线，等待确认', $row['title'], $this->request->domain() . url('index') . '?ref=addtabs');
-                        }else{
+                        } else {
                             Ding::cc_ding($row['entry_user_id'], '任务ID:' . $params['id'] . '+任务已上线，等待确认', $row['title'], $this->request->domain() . url('index') . '?ref=addtabs');
                         }
 
 //                        Ding::cc_ding($row['entry_user_id'], '任务ID:' . $params['id'] . '+任务已上线，等待确认', $row['title'], $this->request->domain() . url('index') . '?ref=addtabs');
-                    }else if ($label ==1){
+                    } else if ($label == 1) {
                         //测试通过 推送给对应开发者
-                        $user_all = array_merge(array_filter(array($row['app_user_id'],$row['phper_user_id'],$row['web_designer_user_id'])));
+                        $user_all = array_merge(array_filter(array($row['app_user_id'], $row['phper_user_id'], $row['web_designer_user_id'])));
                         Ding::cc_ding($user_all, '任务ID:' . $params['id'] . '+测试已通过，等待上线', $row['title'], $this->request->domain() . url('index') . '?ref=addtabs');
                     }
 
