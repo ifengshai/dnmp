@@ -1421,7 +1421,7 @@ class ScmDistribution extends Scm
                     $this->_product_bar_code_item
                     ->allowField(true)
                     ->isUpdate(true, ['item_order_number' => $item_order_number])
-                    ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2,'out_stock_id' => $outstock_id]);
+                    ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2, 'is_loss_report_out' => 1,'out_stock_id' => $outstock_id]);
 
                     //计算出库成本
                     $financecost = new \app\admin\model\finance\FinanceCost();
@@ -2371,7 +2371,7 @@ class ScmDistribution extends Scm
                             $this->_product_bar_code_item
                             ->allowField(true)
                             ->isUpdate(true, ['item_order_number' => ['in', $item_order_numbers]])
-                            ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2,'out_stock_id' => $outstock_id]);
+                            ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2, 'is_loss_report_out' => 1,'out_stock_id' => $outstock_id]);
 
                             //计算出库成本
                             $financecost = new \app\admin\model\finance\FinanceCost();
@@ -2542,14 +2542,14 @@ class ScmDistribution extends Scm
 
                 //校验条形码是否已出库
                 $check_bar_code = $this->_product_bar_code_item
-                    ->where(['item_order_number' => ['in', $item_order_numbers], 'library_status' => 2])
+                    ->where(['item_order_number' => ['in', $item_order_numbers], 'library_status' => 2, 'is_loss_report_out' => 0])
                     ->value('code');
                 if ($check_bar_code) throw new Exception("条形码：{$check_bar_code}已出库，请检查");
 
                 //条形码出库时间
                 $this->_product_bar_code_item
                     ->allowField(true)
-                    ->isUpdate(true, ['item_order_number' => ['in', $item_order_numbers]])
+                    ->isUpdate(true, ['item_order_number' => ['in', $item_order_numbers], 'is_loss_report_out' => 0])
                     ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2]);
             }
 
