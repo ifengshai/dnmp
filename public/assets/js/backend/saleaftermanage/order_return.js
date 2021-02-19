@@ -785,6 +785,19 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'custom-css',
 
             })
 
+            //配货列表
+            $(document).on('click', '.logistics', function () {
+
+                var entity_id = $(this).data('id');
+                var order_platform = $('#order_platform').val();
+                if (!entity_id || !order_platform) {
+                    Toastr.error('缺少参数');
+                    return false;
+                }
+                Backend.api.open('saleaftermanage/order_return/logistics_node/?entity_id=' + entity_id + '&order_platform=' + order_platform , '物流节点', { area: ["32%", "700px"] });
+
+            })
+
 
         }
     };
