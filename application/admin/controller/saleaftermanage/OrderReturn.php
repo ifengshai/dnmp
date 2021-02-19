@@ -40,7 +40,7 @@ class OrderReturn extends Backend
     protected $modelItem = null;
     protected $relationSearch = true;
     protected $noNeedRight = [
-        'machining'
+        'machining','logistics_node'
     ];
     //17track key
     protected $apiKey = 'F26A807B685D794C676FA3CC76567035';
