@@ -785,7 +785,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'custom-css',
 
             })
 
-            //配货列表
+            //物流节点
             $(document).on('click', '.logistics', function () {
 
                 var entity_id = $(this).data('id');
