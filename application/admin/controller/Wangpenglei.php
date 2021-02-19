@@ -31,7 +31,6 @@ class Wangpenglei extends Backend
     {
 
         $list = Db::table('fa_zz_temp2')->select();
-
         foreach ($list as $k => $v) {
             $p_map['sku'] = $v['sku'];
             $data['real_time_qty'] = $v['stock'];
@@ -55,7 +54,10 @@ class Wangpenglei extends Backend
         $this->orderitemprocess = new \app\admin\model\order\order\NewOrderItemProcess();
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
-        $skus = $this->item->where(['is_open' => 1, 'is_del' => 1, 'category_id' => ['<>', 43]])->column('sku');
+        // $skus = $this->item->where(['is_open' => 1, 'is_del' => 1, 'category_id' => ['<>', 43]])->column('sku');
+
+        $skus = Db::table('fa_zz_temp2')->column('sku');
+        
         foreach ($skus as $k => $v) {
             $map = [];
             $zeelool_sku = $this->itemplatformsku->getWebSku($v, 1);
@@ -113,7 +115,9 @@ class Wangpenglei extends Backend
         $this->orderitemprocess = new \app\admin\model\order\order\NewOrderItemProcess();
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
-        $skus = $this->item->where(['is_open' => 1, 'is_del' => 1, 'category_id' => ['<>', 43]])->column('sku');
+        // $skus = $this->item->where(['is_open' => 1, 'is_del' => 1, 'category_id' => ['<>', 43]])->column('sku');
+
+        $skus = Db::table('fa_zz_temp2')->column('sku');
         foreach ($skus as $k => $v) {
             $map = [];
             $zeelool_sku = $this->itemplatformsku->getWebSku($v, 1);

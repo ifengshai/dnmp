@@ -781,7 +781,20 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'custom-css',
                     Toastr.error('缺少参数');
                     return false;
                 }
-                Backend.api.open('saleaftermanage/order_return/machining/?order_number=' + incrementId + '&order_platform=' + order_platform, '配货记录', { area: ["60%", "600px"] });
+                Backend.api.open('saleaftermanage/order_return/order_detail/?order_number=' + incrementId + '&order_platform=' + order_platform, '配货记录', { area: ["60%", "600px"] });
+
+            })
+
+            //物流节点
+            $(document).on('click', '.logistics', function () {
+
+                var entity_id = $(this).data('id');
+                var order_platform = $('#order_platform').val();
+                if (!entity_id || !order_platform) {
+                    Toastr.error('缺少参数');
+                    return false;
+                }
+                Backend.api.open('saleaftermanage/order_return/logistics_node/?entity_id=' + entity_id + '&order_platform=' + order_platform , '物流节点', { area: ["32%", "700px"] });
 
             })
 
