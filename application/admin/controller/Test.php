@@ -2566,7 +2566,7 @@ class Test extends Backend
         $purchase_barcode_item = new \app\admin\model\warehouse\ProductBarCodeItem();
         $arr = ['400498772'];
         foreach ($arr as $key => $value) {
-            $item_order_number = $purchase_barcode_item->where(['item_order_number' => $value])->group('item_order_number')->column('item_order_number','id');
+            $item_order_number = $purchase_barcode_item->where(['item_order_number' => ['like', $value."%"]])->group('item_order_number')->column('item_order_number','id');
             foreach ($item_order_number as $k => $val) {
                 $a = $purchase_barcode_item->where(['item_order_number' => $val,'library_status' => 1])->find();
                 $b = $purchase_barcode_item->where(['item_order_number' => $val,'library_status' => 2])->find();
