@@ -1,4 +1,4 @@
-define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefined, Backend, Table, Form) {
+define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload'], function ($, undefined, Backend, Table, Form, Nkeditor, Upload) {
 
     var Controller = {
         index: function () {
@@ -53,6 +53,111 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         },
         edit: function () {
             Controller.api.bindevent();
+            $(".editor_nkeditor", $("form[role=form]")).each(function () {
+                var that = this;
+                Nkeditor.create(that, {
+                    width: '100%',
+                    height: '50%',
+                    filterMode: false,
+                    wellFormatMode: false,
+                    allowMediaUpload: true, //是否允许媒体上传
+                    allowFileManager: true,
+                    allowImageUpload: true,
+                    wordImageServer: typeof Config.nkeditor != 'undefined' && Config.nkeditor.wordimageserver ? "127.0.0.1:10101" : "", //word图片替换服务器的IP和端口
+                    urlType: Config.upload.cdnurl ? 'domain' : '',//给图片加前缀
+                    cssPath: Fast.api.cdnurl('/assets/addons/nkeditor/plugins/code/prism.css'),
+                    cssData: "body {font-size: 13px}",
+                    fillDescAfterUploadImage: false, //是否在上传后继续添加描述信息
+                    themeType: typeof Config.nkeditor != 'undefined' ? Config.nkeditor.theme : 'black', //编辑器皮肤,这个值从后台获取
+                    fileManagerJson: Fast.api.fixurl("/addons/nkeditor/index/attachment/module/" + Config.modulename),
+                    items: [
+                        'image', 'multiimage', 'insertfile',
+                    ],
+                    afterCreate: function () {
+                        var self = this;
+                        //Ctrl+回车提交
+                        Nkeditor.ctrl(document, 13, function () {
+                            self.sync();
+                            $(that).closest("form").submit();
+                        });
+                        Nkeditor.ctrl(self.edit.doc, 13, function () {
+                            self.sync();
+                            $(that).closest("form").submit();
+                        });
+                        //粘贴上传
+                        $("body", self.edit.doc).bind('paste', function (event) {
+                            var image, pasteEvent;
+                            pasteEvent = event.originalEvent;
+                            if (pasteEvent.clipboardData && pasteEvent.clipboardData.items) {
+                                image = getImageFromClipboard(pasteEvent);
+                                if (image) {
+                                    event.preventDefault();
+                                    Upload.api.send(image, function (data) {
+                                        self.exec("insertimage", Fast.api.cdnurl(data.url));
+                                    });
+                                }
+                            }
+                        });
+                        //挺拽上传
+                        $("body", self.edit.doc).bind('drop', function (event) {
+                            var image, pasteEvent;
+                            pasteEvent = event.originalEvent;
+                            if (pasteEvent.dataTransfer && pasteEvent.dataTransfer.files) {
+                                images = getImageFromDrop(pasteEvent);
+                                if (images.length > 0) {
+                                    event.preventDefault();
+                                    $.each(images, function (i, image) {
+                                        Upload.api.send(image, function (data) {
+                                            self.exec("insertimage", Fast.api.cdnurl(data.url));
+                                        });
+                                    });
+                                }
+                            }
+                        });
+                    },
+                    //FastAdmin自定义处理
+                    beforeUpload: function (callback, file) {
+                        var file = file ? file : $("input.ke-upload-file", this.form).prop('files')[0];
+                        Upload.api.send(file, function (data) {
+                            var data = { code: '000', data: { url: Fast.api.cdnurl(data.url) }, title: '', width: '', height: '', border: '', align: '' };
+                            callback(data);
+                        });
+
+                    },
+                    //错误处理 handler
+                    errorMsgHandler: function (message, type) {
+                        try {
+                            console.log(message, type);
+                        } catch (Error) {
+                            alert(message);
+                        }
+                    }
+                });
+            });
+            $('.ke-edit-iframe').css('height', '240px');
+            $(document).on('click', ".btn-sub", function () {
+                var type = $(this).val();
+                if (type == 'del') {
+                    $("#demand_edit").attr('action', 'demand/it_app_demand/del');
+                }
+                if (type == 'edit') {
+                    $("#demand_edit").attr('action', 'demand/it_app_demand/edit');
+                }
+                if (type == 'pending') {
+                    $('#pm_audit_status').val(2);
+                    $("#demand_edit").attr('action', 'demand/it_app_demand/edit');
+                }
+                if (type == 'refuse') {
+                    $('#pm_audit_status').val(4);
+                    $("#demand_edit").attr('action', 'demand/it_app_demand/edit');
+                }
+                if (type == 'sub') {
+                    $('#pm_audit_status').val(3);
+                    $("#demand_edit").attr('action', 'demand/it_app_demand/edit');
+                }
+                $("#demand_edit").submit();
+            });
+
         },
         api: {
             bindevent: function () {
@@ -265,35 +370,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         Backend.api.open('demand/it_app_demand/edit/type/view/ids/' + row.id, __('任务查看'), { area: ['70%', '70%'] });
                     }
                 },
-                //RDC点击标题，弹出窗口
-                getrdctitle: {
-                    //格式为：方法名+空格+DOM元素
-                    'click .btn-gettitle': function (e, value, row, index) {
-                        Backend.api.open('demand/it_web_demand/edit/demand_type/2/type/view/ids/' + row.id, __('任务查看'), { area: ['70%', '70%'] });
-                    }
-                },
+
                 //点击评审，弹出窗口
                 ge_pm_status: {
                     'click .check_pm_status': function (e, value, row, index) {
                         Backend.api.open('demand/it_web_demand/edit/type/pm_audit/ids/' + row.id, __('任务评审'), { area: ['70%', '70%'] });
                     }
                 },
-                //RDC点击评审，弹出窗口
-                ge_rdcpm_status: {
-                    'click .check_rdcpm_status': function (e, value, row, index) {
-                        if (row.pm_audit_status == 1) {
-                            Backend.api.open('demand/it_web_demand/rdc_demand_pass/ids/' + row.id, __('任务评审'), { area: ['70%', '70%'] });
-                        }
-                        /*Backend.api.ajax({
-                            url: 'demand/it_web_demand/rdc_demand_pass/ids/' + row.id,
-                        }, function (data, ret) {
-                            $("#table").bootstrapTable('refresh');
-                        }, function (data, ret) {
-                            //失败的回调
-                            $("#table").bootstrapTable('refresh');
-                        });*/
-                    }
-                },
+
                 //开发进度，弹出窗口
                 get_develop_status: {
                     'click .check_develop_status': function (e, value, row, index) {
@@ -339,3 +423,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
     };
     return Controller;
 });
+function formatTableUnit(value, row, index) {
+    return {
+        css: {
+            "white-space": "nowrap",
+            "text-overflow": "ellipsis",
+            "overflow": "hidden",
+            "max-width": "200px"
+        }
+    }
+}

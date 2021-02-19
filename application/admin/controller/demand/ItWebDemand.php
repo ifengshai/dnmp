@@ -1191,6 +1191,7 @@ class ItWebDemand extends Backend
                         $app_add['product_remarks'] = $params['product_remarks'];//备注
                         $app_add['accessory'] = $params['accessory'];//附件
                         $app_add['entry_user_id'] = $params['entry_user_id'];//提出人id
+                        $app_add['site_type'] = implode(',', $params['site_type']);//设备端
                         $app_add['create_time'] = date('Y-m-d H:i:s', time());//创建时间
                         if (!empty($params['copy_to_user_id'])) {
                             $app_add['copy_to_user_id'] = implode(',', $params['copy_to_user_id']);//抄送人
@@ -1222,12 +1223,6 @@ class ItWebDemand extends Backend
     }
 
 
-    /**
-     * app端需求列表
-     */
-    public function app_demand_list(){
-        return $this->view->fetch();
-    }
 
     /**
      * 逻辑删除
