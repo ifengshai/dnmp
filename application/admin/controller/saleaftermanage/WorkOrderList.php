@@ -18,6 +18,7 @@ use think\Exception;
 use app\admin\model\AuthGroupAccess;
 use think\exception\PDOException;
 use think\exception\ValidateException;
+use Think\Log;
 use Util\NihaoPrescriptionDetailHelper;
 use Util\ZeeloolPrescriptionDetailHelper;
 use Util\VooguemePrescriptionDetailHelper;
@@ -3891,6 +3892,10 @@ EOF;
                     $res_status = WorkOrderNote::create($data);
                     //查询用户的角色组id
                     $authGroupIds = AuthGroupAccess::where('uid', session('admin.id'))->column('group_id');
+                    Log::write("角色组");
+                    Log::write($authGroupIds);
+                    Log::write($workOrderConfigValue['customer_department_rule']);
+
                     $work = $this->model->find($params['work_id']);
                     $work_order_note_status = $work->work_order_note_status;
 
