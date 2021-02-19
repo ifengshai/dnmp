@@ -100,30 +100,39 @@
 <body>
 <div style="width: 100%">
     <div style="width: 100%;height: 65px;background-color: #F6F5F8;text-align: center;line-height: 10px;border: 1px solid #F6F5F8";>
-        <h3>{$courier_one.shipment_data_type}--{$courier_one.track_number} 132465465456</h3>
+        {if condition="courier_one eq null"} 暂无信息
+            {else/}
+            <h3>{$courier_one.shipment_data_type}--{$courier_one.track_number}</h3>
+        {/if}
+
     </div>
     <div style="width: 100%;text-align: center;font-size: 16px;height: 65px;line-height: 10px;margin:0 auto">
         <!--        <img src="/assets/img/笑脸.png" alt="" style="width: 25px;">Delivered-->
     </div>
     <section>
-
         <div class="bot">
-            <li class="items">
-                <div class="sed">
-                    <span class="mo1"></span>
-                    <span class="ko"></span>
-                </div>
-                {$courier_one.create_time}{$courier_one.content}
-            </li>
-            {volist name="courier_two" id="vo"}
-            <li class="items">
-                <div class="sed">
-                    <span class="mo"></span>
-                    <span class="ko"></span>
-                </div>
-                {$vo.create_time}{$vo.content}
-            </li>
-            {/volist}
+            {if condition="courier_one neq null"}
+                <li class="items">
+                    <div class="sed">
+                        <span class="mo1"></span>
+                        <span class="ko"></span>
+                    </div>
+                    {$courier_one.create_time}{$courier_one.content}
+                </li>
+            {/if}
+
+            {if condition="courier_two  neq null"}
+                {volist name="courier_two" id="vo"}
+                <li class="items">
+                    <div class="sed">
+                        <span class="mo"></span>
+                        <span class="ko"></span>
+                    </div>
+                    {$vo.create_time} &nbsp; &nbsp;{$vo.content}
+                </li>
+                {/volist}
+            {/if}
+
 
         </div>
 
