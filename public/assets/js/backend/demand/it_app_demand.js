@@ -191,7 +191,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
 
         },
         /*修改预期时间*/
-        operation_show: function () {
+        operation_show: function (rows) {
             Controller.api.bindevent();
             $('#change_node_time').on('dp.change', function(e){    //dp.change
                 var node_time = $('#change_node_time').val();
@@ -265,9 +265,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                             async: true,
                             data: {id: value_id},
                             success: function (json) {
-                                layer.closeAll('dialog');
-                                Toastr.success(json.msg);
-                                parent.$('#table').bootstrapTable('refresh');
+                                Toastr.success(json.msg,function (){
+                                    parent.$('#table').bootstrapTable('refresh');
+                                    var index = parent.layer.getFrameIndex(window.name);
+                                    parent.layer.close(index);
+                                });
+
                             }
                         });
                     }, function () { });

@@ -178,12 +178,15 @@ class ItAppDemand extends Backend
                 $this->error('缺少重要参数');
             }
             $app_demand = $this->model->find($params['id']);
-            $app_demand->update_time = date('Y-m-d H:i:s',time());
-            $app_demand->node_time = $params['node_time'];
-            if ($app_demand->save()){
-                $this->success('操作成功');
-            }else{
-                $this->error('操作失败');
+
+            if ($params['node_time'] !== $app_demand->node_time){
+                $app_demand->update_time = date('Y-m-d H:i:s',time());
+                $app_demand->node_time = $params['node_time'];
+                if ($app_demand->save()){
+                    $this->success('操作成功');
+                }else{
+                    $this->error('操作失败');
+                }
             }
         }
     }
