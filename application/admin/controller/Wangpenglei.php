@@ -487,4 +487,29 @@ class Wangpenglei extends Backend
         }
         $purchase->saveAll($params);
     }
+
+    /**
+     * 跑订单节点最后一条物流数据
+     *
+     * @Description
+     * @author wpl
+     * @since 2021/02/20 17:50:13 
+     * @return void
+     */
+    public function order_node()
+    {
+        ini_set('memory_limit', '512M');
+        $ordernode = new \app\admin\model\OrderNode();
+        $ordernodecourier = new \app\admin\model\OrderNodeCourier();
+        $list = $ordernode->where(['create_time' => ['between',['2020-11-20 00:00:00','2021-02-20 00:00:00']]])->where("track_number!=''")->where("shipment_last_msg=''")->select();
+        foreach($list as $k => $v) {
+            $content = $ordernodecourier->where(['order_id' =>$v['order_id'],'site' => $v['site']])->order('id desc')->value('content');
+            if ($content) {
+                $ordernode->where(['id' => $v['id']])->update(['shipment_last_msg' => $content]);
+            }
+            echo $k . "\n";
+            usleep(100000);
+        }
+        echo 'ok';
+    }
 }
