@@ -68,23 +68,7 @@ class ItAppDemand extends Backend
 //
 //            }
             $list = collection($list)->toArray();
-            foreach ($list as $key=>$value){
-                if ($value['develop_finish_status'] ==1){
-                    $list[$key]['develop_finish_status'] = '是';
-                }else{
-                    $list[$key]['develop_finish_status'] = '否';
-                }
-                if ($value['test_is_finish'] ==1){
-                    $list[$key]['test_is_finish'] = '是';
-                }else{
-                    $list[$key]['test_is_finish'] = '否';
-                }
-                if ($value['online_status'] ==1){
-                    $list[$key]['online_status'] = '是';
-                }else{
-                    $list[$key]['online_status'] = '否';
-                }
-            }
+           
 
             $result = array("total" => $total, "rows" => $list);
 
