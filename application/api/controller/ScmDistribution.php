@@ -687,9 +687,9 @@ class ScmDistribution extends Scm
             6 => '成品质检'
         ];
         //获取库位号
-        $coding = $this->_stock_house
+       /* $coding = $this->_stock_house
             ->where(['id' => $item_process_info['temporary_house_id']])
-            ->value('coding');
+            ->value('coding');*/
         //操作失败记录
         if (empty($item_process_info)) {
             DistributionLog::record($this->auth, $item_process_info['id'], 0, $status_arr[$check_status] . '：子订单不存在');
