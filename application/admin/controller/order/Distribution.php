@@ -2270,7 +2270,7 @@ class Distribution extends Backend
                     $this->_product_bar_code_item
                         ->allowField(true)
                         ->isUpdate(true, ['item_order_number' => ['in', $item_order_numbers]])
-                        ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2, 'out_stock_id' => $outstock_id]);
+                        ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2, 'is_loss_report_out' => 1, 'out_stock_id' => $outstock_id]);
 
                     //计算出库成本
                     $financecost = new \app\admin\model\finance\FinanceCost();
@@ -2557,7 +2557,7 @@ class Distribution extends Backend
                     $this->_product_bar_code_item
                         ->allowField(true)
                         ->isUpdate(true, ['item_order_number' => $item_info['item_order_number']])
-                        ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2, 'out_stock_id' => $outstock_id]);
+                        ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2, 'is_loss_report_out' => 1, 'out_stock_id' => $outstock_id]);
 
                     //计算出库成本
                     $financecost = new \app\admin\model\finance\FinanceCost();
