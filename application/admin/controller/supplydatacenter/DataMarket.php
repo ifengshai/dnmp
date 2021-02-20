@@ -60,6 +60,14 @@ class DataMarket extends Backend
             $stock_measure_overview = $this->stock_measure_overview($time_str);
             $this->success('', '', $stock_measure_overview);
         }
+        //默认7天数据
+        $start1 = date('Y-m-d 00:00:00', strtotime('-6 day'));
+        $end1   = date('Y-m-d 23:59:59');
+        $time_str1 = $start1.' - '.$end1;
+        //默认30天数据
+        $start2 = date('Y-m-d 00:00:00', strtotime('-30 day'));
+        $time_str2 = $start2.' - '.$end1;
+
         //库存总览
         $stock_overview = $this->stock_overview();
         //仓库指标总览
@@ -80,7 +88,7 @@ class DataMarket extends Backend
                 unset($magentoplatformarr[$key]);
             }
         }
-        $this->view->assign(compact('stock_overview','stock_measure_overview','stock_level_overview','stock_level_overview2','purchase_overview','logistics_completed_overview','magentoplatformarr','stock_age_overview','time_str'));
+        $this->view->assign(compact('stock_overview','stock_measure_overview','stock_level_overview','stock_level_overview2','purchase_overview','logistics_completed_overview','magentoplatformarr','stock_age_overview','time_str1','time_str2'));
         return $this->view->fetch();
     }
     //库存变化折线图
@@ -659,7 +667,7 @@ class DataMarket extends Backend
         if ($this->request->isAjax()) {
             $time_str = input('time_str');
             if (!$time_str) {
-                $start = date('Y-m-d 00:00:00', strtotime('-6 day'));
+                $start = date('Y-m-d 00:00:00', strtotime('-30 day'));
                 $end = date('Y-m-d 23:59:59');
                 $time_str = $start . ' - ' . $end;
             }

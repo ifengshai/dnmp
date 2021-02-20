@@ -103,7 +103,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function(row){
-                                            return true;
+                                        return true;
                                     }
                                 }
 
@@ -429,6 +429,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
 
             $(document).on("click", ".batch-log-recipient", function () {
                 var ids = $(this).data('value');
+                console.log(ids)
                 Backend.api.open('zendesk/zendesk/order_detail?ids='+ids, '订单节点',{area: ['50%', '45%'] });
             });
 
@@ -486,7 +487,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
         },
         signvalue:function(){
             Form.api.bindevent($("form[role=form]"),function(){
-               location.reload();  
+                location.reload();
             });
         },
         edit_recipient:function(){

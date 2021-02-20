@@ -66,7 +66,7 @@
             <div class="col-md-7 col-center" style="width: 62.4%;margin-bottom: 45px;border-right:0px !important;">
                 <div class="nav-tabs-custom">
                     {if condition="$status neq 5"}
-                        <div class="box box-solid">
+                    <div class="box box-solid">
                         <!-- /.box-header -->
                         <div class="box-body"  >
 
@@ -280,82 +280,83 @@
     <div class="col-md-3" style="width: 36%;margin-left: 1%">
         <div class="box box-primary" style="height:130px;border-top-color:{if condition="$ticket->type eq 1"}#3c65c8"{elseif condition="$ticket->type eq 2"/}#f5513a"{elseif condition="$ticket->type eq 3"/}#b4a078"{/if}>
             <div class="box-body box-profile"  style="height:130px;background-color:{if condition="$ticket->type eq 1"}#3c65c8"{elseif condition="$ticket->type eq 2"/}#f5513a"{elseif condition="$ticket->type eq 3"/}#b4a078"{/if}>
-            <img class="profile-user-img  img-circle"  src="/assets/img/avatar.png" alt="User profile picture" style="width: 74px;margin-top: 17px;margin-left: 29px" >
-            <h3 style="margin-top: -62px;margin-left: 124px" > <font color="#F5F9FF">{$ticket->username}</font>  {if condition="$is_vip  eq 1"}&nbsp <img src="/uploads/imgshow/vip.png" alt="">{/if}</h3>
-            <h5 style="margin-top: 10px;margin-left: 127px"> <font color="#F5F9FF">{$ticket->email}</font></h5>
-            <h5 style="margin-left: 477px"> <font color="#F5F9FF">
-                <a style="color:#F5F9FF "  href="{:url('saleaftermanage/order_return/search',['type' => $rows.type,'email' => $ticket->email])}&ref=addtabs" target="_blank">查看用户信息</a></font></h5>
+                <img class="profile-user-img  img-circle"  src="/assets/img/avatar.png" alt="User profile picture" style="width: 74px;margin-top: 17px;margin-left: 29px" >
+                <h3 style="margin-top: -62px;margin-left: 124px" > <font color="#F5F9FF">{$ticket->username}</font>  {if condition="$is_vip  eq 1"}&nbsp <img src="/uploads/imgshow/vip.png" alt="">{/if}</h3>
+                <h5 style="margin-top: 10px;margin-left: 127px"> <font color="#F5F9FF">{$ticket->email}</font></h5>
+                <h5 style="margin-left: 477px"> <font color="#F5F9FF">
+                    <a style="color:#F5F9FF "  href="{:url('saleaftermanage/order_return/search',['type' => $rows.type,'email' => $ticket->email])}&ref=addtabs" target="_blank">查看用户信息</a></font></h5>
+            </div>
+            <!-- /.box-body -->
         </div>
-        <!-- /.box-body -->
-    </div>
 
-    <!-- Profile Image -->
-    <div class="box box-primary" style="border-top-color:white">
-        <div class="box-header with-border" style="border-bottom: 0px solid #f4f4f4;!important;">
-            <h3 class="box-title">Five Most Recent</h3>
-        </div>
-        <div class="box-body box-profile" id="">
-            <ul class="list-group list-group-unbordered" id="lanren_show">
-                {foreach name="recentTickets" item="vo"}
-                <li class="list-group-item">
-                    <!-- <b><a class="change-ticket" data-status="{$vo->status}" data-title="回复【{$vo->ticket_id}】{$vo->subject}" href="{:url('zendesk/zendesk/edit',['ids' => $vo->id,'btn' => 1])}">#{$vo->ticket_id}  {$vo->subject}</a> </b><a class="pull-right">{$vo->status_format}</a> -->
-                    <b><a class="" target="_blank"  title="回复【{$vo->ticket_id}】{$vo->subject}" href="{:url('zendesk/zendesk/edit',['ids' => $vo->id,'btn' => 1])}" style="font-size: 14.5px" > #{$vo->ticket_id}  {$vo->subject}</a> </b><a class="pull-right">{$vo->status_format}</a>
-                </li>
-                {/foreach}
-            </ul>
-            {if condition="$recentTickets_count gt 5"}
+        <!-- Profile Image -->
+        <div class="box box-primary" style="border-top-color:white">
+            <div class="box-header with-border" style="border-bottom: 0px solid #f4f4f4;!important;">
+                <h3 class="box-title">Five Most Recent</h3>
+            </div>
+            <div class="box-body box-profile" id="">
+                <ul class="list-group list-group-unbordered" id="lanren_show">
+                    {foreach name="recentTickets" item="vo"}
+                    <li class="list-group-item">
+                        <!-- <b><a class="change-ticket" data-status="{$vo->status}" data-title="回复【{$vo->ticket_id}】{$vo->subject}" href="{:url('zendesk/zendesk/edit',['ids' => $vo->id,'btn' => 1])}">#{$vo->ticket_id}  {$vo->subject}</a> </b><a class="pull-right">{$vo->status_format}</a> -->
+                        <b><a class="" target="_blank"  title="回复【{$vo->ticket_id}】{$vo->subject}" href="{:url('zendesk/zendesk/edit',['ids' => $vo->id,'btn' => 1])}" style="font-size: 14.5px" > #{$vo->ticket_id}  {$vo->subject}</a> </b><a class="pull-right">{$vo->status_format}</a>
+                    </li>
+                    {/foreach}
+                </ul>
+                {if condition="$recentTickets_count gt 5"}
                 <a href="##"  class="recent_more" style="width: 100px;text-align: right;color: black"  class="load_more"  data-value="2"  data-area="{$ids}"   data-cyl="{$ticket->user_id}"  data-action="{$ticket->type}"> <h5>查看更多</h5></a>
-            {/if}
+                {/if}
 
+
+            </div>
+            <!-- /.box-body -->
         </div>
-        <!-- /.box-body -->
-    </div>
 
-    <!-- About Me Box -->
-    <div class="box">
-        <div class="box-header">
-            <h3 class="box-title">Order</h3>
+        <!-- About Me Box -->
+        <div class="box">
+            <div class="box-header">
+                <h3 class="box-title">Order</h3>
 
-<!--            <div class="box-tools">-->
-<!--                <div class="input-group input-group-xs" style="width: 200px;">-->
-<!--                    <input type="text" disabled="" class="form-control pull-right" placeholder="{$ticket->email}">-->
-<!--                </div>-->
-<!--            </div>-->
-        </div>
-        <!-- /.box-header -->
-        <div class="box-body table-responsive no-padding">
-            <table class="table table-hover order_info" id="lanren">
-                <tr style="background-color: #F1F4F6">
-                    <th>Number</th>
-                    <th>Date</th>
-                    <th>Amount</th>
-                    <th>Status</th>
-                    <th></th>
-                </tr>
-                {foreach name="orders" item="vo"}
-                <tr>
-                    <td ><a href="{$orderUrl}{$vo->entity_id}" target="_blank" style="font-size: 15px">{$vo['increment_id']}</a></td>
-                    <td style="font-size: 15px"> {$vo['created_at']|strtotime|date='d/m/Y',###}</td>
-                    <td style="font-size: 15px"> {$vo['order_currency_code']}{$vo['grand_total']|substr=0,-2}</h5></td>
-                    <td style="font-size: 15px"> {$vo['status']}</td>
-                    {if condition="$vo['status'] eq 'complete'"}
-                    <td style="font-size: 15px"> {$vo['increment_id']}</td>
-                    {/if}
-                    {if condition="$vo['status'] eq 'processing'"}
-                    <td ><font style="color: #3C8DBC"><a  class="batch-log-recipient" data-value="{$vo['increment_id']}">配货记录</a></font></td>
-                    {/if}
-                </tr>
-                {/foreach}
-            </table>
-            {if condition="$orders_count gt 5"}
+                <!--            <div class="box-tools">-->
+                <!--                <div class="input-group input-group-xs" style="width: 200px;">-->
+                <!--                    <input type="text" disabled="" class="form-control pull-right" placeholder="{$ticket->email}">-->
+                <!--                </div>-->
+                <!--            </div>-->
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body table-responsive no-padding">
+                <table class="table table-hover order_info" id="lanren">
+                    <tr style="background-color: #F1F4F6">
+                        <th>Number</th>
+                        <th>Date</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                    {foreach name="orders" item="vo"}
+                    <tr>
+                        <td ><a href="{$orderUrl}{$vo->entity_id}" target="_blank" style="font-size: 15px">{$vo['increment_id']}</a></td>
+                        <td style="font-size: 15px"> {$vo['created_at']|strtotime|date='d/m/Y',###}</td>
+                        <td style="font-size: 15px"> {$vo['order_currency_code']}{$vo['grand_total']|substr=0,-2}</h5></td>
+                        <td style="font-size: 15px"> {$vo['status']}</td>
+                        {if condition="$vo['status'] eq 'complete'"}
+                        <td style="font-size: 15px"> {$vo['increment_id']}</td>
+                        {/if}
+                        {if condition="$vo['status'] eq 'processing'"}
+                        <td ><font style="color: #3C8DBC"><a  class="batch-log-recipient" data-value="{$vo['increment_id']}">配货记录</a></font></td>
+                        {/if}
+                    </tr>
+                    {/foreach}
+                </table>
+                {if condition="$orders_count gt 5"}
                 <a href="##"  class="load_more" style="width: 100px;text-align: center;" class="load_more"  data-value="2"  data-area="{$ticket->email}"   data-action="{$ticket->type}"> <h5>查看更多</h5></a>
-            {/if}
+                {/if}
 
 
+            </div>
+            <!-- /.box-body -->
         </div>
-        <!-- /.box-body -->
-    </div>
-    <!-- /.box -->
+        <!-- /.box -->
     </div>
     <!-- /.col -->
     </div>

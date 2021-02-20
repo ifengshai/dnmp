@@ -1056,7 +1056,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                     return '<div><span class="check_detail">查看</span></div>';
                 },
             },
-            events: {//绑定事件的方法
+            events: {
+                //绑定事件的方法
                 //点击备注查看全部
                 getcontent: {
                     //格式为：方法名+空格+DOM元素

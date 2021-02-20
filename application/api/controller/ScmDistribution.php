@@ -669,6 +669,7 @@ class ScmDistribution extends Scm
      * @return mixed
      * @author lzh
      */
+
     protected function save($item_order_number, $check_status)
     {
         empty($item_order_number) && $this->error(__('子订单号不能为空'), [], 403);
@@ -757,8 +758,8 @@ class ScmDistribution extends Scm
                     $val['item_order_number'] == $item_order_number //子单措施未处理:更改镜框18、更改镜片19、取消20
                 )
 
-                    // && $this->error(__('有工单未处理，无法操作'), [], 405);
-                    && $this->error(__("子订单存在工单" . "<br><b>$codings</b>"), [], 405);
+                // && $this->error(__('有工单未处理，无法操作'), [], 405);
+                && $this->error(__("子订单存在工单" . "<br><b>$codings</b>"), [], 405);
 
                 if ($val['measure_choose_id'] == 21) {
                     $this->error(__("子订单存在工单" . "<br><b>$codings</b>"), [], 405);
@@ -1615,7 +1616,7 @@ class ScmDistribution extends Scm
                 $store_house_where = ['status' => 1, 'type' => 2, 'occupy' => 0, 'fictitious_occupy_time' => ['<', $fictitious_time]];
                 $store_house_info = $this->_stock_house->field('id,coding,subarea')->where($store_house_where)->find();
                 if ($order_process_info['order_prescription_type'] == 1) {//仅镜架优先分配B开头的货架
-                    $store_house_where['subarea'] == 'B';
+                    $store_house_where['subarea'] = 'B';
                     $store_house_info_b = $this->_stock_house->field('id,coding,subarea')->where($store_house_where)->find();
                     if (!empty($store_house_info_b)) {
                         $store_house_info = $store_house_info_b;
@@ -1677,7 +1678,7 @@ class ScmDistribution extends Scm
             ->alias('a')
             ->where('a.id', $item_process_info['order_id'])
             ->join(['fa_order_process' => 'b'], 'a.id=b.order_id', 'left')
-            ->field('a.id,a.increment_id,a.site,a.entity_id,b.store_house_id')
+            ->field('a.id,a.increment_id,b.store_house_id')
             ->find();
         empty($order_process_info) && $this->error(__('主订单不存在'), [], 403);
 
@@ -2055,7 +2056,7 @@ class ScmDistribution extends Scm
                 $result = $this->_new_order_process->allowField(true)->isUpdate(true, ['order_id' => $order_process_info['id']])->save(['store_house_id' => 0]);
                 if ($result != false) {
                     //释放合单库位占用数量
-                    $res = $this->_stock_house->allowField(true)->isUpdate(true, ['id' => $order_process_info['store_house_id']])->save(['occupy' => 0, 'order_id' => 0, 'fictitious_occupy_time' => null]);
+                    $res = $this->_stock_house->allowField(true)->isUpdate(true, ['id' => $order_process_info['store_house_id']])->save(['occupy' => 0, 'order_id' => 0, 'fictitious_occupy_time' => 0]);
                     if ($res != false) {
                         //回退带有异常子单的 合单子单状态
                         if (0 == $order_process_info['combine_status'] && 2 == $type) {
@@ -2169,6 +2170,7 @@ class ScmDistribution extends Scm
      */
     public function order_examine()
     {
+
         $order_id = $this->request->request('order_id');
         empty($order_id) && $this->error(__('主订单ID不能为空'), [], 403);
         $check_status = $this->request->request('check_status');

@@ -2844,7 +2844,6 @@ class WorkOrderList extends Backend
      */
     public function detail($ids = null)
     {
-
         //获取工单配置信息
         $workOrderConfigValue = $this->workOrderConfigValue;
 
@@ -2875,7 +2874,6 @@ class WorkOrderList extends Backend
 
         //子订单措施及数据
         $order_data = $this->model->getOrderItem($row->platform_order, $row->order_item_numbers, $row->work_type, $row);
-
         if(!empty($order_data['item_order_info'])){
             $this->assignconfig('item_order_info', $order_data['item_order_info']);
             unset($order_data['item_order_info']);

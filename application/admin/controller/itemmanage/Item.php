@@ -1035,7 +1035,7 @@ class Item extends Backend
             $v['voogmechic_stock'] = $item_stock[$v['sku']][12];
         }
 
-        $headlist = ['商品sku', '总库存', '可用库存', '虚拟库存Zeelool', '虚拟库存Zeelool', '虚拟库存Voogueme', '虚拟库存Nihao', '虚拟库存Meeloog', '虚拟库存Wesee', '虚拟库存Amazon', '虚拟库存ZeeloolEs', '虚拟库存ZeeloolDe', '虚拟库存ZeeloolJp', '虚拟库存Voogmechic'];
+        $headlist = ['商品sku', '总库存', '可用库存', '虚拟库存Zeelool', '虚拟库存Voogueme', '虚拟库存Nihao', '虚拟库存Meeloog', '虚拟库存Wesee', '虚拟库存Amazon', '虚拟库存ZeeloolEs', '虚拟库存ZeeloolDe', '虚拟库存ZeeloolJp', '虚拟库存Voogmechic'];
         $filename = '商品虚拟库存';
         Excel::writeCsv($list, $headlist, $filename, true);
         die;

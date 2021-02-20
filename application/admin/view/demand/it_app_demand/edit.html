@@ -38,10 +38,10 @@
         height: 100%;
     }
     .right_input .input_item{
-         float: left;
-         width: 84%;
-         height: 50px;
-         line-height: 50px;
+        float: left;
+        width: 84%;
+        height: 50px;
+        line-height: 50px;
     }
     .right_input .input_tiem_label{
         width: 12%;
@@ -84,34 +84,10 @@
     /*右边div -- end*/
 </style>
 
-<form role="form" method="POST" data-toggle="validator"  action="">
+<form role="form" method="POST" data-toggle="validator" id="demand_edit" action="">
+    <input type="hidden" name="row[id]" value="{$row.id}">
+    <input type="hidden" name="row[entry_user_id]" value="{$row.entry_user_id}">
     <div class="left_input">
-<!--        <div class="input_item">-->
-<!--            <label class="input_tiem_label">项目：</label>-->
-<!--            <span class="input_tiem_span">-->
-<!--                {:Form::select('row[site]', config('demand.site'), null, ['class'=>'selectpicker select_input', 'data-rule'=>'required','title'=>'请选择'])}-->
-<!--            </span>-->
-<!--        </div>-->
-<!--        <div class="input_item">-->
-<!--            <label class="input_tiem_label">设备端：</label>-->
-<!--            <span class="input_tiem_span">-->
-<!--                {:Form::select('row[site_type][]', config('demand.siteType'), null, ['class'=>'selectpicker select_input', 'data-rule'=>'required','title'=>'请选择','multiple'=>true])}-->
-<!--            </span>-->
-<!--        </div>-->
-<!--        <div class="input_item">-->
-<!--            <label class="input_tiem_label">抄送：</label>-->
-<!--            <span class="input_tiem_span">-->
-<!--                {:Form::select('row[copy_to_user_id][]', config('demand.copyToUserId'), null, ['class'=>'selectpicker select_input', null,'data-live-search' => true,'multiple'=>true])}-->
-<!--            </span>-->
-<!--        </div>-->
-<!--        <div class="input_item">-->
-<!--            <label class="input_tiem_label">类型：</label>-->
-<!--            <span class="input_tiem_span">-->
-<!--                {:Form::select('row[type]', config('demand.type'), null, ['class'=>'selectpicker select_input', 'data-rule'=>'required','title'=>'请选择'])}-->
-
-<!--            </span>-->
-<!--        </div>-->
-
         <div class="input_item">
             <label class="input_tiem_label">项目：</label>
             <span class="input_tiem_span">
@@ -148,61 +124,91 @@
                 {:Form::select('row[important_reasons][]', config('demand.important_reasons'), $row['important_reasons'], ['class'=>'selectpicker select_input','title'=>'请选择','multiple'=>true])}
             </span>
         </div>
-
-
-
-
-
-
         <div class="input_item">
             <label class="input_tiem_label2">
-                <input name="row[is_emergency]" type="checkbox" value="1"><span>紧急需求</span>
+                <input name="row[is_emergency]" type="checkbox" value="1" {if $row['is_emergency'] == 1} checked {/if}><span>紧急需求</span>
             </label>
         </div>
 
-        {if $demand_type == 2}
         <div class="input_item">
-            <label class="input_tiem_label ">任务周期：</label>
+            <label class="input_tiem_label">重要程度：</label>
             <span class="input_tiem_span">
-<!--                <input name="row[node_time]" class="select_input" data-rule="required" type="text" value="" style="height: 31px;" placeholder="输入整数(单位：天)">-->
-                <input  style="width: 60%" class="form-control datetimepicker form-control" data-date-format="YYYY-MM-DD" data-use-current="true" name="row[node_time]" type="text" >
+                {:Form::select('row[importance]', config('demand.importance'), $row['importance'], ['class'=>'selectpicker select_input','title'=>'请选择'])}
             </span>
         </div>
-        {/if}
+        <div class="input_item" >
+            <label class="input_tiem_label">紧急程度：</label>
+            <span class="input_tiem_span">
+                {:Form::select('row[degree_of_urgency]', config('demand.degree_of_urgency'), $row['degree_of_urgency'], ['class'=>'selectpicker select_input', 'title'=>'请选择'])}
+            </span>
+        </div>
+        <div class="input_item" >
+            <label class="input_tiem_label">开发难度：</label>
+            <span class="input_tiem_span">
+                {:Form::select('row[development_difficulty]', config('demand.development_difficulty'), $row['development_difficulty'], ['class'=>'selectpicker select_input', 'title'=>'请选择'])}
+            </span>
+        </div>
+        <!--        if $type == 'pm_audit  和产品沟通过 任务周期任何状态下都可修改-->
+        <div class="input_item">
+            <label class="input_tiem_label">优先级：</label>
+            <span class="input_tiem_span">
+
+                {:Form::select('row[priority]', config('demand.priority'), $row['priority'], ['class'=>'selectpicker select_input','title'=>'请选择'])}
+            </span>
+        </div>
+
+        <div class="input_item">
+            <label class="input_tiem_label ">任务周期：</label>
+            <span class="input_tiem_span" >
+                {if $row['node_time'] !== null}
+                  <input  style="width: 60%" class="form-control datetimepicker form-control" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[node_time]" type="text" value="{$row.node_time|datetime}">
+                {else/}
+                  <input  style="width: 60%" class="form-control datetimepicker form-control" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[node_time]" type="text">
+                {/if}
+          </span>
+        </div>
+
     </div>
 
     <div class="right_input">
         <div class="input_item">
             <label class="input_tiem_label ">标题：</label>
             <p class="input_tiem_p">
-                <input name="row[title]" data-rule="required" type="text">
+                <input name="row[title]" data-rule="required" type="text" value="{$row['title']}">
             </p>
         </div>
 
         <div class="input_item2">
             <label class="input_tiem_label2">内容：</label>
             <p class="input_tiem_p2">
-                <textarea name="row[content]"></textarea>
+                <textarea name="row[content]">{$row['content']}</textarea>
             </p>
         </div>
+
         <div class="input_item2">
             <label class="input_tiem_label2">备注：</label>
             <p class="input_tiem_p2">
-                <textarea name="row[product_remarks]"></textarea>
+                <textarea name="row[product_remarks]">{$row['product_remarks']}</textarea>
             </p>
         </div>
+
         <div class="input_item2">
             <label class="input_tiem_label2">附件：</label>
             <p class="input_tiem_p2">
-                <textarea class="editor_nkeditor input_tiem_p2_text form-control" name="row[accessory]" ></textarea>
+                <textarea class="editor_nkeditor input_tiem_p2_text form-control" name="row[accessory]" >{$row['accessory']}</textarea>
             </p>
         </div>
     </div>
 
     <div class="form-group layer-footer">
         <label class="control-label col-xs-12 col-sm-2"></label>
-        <div class="col-xs-12 col-sm-8" style="width: 100%;text-align: right;">
-            <button type="submit" class="btn btn-success btn-embossed disabled" style="width: 80px;">{:__('OK')}</button>
+        <div class="col-xs-12 col-sm-8" style="width: 99.9%!important;">
+            {if $pm_status || $admin_id == $row['entry_user_id']}<!--需求 任何状态下都可编辑  所以将已完成剔除 -->
+            <button type="submit" value="edit" class="btn btn-sub" style='background-color: #333333;width: 150px;color: white;font-size: 14px;font-weight: 700;float: right;'>{:__('修  改')}</button>
+            {else}
+            <button type="submit" value="edit"  class="btn btn-sub" style='background-color: #333333;width: 150px;color: white;font-size: 14px;font-weight: 700;float: right;'>{:__('修  改')}</button>
+            {/if}
+
         </div>
     </div>
 </form>

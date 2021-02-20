@@ -16,6 +16,11 @@ class SupplyData extends Backend
     public function _initialize()
     {
         parent::_initialize();
+        $this->model = new \app\admin\model\itemmanage\Item;
+        $this->item = new \app\admin\model\warehouse\ProductBarCodeItem;
+        $this->productGrade = new \app\admin\model\ProductGrade();
+        $this->order = new \app\admin\model\order\order\NewOrder();
+        $this->process = new \app\admin\model\order\order\NewOrderProcess;
     }
     /**
      * 呆滞数据
@@ -39,8 +44,6 @@ class SupplyData extends Backend
         $arr8 = array();
         $grades = Db::name('product_grade')->field('true_sku,grade')->select();
         foreach ($grades as $key=>$value){
-            $this->model = new \app\admin\model\itemmanage\Item;
-            $this->item = new \app\admin\model\warehouse\ProductBarCodeItem;
             //该品实时库存
             $real_time_stock = $this->model->where('sku',$value['true_sku'])->where('is_del',1)->where('is_open',1)->value('sum(stock)-sum(distribution_occupy_stock) as result');
             //该品库存金额
@@ -188,7 +191,6 @@ class SupplyData extends Backend
                 }
             }
         }
-        $this->productGrade = new \app\admin\model\ProductGrade();
         $gradeSkuStock = $this->productGrade->getSkuStock();
         //计算产品等级的数量
         $a1_stock_num = $gradeSkuStock['aa_stock_num'];
@@ -303,5 +305,61 @@ class SupplyData extends Backend
         $days = Db::name('sku_sales_num')->where($map)->count();
         $data['days'] = $days > 30 ? 30 : $days;
         return $data;
+    }
+    //数据大屏及时率数据
+    public function intime_data(){
+        $start_time = strtotime(date('Y-m-d', strtotime("-30 day")));
+        $end_time = strtotime(date('Y-m-d 23:59:59', strtotime("-1 day")));
+        $date_time = $this->order->query("SELECT FROM_UNIXTIME(payment_time, '%Y-%m-%d') AS date_time FROM `fa_order` where payment_time between ".$start_time." and ".$end_time." GROUP BY FROM_UNIXTIME(payment_time, '%Y-%m-%d') order by FROM_UNIXTIME(payment_time, '%Y-%m-%d') asc");
+        //查询时间
+        foreach ($date_time as $val) {
+            $is_exist = Db::name('datacenter_day_order')->where('day_date', $val['date_time'])->value('id');
+            $info = $this->getIntimeOrder($val['date_time']);
+            if (!$is_exist) {
+                //插入数据
+                $arr = [];
+                $arr['day_date'] = $val['date_time'];
+                $arr['order_num'] = $info['order_num'];
+                $arr['intime_rate'] = $info['intime_rate'];
+                Db::name('datacenter_day_order')->insert($arr);
+                echo $val['date_time'].' is ok'."\n";
+                usleep(10000);
+            }else{
+                $arr = [];
+                //更新数据
+                $arr['order_num'] = $info['order_num'];
+                $arr['intime_rate'] = $info['intime_rate'];
+                Db::name('datacenter_day_order')->where('day_date',$val['date_time'])->update($arr);
+                echo $val['date_time'].' update is ok'."\n";
+                usleep(10000);
+            }
+        }
+    }
+    //获取及时率中的订单数和及时率
+    public function getIntimeOrder($date)
+    {
+        $arr = [];
+        //订单数
+        $start = strtotime($date);
+        $end = strtotime($date.' 23:59:59');
+        $where['o.payment_time'] = ['between',[$start,$end]];
+        $where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+        $arr['order_num'] = $this->order->alias('o')->where($where)->count();
+
+        $map1['p.order_prescription_type'] = 1;
+        $map2['p.order_prescription_type'] = 2;
+        $map3['p.order_prescription_type'] = 3;
+
+        $sql1 = $this->process->alias('p')->join('fa_order o','p.increment_id = o.increment_id')->field('(p.delivery_time-o.payment_time)/3600 AS total')->where($where)->where($map1)->group('p.order_id')->buildSql();
+        $count1 = $this->process->table([$sql1=>'t2'])->value('sum( IF ( total <= 24, 1, 0) ) AS a');
+
+        $sql2 = $this->process->alias('p')->join('fa_order o','p.increment_id = o.increment_id')->field('(p.delivery_time-o.payment_time)/3600 AS total')->where($where)->where($map2)->group('p.order_id')->buildSql();
+        $count2 = $this->process->table([$sql2=>'t2'])->value('sum( IF ( total <= 72, 1, 0) ) AS a');
+
+        $sql3 = $this->process->alias('p')->join('fa_order o','p.increment_id = o.increment_id')->field('(p.delivery_time-o.payment_time)/3600 AS total')->where($where)->where($map3)->group('p.order_id')->buildSql();
+        $count3 = $this->process->table([$sql3=>'t2'])->value('sum( IF ( total <= 168, 1, 0) ) AS a');
+        $untimeout_count = $count1 + $count2 + $count3;
+        $arr['intime_rate'] = $arr['order_num'] ? round($untimeout_count/$arr['order_num']*100,2) : 0;
+        return $arr;
     }
 }
