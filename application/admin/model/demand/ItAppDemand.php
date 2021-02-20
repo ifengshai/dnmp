@@ -39,10 +39,6 @@ class ItAppDemand extends Model
         return is_numeric($value) ? date("Y-m-d H:i:s", $value) : $value;
     }
 
-    protected function setNodeTimeAttr($value)
-    {
-        return $value === '' ? null : ($value && !is_numeric($value) ? strtotime($value) : $value);
-    }
 
 
 }

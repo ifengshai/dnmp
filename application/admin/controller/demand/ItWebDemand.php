@@ -1171,7 +1171,6 @@ class ItWebDemand extends Backend
                 $res = $this->model->allowField(true)->save($add, ['id' => $params['id']]);
                 if ($res) {
                     //如果产品通过审核  并且该需求需要app协助
-
                     if ($params['pm_audit_status'] == 3 && in_array('3',$params['site_type'])) {
                         //将该需求存储到app表
                         $app_add['it_web_demand_id'] = $params['id'];//对应it_web表id

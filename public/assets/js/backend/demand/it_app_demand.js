@@ -8,7 +8,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                     index_url: 'demand/it_app_demand/index' + location.search,
                     add_url: 'demand/it_app_demand/add',
                     edit_url: 'demand/it_app_demand/edit',
-                    del_url: 'demand/it_app_demand/del',
                     multi_url: 'demand/it_app_demand/multi',
                     table: 'it_app_demand',
                 }
@@ -35,12 +34,44 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                             formatter: Controller.api.formatter.gettitle,
                         },
                         {field: 'node_time', title: __('预计完成时间'), operate: false},
-                        {field: 'develop_finish_status', title: __('开发进度'), operate: false},
-                        {field: 'test_is_finish', title: __('测试完成'), searchList: { 0: '否', 1: '是' },},
-                        {field: 'test_status', title: __('已上线'), operate: false},
+                        {field: 'develop_finish_status', title: __('开发完成'), searchList: { 0: '否', 1: '是' },},
+                        {field: 'test_is_finish', title: __('测试完成'), searchList: { 0: '否', 1: '是' }},
+                        {field: 'online_status', title: __('是否上线'), searchList: { 0: '否', 1: '是' }},
                         {field: 'version_number', title: __('上线版本号')},
-                        {field: 'version_number', title: __('完成时间节点'), operate: false},
-                        {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate}
+                        {
+                            field: 'version_number',
+                            title: __('完成时间节点'),
+                            operate: false,
+                            formatter: function (value, rows) {
+                                var all_user_name = '';
+                                if (rows.develop_finish_time) {
+                                    all_user_name += '<span class="all_user_name">开发：<b>' + rows.develop_finish_time + '</b></span><br>';
+                                }
+
+                                if (rows.test_finish_time) {
+                                    all_user_name += '<span class="all_user_name">测试：<b>' + rows.test_finish_time + '</b></span><br>';
+                                }
+
+                                if (rows.online_finish_time) {
+                                    all_user_name += '<span class="all_user_name">上线：<b>' + rows.online_finish_time + '</b></span><br>';
+                                }
+                                if (all_user_name == '') {
+                                    all_user_name = '-';
+                                }
+
+                                return all_user_name;
+                            },
+
+                        },
+                        {
+                            field: 'operate',
+                            title: __('Operate'),
+                            events: Controller.api.events.get_develop_status,
+                            formatter: Controller.api.formatter.get_develop_status,
+                            operate: false
+
+
+                        }
                     ]
                 ]
             });
@@ -159,6 +190,89 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
             });
 
         },
+        /*修改预期时间*/
+        operation_show: function () {
+            Controller.api.bindevent();
+            $('#change_node_time').on('dp.change', function(e){    //dp.change
+                var node_time = $('#change_node_time').val();
+                var value_id = $('#ids').val();
+                $.ajax({
+                    type: "POST",
+                    url: "demand/it_app_demand/expected_time_of_modification",
+                    dataType: "json",
+                    cache: false,
+                    async: false,
+                    data: {
+                        id: value_id,
+                        node_time: node_time,
+                    },
+                    success: function (json) {
+                        Toastr.success(json.msg);
+                        parent.$('#table').bootstrapTable('refresh');
+                    }
+                });
+            });
+
+            /*上线版本号*/
+            $(document).on('click', "#version_number_sub", function () {
+                var version_number = $('#version_number').val();
+                var value_id = $(this).val();
+                var url = "demand/It_app_demand/confirm_version_number";
+                if (version_number == ''){
+                    layer.msg('版本号不能为空');
+                    return  false;
+                }
+                $.ajax({
+                    type: "POST",
+                    url: url,
+                    dataType: "json",
+                    cache: false,
+                    async: false,
+                    data: {
+                        id: value_id,
+                        version_number: version_number,
+                    },
+                    success: function (json) {
+                        Toastr.success(json.msg);
+
+                    }
+                });
+            });
+
+            /*开发完成  -- 测试完成  -- 上线操作*/
+
+            $(document).on('click', "#complete", function () {
+                var status = $(this).data('value')
+                if (status == 'development') {
+                    var url = "demand/It_app_demand/development_iscomplete";
+                }
+                if (status == 'test') {
+                    var url = "demand/It_app_demand/testing_iscomplete";
+                }
+                if (status == 'online') {
+                    $('#pm_audit_status').val(2);
+                    var url = "demand/It_app_demand/online_iscomplete";
+                }
+                var value_id = $('#ids').val();
+                layer.confirm('确定执行该操作吗？',
+                    { btn: ['确定', '取消'] },
+                    function () {
+                        $.ajax({
+                            type: "POST",
+                            url: url,
+                            dataType: "json",
+                            cache: false,
+                            async: true,
+                            data: {id: value_id},
+                            success: function (json) {
+                                layer.closeAll('dialog');
+                                Toastr.success(json.msg);
+                                parent.$('#table').bootstrapTable('refresh');
+                            }
+                        });
+                    }, function () { });
+                });
+        },
         api: {
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
@@ -227,28 +341,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                 },
                 //开发进度点击弹窗
                 get_develop_status: function (value, row, index) {
-                    // if (row.status >= 2) {
-                    if (row.develop_finish_status == 1) {
-                        if (row.status ==1){
-                            return '<div><span>未响应</span></div>';
-                        }else{
-                            return '<div><span class="check_develop_status status1_color">未响应</span></div>';
-                        }
-
-                    } else if (row.develop_finish_status == 2) {
-                        return '<div><span class="check_develop_status status1_color">开发中</span></div>';
-                    } else if (row.develop_finish_status == 3) {
-                        if (row.status == 5) {
-                            return '<div><span class="check_develop_status status4_color">开发完成</span></div>';
-                        } else {
-                            return '<div><span class="check_develop_status status3_color">开发完成</span></div>';
-                        }
-                    } else {
-                        return '<div><span class="check_develop_status status3_color">拒绝</span></div>';
-                    }
-                    // } else {
-                    //     return '-';
-                    // }
+                    return '<div><span class="check_develop_status status4_color">操作</span></div>';
                 },
                 //测试进度点击弹窗
                 get_test_status: function (value, row, index) {
@@ -378,10 +471,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                     }
                 },
 
-                //开发进度，弹出窗口
+                //操作窗口
                 get_develop_status: {
                     'click .check_develop_status': function (e, value, row, index) {
-                        Backend.api.open('demand/it_web_demand/distribution/ids/' + row.id, __('开发进度'), { area: ['80%', '55%'] });
+                        Backend.api.open('demand/it_app_demand/operation_show/ids/' + row.id, __('操作'), { area: ['80%', '55%'] });
                     }
                 },
                 //测试进度

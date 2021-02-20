@@ -2,6 +2,7 @@
 
 namespace app\admin\controller\demand;
 
+use app\api\controller\Ding;
 use app\common\controller\Backend;
 use Think\Db;
 
@@ -18,7 +19,6 @@ class ItAppDemand extends Backend
      * @var \app\admin\model\demand\ItAppDemand
      */
     protected $model = null;
-
     public function _initialize()
     {
         parent::_initialize();
@@ -68,6 +68,23 @@ class ItAppDemand extends Backend
 //
 //            }
             $list = collection($list)->toArray();
+            foreach ($list as $key=>$value){
+                if ($value['develop_finish_status'] ==1){
+                    $list[$key]['develop_finish_status'] = '是';
+                }else{
+                    $list[$key]['develop_finish_status'] = '否';
+                }
+                if ($value['test_is_finish'] ==1){
+                    $list[$key]['test_is_finish'] = '是';
+                }else{
+                    $list[$key]['test_is_finish'] = '否';
+                }
+                if ($value['online_status'] ==1){
+                    $list[$key]['online_status'] = '是';
+                }else{
+                    $list[$key]['online_status'] = '否';
+                }
+            }
 
             $result = array("total" => $total, "rows" => $list);
 
@@ -141,7 +158,129 @@ class ItAppDemand extends Backend
     /**
      * 需求操作
      */
-    public function operation_show(){
+    public function operation_show($ids = null){
+        $row = $this->model->get($ids);
+        $row = $row->toArray();
+        $this->assign('row',$row);
         return $this->view->fetch();
+    }
+
+
+    /**
+     * 修改预期时间
+     * 仅产品组可以操作
+     */
+
+    public function expected_time_of_modification(){
+        if ($this->request->isPost()){
+            $params = input('param.');
+            if (empty($params['id'])){
+                $this->error('缺少重要参数');
+            }
+            $app_demand = $this->model->find($params['id']);
+            $app_demand->update_time = date('Y-m-d H:i:s',time());
+            $app_demand->node_time = $params['node_time'];
+            if ($app_demand->save()){
+                $this->success('操作成功');
+            }else{
+                $this->error('操作失败');
+            }
+        }
+    }
+
+
+    /**
+     *确认版本号
+     * 仅运营组可以操作
+     */
+    public function confirm_version_number(){
+        if ($this->request->isPost()){
+            $params = input('param.');
+            if (empty($params['id'])){
+                $this->error('缺少重要参数');
+            }
+            $app_demand = $this->model->find($params['id']);
+            $app_demand->update_time = date('Y-m-d H:i:s',time());
+            $app_demand->version_number = $params['version_number'];
+
+            if ($app_demand->save()){
+                $this->success('操作成功','It_app_demand/index');
+            }else{
+                $this->error('操作失败');
+            }
+        }
+    }
+
+    /**
+     *开发完成
+     * 仅开发组可以操作
+     */
+    public function development_iscomplete(){
+        if ($this->request->isPost()){
+            $params = input('param.');
+            if (empty($params['id'])){
+                $this->error('缺少重要参数');
+            }
+            $app_demand = $this->model->find($params['id']);
+            $app_demand->update_time = date('Y-m-d H:i:s',time());
+            $app_demand->develop_finish_time = date('Y-m-d H:i:s',time());
+            $app_demand->develop_finish_status = 1;
+
+            if ($app_demand->save()){
+                //开发人员完成 推送给测试主管
+                Ding::cc_ding('350', '任务ID:' . $params['id'] . '+任务已开发完毕，请安排人员测试', $app_demand->title, $this->request->domain() . url('index') . '?ref=addtabs');
+                $this->success('操作成功');
+            }else{
+                $this->error('操作失败');
+            }
+        }
+    }
+
+    /**
+     *测试完成
+     */
+    public function testing_iscomplete(){
+        if ($this->request->isPost()){
+            $params = input('param.');
+            if (empty($params['id'])){
+                $this->error('缺少重要参数');
+            }
+            $app_demand = $this->model->find($params['id']);
+            $app_demand->update_time = date('Y-m-d H:i:s',time());
+            $app_demand->test_finish_time = date('Y-m-d H:i:s',time());
+            $app_demand->test_is_finish = 1;
+
+            if ($app_demand->save()){
+                //测试完成后 钉钉推送产品
+                Ding::cc_ding('350', '任务ID:' . $params['id'] . '+任务已测试完毕，准备上线', $app_demand->title, $this->request->domain() . url('index') . '?ref=addtabs');
+                $this->success('操作成功','');
+            }else{
+                $this->error('操作失败');
+            }
+        }
+    }
+    /**
+     *上线操作
+     *
+     */
+    public function online_iscomplete(){
+        if ($this->request->isPost()){
+            $params = input('param.');
+            if (empty($params['id'])){
+                $this->error('缺少重要参数');
+            }
+            $app_demand = $this->model->find($params['id']);
+            $app_demand->update_time = date('Y-m-d H:i:s',time());
+            $app_demand->online_finish_time = date('Y-m-d H:i:s',time());
+            $app_demand->online_status = 1;
+
+            if ($app_demand->save()){
+                //上线后 钉钉推送给提出人
+                Ding::cc_ding('350', '任务ID:' . $params['id'] . '+任务完成，已提交上线', $app_demand->title, $this->request->domain() . url('index') . '?ref=addtabs');
+                $this->success('操作成功');
+            }else{
+                $this->error('操作失败');
+            }
+        }
     }
 }
