@@ -1539,13 +1539,8 @@ class ScmDistribution extends Scm
                 }
             }
             foreach ($check_work_order as $val) {
-                (3 == $val['measure_choose_id'] //主单取消措施未处理
-                    ||
-                    !empty($val['item_order_number']) //子单措施未处理:更改镜框18、更改镜片19、取消20
-                )
-                    // && $this->error(__('有工单未处理，无法操作'), [], 405);
-
-                    && $this->error(__("子订单存在工单"), [], 405);
+                3 == $val['measure_choose_id'] && $this->error(__("子订单存在工单"), [], 405); //主单取消措施未处理
+                
                 if ($val['measure_choose_id'] == 21) {
                     $this->error(__("子订单存在工单"), [], 405);
                 }
