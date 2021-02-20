@@ -265,13 +265,22 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                             async: true,
                             data: {id: value_id},
                             success: function (json) {
-                                Toastr.success(json.msg,function (){
-                                    parent.$('#table').bootstrapTable('refresh');
+                                if (json.code ==1){
+                                    Toastr.success(json.msg)
                                     var index = parent.layer.getFrameIndex(window.name);
                                     parent.layer.close(index);
-                                });
+                                }else{
+                                    Toastr.error(json.msg)
+                                }
+                                layer.close(index);
+                                parent.$('#table').bootstrapTable('refresh');
+                                // Toastr.success(json.msg,function (){
+                                //     parent.$('#table').bootstrapTable('refresh');
+                                //     var index = parent.layer.getFrameIndex(window.name);
+                                //     parent.layer.close(index);
+                                // });
+                            },
 
-                            }
                         });
                     }, function () { });
                 });

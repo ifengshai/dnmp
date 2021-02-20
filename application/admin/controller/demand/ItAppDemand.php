@@ -252,7 +252,9 @@ class ItAppDemand extends Backend
             $app_demand->update_time = date('Y-m-d H:i:s',time());
             $app_demand->test_finish_time = date('Y-m-d H:i:s',time());
             $app_demand->test_is_finish = 1;
-
+            if ($app_demand->develop_finish_status == 0){
+                $this->error('开发还未完成，无法执行确认完成操作');
+            }
             if ($app_demand->save()){
                 //测试完成后 钉钉推送产品
                 Ding::cc_ding('350', '任务ID:' . $params['id'] . '+任务已测试完毕，准备上线', $app_demand->title, $this->request->domain() . url('index') . '?ref=addtabs');
@@ -276,7 +278,9 @@ class ItAppDemand extends Backend
             $app_demand->update_time = date('Y-m-d H:i:s',time());
             $app_demand->online_finish_time = date('Y-m-d H:i:s',time());
             $app_demand->online_status = 1;
-
+            if ($app_demand->test_is_finish ==0){
+                $this->error('测试还未完成测试，无法执行确认完成操作');
+            }
             if ($app_demand->save()){
                 //上线后 钉钉推送给提出人
                 Ding::cc_ding('350', '任务ID:' . $params['id'] . '+任务完成，已提交上线', $app_demand->title, $this->request->domain() . url('index') . '?ref=addtabs');
