@@ -50,7 +50,7 @@
 
 <div class="all_div">
 
-    <form role="form" method="POST" id="form_web_group" data-toggle="validator" action="">
+    <form role="form" method="POST" id="operation_show" data-toggle="validator" action="">
         <input type="hidden" name="row[id]" value="{$row.id}" id="ids">
         <input type="hidden" name="row[web_status]" value="1">
         <input type="hidden" name="row[type]" id="input_web_group" value="1"><!--1:响应，修改；2：完成-->
@@ -59,9 +59,9 @@
                 <label class="input_tiem_label">修改预期时间：</label>
                 <span class="input_tiem_span">
                     {if $row['node_time'] !== null}
-                     <input  class="selectpicker datetimepicker select_input" id="change_node_time" data-date-format="YYYY-MM-DD" data-use-current="true" name="row[node_time]" type="text" value="{$row.node_time|datetime}">
+                     <input  class="selectpicker datetimepicker select_input" id="change_node_time" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[node_time]" type="text" value="{$row.node_time|datetime}">
                        {else/}
-                     <input  class="selectpicker datetimepicker select_input"   id="change_node_time" data-date-format="YYYY-MM-DD" data-use-current="true" name="row[node_time]" type="text" >
+                     <input  class="selectpicker datetimepicker select_input"   id="change_node_time" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[node_time]" type="text" >
                      {/if}
 
                 </span>
@@ -71,7 +71,7 @@
                 <label class="input_tiem_label">上线版本号：</label>
                 <span class="input_tiem_span">
                     <input type="text" id="version_number" required name="row['version_number']" style="width: 38%;height: 35px" value="{$row['version_number']}">
-                    <button type="submit" id="version_number_sub" class="btn btn-sub"  value="{$row['id']}" style='background-color: #03A7EF;width: 27%;height:37px;color: white;font-size: 14px;font-weight: 700;'>{:__('确定')}</button>
+                    <button type="button" id="version_number_sub" class="btn btn-sub"  value="{$row['id']}" style='background-color: #03A7EF;width: 27%;height:37px;color: white;font-size: 14px;font-weight: 700;'>{:__('确定')}</button>
 
                 </span>
             </div>
