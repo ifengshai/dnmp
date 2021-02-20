@@ -34,9 +34,27 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                             formatter: Controller.api.formatter.gettitle,
                         },
                         {field: 'node_time', title: __('预计完成时间'), operate: false},
-                        {field: 'develop_finish_status', title: __('开发完成'), searchList: { 0: '否', 1: '是' },},
-                        {field: 'test_is_finish', title: __('测试完成'), searchList: { 0: '否', 1: '是' }},
-                        {field: 'online_status', title: __('是否上线'), searchList: { 0: '否', 1: '是' }},
+                        {
+                            field: 'develop_finish_status',
+                            title: __('开发完成'),
+                            searchList: { 0: '否', 1: '是' },
+                            custom: { '1': 'black', '0': 'red'},
+                            formatter: Table.api.formatter.status
+                        },
+                        {
+                            field: 'test_is_finish',
+                            title: __('测试完成'),
+                            searchList: { 0: '否', 1: '是' },
+                            custom: { '1': 'black', '0': 'red'},
+                            formatter: Table.api.formatter.status
+                        },
+                        {
+                            field: 'online_status',
+                            title: __('是否上线'),
+                            searchList: { 0: '否', 1: '是' },
+                            custom: { '1': 'black', '0': 'red'},
+                            formatter: Table.api.formatter.status
+                        },
                         {field: 'version_number', title: __('上线版本号')},
                         {
                             field: 'version_number',
@@ -256,7 +274,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                 var value_id = $('#ids').val();
                 layer.confirm('确定执行该操作吗？',
                     { btn: ['确定', '取消'] },
-                    function (index) {
+                    function () {
                         $.ajax({
                             type: "POST",
                             url: url,
@@ -274,7 +292,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                                 }
                                 layer.close(index);
                                 parent.$('#table').bootstrapTable('refresh');
-                                //
                                 // Toastr.success(json.msg,function (){
                                 //     parent.$('#table').bootstrapTable('refresh');
                                 //     var index = parent.layer.getFrameIndex(window.name);
