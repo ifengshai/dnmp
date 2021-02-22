@@ -132,6 +132,7 @@ class DataMarket extends Backend
                 }
                 $time_arr = array_column($data,'day_date');
                 array_multisort($time_arr,SORT_DESC,$data);
+                dump($data);exit;
            /* }else{
                 $data = $cache_data;
             }*/
