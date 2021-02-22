@@ -102,8 +102,8 @@ class DataMarket extends Backend
             $time_str = $params['time_str'];
             if ($time_str) {
                 $createat = explode(' ', $time_str);
-                $start = date('Y-m',$createat[0]);
-                $end = date('Y-m',$createat[3]);
+                $start = date('Y-m',strtotime($createat[0]));
+                $end = date('Y-m',strtotime($createat[3]));
             } else {
                 $start = date('Y-m', strtotime('-12 months'));
                 $end   = date('Y-m');
