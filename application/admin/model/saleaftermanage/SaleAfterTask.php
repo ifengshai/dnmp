@@ -777,9 +777,9 @@ class SaleAfterTask extends Model
             if (!$result) {
                 return false;
             }
-            Log::write("搜索订单数据");
-            Log::write("$result");
-            Log::write("$order_platform");
+//            Log::write("搜索订单数据");
+//            Log::write("$result");
+//            Log::write("$order_platform");
             foreach ($result as $k => $v) {
                 //$result[$k]['item'] = Db::connect($db)->table('sales_flat_order_item')->where('order_id','=',$v['entity_id'])->field('item_id,name,sku,qty_ordered,product_options')->select();
                 if ($order_platform == 1) {
@@ -801,9 +801,9 @@ class SaleAfterTask extends Model
 
 //                if (!empty($result[$k]['item'][$k]['sku'])){
                 foreach ($result[$k]['item'] as $key=>$value){
-                    Log::write("输出每次");
-                    Log::write($value['order_id']);
-                    Log::write($value['item_id']);
+//                    Log::write("输出每次子订单信息");
+//                    Log::write($value['order_id']);
+//                    Log::write($value['item_id']);
                     $result[$k]['item'][$key]['order_number'] = Db::connect('database.db_mojing_order')->table('fa_order')->where('id',$value['order_id'])->value('increment_id');
                     //子订单号
                     $result[$k]['item'][$key]['item_order_number'] = Db::connect('database.db_mojing_order')->table('fa_order_item_process')
