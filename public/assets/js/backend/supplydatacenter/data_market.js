@@ -139,8 +139,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                                 }
                             },
                             xAxis: {
-                                type: 'category',
-                                data: []
+                                type: 'category'
                             },
                             yAxis: {
                                 type: 'value'
