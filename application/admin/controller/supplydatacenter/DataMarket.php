@@ -39,6 +39,7 @@ class DataMarket extends Backend
         $this->item = new \app\admin\model\warehouse\ProductBarCodeItem;
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku();
         $this->productAllStockLog = new \app\admin\model\ProductAllStock();
+        $this->supplymonth = new \app\admin\model\supplydatacenter\SupplyMonth();
     }
     /**
      * 显示资源列表
@@ -94,7 +95,7 @@ class DataMarket extends Backend
         $this->view->assign(compact('stock_overview','stock_measure_overview','stock_level_overview','stock_level_overview2','purchase_overview','logistics_completed_overview','magentoplatformarr','stock_age_overview','time_str1','time_str2','time_str3'));
         return $this->view->fetch();
     }
-    //库存变化折线图
+    //库存变化
     public function stock_change_bar()
     {
         if ($this->request->isAjax()) {
@@ -108,30 +109,10 @@ class DataMarket extends Backend
                 $start = date('Y-m', strtotime('-12 months'));
                 $end   = date('Y-m');
             }
+            $where['day_date'] = ['between',[$start,$end]];
             $cache_data = Cache::get('Supplydatacenter_datamarket'.$time_str.md5(serialize('stock_change_bar')));
             if (!$cache_data) {
-                $data = array();
-                while($end>$start){
-                    $endmonth = $end;
-                    $end = date('Y-m',strtotime("$endmonth -1 month"));
-                    $startday = $end.'-01';
-                    $endday = $end.'-'.date('t', strtotime($startday));
-                    $start_stock = $this->productAllStockLog->where("DATE_FORMAT(createtime,'%Y-%m-%d')='$startday'")->field('id,allnum')->find();
-                    //判断是否有月初数据
-                    if($start_stock['id']) {
-                        //判断是否有月末数据
-                        $end_stock = $this->productAllStockLog->where("DATE_FORMAT(createtime,'%Y-%m-%d')='$endday'")->field('id,allnum')->find();
-                        if ($end_stock['id']) {
-                            //如果有月末数据，（月初数据+月末数据）/2
-                            $stock = round(($start_stock['allnum'] + $end_stock['allnum']) / 2, 2);
-                            $arr['day_date'] = $end;
-                            $arr['stock'] = $stock;
-                            $data[] = $arr;
-                        }
-                    }
-                }
-                $time_arr = array_column($data,'day_date');
-                array_multisort($time_arr,SORT_ASC,$data);
+                $data = $this->supplymonth->where($where)->field('id,avg_stock,day_date')->order('day_date','asc')->select();
             }else{
                 $data = $cache_data;
             }
@@ -143,6 +124,34 @@ class DataMarket extends Backend
                     'name' => '平均库存',
                     'type' => 'bar',
                     'data' => array_column($data,'stock')
+                ],
+            ];
+            return json(['code' => 1, 'data' => $json]);
+        }
+    }
+    //呆滞库存变化
+    public function dull_stock_change_barline()
+    {
+        if ($this->request->isAjax()) {
+            $params = $this->request->param();
+            $time_str = $params['time_str'];
+            if ($time_str) {
+                $createat = explode(' ', $time_str);
+                $start = date('Y-m',$createat[0]);
+                $end = date('Y-m',$createat[3]);
+            } else {
+                $start = date('Y-m', strtotime('-12 months'));
+                $end   = date('Y-m');
+            }
+            $where['day_date'] = ['between',[$start,$end]];
+            $data = $this->supplymonth->where($where)->field('id,avg_dull_stock,avg_rate,day_date')->order('day_date','asc')->select();
+            $json['xColumnName'] = array_column($data,'day_date');
+            $json['column'] = ['平均呆滞库存'];
+            $json['columnData'] = [
+                [
+                    'name' => '平均呆滞库存',
+                    'type' => 'bar',
+                    'data' => array_column($data,'avg_dull_stock')
                 ],
             ];
             return json(['code' => 1, 'data' => $json]);
