@@ -524,6 +524,9 @@ class Wangpenglei extends Backend
      */
     public function derver_data()
     {
+        $this->orderitemprocess = new \app\admin\model\order\order\NewOrderItemProcess();
+        $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
+        $this->item = new \app\admin\model\itemmanage\Item;
         $sql = "select sku,site,count(1) as num from fa_sku_sales_num where createtime BETWEEN '2020-08-01 00:00:00' and '2021-02-21 00:00:00' GROUP BY sku,site HAVING num > 90";
         $list = db()->query($sql);
         foreach ($list as $k => $v) {
