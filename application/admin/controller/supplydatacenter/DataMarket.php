@@ -109,7 +109,7 @@ class DataMarket extends Backend
                 $end   = date('Y-m');
             }
 
-            $cache_data = Cache::get('Supplydatacenter_datamarket'.$time_str.md5(serialize('stock_change_line')));
+            $cache_data = Cache::get('Supplydatacenter_datamarket'.$time_str.md5(serialize('stock_change_bar')));
             if (!$cache_data) {
                 $data = array();
                 while($end>$start){
@@ -136,7 +136,7 @@ class DataMarket extends Backend
             }else{
                 $data = $cache_data;
             }
-            Cache::set('Supplydatacenter_datamarket' .$time_str . md5(serialize('stock_change_line')), $data, 7200);
+            Cache::set('Supplydatacenter_datamarket' .$time_str . md5(serialize('stock_change_bar')), $data, 7200);
             $json['xcolumnData'] = array_column($data,'day_date');
             $json['column'] = ['库存'];
             $json['columnData'] = [
