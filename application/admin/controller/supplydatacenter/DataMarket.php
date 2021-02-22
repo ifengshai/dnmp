@@ -108,9 +108,8 @@ class DataMarket extends Backend
                 $start = date('Y-m', strtotime('-12 months'));
                 $end   = date('Y-m');
             }
-
-            /*$cache_data = Cache::get('Supplydatacenter_datamarket'.$time_str.md5(serialize('stock_change_bar')));
-            if (!$cache_data) {*/
+            $cache_data = Cache::get('Supplydatacenter_datamarket'.$time_str.md5(serialize('stock_change_bar')));
+            if (!$cache_data) {
                 $data = array();
                 while($end>$start){
                     $endmonth = $end;
@@ -124,7 +123,7 @@ class DataMarket extends Backend
                         $end_stock = $this->productAllStockLog->where("DATE_FORMAT(createtime,'%Y-%m-%d')='$endday'")->field('id,allnum')->find();
                         if ($end_stock['id']) {
                             //如果有月末数据，（月初数据+月末数据）/2
-                            $stock = round(((float)$start_stock['allnum'] + (float)$end_stock['allnum']) / 2, 2);
+                            $stock = round(($start_stock['allnum'] + $end_stock['allnum']) / 2, 2);
                             $arr['day_date'] = $end;
                             $arr['stock'] = $stock;
                             $data[] = $arr;
@@ -133,10 +132,10 @@ class DataMarket extends Backend
                 }
                 $time_arr = array_column($data,'day_date');
                 array_multisort($time_arr,SORT_ASC,$data);
-           /* }else{
+            }else{
                 $data = $cache_data;
             }
-            Cache::set('Supplydatacenter_datamarket' .$time_str . md5(serialize('stock_change_bar')), $data, 7200);*/
+            Cache::set('Supplydatacenter_datamarket' .$time_str . md5(serialize('stock_change_bar')), $data, 7200);
             $json['xColumnName'] = array_column($data,'day_date');
             $json['column'] = ['平均库存'];
             $json['columnData'] = [
