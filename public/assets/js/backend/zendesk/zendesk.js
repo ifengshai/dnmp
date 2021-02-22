@@ -334,6 +334,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                 })
                 return false;
             });
+
             $(document).on('change','.macro-apply',function(){
                 var id = $(this).val();
                 var ticket_id = $('.ticket_id').val();
