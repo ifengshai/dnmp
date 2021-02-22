@@ -530,14 +530,16 @@ class Wangpenglei extends Backend
         $sql = "select sku,site,count(1) as num from fa_sku_sales_num where createtime BETWEEN '2020-08-01 00:00:00' and '2021-02-21 00:00:00' GROUP BY sku,site HAVING num > 90";
         $list = db()->query($sql);
         foreach ($list as $k => $v) {
-            $zeelool_sku = $this->itemplatformsku->getWebSku($v['sku'], 1);
-            $voogueme_sku = $this->itemplatformsku->getWebSku($v['sku'], 2);
-            $nihao_sku = $this->itemplatformsku->getWebSku($v['sku'], 3);
+            if ($v['site'] == 1) {
+                $sku = $this->itemplatformsku->getWebSku($v['sku'], 1);
+            } elseif ($v['site'] == 2) {
+                $sku = $this->itemplatformsku->getWebSku($v['sku'], 2);
+            } elseif ($v['site'] == 3) {
+                $sku = $this->itemplatformsku->getWebSku($v['sku'], 3);
+            }
             $skus = [];
             $skus = [
-                $zeelool_sku,
-                $voogueme_sku,
-                $nihao_sku
+                $sku
             ];
 
             $map['a.sku'] = ['in', array_filter($skus)];
