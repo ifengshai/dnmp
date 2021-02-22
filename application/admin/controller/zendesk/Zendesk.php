@@ -654,12 +654,15 @@ class Zendesk extends Backend
         //array_unshift($templates, 'Apply Macro');
         //获取当前用户的最新5个的订单
         if($ticket->type == 1){
+            $site =1;
             $orderModel = new \app\admin\model\order\order\Zeelool;
             $customer_entity = Db::connect('database.db_zeelool');
         }elseif($ticket->type == 2){
+            $site =2;
             $orderModel = new \app\admin\model\order\order\Voogueme;
             $customer_entity = Db::connect('database.db_voogueme');
         }else{
+            $site =3;
             $orderModel = new \app\admin\model\order\order\Nihao;
             $is_vip = 0;
         }
@@ -673,21 +676,33 @@ class Zendesk extends Backend
         }
 
         $orders = $orderModel
+//            ->alias('ord')
+//            ->join(['fa_order_process=>pro'],'ord.id = pro.order_id')
             ->where('customer_email',$ticket->email)
             ->order('entity_id desc')
-            ->field('increment_id,created_at,order_currency_code,status')
+            ->field('increment_id,created_at,order_currency_code,status,entity_id')
             ->limit(5)
             ->select();
         $orders_count = $orderModel
             ->where('customer_email',$ticket->email)
             ->count();
         $orders = collection($orders)->toArray();
-//        dump($orders);
+        foreach ($orders as $key=>$item){
+            $orders[$key]['track_number'] = Db::connect('database.db_mojing_order')->table('fa_order_process')->where('entity_id',$item['entity_id'])->value('track_number');
+            //查询该订单下是否有工单
+            $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
+            $swhere = [];
+            $swhere['platform_order'] = ['eq', $item['increment_id']];
+            $swhere['work_platform'] = $site;
+            $swhere['work_status'] = ['not in', [0, 4, 6]];
+            $orders[$key]['workorder_list'] = $workorder->where($swhere)->select();
+
+        }
+
 //        foreach ($orders as $key=>$ite){
 //            $model =  Db::connect('database.db_mojing_order');
 //            $find_value = $model->table('fa_order')->where('increment_id',$ite['increment_id'])->select();
 //            dump($find_value);die();
-//
 //        }
 
 //        dump(collection($orders)->toArray());die();

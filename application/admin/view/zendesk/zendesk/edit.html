@@ -339,12 +339,18 @@
                         <td style="font-size: 15px"> {$vo['created_at']|strtotime|date='d/m/Y',###}</td>
                         <td style="font-size: 15px"> {$vo['order_currency_code']}{$vo['grand_total']|substr=0,-2}</h5></td>
                         <td style="font-size: 15px"> {$vo['status']}</td>
-                        <td style="font-size: 15px" id="showmessage" data-value="{$key}"> {$vo['increment_id']}</td>
-                        {if condition="$vo['status'] eq 'processing'"}
+
+                        {if condition="$vo['status'] eq 'complete'"}
+                        <td style="font-size: 15px;cursor: pointer"   id="showmessage" data-value="{$key}">
+                            <button type="button"   data-id="{$vo.entity_id}" style="display: flex;flex-direction: column;color: #0073B7; white-space: nowrap;background-color: #fff;border: 0;margin-bottom: 2px;outline: none;">11111</button>
+                        </td>
+
+                        {/if}
+                       {if condition="$vo['status'] eq 'processing'"}
                         <td ><font style="color: #3C8DBC"><a  class="batch-log-recipient" data-value="{$vo['increment_id']}">配货记录</a></font></td>
                         {/if}
                     </tr>
-                    <tr style="background-color: #FDF6DC; display: none" id="work_list_{$key}" >
+                    <tr style="background-color: #FDF6DC; " id="work_list_{$key}" >
                         <td>24727</td>
                         <td>18/08/2020</td>
                         <td>处方做错</td>
@@ -582,18 +588,11 @@
     }
 </style>
 <script>
-    function my(id){
-        return document.getElementById(id);
+
+    function work_orderlist_show(key){
+     $('#work_list_'+key).slideToggle();
     }
-    var key_val =   $("#showmessage").data("value")
-    var trageet =  document.getElementById("winuiconsole");
-    my("showmessage").onclick = function (){
-        if (trageet.style.display =="none"){
-            my("winuiconsole").style.display ="block"
-        }else{
-            my("winuiconsole").style.display ="none"
-        }
-    }
+
 </script>
 
 
