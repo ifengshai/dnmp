@@ -141,7 +141,9 @@ class NihaoPrescriptionDetailHelper{
 			$prescription_params = json_decode($product_options['info_buyRequest']['tmplens']['prescription'], true) ?? [];
 			
             $final_params = array_merge($prescription_params, $final_params);
-            // dump($final_params);            
+            // dump($final_params);
+
+            $items[$item_key]['item_id'] = $item_value['item_id'];
             $items[$item_key]['order_item_id'] = $item_value['item_id'];
             $items[$item_key]['order_id'] = $item_value['order_id'];
             $items[$item_key]['increment_id'] = $item_value['increment_id'];
