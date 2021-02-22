@@ -123,7 +123,7 @@ class DataMarket extends Backend
                         $end_stock = $this->productAllStockLog->where("DATE_FORMAT(createtime,'%Y-%m-%d')='$endday'")->field('id,allnum')->find();
                         if ($end_stock['id']) {
                             //如果有月末数据，（月初数据+月末数据）/2
-                            $stock = round((float)($start_stock['allnum'] + $end_stock['allnum']) / 2, 2);
+                            $stock = FormatFloat("0.00",(float)($start_stock['allnum'] + $end_stock['allnum']) / 2);
                             $arr['day_date'] = $end;
                             $arr['stock'] = $stock;
                             $data[] = $arr;
