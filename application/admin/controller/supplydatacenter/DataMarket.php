@@ -109,8 +109,8 @@ class DataMarket extends Backend
                 $end   = date('Y-m');
             }
 
-            $cache_data = Cache::get('Supplydatacenter_datamarket'.$time_str.md5(serialize('stock_change_bar')));
-            if (!$cache_data) {
+            /*$cache_data = Cache::get('Supplydatacenter_datamarket'.$time_str.md5(serialize('stock_change_bar')));
+            if (!$cache_data) {*/
                 $data = array();
                 while($end>$start){
                     $endmonth = $end;
@@ -124,7 +124,7 @@ class DataMarket extends Backend
                         $end_stock = $this->productAllStockLog->where("DATE_FORMAT(createtime,'%Y-%m-%d')='$endday'")->field('id,allnum')->find();
                         if ($end_stock['id']) {
                             //如果有月末数据，（月初数据+月末数据）/2
-                            $stock = round(($start_stock + $end_stock) / 2, 2);
+                            $stock = round(($start_stock['allnum'] + $end_stock['allnum']) / 2, 2);
                             $arr['day_date'] = $end;
                             $arr['stock'] = $stock;
                             $data[] = $arr;
@@ -132,18 +132,18 @@ class DataMarket extends Backend
                     }
                 }
                 $time_arr = array_column($data,'day_date');
-                array_multisort($time_arr,SORT_DESC,$data);
-            }else{
+                array_multisort($time_arr,SORT_ASC,$data);
+           /* }else{
                 $data = $cache_data;
             }
-            Cache::set('Supplydatacenter_datamarket' .$time_str . md5(serialize('stock_change_bar')), $data, 7200);
+            Cache::set('Supplydatacenter_datamarket' .$time_str . md5(serialize('stock_change_bar')), $data, 7200);*/
             $json['xcolumnData'] = array_column($data,'day_date');
             $json['column'] = ['库存'];
             $json['columnData'] = [
                 [
                     'name' => '库存',
                     'type' => 'bar',
-                    'data' => array_column($data,'allnum')
+                    'data' => array_column($data,'stock')
                 ],
             ];
             return json(['code' => 1, 'data' => $json]);
