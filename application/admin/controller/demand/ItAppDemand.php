@@ -19,6 +19,7 @@ class ItAppDemand extends Backend
      * @var \app\admin\model\demand\ItAppDemand
      */
     protected $model = null;
+    protected $noNeedRight =['operation_show'];
     public function _initialize()
     {
         parent::_initialize();
