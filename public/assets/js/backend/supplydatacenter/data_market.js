@@ -123,7 +123,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                     }
                 },
                 bar_chart: function () {
-                    //订单数据概况折线图
+                    //月平均库存变化
                     var chartOptions = {
                         targetId: 'echart1',
                         downLoadTitle: '图表',
