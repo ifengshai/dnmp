@@ -109,8 +109,8 @@ class DataMarket extends Backend
                 $end   = date('Y-m');
             }
 
-            $cache_data = Cache::get('Supplydatacenter_datamarket'.$time_str.md5(serialize('stock_change_bar')));
-            if (!$cache_data) {
+            /*$cache_data = Cache::get('Supplydatacenter_datamarket'.$time_str.md5(serialize('stock_change_bar')));
+            if (!$cache_data) {*/
                 $data = array();
                 while($end>$start){
                     $endmonth = $end;
@@ -131,11 +131,12 @@ class DataMarket extends Backend
                         }
                     }
                 }
+                dump($data);exit;
                 $time_arr = array_column($data,'day_date');
                 array_multisort($time_arr,SORT_DESC,$data);
-            }else{
+           /* }else{
                 $data = $cache_data;
-            }
+            }*/
             Cache::set('Supplydatacenter_datamarket' .$time_str . md5(serialize('stock_change_bar')), $data, 7200);
             $json['xcolumnData'] = array_column($data,'day_date');
             $json['column'] = ['库存'];
