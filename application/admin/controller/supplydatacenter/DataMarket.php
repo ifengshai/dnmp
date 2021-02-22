@@ -136,7 +136,7 @@ class DataMarket extends Backend
                 $data = $cache_data;
             }
             Cache::set('Supplydatacenter_datamarket' .$time_str . md5(serialize('stock_change_bar')), $data, 7200);*/
-            $json['xcolumnData'] = array_column($data,'day_date');
+            $json['xColumnName'] = array_column($data,'day_date');
             $json['column'] = ['平均库存'];
             $json['columnData'] = [
                 [
