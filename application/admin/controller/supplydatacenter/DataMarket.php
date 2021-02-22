@@ -108,7 +108,8 @@ class DataMarket extends Backend
                 $start = date('Y-m', strtotime('-12 months'));
                 $end   = date('Y-m');
             }
-
+dump($start);
+dump($end);
             /*$cache_data = Cache::get('Supplydatacenter_datamarket'.$time_str.md5(serialize('stock_change_bar')));
             if (!$cache_data) {*/
                 $data = array();
@@ -117,17 +118,23 @@ class DataMarket extends Backend
                     $end = date('Y-m',strtotime("$endmonth -1 month"));
                     $startday = $end.'-01';
                     $endday = $end.'-'.date('t', strtotime($startday));
+                    dump($startday);
+                    dump($endday);
                     $start_stock = $this->productAllStockLog->where("DATE_FORMAT(createtime,'%Y-%m-%d')='$startday'")->field('id,allnum')->find();
+                    dump($start_stock['id']);
                     //判断是否有月初数据
                     if($start_stock['id']) {
                         //判断是否有月末数据
                         $end_stock = $this->productAllStockLog->where("DATE_FORMAT(createtime,'%Y-%m-%d')='$endday'")->field('id,allnum')->find();
+                        dump($end_stock['id']);
                         if ($end_stock['id']) {
                             //如果有月末数据，（月初数据+月末数据）/2
                             $stock = round(($start_stock + $end_stock) / 2, 2);
                             $arr['day_date'] = $end;
                             $arr['stock'] = $stock;
                             $data[] = $arr;
+                            dump($arr);
+                            dump($data);exit;
                         }
                     }
                 }
