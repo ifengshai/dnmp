@@ -773,7 +773,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'custom-css',
 
             })
 
-            //增加工单
+            //配货列表
             $(document).on('click', '.machiningBtn', function () {
                 var incrementId = $(this).data('id');
                 var order_platform = $('#order_platform').val();

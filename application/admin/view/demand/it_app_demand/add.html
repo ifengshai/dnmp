@@ -1,0 +1,406 @@
+<form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Demand_type')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-demand_type" data-rule="required" class="form-control" name="row[demand_type]" type="number" value="1">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Type')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-type" class="form-control" name="row[type]" type="number">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Site')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-site" class="form-control" name="row[site]" type="number">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Site_type')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-site_type" class="form-control" name="row[site_type]" type="text">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Status')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-status" class="form-control" name="row[status]" type="number">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Create_time')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-create_time" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[create_time]" type="text" value="{:date('Y-m-d H:i:s')}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Entry_user_id')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-entry_user_id" data-rule="required" data-source="entry/user/index" class="form-control selectpage" name="row[entry_user_id]" type="text" value="">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Entry_user_confirm')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-entry_user_confirm" data-rule="required" class="form-control" name="row[entry_user_confirm]" type="number" value="0">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Entry_user_confirm_time')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-entry_user_confirm_time" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[entry_user_confirm_time]" type="text" value="{:date('Y-m-d H:i:s')}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Copy_to_user_id')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-copy_to_user_id" data-rule="required" data-source="copy/to/user/index" class="form-control selectpage" name="row[copy_to_user_id]" type="text" value="">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Title')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-title" class="form-control" name="row[title]" type="text">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Remark')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-remark" class="form-control" name="row[remark]" type="text" value="">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Content')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <textarea id="c-content" class="form-control editor" rows="5" name="row[content]" cols="50"></textarea>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Accessory')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <textarea id="c-accessory" class="form-control " rows="5" name="row[accessory]" cols="50"></textarea>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Priority')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-priority" class="form-control" name="row[priority]" type="number">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Node_time')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-node_time" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[node_time]" type="text" value="{:date('Y-m-d H:i:s')}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Start_time')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-start_time" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[start_time]" type="text" value="{:date('Y-m-d H:i:s')}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('End_time')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-end_time" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[end_time]" type="text" value="{:date('Y-m-d H:i:s')}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Pm_audit_status')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-pm_audit_status" class="form-control" name="row[pm_audit_status]" type="number">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Pm_audit_status_time')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-pm_audit_status_time" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[pm_audit_status_time]" type="text" value="{:date('Y-m-d H:i:s')}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Pm_confirm')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-pm_confirm" data-rule="required" class="form-control" name="row[pm_confirm]" type="number" value="0">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Pm_confirm_time')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-pm_confirm_time" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[pm_confirm_time]" type="text" value="{:date('Y-m-d H:i:s')}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Web_designer_group')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-web_designer_group" data-rule="required" class="form-control" name="row[web_designer_group]" type="number" value="0">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Web_designer_complexity')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-web_designer_complexity" class="form-control" name="row[web_designer_complexity]" type="number">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Web_designer_user_id')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-web_designer_user_id" data-rule="required" data-source="web/designer/user/index" class="form-control selectpage" name="row[web_designer_user_id]" type="text" value="">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Web_designer_expect_time')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-web_designer_expect_time" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[web_designer_expect_time]" type="text" value="{:date('Y-m-d H:i:s')}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Web_designer_is_finish')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-web_designer_is_finish" data-rule="required" class="form-control" name="row[web_designer_is_finish]" type="number" value="0">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Web_designer_finish_time')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-web_designer_finish_time" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[web_designer_finish_time]" type="text" value="{:date('Y-m-d H:i:s')}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Phper_group')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-phper_group" data-rule="required" class="form-control" name="row[phper_group]" type="number" value="0">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Phper_complexity')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-phper_complexity" class="form-control" name="row[phper_complexity]" type="number">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Phper_user_id')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-phper_user_id" data-rule="required" data-source="phper/user/index" class="form-control selectpage" name="row[phper_user_id]" type="text" value="">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Phper_expect_time')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-phper_expect_time" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[phper_expect_time]" type="text" value="{:date('Y-m-d H:i:s')}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Phper_is_finish')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-phper_is_finish" data-rule="required" class="form-control" name="row[phper_is_finish]" type="number" value="0">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Phper_finish_time')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-phper_finish_time" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[phper_finish_time]" type="text" value="{:date('Y-m-d H:i:s')}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('App_group')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-app_group" data-rule="required" class="form-control" name="row[app_group]" type="number" value="0">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('App_complexity')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-app_complexity" class="form-control" name="row[app_complexity]" type="number">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('App_user_id')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-app_user_id" data-rule="required" data-source="app/user/index" class="form-control selectpage" name="row[app_user_id]" type="text" value="">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('App_expect_time')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-app_expect_time" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[app_expect_time]" type="text" value="{:date('Y-m-d H:i:s')}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('App_is_finish')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-app_is_finish" data-rule="required" class="form-control" name="row[app_is_finish]" type="number" value="0">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('App_finish_time')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-app_finish_time" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[app_finish_time]" type="text" value="{:date('Y-m-d H:i:s')}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Test_group')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-test_group" data-rule="required" class="form-control" name="row[test_group]" type="number" value="0">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Test_confirm_time')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-test_confirm_time" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[test_confirm_time]" type="text" value="{:date('Y-m-d H:i:s')}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Test_user_id')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-test_user_id" data-rule="required" data-source="test/user/index" class="form-control selectpage" name="row[test_user_id]" type="text" value="">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Test_is_finish')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-test_is_finish" data-rule="required" class="form-control" name="row[test_is_finish]" type="number" value="0">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Test_finish_time')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-test_finish_time" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[test_finish_time]" type="text" value="{:date('Y-m-d H:i:s')}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Test_status')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-test_status" data-rule="required" class="form-control" name="row[test_status]" type="number" value="1">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Develop_finish_status')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-develop_finish_status" data-rule="required" class="form-control" name="row[develop_finish_status]" type="number" value="1">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Develop_finish_time')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-develop_finish_time" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[develop_finish_time]" type="text" value="{:date('Y-m-d H:i:s')}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('All_finish_time')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-all_finish_time" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[all_finish_time]" type="text" value="{:date('Y-m-d H:i:s')}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Is_emergency')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-is_emergency" data-rule="required" class="form-control" name="row[is_emergency]" type="number" value="0">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Is_small_probability')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-is_small_probability" data-rule="required" class="form-control" name="row[is_small_probability]" type="number" value="0">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Is_low_level_error')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-is_low_level_error" data-rule="required" class="form-control" name="row[is_low_level_error]" type="number" value="0">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Is_difficult')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-is_difficult" data-rule="required" class="form-control" name="row[is_difficult]" type="number" value="0">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Is_del')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-is_del" data-rule="required" class="form-control" name="row[is_del]" type="number" value="1">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Functional_module')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-functional_module" class="form-control" name="row[functional_module]" type="number" value="1">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Important_reasons')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-important_reasons" class="form-control" name="row[important_reasons]" type="text">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Importance')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-importance" class="form-control" name="row[importance]" type="number">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Degree_of_urgency')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-degree_of_urgency" class="form-control" name="row[degree_of_urgency]" type="number">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Development_difficulty')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-development_difficulty" class="form-control" name="row[development_difficulty]" type="number">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Web_remarks')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-web_remarks" class="form-control" name="row[web_remarks]" type="text">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Phper_remarks')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-phper_remarks" class="form-control" name="row[phper_remarks]" type="text">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('App_remarks')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-app_remarks" class="form-control" name="row[app_remarks]" type="text">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Product_remarks')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-product_remarks" class="form-control" name="row[product_remarks]" type="text">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Secondary_operation')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-secondary_operation" data-rule="required" class="form-control" name="row[secondary_operation]" type="number" value="1">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('It_web_demand_id')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-it_web_demand_id" data-rule="required" data-source="it/web/demand/index" class="form-control selectpage" name="row[it_web_demand_id]" type="text" value="">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Version_number')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-version_number" class="form-control" name="row[version_number]" type="text">
+        </div>
+    </div>
+    <div class="form-group layer-footer">
+        <label class="control-label col-xs-12 col-sm-2"></label>
+        <div class="col-xs-12 col-sm-8">
+            <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
+            <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>

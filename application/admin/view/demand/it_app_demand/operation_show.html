@@ -1,0 +1,143 @@
+<style>
+    /*左边div -- start*/
+    .left_input{
+        width: 100%;
+    }
+    .left_input .item_title{
+        text-align: center;
+        font-size: 18px;
+        height: 50px;
+        line-height: 50px;
+        margin-top: 20px;
+    }
+    .left_input .item_button{
+        text-align: center;
+        height: 70px;
+        line-height: 70px;
+        margin-top: 40px;
+    }
+    .left_input .input_item{
+        margin-top: 18px;
+        width: 98%;
+        height: 50px;
+        line-height: 50px;
+        margin-left: 1%;
+    }
+    .left_input .input_tiem_label{
+        width: 25%;
+        text-align: right;
+        margin-right: 10px;
+    }
+    .left_input .select_input{
+        width: 65%!important;
+        max-height: 30px!important;
+    }
+    /*左边div -- end*/
+    .all_div{
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        margin:0 auto;
+    }
+    .all_div form{
+        width: 33%;
+    }
+    .bootstrap-datetimepicker-widget .accordion-toggle{
+        display: none;
+    }
+</style>
+
+<div class="all_div">
+
+    <form role="form" method="POST" id="operation_show" data-toggle="validator" action="">
+        <input type="hidden" name="row[id]" value="{$row.id}" id="ids">
+        <input type="hidden" name="row[web_status]" value="1">
+        <input type="hidden" name="row[type]" id="input_web_group" value="1"><!--1:响应，修改；2：完成-->
+        <div class="left_input">
+            <div class="input_item web_html" >
+                <label class="input_tiem_label">修改预期时间：</label>
+                <span class="input_tiem_span">
+                    {if $row['node_time'] !== null}
+                     <input  class="selectpicker datetimepicker select_input" id="change_node_time" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[node_time]" type="text" value="{$row.node_time|datetime}">
+                       {else/}
+                     <input  class="selectpicker datetimepicker select_input"   id="change_node_time" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[node_time]" type="text" >
+                     {/if}
+
+                </span>
+            </div>
+
+            <div class="input_item web_htmls">
+                <label class="input_tiem_label">上线版本号：</label>
+                <span class="input_tiem_span">
+                    <input type="text" id="version_number" required name="row['version_number']" style="width: 38%;height: 35px" value="{$row['version_number']}">
+                    <button type="button" id="version_number_sub" class="btn btn-sub"  value="{$row['id']}" style='background-color: #03A7EF;width: 27%;height:37px;color: white;font-size: 14px;font-weight: 700;'>{:__('确定')}</button>
+
+                </span>
+            </div>
+            <div class="input_item web_htmls">
+                <label class="input_tiem_label">开发完成：</label>
+                <span class="input_tiem_span">
+                    {if condition="$row.develop_finish_status eq 1"}
+                         <button type="button" disabled class="btn btn-sub-refuse" style='background-color: grey;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('开发完成')}</button>
+                    {else/}
+                          <button type="button" class="btn btn-sub" id="complete" data-value="development" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('开发完成')}</button>
+                    {/if}
+               </span>
+            </div>
+            <div class="input_item web_htmls">
+                <label class="input_tiem_label">测试完成：</label>
+                <span class="input_tiem_span">
+                     {if condition="$row.test_is_finish eq 1"}
+                         <button type="button" disabled class="btn btn-sub-refuse" style='background-color: grey;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('测试完成')}</button>
+                     {else/}
+                        <button type="button" class="btn btn-sub" id="complete" data-value="test" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('测试完成')}</button>
+                     {/if}
+                </span>
+            </div>
+            <div class="input_item web_htmls">
+                <label class="input_tiem_label">已上线：</label>
+                <span class="input_tiem_span">
+                    {if condition="$row.online_status eq 1"}
+                         <button type="button" disabled class="btn btn-sub-refuse" style='background-color: grey;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('已上线')}</button>
+                     {else/}
+                    <button type="button" class="btn btn-sub" id="complete"  data-value="online" style='background-color: #03A7EF;width: 66%;height:50px;color: white;font-size: 14px;font-weight: 700;'>{:__('已上线')}</button>
+                    {/if}
+                </span>
+            </div>
+        </div>
+    </form>
+
+
+</div>
+<script>
+    function jujue(ids,status){
+
+        var url = "{:url('demand/It_web_demand/distriRefuse')}";
+        if (status ==1){
+            var remarks = $('#web_remarks').val();
+        }else if(status ==2){
+            var remarks = $('#phper_remarks').val();
+        }else{
+            var remarks = $('#app_remarks').val();
+        }
+        if (remarks == ''){
+            layer.msg('备注内容不能为空');
+            return  false;
+        }
+        Fast.api.ajax({
+            url:url,
+            data:{ids:ids,status:status,remarks:remarks}
+        }, function(data, ret){
+            //成功的回调
+            layer.msg(ret.msg);
+            return false;
+        }, function(data, ret){
+            //失败的回调
+            layer.msg(ret.msg);
+            return false;
+        });
+    }
+</script>
+
+
