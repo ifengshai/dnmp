@@ -92,23 +92,44 @@ class DataMarket extends Backend
         return $this->view->fetch();
     }
     //库存变化折线图
-    public function stock_change_line()
+    public function stock_change_bar()
     {
         if ($this->request->isAjax()) {
             $params = $this->request->param();
             $time_str = $params['time_str'];
             if ($time_str) {
                 $createat = explode(' ', $time_str);
-                $where['createtime'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
+                $start = date('Y-m',$createat[0]);
+                $end = date('Y-m',$createat[3]);
             } else {
-                $start = date('Y-m-d', strtotime('-6 day'));
-                $end   = date('Y-m-d 23:59:59');
-                $where['createtime'] = ['between', [$start, $end]];
+                $start = date('Y-m', strtotime('-12 months'));
+                $end   = date('Y-m');
             }
+
             $cache_data = Cache::get('Supplydatacenter_datamarket'.$time_str.md5(serialize('stock_change_line')));
             if (!$cache_data) {
-                $data = $this->productAllStockLog->where($where)->field("allnum,DATE_FORMAT(createtime,'%Y-%m-%d') day_date")->select();
-                $data = collection($data)->toArray();
+                $data = array();
+                while($end>$start){
+                    $endmonth = $end;
+                    $end = date('Y-m',strtotime("$endmonth -1 month"));
+                    $startday = $end.'-01';
+                    $endday = $end.'-'.date('t', strtotime($startday));
+                    $start_stock = $this->productAllStockLog->where("DATE_FORMAT(createtime,'%Y-%m-%d')='$startday'")->field('id,allnum')->find();
+                    //判断是否有月初数据
+                    if($start_stock['id']) {
+                        //判断是否有月末数据
+                        $end_stock = $this->productAllStockLog->where("DATE_FORMAT(createtime,'%Y-%m-%d')='$endday'")->field('id,allnum')->find();
+                        if ($end_stock['id']) {
+                            //如果有月末数据，（月初数据+月末数据）/2
+                            $stock = round(($start_stock + $end_stock) / 2, 2);
+                            $arr['day_date'] = $end;
+                            $arr['stock'] = $stock;
+                            $data[] = $arr;
+                        }
+                    }
+                }
+                $time_arr = array_column($data,'day_date');
+                array_multisort($time_arr,SORT_DESC,$data);
             }else{
                 $data = $cache_data;
             }
@@ -118,8 +139,7 @@ class DataMarket extends Backend
             $json['columnData'] = [
                 [
                     'name' => '库存',
-                    'type' => 'line',
-                    'smooth' => true,
+                    'type' => 'bar',
                     'data' => array_column($data,'allnum')
                 ],
             ];
