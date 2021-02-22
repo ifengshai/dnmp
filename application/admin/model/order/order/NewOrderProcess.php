@@ -37,7 +37,7 @@ class NewOrderProcess extends Model
         $map['a.check_status'] = 0;
         //过滤补差价单
         $map['b.order_type'] = ['<>', 5];
-        $map['b.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete','delivered']];
+        $map['b.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal']];
         return $this->alias('a')->where($map)->join(['fa_order' => 'b'], 'a.order_id=b.id')->group('b.site')->column('count(1)', 'b.site');
     }
     /**
@@ -53,7 +53,7 @@ class NewOrderProcess extends Model
         $map['a.check_status'] = 0;
         //过滤补差价单
         $map['b.order_type'] = ['<>', 5];
-        $map['b.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete','delivered']];
+        $map['b.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal']];
         return $this->alias('a')->where($map)->join(['fa_order' => 'b'], 'a.order_id=b.id')->field('b.increment_id,b.status,b.created_at,b.site')->select();
     }
 
@@ -74,7 +74,7 @@ class NewOrderProcess extends Model
         $map['a.check_status'] = 0;
         //过滤补差价单
         $map['b.order_type'] = ['<>', 5];
-        $map['b.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete','delivered']];
+        $map['b.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal']];
         return $this->alias('a')->where($map)->join(['fa_order' => 'b'], 'a.order_id=b.id')->group('b.site')->column('sum(b.total_qty_ordered)', 'b.site');
     }
 
@@ -92,7 +92,7 @@ class NewOrderProcess extends Model
         $map['a.check_status'] = 0;
         //过滤补差价单
         $map['b.order_type'] = ['<>', 5];
-        $map['b.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete','delivered']];
+        $map['b.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal']];
         $list = $this->alias('a')->where($map)->field('c.order_prescription_type,b.site,count(1) as num')
         ->join(['fa_order' => 'b'], 'a.order_id=b.id')
         ->join(['fa_order_item_process' => 'c'],'c.order_id=b.id')

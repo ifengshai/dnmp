@@ -376,11 +376,7 @@ class ScmDistribution extends Scm
         $abnormal_id = $this->_distribution_abnormal
             ->where(['item_process_id' => $item_process_info['id'], 'status' => 1])
             ->value('id');
-        // $abnormal_id && $this->error(__('有异常待处理，无法操作'), [], 405);
-        $coding1 = $this->_stock_house
-            ->where(['id' => $item_process_info['abnormal_house_id']])
-            ->value('coding');
-        $abnormal_id && $this->error(__("子订单存在异常" . "<br><b>$coding1</b>"), [], 405);
+        $abnormal_id && $this->error(__("子订单存在异常" . "<br><b>$coding</b>"), [], 405);
 
         //检测状态
         $status_arr = [
@@ -694,9 +690,9 @@ class ScmDistribution extends Scm
             6 => '成品质检'
         ];
         //获取库位号
-        $coding = $this->_stock_house
+       /* $coding = $this->_stock_house
             ->where(['id' => $item_process_info['temporary_house_id']])
-            ->value('coding');
+            ->value('coding');*/
         //操作失败记录
         if (empty($item_process_info)) {
             DistributionLog::record($this->auth, $item_process_info['id'], 0, $status_arr[$check_status] . '：子订单不存在');
@@ -1546,13 +1542,8 @@ class ScmDistribution extends Scm
                 }
             }
             foreach ($check_work_order as $val) {
-                (3 == $val['measure_choose_id'] //主单取消措施未处理
-                    ||
-                    !empty($val['item_order_number']) //子单措施未处理:更改镜框18、更改镜片19、取消20
-                )
-                // && $this->error(__('有工单未处理，无法操作'), [], 405);
 
-                && $this->error(__("子订单存在工单"), [], 405);
+                3 == $val['measure_choose_id'] && $this->error(__("子订单存在工单"), [], 405); //主单取消措施未处理
                 if ($val['measure_choose_id'] == 21) {
                     $this->error(__("子订单存在工单"), [], 405);
                 }

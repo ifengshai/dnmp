@@ -2562,4 +2562,23 @@ class Test extends Backend
 
         dump($map);
     }
+
+    public function is_loss_report_out(){
+        $purchase_barcode_item = new \app\admin\model\warehouse\ProductBarCodeItem();
+        $arr = ['100205426','430281725','530006219','400501307','430284236','100212153','600135368','100212704','500023187','100205426','430280099','100211062','500024376','430276983','100210875','500009645','400485928','600136009','400487686','600136717','600137221'];
+        foreach ($arr as $key => $value) {
+            $item_order_number = $purchase_barcode_item->where(['item_order_number' => ['like', $value."%"]])->group('item_order_number')->column('item_order_number','id');
+            foreach ($item_order_number as $k => $val) {
+                $a = $purchase_barcode_item->where(['item_order_number' => $val,'library_status' => 1])->find();
+                $b = $purchase_barcode_item->where(['item_order_number' => $val,'library_status' => 2])->find();
+                if (!empty($a) && !empty($b)) {
+                    $purchase_barcode_item->where(['id' => $b['id']])->update(['is_loss_report_out' => 1]);
+                    echo $val."\n";
+                }else{
+                    echo 'error-'.$val."\n";
+                }
+            }
+        }
+
+    }
 }

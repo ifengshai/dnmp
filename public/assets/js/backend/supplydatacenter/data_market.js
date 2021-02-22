@@ -5,17 +5,17 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
             Controller.api.formatter.daterangepicker($("div[role=form]"));
             //订单数据概况折线图
             stock_measure_overview_platform();
-            Controller.api.formatter.line_chart();
+            Controller.api.formatter.bar_chart();
             Controller.api.formatter.line_histogram();
             Controller.api.formatter.comleted_time_rate_pie();
             $("#time_str5").on("apply.daterangepicker", function () {
                 setTimeout(() => {
-                    Controller.api.formatter.line_chart();   //库存变化折线图
+                    Controller.api.formatter.bar_chart();   //库存变化折线图
                 }, 0)
             })
             $("#time_str5").on("cancel.daterangepicker", function () {
                 setTimeout(() => {
-                    Controller.api.formatter.line_chart();   //库存变化折线图
+                    Controller.api.formatter.bar_chart();   //库存变化折线图
                 }, 0)
             })
 
@@ -122,16 +122,16 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                         });
                     }
                 },
-                line_chart: function () {
+                bar_chart: function () {
                     //订单数据概况折线图
                     var chartOptions = {
                         targetId: 'echart1',
                         downLoadTitle: '图表',
-                        type: 'line'
+                        type: 'bar'
                     };
                     var options = {
                         type: 'post',
-                        url: 'supplydatacenter/data_market/stock_change_line',
+                        url: 'supplydatacenter/data_market/stock_change_bar',
                         data: {
                             time_str: $("#time_str5").val()
                         }

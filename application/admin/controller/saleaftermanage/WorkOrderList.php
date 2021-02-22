@@ -18,6 +18,7 @@ use think\Exception;
 use app\admin\model\AuthGroupAccess;
 use think\exception\PDOException;
 use think\exception\ValidateException;
+use Think\Log;
 use Util\NihaoPrescriptionDetailHelper;
 use Util\ZeeloolPrescriptionDetailHelper;
 use Util\VooguemePrescriptionDetailHelper;
@@ -1292,7 +1293,7 @@ class WorkOrderList extends Backend
                         //子单取消
                         if (in_array(18, $item['item_choose'])) {
                             //检测之前是否处理过子单措施
-                            array_intersect([1, 2, 3], $change_type) && $this->error("子订单：{$key} 措施已处理，不能取消");
+                            array_intersect([3], $change_type) && $this->error("子订单：{$key} 措施已处理，不能取消");
                         } /*elseif (in_array(19, $item['item_choose'])) {//更改镜框
                             //检测之前是否处理过更改镜框措施
                             in_array(1, $change_type) && $this->error("子订单：{$key} 措施已处理，不能重复创建");
@@ -3889,6 +3890,10 @@ EOF;
                     $res_status = WorkOrderNote::create($data);
                     //查询用户的角色组id
                     $authGroupIds = AuthGroupAccess::where('uid', session('admin.id'))->column('group_id');
+                    Log::write("角色组");
+                    Log::write($authGroupIds);
+                    Log::write($workOrderConfigValue['warehouse_department_rule']);
+
                     $work = $this->model->find($params['work_id']);
                     $work_order_note_status = $work->work_order_note_status;
 
@@ -3917,6 +3922,9 @@ EOF;
                         $work_order_note_status = 3;
                     }
                     $work->work_order_note_status = $work_order_note_status;
+
+                    Log::write("是否包含");
+                    Log::write($work_order_note_status);
                     $work->save();
                     Db::commit();
                 } catch (\Exception $e) {

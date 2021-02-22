@@ -1,10 +1,11 @@
-define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefined, Backend, Table, Form) {
+define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-to'], function ($, undefined, Backend, Table, Form) {
 
     var Controller = {
         index: function () {
             Controller.api.bindevent();
             // 初始化表格参数配置
             Table.api.init({
+                showJumpto:true,
                 extend: {
                     index_url: 'operatedatacenter/userdata/user_data_detail/index' + location.search,
                     add_url: 'operatedatacenter/userdata/user_data_detail/add',

@@ -2136,7 +2136,32 @@ class Distribution extends Backend
                         ->dec('distribution_occupy_stock', 1)
                         ->dec('stock', 1)
                         ->update();
+                    //扣减总库存自动生成一条出库单 审核通过 分类为成品质检报损
+                    $outstock['out_stock_number'] = 'OUT' . date('YmdHis') . rand(100, 999) . rand(100, 999);
+                    $outstock['type_id'] = 2;
+                    $outstock['remark'] = 'PDA质检拒绝：镜架报损自动生成出库单';
+                    $outstock['status'] = 2;
+                    $outstock['create_person'] = session('admin.nickname');
+                    $outstock['createtime'] = date('Y-m-d H:i:s', time());
+                    $outstock['platform_id'] = $value['site'];
+                    $outstock_id = $this->_outstock->insertGetid($outstock);
 
+                    $outstock_item['sku'] = $true_sku;
+                    $outstock_item['out_stock_num'] = 1;
+                    $outstock_item['out_stock_id'] = $outstock_id;
+                    $this->_outstock_item->insert($outstock_item);
+
+
+
+                    //条码出库
+                    $this->_product_bar_code_item
+                        ->allowField(true)
+                        ->isUpdate(true, ['item_order_number' => ['in', $item_order_numbers]])
+                        ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2, 'is_loss_report_out' => 1, 'out_stock_id' => $outstock_id]);
+
+                    //计算出库成本
+                    $financecost = new \app\admin\model\finance\FinanceCost();
+                    $financecost->outstock_cost($outstock_id, $outstock['out_stock_number']);
                     //扣减虚拟仓库存
                     $this->_item_platform_sku
                         ->where(['sku' => $true_sku, 'platform_type' => $value['site']])
@@ -2396,7 +2421,31 @@ class Distribution extends Backend
                         ->dec('distribution_occupy_stock', 1)
                         ->dec('stock', 1)
                         ->update();
+                    //扣减总库存自动生成一条出库单 审核通过 分类为成品质检报损
+                    $outstock['out_stock_number'] = 'OUT' . date('YmdHis') . rand(100, 999) . rand(100, 999);
+                    //加工报损
+                    $outstock['type_id'] = 4;
+                    $outstock['remark'] = '回滚至待配货自动生成出库单';
+                    $outstock['status'] = 2;
+                    $outstock['create_person'] = session('admin.nickname');
+                    $outstock['createtime'] = date('Y-m-d H:i:s', time());
+                    $outstock['platform_id'] = $item_info['site'];
+                    $outstock_id = $this->_outstock->insertGetid($outstock);
 
+                    $outstock_item['sku'] = $true_sku;
+                    $outstock_item['out_stock_num'] = 1;
+                    $outstock_item['out_stock_id'] = $outstock_id;
+                    $this->_outstock_item->insert($outstock_item);
+
+                    //条码出库
+                    $this->_product_bar_code_item
+                        ->allowField(true)
+                        ->isUpdate(true, ['item_order_number' => $item_info['item_order_number']])
+                        ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2, 'is_loss_report_out' => 1, 'out_stock_id' => $outstock_id]);
+
+                    //计算出库成本
+                    $financecost = new \app\admin\model\finance\FinanceCost();
+                    $financecost->outstock_cost($outstock_id, $outstock['out_stock_number']);
                     //记录库存日志
                     $this->_stock_log->setData([
                         'type' => 2,

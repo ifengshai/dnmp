@@ -142,6 +142,7 @@ class NihaoPrescriptionDetailHelper{
 			
             $final_params = array_merge($prescription_params, $final_params);
             // dump($final_params);
+
             $items[$item_key]['item_id'] = $item_value['item_id'];
             $items[$item_key]['order_item_id'] = $item_value['item_id'];
             $items[$item_key]['order_id'] = $item_value['order_id'];
