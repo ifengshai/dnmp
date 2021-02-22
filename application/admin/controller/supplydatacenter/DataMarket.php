@@ -67,6 +67,9 @@ class DataMarket extends Backend
         //默认30天数据
         $start2 = date('Y-m-d 00:00:00', strtotime('-30 day'));
         $time_str2 = $start2.' - '.$end1;
+        //默认近1年的数据
+        $start3 = date('Y-m-01 00:00:00', strtotime('-12 months'));
+        $time_str3 = $start3.' - '.$end1;
 
         //库存总览
         $stock_overview = $this->stock_overview();
@@ -88,7 +91,7 @@ class DataMarket extends Backend
                 unset($magentoplatformarr[$key]);
             }
         }
-        $this->view->assign(compact('stock_overview','stock_measure_overview','stock_level_overview','stock_level_overview2','purchase_overview','logistics_completed_overview','magentoplatformarr','stock_age_overview','time_str1','time_str2'));
+        $this->view->assign(compact('stock_overview','stock_measure_overview','stock_level_overview','stock_level_overview2','purchase_overview','logistics_completed_overview','magentoplatformarr','stock_age_overview','time_str1','time_str2','time_str3'));
         return $this->view->fetch();
     }
     //库存变化折线图
