@@ -546,9 +546,9 @@ class Wangpenglei extends Backend
             $map['b.status'] = ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered']];
             $map['a.distribution_status'] = ['<>', 0]; //排除取消状态
             $map['b.created_at'] = ['between', [strtotime('2020-08-01 00:00:00'), strtotime('2021-02-21 00:00:00')]]; //时间节点
+            $map['b.site'] = $v['site'];
             $sales_money = $this->orderitemprocess->alias('a')->where($map)
                 ->join(['fa_order' => 'b'], 'a.order_id = b.id')
-                ->join(['fa_order_process' => 'c'], 'a.order_id = c.order_id')
                 ->sum('b.base_grand_total');
 
             $list[$k]['sales_money'] = $sales_money;
