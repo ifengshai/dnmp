@@ -86,6 +86,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                             title: __('Operate'),
                             events: Controller.api.events.get_develop_status,
                             formatter: Controller.api.formatter.get_develop_status,
+
                             operate: false
 
 
@@ -371,7 +372,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                 },
                 //开发进度点击弹窗
                 get_develop_status: function (value, row, index) {
-                    return '<div><span class="check_develop_status status4_color">操作</span></div>';
+                    return '<div><span class="check_develop_status status4_color" style="cursor: pointer;font-size: 12px;color: #03A7EF">操作</span></div>';
                 },
                 //测试进度点击弹窗
                 get_test_status: function (value, row, index) {
