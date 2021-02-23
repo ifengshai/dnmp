@@ -21,6 +21,7 @@ class SupplyData extends Backend
         $this->productGrade = new \app\admin\model\ProductGrade();
         $this->order = new \app\admin\model\order\order\NewOrder();
         $this->process = new \app\admin\model\order\order\NewOrderProcess;
+        $this->ordernode = new \app\admin\model\OrderNode();
     }
     /**
      * 呆滞数据
@@ -315,12 +316,15 @@ class SupplyData extends Backend
         foreach ($date_time as $val) {
             $is_exist = Db::name('datacenter_day_order')->where('day_date', $val['date_time'])->value('id');
             $info = $this->getIntimeOrder($val['date_time']);
+            $info1 = $this->getSendLogistics($val['date_time']);
             if (!$is_exist) {
                 //插入数据
                 $arr = [];
                 $arr['day_date'] = $val['date_time'];
                 $arr['order_num'] = $info['order_num'];
                 $arr['intime_rate'] = $info['intime_rate'];
+                $arr['send_num'] = $info1['send_num'];
+                $arr['logistics_rate'] = $info1['logistics_rate'];
                 Db::name('datacenter_day_order')->insert($arr);
                 echo $val['date_time'].' is ok'."\n";
                 usleep(10000);
@@ -329,6 +333,8 @@ class SupplyData extends Backend
                 //更新数据
                 $arr['order_num'] = $info['order_num'];
                 $arr['intime_rate'] = $info['intime_rate'];
+                $arr['send_num'] = $info1['send_num'];
+                $arr['logistics_rate'] = $info1['logistics_rate'];
                 Db::name('datacenter_day_order')->where('day_date',$val['date_time'])->update($arr);
                 echo $val['date_time'].' update is ok'."\n";
                 usleep(10000);
@@ -360,6 +366,19 @@ class SupplyData extends Backend
         $count3 = $this->process->table([$sql3=>'t2'])->value('sum( IF ( total <= 168, 1, 0) ) AS a');
         $untimeout_count = $count1 + $count2 + $count3;
         $arr['intime_rate'] = $arr['order_num'] ? round($untimeout_count/$arr['order_num']*100,2) : 0;
+        return $arr;
+    }
+    //获取妥投率中的发货数和妥投及时率
+    public function getSendLogistics($date){
+        $arr = [];
+        //订单数
+        $start = strtotime($date);
+        $end = strtotime($date.' 23:59:59');
+        $where['delivery_time'] = ['between',[$start,$end]];
+        $arr['send_num'] = $this->ordernode->where($where)->count();
+        $sql1 = $this->process->field('(signing_time-delivery_time)/3600/24 AS total')->where($where)->group('order_id')->buildSql();
+        $count = $this->process->table([$sql1=>'t2'])->value('sum( IF ( total <= 15, 1, 0) ) AS a');
+        $arr['logistics_rate'] = $arr['send_num'] ? round($count/$arr['send_num']*100,2) : 0;
         return $arr;
     }
     //每月数据(平均总库存、平均呆滞库存)
