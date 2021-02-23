@@ -135,6 +135,7 @@ class DataMarket extends Backend
         if ($this->request->isAjax()) {
             $params = $this->request->param();
             $time_str = $params['time_str'];
+            $time_str = '2020-02-01 00:00:00 - 2021-02-23 23:59:59';
             if ($time_str) {
                 $createat = explode(' ', $time_str);
                 $start = date('Y-m',$createat[0]);
@@ -144,8 +145,7 @@ class DataMarket extends Backend
                 $end   = date('Y-m');
             }
             $where['day_date'] = ['between',[$start,$end]];
-            $data = $this->supplymonth->where($where)->field('id,avg_dull_stock,avg_rate,day_date')->order('day_date','asc')->select(false);
-            echo $data;exit;
+            $data = $this->supplymonth->where($where)->field('id,avg_dull_stock,avg_rate,day_date')->order('day_date','asc')->select();
             $json['xColumnName'] = array_column($data,'day_date');
             $json['column'] = ['平均呆滞库存'];
             $json['columnData'] = [
