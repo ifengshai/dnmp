@@ -2285,6 +2285,33 @@ class Test4 extends Controller
             }
         }
     }
+    //物流概况每天发货数量
+    public function send_logistics_num()
+    {
+        $ordernode = new \app\admin\model\OrderNode();
+        $date_time = Db::name('datacenter_day_order')->order('day_date','asc')->select();
+        //查询时间
+        foreach ($date_time as $val) {
+            $is_exist = Db::name('datacenter_day_order')->where('day_date', $val['day_date'])->value('id');
+            if ($is_exist) {
+                $arr = [];
+                $arr['day_date'] = $val['day_date'];
+                //发送订单数
+                $start = strtotime($val['day_date']);
+                $end = strtotime($val['day_date'].' 23:59:59');
+                $where['delivery_time'] = ['between',[$start,$end]];
+                $arr['send_num'] = $ordernode->where($where)->count();
+
+                $sql1 = $this->process->field('(signing_time-delivery_time)/3600/24 AS total')->where($where)->group('order_id')->buildSql();
+                $count = $this->process->table([$sql1=>'t2'])->value('sum( IF ( total <= 15, 1, 0) ) AS a');
+
+                $arr['logistics_rate'] = $arr['send_num'] ? round($count/$arr['send_num']*100,2) : 0;
+                Db::name('datacenter_day_order')->where('day_date', $val['day_date'])->update($arr);
+                echo $val['day_date'].' is ok'."\n";
+                usleep(10000);
+            }
+        }
+    }
     //每月总库存、呆滞库存数据
     public function supply_month_data(){
         $this->productAllStockLog = new \app\admin\model\ProductAllStock();
