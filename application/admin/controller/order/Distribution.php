@@ -1424,6 +1424,10 @@ class Distribution extends Backend
                 $spreadsheet->getActiveSheet()->setCellValue("L" . ($cat + 1), $v['os_axis']); //AXI
                 $v['os_add'] = urldecode($v['os_add']);
                 $v['od_add'] = urldecode($v['od_add']);
+                dump($v['os_add']);
+                dump($v['od_add']);
+                dump((float)($value['os_add']) * 1);
+                dump((float)($value['od_add']) * 1);die();
                 if ($v['os_add'] && $v['od_add'] && (float)($value['os_add']) * 1 != 0 && (float)($v['od_add']) * 1 != 0) {
                     $spreadsheet->getActiveSheet()->setCellValue("M" . ($cat), $v['od_add']); //ADD
                     $spreadsheet->getActiveSheet()->setCellValue("M" . ($cat + 1), $v['os_add']); //ADD
