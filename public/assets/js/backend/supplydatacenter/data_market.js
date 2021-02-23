@@ -6,6 +6,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
             //订单数据概况折线图
             stock_measure_overview_platform();
             Controller.api.formatter.bar_chart();
+            Controller.api.formatter.dull_stock_change_barline();
             Controller.api.formatter.line_histogram();
             Controller.api.formatter.comleted_time_rate_pie();
             $("#time_str5").on("apply.daterangepicker", function () {
@@ -16,6 +17,17 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
             $("#time_str5").on("cancel.daterangepicker", function () {
                 setTimeout(() => {
                     Controller.api.formatter.bar_chart();   //库存变化折线图
+                }, 0)
+            })
+
+            $("#time_str6").on("apply.daterangepicker", function () {
+                setTimeout(() => {
+                    Controller.api.formatter.dull_stock_change_barline();   //呆滞库存变化折线图
+                }, 0)
+            })
+            $("#time_str6").on("cancel.daterangepicker", function () {
+                setTimeout(() => {
+                    Controller.api.formatter.dull_stock_change_barline();   //呆滞库存变化折线图
                 }, 0)
             })
 
