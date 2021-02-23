@@ -2302,8 +2302,8 @@ class Test4 extends Controller
                 $where['delivery_time'] = ['between',[$start,$end]];
                 $arr['send_num'] = $ordernode->where($where)->count();
 
-                $sql1 = $this->process->field('(signing_time-delivery_time)/3600/24 AS total')->where($where)->group('order_id')->buildSql();
-                $count = $this->process->table([$sql1=>'t2'])->value('sum( IF ( total <= 15, 1, 0) ) AS a');
+                $sql1 = $this->ordernode->field('(signing_time-delivery_time)/3600/24 AS total')->where($where)->group('order_id')->buildSql();
+                $count = $this->ordernode->table([$sql1=>'t2'])->value('sum( IF ( total <= 15, 1, 0) ) AS a');
 
                 $arr['logistics_rate'] = $arr['send_num'] ? round($count/$arr['send_num']*100,2) : 0;
                 Db::name('datacenter_day_order')->where('day_date', $val['day_date'])->update($arr);

@@ -376,8 +376,8 @@ class SupplyData extends Backend
         $end = strtotime($date.' 23:59:59');
         $where['delivery_time'] = ['between',[$start,$end]];
         $arr['send_num'] = $this->ordernode->where($where)->count();
-        $sql1 = $this->process->field('(signing_time-delivery_time)/3600/24 AS total')->where($where)->group('order_id')->buildSql();
-        $count = $this->process->table([$sql1=>'t2'])->value('sum( IF ( total <= 15, 1, 0) ) AS a');
+        $sql1 = $this->ordernode->field('(signing_time-delivery_time)/3600/24 AS total')->where($where)->group('order_id')->buildSql();
+        $count = $this->ordernode->table([$sql1=>'t2'])->value('sum( IF ( total <= 15, 1, 0) ) AS a');
         $arr['logistics_rate'] = $arr['send_num'] ? round($count/$arr['send_num']*100,2) : 0;
         return $arr;
     }
