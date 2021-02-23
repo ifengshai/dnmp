@@ -18,6 +18,7 @@ use think\Exception;
 use app\admin\model\AuthGroupAccess;
 use think\exception\PDOException;
 use think\exception\ValidateException;
+use Think\Log;
 use Util\NihaoPrescriptionDetailHelper;
 use Util\ZeeloolPrescriptionDetailHelper;
 use Util\VooguemePrescriptionDetailHelper;
@@ -1018,7 +1019,7 @@ class WorkOrderList extends Backend
     {
         //获取工单配置信息
         $workOrderConfigValue = $this->workOrderConfigValue;
-        
+
         //获取用户ID和所在权限组
         $admin_id = session('admin.id');
         $nickname = session('admin.nickname');
@@ -1065,7 +1066,7 @@ class WorkOrderList extends Backend
                         if (!empty($item_choose)) {
                             foreach ($item_choose as $key => $value) {
                                 if (!empty($item_choose[$key][0])) {
-                                     $flag = 1;
+                                    $flag = 1;
                                 }
                             }
                         }
@@ -1245,7 +1246,7 @@ class WorkOrderList extends Backend
                             }
                         }
                     }
-                  
+
                     //判断是否选择积分措施
                     if (in_array(10, $measure_choose_id)) {
                         (!$params['integral'] || !is_numeric($params['integral']))
@@ -1293,7 +1294,7 @@ class WorkOrderList extends Backend
                         //子单取消
                         if (in_array(18, $item['item_choose'])) {
                             //检测之前是否处理过子单措施
-                            array_intersect([1, 2, 3], $change_type) && $this->error("子订单：{$key} 措施已处理，不能取消");
+                            array_intersect([3], $change_type) && $this->error("子订单：{$key} 措施已处理，不能取消");
                         } /*elseif (in_array(19, $item['item_choose'])) {//更改镜框
                             //检测之前是否处理过更改镜框措施
                             in_array(1, $change_type) && $this->error("子订单：{$key} 措施已处理，不能重复创建");
@@ -1310,7 +1311,7 @@ class WorkOrderList extends Backend
                     unset($item);
                 }
 
-               
+
 
                 /**获取审核人 start*/
                 $check_person_weight = $workOrderConfigValue['check_person_weight'];//审核人列表
@@ -1335,7 +1336,7 @@ class WorkOrderList extends Backend
                             $all_person = $all_group[$gv['work_create_person_id']];
                         }
 
-                       
+
                         if (!empty($all_person)) {
                             //如果符合创建组
                             if (in_array($admin_id, array_unique($all_person))) {
@@ -1360,7 +1361,7 @@ class WorkOrderList extends Backend
                         }
                     }
                 }
-               
+
                 //没有审核人则不需要审核
                 if (!$params['assign_user_id']) {
                     $params['is_check'] = 0;
@@ -2949,10 +2950,10 @@ class WorkOrderList extends Backend
 
         //获取承接表数据
         $recepts = WorkOrderRecept::where('fa_work_order_recept.work_id', $row->id)
-        ->field('fa_work_order_recept.*,b.measure_choose_id,b.measure_content,b.operation_type,b.item_order_number,b.sku_change_type,b.operation_type,b.operation_time')
-        ->join(['fa_work_order_measure' => 'b'], 'fa_work_order_recept.measure_id=b.id')
-        ->group('recept_group_id,measure_id')
-        ->select();
+            ->field('fa_work_order_recept.*,b.measure_choose_id,b.measure_content,b.operation_type,b.item_order_number,b.sku_change_type,b.operation_type,b.operation_time')
+            ->join(['fa_work_order_measure' => 'b'], 'fa_work_order_recept.measure_id=b.id')
+            ->group('recept_group_id,measure_id')
+            ->select();
         $this->assignconfig('recepts', $recepts);
         $this->view->assign('recepts', $recepts);
 
@@ -3206,7 +3207,7 @@ class WorkOrderList extends Backend
                         if (!empty($gift_sku)) {
                             $gift_sku = collection($gift_sku)->toArray();
                             foreach ($gift_sku as $key => $value) {
-                                for ($i=1; $i <= $value['change_number']; $i++) { 
+                                for ($i=1; $i <= $value['change_number']; $i++) {
                                     $change_sku = $value['change_sku'];
                                     if (empty($barcode[$value['change_sku'].'_'.$i])) {
                                         $this->error("序号为".$i."的sku(".$value['change_sku'].")，条形码不能为空");
@@ -3217,7 +3218,7 @@ class WorkOrderList extends Backend
                                         ->where(['platform_sku' => $value['change_sku'], 'platform_type' => $row['work_platform']])
                                         ->find();
                                     if ($platform_info['sku']) {
-                                         $platform_info_sku = $platform_info['sku'];
+                                        $platform_info_sku = $platform_info['sku'];
                                     }
                                     $bar_code_info = $product_bar_code_item->where(['code' => $barcode[$change_sku.'_'.$i]])->find();
                                     if (empty($bar_code_info)) {
@@ -3240,12 +3241,12 @@ class WorkOrderList extends Backend
                     //措施表
                     $_work_order_measure = new WorkOrderMeasure();
                     $measure_choose_id = $_work_order_measure->where('id',$receptInfo['measure_id'])->value('measure_choose_id');
-                    if (3 == $measure_choose_id) { 
+                    if (3 == $measure_choose_id) {
                         //主单取消收入核算冲减
                         $FinanceCost = new FinanceCost();
                         $FinanceCost->cancel_order_subtract($receptInfo['work_id']);
                     }
-                    if (15 == $measure_choose_id) { 
+                    if (15 == $measure_choose_id) {
                         //vip退款收入核算冲减
                         $FinanceCost = new FinanceCost();
                         $FinanceCost->vip_order_subtract($receptInfo['work_id']);
@@ -3255,7 +3256,7 @@ class WorkOrderList extends Backend
                             case 18://子单取消
                                 $change_type = 3;
                                 break;
-                            
+
                             case 19://更改镜框
                                 $change_type = 1;
                                 break;
@@ -3268,12 +3269,12 @@ class WorkOrderList extends Backend
                             $ProductBarCodeItem->where(['item_order_number'=>$item_order_number])->update(['item_order_number' => '','library_status' => 1,'out_stock_time' => null,'out_stock_id' => 0]);
                         }
                     }
-                    if (8 == $measure_choose_id) { 
+                    if (8 == $measure_choose_id) {
                         //补价收入核算增加
                         $FinanceCost = new FinanceCost();
                         $FinanceCost->return_order_subtract($receptInfo['work_id'],3);
                     }
-                    if (11 == $measure_choose_id) { 
+                    if (11 == $measure_choose_id) {
                         //退件退款收入核算冲减
                         $FinanceCost = new FinanceCost();
                         $FinanceCost->return_order_subtract($receptInfo['work_id'],4);
@@ -3891,6 +3892,10 @@ EOF;
                     $res_status = WorkOrderNote::create($data);
                     //查询用户的角色组id
                     $authGroupIds = AuthGroupAccess::where('uid', session('admin.id'))->column('group_id');
+                    Log::write("角色组");
+                    Log::write($authGroupIds);
+                    Log::write($workOrderConfigValue['warehouse_department_rule']);
+
                     $work = $this->model->find($params['work_id']);
                     $work_order_note_status = $work->work_order_note_status;
 
@@ -3919,6 +3924,9 @@ EOF;
                         $work_order_note_status = 3;
                     }
                     $work->work_order_note_status = $work_order_note_status;
+
+                    Log::write("是否包含");
+                    Log::write($work_order_note_status);
                     $work->save();
                     Db::commit();
                 } catch (\Exception $e) {
