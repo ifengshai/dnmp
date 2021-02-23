@@ -186,8 +186,12 @@ class DataMarket extends Backend
         $where['category_id'] = ['<>',43]; //排除补差价商品
         //库存总数量
         $arr['stock_num'] = $this->model->where($where)->sum('stock');
+        //呆滞库存占比
+        $arr['dull_stock_count_rate'] = $arr['stock_num'] ? round($dull_stock['stock']/$arr['stock_num']*100,0) : 0;
         //库存总金额
         $arr['stock_amount'] = $this->model->where($where)->sum('stock*purchase_price');
+        //呆滞金额占比
+        $arr['dull_stock_total_rate'] = $arr['stock_amount'] ? round($dull_stock['total']/$arr['stock_amount']*100,0) : 0;
         //库存单价
         $arr['stock_price'] = $arr['stock_num'] ? round($arr['stock_amount']/$arr['stock_num'],2) : 0;
         //在途库存数量
@@ -440,9 +444,14 @@ class DataMarket extends Backend
         );
         //获取呆滞库存信息
         $dull_stock = $this->dullstock->where('grade','<>','Z')->order('day_date desc,id asc')->limit(8)->select();
+        $all_dull_stock = $this->dullstock->where('grade','Z')->order('day_date desc,id asc')->limit(1)->find();
+        $arr['all_dull_stock'] = $all_dull_stock['stock'];   //合计呆滞库存
+        $arr['all_dull_total'] = $all_dull_stock['total'];   //合计呆滞金额
 
-        $all_num = $arr['a1_count']+$arr['a_count']+$arr['b_count']+$arr['c1_count']+$arr['c_count']+$arr['d_count']+$arr['e_count']+$arr['f_count'];
-        $all_stock_num = $arr['a1_stock_num']+$arr['a_stock_num']+$arr['b_stock_num']+$arr['c1_stock_num']+$arr['c_stock_num']+$arr['d_stock_num']+$arr['e_stock_num']+$arr['f_stock_num'];
+        $all_num = $arr['all_count'] = $arr['a1_count']+$arr['a_count']+$arr['b_count']+$arr['c1_count']+$arr['c_count']+$arr['d_count']+$arr['e_count']+$arr['f_count'];   //合计SKU数量
+        $all_stock_num = $arr['all_stock_num'] = $arr['a1_stock_num']+$arr['a_stock_num']+$arr['b_stock_num']+$arr['c1_stock_num']+$arr['c_stock_num']+$arr['d_stock_num']+$arr['e_stock_num']+$arr['f_stock_num'];  //合计库存数量
+        $arr['all_stock_price'] = $arr['a1_stock_price']+$arr['a_stock_price']+$arr['b_stock_price']+$arr['c1_stock_price']+$arr['c_stock_price']+$arr['d_stock_price']+$arr['e_stock_price']+$arr['f_stock_price'];  //合计库存金额
+        $arr['all_dull_stock_rate'] = $arr['all_stock_num'] ? round($arr['all_dull_stock']/$arr['all_stock_num']*100,2).'%' : 0;   //合计呆滞库存占比
         $arr['a1_percent'] = $all_num ? round($arr['a1_count']/$all_num*100,2).'%':0;
         $arr['a1_stock_percent'] = $all_stock_num ? round($arr['a1_stock_num']/$all_stock_num*100,2).'%':0;
         $arr['a1_dull_stock'] = $dull_stock[0]['stock'];   //呆滞库存
@@ -500,7 +509,13 @@ class DataMarket extends Backend
             return $cache_data;
         }
         //获取呆滞库存信息
-        $dull_stock = $this->dullstock->where('grade','<>','Z')->order('day_date desc,id asc')->limit(8)->select();
+        $dull_stock = $this->dullstock->order('day_date desc,id asc')->limit(9)->select();
+        foreach($dull_stock as $k=>$v){
+            if($v['grade'] == 'Z'){
+                $dull_stock[$k]['grade'] = '合计';
+                $dull_stock[$k]['stock_rate'] = 100;
+            }
+        }
         Cache::set('Supplydatacenter_datamarket'.md5(serialize('stock_level_overview2')),$dull_stock,7200);
         return $dull_stock;
     }
