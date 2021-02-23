@@ -1406,7 +1406,6 @@ class Distribution extends Backend
             }
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($num), $value['order_type']); //订单类型
             $spreadsheet->getActiveSheet()->setCellValue("F" . ($num), $value['status']); //订单状态
-            dump($value['item_order']);die();
             foreach ($value['item_order'] as $k => $v) {
                 $v['od_sph'] = isset($v['od_sph']) ? urldecode($v['od_sph']) : '';
                 $v['os_sph'] = isset($v['os_sph']) ? urldecode($v['os_sph']) : '';
@@ -1425,7 +1424,7 @@ class Distribution extends Backend
                 $spreadsheet->getActiveSheet()->setCellValue("L" . ($cat + 1), $v['os_axis']); //AXI
                 $v['os_add'] = urldecode($v['os_add']);
                 $v['od_add'] = urldecode($v['od_add']);
-                if ($value['os_add'] && $value['od_add'] && (float)($value['os_add']) * 1 !== 0 && (float)($v['od_add']) * 1 != 0) {
+                if ($v['os_add'] && $v['od_add'] && (float)($value['os_add']) * 1 != 0 && (float)($v['od_add']) * 1 != 0) {
                     $spreadsheet->getActiveSheet()->setCellValue("M" . ($cat), $v['od_add']); //ADD
                     $spreadsheet->getActiveSheet()->setCellValue("M" . ($cat + 1), $v['os_add']); //ADD
                 } else {
