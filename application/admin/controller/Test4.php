@@ -2347,10 +2347,11 @@ class Test4 extends Controller
                     ->sum('all_purchase_num');
                 $order = new \app\admin\model\order\Order();
                 //上个月总的销售数量（副数）
-                $sales_num = $order->where('created_at','>=',strtotime($startday.' 00:00:00'))->where('created_at','<=',strtotime($endday.' 23:59:59'))->sum('total_qty_ordered');
+                $where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
+                $sales_num = $order->where('created_at','>=',strtotime($startday.' 00:00:00'))->where('created_at','<=',strtotime($endday.' 23:59:59'))->where($where)->sum('total_qty_ordered');
                 $arr['purchase_num'] = $purchase_num;
                 $arr['sales_num'] = $sales_num;
-                $arr['purchase_sales_rate'] = round($purchase_num/$sales_num,2);
+                $arr['purchase_sales_rate'] = $sales_num!=0 ? round($purchase_num/$sales_num,2):0;
                 Db::name('datacenter_supply_month')->where('day_date',$start)->update($arr);
             }else{
                 //上个月总的采购数量（副数）
@@ -2360,10 +2361,11 @@ class Test4 extends Controller
                     ->sum('all_purchase_num');
                 $order = new \app\admin\model\order\Order();
                 //上个月总的销售数量（副数）
-                $sales_num = $order->where('created_at','>=',strtotime($startday.' 00:00:00'))->where('created_at','<=',strtotime($endday.' 23:59:59'))->sum('total_qty_ordered');
+                $where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
+                $sales_num = $order->where('created_at','>=',strtotime($startday.' 00:00:00'))->where('created_at','<=',strtotime($endday.' 23:59:59'))->where($where)->sum('total_qty_ordered');
                 $arr['purchase_num'] = $purchase_num;
                 $arr['sales_num'] = $sales_num;
-                $arr['purchase_sales_rate'] = round($purchase_num/$sales_num,2);
+                $arr['purchase_sales_rate'] = $sales_num!=0 ? round($purchase_num/$sales_num,2):0;
                 $arr['day_date'] = $start;
                 Db::name('datacenter_supply_month')->insert($arr);
             }
