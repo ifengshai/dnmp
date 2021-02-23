@@ -123,7 +123,7 @@ class DataMarket extends Backend
                 [
                     'name' => '平均库存',
                     'type' => 'bar',
-                    'data' => array_column($data,'stock')
+                    'data' => array_column($data,'avg_stock')
                 ],
             ];
             return json(['code' => 1, 'data' => $json]);
