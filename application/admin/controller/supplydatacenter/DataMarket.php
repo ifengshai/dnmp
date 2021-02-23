@@ -700,6 +700,41 @@ class DataMarket extends Backend
         }
         return $date;
     }
+    //月度采购数量、采销比
+    public function purchase_sales_barline()
+    {
+        if ($this->request->isAjax()) {
+            $params = $this->request->param();
+            $time_str = $params['time_str'];
+            if ($time_str) {
+                $createat = explode(' ', $time_str);
+                $start = date('Y-m',strtotime($createat[0]));
+                $end = date('Y-m',strtotime($createat[3]));
+            } else {
+                $start = date('Y-m', strtotime('-12 months'));
+                $end   = date('Y-m');
+            }
+            $where['day_date'] = ['between',[$start,$end]];
+            $data = $this->supplymonth->where($where)->field('id,purchase_num,purchase_sales_rate,day_date')->order('day_date','asc')->select();
+            $json['xColumnName'] = array_column($data,'day_date');
+            $json['column'] = ['月度采购数量'];
+            $json['columnData'] = [
+                [
+                    'type' => 'bar',
+                    'data' => array_column($data,'purchase_num'),
+                    'name' => '月度采购数量'
+                ],
+                [
+                    'type' => 'line',
+                    'data' => array_column($data,'purchase_sales_rate'),
+                    'name' => '采销比',
+                    'yAxisIndex' => 1,
+                    'smooth' => true //平滑曲线
+                ],
+            ];
+            return json(['code' => 1, 'data' => $json]);
+        }
+    }
     //订单发货及时率
     public function order_histogram_line(){
         if ($this->request->isAjax()) {
