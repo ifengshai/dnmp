@@ -6,6 +6,7 @@
 
 namespace app\admin\controller\shell;
 
+use app\admin\model\order\order\Order;
 use app\common\controller\Backend;
 use think\Db;
 
@@ -399,7 +400,22 @@ class SupplyData extends Backend
             if ($end_stock['id']) {
                 //如果有月末数据，（月初数据+月末数据）/2
                 $stock = round(($start_stock['allnum'] + $end_stock['allnum']) / 2, 2);
+                //上个月总的采购数量（副数）
+                $purchase_num = Db::name('warehouse_data')
+                    ->where('create_time','>',date('Y-m-01 00:00:00',strtotime('-1 month')))
+                    ->where('create_time','<',date("Y-m-d 23:59:59", strtotime(-date('d').'day')))
+                    ->sum('all_purchase_num');
+                $m = date('Y-m-d', mktime(0,0,0,date('m')-1,1,date('Y')));
+                $t = date('t',strtotime($m)); //上个月共多少天
+                $start = date('Y-m-d', mktime(0,0,0,date('m')-1,1,date('Y'))); //上个月的开始日期
+                $end = date('Y-m-d', mktime(0,0,0,date('m')-1,$t,date('Y'))); //上个月的结束日期
+                $order = new \app\admin\model\order\Order();
+                //上个月总的销售数量（副数）
+                $sales_num = $order->where('created_at','>',$start)->where('created_at','<',$end)->sum('total_qty_ordered');
                 $arr['day_date'] = $lastmonth;
+                $arr['purchase_num'] = $purchase_num;
+                $arr['sales_num'] = $sales_num;
+                $arr['purchase_sales_rate'] = round($purchase_num/$sales_num,2);
                 $arr['avg_stock'] = $stock;
                 Db::name('datacenter_supply_month')->insert($arr);
             }
