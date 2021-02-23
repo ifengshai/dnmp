@@ -149,9 +149,16 @@ class DataMarket extends Backend
             $json['column'] = ['平均呆滞库存'];
             $json['columnData'] = [
                 [
-                    'name' => '平均呆滞库存',
                     'type' => 'bar',
-                    'data' => array_column($data,'avg_dull_stock')
+                    'data' => array_column($data,'avg_dull_stock'),
+                    'name' => '平均呆滞库存'
+                ],
+                [
+                    'type' => 'line',
+                    'data' => array_column($data,'avg_rate'),
+                    'name' => '呆滞库存占比',
+                    'yAxisIndex' => 1,
+                    'smooth' => true //平滑曲线
                 ],
             ];
             return json(['code' => 1, 'data' => $json]);

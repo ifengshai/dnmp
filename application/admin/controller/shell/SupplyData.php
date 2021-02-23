@@ -364,6 +364,8 @@ class SupplyData extends Backend
     }
     //每月数据(平均总库存、平均呆滞库存)
     public function supply_month_data(){
+        $this->productAllStockLog = new \app\admin\model\ProductAllStock();
+        $this->dullstock = new \app\admin\model\supplydatacenter\DullStock();
         $time = date('Y-m');
         $lastmonth = date('Y-m',strtotime("$time -1 month"));
 
@@ -386,17 +388,18 @@ class SupplyData extends Backend
         //获取当前上个月份的库存数据
         $stock_info = Db::name('datacenter_supply_month')->where('day_date',$lastmonth)->field('id,avg_stock')->find();
         //获取月初呆滞库存数据
-        $start_dull_stock = $this->dullstock->where("DATE_FORMAT(day_date,'%Y-%m-%d')='$startday'")->field('id,stock')->find();
+        $start_dull_stock = $this->dullstock->where("DATE_FORMAT(day_date,'%Y-%m-%d')='$startday'")->where('grade','Z')->field('id,stock')->find();
         //判断是否有月初数据
         if($start_dull_stock['id']) {
             //判断是否有月末数据
-            $end_dull_stock = $this->dullstock->where("DATE_FORMAT(day_date,'%Y-%m-%d')='$endday'")->field('id,stock')->find();
+            $end_dull_stock = $this->dullstock->where("DATE_FORMAT(day_date,'%Y-%m-%d')='$endday'")->where('grade','Z')->field('id,stock')->find();
             if ($end_dull_stock['id']) {
                 //如果有月末数据，（月初数据+月末数据）/2
                 $dull_stock = round(($start_dull_stock['stock'] + $end_dull_stock['stock']) / 2, 2);
                 $arr1['avg_dull_stock'] = $dull_stock;
                 $arr1['avg_rate'] = $stock_info['avg_stock'] ? round($arr1['avg_dull_stock']/$stock_info['avg_stock'],2) : 0;
                 Db::name('datacenter_supply_month')->where('id',$stock_info['id'])->update($arr1);
+                echo "success";
             }
         }
     }

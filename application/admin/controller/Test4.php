@@ -2287,6 +2287,8 @@ class Test4 extends Controller
     }
     //每月总库存、呆滞库存数据
     public function supply_month_data(){
+        $this->productAllStockLog = new \app\admin\model\ProductAllStock();
+        $this->dullstock = new \app\admin\model\supplydatacenter\DullStock();
         $start = date('Y-m', strtotime('-15 months'));
         $end   = date('Y-m');
         while($end>$start){
@@ -2302,23 +2304,23 @@ class Test4 extends Controller
                 if ($end_stock['id']) {
                     //如果有月末数据，（月初数据+月末数据）/2
                     $stock = round(($start_stock['allnum'] + $end_stock['allnum']) / 2, 2);
-                    $arr['day_date'] = $end;
+                    $arr['day_date'] = $start;
                     $arr['avg_stock'] = $stock;
                     Db::name('datacenter_supply_month')->insert($arr);
-                    echo $end." is ok"."\n";
+                    echo $start." is ok"."\n";
                 }
             }
             //获取当前上个月份的库存数据
-            $stock_info = Db::name('datacenter_supply_month')->where('day_date',$end)->field('id,avg_stock')->find();
-            $start_dull_stock = $this->dullstock->where("DATE_FORMAT(day_date,'%Y-%m-%d')='$startday'")->field('id,stock')->find();
+            $stock_info = Db::name('datacenter_supply_month')->where('day_date',$start)->field('id,avg_stock')->find();
+            $start_dull_stock = $this->dullstock->where("DATE_FORMAT(day_date,'%Y-%m-%d')='$startday'")->where('grade','Z')->field('id,stock')->find();
             //判断是否有月初数据
             if($start_dull_stock['id']) {
                 //判断是否有月末数据
-                $end_dull_stock = $this->dullstock->where("DATE_FORMAT(day_date,'%Y-%m-%d')='$endday'")->field('id,stock')->find();
+                $end_dull_stock = $this->dullstock->where("DATE_FORMAT(day_date,'%Y-%m-%d')='$endday'")->where('grade','Z')->field('id,stock')->find();
                 if ($end_dull_stock['id']) {
                     //如果有月末数据，（月初数据+月末数据）/2
                     $dull_stock = round(($start_dull_stock['stock'] + $end_dull_stock['stock']) / 2, 2);
-                    $arr1['day_date'] = $end;
+                    $arr1['day_date'] = $start;
                     $arr1['avg_dull_stock'] = $dull_stock;
                     $arr1['avg_rate'] = $stock_info['avg_stock'] ? round($arr1['avg_dull_stock']/$stock_info['avg_stock'],2) : 0;
                     Db::name('datacenter_supply_month')->where('id',$stock_info['id'])->update($arr1);
