@@ -42,6 +42,7 @@ class Zendesk extends Backend
         parent::_initialize();
         $this->model = new \app\admin\model\zendesk\Zendesk;
         $this->ordernodedeltail = new \app\admin\model\order\order\Ordernodedeltail();
+        $this->step = new \app\admin\model\saleaftermanage\WorkOrderMeasure;
         $this->view->assign('getTabList', $this->model->getTabList());
         $this->assignconfig('admin_id', session('admin.id'));
     }
@@ -689,8 +690,7 @@ class Zendesk extends Backend
         $orders = collection($orders)->toArray();
         foreach ($orders as $key=>$item){
             $orders[$key]['track_number'] = Db::connect('database.db_mojing_order')->table('fa_order_process')->where('entity_id',$item['entity_id'])->value('track_number');
-            //查询该订单下是否有工单
-            $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
+
             $swhere = [];
             $platform_order = '400210665';
             $site = 1;
@@ -699,11 +699,7 @@ class Zendesk extends Backend
 //            $swhere['platform_order'] = ['eq', $item['increment_id']];
             $swhere['work_platform'] = $site;
             $swhere['work_status'] = ['not in', [0, 4]];
-            $workorder_list = $workorder->where($swhere)->select();
-            if ($workorder_list){
-                $workorder_list = collection($workorder_list)->toArray();
-            }
-            $orders[$key]['workorder_list'] = $workorder_list;
+            $orders[$key]['workorder_list'] =$this->access_tothe_repair_order($swhere);
 
         }
         dump($orders);die();
@@ -797,6 +793,37 @@ class Zendesk extends Backend
         $this->assign('courier_one',$courier_one);
         $this->assign('courier_two',$courier_two);
         return $this->view->fetch();
+    }
+
+    //查询该订单下是否有工单
+    protected function access_tothe_repair_order($where){
+        $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
+        $workorder_list = $workorder->where($where)->select();
+        if ($workorder_list){
+            $workorder_list = collection($workorder_list)->toArray();
+        }
+        foreach ($workorder_list as $key=>$item){
+            $workorder_list[$key]['step_num'] = $this->sel_order_recept($item['id']);
+        }
+        return $workorder_list;
+    }
+
+
+
+    //根据主记录id，获取措施相关信息
+    protected function sel_order_recept($id)
+    {
+        $this->recept = new \app\admin\model\saleaftermanage\WorkOrderRecept;
+        $step = $this->step->where('work_id', $id)->select();
+        $step_arr = collection($step)->toArray();
+
+        foreach ($step_arr as $k => $v) {
+            $recept = $this->recept->where('measure_id', $v['id'])->where('work_id', $id)->select();
+            $recept_arr = collection($recept)->toArray();
+
+            $step_arr[$k]['recept'] = $recept_arr;
+        }
+        return $step_arr ?: [];
     }
 
 
