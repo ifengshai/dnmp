@@ -144,7 +144,8 @@ class DataMarket extends Backend
                 $end   = date('Y-m');
             }
             $where['day_date'] = ['between',[$start,$end]];
-            $data = $this->supplymonth->where($where)->field('id,avg_dull_stock,avg_rate,day_date')->order('day_date','asc')->select();
+            $data = $this->supplymonth->where($where)->field('id,avg_dull_stock,avg_rate,day_date')->order('day_date','asc')->select(false);
+            echo $data;exit;
             $json['xColumnName'] = array_column($data,'day_date');
             $json['column'] = ['平均呆滞库存'];
             $json['columnData'] = [
