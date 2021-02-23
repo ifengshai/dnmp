@@ -812,29 +812,32 @@ class DataMarket extends Backend
     public function track_logistics_barline()
     {
         if ($this->request->isAjax()) {
-            $params = $this->request->param();
-            $time_str = $params['time_str'];
-            if ($time_str) {
-                $createat = explode(' ', $time_str);
-                $start = date('Y-m',strtotime($createat[0]));
-                $end = date('Y-m',strtotime($createat[3]));
-            } else {
-                $start = date('Y-m', strtotime('-12 months'));
-                $end   = date('Y-m');
+            $time_str = input('time_str');
+            if (!$time_str) {
+                $start = date('Y-m-d 00:00:00', strtotime('-30 day'));
+                $end = date('Y-m-d 23:59:59');
+                $time_str = $start . ' - ' . $end;
             }
-            $where['day_date'] = ['between',[$start,$end]];
-            $data = $this->supplymonth->where($where)->field('id,send_num,intime_rate,day_date')->order('day_date','asc')->select();
-            $json['xColumnName'] = array_column($data,'day_date');
-            $json['column'] = ['发货数量'];
+            $cache_data = Cache::get('Supplydatacenter_datamarket'  .$time_str. md5(serialize('track_logistics_barline')));
+            if (!$cache_data) {
+                $createat = explode(' ', $time_str);
+                $map['day_date'] = ['between',[$createat[0],$createat[3]]];
+                $order_info = Db::name('datacenter_day_order')->where($map)->select();
+                $arr = collection($order_info)->toArray();
+                Cache::set('Supplydatacenter_datamarket'.$time_str.md5(serialize('track_logistics_barline')),$arr,7200);
+            }else{
+                $arr = $cache_data;
+            }
+            $json['xColumnName'] = array_column($arr, 'day_date');
             $json['columnData'] = [
                 [
                     'type' => 'bar',
-                    'data' => array_column($data,'send_num'),
+                    'data' => array_column($arr, 'send_num'),
                     'name' => '发货数量'
                 ],
                 [
                     'type' => 'line',
-                    'data' => array_column($data,'intime_rate'),
+                    'data' => array_column($arr, 'intime_rate'),
                     'name' => '及时妥投率',
                     'yAxisIndex' => 1,
                     'smooth' => true //平滑曲线
