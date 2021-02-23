@@ -135,7 +135,6 @@ class DataMarket extends Backend
         if ($this->request->isAjax()) {
             $params = $this->request->param();
             $time_str = $params['time_str'];
-            $time_str = '2020-02-01 00:00:00 - 2021-02-23 23:59:59';
             if ($time_str) {
                 $createat = explode(' ', $time_str);
                 $start = date('Y-m',strtotime($createat[0]));
