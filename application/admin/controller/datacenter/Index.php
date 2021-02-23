@@ -24,7 +24,7 @@ class Index extends Backend
 
     /**
      * Index模型对象
-     * @var 
+     * @var
      */
     protected $model = null;
 
@@ -53,9 +53,9 @@ class Index extends Backend
      * 销量统计
      *
      * @Description
-     * @author wpl
-     * @since 2020/02/21 14:20:44 
      * @return void
+     * @since 2020/02/21 14:20:44
+     * @author wpl
      */
     public function index()
     {
@@ -73,7 +73,7 @@ class Index extends Backend
             $filter = json_decode($this->request->get('filter'), true);
             if ($filter['created_at']) {
                 $createat = explode(' ', $filter['created_at']);
-                $map['a.created_at'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3]  . ' ' . $createat[4]]];
+                $map['a.created_at'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]]];
                 unset($filter['created_at']);
                 $this->request->get(['filter' => json_encode($filter)]);
             } else {
@@ -160,9 +160,9 @@ class Index extends Backend
      * 供应链数据大屏
      *
      * @Description
-     * @author wpl
-     * @since 2020/02/21 14:23:45 
      * @return void
+     * @since 2020/02/21 14:23:45
+     * @author wpl
      */
     public function supply_chain_data()
     {
@@ -481,9 +481,9 @@ class Index extends Backend
      * 数据统计
      *
      * @Description
-     * @author wpl
-     * @since 2020/02/25 13:52:27 
      * @return void
+     * @since 2020/02/25 13:52:27
+     * @author wpl
      */
     public function warehouse_data()
     {
@@ -510,7 +510,7 @@ class Index extends Backend
 
         //统计处方镜
         $orderPrescriptionNum = $neworderprocess->getOrderPrescriptionNum($map);
-       
+
         $zeeloolOrderPrescriptionNum = $orderPrescriptionNum[1][2] + $orderPrescriptionNum[1][3];
         $vooguemeOrderPrescriptionNum = $orderPrescriptionNum[2][2] + $orderPrescriptionNum[2][3];
         $nihaoOrderPrescriptionNum = $orderPrescriptionNum[3][2] + $orderPrescriptionNum[3][3];
@@ -559,7 +559,8 @@ class Index extends Backend
     /**
      * 导出所有未发货的订单信息
      */
-    public function export_not_shipped(){
+    public function export_not_shipped()
+    {
         set_time_limit(0);
         ini_set('memory_limit', '512M');
 
@@ -567,9 +568,9 @@ class Index extends Backend
 
         if ($time_str) {
             $createat = explode(' ', $time_str);
-            $start = strtotime($createat[0].$createat[1]);
-            $end = strtotime($createat[3].$createat[4]);
-        }else{
+            $start = strtotime($createat[0] . $createat[1]);
+            $end = strtotime($createat[3] . $createat[4]);
+        } else {
             $start = strtotime(date('Y-m-d'));
             $end = time();
         }
@@ -598,23 +599,23 @@ class Index extends Backend
             $swhere['work_platform'] = 1;
             $swhere['work_status'] = ['not in', [0, 4, 6]];
             $work_type = $workorder->where($swhere)->field('work_type,create_user_name')->find();
-            if (!empty($work_type)){
+            if (!empty($work_type)) {
                 $value['work'] = '是';
-                if ($work_type->work_type == 1){
+                if ($work_type->work_type == 1) {
                     $value['work_status'] = '客服工单';
-                }else{
+                } else {
                     $value['work_status'] = '仓库工单';
                 }
-                $value['create_user_name'] =$work_type->create_user_name;
-            }else{
+                $value['create_user_name'] = $work_type->create_user_name;
+            } else {
                 $value['work'] = '否';
                 $value['work_status'] = '无';
                 $value['create_user_name'] = '无';
             }
             $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), $value['increment_id']);
             $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['status']);
-            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), date('Y-m-d H:i:s',$value['created_at']));
-            switch ($value['site']){
+            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), date('Y-m-d H:i:s', $value['created_at']));
+            switch ($value['site']) {
                 case 1:
                     $value['site'] = 'zeelool';
                     break;
@@ -706,10 +707,10 @@ class Index extends Backend
      * 根据处方范围统计SKU副数
      *
      * @Description
-     * @author wpl
      * @param mixed $create_time 时间筛选
-     * @since 2020/03/03 18:05:00 
      * @return void
+     * @since 2020/03/03 18:05:00
+     * @author wpl
      */
     protected function order_sku_num($create_time)
     {
@@ -741,7 +742,7 @@ class Index extends Backend
         (select if (od_sph>os_sph,od_sph,os_sph) as sph,if(od_cyl>os_cyl,od_cyl,os_cyl) as cyl 
         from sales_flat_order_item_prescription as p join sales_flat_order as o on p.order_id=o.entity_id where o.status in ('free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete','delivered') and  $where ) b where sph != '' and cyl != '' limit 1";
         $count = Db::connect('database.db_zeelool')->table('sales_flat_order_item_prescription')->query($sql1);
-        $res[0]['D'] = $count[0]['count']-$res[0]['A']-$res[0]['B']-$res[0]['C'];
+        $res[0]['D'] = $count[0]['count'] - $res[0]['A'] - $res[0]['B'] - $res[0]['C'];
         $res['count'] = $count[0]['count'];
         return $res;
     }
@@ -935,8 +936,8 @@ class Index extends Backend
                 $orderLog = new \app\admin\model\OrderLog();
                 $order_process_res = $orderLog->getOrderProcessNum();
 
-                $all_sales_num  = [];
-                $order_process_num  = [];
+                $all_sales_num = [];
+                $order_process_num = [];
                 foreach ($list as $k => $v) {
                     $all_sales_num[$v['create_date']] = $v['all_sales_num'];
                     $order_process_num[$v['create_date']] = $order_process_res[$v['create_date']] ?? 0;
@@ -949,7 +950,7 @@ class Index extends Backend
                         'name' => '每天订单量',
                         'type' => 'line',
                         'smooth' => true,
-                        'data' =>  array_values($all_sales_num)
+                        'data' => array_values($all_sales_num)
                     ],
                     [
                         'name' => '每天处理订单量',
@@ -1183,14 +1184,14 @@ class Index extends Backend
     }
 
     /**
-     * 采购数据分析
+     * 采购数据分析 （弃用）
      *
      * @Description
      * @author wpl
      * @since 2020/03/20 13:42:08 
      * @return void
      */
-    public function purchase_data_analysis()
+    public function purchase_data_analysis1()
     {
         $purchase = new \app\admin\model\purchase\PurchaseOrder();
         if ($this->request->isAjax()) {
@@ -1314,6 +1315,124 @@ class Index extends Backend
     }
 
     /**
+     * 采购数据分析新
+     * Created by Phpstorm.
+     * User: jhh
+     * Date: 2021/2/23
+     * Time: 13:50:39
+     */
+    public function purchase_data_analysis()
+    {
+        $purchase = new \app\admin\model\purchase\PurchaseOrder();
+        if ($this->request->isAjax()) {
+            $purchase_type = input('purchase_type');
+            $key = input('key');
+            $time = input('time');
+            //拆分
+            if ($time) {
+                $arr = explode(' ', $time);
+                $time = [$arr[0] . ' ' . $arr[1], $arr[3] . ' ' . $arr[4]];
+            }
+            if ($key == 'pie01') {
+                $data = $purchase->getPurchaseNumNowPerson([], $time);
+                $json['column'] = array_keys($data);
+                //转二维数组
+                if ($data) {
+                    $list = [];
+                    $i = 0;
+                    foreach ($data as $k => $v) {
+                        $list[$i]['name'] = $k;
+                        $list[$i]['value'] = $v;
+                        $i++;
+                    }
+                }
+                $json['columnData'] = $list;
+            } elseif ($key == 'pie02') {
+                $data = $purchase->getPurchaseOrderNumNowPerson([], $time);
+                $json['column'] = array_keys($data);
+                //转二维数组
+                if ($data) {
+                    $list = [];
+                    $i = 0;
+                    foreach ($data as $k => $v) {
+                        $list[$i]['name'] = $k;
+                        $list[$i]['value'] = $v;
+                        $i++;
+                    }
+                }
+                $json['columnData'] = $list;
+            } else {
+                $warehouse_data = Db::name('datacenter_supply_month')->select();
+                $barcloumndata = array_column($warehouse_data, 'purchase_num');
+                $linecloumndata = array_column($warehouse_data, 'purchase_sales_rate');
+
+                $json['xColumnName'] = array_column($warehouse_data, 'day_date');
+                $json['columnData'] = [
+                    [
+                        'type' => 'bar',
+                        'data' => $barcloumndata,
+                        'name' => '采购数量'
+                    ],
+                    [
+                        'type' => 'line',
+                        'data' => $linecloumndata,
+                        'name' => '采销比',
+                        'yAxisIndex' => 1,
+                        'smooth' => true //平滑曲线
+                    ],
+
+                ];
+            }
+
+            return json(['code' => 1, 'data' => $json]);
+        }
+        $dataConfig = new \app\admin\model\DataConfig();
+        //采购总数
+        $purchaseNum = $dataConfig->getValue('purchaseNum');
+        //采购总金额
+        $purchasePrice = $dataConfig->getValue('purchasePrice');
+        //采购总SKU数
+        $purchaseSkuNum = $dataConfig->getValue('purchaseSkuNum');
+        //采购镜架总数
+        $purchaseFrameNum = $dataConfig->getValue('purchaseFrameNum');
+        //当月采购镜架总金额
+        $purchaseFramePrice = $dataConfig->getValue('purchaseFramePrice');
+        //采购到货总数
+        $arrivalsNum = $dataConfig->getValue('arrivalsNum');
+        //采购平均单价
+        $purchaseAveragePrice = $dataConfig->getValue('purchaseAveragePrice');
+        //当月销售总数
+        $salesNum = $dataConfig->getValue('salesNum');
+        //当月销售总成本
+        $salesCost = $dataConfig->getValue('salesCost');
+        //当月质检合格总数
+        $quantityNum = $dataConfig->getValue('quantityNum');
+
+        //当月线上采购数量
+        $onlinePurchaseNum = $purchase->getOnlinePurchaseNum();
+        //当月线下采购数量
+        $underPurchaseNum = $purchase->getUnderPurchaseNum();
+
+        //采购SKU排行数据
+        $data = $purchase->getPurchaseNumRanking();
+
+        $this->assign('data', $data);
+        $this->assign('purchaseAveragePrice', $purchaseAveragePrice);
+        $this->assign('purchaseFramePrice', $purchaseFramePrice);
+        $this->assign('salesNum', $salesNum);
+        $this->assign('salesCost', $salesCost);
+        $this->assign('quantityNum', $quantityNum);
+        $this->assign('onlinePurchaseNum', $onlinePurchaseNum);
+        $this->assign('underPurchaseNum', $underPurchaseNum);
+        $this->assign('purchaseNum', $purchaseNum);
+        $this->assign('purchasePrice', $purchasePrice);
+        $this->assign('purchaseSkuNum', $purchaseSkuNum);
+        $this->assign('purchaseFrameNum', $purchaseFrameNum);
+        $this->assign('arrivalsNum', $arrivalsNum);
+        return $this->view->fetch();
+    }
+
+    /**
      * 测试
      *
      * @Description
@@ -1330,6 +1449,7 @@ class Index extends Backend
         dump($track);
         die;
     }
+
     /**
      * 导出销量统计
      *
@@ -1351,7 +1471,7 @@ class Index extends Backend
         $filter = json_decode($this->request->get('filter'), true);
         if ($filter['created_at']) {
             $createat = explode(' ', $filter['created_at']);
-            $map['a.created_at'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3]  . ' ' . $createat[4]]];
+            $map['a.created_at'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]]];
             unset($filter['created_at']);
             $this->request->get(['filter' => json_encode($filter)]);
         } else {
@@ -1448,7 +1568,7 @@ class Index extends Backend
             'borders' => [
                 'allBorders' => [
                     'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
-                    'color'       => ['argb' => 'FF000000'], // 设置border颜色
+                    'color' => ['argb' => 'FF000000'], // 设置border颜色
                 ],
             ],
         ];
