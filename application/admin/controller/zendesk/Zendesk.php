@@ -711,12 +711,15 @@ class Zendesk extends Backend
         //查询魔晶账户
         // $admin = new \app\admin\model\Admin();
         // $username = $admin->where('status','normal')->column('nickname','id');
+        $order_platform =1;
+        $this->view->assign('order_platform', $order_platform);
 
         $this->view->assign(compact('tags', 'ticket', 'comments', 'tickets', 'recentTickets', 'templates','orders','btn'));
         $this->view->assign('rows', $row);
         $this->view->assign('is_vip', $is_vip);
         $this->view->assign('ids', $ids);
         $this->view->assign('status', $status);
+
         $this->view->assign('orders_countds', $orders_count);
         $this->view->assign('recentTickets_count', $recentTickets_count);
         // $this->view->assign('username', $username);
@@ -762,6 +765,33 @@ class Zendesk extends Backend
         $this->view->assign('orderUrl',config('zendesk.platform_url')[$data['type']]);
         return $this->view->fetch();
     }
+
+    /**
+     *
+     * 物流节点
+     */
+    public function logistics_node(){
+        $entity_id = input('param.entity_id');
+//        $site = input('param.order_platform');
+        $site = 1;
+
+        //获取订单信息对应的所有物流信息
+        $courier = Db::name('order_node_courier')
+            ->alias('a')
+            ->join(['fa_order_node' => 'b'], 'a.order_id=b.order_id')
+            ->where('a.order_id',$entity_id)->where('a.site',$site)
+            ->order('create_time desc')
+            ->field('a.content,a.create_time,a.site,a.track_number,b.shipment_data_type')
+            ->select();
+        $courier_one  = $courier[0];
+        unset($courier[0]);
+        $courier_two = array_values($courier);
+        $this->assign('courier_one',$courier_one);
+        $this->assign('courier_two',$courier_two);
+        return $this->view->fetch();
+    }
+
+
 
     public function order_detail($order_number = null)
     {
