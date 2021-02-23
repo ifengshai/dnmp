@@ -2342,12 +2342,12 @@ class Test4 extends Controller
             if ($stock_info['id']){
                 //上个月总的采购数量（副数）
                 $purchase_num = Db::name('warehouse_data')
-                    ->where('create_time','>',$start.' 00:00:00')
-                    ->where('create_time','<',$endday.' 23:59:59')
+                    ->where('create_time','>=',$startday.' 00:00:00')
+                    ->where('create_time','<=',$endday.' 23:59:59')
                     ->sum('all_purchase_num');
                 $order = new \app\admin\model\order\Order();
                 //上个月总的销售数量（副数）
-                $sales_num = $order->where('created_at','>',strtotime($start.' 00:00:00'))->where('created_at','<',strtotime($endday.' 23:59:59'))->sum('total_qty_ordered');
+                $sales_num = $order->where('created_at','>=',strtotime($startday.' 00:00:00'))->where('created_at','<=',strtotime($endday.' 23:59:59'))->sum('total_qty_ordered');
                 $arr['purchase_num'] = $purchase_num;
                 $arr['sales_num'] = $sales_num;
                 $arr['purchase_sales_rate'] = round($purchase_num/$sales_num,2);
@@ -2355,12 +2355,12 @@ class Test4 extends Controller
             }else{
                 //上个月总的采购数量（副数）
                 $purchase_num = Db::name('warehouse_data')
-                    ->where('create_time','>',$start.' 00:00:00')
-                    ->where('create_time','<',$endday.' 23:59:59')
+                    ->where('create_time','>=',$startday.' 00:00:00')
+                    ->where('create_time','<=',$endday.' 23:59:59')
                     ->sum('all_purchase_num');
                 $order = new \app\admin\model\order\Order();
                 //上个月总的销售数量（副数）
-                $sales_num = $order->where('created_at','>',strtotime($start.' 00:00:00'))->where('created_at','<',strtotime($endday.' 23:59:59'))->sum('total_qty_ordered');
+                $sales_num = $order->where('created_at','>=',strtotime($startday.' 00:00:00'))->where('created_at','<=',strtotime($endday.' 23:59:59'))->sum('total_qty_ordered');
                 $arr['purchase_num'] = $purchase_num;
                 $arr['sales_num'] = $sales_num;
                 $arr['purchase_sales_rate'] = round($purchase_num/$sales_num,2);
