@@ -793,6 +793,41 @@ class DataMarket extends Backend
             return json(['code' => 1, 'data' => $json]);
         }
     }
+    //物流妥投概况
+    public function track_logistics_barline()
+    {
+        if ($this->request->isAjax()) {
+            $params = $this->request->param();
+            $time_str = $params['time_str'];
+            if ($time_str) {
+                $createat = explode(' ', $time_str);
+                $start = date('Y-m',strtotime($createat[0]));
+                $end = date('Y-m',strtotime($createat[3]));
+            } else {
+                $start = date('Y-m', strtotime('-12 months'));
+                $end   = date('Y-m');
+            }
+            $where['day_date'] = ['between',[$start,$end]];
+            $data = $this->supplymonth->where($where)->field('id,send_num,intime_rate,day_date')->order('day_date','asc')->select();
+            $json['xColumnName'] = array_column($data,'day_date');
+            $json['column'] = ['发货数量'];
+            $json['columnData'] = [
+                [
+                    'type' => 'bar',
+                    'data' => array_column($data,'send_num'),
+                    'name' => '发货数量'
+                ],
+                [
+                    'type' => 'line',
+                    'data' => array_column($data,'intime_rate'),
+                    'name' => '及时妥投率',
+                    'yAxisIndex' => 1,
+                    'smooth' => true //平滑曲线
+                ],
+            ];
+            return json(['code' => 1, 'data' => $json]);
+        }
+    }
     //物流ajax
     public function track_data()
     {
