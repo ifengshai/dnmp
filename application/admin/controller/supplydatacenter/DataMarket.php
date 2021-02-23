@@ -138,8 +138,8 @@ class DataMarket extends Backend
             $time_str = '2020-02-01 00:00:00 - 2021-02-23 23:59:59';
             if ($time_str) {
                 $createat = explode(' ', $time_str);
-                $start = date('Y-m',$createat[0]);
-                $end = date('Y-m',$createat[3]);
+                $start = date('Y-m',strtotime($createat[0]));
+                $end = date('Y-m',strtotime($createat[3]));
             } else {
                 $start = date('Y-m', strtotime('-12 months'));
                 $end   = date('Y-m');
