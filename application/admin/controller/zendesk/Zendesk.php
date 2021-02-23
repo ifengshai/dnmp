@@ -692,13 +692,21 @@ class Zendesk extends Backend
             //查询该订单下是否有工单
             $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
             $swhere = [];
-            $swhere['platform_order'] = ['eq', $item['increment_id']];
+            $platform_order = '400210665';
+            $site = 1;
+
+            $swhere['platform_order'] = ['eq', $platform_order];
+//            $swhere['platform_order'] = ['eq', $item['increment_id']];
             $swhere['work_platform'] = $site;
-            $swhere['work_status'] = ['not in', [0, 4, 6]];
-            $orders[$key]['workorder_list'] = $workorder->where($swhere)->select();
+            $swhere['work_status'] = ['not in', [0, 4]];
+            $workorder_list = $workorder->where($swhere)->select();
+            if ($workorder_list){
+                $workorder_list = collection($workorder_list)->toArray();
+            }
+            $orders[$key]['workorder_list'] = $workorder_list;
 
         }
-
+        dump($orders);die();
 //        foreach ($orders as $key=>$ite){
 //            $model =  Db::connect('database.db_mojing_order');
 //            $find_value = $model->table('fa_order')->where('increment_id',$ite['increment_id'])->select();
