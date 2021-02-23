@@ -554,7 +554,7 @@ class Wangpenglei extends Backend
             $list[$k]['sales_money'] = $sales_money;
         }
         $headlist = ['sku', '站点', '销售额'];
-        Excel::writeCsv($list, $headlist, '7月份sku销量');
+        Excel::writeCsv($list, $headlist, '8月份sku销量');
         die;
     }
 
