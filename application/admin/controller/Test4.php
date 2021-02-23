@@ -2339,6 +2339,34 @@ class Test4 extends Controller
             }
             //获取当前上个月份的库存数据
             $stock_info = Db::name('datacenter_supply_month')->where('day_date',$start)->field('id,avg_stock')->find();
+            if ($stock_info['id']){
+                //上个月总的采购数量（副数）
+                $purchase_num = Db::name('warehouse_data')
+                    ->where('create_time','>',$start.' 00:00:00')
+                    ->where('create_time','<',$endday.' 23:59:59')
+                    ->sum('all_purchase_num');
+                $order = new \app\admin\model\order\Order();
+                //上个月总的销售数量（副数）
+                $sales_num = $order->where('created_at','>',strtotime($start.' 00:00:00'))->where('created_at','<',strtotime($endday.' 23:59:59'))->sum('total_qty_ordered');
+                $arr['purchase_num'] = $purchase_num;
+                $arr['sales_num'] = $sales_num;
+                $arr['purchase_sales_rate'] = round($purchase_num/$sales_num,2);
+                Db::name('datacenter_supply_month')->where('day_date',$start)->update($arr);
+            }else{
+                //上个月总的采购数量（副数）
+                $purchase_num = Db::name('warehouse_data')
+                    ->where('create_time','>',$start.' 00:00:00')
+                    ->where('create_time','<',$endday.' 23:59:59')
+                    ->sum('all_purchase_num');
+                $order = new \app\admin\model\order\Order();
+                //上个月总的销售数量（副数）
+                $sales_num = $order->where('created_at','>',strtotime($start.' 00:00:00'))->where('created_at','<',strtotime($endday.' 23:59:59'))->sum('total_qty_ordered');
+                $arr['purchase_num'] = $purchase_num;
+                $arr['sales_num'] = $sales_num;
+                $arr['purchase_sales_rate'] = round($purchase_num/$sales_num,2);
+                $arr['day_date'] = $start;
+                Db::name('datacenter_supply_month')->insert($arr);
+            }
             $start_dull_stock = $this->dullstock->where("DATE_FORMAT(day_date,'%Y-%m-%d')='$startday'")->where('grade','Z')->field('id,stock')->find();
             //判断是否有月初数据
             if($start_dull_stock['id']) {
