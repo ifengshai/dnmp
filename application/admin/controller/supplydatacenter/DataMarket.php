@@ -837,7 +837,7 @@ class DataMarket extends Backend
                 ],
                 [
                     'type' => 'line',
-                    'data' => array_column($arr, 'intime_rate'),
+                    'data' => array_column($arr, 'logistics_rate'),
                     'name' => '及时妥投率',
                     'yAxisIndex' => 1,
                     'smooth' => true //平滑曲线
