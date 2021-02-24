@@ -9,6 +9,7 @@ use app\admin\model\zendesk\ZendeskTags;
 use think\exception\PDOException;
 use think\exception\ValidateException;
 use app\admin\model\platformmanage\MagentoPlatform;
+use Think\Log;
 
 /**
  * 自定义邮件模板管理
@@ -350,8 +351,18 @@ class ZendeskMailTemplate extends Backend
                 ->where('increment_id',$increment_id)
                 ->field('track_number,site,complete_time')
                 ->find();
+
             if (!empty($order_node_message['track_number'])){
+
+
                 $OrderNode = new OrderNode();
+                $shipment_last_msg_two  = $OrderNode->alias('n')
+                    ->join(['fa_order_node_courier' => 'c'], 'n.order_id=c.order_id and c.site='.$order_node_message['site'])
+                    ->where('n.track_number ',$order_node_message['track_number'])
+                    ->order('c.create_time desc')
+                    ->select(false);
+                Log::write("输入邮件变量");
+                Log::write($shipment_last_msg_two);
                 $shipment_last_msg  = $OrderNode->alias('n')
                     ->join(['fa_order_node_courier' => 'c'], 'n.order_id=c.order_id and c.site='.$order_node_message['site'])
                     ->where('n.track_number ',$order_node_message['track_number'])
@@ -360,6 +371,7 @@ class ZendeskMailTemplate extends Backend
             }else{
                 $shipment_last_msg = '';
             }
+
             //替换模板内容
             $template['template_content'] = str_replace(['{{username}}','{{email}}','{{ticket_id}}','{{track_number}}','{{complete_time}}','{{shipment_last_msg}}','{{increment_id}}'],[$ticket->username,$ticket->email,$ticket->ticket_id,$order_node_message['track_number'],date('Y-m-d H:i:s',$order_node_message['complete_time']),$shipment_last_msg,$increment_id],$template['template_content']);
             //tags合并
