@@ -356,16 +356,17 @@ class ZendeskMailTemplate extends Backend
 
 
                 $OrderNode = new OrderNode();
+                $where['n.track_number'] = $order_node_message['track_number'];
                 $shipment_last_msg_two  = $OrderNode->alias('n')
                     ->join(['fa_order_node_courier' => 'c'], 'n.order_id=c.order_id and c.site='.$order_node_message['site'])
-                    ->where('n.track_number ',$order_node_message['track_number'])
+                    ->where($where)
                     ->order('c.create_time desc')
                     ->select(false);
                 Log::write("输入邮件变量");
                 Log::write($shipment_last_msg_two);
                 $shipment_last_msg  = $OrderNode->alias('n')
                     ->join(['fa_order_node_courier' => 'c'], 'n.order_id=c.order_id and c.site='.$order_node_message['site'])
-                    ->where('n.track_number ',$order_node_message['track_number'])
+                    ->where($where)
                     ->order('c.create_time desc')
                     ->value('c.content');
             }else{
