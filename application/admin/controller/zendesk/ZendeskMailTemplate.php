@@ -333,17 +333,11 @@ class ZendeskMailTemplate extends Backend
             //获取邮件的信息
             $ticket = \app\admin\model\zendesk\Zendesk::where('ticket_id',$ticket_id)->find();
             if($ticket->type == 1){
-                $site =1;
                 $orderModel = new \app\admin\model\order\order\Zeelool;
-                $customer_entity = Db::connect('database.db_zeelool');
             }elseif($ticket->type == 2){
-                $site =2;
                 $orderModel = new \app\admin\model\order\order\Voogueme;
-                $customer_entity = Db::connect('database.db_voogueme');
             }else{
-                $site =3;
                 $orderModel = new \app\admin\model\order\order\Nihao;
-                $is_vip = 0;
             }
             //通过邮件获取最新的订单号
             $increment_id = $orderModel
@@ -356,12 +350,12 @@ class ZendeskMailTemplate extends Backend
                 ->field('track_number,complete_time')
                 ->find();
             if (!empty($order_node_message['track_number'])){
-                $shipment_last_msg  = Db::table('fa_order_node ')->where('track_number ',$order_node_message['track_number'])->value('shipment_last_msg');
+                $shipment_last_msg  = Db::table('fa_order_node')->where('track_number ',$order_node_message['track_number'])->value('shipment_last_msg');
             }else{
                 $shipment_last_msg = '';
             }
             //替换模板内容
-            $template['template_content'] = str_replace(['{{username}}','{{email}}','{{ticket_id}}','{{track_number}}','{{complete_time}}','{{shipment_last_msg }}','{{increment_id }}'],[$ticket->username,$ticket->email,$ticket->ticket_id,$order_node_message['track_number'],$order_node_message['complete_time'],$shipment_last_msg,$increment_id],$template['template_content']);
+            $template['template_content'] = str_replace(['{{username}}','{{email}}','{{ticket_id}}','{{track_number}}','{{complete_time}}','{{shipment_last_msg}}','{{increment_id}}'],[$ticket->username,$ticket->email,$ticket->ticket_id,$order_node_message['track_number'],$order_node_message['complete_time'],$shipment_last_msg,$increment_id],$template['template_content']);
             //tags合并
             $template['mail_tag'] = array_filter(array_merge(explode(',',$template['mail_tag']),explode(',',$ticket->tags)));
             //使用次数+1
