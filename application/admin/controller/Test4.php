@@ -2289,7 +2289,7 @@ class Test4 extends Controller
     public function send_logistics_num()
     {
         $ordernode = new \app\admin\model\OrderNode();
-        $date_time = Db::name('datacenter_day_order')->order('day_date','asc')->select();
+        $date_time = Db::name('datacenter_day_order')->where('day_date','>','2020-04-01')->order('day_date','asc')->select();
         //查询时间
         foreach ($date_time as $val) {
             $is_exist = Db::name('datacenter_day_order')->where('day_date', $val['day_date'])->value('id');
@@ -2297,12 +2297,12 @@ class Test4 extends Controller
                 $arr = [];
                 $arr['day_date'] = $val['day_date'];
                 //发送订单数
-                $start = strtotime($val['day_date']);
-                $end = strtotime($val['day_date'].' 23:59:59');
+                $start = $val['day_date'];
+                $end = $val['day_date'].' 23:59:59';
                 $where['delivery_time'] = ['between',[$start,$end]];
                 $arr['send_num'] = $ordernode->where($where)->count();
 
-                $sql1 = $this->ordernode->field('(signing_time-delivery_time)/3600/24 AS total')->where($where)->group('order_id')->buildSql();
+                $sql1 = $this->ordernode->field('(UNIX_TIMESTAMP(signing_time)-UNIX_TIMESTAMP(delivery_time))/3600/24 AS total')->where($where)->group('order_id')->buildSql();
                 $count = $this->ordernode->table([$sql1=>'t2'])->value('sum( IF ( total <= 15, 1, 0) ) AS a');
 
                 $arr['logistics_rate'] = $arr['send_num'] ? round($count/$arr['send_num']*100,2) : 0;

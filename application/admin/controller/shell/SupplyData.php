@@ -375,11 +375,11 @@ class SupplyData extends Backend
     public function getSendLogistics($date){
         $arr = [];
         //订单数
-        $start = strtotime($date);
-        $end = strtotime($date.' 23:59:59');
+        $start = $date;
+        $end = $date.' 23:59:59';
         $where['delivery_time'] = ['between',[$start,$end]];
         $arr['send_num'] = $this->ordernode->where($where)->count();
-        $sql1 = $this->ordernode->field('(signing_time-delivery_time)/3600/24 AS total')->where($where)->group('order_id')->buildSql();
+        $sql1 = $this->ordernode->field('(UNIX_TIMESTAMP(signing_time)-UNIX_TIMESTAMP(delivery_time))/3600/24 AS total')->where($where)->group('order_id')->buildSql();
         $count = $this->ordernode->table([$sql1=>'t2'])->value('sum( IF ( total <= 15, 1, 0) ) AS a');
         $arr['logistics_rate'] = $arr['send_num'] ? round($count/$arr['send_num']*100,2) : 0;
         return $arr;
