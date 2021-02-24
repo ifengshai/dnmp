@@ -275,9 +275,9 @@ class NewProduct extends Backend
                     } else {
                         $data['origin_sku'] = $textureEncode . $params['origin_sku'];
                     }
-
                     Db::startTrans();
                     try {
+
                         foreach (array_filter($itemName) as $k => $v) {
                             $data['name'] = $v;
                             $data['category_id'] = $params['category_id'];
@@ -309,6 +309,7 @@ class NewProduct extends Backend
                                         $data['sku'] = $textureEncode . $params['origin_sku'] . '-' . $frame_size[$k];
                                     }
                                 }
+                             
                                 $count = Db::name('new_product')->where(['sku' => $data['sku']])->count();
                                 if ($count > 0) {
                                     throw new  Exception('此SKU尺寸已存在');
