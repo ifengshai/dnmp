@@ -2316,8 +2316,8 @@ class Test4 extends Controller
     public function supply_month_data(){
         $this->productAllStockLog = new \app\admin\model\ProductAllStock();
         $this->dullstock = new \app\admin\model\supplydatacenter\DullStock();
-        $start = date('Y-m', strtotime('-15 months'));
-        $end   = date('Y-m');
+        $start = date('Y-m', strtotime('-12 months'));
+        $end = date('Y-m', strtotime('-2 months'));
         while($end>$start){
             $endmonth = $start;
             $start = date('Y-m',strtotime("$endmonth +1 month"));
@@ -2358,11 +2358,12 @@ class Test4 extends Controller
                 //上个月总的销售数量（副数）
                 $where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
                 $sales_num = $order->where($where)->sum('total_qty_ordered');
-                $arr2['purchase_num'] = $purchase_num;
-                $arr2['sales_num'] = $sales_num;
-                $arr2['purchase_sales_rate'] = $sales_num!=0 ? round($purchase_num/$sales_num*100,2):0;
-                $arr2['day_date'] = $start;
-                Db::name('datacenter_supply_month')->insert($arr2);
+                $arr3['purchase_num'] = $purchase_num;
+                $arr3['sales_num'] = $sales_num;
+                $arr3['purchase_sales_rate'] = $sales_num!=0 ? round($purchase_num/$sales_num*100,2):0;
+                $arr3['day_date'] = $start;
+                Db::name('datacenter_supply_month')->insert($arr3);
+                echo $start." is ok"."\n";
             }
             $start_dull_stock = $this->dullstock->where("DATE_FORMAT(day_date,'%Y-%m-%d')='$startday'")->where('grade','Z')->field('id,stock')->find();
             //判断是否有月初数据
@@ -2370,12 +2371,12 @@ class Test4 extends Controller
                 //判断是否有月末数据
                 $end_dull_stock = $this->dullstock->where("DATE_FORMAT(day_date,'%Y-%m-%d')='$endday'")->where('grade','Z')->field('id,stock')->find();
                 if ($end_dull_stock['id']) {
+                    $stock_info1 = Db::name('datacenter_supply_month')->where('day_date',$start)->field('id,avg_stock')->find();
                     //如果有月末数据，（月初数据+月末数据）/2
                     $dull_stock = round(($start_dull_stock['stock'] + $end_dull_stock['stock']) / 2, 2);
-                    $arr1['day_date'] = $start;
                     $arr1['avg_dull_stock'] = $dull_stock;
-                    $arr1['avg_rate'] = $stock_info['avg_stock'] ? round($arr1['avg_dull_stock']/$stock_info['avg_stock'],2) : 0;
-                    Db::name('datacenter_supply_month')->where('id',$stock_info['id'])->update($arr1);
+                    $arr1['avg_rate'] = $stock_info1['avg_stock'] ? round($arr1['avg_dull_stock']/$stock_info1['avg_stock'],2) : 0;
+                    Db::name('datacenter_supply_month')->where('id',$stock_info1['id'])->update($arr1);
                 }
             }
             usleep(10000);
