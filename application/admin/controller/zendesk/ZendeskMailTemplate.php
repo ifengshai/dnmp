@@ -1,6 +1,7 @@
 <?php
 
 namespace app\admin\controller\zendesk;
+use app\admin\model\OrderNode;
 use think\Db;
 use app\common\controller\Backend;
 use think\Exception;
@@ -350,12 +351,12 @@ class ZendeskMailTemplate extends Backend
                 ->field('track_number,complete_time')
                 ->find();
             if (!empty($order_node_message['track_number'])){
-                $shipment_last_msg  = Db::table('fa_order_node')
-                    ->alias('no')
-                    ->join(['fa_order_node_courier'=>'co'], 'no.order_id = co.order.id')
+                $OrderNode = new OrderNode();
+                $shipment_last_msg  = $OrderNode->alias('n')
+                    ->join(['fa_order_node_courier' => 'c'], 'n.order_id=c.order_id')
                     ->where('no.track_number ',$order_node_message['track_number'])
-                    ->order('create_time dedsc')
-                    ->value('co.content');
+                    ->order('c.create_time dedsc')
+                    ->value('c.content');
             }else{
                 $shipment_last_msg = '';
             }
