@@ -702,7 +702,6 @@ class Zendesk extends Backend
             $orders[$key]['workorder_list'] =$this->access_tothe_repair_order($swhere);
 
         }
-        dump($orders);die();
 //        foreach ($orders as $key=>$ite){
 //            $model =  Db::connect('database.db_mojing_order');
 //            $find_value = $model->table('fa_order')->where('increment_id',$ite['increment_id'])->select();

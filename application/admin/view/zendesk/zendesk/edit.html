@@ -351,19 +351,24 @@
                        {/if}
                     </tr>
                     {if condition="!empty($vo.workorder_list)"}
-                    <volist name="vo.workorder_list" id="it">
+                    {volist name="vo.workorder_list" id="it"}
                         <tr style="background-color: #FDF6DC; " id="work_list_{$key}" >
                             <td>{$it.id}</td>
                             <td>{$it.created_at}</td>
                             <td>{$it.problem_type_content}</td>
-                            <volist name="it.step_num" name="ct">
-                            <td>
-                                {$ct.measure_content}：{$ct.0.status_format}  <br>
-                            </td>
-                            </volist>
-                            <td>补发单号：100144936</td>
+                            {if condition="!empty($it.step_num)"}
+                                {volist name="it.step_num" id="ct"}
+                                <td>
+                                    {$ct.measure_content}：{$ct.0.status_format}  <br>
+                                </td>
+                                {/volist}
+                            {/if}
+
+                            {if condition="$it.measure_choose_id eq 7"}
+                                <td>补发单号:{$it.replacement_order}</td>
+                            {/if}
                         </tr>
-                    </volist>
+                    {/volist}
                     {/if}
 
 
