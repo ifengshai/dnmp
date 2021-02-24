@@ -2,7 +2,6 @@
 
 namespace app\admin\controller\zendesk;
 use app\admin\model\OrderNode;
-use EasyWeChat\Support\Log;
 use think\Db;
 use app\common\controller\Backend;
 use think\Exception;
@@ -10,6 +9,7 @@ use app\admin\model\zendesk\ZendeskTags;
 use think\exception\PDOException;
 use think\exception\ValidateException;
 use app\admin\model\platformmanage\MagentoPlatform;
+use Think\Log;
 
 /**
  * 自定义邮件模板管理
@@ -361,9 +361,8 @@ class ZendeskMailTemplate extends Backend
                     ->where('n.track_number ',$order_node_message['track_number'])
                     ->order('c.create_time desc')
                     ->select(false);
-                \Think\Log::write("输入邮件变量sql");
-                \Think\Log::write($shipment_last_msg_two);
-                
+                Log::write("输入邮件变量");
+                Log::write($shipment_last_msg_two);
                 $shipment_last_msg  = $OrderNode->alias('n')
                     ->join(['fa_order_node_courier' => 'c'], 'n.order_id=c.order_id and c.site='.$order_node_message['site'])
                     ->where('n.track_number ',$order_node_message['track_number'])
