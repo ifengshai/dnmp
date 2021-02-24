@@ -2339,7 +2339,8 @@ class Test4 extends Controller
             }
             //获取当前上个月份的库存数据
             $stock_info = Db::name('datacenter_supply_month')->where('day_date',$start)->field('id,avg_stock')->find();
-            $map['create_time'] = $where['payment_time'] = ['between',[$startday.' 00:00:00',$endday.' 23:59:59']];
+            $map['create_time'] = ['between',[$startday.' 00:00:00',$endday.' 23:59:59']];
+            $where['payment_time'] = ['between',[strtotime($startday.' 00:00:00'),strtotime($endday.' 23:59:59')]];
             $order = new \app\admin\model\order\order\NewOrder();
             if ($stock_info['id']){
                 //上个月总的采购数量（副数）
