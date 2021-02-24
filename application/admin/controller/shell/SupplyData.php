@@ -55,6 +55,11 @@ class SupplyData extends Backend
             //实际周转天数
             $sku_info  = $this->getSkuSales($value['true_sku']);
             $actual_day = $sku_info['days']!=0 && $sku_info['count']!=0 ? round($real_time_stock/($sku_info['count']/$sku_info['days']),2) : 0;
+            $arr8['stock'] += $real_time_stock;
+            $arr8['total'] += $sku_amount;
+            $arr8['high_stock'] += $real_time_stock;
+            $arr8['high_total'] += $sku_amount;
+
             if($actual_day >120 && $actual_day<=144){
                 $count += $real_time_stock;
                 $total += $sku_amount;
@@ -95,11 +100,6 @@ class SupplyData extends Backend
                     $arr7['total'] += $sku_amount;
                     $arr7['low_stock'] += $real_time_stock;
                     $arr7['low_total'] += $sku_amount;
-                }else{
-                    $arr8['stock'] += $real_time_stock;
-                    $arr8['total'] += $sku_amount;
-                    $arr8['low_stock'] += $real_time_stock;
-                    $arr8['low_total'] += $sku_amount;
                 }
             }elseif($actual_day > 144 && $actual_day<=168){
                 $count += $real_time_stock;
@@ -141,11 +141,6 @@ class SupplyData extends Backend
                     $arr7['total'] += $sku_amount;
                     $arr7['center_stock'] += $real_time_stock;
                     $arr7['center_total'] += $sku_amount;
-                }else{
-                    $arr8['stock'] += $real_time_stock;
-                    $arr8['total'] += $sku_amount;
-                    $arr8['center_stock'] += $real_time_stock;
-                    $arr8['center_total'] += $sku_amount;
                 }
             }elseif($actual_day>168){
                 $count += $real_time_stock;
@@ -187,24 +182,19 @@ class SupplyData extends Backend
                     $arr7['total'] += $sku_amount;
                     $arr7['high_stock'] += $real_time_stock;
                     $arr7['high_total'] += $sku_amount;
-                }else{
-                    $arr8['stock'] += $real_time_stock;
-                    $arr8['total'] += $sku_amount;
-                    $arr8['high_stock'] += $real_time_stock;
-                    $arr8['high_total'] += $sku_amount;
                 }
             }
         }
         $gradeSkuStock = $this->productGrade->getSkuStock();
         //计算产品等级的数量
-        $a1_stock_num = $gradeSkuStock['aa_stock_num'];
-        $a_stock_num = $gradeSkuStock['a_stock_num'];
-        $b_stock_num = $gradeSkuStock['b_stock_num'];
-        $c1_stock_num = $gradeSkuStock['ca_stock_num'];
-        $c_stock_num = $gradeSkuStock['c_stock_num'];
-        $d_stock_num = $gradeSkuStock['d_stock_num'];
-        $e_stock_num = $gradeSkuStock['e_stock_num'];
-        $f_stock_num = $gradeSkuStock['f_stock_num'];
+        $a1_stock_num = $gradeSkuStock['aa_realstock_num'];
+        $a_stock_num = $gradeSkuStock['a_realstock_num'];
+        $b_stock_num = $gradeSkuStock['b_realstock_num'];
+        $c1_stock_num = $gradeSkuStock['ca_realstock_num'];
+        $c_stock_num = $gradeSkuStock['c_realstock_num'];
+        $d_stock_num = $gradeSkuStock['d_realstock_num'];
+        $e_stock_num = $gradeSkuStock['e_realstock_num'];
+        $f_stock_num = $gradeSkuStock['f_realstock_num'];
 
         $date_time = date('Y-m-d', strtotime("-1 day"));
         $arr1['day_date'] = $arr2['day_date'] = $arr3['day_date'] = $arr4['day_date'] = $arr5['day_date'] = $arr6['day_date'] = $arr7['day_date'] = $arr8['day_date'] = $sum['day_date'] = $date_time;
