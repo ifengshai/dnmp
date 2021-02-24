@@ -415,10 +415,10 @@ class SupplyData extends Backend
             //上个月总的销售数量（副数）
             $where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
             $sales_num = $order->where($where)->sum('total_qty_ordered');
-            $arr['purchase_num'] = $purchase_num;
-            $arr['sales_num'] = $sales_num;
-            $arr['purchase_sales_rate'] = $sales_num!=0 ? round($purchase_num/$sales_num*100,2):0;
-            Db::name('datacenter_supply_month')->where('day_date',$lastmonth)->update($arr);
+            $arr2['purchase_num'] = $purchase_num;
+            $arr2['sales_num'] = $sales_num;
+            $arr2['purchase_sales_rate'] = $sales_num!=0 ? round($purchase_num/$sales_num*100,2):0;
+            Db::name('datacenter_supply_month')->where('day_date',$lastmonth)->update($arr2);
         }else{
             //上个月总的采购数量（副数）
             $purchase_num = Db::name('warehouse_data')->where($map)->sum('all_purchase_num');
@@ -426,11 +426,11 @@ class SupplyData extends Backend
             //上个月总的销售数量（副数）
             $where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
             $sales_num = $order->where($where)->sum('total_qty_ordered');
-            $arr['purchase_num'] = $purchase_num;
-            $arr['sales_num'] = $sales_num;
-            $arr['purchase_sales_rate'] = $sales_num!=0 ? round($purchase_num/$sales_num*100,2):0;
-            $arr['day_date'] = $lastmonth;
-            Db::name('datacenter_supply_month')->insert($arr);
+            $arr2['purchase_num'] = $purchase_num;
+            $arr2['sales_num'] = $sales_num;
+            $arr2['purchase_sales_rate'] = $sales_num!=0 ? round($purchase_num/$sales_num*100,2):0;
+            $arr2['day_date'] = $lastmonth;
+            Db::name('datacenter_supply_month')->insert($arr2);
         }
         //获取月初呆滞库存数据
         $start_dull_stock = $this->dullstock->where("DATE_FORMAT(day_date,'%Y-%m-%d')='$startday'")->where('grade','Z')->field('id,stock')->find();
