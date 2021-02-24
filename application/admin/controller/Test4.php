@@ -2340,10 +2340,11 @@ class Test4 extends Controller
             //获取当前上个月份的库存数据
             $stock_info = Db::name('datacenter_supply_month')->where('day_date',$start)->field('id,avg_stock')->find();
             $map['create_time'] = $where['payment_time'] = ['between',[$startday.' 00:00:00',$endday.' 23:59:59']];
+            $order = new \app\admin\model\order\order\NewOrder();
             if ($stock_info['id']){
                 //上个月总的采购数量（副数）
                 $purchase_num = Db::name('warehouse_data')->where($map)->sum('all_purchase_num');
-                $order = new \app\admin\model\order\Order();
+
                 //上个月总的销售数量（副数）
                 $where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
                 $sales_num = $order->where($where)->sum('total_qty_ordered');
@@ -2354,7 +2355,6 @@ class Test4 extends Controller
             }else{
                 //上个月总的采购数量（副数）
                 $purchase_num = Db::name('warehouse_data')->where($map)->sum('all_purchase_num');
-                $order = new \app\admin\model\order\Order();
                 //上个月总的销售数量（副数）
                 $where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
                 $sales_num = $order->where($where)->sum('total_qty_ordered');
