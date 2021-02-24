@@ -355,7 +355,7 @@ class ZendeskMailTemplate extends Backend
                     ->join(['fa_order_node_courier=>co','no.order_id = co.order.id'])
                     ->where('no.track_number ',$order_node_message['track_number'])
                     ->order('create_time dedsc')
-                    ->value('content');
+                    ->value('co.content');
             }else{
                 $shipment_last_msg = '';
             }
