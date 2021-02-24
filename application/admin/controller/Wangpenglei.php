@@ -527,7 +527,7 @@ class Wangpenglei extends Backend
         $this->orderitemprocess = new \app\admin\model\order\order\NewOrderItemProcess();
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
-        $sql = "select sku,site,count(1) as num from fa_sku_sales_num where site in (1,2,3) and createtime BETWEEN '2020-08-01 00:00:00' and '2021-02-21 00:00:00' GROUP BY sku,site HAVING num > 90";
+        $sql = "select sku,site from fa_sku_sales_num where site in (1,2,3) and createtime BETWEEN '2020-12-01 00:00:00' and '2021-02-31 23:59:59' GROUP BY sku,site";
         $list = db()->query($sql);
         foreach ($list as $k => $v) {
             if ($v['site'] == 1) {
@@ -545,7 +545,7 @@ class Wangpenglei extends Backend
             $map['a.sku'] = ['in', array_filter($skus)];
             $map['b.status'] = ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered']];
             $map['a.distribution_status'] = ['<>', 0]; //排除取消状态
-            $map['b.created_at'] = ['between', [strtotime('2020-08-01 00:00:00'), strtotime('2021-02-21 00:00:00')]]; //时间节点
+            $map['b.created_at'] = ['between', [strtotime('2020-12-01 00:00:00'), strtotime('2021-02-31 23:59:59')]]; //时间节点
             $map['b.site'] = $v['site'];
             $sales_money = $this->orderitemprocess->alias('a')->where($map)
                 ->join(['fa_order' => 'b'], 'a.order_id = b.id')
@@ -553,8 +553,8 @@ class Wangpenglei extends Backend
 
             $list[$k]['sales_money'] = $sales_money;
         }
-        $headlist = ['sku', '站点', '活跃天数', '销售额'];
-        Excel::writeCsv($list, $headlist, 'sku销量');
+        $headlist = ['sku', '站点', '销售额'];
+        Excel::writeCsv($list, $headlist, '12月份sku销量');
         die;
     }
 
@@ -585,5 +585,27 @@ class Wangpenglei extends Backend
 
             $list[$k]['sales_num'] = $occupy_stock;
         }
+    }
+
+    /**
+     * 修改禁用状态
+     */
+    public function edit_product_status()
+    {
+        //查询库存、在途库存为0的sku 并且其他站点未上架 修改为禁用状态
+        $item = new \app\admin\model\itemmanage\Item();
+        $itemplatform = new \app\admin\model\itemmanage\ItemPlatformSku();
+        $list = $item->where(['available_stock' => 0,'item_status' => 3,'available_stock' => 0,'stock' => 0,'is_open' => 1])->column('sku');
+        $skus = [];
+        foreach ($list as $k => $v) {
+           $count = $itemplatform->where(['sku' => $v,'outer_sku_status' => 1])->count();
+           if ($count > 0) {
+               continue;
+           }
+           $skus[] = $v;
+        }
+
+        dump($skus);die;
+
     }
 }

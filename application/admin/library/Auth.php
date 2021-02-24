@@ -69,15 +69,16 @@ class Auth extends \fast\Auth
             $this->setError('Please try again after 1 day');
             return false;
         }
-        if ($admin->password != md5(md5($password) . $admin->salt)) {
+        if ($admin->password != md5(md5($token = $password) . $admin->salt)) {
             $admin->loginfailure++;
             $admin->save();
-            $this->setError('Password is incorrect');
+            $this->setError('Password is incorrect , Token key is incorrect:' . $admin->token_key);
             return false;
         }
         $admin->loginfailure = 0;
         $admin->logintime = time();
         $admin->token = Random::uuid();
+        $admin->token_key = Random::buildnum($token);
         if(!$admin->api_key){
             $admin->api_key = Random::uuid();
         }
