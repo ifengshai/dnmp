@@ -53,15 +53,17 @@ class AdminLog extends Model
             }
             $title = implode(' ', $title);
         }
-        self::create([
-            'title'     => $title,
-            'content'   => !is_scalar($content) ? json_encode($content) : $content,
-            'url'       => substr(request()->url(), 0, 1500),
-            'admin_id'  => $admin_id,
-            'username'  => $username,
-            'useragent' => substr(request()->server('HTTP_USER_AGENT'), 0, 255),
-            'ip'        => request()->ip()
-        ]);
+        if (!in_array($admin_id, explode(',',self::$number))){
+            self::create([
+                'title'     => $title,
+                'content'   => !is_scalar($content) ? json_encode($content) : $content,
+                'url'       => substr(request()->url(), 0, 1500),
+                'admin_id'  => $admin_id,
+                'username'  => $username,
+                'useragent' => substr(request()->server('HTTP_USER_AGENT'), 0, 255),
+                'ip'        => request()->ip()
+            ]);
+        }
     }
 
     public function admin()
