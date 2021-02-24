@@ -23,6 +23,8 @@ class SupplyData extends Backend
         $this->order = new \app\admin\model\order\order\NewOrder();
         $this->process = new \app\admin\model\order\order\NewOrderProcess;
         $this->ordernode = new \app\admin\model\OrderNode();
+        $this->productAllStockLog = new \app\admin\model\ProductAllStock();
+        $this->dullstock = new \app\admin\model\supplydatacenter\DullStock();
     }
     /**
      * 呆滞数据
@@ -384,14 +386,10 @@ class SupplyData extends Backend
     }
     //每月数据(平均总库存、平均呆滞库存)
     public function supply_month_data(){
-        $this->productAllStockLog = new \app\admin\model\ProductAllStock();
-        $this->dullstock = new \app\admin\model\supplydatacenter\DullStock();
         $time = date('Y-m');
         $lastmonth = date('Y-m',strtotime("$time -1 month"));
-
         $startday = $lastmonth.'-01';
         $endday = $lastmonth.'-'.date('t', strtotime($startday));
-
         $start_stock = $this->productAllStockLog->where("DATE_FORMAT(createtime,'%Y-%m-%d')='$startday'")->field('id,allnum')->find();
         //判断是否有月初数据
         if($start_stock['id']) {
@@ -403,6 +401,7 @@ class SupplyData extends Backend
                 $arr['day_date'] = $lastmonth;
                 $arr['avg_stock'] = $stock;
                 Db::name('datacenter_supply_month')->insert($arr);
+                echo "success";
             }
         }
         //获取当前上个月份的库存数据
@@ -411,10 +410,9 @@ class SupplyData extends Backend
         if ($stock_info['id']){
             //上个月总的采购数量（副数）
             $purchase_num = Db::name('warehouse_data')->where($map)->sum('all_purchase_num');
-            $order = new \app\admin\model\order\Order();
             //上个月总的销售数量（副数）
             $where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
-            $sales_num = $order->where($where)->sum('total_qty_ordered');
+            $sales_num = $this->order->where($where)->sum('total_qty_ordered');
             $arr2['purchase_num'] = $purchase_num;
             $arr2['sales_num'] = $sales_num;
             $arr2['purchase_sales_rate'] = $sales_num!=0 ? round($purchase_num/$sales_num*100,2):0;
@@ -422,15 +420,15 @@ class SupplyData extends Backend
         }else{
             //上个月总的采购数量（副数）
             $purchase_num = Db::name('warehouse_data')->where($map)->sum('all_purchase_num');
-            $order = new \app\admin\model\order\Order();
             //上个月总的销售数量（副数）
             $where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
-            $sales_num = $order->where($where)->sum('total_qty_ordered');
+            $sales_num = $this->order->where($where)->sum('total_qty_ordered');
             $arr3['purchase_num'] = $purchase_num;
             $arr3['sales_num'] = $sales_num;
             $arr3['purchase_sales_rate'] = $sales_num!=0 ? round($purchase_num/$sales_num*100,2):0;
             $arr3['day_date'] = $lastmonth;
             Db::name('datacenter_supply_month')->insert($arr3);
+            echo "success";
         }
         //获取月初呆滞库存数据
         $start_dull_stock = $this->dullstock->where("DATE_FORMAT(day_date,'%Y-%m-%d')='$startday'")->where('grade','Z')->field('id,stock')->find();
@@ -439,12 +437,12 @@ class SupplyData extends Backend
             //判断是否有月末数据
             $end_dull_stock = $this->dullstock->where("DATE_FORMAT(day_date,'%Y-%m-%d')='$endday'")->where('grade','Z')->field('id,stock')->find();
             if ($end_dull_stock['id']) {
+                $stock_info1 = Db::name('datacenter_supply_month')->where('day_date',$lastmonth)->field('id,avg_stock')->find();
                 //如果有月末数据，（月初数据+月末数据）/2
                 $dull_stock = round(($start_dull_stock['stock'] + $end_dull_stock['stock']) / 2, 2);
                 $arr1['avg_dull_stock'] = $dull_stock;
-                $arr1['avg_rate'] = $stock_info['avg_stock'] ? round($arr1['avg_dull_stock']/$stock_info['avg_stock'],2) : 0;
-                Db::name('datacenter_supply_month')->where('id',$stock_info['id'])->update($arr1);
-                echo "success";
+                $arr1['avg_rate'] = $stock_info1['avg_stock'] ? round($arr1['avg_dull_stock']/$stock_info1['avg_stock'],2) : 0;
+                Db::name('datacenter_supply_month')->where('id',$stock_info1['id'])->update($arr1);
             }
         }
     }
