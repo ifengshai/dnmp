@@ -55,11 +55,16 @@ class SupplyData extends Backend
             //实际周转天数
             $sku_info  = $this->getSkuSales($value['true_sku']);
             $actual_day = $sku_info['days']!=0 && $sku_info['count']!=0 ? round($real_time_stock/($sku_info['count']/$sku_info['days']),2) : 0;
-            $arr8['stock'] += $real_time_stock;
-            $arr8['total'] += $sku_amount;
-            $arr8['high_stock'] += $real_time_stock;
-            $arr8['high_total'] += $sku_amount;
-
+            if($value['grade'] == 'F'){
+                $count += $real_time_stock;
+                $total += $sku_amount;
+                $count3 += $real_time_stock;
+                $total3 += $sku_amount;
+                $arr8['stock'] += $real_time_stock;
+                $arr8['total'] += $sku_amount;
+                $arr8['high_stock'] += $real_time_stock;
+                $arr8['high_total'] += $sku_amount;
+            }
             if($actual_day >120 && $actual_day<=144){
                 $count += $real_time_stock;
                 $total += $sku_amount;
