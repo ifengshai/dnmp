@@ -595,7 +595,7 @@ class Wangpenglei extends Backend
         //查询库存、在途库存为0的sku 并且其他站点未上架 修改为禁用状态
         $item = new \app\admin\model\itemmanage\Item();
         $itemplatform = new \app\admin\model\itemmanage\ItemPlatformSku();
-        $list = $item->where(['available_stock' => 0, 'item_status' => 3, 'available_stock' => 0, 'stock' => 0, 'is_open' => 1])->column('sku');
+        $list = $item->where(['available_stock' => 0, 'item_status' => 3, 'on_way_stock' => 0, 'stock' => 0, 'is_open' => 1])->column('sku');
         $skus = [];
         foreach ($list as $k => $v) {
             $count = $itemplatform->where(['sku' => $v, 'outer_sku_status' => 1])->count();
