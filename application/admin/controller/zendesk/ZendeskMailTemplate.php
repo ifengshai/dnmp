@@ -350,12 +350,12 @@ class ZendeskMailTemplate extends Backend
                 ->field('track_number,complete_time')
                 ->find();
             if (!empty($order_node_message['track_number'])){
-                $shipment_last_msg  = Db::table('fa_order_node ')->where('track_number ',$order_node_message['track_number'])->value('shipment_last_msg');
+                $shipment_last_msg  = Db::table('fa_order_node')->where('track_number ',$order_node_message['track_number'])->value('shipment_last_msg');
             }else{
                 $shipment_last_msg = '';
             }
             //替换模板内容
-            $template['template_content'] = str_replace(['{{username}}','{{email}}','{{ticket_id}}','{{track_number}}','{{complete_time}}','{{shipment_last_msg }}','{{increment_id }}'],[$ticket->username,$ticket->email,$ticket->ticket_id,$order_node_message['track_number'],$order_node_message['complete_time'],$shipment_last_msg,$increment_id],$template['template_content']);
+            $template['template_content'] = str_replace(['{{username}}','{{email}}','{{ticket_id}}','{{track_number}}','{{complete_time}}','{{shipment_last_msg}}','{{increment_id}}'],[$ticket->username,$ticket->email,$ticket->ticket_id,$order_node_message['track_number'],$order_node_message['complete_time'],$shipment_last_msg,$increment_id],$template['template_content']);
             //tags合并
             $template['mail_tag'] = array_filter(array_merge(explode(',',$template['mail_tag']),explode(',',$ticket->tags)));
             //使用次数+1
