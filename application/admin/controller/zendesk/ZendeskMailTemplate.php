@@ -350,7 +350,12 @@ class ZendeskMailTemplate extends Backend
                 ->field('track_number,complete_time')
                 ->find();
             if (!empty($order_node_message['track_number'])){
-                $shipment_last_msg  = Db::table('fa_order_node')->where('track_number ',$order_node_message['track_number'])->value('shipment_last_msg');
+                $shipment_last_msg  = Db::table('fa_order_node')
+                    ->alias('no')
+                    ->join(['fa_order_node_courier=>co','no.order_id = co.order.id'])
+                    ->where('no.track_number ',$order_node_message['track_number'])
+                    ->order('create_time dedsc')
+                    ->value('content');
             }else{
                 $shipment_last_msg = '';
             }
