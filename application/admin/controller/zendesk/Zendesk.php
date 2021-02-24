@@ -697,7 +697,6 @@ class Zendesk extends Backend
             $swhere['work_status'] = ['not in', [0, 4, 6]];
             $orders[$key]['workorder_list'] = $workorder->where($swhere)->select();
         }
-        dump($orders);die();
 //        foreach ($orders as $key=>$ite){
 //            $model =  Db::connect('database.db_mojing_order');
 //            $find_value = $model->table('fa_order')->where('increment_id',$ite['increment_id'])->select();
