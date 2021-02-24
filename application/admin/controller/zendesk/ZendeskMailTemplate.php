@@ -356,13 +356,13 @@ class ZendeskMailTemplate extends Backend
                     ->join(['fa_order_node_courier' => 'c'], 'n.order_id=c.order_id')
                     ->where('n.track_number ',$order_node_message['track_number'])
                     ->where('c.site ',$order_node_message['site'])
-                    ->order('c.create_time dedsc')
+                    ->order('c.create_time desc')
                     ->value('c.content');
             }else{
                 $shipment_last_msg = '';
             }
             //替换模板内容
-            $template['template_content'] = str_replace(['{{username}}','{{email}}','{{ticket_id}}','{{track_number}}','{{complete_time}}','{{shipment_last_msg}}','{{increment_id}}'],[$ticket->username,$ticket->email,$ticket->ticket_id,$order_node_message['track_number'],$order_node_message['complete_time'],$shipment_last_msg,$increment_id],$template['template_content']);
+            $template['template_content'] = str_replace(['{{username}}','{{email}}','{{ticket_id}}','{{track_number}}','{{complete_time}}','{{shipment_last_msg}}','{{increment_id}}'],[$ticket->username,$ticket->email,$ticket->ticket_id,$order_node_message['track_number'],date('Y-M-D H:i:s',$order_node_message['complete_time']),$shipment_last_msg,$increment_id],$template['template_content']);
             //tags合并
             $template['mail_tag'] = array_filter(array_merge(explode(',',$template['mail_tag']),explode(',',$ticket->tags)));
             //使用次数+1
