@@ -2330,7 +2330,7 @@ class Test4 extends Controller
                 $end_stock = $this->productAllStockLog->where("DATE_FORMAT(createtime,'%Y-%m-%d')='$endday'")->field('id,allnum')->find();
                 if ($end_stock['id']) {
                     //如果有月末数据，（月初数据+月末数据）/2
-                    $stock = round(($start_stock['allnum'] + $end_stock['allnum']) / 2, 2);
+                    $stock = round(($start_stock['allnum'] + $end_stock['allnum']) / 2, 0);
                     $arr['day_date'] = $start;
                     $arr['avg_stock'] = $stock;
                     Db::name('datacenter_supply_month')->insert($arr);
