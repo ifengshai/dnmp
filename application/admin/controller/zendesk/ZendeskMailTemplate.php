@@ -348,13 +348,14 @@ class ZendeskMailTemplate extends Backend
             $order_node_message = Db::connect('database.db_mojing_order')
                 ->table('fa_order_process')
                 ->where('increment_id',$increment_id)
-                ->field('track_number,complete_time')
+                ->field('track_number,site,complete_time')
                 ->find();
             if (!empty($order_node_message['track_number'])){
                 $OrderNode = new OrderNode();
                 $shipment_last_msg  = $OrderNode->alias('n')
                     ->join(['fa_order_node_courier' => 'c'], 'n.order_id=c.order_id')
                     ->where('n.track_number ',$order_node_message['track_number'])
+                    ->where('c.site ',$order_node_message['site'])
                     ->order('c.create_time dedsc')
                     ->value('c.content');
             }else{
