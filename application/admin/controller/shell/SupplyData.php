@@ -407,41 +407,28 @@ class SupplyData extends Backend
         }
         //获取当前上个月份的库存数据
         $stock_info = Db::name('datacenter_supply_month')->where('day_date',$lastmonth)->field('id,avg_stock')->find();
+        $map['create_time'] = $where['payment_time'] = ['between',[$startday.' 00:00:00',$endday.' 23:59:59']];
         if ($stock_info['id']){
             //上个月总的采购数量（副数）
-            $purchase_num = Db::name('warehouse_data')
-                ->where('create_time','>',date('Y-m-01 00:00:00',strtotime('-1 month')))
-                ->where('create_time','<',date("Y-m-d 23:59:59", strtotime(-date('d').'day')))
-                ->sum('all_purchase_num');
-            $m = date('Y-m-d', mktime(0,0,0,date('m')-1,1,date('Y')));
-            $t = date('t',strtotime($m)); //上个月共多少天
-            $start = date('Y-m-d', mktime(0,0,0,date('m')-1,1,date('Y'))); //上个月的开始日期
-            $end = date('Y-m-d', mktime(0,0,0,date('m')-1,$t,date('Y'))); //上个月的结束日期
+            $purchase_num = Db::name('warehouse_data')->where($map)->sum('all_purchase_num');
             $order = new \app\admin\model\order\Order();
             //上个月总的销售数量（副数）
             $where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
-            $sales_num = $order->where('created_at','>',$start)->where('created_at','<',$end)->where($where)->sum('total_qty_ordered');
+            $sales_num = $order->where($where)->sum('total_qty_ordered');
             $arr['purchase_num'] = $purchase_num;
             $arr['sales_num'] = $sales_num;
-            $arr['purchase_sales_rate'] = $sales_num!=0 ? round($purchase_num/$sales_num,2):0;
+            $arr['purchase_sales_rate'] = $sales_num!=0 ? round($purchase_num/$sales_num*100,2):0;
             Db::name('datacenter_supply_month')->where('day_date',$lastmonth)->update($arr);
         }else{
             //上个月总的采购数量（副数）
-            $purchase_num = Db::name('warehouse_data')
-                ->where('create_time','>',date('Y-m-01 00:00:00',strtotime('-1 month')))
-                ->where('create_time','<',date("Y-m-d 23:59:59", strtotime(-date('d').'day')))
-                ->sum('all_purchase_num');
-            $m = date('Y-m-d', mktime(0,0,0,date('m')-1,1,date('Y')));
-            $t = date('t',strtotime($m)); //上个月共多少天
-            $start = date('Y-m-d', mktime(0,0,0,date('m')-1,1,date('Y'))); //上个月的开始日期
-            $end = date('Y-m-d', mktime(0,0,0,date('m')-1,$t,date('Y'))); //上个月的结束日期
+            $purchase_num = Db::name('warehouse_data')->where($map)->sum('all_purchase_num');
             $order = new \app\admin\model\order\Order();
             //上个月总的销售数量（副数）
             $where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
-            $sales_num = $order->where('created_at','>',$start)->where('created_at','<',$end)->where($where)->sum('total_qty_ordered');
+            $sales_num = $order->where($where)->sum('total_qty_ordered');
             $arr['purchase_num'] = $purchase_num;
             $arr['sales_num'] = $sales_num;
-            $arr['purchase_sales_rate'] = $sales_num!=0 ? round($purchase_num/$sales_num,2):0;
+            $arr['purchase_sales_rate'] = $sales_num!=0 ? round($purchase_num/$sales_num*100,2):0;
             $arr['day_date'] = $lastmonth;
             Db::name('datacenter_supply_month')->insert($arr);
         }
