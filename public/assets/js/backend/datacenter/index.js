@@ -277,7 +277,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj', 'custom
                     legend: { //图例配置
                         padding: 5,
                         top: '2%',
-                        data: ['采购数量', '采购金额']
+                        data: ['采购数量', '采销比']
                     },
                     xAxis: [
                         {
@@ -294,9 +294,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj', 'custom
                         },
                         {
                             type: 'value',
-                            name: '采购金额',
+                            name: '采销比',
                             axisLabel: {
-                                formatter: '{value} ¥'
+                                formatter: '{value}'
                             }
                         }
                     ],
