@@ -53,6 +53,31 @@ class Random
     }
 
     /**
+     * 数字、字母和key组合的随机字符串
+     *
+     * @param string $string 组合字符串
+     * @param string $key 默认为fast
+     * @return string
+     */
+    public static function buildnum($string,$key='fast'){
+        $string = $string.$key;
+        $chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        $nh = rand(0,64);
+        $ch = $chars[$nh];
+        $mdKey = md5($key.$ch);
+        $mdKey = substr($mdKey,$nh%8, $nh%8+7);
+        $string = base64_encode($string);
+        $tmp = '';
+        $i=0;$j=0;$k = 0;
+        for ($i=0; $i<strlen($string); $i++) {
+            $k = $k == strlen($mdKey) ? 0 : $k;
+            $j = ($nh+strpos($chars,$string[$i])+ord($mdKey[$k++]))%64;
+            $tmp .= $chars[$j];
+        }
+        return urlencode(base64_encode($ch.$tmp));
+    }
+
+    /**
      * 能用的随机数生成
      * @param string $type 类型 alpha/alnum/numeric/nozero/unique/md5/encrypt/sha1
      * @param int    $len  长度

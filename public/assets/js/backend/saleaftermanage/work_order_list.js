@@ -82,7 +82,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             field: 'problem_type_content',
                             title: __('Problem_type_content'),
                             align: 'left',
-                            searchList: $.getJSON('saleaftermanage/work_order_list/getProblemTypeContent')
+                            searchList: $.getJSON('saleaftermanage/work_order_list/ ')
                         },
                         {
                             field: 'measure_choose_id',

@@ -759,23 +759,17 @@ class DataMarket extends Backend
                 $end = date('Y-m-d 23:59:59');
                 $time_str = $start . ' - ' . $end;
             }
-            $cache_data = Cache::get('Supplydatacenter_datamarket'  .$time_str. md5(serialize('order_histogram_line')));
-            if (!$cache_data) {
-                $createat = explode(' ', $time_str);
-                $map['day_date'] = ['between',[$createat[0],$createat[3]]];
-                $order_info = Db::name('datacenter_day_order')->where($map)->select();
-                $avg_rate = Db::name('datacenter_day_order')->where($map)->value('round(sum(intime_rate)/count(*),2) as result');
-                $arr = array();
-                foreach ($order_info as $key=>$value){
-                    $arr[$key]['day'] = $value['day_date'];
-                    //订单数量
-                    $arr[$key]['order_count'] = $value['order_num'];
-                    $arr[$key]['rate'] = $value['intime_rate'];
-                    $arr[$key]['avg_rate'] = $avg_rate;
-                }
-                Cache::set('Supplydatacenter_datamarket'.$time_str.md5(serialize('order_histogram_line')),$arr,7200);
-            }else{
-                $arr = $cache_data;
+            $createat = explode(' ', $time_str);
+            $map['day_date'] = ['between',[$createat[0],$createat[3]]];
+            $order_info = Db::name('datacenter_day_order')->where($map)->select();
+            $avg_rate = Db::name('datacenter_day_order')->where($map)->value('round(sum(intime_rate)/count(*),2) as result');
+            $arr = array();
+            foreach ($order_info as $key=>$value){
+                $arr[$key]['day'] = $value['day_date'];
+                //订单数量
+                $arr[$key]['order_count'] = $value['order_num'];
+                $arr[$key]['rate'] = $value['intime_rate'];
+                $arr[$key]['avg_rate'] = $avg_rate;
             }
             //全部采购单
             $barcloumndata = array_column($arr, 'order_count');

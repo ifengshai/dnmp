@@ -2289,7 +2289,7 @@ class Test4 extends Controller
     public function send_logistics_num()
     {
         $ordernode = new \app\admin\model\OrderNode();
-        $date_time = Db::name('datacenter_day_order')->order('day_date','asc')->select();
+        $date_time = Db::name('datacenter_day_order')->where('day_date','>','2020-04-01')->order('day_date','asc')->select();
         //查询时间
         foreach ($date_time as $val) {
             $is_exist = Db::name('datacenter_day_order')->where('day_date', $val['day_date'])->value('id');
@@ -2297,12 +2297,12 @@ class Test4 extends Controller
                 $arr = [];
                 $arr['day_date'] = $val['day_date'];
                 //发送订单数
-                $start = strtotime($val['day_date']);
-                $end = strtotime($val['day_date'].' 23:59:59');
+                $start = $val['day_date'];
+                $end = $val['day_date'].' 23:59:59';
                 $where['delivery_time'] = ['between',[$start,$end]];
                 $arr['send_num'] = $ordernode->where($where)->count();
 
-                $sql1 = $this->ordernode->field('(signing_time-delivery_time)/3600/24 AS total')->where($where)->group('order_id')->buildSql();
+                $sql1 = $this->ordernode->field('(UNIX_TIMESTAMP(signing_time)-UNIX_TIMESTAMP(delivery_time))/3600/24 AS total')->where($where)->group('order_id')->buildSql();
                 $count = $this->ordernode->table([$sql1=>'t2'])->value('sum( IF ( total <= 15, 1, 0) ) AS a');
 
                 $arr['logistics_rate'] = $arr['send_num'] ? round($count/$arr['send_num']*100,2) : 0;
@@ -2330,7 +2330,7 @@ class Test4 extends Controller
                 $end_stock = $this->productAllStockLog->where("DATE_FORMAT(createtime,'%Y-%m-%d')='$endday'")->field('id,allnum')->find();
                 if ($end_stock['id']) {
                     //如果有月末数据，（月初数据+月末数据）/2
-                    $stock = round(($start_stock['allnum'] + $end_stock['allnum']) / 2, 2);
+                    $stock = round(($start_stock['allnum'] + $end_stock['allnum']) / 2, 0);
                     $arr['day_date'] = $start;
                     $arr['avg_stock'] = $stock;
                     Db::name('datacenter_supply_month')->insert($arr);
@@ -2339,11 +2339,13 @@ class Test4 extends Controller
             }
             //获取当前上个月份的库存数据
             $stock_info = Db::name('datacenter_supply_month')->where('day_date',$start)->field('id,avg_stock')->find();
-            $map['create_time'] = $where['payment_time'] = ['between',[$startday.' 00:00:00',$endday.' 23:59:59']];
+            $map['create_time'] = ['between',[$startday.' 00:00:00',$endday.' 23:59:59']];
+            $where['payment_time'] = ['between',[strtotime($startday.' 00:00:00'),strtotime($endday.' 23:59:59')]];
+            $order = new \app\admin\model\order\order\NewOrder();
             if ($stock_info['id']){
                 //上个月总的采购数量（副数）
                 $purchase_num = Db::name('warehouse_data')->where($map)->sum('all_purchase_num');
-                $order = new \app\admin\model\order\Order();
+
                 //上个月总的销售数量（副数）
                 $where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
                 $sales_num = $order->where($where)->sum('total_qty_ordered');
@@ -2354,7 +2356,6 @@ class Test4 extends Controller
             }else{
                 //上个月总的采购数量（副数）
                 $purchase_num = Db::name('warehouse_data')->where($map)->sum('all_purchase_num');
-                $order = new \app\admin\model\order\Order();
                 //上个月总的销售数量（副数）
                 $where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
                 $sales_num = $order->where($where)->sum('total_qty_ordered');

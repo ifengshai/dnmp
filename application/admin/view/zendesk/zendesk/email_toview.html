@@ -8,210 +8,9 @@
 
     <div class="row">
         <form id="edit-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
-            <!--            <div class="col-md-2">-->
 
-            <!--                &lt;!&ndash; Profile Image &ndash;&gt;-->
-            <!--                <div class="box box-primary">-->
-            <!--                    <div class="box-body box-profile">-->
-            <!--                        <img class="profile-user-img img-responsive img-circle" src="/assets/img/avatar.png" alt="User profile picture">-->
-
-            <!--                        <h3 class="profile-username text-center">{$ticket->username}</h3>-->
-
-
-            <!--                        <ul class="list-group list-group-unbordered">-->
-            <!--                            <li class="list-group-item">-->
-            <!--                                <i class="fa fa-envelope margin-r-5"></i> {$ticket->email}-->
-            <!--                            </li>-->
-            <!--                        </ul>-->
-            <!--                    </div>-->
-            <!--                    &lt;!&ndash; /.box-body &ndash;&gt;-->
-            <!--                </div>-->
-            <!--                &lt;!&ndash; /.box &ndash;&gt;-->
-
-            <!--                &lt;!&ndash; About Me Box &ndash;&gt;-->
-            <!--                <div class="box box-primary">-->
-            <!--                    &lt;!&ndash; /.box-header &ndash;&gt;-->
-            <!--                    <div class="box-body">-->
-            <!--                        <strong>CCs</strong>-->
-            <!--                        <p class="text-muted">-->
-            <!--                            <input   class="form-control" id='ccs' name="row[email_cc]" type="text" value="{$rows.email_cc}">-->
-            <!--                        </p>-->
-
-            <!--                        <hr>-->
-            <!--                        <strong>标签</strong>-->
-            <!--                        <p class="text-muted">-->
-            <!--                            {:Form::select('row[tags][]', $tags, explode(',',$ticket->tags), ['class'=>'form-control selectpicker ticket-tags', null,'multiple' => true,'data-live-search' => true,'id'=>'Entry_tags_select'])}-->
-            <!--                        </p>-->
-
-            <!--                        <hr>-->
-
-            <!--                        <strong>优先级</strong>-->
-            <!--                        <p class="text-muted">-->
-            <!--                            <select class="form-control ticket-priority selectpicker" data-live-search="1" data-rule="required" name="row[priority]">-->
-            <!--                                {if condition="$ticket->priority == 0"}-->
-            <!--                                <option value="0" {$ticket->priority == 0 ? 'selected' : ''}>- </option>-->
-            <!--                                {/if}-->
-            <!--                                <option value="1" {$ticket->priority == 1 ? 'selected' : ''}>low</option>-->
-            <!--                                <option value="2" {$ticket->priority == 2 ? 'selected' : ''}>normal</option>-->
-            <!--                                <option value="3" {$ticket->priority == 3 ? 'selected' : ''}>high</option>-->
-            <!--                                <option value="4" {$ticket->priority == 4 ? 'selected' : ''}>urgent</option>-->
-            <!--                            </select>-->
-            <!--                        </p>-->
-            <!--                    </div>-->
-            <!--                    &lt;!&ndash; /.box-body &ndash;&gt;-->
-            <!--                </div>-->
-            <!--                &lt;!&ndash; /.box &ndash;&gt;-->
-            <!--            </div>-->
-            <!-- /.col -->
             <div class="col-md-7 col-center" style="width: 62.4%;margin-bottom: 45px;border-right:0px !important;">
                 <div class="nav-tabs-custom">
-                    {if condition="$status neq 5"}
-                    <div class="box box-solid">
-                        <!-- /.box-header -->
-                        <div class="box-body"  >
-
-                            <div class="user-block pull-left" style="margin-top: 45px">
-                                <a style="position: absolute;top: 37px;left: 6%"><h2> <font style="color: #4564A7">#{$ticket->ticket_id}</font></h2></a>
-                                <span class="username">
-                                  <span href="#"><input id="c-subject" data-rule="required" value="{$ticket->subject}" class="form-control ticket-subject" name="row[subject]" type="text" style="margin-left:28px"></span>
-                                </span>
-                                <span class="description" style="margin-left: 93px">{$ticket->zendesk_update_time} · {$ticket->username} {$ticket->email} · {$ticket->channel}</span>
-                            </div>
-                            <div class="user-block pull-right" style="margin-top: 45px">
-                                <button type="button" class="btn btn-default" data-toggle="modal" data-target="#modal-default">
-                                    合并工单
-                                </button>
-
-                                <a data-value="{$ticket->id}" style="background-color: #f4f4f4;" class="btn btn-default btn-selected batch-edit-recipient {:$auth->check('zendesk/zendesk/batch_edit_recipient')?'':'hide'}"" href="javascript:;" ><font color="#444">修改承接人</font></a>
-                            </div>
-                        </div>
-                        {if condition="in_array($ticket->rating,['bad','good'])"}
-                        <div class="callout" style="background-color:#fffcf3;">
-                            <h4>Rating! <button type="button" class="btn btn-block btn-warning btn-flat">{$ticket->rating}</button></h4>
-                            {$ticket->comment}
-                        </div>
-                        {/if}
-
-                        <div class="form-group" >
-                            <label class="control-label col-xs-12 col-sm-2">{:__('CCs')}：</label>
-                            <div class="col-xs-12 col-sm-8" style="width: 66%">
-                                <input   class="form-control" id='ccs' name="row[email_cc]" type="text" value="{$rows.email_cc}">
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="control-label col-xs-12 col-sm-2">{:__('pulbic_type')}：</label>
-                            <div class="col-xs-12 col-sm-8" style="width: 27.5%">
-                                {:Form::select('row[public_type]', config('zendesk.pulbic_type'), null, ['class'=>'form-control selectpicker', null,'data-live-search' => true,'id'=>'Entry_type_select'])}
-                            </div>
-                            <label class="control-label col-xs-12 col-sm-2">{:__('Status')}：</label>
-                            <div class="col-xs-12 col-sm-8" style="width: 27.5%">
-                                <select class="form-control ticket-status selectpicker" data-live-search="1" data-rule="required" name="row[status]">
-                                    {if condition="$ticket->status ==1"}
-                                    <option value="1">new</option>
-                                    {/if}
-                                    <option value="2">open</option>
-                                    <option value="3">pending</option>
-                                    <option value="4" selected>solved</option>
-                                </select>
-                            </div>
-                        </div>
-                        <!--                        <div class="form-group">-->
-                        <!--                            <label class="control-label col-xs-12 col-sm-2">{:__('Status')}：</label>-->
-                        <!--                            <div class="col-xs-12 col-sm-8">-->
-                        <!--                                <select class="form-control ticket-status selectpicker" data-live-search="1" data-rule="required" name="row[status]">-->
-                        <!--                                    {if condition="$ticket->status ==1"}-->
-                        <!--                                    <option value="1">new</option>-->
-                        <!--                                    {/if}-->
-                        <!--                                    <option value="2">open</option>-->
-                        <!--                                    <option value="3">pending</option>-->
-                        <!--                                    <option value="4" selected>solved</option>-->
-                        <!--                                </select>-->
-                        <!--                            </div>-->
-                        <!--                        </div>-->
-                        <div class="form-group">
-                            <label class="control-label col-xs-12 col-sm-2">回复内容：</label>
-                            <div class="col-xs-12 col-sm-9" style="width: 71.5%">
-                                <textarea id="c-content" class="form-control editor ticket-content" rows="5" name="row[content]" cols="50"></textarea>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="c-image" class="control-label col-xs-12 col-sm-2">上传附件：</label>
-                            <div class="col-xs-12 col-sm-8"  style="width: 74%">
-                                <div class="input-group uploadBox">
-                                    <input id="c-image" class="form-control" size="35" name="row[image]" type="text" value="">
-                                    <div class="input-group-addon no-border no-padding upload">
-                                        <span><button type="button" id="plupload-image" class="btn btn-danger plupload" data-input-id="c-image" data-mimetype="*" data-multiple="true"  data-preview-id="p-image"><i class="fa fa-upload"></i> {:__('Upload')}</button></span>
-                                    </div>
-                                    <span class="msg-box n-right"></span>
-                                </div>
-                                <ul class="row list-inline plupload-preview" id="p-image"></ul>
-                            </div>
-                        </div>
-                        <!--                        <div class="form-group">-->
-                        <!--                            <label class="control-label col-xs-12 col-sm-2">创建工单：</label>-->
-                        <!--                            <div class="col-xs-12 col-sm-8">-->
-                        <!--                                <a href="javascript:;" class="btn btn-primary btn-add create_ticket" title="{:__('创建工单')}">{:__('创建工单')} </a>-->
-                        <!--                            </div>-->
-                        <!--                        </div>-->
-
-                        <div class="form-group">
-                            <label class="control-label col-xs-12 col-sm-2">选择模板：</label>
-                            <div class="col-xs-12 col-sm-8" style="width: 72%">
-                                <select id="Entry_status_select" class="form-control selectpicker macro-apply" data-live-search="true" title="选择模板">
-                                    <optgroup label="常用模板">
-                                        {foreach name="templates" item="vo" key="key"}
-                                        {if condition="$key <= 4"}
-                                        <option value="{$vo.id}">{$vo.title}</option>
-                                        {/if}
-                                        {/foreach}
-                                    </optgroup>
-                                    <optgroup label="所有模板">
-                                        {foreach name="templates" item="vo" key="key"}
-                                        {if condition="$key > 4"}
-                                        <option value="{$vo.id}">{$vo.title}</option>
-                                        {/if}
-                                        {/foreach}
-                                    </optgroup>
-                                </select>
-                            </div>
-                        </div>
-
-
-                        <div class="form-group">
-                            <label class="control-label col-xs-12 col-sm-2">{:__('标签')}：</label>
-                            <div class="col-xs-12 col-sm-8" style="width: 27.5%">
-                                {:Form::select('row[tags][]', $tags, explode(',',$ticket->tags), ['class'=>'form-control selectpicker ticket-tags', null,'multiple' => true,'data-live-search' => true,'id'=>'Entry_tags_select'])}
-                            </div>
-                            <label class="control-label col-xs-12 col-sm-2">{:__('优先级')}：</label>
-                            <div class="col-xs-12 col-sm-8" style="width: 27.9%">
-                                <select class="form-control ticket-priority selectpicker" data-live-search="1" data-rule="required" name="row[priority]">-->
-                                    {if condition="$ticket->priority == 0"}
-                                    <option value="0" {$ticket->priority == 0 ? 'selected' : ''}>- </option>
-                                    {/if}
-                                    <option value="1" {$ticket->priority == 1 ? 'selected' : ''}>low</option>
-                                    <option value="2" {$ticket->priority == 2 ? 'selected' : ''}>normal</option>
-                                    <option value="3" {$ticket->priority == 3 ? 'selected' : ''}>high</option>
-                                    <option value="4" {$ticket->priority == 4 ? 'selected' : ''}>urgent</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-group layer-footer">
-                            <div class="col-xs-12 col-sm-8" style="width: 32%;">
-                                <a href="javascript:;" style="float: right;width: 150px" class="btn btn-primary btn-add create_ticket" title="{:__('创建工单')}">{:__('创建工单')} </a>
-                            </div>
-                            {if condition="$ticket->status != 5"}
-                            <div class="col-xs-12 col-sm-8" style="width: 26.5%;float: right;">
-                                <button  type="submit"  class="btn btn-success btn-embossed disabled" style="width: 150px">发送邮件</button>
-                            </div>
-                            {/if}
-                        </div>
-
-
-                        <!-- /.box-body -->
-                    </div>
-                    {/if}
                     <br />
                     <div class="tab-content">
                         <div class="active tab-pane" id="activity">
@@ -341,33 +140,33 @@
                         <td style="font-size: 15px"> {$vo['order_currency_code']}{$vo['grand_total']|substr=0,-2}</h5></td>
                         <td style="font-size: 15px"> {$vo['status']}</td>
 
-                       {if condition="$vo['status'] eq 'complete'"}
-                         <td style="font-size: 15px;cursor: pointer"   id="showmessage" data-value="{$key}">
+                        {if condition="$vo['status'] eq 'complete'"}
+                        <td style="font-size: 15px;cursor: pointer"   id="showmessage" data-value="{$key}">
                             <button type="button"   class="logistics"  data-id="{$vo.entity_id}" style="display: flex;flex-direction: column;color: #0073B7; white-space: nowrap;background-color: #fff;border: 0;margin-bottom: 2px;outline: none;">{$vo.track_number}</button>
-                         </td>
-                       {/if}
-                       {if condition="$vo['status'] eq 'processing'"}
+                        </td>
+                        {/if}
+                        {if condition="$vo['status'] eq 'processing'"}
                         <td ><font style="color: #3C8DBC"><a  class="batch-log-recipient" data-value="{$vo['increment_id']}">配货记录</a></font></td>
-                       {/if}
+                        {/if}
                     </tr>
                     {if condition="!empty($vo.workorder_list)"}
                     {volist name="vo.workorder_list" id="it"}
-                        <tr style="background-color: #FDF6DC; " id="work_list_{$key}" >
-                            <td>{$it.id}</td>
-                            <td>{$it.created_at}</td>
-                            <td>{$it.problem_type_content}</td>
-                            {if condition="!empty($it.step_num)"}
-                                {volist name="it.step_num" id="ct"}
-                                <td>
-                                    {$ct.measure_content}：{$ct.0.status_format}  <br>
-                                </td>
-                                {/volist}
-                            {/if}
+                    <tr style="background-color: #FDF6DC; " id="work_list_{$key}" >
+                        <td>{$it.id}</td>
+                        <td>{$it.created_at}</td>
+                        <td>{$it.problem_type_content}</td>
+                        {if condition="!empty($it.step_num)"}
+                        {volist name="it.step_num" id="ct"}
+                        <td>
+                            {$ct.measure_content}：{$ct.0.status_format}  <br>
+                        </td>
+                        {/volist}
+                        {/if}
 
-                            {if condition="$it.measure_choose_id eq 7"}
-                                <td>补发单号:{$it.replacement_order}</td>
-                            {/if}
-                        </tr>
+                        {if condition="$it.measure_choose_id eq 7"}
+                        <td>补发单号:{$it.replacement_order}</td>
+                        {/if}
+                    </tr>
                     {/volist}
                     {/if}
 
@@ -603,7 +402,7 @@
 <script>
 
     function work_orderlist_show(key){
-     $('#work_list_'+key).slideToggle();
+        $('#work_list_'+key).slideToggle();
     }
 
 </script>
