@@ -100,14 +100,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
-                                    visible: function(row){
-                                        var range = [row.due_id,1,75,95,114,116,117,181];
-                                        if(-1 != $.inArray(Config.admin_id, range)){
-                                            return true;
-                                        }else{
-                                            return false;
-                                        }
-                                    }
+                                    visible: true,
                                 },
                                 {
                                     name: 'edit_recipient',
