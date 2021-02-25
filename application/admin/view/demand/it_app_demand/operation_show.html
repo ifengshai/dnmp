@@ -59,9 +59,11 @@
                 <label class="input_tiem_label">修改预期时间：</label>
                 <span class="input_tiem_span">
                     {if $row['node_time'] !== null}
-                     <input  class="selectpicker datetimepicker select_input" id="change_node_time" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[node_time]" type="text" value="{$row.node_time|datetime}">
+                     <input  class="selectpicker datetimepicker " id="change_node_time" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[node_time]" type="text" value="{$row.node_time|datetime}" style="width: 38%;height: 35px !important;">
+                      <button type="button" id="change_node_time_operation" class="btn btn-sub"  value="{$row['id']}" style='background-color: #03A7EF;width: 27%;height:37px;color: white;font-size: 14px;font-weight: 700;'>{:__('修改')}</button>
                        {else/}
-                     <input  class="selectpicker datetimepicker select_input"   id="change_node_time" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[node_time]" type="text" >
+                     <input  class="selectpicker datetimepicker "   id="change_node_time" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[node_time]" type="text" style="width: 38%;height: 35px !important;" >
+                     <button type="button" id="change_node_time_operation" class="btn btn-sub"  value="{$row['id']}" style='background-color: #03A7EF;width: 27%;height:37px;color: white;font-size: 14px;font-weight: 700;'>{:__('修改')}</button>
                      {/if}
 
                 </span>
