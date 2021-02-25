@@ -19,6 +19,7 @@ class ItAppDemand extends Backend
      * @var \app\admin\model\demand\ItAppDemand
      */
     protected $model = null;
+    protected $noNeedRight =['operation_show'];
     public function _initialize()
     {
         parent::_initialize();
@@ -78,10 +79,28 @@ class ItAppDemand extends Backend
     }
 
     /**
-     * 编辑
+     * 查看
      */
     public function edit($ids = null)
     {
+        $row = $this->model->get($ids);
+        $row = $row->toArray();
+        $row['site_type_arr'] = explode(',', $row['site_type']);
+        $row['copy_to_user_id_arr'] = explode(',', $row['copy_to_user_id']);
+        $row['important_reasons'] = explode(',', $row['important_reasons']);
+        $this->view->assign('demand_type', input('demand_type'));
+        $this->view->assign("type", input('type'));
+        $this->view->assign("row", $row);
+        //确认权限
+        $this->view->assign('pm_status', $this->auth->check('demand/it_web_demand/pm_status'));
+        $this->view->assign('admin_id', session('admin.id'));
+        return $this->view->fetch();
+    }
+
+    /**
+     * 编辑操作
+     */
+    public function edit_operation(){
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
@@ -125,18 +144,6 @@ class ItAppDemand extends Backend
                 $this->error('操作失败');
             }
         }
-        $row = $this->model->get($ids);
-        $row = $row->toArray();
-        $row['site_type_arr'] = explode(',', $row['site_type']);
-        $row['copy_to_user_id_arr'] = explode(',', $row['copy_to_user_id']);
-        $row['important_reasons'] = explode(',', $row['important_reasons']);
-        $this->view->assign('demand_type', input('demand_type'));
-        $this->view->assign("type", input('type'));
-        $this->view->assign("row", $row);
-        //确认权限
-        $this->view->assign('pm_status', $this->auth->check('demand/it_web_demand/pm_status'));
-        $this->view->assign('admin_id', session('admin.id'));
-        return $this->view->fetch();
     }
 
     /**
@@ -215,7 +222,7 @@ class ItAppDemand extends Backend
 
             if ($app_demand->save()){
                 //开发人员完成 推送给测试主管
-                Ding::cc_ding('350', '任务ID:' . $params['id'] . '+任务已开发完毕，请安排人员测试', $app_demand->title, $this->request->domain() . url('index') . '?ref=addtabs');
+                Ding::cc_ding('280', '任务ID:' . $params['id'] . '+任务已开发完毕，请安排人员测试', $app_demand->title, $this->request->domain() . url('index') . '?ref=addtabs');
                 $this->success('操作成功');
             }else{
                 $this->error('操作失败');
@@ -240,8 +247,9 @@ class ItAppDemand extends Backend
                 $this->error('开发还未完成，无法执行确认完成操作');
             }
             if ($app_demand->save()){
-                //测试完成后 钉钉推送产品
-                Ding::cc_ding('350', '任务ID:' . $params['id'] . '+任务已测试完毕，准备上线', $app_demand->title, $this->request->domain() . url('index') . '?ref=addtabs');
+                //测试完成后 钉钉推送抄送人
+                $user = explode(',',$app_demand->copy_to_user_id);
+                Ding::cc_ding($user, '任务ID:' . $params['id'] . '+任务已测试完毕，准备上线', $app_demand->title, $this->request->domain() . url('index') . '?ref=addtabs');
                 $this->success('操作成功','');
             }else{
                 $this->error('操作失败');
@@ -267,7 +275,7 @@ class ItAppDemand extends Backend
             }
             if ($app_demand->save()){
                 //上线后 钉钉推送给提出人
-                Ding::cc_ding('350', '任务ID:' . $params['id'] . '+任务完成，已提交上线', $app_demand->title, $this->request->domain() . url('index') . '?ref=addtabs');
+                Ding::cc_ding($app_demand->entry_user_id, '任务ID:' . $params['id'] . '+任务完成，已提交上线', $app_demand->title, $this->request->domain() . url('index') . '?ref=addtabs');
                 $this->success('操作成功');
             }else{
                 $this->error('操作失败');

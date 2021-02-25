@@ -226,7 +226,7 @@
                                 <img src="/wenhao.jpg" class="wenhao-class">
                             </span>
                             <span class="extend">
-                                <div class="title1">呆滞库存数量（个）<br/><br/><span style="color: red;font-size: 24px">{$stock_overview.dull_stock_count}</span><hr><span style="font-size: 14px;">高：{$stock_overview.dull_stock_count3}<br>中：{$stock_overview.dull_stock_count2}<br>低：{$stock_overview.dull_stock_count1}</span></div>
+                                <div class="title1">呆滞库存数量（个）<br/><br/><span style="color: red;font-size: 24px">{$stock_overview.dull_stock_count}</span><span style="color:red;font-size: 14px;">（{$stock_overview.dull_stock_count_rate}%）</span><hr><span style="font-size: 14px;">高：{$stock_overview.dull_stock_count3}<br>中：{$stock_overview.dull_stock_count2}<br>低：{$stock_overview.dull_stock_count1}</span></div>
                             </span>
                         </div>
                         <div class="btn btn-div div">
@@ -261,7 +261,7 @@
                     <div class="margin-div" style="text-align: center">
                         <div class="btn btn-div div">
                             <span class="extend">
-                                <div class="title1">呆滞库存金额（￥）<br/><br/><span style="color: red;font-size: 24px">{$stock_overview.dull_stock_total}</span><hr><span style="font-size: 14px;">高：{$stock_overview.dull_stock_total3}<br>中：{$stock_overview.dull_stock_total2}<br>低：{$stock_overview.dull_stock_total1}</span></div>
+                                <div class="title1">呆滞库存金额（￥）<br/><br/><span style="color: red;font-size: 24px">{$stock_overview.dull_stock_total}</span><span style="color:red;font-size: 14px;">（{$stock_overview.dull_stock_total_rate}%）</span><hr><span style="font-size: 14px;">高：{$stock_overview.dull_stock_total3}<br>中：{$stock_overview.dull_stock_total2}<br>低：{$stock_overview.dull_stock_total1}</span></div>
                             </span>
                         </div>
                         <div class="btn btn-div div">
@@ -291,21 +291,46 @@
                 <div class="new-background">
                     <div class="row">
                         <div class="form-group" style="float:left;width: 100%;" >
-                            <label class="control-label col-xs-6">库存变化折线图</label>
-                            <div style="float: right;display: flex;">
+                            <label class="control-label col-xs-6">月平均库存变化</label>
+                            <!--<div style="float: right;display: flex;">
                                 <div style="margin-right: 30px;">
                                     <label style="text-align: right;margin-right: 100px;">时间:</label>
                                     <div id="timetime5" role="form" style="float: right;margin-left: -91px;margin-top: -7px;">
                                         <input type="hidden" class="form-control operate" name="one_time-operate" data-name="time_str" value="RANGE" readonly="">
-                                        <input type="text" autocomplete="off" class="form-control datetimerange" name="time_str"  id="time_str5" value="{$time_str1}" data-index="14">
+                                        <input type="text" autocomplete="off" class="form-control datetimerange" name="time_str"  id="time_str5" value="{$time_str3}" data-index="14">
                                     </div>
                                 </div>
-                            </div>
+                            </div>-->
                         </div>
                         <div class="wrap">
                             <div class="row">
                                 <div class="margin-div" style="text-align: center">
                                     <div id="echart1" style="height:300px;margin: 10px 0px 10px 0px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="widget-body no-padding">
+                <div class="new-background">
+                    <div class="row">
+                        <div class="form-group" style="float:left;width: 100%;" >
+                            <label class="control-label col-xs-6">月平均呆滞库存变化</label>
+                            <!--<div style="float: right;display: flex;">
+                                <div style="margin-right: 30px;">
+                                    <label style="text-align: right;margin-right: 100px;">时间:</label>
+                                    <div id="timetime6" role="form" style="float: right;margin-left: -91px;margin-top: -7px;">
+                                        <input type="hidden" class="form-control operate" name="one_time-operate" data-name="time_str" value="RANGE" readonly="">
+                                        <input type="text" autocomplete="off" class="form-control datetimerange" name="time_str"  id="time_str6" value="{$time_str3}" data-index="14">
+                                    </div>
+                                </div>
+                            </div>-->
+                        </div>
+                        <div class="wrap">
+                            <div class="row">
+                                <div class="margin-div" style="text-align: center">
+                                    <div id="echart3" style="height:300px;margin: 10px 0px 10px 0px;"></div>
                                 </div>
                             </div>
                         </div>
@@ -513,6 +538,18 @@
                         <td>{$stock_level_overview.f_dull_stock_rate}</td>
                         <td>{$stock_level_overview.f_dull_total}</td>
                     </tr>
+                    <tr>
+                        <td>合计</td>
+                        <td>{$stock_level_overview.all_count}</td>
+                        <td>100%</td>
+                        <td>{$stock_level_overview.all_stock_num}</td>
+                        <td>100%</td>
+                        <td>{$stock_level_overview.all_stock_price}</td>
+                        <td>120</td>
+                        <td>{$stock_level_overview.all_dull_stock}</td>
+                        <td>{$stock_level_overview.all_dull_stock_rate}</td>
+                        <td>{$stock_level_overview.all_dull_total}</td>
+                    </tr>
                 </table>
             <div>
                 <div class="new-background">
@@ -632,6 +669,31 @@
                     <div class="new-background">
                         <div class="row">
                             <div class="form-group" style="float:left;width: 100%;" >
+                                <label class="control-label col-xs-6">月度采购数量、采销比</label>
+                                <!--<div style="float: right;display: flex;">
+                                    <div style="margin-right: 30px;">
+                                        <label style="text-align: right;margin-right: 100px;">时间:</label>
+                                        <div id="timetime7" role="form" style="float: right;margin-left: -91px;margin-top: -7px;">
+                                            <input type="hidden" class="form-control operate" name="one_time-operate" data-name="time_str" value="RANGE" readonly="">
+                                            <input type="text" autocomplete="off" class="form-control datetimerange" name="time_str"  id="time_str7" value="{$time_str3}" data-index="14">
+                                        </div>
+                                    </div>
+                                </div>-->
+                            </div>
+                            <div class="wrap">
+                                <div class="row">
+                                    <div class="margin-div" style="text-align: center">
+                                        <div id="echart5" style="height:300px;margin: 10px 0px 10px 0px;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="widget-body no-padding">
+                    <div class="new-background">
+                        <div class="row">
+                            <div class="form-group" style="float:left;width: 100%;" >
                                 <label class="control-label col-xs-6">订单发货及时率</label>
                                 <div style="float: right;display: flex;">
                                     <div style="margin-right: 30px;">
@@ -647,6 +709,31 @@
                                 <div class="row">
                                     <div class="margin-div" style="text-align: center">
                                         <div id="echart2" style="height:300px;margin: 10px 0px 10px 0px;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="widget-body no-padding">
+                    <div class="new-background">
+                        <div class="row">
+                            <div class="form-group" style="float:left;width: 100%;" >
+                                <label class="control-label col-xs-6">物流妥投概况</label>
+                                <div style="float: right;display: flex;">
+                                    <div style="margin-right: 30px;">
+                                        <label style="text-align: right;margin-right: 100px;">时间:</label>
+                                        <div id="timetime8" role="form" style="float: right;margin-left: -91px;margin-top: -7px;">
+                                            <input type="hidden" class="form-control operate" name="one_time-operate" data-name="time_str" value="RANGE" readonly="">
+                                            <input type="text" autocomplete="off" class="form-control datetimerange" name="time_str"  id="time_str8" value="{$time_str2}" data-index="14">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="wrap">
+                                <div class="row">
+                                    <div class="margin-div" style="text-align: center">
+                                        <div id="echart6" style="height:300px;margin: 10px 0px 10px 0px;"></div>
                                     </div>
                                 </div>
                             </div>

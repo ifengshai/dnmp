@@ -38,6 +38,7 @@ class ProductGrade extends Model
         $skus = $this->where($where)->column('true_sku');
         //总库存
         $data['aa_stock_num'] = $item->where(['sku' => ['in', $skus], 'is_del' => 1])->sum('stock');
+        $data['aa_realstock_num'] = $item->where(['sku' => ['in', $skus], 'is_del' => 1])->value('sum(stock)-sum(distribution_occupy_stock) as result');
         //库存金额
         $data['aa_stock_price'] = $item->where(['sku' => ['in', $skus], 'is_del' => 1])->sum('stock*purchase_price');
 
@@ -45,6 +46,7 @@ class ProductGrade extends Model
         $where['grade'] = 'A';
         $skus = $this->where($where)->column('true_sku');
         $data['a_stock_num'] = $item->where(['sku' => ['in', $skus], 'is_del' => 1])->sum('stock');
+        $data['a_realstock_num'] = $item->where(['sku' => ['in', $skus], 'is_del' => 1])->value('sum(stock)-sum(distribution_occupy_stock) as result');
         //库存金额
         $data['a_stock_price'] = $item->where(['sku' => ['in', $skus], 'is_del' => 1])->sum('stock*purchase_price');
 
@@ -52,6 +54,7 @@ class ProductGrade extends Model
         $where['grade'] = 'B';
         $skus = $this->where($where)->column('true_sku');
         $data['b_stock_num'] = $item->where(['sku' => ['in', $skus], 'is_del' => 1])->sum('stock');
+        $data['b_realstock_num'] = $item->where(['sku' => ['in', $skus], 'is_del' => 1])->value('sum(stock)-sum(distribution_occupy_stock) as result');
         //库存金额
         $data['b_stock_price'] = $item->where(['sku' => ['in', $skus], 'is_del' => 1])->sum('stock*purchase_price');
 
@@ -59,6 +62,7 @@ class ProductGrade extends Model
         $where['grade'] = 'C+';
         $skus = $this->where($where)->column('true_sku');
         $data['ca_stock_num'] = $item->where(['sku' => ['in', $skus], 'is_del' => 1])->sum('stock');
+        $data['ca_realstock_num'] = $item->where(['sku' => ['in', $skus], 'is_del' => 1])->value('sum(stock)-sum(distribution_occupy_stock) as result');
         //库存金额
         $data['ca_stock_price'] = $item->where(['sku' => ['in', $skus], 'is_del' => 1])->sum('stock*purchase_price');
 
@@ -67,6 +71,7 @@ class ProductGrade extends Model
         $where['grade'] = 'C';
         $skus = $this->where($where)->column('true_sku');
         $data['c_stock_num'] = $item->where(['sku' => ['in', $skus], 'is_del' => 1])->sum('stock');
+        $data['c_realstock_num'] = $item->where(['sku' => ['in', $skus], 'is_del' => 1])->value('sum(stock)-sum(distribution_occupy_stock) as result');
         //库存金额
         $data['c_stock_price'] = $item->where(['sku' => ['in', $skus], 'is_del' => 1])->sum('stock*purchase_price');
 
@@ -76,6 +81,7 @@ class ProductGrade extends Model
         $where['grade'] = 'D';
         $skus = $this->where($where)->column('true_sku');
         $data['d_stock_num'] = $item->where(['sku' => ['in', $skus], 'is_del' => 1])->sum('stock');
+        $data['d_realstock_num'] = $item->where(['sku' => ['in', $skus], 'is_del' => 1])->value('sum(stock)-sum(distribution_occupy_stock) as result');
         //库存金额
         $data['d_stock_price'] = $item->where(['sku' => ['in', $skus], 'is_del' => 1])->sum('stock*purchase_price');
 
@@ -83,6 +89,7 @@ class ProductGrade extends Model
         $where['grade'] = 'E';
         $skus = $this->where($where)->column('true_sku');
         $data['e_stock_num'] = $item->where(['sku' => ['in', $skus], 'is_del' => 1])->sum('stock');
+        $data['e_realstock_num'] = $item->where(['sku' => ['in', $skus], 'is_del' => 1])->value('sum(stock)-sum(distribution_occupy_stock) as result');
         //库存金额
         $data['e_stock_price'] = $item->where(['sku' => ['in', $skus], 'is_del' => 1])->sum('stock*purchase_price');
 
@@ -90,6 +97,7 @@ class ProductGrade extends Model
         $where['grade'] = 'F';
         $skus = $this->where($where)->column('true_sku');
         $data['f_stock_num'] = $item->where(['sku' => ['in', $skus], 'is_del' => 1])->sum('stock');
+        $data['f_realstock_num'] = $item->where(['sku' => ['in', $skus], 'is_del' => 1])->value('sum(stock)-sum(distribution_occupy_stock) as result');
 
         //库存金额
         $data['f_stock_price'] = $item->where(['sku' => ['in', $skus], 'is_del' => 1])->sum('stock*purchase_price');

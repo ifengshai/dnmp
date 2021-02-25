@@ -373,11 +373,7 @@ class ScmDistribution extends Scm
         $abnormal_id = $this->_distribution_abnormal
             ->where(['item_process_id' => $item_process_info['id'], 'status' => 1])
             ->value('id');
-        // $abnormal_id && $this->error(__('有异常待处理，无法操作'), [], 405);
-        $coding1 = $this->_stock_house
-            ->where(['id' => $item_process_info['abnormal_house_id']])
-            ->value('coding');
-        $abnormal_id && $this->error(__("子订单存在异常" . "<br><b>$coding1</b>"), [], 405);
+        $abnormal_id && $this->error(__("子订单存在异常" . "<br><b>$coding</b>"), [], 405);
 
         //检测状态
         $status_arr = [
@@ -691,9 +687,9 @@ class ScmDistribution extends Scm
             6 => '成品质检'
         ];
         //获取库位号
-        $coding = $this->_stock_house
+       /* $coding = $this->_stock_house
             ->where(['id' => $item_process_info['temporary_house_id']])
-            ->value('coding');
+            ->value('coding');*/
         //操作失败记录
         if (empty($item_process_info)) {
             DistributionLog::record($this->auth, $item_process_info['id'], 0, $status_arr[$check_status] . '：子订单不存在');
@@ -1421,7 +1417,7 @@ class ScmDistribution extends Scm
                     $this->_product_bar_code_item
                     ->allowField(true)
                     ->isUpdate(true, ['item_order_number' => $item_order_number])
-                    ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2,'out_stock_id' => $outstock_id]);
+                    ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2, 'is_loss_report_out' => 1,'out_stock_id' => $outstock_id]);
 
                     //计算出库成本
                     $financecost = new \app\admin\model\finance\FinanceCost();
@@ -1543,13 +1539,8 @@ class ScmDistribution extends Scm
                 }
             }
             foreach ($check_work_order as $val) {
-                (3 == $val['measure_choose_id'] //主单取消措施未处理
-                    ||
-                    !empty($val['item_order_number']) //子单措施未处理:更改镜框18、更改镜片19、取消20
-                )
-                    // && $this->error(__('有工单未处理，无法操作'), [], 405);
-
-                    && $this->error(__("子订单存在工单"), [], 405);
+                3 == $val['measure_choose_id'] && $this->error(__("子订单存在工单"), [], 405); //主单取消措施未处理
+                
                 if ($val['measure_choose_id'] == 21) {
                     $this->error(__("子订单存在工单"), [], 405);
                 }
@@ -2371,7 +2362,7 @@ class ScmDistribution extends Scm
                             $this->_product_bar_code_item
                             ->allowField(true)
                             ->isUpdate(true, ['item_order_number' => ['in', $item_order_numbers]])
-                            ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2,'out_stock_id' => $outstock_id]);
+                            ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2, 'is_loss_report_out' => 1,'out_stock_id' => $outstock_id]);
 
                             //计算出库成本
                             $financecost = new \app\admin\model\finance\FinanceCost();
@@ -2542,14 +2533,14 @@ class ScmDistribution extends Scm
 
                 //校验条形码是否已出库
                 $check_bar_code = $this->_product_bar_code_item
-                    ->where(['item_order_number' => ['in', $item_order_numbers], 'library_status' => 2])
+                    ->where(['item_order_number' => ['in', $item_order_numbers], 'library_status' => 2, 'is_loss_report_out' => 0])
                     ->value('code');
                 if ($check_bar_code) throw new Exception("条形码：{$check_bar_code}已出库，请检查");
 
                 //条形码出库时间
                 $this->_product_bar_code_item
                     ->allowField(true)
-                    ->isUpdate(true, ['item_order_number' => ['in', $item_order_numbers]])
+                    ->isUpdate(true, ['item_order_number' => ['in', $item_order_numbers], 'is_loss_report_out' => 0])
                     ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2]);
             }
 

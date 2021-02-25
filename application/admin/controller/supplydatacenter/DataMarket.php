@@ -39,6 +39,7 @@ class DataMarket extends Backend
         $this->item = new \app\admin\model\warehouse\ProductBarCodeItem;
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku();
         $this->productAllStockLog = new \app\admin\model\ProductAllStock();
+        $this->supplymonth = new \app\admin\model\supplydatacenter\SupplyMonth();
     }
     /**
      * 显示资源列表
@@ -67,6 +68,9 @@ class DataMarket extends Backend
         //默认30天数据
         $start2 = date('Y-m-d 00:00:00', strtotime('-30 day'));
         $time_str2 = $start2.' - '.$end1;
+        //默认近1年的数据
+        $start3 = date('Y-m-01 00:00:00', strtotime('-12 months'));
+        $time_str3 = $start3.' - '.$end1;
 
         //库存总览
         $stock_overview = $this->stock_overview();
@@ -88,39 +92,73 @@ class DataMarket extends Backend
                 unset($magentoplatformarr[$key]);
             }
         }
-        $this->view->assign(compact('stock_overview','stock_measure_overview','stock_level_overview','stock_level_overview2','purchase_overview','logistics_completed_overview','magentoplatformarr','stock_age_overview','time_str1','time_str2'));
+        $this->view->assign(compact('stock_overview','stock_measure_overview','stock_level_overview','stock_level_overview2','purchase_overview','logistics_completed_overview','magentoplatformarr','stock_age_overview','time_str1','time_str2','time_str3'));
         return $this->view->fetch();
     }
-    //库存变化折线图
-    public function stock_change_line()
+    //库存变化
+    public function stock_change_bar()
     {
         if ($this->request->isAjax()) {
             $params = $this->request->param();
             $time_str = $params['time_str'];
             if ($time_str) {
                 $createat = explode(' ', $time_str);
-                $where['createtime'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
+                $start = date('Y-m',strtotime($createat[0]));
+                $end = date('Y-m',strtotime($createat[3]));
             } else {
-                $start = date('Y-m-d', strtotime('-6 day'));
-                $end   = date('Y-m-d 23:59:59');
-                $where['createtime'] = ['between', [$start, $end]];
+                $start = date('Y-m', strtotime('-12 months'));
+                $end   = date('Y-m');
             }
-            $cache_data = Cache::get('Supplydatacenter_datamarket'.$time_str.md5(serialize('stock_change_line')));
+            $where['day_date'] = ['between',[$start,$end]];
+            $cache_data = Cache::get('Supplydatacenter_datamarket'.$time_str.md5(serialize('stock_change_bar')));
             if (!$cache_data) {
-                $data = $this->productAllStockLog->where($where)->field("allnum,DATE_FORMAT(createtime,'%Y-%m-%d') day_date")->select();
-                $data = collection($data)->toArray();
+                $data = $this->supplymonth->where($where)->field('id,avg_stock,day_date')->order('day_date','asc')->select();
             }else{
                 $data = $cache_data;
             }
-            Cache::set('Supplydatacenter_datamarket' .$time_str . md5(serialize('stock_change_line')), $data, 7200);
-            $json['xcolumnData'] = array_column($data,'day_date');
-            $json['column'] = ['库存'];
+            Cache::set('Supplydatacenter_datamarket' .$time_str . md5(serialize('stock_change_bar')), $data, 7200);
+            $json['xColumnName'] = array_column($data,'day_date');
+            $json['column'] = ['平均库存'];
             $json['columnData'] = [
                 [
-                    'name' => '库存',
+                    'name' => '平均库存',
+                    'type' => 'bar',
+                    'data' => array_column($data,'avg_stock')
+                ],
+            ];
+            return json(['code' => 1, 'data' => $json]);
+        }
+    }
+    //呆滞库存变化
+    public function dull_stock_change_barline()
+    {
+        if ($this->request->isAjax()) {
+            $params = $this->request->param();
+            $time_str = $params['time_str'];
+            if ($time_str) {
+                $createat = explode(' ', $time_str);
+                $start = date('Y-m',strtotime($createat[0]));
+                $end = date('Y-m',strtotime($createat[3]));
+            } else {
+                $start = date('Y-m', strtotime('-12 months'));
+                $end   = date('Y-m');
+            }
+            $where['day_date'] = ['between',[$start,$end]];
+            $data = $this->supplymonth->where($where)->field('id,avg_dull_stock,avg_rate,day_date')->order('day_date','asc')->select();
+            $json['xColumnName'] = array_column($data,'day_date');
+            $json['column'] = ['平均呆滞库存'];
+            $json['columnData'] = [
+                [
+                    'type' => 'bar',
+                    'data' => array_column($data,'avg_dull_stock'),
+                    'name' => '平均呆滞库存'
+                ],
+                [
                     'type' => 'line',
-                    'smooth' => true,
-                    'data' => array_column($data,'allnum')
+                    'data' => array_column($data,'avg_rate'),
+                    'name' => '呆滞库存占比',
+                    'yAxisIndex' => 1,
+                    'smooth' => true //平滑曲线
                 ],
             ];
             return json(['code' => 1, 'data' => $json]);
@@ -148,8 +186,12 @@ class DataMarket extends Backend
         $where['category_id'] = ['<>',43]; //排除补差价商品
         //库存总数量
         $arr['stock_num'] = $this->model->where($where)->sum('stock');
+        //呆滞库存占比
+        $arr['dull_stock_count_rate'] = $arr['stock_num'] ? round($dull_stock['stock']/$arr['stock_num']*100,0) : 0;
         //库存总金额
         $arr['stock_amount'] = $this->model->where($where)->sum('stock*purchase_price');
+        //呆滞金额占比
+        $arr['dull_stock_total_rate'] = $arr['stock_amount'] ? round($dull_stock['total']/$arr['stock_amount']*100,0) : 0;
         //库存单价
         $arr['stock_price'] = $arr['stock_num'] ? round($arr['stock_amount']/$arr['stock_num'],2) : 0;
         //在途库存数量
@@ -402,9 +444,14 @@ class DataMarket extends Backend
         );
         //获取呆滞库存信息
         $dull_stock = $this->dullstock->where('grade','<>','Z')->order('day_date desc,id asc')->limit(8)->select();
+        $all_dull_stock = $this->dullstock->where('grade','Z')->order('day_date desc,id asc')->limit(1)->find();
+        $arr['all_dull_stock'] = $all_dull_stock['stock'];   //合计呆滞库存
+        $arr['all_dull_total'] = $all_dull_stock['total'];   //合计呆滞金额
 
-        $all_num = $arr['a1_count']+$arr['a_count']+$arr['b_count']+$arr['c1_count']+$arr['c_count']+$arr['d_count']+$arr['e_count']+$arr['f_count'];
-        $all_stock_num = $arr['a1_stock_num']+$arr['a_stock_num']+$arr['b_stock_num']+$arr['c1_stock_num']+$arr['c_stock_num']+$arr['d_stock_num']+$arr['e_stock_num']+$arr['f_stock_num'];
+        $all_num = $arr['all_count'] = $arr['a1_count']+$arr['a_count']+$arr['b_count']+$arr['c1_count']+$arr['c_count']+$arr['d_count']+$arr['e_count']+$arr['f_count'];   //合计SKU数量
+        $all_stock_num = $arr['all_stock_num'] = $arr['a1_stock_num']+$arr['a_stock_num']+$arr['b_stock_num']+$arr['c1_stock_num']+$arr['c_stock_num']+$arr['d_stock_num']+$arr['e_stock_num']+$arr['f_stock_num'];  //合计库存数量
+        $arr['all_stock_price'] = $arr['a1_stock_price']+$arr['a_stock_price']+$arr['b_stock_price']+$arr['c1_stock_price']+$arr['c_stock_price']+$arr['d_stock_price']+$arr['e_stock_price']+$arr['f_stock_price'];  //合计库存金额
+        $arr['all_dull_stock_rate'] = $arr['all_stock_num'] ? round($arr['all_dull_stock']/$arr['all_stock_num']*100,2).'%' : 0;   //合计呆滞库存占比
         $arr['a1_percent'] = $all_num ? round($arr['a1_count']/$all_num*100,2).'%':0;
         $arr['a1_stock_percent'] = $all_stock_num ? round($arr['a1_stock_num']/$all_stock_num*100,2).'%':0;
         $arr['a1_dull_stock'] = $dull_stock[0]['stock'];   //呆滞库存
@@ -462,7 +509,13 @@ class DataMarket extends Backend
             return $cache_data;
         }
         //获取呆滞库存信息
-        $dull_stock = $this->dullstock->where('grade','<>','Z')->order('day_date desc,id asc')->limit(8)->select();
+        $dull_stock = $this->dullstock->order('day_date desc,id asc')->limit(9)->select();
+        foreach($dull_stock as $k=>$v){
+            if($v['grade'] == 'Z'){
+                $dull_stock[$k]['grade'] = '合计';
+                $dull_stock[$k]['stock_rate'] = 100;
+            }
+        }
         Cache::set('Supplydatacenter_datamarket'.md5(serialize('stock_level_overview2')),$dull_stock,7200);
         return $dull_stock;
     }
@@ -662,6 +715,41 @@ class DataMarket extends Backend
         }
         return $date;
     }
+    //月度采购数量、采销比
+    public function purchase_sales_barline()
+    {
+        if ($this->request->isAjax()) {
+            $params = $this->request->param();
+            $time_str = $params['time_str'];
+            if ($time_str) {
+                $createat = explode(' ', $time_str);
+                $start = date('Y-m',strtotime($createat[0]));
+                $end = date('Y-m',strtotime($createat[3]));
+            } else {
+                $start = date('Y-m', strtotime('-12 months'));
+                $end   = date('Y-m');
+            }
+            $where['day_date'] = ['between',[$start,$end]];
+            $data = $this->supplymonth->where($where)->field('id,purchase_num,purchase_sales_rate,day_date')->order('day_date','asc')->select();
+            $json['xColumnName'] = array_column($data,'day_date');
+            $json['column'] = ['月度采购数量'];
+            $json['columnData'] = [
+                [
+                    'type' => 'bar',
+                    'data' => array_column($data,'purchase_num'),
+                    'name' => '月度采购数量'
+                ],
+                [
+                    'type' => 'line',
+                    'data' => array_column($data,'purchase_sales_rate'),
+                    'name' => '采销比',
+                    'yAxisIndex' => 1,
+                    'smooth' => true //平滑曲线
+                ],
+            ];
+            return json(['code' => 1, 'data' => $json]);
+        }
+    }
     //订单发货及时率
     public function order_histogram_line(){
         if ($this->request->isAjax()) {
@@ -671,23 +759,17 @@ class DataMarket extends Backend
                 $end = date('Y-m-d 23:59:59');
                 $time_str = $start . ' - ' . $end;
             }
-            $cache_data = Cache::get('Supplydatacenter_datamarket'  .$time_str. md5(serialize('order_histogram_line')));
-            if (!$cache_data) {
-                $createat = explode(' ', $time_str);
-                $map['day_date'] = ['between',[$createat[0],$createat[3]]];
-                $order_info = Db::name('datacenter_day_order')->where($map)->select();
-                $avg_rate = Db::name('datacenter_day_order')->where($map)->value('round(sum(intime_rate)/count(*),2) as result');
-                $arr = array();
-                foreach ($order_info as $key=>$value){
-                    $arr[$key]['day'] = $value['day_date'];
-                    //订单数量
-                    $arr[$key]['order_count'] = $value['order_num'];
-                    $arr[$key]['rate'] = $value['intime_rate'];
-                    $arr[$key]['avg_rate'] = $avg_rate;
-                }
-                Cache::set('Supplydatacenter_datamarket'.$time_str.md5(serialize('order_histogram_line')),$arr,7200);
-            }else{
-                $arr = $cache_data;
+            $createat = explode(' ', $time_str);
+            $map['day_date'] = ['between',[$createat[0],$createat[3]]];
+            $order_info = Db::name('datacenter_day_order')->where($map)->select();
+            $avg_rate = Db::name('datacenter_day_order')->where($map)->value('round(sum(intime_rate)/count(*),2) as result');
+            $arr = array();
+            foreach ($order_info as $key=>$value){
+                $arr[$key]['day'] = $value['day_date'];
+                //订单数量
+                $arr[$key]['order_count'] = $value['order_num'];
+                $arr[$key]['rate'] = $value['intime_rate'];
+                $arr[$key]['avg_rate'] = $avg_rate;
             }
             //全部采购单
             $barcloumndata = array_column($arr, 'order_count');
@@ -716,6 +798,44 @@ class DataMarket extends Backend
                     'smooth' => true //平滑曲线
                 ],
 
+            ];
+            return json(['code' => 1, 'data' => $json]);
+        }
+    }
+    //物流妥投概况
+    public function track_logistics_barline()
+    {
+        if ($this->request->isAjax()) {
+            $time_str = input('time_str');
+            if (!$time_str) {
+                $start = date('Y-m-d 00:00:00', strtotime('-30 day'));
+                $end = date('Y-m-d 23:59:59');
+                $time_str = $start . ' - ' . $end;
+            }
+            $cache_data = Cache::get('Supplydatacenter_datamarket'  .$time_str. md5(serialize('track_logistics_barline')));
+            if (!$cache_data) {
+                $createat = explode(' ', $time_str);
+                $map['day_date'] = ['between',[$createat[0],$createat[3]]];
+                $order_info = Db::name('datacenter_day_order')->where($map)->select();
+                $arr = collection($order_info)->toArray();
+                Cache::set('Supplydatacenter_datamarket'.$time_str.md5(serialize('track_logistics_barline')),$arr,7200);
+            }else{
+                $arr = $cache_data;
+            }
+            $json['xColumnName'] = array_column($arr, 'day_date');
+            $json['columnData'] = [
+                [
+                    'type' => 'bar',
+                    'data' => array_column($arr, 'send_num'),
+                    'name' => '发货数量'
+                ],
+                [
+                    'type' => 'line',
+                    'data' => array_column($arr, 'logistics_rate'),
+                    'name' => '及时妥投率',
+                    'yAxisIndex' => 1,
+                    'smooth' => true //平滑曲线
+                ],
             ];
             return json(['code' => 1, 'data' => $json]);
         }

@@ -1406,7 +1406,6 @@ class Distribution extends Backend
             }
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($num), $value['order_type']); //订单类型
             $spreadsheet->getActiveSheet()->setCellValue("F" . ($num), $value['status']); //订单状态
-
             foreach ($value['item_order'] as $k => $v) {
                 $v['od_sph'] = isset($v['od_sph']) ? urldecode($v['od_sph']) : '';
                 $v['os_sph'] = isset($v['os_sph']) ? urldecode($v['os_sph']) : '';
@@ -1425,7 +1424,8 @@ class Distribution extends Backend
                 $spreadsheet->getActiveSheet()->setCellValue("L" . ($cat + 1), $v['os_axis']); //AXI
                 $v['os_add'] = urldecode($v['os_add']);
                 $v['od_add'] = urldecode($v['od_add']);
-                if ($value['os_add'] && $value['os_add'] && (float)($value['os_add']) * 1 != 0 && (float)($v['od_add']) * 1 != 0) {
+
+                if ($v['os_add'] && $v['od_add'] && (float)($v['os_add']) * 1 != 0 && (float)($v['od_add']) * 1 != 0) {
                     $spreadsheet->getActiveSheet()->setCellValue("M" . ($cat), $v['od_add']); //ADD
                     $spreadsheet->getActiveSheet()->setCellValue("M" . ($cat + 1), $v['os_add']); //ADD
                 } else {
@@ -2270,7 +2270,7 @@ class Distribution extends Backend
                     $this->_product_bar_code_item
                         ->allowField(true)
                         ->isUpdate(true, ['item_order_number' => ['in', $item_order_numbers]])
-                        ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2, 'out_stock_id' => $outstock_id]);
+                        ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2, 'is_loss_report_out' => 1, 'out_stock_id' => $outstock_id]);
 
                     //计算出库成本
                     $financecost = new \app\admin\model\finance\FinanceCost();
@@ -2557,7 +2557,7 @@ class Distribution extends Backend
                     $this->_product_bar_code_item
                         ->allowField(true)
                         ->isUpdate(true, ['item_order_number' => $item_info['item_order_number']])
-                        ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2, 'out_stock_id' => $outstock_id]);
+                        ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2, 'is_loss_report_out' => 1, 'out_stock_id' => $outstock_id]);
 
                     //计算出库成本
                     $financecost = new \app\admin\model\finance\FinanceCost();

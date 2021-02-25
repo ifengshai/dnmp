@@ -2285,4 +2285,102 @@ class Test4 extends Controller
             }
         }
     }
+    //物流概况每天发货数量
+    public function send_logistics_num()
+    {
+        $ordernode = new \app\admin\model\OrderNode();
+        $date_time = Db::name('datacenter_day_order')->where('day_date','>','2020-04-01')->order('day_date','asc')->select();
+        //查询时间
+        foreach ($date_time as $val) {
+            $is_exist = Db::name('datacenter_day_order')->where('day_date', $val['day_date'])->value('id');
+            if ($is_exist) {
+                $arr = [];
+                $arr['day_date'] = $val['day_date'];
+                //发送订单数
+                $start = $val['day_date'];
+                $end = $val['day_date'].' 23:59:59';
+                $where['delivery_time'] = ['between',[$start,$end]];
+                $arr['send_num'] = $ordernode->where($where)->count();
+
+                $sql1 = $this->ordernode->field('(UNIX_TIMESTAMP(signing_time)-UNIX_TIMESTAMP(delivery_time))/3600/24 AS total')->where($where)->group('order_id')->buildSql();
+                $count = $this->ordernode->table([$sql1=>'t2'])->value('sum( IF ( total <= 15, 1, 0) ) AS a');
+
+                $arr['logistics_rate'] = $arr['send_num'] ? round($count/$arr['send_num']*100,2) : 0;
+                Db::name('datacenter_day_order')->where('day_date', $val['day_date'])->update($arr);
+                echo $val['day_date'].' is ok'."\n";
+                usleep(10000);
+            }
+        }
+    }
+    //每月总库存、呆滞库存数据
+    public function supply_month_data(){
+        $this->productAllStockLog = new \app\admin\model\ProductAllStock();
+        $this->dullstock = new \app\admin\model\supplydatacenter\DullStock();
+        $start = date('Y-m', strtotime('-12 months'));
+        $end = date('Y-m', strtotime('-2 months'));
+        while($end>$start){
+            $endmonth = $start;
+            $start = date('Y-m',strtotime("$endmonth +1 month"));
+            $startday = $start.'-01';
+            $endday = $start.'-'.date('t', strtotime($startday));
+            $start_stock = $this->productAllStockLog->where("DATE_FORMAT(createtime,'%Y-%m-%d')='$startday'")->field('id,allnum')->find();
+            //判断是否有月初数据
+            if($start_stock['id']) {
+                //判断是否有月末数据
+                $end_stock = $this->productAllStockLog->where("DATE_FORMAT(createtime,'%Y-%m-%d')='$endday'")->field('id,allnum')->find();
+                if ($end_stock['id']) {
+                    //如果有月末数据，（月初数据+月末数据）/2
+                    $stock = round(($start_stock['allnum'] + $end_stock['allnum']) / 2, 0);
+                    $arr['day_date'] = $start;
+                    $arr['avg_stock'] = $stock;
+                    Db::name('datacenter_supply_month')->insert($arr);
+                    echo $start." is ok"."\n";
+                }
+            }
+            //获取当前上个月份的库存数据
+            $stock_info = Db::name('datacenter_supply_month')->where('day_date',$start)->field('id,avg_stock')->find();
+            $map['create_time'] = ['between',[$startday.' 00:00:00',$endday.' 23:59:59']];
+            $where['payment_time'] = ['between',[strtotime($startday.' 00:00:00'),strtotime($endday.' 23:59:59')]];
+            $order = new \app\admin\model\order\order\NewOrder();
+            if ($stock_info['id']){
+                //上个月总的采购数量（副数）
+                $purchase_num = Db::name('warehouse_data')->where($map)->sum('all_purchase_num');
+
+                //上个月总的销售数量（副数）
+                $where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
+                $sales_num = $order->where($where)->sum('total_qty_ordered');
+                $arr2['purchase_num'] = $purchase_num;
+                $arr2['sales_num'] = $sales_num;
+                $arr2['purchase_sales_rate'] = $sales_num!=0 ? round($purchase_num/$sales_num*100,2):0;
+                Db::name('datacenter_supply_month')->where('day_date',$start)->update($arr2);
+            }else{
+                //上个月总的采购数量（副数）
+                $purchase_num = Db::name('warehouse_data')->where($map)->sum('all_purchase_num');
+                //上个月总的销售数量（副数）
+                $where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
+                $sales_num = $order->where($where)->sum('total_qty_ordered');
+                $arr3['purchase_num'] = $purchase_num;
+                $arr3['sales_num'] = $sales_num;
+                $arr3['purchase_sales_rate'] = $sales_num!=0 ? round($purchase_num/$sales_num*100,2):0;
+                $arr3['day_date'] = $start;
+                Db::name('datacenter_supply_month')->insert($arr3);
+                echo $start." is ok"."\n";
+            }
+            $start_dull_stock = $this->dullstock->where("DATE_FORMAT(day_date,'%Y-%m-%d')='$startday'")->where('grade','Z')->field('id,stock')->find();
+            //判断是否有月初数据
+            if($start_dull_stock['id']) {
+                //判断是否有月末数据
+                $end_dull_stock = $this->dullstock->where("DATE_FORMAT(day_date,'%Y-%m-%d')='$endday'")->where('grade','Z')->field('id,stock')->find();
+                if ($end_dull_stock['id']) {
+                    $stock_info1 = Db::name('datacenter_supply_month')->where('day_date',$start)->field('id,avg_stock')->find();
+                    //如果有月末数据，（月初数据+月末数据）/2
+                    $dull_stock = round(($start_dull_stock['stock'] + $end_dull_stock['stock']) / 2, 2);
+                    $arr1['avg_dull_stock'] = $dull_stock;
+                    $arr1['avg_rate'] = $stock_info1['avg_stock'] ? round($arr1['avg_dull_stock']/$stock_info1['avg_stock'],2) : 0;
+                    Db::name('datacenter_supply_month')->where('id',$stock_info1['id'])->update($arr1);
+                }
+            }
+            usleep(10000);
+        }
+    }
 }

@@ -7,6 +7,7 @@ use think\Db;
 use FacebookAds\Api;
 use FacebookAds\Object\Campaign;
 use app\admin\model\financial\Fackbook;
+use fast\Excel;
 
 class Wangpenglei extends Backend
 {
@@ -57,7 +58,7 @@ class Wangpenglei extends Backend
         // $skus = $this->item->where(['is_open' => 1, 'is_del' => 1, 'category_id' => ['<>', 43]])->column('sku');
 
         $skus = Db::table('fa_zz_temp2')->column('sku');
-        
+
         foreach ($skus as $k => $v) {
             $map = [];
             $zeelool_sku = $this->itemplatformsku->getWebSku($v, 1);
@@ -452,7 +453,7 @@ class Wangpenglei extends Backend
         $product_barcode = new \app\admin\model\warehouse\ProductBarCodeItem();
         $instock = new \app\admin\model\warehouse\Instock();
         $list = $product_barcode->where(['library_status' => 1, 'in_stock_id' => ['<>', 0]])->where('in_stock_time is null')->limit(100000)->select();
-        foreach($list as $k => $v) {
+        foreach ($list as $k => $v) {
             //查询入库审核时间
             $check_time = $instock->where(['id' => $v['in_stock_id']])->value('check_time');
             $product_barcode->where(['id' => $v['id']])->update(['in_stock_time' => $check_time]);
@@ -478,13 +479,133 @@ class Wangpenglei extends Backend
         $purchase_item = new \app\admin\model\purchase\PurchaseOrderItem();
 
         $params = [];
-        foreach($list as $k => $v) {
+        foreach ($list as $k => $v) {
             //查询子表商品总价
-           $product_price =  $purchase_item->where(['purchase_id' => $v['id']])->sum('purchase_price*purchase_num');
-           $params[$k]['id'] = $v['id'];
-           $params[$k]['product_total'] = $product_price;
-           $params[$k]['purchase_total'] = $product_price + $v['purchase_freight'];
+            $product_price =  $purchase_item->where(['purchase_id' => $v['id']])->sum('purchase_price*purchase_num');
+            $params[$k]['id'] = $v['id'];
+            $params[$k]['product_total'] = $product_price;
+            $params[$k]['purchase_total'] = $product_price + $v['purchase_freight'];
         }
         $purchase->saveAll($params);
+    }
+
+    /**
+     * 跑订单节点最后一条物流数据
+     *
+     * @Description
+     * @author wpl
+     * @since 2021/02/20 17:50:13 
+     * @return void
+     */
+    public function order_node()
+    {
+        ini_set('memory_limit', '512M');
+        $ordernode = new \app\admin\model\OrderNode();
+        $ordernodecourier = new \app\admin\model\OrderNodeCourier();
+        $list = $ordernode->where(['create_time' => ['between', ['2020-11-20 00:00:00', '2021-02-20 00:00:00']]])->where("track_number!=''")->where("shipment_last_msg=''")->select();
+        foreach ($list as $k => $v) {
+            $content = $ordernodecourier->where(['order_id' => $v['order_id'], 'site' => $v['site']])->order('id desc')->value('content');
+            if ($content) {
+                $ordernode->where(['id' => $v['id']])->update(['shipment_last_msg' => $content]);
+            }
+            echo $k . "\n";
+            usleep(100000);
+        }
+        echo 'ok';
+    }
+
+    /**
+     * 导出sku各站活跃天数销售额
+     *
+     * @Description
+     * @author wpl
+     * @since 2021/02/22 10:34:57 
+     * @return void
+     */
+    public function derver_data()
+    {
+        $this->orderitemprocess = new \app\admin\model\order\order\NewOrderItemProcess();
+        $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
+        $this->item = new \app\admin\model\itemmanage\Item;
+        $sql = "select sku,site from fa_sku_sales_num where site in (1,2,3) and createtime BETWEEN '2020-12-01 00:00:00' and '2021-02-31 23:59:59' GROUP BY sku,site";
+        $list = db()->query($sql);
+        foreach ($list as $k => $v) {
+            if ($v['site'] == 1) {
+                $sku = $this->itemplatformsku->getWebSku($v['sku'], 1);
+            } elseif ($v['site'] == 2) {
+                $sku = $this->itemplatformsku->getWebSku($v['sku'], 2);
+            } elseif ($v['site'] == 3) {
+                $sku = $this->itemplatformsku->getWebSku($v['sku'], 3);
+            }
+            $skus = [];
+            $skus = [
+                $sku
+            ];
+
+            $map['a.sku'] = ['in', array_filter($skus)];
+            $map['b.status'] = ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered']];
+            $map['a.distribution_status'] = ['<>', 0]; //排除取消状态
+            $map['b.created_at'] = ['between', [strtotime('2020-12-01 00:00:00'), strtotime('2021-02-31 23:59:59')]]; //时间节点
+            $map['b.site'] = $v['site'];
+            $sales_money = $this->orderitemprocess->alias('a')->where($map)
+                ->join(['fa_order' => 'b'], 'a.order_id = b.id')
+                ->sum('b.base_grand_total');
+
+            $list[$k]['sales_money'] = $sales_money;
+        }
+        $headlist = ['sku', '站点', '销售额'];
+        Excel::writeCsv($list, $headlist, '12月份sku销量');
+        die;
+    }
+
+    public function derver_data2()
+    {
+        $sql = "select sku,max(b.num) from (select sku,site,count(1) as num from fa_sku_sales_num where createtime BETWEEN '2020-08-01 00:00:00' and '2021-02-21 00:00:00' GROUP BY sku,site HAVING num > 90) b GROUP BY sku";
+        $list = db()->query($sql);
+        foreach ($list as $k => $v) {
+            $zeelool_sku = $this->itemplatformsku->getWebSku($v['sku'], 1);
+            $voogueme_sku = $this->itemplatformsku->getWebSku($v['sku'], 2);
+            $nihao_sku = $this->itemplatformsku->getWebSku($v['sku'], 3);
+
+            $skus = [];
+            $skus = [
+                $zeelool_sku,
+                $voogueme_sku,
+                $nihao_sku
+            ];
+
+            $map['a.sku'] = ['in', array_filter($skus)];
+            $map['b.status'] = ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered']];
+            $map['a.distribution_status'] = ['<>', 0]; //排除取消状态
+            $map['b.created_at'] = ['between', [strtotime('2020-08-01 00:00:00'), strtotime('2021-02-21 00:00:00')]]; //时间节点
+            $occupy_stock = $this->orderitemprocess->alias('a')->where($map)
+                ->join(['fa_order' => 'b'], 'a.order_id = b.id')
+                ->join(['fa_order_process' => 'c'], 'a.order_id = c.order_id')
+                ->sum('b.base_grand_total');
+
+            $list[$k]['sales_num'] = $occupy_stock;
+        }
+    }
+
+    /**
+     * 修改禁用状态
+     */
+    public function edit_product_status()
+    {
+        //查询库存、在途库存为0的sku 并且其他站点未上架 修改为禁用状态
+        $item = new \app\admin\model\itemmanage\Item();
+        $itemplatform = new \app\admin\model\itemmanage\ItemPlatformSku();
+        $list = $item->where(['available_stock' => 0, 'item_status' => 3, 'on_way_stock' => 0, 'stock' => 0, 'is_open' => 1])->column('sku');
+        $skus = [];
+        foreach ($list as $k => $v) {
+            $count = $itemplatform->where(['sku' => $v, 'outer_sku_status' => 1])->count();
+            if ($count > 0) {
+                continue;
+            } else {
+                $skus[] = $v;
+            }
+        }
+
+        $item->where(['sku' => ['in', $skus]])->update(['is_open' => 2]);
     }
 }

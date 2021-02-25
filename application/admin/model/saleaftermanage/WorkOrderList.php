@@ -1143,7 +1143,8 @@ class WorkOrderList extends Model
                 'platform_type'=>$params['work_platform'],
                 'original_sku'=>$change_frame['original_sku'],
                 'original_number'=>$change_frame['original_number'],
-                'change_sku'=>$change_frame['change_sku'],
+                //更改镜框的工单-匹配掉里面SKU的空格
+                'change_sku'=>trim($change_frame['change_sku']),
                 'change_number'=>$change_frame['change_number'],
                 'change_type'=>1,
                 'measure_id'=>$measure_id,
