@@ -29,8 +29,8 @@ class Zendesk extends Backend
 {
     protected $model = null;
     protected $relationSearch = true;
-    protected $noNeedLogin = ['asycTicketsUpdate','asycTicketsVooguemeUpdate','asycTicketsAll','asycTicketsAll2','asycTicketsAll3','asyncTicketHttps'];
-    protected $noNeedRight=['zendesk_export,email_toload_more,order_toload_more'];
+    protected $noNeedLogin = ['asycTicketsUpdate','asycTicketsVooguemeUpdate','asycTicketsAll','asycTicketsAll2','asycTicketsAll3','asyncTicketHttps',];
+    protected $noNeedRight=['zendesk_export,email_toload_more,order_toload_more,email_toview'];
     /**
      * 无需鉴权的方法,但需要登录
      * @var array
@@ -436,7 +436,6 @@ class Zendesk extends Backend
         //获取主的ticket
         $ticket = $this->model->where('id', $ids)->find();
 
-
         $siteName = 'zeelool';
         if($ticket->type == 2){
             $siteName = 'voogueme';
@@ -729,6 +728,170 @@ class Zendesk extends Backend
         $this->view->assign('orderUrl',config('zendesk.platform_url')[$ticket->type]);
         return $this->view->fetch();
     }
+    //邮件查看页面
+    public function email_toview($ids){
+        $row = $this->model->get($ids);
+        $status = input('param.status');
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+
+        $adminIds = $this->getDataLimitAdminIds();
+        if (is_array($adminIds)) {
+            if (!in_array($row[$this->dataLimitField], $adminIds)) {
+                $this->error(__('You have no permission'));
+            }
+        }
+        //获取主的ticket
+        $ticket = $this->model->where('id', $ids)->find();
+
+        $siteName = 'zeelool';
+        if($ticket->type == 2){
+            $siteName = 'voogueme';
+        } elseif($ticket->type == 3){
+            $siteName = 'nihaooptical';
+        }
+        //获取所有的tags
+        $tags = ZendeskTags::order('count desc')->column('name', 'id');
+
+        $comments = ZendeskComments::with(['agent' => function($query) use($ticket){
+            $query->where('type',$ticket->type);
+        }])->where('zid', $ids)->order('id', 'desc')->select();
+        foreach ($comments as $comment){
+            if($comment->is_admin == 1){
+                //获取签名
+                $sign = Db::name('zendesk_signvalue')->where('site',$ticket->type)->value('signvalue');
+                //获取当前评论的用户的昵称
+                $zendesk_nickname = Db::name('zendesk_agents')->where('admin_id',$comment->due_id)->value('nickname');
+                $zendesk_nickname = $zendesk_nickname ? $zendesk_nickname : $siteName;
+                //替换签名中的昵称
+                if(strpos($sign,'{{agent.name}}')!==false){
+                    $sign = str_replace('{{agent.name}}',$zendesk_nickname,$sign);
+                }
+                $comment->sign= $sign ? $sign : '';
+            }
+        }
+        //获取该用户的所有状态不为close，sloved的ticket
+        $tickets = $this->model
+            ->where(['user_id' => $ticket->user_id, 'status' => ['in', [1, 2, 3]], 'type' => $ticket->type])
+            ->where('id', 'neq', $ids)
+            ->field('ticket_id,id,username,subject,update_time,zendesk_update_time')
+            ->order('id desc')
+            ->select();
+        //获取该用户最新的5条ticket
+        $recentTickets = $this->model
+            ->where(['user_id' => $ticket->user_id, 'type' => $ticket->type])
+            ->where('id', 'neq', $ids)
+            ->field('ticket_id,id,username,subject,status')
+            ->order('id desc')
+            ->limit(5)
+            ->select();
+        $recentTickets_count = $this->model
+            ->where(['user_id' => $ticket->user_id, 'type' => $ticket->type])
+            ->where('id', 'neq', $ids)
+            ->count();
+
+
+        //获取所有的消息模板
+        $templateAll = ZendeskMailTemplate::where([
+            'template_platform' => $ticket->type,
+            'template_permission' => 1,
+            'is_active' => 1])
+            ->whereOr('template_permission=2 and is_active =1 and create_person = '. session('admin.id'))
+            ->order('used_time desc,template_category desc,id desc')
+            ->select();
+
+        foreach ($templateAll as $key => $template) {
+            $category = '';
+            if ($template['template_category']) {
+                $category = '【' . config('zendesk.template_category')[$template['template_category']] . '】';
+            }
+            $templates[] = [
+                'id' => $template['id'],
+                'title' => $category . $template['template_name']
+            ];
+
+        }
+        //array_unshift($templates, 'Apply Macro');
+        //获取当前用户的最新5个的订单
+        if($ticket->type == 1){
+            $site =1;
+            $orderModel = new \app\admin\model\order\order\Zeelool;
+            $customer_entity = Db::connect('database.db_zeelool');
+        }elseif($ticket->type == 2){
+            $site =2;
+            $orderModel = new \app\admin\model\order\order\Voogueme;
+            $customer_entity = Db::connect('database.db_voogueme');
+        }else{
+            $site =3;
+            $orderModel = new \app\admin\model\order\order\Nihao;
+            $is_vip = 0;
+        }
+
+        //查询该用户是否是会员
+        if ($customer_entity){
+            $is_vip = $customer_entity->table('customer_entity')->where('entity_id',$ticket->user_id)->value('is_vip');
+            if (empty($is_vip)){
+                $is_vip = 0;
+            }
+        }
+
+        $orders = $orderModel
+//            ->alias('ord')
+//            ->join(['fa_order_process=>pro'],'ord.id = pro.order_id')
+            ->where('customer_email',$ticket->email)
+            ->order('entity_id desc')
+            ->field('increment_id,created_at,order_currency_code,status,entity_id')
+            ->limit(5)
+            ->select();
+        $orders_count = $orderModel
+            ->where('customer_email',$ticket->email)
+            ->count();
+        $orders = collection($orders)->toArray();
+        foreach ($orders as $key=>$item){
+            $orders[$key]['track_number'] = Db::connect('database.db_mojing_order')->table('fa_order_process')->where('entity_id',$item['entity_id'])->value('track_number');
+
+            $swhere = [];
+            $platform_order = '400210665';
+            $site = 1;
+
+            $swhere['platform_order'] = ['eq', $platform_order];
+//            $swhere['platform_order'] = ['eq', $item['increment_id']];
+            $swhere['work_platform'] = $site;
+            $swhere['work_status'] = ['not in', [0, 4]];
+            $orders[$key]['workorder_list'] =$this->access_tothe_repair_order($swhere);
+
+        }
+//        foreach ($orders as $key=>$ite){
+//            $model =  Db::connect('database.db_mojing_order');
+//            $find_value = $model->table('fa_order')->where('increment_id',$ite['increment_id'])->select();
+//            dump($find_value);die();
+//        }
+
+//        dump(collection($orders)->toArray());die();
+        $btn = input('btn',0);
+
+        //查询魔晶账户
+        // $admin = new \app\admin\model\Admin();
+        // $username = $admin->where('status','normal')->column('nickname','id');
+        $order_platform =1;
+        $this->view->assign('order_platform', $order_platform);
+
+        $this->view->assign(compact('tags', 'ticket', 'comments', 'tickets', 'recentTickets', 'templates','orders','btn'));
+        $this->view->assign('rows', $row);
+        $this->view->assign('is_vip', $is_vip);
+        $this->view->assign('ids', $ids);
+        $this->view->assign('status', $status);
+
+        $this->view->assign('orders_countds', $orders_count);
+        $this->view->assign('recentTickets_count', $recentTickets_count);
+        // $this->view->assign('username', $username);
+        $this->view->assign('orderUrl',config('zendesk.platform_url')[$ticket->type]);
+        return $this->view->fetch();
+    }
+
+
+
     //邮件加载更多
     public function email_toload_more(){
         $this->view->engine->layout(false);
