@@ -193,25 +193,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
             });
             $('.ke-edit-iframe').css('height', '240px');
             $(document).on('click', ".btn-sub", function () {
-                var type = $(this).val();
-                if (type == 'del') {
-                    $("#demand_edit").attr('action', 'demand/it_app_demand/del');
-                }
-                if (type == 'edit') {
-                    $("#demand_edit").attr('action', 'demand/it_app_demand/edit');
-                }
-                if (type == 'pending') {
-                    $('#pm_audit_status').val(2);
-                    $("#demand_edit").attr('action', 'demand/it_app_demand/edit');
-                }
-                if (type == 'refuse') {
-                    $('#pm_audit_status').val(4);
-                    $("#demand_edit").attr('action', 'demand/it_app_demand/edit');
-                }
-                if (type == 'sub') {
-                    $('#pm_audit_status').val(3);
-                    $("#demand_edit").attr('action', 'demand/it_app_demand/edit');
-                }
+                $("#demand_edit").attr('action', 'demand/it_app_demand/edit_operation');
                 $("#demand_edit").submit();
             });
 
