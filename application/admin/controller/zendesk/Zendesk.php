@@ -29,8 +29,8 @@ class Zendesk extends Backend
 {
     protected $model = null;
     protected $relationSearch = true;
-    protected $noNeedLogin = ['asycTicketsUpdate','asycTicketsVooguemeUpdate','asycTicketsAll','asycTicketsAll2','asycTicketsAll3','asyncTicketHttps',];
-    protected $noNeedRight=['zendesk_export,email_toload_more,order_toload_more,email_toview'];
+    protected $noNeedLogin = ['asycTicketsUpdate','asycTicketsVooguemeUpdate','asycTicketsAll','asycTicketsAll2','asycTicketsAll3','asyncTicketHttps'];
+    protected $noNeedRight=['zendesk_export,email_toload_more,order_toload_more,check_email'];
     /**
      * 无需鉴权的方法,但需要登录
      * @var array
@@ -42,7 +42,6 @@ class Zendesk extends Backend
         parent::_initialize();
         $this->model = new \app\admin\model\zendesk\Zendesk;
         $this->ordernodedeltail = new \app\admin\model\order\order\Ordernodedeltail();
-        $this->step = new \app\admin\model\saleaftermanage\WorkOrderMeasure;
         $this->view->assign('getTabList', $this->model->getTabList());
         $this->assignconfig('admin_id', session('admin.id'));
     }
@@ -385,7 +384,6 @@ class Zendesk extends Backend
         //站点类型，默认zeelool，1：zeelool，2：voogueme, 3:nihao
         $type = input('type',1);
         //获取所有的消息模板
-        //获取所有的消息模板
         $templateAll = ZendeskMailTemplate::where([
             'template_platform' => $type,
             'template_permission' => 1,
@@ -411,7 +409,7 @@ class Zendesk extends Backend
     }
 
     /**
-     * 发送邮件
+     * 回复发送邮件
      * @param null $ids
      * @return string
      * @throws Exception
@@ -435,6 +433,7 @@ class Zendesk extends Backend
         }
         //获取主的ticket
         $ticket = $this->model->where('id', $ids)->find();
+
 
         $siteName = 'zeelool';
         if($ticket->type == 2){
@@ -654,15 +653,12 @@ class Zendesk extends Backend
         //array_unshift($templates, 'Apply Macro');
         //获取当前用户的最新5个的订单
         if($ticket->type == 1){
-            $site =1;
             $orderModel = new \app\admin\model\order\order\Zeelool;
             $customer_entity = Db::connect('database.db_zeelool');
         }elseif($ticket->type == 2){
-            $site =2;
             $orderModel = new \app\admin\model\order\order\Voogueme;
             $customer_entity = Db::connect('database.db_voogueme');
         }else{
-            $site =3;
             $orderModel = new \app\admin\model\order\order\Nihao;
             $is_vip = 0;
         }
@@ -676,60 +672,45 @@ class Zendesk extends Backend
         }
 
         $orders = $orderModel
-//            ->alias('ord')
-//            ->join(['fa_order_process=>pro'],'ord.id = pro.order_id')
             ->where('customer_email',$ticket->email)
             ->order('entity_id desc')
-            ->field('increment_id,created_at,order_currency_code,status,entity_id')
+            ->field('increment_id,created_at,order_currency_code,status')
             ->limit(5)
             ->select();
         $orders_count = $orderModel
             ->where('customer_email',$ticket->email)
             ->count();
         $orders = collection($orders)->toArray();
-        foreach ($orders as $key=>$item){
-            $orders[$key]['track_number'] = Db::connect('database.db_mojing_order')->table('fa_order_process')->where('entity_id',$item['entity_id'])->value('track_number');
-
-            $swhere = [];
-            $platform_order = '400210665';
-            $site = 1;
-
-            $swhere['platform_order'] = ['eq', $platform_order];
-//            $swhere['platform_order'] = ['eq', $item['increment_id']];
-            $swhere['work_platform'] = $site;
-            $swhere['work_status'] = ['not in', [0, 4]];
-            $orders[$key]['workorder_list'] =$this->access_tothe_repair_order($swhere);
-
-        }
-//        foreach ($orders as $key=>$ite){
-//            $model =  Db::connect('database.db_mojing_order');
-//            $find_value = $model->table('fa_order')->where('increment_id',$ite['increment_id'])->select();
-//            dump($find_value);die();
-//        }
-
-//        dump(collection($orders)->toArray());die();
         $btn = input('btn',0);
 
         //查询魔晶账户
         // $admin = new \app\admin\model\Admin();
         // $username = $admin->where('status','normal')->column('nickname','id');
-        $order_platform =1;
-        $this->view->assign('order_platform', $order_platform);
 
         $this->view->assign(compact('tags', 'ticket', 'comments', 'tickets', 'recentTickets', 'templates','orders','btn'));
         $this->view->assign('rows', $row);
         $this->view->assign('is_vip', $is_vip);
         $this->view->assign('ids', $ids);
         $this->view->assign('status', $status);
-
         $this->view->assign('orders_countds', $orders_count);
         $this->view->assign('recentTickets_count', $recentTickets_count);
         // $this->view->assign('username', $username);
         $this->view->assign('orderUrl',config('zendesk.platform_url')[$ticket->type]);
         return $this->view->fetch();
     }
-    //邮件查看页面
-    public function email_toview($ids){
+
+
+    /**
+     * 查看邮件
+     * @param null $ids
+     * @return string
+     * @throws Exception
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function check_email($ids = null)
+    {
         $row = $this->model->get($ids);
         $status = input('param.status');
         if (!$row) {
@@ -744,6 +725,7 @@ class Zendesk extends Backend
         }
         //获取主的ticket
         $ticket = $this->model->where('id', $ids)->find();
+
 
         $siteName = 'zeelool';
         if($ticket->type == 2){
@@ -815,15 +797,12 @@ class Zendesk extends Backend
         //array_unshift($templates, 'Apply Macro');
         //获取当前用户的最新5个的订单
         if($ticket->type == 1){
-            $site =1;
             $orderModel = new \app\admin\model\order\order\Zeelool;
             $customer_entity = Db::connect('database.db_zeelool');
         }elseif($ticket->type == 2){
-            $site =2;
             $orderModel = new \app\admin\model\order\order\Voogueme;
             $customer_entity = Db::connect('database.db_voogueme');
         }else{
-            $site =3;
             $orderModel = new \app\admin\model\order\order\Nihao;
             $is_vip = 0;
         }
@@ -837,35 +816,21 @@ class Zendesk extends Backend
         }
 
         $orders = $orderModel
-//            ->alias('ord')
-//            ->join(['fa_order_process=>pro'],'ord.id = pro.order_id')
             ->where('customer_email',$ticket->email)
             ->order('entity_id desc')
-            ->field('increment_id,created_at,order_currency_code,status,entity_id')
+            ->field('increment_id,created_at,order_currency_code,status')
             ->limit(5)
             ->select();
         $orders_count = $orderModel
             ->where('customer_email',$ticket->email)
             ->count();
         $orders = collection($orders)->toArray();
-        foreach ($orders as $key=>$item){
-            $orders[$key]['track_number'] = Db::connect('database.db_mojing_order')->table('fa_order_process')->where('entity_id',$item['entity_id'])->value('track_number');
-
-            $swhere = [];
-            $platform_order = '400210665';
-            $site = 1;
-
-            $swhere['platform_order'] = ['eq', $platform_order];
-//            $swhere['platform_order'] = ['eq', $item['increment_id']];
-            $swhere['work_platform'] = $site;
-            $swhere['work_status'] = ['not in', [0, 4]];
-            $orders[$key]['workorder_list'] =$this->access_tothe_repair_order($swhere);
-
-        }
+//        dump($orders);
 //        foreach ($orders as $key=>$ite){
 //            $model =  Db::connect('database.db_mojing_order');
 //            $find_value = $model->table('fa_order')->where('increment_id',$ite['increment_id'])->select();
 //            dump($find_value);die();
+//
 //        }
 
 //        dump(collection($orders)->toArray());die();
@@ -874,15 +839,12 @@ class Zendesk extends Backend
         //查询魔晶账户
         // $admin = new \app\admin\model\Admin();
         // $username = $admin->where('status','normal')->column('nickname','id');
-        $order_platform =1;
-        $this->view->assign('order_platform', $order_platform);
 
         $this->view->assign(compact('tags', 'ticket', 'comments', 'tickets', 'recentTickets', 'templates','orders','btn'));
         $this->view->assign('rows', $row);
         $this->view->assign('is_vip', $is_vip);
         $this->view->assign('ids', $ids);
         $this->view->assign('status', $status);
-
         $this->view->assign('orders_countds', $orders_count);
         $this->view->assign('recentTickets_count', $recentTickets_count);
         // $this->view->assign('username', $username);
@@ -931,64 +893,6 @@ class Zendesk extends Backend
         $this->view->assign('orderUrl',config('zendesk.platform_url')[$data['type']]);
         return $this->view->fetch();
     }
-
-    /**
-     *
-     * 物流节点
-     */
-    public function logistics_node(){
-        $entity_id = input('param.entity_id');
-//        $site = input('param.order_platform');
-        $site = 1;
-
-        //获取订单信息对应的所有物流信息
-        $courier = Db::name('order_node_courier')
-            ->alias('a')
-            ->join(['fa_order_node' => 'b'], 'a.order_id=b.order_id')
-            ->where('a.order_id',$entity_id)->where('a.site',$site)
-            ->order('create_time desc')
-            ->field('a.content,a.create_time,a.site,a.track_number,b.shipment_data_type')
-            ->select();
-        $courier_one  = $courier[0];
-        unset($courier[0]);
-        $courier_two = array_values($courier);
-        $this->assign('courier_one',$courier_one);
-        $this->assign('courier_two',$courier_two);
-        return $this->view->fetch();
-    }
-
-    //查询该订单下是否有工单
-    protected function access_tothe_repair_order($where){
-        $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
-        $workorder_list = $workorder->where($where)->select();
-        if ($workorder_list){
-            $workorder_list = collection($workorder_list)->toArray();
-        }
-        foreach ($workorder_list as $key=>$item){
-            $workorder_list[$key]['step_num'] = $this->sel_order_recept($item['id']);
-        }
-        return $workorder_list;
-    }
-
-
-
-    //根据主记录id，获取措施相关信息
-    protected function sel_order_recept($id)
-    {
-        $this->recept = new \app\admin\model\saleaftermanage\WorkOrderRecept;
-        $step = $this->step->where('work_id', $id)->select();
-        $step_arr = collection($step)->toArray();
-
-        foreach ($step_arr as $k => $v) {
-            $recept = $this->recept->where('measure_id', $v['id'])->where('work_id', $id)->select();
-            $recept_arr = collection($recept)->toArray();
-
-            $step_arr[$k]['recept'] = $recept_arr;
-        }
-        return $step_arr ?: [];
-    }
-
-
 
     public function order_detail($order_number = null)
     {

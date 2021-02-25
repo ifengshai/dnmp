@@ -95,7 +95,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                                     },
                                     classname: 'btn btn-xs btn-success',
                                     icon: '',
-                                    url: 'zendesk/zendesk/email_toview/status/{row.status}',
+                                    url: 'zendesk/zendesk/check_email/status/{row.status}',
                                     extend: 'data-area = \'["100%","100%"]\' target=\'_blank\'',
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
@@ -109,8 +109,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                                         }
                                     }
                                 },
-
-
                                 {
                                     name: 'edit_recipient',
                                     text:__('修改承接人'),
@@ -501,20 +499,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                 };
                 Fast.api.open('saleaftermanage/work_order_list/add?order_number=' +order_number, '分配', options);
             });
-
-            //物流节点
-            $(document).on('click', '.logistics', function () {
-                var entity_id = $(this).data('id');
-                var order_platform = $('#order_platform').val();
-                if (!entity_id || !order_platform) {
-                    Toastr.error('缺少参数');
-                    return false;
-                }
-                Backend.api.open('zendesk/zendesk/logistics_node/?entity_id=' + entity_id + '&order_platform=' + order_platform , '物流节点', { area: ["32%", "700px"] });
-
-            })
-
-
 
             //上面的修改承接人
             $(document).on("click", ".batch-edit-recipient", function () {
