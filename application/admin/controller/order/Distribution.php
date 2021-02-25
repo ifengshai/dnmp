@@ -1461,9 +1461,9 @@ class Distribution extends Backend
                 //过滤饰品站
                 if ($value['site'] != 12) {
                     //查询镜框尺寸
-                    //$tmp_bridge = $this->get_frame_lens_width_height_bridge($value['product_id'], $value['site']);
-                    $getGlassInfo = $this->httpRequest($value['site'], 'magic/order/getGlassInfo', ['skus' => $value['sku']], 'POST');
-                    $tmp_bridge = $getGlassInfo[0];
+                    $tmp_bridge = $this->get_frame_lens_width_height_bridge($value['product_id'], $value['site']);
+                    /*$getGlassInfo = $this->httpRequest($value['site'], 'magic/order/getGlassInfo', ['skus' => $value['sku']], 'POST');
+                    $tmp_bridge = $getGlassInfo[0];*/
                 }
 
                 $lens_name = $lens_list[$v['lens_number']] ?: $v['web_lens_name'];
