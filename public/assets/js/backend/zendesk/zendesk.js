@@ -95,7 +95,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                                     },
                                     classname: 'btn btn-xs btn-success',
                                     icon: '',
-                                    url: 'zendesk/zendesk/check_email/status/{row.status}',
+                                    url: 'zendesk/zendesk/email_toview/status/{row.status}',
                                     extend: 'data-area = \'["100%","100%"]\' target=\'_blank\'',
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });

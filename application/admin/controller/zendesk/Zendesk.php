@@ -30,7 +30,7 @@ class Zendesk extends Backend
     protected $model = null;
     protected $relationSearch = true;
     protected $noNeedLogin = ['asycTicketsUpdate','asycTicketsVooguemeUpdate','asycTicketsAll','asycTicketsAll2','asycTicketsAll3','asyncTicketHttps'];
-    protected $noNeedRight=['zendesk_export,email_toload_more,order_toload_more,check_email'];
+    protected $noNeedRight=['zendesk_export,email_toload_more,order_toload_more,email_toview'];
     /**
      * 无需鉴权的方法,但需要登录
      * @var array
@@ -709,7 +709,7 @@ class Zendesk extends Backend
      * @throws \think\db\exception\ModelNotFoundException
      * @throws \think\exception\DbException
      */
-    public function check_email($ids = null)
+    public function email_toview($ids = null)
     {
         $row = $this->model->get($ids);
         $status = input('param.status');
