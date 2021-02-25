@@ -1370,6 +1370,7 @@ class Distribution extends Backend
                 //查询镜框尺寸
                 //$tmp_bridge = $this->get_frame_lens_width_height_bridge($value['product_id'], $value['site']);
                 $getGlassInfo = $this->httpRequest($value['site'], 'magic/order/getGlassInfo', ['skus' => $value['sku']], 'POST');
+                print_r($getGlassInfo);die;
                 $tmp_bridge = $getGlassInfo['data'];
             }
 
