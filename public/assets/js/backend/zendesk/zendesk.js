@@ -63,12 +63,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
                                 {
                                     name: 'edit',
-                                    text: function(row){
-                                        if(row.status == 5){
-                                            return '查看';
-
-                                        }
-                                        return __('Answer');
+                                    text:'回复',
+                                    hidden:function(row){
+                                        return row.status==5 ? true : false;
                                     },
                                     title: function (row) {
                                         return __('Answer') + '【' + row.ticket_id + '】' + row.subject;
@@ -76,6 +73,29 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                                     classname: 'btn btn-xs btn-success',
                                     icon: '',
                                     url: 'zendesk/zendesk/edit/status/{row.status}',
+                                    extend: 'data-area = \'["100%","100%"]\' target=\'_blank\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function(row){
+                                        var range = [row.due_id,1,75,95,114,116,117,181];
+                                        if(-1 != $.inArray(Config.admin_id, range)){
+                                            return true;
+                                        }else{
+                                            return false;
+                                        }
+                                    }
+                                },
+
+                                {
+                                    name: 'edit',
+                                    text: ('查看'),
+                                    title: function (row) {
+                                        return __('Answer') + '【' + row.ticket_id + '】' + row.subject;
+                                    },
+                                    classname: 'btn btn-xs btn-success',
+                                    icon: '',
+                                    url: 'zendesk/zendesk/check_email/status/{row.status}',
                                     extend: 'data-area = \'["100%","100%"]\' target=\'_blank\'',
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
