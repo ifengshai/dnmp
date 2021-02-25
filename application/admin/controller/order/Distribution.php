@@ -27,6 +27,7 @@ use app\admin\model\StockLog;
 use app\admin\model\order\order\LensData;
 use app\admin\model\saleaftermanage\WorkOrderMeasure;
 use app\admin\model\warehouse\ProductBarCodeItem;
+use GuzzleHttp\Client;
 
 /**
  * 配货列表
