@@ -24,6 +24,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                     [
                         {checkbox: true},
                         {field: 'it_web_demand_id', title: __('App需求ID')},
+                        {
+                            field: 'site',
+                            title: __('站点'),
+                            searchList: { 1: 'zeelool', 2: 'voogueme', 3: 'nihao', 4: 'meeloog', 5: 'wesee', 6: 'rufoo', 7: 'toloog', 8: 'other', 9: 'ZeeloolEs', 10: 'ZeeloolDe', 11: 'ZeeloolJp', 12: 'voogmechic' },
+                            custom: { '1': 'black', '2': 'red', 3: 'black', 4: 'black', 5: 'black', 6: 'black', 7: 'black', 8: 'black', 9: 'black', 10: 'black', 11: 'black',12:'black'},
+                            formatter: Table.api.formatter.status
+                        },
                         {field: 'create_time', title: __('提出时间'), operate:'RANGE',  operate: false,addclass:'datetimerange', formatter: Table.api.formatter.datetime},
                         {
                             field: 'title',
@@ -186,25 +193,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
             });
             $('.ke-edit-iframe').css('height', '240px');
             $(document).on('click', ".btn-sub", function () {
-                var type = $(this).val();
-                if (type == 'del') {
-                    $("#demand_edit").attr('action', 'demand/it_app_demand/del');
-                }
-                if (type == 'edit') {
-                    $("#demand_edit").attr('action', 'demand/it_app_demand/edit');
-                }
-                if (type == 'pending') {
-                    $('#pm_audit_status').val(2);
-                    $("#demand_edit").attr('action', 'demand/it_app_demand/edit');
-                }
-                if (type == 'refuse') {
-                    $('#pm_audit_status').val(4);
-                    $("#demand_edit").attr('action', 'demand/it_app_demand/edit');
-                }
-                if (type == 'sub') {
-                    $('#pm_audit_status').val(3);
-                    $("#demand_edit").attr('action', 'demand/it_app_demand/edit');
-                }
+                $("#demand_edit").attr('action', 'demand/it_app_demand/edit_operation');
                 $("#demand_edit").submit();
             });
 
@@ -212,7 +201,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
         /*修改预期时间*/
         operation_show: function (rows) {
             Controller.api.bindevent();
-            $('#change_node_time').on('dp.change', function(e){    //dp.change
+            $(document).on('click', "#change_node_time_operation", function () {
                 var node_time = $('#change_node_time').val();
                 var value_id = $('#ids').val();
                 $.ajax({
@@ -335,81 +324,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                 gettitle: function (value) {
                     return '<a class="btn-gettitle" style="color: #333333!important;">' + value + '</a>';
                 },
-                //RDC点击标题，弹出窗口
-                getrdctitle: function (value) {
-                    return '<a class="btn-gettitle" style="color: #333333!important;">' + value + '</a>';
-                },
-                //点击评审，弹出窗口
-                ge_pm_status: function (value, row, index) {
-                    if (row.pm_audit_status == 1) {
-                        return '<div><span class="check_pm_status status1_color">待审</span></div>';
-                    }
-                    if (row.pm_audit_status == 2) {
-                        return '<div><span class="check_pm_status status2_color">Pending</span></div>';
-                    }
-                    if (row.pm_audit_status == 3) {
-                        return '<div><span class="check_pm_status status3_color">通过</span></div>';
-                    }
-                    if (row.pm_audit_status == 4) {
-                        return '<div><span class="check_pm_status status4_color">拒绝</span></div>';
-                    }
-                },
-                //rdc点击评审,直接通过
-                ge_rdcpm_status: function (value, row, index) {
-                    if (row.pm_audit_status == 1) {
-                        if (row.pm_status) {
-                            return '<div><span class="check_rdcpm_status status1_color">待通过</span></div>';
-                        } else {
-                            return '<div><span class="check_rdcpm_status status1_color disabled">待通过</span></div>';
-                        }
-                    }
-                    if (row.pm_audit_status == 3) {
-                        return '<div><span class="check_rdcpm_status status3_color disabled">通过</span></div>';
-                    }
-                    if (row.pm_audit_status == 4) {
-                        return '<div><span class="check_rdcpm_status status4_color disabled">拒绝</span></div>';
-                    }
-                },
+
+
                 //开发进度点击弹窗
                 get_develop_status: function (value, row, index) {
                     return '<div><span class="check_develop_status status4_color" style="cursor: pointer;font-size: 12px;color: #03A7EF">操作</span></div>';
                 },
-                //测试进度点击弹窗
-                get_test_status: function (value, row, index) {
-                    // if (row.status >= 2) {
-                    if (row.test_status == 1) {
-                        if (row.site_type.search('3') !== -1){
-                            if (row.web_designer_group ==0  || row.phper_group ==0 ||  row.app_group ==0 ){
-                                return '<div><span>未确认</span></div>';
-                            }else{
-                                return '<div><span class="check_test_status status1_color">未确认</span></div>';
-                            }
-                        }else{
-                            if (row.web_designer_group ==0  || row.phper_group ==0 ){
-                                return '<div><span>未确认</span></div>';
-                            }else{
-                                return '<div><span class="check_test_status status1_color">未确认</span></div>';
-                            }
-                        }
 
-                    } else if (row.test_status == 2) {
-                        if (row.test_group == 1) {
-                            return '<div><span class="check_test_status status3_color">待测试</span></div>';
-                        } else {
-                            return '<div><span class="check_test_status status3_color">无需测试</span></div>';
-                        }
-
-                    } else if (row.test_status == 3) {
-                        return '<div><span class="check_test_status status1_color">待通过</span></div>';
-                    } else if (row.test_status == 4) {
-                        return '<div><span class="check_test_status status1_color">待上线</span></div>';
-                    } else if (row.test_status == 5) {
-                        return '<div><span class="check_test_status status3_color">已上线</span></div>';
-                    }
-                    // } else {
-                    //     return '-';
-                    // }
-                },
                 //完成确认
                 get_user_confirm: function (value, row, index) {
                     if (row.test_status == 5) {
