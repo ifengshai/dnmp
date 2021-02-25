@@ -29,6 +29,7 @@ use app\admin\model\StockLog;
 use app\admin\model\order\order\LensData;
 use app\admin\model\saleaftermanage\WorkOrderMeasure;
 use app\admin\model\warehouse\ProductBarCodeItem;
+use GuzzleHttp\Client;
 
 /**
  * 配货列表
@@ -1298,7 +1299,7 @@ class Distribution extends Backend
             ])
             ->order('a.id', 'desc')
             ->group('a.item_order_number')
-            ->column('a.od_sph,a.od_cyl,a.od_axis,a.od_add,a.pd_r,a.od_pv,a.od_bd,a.od_pv_r,a.od_bd_r,a.os_sph,a.os_cyl,a.os_axis,a.os_add,a.pd_l,a.os_pv,a.os_bd,a.os_pv_r,a.os_bd_r,a.lens_number,a.recipe_type as prescription_type', 'a.item_order_number');
+            ->column('a.od_sph,a.od_cyl,a.od_axis,a.od_add,a.pd_r,a.od_pv,a.od_bd,a.od_pv_r,a.od_bd_r,a.os_sph,a.os_cyl,a.os_axis,a.os_add,a.pd_l,a.os_pv,a.os_bd,a.os_pv_r,a.os_bd_r,a.lens_number,a.recipe_type as prescription_type,a.web_lens_name', 'a.item_order_number');
         if ($change_lens) {
             foreach ($change_lens as $key => $val) {
                 if ($val['pd_l'] && $val['pd_r']) {
@@ -1460,7 +1461,9 @@ class Distribution extends Backend
                 //过滤饰品站
                 if ($value['site'] != 12) {
                     //查询镜框尺寸
-                    $tmp_bridge = $this->get_frame_lens_width_height_bridge($v['product_id'], $value['site']);
+                    $tmp_bridge = $this->get_frame_lens_width_height_bridge($value['product_id'], $value['site']);
+                    /*$getGlassInfo = $this->httpRequest($value['site'], 'magic/order/getGlassInfo', ['skus' => $value['sku']], 'POST');
+                    $tmp_bridge = $getGlassInfo[0];*/
                 }
 
                 $lens_name = $lens_list[$v['lens_number']] ?: $v['web_lens_name'];
@@ -1685,7 +1688,7 @@ class Distribution extends Backend
             ])
             ->order('a.id', 'desc')
             ->group('a.item_order_number')
-            ->column('a.od_sph,a.od_cyl,a.od_axis,a.od_add,a.pd_r,a.od_pv,a.od_bd,a.od_pv_r,a.od_bd_r,a.os_sph,a.os_cyl,a.os_axis,a.os_add,a.pd_l,a.os_pv,a.os_bd,a.os_pv_r,a.os_bd_r,a.lens_number,a.recipe_type as prescription_type', 'a.item_order_number');
+            ->column('a.od_sph,a.od_cyl,a.od_axis,a.od_add,a.pd_r,a.od_pv,a.od_bd,a.od_pv_r,a.od_bd_r,a.os_sph,a.os_cyl,a.os_axis,a.os_add,a.pd_l,a.os_pv,a.os_bd,a.os_pv_r,a.os_bd_r,a.lens_number,a.recipe_type as prescription_type,a.web_lens_name', 'a.item_order_number');
         if ($change_lens) {
             foreach ($change_lens as $key => $val) {
                 if ($val['pd_l'] && $val['pd_r']) {
@@ -3505,5 +3508,75 @@ class Distribution extends Backend
         $this->model->where(['id' => ['in', $ids]])->update($save_data);
 
         $this->success('操作成功!', '', 'success', 200);
+    }
+
+        /**
+     * http请求
+     * @param $siteType
+     * @param $pathinfo
+     * @param array $params
+     * @param string $method
+     * @return bool
+     * @throws \Exception
+     */
+    public function httpRequest($siteType, $pathinfo, $params = [], $method = 'GET')
+    {
+        switch ($siteType) {
+            case 1:
+                $url = config('url.zeelool_url');
+                break;
+            case 2:
+                $url = config('url.voogueme_url');
+                break;
+            case 3:
+                $url = config('url.nihao_url');
+                break;
+            case 4:
+                $url = config('url.meeloog_url');
+                break;
+            case 5:
+                $url = config('url.wesee_url');
+                break;
+            case 9:
+                $url = config('url.zeelooles_url');
+                break;
+            case 10:
+                $url = config('url.zeeloolde_url');
+                break;
+            case 11:
+                $url = config('url.zeelooljp_url');
+                break;
+            default:
+                return false;
+                break;
+        }
+        $url = $url . $pathinfo;
+
+        $client = new Client(['verify' => false]);
+        //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',json_encode($params),FILE_APPEND);
+        try {
+            if ($method == 'GET') {
+                $response = $client->request('GET', $url, array('query' => $params));
+            } else {
+                $response = $client->request('POST', $url, array('form_params' => $params));
+            }
+            $body = $response->getBody();
+            //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$body,FILE_APPEND);
+            $stringBody = (string) $body;
+            $res = json_decode($stringBody, true);
+            //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$stringBody,FILE_APPEND);
+            if ($res === null) {
+                exception('网络异常');
+            }
+
+            $status = -1 == $siteType ? $res['code'] : $res['status'];
+            if (200 == $status) {
+                return $res['data'];
+            }
+
+            exception($res['msg']);
+        } catch (Exception $e) {
+            exception($e->getMessage());
+        }
     }
 }
