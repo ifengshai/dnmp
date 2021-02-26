@@ -1735,8 +1735,7 @@ class ScmDistribution extends Scm
             if ($result !== false) {
                 //操作成功记录
                 DistributionLog::record($this->auth, $item_process_info['id'], 7, '子单号：' . $item_order_number . '作为主单号' . $order_process_info['increment_id'] . '的' . $num . '子单合单完成，库位' . $store_house_info['coding']);
-                Order::rulesto_adjust($item_process_info['item_id'],$item_order_number,$item_process_info['site'],2,9);
-                if (!$next) {
+                if ($next < 1) {
                     //最后一个子单且合单完成，更新主单、子单状态为合单完成
                     $this->_new_order_item_process
                         ->allowField(true)
@@ -1747,7 +1746,8 @@ class ScmDistribution extends Scm
                         ->isUpdate(true, ['order_id' => $item_process_info['order_id']])
                         ->save(['combine_status' => 1, 'check_status' => 0, 'combine_time' => time()]);
                 }
-
+                //订单节点
+                Order::rulesto_adjust($item_process_info['item_id'],$item_order_number,$item_process_info['site'],2,9);
                 $this->success('子单号放入合单架成功', ['info' => $info], 200);
             } else {
                 //操作失败记录
