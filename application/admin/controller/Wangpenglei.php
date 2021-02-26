@@ -527,7 +527,7 @@ class Wangpenglei extends Backend
         $this->orderitemprocess = new \app\admin\model\order\order\NewOrderItemProcess();
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
-        $sql = "select sku,site from fa_sku_sales_num where site in (1,2,3) and createtime BETWEEN '2020-12-01 00:00:00' and '2021-02-31 23:59:59' GROUP BY sku,site";
+        $sql = "select sku,site from fa_sku_sales_num where site in (1,2,3) and createtime BETWEEN '2020-2-21 00:00:00' and '2021-02-26 00:00:00' GROUP BY sku,site having count(1) > 30";
         $list = db()->query($sql);
         foreach ($list as $k => $v) {
             if ($v['site'] == 1) {
@@ -545,7 +545,7 @@ class Wangpenglei extends Backend
             $map['a.sku'] = ['in', array_filter($skus)];
             $map['b.status'] = ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered']];
             $map['a.distribution_status'] = ['<>', 0]; //排除取消状态
-            $map['b.created_at'] = ['between', [strtotime('2020-12-01 00:00:00'), strtotime('2021-02-31 23:59:59')]]; //时间节点
+            $map['b.created_at'] = ['between', [strtotime('2021-01-28 00:00:00'), strtotime('2021-02-31 23:59:59')]]; //时间节点
             $map['b.site'] = $v['site'];
             $sales_money = $this->orderitemprocess->alias('a')->where($map)
                 ->join(['fa_order' => 'b'], 'a.order_id = b.id')
@@ -557,7 +557,6 @@ class Wangpenglei extends Backend
         Excel::writeCsv($list, $headlist, '12月份sku销量');
         die;
     }
-
     public function derver_data2()
     {
         $sql = "select sku,max(b.num) from (select sku,site,count(1) as num from fa_sku_sales_num where createtime BETWEEN '2020-08-01 00:00:00' and '2021-02-21 00:00:00' GROUP BY sku,site HAVING num > 90) b GROUP BY sku";
