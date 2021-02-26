@@ -1760,7 +1760,7 @@ class ScmDistribution extends Scm
                         ->isUpdate(true, ['order_id' => $item_process_info['order_id']])
                         ->save(['combine_status' => 1, 'check_status' => 0, 'combine_time' => time()]);
                 }
-                Order::rulesto_adjust($order_process_info['magento_order_id'],$order_process_info['increment_id'],$item_process_info['site'],2,9);
+                Order::rulesto_adjust($order_process_info['entity_id'],$order_process_info['increment_id'],$item_process_info['site'],2,9);
                 $this->success('子单号放入合单架成功', ['info' => $info], 200);
             } else {
                 //操作失败记录
