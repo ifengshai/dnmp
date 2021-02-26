@@ -1665,20 +1665,23 @@ class ScmDistribution extends Scm
         !in_array($item_process_info['distribution_status'], [7, 8]) && $this->error(__('子订单当前状态不可合单操作'), [], 403);
 
         //查询主单数据
-        $order_process_info = $this->_new_order
-            ->alias('a')
-            ->where('a.id', $item_process_info['order_id'])
-            ->join(['fa_order_process' => 'b'], 'a.id=b.order_id', 'left')
-            ->field('a.id,a.increment_id,,a.magento_order_id,b.store_house_id')
-            ->find();
         $order_process_infoz = $this->_new_order
             ->alias('a')
             ->where('a.id', $item_process_info['order_id'])
             ->join(['fa_order_process' => 'b'], 'a.id=b.order_id', 'left')
-            ->field('a.id,a.increment_id,,a.magento_order_id,b.store_house_id')
+            ->field('a.id,a.increment_id,a.magento_order_id,b.store_house_id')
             ->select(false);
         Log::write("获取子订单数据");
         Log::write($order_process_infoz);
+
+
+        $order_process_info = $this->_new_order
+            ->alias('a')
+            ->where('a.id', $item_process_info['order_id'])
+            ->join(['fa_order_process' => 'b'], 'a.id=b.order_id', 'left')
+            ->field('a.id,a.increment_id,a.magento_order_id,b.store_house_id')
+            ->find();
+
         empty($order_process_info) && $this->error(__('主订单不存在'), [], 403);
 
         //获取库位信息
