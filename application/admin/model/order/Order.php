@@ -37,7 +37,6 @@ class Order extends Model
      */
     public  static  function rulesto_adjust($order_id=null,$order_number=null,$site=null,$order_node=null,$node_type=null)
     {
-
         switch ($node_type){
             //已打印标签
             case 2:
@@ -86,13 +85,6 @@ class Order extends Model
             ->where('order_node',$order_node)
             ->where('node_type',$node_type)
             ->count();
-        Log::write("输出记录信息");
-        Log::write($detail_count);
-        Log::write($order_id);
-        Log::write($order_number);
-        Log::write($site);
-        Log::write($order_node);
-        Log::write($node_type);
         if ($detail_count < 1 ){
             $OrderNodeDetail = new OrderNodeDetail();
             $OrderNodeDetail->order_number = $order_number;
