@@ -626,8 +626,10 @@ class Wangpenglei extends Backend
             if ($allcount == $count && $workcount < 1) {
                 $orderItem->where(['order_id' => $v['order_id'],'distribution_status' => 8])->update(['distribution_status' => 9]);
                 $orderProcess->where(['order_id' => $v['order_id']])->update(['combine_status' => 1, 'combine_time' => time()]);
+
+                echo $v['id'] . "\n";
             }
-            echo $v['id'] . "\n";
+           
             usleep(100000);
         }
 
