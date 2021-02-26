@@ -1669,19 +1669,18 @@ class ScmDistribution extends Scm
             ->alias('a')
             ->where('a.id', $item_process_info['order_id'])
             ->join(['fa_order_process' => 'b'], 'a.id=b.order_id', 'left')
-            ->field('a.id,a.increment_id,a.magento_order_id,b.store_house_id')
+            ->field('a.id,a.increment_id,b.entity_id,b.store_house_id')
             ->select(false);
         Log::write("获取子订单数据");
         Log::write($order_process_infoz);
-
-
         $order_process_info = $this->_new_order
             ->alias('a')
             ->where('a.id', $item_process_info['order_id'])
             ->join(['fa_order_process' => 'b'], 'a.id=b.order_id', 'left')
-            ->field('a.id,a.increment_id,a.magento_order_id,b.store_house_id')
+            ->field('a.id,a.increment_id,b.entity_id,b.store_house_id')
             ->find();
-
+        Log::write('获取查询到的数据');
+        Log::write($order_process_info);
         empty($order_process_info) && $this->error(__('主订单不存在'), [], 403);
 
         //获取库位信息
