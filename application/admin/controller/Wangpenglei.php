@@ -624,7 +624,7 @@ class Wangpenglei extends Backend
             //查询工单是否处理完成
             $workcount = $worklist->where(['order_item_numbers' => ['like','%' .$v['item_order_number']. '%'],'work_status' => ['in',[1,2,3,5]]])->count();
             if ($allcount == $count && $workcount < 1) {
-                $orderItem->where(['id' => $v['id']])->update(['distribution_status' => 9]);
+                $orderItem->where(['order_id' => $v['order_id'],'distribution_status' => 8])->update(['distribution_status' => 9]);
                 $orderProcess->where(['order_id' => $v['order_id']])->update(['combine_status' => 1, 'combine_time' => time()]);
             }
             echo $v['id'] . "\n";
