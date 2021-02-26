@@ -7,6 +7,7 @@ namespace app\admin\model\order;
 
 use app\admin\model\OrderNode;
 use app\admin\model\OrderNodeDetail;
+use Think\Log;
 use think\Model;
 use think\Db;
 
@@ -91,6 +92,13 @@ class Order extends Model
             ->where('order_node',$order_node)
             ->where('node_type',$node_type)
             ->count();
+        Log::write("输出记录信息");
+        Log::write($detail_count);
+        Log::write($order_id);
+        Log::write($order_number);
+        Log::write($site);
+        Log::write($order_node);
+        Log::write($node_type);
         if ($detail_count < 1 ){
             $OrderNodeDetail = new OrderNodeDetail();
             $OrderNodeDetail->order_number = $order_number;
