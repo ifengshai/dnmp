@@ -1321,20 +1321,23 @@ class Distribution extends Backend
 
                 $getGlassInfo = $this->httpRequest($value['site'], 'magic/order/getGlassInfo', ['skus' => $value['sku']], 'POST');
                 $tmp_bridge = $getGlassInfo[0];
-                $data[$value['increment_id']]['item_order'][$key]['lens_width'] = $tmp_bridge['lens_width'];
-                $data[$value['increment_id']]['item_order'][$key]['lens_height'] = $tmp_bridge['lens_height'];
-                $data[$value['increment_id']]['item_order'][$key]['bridge'] = $tmp_bridge['bridge'];
+                
             } else {
-                $data[$value['increment_id']]['item_order'][$key]['lens_width'] = 0;
-                $data[$value['increment_id']]['item_order'][$key]['lens_height'] = 0;
-                $data[$value['increment_id']]['item_order'][$key]['bridge'] = 0;
+                //过滤饰品站
+                if ($value['site'] != 12 ) {
+                    //查询镜框尺寸
+                    $tmp_bridge = $this->get_frame_lens_width_height_bridge($value['product_id'], $value['site']);
+                } 
             }
+
+            $data[$value['increment_id']]['item_order'][$key]['lens_width'] = $tmp_bridge['lens_width'];
+            $data[$value['increment_id']]['item_order'][$key]['lens_height'] = $tmp_bridge['lens_height'];
+            $data[$value['increment_id']]['item_order'][$key]['bridge'] = $tmp_bridge['bridge'];
 
             //更改镜片最新数据
             if ($change_lens[$value['item_order_number']]) {
                 $value = array_merge($value, $change_lens[$value['item_order_number']]);
             }
-
 
             $data[$value['increment_id']]['id'] = $value['id'];
             $data[$value['increment_id']]['created_at'] = $value['created_at'];
@@ -1465,21 +1468,13 @@ class Distribution extends Backend
                     $spreadsheet->getActiveSheet()->mergeCells("N" . ($cat) . ":N" . ($cat + 1)); //PD
                 }
 
-                //过滤饰品站
-                if ($value['site'] != 12 && $v['lens_width'] == 0) {
-                    //查询镜框尺寸
-                    $tmp_bridge = $this->get_frame_lens_width_height_bridge($value['product_id'], $value['site']);
-                } else {
-                    $tmp_bridge['lens_width'] = $v['lens_width'];
-                    $tmp_bridge['lens_height'] = $v['lens_height'];
-                    $tmp_bridge['bridge'] = $v['bridge'];
-                }
+               
 
                 $lens_name = $lens_list[$v['lens_number']] ?: $v['web_lens_name'];
                 $spreadsheet->getActiveSheet()->setCellValue("O" . ($cat), $lens_name); //镜片
-                $spreadsheet->getActiveSheet()->setCellValue("P" . ($cat), $tmp_bridge['lens_width']); //镜框宽度
-                $spreadsheet->getActiveSheet()->setCellValue("Q" . ($cat), $tmp_bridge['lens_height']); //镜框高度
-                $spreadsheet->getActiveSheet()->setCellValue("R" . ($cat), $tmp_bridge['bridge']); //bridge
+                $spreadsheet->getActiveSheet()->setCellValue("P" . ($cat), $v['lens_width']); //镜框宽度
+                $spreadsheet->getActiveSheet()->setCellValue("Q" . ($cat), $v['lens_height']); //镜框高度
+                $spreadsheet->getActiveSheet()->setCellValue("R" . ($cat), $v['bridge']); //bridge
                 $spreadsheet->getActiveSheet()->setCellValue("S" . ($cat), $v['prescription_type']); //处方类型
 
                 $spreadsheet->getActiveSheet()->setCellValue("T" . ($cat), isset($v['od_pv']) ? $v['od_pv'] : ''); //Prism
