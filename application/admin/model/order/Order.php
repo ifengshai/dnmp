@@ -103,7 +103,7 @@ class Order extends Model
             $OrderNodeDetail->create_time = date('Y-m-d H:i:s');
             $OrderNodeDetail->order_node = $order_node;
             $OrderNodeDetail->node_type =$node_type;
-            $OrderNodeDetail->add();
+            $OrderNodeDetail->save();
         }
     }
 
