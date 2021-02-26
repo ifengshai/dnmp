@@ -1318,6 +1318,16 @@ class Distribution extends Backend
             //更改镜框最新sku
             if ($change_sku[$value['item_order_number']]) {
                 $value['sku'] = $change_sku[$value['item_order_number']];
+
+                $getGlassInfo = $this->httpRequest($value['site'], 'magic/order/getGlassInfo', ['skus' => $value['sku']], 'POST');
+                $tmp_bridge = $getGlassInfo[0];
+                $data[$value['increment_id']]['item_order'][$key]['lens_width'] = $tmp_bridge['lens_width'];
+                $data[$value['increment_id']]['item_order'][$key]['lens_height'] = $tmp_bridge['lens_height'];
+                $data[$value['increment_id']]['item_order'][$key]['bridge'] = $tmp_bridge['bridge'];
+            } else {
+                $data[$value['increment_id']]['item_order'][$key]['lens_width'] = $value['lens_width'];
+                $data[$value['increment_id']]['item_order'][$key]['lens_height'] = $value['lens_height'];
+                $data[$value['increment_id']]['item_order'][$key]['bridge'] = $value['bridge'];
             }
 
             //更改镜片最新数据
@@ -1342,9 +1352,7 @@ class Distribution extends Backend
             $data[$value['increment_id']]['item_order'][$key]['pd'] = $value['pd'];
             $data[$value['increment_id']]['item_order'][$key]['pdcheck'] = $value['pdcheck'];
             $data[$value['increment_id']]['item_order'][$key]['product_id'] = $value['product_id'];
-            $data[$value['increment_id']]['item_order'][$key]['lens_width'] = $value['lens_width'];
-            $data[$value['increment_id']]['item_order'][$key]['lens_height'] = $value['lens_height'];
-            $data[$value['increment_id']]['item_order'][$key]['bridge'] = $value['bridge'];
+
             $data[$value['increment_id']]['item_order'][$key]['prescription_type'] = $value['prescription_type'];
             $data[$value['increment_id']]['item_order'][$key]['od_pv'] = $value['od_pv'];
             $data[$value['increment_id']]['item_order'][$key]['os_pv'] = $value['os_pv'];
@@ -1457,13 +1465,14 @@ class Distribution extends Backend
                     $spreadsheet->getActiveSheet()->mergeCells("N" . ($cat) . ":N" . ($cat + 1)); //PD
                 }
 
-
                 //过滤饰品站
-                if ($value['site'] != 12 && $value['site'] != 5 && $value['site'] != 4 ) {
+                if ($value['site'] != 12 && !$v['lens_width']) {
                     //查询镜框尺寸
-                    //$tmp_bridge = $this->get_frame_lens_width_height_bridge($value['product_id'], $value['site']);
-                    $getGlassInfo = $this->httpRequest($value['site'], 'magic/order/getGlassInfo', ['skus' => $v['sku']], 'POST');
-                    $tmp_bridge = $getGlassInfo[0];
+                    $tmp_bridge = $this->get_frame_lens_width_height_bridge($value['product_id'], $value['site']);
+                } else {
+                    $tmp_bridge['lens_width'] = $v['lens_width'];
+                    $tmp_bridge['lens_height'] = $v['lens_height'];
+                    $tmp_bridge['bridge'] = $v['bridge'];
                 }
 
                 $lens_name = $lens_list[$v['lens_number']] ?: $v['web_lens_name'];
@@ -3510,7 +3519,7 @@ class Distribution extends Backend
         $this->success('操作成功!', '', 'success', 200);
     }
 
-        /**
+    /**
      * http请求
      * @param $siteType
      * @param $pathinfo
