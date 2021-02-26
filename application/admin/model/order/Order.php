@@ -37,21 +37,20 @@ class Order extends Model
     public  static  function rulesto_adjust($order_id=null,$order_number=null,$site=null,$order_node=null,$node_type=null)
     {
 
-        //判断如果子节点大于等于1时  不更新
-        $order_count = (new OrderNode())->where([
-            'order_number' => $order_number,
-            'order_id' => $order_id,
-            'site' => $site,
-            'node_type' => ['>=', 1]
-        ])->count();
-
-        if ($order_count < 0) {
-            (new OrderNode())->save([
-                'order_node' => $order_node,
-                'node_type' => $node_type,
-                'update_time' => date('Y-m-d H:i:s'),
-            ], ['order_id' => $order_id, 'site' => $site]);
-        }
+//        $order_count = (new OrderNode())->where([
+//            'order_number' => $order_number,
+//            'order_id' => $order_id,
+//            'site' => $site,
+//            'node_type' => $node_type
+//        ])->count();
+//
+//        if ($order_count > 0) {
+//            (new OrderNode())->save([
+//                'order_node' => $order_node,
+//                'node_type' => $node_type,
+//                'update_time' => date('Y-m-d H:i:s'),
+//            ], ['order_id' => $order_id, 'site' => $site]);
+//        }
 
         switch ($node_type){
             //已打印标签

@@ -1666,7 +1666,7 @@ class ScmDistribution extends Scm
             ->alias('a')
             ->where('a.id', $item_process_info['order_id'])
             ->join(['fa_order_process' => 'b'], 'a.id=b.order_id', 'left')
-            ->field('a.id,a.increment_id,b.store_house_id')
+            ->field('a.id,a.increment_id,b.entity_id,b.store_house_id')
             ->find();
         empty($order_process_info) && $this->error(__('主订单不存在'), [], 403);
 
@@ -1747,7 +1747,7 @@ class ScmDistribution extends Scm
                         ->save(['combine_status' => 1, 'check_status' => 0, 'combine_time' => time()]);
                 }
                 //订单节点
-                Order::rulesto_adjust($item_process_info['item_id'],$item_order_number,$item_process_info['site'],2,9);
+                Order::rulesto_adjust($order_process_info['entity_id'],$order_process_info['increment_id'],$item_process_info['site'],2,9);
                 $this->success('子单号放入合单架成功', ['info' => $info], 200);
             } else {
                 //操作失败记录
@@ -1794,6 +1794,7 @@ class ScmDistribution extends Scm
             $info['next'] = $next;
             //操作成功记录
             DistributionLog::record($this->auth, $item_process_info['id'], 7, '子单号：' . $item_order_number . '作为主单号' . $order_process_info['increment_id'] . '的' . $num . '子单合单完成，库位' . $store_house_info['coding']);
+            Order::rulesto_adjust($order_process_info['entity_id'],$order_process_info['increment_id'],$item_process_info['site'],2,9);
 
             $this->success('子单号放入合单架成功', ['info' => $info], 200);
         } else {
