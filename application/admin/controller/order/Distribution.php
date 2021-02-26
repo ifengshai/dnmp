@@ -1325,9 +1325,9 @@ class Distribution extends Backend
                 $data[$value['increment_id']]['item_order'][$key]['lens_height'] = $tmp_bridge['lens_height'];
                 $data[$value['increment_id']]['item_order'][$key]['bridge'] = $tmp_bridge['bridge'];
             } else {
-                $data[$value['increment_id']]['item_order'][$key]['lens_width'] = $value['lens_width'];
-                $data[$value['increment_id']]['item_order'][$key]['lens_height'] = $value['lens_height'];
-                $data[$value['increment_id']]['item_order'][$key]['bridge'] = $value['bridge'];
+                $data[$value['increment_id']]['item_order'][$key]['lens_width'] = 0;
+                $data[$value['increment_id']]['item_order'][$key]['lens_height'] = 0;
+                $data[$value['increment_id']]['item_order'][$key]['bridge'] = 0;
             }
 
             //更改镜片最新数据
@@ -1466,7 +1466,7 @@ class Distribution extends Backend
                 }
 
                 //过滤饰品站
-                if ($value['site'] != 12 && !$v['lens_width']) {
+                if ($value['site'] != 12 && $v['lens_width'] == 0) {
                     //查询镜框尺寸
                     $tmp_bridge = $this->get_frame_lens_width_height_bridge($value['product_id'], $value['site']);
                 } else {
