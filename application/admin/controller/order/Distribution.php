@@ -1468,8 +1468,6 @@ class Distribution extends Backend
                     $spreadsheet->getActiveSheet()->mergeCells("N" . ($cat) . ":N" . ($cat + 1)); //PD
                 }
 
-               
-
                 $lens_name = $lens_list[$v['lens_number']] ?: $v['web_lens_name'];
                 $spreadsheet->getActiveSheet()->setCellValue("O" . ($cat), $lens_name); //镜片
                 $spreadsheet->getActiveSheet()->setCellValue("P" . ($cat), $v['lens_width']); //镜框宽度

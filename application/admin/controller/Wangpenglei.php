@@ -608,4 +608,29 @@ class Wangpenglei extends Backend
 
         $item->where(['sku' => ['in', $skus]])->update(['is_open' => 2]);
     }
+
+    public function edit_order_status()
+    {
+        //查询所有子单状态为8的子单
+        $orderItem = new \app\admin\model\order\order\NewOrderItemProcess();
+        $orderProcess = new \app\admin\model\order\order\NewOrderProcess();
+        $worklist = new \app\admin\model\saleaftermanage\WorkOrderList();
+        $list = $orderItem->where(['distribution_status' => 8])->select();
+        foreach ($list as $k => $v) {
+            $allcount = $orderItem->where(['order_id' => $v['order_id']])->count();
+
+            $count = $orderItem->where(['distribution_status' => ['in', [0, 8]], 'order_id' => $v['order_id']])->count();
+            
+            //查询工单是否处理完成
+            $workcount = $worklist->where(['order_item_numbers' => ['like','%' .$v['item_order_number']. '%'],'work_status' => ['in',[1,2,3,5]]])->count();
+            if ($allcount == $count && $workcount < 1) {
+                $orderItem->where(['id' => $v['id']])->update(['distribution_status' => 9]);
+                $orderProcess->where(['order_id' => $v['order_id']])->update(['combine_status' => 1, 'combine_time' => time()]);
+            }
+            echo $v['id'] . "\n";
+            usleep(100000);
+        }
+
+        echo "ok";
+    }
 }
