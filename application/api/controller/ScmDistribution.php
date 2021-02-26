@@ -1812,7 +1812,12 @@ class ScmDistribution extends Scm
             $info['next'] = $next;
             //操作成功记录
             DistributionLog::record($this->auth, $item_process_info['id'], 7, '子单号：' . $item_order_number . '作为主单号' . $order_process_info['increment_id'] . '的' . $num . '子单合单完成，库位' . $store_house_info['coding']);
-
+            Order::rulesto_adjust($order_process_info['entity_id'],$order_process_info['increment_id'],$item_process_info['site'],2,9);
+            Log::write("输出参数002");
+            Log::write($order_process_info['entity_id']);
+            Log::write($order_process_info['increment_id']);
+            Log::write($item_process_info['site']);
+            Log::write($status);
             $this->success('子单号放入合单架成功', ['info' => $info], 200);
         } else {
             //操作失败记录
