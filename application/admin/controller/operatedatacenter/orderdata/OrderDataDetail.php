@@ -83,6 +83,7 @@ class OrderDataDetail extends Backend
                 }elseif ($filter['order_status'] == 5){
                     $node_where['node_type'] = 35;
                 }
+                $node_where['site'] = $site;
                 $order_ids = Db::name('order_node')->where($node_where)->column('order_id');
                 $map['o.entity_id'] = ['in',$order_ids];
             }
@@ -146,7 +147,7 @@ class OrderDataDetail extends Backend
                         $list[$key]['order_type']  = '补发';
                         break;
                 }
-                $order_node = Db::name('order_node')->where('order_id',$value['entity_id'])->value('node_type');
+                $order_node = Db::name('order_node')->where('order_id',$value['entity_id'])->where('site',$site)->value('node_type');
                 if($order_node == 7){
                     $order_shipping_status = '已发货';
                 }elseif ($order_node == 8 && $order_node == 10){

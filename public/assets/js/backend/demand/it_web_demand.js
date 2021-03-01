@@ -306,6 +306,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                     });
                     return false;
                 });
+                //批量导出xls
+                $('.btn-batch-export-xls').click(function () {
+                    window.open(Config.moduleurl + '/demand/it_web_demand/batch_export_xls?type=1', '_blank');
+                });
 
             },
             second: function () {
@@ -422,7 +426,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                 $(this).unbind('shown.bs.tab');
 
             });
-
+            //批量导出xls
+            $('.btn-batch-export-xls').click(function () {
+                window.open(Config.moduleurl + '/demand/it_web_demand/batch_export_xls?type=2', '_blank');
+            });
             $('.panel-heading .nav-tabs li a').on('click', function (e) {
                 var field = $(this).data("field");
                 var value = $(this).data("value");

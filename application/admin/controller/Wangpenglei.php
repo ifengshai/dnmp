@@ -527,7 +527,7 @@ class Wangpenglei extends Backend
         $this->orderitemprocess = new \app\admin\model\order\order\NewOrderItemProcess();
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
-        $sql = "select sku,site from fa_sku_sales_num where site in (1,2,3) and createtime BETWEEN '2020-2-21 00:00:00' and '2021-02-26 00:00:00' GROUP BY sku,site having count(1) > 30";
+        $sql = "select sku,site from fa_sku_sales_num where site in (1,2,3) GROUP BY sku,site having count(1) > 30";
         $list = db()->query($sql);
         foreach ($list as $k => $v) {
             if ($v['site'] == 1) {
@@ -558,33 +558,65 @@ class Wangpenglei extends Backend
         Excel::writeCsv($list, $headlist, '12月份sku销量');
         die;
     }
+
+    /**
+     * 导出sku各站活跃天数销售额
+     *
+     * @Description
+     * @author wpl
+     * @since 2021/02/22 10:34:57 
+     * @return void
+     */
     public function derver_data2()
     {
-        $sql = "select sku,max(b.num) from (select sku,site,count(1) as num from fa_sku_sales_num where createtime BETWEEN '2020-08-01 00:00:00' and '2021-02-21 00:00:00' GROUP BY sku,site HAVING num > 90) b GROUP BY sku";
+        $this->orderitemprocess = new \app\admin\model\order\order\NewOrderItemProcess();
+        $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
+        $this->item = new \app\admin\model\itemmanage\Item;
+        $sales_num = new \app\admin\model\SkuSalesNum();
+        $sql = "select sku,site from fa_sku_sales_num where site in (1,2,3) GROUP BY sku,site";
         $list = db()->query($sql);
         foreach ($list as $k => $v) {
-            $zeelool_sku = $this->itemplatformsku->getWebSku($v['sku'], 1);
-            $voogueme_sku = $this->itemplatformsku->getWebSku($v['sku'], 2);
-            $nihao_sku = $this->itemplatformsku->getWebSku($v['sku'], 3);
-
+            if ($v['site'] == 1) {
+                $sku = $this->itemplatformsku->getWebSku($v['sku'], 1);
+            } elseif ($v['site'] == 2) {
+                $sku = $this->itemplatformsku->getWebSku($v['sku'], 2);
+            } elseif ($v['site'] == 3) {
+                $sku = $this->itemplatformsku->getWebSku($v['sku'], 3);
+            }
             $skus = [];
             $skus = [
-                $zeelool_sku,
-                $voogueme_sku,
-                $nihao_sku
+                $sku
             ];
 
+            //查询开始上架时间
+            $res = db('sku_sales_num')->where(['sku' => $v['sku'],'site' => $v['site']])->order('createtime asc')->limit(30)->select();
+            if (!$res) {
+                continue;
+            }
+            $res = array_column($res,'createtime');
+            $first = $res[0];
+            $last = end($res);
             $map['a.sku'] = ['in', array_filter($skus)];
             $map['b.status'] = ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered']];
             $map['a.distribution_status'] = ['<>', 0]; //排除取消状态
-            $map['b.created_at'] = ['between', [strtotime('2020-08-01 00:00:00'), strtotime('2021-02-21 00:00:00')]]; //时间节点
-            $occupy_stock = $this->orderitemprocess->alias('a')->where($map)
-                ->join(['fa_order' => 'b'], 'a.order_id = b.id')
-                ->join(['fa_order_process' => 'c'], 'a.order_id = c.order_id')
-                ->sum('b.base_grand_total');
+            $map['b.created_at'] = ['between', [strtotime($first), strtotime($last)]]; //时间节点
+            $map['b.site'] = $v['site'];
 
-            $list[$k]['sales_num'] = $occupy_stock;
+            $sales_num = $this->orderitemprocess->alias('a')
+            ->where($map)
+            ->join(['fa_order' => 'b'], 'a.order_id = b.id')
+            ->count(1);
+           
+            $sales_money = $this->orderitemprocess->alias('a')->where($map)
+                ->join(['fa_order' => 'b'], 'a.order_id = b.id')
+                ->join(['fa_order_item_option' => 'c'], 'a.order_id = c.order_id and a.option_id = c.id')
+                ->sum('c.base_row_total');
+            $list[$k]['sales_num'] = $sales_num;
+            $list[$k]['sales_money'] = $sales_money;
         }
+        $headlist = ['sku', '站点', '销量', '销售额'];
+        Excel::writeCsv($list, $headlist, 'sku销售额');
+        die;
     }
 
     /**
