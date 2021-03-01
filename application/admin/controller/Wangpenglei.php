@@ -549,7 +549,8 @@ class Wangpenglei extends Backend
             $map['b.site'] = $v['site'];
             $sales_money = $this->orderitemprocess->alias('a')->where($map)
                 ->join(['fa_order' => 'b'], 'a.order_id = b.id')
-                ->sum('b.base_grand_total');
+                ->join(['fa_order_item_option' => 'c'], 'a.order_id = c.order_id and a.option_id = c.id')
+                ->sum('c.base_row_total');
 
             $list[$k]['sales_money'] = $sales_money;
         }
