@@ -548,8 +548,9 @@ class Wangpenglei extends Backend
             $map['b.created_at'] = ['between', [strtotime('2021-01-28 00:00:00'), strtotime('2021-02-31 23:59:59')]]; //时间节点
             $map['b.site'] = $v['site'];
             $sales_money = $this->orderitemprocess->alias('a')->where($map)
-                ->join(['fa_order_item_option' => 'b'], 'a.order_id = b.order_id and a.option_id = b.id')
-                ->sum('b.base_row_total');
+                ->join(['fa_order' => 'b'], 'a.order_id = b.id')
+                ->join(['fa_order_item_option' => 'c'], 'a.order_id = c.order_id and a.option_id = c.id')
+                ->sum('c.base_row_total');
 
             $list[$k]['sales_money'] = $sales_money;
         }
