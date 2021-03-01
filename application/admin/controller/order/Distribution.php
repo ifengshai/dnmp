@@ -407,6 +407,10 @@ class Distribution extends Backend
 
             foreach ($list as $key => $item) {
                 $list[$key]['label'] = $label;
+                //订单副数，去除掉取消的子单
+                $list[$key]['total_qty_ordered'] = $this->model
+                ->where(['order_id' => $list[$key]['order_id'], 'distribution_status' => ['neq', 0]])
+                ->count();
                 //待打印标签时间
                 if ($label == 2) {
                     $list[$key]['created_at'] = Db::table('fa_distribution_log')->where('item_process_id', $item['id'])->where('distribution_node', 1)->value('create_time');
