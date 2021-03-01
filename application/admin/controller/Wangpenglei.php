@@ -589,10 +589,11 @@ class Wangpenglei extends Backend
             ];
 
             //查询开始上架时间
-            $res = $sales_num->where(['sku' => $v['sku'],'site' => $v['site']])->order('createtime asc')->limit(30)->column('createtime');
+            $res = db('sku_sales_num')->where(['sku' => $v['sku'],'site' => $v['site']])->order('createtime asc')->limit(30)->select();
             if (!$res) {
                 continue;
             }
+            $res = array_column($res,'createtime');
             $first = $res[0];
             $last = end($res);
             $map['a.sku'] = ['in', array_filter($skus)];
@@ -600,19 +601,21 @@ class Wangpenglei extends Backend
             $map['a.distribution_status'] = ['<>', 0]; //排除取消状态
             $map['b.created_at'] = ['between', [strtotime($first), strtotime($last)]]; //时间节点
             $map['b.site'] = $v['site'];
+
+            $sales_num = $this->orderitemprocess->alias('a')
+            ->where($map)
+            ->join(['fa_order' => 'b'], 'a.order_id = b.id')
+            ->count(1);
+           
             $sales_money = $this->orderitemprocess->alias('a')->where($map)
                 ->join(['fa_order' => 'b'], 'a.order_id = b.id')
                 ->join(['fa_order_item_option' => 'c'], 'a.order_id = c.order_id and a.option_id = c.id')
                 ->sum('c.base_row_total');
-            $sales_num = $this->orderitemprocess->alias('a')->where($map)
-                ->join(['fa_order' => 'b'], 'a.order_id = b.id')
-                ->count(1);
-          
             $list[$k]['sales_num'] = $sales_num;
             $list[$k]['sales_money'] = $sales_money;
         }
         $headlist = ['sku', '站点', '销量', '销售额'];
-        Excel::writeCsv($list, $headlist, '12月份sku销量');
+        Excel::writeCsv($list, $headlist, 'sku销售额');
         die;
     }
 
