@@ -573,17 +573,15 @@ class Wangpenglei extends Backend
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
         $sales_num = new \app\admin\model\SkuSalesNum();
-        $sql = "select sku,site from fa_sku_sales_num where site in (1,2,3) GROUP BY sku,site";
-        $list = db()->query($sql);
+        // $sql = "select sku,site from fa_sku_sales_num where site in (1,2,3) GROUP BY sku,site";
+        // $list = db()->query($sql);
 
 
-        $sku_list = $this->item->where(['create_time' => ['>', '2020-08-03']])->column('sku');
+        $sku_list = $this->item->where(['create_time' => ['>', '2020-08-03'], 'is_open' => 1, 'is_del' => 1, 'category_id' => ['<>', 43]])->column('sku');
+        $list = $sales_num->field('sku,site')->where(['site' => ['in', [1, 2, 3]], 'sku' => ['in', $sku_list]])->group('sku,site')->select();
 
         foreach ($list as $k => $v) {
-            if (!in_array($v['sku'], $sku_list)) {
-                unset($list[$k]);
-                continue;
-            }
+          
             if ($v['site'] == 1) {
                 $sku = $this->itemplatformsku->getWebSku($v['sku'], 1);
             } elseif ($v['site'] == 2) {
@@ -624,7 +622,7 @@ class Wangpenglei extends Backend
             $list[$k]['sales_money'] = $sales_money;
         }
         $headlist = ['sku', '站点', '销量', '销售额'];
-        Excel::writeCsv($list, $headlist, 'sku销售额2');
+        Excel::writeCsv(array_values($list), $headlist, 'sku销售额2');
         die;
     }
 
