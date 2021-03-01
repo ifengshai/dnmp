@@ -382,9 +382,13 @@ class ItWebDemand extends Backend
      */
     public function batch_export_xls()
     {
+        $starDay = date("Y-m-d H:i:s", mktime(0, 0, 0, date("m")-1, 1));
+        $endDay = date("Y-m-d H:i:s", mktime(0, 0, 0, date("m"), 0));
+        $type = input('param.type');
+
         $where['is_del'] = ['eq', 1];
-        $where['demand_type'] = ['eq', 2];
-        $where['create_time'] = ['between', ['2021-02-01 00:00:00', '2021-02-28 23:59:59']];
+        $where['demand_type'] = ['eq', $type];
+        $where['create_time'] = ['between', [$starDay, $endDay]];
 //        $field = 'id,site,entry_user_id,type,functional_module,title,create_time,pm_audit_status_time,web_designer_user_id,app_user_id,phper_user_id,node_time
 //        develop_finish_time,web_designer_complexity,web_designer_group,web_remarks,pm_audit_status,pm_confirm_time,copy_to_user_id';
         $list = $this->model
@@ -607,8 +611,6 @@ class ItWebDemand extends Backend
             $spreadsheet->getActiveSheet()->setCellValue("P" . ($key * 1 + 2), $value['web_designer_user_name']);
             $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 1 + 2), $value['php_user_name']);
             $spreadsheet->getActiveSheet()->setCellValue("R" . ($key * 1 + 2), $value['app_user_name']);
-
-
         }
 
         //设置宽度
@@ -622,8 +624,6 @@ class ItWebDemand extends Backend
         $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('J')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('L')->setWidth(20);
-
-
         //设置边框
         $border = [
             'borders' => [
@@ -643,8 +643,11 @@ class ItWebDemand extends Backend
         $spreadsheet->setActiveSheetIndex(0);
 
         $format = 'xlsx';
-        $savename = '2021年二月份网站前端RDC列表' . date("YmdHis", time());
-
+        if ($type ==1){
+            $savename = '网站需求列表' . date("YmdHis", time());
+        }else{
+            $savename = '网站RDC列表' . date("YmdHis", time());
+        }
         if ($format == 'xls') {
             //输出Excel03版本
             header('Content-Type:application/vnd.ms-excel');
