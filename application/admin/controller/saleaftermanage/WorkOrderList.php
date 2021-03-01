@@ -3892,9 +3892,9 @@ EOF;
                     $res_status = WorkOrderNote::create($data);
                     //查询用户的角色组id
                     $authGroupIds = AuthGroupAccess::where('uid', session('admin.id'))->column('group_id');
-                    Log::write("角色组");
+                    /*Log::write("角色组");
                     Log::write($authGroupIds);
-                    Log::write($workOrderConfigValue['warehouse_department_rule']);
+                    Log::write($workOrderConfigValue['warehouse_department_rule']);*/
 
                     $work = $this->model->find($params['work_id']);
                     $work_order_note_status = $work->work_order_note_status;
@@ -3925,8 +3925,8 @@ EOF;
                     }
                     $work->work_order_note_status = $work_order_note_status;
 
-                    Log::write("是否包含");
-                    Log::write($work_order_note_status);
+                    /*Log::write("是否包含");
+                    Log::write($work_order_note_status);*/
                     $work->save();
                     Db::commit();
                 } catch (\Exception $e) {
