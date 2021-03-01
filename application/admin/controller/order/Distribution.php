@@ -1194,6 +1194,11 @@ class Distribution extends Backend
                 $map['b.status'] = ['in', $filter['status']];
                 unset($filter['status']);
             }
+
+            if ($filter['sku']) {
+                $map['a.sku'] = ['like', '%' . $filter['sku'] . '%'];
+                unset($filter['sku']);
+            }
             $this->request->get(['filter' => json_encode($filter)]);
 
             list($where, $sort, $order) = $this->buildparams();
@@ -1321,13 +1326,12 @@ class Distribution extends Backend
 
                 $getGlassInfo = $this->httpRequest($value['site'], 'magic/order/getGlassInfo', ['skus' => $value['sku']], 'POST');
                 $tmp_bridge = $getGlassInfo[0];
-                
             } else {
                 //过滤饰品站
-                if ($value['site'] != 12 ) {
+                if ($value['site'] != 12) {
                     //查询镜框尺寸
                     $tmp_bridge = $this->get_frame_lens_width_height_bridge($value['product_id'], $value['site']);
-                } 
+                }
             }
 
             $data[$value['increment_id']]['item_order'][$key]['lens_width'] = $tmp_bridge['lens_width'];
