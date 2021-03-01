@@ -75,7 +75,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'upload'], function (
                 showExport: false,
                 showColumns: false,
                 showToggle: false,
-                pagination: false,
                 columns: [
                     [
                         { field: 'id', title: __('ID'), operate: false },
