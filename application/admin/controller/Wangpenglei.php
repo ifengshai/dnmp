@@ -579,7 +579,7 @@ class Wangpenglei extends Backend
 
         $sku_list = $this->item->where(['create_time' => ['>', '2020-08-03'], 'is_open' => 1, 'is_del' => 1, 'category_id' => ['<>', 43]])->column('sku');
         $list = $sales_num->field('sku,site')->where(['site' => ['in', [1, 2, 3]], 'sku' => ['in', $sku_list]])->group('sku,site')->select();
-
+        $list = collection($list)->toArray();
         foreach ($list as $k => $v) {
           
             if ($v['site'] == 1) {
@@ -597,7 +597,6 @@ class Wangpenglei extends Backend
             //查询开始上架时间
             $res = db('sku_sales_num')->where(['sku' => $v['sku'], 'site' => $v['site']])->order('createtime asc')->limit(30)->select();
             if (!$res) {
-                unset($list[$k]);
                 continue;
             }
             $res = array_column($res, 'createtime');
