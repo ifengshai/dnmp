@@ -1330,14 +1330,14 @@ class Distribution extends Backend
         foreach ($list as $key => &$value) {
 
             //更改镜框最新sku
-            if ($change_sku[$value['item_order_number']]) {
+            if ($change_sku[$value['item_order_number']] && $value['site'] != 5) {
                 $value['sku'] = $change_sku[$value['item_order_number']];
 
                 $getGlassInfo = $this->httpRequest($value['site'], 'magic/order/getGlassInfo', ['skus' => $value['sku']], 'POST');
                 $tmp_bridge = $getGlassInfo[0];
             } else {
                 //过滤饰品站 批发站
-                if ($value['site'] != 12 && $value['site'] != 5) {
+                if ($value['site'] != 12) {
                     //查询镜框尺寸
                     $tmp_bridge = $this->get_frame_lens_width_height_bridge($value['product_id'], $value['site']);
                 }
