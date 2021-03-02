@@ -1341,7 +1341,7 @@ class CustomerService extends Backend
                 }elseif ($v['group_id'] ==2){
                     $result[$k]['group'] = 'B组';
                 }else{
-                    $result[$k]['group'] = '未知';
+                    $result[$k]['group'] = '-';
                 }
             }
         }
