@@ -243,7 +243,7 @@ class PurchasePay extends Backend
                                 ['name' => '收款方开户行', 'value' => $params['opening_bank_address'] ? $params['opening_bank_address'] : '无'],
                             ];
                         }
-
+                       
                         $res = $initiate_approval->initiate_approval($arr);
                         if ($res['errcode'] != 0 || $res === false) {
                             throw new Exception('发起审批失败'.$res['errmsg']);
@@ -840,14 +840,10 @@ class PurchasePay extends Backend
     }
 
 
-    public function category($category_id)
+    protected function category($category_id)
     {
         $item_category = new ItemCategory();
         $sku_category = $item_category->where('id',$category_id)->find();
-        if ($sku_category['pid'] !== 0){
-            $this->category($sku_category['pid']);
-        }else{
-            return $sku_category['name'];
-        }
+        return $sku_category['name'];
     }
 }
