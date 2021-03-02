@@ -14,9 +14,9 @@
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('库区类型')}:</label>
         <div class="col-xs-12 col-sm-8">
-            <select class="form-control" name="row[shelf_number]">
+            <select class="form-control" name="row[type]">
                 {volist name="type" id="vo"}
-                <option value="{$vo}" {if condition="$row.type eq $vo"}selected{/if} >{$vo}</option>
+                <option value="{$key}" {if condition="$row.type eq $key"}selected{/if} >{$vo}</option>
                 {/volist}
             </select>
         </div>

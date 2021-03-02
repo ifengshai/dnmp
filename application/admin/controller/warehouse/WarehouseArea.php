@@ -64,13 +64,11 @@ class WarehouseArea extends Backend
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
-                ->where(['status'=>1])
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
-                ->where(['status'=>1])
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
@@ -141,7 +139,6 @@ class WarehouseArea extends Backend
      */
     public function edit($ids = null)
     {
-        $type = input('type');
         $row = $this->model->get($ids);
         if (!$row) {
             $this->error(__('No Results were found'));
@@ -158,12 +155,6 @@ class WarehouseArea extends Backend
             if ($params) {
                 $params = $this->preExcludeFields($params);
 
-                //判断选择的库位是否已存在
-                if(2 == $type){
-                    $params['location'] = $params['coding'];
-                    $params['coding'] = $params['subarea'].'-'.$params['location'];
-                }
-                $map['type'] = $type;
                 $map['coding'] = $params['coding'];
                 $map['id'] = ['<>', $row->id];
                 $count = $this->model->where($map)->count();

@@ -45,6 +45,27 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
 
             // 为表格绑定事件
             Table.api.bindevent(table);
+            //启用
+            $(document).on('click', '.btn-open', function () {
+                var ids = Table.api.selectedids(table);
+                Backend.api.ajax({
+                    url: Config.moduleurl + '/warehouse/warehouse_area/setStatus',
+                    data: { ids: ids, status: 1 }
+                }, function (data, ret) {
+                    table.bootstrapTable('refresh');
+                });
+            });
+
+            //禁用
+            $(document).on('click', '.btn-close', function () {
+                var ids = Table.api.selectedids(table);
+                Backend.api.ajax({
+                    url: Config.moduleurl + '/warehouse/warehouse_area/setStatus',
+                    data: { ids: ids, status: 2 }
+                }, function (data, ret) {
+                    table.bootstrapTable('refresh');
+                });
+            });
         },
         add: function () {
             Controller.api.bindevent();
