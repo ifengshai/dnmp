@@ -337,11 +337,6 @@ class FinanceOrder extends Backend
         $params = [];
         foreach ($list as $key => $value) {
             $params[$key]['order_number'] = $value['order_number'];
-           
-            $params[$key]['order_number'] = $value['order_number'];
-            $params[$key]['order_number'] = $value['order_number'];
-            $params[$key]['order_number'] = $value['order_number'];
-            $params[$key]['order_number'] = $value['order_number'];
             if ($value['site'] == 1) {
                 $site = 'Zeelool';
             } elseif ($value['site'] == 2) {
