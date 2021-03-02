@@ -577,51 +577,62 @@ class Wangpenglei extends Backend
         // $list = db()->query($sql);
 
 
-        $sku_list = $this->item->where(['create_time' => ['>', '2020-08-03'], 'is_open' => 1, 'is_del' => 1, 'category_id' => ['<>', 43]])->column('sku');
-        $list = $sales_num->field('sku,site')->where(['site' => ['in', [1, 2, 3]], 'sku' => ['in', $sku_list]])->group('sku,site')->select();
+        $list = $this->item->where(['is_open' => 1, 'is_del' => 1, 'category_id' => ['<>', 43]])->column('sku');
+        // $list = $sales_num->field('sku,site')->where(['site' => ['in', [1, 2, 3]], 'sku' => ['in', $sku_list]])->group('sku,site')->select();
         $list = collection($list)->toArray();
+        $params = [];
         foreach ($list as $k => $v) {
-          
-            if ($v['site'] == 1) {
-                $sku = $this->itemplatformsku->getWebSku($v['sku'], 1);
-            } elseif ($v['site'] == 2) {
-                $sku = $this->itemplatformsku->getWebSku($v['sku'], 2);
-            } elseif ($v['site'] == 3) {
-                $sku = $this->itemplatformsku->getWebSku($v['sku'], 3);
-            }
-            $skus = [];
-            $skus = [
-                $sku
-            ];
+
+            // if ($v['site'] == 1) {
+            //     $site = $this->itemplatformsku->getWebSku($v['sku'], 1);
+            // } elseif ($v['site'] == 2) {
+            //     $sku = $this->itemplatformsku->getWebSku($v['sku'], 2);
+            // } elseif ($v['site'] == 3) {
+            //     $sku = $this->itemplatformsku->getWebSku($v['sku'], 3);
+            // } elseif ($v['site'] == 4) {
+            //     $sku = $this->itemplatformsku->getWebSku($v['sku'], 4);
+            // } elseif ($v['site'] == 5) {
+            //     $sku = $this->itemplatformsku->getWebSku($v['sku'], 5);
+            // } elseif ($v['site'] == 9) {
+            //     $sku = $this->itemplatformsku->getWebSku($v['sku'], 9);
+            // } elseif ($v['site'] == 10) {
+            //     $sku = $this->itemplatformsku->getWebSku($v['sku'], 10);
+            // } elseif ($v['site'] == 11) {
+            //     $sku = $this->itemplatformsku->getWebSku($v['sku'], 11);
+            // }
+            $skus =  $this->itemplatformsku->where(['sku' => $v])->column('platform_sku');
+            // $skus = [
+            //     $sku
+            // ];
 
             //查询开始上架时间
-            $res = db('sku_sales_num')->where(['sku' => $v['sku'], 'site' => $v['site']])->order('createtime asc')->limit(30)->select();
-            if (!$res) {
-                continue;
-            }
-            $res = array_column($res, 'createtime');
-            $first = $res[0];
-            $last = end($res);
+            // $res = db('sku_sales_num')->where(['sku' => $v['sku'], 'site' => $v['site']])->order('createtime asc')->limit(30)->select();
+            // if (!$res) {
+            //     continue;
+            // }
+            // $res = array_column($res, 'createtime');
+            // $first = $res[0];
+            // $last = end($res);
             $map['a.sku'] = ['in', array_filter($skus)];
             $map['b.status'] = ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered']];
             $map['a.distribution_status'] = ['<>', 0]; //排除取消状态
-            $map['b.created_at'] = ['between', [strtotime($first), strtotime($last)]]; //时间节点
-            $map['b.site'] = $v['site'];
+            $map['b.created_at'] = ['between', [strtotime('2020-01-01 00:00:00'), strtotime('2020-12-31 23:59:59')]]; //时间节点
+            // $map['b.site'] = $v['site'];
 
             $sales_num = $this->orderitemprocess->alias('a')
                 ->where($map)
                 ->join(['fa_order' => 'b'], 'a.order_id = b.id')
                 ->count(1);
-
-            $sales_money = $this->orderitemprocess->alias('a')->where($map)
-                ->join(['fa_order' => 'b'], 'a.order_id = b.id')
-                ->join(['fa_order_item_option' => 'c'], 'a.order_id = c.order_id and a.option_id = c.id')
-                ->sum('c.base_row_total');
-            $list[$k]['sales_num'] = $sales_num;
-            $list[$k]['sales_money'] = $sales_money;
+            $params[$k]['sku'] = $v;
+            // $sales_money = $this->orderitemprocess->alias('a')->where($map)
+            //     ->join(['fa_order' => 'b'], 'a.order_id = b.id')
+            //     ->join(['fa_order_item_option' => 'c'], 'a.order_id = c.order_id and a.option_id = c.id')
+            //     ->sum('c.base_row_total');
+            $params[$k]['sales_num'] = $sales_num;
+            // $list[$k]['sales_money'] = $sales_money;
         }
-        $headlist = ['sku', '站点', '销量', '销售额'];
-        Excel::writeCsv($list, $headlist, 'sku销售额2');
+        $headlist = ['sku',  '销量'];
+        Excel::writeCsv($params, $headlist, 'sku销售额11');
         die;
     }
 
