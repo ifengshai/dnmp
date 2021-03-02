@@ -333,7 +333,7 @@ class ZendeskMailTemplate extends Backend
                 ->where('id',$id)
                 ->find();
             //获取邮件的信息
-            $ticket = \app\admin\model\zendesk\Zendesk::where('ticket_id',$ticket_id)->find();
+            $ticket = \app\admin\model\zendesk\Zendesk::where('ticket_id',$ticket_id)->where('type',$template['template_platform'])->find();
             if($ticket->type == 1){
                 $orderModel = new \app\admin\model\order\order\Zeelool;
             }elseif($ticket->type == 2){
