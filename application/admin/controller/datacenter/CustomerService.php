@@ -1320,7 +1320,7 @@ class CustomerService extends Backend
 //        $arr[] = 75;
 
 //        $result  = Admin::where('id', 'in', $arr)->field('id,nickname')->select();
-        $result = Admin::where('group_id','in',['1','2'])->field('id,group_id,nickname')->select();
+        $result = Admin::where('group_id','in',['1','2','3'])->field('id,group_id,nickname')->select();
 
         if (!empty($result)) {
             $result = collection($result)->toArray();
