@@ -1671,7 +1671,7 @@ class CustomerService extends Backend
         if (1 == $customer_type || 2 == $customer_type ) {
             $cust_where['group_id'] = ['eq',$customer_type];
         } else{
-            $cust_where['group_id'] = ['in',[1,2]];
+            $cust_where['group_id'] = ['in',[1,2,3]];
         }
 
         //获取对应的分组员工
