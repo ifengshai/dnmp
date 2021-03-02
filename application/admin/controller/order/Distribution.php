@@ -1298,7 +1298,7 @@ class Distribution extends Backend
                 'a.item_order_number' => ['in', array_column($list, 'item_order_number')],
                 'b.operation_type' => 1
             ])
-            ->order('a.id', 'desc')
+            ->order('a.id', 'asc')
             ->group('a.item_order_number')
             ->column('a.change_sku', 'a.item_order_number');
 
@@ -1311,7 +1311,7 @@ class Distribution extends Backend
                 'a.item_order_number' => ['in', array_column($list, 'item_order_number')],
                 'b.operation_type' => 1
             ])
-            ->order('a.id', 'desc')
+            ->order('a.id', 'asc')
             ->group('a.item_order_number')
             ->column('a.od_sph,a.od_cyl,a.od_axis,a.od_add,a.pd_r,a.od_pv,a.od_bd,a.od_pv_r,a.od_bd_r,a.os_sph,a.os_cyl,a.os_axis,a.os_add,a.pd_l,a.os_pv,a.os_bd,a.os_pv_r,a.os_bd_r,a.lens_number,a.recipe_type as prescription_type,a.web_lens_name', 'a.item_order_number');
         if ($change_lens) {
