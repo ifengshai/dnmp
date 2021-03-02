@@ -181,7 +181,7 @@ class PurchasePay extends Backend
                                     $reasons[$kk] = [
                                         ['name' => '采购品名', 'value' => $vv['name']],
                                         ['name' => '采购单号', 'value' => $vv['number']],
-                                        ['name' => '1688单号', 'value' => ''],
+                                        ['name' => '1688单号', 'value' => '0'],
                                         ['name' => '采购批次', 'value' =>  $vv['batch'] ? $vv['batch']:0],
                                         ['name' => '商品分类', 'value' => $type ? $type:'镜框'],
                                         ['name' => '采购数量', 'value' => $vv['num']],
@@ -226,7 +226,7 @@ class PurchasePay extends Backend
                                     [
                                         ['name' => '采购品名', 'value' => $reason['name']],
                                         ['name' => '采购单号', 'value' => $params['purchase_number']],
-                                        ['name' => '1688单号', 'value' => $params['1688_number']],
+                                        ['name' => '1688单号', 'value' => $params['1688_number']  ?: 0],
                                         ['name' => '采购批次', 'value' => '0'],
                                         ['name' => '商品分类', 'value' => $type ? $type:'镜框'],
                                         ['name' => '采购数量', 'value' => $reason['num']],
@@ -461,6 +461,7 @@ class PurchasePay extends Backend
                                     $reasons[$kk] = [
                                         ['name' => '采购品名', 'value' => $vv['name']],
                                         ['name' => '采购单号', 'value' => $vv['number']],
+                                        ['name' => '1688单号', 'value' => '0'],
                                         ['name' => '采购批次', 'value' =>  $vv['batch'] ? $vv['batch']:0],
                                         ['name' => '商品分类', 'value' => $type ? $type:'镜框'],
                                         ['name' => '采购数量', 'value' => $vv['num']],
@@ -502,6 +503,7 @@ class PurchasePay extends Backend
                                     [
                                         ['name' => '采购品名', 'value' => $reason['name']],
                                         ['name' => '采购单号', 'value' => $params['purchase_number']],
+                                        ['name' => '1688单号', 'value' => $params['1688_number'] ?: 0],
                                         ['name' => '采购批次', 'value' => '0'],
                                         ['name' => '商品分类', 'value' => $type ? $type:'镜框'],
                                         ['name' => '采购数量', 'value' => $reason['num']],
