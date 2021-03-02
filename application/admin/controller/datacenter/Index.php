@@ -598,7 +598,7 @@ class Index extends Backend
         foreach ($list as $key => $value) {
 
             $swhere['platform_order'] = $value['increment_id'];
-            $swhere['work_platform'] = 1;
+            $swhere['work_platform'] = $list['site'];
             $swhere['work_status'] = ['not in', [0, 4, 6]];
             $work_type = $workorder->where($swhere)->field('work_type,create_user_name')->find();
             if (!empty($work_type)) {
