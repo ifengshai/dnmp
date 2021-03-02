@@ -246,7 +246,7 @@ class PurchasePay extends Backend
                        
                         $res = $initiate_approval->initiate_approval($arr);
                         if ($res['errcode'] != 0 || $res === false) {
-                            throw new Exception('发起审批失败'.$res['errcode'] . '----' . $res['errmsg'] . '-------' . serialize($arr));
+                            throw new Exception('发起审批失败'.$res['errcode'] . '----' . $res['errmsg']);
                         }
                     }
                     $insert['process_instance_id'] = $res['process_instance_id'];
