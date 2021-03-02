@@ -247,6 +247,7 @@ class Distribution extends Backend
             };
 
             //筛选货架号
+            $sort_flag = 0;
             if ($filter['shelf_number']) {
                 if (1 == $label) {
                     $shelf_number =
@@ -266,6 +267,7 @@ class Distribution extends Backend
                     $sku = Db::connect('database.db_stock');
                     $sku_array = $sku->table('fa_item_platform_sku')->where(['sku' => ['in', $shelf_number]])->column('platform_sku');
                     $map['a.sku'] = ['in', $sku_array];
+                    $sort_flag = 1;
                 }
                 unset($filter['shelf_number']);
             }
@@ -376,9 +378,12 @@ class Distribution extends Backend
                     ];
                 }
             }
-
+            
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-
+            if ($sort_flag == 1) {
+                $sort = 'a.sku';
+                $order = 'asc';
+            }
             $total = $this->model
                 ->alias('a')
                 ->join(['fa_order' => 'b'], 'a.order_id=b.id')
