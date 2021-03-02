@@ -595,10 +595,11 @@ class Index extends Backend
             ->setCellValue("F1", "工单类型")
             ->setCellValue("G1", "创建人")
             ->setCellValue("H1", "处方类型");
+
         foreach ($list as $key => $value) {
 
             $swhere['platform_order'] = $value['increment_id'];
-            $swhere['work_platform'] = 1;
+            $swhere['work_platform'] = $value['site'];
             $swhere['work_status'] = ['not in', [0, 4, 6]];
             $work_type = $workorder->where($swhere)->field('work_type,create_user_name')->find();
             if (!empty($work_type)) {
