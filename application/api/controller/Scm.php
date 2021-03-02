@@ -98,6 +98,12 @@ class Scm extends Api
                     'link' => 'pda/waitmerge',
                     'icon' => '/assets/img/distribution/hedandaiqu.png',
                     'href' => 'com.nextmar.mojing.ui.merge.OrderMergeCompletedActivity'
+                ],
+                [
+                    'name' => '库内调拨',
+                    'link' => 'warehouse/allocation',
+                    'icon' => '/assets/img/distribution/hedandaiqu.png',
+                    'href' => 'com.nextmar.mojing.ui.allocation.AllocationListActivity'
                 ]
             ],
         ],

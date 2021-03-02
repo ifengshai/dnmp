@@ -313,8 +313,10 @@ class PurchaseOrder extends Backend
                 //查询供应商SKU
                 $v['supplier_sku'] = $supplier->getSupplierSkuData($v['sku'], $v['supplier_id']);
             }
+            $new_old =$item->where('sku',$list[0]['sku'])->value('is_new');
             unset($v);
             if (count(array_unique(array_column($list, 'supplier_id'))) > 1) $this->error('必须选择相同的供应商！！');
+            $this->assign('new_old', $new_old);
             $this->assign('list', $list);
         }
 
@@ -415,7 +417,7 @@ class PurchaseOrder extends Backend
 
 
         //判断状态是否为新建
-        if (!in_array($row['purchase_status'], [0]) && $row['purchase_type'] == 1) {
+        if (!in_array($row['purchase_status'], [0])) {
             $this->error('只有新建状态才能编辑！！', url('index'));
         }
 

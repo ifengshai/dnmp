@@ -527,7 +527,7 @@ class Wangpenglei extends Backend
         $this->orderitemprocess = new \app\admin\model\order\order\NewOrderItemProcess();
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
-        $sql = "select sku,site from fa_sku_sales_num where site in (1,2,3) and createtime BETWEEN '2020-12-01 00:00:00' and '2021-02-31 23:59:59' GROUP BY sku,site";
+        $sql = "select sku,site from fa_sku_sales_num where site in (1,2,3) GROUP BY sku,site having count(1) > 30";
         $list = db()->query($sql);
         foreach ($list as $k => $v) {
             if ($v['site'] == 1) {
@@ -545,11 +545,12 @@ class Wangpenglei extends Backend
             $map['a.sku'] = ['in', array_filter($skus)];
             $map['b.status'] = ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered']];
             $map['a.distribution_status'] = ['<>', 0]; //排除取消状态
-            $map['b.created_at'] = ['between', [strtotime('2020-12-01 00:00:00'), strtotime('2021-02-31 23:59:59')]]; //时间节点
+            $map['b.created_at'] = ['between', [strtotime('2021-01-28 00:00:00'), strtotime('2021-02-31 23:59:59')]]; //时间节点
             $map['b.site'] = $v['site'];
             $sales_money = $this->orderitemprocess->alias('a')->where($map)
                 ->join(['fa_order' => 'b'], 'a.order_id = b.id')
-                ->sum('b.base_grand_total');
+                ->join(['fa_order_item_option' => 'c'], 'a.order_id = c.order_id and a.option_id = c.id')
+                ->sum('c.base_row_total');
 
             $list[$k]['sales_money'] = $sales_money;
         }
@@ -558,33 +559,70 @@ class Wangpenglei extends Backend
         die;
     }
 
+    /**
+     * 导出sku各站活跃天数销售额
+     *
+     * @Description
+     * @author wpl
+     * @since 2021/02/22 10:34:57 
+     * @return void
+     */
     public function derver_data2()
     {
-        $sql = "select sku,max(b.num) from (select sku,site,count(1) as num from fa_sku_sales_num where createtime BETWEEN '2020-08-01 00:00:00' and '2021-02-21 00:00:00' GROUP BY sku,site HAVING num > 90) b GROUP BY sku";
-        $list = db()->query($sql);
-        foreach ($list as $k => $v) {
-            $zeelool_sku = $this->itemplatformsku->getWebSku($v['sku'], 1);
-            $voogueme_sku = $this->itemplatformsku->getWebSku($v['sku'], 2);
-            $nihao_sku = $this->itemplatformsku->getWebSku($v['sku'], 3);
+        $this->orderitemprocess = new \app\admin\model\order\order\NewOrderItemProcess();
+        $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
+        $this->item = new \app\admin\model\itemmanage\Item;
+        $sales_num = new \app\admin\model\SkuSalesNum();
+        // $sql = "select sku,site from fa_sku_sales_num where site in (1,2,3) GROUP BY sku,site";
+        // $list = db()->query($sql);
 
+
+        $sku_list = $this->item->where(['create_time' => ['>', '2020-08-03'], 'is_open' => 1, 'is_del' => 1, 'category_id' => ['<>', 43]])->column('sku');
+        $list = $sales_num->field('sku,site')->where(['site' => ['in', [1, 2, 3]], 'sku' => ['in', $sku_list]])->group('sku,site')->select();
+        $list = collection($list)->toArray();
+        foreach ($list as $k => $v) {
+          
+            if ($v['site'] == 1) {
+                $sku = $this->itemplatformsku->getWebSku($v['sku'], 1);
+            } elseif ($v['site'] == 2) {
+                $sku = $this->itemplatformsku->getWebSku($v['sku'], 2);
+            } elseif ($v['site'] == 3) {
+                $sku = $this->itemplatformsku->getWebSku($v['sku'], 3);
+            }
             $skus = [];
             $skus = [
-                $zeelool_sku,
-                $voogueme_sku,
-                $nihao_sku
+                $sku
             ];
 
+            //查询开始上架时间
+            $res = db('sku_sales_num')->where(['sku' => $v['sku'], 'site' => $v['site']])->order('createtime asc')->limit(30)->select();
+            if (!$res) {
+                continue;
+            }
+            $res = array_column($res, 'createtime');
+            $first = $res[0];
+            $last = end($res);
             $map['a.sku'] = ['in', array_filter($skus)];
             $map['b.status'] = ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered']];
             $map['a.distribution_status'] = ['<>', 0]; //排除取消状态
-            $map['b.created_at'] = ['between', [strtotime('2020-08-01 00:00:00'), strtotime('2021-02-21 00:00:00')]]; //时间节点
-            $occupy_stock = $this->orderitemprocess->alias('a')->where($map)
-                ->join(['fa_order' => 'b'], 'a.order_id = b.id')
-                ->join(['fa_order_process' => 'c'], 'a.order_id = c.order_id')
-                ->sum('b.base_grand_total');
+            $map['b.created_at'] = ['between', [strtotime($first), strtotime($last)]]; //时间节点
+            $map['b.site'] = $v['site'];
 
-            $list[$k]['sales_num'] = $occupy_stock;
+            $sales_num = $this->orderitemprocess->alias('a')
+                ->where($map)
+                ->join(['fa_order' => 'b'], 'a.order_id = b.id')
+                ->count(1);
+
+            $sales_money = $this->orderitemprocess->alias('a')->where($map)
+                ->join(['fa_order' => 'b'], 'a.order_id = b.id')
+                ->join(['fa_order_item_option' => 'c'], 'a.order_id = c.order_id and a.option_id = c.id')
+                ->sum('c.base_row_total');
+            $list[$k]['sales_num'] = $sales_num;
+            $list[$k]['sales_money'] = $sales_money;
         }
+        $headlist = ['sku', '站点', '销量', '销售额'];
+        Excel::writeCsv($list, $headlist, 'sku销售额2');
+        die;
     }
 
     /**
@@ -607,5 +645,32 @@ class Wangpenglei extends Backend
         }
 
         $item->where(['sku' => ['in', $skus]])->update(['is_open' => 2]);
+    }
+
+    public function edit_order_status()
+    {
+        //查询所有子单状态为8的子单
+        $orderItem = new \app\admin\model\order\order\NewOrderItemProcess();
+        $orderProcess = new \app\admin\model\order\order\NewOrderProcess();
+        $worklist = new \app\admin\model\saleaftermanage\WorkOrderList();
+        $list = $orderItem->where(['distribution_status' => 8])->select();
+        foreach ($list as $k => $v) {
+            $allcount = $orderItem->where(['order_id' => $v['order_id']])->count();
+
+            $count = $orderItem->where(['distribution_status' => ['in', [0, 8, 9]], 'order_id' => $v['order_id']])->count();
+
+            //查询工单是否处理完成
+            $workcount = $worklist->where(['order_item_numbers' => ['like', '%' . $v['item_order_number'] . '%'], 'work_status' => ['in', [1, 2, 3, 5]]])->count();
+            if ($allcount == $count && $workcount < 1) {
+                $orderItem->where(['order_id' => $v['order_id'], 'distribution_status' => 8])->update(['distribution_status' => 9]);
+                $orderProcess->where(['order_id' => $v['order_id']])->update(['combine_status' => 1, 'combine_time' => time()]);
+
+                echo $v['id'] . "\n";
+            }
+
+            usleep(100000);
+        }
+
+        echo "ok";
     }
 }

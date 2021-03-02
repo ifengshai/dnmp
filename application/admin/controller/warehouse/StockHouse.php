@@ -73,6 +73,12 @@ class StockHouse extends Backend
                 ->select();
 
             $list = collection($list)->toArray();
+            //所有库区编码id
+            $area_coding = Db::name('warehouse_area')->column('coding','id');
+            //获得库位所属库区编码
+            foreach ($list as $k=>$v){
+                $list[$k]['area_coding'] = $area_coding[$v['area_id']];
+            }
             $result = array("total" => $total, "rows" => $list);
 
             return json($result);
@@ -142,7 +148,10 @@ class StockHouse extends Backend
 //            $arr[$v] = $v;
 //        }
         $arr =['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
+        //所有库区编码id
+        $area_coding = Db::name('warehouse_area')->column('coding','id');
         $this->assign('shelf_number',$arr);
+        $this->assign('area_coding',$area_coding);
         return $this->view->fetch();
     }
 

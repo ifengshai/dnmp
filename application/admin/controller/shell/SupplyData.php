@@ -437,7 +437,7 @@ class SupplyData extends Backend
                 //如果有月末数据，（月初数据+月末数据）/2
                 $dull_stock = round(($start_dull_stock['stock'] + $end_dull_stock['stock']) / 2, 2);
                 $arr1['avg_dull_stock'] = $dull_stock;
-                $arr1['avg_rate'] = $stock_info1['avg_stock'] ? round($arr1['avg_dull_stock']/$stock_info1['avg_stock'],2) : 0;
+                $arr1['avg_rate'] = $stock_info1['avg_stock'] ? round($arr1['avg_dull_stock']/$stock_info1['avg_stock']*100,2) : 0;
                 Db::name('datacenter_supply_month')->where('id',$stock_info1['id'])->update($arr1);
             }
         }

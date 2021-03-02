@@ -1,0 +1,31 @@
+<form id="edit-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('库区编码')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-coding" class="form-control" name="row[coding]" type="text" value="{$row.coding|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('库区名称')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-name" class="form-control" name="row[name]" type="text" value="{$row.name|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('库区类型')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <select class="form-control" name="row[type]">
+                {volist name="type" id="vo"}
+                <option value="{$key}" {if condition="$row.type eq $key"}selected{/if} >{$vo}</option>
+                {/volist}
+            </select>
+        </div>
+    </div>
+    <div class="form-group layer-footer">
+        <label class="control-label col-xs-12 col-sm-2"></label>
+        <div class="col-xs-12 col-sm-8">
+            <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
+            <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>

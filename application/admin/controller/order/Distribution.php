@@ -384,6 +384,7 @@ class Distribution extends Backend
 
             foreach ($list as $key => $item) {
                 $list[$key]['label'] = $label;
+                //订单副数，去除掉取消的子单
                 $list[$key]['total_qty_ordered'] = $this->model
                 ->where(['order_id' => $list[$key]['order_id'], 'distribution_status' => ['neq', 0]])
                 ->count();
@@ -1198,6 +1199,11 @@ class Distribution extends Backend
                 $map['b.status'] = ['in', $filter['status']];
                 unset($filter['status']);
             }
+
+            if ($filter['sku']) {
+                $map['a.sku'] = ['like', '%' . $filter['sku'] . '%'];
+                unset($filter['sku']);
+            }
             $this->request->get(['filter' => json_encode($filter)]);
 
             list($where, $sort, $order) = $this->buildparams();
@@ -1315,12 +1321,75 @@ class Distribution extends Backend
             //更改镜框最新sku
             if ($change_sku[$value['item_order_number']]) {
                 $value['sku'] = $change_sku[$value['item_order_number']];
+
+                $getGlassInfo = $this->httpRequest($value['site'], 'magic/order/getGlassInfo', ['skus' => $value['sku']], 'POST');
+                $tmp_bridge = $getGlassInfo[0];
+            } else {
+                //过滤饰品站
+                if ($value['site'] != 12) {
+                    //查询镜框尺寸
+                    $tmp_bridge = $this->get_frame_lens_width_height_bridge($value['product_id'], $value['site']);
+                }
             }
+
+            $data[$value['increment_id']]['item_order'][$key]['lens_width'] = $tmp_bridge['lens_width'];
+            $data[$value['increment_id']]['item_order'][$key]['lens_height'] = $tmp_bridge['lens_height'];
+            $data[$value['increment_id']]['item_order'][$key]['bridge'] = $tmp_bridge['bridge'];
 
             //更改镜片最新数据
             if ($change_lens[$value['item_order_number']]) {
                 $value = array_merge($value, $change_lens[$value['item_order_number']]);
             }
+
+            $data[$value['increment_id']]['id'] = $value['id'];
+            $data[$value['increment_id']]['created_at'] = $value['created_at'];
+            $data[$value['increment_id']]['increment_id'] = $value['increment_id'];
+            $data[$value['increment_id']]['site'] = $value['site'];
+            $data[$value['increment_id']]['order_type'] = $value['order_type'];
+            $data[$value['increment_id']]['status'] = $value['status'];
+            $data[$value['increment_id']]['item_order'][$key]['item_order_number'] = $value['item_order_number'];
+            $data[$value['increment_id']]['item_order'][$key]['sku'] = $value['sku'];
+            $data[$value['increment_id']]['item_order'][$key]['od_sph'] = $value['od_sph'];
+            $data[$value['increment_id']]['item_order'][$key]['od_cyl'] = $value['od_cyl'];
+            $data[$value['increment_id']]['item_order'][$key]['od_axis'] = $value['od_axis'];
+            $data[$value['increment_id']]['item_order'][$key]['od_add'] = $value['od_add'];
+            $data[$value['increment_id']]['item_order'][$key]['os_add'] = $value['os_add'];
+            $data[$value['increment_id']]['item_order'][$key]['pd'] = $value['pd'];
+            $data[$value['increment_id']]['item_order'][$key]['pdcheck'] = $value['pdcheck'];
+            $data[$value['increment_id']]['item_order'][$key]['product_id'] = $value['product_id'];
+
+            $data[$value['increment_id']]['item_order'][$key]['prescription_type'] = $value['prescription_type'];
+            $data[$value['increment_id']]['item_order'][$key]['od_pv'] = $value['od_pv'];
+            $data[$value['increment_id']]['item_order'][$key]['os_pv'] = $value['os_pv'];
+            $data[$value['increment_id']]['item_order'][$key]['pd_r'] = $value['pd_r'];
+            $data[$value['increment_id']]['item_order'][$key]['pd_l'] = $value['pd_l'];
+            $data[$value['increment_id']]['item_order'][$key]['os_pv'] = $value['os_pv'];
+            $data[$value['increment_id']]['item_order'][$key]['os_bd'] = $value['os_bd'];
+            $data[$value['increment_id']]['item_order'][$key]['od_bd'] = $value['od_bd'];
+            $data[$value['increment_id']]['item_order'][$key]['od_pv_r'] = $value['od_pv_r'];
+            $data[$value['increment_id']]['item_order'][$key]['os_bd_r'] = $value['os_bd_r'];
+            $data[$value['increment_id']]['item_order'][$key]['od_bd_r'] = $value['od_bd_r'];
+            $data[$value['increment_id']]['item_order'][$key]['os_pv_r'] = $value['os_pv_r'];
+            $data[$value['increment_id']]['item_order'][$key]['os_sph'] = $value['os_sph'];
+            $data[$value['increment_id']]['item_order'][$key]['od_sph'] = $value['od_sph'];
+            $data[$value['increment_id']]['item_order'][$key]['os_cyl'] = $value['os_cyl'];
+            $data[$value['increment_id']]['item_order'][$key]['od_cyl'] = $value['od_cyl'];
+            $data[$value['increment_id']]['item_order'][$key]['os_axis'] = $value['os_axis'];
+            $data[$value['increment_id']]['item_order'][$key]['od_axis'] = $value['od_axis'];
+            $data[$value['increment_id']]['item_order'][$key]['lens_number'] = $value['lens_number'];
+            $data[$value['increment_id']]['item_order'][$key]['web_lens_name'] = $value['web_lens_name'];
+            $data[$value['increment_id']]['item_order'][$key]['product_id'] = $value['product_id'];
+            $data[$value['increment_id']]['base_grand_total'] = $value['base_grand_total'];
+            $data[$value['increment_id']]['base_currency_code'] = $value['base_currency_code'];
+            $data[$value['increment_id']]['base_grand_total'] = $value['base_grand_total'];
+            $data[$value['increment_id']]['payment_method'] = $value['payment_method'];
+            $data[$value['increment_id']]['payment_time'] = $value['payment_time'];
+        }
+        unset($value);
+        $cat = '0';
+        foreach ($data as  $key => &$value) {
+            $num = $cat + 2;
+
 
             //网站SKU转换仓库SKU
             $value['prescription_type'] = isset($value['prescription_type']) ? $value['prescription_type'] : '';
@@ -1360,18 +1429,18 @@ class Distribution extends Backend
                 }
             }
 
-            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 2 + 2), $value['pd_r']);
-            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 2 + 3), $value['pd_l']);
-            $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 2 + 2), $value['pd']);
-            $spreadsheet->getActiveSheet()->mergeCells("M" . ($key * 2 + 2) . ":M" . ($key * 2 + 3));
+                $lens_name = $lens_list[$v['lens_number']] ?: $v['web_lens_name'];
+                $spreadsheet->getActiveSheet()->setCellValue("O" . ($cat), $lens_name); //镜片
+                $spreadsheet->getActiveSheet()->setCellValue("P" . ($cat), $v['lens_width']); //镜框宽度
+                $spreadsheet->getActiveSheet()->setCellValue("Q" . ($cat), $v['lens_height']); //镜框高度
+                $spreadsheet->getActiveSheet()->setCellValue("R" . ($cat), $v['bridge']); //bridge
+                $spreadsheet->getActiveSheet()->setCellValue("S" . ($cat), $v['prescription_type']); //处方类型
 
-            //过滤饰品站
-            if ($value['site'] != 12) {
-                //查询镜框尺寸
-                //$tmp_bridge = $this->get_frame_lens_width_height_bridge($value['product_id'], $value['site']);
-                $getGlassInfo = $this->httpRequest($value['site'], 'magic/order/getGlassInfo', ['skus' => $value['sku']], 'POST');
-                $tmp_bridge = $getGlassInfo[0];
-            }
+                $spreadsheet->getActiveSheet()->setCellValue("T" . ($cat), isset($v['od_pv']) ? $v['od_pv'] : ''); //Prism
+                $spreadsheet->getActiveSheet()->setCellValue("T" . ($cat + 1), isset($v['os_pv']) ? $v['os_pv'] : ''); //Prism
+
+                $spreadsheet->getActiveSheet()->setCellValue("U" . ($cat), isset($v['od_bd']) ? $v['od_bd'] : ''); //Direct
+                $spreadsheet->getActiveSheet()->setCellValue("U" . ($cat + 1), isset($v['os_bd']) ? $v['os_bd'] : ''); //Direct
 
             $lens_name = $lens_list[$value['lens_number']] ?: $value['web_lens_name'];
             $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 2 + 2), $lens_name);
