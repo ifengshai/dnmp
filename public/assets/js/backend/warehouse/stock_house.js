@@ -46,7 +46,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             formatter: Table.api.formatter.shelf_number
 
                         },
-                        { field: 'coding', title: __('Coding'), operate: 'like' }, 
+                        { field: 'area_coding', title: __('库区编码') },
+                        { field: 'coding', title: __('Coding'), operate: 'like' },
+                        { field: 'volume', title: __('库容') },
                         { field: 'library_name', title: __('Library_name') },
                         {
                             field: 'status', title: __('Status'), custom: { 1: 'success', 2: 'danger' },
