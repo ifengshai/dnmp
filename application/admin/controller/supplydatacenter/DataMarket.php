@@ -110,13 +110,7 @@ class DataMarket extends Backend
                 $end   = date('Y-m');
             }
             $where['day_date'] = ['between',[$start,$end]];
-            $cache_data = Cache::get('Supplydatacenter_datamarket'.$time_str.md5(serialize('stock_change_bar')));
-            if (!$cache_data) {
-                $data = $this->supplymonth->where($where)->field('id,avg_stock,day_date')->order('day_date','asc')->select();
-            }else{
-                $data = $cache_data;
-            }
-            Cache::set('Supplydatacenter_datamarket' .$time_str . md5(serialize('stock_change_bar')), $data, 7200);
+            $data = $this->supplymonth->where($where)->field('id,avg_stock,purchase_sales_rate,day_date')->order('day_date','asc')->select();
             $json['xColumnName'] = array_column($data,'day_date');
             $json['column'] = ['平均库存'];
             $json['columnData'] = [
@@ -124,6 +118,13 @@ class DataMarket extends Backend
                     'name' => '平均库存',
                     'type' => 'bar',
                     'data' => array_column($data,'avg_stock')
+                ],
+                [
+                    'type' => 'line',
+                    'data' => array_column($data,'purchase_sales_rate'),
+                    'name' => '采销比',
+                    'yAxisIndex' => 1,
+                    'smooth' => true //平滑曲线
                 ],
             ];
             return json(['code' => 1, 'data' => $json]);
