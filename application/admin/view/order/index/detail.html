@@ -387,7 +387,7 @@
                             </tr> -->
                                 <tr>
                                     <td>镜片类型：</td>
-                                    <td>{$v.web_lens_name}</td>
+                                    <td>{:$v['color_name'] ? $v['web_lens_name'] .'-'. $v['color_name'] : $v['web_lens_name']}</td>
                                 </tr>
                                 <!-- <tr>
                                 <td>折射率：</td>
