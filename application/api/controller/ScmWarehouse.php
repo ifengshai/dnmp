@@ -2,7 +2,6 @@
 
 namespace app\api\controller;
 
-use EasyWeChat\Support\Log;
 use think\Db;
 use think\Exception;
 use think\exception\PDOException;
@@ -361,7 +360,7 @@ class ScmWarehouse extends Scm
         $type_list = $this->_out_stock_type
             ->field('id,name')
             ->where('is_del', 1)
-            ->where('id','not in',[2,4])
+            ->where('id', 'not in', [2, 4])
             ->select();
 
         //站点列表
@@ -643,7 +642,11 @@ class ScmWarehouse extends Scm
                     ->allowField(true)
                     ->isUpdate(true, ['out_stock_id' => $out_stock_id])
                     ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2]);
-            } else {//审核拒绝解除条形码绑定关系
+
+                //计算出库成本 
+                $financecost = new \app\admin\model\finance\FinanceCost();
+                $financecost->outstock_cost($out_stock_id, $row['out_stock_number']);
+            } else { //审核拒绝解除条形码绑定关系
                 $code_clear = [
                     'out_stock_id' => 0
                 ];
@@ -731,8 +734,8 @@ class ScmWarehouse extends Scm
         empty($page_size) && $this->error(__('Page size can not be empty'), [], 407);
 
         $where = [];
-        $where['a.is_stock'] = 0;//质检单待入库 状态为0
-        $where['a.status'] = 2;//质检单待入库 状态为2 已审核
+        $where['a.is_stock'] = 0; //质检单待入库 状态为0
+        $where['a.status'] = 2; //质检单待入库 状态为2 已审核
         if ($query) {
             $where['a.check_order_number|b.sku|c.logistics_number'] = ['like', '%' . $query . '%'];
         }
@@ -770,7 +773,6 @@ class ScmWarehouse extends Scm
                 ->where('a.purchase_number', $value['purchase_number'])
                 ->value('b.supplier_name');
             $list[$key]['batch_id'] = $value['batch_id'] == 0 ? '无批次' : $value['batch_id'];
-
         }
 
         $this->success('', ['list' => $list], 200);
@@ -840,19 +842,19 @@ class ScmWarehouse extends Scm
             $list[$key]['status'] = $status_list[$value['status']];
             //按钮
             if ($list[$key]['check_id']) {
-                $list[$key]['check_in'] = 1;//是否有质检单 1有 0没有
+                $list[$key]['check_in'] = 1; //是否有质检单 1有 0没有
             } else {
-                $list[$key]['check_in'] = 0;//是否有质检单 1有 0没有
+                $list[$key]['check_in'] = 0; //是否有质检单 1有 0没有
             }
             //退货入库
             if ($list[$key]['type_id'] == 3) {
                 $list[$key]['check_in'] = 0;
                 $list[$key]['check_id'] = 0;
             }
-            $list[$key]['show_edit'] = 0 == $value['status'] ? 1 : 0;//编辑按钮
-            $list[$key]['cancel_show'] = 0 == $value['status'] ? 1 : 0;//取消按钮
-            $list[$key]['show_examine'] = 1 == $value['status'] ? 1 : 0;//审核按钮
-            $list[$key]['show_detail'] = in_array($value['status'], [2, 3, 4]) ? 1 : 0;//详情按钮
+            $list[$key]['show_edit'] = 0 == $value['status'] ? 1 : 0; //编辑按钮
+            $list[$key]['cancel_show'] = 0 == $value['status'] ? 1 : 0; //取消按钮
+            $list[$key]['show_examine'] = 1 == $value['status'] ? 1 : 0; //审核按钮
+            $list[$key]['show_detail'] = in_array($value['status'], [2, 3, 4]) ? 1 : 0; //详情按钮
         }
 
         $this->success('', ['list' => $list], 200);
@@ -908,7 +910,7 @@ class ScmWarehouse extends Scm
         }
         $in_stock_number = $this->request->request("in_stock_number");
         empty($in_stock_number) && $this->error(__('入库单号不能为空'), [], 510);
-        $type_id = $this->request->request("type_id");//入库分类
+        $type_id = $this->request->request("type_id"); //入库分类
         empty($type_id) && $this->error(__('请选择入库分类'), [], 510);
         $item_sku = $this->request->request("item_data");
         empty($item_sku) && $this->error(__('sku集合不能为空！！'), [], 508);
@@ -916,8 +918,8 @@ class ScmWarehouse extends Scm
         empty($item_sku) && $this->error(__('sku集合不能为空'), [], 403);
         $item_sku = array_filter($item_sku);
 
-        $in_stock_id = $this->request->request("in_stock_id");//入库单ID，
-        $platform_id = $this->request->request("platform_id");//站点，判断是否是新创建入库 还是 质检单入库
+        $in_stock_id = $this->request->request("in_stock_id"); //入库单ID，
+        $platform_id = $this->request->request("platform_id"); //站点，判断是否是新创建入库 还是 质检单入库
         $result = false;
 
         $this->_check->startTrans();
@@ -965,8 +967,8 @@ class ScmWarehouse extends Scm
 
                     //编辑入库单主表
                     $_in_stock_data['platform_id'] = $platform_id;
-                    $purchase_id = 0;//无采购单id
-                    $check_data = [];//质检单子表数据
+                    $purchase_id = 0; //无采购单id
+                    $check_data = []; //质检单子表数据
                 } else {
                     //无站点，是质检单入口
                     $check_order_number = $this->request->request("check_order_number");
@@ -978,8 +980,8 @@ class ScmWarehouse extends Scm
                         throw new Exception('质检单不存在');
                     }
                     $_in_stock_data['check_id'] = $check_info['id'];
-                    $_in_stock_data['replenish_id'] = $check_info['replenish_id'];//补货单ID
-                    $purchase_id = $check_info['purchase_id'];//有采购单id
+                    $_in_stock_data['replenish_id'] = $check_info['replenish_id']; //补货单ID
+                    $purchase_id = $check_info['purchase_id']; //有采购单id
 
                     //获取质检单子表数据
                     $check_data = $this->_check_item
@@ -994,10 +996,10 @@ class ScmWarehouse extends Scm
                     $where_code = [];
                     $where_code_sku = [];
                     foreach (array_filter($item_sku) as $k => $v) {
-                        $item_save['purchase_id'] = $purchase_id;//采购单id
-                        $item_save['in_stock_num'] = $v['in_stock_num'];//入库数量
-                        $item_save['price'] = $v['price'];//退货入库采购单单价
-                        $item_save['sample_num'] = $check_data[$v['sku']] ?: 0;//留样数量
+                        $item_save['purchase_id'] = $purchase_id; //采购单id
+                        $item_save['in_stock_num'] = $v['in_stock_num']; //入库数量
+                        $item_save['price'] = $v['price']; //退货入库采购单单价
+                        $item_save['sample_num'] = $check_data[$v['sku']] ?: 0; //留样数量
                         //修改入库单子表
                         $where = ['sku' => $v['sku'], 'in_stock_id' => $in_stock_id];
                         $this->_in_stock_item->where($where)->update($item_save);
@@ -1020,7 +1022,7 @@ class ScmWarehouse extends Scm
                     //入库单绑定条形码执行
                     if ($where_code) {
                         $save_code_data = [];
-                        if ($type_id == 3) {//退货入库绑定sku和商品条形码
+                        if ($type_id == 3) { //退货入库绑定sku和商品条形码
                             foreach ($where_code_sku as $key => $value) {
                                 $save_code_data['in_stock_id'] = $in_stock_id;
                                 $save_code_data['sku'] = $where_code_sku[$key];
@@ -1081,8 +1083,8 @@ class ScmWarehouse extends Scm
                         $where_code_sku = [];
                         foreach (array_filter($item_sku) as $k => $v) {
                             $data[$k]['sku'] = $v['sku'];
-                            $data[$k]['in_stock_num'] = $v['in_stock_num'];//入库数量
-                            $data[$k]['price'] = $v['price'];//退货入库采购单单价
+                            $data[$k]['in_stock_num'] = $v['in_stock_num']; //入库数量
+                            $data[$k]['price'] = $v['price']; //退货入库采购单单价
                             $data[$k]['in_stock_id'] = $this->_in_stock->id;
                             if ($type_id == 3) {
                                 $data[$k]['price'] = $v['price'];
@@ -1100,7 +1102,7 @@ class ScmWarehouse extends Scm
                         //入库单绑定条形码执行
                         if ($where_code) {
                             $save_code_data = [];
-                            if ($type_id == 3) {//退货入库绑定sku和商品条形码
+                            if ($type_id == 3) { //退货入库绑定sku和商品条形码
                                 foreach ($where_code_sku as $key => $value) {
                                     $save_code_data['in_stock_id'] = $this->_in_stock->id;
                                     $save_code_data['sku'] = $where_code_sku[$key];
@@ -1133,8 +1135,8 @@ class ScmWarehouse extends Scm
                         ->column('sample_num', 'sku');
 
                     $params['check_id'] = $check_info['id'];
-                    $params['replenish_id'] = $check_info['replenish_id'];//补货单ID
-                    $purchase_id = $check_info['purchase_id'];//有采购单id
+                    $params['replenish_id'] = $check_info['replenish_id']; //补货单ID
+                    $purchase_id = $check_info['purchase_id']; //有采购单id
                     //质检单页面去创建入库单
                     $result = $this->_in_stock->allowField(true)->save($params);
                     //添加入库信息
@@ -1145,11 +1147,11 @@ class ScmWarehouse extends Scm
                         $where_code = [];
                         foreach (array_filter($item_sku) as $k => $v) {
                             $data[$k]['sku'] = $v['sku'];
-                            $data[$k]['purchase_id'] = $purchase_id;//采购单id
-                            $data[$k]['in_stock_num'] = $v['in_stock_num'];//入库数量
-                            $data[$k]['price'] = $v['price'];//退货入库采购单价
-                            $data[$k]['in_stock_id'] = $this->_in_stock->id;//入库单ID
-                            $data[$k]['sample_num'] = $check_data[$v['sku']] ?: 0;//留样数量
+                            $data[$k]['purchase_id'] = $purchase_id; //采购单id
+                            $data[$k]['in_stock_num'] = $v['in_stock_num']; //入库数量
+                            $data[$k]['price'] = $v['price']; //退货入库采购单价
+                            $data[$k]['in_stock_id'] = $this->_in_stock->id; //入库单ID
+                            $data[$k]['sample_num'] = $check_data[$v['sku']] ?: 0; //留样数量
 
                             //入库单绑定条形码数组组装
                             foreach ($v['sku_agg'] as $k_code => $v_code) {
@@ -1171,7 +1173,6 @@ class ScmWarehouse extends Scm
                         $this->_in_stock_item->allowField(true)->saveAll($data);
                     }
                 }
-
             }
             $this->_check->commit();
             $this->_in_stock->commit();
@@ -1202,7 +1203,6 @@ class ScmWarehouse extends Scm
         } else {
             $this->error(__($msg . '失败'), [], 511);
         }
-
     }
 
     //生成退货入库采购单质检单
@@ -1212,7 +1212,7 @@ class ScmWarehouse extends Scm
         $gen_check_item = new \app\admin\model\warehouse\CheckItem;
         $gen_purchase_order = new \app\admin\model\purchase\PurchaseOrder;
         $gen_purchase_order_item = new \app\admin\model\purchase\PurchaseOrderItem;
-        
+
         foreach ($item_sku as $key => $value) {
             //计算总金额
             $all_total =  $value['price'] * $value['in_stock_num'];
@@ -1235,6 +1235,7 @@ class ScmWarehouse extends Scm
 
         return ['purchase_id' => $purchase, 'check_id' => $check];
     }
+
     /**
      * 新建入库单页面--ok
      *
@@ -1297,13 +1298,11 @@ class ScmWarehouse extends Scm
                 $item_list[$key]['remark'] = $this->_check_item->where('check_id', $check_id)->value('remark');
             }
             $info['item_list'] = $item_list;
-
         } else {
             //入库单直接添加，查询站点数据
             $platform_list = $this->_magento_platform->field('id, name')->where(['is_del' => 1, 'status' => 1])->select();
             $info['platform_list'] = $platform_list;
             $in_stock_type_list = $in_stock_type;
-
         }
 
         $info['in_stock_type'] = $in_stock_type_list;
@@ -1370,7 +1369,6 @@ class ScmWarehouse extends Scm
                 $item_list[$key]['remark'] = $this->_check_item->where('check_id', $check_order_info['id'])->value('remark');
             }
             $info['check_order_number'] = $check_order_info['check_order_number'];
-
         } else {
             $platform_list = $this->_magento_platform->field('id, name')->where(['is_del' => 1, 'status' => 1])->select();
             $info['platform_check_id'] = $_in_stock_info['platform_id'];
@@ -1457,7 +1455,7 @@ class ScmWarehouse extends Scm
         empty($row) && $this->error(__('入库单不存在'), [], 516);
         1 != $row['status'] && $this->error(__('只有待审核状态才能操作'), [], 518);
 
-        $data['status'] = $do_type;//审核状态，2通过，3拒绝
+        $data['status'] = $do_type; //审核状态，2通过，3拒绝
         if (2 == $data['status']) {
             $data['check_time'] = date('Y-m-d H:i:s', time());
             $msg = '审核';
@@ -1493,7 +1491,7 @@ class ScmWarehouse extends Scm
         (new StockLog())->startTrans();
         try {
             $data['create_person'] = $this->auth->nickname;
-            $res = $this->_in_stock->allowField(true)->isUpdate(true, ['id' => $in_stock_id])->save($data);//审核拒绝不更新数据
+            $res = $this->_in_stock->allowField(true)->isUpdate(true, ['id' => $in_stock_id])->save($data); //审核拒绝不更新数据
 
             if ($data['status'] == 2) {
                 $error_num = [];
@@ -1526,17 +1524,14 @@ class ScmWarehouse extends Scm
                             foreach ($rate_arr as $key => $val) {
                                 //最后一个站点 剩余数量分给最后一个站
                                 if (($all_num - $key) == 1) {
-                                    \Think\Log::write("接口请求第一次");
-                                    \Think\Log::write($val);
                                     //当前sku映射关系详情
                                     $sku_platform =  $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->find();
-                                    \Think\Log::write($sku_platform);
                                     //如果站点是Z站 且虚拟仓库存为0
-                                    if ($val['website_type'] ==1){
-                                        if ($sku_platform['stock'] == 0  && $stock_num > 0){
+                                    if ($val['website_type'] == 1) {
+                                        if ($sku_platform['stock'] == 0  && $stock_num > 0) {
                                             $value['sku'] = $sku_platform['platform_sku'];
-                                            $url  =  config('url.zeelool_url').'magic/product/productArrival';
-                                            $this->submission_post($url,$value);
+                                            $url  =  config('url.zeelool_url') . 'magic/product/productArrival';
+                                            $this->submission_post($url, $value);
                                         }
                                     }
                                     //增加站点虚拟仓库存
@@ -1561,20 +1556,17 @@ class ScmWarehouse extends Scm
                                         'create_time' => time(),
                                         'number_type' => 3,
                                     ]);
-
                                 } else {
                                     $num = round($v['in_stock_num'] * $val['rate']);
                                     $should_arrivals_num_plat = round($should_arrivals_num * $val['rate']);
                                     $stock_num -= $num;
                                     $should_arrivals_num -= $should_arrivals_num_plat;
                                     $sku_platform = $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->find();
-                                    \Think\Log::write("第二次");
-                                    \Think\Log::write($sku_platform);
-                                    if ($val['website_type'] ==1){
-                                        if ($sku_platform['stock'] == 0  && $num > 0){
+                                    if ($val['website_type'] == 1) {
+                                        if ($sku_platform['stock'] == 0  && $num > 0) {
                                             $value['sku'] = $sku_platform['platform_sku'];
-                                            $url  =  config('url.zeelool_url').'magic/product/productArrival';
-                                            $this->submission_post($url,$value);
+                                            $url  =  config('url.zeelool_url') . 'magic/product/productArrival';
+                                            $this->submission_post($url, $value);
                                         }
                                     }
                                     //增加站点虚拟仓库存
@@ -1674,15 +1666,15 @@ class ScmWarehouse extends Scm
                             'number_type' => 3,
                         ]);
 
-//                        if ($v['platform_id'] ==1 && $v['type_id'] !== 3 && $k == 0){
-//                            \Think\Log::write("第三次");
-//                            \Think\Log::write($item_platform_sku);
-//                            if ($item_platform_sku['stock'] == 0  && $v['in_stock_num'] > 0){
-//                                $value['sku'] = $item_platform_sku['platform_sku'];
-//                                $url  =  config('url.zeelool_url').'magic/product/productArrival';
-//                                $this->submission_post($url,$value);
-//                            }
-//                        }
+                        //                        if ($v['platform_id'] ==1 && $v['type_id'] !== 3 && $k == 0){
+                        //                            \Think\Log::write("第三次");
+                        //                            \Think\Log::write($item_platform_sku);
+                        //                            if ($item_platform_sku['stock'] == 0  && $v['in_stock_num'] > 0){
+                        //                                $value['sku'] = $item_platform_sku['platform_sku'];
+                        //                                $url  =  config('url.zeelool_url').'magic/product/productArrival';
+                        //                                $this->submission_post($url,$value);
+                        //                            }
+                        //                        }
 
                     } //没有采购单也没有站点id 说明是盘点过来的
                     else {
@@ -1702,15 +1694,15 @@ class ScmWarehouse extends Scm
                             foreach ($item_platform_sku as $key => $val) {
                                 $item_platform_sku_detail = $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->find();
 
-//                                if ($val['platform_type'] ==1){
-//                                    \Think\Log::write("第四次");
-//                                    \Think\Log::write($item_platform_sku_detail);
-//                                    if ($item_platform_sku_detail['stock'] ==0 && $stock_num >0 ){
-//                                        $value['sku'] = $item_platform_sku_detail['platform_sku'];
-//                                        $url  =  config('url.zeelool_url').'magic/product/productArrival';
-//                                        $this->submission_post($url,$value);
-//                                    }
-//                                }
+                                //                                if ($val['platform_type'] ==1){
+                                //                                    \Think\Log::write("第四次");
+                                //                                    \Think\Log::write($item_platform_sku_detail);
+                                //                                    if ($item_platform_sku_detail['stock'] ==0 && $stock_num >0 ){
+                                //                                        $value['sku'] = $item_platform_sku_detail['platform_sku'];
+                                //                                        $url  =  config('url.zeelool_url').'magic/product/productArrival';
+                                //                                        $this->submission_post($url,$value);
+                                //                                    }
+                                //                                }
                                 //最后一个站点 剩余数量分给最后一个站
                                 if (($all_num - $key) == 1) {
                                     $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setInc('stock', $stock_num);
@@ -1757,15 +1749,15 @@ class ScmWarehouse extends Scm
                             foreach ($item_platform_sku as $key => $val) {
                                 $item_platform_sku_detail = $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->find();
                                 //最后一个站点 剩余数量分给最后一个站
-//                                if ($val['platform_type'] ==1){
-//                                    \Think\Log::write("第五次");
-//                                    \Think\Log::write($item_platform_sku_detail);
-//                                    if ($item_platform_sku_detail['stock'] ==0 && $stock_num >0 ){
-//                                        $value['sku'] = $item_platform_sku_detail['platform_sku'];
-//                                        $url  =  config('url.zeelool_url').'magic/product/productArrival';
-//                                        $this->submission_post($url,$value);
-//                                    }
-//                                }
+                                //                                if ($val['platform_type'] ==1){
+                                //                                    \Think\Log::write("第五次");
+                                //                                    \Think\Log::write($item_platform_sku_detail);
+                                //                                    if ($item_platform_sku_detail['stock'] ==0 && $stock_num >0 ){
+                                //                                        $value['sku'] = $item_platform_sku_detail['platform_sku'];
+                                //                                        $url  =  config('url.zeelool_url').'magic/product/productArrival';
+                                //                                        $this->submission_post($url,$value);
+                                //                                    }
+                                //                                }
 
                                 if (($all_num - $key) == 1) {
                                     $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setInc('stock', $stock_num);
@@ -1955,8 +1947,9 @@ class ScmWarehouse extends Scm
         } else {
             $this->error(__($msg . '失败'), [], 519);
         }
-
     }
+
+
     /**
      * post方式请求接口
      *
@@ -1965,7 +1958,8 @@ class ScmWarehouse extends Scm
      * @since 
      * @return
      */
-    function submission_post($url,$value){
+    function submission_post($url, $value)
+    {
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL, $url);
         curl_setopt($curl, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
@@ -1975,14 +1969,14 @@ class ScmWarehouse extends Scm
         curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_TIMEOUT, 20);
-        $content =json_decode(curl_exec($curl),true);
+        $content = json_decode(curl_exec($curl), true);
         curl_close($curl);
         return $content;
     }
 
 
     /***************************************盘点单******************************************/
-        /**
+    /**
      * 盘点单列表--ok
      *
      * @参数 string query  查询内容
@@ -2042,15 +2036,15 @@ class ScmWarehouse extends Scm
             unset($list[$key]['status']);
             $list[$key]['check_status'] = $check_status[$value['check_status']];
             //按钮
-            $list[$key]['show_start'] = 0 == $value['status'] ? 1 : 0;//开始盘点按钮
-            $list[$key]['show_continue'] = 1 == $value['status'] ? 1 : 0;//继续盘点按钮
-            $list[$key]['show_examine'] = 2 == $value['status'] && 1 == $value['check_status'] ? 1 : 0;//审核按钮
-            $list[$key]['show_detail'] = in_array($value['check_status'], [2, 3, 4]) ? 1 : 0;//详情按钮
+            $list[$key]['show_start'] = 0 == $value['status'] ? 1 : 0; //开始盘点按钮
+            $list[$key]['show_continue'] = 1 == $value['status'] ? 1 : 0; //继续盘点按钮
+            $list[$key]['show_examine'] = 2 == $value['status'] && 1 == $value['check_status'] ? 1 : 0; //审核按钮
+            $list[$key]['show_detail'] = in_array($value['check_status'], [2, 3, 4]) ? 1 : 0; //详情按钮
             //计算已盘点数量
             $count = $this->_inventory_item->where(['inventory_id' => $value['id']])->count();
             $sum = $this->_inventory_item->where(['inventory_id' => $value['id'], 'is_add' => 0])->count();
 
-            $list[$key]['sum_count'] = $sum . '/' . $count;//需要fa_inventory_item表数据加和
+            $list[$key]['sum_count'] = $sum . '/' . $count; //需要fa_inventory_item表数据加和
         }
 
         $this->success('', ['list' => $list], 200);
@@ -2109,7 +2103,7 @@ class ScmWarehouse extends Scm
                 'a.sku' => ['in', $item_sku]
             ];
             if ($query) {
-                $where['a.sku|b.coding'] = ['like', '%' . $query . '%'];//coding库位编码，library_name库位名称
+                $where['a.sku|b.coding'] = ['like', '%' . $query . '%']; //coding库位编码，library_name库位名称
             }
 
             $offset = ($page - 1) * $page_size;
@@ -2168,14 +2162,14 @@ class ScmWarehouse extends Scm
                             $this->error(__($v['sku'] . '不存在'), [], 525);
                         }
 
-                        $list[$k]['name'] = $item['name'];//商品名
-                        $list[$k]['distribution_occupy_stock'] = $item['distribution_occupy_stock'] ?? 0;//配货站用数量
-                        $real_time_qty = ($item['stock'] * 1 - $item['distribution_occupy_stock'] * 1);//实时库存
+                        $list[$k]['name'] = $item['name']; //商品名
+                        $list[$k]['distribution_occupy_stock'] = $item['distribution_occupy_stock'] ?? 0; //配货站用数量
+                        $real_time_qty = ($item['stock'] * 1 - $item['distribution_occupy_stock'] * 1); //实时库存
                         $list[$k]['real_time_qty'] = $real_time_qty ?? 0;
-                        $list[$k]['available_stock'] = $item['available_stock'] ?? 0;//可用库存
+                        $list[$k]['available_stock'] = $item['available_stock'] ?? 0; //可用库存
                         //                        $list[$k]['inventory_qty'] = $v['inventory_qty'] ?? 0;//盘点数量
                         //                        $list[$k]['error_qty'] = $v['error_qty'] ?? 0;//误差数量
-                        $list[$k]['remark'] = $v['remark'];//备注
+                        $list[$k]['remark'] = $v['remark']; //备注
                     }
 
                     //添加明细表数据
@@ -2202,9 +2196,7 @@ class ScmWarehouse extends Scm
             } else {
                 $this->error(__('No rows were inserted'), [], 525);
             }
-
         }
-
     }
 
     /**
@@ -2300,13 +2292,13 @@ class ScmWarehouse extends Scm
 
         if ($do_type == 1) {
             //提交
-            $params['status'] = 2;//盘点完成
+            $params['status'] = 2; //盘点完成
             $params['end_time'] = date('Y-m-d H:i:s', time());
-            $is_add = 1;//更新为盘点
+            $is_add = 1; //更新为盘点
             $msg = '提交';
         } else {
             //保存
-            $is_add = 0;//未盘点
+            $is_add = 0; //未盘点
             $params['status'] = 1;
             $msg = '保存';
         }
@@ -2351,17 +2343,17 @@ class ScmWarehouse extends Scm
                         throw new Exception('SKU=>' . $v['sku'] . '不存在');
                     }
                     $save_data = [];
-                    $save_data['is_add'] = $is_add;//是否盘点
-                    $save_data['inventory_qty'] = $v['inventory_qty'] ?? 0;//盘点数量
-                    $save_data['error_qty'] = $save_data['inventory_qty'] - $item_row[$v['sku']];//误差数量
-                    $save_data['remark'] = $v['remark'];//备注
-                    $save_data['real_time_qty'] = $sku_item['stock'];//实时库存即为商品库存,fa_item表中real_time_qty字段无效
-                    $save_data['distribution_occupy_stock'] = $sku_item['distribution_occupy_stock'];//配货占用库存
-                    $save_data['available_stock'] = $sku_item['available_stock'];//可用库存
+                    $save_data['is_add'] = $is_add; //是否盘点
+                    $save_data['inventory_qty'] = $v['inventory_qty'] ?? 0; //盘点数量
+                    $save_data['error_qty'] = $save_data['inventory_qty'] - $item_row[$v['sku']]; //误差数量
+                    $save_data['remark'] = $v['remark']; //备注
+                    $save_data['real_time_qty'] = $sku_item['stock']; //实时库存即为商品库存,fa_item表中real_time_qty字段无效
+                    $save_data['distribution_occupy_stock'] = $sku_item['distribution_occupy_stock']; //配货占用库存
+                    $save_data['available_stock'] = $sku_item['available_stock']; //可用库存
                     $sku = $this->_inventory_item->where(['inventory_id' => $inventory_id, 'sku' => $v['sku']])->value('sku');
                     if (empty($sku)) {
-                        $save_data['inventory_id'] = $inventory_id;//SKU
-                        $save_data['sku'] = $v['sku'];//SKU
+                        $save_data['inventory_id'] = $inventory_id; //SKU
+                        $save_data['sku'] = $v['sku']; //SKU
                         $this->_inventory_item->allowField(true)->isUpdate(false)->data($save_data)->save();
                     } else {
                         $this->_inventory_item->where(['inventory_id' => $inventory_id, 'sku' => $v['sku']])->update($save_data);
@@ -2411,7 +2403,6 @@ class ScmWarehouse extends Scm
         } else {
             $this->error(__($msg . '失败'), [], 511);
         }
-
     }
 
     /**
@@ -2594,7 +2585,6 @@ class ScmWarehouse extends Scm
                                 }
                             }
                         }
-
                     }
 
                     //修改库存结果为真
@@ -2731,7 +2721,11 @@ class ScmWarehouse extends Scm
      */
     public function inventory_warehouse_area()
     {
-        
+        if ($this->request->isPost()) {
+            $list = $this->_warehouse_area->getRowsData();
+            $this->success('获取成功', $list, 200);
+        }
+        $this->error('网络异常', [], 400);
     }
 
     /***************************************end******************************************/
@@ -2753,5 +2747,4 @@ class ScmWarehouse extends Scm
 
         $this->success('扫码成功', [], 200);
     }
-
 }
