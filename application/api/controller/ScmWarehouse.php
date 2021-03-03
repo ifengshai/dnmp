@@ -28,6 +28,7 @@ use app\admin\model\warehouse\Inventory;
 use app\admin\model\warehouse\InventoryItem;
 use app\admin\model\warehouse\StockSku;
 use app\admin\model\warehouse\WarehouseArea;
+use app\admin\model\warehouse\StockHouse;
 
 /**
  * 供应链出入库接口类
@@ -190,6 +191,13 @@ class ScmWarehouse extends Scm
      */
     protected $_store_sku = null;
 
+    /**
+     * 库位模型对象
+     * @var object
+     * @access protected
+     */
+    protected $_store_house = null;
+
     protected function _initialize()
     {
         parent::_initialize();
@@ -216,6 +224,7 @@ class ScmWarehouse extends Scm
         $this->_inventory_item = new InventoryItem();
         $this->_store_sku = new StockSku();
         $this->_warehouse_area = new WarehouseArea();
+        $this->_store_house = new StockHouse();
     }
 
     /**
@@ -2051,7 +2060,7 @@ class ScmWarehouse extends Scm
     }
 
     /**
-     * 创建盘点单页面/筛选/保存
+     * 创建盘点单页面/筛选/保存  版本2.0
      *
      * @参数 int type  新建入口 1.筛选，2.保存
      * @参数 json item_sku  sku集合
@@ -2065,56 +2074,63 @@ class ScmWarehouse extends Scm
         $info = [];
         if ($type == 1) {
             //创建盘点单筛选 ok
-            $query = $this->request->request('query');
+            $coding = $this->request->request('coding'); //库位编码
+            $area_name = $this->request->request('area_name'); //库区名称
+            $sku = $this->request->request('sku'); //sku筛选
             $start_stock = $this->request->request('start_stock');
             $end_stock = $this->request->request('end_stock');
             $page = $this->request->request('page');
             $page_size = $this->request->request('page_size');
-
             empty($page) && $this->error(__('Page can not be empty'), [], 522);
             empty($page_size) && $this->error(__('Page size can not be empty'), [], 523);
-
-            $item_where = [
-                'is_open' => ['in', [1, 2]]
-            ];
 
             //排除待盘点sku
             $sku_arr = $this->_inventory_item->where('is_add', 0)->column('sku');
             if ($sku_arr) {
-                $item_where['sku'] = ['not in', $sku_arr];
+                $where['sku'] = ['not in', $sku_arr];
             }
 
             //库存范围
             if ($start_stock && $end_stock) {
+                $item_where = [
+                    'is_open' => ['in', [1, 2]]
+                ];
                 $item_where['stock'] = ['between', [$start_stock, $end_stock]];
+                $item_sku = $this->_item
+                    ->where($item_where)
+                    ->column('sku');
+                $where['a.sku'] = ['in', $item_sku];
             }
 
-            //查询商品表
-            $item_sku = $this->_item
-                ->where($item_where)
-                ->limit(0, 1000)
-                ->column('sku');
-            $info_no = [];
-            $info_no['list'] = [];
-            empty($item_sku) && $this->success('', ['info' => $info_no], 200);
-
-            $where = [
-                'a.is_del' => 1,
-                'a.sku' => ['in', $item_sku]
-            ];
-            if ($query) {
-                $where['a.sku|b.coding'] = ['like', '%' . $query . '%']; //coding库位编码，library_name库位名称
+            //库区筛选
+            if ($area_name) {
+                $where['c.name'] = ['like',  $area_name . '%']; //库区名称
             }
 
+            //库位筛选
+            if ($coding) {
+                $where['b.coding'] = ['like',  $coding . '%']; //coding库位编码，library_name库位名称
+            }
+
+            //sku筛选
+            if ($sku) {
+                $where['a.sku'] = ['like',  $sku . '%']; //sku筛选
+            }
+
+            $where['a.is_del'] = 1;
+            $where['b.status'] = 1;
+            $where['b.type'] = 1;
+            
             $offset = ($page - 1) * $page_size;
             $limit = $page_size;
 
             //获取SKU库位绑定表（fa_store_sku）数据列表
             $list = $this->_store_sku
                 ->alias('a')
-                ->field('a.id,a.sku,b.coding')
+                ->field('a.id,a.sku,b.coding,c.name')
                 ->where($where)
-                ->join(['fa_store_house' => 'b'], 'a.store_id=b.id', 'left')
+                ->join(['fa_store_house' => 'b'], 'a.store_id=b.id')
+                ->join(['fa_warehouse_area' => 'c'], 'b.area_id=c.id')
                 ->order('a.id', 'desc')
                 ->limit($offset, $limit)
                 ->select();
@@ -2722,11 +2738,55 @@ class ScmWarehouse extends Scm
     public function inventory_warehouse_area()
     {
         if ($this->request->isPost()) {
-            $list = $this->_warehouse_area->getRowsData();
+            $area_name = $this->request->request('area_name'); //库区名称
+            $list = $this->_warehouse_area->getRowsData($area_name);
             $this->success('获取成功', $list, 200);
         }
-        $this->error('网络异常', [], 400);
+        $this->error('网络异常', [], 401);
     }
+
+    /**
+     * 获取库位
+     *
+     * @Description
+     * @author wpl
+     * @since 2021/03/03 09:14:36 
+     * @return void
+     */
+    public function inventory_warehouse_location()
+    {
+        if ($this->request->isPost()) {
+            $area_id = $this->request->request('area_id'); //库区id 多个逗号拼接
+            $coding = $this->request->request('coding'); //库位编码
+            empty($area_id) && $this->error(__('库区id不能为空'), [], 403);
+            $list = $this->_store_house->getLocationData($area_id, $coding);
+            $this->success('获取成功', $list, 200);
+        }
+        $this->error('网络异常', [], 401);
+    }
+
+    /**
+     * 根据库位获取对应SKU
+     *
+     * @Description
+     * @author wpl
+     * @since 2021/03/03 13:38:05 
+     * @return void
+     */
+    public function inventory_location_sku()
+    {
+        if ($this->request->isPost()) {
+            $location_id = $this->request->request('location_id'); //库位id 多个逗号拼接
+            $sku = $this->request->request('sku'); //sku
+            empty($location_id) && $this->error(__('库位id不能为空'), [], 403);
+            $list = $this->_store_sku->getRowsData($location_id, $sku);
+            $this->success('获取成功', $list, 200);
+        }
+        $this->error('网络异常', [], 401);
+    }
+
+
+
 
     /***************************************end******************************************/
 
