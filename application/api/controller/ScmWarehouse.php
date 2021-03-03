@@ -3,6 +3,7 @@
 namespace app\api\controller;
 
 use app\admin\model\warehouse\WarehouseTransferOrder;
+use app\admin\model\warehouse\WarehouseTransferOrderItem;
 use think\Db;
 use think\Exception;
 use think\exception\PDOException;
@@ -227,6 +228,7 @@ class ScmWarehouse extends Scm
         $this->_warehouse_area = new WarehouseArea();
         $this->_store_house = new StockHouse();
         $this->_warehouse_transfer_order = new WarehouseTransferOrder();
+        $this->_warehouse_transfer_order_item = new WarehouseTransferOrderItem();
     }
 
     /**
@@ -2794,9 +2796,8 @@ class ScmWarehouse extends Scm
     {
         if ($this->request->isPost()) {
             $location_id = $this->request->request('location_id'); //库位id 多个逗号拼接
-            $sku = $this->request->request('sku'); //sku
             empty($location_id) && $this->error(__('库位id不能为空'), [], 403);
-            $list = $this->_store_sku->getRowsData($location_id, $sku);
+            $list = $this->_store_sku->getRowsData($location_id);
             $this->success('获取成功', $list, 200);
         }
         $this->error('网络异常', [], 401);
@@ -2876,38 +2877,29 @@ class ScmWarehouse extends Scm
 
     /**
      * 创建库内调拨单页面/筛选/保存
-     *
-     * @参数 int type  新建入口 1.筛选，2.保存
-     * @参数 json item_sku  sku集合
-     * @return mixed
-     * @author jhh
+     * Created by Phpstorm.
+     * User: jhh
+     * Date: 2021/3/3
+     * Time: 15:54:44
      */
     public function transfer_order_add()
     {
         $item_sku = $this->request->request("item_sku");
-        empty($item_sku) && $this->error(__('sku集合不能为空！！'), [], 523);
-        $item_sku = html_entity_decode($item_sku);
-        $item_sku = array_filter(json_decode($item_sku, true));
-        if (count(array_filter($item_sku)) < 1) {
-            $this->error(__('sku集合不能为空！！'), [], 524);
-        }
-        $no_sku = [];
-        foreach ($item_sku as $k => $v) {
-            $item_id = $this->_item->where('sku', $v['sku'])->value('id');
-            if (!$item_id) {
-                $no_sku[] = $v['sku'];
-            }
-        }
-        if ($no_sku) $this->error(__('SKU：' . implode(',', $no_sku) . '不存在'), [], 523);
+        //调出库位
+        $call_out_site = $this->request->request("call_out_site");
+        //调入库位
+        $call_in_site = $this->request->request("call_in_site");
 
         $result = false;
-        $this->_inventory->startTrans();
-        $this->_inventory_item->startTrans();
+        $this->_warehouse_transfer_order->startTrans();
+        $this->_warehouse_transfer_order_item->startTrans();
         try {
-            //保存--创建盘点单
+            //保存--创建库内调拨单
             $arr = [];
             $arr['number'] = 'IS' . date('YmdHis') . rand(100, 999) . rand(100, 999);
             $arr['create_person'] = $this->auth->nickname;
+            $arr['call_out_site'] = $call_out_site;
+            $arr['call_in_site'] = $call_in_site;
             $arr['createtime'] = date('Y-m-d H:i:s', time());
             $result = $this->_inventory->allowField(true)->save($arr);
             if ($result) {
@@ -2953,212 +2945,6 @@ class ScmWarehouse extends Scm
             $this->success('添加成功！！', '', 200);
         } else {
             $this->error(__('No rows were inserted'), [], 525);
-        }
-    }
-
-    /**
-     * 盘点单详情/开始盘点/继续盘点页面--ok
-     *
-     * @参数 int inventory_id  盘点单ID
-     * @return mixed
-     * @author wgj
-     */
-    public function transfer_order_edit()
-    {
-        $inventory_id = $this->request->request('inventory_id');
-        empty($inventory_id) && $this->error(__('盘点单ID不能为空'), [], 530);
-        //获取盘点单数据
-        $_inventory_info = $this->_inventory->get($inventory_id);
-        empty($_inventory_info) && $this->error(__('盘点单不存在'), [], 531);
-        //        $inventory_item_info = $_inventory_item->field('id,sku,inventory_qty,error_qty,real_time_qty,available_stock,distribution_occupy_stock')->where(['inventory_id'=>$inventory_id])->select();
-
-        $inventory_item_info = $this->_inventory_item
-            ->field('id,sku,inventory_qty,error_qty,real_time_qty,available_stock,distribution_occupy_stock')
-            ->where(['inventory_id' => $inventory_id])
-            ->order('id', 'desc')
-            ->select();
-        $item_list = collection($inventory_item_info)->toArray();
-
-        //获取条形码数据
-        $bar_code_list = $this->_product_bar_code_item
-            ->where(['inventory_id' => $inventory_id])
-            ->field('sku,code')
-            ->select();
-        $bar_code_list = collection($bar_code_list)->toArray();
-
-        foreach (array_filter($item_list) as $key => $value) {
-            $item_list[$key]['stock'] = $this->_item->where('sku', $value['sku'])->value('stock');
-            //            $stock = $this->_item->where('sku',$value['sku'])->value('stock');
-            $sku = $value['sku'];
-            //条形码列表
-            $sku_agg = array_filter($bar_code_list, function ($v) use ($sku) {
-                if ($v['sku'] == $sku) {
-                    return $v;
-                }
-            });
-
-            if (!empty($sku_agg)) {
-                array_walk($sku_agg, function (&$value, $k, $p) {
-                    $value = array_merge($value, $p);
-                }, ['is_new' => 0]);
-            }
-
-            $item_list[$key]['sku_agg'] = array_values($sku_agg);
-        }
-
-        //盘点单所需数据
-        $info = [
-            'inventory_id' => $_inventory_info['id'],
-            'inventory_number' => $_inventory_info['number'],
-            //            'status'=>$_inventory_info['status'],
-            'item_list' => !empty($item_list) ? $item_list : []
-        ];
-
-        $this->success('', ['info' => $info], 200);
-    }
-
-    /**
-     * 开始盘点页面，保存/提交--ok
-     *
-     * @参数 int inventory_id  盘点单ID
-     * @参数 int do_type  提交类型 1提交-盘点结束 2保存-盘点中
-     * @参数 json item_sku  sku数据集合
-     * @return mixed
-     * @author wgj
-     */
-    public function transfer_order_submit()
-    {
-        $do_type = $this->request->request('do_type');
-        $item_sku = $this->request->request("item_data");
-        empty($item_sku) && $this->error(__('sku集合不能为空！！'), [], 508);
-        $item_sku = json_decode(htmlspecialchars_decode($item_sku), true);
-        empty($item_sku) && $this->error(__('sku集合不能为空'), [], 403);
-        $item_sku = array_filter($item_sku);
-
-        $inventory_id = $this->request->request("inventory_id");
-        empty($inventory_id) && $this->error(__('盘点单号不能为空'), [], 541);
-        //获取盘点单数据
-        $row = $this->_inventory->get($inventory_id);
-        empty($row) && $this->error(__('盘点单不存在'), [], 543);
-        if ($row['status'] > 1) {
-            $this->error(__('此状态不能编辑'), [], 544);
-        }
-        $item_row = $this->_inventory_item
-            ->where('inventory_id', $inventory_id)
-            ->column('real_time_qty', 'sku');
-
-        if ($do_type == 1) {
-            //提交
-            $params['status'] = 2; //盘点完成
-            $params['end_time'] = date('Y-m-d H:i:s', time());
-            $is_add = 1; //更新为盘点
-            $msg = '提交';
-        } else {
-            //保存
-            $is_add = 0; //未盘点
-            $params['status'] = 1;
-            $msg = '保存';
-        }
-
-        //检测条形码是否已绑定
-        foreach (array_filter($item_sku) as $key => $value) {
-            /*$info_id = $this->_inventory_item->where(['sku' => $value['sku'],'is_add'=>0,'inventory_id'=>['neq',$inventory_id]])->column('id');
-            !empty($info_id) && $this->error(__('SKU=>'.$value['sku'].'存在未完成的盘点单'), [], 543);*/
-            $sku_code = array_column($value['sku_agg'], 'code');
-            if (count($value['sku_agg']) != count(array_unique($sku_code))) $this->error(__('条形码有重复，请检查'), [], 405);
-
-            $where = [];
-            $where['inventory_id'] = [['>', 0], ['neq', $inventory_id]];
-            $where['code'] = ['in', $sku_code];
-            $inventory_info = $this->_product_bar_code_item
-                ->where($where)
-                ->field('code')
-                ->find();
-            if (!empty($inventory_info['code'])) {
-                $this->error(__('条形码:' . $inventory_info['code'] . ' 已绑定,请移除'), [], 405);
-                exit;
-            }
-        }
-
-        //保存不需要编辑盘点单
-        //编辑盘点单明细item
-        $result = false;
-        $this->_inventory_item->startTrans();
-        $this->_product_bar_code_item->startTrans();
-        try {
-            //更新数据
-            //提交盘点单状态为已完成，保存盘点单状态为盘点中
-            $result = $this->_inventory->allowField(true)->save($params, ['id' => $inventory_id]);
-            if ($result !== false) {
-                $where_code = [];
-                $sku_in = [];
-                foreach (array_filter($item_sku) as $k => $v) {
-                    $item_map['sku'] = $v['sku'];
-                    $item_map['is_del'] = 1;
-                    $sku_item = $this->_item->where($item_map)->field('stock,available_stock,distribution_occupy_stock')->find();
-                    if (empty($sku_item)) {
-                        throw new Exception('SKU=>' . $v['sku'] . '不存在');
-                    }
-                    $save_data = [];
-                    $save_data['is_add'] = $is_add; //是否盘点
-                    $save_data['inventory_qty'] = $v['inventory_qty'] ?? 0; //盘点数量
-                    $save_data['error_qty'] = $save_data['inventory_qty'] - $item_row[$v['sku']]; //误差数量
-                    $save_data['remark'] = $v['remark']; //备注
-                    $save_data['real_time_qty'] = $sku_item['stock']; //实时库存即为商品库存,fa_item表中real_time_qty字段无效
-                    $save_data['distribution_occupy_stock'] = $sku_item['distribution_occupy_stock']; //配货占用库存
-                    $save_data['available_stock'] = $sku_item['available_stock']; //可用库存
-                    $sku = $this->_inventory_item->where(['inventory_id' => $inventory_id, 'sku' => $v['sku']])->value('sku');
-                    if (empty($sku)) {
-                        $save_data['inventory_id'] = $inventory_id; //SKU
-                        $save_data['sku'] = $v['sku']; //SKU
-                        $this->_inventory_item->allowField(true)->isUpdate(false)->data($save_data)->save();
-                    } else {
-                        $this->_inventory_item->where(['inventory_id' => $inventory_id, 'sku' => $v['sku']])->update($save_data);
-                    }
-                    //                    $this->_inventory_item->where(['inventory_id' => $inventory_id, 'sku' => $v['sku']])->update($save_data);
-                    //盘点单绑定条形码数组组装
-                    foreach ($v['sku_agg'] as $k_code => $v_code) {
-                        if (!empty($v_code)) {
-                            $where_code[] = $v_code['code'];
-                        }
-                    }
-                    //盘点单移除条形码
-                    if (!empty($v['remove_agg'])) {
-                        $code_clear = [
-                            'inventory_id' => 0
-                        ];
-                        $this->_product_bar_code_item->where(['code' => ['in', $v['remove_agg']]])->update($code_clear);
-                    }
-                }
-
-                //盘点单绑定条形码执行
-                if ($where_code) {
-                    $this->_product_bar_code_item
-                        ->allowField(true)
-                        ->isUpdate(true, ['code' => ['in', $where_code]])
-                        ->save(['inventory_id' => $inventory_id]);
-                }
-            }
-            $this->_inventory_item->commit();
-            $this->_product_bar_code_item->commit();
-        } catch (ValidateException $e) {
-            $this->_inventory_item->rollback();
-            $this->_product_bar_code_item->rollback();
-            $this->error($e->getMessage(), [], 444);
-        } catch (PDOException $e) {
-            $this->_inventory_item->rollback();
-            $this->_product_bar_code_item->rollback();
-            $this->error($e->getMessage(), [], 444);
-        } catch (Exception $e) {
-            $this->_inventory_item->rollback();
-            $this->_product_bar_code_item->rollback();
-            $this->error($e->getMessage(), [], 444);
-        }
-
-        if ($result !== false) {
-            $this->success($msg . '成功！！', '', 200);
-        } else {
-            $this->error(__($msg . '失败'), [], 511);
         }
     }
 
