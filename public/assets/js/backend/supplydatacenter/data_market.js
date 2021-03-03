@@ -190,7 +190,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                             legend: { //图例配置
                                 padding: 5,
                                 top: '2%',
-                                data: ['月平均库存', '库销比']
+                                data: ['月平均库存', '采销比']
                             },
                             xAxis: [
                                 {
@@ -207,7 +207,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                                 },
                                 {
                                     type: 'value',
-                                    name: '库销比',
+                                    name: '采销比',
                                     axisLabel: {
                                         formatter: '{value} %'
                                     }
