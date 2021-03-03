@@ -102,7 +102,7 @@ class Scm extends Api
                 [
                     'name' => '库内调拨',
                     'link' => 'warehouse/allocation',
-                    'icon' => '/assets/img/distribution/hedandaiqu.png',
+                    'icon' => '/assets/img/distribution/kuneidiaobo.png',
                     'href' => 'com.nextmar.mojing.ui.allocation.AllocationListActivity'
                 ]
             ],
