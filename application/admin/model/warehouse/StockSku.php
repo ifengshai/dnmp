@@ -48,12 +48,9 @@ class StockSku extends Model
      * @param [type] $sku s
      * @return void
      */
-    public function getRowsData($store_id, $sku)
+    public function getRowsData($store_id)
     {
-        if ($sku) {
-            $where['sku'] = ['like', $sku . '%'];
-        }
-        $list = $this->field('sku')->where($where)->where(['store_id' => ['in', $store_id], 'is_del' => 1])->select();
+        $list = $this->field('sku')->where(['store_id' => ['in', $store_id], 'is_del' => 1])->select();
         return collection($list)->toArray();
     }
 }
