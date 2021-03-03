@@ -855,7 +855,7 @@ class Check extends Backend
         if ($ids) {
             $map['check.id'] = ['in', $ids];
         }
-
+        dump($map);
         list($where) = $this->buildparams();
         $list = $this->model->alias('check')
             ->join(['fa_purchase_order' => 'purchaseorder'], 'check.purchase_id=purchaseorder.id')
