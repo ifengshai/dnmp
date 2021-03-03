@@ -862,7 +862,8 @@ class Check extends Backend
             ->join(['fa_supplier' => 'supplier'], 'check.supplier_id=supplier.id')
             ->join(['fa_check_order_item' => 'b'], 'b.check_id=check.id')
 //            ->join(['fa_purchase_order_item' => 'c'], 'b.purchase_id=c.purchase_id and c.sku=b.sku')
-            ->field('check.*,b.*,c.purchase_price,purchaseorder.purchase_number,purchaseorder.create_person as person,purchaseorder.purchase_remark,supplier.supplier_name,purchaseorder.is_new_product,purchaseorder.type,purchaseorder.customized_procurement')
+//                c.purchase_price,
+            ->field('check.*,b.*,purchaseorder.purchase_number,purchaseorder.create_person as person,purchaseorder.purchase_remark,supplier.supplier_name,purchaseorder.is_new_product,purchaseorder.type,purchaseorder.customized_procurement')
             ->where($where)
             ->where($map)
             ->order('check.id desc')
