@@ -23,4 +23,17 @@ class WarehouseArea extends Model
     // 追加属性
     protected $append = [];
 
+    /**
+     * 获取库区数据
+     *
+     * @Description
+     * @author wpl
+     * @since 2021/03/03 09:18:37 
+     * @return void
+     */
+    public function getRowsData()
+    {
+        $list = $this->where('status', 1)->field('id,coding,name,type')->select();
+        return collection($list)->toArray();
+    }
 }
