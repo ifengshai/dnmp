@@ -156,10 +156,10 @@ class PurchasePay extends Backend
                         $arr['dept_id'] = $admin['department_id'];
                         if ($params['pay_grand_total'] >= 300000){
                             // //任萍 王涛 陈见 王剑 李亚方
-                            $arr['approvers'] = '1007304767660594,0221135665945008,405544201227897,0647044715938022,171603353926064429';
+                            $arr['approvers'] = '1007304767660594,0221135665945008,405544201227897,0647044715938022,01223742335734031749';
                         }else{
                             // //任萍 王涛 王剑 李亚方
-                            $arr['approvers'] = '1007304767660594,0221135665945008,0647044715938022,171603353926064429';
+                            $arr['approvers'] = '1007304767660594,0221135665945008,0647044715938022,01223742335734031749';
                         }
                         // //抄送 屈金金
                         $arr['cc_list'] = '204112301323897192';
@@ -181,7 +181,7 @@ class PurchasePay extends Backend
                                     $reasons[$kk] = [
                                         ['name' => '采购品名', 'value' => $vv['name']],
                                         ['name' => '采购单号', 'value' => $vv['number']],
-                                        ['name' => '1688单号', 'value' => ''],
+                                        ['name' => '1688单号', 'value' => '0'],
                                         ['name' => '采购批次', 'value' =>  $vv['batch'] ? $vv['batch']:0],
                                         ['name' => '商品分类', 'value' => $type ? $type:'镜框'],
                                         ['name' => '采购数量', 'value' => $vv['num']],
@@ -226,7 +226,7 @@ class PurchasePay extends Backend
                                     [
                                         ['name' => '采购品名', 'value' => $reason['name']],
                                         ['name' => '采购单号', 'value' => $params['purchase_number']],
-                                        ['name' => '1688单号', 'value' => $params['1688_number']],
+                                        ['name' => '1688单号', 'value' => $params['1688_number']  ?: 0],
                                         ['name' => '采购批次', 'value' => '0'],
                                         ['name' => '商品分类', 'value' => $type ? $type:'镜框'],
                                         ['name' => '采购数量', 'value' => $reason['num']],
@@ -243,10 +243,10 @@ class PurchasePay extends Backend
                                 ['name' => '收款方开户行', 'value' => $params['opening_bank_address'] ? $params['opening_bank_address'] : '无'],
                             ];
                         }
-
+                       
                         $res = $initiate_approval->initiate_approval($arr);
                         if ($res['errcode'] != 0 || $res === false) {
-                            throw new Exception('发起审批失败'.$res['errmsg']);
+                            throw new Exception('发起审批失败'.$res['errcode'] . '----' . $res['errmsg']);
                         }
                     }
                     $insert['process_instance_id'] = $res['process_instance_id'];
@@ -437,11 +437,11 @@ class PurchasePay extends Backend
                         $arr['originator_user_id'] = $admin['userid'];
                         $arr['dept_id'] = $admin['department_id'];
                         if ($params['pay_grand_total'] >= 300000){
-                            // //任萍 王涛 陈见 王剑 李亚方
-                            $arr['approvers'] = '1007304767660594,0221135665945008,405544201227897,0647044715938022,171603353926064429';
+                            // //任萍 王涛 陈见 王剑 出纳 - 蔡鸣慧
+                            $arr['approvers'] = '1007304767660594,0221135665945008,405544201227897,0647044715938022,01223742335734031749';
                         }else{
-                            // //任萍 王涛 王剑 李亚方
-                            $arr['approvers'] = '1007304767660594,0221135665945008,0647044715938022,171603353926064429';
+                            // //任萍 王涛 王剑 出纳 - 蔡鸣慧
+                            $arr['approvers'] = '1007304767660594,0221135665945008,0647044715938022,01223742335734031749';
                         }
                         // //抄送 屈金金
                         $arr['cc_list'] = '204112301323897192';
@@ -461,6 +461,7 @@ class PurchasePay extends Backend
                                     $reasons[$kk] = [
                                         ['name' => '采购品名', 'value' => $vv['name']],
                                         ['name' => '采购单号', 'value' => $vv['number']],
+                                        ['name' => '1688单号', 'value' => '0'],
                                         ['name' => '采购批次', 'value' =>  $vv['batch'] ? $vv['batch']:0],
                                         ['name' => '商品分类', 'value' => $type ? $type:'镜框'],
                                         ['name' => '采购数量', 'value' => $vv['num']],
@@ -502,6 +503,7 @@ class PurchasePay extends Backend
                                     [
                                         ['name' => '采购品名', 'value' => $reason['name']],
                                         ['name' => '采购单号', 'value' => $params['purchase_number']],
+                                        ['name' => '1688单号', 'value' => $params['1688_number'] ?: 0],
                                         ['name' => '采购批次', 'value' => '0'],
                                         ['name' => '商品分类', 'value' => $type ? $type:'镜框'],
                                         ['name' => '采购数量', 'value' => $reason['num']],
@@ -840,14 +842,10 @@ class PurchasePay extends Backend
     }
 
 
-    public function category($category_id)
+    protected function category($category_id)
     {
         $item_category = new ItemCategory();
         $sku_category = $item_category->where('id',$category_id)->find();
-        if ($sku_category['pid'] !== 0){
-            $this->category($sku_category['pid']);
-        }else{
-            return $sku_category['name'];
-        }
+        return $sku_category['name'];
     }
 }

@@ -1321,7 +1321,7 @@ class CustomerService extends Backend
 //        $arr[] = 75;
 
 //        $result  = Admin::where('id', 'in', $arr)->field('id,nickname')->select();
-        $result = Admin::where('group_id','in',['1','2'])->field('id,group_id,nickname')->select();
+        $result = Admin::where('group_id','in',['1','2','3'])->field('id,group_id,nickname')->select();
 
         if (!empty($result)) {
             $result = collection($result)->toArray();
@@ -1342,7 +1342,7 @@ class CustomerService extends Backend
                 }elseif ($v['group_id'] ==2){
                     $result[$k]['group'] = 'B组';
                 }else{
-                    $result[$k]['group'] = '未知';
+                    $result[$k]['group'] = '-';
                 }
             }
         }
@@ -1628,7 +1628,7 @@ class CustomerService extends Backend
                 } elseif (in_array($v['due_id'], $kefumanage[117]) || (117 == $v['due_id'])) {
                     $customerReply[$k]['group'] = 'A组';
                 } else {
-                    $customerReply[$k]['group'] = '未知';
+                    $customerReply[$k]['group'] = '-';
                 }
                 if (array_key_exists($v['due_id'], $info)) {
                     $customerReply[$k]['create_user_name'] = $info[$v['due_id']];
@@ -1672,7 +1672,7 @@ class CustomerService extends Backend
         if (1 == $customer_type || 2 == $customer_type ) {
             $cust_where['group_id'] = ['eq',$customer_type];
         } else{
-            $cust_where['group_id'] = ['in',[1,2]];
+            $cust_where['group_id'] = ['in',[1,2,3]];
         }
 
         //获取对应的分组员工
@@ -1700,7 +1700,7 @@ class CustomerService extends Backend
             }elseif ($v['group_id'] ==2){
                 $allCustomers[$k]['group'] = 'B组';
             }else{
-                $allCustomers[$k]['group'] = '未知';
+                $allCustomers[$k]['group'] = '-';
             }
         }
 
@@ -1975,7 +1975,7 @@ class CustomerService extends Backend
                 } elseif (in_array($v['create_user_id'], $kefumanage[117]) || ($v['create_user_id'] == 117)) {
                     $workList[$k]['group'] = 'A组';
                 } else {
-                    $workList[$k]['group'] = '未知';
+                    $workList[$k]['group'] = '-';
                 }
                 //如果存在补发单数数组
                 if (is_array($replacementArr)) {

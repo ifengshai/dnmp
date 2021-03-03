@@ -52,15 +52,24 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                     Controller.api.formatter.track_logistics_barline();   //物流妥投概况折线图
                 }, 0)
             })
-            $("#time_str1").on("apply.daterangepicker", function () {
+            $("#time_str9").on("apply.daterangepicker", function () {
                 setTimeout(() => {
                     index_data();   //仓库指标总览
+                }, 0)
+            })
+            $("#time_str9").on("cancel.daterangepicker", function () {
+                setTimeout(() => {
+                    index_data();   //仓库指标总览
+                }, 0)
+            })
+
+            $("#time_str1").on("apply.daterangepicker", function () {
+                setTimeout(() => {
                     stock_measure_overview_platform();   //仓库和站点有关的指标
                 }, 0)
             })
             $("#time_str1").on("cancel.daterangepicker", function () {
                 setTimeout(() => {
-                    index_data();   //仓库指标总览
                     stock_measure_overview_platform();   //仓库和站点有关的指标
                 }, 0)
             })
@@ -472,7 +481,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
     return Controller;
 });
 function index_data(){
-    var time_str = $('#time_str1').val();
+    var time_str = $('#time_str9').val();
     Backend.api.ajax({
         url: 'supplydatacenter/data_market/index',
         data: {time_str: time_str}
@@ -480,9 +489,7 @@ function index_data(){
         var stock_measure_overview = ret.data;
         //仓库指标总览
         $('#turnover_rate').html(stock_measure_overview.turnover_rate);
-        $('#stock_sales_rate').html(stock_measure_overview.stock_sales_rate);
         $('#turnover_days_rate').html(stock_measure_overview.turnover_days_rate);
-        $('#month_in_out_rate').html(stock_measure_overview.month_in_out_rate);
         return false;
     }, function (data, ret) {
         Layer.alert(ret.msg);

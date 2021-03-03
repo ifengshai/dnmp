@@ -247,68 +247,11 @@ class DataMarket extends Backend
         //库存周转率
         $arr['turnover_rate'] = $sum ? round($stock_consume_num/$sum/2,2) : 0;
         /*
-         * 库存精度
-         * 库存精度：（最新的盘点单）（该盘点单内盘点的总数量-盘点误差数）/盘点的总数量
-         * */
-        $inv_where['is_del'] = 1;
-        $inv_where['check_status'] = 2;
-        $id = $this->inventory->where($inv_where)->order('id desc')->value('id');
-        $inventory_count = $this->inventoryitem->where('inventory_id',$id)->sum('inventory_qty');
-        $inventory_error_count = $this->inventoryitem->where('inventory_id',$id)->field('sum(ABS(error_qty)) as count')->select();
-        $inventory_error_count = $inventory_error_count[0]['count'];
-        $arr['stock_accuracy'] = $inventory_count ? round(($inventory_count-$inventory_error_count)/$inventory_count,2) : 0;
-        /*
-         * SKU库存精度：（最新的盘点单）该盘点单内有误差SKU/该盘点单总盘点的SKU
-         * */
-        $error_sku = $this->inventoryitem->where('inventory_id',$id)->where('error_qty','<>',0)->count();
-        $sku_count = $this->inventoryitem->where('inventory_id',$id)->count();
-        $arr['sku_accuracy'] = $sku_count ? round($error_sku/$sku_count,2) : 0;
-        /*
-         * 库销比：实时库存数量/所选时间段内销售数量
-         * 实时库存 = 总库存-配货占用
-         * */
-        //实时库存
-        $real_time_stock = $this->model->where('category_id','<>',43)->where('is_del',1)->where('is_open',1)->value('sum(stock)-sum(distribution_occupy_stock) as result');
-        //库销比
-        $arr['stock_sales_rate'] = $order_sales_num ? round($real_time_stock/$order_sales_num,2) : 0;
-        /*
-         * 缺货率：缺货次数（每仓库工单镜框缺货问题类型工单算一次）/订单总副数
-         * */
-        $work_order_where['problem_type_id'] = 26;
-        $work_order_where['work_status'] = ['<>',0];
-        //缺货次数
-        $stockout_num = $this->worklist->where($work_order_where)->count();
-        //订单总副数
-        $order_sum_num = $this->order->alias('o')->join('fa_order_item_option i','o.entity_id=i.order_id')->where($order_where)->sum('i.qty');
-        //缺货率
-        $arr['stockout_rate'] = $order_sum_num ? round($stockout_num/$order_sum_num,2) : 0;
-
-        /*
          * 库存周转天数：所选时间段的天数/库存周转率
          * */
         //库存周转天数
         $days = round(($end - $start) / 3600 / 24);
         $arr['turnover_days_rate'] = $arr['turnover_rate'] ? round($days/$arr['turnover_rate']) : 0;
-        /*
-         * 月进销比:（所选时间包含的月份整月）月度已审核采购单采购的数量/月度销售数量（订单、批发出库、亚马逊出库）
-         * */
-        $month_start=date('Y-m-01',$start);
-        $month_end_first = date('Y-m-01', $end);
-        $month_end=date('Y-m-d 23:59:59',strtotime("$month_end_first +1 month -1 day"));
-        $month_start_time = strtotime($month_start);
-        $month_end_time = strtotime($month_end);
-        $time_where['createtime'] = ['between', [$month_start, $month_end]];
-        $order_time_where['payment_time'] = ['between', [$month_start_time, $month_end_time]];
-        $purchase_where['purchase_status'] = ['>=',2];
-        $purchase_where['is_del'] = 1;
-        //（所选时间包含的月份整月）月度已审核采购单采购的数量--暂时使用的是采购单创建时间
-        $purchase_num = $this->purchase->where($purchase_where)->where($time_where)->count();
-        //月度销售数量
-        $month_sales_num1 = $this->order->alias('o')->join('fa_order_item_option i','o.entity_id=i.order_id')->where($order_where)->where($order_time_where)->sum('i.qty');
-        $month_sales_num2 = $this->outstock->alias('o')->join('fa_out_stock_item i','o.id=i.out_stock_id','left')->where($time_where)->where('o.platform_id','in','5,8')->where('status',2)->sum('i.out_stock_num');
-        $month_sales_num = $month_sales_num1+$month_sales_num2;
-        //月进销比
-        $arr['month_in_out_rate'] = $month_sales_num ? round($purchase_num/$month_sales_num,2) : 0;
         Cache::set('Supplydatacenter_datamarket'  .$time_str. md5(serialize('stock_measure_overview')), $arr, 7200);
         return $arr;
     }

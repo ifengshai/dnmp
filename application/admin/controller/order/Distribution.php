@@ -243,6 +243,7 @@ class Distribution extends Backend
                 }
             };
             //筛选货架号
+            $sort_flag = 0;
             if ($filter['shelf_number']) {
                 if (1 == $label) {
                     $shelf_number =
@@ -257,6 +258,7 @@ class Distribution extends Backend
                     $sku = Db::connect('database.db_stock');
                     $sku_array = $sku->table('fa_item_platform_sku')->where(['sku'=>['in',$shelf_number]])->column('platform_sku');
                     $map['a.sku'] = ['in', $sku_array];
+                    $sort_flag = 1;
                 }
                 unset($filter['shelf_number']);
             }
@@ -357,9 +359,12 @@ class Distribution extends Backend
             if ($item_process_ids) {
                 $map['a.id'] = ['in', $item_process_ids];
             }
-
+            
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-
+            if ($sort_flag == 1) {
+                $sort = 'a.sku';
+                $order = 'asc';
+            }
             $total = $this->model
                 ->alias('a')
                 ->join(['fa_order' => 'b'], 'a.order_id=b.id')
@@ -1287,7 +1292,6 @@ class Distribution extends Backend
                 'a.item_order_number' => ['in', array_column($list, 'item_order_number')],
                 'b.operation_type' => 1
             ])
-            ->order('a.id', 'desc')
             ->group('a.item_order_number')
             ->column('a.change_sku', 'a.item_order_number');
 
@@ -1300,9 +1304,9 @@ class Distribution extends Backend
                 'a.item_order_number' => ['in', array_column($list, 'item_order_number')],
                 'b.operation_type' => 1
             ])
-            ->order('a.id', 'desc')
-            ->group('a.item_order_number')
-            ->column('a.od_sph,a.od_cyl,a.od_axis,a.od_add,a.pd_r,a.od_pv,a.od_bd,a.od_pv_r,a.od_bd_r,a.os_sph,a.os_cyl,a.os_axis,a.os_add,a.pd_l,a.os_pv,a.os_bd,a.os_pv_r,a.os_bd_r,a.lens_number,a.recipe_type as prescription_type', 'a.item_order_number');
+            ->column('a.od_sph,a.od_cyl,a.od_axis,a.od_add,a.pd_r,a.od_pv,a.od_bd,a.od_pv_r,a.od_bd_r,a.os_sph,a.os_cyl,a.os_axis,a.os_add,a.pd_l,a.os_pv,a.os_bd,a.os_pv_r,a.os_bd_r,a.lens_number,a.recipe_type as prescription_type,a.web_lens_name', 'a.item_order_number');
+
+
         if ($change_lens) {
             foreach ($change_lens as $key => $val) {
                 if ($val['pd_l'] && $val['pd_r']) {
@@ -1319,13 +1323,13 @@ class Distribution extends Backend
         $lens_list = $this->_lens_data->column('lens_name', 'lens_number');
         foreach ($list as $key => &$value) {
             //更改镜框最新sku
-            if ($change_sku[$value['item_order_number']]) {
+            if ($change_sku[$value['item_order_number']] && $value['site'] != 5) {
                 $value['sku'] = $change_sku[$value['item_order_number']];
 
                 $getGlassInfo = $this->httpRequest($value['site'], 'magic/order/getGlassInfo', ['skus' => $value['sku']], 'POST');
                 $tmp_bridge = $getGlassInfo[0];
             } else {
-                //过滤饰品站
+                //过滤饰品站 批发站
                 if ($value['site'] != 12) {
                     //查询镜框尺寸
                     $tmp_bridge = $this->get_frame_lens_width_height_bridge($value['product_id'], $value['site']);
@@ -1610,8 +1614,7 @@ class Distribution extends Backend
             ->select();
         $list = collection($list)->toArray();
         $order_ids = array_column($list, 'order_id');
-        $sku_arr = array_column($list, 'sku');
-
+        
         //查询sku映射表
         // $item_res = $this->_item_platform_sku->cache(3600)->where(['platform_sku' => ['in', array_unique($sku_arr)]])->column('sku', 'platform_sku');
 
@@ -1630,7 +1633,7 @@ class Distribution extends Backend
                 'a.item_order_number' => ['in', array_column($list, 'item_order_number')],
                 'b.operation_type' => 1
             ])
-            ->order('a.id', 'desc')
+            ->order('a.id', 'asc')
             ->group('a.item_order_number')
             ->column('a.change_sku', 'a.item_order_number');
 
@@ -1643,9 +1646,8 @@ class Distribution extends Backend
                 'a.item_order_number' => ['in', array_column($list, 'item_order_number')],
                 'b.operation_type' => 1
             ])
-            ->order('a.id', 'desc')
-            ->group('a.item_order_number')
-            ->column('a.od_sph,a.od_cyl,a.od_axis,a.od_add,a.pd_r,a.od_pv,a.od_bd,a.od_pv_r,a.od_bd_r,a.os_sph,a.os_cyl,a.os_axis,a.os_add,a.pd_l,a.os_pv,a.os_bd,a.os_pv_r,a.os_bd_r,a.lens_number,a.recipe_type as prescription_type', 'a.item_order_number');
+            ->column('a.od_sph,a.od_cyl,a.od_axis,a.od_add,a.pd_r,a.od_pv,a.od_bd,a.od_pv_r,a.od_bd_r,a.os_sph,a.os_cyl,a.os_axis,a.os_add,a.pd_l,a.os_pv,a.os_bd,a.os_pv_r,a.os_bd_r,a.lens_number,a.recipe_type as prescription_type,a.web_lens_name', 'a.item_order_number');
+
         if ($change_lens) {
             foreach ($change_lens as $key => $val) {
                 if ($val['pd_l'] && $val['pd_r']) {
