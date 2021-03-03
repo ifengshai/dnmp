@@ -507,15 +507,30 @@ function purchase_data(){
         //采购概况
         $('#purchase_num').html(purchase_overview.purchase_num);
         $('#purchase_num_big').html(purchase_overview.purchase_num_big);
+        $('#purchase_num_big_rate').html(purchase_overview.purchase_num_big_rate);
         $('#purchase_num_now').html(purchase_overview.purchase_num_now);
+        $('#purchase_num_now_rate').html(purchase_overview.purchase_num_now_rate);
+
         $('#purchase_amount').html(purchase_overview.purchase_amount);
         $('#purchase_amount_big').html(purchase_overview.purchase_amount_big);
+        $('#purchase_amount_big_rate').html(purchase_overview.purchase_amount_big_rate);
         $('#purchase_amount_now').html(purchase_overview.purchase_amount_now);
+        $('#purchase_amount_now_rate').html(purchase_overview.purchase_amount_now_rate);
+
         $('#purchase_sku_num').html(purchase_overview.purchase_sku_num);
         $('#purchase_sku_num_big').html(purchase_overview.purchase_sku_num_big);
+        $('#purchase_sku_num_big_rate').html(purchase_overview.purchase_sku_num_big_rate);
         $('#purchase_sku_num_now').html(purchase_overview.purchase_sku_num_now);
+        $('#purchase_sku_num_now_rate').html(purchase_overview.purchase_sku_num_now_rate);
+
         $('#purchase_delay_rate').html(purchase_overview.purchase_delay_rate);
+        $('#purchase_delay_rate_big').html(purchase_overview.purchase_delay_rate_big);
+        $('#purchase_delay_rate_now').html(purchase_overview.purchase_delay_rate_now);
+        
         $('#purchase_qualified_rate').html(purchase_overview.purchase_qualified_rate);
+        $('#purchase_qualified_rate_big').html(purchase_overview.purchase_qualified_rate_big);
+        $('#purchase_qualified_rate_now').html(purchase_overview.purchase_qualified_rate_now);
+
         $('#purchase_price').html(purchase_overview.purchase_price);
         $('#purchase_price_big').html(purchase_overview.purchase_price_big);
         $('#purchase_price_now').html(purchase_overview.purchase_price_now);
