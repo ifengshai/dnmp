@@ -600,7 +600,7 @@ class Index extends Backend
 
             $swhere['platform_order'] = $value['increment_id'];
             $swhere['work_platform'] = $value['site'];
-            $swhere['work_status'] = ['not in', [0, 4, 6]];
+            $swhere['work_status'] = ['not in', [0,7]];
             $work_type = $workorder->where($swhere)->field('work_type,create_user_name')->find();
             if (!empty($work_type)) {
                 $value['work'] = '是';
