@@ -865,10 +865,10 @@ class Check extends Backend
             ->where($where)
             ->where($map)
             ->order('check.id desc')
-            ->select();
-            
+            ->select(false);
+            dump($list);die();
         $list = collection($list)->toArray();
-       
+
         /*//查询供应商
         $supplier = new \app\admin\model\purchase\Supplier();
         $supplier_data = $supplier->getSupplierData();*/
