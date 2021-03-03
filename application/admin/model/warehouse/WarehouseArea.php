@@ -31,9 +31,12 @@ class WarehouseArea extends Model
      * @since 2021/03/03 09:18:37 
      * @return void
      */
-    public function getRowsData()
+    public function getRowsData($area_name = null)
     {
-        $list = $this->where('status', 1)->field('id,coding,name,type')->select();
+        if ($area_name) {
+            $where['name'] = ['like', '%' . $area_name . '%'];
+        }
+        $list = $this->where('status', 1)->where($where)->field('id,coding,name,type')->select();
         return collection($list)->toArray();
     }
 }

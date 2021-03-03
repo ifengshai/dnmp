@@ -8,13 +8,13 @@ use think\Model;
 class StockSku extends Model
 {
 
-    
 
-    
+
+
 
     // 表名
     protected $name = 'store_sku';
-    
+
     // 自动写入时间戳字段
     protected $autoWriteTimestamp = 'int';
 
@@ -24,10 +24,8 @@ class StockSku extends Model
     protected $deleteTime = false;
 
     // 追加属性
-    protected $append = [
+    protected $append = [];
 
-    ];
- 
     //关联库位表
     public function storehouse()
     {
@@ -38,5 +36,21 @@ class StockSku extends Model
     public function item()
     {
         return $this->belongsTo('app\admin\model\itemmanage\Item', 'item_id', 'id', [], 'LEFT')->setEagerlyType(0);
+    }
+
+    /**
+     * 获取库位下sku
+     *
+     * @Description
+     * @author wpl
+     * @since 2021/03/03 13:52:32 
+     * @param [type] $store_id 库位id
+     * @param [type] $sku s
+     * @return void
+     */
+    public function getRowsData($store_id)
+    {
+        $list = $this->field('sku')->where(['store_id' => ['in', $store_id], 'is_del' => 1])->select();
+        return collection($list)->toArray();
     }
 }

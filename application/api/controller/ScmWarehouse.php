@@ -2,6 +2,8 @@
 
 namespace app\api\controller;
 
+use app\admin\model\warehouse\WarehouseTransferOrder;
+use app\admin\model\warehouse\WarehouseTransferOrderItem;
 use think\Db;
 use think\Exception;
 use think\exception\PDOException;
@@ -28,6 +30,7 @@ use app\admin\model\warehouse\Inventory;
 use app\admin\model\warehouse\InventoryItem;
 use app\admin\model\warehouse\StockSku;
 use app\admin\model\warehouse\WarehouseArea;
+use app\admin\model\warehouse\StockHouse;
 
 /**
  * 供应链出入库接口类
@@ -190,6 +193,13 @@ class ScmWarehouse extends Scm
      */
     protected $_store_sku = null;
 
+    /**
+     * 库位模型对象
+     * @var object
+     * @access protected
+     */
+    protected $_store_house = null;
+
     protected function _initialize()
     {
         parent::_initialize();
@@ -216,6 +226,9 @@ class ScmWarehouse extends Scm
         $this->_inventory_item = new InventoryItem();
         $this->_store_sku = new StockSku();
         $this->_warehouse_area = new WarehouseArea();
+        $this->_store_house = new StockHouse();
+        $this->_warehouse_transfer_order = new WarehouseTransferOrder();
+        $this->_warehouse_transfer_order_item = new WarehouseTransferOrderItem();
     }
 
     /**
@@ -1215,7 +1228,7 @@ class ScmWarehouse extends Scm
 
         foreach ($item_sku as $key => $value) {
             //计算总金额
-            $all_total =  $value['price'] * $value['in_stock_num'];
+            $all_total = $value['price'] * $value['in_stock_num'];
             //生成采购单
             $purchase_number = 'PO' . date('YmdHis') . rand(100, 999) . rand(100, 999);
             $purchase_data = ['purchase_number' => $purchase_number, 'purchase_name' => '退货入库', 'purchase_status' => 10, 'check_status' => 2, 'is_in_stock' => 1, 'stock_status' => 2, 'createtime' => date('Y-m-d H:i:s'), 'product_total' => $all_total, 'purchase_total' => $all_total];
@@ -1525,7 +1538,7 @@ class ScmWarehouse extends Scm
                                 //最后一个站点 剩余数量分给最后一个站
                                 if (($all_num - $key) == 1) {
                                     //当前sku映射关系详情
-                                    $sku_platform =  $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->find();
+                                    $sku_platform = $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->find();
                                     //如果站点是Z站 且虚拟仓库存为0
                                     if ($val['website_type'] == 1) {
                                         if ($sku_platform['stock'] == 0  && $stock_num > 0) {
@@ -2051,7 +2064,7 @@ class ScmWarehouse extends Scm
     }
 
     /**
-     * 创建盘点单页面/筛选/保存
+     * 创建盘点单页面/筛选/保存  版本2.0
      *
      * @参数 int type  新建入口 1.筛选，2.保存
      * @参数 json item_sku  sku集合
@@ -2065,56 +2078,63 @@ class ScmWarehouse extends Scm
         $info = [];
         if ($type == 1) {
             //创建盘点单筛选 ok
-            $query = $this->request->request('query');
+            $coding = $this->request->request('coding'); //库位编码
+            $area_name = $this->request->request('area_name'); //库区名称
+            $sku = $this->request->request('sku'); //sku筛选
             $start_stock = $this->request->request('start_stock');
             $end_stock = $this->request->request('end_stock');
             $page = $this->request->request('page');
             $page_size = $this->request->request('page_size');
-
             empty($page) && $this->error(__('Page can not be empty'), [], 522);
             empty($page_size) && $this->error(__('Page size can not be empty'), [], 523);
-
-            $item_where = [
-                'is_open' => ['in', [1, 2]]
-            ];
 
             //排除待盘点sku
             $sku_arr = $this->_inventory_item->where('is_add', 0)->column('sku');
             if ($sku_arr) {
-                $item_where['sku'] = ['not in', $sku_arr];
+                $where['sku'] = ['not in', $sku_arr];
             }
 
             //库存范围
             if ($start_stock && $end_stock) {
+                $item_where = [
+                    'is_open' => ['in', [1, 2]]
+                ];
                 $item_where['stock'] = ['between', [$start_stock, $end_stock]];
+                $item_sku = $this->_item
+                    ->where($item_where)
+                    ->column('sku');
+                $where['a.sku'] = ['in', $item_sku];
             }
 
-            //查询商品表
-            $item_sku = $this->_item
-                ->where($item_where)
-                ->limit(0, 1000)
-                ->column('sku');
-            $info_no = [];
-            $info_no['list'] = [];
-            empty($item_sku) && $this->success('', ['info' => $info_no], 200);
-
-            $where = [
-                'a.is_del' => 1,
-                'a.sku' => ['in', $item_sku]
-            ];
-            if ($query) {
-                $where['a.sku|b.coding'] = ['like', '%' . $query . '%']; //coding库位编码，library_name库位名称
+            //库区筛选
+            if ($area_name) {
+                $where['c.name'] = ['like',  $area_name . '%']; //库区名称
             }
 
+            //库位筛选
+            if ($coding) {
+                $where['b.coding'] = ['like',  $coding . '%']; //coding库位编码，library_name库位名称
+            }
+
+            //sku筛选
+            if ($sku) {
+                $where['a.sku'] = ['like',  $sku . '%']; //sku筛选
+            }
+
+            $where['a.is_del'] = 1;
+            $where['b.status'] = 1;
+            $where['b.type'] = 1;
+            
             $offset = ($page - 1) * $page_size;
             $limit = $page_size;
 
             //获取SKU库位绑定表（fa_store_sku）数据列表
             $list = $this->_store_sku
                 ->alias('a')
-                ->field('a.id,a.sku,b.coding')
+                ->field('a.id,a.sku,b.coding,c.name')
                 ->where($where)
-                ->join(['fa_store_house' => 'b'], 'a.store_id=b.id', 'left')
+                ->join(['fa_store_house' => 'b'], 'a.store_id=b.id')
+                ->join(['fa_warehouse_area' => 'c'], 'b.area_id=c.id')
                 ->order('a.id', 'desc')
                 ->limit($offset, $limit)
                 ->select();
@@ -2722,14 +2742,56 @@ class ScmWarehouse extends Scm
     public function inventory_warehouse_area()
     {
         if ($this->request->isPost()) {
-            $list = $this->_warehouse_area->getRowsData();
+            $area_name = $this->request->request('area_name'); //库区名称
+            $list = $this->_warehouse_area->getRowsData($area_name);
             $this->success('获取成功', $list, 200);
         }
-        $this->error('网络异常', [], 400);
+        $this->error('网络异常', [], 401);
     }
 
-    /***************************************end******************************************/
+    /**
+     * 获取库位
+     *
+     * @Description
+     * @author wpl
+     * @since 2021/03/03 09:14:36 
+     * @return void
+     */
+    public function inventory_warehouse_location()
+    {
+        if ($this->request->isPost()) {
+            $area_id = $this->request->request('area_id'); //库区id 多个逗号拼接
+            $coding = $this->request->request('coding'); //库位编码
+            empty($area_id) && $this->error(__('库区id不能为空'), [], 403);
+            $list = $this->_store_house->getLocationData($area_id, $coding);
+            $this->success('获取成功', $list, 200);
+        }
+        $this->error('网络异常', [], 401);
+    }
 
+    /**
+     * 根据库位获取对应SKU
+     *
+     * @Description
+     * @author wpl
+     * @since 2021/03/03 13:38:05 
+     * @return void
+     */
+    public function inventory_location_sku()
+    {
+        if ($this->request->isPost()) {
+            $location_id = $this->request->request('location_id'); //库位id 多个逗号拼接
+            empty($location_id) && $this->error(__('库位id不能为空'), [], 403);
+            $list = $this->_store_sku->getRowsData($location_id);
+            $this->success('获取成功', $list, 200);
+        }
+        $this->error('网络异常', [], 401);
+    }
+
+
+
+
+    /***************************************end******************************************/
 
 
     //判断条形码是否绑定过sku
@@ -2747,4 +2809,436 @@ class ScmWarehouse extends Scm
 
         $this->success('扫码成功', [], 200);
     }
+    /***************************************库内调拨单******************************************/
+    /**
+     * 库内调拨单列表--ok
+     *
+     * @参数 string query  查询内容
+     * @参数 int status  状态
+     * @参数 string start_time  开始时间
+     * @参数 string end_time  结束时间
+     * @参数 int page  * 页码
+     * @参数 int page_size  * 每页显示数量
+     * Created by Phpstorm.
+     * User: jhh
+     * Date: 2021/3/3
+     * Time: 10:48:36
+     */
+    public function transfer_order_list()
+    {
+        $query = $this->request->request('query');
+        $status = $this->request->request('status');
+        $start_time = $this->request->request('start_time');
+        $end_time = $this->request->request('end_time');
+        $page = $this->request->request('page');
+        $page_size = $this->request->request('page_size');
+
+        empty($page) && $this->error(__('Page can not be empty'), [], 520);
+        empty($page_size) && $this->error(__('Page size can not be empty'), [], 521);
+
+        $where = [];
+        if ($query) {
+            $where['transfer_order_number|create_person'] = ['like', '%' . $query . '%'];
+        }
+        if (isset($status)) {
+            $where['status'] = $status;
+        }
+        if ($start_time && $end_time) {
+            $where['create_time'] = ['between', [$start_time, $end_time]];
+        }
+
+        $offset = ($page - 1) * $page_size;
+        $limit = $page_size;
+
+        //获取库内调拨单列表数据
+        $list = $this->_warehouse_transfer_order
+            ->where($where)
+            ->order('create_time', 'desc')
+            ->limit($offset, $limit)
+            ->select();
+        $list = collection($list)->toArray();
+        $this->success('', ['list' => $list], 200);
+    }
+
+    /**
+     * 创建库内调拨单页面/筛选/保存
+     * Created by Phpstorm.
+     * User: jhh
+     * Date: 2021/3/3
+     * Time: 15:54:44
+     */
+    public function transfer_order_add()
+    {
+        $item_sku = $this->request->request("item_sku");
+        //调出库位
+        $call_out_site = $this->request->request("call_out_site");
+        //调入库位
+        $call_in_site = $this->request->request("call_in_site");
+
+        $result = false;
+        $this->_warehouse_transfer_order->startTrans();
+        $this->_warehouse_transfer_order_item->startTrans();
+        try {
+            //保存--创建库内调拨单
+            $arr = [];
+            $arr['number'] = 'IS' . date('YmdHis') . rand(100, 999) . rand(100, 999);
+            $arr['create_person'] = $this->auth->nickname;
+            $arr['call_out_site'] = $call_out_site;
+            $arr['call_in_site'] = $call_in_site;
+            $arr['createtime'] = date('Y-m-d H:i:s', time());
+            $result = $this->_inventory->allowField(true)->save($arr);
+            if ($result) {
+                $list = [];
+                foreach ($item_sku as $k => $v) {
+                    $list[$k]['inventory_id'] = $this->_inventory->id;
+                    $list[$k]['sku'] = $v['sku'];
+                    $item = $this->_item->field('name,stock,available_stock,distribution_occupy_stock')->where('sku', $v['sku'])->find();
+                    if (empty($item)) {
+                        $this->error(__($v['sku'] . '不存在'), [], 525);
+                    }
+
+                    $list[$k]['name'] = $item['name']; //商品名
+                    $list[$k]['distribution_occupy_stock'] = $item['distribution_occupy_stock'] ?? 0; //配货站用数量
+                    $real_time_qty = ($item['stock'] * 1 - $item['distribution_occupy_stock'] * 1); //实时库存
+                    $list[$k]['real_time_qty'] = $real_time_qty ?? 0;
+                    $list[$k]['available_stock'] = $item['available_stock'] ?? 0; //可用库存
+                    //                        $list[$k]['inventory_qty'] = $v['inventory_qty'] ?? 0;//盘点数量
+                    //                        $list[$k]['error_qty'] = $v['error_qty'] ?? 0;//误差数量
+                    $list[$k]['remark'] = $v['remark']; //备注
+                }
+
+                //添加明细表数据
+                $result = $this->_inventory_item->allowField(true)->saveAll($list);
+            }
+
+            $this->_inventory->commit();
+            $this->_inventory_item->commit();
+        } catch (ValidateException $e) {
+            $this->_inventory->rollback();
+            $this->_inventory_item->rollback();
+            $this->error($e->getMessage(), [], 444);
+        } catch (PDOException $e) {
+            $this->_inventory->rollback();
+            $this->_inventory_item->rollback();
+            $this->error($e->getMessage(), [], 444);
+        } catch (Exception $e) {
+            $this->_inventory->rollback();
+            $this->_inventory_item->rollback();
+            $this->error($e->getMessage(), [], 444);
+        }
+        if ($result !== false) {
+            $this->success('添加成功！！', '', 200);
+        } else {
+            $this->error(__('No rows were inserted'), [], 525);
+        }
+
+    }
+
+    /**
+     * 审核盘点单
+     *
+     * @参数 int inventory_id  盘点单ID
+     * @参数 int do_type  审核类型 2通过-盘点结束-更改状态-创建入库单-盘盈加库存、盘亏扣减库存; 3拒绝-盘点结束-更改状态
+     * @return mixed
+     * @author wgj
+     */
+    public function transfer_order_examine()
+    {
+        $do_type = $this->request->request('do_type');
+
+        $inventory_id = $this->request->request("inventory_id");
+        empty($inventory_id) && $this->error(__('盘点单号不能为空'), [], 545);
+        //获取盘点单数据
+        $row = $this->_inventory->get($inventory_id);
+        empty($row) && $this->error(__('盘点单不存在'), [], 546);
+        !in_array($row['check_status'], [1, 2]) && $this->error(__('只有待审核、已完成状态才能操作'), [], 547);
+        $data['check_time'] = date('Y-m-d H:i:s', time());
+        $data['check_person'] = $this->auth->nickname;
+
+        $msg = '';
+        if (3 == $do_type) {
+            $data['check_status'] = 3;
+            $this->_inventory->allowField(true)->save($data, ['id' => $inventory_id]);
+            $msg = '操作成功';
+        } else {
+            $data['check_status'] = 2;
+        }
+
+        $this->_item->startTrans();
+        $this->_in_stock->startTrans();
+        $this->_out_stock->startTrans();
+        $this->_inventory->startTrans();
+        $this->_stock_log->startTrans();
+        $this->_in_stock_item->startTrans();
+        $this->_out_stock_item->startTrans();
+        $this->_item_platform_sku->startTrans();
+        (new StockLog())->startTrans();
+        try {
+            $res = $this->_inventory->allowField(true)->isUpdate(true, ['id' => $inventory_id])->save($data);
+            //审核通过 生成出、入库单 并同步库存
+            if ($data['check_status'] == 2) {
+                $infos = $this->_inventory_item->where(['inventory_id' => $inventory_id])
+                    ->field('sku,error_qty,inventory_id')
+                    ->group('sku')
+                    ->select();
+                $infos = collection($infos)->toArray();
+                foreach ($infos as $k => $v) {
+                    //如果误差为0则跳过
+                    if ($v['error_qty'] == 0) {
+                        continue;
+                    }
+                    //同步对应SKU库存 更新商品表商品总库存 总库存
+                    $item_map['sku'] = $v['sku'];
+                    $item_map['is_del'] = 1;
+                    $sku_item = $this->_item->where($item_map)->field('stock,available_stock,sample_num,wait_instock_num,occupy_stock,distribution_occupy_stock')->find();
+                    if ($v['sku']) {
+                        $stock = $this->_item->where($item_map)->inc('stock', $v['error_qty'])->inc('available_stock', $v['error_qty'])->update();
+                        //插入日志表
+                        (new StockLog())->setData([
+                            'type' => 2,
+                            'site' => 0,
+                            'modular' => 12,
+                            'change_type' => $v['error_qty'] > 0 ? 20 : 21,
+                            'sku' => $v['sku'],
+                            'order_number' => $v['inventory_id'],
+                            'source' => 2,
+                            'stock_before' => $sku_item['stock'],
+                            'stock_change' => $v['error_qty'],
+                            'available_stock_before' => $sku_item['available_stock'],
+                            'available_stock_change' => $v['error_qty'],
+                            'create_person' => $this->auth->nickname,
+                            'create_time' => time(),
+                            'number_type' => 5,
+                        ]);
+                        //盘点的时候盘盈入库 盘亏出库 的同时要对虚拟库存进行一定的操作
+                        //查出映射表中此sku对应的所有平台sku 并根据库存数量进行排序（用于遍历数据的时候首先分配到那个站点）
+                        $item_platform_sku = $this->_item_platform_sku->where('sku', $v['sku'])->order('stock asc')->field('platform_type,stock')->select();
+                        $all_num = count($item_platform_sku);
+                        $whole_num = $this->_item_platform_sku
+                            ->where('sku', $v['sku'])
+                            ->field('stock')
+                            ->select();
+                        $num_num = 0;
+                        foreach ($whole_num as $kk => $vv) {
+                            $num_num += abs($vv['stock']);
+                        }
+                        //盘盈或者盘亏的数量 根据此数量对平台sku虚拟库存进行操作
+                        $stock_num = $v['error_qty'];
+                        //计算当前sku的总虚拟库存 如果总的为0 表示当前所有平台的此sku都为0 此时入库的话按照平均规则分配 例如五个站都有此品 那么比例就是20%
+                        $stock_all_num = array_sum(array_column($item_platform_sku, 'stock'));
+                        if ($stock_all_num == 0) {
+                            $rate_rate = 1 / $all_num;
+                            foreach ($item_platform_sku as $key => $val) {
+                                //最后一个站点 剩余数量分给最后一个站
+                                if (($all_num - $key) == 1) {
+                                    $item_platform_sku_detail = $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->find();
+                                    $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->inc('stock', $stock_num)->update();
+                                    //插入日志表
+                                    (new StockLog())->setData([
+                                        'type' => 2,
+                                        'site' => $val['platform_type'],
+                                        'modular' => 12,
+                                        'change_type' => $v['error_qty'] > 0 ? 20 : 21,
+                                        'sku' => $v['sku'],
+                                        'order_number' => $v['inventory_id'],
+                                        'source' => 2,
+                                        'fictitious_before' => $item_platform_sku_detail['stock'],
+                                        'fictitious_change' => $stock_num,
+                                        'create_person' => $this->auth->nickname,
+                                        'create_time' => time(),
+                                        'number_type' => 5,
+                                    ]);
+                                } else {
+                                    $num = round($v['error_qty'] * $rate_rate);
+                                    $stock_num -= $num;
+                                    $item_platform_sku_detail = $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->find();
+                                    $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->inc('stock', $num)->update();
+                                    //插入日志表
+                                    (new StockLog())->setData([
+                                        'type' => 2,
+                                        'site' => $val['platform_type'],
+                                        'modular' => 12,
+                                        'change_type' => $v['error_qty'] > 0 ? 20 : 21,
+                                        'sku' => $v['sku'],
+                                        'order_number' => $v['inventory_id'],
+                                        'source' => 2,
+                                        'fictitious_before' => $item_platform_sku_detail['stock'],
+                                        'fictitious_change' => $num,
+                                        'create_person' => $this->auth->nickname,
+                                        'create_time' => time(),
+                                        'number_type' => 5,
+                                    ]);
+                                }
+                            }
+                        } else {
+                            foreach ($item_platform_sku as $key => $val) {
+                                //最后一个站点 剩余数量分给最后一个站
+                                if (($all_num - $key) == 1) {
+                                    $item_platform_sku_detail = $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->find();
+                                    $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->inc('stock', $stock_num)->update();
+                                    //插入日志表
+                                    (new StockLog())->setData([
+                                        'type' => 2,
+                                        'site' => $val['platform_type'],
+                                        'modular' => 12,
+                                        'change_type' => $v['error_qty'] > 0 ? 20 : 21,
+                                        'sku' => $v['sku'],
+                                        'order_number' => $v['inventory_id'],
+                                        'source' => 2,
+                                        'fictitious_before' => $item_platform_sku_detail['stock'],
+                                        'fictitious_change' => $stock_num,
+                                        'create_person' => $this->auth->nickname,
+                                        'create_time' => time(),
+                                        'number_type' => 5,
+                                    ]);
+                                } else {
+                                    $num = round($v['error_qty'] * abs($val['stock']) / $num_num);
+                                    $stock_num -= $num;
+                                    $item_platform_sku_detail = $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->find();
+                                    $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->inc('stock', $num)->update();
+                                    //插入日志表
+                                    (new StockLog())->setData([
+                                        'type' => 2,
+                                        'site' => $val['platform_type'],
+                                        'modular' => 12,
+                                        'change_type' => $v['error_qty'] > 0 ? 20 : 21,
+                                        'sku' => $v['sku'],
+                                        'order_number' => $v['inventory_id'],
+                                        'source' => 2,
+                                        'fictitious_before' => $item_platform_sku_detail['stock'],
+                                        'fictitious_change' => $num,
+                                        'create_person' => $this->auth->nickname,
+                                        'create_time' => time(),
+                                        'number_type' => 5,
+                                    ]);
+                                }
+                            }
+                        }
+                    }
+
+                    //修改库存结果为真
+                    if ($stock === false) {
+                        throw new Exception('同步库存失败,请检查SKU=>' . $v['sku']);
+                    }
+
+                    if ($v['error_qty'] > 0) {
+                        //生成入库单
+                        $info[$k]['sku'] = $v['sku'];
+                        $info[$k]['in_stock_num'] = abs($v['error_qty']);
+                        $info[$k]['no_stock_num'] = abs($v['error_qty']);
+                    } else {
+                        $list[$k]['sku'] = $v['sku'];
+                        $list[$k]['out_stock_num'] = abs($v['error_qty']);
+                    }
+                }
+                //入库记录
+                if ($info) {
+                    $params['in_stock_number'] = 'IN' . date('YmdHis') . rand(100, 999) . rand(100, 999);
+                    $params['create_person'] = $this->auth->nickname;
+                    $params['createtime'] = date('Y-m-d H:i:s', time());
+                    $params['type_id'] = 2;
+                    $params['status'] = 2;
+                    $params['remark'] = '盘盈入库';
+                    $params['check_time'] = date('Y-m-d H:i:s', time());
+                    $params['check_person'] = $this->auth->nickname;
+                    $instorck_res = $this->_in_stock->isUpdate(false)->allowField(true)->data($params, true)->save();
+
+                    //添加入库信息
+                    if ($instorck_res !== false) {
+                        $instockItemList = array_values($info);
+                        unset($info);
+                        foreach ($instockItemList as &$v) {
+                            $v['in_stock_id'] = $this->_in_stock->id;
+                        }
+                        unset($v);
+                        //批量添加
+                        $this->_in_stock_item->allowField(true)->saveAll($instockItemList);
+                    } else {
+                        throw new Exception('生成入库记录失败！！数据回滚');
+                    }
+                }
+
+                //出库记录
+                if ($list) {
+                    $params = [];
+                    $params['out_stock_number'] = 'OUT' . date('YmdHis') . rand(100, 999) . rand(100, 999);
+                    $params['create_person'] = $this->auth->nickname;
+                    $params['createtime'] = date('Y-m-d H:i:s', time());
+                    $params['type_id'] = 1;
+                    $params['status'] = 2;
+                    $params['remark'] = '盘亏出库';
+                    $params['check_time'] = date('Y-m-d H:i:s', time());
+                    $params['check_person'] = $this->auth->nickname;
+                    $outstock_res = $this->_out_stock->isUpdate(false)->allowField(true)->data($params, true)->save();
+
+                    //添加出库信息
+                    if ($outstock_res !== false) {
+                        $outstockItemList = array_values($list);
+                        foreach ($outstockItemList as $k => $v) {
+                            $outstockItemList[$k]['out_stock_id'] = $this->_out_stock->id;
+                        }
+                        //批量添加
+                        $this->_out_stock_item->allowField(true)->saveAll($outstockItemList);
+                    } else {
+                        throw new Exception('生成出库记录失败！！数据回滚');
+                    }
+                }
+            } else {
+                //审核拒绝 解除条形码绑定的盘点单号
+                $code_clear = [
+                    'inventory_id' => 0
+                ];
+                $this->_product_bar_code_item->where(['inventory_id' => $inventory_id])->update($code_clear);
+            }
+            $this->_item->commit();
+            $this->_in_stock->commit();
+            $this->_out_stock->commit();
+            $this->_inventory->commit();
+            $this->_stock_log->commit();
+            $this->_in_stock_item->commit();
+            $this->_out_stock_item->commit();
+            $this->_item_platform_sku->commit();
+            (new StockLog())->commit();
+        } catch (ValidateException $e) {
+            $this->_item->rollback();
+            $this->_in_stock->rollback();
+            $this->_out_stock->rollback();
+            $this->_inventory->rollback();
+            $this->_stock_log->rollback();
+            $this->_in_stock_item->rollback();
+            $this->_out_stock_item->rollback();
+            $this->_item_platform_sku->rollback();
+            (new StockLog())->rollback();
+            $this->error($e->getMessage(), [], 443);
+        } catch (PDOException $e) {
+            $this->_item->rollback();
+            $this->_in_stock->rollback();
+            $this->_out_stock->rollback();
+            $this->_inventory->rollback();
+            $this->_stock_log->rollback();
+            $this->_in_stock_item->rollback();
+            $this->_out_stock_item->rollback();
+            $this->_item_platform_sku->rollback();
+            (new StockLog())->rollback();
+            $this->error($e->getMessage(), [], 442);
+        } catch (Exception $e) {
+            $this->_item->rollback();
+            $this->_in_stock->rollback();
+            $this->_out_stock->rollback();
+            $this->_inventory->rollback();
+            $this->_stock_log->rollback();
+            $this->_in_stock_item->rollback();
+            $this->_out_stock_item->rollback();
+            $this->_item_platform_sku->rollback();
+            (new StockLog())->rollback();
+            $this->error($e->getMessage(), [], 441);
+        }
+        if ($res) {
+            $msg = '审核成功';
+        }
+
+        $this->success($msg, ['info' => ''], 200);
+    }
+
+    /***************************************库内调拨单end******************************************/
 }
