@@ -640,7 +640,7 @@ class DataMarket extends Backend
         //所选时间内大货到货的采购单延迟的批次
         $delay_batch_big = $this->purchase->alias('p')->join('fa_purchase_batch b','p.id=b.purchase_id','left')->join('fa_logistics_info l','p.id=l.purchase_id','left')->where($where)->where($arrive_where)->where('p.type',2)->where('p.arrival_time<l.sign_time')->count();
         //采购批次到货延时率
-        $arr['purchase_delay_rate_big'] = $delay_batch_big ? round($sum_batch_big/$delay_batch_big*100,2).'%' : 0;
+        $arr['purchase_delay_rate_big'] = $sum_batch_big ? round($delay_batch_big/$sum_batch_big*100,2).'%' : 0;
         //所选时间内到货的采购单合格率90%以上的批次
         $qualified_num = $this->purchase->alias('p')->join('fa_check_order o','p.id = o.purchase_id','left')->join('fa_check_order_item i','o.id = i.check_id','left')->where($where)->where($arrive_where)->group('p.id')->having('sum( quantity_num )/ sum( arrivals_num )>= 0.9')->count();
         //采购批次到货合格率
