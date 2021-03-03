@@ -2057,7 +2057,11 @@ class ScmWarehouse extends Scm
             $count = $this->_inventory_item->where(['inventory_id' => $value['id']])->count();
             $sum = $this->_inventory_item->where(['inventory_id' => $value['id'], 'is_add' => 0])->count();
 
+            //查询盘点的库区
+            $warehouse_name = $this->_inventory_item->where(['inventory_id' => $value['id']])->group('warehouse_name')->column('warehouse_name');
+
             $list[$key]['sum_count'] = $sum . '/' . $count; //需要fa_inventory_item表数据加和
+            $list[$key]['warehouse_name'] = implode(',', $warehouse_name); //拼接库区
         }
 
         $this->success('', ['list' => $list], 200);
@@ -2628,11 +2632,11 @@ class ScmWarehouse extends Scm
                     $this->_product_bar_code_item
                         ->where(['code' => ['in', $sku_code]])
                         ->update(['inventory_id' => $inventory_id, 'sku' => $v['sku'], 'library_status' => 1]);
-                    
+
                     //不在此数组的条形码改为出库状态
                     $this->_product_bar_code_item
-                    ->where(['code' => ['not in', $sku_code]])
-                    ->update(['library_status' => 2]);
+                        ->where(['code' => ['not in', $sku_code]])
+                        ->update(['library_status' => 2]);
                 }
 
                 //入库记录

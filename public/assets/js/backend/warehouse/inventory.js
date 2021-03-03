@@ -61,6 +61,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable', 'bootstra
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function (row) {
+                                        return false;
                                         //返回true时按钮显示,返回false隐藏
                                         if (row.status == 1 || row.status == 2) {
                                             return false;
@@ -80,6 +81,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable', 'bootstra
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function (row) {
+                                        return false;
                                         //返回true时按钮显示,返回false隐藏
                                         if (row.status == 1) {
                                             return true;
@@ -99,6 +101,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable', 'bootstra
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function (row) {
+                                        return false;
                                         //返回true时按钮显示,返回false隐藏
                                         if (row.status == 0) {
                                             return true;
@@ -125,6 +128,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable', 'bootstra
                                         return false;
                                     },
                                     visible: function (row) {
+                                        return false;
                                         //返回true时按钮显示,返回false隐藏
                                         if (row.check_status == 0 && row.status == 2) {
                                             return true;
@@ -144,6 +148,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable', 'bootstra
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function (row) {
+                                        return false;
                                         //返回true时按钮显示,返回false隐藏
                                         if (row.check_status == 0 && row.status == 2) {
                                             return true;
@@ -654,6 +659,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable', 'bootstra
                             field: 'inventory_qty', title: __('盘点数量'), operate: false
                         },
                         { field: 'error_qty', title: __('误差数量'), operate: false },
+                        { field: 'warehouse_name', title: __('库区'), operate: false },
+                        { field: 'library_name', title: __('库位编码'), operate: false },
                         {
                             field: 'remark', title: __('备注'), operate: false
                         },
