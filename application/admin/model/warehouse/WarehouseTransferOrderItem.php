@@ -5,18 +5,18 @@ namespace app\admin\model\warehouse;
 use think\Model;
 
 
-class WarehouseTransferOrder extends Model
+class WarehouseTransferOrderItem extends Model
 {
 
 
     // 表名
-    protected $name = 'warehouse_transfer_order';
+    protected $name = 'warehouse_transfer_order_item';
 
     // 自动写入时间戳字段
     protected $autoWriteTimestamp = 'int';
 
     // 定义时间戳字段名
-    protected $createTime = 'create_time';
+    protected $createTime = 'createtime';
     protected $updateTime = false;
     protected $deleteTime = false;
 
