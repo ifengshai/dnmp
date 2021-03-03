@@ -608,29 +608,62 @@ class DataMarket extends Backend
         //采购总数
         $arr['purchase_num'] = $this->purchase->alias('p')->where($where)->where($status_where)->join(['fa_purchase_order_item' => 'b'], 'p.id=b.purchase_id')->sum('b.purchase_num');
         $arr['purchase_num_now'] = $this->purchase->alias('p')->where($where)->where($status_where)->where('p.type',1)->join(['fa_purchase_order_item' => 'b'], 'p.id=b.purchase_id')->sum('b.purchase_num');  //现货
+        $arr['purchase_num_now_rate'] = $arr['purchase_num'] ? round($arr['purchase_num_now']/$arr['purchase_num']*100,2).'%' : '0%';   //现货比例
         $arr['purchase_num_big'] = $this->purchase->alias('p')->where($where)->where($status_where)->where('p.type',2)->join(['fa_purchase_order_item' => 'b'], 'p.id=b.purchase_id')->sum('b.purchase_num');  //大货
+        $arr['purchase_num_big_rate'] = $arr['purchase_num'] ? round($arr['purchase_num_big']/$arr['purchase_num']*100,2).'%' : '0%';   //大货比例
         //采购总金额
         $arr['purchase_amount'] = $this->purchase->alias('p')->where($where)->where($status_where)->sum('purchase_total');
         $arr['purchase_amount_now'] = $this->purchase->alias('p')->where($where)->where($status_where)->where('p.type',1)->sum('purchase_total');//现货
+        $arr['purchase_amount_now_rate'] = $arr['purchase_amount'] ? round($arr['purchase_amount_now']/$arr['purchase_amount']*100,2).'%' : '0%';  //现货比例
         $arr['purchase_amount_big'] = $this->purchase->alias('p')->where($where)->where($status_where)->where('p.type',2)->sum('purchase_total');//大货
+        $arr['purchase_amount_big_rate'] = $arr['purchase_amount'] ? round($arr['purchase_amount_big']/$arr['purchase_amount']*100,2).'%' : '0%';  //大货比例
         //采购总SKU数
         $arr['purchase_sku_num'] = $this->purchase->alias('p')->where($where)->where($status_where)->join(['fa_purchase_order_item' => 'b'], 'p.id=b.purchase_id')->group('sku')->count(1);
         $arr['purchase_sku_num_now'] = $this->purchase->alias('p')->where($where)->where($status_where)->where('p.type',1)->join(['fa_purchase_order_item' => 'b'], 'p.id=b.purchase_id')->group('sku')->count(1);  //现货
+        $arr['purchase_sku_num_now_rate'] = $arr['purchase_sku_num'] ? round($arr['purchase_sku_num_now']/$arr['purchase_sku_num']*100,2).'%' : '0%';  //现货比例
         $arr['purchase_sku_num_big'] = $this->purchase->alias('p')->where($where)->where($status_where)->where('p.type',2)->join(['fa_purchase_order_item' => 'b'], 'p.id=b.purchase_id')->group('sku')->count(1);  //大货
-        //所选时间短内到货总批次
+        $arr['purchase_sku_num_big_rate'] = $arr['purchase_sku_num'] ? round($arr['purchase_sku_num_big']/$arr['purchase_sku_num']*100,2).'%' : '0%';  //大货比例
+        //所选时间段内到货总批次
         $sum_batch = $this->purchase->alias('p')->join('fa_purchase_batch b','p.id=b.purchase_id','left')->where($where)->where($arrive_where)->count();
         //所选时间内到货的采购单延迟的批次
         $delay_batch = $this->purchase->alias('p')->join('fa_purchase_batch b','p.id=b.purchase_id','left')->join('fa_logistics_info l','p.id=l.purchase_id','left')->where($where)->where($arrive_where)->where('p.arrival_time<l.sign_time')->count();
         //采购批次到货延时率
         $arr['purchase_delay_rate'] = $sum_batch ? round($delay_batch/$sum_batch*100,2).'%' : 0;
+        //所选时间段内现货到货总批次
+        $sum_batch_now = $this->purchase->alias('p')->join('fa_purchase_batch b','p.id=b.purchase_id','left')->where($where)->where($arrive_where)->where('p.type',1)->count();
+        //所选时间内现货到货的采购单延迟的批次
+        $delay_batch_now = $this->purchase->alias('p')->join('fa_purchase_batch b','p.id=b.purchase_id','left')->join('fa_logistics_info l','p.id=l.purchase_id','left')->where($where)->where($arrive_where)->where('p.type',1)->where('p.arrival_time<l.sign_time')->count();
+        //采购批次到货延时率
+        $arr['purchase_delay_rate_now'] = $sum_batch_now ? round($delay_batch_now/$sum_batch_now*100,2).'%' : 0;
+        $arr['purchase_delay_rate_now_rate'] = $arr['purchase_delay_rate'] ? round($arr['purchase_delay_rate_now']/$arr['purchase_delay_rate']*100,2).'%' : '0%';  //现货比例
+        //所选时间段内大货到货总批次
+        $sum_batch_big = $this->purchase->alias('p')->join('fa_purchase_batch b','p.id=b.purchase_id','left')->where($where)->where($arrive_where)->where('p.type',2)->count();
+        //所选时间内大货到货的采购单延迟的批次
+        $delay_batch_big = $this->purchase->alias('p')->join('fa_purchase_batch b','p.id=b.purchase_id','left')->join('fa_logistics_info l','p.id=l.purchase_id','left')->where($where)->where($arrive_where)->where('p.type',2)->where('p.arrival_time<l.sign_time')->count();
+        //采购批次到货延时率
+        $arr['purchase_delay_rate_big'] = $delay_batch_big ? round($sum_batch_big/$delay_batch_big*100,2).'%' : 0;
+        $arr['purchase_delay_rate_big_rate'] = $arr['purchase_delay_rate'] ? round($arr['purchase_delay_rate_big']/$arr['purchase_delay_rate']*100,2).'%' : '0%';  //大货比例
         //所选时间内到货的采购单合格率90%以上的批次
         $qualified_num = $this->purchase->alias('p')->join('fa_check_order o','p.id = o.purchase_id','left')->join('fa_check_order_item i','o.id = i.check_id','left')->where($where)->where($arrive_where)->group('p.id')->having('sum( quantity_num )/ sum( arrivals_num )>= 0.9')->count();
         //采购批次到货合格率
         $arr['purchase_qualified_rate'] = $sum_batch ? round($qualified_num/$sum_batch*100,2).'%' : 0;
+        //所选时间内现货到货的采购单合格率90%以上的批次
+        $qualified_num_now = $this->purchase->alias('p')->join('fa_check_order o','p.id = o.purchase_id','left')->join('fa_check_order_item i','o.id = i.check_id','left')->where($where)->where($arrive_where)->where('p.type',1)->group('p.id')->having('sum( quantity_num )/ sum( arrivals_num )>= 0.9')->count();
+        //采购批次到货合格率
+        $arr['purchase_qualified_rate_now'] = $sum_batch_now ? round($qualified_num_now/$sum_batch_now*100,2).'%' : 0;
+        $arr['purchase_qualified_rate_now_rate'] = $arr['purchase_qualified_rate'] ? round($arr['purchase_qualified_rate_now']/$arr['purchase_qualified_rate']*100,2).'%' : '0%'; //现货比例
+        //所选时间内大货到货的采购单合格率90%以上的批次
+        $qualified_num_big = $this->purchase->alias('p')->join('fa_check_order o','p.id = o.purchase_id','left')->join('fa_check_order_item i','o.id = i.check_id','left')->where($where)->where($arrive_where)->where('p.type',2)->group('p.id')->having('sum( quantity_num )/ sum( arrivals_num )>= 0.9')->count();
+        //采购批次到货合格率
+        $arr['purchase_qualified_rate_big'] = $sum_batch_big ? round($qualified_num_big/$sum_batch_big*100,2).'%' : 0;
+        $arr['purchase_qualified_rate_big_rate'] = $arr['purchase_qualified_rate'] ? round($arr['purchase_qualified_rate_big']/$arr['purchase_qualified_rate']*100,2).'%' : '0%'; //大货比例
+
         //采购单价
         $arr['purchase_price'] = $arr['purchase_num'] ? round($arr['purchase_amount']/$arr['purchase_num'],2) : 0;
         $arr['purchase_price_now'] = $arr['purchase_num_now'] ? round($arr['purchase_amount_now']/$arr['purchase_num_now'],2) : 0;  //现货
+        $arr['purchase_price_now_rate'] = $arr['purchase_price'] ? round($arr['purchase_price_now']/$arr['purchase_price']*100,2).'%' : '0%';  //现货比例
         $arr['purchase_price_big'] = $arr['purchase_num_big'] ? round($arr['purchase_amount_big']/$arr['purchase_num_big'],2) : 0;//大货
+        $arr['purchase_price_big_rate'] = $arr['purchase_price'] ? round($arr['purchase_price_big']/$arr['purchase_price']*100,2).'%' : '0%';  //大货比例
         Cache::set('Supplydatacenter_datamarket'.$time_str.md5(serialize('purchase_overview')),$arr,7200);
         return $arr;
     }
