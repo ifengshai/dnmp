@@ -121,6 +121,7 @@ class StockHouse extends Backend
                     }
                     $params['create_person'] = session('admin.nickname');
                     $params['createtime'] = date('Y-m-d H:i:s', time());
+                    // dump($params);die;
                     $result = $this->model->allowField(true)->save($params);
                     Db::commit();
                 } catch (ValidateException $e) {
@@ -227,6 +228,9 @@ class StockHouse extends Backend
         $this->assign('shelf_number',$arr);
         $this->view->assign("type", $type);
         $this->view->assign("row", $row);
+        //所有库区编码id
+        $area_coding = Db::name('warehouse_area')->column('coding','id');
+        $this->assign('area_coding',$area_coding);
         return $this->view->fetch();
     }
 
