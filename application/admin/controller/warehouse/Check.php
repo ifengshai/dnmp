@@ -858,15 +858,15 @@ class Check extends Backend
         list($where) = $this->buildparams();
         $list = $this->model->alias('check')
             ->join(['fa_purchase_order' => 'purchaseorder'], 'check.purchase_id=purchaseorder.id')
-            ->join(['fa_supplier' => 'supplier'], 'check.supplier_id=supplier.id')
+            ->join(['fa_supplier' => 'supplier'], 'check.supplier_id=supplier.id','left')
             ->join(['fa_check_order_item' => 'b'], 'b.check_id=check.id')
             ->join(['fa_purchase_order_item' => 'c'], 'b.purchase_id=c.purchase_id and c.sku=b.sku')
             ->field('check.*,b.*,c.purchase_price,purchaseorder.purchase_number,purchaseorder.create_person as person,purchaseorder.purchase_remark,supplier.supplier_name,purchaseorder.is_new_product,purchaseorder.type,purchaseorder.customized_procurement')
             ->where($where)
             ->where($map)
             ->order('check.id desc')
-            ->select(false);
-            dump($list);die();
+            ->select();
+
         $list = collection($list)->toArray();
 
         /*//查询供应商
