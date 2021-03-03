@@ -30,7 +30,7 @@ class Zendesk extends Backend
     protected $model = null;
     protected $relationSearch = true;
     protected $noNeedLogin = ['asycTicketsUpdate','asycTicketsVooguemeUpdate','asycTicketsAll','asycTicketsAll2','asycTicketsAll3','asyncTicketHttps'];
-    protected $noNeedRight=['zendesk_export,email_toload_more,order_toload_more'];
+    protected $noNeedRight=['zendesk_export','email_toload_more','order_toload_more'];
     /**
      * 无需鉴权的方法,但需要登录
      * @var array
