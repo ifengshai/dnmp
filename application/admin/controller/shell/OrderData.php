@@ -780,11 +780,11 @@ class OrderData extends Backend
         //镀膜名称
         $arr['coating_name'] = $options['info_buyRequest']['tmplens']['four_name'] ?: '';
         //镀膜价格
-        $arr['coating_price'] = $options['info_buyRequest']['tmplens']['coating_base_price'];
+        $arr['coating_price'] = $options['info_buyRequest']['tmplens']['four_price'];
         //镜框价格
-        $arr['frame_price'] = $options['info_buyRequest']['tmplens']['frame_base_price'];
+        $arr['frame_price'] = $options['info_buyRequest']['tmplens']['frame_price'];
         //镜片价格
-        $arr['index_price'] = $options['info_buyRequest']['tmplens']['lens_base_price'];
+        $arr['index_price'] = $options['info_buyRequest']['tmplens']['third_price'];
         //镜框原始价格
         $arr['frame_regural_price'] = $options['info_buyRequest']['tmplens']['frame_regural_price'];
         //镜片颜色
@@ -792,7 +792,7 @@ class OrderData extends Backend
         //镜框颜色
         $arr['frame_color'] = $options['options'][0]['value'];
         //镜片+镀膜价格
-        $arr['lens_price'] = $options['info_buyRequest']['tmplens']['lens'] ?? 0;
+        $arr['lens_price'] = $options['info_buyRequest']['tmplens']['lens_price'] ?? 0;
         //镜框+镜片+镀膜价格
         $arr['total'] = $options['info_buyRequest']['tmplens']['total'] ?? 0;
         //镜片分类

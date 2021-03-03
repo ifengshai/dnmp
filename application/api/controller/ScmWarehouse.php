@@ -28,6 +28,7 @@ use app\admin\model\saleaftermanage\OrderReturn;
 use app\admin\model\warehouse\Inventory;
 use app\admin\model\warehouse\InventoryItem;
 use app\admin\model\warehouse\StockSku;
+use app\admin\model\warehouse\WarehouseArea;
 
 /**
  * 供应链出入库接口类
@@ -177,6 +178,13 @@ class ScmWarehouse extends Scm
     protected $_inventory_item = null;
 
     /**
+     * 库区模型对象
+     * @var object
+     * @access protected
+     */
+    protected $_warehouse_area = null;
+
+    /**
      * SKU库位绑定模型对象
      * @var object
      * @access protected
@@ -208,6 +216,7 @@ class ScmWarehouse extends Scm
         $this->_inventory = new Inventory();
         $this->_inventory_item = new InventoryItem();
         $this->_store_sku = new StockSku();
+        $this->_warehouse_area = new WarehouseArea();
     }
 
     /**
@@ -1972,6 +1981,7 @@ class ScmWarehouse extends Scm
     }
 
 
+    /***************************************盘点单******************************************/
         /**
      * 盘点单列表--ok
      *
@@ -2710,6 +2720,23 @@ class ScmWarehouse extends Scm
 
         $this->success($msg, ['info' => ''], 200);
     }
+
+    /**
+     * 获取库区
+     *
+     * @Description
+     * @author wpl
+     * @since 2021/03/03 09:14:36 
+     * @return void
+     */
+    public function inventory_warehouse_area()
+    {
+        
+    }
+
+    /***************************************end******************************************/
+
+
 
     //判断条形码是否绑定过sku
     public function is_empty_code()
