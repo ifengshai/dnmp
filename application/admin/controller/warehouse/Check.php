@@ -869,6 +869,7 @@ class Check extends Backend
             ->select();
             
         $list = collection($list)->toArray();
+        dump($list);die();
         /*//查询供应商
         $supplier = new \app\admin\model\purchase\Supplier();
         $supplier_data = $supplier->getSupplierData();*/
