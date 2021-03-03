@@ -110,13 +110,7 @@ class DataMarket extends Backend
                 $end   = date('Y-m');
             }
             $where['day_date'] = ['between',[$start,$end]];
-            $cache_data = Cache::get('Supplydatacenter_datamarket'.$time_str.md5(serialize('stock_change_bar')));
-            if (!$cache_data) {
-                $data = $this->supplymonth->where($where)->field('id,avg_stock,day_date')->order('day_date','asc')->select();
-            }else{
-                $data = $cache_data;
-            }
-            Cache::set('Supplydatacenter_datamarket' .$time_str . md5(serialize('stock_change_bar')), $data, 7200);
+            $data = $this->supplymonth->where($where)->field('id,avg_stock,purchase_sales_rate,day_date')->order('day_date','asc')->select();
             $json['xColumnName'] = array_column($data,'day_date');
             $json['column'] = ['平均库存'];
             $json['columnData'] = [
@@ -124,6 +118,13 @@ class DataMarket extends Backend
                     'name' => '平均库存',
                     'type' => 'bar',
                     'data' => array_column($data,'avg_stock')
+                ],
+                [
+                    'type' => 'line',
+                    'data' => array_column($data,'purchase_sales_rate'),
+                    'name' => '采销比',
+                    'yAxisIndex' => 1,
+                    'smooth' => true //平滑曲线
                 ],
             ];
             return json(['code' => 1, 'data' => $json]);
@@ -640,7 +641,7 @@ class DataMarket extends Backend
         //所选时间内大货到货的采购单延迟的批次
         $delay_batch_big = $this->purchase->alias('p')->join('fa_purchase_batch b','p.id=b.purchase_id','left')->join('fa_logistics_info l','p.id=l.purchase_id','left')->where($where)->where($arrive_where)->where('p.type',2)->where('p.arrival_time<l.sign_time')->count();
         //采购批次到货延时率
-        $arr['purchase_delay_rate_big'] = $delay_batch_big ? round($sum_batch_big/$delay_batch_big*100,2).'%' : 0;
+        $arr['purchase_delay_rate_big'] = $sum_batch_big ? round($delay_batch_big/$sum_batch_big*100,2).'%' : 0;
         //所选时间内到货的采购单合格率90%以上的批次
         $qualified_num = $this->purchase->alias('p')->join('fa_check_order o','p.id = o.purchase_id','left')->join('fa_check_order_item i','o.id = i.check_id','left')->where($where)->where($arrive_where)->group('p.id')->having('sum( quantity_num )/ sum( arrivals_num )>= 0.9')->count();
         //采购批次到货合格率
