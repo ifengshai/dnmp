@@ -729,7 +729,7 @@ class Wangpenglei extends Backend
         $item = new \app\admin\model\itemmanage\Item();
         $result = $item->where(['is_open' => 1, 'is_del' => 1])->field('sku,id')->select();
         $result = collection($result)->toArray();
-        $skus = array_column($result, 'sku');
+        // $skus = array_column($result, 'sku');
 
         //查询签收的采购单
         $logistics = new \app\admin\model\LogisticsInfo();
@@ -738,11 +738,11 @@ class Wangpenglei extends Backend
         // $res = $purchase->where(['id' => ['in', $purchase_id], 'purchase_status' => 6])->update(['purchase_status' => 7]);
         //计算SKU总采购数量
         $purchase = new \app\admin\model\purchase\PurchaseOrder;
-        $hasWhere['sku'] = ['in', $skus];
+        // $hasWhere['sku'] = ['in', $skus];
         $purchase_map['purchase_status'] = ['in', [2, 5, 6]];
         $purchase_map['is_del'] = 1;
         $purchase_map['PurchaseOrder.id'] = ['not in', $purchase_id];
-        $purchase_list = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
+        $purchase_list = $purchase->hasWhere('purchaseOrderItem')
             ->where($purchase_map)
             ->group('sku')
             ->column('sum(purchase_num) as purchase_num', 'sku');
