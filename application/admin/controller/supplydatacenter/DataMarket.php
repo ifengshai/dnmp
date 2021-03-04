@@ -702,6 +702,19 @@ class DataMarket extends Backend
             }
             $where['day_date'] = ['between',[$start,$end]];
             $data = $this->supplymonth->where($where)->field('id,purchase_num,purchase_sales_rate,day_date')->order('day_date','asc')->select();
+            $data = collection($data)->toArray();
+            $arr['day_date'] = date('Y-m');
+            $map['create_time'] = ['between',[date('Y-m-01').' 00:00:00',date('Y-m-t').' 23:59:59']];
+            $map['is_del'] = 1;
+            $map['purchase_status'] = ['in', [2, 5, 6, 7]];
+            $purchase_num = $this->purchase->alias('a')->where($map)->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')->sum('b.purchase_num');
+            $arr['purchase_num'] = $purchase_num;
+            $map1['payment_time'] = ['between',[strtotime(date('Y-m-01').' 00:00:00'),strtotime(date('Y-m-t').' 23:59:59')]];
+            $map1['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
+            $sales_num = $this->order->where($map1)->sum('total_qty_ordered');
+            $arr['purchase_sales_rate'] = $sales_num!=0 ? round($purchase_num/$sales_num*100,2):0;
+            $data[] = $arr;
+
             $json['xColumnName'] = array_column($data,'day_date');
             $json['column'] = ['月度采购数量'];
             $json['columnData'] = [
