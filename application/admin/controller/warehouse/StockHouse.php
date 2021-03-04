@@ -355,6 +355,62 @@ class StockHouse extends Backend
         return $this->view->fetch();
     }
 
+
+    /**
+     * 库位打印
+     */
+    public function stock_print_label($ids = null)
+    {
+        
+        $stock_house_info = $this->model
+            ->where(['id' => ['in',$ids]])
+            ->field('status,subarea,coding')
+            ->select()
+        ;
+        $stock_house_info = collection($stock_house_info)->toArray();
+        
+        $status_arr = array_column($stock_house_info, 'status');
+        if (in_array(2, $status_arr)) {
+            $this->error('禁用状态无法打印！');
+        }
+        ob_start();
+        $file_header =
+            <<<EOF
+            <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<style>
+body{ margin:0; padding:0}
+.single_box{margin:0 auto;}
+table.addpro {clear: both;table-layout: fixed; margin-top:6px; border-top:1px solid #000;border-left:1px solid #000; font-size:12px;}
+table.addpro .title {background: none repeat scroll 0 0 #f5f5f5; }
+table.addpro .title  td {border-collapse: collapse;color: #000;text-align: center; font-weight:normal; }
+table.addpro tbody td {word-break: break-all; text-align: center;border-bottom:1px solid #000;border-right:1px solid #000;}
+table.addpro.re tbody td{ position:relative}
+</style>
+EOF;
+
+        $file_content = '';
+        foreach ($stock_house_info as $key => $value) {
+                //检测文件夹
+                $dir = ROOT_PATH . "public" . DS . "uploads" . DS . "stock_house" . DS . "all";
+                !file_exists($dir) && mkdir($dir, 0777, true);
+
+                //生成条形码
+                $fileName = $dir . DS . $value['coding'] .".png";
+                $this->generate_barcode($value['coding'], $fileName);
+
+                //拼接条形码
+                $img_url = "/uploads/stock_house/all/{$value['coding']}.png";
+                $file_content .= "
+<div style='display:list-item;margin: 0mm auto;padding-top:4mm;padding-right:2mm;text-align:center;'>
+<p>库位条形码</p>
+<img src='" . $img_url . "' style='width:36mm'>
+</div>";
+        }
+
+    echo $file_header . $file_content;
+    }
+
+    
     /**
      * 打印
      */

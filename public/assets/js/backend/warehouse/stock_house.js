@@ -12,7 +12,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
             Table.api.init({
                 showJumpto: true,
                 searchFormVisible: true,
-                pageList: [10, 25, 50, 100],
+                pageList: [10, 25, 50, 100, 300],
                 extend: {
                     index_url: 'warehouse/stock_house/index' + location.search,
                     add_url: 'warehouse/stock_house/add?type=1',
@@ -87,6 +87,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                     table.bootstrapTable('refresh');
                 });
             })
+
+            //批量打印条形码
+            $('.btn-batch-printed_test').click(function () {
+                var id_params = [];
+                $.each(table.bootstrapTable('getSelections'), function (index, row) {
+                    id_params.push(row['id']);
+                });
+                window.open(Config.moduleurl + '/warehouse/stock_house/stock_print_label/ids/' + id_params.join(','), '_blank');
+            });
         },
         add: function () {
             Controller.api.bindevent();
