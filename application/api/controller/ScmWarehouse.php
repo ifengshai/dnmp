@@ -2896,6 +2896,7 @@ class ScmWarehouse extends Scm
     {
         //库内调拨子单详情
         $item_sku = $this->request->request("item_sku");
+        empty($item_sku) && $this->error(__('调拨单子数据集合不能为空！！'), [], 523);
         $result = false;
         $this->_warehouse_transfer_order->startTrans();
         $this->_warehouse_transfer_order_item->startTrans();
