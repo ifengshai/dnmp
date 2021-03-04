@@ -693,7 +693,7 @@ class Wangpenglei extends Backend
         $process = new \app\admin\model\order\order\NewOrderProcess;
         $orderitemprocess = new \app\admin\model\order\order\NewOrderItemProcess();
         //查询所有订单 2月1号
-        $order = $process->where('order_prescription_type', 1)->where(['order_id' => ['>',1197029]])->column('order_id');
+        $order = $process->where('order_prescription_type', 1)->where(['order_id' => ['>', 1197029]])->column('order_id');
         foreach ($order as $key => $value) {
             $order_type = $orderitemprocess->where('order_id', $value)->column('order_prescription_type');
             //查不到结果跳过 防止子单表延迟两分钟查不到数据
@@ -733,7 +733,7 @@ class Wangpenglei extends Backend
 
         //查询签收的采购单
         $logistics = new \app\admin\model\LogisticsInfo();
-        $purchase_id = $logistics->where(['status' => 1])->column('purchase_id');
+        $purchase_id = $logistics->where(['status' => 1, 'purchase_id' => ['>', 0]])->column('purchase_id');
         $purchase = new \app\admin\model\purchase\PurchaseOrder;
         // $res = $purchase->where(['id' => ['in', $purchase_id], 'purchase_status' => 6])->update(['purchase_status' => 7]);
         //计算SKU总采购数量
@@ -746,18 +746,13 @@ class Wangpenglei extends Backend
             ->where($purchase_map)
             ->group('sku')
             ->column('sum(purchase_num) as purchase_num', 'sku');
-        echo $purchase->getLastSql();
-        dump($purchase_list);die;
+       
         foreach ($result as &$v) {
             $v['on_way_stock'] = $purchase_list[$v['sku']] ?? 0;
             unset($v['sku']);
         }
         unset($v);
-        dump($result);
         $res = $item->saveAll($result);
         die;
     }
-
-
 }
-
