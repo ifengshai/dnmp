@@ -827,6 +827,7 @@ class Check extends Backend
         set_time_limit(0);
         ini_set('memory_limit', '512M');
         $ids = input('ids');
+
         //自定义sku搜索
         $filter = json_decode($this->request->get('filter'), true);
         //是否存在需要退回产品
@@ -854,20 +855,20 @@ class Check extends Backend
         if ($ids) {
             $map['check.id'] = ['in', $ids];
         }
-
         list($where) = $this->buildparams();
         $list = $this->model->alias('check')
             ->join(['fa_purchase_order' => 'purchaseorder'], 'check.purchase_id=purchaseorder.id')
-            ->join(['fa_supplier' => 'supplier'], 'check.supplier_id=supplier.id')
+            ->join(['fa_supplier' => 'supplier'], 'check.supplier_id=supplier.id','left')
             ->join(['fa_check_order_item' => 'b'], 'b.check_id=check.id')
             ->join(['fa_purchase_order_item' => 'c'], 'b.purchase_id=c.purchase_id and c.sku=b.sku')
-            ->field('check.*,b.*,c.purchase_price,purchaseorder.purchase_number,purchaseorder.create_person as person,purchaseorder.purchase_remark,supplier.supplier_name')
+            ->field('check.*,b.*,c.purchase_price,purchaseorder.purchase_number,purchaseorder.create_person as person,purchaseorder.purchase_remark,supplier.supplier_name,purchaseorder.is_new_product,purchaseorder.type,purchaseorder.customized_procurement')
             ->where($where)
             ->where($map)
             ->order('check.id desc')
             ->select();
-            
+
         $list = collection($list)->toArray();
+
         /*//查询供应商
         $supplier = new \app\admin\model\purchase\Supplier();
         $supplier_data = $supplier->getSupplierData();*/
@@ -886,13 +887,16 @@ class Check extends Backend
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("H1", "质检备注")
             ->setCellValue("I1", "SKU")
             ->setCellValue("J1", "供应商SKU")
-            ->setCellValue("K1", "单价");
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("L1", "采购数量")
-            ->setCellValue("M1", "到货数量")
-            ->setCellValue("N1", "合格数量")
-            ->setCellValue("O1", "不合格数量")
-            ->setCellValue("P1", "创建人")
-            ->setCellValue("Q1", "创建时间");
+            ->setCellValue("K1", "是否新品")
+            ->setCellValue("L1", "是否大货")
+            ->setCellValue("M1", "是否首次定做")
+            ->setCellValue("N1", "单价");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("O1", "采购数量")
+            ->setCellValue("P1", "到货数量")
+            ->setCellValue("Q1", "合格数量")
+            ->setCellValue("R1", "不合格数量")
+            ->setCellValue("S1", "创建人")
+            ->setCellValue("T1", "创建时间");
 
         $spreadsheet->setActiveSheetIndex(0)->setTitle('质检单数据');
 
@@ -908,13 +912,19 @@ class Check extends Backend
             $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['remark']);
             $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), $value['sku']);
             $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 1 + 2), $value['supplier_sku']);
-            $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 1 + 2), $value['purchase_price']);
-            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 1 + 2), $value['purchase_num']);
-            $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 1 + 2), $value['arrivals_num']);
-            $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 1 + 2), $value['quantity_num']);
-            $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 1 + 2), $value['unqualified_num']);
-            $spreadsheet->getActiveSheet()->setCellValue("P" . ($key * 1 + 2), $value['create_person']);
-            $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 1 + 2), $value['createtime']);
+            $value['is_new_product'] =$value['is_new_product']==1?'是':'否';
+            $value['type'] =$value['type']==1?'是':'否';
+            $value['customized_procurement'] =$value['customized_procurement']==1?'是':'否';
+            $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 1 + 2), $value['is_new_product']);
+            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 1 + 2), $value['type']);
+            $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 1 + 2), $value['customized_procurement']);
+            $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 1 + 2), $value['purchase_price']);
+            $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 1 + 2), $value['purchase_num']);
+            $spreadsheet->getActiveSheet()->setCellValue("P" . ($key * 1 + 2), $value['arrivals_num']);
+            $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 1 + 2), $value['quantity_num']);
+            $spreadsheet->getActiveSheet()->setCellValue("R" . ($key * 1 + 2), $value['unqualified_num']);
+            $spreadsheet->getActiveSheet()->setCellValue("S" . ($key * 1 + 2), $value['create_person']);
+            $spreadsheet->getActiveSheet()->setCellValue("T" . ($key * 1 + 2), $value['createtime']);
         }
 
         //设置宽度
@@ -935,6 +945,9 @@ class Check extends Backend
         $spreadsheet->getActiveSheet()->getColumnDimension('M')->setWidth(16);
         $spreadsheet->getActiveSheet()->getColumnDimension('P')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('Q')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('R')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('S')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('T')->setWidth(20);
 
 
 
@@ -954,7 +967,7 @@ class Check extends Backend
         $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
         $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
 
-        $spreadsheet->getActiveSheet()->getStyle('A1:Q' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle('A1:T1' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
 
         $spreadsheet->setActiveSheetIndex(0);

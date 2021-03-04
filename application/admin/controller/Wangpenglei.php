@@ -684,4 +684,80 @@ class Wangpenglei extends Backend
 
         echo "ok";
     }
+
+
+    //跑订单加工分类 - 仅镜架重新跑
+    public function order_send_time()
+    {
+        ini_set('memory_limit', '512M');
+        $process = new \app\admin\model\order\order\NewOrderProcess;
+        $orderitemprocess = new \app\admin\model\order\order\NewOrderItemProcess();
+        //查询所有订单 2月1号
+        $order = $process->where('order_prescription_type', 1)->where(['order_id' => ['>',1197029]])->column('order_id');
+        foreach ($order as $key => $value) {
+            $order_type = $orderitemprocess->where('order_id', $value)->column('order_prescription_type');
+            //查不到结果跳过 防止子单表延迟两分钟查不到数据
+            if (!$order_type) {
+                continue;
+            }
+
+            if (in_array(3, $order_type)) {
+                $type = 3;
+            } elseif (in_array(2, $order_type)) {
+                $type = 2;
+            } else {
+                $type = 1;
+            }
+            $process->where('order_id', $value)->update(['order_prescription_type' => $type]);
+            echo $value . ' is ok' . "\n";
+            usleep(100000);
+        }
+    }
+
+
+
+    /**
+     * 处理在途库存 - 更新在途库存
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/06/09 10:08:03 
+     * @return void
+     */
+    public function proccess_stock()
+    {
+        $item = new \app\admin\model\itemmanage\Item();
+        $result = $item->where(['is_open' => 1, 'is_del' => 1])->field('sku,id')->select();
+        $result = collection($result)->toArray();
+        // $skus = array_column($result, 'sku');
+
+        //查询签收的采购单
+        $logistics = new \app\admin\model\LogisticsInfo();
+        $purchase_id = $logistics->where(['status' => 1])->column('purchase_id');
+        $purchase = new \app\admin\model\purchase\PurchaseOrder;
+        // $res = $purchase->where(['id' => ['in', $purchase_id], 'purchase_status' => 6])->update(['purchase_status' => 7]);
+        //计算SKU总采购数量
+        $purchase = new \app\admin\model\purchase\PurchaseOrder;
+        // $hasWhere['sku'] = ['in', $skus];
+        $purchase_map['purchase_status'] = ['in', [2, 5, 6]];
+        $purchase_map['is_del'] = 1;
+        $purchase_map['PurchaseOrder.id'] = ['not in', $purchase_id];
+        $purchase_list = $purchase->hasWhere('purchaseOrderItem')
+            ->where($purchase_map)
+            ->group('sku')
+            ->column('sum(purchase_num) as purchase_num', 'sku');
+        echo $purchase->getLastSql();
+        dump($purchase_list);die;
+        foreach ($result as &$v) {
+            $v['on_way_stock'] = $purchase_list[$v['sku']] ?? 0;
+            unset($v['sku']);
+        }
+        unset($v);
+        dump($result);
+        $res = $item->saveAll($result);
+        die;
+    }
+
+
 }
+
