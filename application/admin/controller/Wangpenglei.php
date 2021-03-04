@@ -746,6 +746,7 @@ class Wangpenglei extends Backend
             ->where($purchase_map)
             ->group('sku')
             ->column('sum(purchase_num) as purchase_num', 'sku');
+        dump($purchase_list);die;
         foreach ($result as &$v) {
             $v['on_way_stock'] = $purchase_list[$v['sku']] ?? 0;
             unset($v['sku']);
