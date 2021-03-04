@@ -1298,7 +1298,6 @@ class Distribution extends Backend
                 'a.item_order_number' => ['in', array_column($list, 'item_order_number')],
                 'b.operation_type' => 1
             ])
-            ->group('a.item_order_number')
             ->column('a.change_sku', 'a.item_order_number');
 
         //获取更改镜片最新处方信息
@@ -1685,8 +1684,6 @@ class Distribution extends Backend
                 'a.item_order_number' => ['in', array_column($list, 'item_order_number')],
                 'b.operation_type' => 1
             ])
-            ->order('a.id', 'asc')
-            ->group('a.item_order_number')
             ->column('a.change_sku', 'a.item_order_number');
 
         //获取更改镜片最新处方信息
