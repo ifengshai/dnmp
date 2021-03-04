@@ -169,6 +169,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable', 'bootstra
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function (row) {
+                                        return true;
                                         //返回true时按钮显示,返回false隐藏
                                         if (row.status == 2) {
                                             return true;
