@@ -696,7 +696,7 @@ class Test4 extends Controller
 
         //查询签收的采购单
         $logistics = new \app\admin\model\LogisticsInfo();
-        $purchase_id = $logistics->where(['status' => 1])->column('purchase_id');
+        $purchase_id = $logistics->where(['status' => 1, 'purchase_id' => ['>', 0]])->column('purchase_id');
         $purchase = new \app\admin\model\purchase\PurchaseOrder;
         // $res = $purchase->where(['id' => ['in', $purchase_id], 'purchase_status' => 6])->update(['purchase_status' => 7]);
         //计算SKU总采购数量
