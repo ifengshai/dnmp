@@ -704,7 +704,7 @@ class DataMarket extends Backend
             $data = $this->supplymonth->where($where)->field('id,purchase_num,purchase_sales_rate,day_date')->order('day_date','asc')->select();
             $data = collection($data)->toArray();
             $arr['day_date'] = date('Y-m');
-            $map['create_time'] = ['between',[date('Y-m-01').' 00:00:00',date('Y-m-t').' 23:59:59']];
+            $map['createtime'] = ['between',[date('Y-m-01').' 00:00:00',date('Y-m-t').' 23:59:59']];
             $map['is_del'] = 1;
             $map['purchase_status'] = ['in', [2, 5, 6, 7]];
             $purchase_num = $this->purchase->alias('a')->where($map)->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')->sum('b.purchase_num');
