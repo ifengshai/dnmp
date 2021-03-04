@@ -727,10 +727,9 @@ class Wangpenglei extends Backend
     public function proccess_stock()
     {
         $item = new \app\admin\model\itemmanage\Item();
-        $result = $item->where(['is_open' => 1, 'is_del' => 1, 'on_way_stock' => ['>', 0]])->field('sku,id')->select();
+        $result = $item->where(['is_open' => 1, 'is_del' => 1])->field('sku,id')->select();
         $result = collection($result)->toArray();
         $skus = array_column($result, 'sku');
-
 
         //查询签收的采购单
         $logistics = new \app\admin\model\LogisticsInfo();
@@ -747,14 +746,13 @@ class Wangpenglei extends Backend
             ->where($purchase_map)
             ->group('sku')
             ->column('sum(purchase_num) as purchase_num', 'sku');
-
         foreach ($result as &$v) {
             $v['on_way_stock'] = $purchase_list[$v['sku']] ?? 0;
             unset($v['sku']);
         }
         unset($v);
+        dump($result);
         $res = $item->saveAll($result);
-        echo  $res;
         die;
     }
 
