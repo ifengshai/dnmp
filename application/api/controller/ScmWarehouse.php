@@ -2876,6 +2876,12 @@ class ScmWarehouse extends Scm
             ->limit($offset, $limit)
             ->select();
         $list = collection($list)->toArray();
+        $check_status = [0 => '新建', 1 => '待审核', 2 => '已审核', 3 => '已拒绝', 4 => '已取消', 5 => '调拨中', 6 => '已完成'];
+        foreach ($list as $key => $value) {
+            $list[$key]['status'] = $check_status[$value['status']];
+            //按钮
+            $list[$key]['show_start'] = 0 == $value['status'] ? 1 : 0; //编辑按钮
+        }
         $this->success('', ['list' => $list], 200);
     }
 
@@ -2888,48 +2894,32 @@ class ScmWarehouse extends Scm
      */
     public function transfer_order_add()
     {
+        //库内调拨子单详情
         $item_sku = $this->request->request("item_sku");
-        //调出库位
-        $call_out_site = $this->request->request("call_out_site");
-        //调入库位
-        $call_in_site = $this->request->request("call_in_site");
-
         $result = false;
         $this->_warehouse_transfer_order->startTrans();
         $this->_warehouse_transfer_order_item->startTrans();
         try {
             //保存--创建库内调拨单
             $arr = [];
-            $arr['number'] = 'IS' . date('YmdHis') . rand(100, 999) . rand(100, 999);
+            $arr['number'] = 'TO' . date('YmdHis') . rand(100, 999) . rand(100, 999);
             $arr['create_person'] = $this->auth->nickname;
-            $arr['call_out_site'] = $call_out_site;
-            $arr['call_in_site'] = $call_in_site;
             $arr['createtime'] = date('Y-m-d H:i:s', time());
-            $result = $this->_inventory->allowField(true)->save($arr);
+            $result = $this->_warehouse_transfer_order->allowField(true)->save($arr);
             if ($result) {
                 $list = [];
                 foreach ($item_sku as $k => $v) {
-                    $list[$k]['inventory_id'] = $this->_inventory->id;
+                    $list[$k]['transfer_order_id'] = $this->_inventory->id;
                     $list[$k]['sku'] = $v['sku'];
-                    $item = $this->_item->field('name,stock,available_stock,distribution_occupy_stock')->where('sku', $v['sku'])->find();
-                    if (empty($item)) {
-                        $this->error(__($v['sku'] . '不存在'), [], 525);
-                    }
-
-                    $list[$k]['name'] = $item['name']; //商品名
-                    $list[$k]['distribution_occupy_stock'] = $item['distribution_occupy_stock'] ?? 0; //配货站用数量
-                    $real_time_qty = ($item['stock'] * 1 - $item['distribution_occupy_stock'] * 1); //实时库存
-                    $list[$k]['real_time_qty'] = $real_time_qty ?? 0;
-                    $list[$k]['available_stock'] = $item['available_stock'] ?? 0; //可用库存
-                    //                        $list[$k]['inventory_qty'] = $v['inventory_qty'] ?? 0;//盘点数量
-                    //                        $list[$k]['error_qty'] = $v['error_qty'] ?? 0;//误差数量
-                    $list[$k]['remark'] = $v['remark']; //备注
+                    $list[$k]['num'] = $v['num'];
+                    $list[$k]['outarea'] = $v['outarea'];//调出库区
+                    $list[$k]['call_out_site'] = $v['call_out_site']; //调出库位
+                    $list[$k]['inarea'] = $v['inarea']; //调入库区
+                    $list[$k]['call_in_site'] = $v['call_in_site'];//调入库位
                 }
-
                 //添加明细表数据
-                $result = $this->_inventory_item->allowField(true)->saveAll($list);
+                $result = $this->_warehouse_transfer_order_item->allowField(true)->saveAll($list);
             }
-
             $this->_inventory->commit();
             $this->_inventory_item->commit();
         } catch (ValidateException $e) {
@@ -2950,6 +2940,40 @@ class ScmWarehouse extends Scm
         } else {
             $this->error(__('No rows were inserted'), [], 525);
         }
+    }
+
+    /**
+     * //库区库位sku
+     * Created by Phpstorm.
+     * User: jhh
+     * Date: 2021/3/4
+     * Time: 10:21:30
+     */
+    public function area_warehouse_sku()
+    {
+        $area_id = $this->request->request("area_id");
+        $store_id = $this->request->request("store_id");
+        $sku = $this->request->request("sku");
+        $where = [];
+        if ($area_id) {
+            $where['b.area_id'] = $area_id;
+        }
+        if ($store_id) {
+            $where['b.id'] = $store_id;
+        }
+        if ($sku) {
+            $where['a.sku'] = ['like', '%' . $sku . '%'];
+        }
+        $list = Db::name('store_sku')
+            ->alias('a')
+            ->join(['fa_store_house' => 'b'], 'a.store_id=b.id', 'left')
+            ->join(['fa_warehouse_area' => 'c'], 'b.area_id=c.id')
+            ->field('a.sku,b.coding,c.name')
+            ->where('is_del',1)
+            ->where($where)
+            ->select();
+
+        $this->success('', ['list' => $list], 200);
     }
 
     /**
