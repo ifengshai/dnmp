@@ -913,7 +913,7 @@ class Check extends Backend
             $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), $value['sku']);
             $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 1 + 2), $value['supplier_sku']);
             $value['is_new_product'] =$value['is_new_product']==1?'是':'否';
-            $value['type'] =$value['type']==1?'是':'否';
+            $value['type'] =$value['type']==2?'是':'否';
             $value['customized_procurement'] =$value['customized_procurement']==1?'是':'否';
             $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 1 + 2), $value['is_new_product']);
             $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 1 + 2), $value['type']);
