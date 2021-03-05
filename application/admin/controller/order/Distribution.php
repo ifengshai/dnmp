@@ -1663,7 +1663,7 @@ class Distribution extends Backend
             ->select();
         $list = collection($list)->toArray();
         $order_ids = array_column($list, 'order_id');
-        $sku_arr = array_column($list, 'sku');
+        // $sku_arr = array_column($list, 'sku');
 
         //查询sku映射表
         // $item_res = $this->_item_platform_sku->cache(3600)->where(['platform_sku' => ['in', array_unique($sku_arr)]])->column('sku', 'platform_sku');
@@ -1671,8 +1671,8 @@ class Distribution extends Backend
         //获取订单数据
         $order_list = $this->_new_order->where(['id' => ['in', array_unique($order_ids)]])->column('total_qty_ordered,increment_id', 'id');
 
-        //查询产品货位号
-        $cargo_number = $this->_stock_house->alias('a')->where(['status' => 1, 'b.is_del' => 1, 'a.type' => 1])->join(['fa_store_sku' => 'b'], 'a.id=b.store_id')->column('coding', 'sku');
+        //查询产品货位号 拣货区库位 库位id默认为3
+        $cargo_number = $this->_stock_house->alias('a')->where(['status' => 1, 'b.is_del' => 1, 'a.type' => 1,'area_id' => 3])->join(['fa_store_sku' => 'b'], 'a.id=b.store_id')->column('coding', 'sku');
 
         //获取更改镜框最新信息
         $change_sku = $this->_work_order_change_sku
