@@ -1226,6 +1226,7 @@ class CustomerService extends Backend
             $notCustomer_where['create_user_id'] = ['in',$cat];
             $notCustomer_where['work_status'] = 6;
             $notCustomer_where['work_platform'] = 1;
+            $notCustomer_where_other['work_platform'] = 1;
             $notCustomer_where_other['work_status'] = ['in',[0, 1, 2, 3, 4, 5, 6, 7]];
             $notCustomer_where_other['create_user_id'] = ['in',$cat];
             //非客服工单已完成数据
