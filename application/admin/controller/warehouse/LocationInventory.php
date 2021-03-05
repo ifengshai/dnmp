@@ -103,7 +103,10 @@ class LocationInventory extends Backend
             foreach ($list as $k => $row) {
                 $row->getRelation('storehouse')->visible(['coding', 'library_name', 'status','area_id']);
                 $list[$k]['name'] = $arr[$row['sku']]['name'];
-                $list[$k]['stock'] = $productbarcodeitem->where(['location_id'=>$row['storehouse']['area_id'],'location_code'=>$row['storehouse']['coding']])->count();
+                //在库 子单号为空 库位号 库区id都一致的库存作为此库位的库存
+                $list[$k]['stock'] = $productbarcodeitem
+                    ->where(['location_id'=>$row['storehouse']['area_id'],'location_code'=>$row['storehouse']['coding'],'library_status'=>1,'item_order_number'=>''])
+                    ->count();
                 $list[$k]['area_code'] = $area_list[$row['storehouse']['area_id']];
             }
             $list = collection($list)->toArray();
