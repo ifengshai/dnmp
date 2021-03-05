@@ -424,7 +424,7 @@ class ScmWarehouse extends Scm
         $get_out_stock_id = $this->request->request('out_stock_id');
 
         //入库库位详情
-        $warehouse_area = $this->_store_house->where('id',$warehouse_area_id)->find();
+        $warehouse_area = $this->_store_house->where('id', $warehouse_area_id)->find();
 
         $this->_out_stock->startTrans();
         $this->_out_stock_item->startTrans();
@@ -514,7 +514,7 @@ class ScmWarehouse extends Scm
 
                 //绑定条形码
                 foreach ($value['sku_agg'] as $v) {
-                    $this->_product_bar_code_item->where(['code' => $v['code'],'location_code'=>$warehouse_area['coding']])->update(['out_stock_id' => $out_stock_id]);
+                    $this->_product_bar_code_item->where(['code' => $v['code'], 'location_code' => $warehouse_area['coding']])->update(['out_stock_id' => $out_stock_id]);
                 }
             }
 
@@ -660,7 +660,7 @@ class ScmWarehouse extends Scm
                 $this->_product_bar_code_item
                     ->allowField(true)
                     ->isUpdate(true, ['out_stock_id' => $out_stock_id])
-                    ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2,'location_code'=>'']);//出库解除库位号与商品条形码绑定
+                    ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2, 'location_code' => '']);//出库解除库位号与商品条形码绑定
 
                 //计算出库成本 
                 $financecost = new \app\admin\model\finance\FinanceCost();
@@ -897,7 +897,7 @@ class ScmWarehouse extends Scm
         0 != $row['status'] && $this->error(__('只有新建状态才能取消'), [], 504);
 
         //解除条形码绑定关系
-        $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['in_stock_id' => $in_stock_id])->save(['in_stock_id' => 0,'location_code'=>'']);
+        $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['in_stock_id' => $in_stock_id])->save(['in_stock_id' => 0, 'location_code' => '']);
 
         $res = $this->_in_stock->allowField(true)->isUpdate(true, ['id' => $in_stock_id])->save(['status' => 4]);
         $res ? $this->success('取消成功', [], 200) : $this->error(__('取消失败'), [], 505);
@@ -1193,7 +1193,7 @@ class ScmWarehouse extends Scm
                             $this->_product_bar_code_item
                                 ->allowField(true)
                                 ->isUpdate(true, ['code' => ['in', $where_code]])
-                                ->save(['in_stock_id' => $this->_in_stock->id, 'location_code' => $warehouse_area['coding']]); //绑定条形码与库位号
+                                ->save(['in_stock_id' => $this->_in_stock->id, 'location_code' => $warehouse_area['coding']]);//绑定条形码与库位号
                         }
 
                         //批量添加
@@ -1437,7 +1437,7 @@ class ScmWarehouse extends Scm
             //入库单子表的sku与条形码有绑定 先解除绑定
             $barcode = $this->_product_bar_code_item
                 ->where(['in_stock_id' => $instock_id['instock_id'], 'sku' => $instock_id['sku']])
-                ->update(['in_stock_id' => 0, 'location_code' => '']); //解除条形码与库位号的绑定关系
+                ->update(['in_stock_id' => 0, 'location_code' => '']);//解除条形码与库位号的绑定关系
             $this->_in_stock_item->commit();
             $this->_product_bar_code_item->commit();
         } catch (ValidateException $e) {
@@ -1922,7 +1922,7 @@ class ScmWarehouse extends Scm
                 $this->_product_bar_code_item
                     ->allowField(true)
                     ->isUpdate(true, ['in_stock_id' => $in_stock_id])
-                    ->save(['in_stock_id' => 0, 'location_code' => '']); //解除条形码与库位号的绑定关系
+                    ->save(['in_stock_id' => 0, 'location_code' => '']);//解除条形码与库位号的绑定关系
             }
 
             $this->_item->commit();
@@ -2935,7 +2935,8 @@ class ScmWarehouse extends Scm
         if (count(array_filter($item_sku)) < 1) {
             $this->error(__('调拨单子数据集合不能为空！！'), [], 524);
         }
-        if ($type == 0 || $type == 1) {
+        if (!empty($number) && !$id) {
+            //有调拨单号没有调拨单id说明是第一次保存
             $result = false;
             $this->_warehouse_transfer_order->startTrans();
             $this->_warehouse_transfer_order_item->startTrans();
@@ -2981,45 +2982,57 @@ class ScmWarehouse extends Scm
             } else {
                 $this->error(__('No rows were inserted'), [], 525);
             }
-        } else { //编辑调拨单
+        } else if (empty($number) && $id) {//编辑调拨单
             empty($id) && $this->error(__('调拨单id不能为空！！'), [], 523);
-            $this->_warehouse_transfer_order->startTrans();
-            $this->_warehouse_transfer_order_item->startTrans();
-            try {
-                $results = $this->_warehouse_transfer_order_item->where('transfer_order_id', $id)->delete();
-                if ($results) {
-                    $list = [];
-                    foreach ($item_sku as $k => $v) {
-                        $list[$k]['transfer_order_id'] = $this->_inventory->id;
-                        $list[$k]['sku'] = $v['sku'];
-                        $list[$k]['num'] = $v['num'];
-                        $list[$k]['outarea'] = $v['outarea']; //调出库区
-                        $list[$k]['call_out_site'] = $v['call_out_site']; //调出库位
-                        $list[$k]['inarea'] = $v['inarea']; //调入库区
-                        $list[$k]['call_in_site'] = $v['call_in_site']; //调入库位
+            $warehouse_trans_order_detail = $this->_warehouse_transfer_order->where('id', $id)->find();
+            //状态为5说明是调拨中 只能更改条形码 0是新建状态可以编辑
+            if ($warehouse_trans_order_detail['status'] == 5) {
+                if ($type == 0) {
+
+                } else {
+                    //调拨中提交需要判断子调拨单是不是都已经完成了
+                    $is_complete = $this->_warehouse_transfer_order_item->where('num',0)->where('transfer_order_id', $id)->find();
+                    if (!empty($is_complete)){
+                        $this->error(__('存在未调拨完成的子单，请调拨后重试'), [], 525);
                     }
-                    //添加明细表数据
-                    $result = $this->_warehouse_transfer_order_item->allowField(true)->saveAll($list);
                 }
-                $this->_warehouse_transfer_order->commit();
-                $this->_warehouse_transfer_order_item->commit();
-            } catch (ValidateException $e) {
-                $this->_warehouse_transfer_order->rollback();
-                $this->_warehouse_transfer_order_item->rollback();
-                $this->error($e->getMessage(), [], 444);
-            } catch (PDOException $e) {
-                $this->_warehouse_transfer_order->rollback();
-                $this->_warehouse_transfer_order_item->rollback();
-                $this->error($e->getMessage(), [], 444);
-            } catch (Exception $e) {
-                $this->_warehouse_transfer_order->rollback();
-                $this->_warehouse_transfer_order_item->rollback();
-                $this->error($e->getMessage(), [], 444);
-            }
-            if ($result !== false) {
-                $this->success('添加成功！！', '', 200);
             } else {
-                $this->error(__('No rows were inserted'), [], 525);
+                //type为0是保存 1是提交
+                if ($type == 0) {
+                    0 != $warehouse_trans_order_detail['status'] && $this->error(__('只有新建状态才能编辑'), [], 405);
+                    $results = $this->_warehouse_transfer_order_item->where('transfer_order_id', $id)->delete();
+                    if ($results) {
+                        $list = [];
+                        foreach ($item_sku as $k => $v) {
+                            $list[$k]['transfer_order_id'] = $this->_inventory->id;
+                            $list[$k]['sku'] = $v['sku'];
+                            $list[$k]['num'] = $v['num'];
+                            $list[$k]['outarea'] = $v['outarea'];//调出库区
+                            $list[$k]['call_out_site'] = $v['call_out_site']; //调出库位
+                            $list[$k]['inarea'] = $v['inarea']; //调入库区
+                            $list[$k]['call_in_site'] = $v['call_in_site'];//调入库位
+                        }
+                        //添加明细表数据
+                        $result = $this->_warehouse_transfer_order_item->allowField(true)->saveAll($list);
+                    }
+                } else {
+                    $res = $this->_warehouse_transfer_order->where('id', $id)->update(['status'=>$type]);
+                    $results = $this->_warehouse_transfer_order_item->where('transfer_order_id', $id)->delete();
+                    if ($results) {
+                        $list = [];
+                        foreach ($item_sku as $k => $v) {
+                            $list[$k]['transfer_order_id'] = $this->_inventory->id;
+                            $list[$k]['sku'] = $v['sku'];
+                            $list[$k]['num'] = $v['num'];
+                            $list[$k]['outarea'] = $v['outarea'];//调出库区
+                            $list[$k]['call_out_site'] = $v['call_out_site']; //调出库位
+                            $list[$k]['inarea'] = $v['inarea']; //调入库区
+                            $list[$k]['call_in_site'] = $v['call_in_site'];//调入库位
+                        }
+                        //添加明细表数据
+                        $result = $this->_warehouse_transfer_order_item->allowField(true)->saveAll($list);
+                    }
+                }
             }
         }
     }
@@ -3153,7 +3166,27 @@ class ScmWarehouse extends Scm
         $row = $this->_warehouse_transfer_order->where('id', $transfer_order_id)->find();
         1 != $row['status'] && $this->error(__('只有待审核状态才能审核'), [], 405);
 
-        $res = $this->_out_stock->allowField(true)->isUpdate(true, ['id' => $transfer_order_id])->save(['status' => $do_type]);
+        $res = $this->_warehouse_transfer_order->allowField(true)->isUpdate(true, ['id' => $transfer_order_id])->save(['status' => $do_type]);
+        false === $res ? $this->error(__('审核失败'), [], 404) : $this->success('审核成功', [], 200);
+    }
+
+    /**
+     * 取消
+     * Created by Phpstorm.
+     * User: jhh
+     * Date: 2021/3/5
+     * Time: 18:17:14
+     */
+    public function transfer_order_cancel()
+    {
+        $transfer_order_id = $this->request->request('transfer_order_id');
+        empty($transfer_order_id) && $this->error(__('库内调拨单ID不能为空'), [], 403);
+
+        //检测出库单状态
+        $row = $this->_warehouse_transfer_order->where('id', $transfer_order_id)->find();
+        0 != $row['status'] && $this->error(__('只有新建状态才能取消'), [], 405);
+
+        $res = $this->_warehouse_transfer_order->allowField(true)->isUpdate(true, ['id' => $transfer_order_id])->save(['status' => 4]);
         false === $res ? $this->error(__('审核失败'), [], 404) : $this->success('审核成功', [], 200);
     }
 
