@@ -412,6 +412,9 @@ class ScmWarehouse extends Scm
         $platform_id = $this->request->request('platform_id');
         empty($platform_id) && $this->error(__('平台ID不能为空'), [], 403);
 
+        $warehouse_area_id = $this->request->request("warehouse_area_id"); //入库库位id
+        empty($warehouse_area_id) && $this->error(__('请选择入库库位'), [], 510);
+
         $item_data = $this->request->request('item_data');
         $item_data = json_decode(htmlspecialchars_decode($item_data), true);
         empty($item_data) && $this->error(__('sku集合不能为空'), [], 403);
@@ -419,6 +422,9 @@ class ScmWarehouse extends Scm
 
         $do_type = $this->request->request('do_type');
         $get_out_stock_id = $this->request->request('out_stock_id');
+
+        //入库库位详情
+        $warehouse_area = $this->_store_house->where('id',$warehouse_area_id)->find();
 
         $this->_out_stock->startTrans();
         $this->_out_stock_item->startTrans();
@@ -508,7 +514,7 @@ class ScmWarehouse extends Scm
 
                 //绑定条形码
                 foreach ($value['sku_agg'] as $v) {
-                    $this->_product_bar_code_item->where(['code' => $v['code']])->update(['out_stock_id' => $out_stock_id]);
+                    $this->_product_bar_code_item->where(['code' => $v['code'],'location_code'=>$warehouse_area['coding']])->update(['out_stock_id' => $out_stock_id]);
                 }
             }
 
@@ -654,7 +660,7 @@ class ScmWarehouse extends Scm
                 $this->_product_bar_code_item
                     ->allowField(true)
                     ->isUpdate(true, ['out_stock_id' => $out_stock_id])
-                    ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2]);
+                    ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2,'location_code'=>'']);//出库解除库位号与商品条形码绑定
 
                 //计算出库成本 
                 $financecost = new \app\admin\model\finance\FinanceCost();
@@ -891,7 +897,7 @@ class ScmWarehouse extends Scm
         0 != $row['status'] && $this->error(__('只有新建状态才能取消'), [], 504);
 
         //解除条形码绑定关系
-        $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['in_stock_id' => $in_stock_id])->save(['in_stock_id' => 0]);
+        $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['in_stock_id' => $in_stock_id])->save(['in_stock_id' => 0,'location_code'=>'']);
 
         $res = $this->_in_stock->allowField(true)->isUpdate(true, ['id' => $in_stock_id])->save(['status' => 4]);
         $res ? $this->success('取消成功', [], 200) : $this->error(__('取消失败'), [], 505);
@@ -926,7 +932,7 @@ class ScmWarehouse extends Scm
         $type_id = $this->request->request("type_id"); //入库分类
         empty($type_id) && $this->error(__('请选择入库分类'), [], 510);
         $warehouse_area_id = $this->request->request("warehouse_area_id"); //入库库位id
-        empty($warehouse_area) && $this->error(__('请选择入库库位'), [], 510);
+        empty($warehouse_area_id) && $this->error(__('请选择入库库位'), [], 510);
         $item_sku = $this->request->request("item_data");
         empty($item_sku) && $this->error(__('sku集合不能为空！！'), [], 508);
         $item_sku = json_decode(htmlspecialchars_decode($item_sku), true);
@@ -2921,6 +2927,7 @@ class ScmWarehouse extends Scm
     {
         //库内调拨子单详情
         $item_sku = $this->request->request("item_sku");
+        $number = $this->request->request("number");
         $type = $this->request->request("type");
         $id = $this->request->request("transfer_order_id");
         $item_sku = html_entity_decode($item_sku);
@@ -2935,7 +2942,7 @@ class ScmWarehouse extends Scm
             try {
                 //保存--创建库内调拨单
                 $arr = [];
-                $arr['number'] = 'TO' . date('YmdHis') . rand(100, 999) . rand(100, 999);
+                $arr['number'] = $number;
                 $arr['create_person'] = $this->auth->nickname;
                 $arr['status'] = $type;
                 $arr['createtime'] = date('Y-m-d H:i:s', time());
