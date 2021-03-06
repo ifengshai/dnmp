@@ -111,6 +111,10 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
             $(document).on('change', '#order_platform', function () {
                 stock_measure_overview_platform();
             });
+            //批量导出xls
+            $('.btn-batch-export-xls').click(function () {
+                window.open(Config.moduleurl + '/supplydatacenter/data_market/timeout_orders', '_blank');
+            });
         },
         add: function () {
             Controller.api.bindevent();
