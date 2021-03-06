@@ -1155,7 +1155,7 @@ class DataMarket extends Backend
 WHERE `o`.`status` IN ( 'free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal','payment_review') 
 	AND `p`.`order_prescription_type` = 1 
 	AND `p`.`delivery_time` BETWEEN 1590463258 
-	AND 1615015605 
+	AND unix_timestamp(now())
 	AND ( p.delivery_time - o.payment_time )/ 3600 > 24 GROUP BY
 	`p`.`order_id` ORDER BY
 	created_at ASC";
@@ -1163,7 +1163,7 @@ WHERE `o`.`status` IN ( 'free_processing', 'processing', 'paypal_reversed', 'pay
 WHERE `o`.`status` IN ( 'free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal','payment_review') 
 	AND `p`.`order_prescription_type` = 2 
 	AND `p`.`delivery_time` BETWEEN 1590463258 
-	AND 1615015605 
+	AND unix_timestamp(now())
 	AND ( p.delivery_time - o.payment_time )/ 3600 > 72 GROUP BY
 	`p`.`order_id` ORDER BY
 	created_at ASC";
@@ -1171,7 +1171,7 @@ WHERE `o`.`status` IN ( 'free_processing', 'processing', 'paypal_reversed', 'pay
 WHERE `o`.`status` IN ( 'free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal','payment_review') 
 	AND `p`.`order_prescription_type` = 3
 	AND `p`.`delivery_time` BETWEEN 1590463258 
-	AND 1615015605 
+	AND unix_timestamp(now())
 	AND ( p.delivery_time - o.payment_time )/ 3600 > 168 GROUP BY
 	`p`.`order_id` ORDER BY
 	created_at ASC";
