@@ -1003,6 +1003,7 @@ class Distribution extends Backend
             $lens_name = $this->_lens_data->where('lens_number', $result['lens_number'])->value('lens_name');
         }
         $result['lens_name'] = $lens_name;
+        $result['web_lens_name'] = $result['web_lens_name'] ?: $result['index_name'];
         $this->assign('result', $result);
         return $this->view->fetch();
     }
@@ -1385,7 +1386,7 @@ class Distribution extends Backend
             $data[$value['increment_id']]['item_order'][$key]['os_axis'] = $value['os_axis'];
             $data[$value['increment_id']]['item_order'][$key]['od_axis'] = $value['od_axis'];
             $data[$value['increment_id']]['item_order'][$key]['lens_number'] = $value['lens_number'];
-            $data[$value['increment_id']]['item_order'][$key]['web_lens_name'] = $value['web_lens_name'];
+            $data[$value['increment_id']]['item_order'][$key]['web_lens_name'] = $value['web_lens_name'] ?: $value['index_name'];
             $data[$value['increment_id']]['item_order'][$key]['product_id'] = $value['product_id'];
             $data[$value['increment_id']]['base_grand_total'] = $value['base_grand_total'];
             $data[$value['increment_id']]['base_currency_code'] = $value['base_currency_code'];
@@ -1759,6 +1760,7 @@ class Distribution extends Backend
                 }
             }
 
+            $v['web_lens_name'] = $v['web_lens_name'] ?: $v['index_name'];
             //获取镜片名称
             $v['lens_name'] = $lens_list[$v['lens_number']] ?: $v['web_lens_name'];
 
