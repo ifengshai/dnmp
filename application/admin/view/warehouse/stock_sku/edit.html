@@ -8,6 +8,12 @@
         </div>
     </div>
     <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('库区')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            {:build_select('row[area_id]', $data1 ,$row['area_id'], ['class'=>'form-control selectpicker', 'data-live-search' => true])}
+        </div>
+    </div>
+    <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Store_id')}:</label>
         <div class="col-xs-12 col-sm-8">
             {:build_select('row[store_id]', $data , $row['store_id'] , ['class'=>'form-control selectpicker','data-live-search' => true])}
