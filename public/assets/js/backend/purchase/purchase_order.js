@@ -380,9 +380,20 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                     Toastr.error('至少选择一个采购单');
                     return false;
                 }
-                var url = 'financepurchase/purchase_pay/batch_add?ids=' + ids;
-                Fast.api.open(url, __('创建付款申请单'), {area: ['900px', '500px']});
+                layer.load();
+                var url = 'financepurchase/purchase_pay/is_conditions';
+                Backend.api.ajax({
+                    url: url,
+                    data: {
+                        'ids':ids
+                    }
+                }, function (data, ret) {
+                    var url = 'financepurchase/purchase_pay/batch_add?ids=' + ids;
+                    Fast.api.open(url, __('创建付款申请单'), {area: ['900px', '500px']});
+                });
 
+
+               
                 return false;
             });
         },
