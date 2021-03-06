@@ -660,7 +660,7 @@ class ScmWarehouse extends Scm
                 $this->_product_bar_code_item
                     ->allowField(true)
                     ->isUpdate(true, ['out_stock_id' => $out_stock_id])
-                    ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2,'location_code' =>'','location_id' =>'']);//出库解除库位号与商品条形码绑定
+                    ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2, 'location_code' => '', 'location_id' => '']);//出库解除库位号与商品条形码绑定
 
                 //计算出库成本 
                 $financecost = new \app\admin\model\finance\FinanceCost();
@@ -1200,7 +1200,7 @@ class ScmWarehouse extends Scm
                             $this->_product_bar_code_item
                                 ->allowField(true)
                                 ->isUpdate(true, ['code' => ['in', $where_code]])
-                                ->save(['in_stock_id' => $this->_in_stock->id, 'location_code' => $warehouse_area['coding'],'location_id'=>$area['id']]);//绑定条形码与库位号//绑定条形码与库区id
+                                ->save(['in_stock_id' => $this->_in_stock->id, 'location_code' => $warehouse_area['coding'], 'location_id' => $area['id']]);//绑定条形码与库位号//绑定条形码与库区id
                         }
 
                         //批量添加
@@ -1444,7 +1444,7 @@ class ScmWarehouse extends Scm
             //入库单子表的sku与条形码有绑定 先解除绑定
             $barcode = $this->_product_bar_code_item
                 ->where(['in_stock_id' => $instock_id['instock_id'], 'sku' => $instock_id['sku']])
-                ->update(['in_stock_id' => 0,'location_code'=>'','location_id' =>'']);//解除条形码与库位号的绑定关系
+                ->update(['in_stock_id' => 0, 'location_code' => '', 'location_id' => '']);//解除条形码与库位号的绑定关系
             $this->_in_stock_item->commit();
             $this->_product_bar_code_item->commit();
         } catch (ValidateException $e) {
@@ -1929,7 +1929,7 @@ class ScmWarehouse extends Scm
                 $this->_product_bar_code_item
                     ->allowField(true)
                     ->isUpdate(true, ['in_stock_id' => $in_stock_id])
-                    ->save(['in_stock_id' => 0,'location_code'=>'','location_id' =>'']);//解除条形码与库位号的绑定关系
+                    ->save(['in_stock_id' => 0, 'location_code' => '', 'location_id' => '']);//解除条形码与库位号的绑定关系
             }
 
             $this->_item->commit();
@@ -3068,9 +3068,9 @@ class ScmWarehouse extends Scm
         empty($id) && $this->error(__('调拨单id不能为空！！'), [], 523);
         $list['transfer_order_number'] = $this->_warehouse_transfer_order->where('id', $id)->value('transfer_order_number');
         $list['item_list'] = $this->_warehouse_transfer_order_item->where('transfer_order_id', $id)->select();
-        foreach ($list['item_list'] as $k=>$v){
-            $area_id = Db::name('warehouse_area')->where('coding',$v['outarea'])->value('id');
-            $store_id = Db::name('store_house')->where('coding',$v['call_out_site'])->where('area_id',$area_id)->value('id');
+        foreach ($list['item_list'] as $k => $v) {
+            $area_id = Db::name('warehouse_area')->where('coding', $v['outarea'])->value('id');
+            $store_id = Db::name('store_house')->where('coding', $v['call_out_site'])->where('area_id', $area_id)->value('id');
             $list['item_list'][$k]['skuid'] = $store_id;
         }
         $this->success('', ['info' => $list], 200);
@@ -3087,15 +3087,17 @@ class ScmWarehouse extends Scm
     {
         $id = $this->request->request("transfer_order_item_id");
         $transfer_order_item = $this->_warehouse_transfer_order_item->where('id', $id)->find();
-        $area_all = $this->_warehouse_area->column('id','coding');
+        $area_all = $this->_warehouse_area->column('id', 'coding');
         $num = $this->request->request("num");
         $do_type = $this->request->request("do_type");
         $sku_agg = $this->request->request("sku_agg");
-        $remove_agg= $this->request->request("remove_agg");
+        $remove_agg = $this->request->request("remove_agg");
         $sku_agg = html_entity_decode($sku_agg);
         $sku_agg = array_filter(json_decode($sku_agg, true));
-        $remove_agg = html_entity_decode($remove_agg);
-        $remove_agg = array_filter(json_decode($remove_agg, true));
+        if ($remove_agg) {
+            $remove_agg = html_entity_decode($remove_agg);
+            $remove_agg = array_filter(json_decode($remove_agg, true));
+        }
         if (count(array_filter($sku_agg)) < 1) {
             $this->error(__('条形码数据不能为空！！'), [], 524);
         }
@@ -3103,7 +3105,7 @@ class ScmWarehouse extends Scm
         $this->_product_bar_code_item->startTrans();
         $this->_warehouse_transfer_order_item->startTrans();
         try {
-            $this->_warehouse_transfer_order_item->where('id',$id)->update('status',$do_type);
+            $this->_warehouse_transfer_order_item->where('id', $id)->update('status', $do_type);
             foreach ($sku_agg as $k => $v) {
                 //当前条形码详情
                 $detail = $this->_product_bar_code_item->where('code', $v['code'])->find();
@@ -3111,17 +3113,19 @@ class ScmWarehouse extends Scm
                     $this->error(__('条形码' . $v['code'] . '当前未在调出库位！！' . $transfer_order_item['call_out_site']), [], 546);
                 }
                 //调入仓库位id
-                $store_house_id = $this->_store_house->where(['coding'=>$transfer_order_item['call_in_site'],'area_id'=>$area_all[$transfer_order_item['in_area']]])->value('id');
+                $store_house_id = $this->_store_house->where(['coding' => $transfer_order_item['call_in_site'], 'area_id' => $area_all[$transfer_order_item['in_area']]])->value('id');
                 //判断调入库位是否有sku跟库位的绑定关系
                 $store_sku = $this->_store_sku->where('sku', $transfer_order_item['sku'])->where('store_id', $store_house_id)->find();
                 empty($store_sku) && $this->error(__('调入库位' . $transfer_order_item['call_in_site'] . '与sku：' . $transfer_order_item['sku'] . '没有绑定关系！！'), [], 546);
                 //更新条形码当前所属的库区库位
-                $this->_product_bar_code_item->where(['code'=>$v['code']])->update(['location_code' => $transfer_order_item['call_in_site'],'location_id'=>$area_all[$transfer_order_item['inarea']]]);
+                $this->_product_bar_code_item->where(['code' => $v['code']])->update(['location_code' => $transfer_order_item['call_in_site'], 'location_id' => $area_all[$transfer_order_item['inarea']]]);
             }
-            //调拨单移除条形码
-            foreach ($remove_agg as $k => $v) {
-                //更新条形码当前所属的库区库位 移除条形码 此条形码应该再次回到调出的库区库位
-                $this->_product_bar_code_item->where('code', $v['code'])->update(['location_code' => $transfer_order_item['call_out_site'],'location_id'=>$area_all[$transfer_order_item['outarea']]]);
+            if ($remove_agg) {
+                //调拨单移除条形码
+                foreach ($remove_agg as $k => $v) {
+                    //更新条形码当前所属的库区库位 移除条形码 此条形码应该再次回到调出的库区库位
+                    $this->_product_bar_code_item->where('code', $v['code'])->update(['location_code' => $transfer_order_item['call_out_site'], 'location_id' => $area_all[$transfer_order_item['outarea']]]);
+                }
             }
             //更新库内调拨单子单的调拨数量
             $res = $this->_warehouse_transfer_order_item->where('id', $id)->update(['num' => $num]);
