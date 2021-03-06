@@ -24,13 +24,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                         { checkbox: true },
                         { field: 'id', title: __('Id') },
                         { field: 'transfer_order_number', title: __('调拨单号'), operate: 'like' },
+                        { field: 'sku', title: __('sku'), operate: 'like' ,visible:false},
                         {
                             field: 'status', title: __('Status'), custom: { 1: 'success', 2: 'danger' },
                             searchList: { 0: '新建', 1: '待审核' , 2: '已审核', 3: '已拒绝', 4: '已取消', 5: '调拨中', 6: '已完成'},
                             formatter: Table.api.formatter.status
                         },
                         { field: 'create_person', title: __('创建人'), operate: 'like' },
-                        { field: 'create_time', title: __('订单创建时间'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime,visible:false},
+                        { field: 'create_time', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime,visible:false},
                         {
                             field: 'operate',
                             title: __('Operate'),

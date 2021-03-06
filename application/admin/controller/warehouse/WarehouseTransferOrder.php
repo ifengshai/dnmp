@@ -52,14 +52,25 @@ class WarehouseTransferOrder extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
+            $map =[];
+            //自定义sku搜索
+            $filter = json_decode($this->request->get('filter'), true);
+            if ($filter['sku']) {
+                $transfer_ids = Db::name('transfer_order_item')->where('sku',$filter['sku'])->group('transfer_order_id')->column('transfer_order_id');
+                $map['id'] = ['in',$transfer_ids];
+                unset($filter['sku']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
