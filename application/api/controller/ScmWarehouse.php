@@ -2958,7 +2958,7 @@ class ScmWarehouse extends Scm
                 if ($result) {
                     $list = [];
                     foreach ($item_sku as $k => $v) {
-                        $list[$k]['transfer_order_id'] = $this->_inventory->id;
+                        $list[$k]['transfer_order_id'] = $this->_warehouse_transfer_order->id;
                         $list[$k]['sku'] = $v['sku'];
                         $list[$k]['num'] = $v['num'];
                         $list[$k]['outarea'] = $v['outarea']; //调出库区
@@ -3016,7 +3016,7 @@ class ScmWarehouse extends Scm
                     if ($results) {
                         $list = [];
                         foreach ($item_sku as $k => $v) {
-                            $list[$k]['transfer_order_id'] = $this->_inventory->id;
+                            $list[$k]['transfer_order_id'] = $this->_warehouse_transfer_order->id;
                             $list[$k]['sku'] = $v['sku'];
                             $list[$k]['num'] = $v['num'];
                             $list[$k]['outarea'] = $v['outarea'];//调出库区
