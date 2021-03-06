@@ -2953,7 +2953,7 @@ class ScmWarehouse extends Scm
                 $arr['number'] = $number;
                 $arr['create_person'] = $this->auth->nickname;
                 $arr['status'] = $type;
-                $arr['createtime'] = date('Y-m-d H:i:s', time());
+                $arr['create_time'] = date('Y-m-d H:i:s', time());
                 $result = $this->_warehouse_transfer_order->allowField(true)->save($arr);
                 if ($result) {
                     $list = [];

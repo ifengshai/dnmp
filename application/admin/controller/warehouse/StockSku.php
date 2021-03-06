@@ -46,21 +46,33 @@ class StockSku extends Backend
         $this->relationSearch = true;
         //设置过滤方法
         $this->request->filter(['strip_tags']);
+
         if ($this->request->isAjax()) {
             //如果发送的来源是Selectpage，则转发到Selectpage
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
+            //自定义sku搜索
+            $filter = json_decode($this->request->get('filter'), true);
+            if ($filter['area_coding']) {
+                $area_id = Db::name('warehouse_area')->where('coding',$filter['area_coding'])->value('id');
+                $all_store_id = Db::name('store_house')->where('area_id',$area_id)->column('id');
+                $map['storehouse.id'] = ['in',$all_store_id];
+                unset($filter['area_coding']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->with(['storehouse'])
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
                 ->with(['storehouse'])
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
