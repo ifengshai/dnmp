@@ -1175,7 +1175,14 @@ WHERE `o`.`status` IN ( 'free_processing', 'processing', 'paypal_reversed', 'pay
 	AND ( p.delivery_time - o.payment_time )/ 3600 > 168 GROUP BY
 	`p`.`order_id` ORDER BY
 	created_at ASC";
+        $where['p.order_prescription_type'] = 3;
         $NewOrderProcess = Db::connect('database.db_mojing_order');
+        $data = Db::connect()->table()->where($where)->field('((p.delivery_time - o.payment_time)/3600)  as new')
+            ->where('new','gt',168)->limit(10);
+        dump($data);die();
+
+
+
         $list1 = $NewOrderProcess->query($sql1);
         $list2 = $NewOrderProcess->query($sql2);
         $list3 = $NewOrderProcess->query($sql3);
