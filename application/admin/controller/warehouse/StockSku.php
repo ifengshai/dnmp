@@ -68,11 +68,18 @@ class StockSku extends Backend
             //查询商品SKU
             $item = new \app\admin\model\itemmanage\Item;
             $arr = $item->where('is_del', 1)->column('name,is_open', 'sku');
+            //所有库区编码id
+            $area_coding = Db::name('warehouse_area')->column('coding','id');
             foreach ($list as $k => $row) {
                 $row->getRelation('storehouse')->visible(['coding', 'library_name', 'status']);
                 $list[$k]['name'] = $arr[$row['sku']]['name'];
                 $list[$k]['is_open'] = $arr[$row['sku']]['is_open'];
+                $store_house = Db::name('store_house')->where('id',$row['store_id'])->find();
+                //获得库位所属库区编码
+                $list[$k]['area_coding'] = $area_coding[$store_house['area_id']];
+                $list[$k]['area_status'] = Db::name('warehouse_area')->where('id',$store_house['area_id'])->value('status');
             }
+
             $list = collection($list)->toArray();
 
             $result = array("total" => $total, "rows" => $list);
@@ -103,7 +110,10 @@ class StockSku extends Backend
                 if ($count > 0) {
                     $this->error('库位已绑定！！');
                 }
-
+                $store_house = Db::name('store_house')->where('id',$params['store_id'])->find();
+                if ($store_house['area_id'] != $params['area_id']){
+                    $this->error('库位不在当前选择库区！！');
+                }
                 $result = false;
                 Db::startTrans();
                 try {
@@ -135,6 +145,9 @@ class StockSku extends Backend
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
+        //查询库区数据
+        $data1 = Db::name('warehouse_area')->column('coding','id');
+        $this->assign('data1', $data1);
         //查询库位数据
         $data = (new StockHouse())->getStockHouseData();
         $this->assign('data', $data);
@@ -151,6 +164,7 @@ class StockSku extends Backend
     public function edit($ids = null)
     {
         $row = $this->model->get($ids);
+        $row['area_id'] = Db::name('store_house')->where('id',$row['store_id'])->value('id');
         if (!$row) {
             $this->error(__('No Results were found'));
         }
@@ -174,7 +188,10 @@ class StockSku extends Backend
                 if ($count > 0) {
                     $this->error('库位已绑定！！');
                 }
-
+                $store_house = Db::name('store_house')->where('id',$params['store_id'])->find();
+                if ($store_house['area_id'] != $params['area_id']){
+                    $this->error('库位不在当前选择库区！！');
+                }
                 $result = false;
                 Db::startTrans();
                 try {
@@ -206,6 +223,9 @@ class StockSku extends Backend
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
+        //查询库区数据
+        $data1 = Db::name('warehouse_area')->column('coding','id');
+        $this->assign('data1', $data1);
         //查询库位数据
         $data = (new StockHouse())->getStockHouseData();
         $this->assign('data', $data);
