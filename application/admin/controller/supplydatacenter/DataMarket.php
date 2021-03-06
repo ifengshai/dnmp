@@ -1138,18 +1138,31 @@ class DataMarket extends Backend
     }
 
     //导出超时订单的详细数据
-    public function test001(){
-        $order = new \app\admin\model\order\order\NewOrder();
-        $this->process = new \app\admin\model\order\order\NewOrderProcess();
-        $where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
-        $map1['p.order_prescription_type'] = 1;
-        $map2['p.order_prescription_type'] = 2;
-        $map3['p.order_prescription_type'] = 3;
-        $sql1 = $this->process->alias('p')
-            ->join('fa_order o','p.increment_id = o.increment_id')
-            ->field('(p.delivery_time-o.payment_time)/3600 AS total')
-            ->where($where)->where($map1)->group('p.order_id')->buildSql();
-        dump($sql1);die();
-
+    public function timeout_orders(){
+//        $order = new \app\admin\model\order\order\NewOrder();
+//        $this->process = new \app\admin\model\order\order\NewOrderProcess();
+//        $where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+//        $map1['p.order_prescription_type'] = 1;
+//        $map2['p.order_prescription_type'] = 2;
+//        $map3['p.order_prescription_type'] = 3;
+//        $sql1 = $this->process->alias('p')
+//            ->join('fa_order o','p.increment_id = o.increment_id')
+//            ->field('(p.delivery_time-o.payment_time)/3600 AS total')
+//            ->where($where)->where($map1)->group('p.order_id')->buildSql();
+//        $sql =
+//        dump($sql1);die();
+      $sql = "SELECT p.increment_id,o.created_at  FROM `fa_order_process` `p` INNER JOIN `fa_order` `o` ON `p`.`increment_id` = `o`.`increment_id` 
+WHERE `o`.`status` IN ( 'free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal','payment_review') 
+	AND `p`.`order_prescription_type` = 3 
+	AND `p`.`delivery_time` BETWEEN 1590463258 
+	AND 1615015605 
+	AND ( p.delivery_time - o.payment_time )/ 3600 > 168 
+GROUP BY
+	`p`.`order_id` 
+ORDER BY
+	created_at ASC";
+        $NewOrderProcess = Db::connect('database.db_mojing_order');
+        $data = $NewOrderProcess->query($sql);
+        dump($data);die();
     }
 }
