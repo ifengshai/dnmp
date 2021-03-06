@@ -1151,12 +1151,12 @@ class DataMarket extends Backend
 //            ->where($where)->where($map1)->group('p.order_id')->buildSql();
 //        $sql =
 //        dump($sql1);die();
-      $sql = "SELECT p.increment_id,o.created_at  FROM `fa_order_process` `p` INNER JOIN `fa_order` `o` ON `p`.`increment_id` = `o`.`increment_id` 
+      $sql = "SELECT p.increment_id,o.created_at,o.status,p.order_prescription_type,o.payment_time,o.site   FROM `fa_order_process` `p` INNER JOIN `fa_order` `o` ON `p`.`increment_id` = `o`.`increment_id` 
 WHERE `o`.`status` IN ( 'free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal','payment_review') 
-	AND `p`.`order_prescription_type` = 3 
+	AND `p`.`order_prescription_type` = 1 
 	AND `p`.`delivery_time` BETWEEN 1590463258 
 	AND 1615015605 
-	AND ( p.delivery_time - o.payment_time )/ 3600 > 168 GROUP BY
+	AND ( p.delivery_time - o.payment_time )/ 3600 > 24 GROUP BY
 	`p`.`order_id` ORDER BY
 	created_at ASC";
         $NewOrderProcess = Db::connect('database.db_mojing_order');
