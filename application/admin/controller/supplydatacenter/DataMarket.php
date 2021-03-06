@@ -1175,28 +1175,28 @@ class DataMarket extends Backend
     //导出超时订单的详细数据
     public function timeout_orders()
     {
-        $sql1 = "SELECT p.increment_id,o.created_at,o.status,p.order_prescription_type,o.payment_time,o.site   FROM `fa_order_process` `p` INNER JOIN `fa_order` `o` ON `p`.`increment_id` = `o`.`increment_id` 
+        $sql1 = "SELECT p.increment_id,o.created_at,o.status,p.order_prescription_type,o.payment_time,o.site,p.delivery_time   FROM `fa_order_process` `p` INNER JOIN `fa_order` `o` ON `p`.`increment_id` = `o`.`increment_id` 
 WHERE `o`.`status` IN ( 'free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal','payment_review') 
 	AND `p`.`order_prescription_type` = 1 
 	AND `p`.`delivery_time` BETWEEN 1590463258 
 	AND unix_timestamp(now())
-	AND ( p.delivery_time - o.payment_time )/ 3600 > 24 GROUP BY `p`.`order_id` ORDER BY created_at ASC";
-        $sql2 = "SELECT p.increment_id,o.created_at,o.status,p.order_prescription_type,o.payment_time,o.site   FROM `fa_order_process` `p` INNER JOIN `fa_order` `o` ON `p`.`increment_id` = `o`.`increment_id` 
+	AND ( p.delivery_time - o.payment_time )/ 3600 > 24 GROUP BY `p`.`order_id` ORDER BY `p`.`delivery_time` ASC";
+        $sql2 = "SELECT p.increment_id,o.created_at,o.status,p.order_prescription_type,o.payment_time,o.site,p.delivery_time   FROM `fa_order_process` `p` INNER JOIN `fa_order` `o` ON `p`.`increment_id` = `o`.`increment_id` 
 WHERE `o`.`status` IN ( 'free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal','payment_review') 
 	AND `p`.`order_prescription_type` = 2 
 	AND `p`.`delivery_time` BETWEEN 1590463258 
 	AND unix_timestamp(now())
 	AND ( p.delivery_time - o.payment_time )/ 3600 > 72 GROUP BY
 	`p`.`order_id` ORDER BY
-	created_at ASC";
-        $sql3 = "SELECT p.increment_id,o.created_at,o.status,p.order_prescription_type,o.payment_time,o.site   FROM `fa_order_process` `p` INNER JOIN `fa_order` `o` ON `p`.`increment_id` = `o`.`increment_id` 
+	`p`.`delivery_time` ASC";
+        $sql3 = "SELECT p.increment_id,o.created_at,o.status,p.order_prescription_type,o.payment_time,o.site,p.delivery_time   FROM `fa_order_process` `p` INNER JOIN `fa_order` `o` ON `p`.`increment_id` = `o`.`increment_id` 
 WHERE `o`.`status` IN ( 'free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal','payment_review') 
 	AND `p`.`order_prescription_type` = 3
 	AND `p`.`delivery_time` BETWEEN 1590463258 
 	AND unix_timestamp(now())
 	AND ( p.delivery_time - o.payment_time )/ 3600 > 168 GROUP BY
 	`p`.`order_id` ORDER BY
-	created_at ASC";
+	`p`.`delivery_time` ASC";
 
         $NewOrderProcess = Db::connect('database.db_mojing_order');
         $list1 = $NewOrderProcess->query($sql1);
@@ -1212,10 +1212,10 @@ WHERE `o`.`status` IN ( 'free_processing', 'processing', 'paypal_reversed', 'pay
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "订单号")
             ->setCellValue("B1", "订单状态")
             ->setCellValue("C1", "处方类型");   //利用setCellValues()填充数据
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "下单时间")
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "支付时间")
             ->setCellValue("E1", "站点")
             ->setCellValue("F1", "是否有工单")
-            ->setCellValue("G1", "创建时间");
+            ->setCellValue("G1", "打印面单时间");
         foreach ($list as $key => $value) {
 
             $swhere['platform_order'] = $value['increment_id'];
@@ -1269,7 +1269,7 @@ WHERE `o`.`status` IN ( 'free_processing', 'processing', 'paypal_reversed', 'pay
             $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), date('Y-m-d H:i:s', $value['payment_time']));
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['site']);
             $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['work']);
-            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), date('Y-m-d H:i:s', $value['created_at']));
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), date('Y-m-d H:i:s', $value['delivery_time']));
 
 
         }
