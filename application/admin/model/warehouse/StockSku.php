@@ -50,7 +50,7 @@ class StockSku extends Model
      */
     public function getRowsData($store_id)
     {
-        $list = $this->field('sku')->where(['store_id' => ['in', $store_id], 'is_del' => 1])->select();
+        $list = $this->field('id,sku')->where(['store_id' => ['in', $store_id], 'is_del' => 1])->select();
         return collection($list)->toArray();
     }
 }
