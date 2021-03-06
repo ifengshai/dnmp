@@ -2950,7 +2950,7 @@ class ScmWarehouse extends Scm
             try {
                 //保存--创建库内调拨单
                 $arr = [];
-                $arr['number'] = $number;
+                $arr['transfer_order_number'] = $number;
                 $arr['create_person'] = $this->auth->nickname;
                 $arr['status'] = $type;
                 $arr['create_time'] = date('Y-m-d H:i:s', time());
