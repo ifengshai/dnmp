@@ -1151,7 +1151,7 @@ class DataMarket extends Backend
 //            ->where($where)->where($map1)->group('p.order_id')->buildSql();
 //        $sql =
 //        dump($sql1);die();
-      $sql = "SELECT p.increment_id,o.created_at,o.status,p.order_prescription_type,o.payment_time,o.site   FROM `fa_order_process` `p` INNER JOIN `fa_order` `o` ON `p`.`increment_id` = `o`.`increment_id` 
+      $sql1 = "SELECT p.increment_id,o.created_at,o.status,p.order_prescription_type,o.payment_time,o.site   FROM `fa_order_process` `p` INNER JOIN `fa_order` `o` ON `p`.`increment_id` = `o`.`increment_id` 
 WHERE `o`.`status` IN ( 'free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal','payment_review') 
 	AND `p`.`order_prescription_type` = 1 
 	AND `p`.`delivery_time` BETWEEN 1590463258 
@@ -1159,8 +1159,27 @@ WHERE `o`.`status` IN ( 'free_processing', 'processing', 'paypal_reversed', 'pay
 	AND ( p.delivery_time - o.payment_time )/ 3600 > 24 GROUP BY
 	`p`.`order_id` ORDER BY
 	created_at ASC";
+        $sql2 = "SELECT p.increment_id,o.created_at,o.status,p.order_prescription_type,o.payment_time,o.site   FROM `fa_order_process` `p` INNER JOIN `fa_order` `o` ON `p`.`increment_id` = `o`.`increment_id` 
+WHERE `o`.`status` IN ( 'free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal','payment_review') 
+	AND `p`.`order_prescription_type` = 2 
+	AND `p`.`delivery_time` BETWEEN 1590463258 
+	AND 1615015605 
+	AND ( p.delivery_time - o.payment_time )/ 3600 > 72 GROUP BY
+	`p`.`order_id` ORDER BY
+	created_at ASC";
+        $sql3 = "SELECT p.increment_id,o.created_at,o.status,p.order_prescription_type,o.payment_time,o.site   FROM `fa_order_process` `p` INNER JOIN `fa_order` `o` ON `p`.`increment_id` = `o`.`increment_id` 
+WHERE `o`.`status` IN ( 'free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal','payment_review') 
+	AND `p`.`order_prescription_type` = 3
+	AND `p`.`delivery_time` BETWEEN 1590463258 
+	AND 1615015605 
+	AND ( p.delivery_time - o.payment_time )/ 3600 > 168 GROUP BY
+	`p`.`order_id` ORDER BY
+	created_at ASC";
         $NewOrderProcess = Db::connect('database.db_mojing_order');
-        $list = $NewOrderProcess->query($sql);
+        $list1 = $NewOrderProcess->query($sql1);
+        $list2 = $NewOrderProcess->query($sql2);
+        $list3 = $NewOrderProcess->query($sql3);
+        $list = array_merge($list1,$list2,$list3);
         $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
 
         //从数据库查询需要的数据
@@ -1233,7 +1252,6 @@ WHERE `o`.`status` IN ( 'free_processing', 'processing', 'paypal_reversed', 'pay
         $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(20);
-        $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(20);
         //设置边框
         $border = [
             'borders' => [
@@ -1250,7 +1268,7 @@ WHERE `o`.`status` IN ( 'free_processing', 'processing', 'paypal_reversed', 'pay
         $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
         $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
 
-        $spreadsheet->getActiveSheet()->getStyle('A1:H' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle('A1:G' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         $spreadsheet->setActiveSheetIndex(0);
 
         $format = 'xlsx';
