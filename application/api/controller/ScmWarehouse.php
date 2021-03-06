@@ -3105,7 +3105,7 @@ class ScmWarehouse extends Scm
         $this->_product_bar_code_item->startTrans();
         $this->_warehouse_transfer_order_item->startTrans();
         try {
-            $this->_warehouse_transfer_order_item->where('id', $id)->update('status', $do_type);
+            $this->_warehouse_transfer_order_item->where('id', $id)->update(['status'=>$do_type]);
             foreach ($sku_agg as $k => $v) {
                 //当前条形码详情
                 $detail = $this->_product_bar_code_item->where('code', $v['code'])->find();
