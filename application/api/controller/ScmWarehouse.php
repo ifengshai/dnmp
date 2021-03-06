@@ -660,7 +660,7 @@ class ScmWarehouse extends Scm
                 $this->_product_bar_code_item
                     ->allowField(true)
                     ->isUpdate(true, ['out_stock_id' => $out_stock_id])
-                    ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2, 'location_code' => '']);//出库解除库位号与商品条形码绑定
+                    ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2,'location_code' =>'','location_id' =>'']);//出库解除库位号与商品条形码绑定
 
                 //计算出库成本 
                 $financecost = new \app\admin\model\finance\FinanceCost();
@@ -931,6 +931,8 @@ class ScmWarehouse extends Scm
         empty($in_stock_number) && $this->error(__('入库单号不能为空'), [], 510);
         $type_id = $this->request->request("type_id"); //入库分类
         empty($type_id) && $this->error(__('请选择入库分类'), [], 510);
+        $area_id = $this->request->request("area_id"); //入库库区id
+        empty($area_id) && $this->error(__('请选择入库库位'), [], 510);
         $warehouse_area_id = $this->request->request("warehouse_area_id"); //入库库位id
         empty($warehouse_area_id) && $this->error(__('请选择入库库位'), [], 510);
         $item_sku = $this->request->request("item_data");
@@ -945,6 +947,7 @@ class ScmWarehouse extends Scm
 
         //入库库位详情
         $warehouse_area = $this->_store_house->where('id', $warehouse_area_id)->find();
+        $area = $this->_warehouse_area->where('id', $area_id)->find();
         $this->_check->startTrans();
         $this->_in_stock->startTrans();
         $this->_in_stock_item->startTrans();
@@ -1050,11 +1053,13 @@ class ScmWarehouse extends Scm
                                 $save_code_data['in_stock_id'] = $in_stock_id;
                                 $save_code_data['sku'] = $where_code_sku[$key];
                                 $save_code_data['location_code'] = $warehouse_area['coding']; //绑定条形码与库位号
+                                $save_code_data['location_id'] = $area['id']; //绑定条形码与库区id
                                 $this->_product_bar_code_item->where(['code' => $key])->update($save_code_data);
                             }
                         } else {
                             $save_code_data['in_stock_id'] = $in_stock_id;
                             $save_code_data['location_code'] = $warehouse_area['coding']; //绑定条形码与库位号
+                            $save_code_data['location_id'] = $area['id']; //绑定条形码与库区id
                             $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => ['in', $where_code]])->save($save_code_data);
                         }
                     }
@@ -1132,11 +1137,13 @@ class ScmWarehouse extends Scm
                                     $save_code_data['in_stock_id'] = $this->_in_stock->id;
                                     $save_code_data['sku'] = $where_code_sku[$key];
                                     $save_code_data['location_code'] = $warehouse_area['coding']; //绑定条形码与库位号
+                                    $save_code_data['location_id'] = $area['id']; //绑定条形码与库区id
                                     $this->_product_bar_code_item->where(['code' => $key])->update($save_code_data);
                                 }
                             } else {
                                 $save_code_data['in_stock_id'] = $this->_in_stock->id;
                                 $save_code_data['location_code'] = $warehouse_area['coding']; //绑定条形码与库位号
+                                $save_code_data['location_id'] = $area['id']; //绑定条形码与库区id
                                 $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => ['in', $where_code]])->save($save_code_data);
                             }
                         }
@@ -1193,7 +1200,7 @@ class ScmWarehouse extends Scm
                             $this->_product_bar_code_item
                                 ->allowField(true)
                                 ->isUpdate(true, ['code' => ['in', $where_code]])
-                                ->save(['in_stock_id' => $this->_in_stock->id, 'location_code' => $warehouse_area['coding']]);//绑定条形码与库位号
+                                ->save(['in_stock_id' => $this->_in_stock->id, 'location_code' => $warehouse_area['coding'],'location_id'=>$area['id']]);//绑定条形码与库位号//绑定条形码与库区id
                         }
 
                         //批量添加
@@ -1437,7 +1444,7 @@ class ScmWarehouse extends Scm
             //入库单子表的sku与条形码有绑定 先解除绑定
             $barcode = $this->_product_bar_code_item
                 ->where(['in_stock_id' => $instock_id['instock_id'], 'sku' => $instock_id['sku']])
-                ->update(['in_stock_id' => 0, 'location_code' => '']);//解除条形码与库位号的绑定关系
+                ->update(['in_stock_id' => 0,'location_code'=>'','location_id' =>'']);//解除条形码与库位号的绑定关系
             $this->_in_stock_item->commit();
             $this->_product_bar_code_item->commit();
         } catch (ValidateException $e) {
@@ -1922,7 +1929,7 @@ class ScmWarehouse extends Scm
                 $this->_product_bar_code_item
                     ->allowField(true)
                     ->isUpdate(true, ['in_stock_id' => $in_stock_id])
-                    ->save(['in_stock_id' => 0, 'location_code' => '']);//解除条形码与库位号的绑定关系
+                    ->save(['in_stock_id' => 0,'location_code'=>'','location_id' =>'']);//解除条形码与库位号的绑定关系
             }
 
             $this->_item->commit();
