@@ -2919,6 +2919,8 @@ class ScmWarehouse extends Scm
             $list[$key]['status'] = $check_status[$value['status']];
             //按钮
             $list[$key]['show_start'] = 0 == $value['status'] ? 1 : 0; //编辑按钮
+            $list[$key]['show_cancel'] = 0 == $value['status'] ? 1 : 0; //取消按钮
+            $list[$key]['show_detail'] = 6 == $value['status'] ? 1 : 0; //详情按钮
         }
         $this->success('', ['list' => $list], 200);
     }
