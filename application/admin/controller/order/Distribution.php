@@ -29,7 +29,8 @@ use app\admin\model\saleaftermanage\WorkOrderMeasure;
 use app\admin\model\warehouse\ProductBarCodeItem;
 use GuzzleHttp\Client;
 use app\admin\model\warehouse\Inventory;
-
+use app\admin\model\warehouse\Outstock;
+use app\admin\model\warehouse\OutstockItem;
 /**
  * 配货列表
  */
