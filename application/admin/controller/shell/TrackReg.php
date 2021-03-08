@@ -2369,6 +2369,7 @@ class TrackReg extends Backend
         $this->outstock = new \app\admin\model\warehouse\Outstock;
         $this->stockparameter = new \app\admin\model\financepurchase\StockParameter;
         $this->item = new \app\admin\model\warehouse\ProductBarCodeItem;
+        $this->model = new \app\admin\model\itemmanage\Item;
         $start = date('Y-m-d', strtotime("-1 day"));
         $end = $start . ' 23:59:59';
         //库存主表插入数据
@@ -2499,12 +2500,17 @@ class TrackReg extends Backend
         }
         /*************订单出库end**************/
         //查询最新一条的余额
-        $rest_total = $this->stockparameter->order('id', 'desc')->field('rest_total')->limit(1,1)->select();
+        //$rest_total = $this->stockparameter->order('id', 'desc')->field('rest_total')->limit(1,1)->select();
+        $where_arr['is_open'] = 1;
+        $where_arr['is_del'] = 1;
+        $where_arr['category_id'] = ['<>',43]; //排除补差价商品
+        $rest_total = $this->model->where($where_arr)->sum('stock*purchase_price');
         $cha_amount = 0;  //冲减金额
         foreach ($is_exist as $k=>$v){
             $cha_amount += $v['total'];
         }
-        $end_rest = round($cha_amount + $rest_total[0]['rest_total'] + $instock_total - $outstock_total1 - $outstock_total2, 2);
+        //$end_rest = round($cha_amount + $rest_total[0]['rest_total'] + $instock_total - $outstock_total1 - $outstock_total2, 2);
+        $end_rest = round($cha_amount + $rest_total + $instock_total - $outstock_total1 - $outstock_total2, 2);
         $info['instock_total'] = $instock_total;
         $info['outstock_total'] = round($outstock_total1 + $outstock_total2, 2);
         $info['rest_total'] = $end_rest;
