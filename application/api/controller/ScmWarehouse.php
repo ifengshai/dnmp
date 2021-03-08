@@ -2304,7 +2304,7 @@ class ScmWarehouse extends Scm
             //     }, ['is_new' => 0]);
             // }
 
-            $item_list[$key]['sku_agg'] = unserialize($value['sku_agg']) ?: '';
+            $item_list[$key]['sku_agg'] = unserialize($value['sku_agg']) ?: [];
         }
 
         //盘点单所需数据
