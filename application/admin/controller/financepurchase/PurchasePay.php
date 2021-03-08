@@ -68,7 +68,15 @@ class PurchasePay extends Backend
             if ($filter['status'] === 0) {
                 $map['status'] = $filter['status'];
                 unset($filter['status']);
-            } 
+            }
+
+            //采购单号筛选
+            if ($filter['purchase_number']) {
+                $purchase_id = Db::name('purchase_order')->where(['purchase_number' => ['like', '%' . $filter['purchase_number'] . '%']])->column('id');
+                $map['purchase_id'] = ['in', $purchase_id];
+                unset($filter['purchase_number']);
+            }
+
 
             unset($filter['label']);
             $this->request->get(['filter' => json_encode($filter)]);
