@@ -57,11 +57,7 @@ class PurchasePay extends Backend
                 $this->request->get(['filter' => json_encode($filter)]);
             }
 
-            if ($filter['status'] === 0) {
-                $map['status'] = $filter['status'];
-                unset($filter['status']);
-                $this->request->get(['filter' => json_encode($filter)]);
-            } elseif ($filter['status'] == 1) {
+            if ($filter['label'] == 1) {
                 //查询我的待审核列表
                 $userid = session('admin.id');
                 //查询审批记录表我的待审核
@@ -69,6 +65,13 @@ class PurchasePay extends Backend
                 $map['id'] = ['in', $finance_purchase_id];
             }
 
+            if ($filter['status'] === 0) {
+                $map['status'] = $filter['status'];
+                unset($filter['status']);
+            } 
+
+            unset($filter['label']);
+            $this->request->get(['filter' => json_encode($filter)]);
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->where($where)

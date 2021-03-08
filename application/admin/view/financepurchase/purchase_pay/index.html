@@ -4,7 +4,7 @@
         <ul class="nav nav-tabs">
             {foreach name="label_list" item="value"}
             <li class="{:$label == $key ? 'active' : ''}">
-                <a href="#t-{$key}" data-value="{$key}" data-field="status" data-toggle="tab">{$value}</a>
+                <a href="#t-{$key}" data-value="{$key}" data-field="label" data-toggle="tab">{$value}</a>
             </li>
             {/foreach}
         </ul>

@@ -130,13 +130,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
              $('.panel-heading a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
                 var field = $(this).data("field");
                 var value = $(this).data("value");
-                console.log(value);
                 if (value == 1) {
                     $('.btn-open').removeClass('hide');
                     $('.btn-close').removeClass('hide');
                 } else {
                     $('.btn-open').addClass('hide');
                     $('.btn-close').addClass('hide');
+                    value = '';
                 }
                 var options = table.bootstrapTable('getOptions');
                 options.pageNumber = 1;
@@ -145,10 +145,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     var params = queryParams(params);
                     var filter = params.filter ? JSON.parse(params.filter) : {};
                     var op = params.op ? JSON.parse(params.op) : {};
-                    if (field == 'status') {
+                    if (field == 'label') {
                         filter[field] = value;
                     } else {
-                        delete filter.test;
+                        delete filter.label;
                     }
                     params.filter = JSON.stringify(filter);
                     params.op = JSON.stringify(op);
