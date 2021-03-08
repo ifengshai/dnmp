@@ -414,8 +414,8 @@ class ScmWarehouse extends Scm
         $platform_id = $this->request->request('platform_id');
         empty($platform_id) && $this->error(__('平台ID不能为空'), [], 403);
 
-        $warehouse_area_id = $this->request->request("warehouse_area_id"); //入库库位id
-        empty($warehouse_area_id) && $this->error(__('请选择入库库位'), [], 510);
+        $warehouse_area_id = $this->request->request("warehouse_area_id"); //出库库库位id
+        empty($warehouse_area_id) && $this->error(__('请选择出库库位'), [], 510);
 
         $item_data = $this->request->request('item_data');
         $item_data = json_decode(htmlspecialchars_decode($item_data), true);
@@ -425,7 +425,7 @@ class ScmWarehouse extends Scm
         $do_type = $this->request->request('do_type');
         $get_out_stock_id = $this->request->request('out_stock_id');
 
-        //入库库位详情
+        //出库库位详情
         $warehouse_area = $this->_store_house->where('id', $warehouse_area_id)->find();
 
         $this->_out_stock->startTrans();
@@ -943,7 +943,7 @@ class ScmWarehouse extends Scm
         $type_id = $this->request->request("type_id"); //入库分类
         empty($type_id) && $this->error(__('请选择入库分类'), [], 510);
         $area_id = $this->request->request("area_id"); //入库库区id
-        empty($area_id) && $this->error(__('请选择入库库位'), [], 510);
+        empty($area_id) && $this->error(__('请选择入库库区'), [], 510);
         $warehouse_area_id = $this->request->request("warehouse_area_id"); //入库库位id
         empty($warehouse_area_id) && $this->error(__('请选择入库库位'), [], 510);
         $item_sku = $this->request->request("item_data");
@@ -959,6 +959,17 @@ class ScmWarehouse extends Scm
         //入库库位详情
         $warehouse_area = $this->_store_house->where('id', $warehouse_area_id)->find();
         $area = $this->_warehouse_area->where('id', $area_id)->find();
+        foreach ($item_sku as $key1 => $value1) {
+            $store_sku = Db::name('store_sku')->where('sku',$value1['sku'])->where('store_id',$warehouse_area_id)->find();
+            //判断sku跟库位号是否有绑定关系
+            if (empty($store_sku)) {
+                throw new Exception('sku:' . $value1['sku'] . '与'.$warehouse_area['coding'].'没有绑定关系，请先绑定');
+            }
+            //有库容 入库数量大于库容不能继续
+            if ($warehouse_area['volume'] && $value1['in_stock_num'] > $warehouse_area['volume']) {
+                throw new Exception('sku:' . $value1['sku'] . '入库数量大于'.$warehouse_area['coding'].'库容');
+            }
+        }
         $this->_check->startTrans();
         $this->_in_stock->startTrans();
         $this->_in_stock_item->startTrans();
