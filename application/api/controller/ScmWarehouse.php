@@ -2121,7 +2121,7 @@ class ScmWarehouse extends Scm
         if ($type == 1) {
             //创建盘点单筛选 ok
             $query = $this->request->request('query'); //sku 、 库位编码筛选
-            $area_name = $this->request->request('area_name'); //库区名称 筛选
+            $area_name = $this->request->request('area_name'); //库区编码 筛选
             $start_stock = $this->request->request('start_stock');
             $end_stock = $this->request->request('end_stock');
             $page = $this->request->request('page');
@@ -2147,9 +2147,9 @@ class ScmWarehouse extends Scm
                 $where['a.sku'] = ['in', $item_sku];
             }
 
-            //库区筛选
+            //库区编码筛选
             if ($area_name) {
-                $where['c.name'] = ['like', $area_name . '%']; //库区名称
+                $where['c.coding'] = ['like', '%' . $area_name . '%']; //库区编码
             }
 
             //库位筛选 sku筛选
@@ -2167,7 +2167,7 @@ class ScmWarehouse extends Scm
             //获取SKU库位绑定表（fa_store_sku）数据列表
             $list = $this->_store_sku
                 ->alias('a')
-                ->field('a.id,a.sku,b.coding as library_name,c.name as warehouse_name,b.area_id')
+                ->field('a.id,a.sku,b.coding as library_name,c.coding as warehouse_name,b.area_id')
                 ->where($where)
                 ->join(['fa_store_house' => 'b'], 'a.store_id=b.id')
                 ->join(['fa_warehouse_area' => 'c'], 'b.area_id=c.id')
@@ -2226,7 +2226,7 @@ class ScmWarehouse extends Scm
                         // $list[$k]['real_time_qty'] = $real_time_qty; //库区实时库存
                         $list[$k]['available_stock'] = $item['available_stock'] ?? 0; //可用库存
                         $list[$k]['remark'] = $v['remark']; //备注
-                        $list[$k]['warehouse_name'] = $v['warehouse_name']; //库区名称
+                        $list[$k]['warehouse_name'] = $v['warehouse_name']; //库区编码
                         $list[$k]['area_id'] = $v['area_id']; //库区id
                         $list[$k]['library_name'] = $v['library_name']; //库位编码
                     }
@@ -2804,6 +2804,33 @@ class ScmWarehouse extends Scm
         }
 
         $this->success($msg, ['info' => ''], 200);
+    }
+
+    /**
+     * 盘点时检查条形码绑定关系是否正确
+     *
+     * @Description
+     * @author wpl
+     * @since 2021/03/08 13:56:55 
+     * @return void
+     */
+    public function check_code()
+    {
+        if ($this->request->isPost()) {
+            $code = $this->request->request('code'); //条形码
+            $sku = $this->request->request('sku'); //sku
+            empty($code) && $this->error(__('条形码不能为空'), [], 405);
+            empty($sku) && $this->error(__('sku不能为空'), [], 406);
+            $list = $this->_product_bar_code_item->where(['code' => $code])->find();
+            if ($list->sku && $list->sku != $sku) {
+                $this->error('条形码和sku不匹配,条形码:' . $code, [], 402);
+            }
+            if ($list->library_status != 1) {
+                $this->error('此条形码已出库,条形码:' . $code, [], 403);
+            }
+            $this->success('获取成功', [], 200);
+        }
+        $this->error('网络异常', [], 401);
     }
 
     /**
