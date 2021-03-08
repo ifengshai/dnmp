@@ -144,6 +144,7 @@ class PurchasePay extends Backend
                     $insert['order_number'] = $params['order_number'];
                     $insert['pay_grand_total'] = $params['pay_grand_total'];
                     $insert['base_currency_code'] = $params['base_currency_code'];
+                    $insert['file'] = $params['file']; //附件
                     $insert['create_time'] = time();
                     $insert['create_person'] = session('admin.nickname');
                     $finance_purchase_id = Db::name('finance_purchase')->insertGetId($insert);
@@ -423,6 +424,7 @@ class PurchasePay extends Backend
                     $update['status'] = $params['status'];
                     $update['pay_type'] = $params['pay_type'];
                     $update['remark'] = $params['remark'];
+                    $update['file'] = $params['file'];
                     $update['pay_grand_total'] = $params['pay_grand_total'];
                     switch ($params['pay_type']) {
                         case 1:

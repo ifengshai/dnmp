@@ -121,6 +121,20 @@
                 <textarea class="form-control" id="desc" rows="8" name="row[remark]" cols="50">{$row.remark}</textarea>
             </div>
         </div>
+
+        <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2">{:__('上传附件')}:</label>
+            <div class="col-xs-12 col-sm-8">
+                <div class="input-group">
+                    <input id="c-upload_photos" data-rule="false" class="form-control" name="row[file]" type="text" value="{$row.file}">
+                    <div class="input-group-addon no-border no-padding">
+                        <span><button type="button" id="plupload-upload_photos"   class="btn btn-danger plupload" data-input-id="c-upload_photos"  data-url="ajax/upload?dir=purchase_pay/pay_order" data-multiple="true" data-preview-id="p-upload_photos" data-maxsize="10M"><i class="fa fa-upload"></i> 上传附件</button></span>
+                    </div>
+                    <span class="msg-box n-right" for="c-upload_photos"></span>
+                </div>
+                <ul class="row list-inline plupload-preview" id="p-upload_photos"></ul>
+            </div>
+        </div>
     </div>
     <hr>
     <div class='caigou' style="width: 97%;margin-left: 3%;">

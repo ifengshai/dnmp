@@ -1,9 +1,10 @@
 <form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
     <input type="hidden" name="ids" value="{$ids}" />
+    <input type="hidden" name="status" value="3" />
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">拒绝原因:</label>
         <div class="col-xs-12 col-sm-8">
-            <textarea id="c-remark" class="form-control" name="row[remarks]" style="height: 240px;">{$row.remarks}</textarea>
+            <textarea id="c-remark" class="form-control" name="remarks" style="height: 240px;">{$row.remarks}</textarea>
         </div>
     </div>
     

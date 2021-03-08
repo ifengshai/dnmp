@@ -282,6 +282,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         edit: function () {
             Controller.api.bindevent();
         },
+        detail: function () {
+            Controller.api.bindevent();
+        },
         batch_add: function () {
             Controller.api.bindevent();
             $(document).on('click', '.btn-status', function () {
@@ -327,6 +330,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
 
             // 为表格绑定事件
             Table.api.bindevent(table);
+        },
+        setstatus: function () {
+            Controller.api.bindevent();
         },
         api: {
             bindevent: function () {
