@@ -448,6 +448,16 @@ class Instock extends Backend
      */
     public function setStatus()
     {
+        $this->_inventory = new \app\admin\model\warehouse\Inventory();
+        /*****************限制如果有盘点单未结束不能操作调拨单审核*******************/
+        $count = $this->_inventory->where(['is_del' => 1, 'check_status' => ['in', [0, 1]]])->count();
+        if ($count > 0) {
+            $this->error(__('存在正在盘点的单据,暂无法审核'));
+        }
+
+        /****************************end*****************************************/
+
+
         $ids = $this->request->post("ids/a");
         if (!$ids) {
             $this->error('缺少参数！！');

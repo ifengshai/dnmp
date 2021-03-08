@@ -25,6 +25,7 @@ use app\admin\model\warehouse\ProductBarCodeItem;
 use app\admin\model\order\order\LensData;
 use app\admin\model\saleaftermanage\WorkOrderList;
 use app\admin\model\finance\FinanceCost;
+use app\admin\model\warehouse\Inventory;
 
 /**
  * 供应链配货接口类
@@ -143,6 +144,7 @@ class ScmDistribution extends Scm
         $this->_work_order_list = new WorkOrderList();
         $this->_outstock = new Outstock();
         $this->_outstock_item = new OutStockItem();
+        $this->_inventory = new Inventory();
     }
 
     /**

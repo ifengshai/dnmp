@@ -30,6 +30,7 @@ use app\admin\model\order\order\LensData;
 use app\admin\model\saleaftermanage\WorkOrderMeasure;
 use app\admin\model\warehouse\ProductBarCodeItem;
 use GuzzleHttp\Client;
+use app\admin\model\warehouse\Inventory;
 
 /**
  * 配货列表
@@ -162,6 +163,7 @@ class Distribution extends Backend
         $this->_product_bar_code_item = new ProductBarCodeItem();
         $this->_outstock = new Outstock();
         $this->_outstock_item = new OutStockItem();
+        $this->_inventory = new Inventory();
     }
 
     /**
@@ -1598,6 +1600,16 @@ class Distribution extends Backend
      */
     public function tag_printed()
     {
+
+        /*****************限制如果有盘点单未结束不能操作配货完成*******************/
+        //拣货区盘点时不能操作
+        $count = $this->_inventory->alias('a')->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'b.area_id' => 3])->count();
+        if ($count > 0) {
+            $this->error(__('存在正在盘点的单据,暂无法审核'));
+        }
+        /****************************end*****************************************/
+
+
         $ids = input('id_params/a');
         !$ids && $this->error('请选择要标记的数据');
 
@@ -1647,6 +1659,14 @@ class Distribution extends Backend
      */
     public function batch_print_label()
     {
+        /*****************限制如果有盘点单未结束不能操作配货完成*******************/
+        //拣货区盘点时不能操作
+        $count = $this->_inventory->alias('a')->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'b.area_id' => 3])->count();
+        if ($count > 0) {
+            $this->error(__('存在正在盘点的单据,暂无法审核'));
+        }
+        /****************************end*****************************************/
+        
         //禁用默认模板
         $this->view->engine->layout(false);
         ob_start();
