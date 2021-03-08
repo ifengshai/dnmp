@@ -2504,7 +2504,7 @@ class TrackReg extends Backend
         $where_arr['is_open'] = 1;
         $where_arr['is_del'] = 1;
         $where_arr['category_id'] = ['<>',43]; //排除补差价商品
-        $rest_total = $this->model->where($where_arr)->value('stock*purchase_price');
+        $rest_total = $this->model->where($where_arr)->sum('stock*purchase_price');
         $cha_amount = 0;  //冲减金额
         foreach ($is_exist as $k=>$v){
             $cha_amount += $v['total'];
