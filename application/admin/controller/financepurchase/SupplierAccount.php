@@ -87,7 +87,6 @@ class SupplierAccount extends Backend
                     ->where('c.id', '>', 0)
                     ->field('c.purchase_number,a.id,d.purchase_price,c.purchase_freight,f.quantity_num,a.in_stock_number,b.check_order_number,b.purchase_id,b.batch_id,c.purchase_name,c.pay_type,e.in_stock_num,f.arrivals_num,f.quantity_num,f.unqualified_num')
                     ->select();
-                dump($instock->getLastSql());die;
                 $wait_pay_money = 0;
                 $now = date('Y-m-t', time());
                 $all = 0;
