@@ -57,7 +57,8 @@ class PurchasePay extends Backend
                 $this->request->get(['filter' => json_encode($filter)]);
             }
 
-            if ($filter['status'] == 0) {
+            if ($filter['status'] === 0) {
+                $map['status'] = $filter['status'];
                 unset($filter['status']);
                 $this->request->get(['filter' => json_encode($filter)]);
             } elseif ($filter['status'] == 1) {
