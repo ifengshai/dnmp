@@ -781,7 +781,7 @@ class SaleAfterTask extends Model
 //            Log::write("$result");
 //            Log::write("$order_platform");
             foreach ($result as $k => $v) {
-                $ship =  Db::connect($db)->table('sales_flat_shipment_track')->where(['order_id' => $v['entity_id']])->order('id desc')->find();
+                $ship =  Db::connect($db)->table('sales_flat_shipment_track')->where(['order_id' => $v['entity_id']])->order('entity_id desc')->find();
                 $result[$k]['track_number'] = $ship['track_number'];
                 $result[$k]['titel'] = $ship['titel'];
 
