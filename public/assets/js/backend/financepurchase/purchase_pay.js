@@ -27,6 +27,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'id', title: __('Id')},
                         {field: 'order_number', title: __('付款申请单号'), operate: 'LIKE'},
                         {field: 'supplier_name', title: __('供应商名称'), operate: 'LIKE'},
+                        {field: 'purchase_number', title: __('采购单号'), operate: 'LIKE', visible:false},
                         {
                             field: 'pay_type', title: __('付款类型'), custom: { 0: 'success', 1: 'yellow', 2: 'blue', 3: 'danger'},
                             searchList: {1: '预付款', 2: '全款预付', 3: '尾款'},
