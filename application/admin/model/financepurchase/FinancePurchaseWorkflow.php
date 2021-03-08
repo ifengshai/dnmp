@@ -5,6 +5,7 @@ namespace app\admin\model\financepurchase;
 use think\Db;
 use think\Model;
 use app\admin\model\financepurchase\FinancePurchaseWorkflowRecords;
+use app\api\controller\Ding;
 
 class FinancePurchaseWorkflow extends Model
 {
@@ -53,6 +54,8 @@ class FinancePurchaseWorkflow extends Model
         //插入记录表第一个审核人
         $financePurchaseWorkflowRecords = new FinancePurchaseWorkflowRecords();
         $financePurchaseWorkflowRecords->save(['finance_purchase_id' => $finance_purchase_id, 'assignee_id' => $check_userids[0], 'createtime' => time()]);
+
+        Ding::cc_ding($check_userids[0], '', '有一个新的付款申请单需要你审核', '有一个新的付款申请单需要你审核,申请单id为' . $finance_purchase_id);
         return true;
     }
 }

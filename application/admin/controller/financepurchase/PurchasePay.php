@@ -163,6 +163,8 @@ class PurchasePay extends Backend
                     //提交审核 生成审批单
                     if ($insert['status'] == 1) {
                         $this->workflow->setData($finance_purchase_id, $insert['pay_grand_total']);
+
+                        
                     }
                     $label = input('label');
                     //结算单页面过来的创建付款申请单 需要更新结算的付款申请单id字段
@@ -834,6 +836,8 @@ class PurchasePay extends Backend
                             $flow_sort = $this->workflow->where(['finance_purchase_id' => $v['id'], 'post_id' => session('admin.id')])->value('flow_sort');
                             $post_id = $this->workflow->where(['finance_purchase_id' => $v['id'], 'flow_sort' => $flow_sort + 1])->value('post_id');
                             $this->workflowrecords->insert(['finance_purchase_id' => $v['id'], 'assignee_id' => $post_id, 'createtime' => time()]);
+
+                            Ding::cc_ding($post_id, '', '有一个新的付款申请单需要你审核', '有一个新的付款申请单需要你审核,申请单id为' . $v['id']);
                         }
                     } else {
                         //更新主表状态
