@@ -51,8 +51,8 @@ class PurchasePay extends Backend
             $map = [];
             $filter = json_decode($this->request->get('filter'), true);
             if ($filter['supplier_name']) {
-                $supplier = Db::name('supplier')->where('supplier_name', 'like', '%' . trim($filter['supplier_name']) . '%')->value('id');
-                $map['supplier_id'] = ['=', $supplier];
+                $supplier_ids = Db::name('supplier')->where('supplier_name', 'like', '%' . trim($filter['supplier_name']) . '%')->column('id');
+                $map['supplier_id'] = ['in', $supplier_ids];
                 unset($filter['supplier_name']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
