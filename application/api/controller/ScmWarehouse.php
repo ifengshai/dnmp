@@ -1395,7 +1395,7 @@ class ScmWarehouse extends Scm
         //获取条形码数据
         $bar_code_list = $this->_product_bar_code_item
             ->where(['in_stock_id' => $in_stock_id])
-            ->field('sku,code,location_id,location_code')
+            ->field('sku,code')
             ->order('id', 'desc')
             ->select();
         $bar_code_list = collection($bar_code_list)->toArray();
@@ -1407,7 +1407,6 @@ class ScmWarehouse extends Scm
             foreach ($bar_code_list as $k => $v) {
                 if ($v['sku'] == $sku) {
                     $v['is_new'] = 0;
-                    $v['location_area'] = Db::name('warehouse_area')->where('id',$v['location_id'])->value('coding');
                     $sku_agg[] = $v;
                 }
             }
@@ -1433,9 +1432,12 @@ class ScmWarehouse extends Scm
             $in_stock_type_list = $in_stock_type;
         }
 
+        $kuqu_kuwei =$this->_product_bar_code_item->where(['in_stock_id' => $in_stock_id])->find();
         //入库单所需数据
         $info['in_stock_id'] = $_in_stock_info['id'];
         $info['in_stock_number'] = $_in_stock_info['in_stock_number'];
+        $info['location_area'] = Db::name('warehouse_area')->where('id',$kuqu_kuwei['location_id'])->value('coding');
+        $info['location_code'] = $kuqu_kuwei['location_code'];
         $info['in_stock_type_check_id'] = $_in_stock_info['type_id'];
         $info['in_stock_type'] = $in_stock_type_list;
         $info['item_list'] = $item_list;
