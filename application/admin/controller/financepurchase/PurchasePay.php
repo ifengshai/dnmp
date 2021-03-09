@@ -18,7 +18,7 @@ use think\Request;
 
 class PurchasePay extends Backend
 {
-    protected $noNeedRight = ['is_conditions'];
+    protected $noNeedRight = ['is_conditions', 'batch_add'];
 
     protected $model = null;
 
@@ -163,8 +163,6 @@ class PurchasePay extends Backend
                     //提交审核 生成审批单
                     if ($insert['status'] == 1) {
                         $this->workflow->setData($finance_purchase_id, $insert['pay_grand_total']);
-
-                        
                     }
                     $label = input('label');
                     //结算单页面过来的创建付款申请单 需要更新结算的付款申请单id字段
