@@ -553,16 +553,22 @@ class ScmWarehouse extends Scm
     public function out_stock_examine()
     {
 
-        /*****************限制如果有盘点单未结束不能操作出库单审核*******************/
-        $count = $this->_inventory->where(['is_del' => 1, 'check_status' => ['in', [0, 1]]])->count();
-        if ($count > 0) {
-            $this->error(__('存在正在盘点的单据,暂无法审核'), [], 403);
-        }
-
-        /****************************end*****************************************/
 
         $out_stock_id = $this->request->request('out_stock_id');
         empty($out_stock_id) && $this->error(__('出库单ID不能为空'), [], 403);
+
+        /*****************限制如果有盘点单未结束不能操作配货完成*******************/
+        //配货完成时判断
+        //拣货区盘点时不能操作
+        //查询条形码库区库位
+        $barcodedata = $this->_product_bar_code_item->where(['out_stock_id' => $out_stock_id])->column('location_code');
+        $count = $this->_inventory->alias('a')
+            ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata]])
+            ->count();
+        if ($count > 0) {
+            $this->error(__('此库位正在盘点,暂无法出库审核'), [], 403);
+        }
+        /****************************end*****************************************/
 
         $do_type = $this->request->request('do_type');
         empty($do_type) && $this->error(__('审核类型不能为空'), [], 403);
@@ -1487,15 +1493,21 @@ class ScmWarehouse extends Scm
      */
     public function in_stock_examine()
     {
-        /*****************限制如果有盘点单未结束不能操作入库单审核*******************/
-        $count = $this->_inventory->where(['is_del' => 1, 'check_status' => ['in', [0, 1]]])->count();
-        if ($count > 0) {
-            $this->error(__('存在正在盘点的单据,暂无法审核'), [], 403);
-        }
-        /****************************end*****************************************/
-
         $in_stock_id = $this->request->request('in_stock_id');
         empty($in_stock_id) && $this->error(__('入库单ID不能为空'), [], 516);
+
+        /*****************限制如果有盘点单未结束不能操作配货完成*******************/
+        //配货完成时判断
+        //拣货区盘点时不能操作
+        //查询条形码库区库位
+        $barcodedata = $this->_product_bar_code_item->where(['in_stock_id' => $in_stock_id])->column('location_code');
+        $count = $this->_inventory->alias('a')
+            ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata]])
+            ->count();
+        if ($count > 0) {
+            $this->error(__('此库位正在盘点,暂无法入库审核'), [], 403);
+        }
+        /****************************end*****************************************/
 
         $do_type = $this->request->request('do_type');
         empty($do_type) && $this->error(__('审核类型不能为空'), [], 517);
@@ -1521,6 +1533,7 @@ class ScmWarehouse extends Scm
             ->where(['a.id' => $in_stock_id])
             ->select();
         $list = collection($list)->toArray();
+
         //查询存在产品库的sku
         $skus = array_column($list, 'sku');
         $skus = $this->_item->where(['sku' => ['in', $skus]])->column('sku');
@@ -3129,15 +3142,6 @@ class ScmWarehouse extends Scm
      */
     public function transfer_ing()
     {
-        /*****************限制如果有盘点单未结束不能操作调拨单审核*******************/
-        $count = $this->_inventory->where(['is_del' => 1, 'check_status' => ['in', [0, 1]]])->count();
-        if ($count > 0) {
-            $this->error(__('存在正在盘点的单据,暂无法审核'), [], 403);
-        }
-
-        /****************************end*****************************************/
-
-
         $id = $this->request->request("transfer_order_item_id");
         $transfer_order_item = $this->_warehouse_transfer_order_item->where('id', $id)->find();
         $area_all = $this->_warehouse_area->column('id', 'coding');

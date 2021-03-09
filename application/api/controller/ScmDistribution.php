@@ -667,18 +667,6 @@ class ScmDistribution extends Scm
 
     protected function save($item_order_number, $check_status)
     {
-
-        /*****************限制如果有盘点单未结束不能操作配货完成*******************/
-        //配货完成时判断
-        if ($check_status == 2) {
-            //拣货区盘点时不能操作
-            $count = $this->_inventory->alias('a')->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'b.area_id' => 3])->count();
-            if ($count > 0) {
-                $this->error(__('存在正在盘点的单据,暂无法审核'), [], 403);
-            }
-        }
-        /****************************end*****************************************/
-
         empty($item_order_number) && $this->error(__('子订单号不能为空'), [], 403);
 
         //获取子订单数据
@@ -998,10 +986,24 @@ class ScmDistribution extends Scm
      */
     public function product_submit()
     {
+
         $item_order_number = $this->request->request('item_order_number');
         $barcode = $this->request->request('barcode');
         empty($item_order_number) && $this->error(__('子订单号不能为空'), [], 403);
         empty($barcode) && $this->error(__('商品条形码不能为空'), [], 403);
+
+        /*****************限制如果有盘点单未结束不能操作配货完成*******************/
+        //配货完成时判断
+        //拣货区盘点时不能操作
+        //查询条形码库区库位
+        $barcodedata = $this->_product_bar_code_item->where(['code' => $barcode])->find();
+        $count = $this->_inventory->alias('a')
+            ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'b.area_id' => 3, 'library_name' => $barcodedata->location_code])
+            ->count();
+        if ($count > 0) {
+            $this->error(__('此库位正在盘点,暂无法配货'), [], 403);
+        }
+        /****************************end*****************************************/
 
         //子订单号获取平台platform_sku
         $order_item_id = $this->_new_order_item_process->where('item_order_number', $item_order_number)->value('id');
@@ -1038,14 +1040,9 @@ class ScmDistribution extends Scm
         $true_sku = $this->_item_platform_sku
             ->where(['platform_sku' => $order_item_true_sku, 'platform_type' => $order_item_info['site']])
             ->value('sku');
-
-        $barcode_item_order_number = $this->_product_bar_code_item->where('code', $barcode)->value('item_order_number');
-        !empty($barcode_item_order_number) && $this->error(__('此条形码已经绑定过其他订单'), [], 403);
-        $code_item_sku = $this->_product_bar_code_item->where('code', $barcode)->value('sku');
-        // empty($code_item_sku) && $this->error(__('此条形码未绑定SKU'), [], 403);
-        empty($code_item_sku) && $this->error(__('商品条码没有绑定关系'), [], 403);
-
-        if (strtolower($true_sku) != strtolower($code_item_sku)) {
+        !empty($barcodedata->item_order_number) && $this->error(__('此条形码已经绑定过其他订单'), [], 403);
+        empty($barcodedata->sku) && $this->error(__('商品条码没有绑定关系'), [], 403);
+        if (strtolower($true_sku) != strtolower($barcodedata->sku)) {
             //扫描获取的条形码 和 子订单查询出的 SKU(即true_sku)对比失败则配货失败
             //操作失败记录
             DistributionLog::record($this->auth, $order_item_id, 2, '配货失败：sku配错');
