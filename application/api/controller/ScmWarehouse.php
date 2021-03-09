@@ -3304,12 +3304,15 @@ class ScmWarehouse extends Scm
                 if ($transfer_order_item['sku'] != $detail['sku']) {
                     $this->error(__('条形码' . $v['code'] . '与当前调拨单sku不一致请确认后重试'), '', 546);
                 }
-                dump($transfer_order_item);
-                dump($detail);
-                dump($detail['location_code']);
-                die;
-                //判断当前扫码的sku是否在当前调出的库位
-                if ($transfer_order_item['call_out_site'] != $detail['location_code']) {
+                // dump($transfer_order_item);
+                // dump($detail);
+                // dump($detail['location_code']);
+                // die;
+                // //判断当前扫码的sku是否在当前调出的库位
+                // if ($transfer_order_item['call_out_site'] != $detail['location_code']) {
+                //     $this->error(__('条形码' . $v['code'] . '当前未在调出库位！！' . $transfer_order_item['call_out_site']), '', 546);
+                // }
+                if (strcmp($transfer_order_item['call_out_site'], $detail['location_code']) !== 0) {
                     $this->error(__('条形码' . $v['code'] . '当前未在调出库位！！' . $transfer_order_item['call_out_site']), '', 546);
                 }
                 //调入仓库位id
@@ -3375,9 +3378,9 @@ class ScmWarehouse extends Scm
         try {
             foreach ($all_history as $k => $v) {
                 //当前库位的id 为了更新条形码当前所属的库区库位
-                $location_code_id = $this->_store_house->where('coding',$transfer_order_item['call_in_site'])->where('area_id',$area_all[$transfer_order_item['inarea']])->value('id');
+                $location_code_id = $this->_store_house->where('coding', $transfer_order_item['call_in_site'])->where('area_id', $area_all[$transfer_order_item['inarea']])->value('id');
                 //更新条形码当前所属的库区库位
-                $res = $this->_product_bar_code_item->where(['code' => $v['code']])->update(['location_code' => $transfer_order_item['call_in_site'],'location_code_id' => $location_code_id, 'location_id' => $area_all[$transfer_order_item['inarea']]]);
+                $res = $this->_product_bar_code_item->where(['code' => $v['code']])->update(['location_code' => $transfer_order_item['call_in_site'], 'location_code_id' => $location_code_id, 'location_id' => $area_all[$transfer_order_item['inarea']]]);
             }
             $this->_product_bar_code_item->commit();
         } catch (ValidateException $e) {
@@ -3432,7 +3435,7 @@ class ScmWarehouse extends Scm
         $detail = $this->_product_bar_code_item->where('code', $code)->find();
         //判断调拨单子单sku是否与条形码sku一致
         if ($transfer_order_item['sku'] != $detail['sku']) {
-            $this->error(__('条形码' . $code . 'sku：'.$detail['sku'].'与当前调拨子单sku不一致请确认后重试'), '', 546);
+            $this->error(__('条形码' . $code . 'sku：' . $detail['sku'] . '与当前调拨子单sku不一致请确认后重试'), '', 546);
         }
         //判断当前扫码的sku是否在当前调出的库位
         if ($transfer_order_item['call_out_site'] != $detail['location_code']) {
@@ -3500,7 +3503,7 @@ class ScmWarehouse extends Scm
         $row = $this->_warehouse_transfer_order->where('id', $transfer_order_id)->find();
         1 != $row['status'] && $this->error(__('只有待审核状态才能审核'), '', 405);
 
-        if ($do_type == 2){
+        if ($do_type == 2) {
             //审核通过变为调拨中
             $do_type = 5;
         }
