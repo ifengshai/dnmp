@@ -55,7 +55,7 @@ class FinancePurchaseWorkflow extends Model
         $financePurchaseWorkflowRecords = new FinancePurchaseWorkflowRecords();
         $financePurchaseWorkflowRecords->save(['finance_purchase_id' => $finance_purchase_id, 'assignee_id' => $check_userids[0], 'createtime' => time()]);
 
-        Ding::cc_ding($check_userids[0], '', '有一个新的付款申请单需要你审核', '有一个新的付款申请单需要你审核,申请单id为' . $finance_purchase_id);
+        Ding::cc_ding($check_userids[0], '', '魔晶系统有一个新的付款申请单需要你审核', '有一个新的付款申请单需要你审核,申请单id为' . $finance_purchase_id);
         return true;
     }
 }
