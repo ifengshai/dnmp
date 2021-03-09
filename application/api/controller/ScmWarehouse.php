@@ -3047,9 +3047,13 @@ class ScmWarehouse extends Scm
                         $list[$k]['transfer_order_id'] = $this->_warehouse_transfer_order->id;
                         $list[$k]['sku'] = $v['sku'];
                         $list[$k]['num'] = $v['num'];
+                        $list[$k]['outarea_id'] = $v['outarea_id']; //调出库区id
                         $list[$k]['outarea'] = $v['outarea']; //调出库区
+                        $list[$k]['call_out_site_id'] = $v['call_out_site_id']; //调出库位id
                         $list[$k]['call_out_site'] = $v['call_out_site']; //调出库位
+                        $list[$k]['inarea_id'] = $v['inarea_id']; //调入库区id
                         $list[$k]['inarea'] = $v['inarea']; //调入库区
+                        $list[$k]['call_in_site_id'] = $v['call_in_site_id']; //调入库位id
                         $list[$k]['call_in_site'] = $v['call_in_site']; //调入库位
                     }
                     //添加明细表数据
@@ -3514,7 +3518,7 @@ class ScmWarehouse extends Scm
         0 != $row['status'] && $this->error(__('只有新建状态才能取消'), [], 405);
 
         $res = $this->_warehouse_transfer_order->allowField(true)->isUpdate(true, ['id' => $transfer_order_id])->save(['status' => 4]);
-        false === $res ? $this->error(__('审核失败'), [], 404) : $this->success('审核成功', [], 200);
+        false === $res ? $this->error(__('取消失败'), [], 404) : $this->success('取消成功', [], 200);
     }
 
     /***************************************库内调拨单end******************************************/
