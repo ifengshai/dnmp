@@ -3109,9 +3109,13 @@ class ScmWarehouse extends Scm
                             $list[$k]['transfer_order_id'] = $id;
                             $list[$k]['sku'] = $v['sku'];
                             $list[$k]['num'] = $v['num'];
+                            $list[$k]['outarea_id'] = $v['outarea_id']; //调出库区id
                             $list[$k]['outarea'] = $v['outarea']; //调出库区
+                            $list[$k]['call_out_site_id'] = $v['call_out_site_id']; //调出库位id
                             $list[$k]['call_out_site'] = $v['call_out_site']; //调出库位
+                            $list[$k]['inarea_id'] = $v['inarea_id']; //调入库区id
                             $list[$k]['inarea'] = $v['inarea']; //调入库区
+                            $list[$k]['call_in_site_id'] = $v['call_in_site_id']; //调入库位id
                             $list[$k]['call_in_site'] = $v['call_in_site']; //调入库位
                         }
                         //添加明细表数据
@@ -3464,7 +3468,7 @@ class ScmWarehouse extends Scm
             ->alias('a')
             ->join(['fa_store_house' => 'b'], 'a.store_id=b.id', 'left')
             ->join(['fa_warehouse_area' => 'c'], 'b.area_id=c.id')
-            ->field('a.sku,b.coding,c.name,a.id')
+            ->field('a.sku,b.coding,c.name,a.id as location_id,c.id as area_id')
             ->where('is_del', 1)
             ->where($where)
             ->select();
