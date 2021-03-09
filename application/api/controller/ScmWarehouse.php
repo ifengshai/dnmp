@@ -3003,6 +3003,7 @@ class ScmWarehouse extends Scm
             $list[$key]['show_start'] = 0 == $value['status'] ? 1 : 0; //编辑按钮
             $list[$key]['show_cancel'] = 0 == $value['status'] ? 1 : 0; //取消按钮
             $list[$key]['show_detail'] = 6 == $value['status'] ? 1 : 0; //详情按钮
+            $list[$key]['show_examine'] = 1 == $value['status'] ? 1 : 0; //审核按钮
             $list[$key]['show_trans'] = 5 == $value['status'] ? 1 : 0; //调拨中编辑按钮
         }
         $this->success('', ['list' => $list], 200);
@@ -3158,7 +3159,7 @@ class ScmWarehouse extends Scm
     }
 
     /**
-     * 调拨中提交子单 扫调出库位二维码-扫商品条形码-扫调入库位条形码
+     * 调拨中提交子单 扫调出库位二维码-扫商品条形码-扫调入库位条形码（弃用）
      * Created by Phpstorm.
      * User: jhh
      * Date: 2021/3/4
@@ -3361,8 +3362,10 @@ class ScmWarehouse extends Scm
         $this->_product_bar_code_item->startTrans();
         try {
             foreach ($all_history as $k => $v) {
+                //当前库位的id 为了更新条形码当前所属的库区库位
+                $location_code_id = $this->_store_house->where('coding',$transfer_order_item['call_in_site'])->where('area_id',$area_all[$transfer_order_item['inarea']])->value('id');
                 //更新条形码当前所属的库区库位
-                $res = $this->_product_bar_code_item->where(['code' => $v['code']])->update(['location_code' => $transfer_order_item['call_in_site'], 'location_id' => $area_all[$transfer_order_item['inarea']]]);
+                $res = $this->_product_bar_code_item->where(['code' => $v['code']])->update(['location_code' => $transfer_order_item['call_in_site'],'location_code_id' => $location_code_id, 'location_id' => $area_all[$transfer_order_item['inarea']]]);
             }
             $this->_product_bar_code_item->commit();
         } catch (ValidateException $e) {
