@@ -30,7 +30,7 @@ use app\admin\model\warehouse\ProductBarCodeItem;
 use GuzzleHttp\Client;
 use app\admin\model\warehouse\Inventory;
 use app\admin\model\warehouse\Outstock;
-use app\admin\model\warehouse\OutstockItem;
+use app\admin\model\warehouse\OutStockItem;
 /**
  * 配货列表
  */
