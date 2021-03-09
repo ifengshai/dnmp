@@ -3305,7 +3305,9 @@ class ScmWarehouse extends Scm
                     $this->error(__('条形码' . $v['code'] . '与当前调拨单sku不一致请确认后重试'), '', 546);
                 }
                 dump($transfer_order_item);
-                dump($detail);die;
+                dump($detail);
+                dump($detail['location_code']);
+                die;
                 //判断当前扫码的sku是否在当前调出的库位
                 if ($transfer_order_item['call_out_site'] != $detail['location_code']) {
                     $this->error(__('条形码' . $v['code'] . '当前未在调出库位！！' . $transfer_order_item['call_out_site']), '', 546);
