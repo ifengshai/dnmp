@@ -387,7 +387,8 @@ class ScmWarehouse extends Scm
             ['id' => 8, 'title' => 'amazon'],
             ['id' => 9, 'title' => 'zeelool_es'],
             ['id' => 10, 'title' => 'zeelool_de'],
-            ['id' => 11, 'title' => 'zeelool_jp']
+            ['id' => 11, 'title' => 'zeelool_jp'],
+            ['id' => 12, 'title' => 'voogmechic']
         ];
 
         $this->success('', ['type_list' => $type_list, 'site_list' => $site_list, 'info' => $info], 200);
@@ -413,8 +414,8 @@ class ScmWarehouse extends Scm
         $platform_id = $this->request->request('platform_id');
         empty($platform_id) && $this->error(__('平台ID不能为空'), [], 403);
 
-        $warehouse_area_id = $this->request->request("warehouse_area_id"); //入库库位id
-        empty($warehouse_area_id) && $this->error(__('请选择入库库位'), [], 510);
+        $warehouse_area_id = $this->request->request("warehouse_area_id"); //出库库库位id
+        empty($warehouse_area_id) && $this->error(__('请选择出库库位'), [], 510);
 
         $item_data = $this->request->request('item_data');
         $item_data = json_decode(htmlspecialchars_decode($item_data), true);
@@ -424,7 +425,7 @@ class ScmWarehouse extends Scm
         $do_type = $this->request->request('do_type');
         $get_out_stock_id = $this->request->request('out_stock_id');
 
-        //入库库位详情
+        //出库库位详情
         $warehouse_area = $this->_store_house->where('id', $warehouse_area_id)->find();
 
         $this->_out_stock->startTrans();
@@ -937,24 +938,24 @@ class ScmWarehouse extends Scm
     public function in_stock_submit()
     {
         $do_type = $this->request->request('do_type');
-        empty($do_type) && $this->error(__('请选择操作类型'), [], 510);
+        empty($do_type) && $this->error(__('请选择操作类型'), '', 510);
         if ($do_type == 1) {
             $msg = '提交';
         } else {
             $msg = '保存';
         }
         $in_stock_number = $this->request->request("in_stock_number");
-        empty($in_stock_number) && $this->error(__('入库单号不能为空'), [], 510);
+        empty($in_stock_number) && $this->error(__('入库单号不能为空'), '', 510);
         $type_id = $this->request->request("type_id"); //入库分类
-        empty($type_id) && $this->error(__('请选择入库分类'), [], 510);
+        empty($type_id) && $this->error(__('请选择入库分类'), '', 510);
         $area_id = $this->request->request("area_id"); //入库库区id
-        empty($area_id) && $this->error(__('请选择入库库位'), [], 510);
+        empty($area_id) && $this->error(__('请选择入库库区'), '', 510);
         $warehouse_area_id = $this->request->request("warehouse_area_id"); //入库库位id
-        empty($warehouse_area_id) && $this->error(__('请选择入库库位'), [], 510);
+        empty($warehouse_area_id) && $this->error(__('请选择入库库位'), '', 510);
         $item_sku = $this->request->request("item_data");
-        empty($item_sku) && $this->error(__('sku集合不能为空！！'), [], 508);
+        empty($item_sku) && $this->error(__('sku集合不能为空！！'), '', 508);
         $item_sku = json_decode(htmlspecialchars_decode($item_sku), true);
-        empty($item_sku) && $this->error(__('sku集合不能为空'), [], 403);
+        empty($item_sku) && $this->error(__('sku集合不能为空'), '', 403);
         $item_sku = array_filter($item_sku);
 
         $in_stock_id = $this->request->request("in_stock_id"); //入库单ID，
@@ -964,6 +965,17 @@ class ScmWarehouse extends Scm
         //入库库位详情
         $warehouse_area = $this->_store_house->where('id', $warehouse_area_id)->find();
         $area = $this->_warehouse_area->where('id', $area_id)->find();
+        foreach ($item_sku as $key1 => $value1) {
+            $store_sku = Db::name('store_sku')->where('sku', $value1['sku'])->where('store_id', $warehouse_area_id)->find();
+            //判断sku跟库位号是否有绑定关系
+            if (empty($store_sku)) {
+                $this->error('sku:' . $value1['sku'] . '与' . $warehouse_area['coding'] . '没有绑定关系，请先绑定', '', 503);
+            }
+            //有库容 入库数量大于库容不能继续
+            if ($warehouse_area['volume'] && $value1['in_stock_num'] > $warehouse_area['volume']) {
+                $this->error('sku:' . $value1['sku'] . '入库数量大于' . $warehouse_area['coding'] . '库容', '', 503);
+            }
+        }
         $this->_check->startTrans();
         $this->_in_stock->startTrans();
         $this->_in_stock_item->startTrans();
@@ -1251,7 +1263,7 @@ class ScmWarehouse extends Scm
         if ($result !== false) {
             $this->success($msg . '成功！！', '', 200);
         } else {
-            $this->error(__($msg . '失败'), [], 511);
+            $this->error(__($msg . '失败'), '', 511);
         }
     }
 
@@ -1426,9 +1438,14 @@ class ScmWarehouse extends Scm
             $in_stock_type_list = $in_stock_type;
         }
 
+        $kuqu_kuwei = $this->_product_bar_code_item->where(['in_stock_id' => $in_stock_id])->find();
         //入库单所需数据
         $info['in_stock_id'] = $_in_stock_info['id'];
         $info['in_stock_number'] = $_in_stock_info['in_stock_number'];
+        $info['location_id'] = $kuqu_kuwei['location_id'];
+        $info['location_area'] = Db::name('warehouse_area')->where('id', $kuqu_kuwei['location_id'])->value('coding');
+        $info['location_code_id'] = $kuqu_kuwei['location_code_id'];
+        $info['location_code'] = $kuqu_kuwei['location_code'];
         $info['in_stock_type_check_id'] = $_in_stock_info['type_id'];
         $info['in_stock_type'] = $in_stock_type_list;
         $info['item_list'] = $item_list;
@@ -3223,6 +3240,22 @@ class ScmWarehouse extends Scm
         $remove_agg = $this->request->request("remove_agg");
         $sku_agg = html_entity_decode($sku_agg);
         $sku_agg = array_filter(json_decode($sku_agg, true));
+
+        /*****************限制如果有盘点单未结束不能操作配货完成*******************/
+        //配货完成时判断
+        //拣货区盘点时不能操作
+        //查询条形码库区库位
+        $codes = array_column($sku_agg, 'code');
+        $barcodedata = $this->_product_bar_code_item->where(['code' => ['in', $codes]])->column('location_code');
+        $count = $this->_inventory->alias('a')
+            ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata]])
+            ->count();
+        if ($count > 0) {
+            $this->error(__('此库位正在盘点,暂无法调拨'), [], 403);
+        }
+        /****************************end*****************************************/
+
+
         if ($remove_agg) {
             $remove_agg = html_entity_decode($remove_agg);
             $remove_agg = array_filter(json_decode($remove_agg, true));
