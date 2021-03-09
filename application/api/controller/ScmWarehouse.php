@@ -3488,6 +3488,11 @@ class ScmWarehouse extends Scm
         $row = $this->_warehouse_transfer_order->where('id', $transfer_order_id)->find();
         1 != $row['status'] && $this->error(__('只有待审核状态才能审核'), [], 405);
 
+        if ($do_type == 2){
+            //审核通过变为调拨中
+            $do_type = 5;
+        }
+
         $res = $this->_warehouse_transfer_order->allowField(true)->isUpdate(true, ['id' => $transfer_order_id])->save(['status' => $do_type]);
         false === $res ? $this->error(__('审核失败'), [], 404) : $this->success('审核成功', [], 200);
     }
