@@ -932,24 +932,24 @@ class ScmWarehouse extends Scm
     public function in_stock_submit()
     {
         $do_type = $this->request->request('do_type');
-        empty($do_type) && $this->error(__('请选择操作类型'), [], 510);
+        empty($do_type) && $this->error(__('请选择操作类型'), '', 510);
         if ($do_type == 1) {
             $msg = '提交';
         } else {
             $msg = '保存';
         }
         $in_stock_number = $this->request->request("in_stock_number");
-        empty($in_stock_number) && $this->error(__('入库单号不能为空'), [], 510);
+        empty($in_stock_number) && $this->error(__('入库单号不能为空'), '', 510);
         $type_id = $this->request->request("type_id"); //入库分类
-        empty($type_id) && $this->error(__('请选择入库分类'), [], 510);
+        empty($type_id) && $this->error(__('请选择入库分类'), '', 510);
         $area_id = $this->request->request("area_id"); //入库库区id
-        empty($area_id) && $this->error(__('请选择入库库区'), [], 510);
+        empty($area_id) && $this->error(__('请选择入库库区'), '', 510);
         $warehouse_area_id = $this->request->request("warehouse_area_id"); //入库库位id
-        empty($warehouse_area_id) && $this->error(__('请选择入库库位'), [], 510);
+        empty($warehouse_area_id) && $this->error(__('请选择入库库位'), '', 510);
         $item_sku = $this->request->request("item_data");
-        empty($item_sku) && $this->error(__('sku集合不能为空！！'), [], 508);
+        empty($item_sku) && $this->error(__('sku集合不能为空！！'), '', 508);
         $item_sku = json_decode(htmlspecialchars_decode($item_sku), true);
-        empty($item_sku) && $this->error(__('sku集合不能为空'), [], 403);
+        empty($item_sku) && $this->error(__('sku集合不能为空'), '', 403);
         $item_sku = array_filter($item_sku);
 
         $in_stock_id = $this->request->request("in_stock_id"); //入库单ID，
@@ -963,11 +963,11 @@ class ScmWarehouse extends Scm
             $store_sku = Db::name('store_sku')->where('sku',$value1['sku'])->where('store_id',$warehouse_area_id)->find();
             //判断sku跟库位号是否有绑定关系
             if (empty($store_sku)) {
-               $this->error('sku:' . $value1['sku'] . '与'.$warehouse_area['coding'].'没有绑定关系，请先绑定', [], 503);
+               $this->error('sku:' . $value1['sku'] . '与'.$warehouse_area['coding'].'没有绑定关系，请先绑定', '', 503);
             }
             //有库容 入库数量大于库容不能继续
             if ($warehouse_area['volume'] && $value1['in_stock_num'] > $warehouse_area['volume']) {
-                $this->error('sku:' . $value1['sku'] . '入库数量大于'.$warehouse_area['coding'].'库容', [], 503);
+                $this->error('sku:' . $value1['sku'] . '入库数量大于'.$warehouse_area['coding'].'库容', '', 503);
             }
         }
         $this->_check->startTrans();
@@ -1257,7 +1257,7 @@ class ScmWarehouse extends Scm
         if ($result !== false) {
             $this->success($msg . '成功！！', '', 200);
         } else {
-            $this->error(__($msg . '失败'), [], 511);
+            $this->error(__($msg . '失败'), '', 511);
         }
     }
 
@@ -1395,7 +1395,7 @@ class ScmWarehouse extends Scm
         //获取条形码数据
         $bar_code_list = $this->_product_bar_code_item
             ->where(['in_stock_id' => $in_stock_id])
-            ->field('sku,code')
+            ->field('sku,code,location_id,location_code')
             ->order('id', 'desc')
             ->select();
         $bar_code_list = collection($bar_code_list)->toArray();
@@ -1407,6 +1407,7 @@ class ScmWarehouse extends Scm
             foreach ($bar_code_list as $k => $v) {
                 if ($v['sku'] == $sku) {
                     $v['is_new'] = 0;
+                    $v['location_area'] = Db::name('warehouse_area')->where('id',$v['location_id'])->value('coding');
                     $sku_agg[] = $v;
                 }
             }
