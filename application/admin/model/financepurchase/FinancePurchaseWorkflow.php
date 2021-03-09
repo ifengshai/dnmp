@@ -35,7 +35,7 @@ class FinancePurchaseWorkflow extends Model
         if (!$finance_purchase_id) return false;
         //金额大于30w 包含总监审核
         if ($total > 300000) {
-            $check_userids = [56, 50, 49, 154];
+            $check_userids = [56, 50, 1, 154];
             $check_usernickname = ['采购主管', '供应链总监', '总监', '财务经理'];
         } else {
             $check_userids = [56, 50, 154];
