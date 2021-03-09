@@ -3304,8 +3304,11 @@ class ScmWarehouse extends Scm
                 if ($transfer_order_item['sku'] != $detail['sku']) {
                     $this->error(__('条形码' . $v['code'] . '与当前调拨单sku不一致请确认后重试'), '', 546);
                 }
-                //判断当前扫码的sku是否在当前调出的库位
-                if ($transfer_order_item['call_out_site'] != $detail['location_code']) {
+                // //判断当前扫码的sku是否在当前调出的库位
+                // if ($transfer_order_item['call_out_site'] != $detail['location_code']) {
+                //     $this->error(__('条形码' . $v['code'] . '当前未在调出库位！！' . $transfer_order_item['call_out_site']), '', 546);
+                // }
+                if (strcmp($transfer_order_item['call_out_site'], $detail['location_code']) !== 0) {
                     $this->error(__('条形码' . $v['code'] . '当前未在调出库位！！' . $transfer_order_item['call_out_site']), '', 546);
                 }
                 //调入仓库位id
@@ -3430,8 +3433,11 @@ class ScmWarehouse extends Scm
         if ($transfer_order_item['sku'] != $detail['sku']) {
             $this->error(__('条形码' . $code . 'sku：'.$detail['sku'].'与当前调拨子单sku不一致请确认后重试'), '', 546);
         }
-        //判断当前扫码的sku是否在当前调出的库位
-        if ($transfer_order_item['call_out_site'] != $detail['location_code']) {
+        // //判断当前扫码的sku是否在当前调出的库位
+        // if ($transfer_order_item['call_out_site'] != $detail['location_code']) {
+        //     $this->error(__('条形码' . $code . '当前未在调出库位！！' . $transfer_order_item['call_out_site']), '', 546);
+        // }
+        if (strcmp($transfer_order_item['call_out_site'], $detail['location_code']) !== 0) {
             $this->error(__('条形码' . $code . '当前未在调出库位！！' . $transfer_order_item['call_out_site']), '', 546);
         }
         //判断当前扫码的sku是否在当前调出的库位
@@ -3468,7 +3474,7 @@ class ScmWarehouse extends Scm
             ->alias('a')
             ->join(['fa_store_house' => 'b'], 'a.store_id=b.id', 'left')
             ->join(['fa_warehouse_area' => 'c'], 'b.area_id=c.id')
-            ->field('a.sku,b.coding,c.name,a.id as location_id,c.id as area_id')
+            ->field('a.sku,b.coding,c.name,a.id as bind_id,c.id as area_id,a.store_id as location_id')
             ->where('is_del', 1)
             ->where($where)
             ->select();
