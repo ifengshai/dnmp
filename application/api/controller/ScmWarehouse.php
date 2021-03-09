@@ -3428,7 +3428,7 @@ class ScmWarehouse extends Scm
         $detail = $this->_product_bar_code_item->where('code', $code)->find();
         //判断调拨单子单sku是否与条形码sku一致
         if ($transfer_order_item['sku'] != $detail['sku']) {
-            $this->error(__('条形码' . $code . '与当前调拨子单sku不一致请确认后重试'), [], 546);
+            $this->error(__('条形码' . $code . 'sku：'.$detail['sku'].'与当前调拨子单sku不一致请确认后重试'), [], 546);
         }
         //判断当前扫码的sku是否在当前调出的库位
         if ($transfer_order_item['call_out_site'] != $detail['location_code']) {
@@ -3436,7 +3436,7 @@ class ScmWarehouse extends Scm
         }
         //判断当前扫码的sku是否在当前调出的库位
         if ($transfer_order_item['call_out_site'] != $location) {
-            $this->error(__('库位' . $location . '与调拨单' . $transfer_order_item['call_out_site'] . '不一致'), [], 546);
+            $this->error(__('扫码库位' . $location . '与调拨单库位' . $transfer_order_item['call_out_site'] . '不一致'), [], 546);
         }
         $this->success('扫码成功！！', '', 200);
     }
