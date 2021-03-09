@@ -34,7 +34,7 @@ class WaitPay extends Backend
                 $end = strtotime($createat[3].' '.$createat[4]);
                 $map['p.create_time'] = ['between', [$start,$end]];
             }
-            $map['p.status'] = 4;
+            $map['p.status'] = 2;
             $map['p.is_show'] = 1;
             unset($filter['create_time']);
             unset($filter['one_time-operate']);

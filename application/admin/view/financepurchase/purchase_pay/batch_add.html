@@ -1,0 +1,32 @@
+<form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+    <input type="hidden" name="row[ids]" value="{$ids}" />
+    <input id="status" class="form-control" readonly name="row[status]" value="0" type="hidden">
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('上传附件')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <div class="input-group">
+                <input id="c-upload_photos" data-rule="false" class="form-control" name="row[file]" type="text" value="">
+                <div class="input-group-addon no-border no-padding">
+                    <span><button type="button" id="plupload-upload_photos"   class="btn btn-danger plupload" data-input-id="c-upload_photos"  data-url="ajax/upload?dir=purchase_pay/pay_order" data-multiple="true" data-preview-id="p-upload_photos" data-maxsize="10M"><i class="fa fa-upload"></i> 上传附件</button></span>
+                </div>
+                <span class="msg-box n-right" for="c-upload_photos"></span>
+            </div>
+            <ul class="row list-inline plupload-preview" id="p-upload_photos"></ul>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">备注:</label>
+        <div class="col-xs-12 col-sm-8">
+            <textarea id="c-remark" class="form-control" name="row[remark]" style="height: 240px;">{$row.remark}</textarea>
+        </div>
+    </div>
+    
+
+    <div class="form-group layer-footer">
+        <label class="control-label col-xs-12 col-sm-2"></label>
+        <div class="col-xs-12 col-sm-8">
+            <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
+            <button type="submit" class="btn btn-success btn-status btn-embossed disabled">提交审核</button>
+        </div>
+    </div>
+</form>
