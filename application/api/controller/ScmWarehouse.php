@@ -3079,7 +3079,7 @@ class ScmWarehouse extends Scm
             } else {
                 $this->error(__('No rows were inserted'), '', 525);
             }
-        } else if (empty($number) && $id) { //编辑调拨单
+        } else if ($id) { //编辑调拨单
             empty($id) && $this->error(__('调拨单id不能为空！！'), '', 523);
             $warehouse_trans_order_detail = $this->_warehouse_transfer_order->where('id', $id)->find();
             $this->_warehouse_transfer_order->startTrans();
