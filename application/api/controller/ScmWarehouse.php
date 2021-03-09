@@ -914,7 +914,7 @@ class ScmWarehouse extends Scm
         0 != $row['status'] && $this->error(__('只有新建状态才能取消'), [], 504);
 
         //解除条形码绑定关系
-        $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['in_stock_id' => $in_stock_id])->save(['in_stock_id' => 0, 'location_code' => '']);
+        $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['in_stock_id' => $in_stock_id])->save(['in_stock_id' => 0, 'location_code' => '', 'location_code_id' => '', 'location_id' => '']);//解除库位号条形码绑定
 
         $res = $this->_in_stock->allowField(true)->isUpdate(true, ['id' => $in_stock_id])->save(['status' => 4]);
         $res ? $this->success('取消成功', [], 200) : $this->error(__('取消失败'), [], 505);
@@ -1068,7 +1068,10 @@ class ScmWarehouse extends Scm
                         //入库单移除条形码
                         if (!empty($value['remove_agg'])) {
                             $code_clear = [
-                                'in_stock_id' => 0
+                                'in_stock_id' => 0,
+                                'location_code' => '',
+                                'location_code_id' => '',
+                                'location_id' => '',//解除库位号条形码绑定
                             ];
                             $this->_product_bar_code_item->where(['code' => ['in', $value['remove_agg']]])->update($code_clear);
                         }
@@ -1088,7 +1091,7 @@ class ScmWarehouse extends Scm
                         } else {
                             $save_code_data['in_stock_id'] = $in_stock_id;
                             $save_code_data['location_code'] = $warehouse_area['coding']; //绑定条形码与库位号
-                            $save_code_data['location_code'] = $warehouse_area_id; //绑定条形码与库位号
+                            $save_code_data['location_code_id'] = $warehouse_area_id; //绑定条形码与库位号
                             $save_code_data['location_id'] = $area['id']; //绑定条形码与库区id
                             $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => ['in', $where_code]])->save($save_code_data);
                         }
