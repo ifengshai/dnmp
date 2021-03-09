@@ -837,7 +837,7 @@ class PurchasePay extends Backend
                             $post_id = $this->workflow->where(['finance_purchase_id' => $v['id'], 'flow_sort' => $flow_sort + 1])->value('post_id');
                             $this->workflowrecords->insert(['finance_purchase_id' => $v['id'], 'assignee_id' => $post_id, 'createtime' => time()]);
 
-                            Ding::cc_ding($post_id, '', '有一个新的付款申请单需要你审核', '有一个新的付款申请单需要你审核,申请单id为' . $v['id']);
+                            Ding::cc_ding($post_id, '', '魔晶系统有一个新的付款申请单需要你审核', '有一个新的付款申请单需要你审核,申请单id为' . $v['id']);
                         }
                     } else {
                         //更新主表状态
