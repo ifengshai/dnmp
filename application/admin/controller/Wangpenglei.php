@@ -616,23 +616,26 @@ class Wangpenglei extends Backend
             $map['a.sku'] = ['in', array_filter($skus)];
             $map['b.status'] = ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered']];
             $map['a.distribution_status'] = ['<>', 0]; //排除取消状态
-            $map['b.created_at'] = ['between', [strtotime('2020-01-01 00:00:00'), strtotime('2020-12-31 23:59:59')]]; //时间节点
+            $map['b.created_at'] = ['between', [strtotime('2020-12-01 00:00:00'), strtotime('2021-02-31 23:59:59')]]; //时间节点
             // $map['b.site'] = $v['site'];
 
             $sales_num = $this->orderitemprocess->alias('a')
                 ->where($map)
                 ->join(['fa_order' => 'b'], 'a.order_id = b.id')
                 ->count(1);
+
+            $map['b.created_at'] = ['between', [strtotime('2010-12-01 00:00:00'), strtotime('2021-03-31 23:59:59')]]; //时间节点
+            $all_sales_num = $this->orderitemprocess->alias('a')
+                ->where($map)
+                ->join(['fa_order' => 'b'], 'a.order_id = b.id')
+                ->count(1);
             $params[$k]['sku'] = $v;
-            // $sales_money = $this->orderitemprocess->alias('a')->where($map)
-            //     ->join(['fa_order' => 'b'], 'a.order_id = b.id')
-            //     ->join(['fa_order_item_option' => 'c'], 'a.order_id = c.order_id and a.option_id = c.id')
-            //     ->sum('c.base_row_total');
             $params[$k]['sales_num'] = $sales_num;
+            $params[$k]['all_sales_num'] = $all_sales_num;
             // $list[$k]['sales_money'] = $sales_money;
         }
-        $headlist = ['sku',  '销量'];
-        Excel::writeCsv($params, $headlist, 'sku销售额11');
+        $headlist = ['sku',  '近3个月销量', '历史累计销量'];
+        Excel::writeCsv($params, $headlist, 'sku销量');
         die;
     }
 
