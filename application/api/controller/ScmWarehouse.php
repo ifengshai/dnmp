@@ -963,11 +963,11 @@ class ScmWarehouse extends Scm
             $store_sku = Db::name('store_sku')->where('sku',$value1['sku'])->where('store_id',$warehouse_area_id)->find();
             //判断sku跟库位号是否有绑定关系
             if (empty($store_sku)) {
-                throw new Exception('sku:' . $value1['sku'] . '与'.$warehouse_area['coding'].'没有绑定关系，请先绑定');
+               $this->error('sku:' . $value1['sku'] . '与'.$warehouse_area['coding'].'没有绑定关系，请先绑定');
             }
             //有库容 入库数量大于库容不能继续
             if ($warehouse_area['volume'] && $value1['in_stock_num'] > $warehouse_area['volume']) {
-                throw new Exception('sku:' . $value1['sku'] . '入库数量大于'.$warehouse_area['coding'].'库容');
+                $this->error('sku:' . $value1['sku'] . '入库数量大于'.$warehouse_area['coding'].'库容');
             }
         }
         $this->_check->startTrans();
