@@ -2290,7 +2290,7 @@ class ScmWarehouse extends Scm
             if ($result !== false) {
                 $this->success('添加成功！！', '', 200);
             } else {
-                $this->error(__('No rows were inserted'), [], 525);
+                $this->error(__('No rows were inserted'), '', 525);
             }
         }
     }
