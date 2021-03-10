@@ -64,7 +64,7 @@ class StockHouse extends Backend
             if ($filter['area_coding']) {
                 $area_id = Db::name('warehouse_area')->where('coding',$filter['area_coding'])->value('id');
                 $all_store_id = Db::name('store_house')->where('area_id',$area_id)->column('id');
-                $map['store_id'] = ['in',$all_store_id];
+                $map['id'] = ['in',$all_store_id];
                 unset($filter['area_coding']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
