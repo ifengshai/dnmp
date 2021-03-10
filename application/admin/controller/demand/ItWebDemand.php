@@ -1114,7 +1114,7 @@ class ItWebDemand extends Backend
 //                                }
 //                            }
 //                        } else {
-                        if ($row['priority'] != $params['priority'] || $row['node_time'] != $params['node_time'] || $row['site_type'] != $add['site_type']) {
+                        if ($row['priority'] != $params['priority'] || $row['site_type'] != $add['site_type']) {
                             $add['web_designer_group'] = 0;
                             $add['web_designer_complexity'] = null;
                             $add['web_designer_expect_time'] = null;
