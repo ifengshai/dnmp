@@ -26,7 +26,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                     [
                         { checkbox: true },
                         { field: 'id', title: __('Id') },
-                        { field: 'coding', title: __('库区编码')},
+                        { field: 'coding', title: __('库区编码'), operate: 'like' },
                         { field: 'name', title: __('库区名称') , operate: 'like' },
                         {
                             field: 'type', title: __('库区类型'), custom: { 1: 'success', 2: 'danger' },
