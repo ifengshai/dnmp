@@ -33,7 +33,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                     [
                         { checkbox: true },
                         { field: 'id', title: __('Id') },
-                        { field: 'coding', title: __('Coding'), operate: 'like' },
                         {
                             field: 'shelf_number',
                             title: __('货架号'),
