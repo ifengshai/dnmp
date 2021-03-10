@@ -244,7 +244,7 @@ class PayOrder extends Backend
         $count2 = 0;
         foreach ($prepay as $k1=>$v1){
             $pay_rate = $v1['pay_rate']*100;
-            $prepay[$k1]['pay_rate'] = $pay_rate.'%';
+            $prepay[$k1]['pay_rate'] = $pay_rate;
             $total2 += $v1['pay_grand_total'];
             $count2++;
         }

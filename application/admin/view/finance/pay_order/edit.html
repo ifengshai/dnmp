@@ -182,7 +182,12 @@
                     <td>{$total2}</td>
                 </tr>
                 {/if}
-                {if $settle || $prepay}
+                {if $prepay || ($settle && $prepay)}
+                <tr>
+                    <td colspan="15" style="text-align: right">合计应付：</td>
+                    <td>{$total}</td>
+                </tr>
+                {else}
                 <tr>
                     <td colspan="12" style="text-align: right">合计应付：</td>
                     <td>{$total}</td>
