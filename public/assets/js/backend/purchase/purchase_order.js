@@ -373,19 +373,29 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
             })
 
 
+            //批量创建付款申请单
+            $(document).on('click', ".btn-pay-order", function () {
+                var ids = Table.api.selectedids(table);
+                if (ids.length <= 0) {
+                    Toastr.error('至少选择一个采购单');
+                    return false;
+                }
+                layer.load();
+                var url = 'financepurchase/purchase_pay/is_conditions';
+                Backend.api.ajax({
+                    url: url,
+                    data: {
+                        'ids':ids
+                    }
+                }, function (data, ret) {
+                    var url = 'financepurchase/purchase_pay/batch_add?ids=' + ids;
+                    Fast.api.open(url, __('创建付款申请单'), {area: ['900px', '500px']});
+                });
 
-            // // 导入按钮事件
-            // Upload.api.plupload($('.btn-import'), function (data, ret) {
-            //     Fast.api.ajax({
-            //         url: 'purchase/purchase_order/logistics_info_import',
-            //         data: { file: data.url },
-            //     }, function (data, ret) {
-            //         layer.msg('导入成功！！', { time: 3000, icon: 6 }, function () {
-            //             location.reload();
-            //         });
 
-            //     });
-            // });
+               
+                return false;
+            });
         },
         add: function () {
             Controller.api.bindevent();

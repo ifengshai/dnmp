@@ -1114,18 +1114,19 @@ class ItWebDemand extends Backend
 //                                }
 //                            }
 //                        } else {
-                        if ($row['priority'] != $params['priority'] || $row['node_time'] != $params['node_time'] || $row['site_type'] != $add['site_type']) {
-                            $add['web_designer_group'] = 0;
-                            $add['web_designer_complexity'] = null;
-                            $add['web_designer_expect_time'] = null;
-                            $add['phper_group'] = 0;
-                            $add['phper_complexity'] = null;
-                            $add['phper_expect_time'] = null;
-                            $add['app_group'] = 0;
-                            $add['app_complexity'] = null;
-                            $add['app_expect_time'] = null;
-                            $add['develop_finish_status'] = 1;
-                        }
+                        //产品要求  优先级  类型  被修改的时候  开发进度的记录会被重置功能去除
+//                        if ($row['priority'] != $params['priority'] || $row['site_type'] != $add['site_type']) {
+//                            $add['web_designer_group'] = 0;
+//                            $add['web_designer_complexity'] = null;
+//                            $add['web_designer_expect_time'] = null;
+//                            $add['phper_group'] = 0;
+//                            $add['phper_complexity'] = null;
+//                            $add['phper_expect_time'] = null;
+//                            $add['app_group'] = 0;
+//                            $add['app_complexity'] = null;
+//                            $add['app_expect_time'] = null;
+//                            $add['develop_finish_status'] = 1;
+//                        }
 //                        }
                         if ($params['pm_audit_status'] == 3) {
                             $add['status'] = 3;
