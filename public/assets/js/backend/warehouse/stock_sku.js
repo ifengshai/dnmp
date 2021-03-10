@@ -42,17 +42,17 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                         { field: 'storehouse.library_name', title: __('Storehouse.library_name'), operate: 'like' },
                         {
                             field: 'storehouse.status', title: __('库位状态'), custom: { 1: 'success', 2: 'danger' },
-                            searchList: { 1: '启用', 2: '禁用' },
+                            searchList: { 1: '启用', 2: '禁用' },operate: false,
                             formatter: Table.api.formatter.status
                         },
                         {
                             field: 'area_status', title: __('库区状态'), custom: { 1: 'success', 2: 'danger' },
-                            searchList: { 1: '启用', 2: '禁用' },
+                            searchList: { 1: '启用', 2: '禁用' },operate: false,
                             formatter: Table.api.formatter.status
                         },
                         {
-                            field: 'storehouse.status', title: __('SKU启用状态'), custom: { 1: 'success', 2: 'danger' },
-                            searchList: { 1: '启用', 2: '禁用' },
+                            field: 'is_open', title: __('SKU启用状态'), custom: { 1: 'success', 2: 'danger' },
+                            searchList: { 1: '启用', 2: '禁用' }, operate: false,
                             formatter: Table.api.formatter.status
                         },
                         { field: 'create_person', title: __('Create_person') },
