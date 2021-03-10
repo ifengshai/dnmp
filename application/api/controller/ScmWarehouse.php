@@ -2167,7 +2167,7 @@ class ScmWarehouse extends Scm
             empty($page_size) && $this->error(__('Page size can not be empty'), [], 523);
 
             //排除待盘点sku
-            $sku_arr = $this->_inventory_item->where('is_add', 0)->column('sku');
+            $sku_arr = $this->_inventory_item->alias('a')->join(['fa_inventory_list' => 'b'], 'a.inventory_id=b.id')->where(['b.status' => ['in', [0, 1]]])->column('sku');
             if ($sku_arr) {
                 $where['sku'] = ['not in', $sku_arr];
             }
