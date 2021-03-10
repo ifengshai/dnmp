@@ -428,12 +428,12 @@ class ScmWarehouse extends Scm
         //出库库位详情
         $warehouse_area = $this->_store_house->where('id', $warehouse_area_id)->find();
 
-         /*****************限制如果有盘点单未结束不能操作配货完成*******************/
+        /*****************限制如果有盘点单未结束不能操作配货完成*******************/
         //配货完成时判断
         //拣货区盘点时不能操作
         //查询条形码库区库位
         $count = $this->_inventory->alias('a')
-            ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => $warehouse_area['coding'],'area_id' => $warehouse_area['area_id']])
+            ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => $warehouse_area['coding'], 'area_id' => $warehouse_area['area_id']])
             ->count();
         if ($count > 0) {
             $this->error(__('此库位正在盘点,暂无法入库提交'), [], 403);
@@ -982,7 +982,7 @@ class ScmWarehouse extends Scm
         //拣货区盘点时不能操作
         //查询条形码库区库位
         $count = $this->_inventory->alias('a')
-            ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => $warehouse_area['coding'],'area_id' => $area_id])
+            ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => $warehouse_area['coding'], 'area_id' => $area_id])
             ->count();
         if ($count > 0) {
             $this->error(__('此库位正在盘点,暂无法入库提交'), [], 403);
@@ -2285,7 +2285,7 @@ class ScmWarehouse extends Scm
                         $list[$k]['distribution_occupy_stock'] = $item['distribution_occupy_stock'] ?? 0; //配货占用数量
 
                         // //查询库位实时库存
-                        $real_time_qty = $this->_product_bar_code_item->where(['location_id' => $v['area_id'], 'location_code' => $v['library_name'], 'library_status' => 1])->where("item_order_number=''")->count();
+                        $real_time_qty = $this->_product_bar_code_item->where(['sku' => $v['sku'], 'location_id' => $v['area_id'], 'location_code' => $v['library_name'], 'library_status' => 1])->where("item_order_number=''")->count();
                         $list[$k]['real_time_qty'] = $real_time_qty; //库区实时库存
                         $list[$k]['available_stock'] = $item['available_stock'] ?? 0; //可用库存
                         $list[$k]['remark'] = $v['remark']; //备注
@@ -2470,7 +2470,7 @@ class ScmWarehouse extends Scm
                     }
 
                     //查询库位实时库存
-                    $real_time_qty = $this->_product_bar_code_item->where(['location_id' => $v['area_id'], 'location_code' => $v['library_name'], 'library_status' => 1])->where("item_order_number=''")->count();
+                    $real_time_qty = $this->_product_bar_code_item->where(['sku' => $v['sku'],'location_id' => $v['area_id'], 'location_code' => $v['library_name'], 'library_status' => 1])->where("item_order_number=''")->count();
 
                     $save_data = [];
                     $save_data['is_add'] = $is_add; //是否盘点
@@ -2486,7 +2486,7 @@ class ScmWarehouse extends Scm
                     //     $save_data['sku'] = $v['sku']; //SKU
                     //     $this->_inventory_item->allowField(true)->isUpdate(false)->data($save_data)->save();
                     // } else {
-                        
+
                     // }
 
                     $this->_inventory_item->where(['inventory_id' => $inventory_id, 'sku' => $v['sku']])->update($save_data);
@@ -3085,7 +3085,7 @@ class ScmWarehouse extends Scm
                         $list[$k]['inarea_id'] = $v['inarea_id']; //调入库区id
                         $list[$k]['inarea'] = $v['inarea']; //调入库区
                         $list[$k]['call_in_site_id'] = $v['call_in_site_id']; //调入库位id
-                        $list[$k]['call_in_site'] = Db::name('store_house')->where('id',$v['call_in_site_id'])->value('coding'); //调入库位
+                        $list[$k]['call_in_site'] = Db::name('store_house')->where('id', $v['call_in_site_id'])->value('coding'); //调入库位
                     }
                     //添加明细表数据
                     $result = $this->_warehouse_transfer_order_item->allowField(true)->saveAll($list);
@@ -3142,7 +3142,7 @@ class ScmWarehouse extends Scm
                             $list[$k]['inarea_id'] = $v['inarea_id']; //调入库区id
                             $list[$k]['inarea'] = $v['inarea']; //调入库区
                             $list[$k]['call_in_site_id'] = $v['call_in_site_id']; //调入库位id
-                            $list[$k]['call_in_site'] = Db::name('store_house')->where('id',$v['call_in_site_id'])->value('coding'); //调入库位
+                            $list[$k]['call_in_site'] = Db::name('store_house')->where('id', $v['call_in_site_id'])->value('coding'); //调入库位
                         }
                         //添加明细表数据
                         $result1 = $this->_warehouse_transfer_order_item->allowField(true)->saveAll($list);
