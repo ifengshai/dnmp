@@ -122,8 +122,9 @@ class StockHouse extends Backend
                 }
                 $map['type'] = $type;
                 $map['coding'] = $params['coding'];
+                $map['area_id'] = $params['area_id'];
                 $count = $this->model->where($map)->count();
-                $count > 0 && $this->error('已存在此编码！');
+                $count > 0 && $this->error('当前库区已存在此编码！');
 
                 $result = false;
                 Db::startTrans();
