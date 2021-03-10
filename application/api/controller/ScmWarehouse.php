@@ -3092,12 +3092,7 @@ class ScmWarehouse extends Scm
                     if (!empty($is_complete)) {
                         $this->error(__('存在未调拨完成的子单，请调拨后重试'), '', 525);
                     }
-                    $res = $this->_warehouse_transfer_order->where('id', $id)->update(['status' => 6]);
-                    if ($res !== false) {
-                        $this->success('提交成功！！', '', 200);
-                    } else {
-                        $this->error(__('No rows were inserted'), '', 525);
-                    }
+                    $result = $this->_warehouse_transfer_order->where('id', $id)->update(['status' => 6]);
                 } else {
                     //type为0是保存 1是提交
                     0 != $warehouse_trans_order_detail['status'] && $this->error(__('只有新建状态才能编辑'), '', 405);
