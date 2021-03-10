@@ -182,7 +182,7 @@ class StockSku extends Backend
     public function edit($ids = null)
     {
         $row = $this->model->get($ids);
-        $row['area_id'] = Db::name('store_house')->where('id',$row['store_id'])->value('id');
+        $row['area_id'] = Db::name('store_house')->where('id',$row['store_id'])->value('area_id');
         if (!$row) {
             $this->error(__('No Results were found'));
         }
