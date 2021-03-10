@@ -42,7 +42,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                         { field: 'storehouse.library_name', title: __('Storehouse.library_name'), operate: 'like' },
                         {
                             field: 'storehouse.status', title: __('库位状态'), custom: { 1: 'success', 2: 'danger' },
-                            searchList: { 1: '启用', 2: '禁用' },operate: false,
+                            searchList: { 1: '启用', 2: '禁用' },
                             formatter: Table.api.formatter.status
                         },
                         {
