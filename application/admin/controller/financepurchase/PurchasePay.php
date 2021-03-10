@@ -76,8 +76,8 @@ class PurchasePay extends Backend
                 $map['purchase_id'] = ['in', $purchase_id];
                 unset($filter['purchase_number']);
             }
-
-
+            //创建人
+            $map['create_person'] = session('admin.nickname');
             unset($filter['label']);
             $this->request->get(['filter' => json_encode($filter)]);
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
