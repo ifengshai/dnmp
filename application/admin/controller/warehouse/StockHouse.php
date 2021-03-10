@@ -111,6 +111,7 @@ class StockHouse extends Backend
                 if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
                     $params[$this->dataLimitField] = $this->auth->id;
                 }
+                empty($params['coding']) && $this->error('库位编码不能为空！');
                 $warehouse_area = Db::name('warehouse_area')->where('id',$params['area_id'])->find();
                 if ($warehouse_area['status'] == 2){
                     $this->error('当前库区已禁用！');
