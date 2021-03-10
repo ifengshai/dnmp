@@ -2212,12 +2212,12 @@ class ScmWarehouse extends Scm
                 ->limit($offset, $limit)
                 ->select();
             $list = collection($list)->toArray();
-            foreach ($list as $k => $v) {
-                $count = $this->_item->where(['sku' => $v['sku'], 'is_del' => 1, 'is_open' => 1])->count();
-                if ($count < 1) {
-                    continue;
-                }
-            }
+            // foreach ($list as $k => $v) {
+            //     $count = $this->_item->where(['sku' => $v['sku'], 'is_del' => 1, 'is_open' => 1])->count();
+            //     if ($count < 1) {
+            //         continue;
+            //     }
+            // }
 
             //盘点单所需数据
             $info['list'] = !empty($list) ? $list : [];
