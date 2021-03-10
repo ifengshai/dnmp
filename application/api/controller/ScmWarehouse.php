@@ -914,7 +914,7 @@ class ScmWarehouse extends Scm
         0 != $row['status'] && $this->error(__('只有新建状态才能取消'), [], 504);
 
         //解除条形码绑定关系
-        $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['in_stock_id' => $in_stock_id])->save(['in_stock_id' => 0, 'location_code' => '', 'location_code_id' => '', 'location_id' => '']);//解除库位号条形码绑定
+        $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['in_stock_id' => $in_stock_id])->save(['in_stock_id' => 0, 'location_code' => '', 'location_code_id' => '', 'location_id' => '']); //解除库位号条形码绑定
 
         $res = $this->_in_stock->allowField(true)->isUpdate(true, ['id' => $in_stock_id])->save(['status' => 4]);
         $res ? $this->success('取消成功', [], 200) : $this->error(__('取消失败'), [], 505);
@@ -1071,7 +1071,7 @@ class ScmWarehouse extends Scm
                                 'in_stock_id' => 0,
                                 'location_code' => '',
                                 'location_code_id' => '',
-                                'location_id' => '',//解除库位号条形码绑定
+                                'location_id' => '', //解除库位号条形码绑定
                             ];
                             $this->_product_bar_code_item->where(['code' => ['in', $value['remove_agg']]])->update($code_clear);
                         }
@@ -2212,6 +2212,12 @@ class ScmWarehouse extends Scm
                 ->limit($offset, $limit)
                 ->select();
             $list = collection($list)->toArray();
+            // foreach ($list as $k => $v) {
+            //     $count = $this->_item->where(['sku' => $v['sku'], 'is_del' => 1, 'is_open' => 1])->count();
+            //     if ($count < 1) {
+            //         continue;
+            //     }
+            // }
 
             //盘点单所需数据
             $info['list'] = !empty($list) ? $list : [];
@@ -2290,7 +2296,7 @@ class ScmWarehouse extends Scm
             if ($result !== false) {
                 $this->success('添加成功！！', '', 200);
             } else {
-                $this->error(__('No rows were inserted'), [], 525);
+                $this->error(__('No rows were inserted'), '', 525);
             }
         }
     }
