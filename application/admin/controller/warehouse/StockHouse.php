@@ -198,6 +198,7 @@ class StockHouse extends Backend
                 if ($warehouse_area['status'] == 2){
                     $this->error('当前库区已禁用！');
                 }
+                empty($params['coding']) && $this->error('库位编码不能为空！');
                 //判断选择的库位是否已存在
                 if(2 == $type){
                     $params['location'] = $params['coding'];
@@ -206,8 +207,9 @@ class StockHouse extends Backend
                 $map['type'] = $type;
                 $map['coding'] = $params['coding'];
                 $map['id'] = ['<>', $row->id];
+                $map['area_id'] = $params['area_id'];
                 $count = $this->model->where($map)->count();
-                $count > 0 && $this->error('已存在此编码！');
+                $count > 0 && $this->error('当前库区已存在此编码！');
 
                 $result = false;
                 Db::startTrans();
