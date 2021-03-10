@@ -433,6 +433,19 @@ class ScmWarehouse extends Scm
         //出库库位详情
         $warehouse_area = $this->_store_house->where('id', $warehouse_area_id)->find();
 
+        /*****************限制如果有盘点单未结束不能操作配货完成*******************/
+        //配货完成时判断
+        //拣货区盘点时不能操作
+        //查询条形码库区库位
+        $count = $this->_inventory->alias('a')
+            ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => $warehouse_area['coding'], 'area_id' => $warehouse_area['area_id']])
+            ->count();
+        if ($count > 0) {
+            $this->error(__('此库位正在盘点,暂无法入库提交'), [], 403);
+        }
+        /****************************end*****************************************/
+
+
         $this->_out_stock->startTrans();
         $this->_out_stock_item->startTrans();
         $this->_product_bar_code_item->startTrans();
@@ -963,13 +976,26 @@ class ScmWarehouse extends Scm
         $item_sku = json_decode(htmlspecialchars_decode($item_sku), true);
         empty($item_sku) && $this->error(__('sku集合不能为空'), '', 403);
         $item_sku = array_filter($item_sku);
-
         $in_stock_id = $this->request->request("in_stock_id"); //入库单ID，
         $platform_id = $this->request->request("platform_id"); //站点，判断是否是新创建入库 还是 质检单入库
         $result = false;
 
         //入库库位详情
         $warehouse_area = $this->_store_house->where('id', $warehouse_area_id)->find();
+
+        /*****************限制如果有盘点单未结束不能操作配货完成*******************/
+        //配货完成时判断
+        //拣货区盘点时不能操作
+        //查询条形码库区库位
+        $count = $this->_inventory->alias('a')
+            ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => $warehouse_area['coding'], 'area_id' => $area_id])
+            ->count();
+        if ($count > 0) {
+            $this->error(__('此库位正在盘点,暂无法入库提交'), [], 403);
+        }
+        /****************************end*****************************************/
+
+
         $area = $this->_warehouse_area->where('id', $area_id)->find();
         foreach ($item_sku as $key1 => $value1) {
             $store_sku = Db::name('store_sku')->where('sku', $value1['sku'])->where('store_id', $warehouse_area_id)->find();
@@ -2265,7 +2291,7 @@ class ScmWarehouse extends Scm
                         $list[$k]['distribution_occupy_stock'] = $item['distribution_occupy_stock'] ?? 0; //配货占用数量
 
                         // //查询库位实时库存
-                        $real_time_qty = $this->_product_bar_code_item->where(['location_id' => $v['area_id'], 'location_code' => $v['library_name'], 'library_status' => 1])->where("item_order_number=''")->count();
+                        $real_time_qty = $this->_product_bar_code_item->where(['sku' => $v['sku'], 'location_id' => $v['area_id'], 'location_code' => $v['library_name'], 'library_status' => 1])->where("item_order_number=''")->count();
                         $list[$k]['real_time_qty'] = $real_time_qty; //库区实时库存
                         $list[$k]['available_stock'] = $item['available_stock'] ?? 0; //可用库存
                         $list[$k]['remark'] = $v['remark']; //备注
@@ -2439,6 +2465,9 @@ class ScmWarehouse extends Scm
                 // $where_code = [];
                 // $sku_in = [];
                 foreach (array_filter($item_sku) as $k => $v) {
+                    if (!$v['sku']) {
+                        continue;
+                    }
                     $item_map['sku'] = $v['sku'];
                     $item_map['is_del'] = 1;
                     $sku_item = $this->_item->where($item_map)->field('stock,available_stock,distribution_occupy_stock')->find();
@@ -2447,7 +2476,7 @@ class ScmWarehouse extends Scm
                     }
 
                     //查询库位实时库存
-                    $real_time_qty = $this->_product_bar_code_item->where(['location_id' => $v['area_id'], 'location_code' => $v['library_name'], 'library_status' => 1])->where("item_order_number=''")->count();
+                    $real_time_qty = $this->_product_bar_code_item->where(['sku' => $v['sku'],'location_id' => $v['area_id'], 'location_code' => $v['library_name'], 'library_status' => 1])->where("item_order_number=''")->count();
 
                     $save_data = [];
                     $save_data['is_add'] = $is_add; //是否盘点
@@ -2455,17 +2484,19 @@ class ScmWarehouse extends Scm
                     $save_data['error_qty'] = $save_data['inventory_qty'] - $real_time_qty; //误差数量
                     $save_data['remark'] = $v['remark']; //备注
                     $save_data['real_time_qty'] = $real_time_qty; //实时库存即为库位实时库存
-                    $count = $this->_inventory_item->where(['inventory_id' => $inventory_id, 'sku' => $v['sku']])->count();
+                    // $count = $this->_inventory_item->where(['inventory_id' => $inventory_id, 'sku' => $v['sku']])->count();
                     $save_data['sku_agg'] = serialize($v['sku_agg']); //SKU 条形码集合 
                     $save_data['remove_agg'] = serialize($v['remove_agg']); //SKU需移除的条形码集合
-                    if ($count > 0) {
-                        $save_data['inventory_id'] = $inventory_id; //SKU
-                        $save_data['sku'] = $v['sku']; //SKU
-                        $this->_inventory_item->allowField(true)->isUpdate(false)->data($save_data)->save();
-                    } else {
-                        $this->_inventory_item->where(['inventory_id' => $inventory_id, 'sku' => $v['sku']])->update($save_data);
-                    }
-                    //                    $this->_inventory_item->where(['inventory_id' => $inventory_id, 'sku' => $v['sku']])->update($save_data);
+                    // if ($count < 1) {
+                    //     $save_data['inventory_id'] = $inventory_id; //SKU
+                    //     $save_data['sku'] = $v['sku']; //SKU
+                    //     $this->_inventory_item->allowField(true)->isUpdate(false)->data($save_data)->save();
+                    // } else {
+
+                    // }
+
+                    $this->_inventory_item->where(['inventory_id' => $inventory_id, 'sku' => $v['sku']])->update($save_data);
+
                     // //盘点单绑定条形码数组组装
                     // foreach ($v['sku_agg'] as $k_code => $v_code) {
                     //     if (!empty($v_code)) {
@@ -3060,7 +3091,7 @@ class ScmWarehouse extends Scm
                         $list[$k]['inarea_id'] = $v['inarea_id']; //调入库区id
                         $list[$k]['inarea'] = $v['inarea']; //调入库区
                         $list[$k]['call_in_site_id'] = $v['call_in_site_id']; //调入库位id
-                        $list[$k]['call_in_site'] = Db::name('store_house')->where('id',$v['call_in_site_id'])->value('coding'); //调入库位
+                        $list[$k]['call_in_site'] = Db::name('store_house')->where('id', $v['call_in_site_id'])->value('coding'); //调入库位
                     }
                     //添加明细表数据
                     $result = $this->_warehouse_transfer_order_item->allowField(true)->saveAll($list);
@@ -3117,7 +3148,7 @@ class ScmWarehouse extends Scm
                             $list[$k]['inarea_id'] = $v['inarea_id']; //调入库区id
                             $list[$k]['inarea'] = $v['inarea']; //调入库区
                             $list[$k]['call_in_site_id'] = $v['call_in_site_id']; //调入库位id
-                            $list[$k]['call_in_site'] = Db::name('store_house')->where('id',$v['call_in_site_id'])->value('coding'); //调入库位
+                            $list[$k]['call_in_site'] = Db::name('store_house')->where('id', $v['call_in_site_id'])->value('coding'); //调入库位
                         }
                         //添加明细表数据
                         $result1 = $this->_warehouse_transfer_order_item->allowField(true)->saveAll($list);
