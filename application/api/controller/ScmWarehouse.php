@@ -3474,7 +3474,7 @@ class ScmWarehouse extends Scm
             ->alias('a')
             ->join(['fa_store_house' => 'b'], 'a.store_id=b.id', 'left')
             ->join(['fa_warehouse_area' => 'c'], 'b.area_id=c.id')
-            ->field('a.sku,b.coding,c.name,a.id as bind_id,c.id as area_id,a.store_id as location_id')
+            ->field('a.sku,b.coding,c.name,a.id as bind_id,c.id as area_id,a.store_id as location_id,c.coding as area')
             ->where('is_del', 1)
             ->where($where)
             ->select();
