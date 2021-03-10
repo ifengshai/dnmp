@@ -2478,7 +2478,7 @@ class ScmWarehouse extends Scm
                     $count = $this->_inventory_item->where(['inventory_id' => $inventory_id, 'sku' => $v['sku']])->count();
                     $save_data['sku_agg'] = serialize($v['sku_agg']); //SKU 条形码集合 
                     $save_data['remove_agg'] = serialize($v['remove_agg']); //SKU需移除的条形码集合
-                    if ($count > 0) {
+                    if ($count < 1) {
                         $save_data['inventory_id'] = $inventory_id; //SKU
                         $save_data['sku'] = $v['sku']; //SKU
                         $this->_inventory_item->allowField(true)->isUpdate(false)->data($save_data)->save();
