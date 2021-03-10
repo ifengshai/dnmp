@@ -3099,6 +3099,7 @@ class ScmWarehouse extends Scm
                         $this->error(__('存在未调拨完成的子单，请调拨后重试'), '', 525);
                     }
                     $res = $this->_warehouse_transfer_order->where('id', $id)->update(['status' => 6]);
+                    dump($res);
                     if ($res !== false) {
                         $this->success('提交成功！！', '', 200);
                     } else {
