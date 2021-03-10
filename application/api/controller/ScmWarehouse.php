@@ -3284,6 +3284,7 @@ class ScmWarehouse extends Scm
         $this->_warehouse_transfer_order_item->startTrans();
         try {
             if ($do_type == 1) {
+                $warehouse_transfer_order_item_code->where('transfer_order_item_id', $transfer_order_item_id)->delete();
                 $this->_warehouse_transfer_order_item->where('id', $transfer_order_item_id)->update(['status' => $do_type]);
                 $msg = '调拨成功';
             } else {
