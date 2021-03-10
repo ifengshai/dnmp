@@ -369,7 +369,12 @@ class ScmWarehouse extends Scm
                 'item_data' => []
             ];
         }
-
+        $kuqu_kuwei = $this->_product_bar_code_item->where(['out_stock_id' => $out_stock_id])->find();
+        //出库单所需数据
+        $info['location_id'] = $kuqu_kuwei['location_id'];
+        $info['location_area'] = Db::name('warehouse_area')->where('id', $kuqu_kuwei['location_id'])->value('coding');
+        $info['location_code_id'] = $kuqu_kuwei['location_code_id'];
+        $info['location_code'] = $kuqu_kuwei['location_code'];
         //获取出库分类数据
         $type_list = $this->_out_stock_type
             ->field('id,name')
@@ -690,7 +695,8 @@ class ScmWarehouse extends Scm
                 $this->_product_bar_code_item
                     ->allowField(true)
                     ->isUpdate(true, ['out_stock_id' => $out_stock_id])
-                    ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2, 'location_code' => '', 'location_code_id' => '', 'location_id' => '']); //出库解除库位号与商品条形码绑定
+                    // ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2, 'location_code' => '', 'location_code_id' => '', 'location_id' => '']); //出库解除库位号与商品条形码绑定
+                    ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2]); //出库解除库位号与商品条形码绑定
 
                 //计算出库成本 
                 $financecost = new \app\admin\model\finance\FinanceCost();
