@@ -2465,6 +2465,9 @@ class ScmWarehouse extends Scm
                 // $where_code = [];
                 // $sku_in = [];
                 foreach (array_filter($item_sku) as $k => $v) {
+                    if (!$v['sku']) {
+                        continue;
+                    }
                     $item_map['sku'] = $v['sku'];
                     $item_map['is_del'] = 1;
                     $sku_item = $this->_item->where($item_map)->field('stock,available_stock,distribution_occupy_stock')->find();
@@ -2481,17 +2484,19 @@ class ScmWarehouse extends Scm
                     $save_data['error_qty'] = $save_data['inventory_qty'] - $real_time_qty; //误差数量
                     $save_data['remark'] = $v['remark']; //备注
                     $save_data['real_time_qty'] = $real_time_qty; //实时库存即为库位实时库存
-                    $count = $this->_inventory_item->where(['inventory_id' => $inventory_id, 'sku' => $v['sku']])->count();
+                    // $count = $this->_inventory_item->where(['inventory_id' => $inventory_id, 'sku' => $v['sku']])->count();
                     $save_data['sku_agg'] = serialize($v['sku_agg']); //SKU 条形码集合 
                     $save_data['remove_agg'] = serialize($v['remove_agg']); //SKU需移除的条形码集合
-                    if ($count < 1) {
-                        $save_data['inventory_id'] = $inventory_id; //SKU
-                        $save_data['sku'] = $v['sku']; //SKU
-                        $this->_inventory_item->allowField(true)->isUpdate(false)->data($save_data)->save();
-                    } else {
-                        $this->_inventory_item->where(['inventory_id' => $inventory_id, 'sku' => $v['sku']])->update($save_data);
-                    }
-                    //                    $this->_inventory_item->where(['inventory_id' => $inventory_id, 'sku' => $v['sku']])->update($save_data);
+                    // if ($count < 1) {
+                    //     $save_data['inventory_id'] = $inventory_id; //SKU
+                    //     $save_data['sku'] = $v['sku']; //SKU
+                    //     $this->_inventory_item->allowField(true)->isUpdate(false)->data($save_data)->save();
+                    // } else {
+                        
+                    // }
+
+                    $this->_inventory_item->where(['inventory_id' => $inventory_id, 'sku' => $v['sku']])->update($save_data);
+
                     // //盘点单绑定条形码数组组装
                     // foreach ($v['sku_agg'] as $k_code => $v_code) {
                     //     if (!empty($v_code)) {
