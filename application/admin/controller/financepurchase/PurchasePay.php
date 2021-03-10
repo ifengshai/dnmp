@@ -63,6 +63,9 @@ class PurchasePay extends Backend
                 //查询审批记录表我的待审核
                 $finance_purchase_id = Db::name('finance_purchase_workflow_records')->where(['assignee_id' => $userid, 'audit_status' => 0])->column('finance_purchase_id');
                 $map['id'] = ['in', $finance_purchase_id];
+            } else {
+                 //创建人
+                $map['create_person'] = session('admin.nickname');
             }
 
             if ($filter['status'] === 0) {
@@ -76,8 +79,7 @@ class PurchasePay extends Backend
                 $map['purchase_id'] = ['in', $purchase_id];
                 unset($filter['purchase_number']);
             }
-            //创建人
-            $map['create_person'] = session('admin.nickname');
+           
             unset($filter['label']);
             $this->request->get(['filter' => json_encode($filter)]);
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
