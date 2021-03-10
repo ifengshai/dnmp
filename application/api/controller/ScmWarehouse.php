@@ -428,6 +428,19 @@ class ScmWarehouse extends Scm
         //出库库位详情
         $warehouse_area = $this->_store_house->where('id', $warehouse_area_id)->find();
 
+         /*****************限制如果有盘点单未结束不能操作配货完成*******************/
+        //配货完成时判断
+        //拣货区盘点时不能操作
+        //查询条形码库区库位
+        $count = $this->_inventory->alias('a')
+            ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => $warehouse_area['coding'],'area_id' => $warehouse_area['area_id']])
+            ->count();
+        if ($count > 0) {
+            $this->error(__('此库位正在盘点,暂无法入库提交'), [], 403);
+        }
+        /****************************end*****************************************/
+
+
         $this->_out_stock->startTrans();
         $this->_out_stock_item->startTrans();
         $this->_product_bar_code_item->startTrans();
@@ -957,13 +970,26 @@ class ScmWarehouse extends Scm
         $item_sku = json_decode(htmlspecialchars_decode($item_sku), true);
         empty($item_sku) && $this->error(__('sku集合不能为空'), '', 403);
         $item_sku = array_filter($item_sku);
-
         $in_stock_id = $this->request->request("in_stock_id"); //入库单ID，
         $platform_id = $this->request->request("platform_id"); //站点，判断是否是新创建入库 还是 质检单入库
         $result = false;
 
         //入库库位详情
         $warehouse_area = $this->_store_house->where('id', $warehouse_area_id)->find();
+
+        /*****************限制如果有盘点单未结束不能操作配货完成*******************/
+        //配货完成时判断
+        //拣货区盘点时不能操作
+        //查询条形码库区库位
+        $count = $this->_inventory->alias('a')
+            ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => $warehouse_area['coding'],'area_id' => $area_id])
+            ->count();
+        if ($count > 0) {
+            $this->error(__('此库位正在盘点,暂无法入库提交'), [], 403);
+        }
+        /****************************end*****************************************/
+
+
         $area = $this->_warehouse_area->where('id', $area_id)->find();
         foreach ($item_sku as $key1 => $value1) {
             $store_sku = Db::name('store_sku')->where('sku', $value1['sku'])->where('store_id', $warehouse_area_id)->find();
