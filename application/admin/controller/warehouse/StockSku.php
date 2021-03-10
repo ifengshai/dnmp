@@ -122,6 +122,7 @@ class StockSku extends Backend
                 if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
                     $params[$this->dataLimitField] = $this->auth->id;
                 }
+                empty($params['sku']) && $this->error('sku不能为空！');
                 //判断选择的库位是否已存在
                 $map['store_id'] = $params['store_id'];
                 $map['is_del'] = 1;
@@ -198,7 +199,7 @@ class StockSku extends Backend
             $params = $this->request->post("row/a");
             if ($params) {
                 $params = $this->preExcludeFields($params);
-
+                empty($params['sku']) && $this->error('sku不能为空！');
                 //判断选择的库位是否已存在
                 $map['store_id'] = $params['store_id'];
                 $map['id'] = ['<>', $row->id];
