@@ -18,7 +18,7 @@ use think\Request;
 
 class PurchasePay extends Backend
 {
-    protected $noNeedRight = ['is_conditions', 'batch_add'];
+    protected $noNeedRight = ['is_conditions', 'batch_add', 'check_detail'];
 
     protected $model = null;
 
@@ -64,7 +64,7 @@ class PurchasePay extends Backend
                 $finance_purchase_id = Db::name('finance_purchase_workflow_records')->where(['assignee_id' => $userid, 'audit_status' => 0])->column('finance_purchase_id');
                 $map['id'] = ['in', $finance_purchase_id];
             } else {
-                 //创建人
+                //创建人
                 $map['create_person'] = session('admin.nickname');
             }
 
@@ -79,7 +79,7 @@ class PurchasePay extends Backend
                 $map['purchase_id'] = ['in', $purchase_id];
                 unset($filter['purchase_number']);
             }
-           
+
             unset($filter['label']);
             $this->request->get(['filter' => json_encode($filter)]);
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
