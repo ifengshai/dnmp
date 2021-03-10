@@ -1411,7 +1411,7 @@ class OrderData extends Backend
             }
         }
 
-        if ($params['lens_number'] == '23302000' || $params['lens_number'] == '22306000' || $params['lens_number'] == '22305000') {
+        if ($params['lens_number'] == '22306000' || $params['lens_number'] == '22305000' || $params['lens_number'] == '22304000') {
             /**
              * 1.71防蓝光 现片
              * SPH:0.00～-12.00 CYL:0.00～-2.00（不含-0.25）
