@@ -3054,7 +3054,7 @@ class ScmWarehouse extends Scm
                         $list[$k]['inarea_id'] = $v['inarea_id']; //调入库区id
                         $list[$k]['inarea'] = $v['inarea']; //调入库区
                         $list[$k]['call_in_site_id'] = $v['call_in_site_id']; //调入库位id
-                        $list[$k]['call_in_site'] = $v['call_in_site']; //调入库位
+                        $list[$k]['call_in_site'] = Db::name('store_house')->where('id',$v['call_in_site_id'])->value('coding'); //调入库位
                     }
                     //添加明细表数据
                     $result = $this->_warehouse_transfer_order_item->allowField(true)->saveAll($list);
@@ -3111,7 +3111,7 @@ class ScmWarehouse extends Scm
                             $list[$k]['inarea_id'] = $v['inarea_id']; //调入库区id
                             $list[$k]['inarea'] = $v['inarea']; //调入库区
                             $list[$k]['call_in_site_id'] = $v['call_in_site_id']; //调入库位id
-                            $list[$k]['call_in_site'] = $v['call_in_site']; //调入库位
+                            $list[$k]['call_in_site'] = Db::name('store_house')->where('id',$v['call_in_site_id'])->value('coding'); //调入库位
                         }
                         //添加明细表数据
                         $result1 = $this->_warehouse_transfer_order_item->allowField(true)->saveAll($list);
