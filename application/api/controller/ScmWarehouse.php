@@ -2247,7 +2247,7 @@ class ScmWarehouse extends Scm
                 $result = $this->_inventory->allowField(true)->save($arr);
                 if ($result) {
                     $list = [];
-                    foreach ($item_sku as $k => $v) {
+                    foreach (array_filter($item_sku) as $k => $v) {
                         $list[$k]['inventory_id'] = $this->_inventory->id;
                         $list[$k]['sku'] = $v['sku'];
                         $item = $this->_item->field('name,stock,available_stock,distribution_occupy_stock')->where('sku', $v['sku'])->find();
