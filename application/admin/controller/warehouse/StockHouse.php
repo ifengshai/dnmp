@@ -111,7 +111,10 @@ class StockHouse extends Backend
                 if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
                     $params[$this->dataLimitField] = $this->auth->id;
                 }
-
+                $warehouse_area = Db::name('warehouse_area')->where('id',$params['area_id'])->find();
+                if ($warehouse_area['status'] == 2){
+                    $this->error('当前库区已禁用！');
+                }
                 //判断选择的库位是否已存在
                 if(2 == $type){
                     $params['location'] = $params['coding'];
@@ -189,7 +192,10 @@ class StockHouse extends Backend
             $params = $this->request->post("row/a");
             if ($params) {
                 $params = $this->preExcludeFields($params);
-
+                $warehouse_area = Db::name('warehouse_area')->where('id',$params['area_id'])->find();
+                if ($warehouse_area['status'] == 2){
+                    $this->error('当前库区已禁用！');
+                }
                 //判断选择的库位是否已存在
                 if(2 == $type){
                     $params['location'] = $params['coding'];
