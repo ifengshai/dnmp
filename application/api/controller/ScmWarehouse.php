@@ -2745,16 +2745,9 @@ class ScmWarehouse extends Scm
                 }
 
                 //重新绑定条形码
+                $sku_code = [];
                 if ($v['sku_agg']) {
                     $sku_code = array_unique(array_column(unserialize($v['sku_agg']), 'code'));
-                    $this->_product_bar_code_item
-                        ->where(['code' => ['in', $sku_code], 'location_code' => $v['library_name'], 'area_id' => $v['area_id'], 'sku' => $v['sku']])
-                        ->update(['inventory_id' => $inventory_id, 'library_status' => 1]);
-
-                    //不在此数组的条形码改为出库状态
-                    $this->_product_bar_code_item
-                        ->where(['code' => ['not in', $sku_code], 'location_code' => $v['library_name'], 'area_id' => $v['area_id'], 'sku' => $v['sku']])
-                        ->update(['library_status' => 2]);
                 }
 
                 //入库记录
@@ -2773,7 +2766,7 @@ class ScmWarehouse extends Scm
                     if ($sku_code) {
                         $this->_product_bar_code_item
                             ->where(['code' => ['in', $sku_code], 'location_code' => $v['library_name'], 'area_id' => $v['area_id'], 'sku' => $v['sku'], 'in_stock_id' => 0])
-                            ->update(['in_stock_id' => $this->_in_stock->id, 'in_stock_time' => date('Y-m-d H:i:s')]);
+                            ->update(['in_stock_id' => $this->_in_stock->id, 'in_stock_time' => date('Y-m-d H:i:s'), 'inventory_id' => $inventory_id, 'library_status' => 1]);
                     }
 
                     //添加入库信息
@@ -2805,11 +2798,9 @@ class ScmWarehouse extends Scm
                     $outstock_res = $this->_out_stock->isUpdate(false)->allowField(true)->data($params, true)->save();
 
                     //更新如果出库单id为空 添加出库单id
-                    if ($sku_code) {
-                        $this->_product_bar_code_item
-                            ->where(['code' => ['not in', $sku_code], 'location_code' => $v['library_name'], 'area_id' => $v['area_id'], 'sku' => $v['sku'], 'out_stock_id' => 0])
-                            ->update(['out_stock_id' => $this->_out_stock->id, 'out_stock_time' => date('Y-m-d H:i:s')]);
-                    }
+                    $this->_product_bar_code_item
+                        ->where(['code' => ['not in', $sku_code], 'location_code' => $v['library_name'], 'area_id' => $v['area_id'], 'sku' => $v['sku'], 'out_stock_id' => 0])
+                        ->update(['out_stock_id' => $this->_out_stock->id, 'out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2, 'inventory_id' => $inventory_id]);
 
                     //添加出库信息
                     if ($outstock_res !== false) {
