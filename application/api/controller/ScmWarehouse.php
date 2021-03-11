@@ -2475,7 +2475,7 @@ class ScmWarehouse extends Scm
                     //查询库位实时库存
                     // $real_time_qty = $this->_product_bar_code_item->where(['sku' => $v['sku'],'location_id' => $v['area_id'], 'location_code' => $v['library_name'], 'library_status' => 1])->where("item_order_number=''")->count();
 
-                    $item_list = $this->_inventory_item->where(['inventory_id' => $inventory_id, 'sku' => $v['sku'], 'area_id' => $v['area_id'], 'library_name' => $v['library_name'],])->find();
+                    $item_list = $this->_inventory_item->where(['inventory_id' => $inventory_id, 'sku' => $v['sku']])->find();
                     $save_data = [];
                     $save_data['is_add'] = $is_add; //是否盘点
                     $save_data['inventory_qty'] = $v['inventory_qty'] ?? 0; //盘点数量
