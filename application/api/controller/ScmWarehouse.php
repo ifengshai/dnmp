@@ -2162,12 +2162,11 @@ class ScmWarehouse extends Scm
             $list[$key]['show_detail'] = in_array($value['check_status'], [2, 3, 4]) ? 1 : 0; //详情按钮
             //计算已盘点数量
             $count = $this->_inventory_item->where(['inventory_id' => $value['id']])->count();
-            $sum = $this->_inventory_item->where(['inventory_id' => $value['id'], 'is_add' => 1])->count();
-
+           
             //查询盘点的库区
             $warehouse_name = $this->_inventory_item->where(['inventory_id' => $value['id']])->group('warehouse_name')->column('warehouse_name');
 
-            $list[$key]['sum_count'] = $sum . '/' . $count; //需要fa_inventory_item表数据加和
+            $list[$key]['sum_count'] = $count; //需要fa_inventory_item表数据加和
             $list[$key]['warehouse_name'] = implode(',', $warehouse_name); //拼接库区
         }
 
