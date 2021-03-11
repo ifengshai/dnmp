@@ -2577,7 +2577,7 @@ class ScmWarehouse extends Scm
             //审核通过 生成出、入库单 并同步库存
             if ($data['check_status'] == 2) {
                 $infos = $this->_inventory_item->where(['inventory_id' => $inventory_id])
-                    ->field('sku,error_qty,inventory_id,area_id,library_name')
+                    ->field('sku,error_qty,inventory_id,area_id,library_name,sku_agg')
                     ->select();
                 $infos = collection($infos)->toArray();
                 $sku_code = [];
