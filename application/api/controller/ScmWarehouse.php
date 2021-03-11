@@ -3362,6 +3362,7 @@ class ScmWarehouse extends Scm
                 //生成一条子调拨单的出库记录
                 $res = $warehouse_transfer_order_item_code->insert($arr);
             }
+            $this->_warehouse_transfer_order_item->where('id', $transfer_order_item_id)->update(['num' => count(array_filter($sku_agg))]);
             if ($remove_agg) {
                 //调拨单移除条形码
                 foreach ($remove_agg as $k => $v) {
