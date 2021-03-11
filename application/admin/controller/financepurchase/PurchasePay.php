@@ -68,6 +68,14 @@ class PurchasePay extends Backend
                 $map['create_person'] = session('admin.nickname');
             }
 
+            if ($filter['check_user_id']) {
+                //查询审批记录表我的待审核
+                $finance_purchase_id = Db::name('finance_purchase_workflow_records')->where(['assignee_id' => $filter['check_user_id'], 'audit_status' => 0])->column('finance_purchase_id');
+                $map['id'] = ['in', $finance_purchase_id];
+                unset($filter['status']);
+            }
+
+
             if ($filter['status'] === 0) {
                 $map['status'] = $filter['status'];
                 unset($filter['status']);
@@ -95,8 +103,13 @@ class PurchasePay extends Backend
                 ->limit($offset, $limit)
                 ->select();
             $list = collection($list)->toArray();
+            $admin = new \app\admin\model\Admin();
+            $userlist = $admin->where(['status' => 'normal'])->column('nickname','id');
             foreach ($list as $k => $v) {
                 $list[$k]['supplier_name'] = $this->supplier->where('id', $v['supplier_id'])->value('supplier_name');
+                //查询待审核人
+                $userid = Db::name('finance_purchase_workflow_records')->where(['finance_purchase_id'=> $v['id'], 'audit_status' => 0])->value('assignee_id');
+                $list[$k]['check_user_nickname'] = $userlist[$userid];
             }
             $result = array("total" => $total, "rows" => $list);
             return json($result);
