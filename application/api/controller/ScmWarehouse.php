@@ -2401,6 +2401,8 @@ class ScmWarehouse extends Scm
     {
         $do_type = $this->request->request('do_type');
         $item_sku = $this->request->request("item_data");
+
+        file_put_contents('/www/wwwroot/mojing/runtime/log/test.log', serialize($item_sku) . "\r\n", FILE_APPEND);
         empty($item_sku) && $this->error(__('sku集合不能为空！！'), [], 508);
         $item_sku = json_decode(htmlspecialchars_decode($item_sku), true);
         empty($item_sku) && $this->error(__('sku集合不能为空'), [], 403);
