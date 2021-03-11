@@ -31,6 +31,10 @@ class StockSku extends Model
     {
         return $this->belongsTo('app\admin\model\warehouse\StockHouse', 'store_id', 'id', [], 'LEFT')->setEagerlyType(0);
     }
+    public function storehouse1()
+    {
+        return $this->belongsTo('app\admin\model\warehouse\StockHouse', 'store_id', 'id', [], 'RIGHT')->setEagerlyType(0);
+    }
 
     //关联商品表
     public function item()
