@@ -23,7 +23,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                     [
                         { checkbox: true },
                         { field: 'id', title: __('Id') },
-                        { field: 'storehouse.coding', title: __('库位编码'), operate: 'like' },
+                        { field: 'storehouse1.coding', title: __('库位编码'), operate: 'like' },
                         { field: 'area_code', title: __('库区编码'), operate: 'like' },
                         { field: 'sku', title: __('Sku'), operate: 'like' },
                         { field: 'name', title: __('商品名称'), operate: false},
