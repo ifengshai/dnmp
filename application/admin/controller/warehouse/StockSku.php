@@ -121,15 +121,20 @@ class StockSku extends Backend
                     $params[$this->dataLimitField] = $this->auth->id;
                 }
                 empty($params['sku']) && $this->error('sku不能为空！');
+
+                $store_house = Db::name('store_house')->where('id',$params['store_id'])->find();
+                $warehouse_area = Db::name('warehouse_area')->where('id',$store_house['area_id'])->find();
+                //拣货货区一个库位号只能有一个sku
+                if ($warehouse_area['type'] !== 2){
+                    $map['sku'] = $params['sku'];
+                }
                 //判断选择的库位是否已存在
-                $map['store_id'] = $params['store_id'];
+                $map['store_id'] = $params['store_id'];//库位id
                 $map['is_del'] = 1;
-                $map['sku'] = $params['sku'];
                 $count = $this->model->where($map)->count();
                 if ($count > 0) {
                     $this->error('库位已绑定！！');
                 }
-                $store_house = Db::name('store_house')->where('id',$params['store_id'])->find();
                 if ($store_house['area_id'] != $params['area_id']){
                     $this->error('库位不在当前选择库区！！');
                 }
