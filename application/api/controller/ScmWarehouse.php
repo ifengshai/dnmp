@@ -2748,13 +2748,10 @@ class ScmWarehouse extends Scm
                     } else {
                         $list[$k]['sku'] = $v['sku'];
                         $list[$k]['out_stock_num'] = abs($v['error_qty']);
-
-                        dump($v);
                         //更新如果出库单id为空 添加出库单id
                         $this->_product_bar_code_item
-                            ->where(['code' => ['not in', $codes], 'location_code' => $v['library_name'], 'area_id' => $v['area_id'], 'sku' => $v['sku'], 'out_stock_id' => 0])
+                            ->where(['code' => ['not in', $codes], 'location_code' => $v['library_name'], 'location_id' => $v['area_id'], 'sku' => $v['sku'], 'out_stock_id' => 0])
                             ->update(['library_status' => 2, 'inventory_id' => $inventory_id]);
-                        echo 1111;
                     }
                 }
 
