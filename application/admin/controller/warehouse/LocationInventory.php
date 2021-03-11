@@ -70,7 +70,7 @@ class LocationInventory extends Backend
             //自定义sku搜索
             $filter = json_decode($this->request->get('filter'), true);
             if ($filter['area_code']) {
-                $map['coding'] = ['=',$filter['area_code']];
+                $map['coding'] = ['like','%'.$filter['area_code'].'%'];
                 unset($filter['area_code']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
