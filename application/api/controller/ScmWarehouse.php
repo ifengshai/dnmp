@@ -2244,12 +2244,6 @@ class ScmWarehouse extends Scm
                 ->limit($offset, $limit)
                 ->select();
             $list = collection($list)->toArray();
-            // foreach ($list as $k => $v) {
-            //     $count = $this->_item->where(['sku' => $v['sku'], 'is_del' => 1, 'is_open' => 1])->count();
-            //     if ($count < 1) {
-            //         continue;
-            //     }
-            // }
 
             //盘点单所需数据
             $info['list'] = !empty($list) ? $list : [];
@@ -2407,12 +2401,8 @@ class ScmWarehouse extends Scm
     {
         $do_type = $this->request->request('do_type');
         $item_sku = $this->request->request("item_data");
-
-        file_put_contents('/www/wwwroot/mojing/runtime/log/test.log', $item_sku . "\r\n", FILE_APPEND);
         empty($item_sku) && $this->error(__('sku集合不能为空！！'), [], 508);
         $item_sku = json_decode(htmlspecialchars_decode($item_sku), true);
-
-        file_put_contents('/www/wwwroot/mojing/runtime/log/test.log', $item_sku . "\r\n", FILE_APPEND);
         empty($item_sku) && $this->error(__('sku集合不能为空'), [], 403);
         $item_sku = array_filter($item_sku);
 
@@ -2424,10 +2414,7 @@ class ScmWarehouse extends Scm
         if ($row['status'] > 1) {
             $this->error(__('此状态不能编辑'), [], 544);
         }
-        // $item_row = $this->_inventory_item
-        //     ->where('inventory_id', $inventory_id)
-        //     ->column('real_time_qty', 'sku');
-
+    
         if ($do_type == 1) {
             //提交
             $params['status'] = 2; //盘点完成
@@ -2751,6 +2738,7 @@ class ScmWarehouse extends Scm
                         //更新如果出库单id为空 添加出库单id
                         $this->_product_bar_code_item
                             ->where(['code' => ['not in', $codes], 'location_code' => $v['library_name'], 'location_id' => $v['area_id'], 'sku' => $v['sku'], 'out_stock_id' => 0])
+                            ->where("item_order_number=''")
                             ->update(['library_status' => 2, 'inventory_id' => $inventory_id]);
                     }
                 }
