@@ -1220,7 +1220,7 @@ WHERE `o`.`status` IN ( 'free_processing', 'processing', 'paypal_reversed', 'pay
 
             $swhere['platform_order'] = $value['increment_id'];
             $swhere['work_platform'] = 1;
-            $swhere['work_status'] = ['not in', [0, 4, 6]];
+//            $swhere['work_status'] = ['not in', [0, 4, 6]]; 工单类型不做判断
             $work_type = $workorder->where($swhere)->field('work_type,create_user_name')->find();
             if (!empty($work_type)) {
                 $value['work'] = '是';
