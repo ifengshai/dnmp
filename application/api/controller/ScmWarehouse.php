@@ -3391,7 +3391,6 @@ class ScmWarehouse extends Scm
     {
         $transfer_order_item_id = $this->request->request('transfer_order_item_id');
         $transfer_order_item = $this->_warehouse_transfer_order_item->where('id', $transfer_order_item_id)->find();
-        $transfer_order_item['status'] == 1 && $this->error(__('调拨子单已提交，不要重复提交'), '', 546);
         $area_all = $this->_warehouse_area->column('id', 'coding');
         $all_history = Db::name('warehouse_transfer_order_item_code')->where('transfer_order_item_id', $transfer_order_item_id)->select();
         //调入仓库位id
