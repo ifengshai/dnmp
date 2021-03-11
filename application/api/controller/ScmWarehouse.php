@@ -2414,7 +2414,7 @@ class ScmWarehouse extends Scm
         if ($row['status'] > 1) {
             $this->error(__('此状态不能编辑'), [], 544);
         }
-    
+
         if ($do_type == 1) {
             //提交
             $params['status'] = 2; //盘点完成
@@ -2724,14 +2724,22 @@ class ScmWarehouse extends Scm
                     $codes = [];
                     if ($v['sku_agg']) {
                         $codes = array_unique(array_column(unserialize($v['sku_agg']), 'code'));
-                        $sku_code = array_merge($codes, $sku_code);
                     }
+
+
 
                     if ($v['error_qty'] > 0) {
                         //生成入库单
                         $info[$k]['sku'] = $v['sku'];
                         $info[$k]['in_stock_num'] = abs($v['error_qty']);
                         $info[$k]['no_stock_num'] = abs($v['error_qty']);
+
+                        //查询库位id
+                        $store_id = $this->_store_house->where(['area_id' => $v['area_id'], 'coding' => $v['library_name'], 'status' => 1])->value('id');
+
+                        $this->_product_bar_code_item
+                            ->where(['code' => ['in', $codes]])
+                            ->update(['inventory_id' => $inventory_id, 'library_status' => 1, 'location_code' => $v['library_name'], 'location_id' => $v['area_id'], 'location_code_id' => $store_id]);
                     } else {
                         $list[$k]['sku'] = $v['sku'];
                         $list[$k]['out_stock_num'] = abs($v['error_qty']);
@@ -2759,8 +2767,8 @@ class ScmWarehouse extends Scm
                     //更新如果入库单id为空 添加入库单id
                     if ($sku_code) {
                         $this->_product_bar_code_item
-                            ->where(['code' => ['in', $sku_code]])
-                            ->update(['in_stock_id' => $this->_in_stock->id, 'in_stock_time' => date('Y-m-d H:i:s'), 'inventory_id' => $inventory_id, 'library_status' => 1]);
+                            ->where(['inventory_id' => $inventory_id, 'library_status' => 1])
+                            ->update(['in_stock_id' => $this->_in_stock->id, 'in_stock_time' => date('Y-m-d H:i:s')]);
                     }
 
                     //添加入库信息
