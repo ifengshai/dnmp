@@ -105,7 +105,7 @@ class LocationInventory extends Backend
                 $list[$k]['name'] = $arr[$row['sku']]['name'];
                 //在库 子单号为空 库位号 库区id都一致的库存作为此库位的库存
                 $list[$k]['stock'] = $productbarcodeitem
-                    ->where(['location_id'=>$row['storehouse']['area_id'],'location_code'=>$row['storehouse']['coding'],'library_status'=>1,'item_order_number'=>''])
+                    ->where(['location_id'=>$row['storehouse']['area_id'],'location_code'=>$row['storehouse']['coding'],'library_status'=>1,'item_order_number'=>'','sku'=>$row['sku']])
                     ->count();
                 $list[$k]['area_code'] = $area_list[$row['storehouse']['area_id']];
             }
