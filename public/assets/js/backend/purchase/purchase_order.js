@@ -449,13 +449,22 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
             })
             $(document).on('change','#factory_type',function (){
                 var fac_val = $('#factory_type').val();
-                console.log(fac_val)
                 if (fac_val ==0){
                     $('#is_first').show();
+                    $('#is_first_purchase').show();
+                    $('#1688_number').hide();
                     $('#customized_procurement').show();
                 }else{
                     $('#is_first').hide();
                     $('#customized_procurement').hide();
+                }
+            });
+            $(document).on('change','#pay_type',function (){
+                var pay_type = $('#pay_type').val();
+                if (pay_type ==1){
+                    $('#pay_rate').show();
+                }else{
+                    $('#pay_rate').hide();
                 }
             })
 
@@ -622,19 +631,21 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 $(this).parent().remove();
                 z--;
             })
-
             $(document).on('change','#factory_type',function (){
                 var fac_val = $('#factory_type').val();
-                console.log(fac_val)
                 if (fac_val ==0){
                     $('#is_first').show();
+                    $('#is_first_purchase').show();
+                    $('#1688_number').hide();
+                    $('#time').show();
                     $('#customized_procurement').show();
                 }else{
                     $('#is_first').hide();
+                    $('#1688_number').show();
+                    $('#time').hide();
                     $('#customized_procurement').hide();
                 }
-            })
-
+            });
             $(document).on('click', '.btn-addplus', function () {
                 // var content = $('#arrival-content').html();
                 // $('#arrival_div').append(content);
