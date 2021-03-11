@@ -422,6 +422,9 @@ class ScmWarehouse extends Scm
         $warehouse_area_id = $this->request->request("warehouse_area_id"); //出库库库位id
         empty($warehouse_area_id) && $this->error(__('请选择出库库位'), [], 510);
 
+        $area_id = $this->request->request("area_id"); //出库库库区id
+        empty($area_id) && $this->error(__('请选择出库区'), [], 510);
+
         $item_data = $this->request->request('item_data');
         $item_data = json_decode(htmlspecialchars_decode($item_data), true);
         empty($item_data) && $this->error(__('sku集合不能为空'), [], 403);
@@ -485,7 +488,13 @@ class ScmWarehouse extends Scm
                 $result = $this->_out_stock->allowField(true)->save($out_stock_data);
                 $out_stock_id = $this->_out_stock->id;
             }
-
+            foreach ($item_data as $key => $value) {
+                //校验条形码当前是否在出库库区跟库位
+                foreach ($value['sku_agg'] as $v) {
+                    $detail = $this->_product_bar_code_item->where(['code' => $v['code'], 'location_code_id' => $warehouse_area_id, 'location_id' => $area_id])->find();
+                    if (empty($detail)) throw new Exception($v['code'].'不在当前库区库位');
+                }
+            }
             if (false === $result) throw new Exception('提交失败');
 
             if (count($item_data) != count(array_unique(array_column($item_data, 'sku')))) throw new Exception('sku重复，请检查');
