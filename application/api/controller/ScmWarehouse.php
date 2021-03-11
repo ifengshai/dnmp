@@ -3130,9 +3130,15 @@ class ScmWarehouse extends Scm
                 //状态为5说明是调拨中 只能提交
                 if ($warehouse_trans_order_detail['status'] == 5) {
                     //调拨中提交需要判断子调拨单是不是都已经完成了
-                    $is_complete = $this->_warehouse_transfer_order_item->where('num', 0)->where('transfer_order_id', $id)->find();
-                    if (!empty($is_complete)) {
-                        $this->error(__('存在未调拨完成的子单，请调拨后重试'), '', 525);
+                    $is_complete = $this->_warehouse_transfer_order_item->where('transfer_order_id', $id)->field('id,sku,inarea_id,call_in_site_id')->select();
+                    foreach ($is_complete as $key=>$value){
+                        $transfer_order_item_code = Db::name('warehouse_transfer_order_item_code')->where('transfer_order_item_id',$value['id'])->select();
+                        foreach ($transfer_order_item_code as $key1=>$value1){
+                            $product_bar_code=$this->_product_bar_code_item->where(['code'=>$value1['code'],'location_id'=>$value['inarea_id'],'location_code_id'=>$value['call_in_site_id']])->find();
+                            if (empty($product_bar_code)) {
+                                $this->error(__($value1['code'].'未调入'), '', 525);
+                            }
+                        }
                     }
                     $result = $this->_warehouse_transfer_order->where('id', $id)->update(['status' => 6]);
                 } else {
