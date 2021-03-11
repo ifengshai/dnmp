@@ -2486,25 +2486,17 @@ class ScmWarehouse extends Scm
                     }
 
                     //查询库位实时库存
-                    $real_time_qty = $this->_product_bar_code_item->where(['sku' => $v['sku'],'location_id' => $v['area_id'], 'location_code' => $v['library_name'], 'library_status' => 1])->where("item_order_number=''")->count();
+                    // $real_time_qty = $this->_product_bar_code_item->where(['sku' => $v['sku'],'location_id' => $v['area_id'], 'location_code' => $v['library_name'], 'library_status' => 1])->where("item_order_number=''")->count();
 
+                    $item_list = $this->_inventory_item->where(['inventory_id' => $inventory_id, 'sku' => $v['sku']])->find();
                     $save_data = [];
                     $save_data['is_add'] = $is_add; //是否盘点
                     $save_data['inventory_qty'] = $v['inventory_qty'] ?? 0; //盘点数量
-                    $save_data['error_qty'] = $save_data['inventory_qty'] - $real_time_qty; //误差数量
+                    $save_data['error_qty'] = $save_data['inventory_qty'] - $item_list['real_time_qty']; //误差数量
                     $save_data['remark'] = $v['remark']; //备注
-                    $save_data['real_time_qty'] = $real_time_qty; //实时库存即为库位实时库存
-                    // $count = $this->_inventory_item->where(['inventory_id' => $inventory_id, 'sku' => $v['sku']])->count();
-                    $save_data['sku_agg'] = serialize($v['sku_agg']); //SKU 条形码集合 
-                    $save_data['remove_agg'] = serialize($v['remove_agg']); //SKU需移除的条形码集合
-                    // if ($count < 1) {
-                    //     $save_data['inventory_id'] = $inventory_id; //SKU
-                    //     $save_data['sku'] = $v['sku']; //SKU
-                    //     $this->_inventory_item->allowField(true)->isUpdate(false)->data($save_data)->save();
-                    // } else {
-
-                    // }
-
+                    $save_data['real_time_qty'] = $item_list['real_time_qty']; //实时库存即为库位实时库存
+                    $save_data['sku_agg'] = count($v['sku_agg']) > 0 ? serialize($v['sku_agg']) : $item_list['sku_agg']; //SKU 条形码集合 
+                    $save_data['remove_agg'] = count($v['remove_agg']) > 0 ? serialize($v['remove_agg']) : $item_list['remove_agg']; //SKU需移除的条形码集合
                     $this->_inventory_item->where(['inventory_id' => $inventory_id, 'sku' => $v['sku']])->update($save_data);
 
                     // //盘点单绑定条形码数组组装
