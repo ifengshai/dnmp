@@ -82,14 +82,14 @@ class LocationInventory extends Backend
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
-                ->with(['storehouse'])
+                ->with(['storehouse1'])
                 ->where($where)
                 ->where($maps)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
-                ->with(['storehouse'])
+                ->with(['storehouse1'])
                 ->where($where)
                 ->where($maps)
                 ->order($sort, $order)
@@ -101,7 +101,7 @@ class LocationInventory extends Backend
             $arr = $item->where('is_del', 1)->column('name,is_open', 'sku');
 
             foreach ($list as $k => $row) {
-                $row->getRelation('storehouse')->visible(['coding', 'library_name', 'status','area_id']);
+                $row->getRelation('storehouse1')->visible(['coding', 'library_name', 'status','area_id']);
                 $list[$k]['name'] = $arr[$row['sku']]['name'];
                 //在库 子单号为空 库位号 库区id都一致的库存作为此库位的库存
                 $list[$k]['stock'] = $productbarcodeitem
