@@ -3133,6 +3133,9 @@ class ScmWarehouse extends Scm
                     $is_complete = $this->_warehouse_transfer_order_item->where('transfer_order_id', $id)->field('id,sku,inarea_id,call_in_site_id')->select();
                     foreach ($is_complete as $key=>$value){
                         $transfer_order_item_code = Db::name('warehouse_transfer_order_item_code')->where('transfer_order_item_id',$value['id'])->select();
+                        if (empty($transfer_order_item_code)) {
+                            $this->error(__('请先扫码调出调入'), '', 525);
+                        }
                         foreach ($transfer_order_item_code as $key1=>$value1){
                             $product_bar_code=$this->_product_bar_code_item->where(['code'=>$value1['code'],'location_id'=>$value['inarea_id'],'location_code_id'=>$value['call_in_site_id']])->find();
                             if (empty($product_bar_code)) {
