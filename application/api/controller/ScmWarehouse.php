@@ -2585,6 +2585,7 @@ class ScmWarehouse extends Scm
                     ->field('sku,error_qty,inventory_id,area_id,library_name')
                     ->select();
                 $infos = collection($infos)->toArray();
+                $sku_code = [];
                 foreach ($infos as $k => $v) {
                     //如果误差为0则跳过
                     if ($v['error_qty'] == 0) {
@@ -2724,6 +2725,13 @@ class ScmWarehouse extends Scm
                         throw new Exception('同步库存失败,请检查SKU=>' . $v['sku']);
                     }
 
+                    //重新绑定条形码
+                    $codes = [];
+                    if ($v['sku_agg']) {
+                        $codes = array_unique(array_column(unserialize($v['sku_agg']), 'code'));
+                        $sku_code = array_merge($codes, $sku_code);
+                    }
+
                     if ($v['error_qty'] > 0) {
                         //生成入库单
                         $info[$k]['sku'] = $v['sku'];
@@ -2732,14 +2740,14 @@ class ScmWarehouse extends Scm
                     } else {
                         $list[$k]['sku'] = $v['sku'];
                         $list[$k]['out_stock_num'] = abs($v['error_qty']);
+
+                        //更新如果出库单id为空 添加出库单id
+                        $this->_product_bar_code_item
+                            ->where(['code' => ['not in', $codes], 'location_code' => $v['library_name'], 'area_id' => $v['area_id'], 'sku' => $v['sku'], 'out_stock_id' => 0])
+                            ->update(['library_status' => 2, 'inventory_id' => $inventory_id]);
                     }
                 }
 
-                //重新绑定条形码
-                $sku_code = [];
-                if ($v['sku_agg']) {
-                    $sku_code = array_unique(array_column(unserialize($v['sku_agg']), 'code'));
-                }
 
                 //入库记录
                 if ($info) {
@@ -2756,7 +2764,7 @@ class ScmWarehouse extends Scm
                     //更新如果入库单id为空 添加入库单id
                     if ($sku_code) {
                         $this->_product_bar_code_item
-                            ->where(['code' => ['in', $sku_code], 'location_code' => $v['library_name'], 'area_id' => $v['area_id'], 'sku' => $v['sku'], 'in_stock_id' => 0])
+                            ->where(['code' => ['in', $sku_code]])
                             ->update(['in_stock_id' => $this->_in_stock->id, 'in_stock_time' => date('Y-m-d H:i:s'), 'inventory_id' => $inventory_id, 'library_status' => 1]);
                     }
 
@@ -2790,8 +2798,8 @@ class ScmWarehouse extends Scm
 
                     //更新如果出库单id为空 添加出库单id
                     $this->_product_bar_code_item
-                        ->where(['code' => ['not in', $sku_code], 'location_code' => $v['library_name'], 'area_id' => $v['area_id'], 'sku' => $v['sku'], 'out_stock_id' => 0])
-                        ->update(['out_stock_id' => $this->_out_stock->id, 'out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2, 'inventory_id' => $inventory_id]);
+                        ->where(['inventory_id' => $inventory_id, 'library_status' => 2])
+                        ->update(['out_stock_id' => $this->_out_stock->id, 'out_stock_time' => date('Y-m-d H:i:s')]);
 
                     //添加出库信息
                     if ($outstock_res !== false) {
