@@ -267,7 +267,8 @@ class ItemCategory extends Model
      */
     public function getPidCategoryName($pid = 0)
     {
-        $result = $this->where(['pid' => $pid])->column('name','id');
+        $where['is_del'] = 1;
+        $result = $this->where(['pid' => $pid])->where($where)->column('name','id');
         return $result;
     }
 }
