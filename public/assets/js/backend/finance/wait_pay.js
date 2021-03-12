@@ -25,6 +25,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                         {field: 'order_number', title: __('付款申请单号')},
                         {field: '1688_number', title: __('1688单号'), operate:'like'},
                         {field: 'supplier_name', title: __('供应商名称'),operate:'like'},
+                        {
+                            field: 'category_id', title: __('商品分类'),
+                            searchList: $.getJSON('finance/wait_pay/getCategoryName'),
+                            formatter: Table.api.formatter.status, visible:false
+                            //formatter: Controller.api.formatter.devicess
+                        },
                         {field: 'create_person', title: __('创建人')},
                         {field: 'create_time', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime},
                     ]
