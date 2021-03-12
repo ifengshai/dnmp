@@ -2384,16 +2384,16 @@ class ScmDistribution extends Scm
 
 
 
-                            // //条码出库
-                            // $this->_product_bar_code_item
-                            //     ->allowField(true)
-                            //     ->isUpdate(true, ['item_order_number' => ['in', $item_order_numbers]])
-                            //     ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2, 'is_loss_report_out' => 1, 'out_stock_id' => $outstock_id]);
                             //条码出库
                             $this->_product_bar_code_item
                                 ->allowField(true)
-                                ->isUpdate(true, ['item_order_number' => $value['item_order_number']])
+                                ->isUpdate(true, ['item_order_number' => ['in', $item_order_numbers]])
                                 ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2, 'is_loss_report_out' => 1, 'out_stock_id' => $outstock_id]);
+                            // //条码出库
+                            // $this->_product_bar_code_item
+                            //     ->allowField(true)
+                            //     ->isUpdate(true, ['item_order_number' => $value['item_order_number']])
+                            //     ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2, 'is_loss_report_out' => 1, 'out_stock_id' => $outstock_id]);
 
                             //计算出库成本
                             $financecost = new \app\admin\model\finance\FinanceCost();
