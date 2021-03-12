@@ -451,11 +451,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 var fac_val = $('#factory_type').val();
                 if (fac_val ==0){
                     $('#is_first').show();
+                    $('#time').show();
                     $('#is_first_purchase').show();
                     $('#1688_number').hide();
                     $('#customized_procurement').show();
                 }else{
                     $('#is_first').hide();
+                    $('#time').hide();
+                    $('#1688_number').show();
                     $('#customized_procurement').hide();
                 }
             });

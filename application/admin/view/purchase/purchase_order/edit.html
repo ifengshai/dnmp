@@ -108,13 +108,13 @@
             </select>
         </div>
         {if condition="$row['factory_type'] eq 0"}
-        <label class="control-label col-xs-12 col-sm-2" id="is_first">是否首次定做采购:</label>
-        <div class="col-xs-12 col-sm-3" id="customized_procurement">
-            <select name="row[customized_procurement]" class="form-control" >
-                <option value="0" {:$row['customized_procurement']==0 ? 'selected' : '' }>否</option>
-                <option value="1" {:$row['customized_procurement']==1 ? 'selected' : '' }>是</option>
-            </select>
-        </div>
+            <label class="control-label col-xs-12 col-sm-2" id="is_first">是否首次定做采购:</label>
+            <div class="col-xs-12 col-sm-3" id="customized_procurement">
+                <select name="row[customized_procurement]" class="form-control" >
+                    <option value="0" {:$row['customized_procurement']==0 ? 'selected' : '' }>否</option>
+                    <option value="1" {:$row['customized_procurement']==1 ? 'selected' : '' }>是</option>
+                </select>
+            </div>
         {/if}
     </div>
 
@@ -143,24 +143,29 @@
         <input id="c-1688_number" class="form-control"  name="row[1688_number]" value="{$row['1688_number']}" type="text">
     </div>
     </div>
-    <div id="time">
-        <div class="form-group">
+    <div id="time" {if condition="$row['factory_type'] eq 1"}style="display:none"{/if}>
+    <div class="form-group">
 
-            <label class="control-label col-xs-12 col-sm-2">预计出货时间:</label>
-            <div class="col-xs-12 col-sm-3">
-                <input id="c-arrival_time" class="form-control datetimepicker arrival_time"
-                       data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[arrival_time]" type="text"
-                       value="{$row.arrival_time}">
-            </div>
-            <label class="control-label col-xs-12 col-sm-2">订单生效时间:</label>
-            <div class="col-xs-12 col-sm-3">
-                <input id="c-arrival_time" class="form-control datetimepicker arrival_time"
-                       data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[effect_time]" type="text"
-                       value="{$row.effect_time}">
-            </div>
+<!--        <label class="control-label col-xs-12 col-sm-2">预计出货时间:</label>-->
+<!--        <div class="col-xs-12 col-sm-3">-->
+<!--            <input id="c-arrival_time" class="form-control datetimepicker arrival_time"-->
+<!--                   data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[arrival_time]" type="text"-->
+<!--                   value="{$row.arrival_time}">-->
+<!--        </div>-->
+        <label class="control-label col-xs-12 col-sm-2">订单生效时间:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-arrival_time" class="form-control datetimepicker arrival_time"
+                   data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[effect_time]" type="text"
+                   value="{$row.effect_time}">
         </div>
     </div>
-
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">预计出货时间:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-arrival_time" class="form-control datetimepicker arrival_time" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[arrival_time]" type="text" value="{$row.arrival_time}">
+        </div>
+    </div>
 
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">采购备注:</label>
