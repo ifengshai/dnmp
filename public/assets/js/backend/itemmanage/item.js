@@ -899,7 +899,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                     { field: 'zeelool_de_stock', title: __('Zeelool_de'), operate: false },
                     { field: 'zeelool_jp_stock', title: __('Zeelool_jp'), operate: false },
                     { field: 'voogmechic_stock', title: __('Voogmechic'), operate: false },
-
+                    { field: 'douyin_stock', title: __('抖音'), operate: false },
+                    { field: 'alibaba_stock', title: __('阿里巴巴国际站'), operate: false },
                     { field: 'occupy_stock', title: __('订单占用库存'), operate: false },
                     { field: 'distribution_occupy_stock', title: __('配货占用库存'), operate: false },
                     { field: 'sample_num', title: __('留样库存'), operate: false },
@@ -937,7 +938,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
             // 为表格绑定事件
             Table.api.bindevent(table);
 
-            var all_arr = ['zeelool_stock', 'occupy_stock', 'distribution_occupy_stock', 'voogueme_stock', 'nihao_stock', 'meeloog_stock', 'wesee_stock', 'amazon_stock', 'zeelool_es_stock', 'zeelool_de_stock', 'zeelool_jp_stock', 'on_way_stock', 'voogmechic_stock'];
+            var all_arr = ['zeelool_stock', 'occupy_stock', 'distribution_occupy_stock', 'voogueme_stock', 'nihao_stock', 'meeloog_stock', 'wesee_stock', 'amazon_stock', 'zeelool_es_stock', 'zeelool_de_stock', 'zeelool_jp_stock', 'on_way_stock', 'voogmechic_stock', 'douyin_stock', 'alibaba_stock'];
             var site_arr = ['plat_stock', 'plat_on_way_stock'];
 
             viewTable(table, Config.label == 100 ? all_arr : site_arr, Config.label == 100 ? site_arr : all_arr);

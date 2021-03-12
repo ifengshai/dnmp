@@ -480,8 +480,6 @@ class PurchaseOrder extends Backend
                             }
                         }
                     }
-
-
                     $result = $row->allowField(true)->save($params);
 
                     //添加合同产品

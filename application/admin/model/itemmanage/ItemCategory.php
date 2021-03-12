@@ -236,4 +236,39 @@ class ItemCategory extends Model
     /***
      * 获取配饰材质（固定）
      */
+
+
+    /**
+     * 根据分类ID查询第一级分类名称
+     *
+     * @Description
+     * @author wpl
+     * @since 2021/03/12 10:24:07 
+     * @param [type] $id 分类id
+     * @return void
+     */
+    public function getCategoryName($id)
+    {
+        $result = $this->get($id);
+        if ($result->pid > 0) {
+           return $this->getCategoryName($result->pid);
+        }
+        return $result['name'];
+    }
+
+    /**
+     * 查询第一级分类
+     *
+     * @Description
+     * @author wpl
+     * @since 2021/03/12 10:24:07 
+     * @param [type] $id 分类id
+     * @return void
+     */
+    public function getPidCategoryName($pid = 0)
+    {
+        $where['is_del'] = 1;
+        $result = $this->where(['pid' => $pid])->where($where)->column('name','id');
+        return $result;
+    }
 }

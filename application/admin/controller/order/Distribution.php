@@ -1637,8 +1637,7 @@ class Distribution extends Backend
             ->select();
         $list = collection($list)->toArray();
         $order_ids = array_column($list, 'order_id');
-        // $sku_arr = array_column($list, 'sku');
-
+        
         //查询sku映射表
         // $item_res = $this->_item_platform_sku->cache(3600)->where(['platform_sku' => ['in', array_unique($sku_arr)]])->column('sku', 'platform_sku');
 

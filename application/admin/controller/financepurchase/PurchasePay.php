@@ -18,7 +18,7 @@ use think\Request;
 
 class PurchasePay extends Backend
 {
-    protected $noNeedRight = ['is_conditions'];
+    protected $noNeedRight = ['is_conditions', 'batch_add', 'check_detail'];
 
     protected $model = null;
 
@@ -63,7 +63,18 @@ class PurchasePay extends Backend
                 //查询审批记录表我的待审核
                 $finance_purchase_id = Db::name('finance_purchase_workflow_records')->where(['assignee_id' => $userid, 'audit_status' => 0])->column('finance_purchase_id');
                 $map['id'] = ['in', $finance_purchase_id];
+            } else {
+                //创建人
+                $map['create_person'] = session('admin.nickname');
             }
+
+            if ($filter['check_user_id']) {
+                //查询审批记录表我的待审核
+                $finance_purchase_id = Db::name('finance_purchase_workflow_records')->where(['assignee_id' => $filter['check_user_id'], 'audit_status' => 0])->column('finance_purchase_id');
+                $map['id'] = ['in', $finance_purchase_id];
+                unset($filter['status']);
+            }
+
 
             if ($filter['status'] === 0) {
                 $map['status'] = $filter['status'];
@@ -77,6 +88,12 @@ class PurchasePay extends Backend
                 unset($filter['purchase_number']);
             }
 
+            //采购单号筛选
+            if ($filter['1688_number']) {
+                $purchase_id = Db::name('purchase_order')->where(['1688_number' => ['like', '%' . $filter['1688_number'] . '%']])->column('id');
+                $map['purchase_id'] = ['in', $purchase_id];
+                unset($filter['1688_number']);
+            }
 
             unset($filter['label']);
             $this->request->get(['filter' => json_encode($filter)]);
@@ -93,8 +110,19 @@ class PurchasePay extends Backend
                 ->limit($offset, $limit)
                 ->select();
             $list = collection($list)->toArray();
+            $admin = new \app\admin\model\Admin();
+            $userlist = $admin->where(['status' => 'normal'])->column('nickname','id');
             foreach ($list as $k => $v) {
                 $list[$k]['supplier_name'] = $this->supplier->where('id', $v['supplier_id'])->value('supplier_name');
+                //查询待审核人
+                $userid = Db::name('finance_purchase_workflow_records')->where(['finance_purchase_id'=> $v['id'], 'audit_status' => 0])->value('assignee_id');
+                $list[$k]['check_user_nickname'] = $userlist[$userid];
+
+                $purchase_data = Db::name('purchase_order')->where(['id' => $v['purchase_id']])->find();
+                $list[$k]['1688_number'] = $purchase_data['1688_number'];
+                $list[$k]['purchase_num'] = Db::name('purchase_order_item')->where(['purchase_id' => $v['purchase_id']])->value('purchase_num');
+                $list[$k]['purchase_name'] = $purchase_data['purchase_name'];
+                $list[$k]['purchase_number'] = $purchase_data['purchase_number'];
             }
             $result = array("total" => $total, "rows" => $list);
             return json($result);
@@ -163,8 +191,6 @@ class PurchasePay extends Backend
                     //提交审核 生成审批单
                     if ($insert['status'] == 1) {
                         $this->workflow->setData($finance_purchase_id, $insert['pay_grand_total']);
-
-                        
                     }
                     $label = input('label');
                     //结算单页面过来的创建付款申请单 需要更新结算的付款申请单id字段

@@ -675,8 +675,10 @@ class ScmDistribution extends Scm
         $count = $this->_product_bar_code_item
         ->where(['code' => $barcode, 'library_status' => 1])
         ->count();
-        if ($count < 1) {
-            $this->error(__('条形码非在库状态'), [], 403);
+        if (2 == $check_status) {
+            if ($count < 1) {
+                $this->error(__('条形码非在库状态'), [], 403);
+            }
         }
 
         //获取子订单数据

@@ -1183,6 +1183,7 @@ class NewProduct extends Backend
                 ->where($where)
                 ->where($map)
                 ->order('a.id', 'desc')
+                // ->distinct('a.id')
                 ->count();
 
             $list = $this->model
@@ -1193,6 +1194,7 @@ class NewProduct extends Backend
                 ->where($map)
                 ->order('a.id', 'desc')
                 ->limit($params['offset'], $params['limit'])
+                // ->distinct('a.id')
                 ->select();
             $list = collection($list)->toArray();
             $skus = array_column($list, 'sku');

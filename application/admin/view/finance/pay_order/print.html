@@ -1,0 +1,179 @@
+<style>
+    .caigou {
+        width: 100%;
+        /* border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px; */
+        padding: 10px;
+    }
+
+    .caigou #caigou-table {
+        width: 100%;
+        height: 130px;
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 1px;
+        text-align: center;
+    }
+
+     .caigou #caigou-table tr {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 1px;
+        line-height: 50px;
+    }
+
+    .caigou #caigou-table tr th {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 1px;
+        text-align: center;
+        font-size: 14px;
+    }
+
+    .caigou #caigou-table tr td {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 1px;
+    } 
+
+
+    table {
+        border-collapse: separate;
+        border-spacing: 0px;
+        margin-bottom: 20px;
+    }
+
+    .lists {
+       
+        width: 100%;
+        margin-bottom: 30px;
+    }
+</style>
+
+<div class="panel-heading">
+    {:build_heading()}
+
+</div>
+
+<form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+
+
+    <div class='caigou'>
+        <div style="margin-bottom: 20px;width: 100%;">
+         
+                <table id="caigou-table">
+                    <tr>
+                        <th colspan="2">付款单</th>
+                    </tr>
+                    <tr>
+                        <th>付款单号: {$pay_order.pay_number}</th>
+                        <th>供应商名称: {$supplier.supplier_name}</th>
+                    </tr>
+                    <tr>
+                        <th>供应商账期: {$supplier.period}</th>
+                        <th>收款方名称: {$supplier.recipient_name}</th>
+                    </tr>
+                    <tr>
+                        <th>收款方开户行: {$supplier.opening_bank}</th>
+                        <th>收款方账户: {$supplier.bank_account}</th>
+                    </tr>
+                    <tr>
+                        <th>付款币种: {$supplier.currency}</th>
+                        <th>备注: {$pay_order.desc}</th>
+                    </tr>
+                   
+                    <tr>
+                        <th colspan="2">
+                            {if $prepay}
+                         
+                            <table id="caigou-table">
+                                <tr>
+                                    <th rowspan="{$count2+2}">预付信息</th>
+                                    <th>序号</th>
+                                    <th>采购单号</th>
+                                    <th>16688单号</th>
+                                    <th>申请人</th>
+                                    <th>SKU</th>
+                                    <th>商品分类</th>
+                                    <th>采购单金额</th>
+                                    <th>预付款比例</th>
+                                    <th>预付款金额</th>
+                                </tr>
+                                {foreach $prepay as $k => $v}
+                                <tr>
+                                    <td>{$k+1}</td>
+                                    <td>{$v.purchase_number}</td>
+                                    <td>{$v.1688_number}</td>
+                                    <td>{$v.create_person}</td>
+                                    <td>{$v.purchase_name}</td>
+                                    <td>{$v.category_name}</td>
+                                    <td>{$v.purchase_total}</td>
+                                    <td>{$v.pay_rate}%</td>
+                                    <td>{$v.pay_grand_total}</td>
+                                </tr>
+                                {/foreach}
+                                <tr>
+                                    <td colspan="8" style="text-align: right;">预付款金额合计：</td>
+                                    <td>{$total2}</td>
+                                </tr>
+                              
+                            </table>
+                           
+                            {/if}
+                            {if $settle}
+                            <table id="caigou-table">
+                                <tr>
+                                    <th rowspan="{$count1+2}">结算金额</th>
+                                    <th>序号</th>
+                                    <th>采购单号</th>
+                                    <th>采购批次ID</th>
+                                    <th>已支付金额</th>
+                                    <th>批次入库金额</th>
+                                    <th>扣款</th>
+                                    <th>扣款原因</th>
+                                    <th>总待结算金额</th>
+                                </tr>
+                                {foreach $settle as $k => $v}
+                                <tr>
+                                    <td>{$k+1}</td>
+                                    <td>{$v.purchase_number}</td>
+                                    <td>{$v.purchase_batch_id}</td>
+                                    <td>{$v.now_before_total}</td>
+                                    <td>{$v.instock_total}</td>
+                                    <td>{$v.deduction_total}</td>
+                                    <td>{$v.deduction_reason}</td>
+                                    <td>{$v.wait_statement_total}</td>
+                                </tr>
+                                {/foreach}
+                               
+                                <tr>
+                                    <td colspan="7" style="text-align: right;">待结算金额合计：</td>
+                                    <td>{$total1}</td>
+                                </tr>
+                               
+                            </table>
+                            {/if}
+                        </th>
+                    </tr>
+                    <tr>
+                        <td style="text-align: right;">合计应付：</td>
+                        <td>{$total}</td>
+                    </tr>
+                </table>
+                
+
+        </div>
+    </div>
+
+
+
+</form>

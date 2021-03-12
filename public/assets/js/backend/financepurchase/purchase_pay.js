@@ -27,7 +27,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'id', title: __('Id')},
                         {field: 'order_number', title: __('付款申请单号'), operate: 'LIKE'},
                         {field: 'supplier_name', title: __('供应商名称'), operate: 'LIKE'},
-                        {field: 'purchase_number', title: __('采购单号'), operate: 'LIKE', visible:false},
+                        {field: 'purchase_number', title: __('采购单号'), operate: 'LIKE'},
+                        {field: '1688_number', title: __('1688单号'), operate: 'LIKE'},
+                        {field: 'purchase_name', title: __('采购品名'), operate: false},
+                        {field: 'purchase_num', title: __('采购数量'), operate: false},
                         {
                             field: 'pay_type', title: __('付款类型'), custom: { 0: 'success', 1: 'yellow', 2: 'blue', 3: 'danger'},
                             searchList: {1: '预付款', 2: '全款预付', 3: '尾款'},
@@ -40,6 +43,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             searchList: { 0: '新建', 1: '待审核', 2: '审核通过', 3: '审核拒绝', 4: '已完成', 5: '已取消'},
                             formatter: Table.api.formatter.status
                         },
+                        {
+                            field: 'check_user_id', title: __('审批人'),
+                            searchList: { 56: '采购主管', 50: '供应链总监', 1: '总监', 154: '财务经理'},
+                            formatter: Table.api.formatter.status,visible:false
+                        },
+                        {field: 'check_user_nickname', title: __('待审批人'), operate: false},
                         {field: 'create_person', title: __('创建人'), operate: 'LIKE'},
                         {field: 'create_time', title: __('创建时间'), formatter: Table.api.formatter.datetime, operate: 'RANGE', addclass: 'datetimerange', sortable: true},
                         {

@@ -1435,7 +1435,7 @@ class OrderData extends Backend
             }
         }
 
-        if ($params['lens_number'] == '23302000' || $params['lens_number'] == '22306000' || $params['lens_number'] == '22305000') {
+        if ($params['lens_number'] == '22306000' || $params['lens_number'] == '22305000' || $params['lens_number'] == '22304000') {
             /**
              * 1.71防蓝光 现片
              * SPH:0.00～-12.00 CYL:0.00～-2.00（不含-0.25）
@@ -1848,14 +1848,24 @@ class OrderData extends Backend
 
     public function order_address_data_shell()
     {
-        $this->order_address_data(1);
-        $this->order_address_data(2);
-        $this->order_address_data(3);
-        $this->order_address_data(4);
-        $this->order_address_data(5);
-        $this->order_address_data(9);
-        $this->order_address_data(10);
-        $this->order_address_data(11);
+        $list = Db::connect('database.db_voogueme_acc')->table('sales_flat_order_address')->where(['address_type' => 'shipping'])->select();
+
+        foreach ($list as $k => $v) {
+            $params = [];
+            if ($v['address_type'] == 'shipping') {
+                $params['country_id'] = $v['country_id'];
+                $params['region'] = $v['region'];
+                $params['region_id'] = $v['region_id'];
+                $params['city'] = $v['city'];
+                $params['street'] = $v['street'];
+                $params['postcode'] = $v['postcode'];
+                $params['telephone'] = $v['telephone'];
+                $params['firstname'] = $v['firstname'];
+                $params['lastname'] = $v['lastname'];
+                $params['updated_at'] = strtotime($v['updated_at']) + 28800;
+                $this->order->where(['entity_id' => $v['parent_id'], 'site' => 12])->update($params);
+            }
+        }
     }
 
     /**
@@ -2180,66 +2190,27 @@ class OrderData extends Backend
         $this->order_item_data_shell_temp(5);
         $this->order_item_data_shell_temp(9);
         $this->order_item_data_shell_temp(10);
-        $this->order_item_data_shell_temp(11);
+        // $this->order_item_data_shell_temp(11);
         // $this->order_item_shell(5);
 
     }
 
     protected function order_item_data_shell_temp($site)
     {
-        $list = $this->orderitemprocess->where('site=' . $site . ' and distribution_status = 3')->limit(3000)->select();
+        $list = $this->orderitemoption->where('site=' . $site . ' and lens_number = 22304000')->limit(3000)->select();
         $list = collection($list)->toArray();
-        $item_ids = array_column($list, 'item_id');
-
-        if ($site == 1) {
-            $item_data = Db::connect('database.db_zeelool')->table('sales_flat_order_item')->where(['item_id' => ['in', $item_ids]])->column('product_options', 'item_id');
-        } elseif ($site == 2) {
-            $item_data = Db::connect('database.db_voogueme')->table('sales_flat_order_item')->where(['item_id' => ['in', $item_ids]])->column('product_options', 'item_id');
-        } elseif ($site == 3) {
-            $item_data = Db::connect('database.db_nihao')->table('sales_flat_order_item')->where(['item_id' => ['in', $item_ids]])->column('product_options', 'item_id');
-        } elseif ($site == 4) {
-            $item_data = Db::connect('database.db_meeloog')->table('sales_flat_order_item')->where(['item_id' => ['in', $item_ids]])->column('product_options', 'item_id');
-        } elseif ($site == 5) {
-            $item_data = Db::connect('database.db_weseeoptical')->table('sales_flat_order_item')->where(['item_id' => ['in', $item_ids]])->column('product_options', 'item_id');
-        } elseif ($site == 9) {
-            $item_data = Db::connect('database.db_zeelool_es')->table('sales_flat_order_item')->where(['item_id' => ['in', $item_ids]])->column('product_options', 'item_id');
-        } elseif ($site == 10) {
-            $item_data = Db::connect('database.db_zeelool_de')->table('sales_flat_order_item')->where(['item_id' => ['in', $item_ids]])->column('product_options', 'item_id');
-        } elseif ($site == 11) {
-            $item_data = Db::connect('database.db_zeelool_jp')->table('sales_flat_order_item')->where(['item_id' => ['in', $item_ids]])->column('product_options', 'item_id');
-        }
         $option_params = [];
         foreach ($list as $k => $v) {
-            $options = [];
             //处方解析 不同站不同字段
-            if ($site == 1) {
-                $options =  $this->zeelool_prescription_analysis($item_data[$v['item_id']]);
-            } elseif ($site == 2) {
-                $options =  $this->voogueme_prescription_analysis($item_data[$v['item_id']]);
-            } elseif ($site == 3) {
-                $options =  $this->nihao_prescription_analysis($item_data[$v['item_id']]);
-            } elseif ($site == 4) {
-                $options =  $this->meeloog_prescription_analysis($item_data[$v['item_id']]);
-            } elseif ($site == 5) {
-                $options =  $this->wesee_prescription_analysis($item_data[$v['item_id']]);
-            } elseif ($site == 9) {
-                $options =  $this->zeelool_es_prescription_analysis($item_data[$v['item_id']]);
-            } elseif ($site == 10) {
-                $options =  $this->zeelool_de_prescription_analysis($item_data[$v['item_id']]);
-            } elseif ($site == 11) {
-                $options =  $this->zeelool_jp_prescription_analysis($item_data[$v['item_id']]);
-            }
-            $option_params[$k]['order_prescription_type'] = $options['order_prescription_type'];
-            $option_params[$k]['id'] = $v['id'];
+            $result = $this->set_processing_type($v);
+            $this->orderitemprocess->where(['site' => $v['site'], 'item_id' => $v['item_id'], 'order_id' => $v['order_id']])->update(['order_prescription_type' => $result['order_prescription_type']]);
             echo $v['item_id'] . "\n";
             usleep(10000);
         }
 
-        $this->orderitemprocess->saveAll($option_params);
+        // $this->orderitemprocess->saveAll($option_params);
         echo "ok";
     }
-
-
 
 
     public function process_order_type()
