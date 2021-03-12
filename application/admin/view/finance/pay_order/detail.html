@@ -163,9 +163,9 @@
                     <th colspan="2">采购单金额</td>
                     <th colspan="2">采购方式</td>
                     <th colspan="2">付款类型</td>
-                    <th colspan="2">预付款比例</td>
+                    <th >预付款比例</td>
                     <th>预付款金额</td>
-                    <th colspan="2">申请人</td>
+                    <th >申请人</td>
                 </tr>
                 {foreach $prepay as $key=>$value}
                 <tr>
@@ -183,7 +183,7 @@
                         货到付款
                         {/if}
                     </td>
-                    <td colspan="2">{$value.pay_rate}%</td>
+                    <td >{$value.pay_rate}%</td>
                     <td>{$value.pay_grand_total}</td>
                     <td>{$value.create_person}</td>
                 </tr>
