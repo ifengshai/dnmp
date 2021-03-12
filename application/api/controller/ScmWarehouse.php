@@ -492,7 +492,7 @@ class ScmWarehouse extends Scm
                 //校验条形码当前是否在出库库区跟库位
                 foreach ($value['sku_agg'] as $v) {
                     $detail = $this->_product_bar_code_item->where(['code' => $v['code'], 'location_code_id' => $warehouse_area_id, 'location_id' => $area_id])->find();
-                    if (empty($detail)) throw new Exception($v['code'].'不在当前库区库位');
+                    if (empty($detail)) throw new Exception($v['code'] . '不在当前库区库位');
                 }
             }
             if (false === $result) throw new Exception('提交失败');
@@ -2171,7 +2171,7 @@ class ScmWarehouse extends Scm
             $list[$key]['show_detail'] = in_array($value['check_status'], [2, 3, 4]) ? 1 : 0; //详情按钮
             //计算已盘点数量
             $count = $this->_inventory_item->where(['inventory_id' => $value['id']])->count();
-           
+
             //查询盘点的库区
             $warehouse_name = $this->_inventory_item->where(['inventory_id' => $value['id']])->group('warehouse_name')->column('warehouse_name');
 
@@ -2494,7 +2494,7 @@ class ScmWarehouse extends Scm
                     $save_data['real_time_qty'] = $item_list['real_time_qty']; //实时库存即为库位实时库存
                     $save_data['sku_agg'] = count($v['sku_agg']) > 0 ? serialize($v['sku_agg']) : $item_list['sku_agg']; //SKU 条形码集合 
                     $save_data['remove_agg'] = count($v['remove_agg']) > 0 ? serialize($v['remove_agg']) : $item_list['remove_agg']; //SKU需移除的条形码集合
-                    $this->_inventory_item->where(['inventory_id' => $inventory_id, 'sku' => $v['sku']])->update($save_data);
+                    $this->_inventory_item->where(['inventory_id' => $inventory_id, 'sku' => $v['sku'], 'area_id' => $v['area_id'], 'library_name' => $v['library_name']])->update($save_data);
 
                     // //盘点单绑定条形码数组组装
                     // foreach ($v['sku_agg'] as $k_code => $v_code) {
@@ -3128,15 +3128,15 @@ class ScmWarehouse extends Scm
                 if ($warehouse_trans_order_detail['status'] == 5) {
                     //调拨中提交需要判断子调拨单是不是都已经完成了
                     $is_complete = $this->_warehouse_transfer_order_item->where('transfer_order_id', $id)->field('id,sku,inarea_id,call_in_site_id')->select();
-                    foreach ($is_complete as $key=>$value){
-                        $transfer_order_item_code = Db::name('warehouse_transfer_order_item_code')->where('transfer_order_item_id',$value['id'])->select();
+                    foreach ($is_complete as $key => $value) {
+                        $transfer_order_item_code = Db::name('warehouse_transfer_order_item_code')->where('transfer_order_item_id', $value['id'])->select();
                         if (empty($transfer_order_item_code)) {
                             $this->error(__('请先扫码调出调入'), '', 525);
                         }
-                        foreach ($transfer_order_item_code as $key1=>$value1){
-                            $product_bar_code=$this->_product_bar_code_item->where(['code'=>$value1['code'],'location_id'=>$value['inarea_id'],'location_code_id'=>$value['call_in_site_id']])->find();
+                        foreach ($transfer_order_item_code as $key1 => $value1) {
+                            $product_bar_code = $this->_product_bar_code_item->where(['code' => $value1['code'], 'location_id' => $value['inarea_id'], 'location_code_id' => $value['call_in_site_id']])->find();
                             if (empty($product_bar_code)) {
-                                $this->error(__($value1['code'].'未调入'), '', 525);
+                                $this->error(__($value1['code'] . '未调入'), '', 525);
                             }
                         }
                     }
@@ -3325,20 +3325,20 @@ class ScmWarehouse extends Scm
         foreach ($sku_agg as $k => $v) {
             //判断当前条码的在库状态
             $code_status = $this->_product_bar_code_item->where('code', $v['code'])->value('library_status');
-            if ($code_status == 2){
-                $this->error(__($v['code'].'当前不是在库状态，请检查！！'), '', 524);
+            if ($code_status == 2) {
+                $this->error(__($v['code'] . '当前不是在库状态，请检查！！'), '', 524);
             }
         }
         //当前调拨子单详情
         $transfer_order_item = Db::name('warehouse_transfer_order_item')->where('id', $transfer_order_item_id)->find();
         //调入库位的库容
-        $in_store_house = Db::name('store_house')->where('id',$transfer_order_item['call_in_site_id'])->value('volume');
+        $in_store_house = Db::name('store_house')->where('id', $transfer_order_item['call_in_site_id'])->value('volume');
         //调入库位当前的库存
         $in_store_house_stock = $this->_product_bar_code_item
-            ->where(['location_id'=>$transfer_order_item['inarea_id'],'location_code'=>$transfer_order_item['call_in_site'],'library_status'=>1,'item_order_number'=>'','sku'=>$transfer_order_item['sku']])
+            ->where(['location_id' => $transfer_order_item['inarea_id'], 'location_code' => $transfer_order_item['call_in_site'], 'library_status' => 1, 'item_order_number' => '', 'sku' => $transfer_order_item['sku']])
             ->count();
         //当前调入库位的库存加调拨进入的库存不能大于库容
-        if (!empty($in_store_house) && (count(array_filter($sku_agg)) + $in_store_house_stock) > $in_store_house){
+        if (!empty($in_store_house) && (count(array_filter($sku_agg)) + $in_store_house_stock) > $in_store_house) {
             $this->error(__('调入后超出当前库位库容，请检查！！'), '', 524);
         }
         empty($transfer_order_item) && $this->error(__('调拨子单不存在'), '', 546);
