@@ -924,6 +924,8 @@ class Item extends Backend
                     $v['zeelool_de_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 10])->value('stock');
                     $v['zeelool_jp_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 11])->value('stock');
                     $v['voogmechic_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 12])->value('stock');
+                    $v['douyin_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 13])->value('stock');
+                    $v['alibaba_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 14])->value('stock');
                 }
                 unset($v);
             } else {
@@ -1023,9 +1025,11 @@ class Item extends Backend
             $v['zeelool_de_stock'] = $item_stock[$v['sku']][10];
             $v['zeelool_jp_stock'] = $item_stock[$v['sku']][11];
             $v['voogmechic_stock'] = $item_stock[$v['sku']][12];
+            $v['douyin_stock'] = $item_stock[$v['sku']][13];
+            $v['alibaba_stock'] = $item_stock[$v['sku']][14];
         }
 
-        $headlist = ['商品sku', '总库存', '可用库存', '虚拟库存Zeelool', '虚拟库存Voogueme', '虚拟库存Nihao', '虚拟库存Meeloog', '虚拟库存Wesee', '虚拟库存Amazon', '虚拟库存ZeeloolEs', '虚拟库存ZeeloolDe', '虚拟库存ZeeloolJp', '虚拟库存Voogmechic'];
+        $headlist = ['商品sku', '总库存', '可用库存', '虚拟库存Zeelool', '虚拟库存Voogueme', '虚拟库存Nihao', '虚拟库存Meeloog', '虚拟库存Wesee', '虚拟库存Amazon', '虚拟库存ZeeloolEs', '虚拟库存ZeeloolDe', '虚拟库存ZeeloolJp', '虚拟库存Voogmechic', '虚拟库存抖音', '虚拟库存阿里巴巴国际站'];
         $filename = '商品虚拟库存';
         Excel::writeCsv($list, $headlist, $filename, true);
         die;
