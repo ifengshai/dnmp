@@ -2463,12 +2463,12 @@ class Distribution extends Backend
                 $this->model->where(['id' => $ids])->update($save_data);
 
                 //回退到待配货、待打印标签，解绑条形码
-                if (3 > $status) {
-                    $this->_product_bar_code_item
-                        ->allowField(true)
-                        ->isUpdate(true, ['item_order_number' => $item_info['item_order_number']])
-                        ->save(['item_order_number' => '']);
-                }
+                // if (3 > $status) {
+                //     $this->_product_bar_code_item
+                //         ->allowField(true)
+                //         ->isUpdate(true, ['item_order_number' => $item_info['item_order_number']])
+                //         ->save(['item_order_number' => '']);
+                // }
 
                 //标记处理异常状态及时间
                 $this->_distribution_abnormal->where(['id' => $abnormal_info['id']])->update(['status' => 2, 'do_time' => time(), 'do_person' => $admin->nickname]);
@@ -2535,15 +2535,12 @@ class Distribution extends Backend
                     $outstock_item['out_stock_id'] = $outstock_id;
                     $this->_outstock_item->insert($outstock_item);
 
-                    // //条码出库
-                    // $this->_product_bar_code_item
-                    //     ->allowField(true)
-                    //     ->isUpdate(true, ['item_order_number' => $item_info['item_order_number']])
-                    //     ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2, 'is_loss_report_out' => 1, 'out_stock_id' => $outstock_id]);
                     //条码出库
                     $this->_product_bar_code_item
-                        ->where(['item_order_number' => $item_info['item_order_number']])
-                        ->update(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2, 'is_loss_report_out' => 1, 'out_stock_id' => $outstock_id]);
+                        ->allowField(true)
+                        ->isUpdate(true, ['item_order_number' => $item_info['item_order_number']])
+                        ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2, 'is_loss_report_out' => 1, 'out_stock_id' => $outstock_id]);
+
                     //计算出库成本
                     $financecost = new \app\admin\model\finance\FinanceCost();
                     $financecost->outstock_cost($outstock_id, $outstock['out_stock_number']);
