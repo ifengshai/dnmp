@@ -52,15 +52,24 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                     Controller.api.formatter.track_logistics_barline();   //物流妥投概况折线图
                 }, 0)
             })
-            $("#time_str1").on("apply.daterangepicker", function () {
+            $("#time_str9").on("apply.daterangepicker", function () {
                 setTimeout(() => {
                     index_data();   //仓库指标总览
+                }, 0)
+            })
+            $("#time_str9").on("cancel.daterangepicker", function () {
+                setTimeout(() => {
+                    index_data();   //仓库指标总览
+                }, 0)
+            })
+
+            $("#time_str1").on("apply.daterangepicker", function () {
+                setTimeout(() => {
                     stock_measure_overview_platform();   //仓库和站点有关的指标
                 }, 0)
             })
             $("#time_str1").on("cancel.daterangepicker", function () {
                 setTimeout(() => {
-                    index_data();   //仓库指标总览
                     stock_measure_overview_platform();   //仓库和站点有关的指标
                 }, 0)
             })
@@ -101,6 +110,10 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
             })
             $(document).on('change', '#order_platform', function () {
                 stock_measure_overview_platform();
+            });
+            //批量导出xls
+            $('.btn-batch-export-xls').click(function () {
+                window.open(Config.moduleurl + '/supplydatacenter/data_market/timeout_orders', '_blank');
             });
         },
         add: function () {
@@ -168,15 +181,42 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                                     type: 'shadow' //指示器类型。可选项'line' 直线指示器。'shadow' 阴影指示器。'cross' 十字准星指示器。其实是种简写，表示启用两个正交的轴的 axisPointer。
                                 },
                                 formatter: function (param) { //格式化提示信息
-                                    return param[0].name + '<br/>' + param[0].seriesName + '：' + param[0].value;
+                                    return param[0].name + '<br/>' + param[0].seriesName + '：' + param[0].value + '<br/>' + param[1].seriesName + '：' + param[1].value + '%';
                                 }
                             },
-                            xAxis: {
-                                type: 'category'
+                            grid: { //直角坐标系内绘图网格
+                                top: '10%', //grid 组件离容器上侧的距离。
+                                left: '5%', //grid 组件离容器左侧的距离。
+                                right: '10%', //grid 组件离容器右侧的距离。
+                                bottom: '10%', //grid 组件离容器下侧的距离。
+                                containLabel: true //grid 区域是否包含坐标轴的刻度标签。
                             },
-                            yAxis: {
-                                type: 'value'
-                            }
+                            legend: { //图例配置
+                                padding: 5,
+                                top: '2%',
+                                data: ['月平均库存', '采销比']
+                            },
+                            xAxis: [
+                                {
+                                    type: 'category'
+                                }
+                            ],
+                            yAxis: [
+                                {
+                                    type: 'value',
+                                    name: '月平均库存',
+                                    axisLabel: {
+                                        formatter: '{value} '
+                                    }
+                                },
+                                {
+                                    type: 'value',
+                                    name: '采销比',
+                                    axisLabel: {
+                                        formatter: '{value} %'
+                                    }
+                                },
+                            ],
                         }
                     };
                     var options = {
@@ -472,7 +512,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
     return Controller;
 });
 function index_data(){
-    var time_str = $('#time_str1').val();
+    var time_str = $('#time_str9').val();
     Backend.api.ajax({
         url: 'supplydatacenter/data_market/index',
         data: {time_str: time_str}
@@ -480,9 +520,7 @@ function index_data(){
         var stock_measure_overview = ret.data;
         //仓库指标总览
         $('#turnover_rate').html(stock_measure_overview.turnover_rate);
-        $('#stock_sales_rate').html(stock_measure_overview.stock_sales_rate);
         $('#turnover_days_rate').html(stock_measure_overview.turnover_days_rate);
-        $('#month_in_out_rate').html(stock_measure_overview.month_in_out_rate);
         return false;
     }, function (data, ret) {
         Layer.alert(ret.msg);
@@ -500,15 +538,30 @@ function purchase_data(){
         //采购概况
         $('#purchase_num').html(purchase_overview.purchase_num);
         $('#purchase_num_big').html(purchase_overview.purchase_num_big);
+        $('#purchase_num_big_rate').html(purchase_overview.purchase_num_big_rate);
         $('#purchase_num_now').html(purchase_overview.purchase_num_now);
+        $('#purchase_num_now_rate').html(purchase_overview.purchase_num_now_rate);
+
         $('#purchase_amount').html(purchase_overview.purchase_amount);
         $('#purchase_amount_big').html(purchase_overview.purchase_amount_big);
+        $('#purchase_amount_big_rate').html(purchase_overview.purchase_amount_big_rate);
         $('#purchase_amount_now').html(purchase_overview.purchase_amount_now);
+        $('#purchase_amount_now_rate').html(purchase_overview.purchase_amount_now_rate);
+
         $('#purchase_sku_num').html(purchase_overview.purchase_sku_num);
         $('#purchase_sku_num_big').html(purchase_overview.purchase_sku_num_big);
+        $('#purchase_sku_num_big_rate').html(purchase_overview.purchase_sku_num_big_rate);
         $('#purchase_sku_num_now').html(purchase_overview.purchase_sku_num_now);
+        $('#purchase_sku_num_now_rate').html(purchase_overview.purchase_sku_num_now_rate);
+
         $('#purchase_delay_rate').html(purchase_overview.purchase_delay_rate);
+        $('#purchase_delay_rate_big').html(purchase_overview.purchase_delay_rate_big);
+        $('#purchase_delay_rate_now').html(purchase_overview.purchase_delay_rate_now);
+        
         $('#purchase_qualified_rate').html(purchase_overview.purchase_qualified_rate);
+        $('#purchase_qualified_rate_big').html(purchase_overview.purchase_qualified_rate_big);
+        $('#purchase_qualified_rate_now').html(purchase_overview.purchase_qualified_rate_now);
+
         $('#purchase_price').html(purchase_overview.purchase_price);
         $('#purchase_price_big').html(purchase_overview.purchase_price_big);
         $('#purchase_price_now').html(purchase_overview.purchase_price_now);

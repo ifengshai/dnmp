@@ -75,8 +75,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
             table.bootstrapTable({
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
                 pk: 'id',
-                sortName: 'a.sku',
-                sortOrder: 'asc',
+                sortName: 'a.created_at',
+                sortOrder: 'desc',
                 columns: [
                     [
                         { checkbox: true },
@@ -115,6 +115,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                 10: 'Zeelool_de',
                                 11: 'Zeelool_jp',
                                 12: 'Voogueme_acc',
+                                13: '抖音',
+                                14: '阿里巴巴国际站',
                             }, operate: 'IN',
                             formatter: Table.api.formatter.status
                         },

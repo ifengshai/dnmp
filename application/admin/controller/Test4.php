@@ -696,7 +696,7 @@ class Test4 extends Controller
 
         //查询签收的采购单
         $logistics = new \app\admin\model\LogisticsInfo();
-        $purchase_id = $logistics->where(['status' => 1])->column('purchase_id');
+        $purchase_id = $logistics->where(['status' => 1, 'purchase_id' => ['>', 0]])->column('purchase_id');
         $purchase = new \app\admin\model\purchase\PurchaseOrder;
         // $res = $purchase->where(['id' => ['in', $purchase_id], 'purchase_status' => 6])->update(['purchase_status' => 7]);
         //计算SKU总采购数量
@@ -2027,8 +2027,8 @@ class Test4 extends Controller
         $this->outstock = new \app\admin\model\warehouse\Outstock;
         $this->stockparameter = new \app\admin\model\financepurchase\StockParameter;
         $this->item = new \app\admin\model\warehouse\ProductBarCodeItem;
-        $stimestamp = 1611590400;
-        $etimestamp = 1612281600;
+        $stimestamp = 1608868800;
+        $etimestamp = 1614916800;
         // 计算日期段内有多少天
         $days = ($etimestamp - $stimestamp) / 86400 + 1;
         // 循环每天日期
@@ -2382,5 +2382,10 @@ class Test4 extends Controller
             }
             usleep(10000);
         }
+    }
+
+    public function add_plat(){
+        $res = Db::name('magento_platform')->insert(['id'=>13,'name'=>'抖音','prefix'=>'B','create_time'=>time()]);
+        $res = Db::name('magento_platform')->insert(['id'=>14,'name'=>'阿里巴巴国际站','prefix'=>'L','create_time'=>time()]);
     }
 }

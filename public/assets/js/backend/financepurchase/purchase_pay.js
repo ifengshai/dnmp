@@ -27,6 +27,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'id', title: __('Id')},
                         {field: 'order_number', title: __('付款申请单号'), operate: 'LIKE'},
                         {field: 'supplier_name', title: __('供应商名称'), operate: 'LIKE'},
+                        {field: 'purchase_number', title: __('采购单号'), operate: 'LIKE'},
+                        {field: '1688_number', title: __('1688单号'), operate: 'LIKE'},
+                        {field: 'purchase_name', title: __('采购品名'), operate: false},
+                        {field: 'purchase_num', title: __('采购数量'), operate: false},
                         {
                             field: 'pay_type', title: __('付款类型'), custom: { 0: 'success', 1: 'yellow', 2: 'blue', 3: 'danger'},
                             searchList: {1: '预付款', 2: '全款预付', 3: '尾款'},
@@ -39,6 +43,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             searchList: { 0: '新建', 1: '待审核', 2: '审核通过', 3: '审核拒绝', 4: '已完成', 5: '已取消'},
                             formatter: Table.api.formatter.status
                         },
+                        {
+                            field: 'check_user_id', title: __('审批人'),
+                            searchList: { 56: '采购主管', 50: '供应链总监', 1: '总监', 154: '财务经理'},
+                            formatter: Table.api.formatter.status,visible:false
+                        },
+                        {field: 'check_user_nickname', title: __('待审批人'), operate: false},
                         {field: 'create_person', title: __('创建人'), operate: 'LIKE'},
                         {field: 'create_time', title: __('创建时间'), formatter: Table.api.formatter.datetime, operate: 'RANGE', addclass: 'datetimerange', sortable: true},
                         {
@@ -57,6 +67,27 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
                                         return true;
+                                    }
+                                },
+
+                                {
+                                    name: 'detail',
+                                    text: '审批记录',
+                                    title: __('Detail'),
+                                    classname: 'btn btn-xs  btn-primary  btn-dialog',
+                                    icon: 'fa fa-list',
+                                    url: 'financepurchase/purchase_pay/check_detail',
+                                    extend: 'data-area = \'["60%","50%"]\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        if (row.status > 0) {
+                                            //返回true时按钮显示,返回false隐藏
+                                            return true;
+                                        }
+                                        return false;
+                                        
                                     }
                                 },
                                 {
@@ -104,6 +135,41 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     ]
                 ]
             });
+
+             //选项卡切换
+             $('.panel-heading a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+                var field = $(this).data("field");
+                var value = $(this).data("value");
+                if (value == 1) {
+                    $('.btn-open').removeClass('hide');
+                    $('.btn-close').removeClass('hide');
+                } else {
+                    $('.btn-open').addClass('hide');
+                    $('.btn-close').addClass('hide');
+                    value = '';
+                }
+                var options = table.bootstrapTable('getOptions');
+                options.pageNumber = 1;
+                var queryParams = options.queryParams;
+                options.queryParams = function (params) {
+                    var params = queryParams(params);
+                    var filter = params.filter ? JSON.parse(params.filter) : {};
+                    var op = params.op ? JSON.parse(params.op) : {};
+                    if (field == 'label') {
+                        filter[field] = value;
+                    } else {
+                        delete filter.label;
+                    }
+                    params.filter = JSON.stringify(filter);
+                    params.op = JSON.stringify(op);
+                    return params;
+                };
+                table.bootstrapTable('refresh', {});
+                return false;
+            });
+
+            
+
             //审核取消
             $(document).on('click', '.btn-cancel', function (e) {
                 e.preventDefault();
@@ -115,6 +181,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     table.bootstrapTable('refresh');
                 });
             })
+
             //审核通过
             $(document).on('click', '.btn-open', function () {
                 var ids = Table.api.selectedids(table);
@@ -128,13 +195,22 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
 
             //审核拒绝
             $(document).on('click', '.btn-close', function () {
+
                 var ids = Table.api.selectedids(table);
-                Backend.api.ajax({
-                    url: Config.moduleurl + '/financepurchase/purchase_pay/setStatus',
-                    data: {ids: ids, status: 3}
-                }, function (data, ret) {
-                    table.bootstrapTable('refresh');
-                });
+                if (ids.length <= 0) {
+                    Toastr.error('至少选择一个采购单');
+                    return false;
+                }
+                var url = 'financepurchase/purchase_pay/setStatus?ids=' + ids;
+                Fast.api.open(url, __('审核拒绝'), {area: ['900px', '500px']});
+
+                // var ids = Table.api.selectedids(table);
+                // Backend.api.ajax({
+                //     url: Config.moduleurl + '/financepurchase/purchase_pay/setStatus',
+                //     data: {ids: ids, status: 3}
+                // }, function (data, ret) {
+                //     table.bootstrapTable('refresh');
+                // });
             })
             // 为表格绑定事件
             Table.api.bindevent(table);
@@ -214,6 +290,58 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             })
         },
         edit: function () {
+            Controller.api.bindevent();
+        },
+        detail: function () {
+            Controller.api.bindevent();
+        },
+        batch_add: function () {
+            Controller.api.bindevent();
+            $(document).on('click', '.btn-status', function () {
+                $('#status').val(1);
+            })
+        },
+        check_detail:function()
+        {
+            // 初始化表格参数配置
+            Table.api.init({
+                commonSearch: false,
+                search: false,
+                showExport: false,
+                showColumns: false,
+                showToggle: false,
+                pagination: false,
+                extend: {
+                    index_url: 'financepurchase/purchase_pay/check_detail' + location.search + '&ids=' + Config.ids,
+                }
+            });
+
+            var table = $("#table");
+
+            // 初始化表格
+            table.bootstrapTable({
+                url: $.fn.bootstrapTable.defaults.extend.index_url,
+                pk: 'id',
+                sortName: 'id',
+                columns: [
+                    [
+                        { field: 'id', title: __('Id'), operate: false },
+                        { field: 'assignee_id', title: '审批人', operate: false },
+                        { field: 'handle_date', title: '审批时间', operate: false },
+                        { field: 'remarks', title: '备注', operate: false },
+                        {
+                            field: 'audit_status', title: __('审批状态'), custom: { 0: 'success', 1: 'blue', 2: 'danger'},
+                            searchList: {0: '待审核', 1: '通过', 2: '驳回'},
+                            formatter: Table.api.formatter.status
+                        },
+                    ]
+                ]
+            });
+
+            // 为表格绑定事件
+            Table.api.bindevent(table);
+        },
+        setstatus: function () {
             Controller.api.bindevent();
         },
         api: {

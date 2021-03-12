@@ -55,7 +55,7 @@ class NewOrderProcess extends Model
         $map['b.order_type'] = ['<>', 5];
         $map['b.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal']];
         $map['b.site'] = ['in', [1, 2, 3]];
-        return $this->alias('a')->where($map)->join(['fa_order' => 'b'], 'a.order_id=b.id')->field('b.increment_id,b.status,b.created_at,b.site')->group('b.increment_id')->select();
+        return $this->alias('a')->where($map)->join(['fa_order' => 'b'], 'a.order_id=b.id')->field('b.increment_id,b.status,b.created_at,b.site,a.order_prescription_type')->group('b.increment_id')->select();
     }
 
 

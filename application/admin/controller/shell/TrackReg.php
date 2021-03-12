@@ -1361,6 +1361,11 @@ class TrackReg extends Backend
         $order = $process->where('order_prescription_type', 0)->column('order_id');
         foreach ($order as $key => $value) {
             $order_type = $orderitemprocess->where('order_id', $value)->column('order_prescription_type');
+            //查不到结果跳过 防止子单表延迟两分钟查不到数据
+            if (!$order_type) {
+                continue;
+            }
+
             if (in_array(3, $order_type)) {
                 $type = 3;
             } elseif (in_array(2, $order_type)) {
@@ -2364,6 +2369,7 @@ class TrackReg extends Backend
         $this->outstock = new \app\admin\model\warehouse\Outstock;
         $this->stockparameter = new \app\admin\model\financepurchase\StockParameter;
         $this->item = new \app\admin\model\warehouse\ProductBarCodeItem;
+        $this->model = new \app\admin\model\itemmanage\Item;
         $start = date('Y-m-d', strtotime("-1 day"));
         $end = $start . ' 23:59:59';
         //库存主表插入数据

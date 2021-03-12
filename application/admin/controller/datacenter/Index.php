@@ -580,6 +580,7 @@ class Index extends Backend
         $undeliveredOrder = $neworderprocess->undeliveredOrderMessage($map);
 
         $list = collection($undeliveredOrder)->toArray();
+
         $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
 
         //从数据库查询需要的数据
@@ -592,12 +593,14 @@ class Index extends Backend
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "站点")
             ->setCellValue("E1", "是否有工单")
             ->setCellValue("F1", "工单类型")
-            ->setCellValue("G1", "创建人");
+            ->setCellValue("G1", "创建人")
+            ->setCellValue("H1", "处方类型");
+
         foreach ($list as $key => $value) {
 
             $swhere['platform_order'] = $value['increment_id'];
-            $swhere['work_platform'] = 1;
-            $swhere['work_status'] = ['not in', [0, 4, 6]];
+            $swhere['work_platform'] = $value['site'];
+//            $swhere['work_status'] = ['not in', [0,7]]; 产品要求工单状态不判断 只要有就显示
             $work_type = $workorder->where($swhere)->field('work_type,create_user_name')->find();
             if (!empty($work_type)) {
                 $value['work'] = '是';
@@ -644,11 +647,23 @@ class Index extends Backend
                     $value['site'] = 'voogmechic';
                     break;
             }
+            switch ($value['order_prescription_type']) {
+                case 1:
+                    $value['order_prescription_type'] = '仅镜架';
+                    break;
+                case 2:
+                    $value['order_prescription_type'] = '现货处方镜';
+                    break;
+                case 3:
+                    $value['order_prescription_type'] = '定制处方镜';
+                    break;
+            }
 
             $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['site']);
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['work']);
             $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['work_status']);
             $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['create_user_name']);
+            $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['order_prescription_type']);
 
         }
         //设置宽度
