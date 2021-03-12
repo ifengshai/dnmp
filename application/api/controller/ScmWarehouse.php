@@ -2409,12 +2409,10 @@ class ScmWarehouse extends Scm
     {
         $do_type = $this->request->request('do_type');
         $item_sku = $this->request->request("item_data");
-        file_put_contents('/www/wwwroot/mojing/runtime/log/test.log', htmlspecialchars_decode($item_sku) . "\r\n", FILE_APPEND);
         empty($item_sku) && $this->error(__('sku集合不能为空！！'), [], 508);
         $item_sku = json_decode(htmlspecialchars_decode($item_sku), true);
         empty($item_sku) && $this->error(__('sku集合不能为空'), [], 403);
         $item_sku = array_filter($item_sku);
-        file_put_contents('/www/wwwroot/mojing/runtime/log/test.log', serialize($item_sku) . "\r\n", FILE_APPEND);
         $inventory_id = $this->request->request("inventory_id");
         empty($inventory_id) && $this->error(__('盘点单号不能为空'), [], 541);
         //获取盘点单数据
@@ -2439,11 +2437,7 @@ class ScmWarehouse extends Scm
 
         //检测条形码是否已绑定
         foreach ($item_sku as $key => $value) {
-            /*$info_id = $this->_inventory_item->where(['sku' => $value['sku'],'is_add'=>0,'inventory_id'=>['neq',$inventory_id]])->column('id');
-            !empty($info_id) && $this->error(__('SKU=>'.$value['sku'].'存在未完成的盘点单'), [], 543);*/
-            // 
-            // if (count($value['sku_agg']) != count(array_unique($sku_code))) $this->error(__('条形码有重复，请检查'), [], 405);
-
+           
             $sku_code = array_column($value['sku_agg'], 'code');
             //查询条形码是否已绑定过sku
             $where = [];
@@ -2467,7 +2461,6 @@ class ScmWarehouse extends Scm
             //更新数据
             //提交盘点单状态为已完成，保存盘点单状态为盘点中
             $result = $this->_inventory->allowField(true)->save($params, ['id' => $inventory_id]);
-            dump($item_sku);
             if ($result !== false) {
                 // $where_code = [];
                 // $sku_in = [];
@@ -2476,8 +2469,6 @@ class ScmWarehouse extends Scm
                         continue;
                     }
 
-                    echo $k . "\n";
-                    dump($v);
                     $item_map['sku'] = $v['sku'];
                     $item_map['is_del'] = 1;
                     $sku_item = $this->_item->where($item_map)->field('stock,available_stock,distribution_occupy_stock')->find();
@@ -2485,12 +2476,9 @@ class ScmWarehouse extends Scm
                         throw new Exception('SKU=>' . $v['sku'] . '不存在');
                     }
 
-                    //查询库位实时库存
-                    // $real_time_qty = $this->_product_bar_code_item->where(['sku' => $v['sku'],'location_id' => $v['area_id'], 'location_code' => $v['library_name'], 'library_status' => 1])->where("item_order_number=''")->count();
-
+                   
                     //等PDA改为 以此为准
                     $item_list = $this->_inventory_item->where(['inventory_id' => $inventory_id, 'sku' => $v['sku'], 'area_id' => $v['area_id'], 'library_name' => $v['library_name']])->find();
-                    // $item_list = $this->_inventory_item->where(['inventory_id' => $inventory_id, 'sku' => $v['sku']])->find();
                     $save_data = [];
                     $save_data['is_add'] = $is_add; //是否盘点
                     $save_data['inventory_qty'] = $v['inventory_qty'] ?? 0; //盘点数量
@@ -2501,28 +2489,7 @@ class ScmWarehouse extends Scm
                     $save_data['remove_agg'] = count($v['remove_agg']) > 0 ? serialize($v['remove_agg']) : $item_list['remove_agg']; //SKU需移除的条形码集合
                     $this->_inventory_item->where(['inventory_id' => $inventory_id, 'sku' => $v['sku'], 'area_id' => $v['area_id'], 'library_name' => $v['library_name']])->update($save_data);
 
-                    // //盘点单绑定条形码数组组装
-                    // foreach ($v['sku_agg'] as $k_code => $v_code) {
-                    //     if (!empty($v_code)) {
-                    //         $where_code[] = $v_code['code'];
-                    //     }
-                    // }
-                    // //盘点单移除条形码
-                    // if (!empty($v['remove_agg'])) {
-                    //     $code_clear = [
-                    //         'inventory_id' => 0
-                    //     ];
-                    //     $this->_product_bar_code_item->where(['code' => ['in', $v['remove_agg']]])->update($code_clear);
-                    // }
                 }
-
-                // //盘点单绑定条形码执行
-                // if ($where_code) {
-                //     $this->_product_bar_code_item
-                //         ->allowField(true)
-                //         ->isUpdate(true, ['code' => ['in', $where_code]])
-                //         ->save(['inventory_id' => $inventory_id]);
-                // }
             }
             $this->_inventory_item->commit();
             $this->_product_bar_code_item->commit();
