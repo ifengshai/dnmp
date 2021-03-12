@@ -88,6 +88,13 @@ class PurchasePay extends Backend
                 unset($filter['purchase_number']);
             }
 
+            //采购单号筛选
+            if ($filter['1688_number']) {
+                $purchase_id = Db::name('purchase_order')->where(['1688_number' => ['like', '%' . $filter['1688_number'] . '%']])->column('id');
+                $map['purchase_id'] = ['in', $purchase_id];
+                unset($filter['1688_number']);
+            }
+
             unset($filter['label']);
             $this->request->get(['filter' => json_encode($filter)]);
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
@@ -110,6 +117,12 @@ class PurchasePay extends Backend
                 //查询待审核人
                 $userid = Db::name('finance_purchase_workflow_records')->where(['finance_purchase_id'=> $v['id'], 'audit_status' => 0])->value('assignee_id');
                 $list[$k]['check_user_nickname'] = $userlist[$userid];
+
+                $purchase_data = Db::name('purchase_order')->where(['id' => $v['purchase_id']])->find();
+                $list[$k]['1688_number'] = $purchase_data['1688_number'];
+                $list[$k]['purchase_num'] = Db::name('purchase_order_item')->where(['purchase_id' => $v['purchase_id']])->value('purchase_num');
+                $list[$k]['purchase_name'] = $purchase_data['purchase_name'];
+                $list[$k]['purchase_number'] = $purchase_data['purchase_number'];
             }
             $result = array("total" => $total, "rows" => $list);
             return json($result);
