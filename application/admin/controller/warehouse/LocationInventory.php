@@ -21,7 +21,7 @@ use think\Loader;
  */
 class LocationInventory extends Backend
 {
-    
+
     /**
      * StockHouse模型对象
      * @var \app\admin\model\warehouse\StockHouse
@@ -65,21 +65,20 @@ class LocationInventory extends Backend
                 return $this->selectpage();
             }
             $map = [];
+            $maps = [];
             $area = new \app\admin\model\warehouse\WarehouseArea();
             $productbarcodeitem = new ProductBarCodeItem();
             //自定义sku搜索
             $filter = json_decode($this->request->get('filter'), true);
             if ($filter['area_code']) {
                 $map['coding'] = ['like','%'.$filter['area_code'].'%'];
+                $area_id = $area->where($map)->value('id');
+                $maps['area_id'] = $area_id;
                 unset($filter['area_code']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
-            $area_list = $area->where($map)->column('coding','id');
-            $maps = [];
-            if (count($area_list) == 1){
-                $area_id = array_keys($area_list)[0];
-                $maps['area_id'] = $area_id;
-            }
+            $area_list = $area->column('coding','id');
+
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->with(['storehouse1'])
