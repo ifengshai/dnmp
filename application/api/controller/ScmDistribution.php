@@ -669,6 +669,15 @@ class ScmDistribution extends Scm
     {
         empty($item_order_number) && $this->error(__('子订单号不能为空'), [], 403);
 
+        //判断条码是否在库
+        $barcode = $this->request->request('barcode');
+        $count = $this->_product_bar_code_item
+        ->where(['code' => $barcode, 'library_status' => 1])
+        ->count();
+        if ($count < 1) {
+            $this->error(__('条形码非在库状态'), [], 403);
+        }
+
         //获取子订单数据
         $item_process_info = $this->_new_order_item_process
             ->field('id,item_order_number,distribution_status,order_prescription_type,option_id,order_id,site,customize_status,temporary_house_id,abnormal_house_id,magento_order_id')
