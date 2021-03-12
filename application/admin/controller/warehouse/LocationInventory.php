@@ -21,7 +21,7 @@ use think\Loader;
  */
 class LocationInventory extends Backend
 {
-    
+
     /**
      * StockHouse模型对象
      * @var \app\admin\model\warehouse\StockHouse
@@ -77,6 +77,7 @@ class LocationInventory extends Backend
                 unset($filter['area_code']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
+            $area_list = $area->column('coding','id');
 
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
