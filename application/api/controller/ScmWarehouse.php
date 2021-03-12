@@ -2466,6 +2466,7 @@ class ScmWarehouse extends Scm
             //更新数据
             //提交盘点单状态为已完成，保存盘点单状态为盘点中
             $result = $this->_inventory->allowField(true)->save($params, ['id' => $inventory_id]);
+            dump($item_sku);
             if ($result !== false) {
                 // $where_code = [];
                 // $sku_in = [];
@@ -2473,6 +2474,9 @@ class ScmWarehouse extends Scm
                     if (!$v['sku']) {
                         continue;
                     }
+
+                    echo $k . "\n";
+                    dump($v);
                     $item_map['sku'] = $v['sku'];
                     $item_map['is_del'] = 1;
                     $sku_item = $this->_item->where($item_map)->field('stock,available_stock,distribution_occupy_stock')->find();
