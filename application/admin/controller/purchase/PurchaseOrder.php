@@ -133,6 +133,11 @@ class PurchaseOrder extends Backend
      */
     public function add($ids = null)
     {
+        if ($ids){
+            $replenish_list_detail = Db::name('new_product_replenish_list')->where('id',$ids)->find();
+            $supplier_detail = Db::name('supplier')->where('id',$replenish_list_detail['supplier_id'])->find();
+            $this->assign('supplier_detail',$supplier_detail);
+        }
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
 
@@ -299,7 +304,6 @@ class PurchaseOrder extends Backend
             $ids = $ids ? $ids : input('ids');
             $this->list = new \app\admin\model\purchase\NewProductReplenishList;
             $list = $this->list->where('id', 'in', $ids)->select();
-
             $item = new \app\admin\model\itemmanage\Item;
             $supplier = new \app\admin\model\purchase\SupplierSku;
             foreach ($list as &$v) {
@@ -313,7 +317,6 @@ class PurchaseOrder extends Backend
                 $v['supplier_sku'] = $supplier->getSupplierSkuData($v['sku'], $v['supplier_id']);
             }
             $new_old =$item->where('sku',$list[0]['sku'])->value('is_new');
-            unset($v);
             if (count(array_unique(array_column($list, 'supplier_id'))) > 1) $this->error('必须选择相同的供应商！！');
             $this->assign('new_old', $new_old);
             $this->assign('list', $list);
