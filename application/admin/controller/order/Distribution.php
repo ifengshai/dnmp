@@ -2485,6 +2485,7 @@ class Distribution extends Backend
             $this->_item->startTrans();
             $this->_outstock->startTrans();
             $this->_stock_log->startTrans();
+            $this->_product_bar_code_item->startTrans();
             try {
                 //异常库位占用数量-1
                 $this->_stock_house
@@ -2630,6 +2631,7 @@ class Distribution extends Backend
                 $this->_item->commit();
                 $this->_outstock->commit();
                 $this->_stock_log->commit();
+                $this->_product_bar_code_item->commit();
             } catch (PDOException $e) {
                 $this->model->rollback();
                 $this->_distribution_abnormal->rollback();
@@ -2637,6 +2639,7 @@ class Distribution extends Backend
                 $this->_item->rollback();
                 $this->_outstock->rollback();
                 $this->_stock_log->rollback();
+                $this->_product_bar_code_item->rollback();
                 $this->error($e->getMessage());
             } catch (Exception $e) {
                 $this->model->rollback();
@@ -2645,6 +2648,7 @@ class Distribution extends Backend
                 $this->_item->rollback();
                 $this->_outstock->rollback();
                 $this->_stock_log->rollback();
+                $this->_product_bar_code_item->rollback();
                 $this->error($e->getMessage());
             }
 
