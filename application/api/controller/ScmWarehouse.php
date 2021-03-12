@@ -2411,10 +2411,9 @@ class ScmWarehouse extends Scm
         $item_sku = $this->request->request("item_data");
         empty($item_sku) && $this->error(__('sku集合不能为空！！'), [], 508);
         $item_sku = json_decode(htmlspecialchars_decode($item_sku), true);
-        file_put_contents('/www/wwwroot/mojing/runtime/log/test.log', serialize($item_sku) . "\r\n", FILE_APPEND);
         empty($item_sku) && $this->error(__('sku集合不能为空'), [], 403);
         $item_sku = array_filter($item_sku);
-
+        file_put_contents('/www/wwwroot/mojing/runtime/log/test.log', serialize($item_sku) . "\r\n", FILE_APPEND);
         $inventory_id = $this->request->request("inventory_id");
         empty($inventory_id) && $this->error(__('盘点单号不能为空'), [], 541);
         //获取盘点单数据
@@ -2438,7 +2437,7 @@ class ScmWarehouse extends Scm
         }
 
         //检测条形码是否已绑定
-        foreach (array_filter($item_sku) as $key => $value) {
+        foreach ($item_sku as $key => $value) {
             /*$info_id = $this->_inventory_item->where(['sku' => $value['sku'],'is_add'=>0,'inventory_id'=>['neq',$inventory_id]])->column('id');
             !empty($info_id) && $this->error(__('SKU=>'.$value['sku'].'存在未完成的盘点单'), [], 543);*/
             // 
@@ -2470,7 +2469,7 @@ class ScmWarehouse extends Scm
             if ($result !== false) {
                 // $where_code = [];
                 // $sku_in = [];
-                foreach (array_filter($item_sku) as $k => $v) {
+                foreach ($item_sku as $k => $v) {
                     if (!$v['sku']) {
                         continue;
                     }
@@ -2490,7 +2489,7 @@ class ScmWarehouse extends Scm
                     $save_data = [];
                     $save_data['is_add'] = $is_add; //是否盘点
                     $save_data['inventory_qty'] = $v['inventory_qty'] ?? 0; //盘点数量
-                    $save_data['error_qty'] = $save_data['inventory_qty'] - $item_list['real_time_qty']; //误差数量
+                    $save_data['error_qty'] = $v['inventory_qty'] - $item_list['real_time_qty']; //误差数量
                     $save_data['remark'] = $v['remark']; //备注
                     $save_data['real_time_qty'] = $item_list['real_time_qty']; //实时库存即为库位实时库存
                     $save_data['sku_agg'] = count($v['sku_agg']) > 0 ? serialize($v['sku_agg']) : $item_list['sku_agg']; //SKU 条形码集合 
