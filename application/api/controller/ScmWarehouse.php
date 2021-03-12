@@ -3325,6 +3325,13 @@ class ScmWarehouse extends Scm
         if (count(array_filter($sku_agg)) < 1) {
             $this->error(__('条形码数据不能为空！！'), '', 524);
         }
+        foreach ($sku_agg as $k => $v) {
+            //判断当前条码的在库状态
+            $code_status = $this->_product_bar_code_item->where('code', $v['code'])->value('library_status');
+            if ($code_status == 2){
+                $this->error(__($v['code'].'当前不是在库状态，请检查！！'), '', 524);
+            }
+        }
         //当前调拨子单详情
         $transfer_order_item = Db::name('warehouse_transfer_order_item')->where('id', $transfer_order_item_id)->find();
         //调入库位的库容
