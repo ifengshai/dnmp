@@ -2904,9 +2904,6 @@ class ScmWarehouse extends Scm
             if ($list->sku && $list->sku != $sku) {
                 $this->error('条形码和sku不匹配,条形码:' . $code, [], 402);
             }
-            if ($list->library_status != 1) {
-                $this->error('此条形码已出库,条形码:' . $code, [], 403);
-            }
             $this->success('获取成功', [], 200);
         }
         $this->error('网络异常', [], 401);
