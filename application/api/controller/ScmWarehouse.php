@@ -3327,6 +3327,16 @@ class ScmWarehouse extends Scm
         }
         //当前调拨子单详情
         $transfer_order_item = Db::name('warehouse_transfer_order_item')->where('id', $transfer_order_item_id)->find();
+        //调入库位的库容
+        $in_store_house = Db::name('store_house')->where('id',$transfer_order_item['call_in_site_id'])->value('volume');
+        //调入库位当前的库存
+        $in_store_house_stock = $this->_product_bar_code_item
+            ->where(['location_id'=>$transfer_order_item['inarea_id'],'location_code'=>$transfer_order_item['call_in_site'],'library_status'=>1,'item_order_number'=>'','sku'=>$transfer_order_item['sku']])
+            ->count();
+        //当前调入库位的库存加调拨进入的库存不能大于库容
+        if (!empty($in_store_house) && (count(array_filter($sku_agg)) + $in_store_house_stock) > $in_store_house){
+            $this->error(__('调入后超出当前库位库容，请检查！！'), '', 524);
+        }
         empty($transfer_order_item) && $this->error(__('调拨子单不存在'), '', 546);
         $transfer_order_item['status'] == 1 && $this->error(__('调拨子单已提交，不要重复提交'), '', 546);
         $res = false;
