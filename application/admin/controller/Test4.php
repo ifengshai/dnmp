@@ -2406,6 +2406,7 @@ class Test4 extends Controller
 
     public function store_sku()
     {
+        $res = Db::name('store_sku')->where('id','>',4629)->delete();
         $data = Db::name('zzzz_temp')->where('id','>',0)->field('sku,product_number')->select();
         $store_house = Db::name('store_house')->column('id','coding');
         foreach ($data as $k=>$v){
