@@ -3507,6 +3507,9 @@ class ScmWarehouse extends Scm
         if ($transfer_order_item['sku'] != $detail['sku']) {
             $this->error(__('条形码' . $code . 'sku：' . $detail['sku'] . '与当前调拨子单sku不一致请确认后重试'), '', 546);
         }
+        if ($detail['purchase_id'] < 1) {
+            $this->error(__('条形码没有采购单绑定关系,条形码:' . $code, '', 402));
+        }
         // //判断当前扫码的sku是否在当前调出的库位
         // if ($transfer_order_item['call_out_site'] != $detail['location_code']) {
         //     $this->error(__('条形码' . $code . '当前未在调出库位！！' . $transfer_order_item['call_out_site']), '', 546);
