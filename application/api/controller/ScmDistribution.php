@@ -672,10 +672,10 @@ class ScmDistribution extends Scm
 
         //判断条码是否在库
         $barcode = $this->request->request('barcode');
-        $count = $this->_product_bar_code_item
-        ->where(['code' => $barcode, 'library_status' => 1])
-        ->count();
         if (2 == $check_status) {
+            $count = $this->_product_bar_code_item
+            ->where(['code' => $barcode, 'library_status' => 1])
+            ->count();
             if ($count < 1) {
                 $this->error(__('条形码非在库状态'), [], 403);
             }
