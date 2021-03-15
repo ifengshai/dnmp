@@ -85,6 +85,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                     table.bootstrapTable('refresh');
                 });
             })
+
+            //批量打印条形码
+            $('.btn-batch-printed_test').click(function () {
+                var id_params = [];
+                $.each(table.bootstrapTable('getSelections'), function (index, row) {
+                    id_params.push(row['id']);
+                });
+                window.open(Config.moduleurl + '/warehouse/stock_house/stock_print_label/ids/' + id_params.join(','), '_blank');
+            });
         },
         add: function () {
             Controller.api.bindevent();
