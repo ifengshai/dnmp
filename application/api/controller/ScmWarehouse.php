@@ -2757,7 +2757,7 @@ class ScmWarehouse extends Scm
                     $instorck_res = $this->_in_stock->isUpdate(false)->allowField(true)->data($params, true)->save();
 
                     //更新如果入库单id为空 添加入库单id
-                    $this->_product_bar_code_item->where(['inventory_id' => $inventory_id, 'library_status' => 1])
+                    $this->_product_bar_code_item->where(['inventory_id' => $inventory_id, 'library_status' => 1, 'in_stock_id' => 0])
                     ->update(['in_stock_id' => $this->_in_stock->id, 'in_stock_time' => date('Y-m-d H:i:s')]);
 
                     //添加入库信息
@@ -2883,6 +2883,11 @@ class ScmWarehouse extends Scm
             if ($list->sku && $list->sku != $sku) {
                 $this->error('条形码和sku不匹配,条形码:' . $code, [], 402);
             }
+
+            if ($list->purchase_id < 1) {
+                $this->error('条形码没有采购单绑定关系,条形码:' . $code, [], 402);
+            }
+
             $this->success('获取成功', [], 200);
         }
         $this->error('网络异常', [], 401);
