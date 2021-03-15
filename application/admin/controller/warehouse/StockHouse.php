@@ -706,7 +706,7 @@ EOF;
         //     }
         // }
         foreach ($data as $k => $v) {
-            $result = $this->model->insert(['coding' => $v, 'area_id' => 2,'createtime' => date('y-m-d h:i:s', time()), 'create_person' => $this->auth->username]);
+            $result = $this->model->insert(['coding' => $v, 'area_id' => 1,'createtime' => date('y-m-d h:i:s', time()), 'create_person' => $this->auth->username]);
         }
         if ($result) {
             $this->success('导入成功！！');
