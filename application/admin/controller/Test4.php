@@ -2400,7 +2400,7 @@ class Test4 extends Controller
         foreach ($store_sku as $k=>$v){
             $res = Db::name('product_barcode_item')->where('sku',$v['sku'])->update(['location_code'=>$v['coding'],'location_id'=>$v['area_id'],'location_code_id'=>$v['store_id']]);
             echo $v['sku'].'更新'.$res.'条数据 is ok'."\n";
-            // usleep(10000);
+            usleep(10000);
         }
     }
 }
