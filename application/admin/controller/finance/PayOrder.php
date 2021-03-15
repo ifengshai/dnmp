@@ -106,7 +106,7 @@ class PayOrder extends Backend
         return $this->view->fetch();
     }
 
-    
+
 
     /*
      * 创建付款单
@@ -281,7 +281,7 @@ class PayOrder extends Backend
     {
         $id = input('ids');
         //更改状态
-        $this->payorder->where('id', $id)->update(['status' => 4]);
+        $this->payorder->where('id', $id)->update(['status' => 4, 'pay_time' => time()]);
         //获取付款单下所有的采购单id
         $pay_order_item = $this->payorder_item->where('pay_id', $id)->where('pay_type', 'in', '1,2')->field('purchase_order_id,pay_type')->select();
         foreach ($pay_order_item as $key => $value) {
@@ -539,6 +539,8 @@ class PayOrder extends Backend
     {
         //获取付款单信息
         $pay_order = $this->payorder->where('id', $ids)->find();
+
+        $pay_order->pay_time = $pay_order->pay_time ? date('Y-m-d H:i:s', $pay_order->pay_time) : '';
         //获取付款单子单结算信息
         $settle = $this->payorder_item->alias('a')
             ->field('a.*,b.create_person,b.purchase_type,b.1688_number,b.purchase_number')
