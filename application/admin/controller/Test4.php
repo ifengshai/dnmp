@@ -2403,4 +2403,14 @@ class Test4 extends Controller
             usleep(10000);
         }
     }
+
+    public function store_sku()
+    {
+        $data = Db::name('zzzz_temp')->where('id','>',0)->field('sku,product_number')->select();
+        $store_house = Db::name('store_house')->column('id','coding');
+        foreach ($data as $k=>$v){
+            $data[$k]['store_id'] =$store_house[$v['product_number']];
+            Db::name('store_sku')->insert(['sku'=>$v['sku'],'store_id'=>$v['store_id'],'create_person'=>'Admin','createtime'=>date("Y-m-d H:i:s")]);
+        }
+    }
 }
