@@ -281,7 +281,7 @@ class PayOrder extends Backend
     {
         $id = input('ids');
         //更改状态
-        $this->payorder->where('id', $id)->update(['status' => 4, 'pay_time' => time()]);
+        $this->payorder->where('id', $id)->update(['status' => 4, 'pay_time' => time(), 'pay_person' => session('admin.nickname')]);
         //获取付款单下所有的采购单id
         $pay_order_item = $this->payorder_item->where('pay_id', $id)->where('pay_type', 'in', '1,2')->field('purchase_order_id,pay_type')->select();
         foreach ($pay_order_item as $key => $value) {
