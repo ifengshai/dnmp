@@ -2385,7 +2385,7 @@ class Test4 extends Controller
     }
 
     public function add_plat(){
-        $res = Db::name('magento_platform')->insert(['id'=>13,'name'=>'抖音','prefix'=>'B','create_time'=>time()]);
-        $res = Db::name('magento_platform')->insert(['id'=>14,'name'=>'阿里巴巴国际站','prefix'=>'L','create_time'=>time()]);
+        $res = Db::name('magento_platform')->where(['id'=>13])->update(['name'=>'zeelool_cn','prefix'=>'B','create_time'=>time()]);
+        $res = Db::name('magento_platform')->where(['id'=>14])->update(['name'=>'alibaba','prefix'=>'L','create_time'=>time()]);
     }
 }
