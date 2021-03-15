@@ -2912,7 +2912,7 @@ class ScmWarehouse extends Scm
                 $this->error('条形码和sku不匹配,条形码:' . $code, [], 402);
             }
 
-            if ($list->purchase_id > 0) {
+            if ($list->purchase_id < 1) {
                 $this->error('条形码没有采购单绑定关系,条形码:' . $code, [], 402);
             }
 
