@@ -2785,11 +2785,8 @@ class ScmWarehouse extends Scm
                     $instorck_res = $this->_in_stock->isUpdate(false)->allowField(true)->data($params, true)->save();
 
                     //更新如果入库单id为空 添加入库单id
-                    if ($sku_code) {
-                        $this->_product_bar_code_item
-                            ->where(['inventory_id' => $inventory_id, 'library_status' => 1])
-                            ->update(['in_stock_id' => $this->_in_stock->id, 'in_stock_time' => date('Y-m-d H:i:s')]);
-                    }
+                    $this->_product_bar_code_item->where(['inventory_id' => $inventory_id, 'library_status' => 1])
+                    ->update(['in_stock_id' => $this->_in_stock->id, 'in_stock_time' => date('Y-m-d H:i:s')]);
 
                     //添加入库信息
                     if ($instorck_res !== false) {
