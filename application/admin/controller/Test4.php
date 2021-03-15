@@ -2388,4 +2388,19 @@ class Test4 extends Controller
         $res = Db::name('magento_platform')->where(['id'=>13])->update(['name'=>'zeelool_cn','prefix'=>'B','create_time'=>time()]);
         $res = Db::name('magento_platform')->where(['id'=>14])->update(['name'=>'alibaba','prefix'=>'L','create_time'=>time()]);
     }
+
+    public function product_bar_code_warehouse()
+    {
+        $store_sku = Db::name('store_sku')
+            ->alias('a')
+            ->join(['fa_store_house' => 'b'], 'a.store_id=b.id')
+            ->where('a.is_del',1)
+            ->field('a.sku,a.store_id,b.id,b.coding,b.area_id')
+            ->select();
+        foreach ($store_sku as $k=>$v){
+            $res = Db::name('product_barcode_item')->where('sku',$v['sku'])->update(['location_code'=>$v['coding'],'location_id'=>$v['area_id'],'location_code_id'=>$v['store_id']]);
+            echo $v['sku'].'更新'.$res.'条数据 is ok'."\n";
+            // usleep(10000);
+        }
+    }
 }
