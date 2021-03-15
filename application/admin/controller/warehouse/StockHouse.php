@@ -20,7 +20,7 @@ use think\Loader;
  */
 class StockHouse extends Backend
 {
-    
+
     /**
      * StockHouse模型对象
      * @var \app\admin\model\warehouse\StockHouse
@@ -31,7 +31,7 @@ class StockHouse extends Backend
      * 无需鉴权的方法,但需要登录
      * @var array
      */
-    protected $noNeedRight = ['print_label','stock_print_label'];
+    protected $noNeedRight = ['print_label', 'stock_print_label'];
 
     public function _initialize()
     {
@@ -39,7 +39,7 @@ class StockHouse extends Backend
         $this->model = new \app\admin\model\warehouse\StockHouse;
 
     }
-    
+
     /**
      * 默认生成的控制器所继承的父类中有index/add/edit/del/multi五个基础方法、destroy/restore/recyclebin三个回收站方法
      * 因此在当前控制器中可不用编写增删改查的代码,除非需要自己控制这部分逻辑
@@ -60,13 +60,13 @@ class StockHouse extends Backend
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
-                ->where(['type'=>1])
+                ->where(['type' => 1])
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
-                ->where(['type'=>1])
+                ->where(['type' => 1])
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
@@ -79,8 +79,8 @@ class StockHouse extends Backend
         }
         return $this->view->fetch();
     }
-    
-     /**
+
+    /**
      * 添加
      */
     public function add()
@@ -95,9 +95,9 @@ class StockHouse extends Backend
                 }
 
                 //判断选择的库位是否已存在
-                if(2 == $type){
+                if (2 == $type) {
                     $params['location'] = $params['coding'];
-                    $params['coding'] = $params['subarea'].'-'.$params['location'];
+                    $params['coding'] = $params['subarea'] . '-' . $params['location'];
                 }
                 $map['type'] = $type;
                 $map['coding'] = $params['coding'];
@@ -136,13 +136,13 @@ class StockHouse extends Backend
             $this->error(__('Parameter %s can not be empty', ''));
         }
         $this->view->assign("type", $type);
-//        $arr = [];
-//        $kuweihao = $this->shelf_number1();
-//        foreach ($kuweihao as $k=>$v){
-//            $arr[$v] = $v;
-//        }
-        $arr =['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
-        $this->assign('shelf_number',$arr);
+        //        $arr = [];
+        //        $kuweihao = $this->shelf_number1();
+        //        foreach ($kuweihao as $k=>$v){
+        //            $arr[$v] = $v;
+        //        }
+        $arr = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
+        $this->assign('shelf_number', $arr);
         return $this->view->fetch();
     }
 
@@ -169,9 +169,9 @@ class StockHouse extends Backend
                 $params = $this->preExcludeFields($params);
 
                 //判断选择的库位是否已存在
-                if(2 == $type){
+                if (2 == $type) {
                     $params['location'] = $params['coding'];
-                    $params['coding'] = $params['subarea'].'-'.$params['location'];
+                    $params['coding'] = $params['subarea'] . '-' . $params['location'];
                 }
                 $map['type'] = $type;
                 $map['coding'] = $params['coding'];
@@ -209,13 +209,13 @@ class StockHouse extends Backend
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
-//        $arr = [];
-//        $kuweihao = $this->shelf_number1();
-//        foreach ($kuweihao as $k=>$v){
-//            $arr[$v] = $v;
-//        }
-        $arr =['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
-        $this->assign('shelf_number',$arr);
+        //        $arr = [];
+        //        $kuweihao = $this->shelf_number1();
+        //        foreach ($kuweihao as $k=>$v){
+        //            $arr[$v] = $v;
+        //        }
+        $arr = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
+        $this->assign('shelf_number', $arr);
         $this->view->assign("type", $type);
         $this->view->assign("row", $row);
         return $this->view->fetch();
@@ -254,13 +254,13 @@ class StockHouse extends Backend
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
-                ->where(['type'=>2])
+                ->where(['type' => 2])
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
-                ->where(['type'=>2])
+                ->where(['type' => 2])
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
@@ -288,13 +288,13 @@ class StockHouse extends Backend
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
-                ->where(['type'=>3])
+                ->where(['type' => 3])
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
-                ->where(['type'=>3])
+                ->where(['type' => 3])
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
@@ -322,13 +322,13 @@ class StockHouse extends Backend
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
-                ->where(['type'=>4])
+                ->where(['type' => 4])
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
-                ->where(['type'=>4])
+                ->where(['type' => 4])
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
@@ -347,14 +347,13 @@ class StockHouse extends Backend
      */
     public function stock_print_label($ids = null)
     {
-        
+
         $stock_house_info = $this->model
-            ->where(['id' => ['in',$ids]])
+            ->where(['id' => ['in', $ids]])
             ->field('status,subarea,coding')
-            ->select()
-        ;
+            ->select();
         $stock_house_info = collection($stock_house_info)->toArray();
-        
+
         $status_arr = array_column($stock_house_info, 'status');
         if (in_array(2, $status_arr)) {
             $this->error('禁用状态无法打印！');
@@ -376,24 +375,24 @@ EOF;
 
         $file_content = '';
         foreach ($stock_house_info as $key => $value) {
-                //检测文件夹
-                $dir = ROOT_PATH . "public" . DS . "uploads" . DS . "stock_house" . DS . "all";
-                !file_exists($dir) && mkdir($dir, 0777, true);
+            //检测文件夹
+            $dir = ROOT_PATH . "public" . DS . "uploads" . DS . "stock_house" . DS . "all";
+            !file_exists($dir) && mkdir($dir, 0777, true);
 
-                //生成条形码
-                $fileName = $dir . DS . $value['coding'] .".png";
-                $this->generate_barcode($value['coding'], $fileName);
+            //生成条形码
+            $fileName = $dir . DS . $value['coding'] . ".png";
+            $this->generate_barcode($value['coding'], $fileName);
 
-                //拼接条形码
-                $img_url = "/uploads/stock_house/all/{$value['coding']}.png";
-                $file_content .= "
+            //拼接条形码
+            $img_url = "/uploads/stock_house/all/{$value['coding']}.png";
+            $file_content .= "
 <div style='display:list-item;margin: 0mm auto;padding-top:4mm;padding-right:2mm;text-align:center;'>
 <p>库位条形码</p>
 <img src='" . $img_url . "' style='width:36mm'>
 </div>";
         }
 
-    echo $file_header . $file_content;
+        echo $file_header . $file_content;
     }
 
     /**
@@ -401,14 +400,13 @@ EOF;
      */
     public function print_label($ids = null)
     {
-        
+
         $stock_house_info = $this->model
-            ->where(['id' => ['in',$ids]])
+            ->where(['id' => ['in', $ids]])
             ->field('status,subarea,coding')
-            ->select()
-        ;
+            ->select();
         $stock_house_info = collection($stock_house_info)->toArray();
-        
+
         $status_arr = array_column($stock_house_info, 'status');
         if (in_array(2, $status_arr)) {
             $this->error('禁用状态无法打印！');
@@ -428,26 +426,26 @@ table.addpro.re tbody td{ position:relative}
 </style>
 EOF;
 
-        
+
         foreach ($stock_house_info as $key => $value) {
-                //检测文件夹
-                $dir = ROOT_PATH . "public" . DS . "uploads" . DS . "stock_house" . DS . "merge_shelf";
-                !file_exists($dir) && mkdir($dir, 0777, true);
+            //检测文件夹
+            $dir = ROOT_PATH . "public" . DS . "uploads" . DS . "stock_house" . DS . "merge_shelf";
+            !file_exists($dir) && mkdir($dir, 0777, true);
 
-                //生成条形码
-                $fileName = $dir . DS . $value['coding'] .".png";
-                $this->generate_barcode($value['coding'], $fileName);
+            //生成条形码
+            $fileName = $dir . DS . $value['coding'] . ".png";
+            $this->generate_barcode($value['coding'], $fileName);
 
-                //拼接条形码
-                $img_url = "/uploads/stock_house/merge_shelf/{$value['coding']}.png";
-                $file_content .= "
+            //拼接条形码
+            $img_url = "/uploads/stock_house/merge_shelf/{$value['coding']}.png";
+            $file_content .= "
 <div style='display:list-item;margin: 0mm auto;padding-top:4mm;padding-right:2mm;text-align:center;'>
 <p>合单架库位条形码</p>
 <img src='" . $img_url . "' style='width:36mm'>
 </div>";
         }
 
-    echo $file_header . $file_content;
+        echo $file_header . $file_content;
     }
 
     /**
@@ -505,6 +503,112 @@ EOF;
     /**
      * 导入库位数据
      */
+    public function import1()
+    {
+        $file = $this->request->request('file');
+        if (!$file) {
+            $this->error(__('Parameter %s can not be empty', 'file'));
+        }
+        $filePath = ROOT_PATH . DS . 'public' . DS . $file;
+        if (!is_file($filePath)) {
+            $this->error(__('No results were found'));
+        }
+        //实例化reader
+        $ext = pathinfo($filePath, PATHINFO_EXTENSION);
+        if (!in_array($ext, ['csv', 'xls', 'xlsx'])) {
+            $this->error(__('Unknown data format'));
+        }
+        if ($ext === 'csv') {
+            $file = fopen($filePath, 'r');
+            $filePath = tempnam(sys_get_temp_dir(), 'import_csv');
+            $fp = fopen($filePath, "w");
+            $n = 0;
+            while ($line = fgets($file)) {
+                $line = rtrim($line, "\n\r\0");
+                $encoding = mb_detect_encoding($line, ['utf-8', 'gbk', 'latin1', 'big5']);
+                if ($encoding != 'utf-8') {
+                    $line = mb_convert_encoding($line, 'utf-8', $encoding);
+                }
+                if ($n == 0 || preg_match('/^".*"$/', $line)) {
+                    fwrite($fp, $line . "\n");
+                } else {
+                    fwrite($fp, '"' . str_replace(['"', ','], ['""', '","'], $line) . "\"\n");
+                }
+                $n++;
+            }
+            fclose($file) || fclose($fp);
+
+            $reader = new Csv();
+        } elseif ($ext === 'xls') {
+            $reader = new Xls();
+        } else {
+            $reader = new Xlsx();
+        }
+
+        //导入文件首行类型,默认是注释,如果需要使用字段名称请使用name
+        //$importHeadType = isset($this->importHeadType) ? $this->importHeadType : 'comment';
+        //模板文件列名
+        //        $listName = ['折射率', '镜片类型', 'SPH', 'CYL', '库存数量', '镜片价格'];
+        try {
+            if (!$PHPExcel = $reader->load($filePath)) {
+                $this->error(__('Unknown data format'));
+            }
+            $currentSheet = $PHPExcel->getSheet(0);  //读取文件中的第一个工作表
+            $allColumn = $currentSheet->getHighestDataColumn(); //取得最大的列号
+            $allRow = $currentSheet->getHighestRow(); //取得一共有多少行
+            $maxColumnNumber = Coordinate::columnIndexFromString($allColumn);
+
+            $fields = [];
+            for ($currentRow = 1; $currentRow <= 1; $currentRow++) {
+                for ($currentColumn = 1; $currentColumn <= $maxColumnNumber; $currentColumn++) {
+                    $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getValue();
+                    $fields[] = $val;
+                }
+            }
+            //模板文件不正确
+            //            if ($listName !== $fields) {
+            //                throw new Exception("模板文件不正确！！");
+            //            }
+
+            $data = [];
+            for ($currentRow = 2; $currentRow <= $allRow; $currentRow++) {
+                for ($currentColumn = 1; $currentColumn <= $maxColumnNumber; $currentColumn++) {
+                    $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getCalculatedValue();
+                    $data[$currentRow - 2][$currentColumn - 1] = is_null($val) ? '' : $val;
+                }
+            }
+        } catch (Exception $exception) {
+            $this->error($exception->getMessage());
+        }
+        if (!$data) {
+            $this->error('未导入任何数据！！');
+        }
+        //检测库存编码是否有重复
+        $list = array_column($data, '0');
+        if (count($list) != count(array_unique($list))) {
+            $this->error('库存编码有重复！！请仔细核对库存编码');
+        }
+
+        //批量添加产品
+        foreach ($data as $k => $v) {
+            //检测库存编码是否已入库
+            $findDetection = $this->model->where('coding', $v[0])->find();
+            if ($findDetection) {
+                $result = $this->model->save(['coding' => $v[0], 'library_name' => $v[1], 'remark' => $v[2], 'create_person' => $this->auth->username, 'createtime' => date('y-m-d h:i:s', time())], ['id' => $findDetection['id']]);
+            } else {
+                $result = $this->model->insert(['coding' => $v[0], 'library_name' => $v[1], 'remark' => $v[2], 'createtime' => date('y-m-d h:i:s', time()), 'create_person' => $this->auth->username]);
+            }
+        }
+        if ($result) {
+            $this->success('导入成功！！');
+        } else {
+            $this->error('导入失败！！');
+        }
+    }
+
+    /**
+     * 导入库位数据
+     */
     public function import()
     {
         $file = $this->request->request('file');
@@ -550,7 +654,7 @@ EOF;
         //导入文件首行类型,默认是注释,如果需要使用字段名称请使用name
         //$importHeadType = isset($this->importHeadType) ? $this->importHeadType : 'comment';
         //模板文件列名
-//        $listName = ['折射率', '镜片类型', 'SPH', 'CYL', '库存数量', '镜片价格'];
+        //        $listName = ['折射率', '镜片类型', 'SPH', 'CYL', '库存数量', '镜片价格'];
         try {
             if (!$PHPExcel = $reader->load($filePath)) {
                 $this->error(__('Unknown data format'));
@@ -568,9 +672,9 @@ EOF;
                 }
             }
             //模板文件不正确
-//            if ($listName !== $fields) {
-//                throw new Exception("模板文件不正确！！");
-//            }
+            //            if ($listName !== $fields) {
+            //                throw new Exception("模板文件不正确！！");
+            //            }
 
             $data = [];
             for ($currentRow = 2; $currentRow <= $allRow; $currentRow++) {
@@ -585,21 +689,24 @@ EOF;
         if (!$data) {
             $this->error('未导入任何数据！！');
         }
-        //检测库存编码是否有重复
-        $list = array_column($data,'0');
-        if (count($list) != count(array_unique($list))) {
-            $this->error('库存编码有重复！！请仔细核对库存编码');
-        }
-
+        // //检测库存编码是否有重复
+        $list = array_column($data, '0');
+        // if (count($list) != count(array_unique($list))) {
+        //     $this->error('库存编码有重复！！请仔细核对库存编码');
+        // }
+        $data = array_unique(array_column($data, '0'));
         //批量添加产品
+        // foreach ($data as $k => $v) {
+        //     //检测库存编码是否已入库
+        //     $findDetection  = $this->model->where('coding',$v[0])->find();
+        //     if ($findDetection){
+        //         $result = $this->model->save(['coding'=>$v[0],'library_name'=>$v[1],'remark'=>$v[2],'create_person'=>$this->auth->username,'createtime'=>date('y-m-d h:i:s',time())],['id'=>$findDetection['id']]);
+        //     }else{
+        //         $result = $this->model->insert(['coding'=>$v[0],'library_name'=>$v[1],'remark'=>$v[2],'createtime'=>date('y-m-d h:i:s',time()),'create_person'=>$this->auth->username]);
+        //     }
+        // }
         foreach ($data as $k => $v) {
-            //检测库存编码是否已入库
-            $findDetection  = $this->model->where('coding',$v[0])->find();
-            if ($findDetection){
-                $result = $this->model->save(['coding'=>$v[0],'library_name'=>$v[1],'remark'=>$v[2],'create_person'=>$this->auth->username,'createtime'=>date('y-m-d h:i:s',time())],['id'=>$findDetection['id']]);
-            }else{
-                $result = $this->model->insert(['coding'=>$v[0],'library_name'=>$v[1],'remark'=>$v[2],'createtime'=>date('y-m-d h:i:s',time()),'create_person'=>$this->auth->username]);
-            }
+            $result = $this->model->insert(['coding' => $v, 'area_id' => 2,'createtime' => date('y-m-d h:i:s', time()), 'create_person' => $this->auth->username]);
         }
         if ($result) {
             $this->success('导入成功！！');
@@ -617,6 +724,7 @@ EOF;
         $repeat_arr = array_diff_assoc($arr, $unique_arr);
         return $repeat_arr;
     }
+
     //跑老的库位编码添加货架号字段
     public function shelf_number()
     {
@@ -628,6 +736,7 @@ EOF;
         }
         $this->model->isUpdate()->saveAll($shelf_number);
     }
+
     public function shelf_number1()
     {
         $data = (new \app\admin\model\warehouse\StockHouse())->get_shelf_number();
