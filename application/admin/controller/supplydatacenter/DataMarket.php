@@ -1175,33 +1175,76 @@ class DataMarket extends Backend
     //导出超时订单的详细数据
     public function timeout_orders()
     {
-        $sql1 = "SELECT p.increment_id,o.created_at,o.status,p.order_prescription_type,o.payment_time,o.site,p.delivery_time   FROM `fa_order_process` `p` INNER JOIN `fa_order` `o` ON `p`.`increment_id` = `o`.`increment_id` 
-WHERE `o`.`status` IN ( 'free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal','payment_review') 
-	AND `p`.`order_prescription_type` = 1 
-	AND `p`.`delivery_time` BETWEEN 1590463258 
-	AND unix_timestamp(now())
-	AND ( p.delivery_time - o.payment_time )/ 3600 > 24 GROUP BY `p`.`order_id` ORDER BY `p`.`delivery_time` ASC";
-        $sql2 = "SELECT p.increment_id,o.created_at,o.status,p.order_prescription_type,o.payment_time,o.site,p.delivery_time   FROM `fa_order_process` `p` INNER JOIN `fa_order` `o` ON `p`.`increment_id` = `o`.`increment_id` 
-WHERE `o`.`status` IN ( 'free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal','payment_review') 
-	AND `p`.`order_prescription_type` = 2 
-	AND `p`.`delivery_time` BETWEEN 1590463258 
-	AND unix_timestamp(now())
-	AND ( p.delivery_time - o.payment_time )/ 3600 > 72 GROUP BY
-	`p`.`order_id` ORDER BY
-	`p`.`delivery_time` ASC";
-        $sql3 = "SELECT p.increment_id,o.created_at,o.status,p.order_prescription_type,o.payment_time,o.site,p.delivery_time   FROM `fa_order_process` `p` INNER JOIN `fa_order` `o` ON `p`.`increment_id` = `o`.`increment_id` 
-WHERE `o`.`status` IN ( 'free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal','payment_review') 
-	AND `p`.`order_prescription_type` = 3
-	AND `p`.`delivery_time` BETWEEN 1590463258 
-	AND unix_timestamp(now())
-	AND ( p.delivery_time - o.payment_time )/ 3600 > 168 GROUP BY
-	`p`.`order_id` ORDER BY
-	`p`.`delivery_time` ASC";
 
-        $NewOrderProcess = Db::connect('database.db_mojing_order');
-        $list1 = $NewOrderProcess->query($sql1);
-        $list2 = $NewOrderProcess->query($sql2);
-        $list3 = $NewOrderProcess->query($sql3);
+        if ($_GET['time_str']){
+            $time = explode(' - ',$_GET['time_str']);
+            $startime = strtotime($time[0]);
+            $endtime = strtotime($time[1]);
+
+        }else{
+            $startime  = strtotime('-7 day');
+            $endtime  = time();
+        }
+        $map['p.delivery_time'] = ['between',[$startime,$endtime]];
+        $deve_time_one[] = ['exp', Db::raw("( p.delivery_time - o.payment_time )/ 3600 > 24")];
+        $deve_time_two[] = ['exp', Db::raw("( p.delivery_time - o.payment_time )/ 3600 > 72")];
+        $deve_time_three[] = ['exp', Db::raw("( p.delivery_time - o.payment_time )/ 3600 > 168")];
+        $deve_time_one['p.order_prescription_type'] =1;
+        $deve_time_two['p.order_prescription_type'] =2;
+        $deve_time_three['p.order_prescription_type'] =3;
+        $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered','complete']];
+        $table = Db::connect('database.db_mojing_order');
+        $list1 = $table->table('fa_order_process')
+            ->alias('p')
+            ->join('fa_order o','p.increment_id = o.increment_id')
+            ->field('p.increment_id,o.created_at,o.status,p.order_prescription_type,o.payment_time,o.site,p.delivery_time')
+            ->where($map)
+            ->where($deve_time_one)
+            ->select();
+        $list2 = $table->table('fa_order_process')
+            ->alias('p')
+            ->join('fa_order o','p.increment_id = o.increment_id')
+            ->field('p.increment_id,o.created_at,o.status,p.order_prescription_type,o.payment_time,o.site,p.delivery_time')
+            ->where($map)
+            ->where($deve_time_two)
+            ->select();
+        $list3 = $table->table('fa_order_process')
+            ->alias('p')
+            ->join('fa_order o','p.increment_id = o.increment_id')
+            ->field('p.increment_id,o.created_at,o.status,p.order_prescription_type,o.payment_time,o.site,p.delivery_time')
+            ->where($map)
+            ->where($deve_time_three)
+            ->select();
+
+//
+//        $sql1 = "SELECT p.increment_id,o.created_at,o.status,p.order_prescription_type,o.payment_time,o.site,p.delivery_time   FROM `fa_order_process` `p` INNER JOIN `fa_order` `o` ON `p`.`increment_id` = `o`.`increment_id`
+//WHERE `o`.`status` IN ( 'free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal','payment_review')
+//	AND `p`.`order_prescription_type` = 1
+//	AND `p`.`delivery_time` BETWEEN $startime
+//	AND $endtime
+//	AND ( p.delivery_time - o.payment_time )/ 3600 > 24 GROUP BY `p`.`order_id` ORDER BY `p`.`delivery_time` ASC";
+//        $sql2 = "SELECT p.increment_id,o.created_at,o.status,p.order_prescription_type,o.payment_time,o.site,p.delivery_time   FROM `fa_order_process` `p` INNER JOIN `fa_order` `o` ON `p`.`increment_id` = `o`.`increment_id`
+//WHERE `o`.`status` IN ( 'free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal','payment_review')
+//	AND `p`.`order_prescription_type` = 2
+//	AND `p`.`delivery_time` BETWEEN 1590463258
+//	AND unix_timestamp(now())
+//	AND ( p.delivery_time - o.payment_time )/ 3600 > 72 GROUP BY
+//	`p`.`order_id` ORDER BY
+//	`p`.`delivery_time` ASC";
+//        $sql3 = "SELECT p.increment_id,o.created_at,o.status,p.order_prescription_type,o.payment_time,o.site,p.delivery_time   FROM `fa_order_process` `p` INNER JOIN `fa_order` `o` ON `p`.`increment_id` = `o`.`increment_id`
+//WHERE `o`.`status` IN ( 'free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal','payment_review')
+//	AND `p`.`order_prescription_type` = 3
+//	AND `p`.`delivery_time` BETWEEN 1590463258
+//	AND unix_timestamp(now())
+//	AND ( p.delivery_time - o.payment_time )/ 3600 > 168 GROUP BY
+//	`p`.`order_id` ORDER BY
+//	`p`.`delivery_time` ASC";
+//
+//        $NewOrderProcess = Db::connect('database.db_mojing_order');
+//        $list1 = $NewOrderProcess->query($sql1);
+//        $list2 = $NewOrderProcess->query($sql2);
+//        $list3 = $NewOrderProcess->query($sql3);
+
         $list = array_merge($list1, $list2, $list3);
         $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
 
@@ -1215,13 +1258,14 @@ WHERE `o`.`status` IN ( 'free_processing', 'processing', 'paypal_reversed', 'pay
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "支付时间")
             ->setCellValue("E1", "站点")
             ->setCellValue("F1", "是否有工单")
-            ->setCellValue("G1", "打印面单时间");
+            ->setCellValue("G1", "打印面单时间")
+            ->setCellValue("H1", "问题类型");
         foreach ($list as $key => $value) {
 
             $swhere['platform_order'] = $value['increment_id'];
             $swhere['work_platform'] = 1;
 //            $swhere['work_status'] = ['not in', [0, 4, 6]]; 工单类型不做判断
-            $work_type = $workorder->where($swhere)->field('work_type,create_user_name')->find();
+            $work_type = $workorder->where($swhere)->field('work_type,create_user_name,problem_type_content')->find();
             if (!empty($work_type)) {
                 $value['work'] = '是';
             } else {
@@ -1270,6 +1314,7 @@ WHERE `o`.`status` IN ( 'free_processing', 'processing', 'paypal_reversed', 'pay
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['site']);
             $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['work']);
             $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), date('Y-m-d H:i:s', $value['delivery_time']));
+            $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['problem_type_content']);
 
 
         }
@@ -1281,6 +1326,7 @@ WHERE `o`.`status` IN ( 'free_processing', 'processing', 'paypal_reversed', 'pay
         $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(20);
         //设置边框
         $border = [
             'borders' => [
@@ -1297,7 +1343,7 @@ WHERE `o`.`status` IN ( 'free_processing', 'processing', 'paypal_reversed', 'pay
         $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
         $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
 
-        $spreadsheet->getActiveSheet()->getStyle('A1:G' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle('A1:H' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         $spreadsheet->setActiveSheetIndex(0);
 
         $format = 'xlsx';
