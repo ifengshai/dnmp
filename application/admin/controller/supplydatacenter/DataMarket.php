@@ -1306,7 +1306,7 @@ class DataMarket extends Backend
 
 
             $csv[$key]['delivery_time'] = $value['delivery_time']; //订单金额
-            $csv[$key]['order_prescription_type'] = $work_type['order_prescription_type']; //订单金额
+            $csv[$key]['order_prescription_type'] = $work_type['problem_type_content']; //订单金额
         }
         dump($csv);die();
         $headlist = [
