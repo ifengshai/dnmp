@@ -1311,9 +1311,10 @@ class DataMarket extends Backend
             '支付时间', '站点','是否有工单',
             '打印面单时间', '问题类型',
         ];
-        $fileName = '超时订单的数据'.date('Y-m-d H:i:s',time());
-//        $path = "/uploads/";
-        Excel::exportExcel($csv, 'csv',$fileName);
+        $fileName = '超时订单的数据'.date('Y-m-d',time());
+        $path = "/uploads/";
+        Excel::writeCsv($csv, $headlist, $path . $fileName);
+        Excel::exportExcel($csv, 'csv', '登陆日志');
 //        header('Content-Disposition: attachment;filename="' . $fileName . '.' . $format . '"');
 
 
