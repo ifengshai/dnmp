@@ -4,6 +4,7 @@ namespace app\admin\controller\supplydatacenter;
 
 use app\admin\model\OrderStatistics;
 use app\common\controller\Backend;
+use fast\Excel;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use function GuzzleHttp\Psr7\str;
 use think\Cache;
@@ -1192,7 +1193,7 @@ class DataMarket extends Backend
         $deve_time_one['p.order_prescription_type'] =1;
         $deve_time_two['p.order_prescription_type'] =2;
         $deve_time_three['p.order_prescription_type'] =3;
-        $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered','complete']];
+        $map['o.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','complete',  'delivered']];
         $table = Db::connect('database.db_mojing_order');
         $list1 = $table->table('fa_order_process')
             ->alias('p')
@@ -1246,127 +1247,199 @@ class DataMarket extends Backend
 //        $list3 = $NewOrderProcess->query($sql3);
 
         $list = array_merge($list1, $list2, $list3);
+
         $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
-
-        //从数据库查询需要的数据
-        $spreadsheet = new Spreadsheet();
-
-        //常规方式：利用setCellValue()填充数据
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "订单号")
-            ->setCellValue("B1", "订单状态")
-            ->setCellValue("C1", "处方类型");   //利用setCellValues()填充数据
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "支付时间")
-            ->setCellValue("E1", "站点")
-            ->setCellValue("F1", "是否有工单")
-            ->setCellValue("G1", "打印面单时间")
-            ->setCellValue("H1", "问题类型");
         foreach ($list as $key => $value) {
-
             $swhere['platform_order'] = $value['increment_id'];
             $swhere['work_platform'] = 1;
 //            $swhere['work_status'] = ['not in', [0, 4, 6]]; 工单类型不做判断
             $work_type = $workorder->where($swhere)->field('work_type,create_user_name,problem_type_content')->find();
-            if (!empty($work_type)) {
-                $value['work'] = '是';
-            } else {
-                $value['work'] = '否';
-            }
-            if ($value['order_prescription_type'] == 1) {
-                $value['order_prescription_type'] = '仅镜架';
+
+
+
+
+
+            $csv[$key]['increment_id'] = $value['increment_id'];  //订单号
+            $csv[$key]['status'] = $value['status'];  //订单状态
+            if ($value['order_prescription_type'] == 1) { //订单类型
+                $csv[$key]['order_prescription_type'] = '仅镜架';
             } elseif ($value['order_prescription_type'] == 2) {
-                $value['order_prescription_type'] = '现货处方镜';
+                $csv[$key]['order_prescription_type'] = '现货处方镜';
             } else {
-                $value['order_prescription_type'] = '定制处方镜';
+                $csv[$key]['order_prescription_type'] = '定制处方镜';
             }
-            $value['problem_type_content'] = $work_type['problem_type_content'];
-            $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), $value['increment_id']);//订单号
-            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['status']);//订单状态
-            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['order_prescription_type']);//处方类型
+            $csv[$key]['payment_time'] =  date('Y-m-d H:i:s',$value['payment_time']) ;  //支付时间
             switch ($value['site']) {
                 case 1:
-                    $value['site'] = 'zeelool';
+                    $csv[$key]['site'] = 'zeelool';
                     break;
                 case 2:
-                    $value['site'] = 'voogueme';
+                    $csv[$key]['site'] = 'voogueme';
                     break;
                 case 3:
-                    $value['site'] = 'nihao';
+                    $csv[$key]['site'] = 'nihao';
                     break;
                 case 4:
-                    $value['site'] = 'meeloog';
+                    $csv[$key]['site'] = 'meeloog';
                     break;
                 case 5:
-                    $value['site'] = 'wesee';
+                    $csv[$key]['site'] = 'wesee';
                     break;
                 case 9:
-                    $value['site'] = 'zeelool_es';
+                    $csv[$key]['site'] = 'zeelool_es';
                     break;
                 case 10:
-                    $value['site'] = 'zeelool_de';
+                    $csv[$key]['site'] = 'zeelool_de';
                     break;
                 case 11:
-                    $value['site'] = 'zeelool_jp';
+                    $csv[$key]['site'] = 'zeelool_jp';
                     break;
                 case 12:
-                    $value['site'] = 'voogmechic';
+                    $csv[$key]['site'] = 'voogmechic';
                     break;
             }
-            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), date('Y-m-d H:i:s', $value['payment_time']));
-            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['site']);
-            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['work']);
-            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), date('Y-m-d H:i:s', $value['delivery_time']));
-            $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['problem_type_content']);
+            if (!empty($work_type)) { //是否有工单
+                $csv[$key]['work'] = '是';
+            } else {
+                $csv[$key]['work'] = '否';
+            }
 
 
+            $csv[$key]['delivery_time'] = $value['delivery_time']; //订单金额
+            $csv[$key]['order_prescription_type'] = $work_type['order_prescription_type']; //订单金额
         }
-        //设置宽度
-        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(20);
-        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(20);
-        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(40);
-        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(20);
-        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(20);
-        $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(20);
-        $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(20);
-        $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(20);
-        //设置边框
-        $border = [
-            'borders' => [
-                'allBorders' => [
-                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
-                    'color' => ['argb' => 'FF000000'], // 设置border颜色
-                ],
-            ],
+        
+        $headlist = [
+            '订单号', '订单状态','处方类型',
+            '支付时间', '站点','是否有工单',
+            '打印面单时间', '问题类型',
         ];
+        $path = "/uploads/";
+        $fileName = '超时订单的数据';
+        Excel::writeCsv($csv, $headlist, $path . $fileName);
 
-        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
 
-
-        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
-        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
-
-        $spreadsheet->getActiveSheet()->getStyle('A1:H' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-        $spreadsheet->setActiveSheetIndex(0);
-
-        $format = 'xlsx';
-        $savename = '超时订单的数据' . date("YmdHis", time());;
-
-        if ($format == 'xls') {
-            //输出Excel03版本
-            header('Content-Type:application/vnd.ms-excel');
-            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
-        } elseif ($format == 'xlsx') {
-            //输出07Excel版本
-            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
-        }
-
-        //输出名称
-        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
-        //禁止缓存
-        header('Cache-Control: max-age=0');
-        $writer = new $class($spreadsheet);
-
-        $writer->save('php://output');
+//        $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
+//
+//        //从数据库查询需要的数据
+//        $spreadsheet = new Spreadsheet();
+//
+//        //常规方式：利用setCellValue()填充数据
+//        $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "订单号")
+//            ->setCellValue("B1", "订单状态")
+//            ->setCellValue("C1", "处方类型");   //利用setCellValues()填充数据
+//        $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "支付时间")
+//            ->setCellValue("E1", "站点")
+//            ->setCellValue("F1", "是否有工单")
+//            ->setCellValue("G1", "打印面单时间")
+//            ->setCellValue("H1", "问题类型");
+//        foreach ($list as $key => $value) {
+//
+//            $swhere['platform_order'] = $value['increment_id'];
+//            $swhere['work_platform'] = 1;
+////            $swhere['work_status'] = ['not in', [0, 4, 6]]; 工单类型不做判断
+//            $work_type = $workorder->where($swhere)->field('work_type,create_user_name,problem_type_content')->find();
+//            if (!empty($work_type)) {
+//                $value['work'] = '是';
+//            } else {
+//                $value['work'] = '否';
+//            }
+//            if ($value['order_prescription_type'] == 1) {
+//                $value['order_prescription_type'] = '仅镜架';
+//            } elseif ($value['order_prescription_type'] == 2) {
+//                $value['order_prescription_type'] = '现货处方镜';
+//            } else {
+//                $value['order_prescription_type'] = '定制处方镜';
+//            }
+//            $value['problem_type_content'] = $work_type['problem_type_content'];
+//            $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), $value['increment_id']);//订单号
+//            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['status']);//订单状态
+//            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['order_prescription_type']);//处方类型
+//            switch ($value['site']) {
+//                case 1:
+//                    $value['site'] = 'zeelool';
+//                    break;
+//                case 2:
+//                    $value['site'] = 'voogueme';
+//                    break;
+//                case 3:
+//                    $value['site'] = 'nihao';
+//                    break;
+//                case 4:
+//                    $value['site'] = 'meeloog';
+//                    break;
+//                case 5:
+//                    $value['site'] = 'wesee';
+//                    break;
+//                case 9:
+//                    $value['site'] = 'zeelool_es';
+//                    break;
+//                case 10:
+//                    $value['site'] = 'zeelool_de';
+//                    break;
+//                case 11:
+//                    $value['site'] = 'zeelool_jp';
+//                    break;
+//                case 12:
+//                    $value['site'] = 'voogmechic';
+//                    break;
+//            }
+//            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), date('Y-m-d H:i:s', $value['payment_time']));
+//            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['site']);
+//            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['work']);
+//            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), date('Y-m-d H:i:s', $value['delivery_time']));
+//            $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['problem_type_content']);
+//
+//
+//        }
+//        //设置宽度
+//        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(20);
+//        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(20);
+//        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(40);
+//        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(20);
+//        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(20);
+//        $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(20);
+//        $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(20);
+//        $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(20);
+//        //设置边框
+//        $border = [
+//            'borders' => [
+//                'allBorders' => [
+//                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
+//                    'color' => ['argb' => 'FF000000'], // 设置border颜色
+//                ],
+//            ],
+//        ];
+//
+//        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+//
+//
+//        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
+//        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
+//
+//        $spreadsheet->getActiveSheet()->getStyle('A1:H' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+//        $spreadsheet->setActiveSheetIndex(0);
+//
+//        $format = 'xlsx';
+//        $savename = '超时订单的数据' . date("YmdHis", time());;
+//
+//        if ($format == 'xls') {
+//            //输出Excel03版本
+//            header('Content-Type:application/vnd.ms-excel');
+//            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
+//        } elseif ($format == 'xlsx') {
+//            //输出07Excel版本
+//            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+//            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
+//        }
+//
+//        //输出名称
+//        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
+//        //禁止缓存
+//        header('Cache-Control: max-age=0');
+//        $writer = new $class($spreadsheet);
+//
+//        $writer->save('php://output');
 
     }
 }
