@@ -1311,9 +1311,10 @@ class DataMarket extends Backend
             '支付时间', '站点','是否有工单',
             '打印面单时间', '问题类型',
         ];
-        $path = "/uploads/";
-        $fileName = '超时订单的数据';
-        Excel::writeCsv($csv, $headlist, $path . $fileName);
+        $fileName = '超时订单的数据'.date('Y-m-d H:i:s',time());
+//        $path = "/uploads/";
+        Excel::exportExcel($csv, 'csv',$fileName);
+//        header('Content-Disposition: attachment;filename="' . $fileName . '.' . $format . '"');
 
 
 //        $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
