@@ -1278,6 +1278,7 @@ class DataMarket extends Backend
             } else {
                 $value['order_prescription_type'] = '定制处方镜';
             }
+            $value['problem_type_content'] = $work_type['problem_type_content'];
             $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), $value['increment_id']);//订单号
             $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['status']);//订单状态
             $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['order_prescription_type']);//处方类型
