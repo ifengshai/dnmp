@@ -616,7 +616,7 @@ class ItemPlatformSku extends Backend
                 $third_res = json_decode($third_res, true);
             } elseif ($uploadItemArr['site'] == 14) {
                 $params['sku_info'] = implode(',', $uploadItemArr['skus']);
-                $params['platform_type'] = 1;
+                $params['platform_type'] = 2;
                 $third_res = Http::post('http://shop.mruilove.com/index.php/api/commodity/index', $params);
                 $third_res = json_decode($third_res, true);
             } else {
