@@ -2385,7 +2385,33 @@ class Test4 extends Controller
     }
 
     public function add_plat(){
-        $res = Db::name('magento_platform')->insert(['id'=>13,'name'=>'抖音','prefix'=>'B','create_time'=>time()]);
-        $res = Db::name('magento_platform')->insert(['id'=>14,'name'=>'阿里巴巴国际站','prefix'=>'L','create_time'=>time()]);
+        $res = Db::name('magento_platform')->where(['id'=>13])->update(['name'=>'zeelool_cn','prefix'=>'B','create_time'=>time()]);
+        $res = Db::name('magento_platform')->where(['id'=>14])->update(['name'=>'alibaba','prefix'=>'L','create_time'=>time()]);
+    }
+
+    public function product_bar_code_warehouse()
+    {
+        $store_sku = Db::name('store_sku')
+            ->alias('a')
+            ->join(['fa_store_house' => 'b'], 'a.store_id=b.id')
+            ->where('a.is_del',1)
+            ->field('a.sku,a.store_id,b.id,b.coding,b.area_id')
+            ->select();
+        foreach ($store_sku as $k=>$v){
+            $res = Db::name('product_barcode_item')->where('sku',$v['sku'])->update(['location_code'=>$v['coding'],'location_id'=>$v['area_id'],'location_code_id'=>$v['store_id']]);
+            echo $v['sku'].'更新'.$res.'条数据 is ok'."\n";
+            usleep(10000);
+        }
+    }
+
+    public function store_sku()
+    {
+        $res = Db::name('store_sku')->where('id','>',4629)->delete();
+        $data = Db::name('zzzz_temp')->where('id','>',0)->field('sku,product_number')->select();
+        $store_house = Db::name('store_house')->column('id','coding');
+        foreach ($data as $k=>$v){
+            $data[$k]['store_id'] =$store_house[$v['product_number']];
+            Db::name('store_sku')->insert(['sku'=>$v['sku'],'store_id'=>$data[$k]['store_id'],'create_person'=>'Admin','createtime'=>date("Y-m-d H:i:s")]);
+        }
     }
 }

@@ -75,6 +75,10 @@
                         <th colspan="2">付款单</th>
                     </tr>
                     <tr>
+                        <th>付款人: {$pay_order['pay_person']}</th>
+                        <th>付款时间: {$pay_order['pay_time']}</th>
+                    </tr>
+                    <tr>
                         <th>付款单号: {$pay_order.pay_number}</th>
                         <th>供应商名称: {$supplier.supplier_name}</th>
                     </tr>
@@ -90,7 +94,7 @@
                         <th>付款币种: {$supplier.currency}</th>
                         <th>备注: {$pay_order.desc}</th>
                     </tr>
-                   
+                    
                     <tr>
                         <th colspan="2">
                             {if $prepay}
