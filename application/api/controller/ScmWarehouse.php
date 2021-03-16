@@ -394,8 +394,8 @@ class ScmWarehouse extends Scm
             ['id' => 10, 'title' => 'zeelool_de'],
             ['id' => 11, 'title' => 'zeelool_jp'],
             ['id' => 12, 'title' => 'voogmechic'],
-            ['id' => 13, 'title' => '抖音'],
-            ['id' => 14, 'title' => '阿里巴巴国际站']
+            ['id' => 13, 'title' => 'zeelool_cn'],
+            ['id' => 14, 'title' => 'alibaba']
         ];
 
         $this->success('', ['type_list' => $type_list, 'site_list' => $site_list, 'info' => $info], 200);

@@ -33,7 +33,6 @@ class Test4 extends Controller
     }
 
 
-
     protected function initializeAnalytics()
     {
         // Use the developers console and download your service account
@@ -50,6 +49,7 @@ class Test4 extends Controller
 
         return $analytics;
     }
+
     //活跃用户数
     public function google_active_user($site, $start_time)
     {
@@ -67,6 +67,7 @@ class Test4 extends Controller
         $result = $this->printResults($response);
         return $result[0]['ga:1dayUsers'] ? round($result[0]['ga:1dayUsers'], 2) : 0;
     }
+
     protected function getReport_active_user($site, $analytics, $startDate, $endDate)
     {
 
@@ -109,6 +110,7 @@ class Test4 extends Controller
         $body->setReportRequests(array($request));
         return $analytics->reports->batchGet($body);
     }
+
     //session
     public function google_session($site, $start_time)
     {
@@ -130,6 +132,7 @@ class Test4 extends Controller
 
         return $result[0]['ga:sessions'] ? round($result[0]['ga:sessions'], 2) : 0;
     }
+
     protected function getReport_session($site, $analytics, $startDate, $endDate)
     {
 
@@ -171,6 +174,7 @@ class Test4 extends Controller
         $body->setReportRequests(array($request));
         return $analytics->reports->batchGet($body);
     }
+
     /**
      * Parses and prints the Analytics Reporting API V4 response.
      *
@@ -204,6 +208,7 @@ class Test4 extends Controller
             return $finalResult;
         }
     }
+
     //新增运营数据中心
     public function zeelool_operate_data_center()
     {
@@ -280,6 +285,7 @@ class Test4 extends Controller
             }
         }
     }
+
     //新增运营数据中心
     public function voogueme_operate_data_center()
     {
@@ -356,6 +362,7 @@ class Test4 extends Controller
             }
         }
     }
+
     //新增运营数据中心
     public function nihao_operate_data_center()
     {
@@ -427,6 +434,7 @@ class Test4 extends Controller
             }
         }
     }
+
     //更新运营数据中心
     public function zeelool_operate_data_center_update()
     {
@@ -446,34 +454,35 @@ class Test4 extends Controller
             $register_num = count($register_userids);
             //当天注册用户在当天下单的用户数
             $order_user_count1 = 0;
-            foreach($register_userids as $register_userid){
+            foreach ($register_userids as $register_userid) {
                 //判断当前用户在当天是否下单
-                $order = $model->table('sales_flat_order')->where($create_where)->where($order_where)->where('customer_id',$register_userid)->value('entity_id');
-                if($order){
+                $order = $model->table('sales_flat_order')->where($create_where)->where($order_where)->where('customer_id', $register_userid)->value('entity_id');
+                if ($order) {
                     $order_user_count1++;
                 }
             }
-            $arr['create_user_change_rate'] = $register_num ? round($order_user_count1/$register_num*100,2) : 0;
+            $arr['create_user_change_rate'] = $register_num ? round($order_user_count1 / $register_num * 100, 2) : 0;
 
             //当天更新用户数
             $update_userids = $model->table('customer_entity')->where($update_where)->column('entity_id');
             $update_num = count($update_userids);
             //当天活跃更新用户数在当天是否下单
             $order_user_count2 = 0;
-            foreach ($update_userids as $update_userid){
+            foreach ($update_userids as $update_userid) {
                 //判断活跃用户在当天下单的用户数
-                $order = $model->table('sales_flat_order')->where($create_where)->where($order_where)->where('customer_id',$update_userid)->value('entity_id');
-                if($order){
+                $order = $model->table('sales_flat_order')->where($create_where)->where($order_where)->where('customer_id', $update_userid)->value('entity_id');
+                if ($order) {
                     $order_user_count2++;
                 }
             }
-            $arr['update_user_change_rate'] = $update_num ? round($order_user_count2/$update_num*100,2) : 0;
+            $arr['update_user_change_rate'] = $update_num ? round($order_user_count2 / $update_num * 100, 2) : 0;
             //更新数据
             Db::name('datacenter_day')->where('id', $val['id'])->update($arr);
             echo $val['day_date'] . "\n";
             usleep(100000);
         }
     }
+
     //更新运营数据中心
     public function voogueme_operate_data_center_update()
     {
@@ -493,28 +502,28 @@ class Test4 extends Controller
             $register_num = count($register_userids);
             //当天注册用户在当天下单的用户数
             $order_user_count1 = 0;
-            foreach($register_userids as $register_userid){
+            foreach ($register_userids as $register_userid) {
                 //判断当前用户在当天是否下单
-                $order = $model->table('sales_flat_order')->where($create_where)->where($order_where)->where('customer_id',$register_userid)->value('entity_id');
-                if($order){
+                $order = $model->table('sales_flat_order')->where($create_where)->where($order_where)->where('customer_id', $register_userid)->value('entity_id');
+                if ($order) {
                     $order_user_count1++;
                 }
             }
-            $arr['create_user_change_rate'] = $register_num ? round($order_user_count1/$register_num*100,2) : 0;
+            $arr['create_user_change_rate'] = $register_num ? round($order_user_count1 / $register_num * 100, 2) : 0;
 
             //当天更新用户数
             $update_userids = $model->table('customer_entity')->where($update_where)->column('entity_id');
             $update_num = count($update_userids);
             //当天活跃更新用户数在当天是否下单
             $order_user_count2 = 0;
-            foreach ($update_userids as $update_userid){
+            foreach ($update_userids as $update_userid) {
                 //判断活跃用户在当天下单的用户数
-                $order = $model->table('sales_flat_order')->where($create_where)->where($order_where)->where('customer_id',$update_userid)->value('entity_id');
-                if($order){
+                $order = $model->table('sales_flat_order')->where($create_where)->where($order_where)->where('customer_id', $update_userid)->value('entity_id');
+                if ($order) {
                     $order_user_count2++;
                 }
             }
-            $arr['update_user_change_rate'] = $update_num ? round($order_user_count2/$update_num*100,2) : 0;
+            $arr['update_user_change_rate'] = $update_num ? round($order_user_count2 / $update_num * 100, 2) : 0;
 
             //更新数据
             Db::name('datacenter_day')->where('id', $val['id'])->update($arr);
@@ -522,6 +531,7 @@ class Test4 extends Controller
             usleep(100000);
         }
     }
+
     //更新运营数据中心
     public function nihao_operate_data_center_update()
     {
@@ -541,34 +551,35 @@ class Test4 extends Controller
             $register_num = count($register_userids);
             //当天注册用户在当天下单的用户数
             $order_user_count1 = 0;
-            foreach($register_userids as $register_userid){
+            foreach ($register_userids as $register_userid) {
                 //判断当前用户在当天是否下单
-                $order = $model->table('sales_flat_order')->where($create_where)->where($order_where)->where('customer_id',$register_userid)->value('entity_id');
-                if($order){
+                $order = $model->table('sales_flat_order')->where($create_where)->where($order_where)->where('customer_id', $register_userid)->value('entity_id');
+                if ($order) {
                     $order_user_count1++;
                 }
             }
-            $arr['create_user_change_rate'] = $register_num ? round($order_user_count1/$register_num*100,2) : 0;
+            $arr['create_user_change_rate'] = $register_num ? round($order_user_count1 / $register_num * 100, 2) : 0;
 
             //当天更新用户数
             $update_userids = $model->table('customer_entity')->where($update_where)->column('entity_id');
             $update_num = count($update_userids);
             //当天活跃更新用户数在当天是否下单
             $order_user_count2 = 0;
-            foreach ($update_userids as $update_userid){
+            foreach ($update_userids as $update_userid) {
                 //判断活跃用户在当天下单的用户数
-                $order = $model->table('sales_flat_order')->where($create_where)->where($order_where)->where('customer_id',$update_userid)->value('entity_id');
-                if($order){
+                $order = $model->table('sales_flat_order')->where($create_where)->where($order_where)->where('customer_id', $update_userid)->value('entity_id');
+                if ($order) {
                     $order_user_count2++;
                 }
             }
-            $arr['update_user_change_rate'] = $update_num ? round($order_user_count2/$update_num*100,2) : 0;
+            $arr['update_user_change_rate'] = $update_num ? round($order_user_count2 / $update_num * 100, 2) : 0;
             //更新数据
             Db::name('datacenter_day')->where('id', $val['id'])->update($arr);
             echo $val['day_date'] . "\n";
             usleep(100000);
         }
     }
+
     /**
      *计算中位数 中位数：是指一组数据从小到大排列，位于中间的那个数。可以是一个（数据为奇数），也可以是2个的平均（数据为偶数）
      */
@@ -580,6 +591,7 @@ class Test4 extends Controller
 
         return ($totalNumbers % 2) === 0 ? ($numbers[$mid - 1] + $numbers[$mid]) / 2 : $numbers[$mid];
     }
+
     /**
      * 得到数组的标准差
      * @param unknown type $avg
@@ -601,6 +613,7 @@ class Test4 extends Controller
         $variance = $count / $length;
         return sqrt($variance);
     }
+
     public function test006()
     {
 
@@ -621,7 +634,6 @@ class Test4 extends Controller
         dump($trackInfo['data']['accepted'][0]['track']['z1']);
         die;
     }
-
 
 
     //数据已跑完 2020 08.25 14:47
@@ -716,7 +728,7 @@ class Test4 extends Controller
         }
         unset($v);
         $res = $item->saveAll($result);
-        echo  $res;
+        echo $res;
         die;
     }
 
@@ -745,13 +757,13 @@ class Test4 extends Controller
             $wesee_stock = 0;
             //如果存在比例
             if ($data[$v['sku']]) {
-                $zeelool_stock = $data[$v['sku']]['zeelool']  > 0 ? ceil($v['available_stock'] * $data[$v['sku']]['zeelool'] / 100) : 0;
+                $zeelool_stock = $data[$v['sku']]['zeelool'] > 0 ? ceil($v['available_stock'] * $data[$v['sku']]['zeelool'] / 100) : 0;
                 if (($v['available_stock'] - $zeelool_stock) > 0) {
-                    $voogueme_stock = ($v['available_stock'] - $zeelool_stock)  > ceil($v['available_stock'] * $data[$v['sku']]['voogueme'] / 100) ? ceil($v['available_stock'] * $data[$v['sku']]['voogueme'] / 100) : ($v['available_stock'] - $zeelool_stock);
+                    $voogueme_stock = ($v['available_stock'] - $zeelool_stock) > ceil($v['available_stock'] * $data[$v['sku']]['voogueme'] / 100) ? ceil($v['available_stock'] * $data[$v['sku']]['voogueme'] / 100) : ($v['available_stock'] - $zeelool_stock);
                 }
 
                 if (($v['available_stock'] - $zeelool_stock - $voogueme_stock) > 0) {
-                    $nihao_stock = ($v['available_stock'] - $zeelool_stock - $voogueme_stock)  > ceil($v['available_stock'] * $data[$v['sku']]['nihao'] / 100) ? ceil($v['available_stock'] * $data[$v['sku']]['nihao'] / 100) : ($v['available_stock'] - $zeelool_stock - $voogueme_stock);
+                    $nihao_stock = ($v['available_stock'] - $zeelool_stock - $voogueme_stock) > ceil($v['available_stock'] * $data[$v['sku']]['nihao'] / 100) ? ceil($v['available_stock'] * $data[$v['sku']]['nihao'] / 100) : ($v['available_stock'] - $zeelool_stock - $voogueme_stock);
                 }
 
 
@@ -1154,7 +1166,6 @@ class Test4 extends Controller
                         $order_node_date = Db::name('order_node')->where('track_number', $add['track_number'])->find();
 
 
-
                         //因为没有匹配上到达目的国，所以根据签收时间-1天就是到达目的国
                         if ($data['e'] == 40 && ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 10)) {
                             $time = date('Y-m-d H:i', strtotime(($v['a'] . " -1 day")));
@@ -1171,7 +1182,6 @@ class Test4 extends Controller
                             $order_node_date['order_node'] = 3;
                             $order_node_date['node_type'] = 11;
                         }
-
 
 
                         if ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 11) {
@@ -1482,7 +1492,7 @@ class Test4 extends Controller
             'dhl' => '100001',
             'chinapost' => '03011',
             'chinaems' => '03013',
-            'cpc' =>  '03041',
+            'cpc' => '03041',
             'fedex' => '100003',
             'usps' => '21051',
             'yanwen' => '190012'
@@ -1579,6 +1589,7 @@ class Test4 extends Controller
         }
         db('it_web_demand')->insertAll($data);
     }
+
     /*
      * 同步工单支付时间
      * */
@@ -1594,6 +1605,7 @@ class Test4 extends Controller
             echo $value['id'] . ' is ok' . "\n";
         }
     }
+
     /*
      * 同步借出数量
      * */
@@ -1609,34 +1621,38 @@ class Test4 extends Controller
             echo $v['id'] . "\n";
         }
     }
+
     //同步track签收数据到fa_order_process
-    public function track_process(){
+    public function track_process()
+    {
         $orderNode = new \app\admin\model\OrderNode;
         $process = new \app\admin\model\order\order\NewOrderProcess;
         //查询order_node表中签收的订单数据
         $where['node_type'] = 40;
         $all_order = $orderNode->where($where)->column('order_number');
-        foreach ($all_order as $key=>$value){
-            $is_tracking = $process->where('increment_id',$value)->value('is_tracking');
-            if($is_tracking != 5){
+        foreach ($all_order as $key => $value) {
+            $is_tracking = $process->where('increment_id', $value)->value('is_tracking');
+            if ($is_tracking != 5) {
                 //更新process表中数据
-                $process->where('increment_id',$value)->update(['is_tracking'=>5]);
-                echo $value." is ok"."\n";
+                $process->where('increment_id', $value)->update(['is_tracking' => 5]);
+                echo $value . " is ok" . "\n";
                 usleep(10000);
             }
         }
     }
+
     //产品等级销量数据脚本
-    public function product_level_salesnum(){
+    public function product_level_salesnum()
+    {
         //查询时间
         $date_time = $this->zeelool->query("SELECT DATE_FORMAT(created_at, '%Y-%m-%d') AS date_time FROM `sales_flat_order` where created_at between '2021-01-22' and '2021-01-23' GROUP BY DATE_FORMAT(created_at, '%Y%m%d') order by DATE_FORMAT(created_at, '%Y%m%d') asc");
         foreach ($date_time as $val) {
             $is_exist = Db::name('datacenter_day_supply')->where('day_date', $val['date_time'])->value('id');
             if (!$is_exist) {
                 $arr['day_date'] = $val['date_time'];
-                $zeelool = $this->getSalesnum(1,$val['date_time']);
-                $voogueme = $this->getSalesnum(2,$val['date_time']);
-                $nihao = $this->getSalesnum(3,$val['date_time']);
+                $zeelool = $this->getSalesnum(1, $val['date_time']);
+                $voogueme = $this->getSalesnum(2, $val['date_time']);
+                $nihao = $this->getSalesnum(3, $val['date_time']);
                 $arr['sales_num_a1'] = $zeelool[0] + $voogueme[0] + $nihao[0];
                 $arr['sales_num_a'] = $zeelool[1] + $voogueme[1] + $nihao[1];
                 $arr['sales_num_b'] = $zeelool[2] + $voogueme[2] + $nihao[2];
@@ -1646,24 +1662,26 @@ class Test4 extends Controller
                 $arr['sales_num_e'] = $zeelool[6] + $voogueme[6] + $nihao[6];
                 $arr['sales_num_f'] = $zeelool[7] + $voogueme[7] + $nihao[7];
                 Db::name('datacenter_day_supply')->insert($arr);
-                echo $val['date_time']." is ok"."\n";
+                echo $val['date_time'] . " is ok" . "\n";
                 usleep(10000);
             }
         }
     }
-    public function getSalesnum($site,$date){
+
+    public function getSalesnum($site, $date)
+    {
         $this->order = new \app\admin\model\order\order\NewOrder();
         $this->productGrade = new \app\admin\model\ProductGrade();
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         //所选时间段内有销量的平台sku
         $start = $date;
-        $end = $date.' 23:59:59';
+        $end = $date . ' 23:59:59';
         $start_time = strtotime($start);
         $end_time = strtotime($end);
-        $where['o.payment_time'] = ['between',[$start_time,$end_time]];
-        $where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+        $where['o.payment_time'] = ['between', [$start_time, $end_time]];
+        $where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
         $where['o.site'] = $site;
-        $order = $this->order->alias('o')->join('fa_order_item_option i','o.entity_id=i.order_id')->field('i.sku,count(*) as count')->where($where)->group('i.sku')->select();
+        $order = $this->order->alias('o')->join('fa_order_item_option i', 'o.entity_id=i.order_id')->field('i.sku,count(*) as count')->where($where)->group('i.sku')->select();
         $grade1 = 0;
         $grade2 = 0;
         $grade3 = 0;
@@ -1672,11 +1690,11 @@ class Test4 extends Controller
         $grade6 = 0;
         $grade7 = 0;
         $grade8 = 0;
-        foreach ($order as $key=>$value){
+        foreach ($order as $key => $value) {
             $sku = $this->itemplatformsku->getTrueSku($value['sku'], $site);
             //查询该品的等级
-            $grade = $this->productGrade->where('true_sku',$sku)->value('grade');
-            switch ($grade){
+            $grade = $this->productGrade->where('true_sku', $sku)->value('grade');
+            switch ($grade) {
                 case 'A+':
                     $grade1 += $value['count'];
                     break;
@@ -1707,35 +1725,39 @@ class Test4 extends Controller
             }
         }
         $arr = array(
-            $grade1,$grade2,$grade3,$grade4,$grade5,$grade6,$grade7,$grade8
+            $grade1, $grade2, $grade3, $grade4, $grade5, $grade6, $grade7, $grade8
         );
         return $arr;
 
     }
+
     //订单发出时间脚本
-    public function order_send_time(){
+    public function order_send_time()
+    {
         $process = new \app\admin\model\order\order\NewOrderProcess;
         $orderitemprocess = new \app\admin\model\order\order\NewOrderItemProcess();
         //查询所有订单
-        $order = $process->where('order_prescription_type',0)->column('order_id');
-        foreach ($order as $key=>$value){
-            $order_type = $orderitemprocess->where('order_id',$value)->column('order_prescription_type');
-            if(in_array(3,$order_type)){
+        $order = $process->where('order_prescription_type', 0)->column('order_id');
+        foreach ($order as $key => $value) {
+            $order_type = $orderitemprocess->where('order_id', $value)->column('order_prescription_type');
+            if (in_array(3, $order_type)) {
                 $type = 3;
-            }elseif(in_array(2,$order_type)){
+            } elseif (in_array(2, $order_type)) {
                 $type = 2;
-            }else{
+            } else {
                 $type = 1;
             }
-            $process->where('order_id',$value)->update(['order_prescription_type'=>$type]);
-            echo $value.' is ok'."\n";
+            $process->where('order_id', $value)->update(['order_prescription_type' => $type]);
+            echo $value . ' is ok' . "\n";
             usleep(100000);
         }
     }
+
     /**
      * 呆滞数据
      */
-    public function dull_stock(){
+    public function dull_stock()
+    {
         $count = 0;   //总数量
         $count1 = 0;   //低
         $count2 = 0;   //中
@@ -1753,149 +1775,149 @@ class Test4 extends Controller
         $arr7 = array();
         $arr8 = array();
         $grades = Db::name('product_grade')->field('true_sku,grade')->select();
-        foreach ($grades as $key=>$value){
+        foreach ($grades as $key => $value) {
             $this->model = new \app\admin\model\itemmanage\Item;
             $this->item = new \app\admin\model\warehouse\ProductBarCodeItem;
             //该品实时库存
-            $real_time_stock = $this->model->where('sku',$value['true_sku'])->where('is_del',1)->where('is_open',1)->value('sum(stock)-sum(distribution_occupy_stock) as result');
+            $real_time_stock = $this->model->where('sku', $value['true_sku'])->where('is_del', 1)->where('is_open', 1)->value('sum(stock)-sum(distribution_occupy_stock) as result');
             //该品库存金额
-            $sku_amount = $this->item->alias('i')->join('fa_purchase_order_item o','i.purchase_id=o.purchase_id and i.sku=o.sku')->where('i.sku',$value['true_sku'])->where('i.library_status',1)->value('SUM(IF(o.actual_purchase_price != 0,o.actual_purchase_price,o.purchase_price)) as result');
+            $sku_amount = $this->item->alias('i')->join('fa_purchase_order_item o', 'i.purchase_id=o.purchase_id and i.sku=o.sku')->where('i.sku', $value['true_sku'])->where('i.library_status', 1)->value('SUM(IF(o.actual_purchase_price != 0,o.actual_purchase_price,o.purchase_price)) as result');
             //实际周转天数
-            $sku_info  = $this->getSkuSales($value['true_sku']);
-            $actual_day = $sku_info['days']!=0 && $sku_info['count']!=0 ? round($real_time_stock/($sku_info['count']/$sku_info['days']),2) : 0;
-            if($actual_day >120 && $actual_day<=144){
+            $sku_info = $this->getSkuSales($value['true_sku']);
+            $actual_day = $sku_info['days'] != 0 && $sku_info['count'] != 0 ? round($real_time_stock / ($sku_info['count'] / $sku_info['days']), 2) : 0;
+            if ($actual_day > 120 && $actual_day <= 144) {
                 $count += $real_time_stock;
                 $total += $sku_amount;
                 $count1 += $real_time_stock;
                 $total1 += $sku_amount;
-                if($value['grade'] == 'A+'){
+                if ($value['grade'] == 'A+') {
                     $arr1['stock'] += $real_time_stock;
                     $arr1['total'] += $sku_amount;
                     $arr1['low_stock'] += $real_time_stock;
                     $arr1['low_total'] += $sku_amount;
-                }elseif($value['grade'] == 'A'){
+                } elseif ($value['grade'] == 'A') {
                     $arr2['stock'] += $real_time_stock;
                     $arr2['total'] += $sku_amount;
                     $arr2['low_stock'] += $real_time_stock;
                     $arr2['low_total'] += $sku_amount;
-                }elseif($value['grade'] == 'B'){
+                } elseif ($value['grade'] == 'B') {
                     $arr3['stock'] += $real_time_stock;
                     $arr3['total'] += $sku_amount;
                     $arr3['low_stock'] += $real_time_stock;
                     $arr3['low_total'] += $sku_amount;
-                }elseif($value['grade'] == 'C+'){
+                } elseif ($value['grade'] == 'C+') {
                     $arr4['stock'] += $real_time_stock;
                     $arr4['total'] += $sku_amount;
                     $arr4['low_stock'] += $real_time_stock;
                     $arr4['low_total'] += $sku_amount;
-                }elseif($value['grade'] == 'C'){
+                } elseif ($value['grade'] == 'C') {
                     $arr5['stock'] += $real_time_stock;
                     $arr5['total'] += $sku_amount;
                     $arr5['low_stock'] += $real_time_stock;
                     $arr5['low_total'] += $sku_amount;
-                }elseif($value['grade'] == 'D'){
+                } elseif ($value['grade'] == 'D') {
                     $arr6['stock'] += $real_time_stock;
                     $arr6['total'] += $sku_amount;
                     $arr6['low_stock'] += $real_time_stock;
                     $arr6['low_total'] += $sku_amount;
-                }elseif($value['grade'] == 'E'){
+                } elseif ($value['grade'] == 'E') {
                     $arr7['stock'] += $real_time_stock;
                     $arr7['total'] += $sku_amount;
                     $arr7['low_stock'] += $real_time_stock;
                     $arr7['low_total'] += $sku_amount;
-                }else{
+                } else {
                     $arr8['stock'] += $real_time_stock;
                     $arr8['total'] += $sku_amount;
                     $arr8['low_stock'] += $real_time_stock;
                     $arr8['low_total'] += $sku_amount;
                 }
-            }elseif($actual_day > 144 && $actual_day<=168){
+            } elseif ($actual_day > 144 && $actual_day <= 168) {
                 $count += $real_time_stock;
                 $total += $sku_amount;
                 $count2 += $real_time_stock;
                 $total2 += $sku_amount;
-                if($value['grade'] == 'A+'){
+                if ($value['grade'] == 'A+') {
                     $arr1['stock'] += $real_time_stock;
                     $arr1['total'] += $sku_amount;
                     $arr1['center_stock'] += $real_time_stock;
                     $arr1['center_total'] += $sku_amount;
-                }elseif($value['grade'] == 'A'){
+                } elseif ($value['grade'] == 'A') {
                     $arr2['stock'] += $real_time_stock;
                     $arr2['total'] += $sku_amount;
                     $arr2['center_stock'] += $real_time_stock;
                     $arr2['center_total'] += $sku_amount;
-                }elseif($value['grade'] == 'B'){
+                } elseif ($value['grade'] == 'B') {
                     $arr3['stock'] += $real_time_stock;
                     $arr3['total'] += $sku_amount;
                     $arr3['center_stock'] += $real_time_stock;
                     $arr3['center_total'] += $sku_amount;
-                }elseif($value['grade'] == 'C+'){
+                } elseif ($value['grade'] == 'C+') {
                     $arr4['stock'] += $real_time_stock;
                     $arr4['total'] += $sku_amount;
                     $arr4['center_stock'] += $real_time_stock;
                     $arr4['center_total'] += $sku_amount;
-                }elseif($value['grade'] == 'C'){
+                } elseif ($value['grade'] == 'C') {
                     $arr5['stock'] += $real_time_stock;
                     $arr5['total'] += $sku_amount;
                     $arr5['center_stock'] += $real_time_stock;
                     $arr5['center_total'] += $sku_amount;
-                }elseif($value['grade'] == 'D'){
+                } elseif ($value['grade'] == 'D') {
                     $arr6['stock'] += $real_time_stock;
                     $arr6['total'] += $sku_amount;
                     $arr6['center_stock'] += $real_time_stock;
                     $arr6['center_total'] += $sku_amount;
-                }elseif($value['grade'] == 'E'){
+                } elseif ($value['grade'] == 'E') {
                     $arr7['stock'] += $real_time_stock;
                     $arr7['total'] += $sku_amount;
                     $arr7['center_stock'] += $real_time_stock;
                     $arr7['center_total'] += $sku_amount;
-                }else{
+                } else {
                     $arr8['stock'] += $real_time_stock;
                     $arr8['total'] += $sku_amount;
                     $arr8['center_stock'] += $real_time_stock;
                     $arr8['center_total'] += $sku_amount;
                 }
-            }elseif($actual_day>168){
+            } elseif ($actual_day > 168) {
                 $count += $real_time_stock;
                 $total += $sku_amount;
                 $count3 += $real_time_stock;
                 $total3 += $sku_amount;
-                if($value['grade'] == 'A+'){
+                if ($value['grade'] == 'A+') {
                     $arr1['stock'] += $real_time_stock;
                     $arr1['total'] += $sku_amount;
                     $arr1['high_stock'] += $real_time_stock;
                     $arr1['high_total'] += $sku_amount;
-                }elseif($value['grade'] == 'A'){
+                } elseif ($value['grade'] == 'A') {
                     $arr2['stock'] += $real_time_stock;
                     $arr2['total'] += $sku_amount;
                     $arr2['high_stock'] += $real_time_stock;
                     $arr2['high_total'] += $sku_amount;
-                }elseif($value['grade'] == 'B'){
+                } elseif ($value['grade'] == 'B') {
                     $arr3['stock'] += $real_time_stock;
                     $arr3['total'] += $sku_amount;
                     $arr3['high_stock'] += $real_time_stock;
                     $arr3['high_total'] += $sku_amount;
-                }elseif($value['grade'] == 'C+'){
+                } elseif ($value['grade'] == 'C+') {
                     $arr4['stock'] += $real_time_stock;
                     $arr4['total'] += $sku_amount;
                     $arr4['high_stock'] += $real_time_stock;
                     $arr4['high_total'] += $sku_amount;
-                }elseif($value['grade'] == 'C'){
+                } elseif ($value['grade'] == 'C') {
                     $arr5['stock'] += $real_time_stock;
                     $arr5['total'] += $sku_amount;
                     $arr5['high_stock'] += $real_time_stock;
                     $arr5['high_total'] += $sku_amount;
-                }elseif($value['grade'] == 'D'){
+                } elseif ($value['grade'] == 'D') {
                     $arr6['stock'] += $real_time_stock;
                     $arr6['total'] += $sku_amount;
                     $arr6['high_stock'] += $real_time_stock;
                     $arr6['high_total'] += $sku_amount;
-                }elseif($value['grade'] == 'E'){
+                } elseif ($value['grade'] == 'E') {
                     $arr7['stock'] += $real_time_stock;
                     $arr7['total'] += $sku_amount;
                     $arr7['high_stock'] += $real_time_stock;
                     $arr7['high_total'] += $sku_amount;
-                }else{
+                } else {
                     $arr8['stock'] += $real_time_stock;
                     $arr8['total'] += $sku_amount;
                     $arr8['high_stock'] += $real_time_stock;
@@ -1918,21 +1940,21 @@ class Test4 extends Controller
         $date_time = date('Y-m-d', strtotime("-1 day"));
         $arr1['day_date'] = $arr2['day_date'] = $arr3['day_date'] = $arr4['day_date'] = $arr5['day_date'] = $arr6['day_date'] = $arr7['day_date'] = $arr8['day_date'] = $sum['day_date'] = $date_time;
         $arr1['grade'] = 'A+';
-        $arr1['stock_rate'] = $a1_stock_num ? round($arr1['stock']/$a1_stock_num*100,2) : 0;
+        $arr1['stock_rate'] = $a1_stock_num ? round($arr1['stock'] / $a1_stock_num * 100, 2) : 0;
         $arr2['grade'] = 'A';
-        $arr2['stock_rate'] = $a_stock_num ? round($arr2['stock']/$a_stock_num*100,2) : 0;
+        $arr2['stock_rate'] = $a_stock_num ? round($arr2['stock'] / $a_stock_num * 100, 2) : 0;
         $arr3['grade'] = 'B';
-        $arr3['stock_rate'] = $b_stock_num ? round($arr3['stock']/$b_stock_num*100,2) : 0;
+        $arr3['stock_rate'] = $b_stock_num ? round($arr3['stock'] / $b_stock_num * 100, 2) : 0;
         $arr4['grade'] = 'C+';
-        $arr4['stock_rate'] = $c1_stock_num ? round($arr4['stock']/$c1_stock_num*100,2) : 0;
+        $arr4['stock_rate'] = $c1_stock_num ? round($arr4['stock'] / $c1_stock_num * 100, 2) : 0;
         $arr5['grade'] = 'C';
-        $arr5['stock_rate'] = $c_stock_num ? round($arr5['stock']/$c_stock_num*100,2) : 0;
+        $arr5['stock_rate'] = $c_stock_num ? round($arr5['stock'] / $c_stock_num * 100, 2) : 0;
         $arr6['grade'] = 'D';
-        $arr6['stock_rate'] = $d_stock_num ? round($arr6['stock']/$d_stock_num*100,2) : 0;
+        $arr6['stock_rate'] = $d_stock_num ? round($arr6['stock'] / $d_stock_num * 100, 2) : 0;
         $arr7['grade'] = 'E';
-        $arr7['stock_rate'] = $e_stock_num ? round($arr7['stock']/$e_stock_num*100,2) : 0;
+        $arr7['stock_rate'] = $e_stock_num ? round($arr7['stock'] / $e_stock_num * 100, 2) : 0;
         $arr8['grade'] = 'F';
-        $arr8['stock_rate'] = $f_stock_num ? round($arr8['stock']/$f_stock_num*100,2) : 0;
+        $arr8['stock_rate'] = $f_stock_num ? round($arr8['stock'] / $f_stock_num * 100, 2) : 0;
         Db::name('supply_dull_stock')->insert($arr1);
         Db::name('supply_dull_stock')->insert($arr2);
         Db::name('supply_dull_stock')->insert($arr3);
@@ -1943,34 +1965,35 @@ class Test4 extends Controller
         Db::name('supply_dull_stock')->insert($arr8);
         $sum['grade'] = 'Z';
         $sum['stock'] = $count;
-        $sum['total'] = round($total,2);
+        $sum['total'] = round($total, 2);
         $sum['low_stock'] = $count1;
-        $sum['low_total'] = round($total1,2);
+        $sum['low_total'] = round($total1, 2);
         $sum['center_stock'] = $count2;
-        $sum['center_total'] = round($total2,2);
+        $sum['center_total'] = round($total2, 2);
         $sum['high_stock'] = $count3;
-        $sum['high_total'] = round($total3,2);
+        $sum['high_total'] = round($total3, 2);
         Db::name('supply_dull_stock')->insert($sum);
         echo 'ALL IS OK';
     }
+
     //获取sku总销量
     public function getSkuSales($sku)
     {
         $days = array();
         //zeelool
-        $z_info = $this->getDullStock($sku,1);
+        $z_info = $this->getDullStock($sku, 1);
         $sales_num1 = $z_info['sales_num'];
         $days[] = $z_info['days'];
         //voogueme
-        $v_info = $this->getDullStock($sku,2);
+        $v_info = $this->getDullStock($sku, 2);
         $sales_num2 = $v_info['sales_num'];
         $days[] = $v_info['days'];
         //nihao
-        $n_info = $this->getDullStock($sku,3);
+        $n_info = $this->getDullStock($sku, 3);
         $sales_num3 = $n_info['sales_num'];
         $days[] = $n_info['days'];
         //meeloog
-        $m_info = $this->getDullStock($sku,4);
+        $m_info = $this->getDullStock($sku, 4);
         $sales_num4 = $m_info['sales_num'];
         $days[] = $m_info['days'];
         //wesee
@@ -1997,16 +2020,17 @@ class Test4 extends Controller
         $c_info = $this->getDullStock($sku, 12);
         $sales_num10 = $c_info['sales_num'];
         $days[] = $j_info['days'];
-        $count = $sales_num1+$sales_num2+$sales_num3+$sales_num4+$sales_num5+$sales_num6+$sales_num7+$sales_num8+$sales_num9+$sales_num10;
+        $count = $sales_num1 + $sales_num2 + $sales_num3 + $sales_num4 + $sales_num5 + $sales_num6 + $sales_num7 + $sales_num8 + $sales_num9 + $sales_num10;
         $days = max($days);
         $data = array(
-            'count'=>$count,
-            'days'=>$days,
+            'count' => $count,
+            'days' => $days,
         );
         return $data;
     }
+
     //查询sku的有效天数的销量和有效天数
-    public function getDullStock($sku,$site)
+    public function getDullStock($sku, $site)
     {
         $skuSalesNum = new \app\admin\model\SkuSalesNum();
         $date = date('Y-m-d');
@@ -2014,15 +2038,17 @@ class Test4 extends Controller
         $map['sku'] = $sku;
         $map['site'] = $site;
         $sql = $skuSalesNum->field('sales_num')->where($map)->limit(30)->order('createtime desc')->buildSql();
-        $data['sales_num'] = Db::table($sql.' a')->sum('a.sales_num');
+        $data['sales_num'] = Db::table($sql . ' a')->sum('a.sales_num');
         $days = Db::name('sku_sales_num')->where($map)->count();
         $data['days'] = $days > 30 ? 30 : $days;
         return $data;
     }
+
     /*
      * 库存台账
      * */
-    public function stock_parameter(){
+    public function stock_parameter()
+    {
         $this->instock = new \app\admin\model\warehouse\Instock;
         $this->outstock = new \app\admin\model\warehouse\Outstock;
         $this->stockparameter = new \app\admin\model\financepurchase\StockParameter;
@@ -2042,7 +2068,7 @@ class Test4 extends Controller
             $instock_where['s.status'] = 2;
             $instock_where['s.type_id'] = 1;
             $instock_where['s.check_time'] = ['between', [$start, $end]];
-            $instocks = $this->instock->alias('s')->join('fa_check_order c', 'c.id=s.check_id')->join('fa_purchase_order_item oi', 'c.purchase_id=oi.purchase_id')->join('fa_purchase_order o','oi.purchase_id=o.id')->where($instock_where)->field('s.id,round(o.purchase_total/oi.purchase_num,2) purchase_price')->select();
+            $instocks = $this->instock->alias('s')->join('fa_check_order c', 'c.id=s.check_id')->join('fa_purchase_order_item oi', 'c.purchase_id=oi.purchase_id')->join('fa_purchase_order o', 'oi.purchase_id=o.id')->where($instock_where)->field('s.id,round(o.purchase_total/oi.purchase_num,2) purchase_price')->select();
             $instock_total = 0; //入库总金额
             foreach ($instocks as $key => $instock) {
                 $arr = array();
@@ -2073,12 +2099,12 @@ class Test4 extends Controller
                 $flag['stock_id'] = $stockId;
                 $flag['bar_id'] = $bar;
                 $flag['type'] = 2;
-                $bar_items = $this->item->alias('i')->join('fa_purchase_order_item p','i.purchase_id=p.purchase_id and i.sku=p.sku')->join('fa_purchase_order o','p.purchase_id=o.id')->field('i.out_stock_id,i.purchase_id,i.out_stock_time,p.actual_purchase_price,round(o.purchase_total/p.purchase_num,2) purchase_price')->where($bar_where)->where('barcode_id', $bar)->select();
+                $bar_items = $this->item->alias('i')->join('fa_purchase_order_item p', 'i.purchase_id=p.purchase_id and i.sku=p.sku')->join('fa_purchase_order o', 'p.purchase_id=o.id')->field('i.out_stock_id,i.purchase_id,i.out_stock_time,p.actual_purchase_price,round(o.purchase_total/p.purchase_num,2) purchase_price')->where($bar_where)->where('barcode_id', $bar)->select();
                 $sum_count = 0;
                 $sum_total = 0;
                 foreach ($bar_items as $item) {
-                    if(count(array_unique($is_exist)) != 0){
-                        foreach ($is_exist as $value){
+                    if (count(array_unique($is_exist)) != 0) {
+                        foreach ($is_exist as $value) {
                             if ($item['purchase_id'] == $value['purchase_id']) {
                                 $end_date = date('Y-m-d H:i:s', $value['create_time']);
                                 if ($item['out_stock_time'] >= $end_date) {
@@ -2097,7 +2123,7 @@ class Test4 extends Controller
                                 }
                             }
                         }
-                    }else{
+                    } else {
                         //没有冲减数据，直接拿预估成本计算
                         if ($item['actual_purchase_price'] != 0) {
                             $total = $item['actual_purchase_price'];   //有成本价拿成本价计算
@@ -2120,13 +2146,13 @@ class Test4 extends Controller
             $bar_where1['item_order_number'] = ['<>', ''];
             $bar_where1['library_status'] = 2;
             //判断冲减前的出库单出库数量和金额
-            $bars1 = $this->item->alias('i')->join('fa_purchase_order_item p','i.purchase_id=p.purchase_id and i.sku=p.sku')->join('fa_purchase_order o','p.purchase_id=o.id')->where($bar_where1)->field('i.out_stock_id,i.purchase_id,i.out_stock_time,p.actual_purchase_price,round(o.purchase_total/p.purchase_num,2) purchase_price')->select();
+            $bars1 = $this->item->alias('i')->join('fa_purchase_order_item p', 'i.purchase_id=p.purchase_id and i.sku=p.sku')->join('fa_purchase_order o', 'p.purchase_id=o.id')->where($bar_where1)->field('i.out_stock_id,i.purchase_id,i.out_stock_time,p.actual_purchase_price,round(o.purchase_total/p.purchase_num,2) purchase_price')->select();
             if (count($bars1) != 0) {
                 $flag1 = [];
                 $flag1['stock_id'] = $stockId;
                 $flag1['type'] = 3;
                 foreach ($bars1 as $bar1) {
-                    if(count(array_unique($is_exist)) != 0) {
+                    if (count(array_unique($is_exist)) != 0) {
                         foreach ($is_exist as $value) {
                             if ($bar1['purchase_id'] == $value['purchase_id']) {
                                 $end_date = date('Y-m-d H:i:s', $value['create_time']);
@@ -2139,15 +2165,15 @@ class Test4 extends Controller
                                 }
                             } else {
                                 //没有冲减数据，直接拿预估成本计算
-                                if ($bar1['actual_purchase_price']  != 0) {
+                                if ($bar1['actual_purchase_price'] != 0) {
                                     $total1 = $bar1['actual_purchase_price'];   //有成本价拿成本价计算
                                 } else {
                                     $total1 = $bar1['purchase_price'];   //没有成本价拿预估价计算
                                 }
                             }
                         }
-                    }else{
-                        if ($bar1['actual_purchase_price']  != 0) {
+                    } else {
+                        if ($bar1['actual_purchase_price'] != 0) {
                             $total1 = $bar1['actual_purchase_price'];   //有成本价拿成本价计算
                         } else {
                             $total1 = $bar1['purchase_price'];   //没有成本价拿预估价计算
@@ -2161,39 +2187,39 @@ class Test4 extends Controller
             }
             /*************订单出库end**************/
             //查询最新一条的余额
-            $rest_total = $this->stockparameter->order('id', 'desc')->field('rest_total')->limit(1,1)->select();
+            $rest_total = $this->stockparameter->order('id', 'desc')->field('rest_total')->limit(1, 1)->select();
             $cha_amount = 0;
-            foreach ($is_exist as $k=>$v){
+            foreach ($is_exist as $k => $v) {
                 $cha_amount += $v['total'];
             }
-            $end_rest = round($rest_total[0]['rest_total'] + $instock_total - $outstock_total1 - $outstock_total2+$cha_amount, 2);
+            $end_rest = round($rest_total[0]['rest_total'] + $instock_total - $outstock_total1 - $outstock_total2 + $cha_amount, 2);
             $info['instock_total'] = $instock_total;
             $info['outstock_total'] = round($outstock_total1 + $outstock_total2, 2);
             $info['rest_total'] = $end_rest;
             $this->stockparameter->where('id', $stockId)->update($info);
-            echo $start.' is ok'."\n";
+            echo $start . ' is ok' . "\n";
             usleep(100000);
         }
         echo "all is ok";
     }
 
 
-
     /**
      * 呆滞数据
      */
-    public function dull_stock1(){
+    public function dull_stock1()
+    {
         $grades = Db::name('product_grade')->field('true_sku,grade')->select();
-        foreach ($grades as $key=>$value){
+        foreach ($grades as $key => $value) {
             $this->model = new \app\admin\model\itemmanage\Item;
             $this->item = new \app\admin\model\warehouse\ProductBarCodeItem;
             //该品实时库存
-            $real_time_stock = $this->model->where('sku',$value['true_sku'])->where('is_del',1)->where('is_open',1)->value('sum(stock)-sum(distribution_occupy_stock) as result');
+            $real_time_stock = $this->model->where('sku', $value['true_sku'])->where('is_del', 1)->where('is_open', 1)->value('sum(stock)-sum(distribution_occupy_stock) as result');
             //该品库存金额
-            $sku_amount = $this->item->alias('i')->join('fa_purchase_order_item o','i.purchase_id=o.purchase_id and i.sku=o.sku')->where('i.sku',$value['true_sku'])->where('i.library_status',1)->value('SUM(IF(o.actual_purchase_price != 0,o.actual_purchase_price,o.purchase_price)) as result');
+            $sku_amount = $this->item->alias('i')->join('fa_purchase_order_item o', 'i.purchase_id=o.purchase_id and i.sku=o.sku')->where('i.sku', $value['true_sku'])->where('i.library_status', 1)->value('SUM(IF(o.actual_purchase_price != 0,o.actual_purchase_price,o.purchase_price)) as result');
             //实际周转天数
-            $sku_info  = $this->getSkuSales($value['true_sku']);
-            $actual_day = $sku_info['days']!=0 && $sku_info['count']!=0 ? round($real_time_stock/($sku_info['count']/$sku_info['days']),2) : 0;
+            $sku_info = $this->getSkuSales($value['true_sku']);
+            $actual_day = $sku_info['days'] != 0 && $sku_info['count'] != 0 ? round($real_time_stock / ($sku_info['count'] / $sku_info['days']), 2) : 0;
             $data['sku'] = $value['true_sku'];
             $data['grade'] = $value['grade'];
             $data['sales_num'] = $sku_info['count'];
@@ -2202,44 +2228,45 @@ class Test4 extends Controller
             $data['total'] = $sku_amount ? $sku_amount : 0;
             $data['actual_day'] = $actual_day;
             Db::name('ceshi')->insert($data);
-            echo $value['true_sku'].' is ok'."\n";
+            echo $value['true_sku'] . ' is ok' . "\n";
             usleep(10000);
         }
     }
+
     /**
      * 邮件排查没有回复状态为关闭的邮件
      */
     public function zendesk_error_assign_email()
     {
         $this->zendesk = new \app\admin\model\zendesk\Zendesk;
-        $where['channel'] = ['<>','voice'];
+        $where['channel'] = ['<>', 'voice'];
         $start = '2021-01-01';
         $end = '2021-01-31 23:59:59';
-        $where['create_time'] = ['between',[$start,$end]];
+        $where['create_time'] = ['between', [$start, $end]];
         $email = $this->zendesk->where('assign_id  is null or assign_id=0')->where($where)->select();
-        foreach ($email as $key=>$value){
+        foreach ($email as $key => $value) {
             //判断是否只有用户发送的邮件
-            $count = Db::name('zendesk_comments')->where('zid',$value['id'])->where('is_admin',1)->count();
-            if($count == 0){
+            $count = Db::name('zendesk_comments')->where('zid', $value['id'])->where('is_admin', 1)->count();
+            if ($count == 0) {
                 $data['zid'] = $value['id'];
                 $data['ticket_id'] = $value['ticket_id'];
                 $data['site'] = $value['type'];
                 //判断是否有合并邮件
-                $zemail = Db::name('zendesk_comments')->where('zid',$value['id'])->where('is_admin',0)->field('html_body')->select();
+                $zemail = Db::name('zendesk_comments')->where('zid', $value['id'])->where('is_admin', 0)->field('html_body')->select();
                 $i = 0;
-                foreach ($zemail as $k=>$v){
+                foreach ($zemail as $k => $v) {
                     $str = strtolower($v['html_body']);
-                    if(strpos($str,'merged') !== false){
+                    if (strpos($str, 'merged') !== false) {
                         $i++;
                     }
                 }
-                if($i>0){
+                if ($i > 0) {
                     $data['type'] = 1;
-                }else{
+                } else {
                     $data['type'] = 0;
                 }
                 Db::name('ceshi')->insert($data);
-                echo $value['ticket_id'].' is ok '."\n";
+                echo $value['ticket_id'] . ' is ok ' . "\n";
                 usleep(10000);
             }
 
@@ -2260,36 +2287,37 @@ class Test4 extends Controller
                 $arr['day_date'] = $val['date_time'];
                 //订单数
                 $start = strtotime($val['date_time']);
-                $end = strtotime($val['date_time'].' 23:59:59');
-                $where['o.payment_time'] = ['between',[$start,$end]];
-                $where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+                $end = strtotime($val['date_time'] . ' 23:59:59');
+                $where['o.payment_time'] = ['between', [$start, $end]];
+                $where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
                 $arr['order_num'] = $order->alias('o')->where($where)->count();
 
                 $map1['p.order_prescription_type'] = 1;
                 $map2['p.order_prescription_type'] = 2;
                 $map3['p.order_prescription_type'] = 3;
 
-                $sql1 = $this->process->alias('p')->join('fa_order o','p.increment_id = o.increment_id')->field('(p.delivery_time-o.payment_time)/3600 AS total')->where($where)->where($map1)->group('p.order_id')->buildSql();
-                $count1 = $this->process->table([$sql1=>'t2'])->value('sum( IF ( total <= 24, 1, 0) ) AS a');
+                $sql1 = $this->process->alias('p')->join('fa_order o', 'p.increment_id = o.increment_id')->field('(p.delivery_time-o.payment_time)/3600 AS total')->where($where)->where($map1)->group('p.order_id')->buildSql();
+                $count1 = $this->process->table([$sql1 => 't2'])->value('sum( IF ( total <= 24, 1, 0) ) AS a');
 
-                $sql2 = $this->process->alias('p')->join('fa_order o','p.increment_id = o.increment_id')->field('(p.delivery_time-o.payment_time)/3600 AS total')->where($where)->where($map2)->group('p.order_id')->buildSql();
-                $count2 = $this->process->table([$sql2=>'t2'])->value('sum( IF ( total <= 72, 1, 0) ) AS a');
+                $sql2 = $this->process->alias('p')->join('fa_order o', 'p.increment_id = o.increment_id')->field('(p.delivery_time-o.payment_time)/3600 AS total')->where($where)->where($map2)->group('p.order_id')->buildSql();
+                $count2 = $this->process->table([$sql2 => 't2'])->value('sum( IF ( total <= 72, 1, 0) ) AS a');
 
-                $sql3 = $this->process->alias('p')->join('fa_order o','p.increment_id = o.increment_id')->field('(p.delivery_time-o.payment_time)/3600 AS total')->where($where)->where($map3)->group('p.order_id')->buildSql();
-                $count3 = $this->process->table([$sql3=>'t2'])->value('sum( IF ( total <= 168, 1, 0) ) AS a');
+                $sql3 = $this->process->alias('p')->join('fa_order o', 'p.increment_id = o.increment_id')->field('(p.delivery_time-o.payment_time)/3600 AS total')->where($where)->where($map3)->group('p.order_id')->buildSql();
+                $count3 = $this->process->table([$sql3 => 't2'])->value('sum( IF ( total <= 168, 1, 0) ) AS a');
                 $untimeout_count = $count1 + $count2 + $count3;
-                $arr['intime_rate'] = $arr['order_num'] ? round($untimeout_count/$arr['order_num']*100,2) : 0;
+                $arr['intime_rate'] = $arr['order_num'] ? round($untimeout_count / $arr['order_num'] * 100, 2) : 0;
                 Db::name('datacenter_day_order')->insert($arr);
-                echo $val['date_time'].' is ok'."\n";
+                echo $val['date_time'] . ' is ok' . "\n";
                 usleep(10000);
             }
         }
     }
+
     //物流概况每天发货数量
     public function send_logistics_num()
     {
         $ordernode = new \app\admin\model\OrderNode();
-        $date_time = Db::name('datacenter_day_order')->where('day_date','>','2020-04-01')->order('day_date','asc')->select();
+        $date_time = Db::name('datacenter_day_order')->where('day_date', '>', '2020-04-01')->order('day_date', 'asc')->select();
         //查询时间
         foreach ($date_time as $val) {
             $is_exist = Db::name('datacenter_day_order')->where('day_date', $val['day_date'])->value('id');
@@ -2298,34 +2326,36 @@ class Test4 extends Controller
                 $arr['day_date'] = $val['day_date'];
                 //发送订单数
                 $start = $val['day_date'];
-                $end = $val['day_date'].' 23:59:59';
-                $where['delivery_time'] = ['between',[$start,$end]];
+                $end = $val['day_date'] . ' 23:59:59';
+                $where['delivery_time'] = ['between', [$start, $end]];
                 $arr['send_num'] = $ordernode->where($where)->count();
 
                 $sql1 = $this->ordernode->field('(UNIX_TIMESTAMP(signing_time)-UNIX_TIMESTAMP(delivery_time))/3600/24 AS total')->where($where)->group('order_id')->buildSql();
-                $count = $this->ordernode->table([$sql1=>'t2'])->value('sum( IF ( total <= 15, 1, 0) ) AS a');
+                $count = $this->ordernode->table([$sql1 => 't2'])->value('sum( IF ( total <= 15, 1, 0) ) AS a');
 
-                $arr['logistics_rate'] = $arr['send_num'] ? round($count/$arr['send_num']*100,2) : 0;
+                $arr['logistics_rate'] = $arr['send_num'] ? round($count / $arr['send_num'] * 100, 2) : 0;
                 Db::name('datacenter_day_order')->where('day_date', $val['day_date'])->update($arr);
-                echo $val['day_date'].' is ok'."\n";
+                echo $val['day_date'] . ' is ok' . "\n";
                 usleep(10000);
             }
         }
     }
+
     //每月总库存、呆滞库存数据
-    public function supply_month_data(){
+    public function supply_month_data()
+    {
         $this->productAllStockLog = new \app\admin\model\ProductAllStock();
         $this->dullstock = new \app\admin\model\supplydatacenter\DullStock();
         $start = date('Y-m', strtotime('-12 months'));
         $end = date('Y-m', strtotime('-2 months'));
-        while($end>$start){
+        while ($end > $start) {
             $endmonth = $start;
-            $start = date('Y-m',strtotime("$endmonth +1 month"));
-            $startday = $start.'-01';
-            $endday = $start.'-'.date('t', strtotime($startday));
+            $start = date('Y-m', strtotime("$endmonth +1 month"));
+            $startday = $start . '-01';
+            $endday = $start . '-' . date('t', strtotime($startday));
             $start_stock = $this->productAllStockLog->where("DATE_FORMAT(createtime,'%Y-%m-%d')='$startday'")->field('id,allnum')->find();
             //判断是否有月初数据
-            if($start_stock['id']) {
+            if ($start_stock['id']) {
                 //判断是否有月末数据
                 $end_stock = $this->productAllStockLog->where("DATE_FORMAT(createtime,'%Y-%m-%d')='$endday'")->field('id,allnum')->find();
                 if ($end_stock['id']) {
@@ -2334,15 +2364,15 @@ class Test4 extends Controller
                     $arr['day_date'] = $start;
                     $arr['avg_stock'] = $stock;
                     Db::name('datacenter_supply_month')->insert($arr);
-                    echo $start." is ok"."\n";
+                    echo $start . " is ok" . "\n";
                 }
             }
             //获取当前上个月份的库存数据
-            $stock_info = Db::name('datacenter_supply_month')->where('day_date',$start)->field('id,avg_stock')->find();
-            $map['create_time'] = ['between',[$startday.' 00:00:00',$endday.' 23:59:59']];
-            $where['payment_time'] = ['between',[strtotime($startday.' 00:00:00'),strtotime($endday.' 23:59:59')]];
+            $stock_info = Db::name('datacenter_supply_month')->where('day_date', $start)->field('id,avg_stock')->find();
+            $map['create_time'] = ['between', [$startday . ' 00:00:00', $endday . ' 23:59:59']];
+            $where['payment_time'] = ['between', [strtotime($startday . ' 00:00:00'), strtotime($endday . ' 23:59:59')]];
             $order = new \app\admin\model\order\order\NewOrder();
-            if ($stock_info['id']){
+            if ($stock_info['id']) {
                 //上个月总的采购数量（副数）
                 $purchase_num = Db::name('warehouse_data')->where($map)->sum('all_purchase_num');
 
@@ -2351,9 +2381,9 @@ class Test4 extends Controller
                 $sales_num = $order->where($where)->sum('total_qty_ordered');
                 $arr2['purchase_num'] = $purchase_num;
                 $arr2['sales_num'] = $sales_num;
-                $arr2['purchase_sales_rate'] = $sales_num!=0 ? round($purchase_num/$sales_num*100,2):0;
-                Db::name('datacenter_supply_month')->where('day_date',$start)->update($arr2);
-            }else{
+                $arr2['purchase_sales_rate'] = $sales_num != 0 ? round($purchase_num / $sales_num * 100, 2) : 0;
+                Db::name('datacenter_supply_month')->where('day_date', $start)->update($arr2);
+            } else {
                 //上个月总的采购数量（副数）
                 $purchase_num = Db::name('warehouse_data')->where($map)->sum('all_purchase_num');
                 //上个月总的销售数量（副数）
@@ -2361,31 +2391,69 @@ class Test4 extends Controller
                 $sales_num = $order->where($where)->sum('total_qty_ordered');
                 $arr3['purchase_num'] = $purchase_num;
                 $arr3['sales_num'] = $sales_num;
-                $arr3['purchase_sales_rate'] = $sales_num!=0 ? round($purchase_num/$sales_num*100,2):0;
+                $arr3['purchase_sales_rate'] = $sales_num != 0 ? round($purchase_num / $sales_num * 100, 2) : 0;
                 $arr3['day_date'] = $start;
                 Db::name('datacenter_supply_month')->insert($arr3);
-                echo $start." is ok"."\n";
+                echo $start . " is ok" . "\n";
             }
-            $start_dull_stock = $this->dullstock->where("DATE_FORMAT(day_date,'%Y-%m-%d')='$startday'")->where('grade','Z')->field('id,stock')->find();
+            $start_dull_stock = $this->dullstock->where("DATE_FORMAT(day_date,'%Y-%m-%d')='$startday'")->where('grade', 'Z')->field('id,stock')->find();
             //判断是否有月初数据
-            if($start_dull_stock['id']) {
+            if ($start_dull_stock['id']) {
                 //判断是否有月末数据
-                $end_dull_stock = $this->dullstock->where("DATE_FORMAT(day_date,'%Y-%m-%d')='$endday'")->where('grade','Z')->field('id,stock')->find();
+                $end_dull_stock = $this->dullstock->where("DATE_FORMAT(day_date,'%Y-%m-%d')='$endday'")->where('grade', 'Z')->field('id,stock')->find();
                 if ($end_dull_stock['id']) {
-                    $stock_info1 = Db::name('datacenter_supply_month')->where('day_date',$start)->field('id,avg_stock')->find();
+                    $stock_info1 = Db::name('datacenter_supply_month')->where('day_date', $start)->field('id,avg_stock')->find();
                     //如果有月末数据，（月初数据+月末数据）/2
                     $dull_stock = round(($start_dull_stock['stock'] + $end_dull_stock['stock']) / 2, 2);
                     $arr1['avg_dull_stock'] = $dull_stock;
-                    $arr1['avg_rate'] = $stock_info1['avg_stock'] ? round($arr1['avg_dull_stock']/$stock_info1['avg_stock']*100,2) : 0;
-                    Db::name('datacenter_supply_month')->where('id',$stock_info1['id'])->update($arr1);
+                    $arr1['avg_rate'] = $stock_info1['avg_stock'] ? round($arr1['avg_dull_stock'] / $stock_info1['avg_stock'] * 100, 2) : 0;
+                    Db::name('datacenter_supply_month')->where('id', $stock_info1['id'])->update($arr1);
                 }
             }
             usleep(10000);
         }
     }
 
-    public function add_plat(){
-        $res = Db::name('magento_platform')->insert(['id'=>13,'name'=>'抖音','prefix'=>'B','create_time'=>time()]);
-        $res = Db::name('magento_platform')->insert(['id'=>14,'name'=>'阿里巴巴国际站','prefix'=>'L','create_time'=>time()]);
+    public function add_plat()
+    {
+        $res = Db::name('magento_platform')->where(['id' => 13])->update(['name' => 'zeelool_cn', 'prefix' => 'B', 'create_time' => time()]);
+        $res = Db::name('magento_platform')->where(['id' => 14])->update(['name' => 'alibaba', 'prefix' => 'L', 'create_time' => time()]);
+    }
+
+    public function product_bar_code_warehouse()
+    {
+        $store_sku = Db::name('store_sku')
+            ->alias('a')
+            ->join(['fa_store_house' => 'b'], 'a.store_id=b.id')
+            ->where('a.is_del', 1)
+            ->field('a.sku,a.store_id,b.id,b.coding,b.area_id')
+            ->select();
+        foreach ($store_sku as $k => $v) {
+            $res = Db::name('product_barcode_item')->where('sku', $v['sku'])->update(['location_code' => $v['coding'], 'location_id' => $v['area_id'], 'location_code_id' => $v['store_id']]);
+            echo $v['sku'] . '更新' . $res . '条数据 is ok' . "\n";
+            usleep(10000);
+        }
+    }
+
+    public function store_sku()
+    {
+        $res = Db::name('store_sku')->where('id', '>', 4629)->delete();
+        $data = Db::name('zzzz_temp')->where('id', '>', 0)->field('sku,product_number')->select();
+        $store_house = Db::name('store_house')->column('id', 'coding');
+        foreach ($data as $k => $v) {
+            $data[$k]['store_id'] = $store_house[$v['product_number']];
+            Db::name('store_sku')->insert(['sku' => $v['sku'], 'store_id' => $data[$k]['store_id'], 'create_person' => 'Admin', 'createtime' => date("Y-m-d H:i:s")]);
+        }
+    }
+
+    public function update_purchase_order()
+    {
+        $arr = ['PO20210315162344924696', 'PO20210315162215645784', 'PO20210315161228347829', 'PO20210315161000139240', 'PO20210315165346719168', 'PO20210315165153941625', 'PO20210315165020644213', 'PO20210315164835238322',
+            'PO20210315164722739902', 'PO20210315164147826371', 'PO20210315163755709146', 'PO20210315163110907985', 'PO20210315162728388129', 'PO20210315172414645839'];
+        foreach ($arr as $k => $v) {
+            $res = Db::name('purchase_order')->where('purchase_number', $v)->update(['type' => 1]);
+            dump($res);
+        }
+
     }
 }

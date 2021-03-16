@@ -39,6 +39,11 @@ class DataMarket extends Backend
     public function index()
     {
         $platform = $this->magentoplatform->getNewAuthSite();
+        foreach ($platform as $k=>$v){
+            if(in_array($k,[8,13,14])){
+                unset($platform[$k]);
+            }
+        }
         if(empty($platform)){
             $this->error('您没有权限访问','general/profile?ref=addtabs');
         }
