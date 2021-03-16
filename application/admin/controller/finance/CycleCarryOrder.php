@@ -69,16 +69,18 @@ class CycleCarryOrder extends Backend
                 return $this->selectpage();
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-            
+            $map['bill_type'] = ['<>',1];
             $total = $this->cost
                 ->where($where)
                 ->where(['cycle_id' => $ids])
+                ->where($map)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->cost
                 ->where($where)
                 ->where(['cycle_id' => $ids])
+                ->where($map)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
