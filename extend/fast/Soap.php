@@ -101,6 +101,14 @@ class Soap
             case 12:
                 $url = config('url.api_voogmechic_url');
                 break;
+            case 13:
+                $url = config('url.api_zeelool_cn_url');
+                $url = 'http://shop.mruilove.com/api/commodity/index';
+                break;
+            case 14:
+                $url = config('url.api_alibaba_url');
+                $url = 'http://shop.mruilove.com/index.php/api/commodity/index';
+                break;
             default:
                 return false;
                 break;
