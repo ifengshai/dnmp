@@ -29,7 +29,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     [
                         { checkbox: true },
                         { field: 'id', title: __('Id') },
-                        { field: 'work_platform', title: __('work_platform'), custom: { 1: 'blue', 2: 'danger', 3: 'orange' }, searchList: { 1: 'Z', 2: 'V', 3: 'Nh',4:'Ml',5:'We',9:'Es',10:'De',11:'Jp' }, data: 'multiple',addClass: 'selectpicker',formatter: Table.api.formatter.status },
+                        { field: 'work_platform', title: __('work_platform'), custom: { 1: 'blue', 2: 'danger', 3: 'orange' }, searchList: { 1: 'Z', 2: 'V', 3: 'Nh',4:'Ml',5:'We',9:'Es',10:'De',11:'Jp' }, data: 'multiple',addClass: 'selectpicker', operate: 'IN', formatter: Table.api.formatter.status },
                         { field: 'work_type_str', title: __('Work_type'), operate: false },
                         { field: 'work_type', title: __('Work_type'), searchList: { 1: '客服工单', 2: '仓库工单' }, visible: false, formatter: Table.api.formatter.status },
                         { field: 'platform_order', title: __('Platform_order') },
