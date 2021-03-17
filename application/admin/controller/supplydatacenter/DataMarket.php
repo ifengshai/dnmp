@@ -1249,6 +1249,7 @@ class DataMarket extends Backend
             ->where('p.delivery_time is NULL')
             ->select();
         foreach ($list4 as $key=>$value){
+            dump((time() - $value['payment_time']) /3600);die();
             if ($value['order_prescription_type'] ==1){
                 if ((time() - $value['payment_time']) /3600 < 25){
                     unset($key);
