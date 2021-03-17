@@ -1187,47 +1187,32 @@ class DataMarket extends Backend
             $endtime  = time();
         }
 
-
-
-
-        $where['o.payment_time'] = ['between',[$startime,$endtime]];
-        $where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
-        $arr['order_num'] = $this->order->alias('o')->where($where)->count();
-
-        $map1['p.order_prescription_type'] = 1;
-        $map2['p.order_prescription_type'] = 2;
-        $map3['p.order_prescription_type'] = 3;
-
-        $sql1 = $this->process->alias('p')->join('fa_order o','p.increment_id = o.increment_id')->field('(p.delivery_time-o.payment_time)/3600 AS total')->where($where)->where($map1)->group('p.order_id')->buildSql();
-        $count1 = $this->process->table([$sql1=>'t2'])->value('sum( IF ( total <= 24, 1, 0) ) AS a');
-
-        $sql2 = $this->process->alias('p')->join('fa_order o','p.increment_id = o.increment_id')->field('(p.delivery_time-o.payment_time)/3600 AS total')->where($where)->where($map2)->group('p.order_id')->buildSql();
-        $count2 = $this->process->table([$sql2=>'t2'])->value('sum( IF ( total <= 72, 1, 0) ) AS a');
-
-        $sql3 = $this->process->alias('p')->join('fa_order o','p.increment_id = o.increment_id')->field('(p.delivery_time-o.payment_time)/3600 AS total')->where($where)->where($map3)->group('p.order_id')->buildSql();
-        $count3 = $this->process->table([$sql3=>'t2'])->value('sum( IF ( total <= 168, 1, 0) ) AS a');
-        $untimeout_count = $count1 + $count2 + $count3;
-        dump($untimeout_count);die();
-
-
-
-
-
-
-
-
-
-
-
-
+//        $where['o.payment_time'] = ['between',[$startime,$endtime]];
+//        $where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+//        $arr['order_num'] = $this->order->alias('o')->where($where)->count();
+//
+//        $map1['p.order_prescription_type'] = 1;
+//        $map2['p.order_prescription_type'] = 2;
+//        $map3['p.order_prescription_type'] = 3;
+//
+//        $sql1 = $this->process->alias('p')->join('fa_order o','p.increment_id = o.increment_id')->field('(p.delivery_time-o.payment_time)/3600 AS total')->where($where)->where($map1)->group('p.order_id')->buildSql();
+//        $count1 = $this->process->table([$sql1=>'t2'])->value('sum( IF ( total <= 24, 1, 0) ) AS a');
+//
+//        $sql2 = $this->process->alias('p')->join('fa_order o','p.increment_id = o.increment_id')->field('(p.delivery_time-o.payment_time)/3600 AS total')->where($where)->where($map2)->group('p.order_id')->buildSql();
+//        $count2 = $this->process->table([$sql2=>'t2'])->value('sum( IF ( total <= 72, 1, 0) ) AS a');
+//
+//        $sql3 = $this->process->alias('p')->join('fa_order o','p.increment_id = o.increment_id')->field('(p.delivery_time-o.payment_time)/3600 AS total')->where($where)->where($map3)->group('p.order_id')->buildSql();
+//        $count3 = $this->process->table([$sql3=>'t2'])->value('sum( IF ( total <= 168, 1, 0) ) AS a');
+//        $untimeout_count = $count1 + $count2 + $count3;
+//        dump($untimeout_count);die();
 
         $map['o.payment_time'] = ['between',[$startime,$endtime]];
         $deve_time_one[] = ['exp', Db::raw("( p.delivery_time - o.payment_time )/ 3600 > 24")];
         $deve_time_two[] = ['exp', Db::raw("( p.delivery_time - o.payment_time )/ 3600 > 72")];
         $deve_time_three[] = ['exp', Db::raw("( p.delivery_time - o.payment_time )/ 3600 > 168")];
-        $deve_time_one['p.order_prescription_type'] =1;
-        $deve_time_two['p.order_prescription_type'] =2;
-        $deve_time_three['p.order_prescription_type'] =3;
+        $deve_time_one_type['p.order_prescription_type'] =1;
+        $deve_time_two_type['p.order_prescription_type'] =2;
+        $deve_time_three_type['p.order_prescription_type'] =3;
         $map['o.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','complete',  'delivered']];
         $table = Db::connect('database.db_mojing_order');
         $list1 = $table->table('fa_order_process')
@@ -1236,6 +1221,7 @@ class DataMarket extends Backend
             ->field('p.increment_id,o.created_at,o.status,p.order_prescription_type,o.payment_time,o.site,p.delivery_time')
             ->where($map)
             ->where($deve_time_one)
+            ->where($deve_time_one_type)
             ->select();
         $list2 = $table->table('fa_order_process')
             ->alias('p')
@@ -1243,6 +1229,7 @@ class DataMarket extends Backend
             ->field('p.increment_id,o.created_at,o.status,p.order_prescription_type,o.payment_time,o.site,p.delivery_time')
             ->where($map)
             ->where($deve_time_two)
+            ->where($deve_time_two_type)
             ->select();
         $list3 = $table->table('fa_order_process')
             ->alias('p')
@@ -1250,6 +1237,7 @@ class DataMarket extends Backend
             ->field('p.increment_id,o.created_at,o.status,p.order_prescription_type,o.payment_time,o.site,p.delivery_time')
             ->where($map)
             ->where($deve_time_three)
+            ->where($deve_time_three_type)
             ->select();
 
 //
