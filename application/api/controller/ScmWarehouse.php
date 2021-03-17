@@ -3372,18 +3372,18 @@ class ScmWarehouse extends Scm
             $area_all = $this->_warehouse_area->column('id', 'coding');
             foreach ($sku_agg as $k => $v) {
                 //当前条形码详情
-                $detail = $this->_product_bar_code_item->where('code', $v['code'])->find();
+                // $detail = $this->_product_bar_code_item->where('code', $v['code'])->find();
                 //判断调拨单子单sku是否与条形码sku一致
-                if ($transfer_order_item['sku'] != $detail['sku']) {
-                    $this->error(__('条形码' . $v['code'] . '与当前调拨单sku不一致请确认后重试'), '', 546);
-                }
+                // if ($transfer_order_item['sku'] != $detail['sku']) {
+                //     $this->error(__('条形码' . $v['code'] . '与当前调拨单sku不一致请确认后重试'), '', 546);
+                // }
                 // //判断当前扫码的sku是否在当前调出的库位
                 // if ($transfer_order_item['call_out_site'] != $detail['location_code']) {
                 //     $this->error(__('条形码' . $v['code'] . '当前未在调出库位！！' . $transfer_order_item['call_out_site']), '', 546);
                 // }
-                if (strcmp($transfer_order_item['call_out_site'], $detail['location_code']) !== 0) {
-                    $this->error(__('条形码' . $v['code'] . '当前未在调出库位！！' . $transfer_order_item['call_out_site']), '', 546);
-                }
+                // if (strcmp($transfer_order_item['call_out_site'], $detail['location_code']) !== 0) {
+                //     $this->error(__('条形码' . $v['code'] . '当前未在调出库位！！' . $transfer_order_item['call_out_site']), '', 546);
+                // }
                 //调入仓库位id
                 $store_house_id = $this->_store_house->where(['coding' => $transfer_order_item['call_in_site'], 'area_id' => $area_all[$transfer_order_item['inarea']]])->value('id');
                 //判断调入库位是否有sku跟库位的绑定关系
