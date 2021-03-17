@@ -1249,7 +1249,6 @@ class DataMarket extends Backend
             ->where('p.delivery_time is NULL')
             ->select();
         foreach ($list4 as $key=>$value){
-            dump((time() - $value['payment_time']) /3600);die();
             if ($value['order_prescription_type'] ==1){
                 if ((time() - $value['payment_time']) /3600 < 25){
                     unset($key);
@@ -1266,7 +1265,7 @@ class DataMarket extends Backend
                 }
             }
         }
-dump($list4);die();
+
 
 //
 //        $sql1 = "SELECT p.increment_id,o.created_at,o.status,p.order_prescription_type,o.payment_time,o.site,p.delivery_time   FROM `fa_order_process` `p` INNER JOIN `fa_order` `o` ON `p`.`increment_id` = `o`.`increment_id`
