@@ -3639,7 +3639,7 @@ class Distribution extends Backend
                 $total[$key]['mesage'] = collection($data)->toArray();
             }
         }
-
+        dump($total);die();
         $spreadsheet = new Spreadsheet();
         //常规方式：利用setCellValue()填充数据
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "子单创建时间")
