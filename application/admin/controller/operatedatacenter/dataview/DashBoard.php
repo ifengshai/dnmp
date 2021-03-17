@@ -19,6 +19,8 @@ class DashBoard extends Backend
         $this->zeeloolOperate = new \app\admin\model\operatedatacenter\Zeelool;
         $this->vooguemeOperate = new \app\admin\model\operatedatacenter\Voogueme();
         $this->nihaoOperate = new \app\admin\model\operatedatacenter\Nihao();
+        $this->zeeloolDeOperate = new \app\admin\model\operatedatacenter\ZeeloolDe;
+        $this->zeeloolJpOperate = new \app\admin\model\operatedatacenter\ZeeloolJp;
         $this->datacenterday = new \app\admin\model\operatedatacenter\Datacenter();
         $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform();
     }
@@ -57,6 +59,10 @@ class DashBoard extends Backend
      */
     public function index()
     {
+        $active_user_num = $this->zeeloolDeOperate->getActiveUser();
+        exit;
+
+
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getNewAuthSite();
         // dump(collection($magentoplatformarr)->toArray());

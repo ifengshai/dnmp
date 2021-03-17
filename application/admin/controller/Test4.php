@@ -27,6 +27,8 @@ class Test4 extends Controller
         $this->zeelool = new \app\admin\model\order\order\Zeelool();
         $this->voogueme = new \app\admin\model\order\order\Voogueme();
         $this->nihao = new \app\admin\model\order\order\Nihao();
+        $this->zeeloolde = new \app\admin\model\order\order\ZeeloolDe();
+        $this->zeelooljp = new \app\admin\model\order\order\ZeeloolJp();
         $this->user = new \app\admin\model\Admin();
         $this->ordernodedetail = new \app\admin\model\OrderNodeDetail();
         $this->ordernode = new \app\admin\model\OrderNode();
@@ -80,6 +82,10 @@ class Test4 extends Controller
             $VIEW_ID = config('VOOGUEME_GOOGLE_ANALYTICS_VIEW_ID');
         } elseif ($site == 3) {
             $VIEW_ID = config('NIHAO_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 10) {
+            $VIEW_ID = config('ZEELOOLDE_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 11) {
+            $VIEW_ID = config('ZEELOOLJP_GOOGLE_ANALYTICS_VIEW_ID');
         }
 
         // Replace with your view ID, for example XXXX.
@@ -145,6 +151,10 @@ class Test4 extends Controller
             $VIEW_ID = config('VOOGUEME_GOOGLE_ANALYTICS_VIEW_ID');
         } elseif ($site == 3) {
             $VIEW_ID = config('NIHAO_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 10) {
+            $VIEW_ID = config('ZEELOOLDE_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 11) {
+            $VIEW_ID = config('ZEELOOLJP_GOOGLE_ANALYTICS_VIEW_ID');
         }
 
         // Replace with your view ID, for example XXXX.
@@ -430,6 +440,169 @@ class Test4 extends Controller
                 //插入数据
                 Db::name('datacenter_day')->insert($arr);
                 echo $val['date_time'] . "\n";
+                usleep(100000);
+            }
+        }
+    }
+
+    //运营数据中心--德语站
+    public function zeelool_de_operate_data_center()
+    {
+        $model = Db::connect('database.db_zeelool_de');
+        $model->table('customer_entity')->query("set time_zone='+8:00'");
+        $model->table('oc_vip_order')->query("set time_zone='+8:00'");
+        $model->table('sales_flat_quote')->query("set time_zone='+8:00'");
+
+        //查询时间
+        $date_time = $this->zeeloolde->query("SELECT DATE_FORMAT(payment_time, '%Y-%m-%d') AS date_time FROM `sales_flat_order` where payment_time between '2020-09-17' and '2021-03-18' GROUP BY DATE_FORMAT(payment_time, '%Y%m%d') order by DATE_FORMAT(payment_time, '%Y%m%d') asc");
+        foreach ($date_time as $val) {
+            $is_exist = Db::name('datacenter_day')->where('day_date', $val['date_time'])->where('site', 10)->value('id');
+            $arr = [];
+            //活跃用户数
+            $arr['active_user_num'] = $this->google_active_user(10, $val['date_time']);
+            //注册用户数
+            $register_where = [];
+            $register_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $val['date_time'] . "'")];
+            $arr['register_num'] = $model->table('customer_entity')->where($register_where)->count();
+            //新增vip用户数
+            $vip_where = [];
+            $vip_where[] = ['exp', Db::raw("DATE_FORMAT(start_time, '%Y-%m-%d') = '" . $val['date_time'] . "'")];
+            $vip_where['order_status'] = 'Success';
+            $arr['vip_user_num'] = $model->table('oc_vip_order')->where($vip_where)->count();
+            //订单数
+            $order_where = [];
+            $order_where[] = ['exp', Db::raw("DATE_FORMAT(payment_time, '%Y-%m-%d') = '" . $val['date_time'] . "'")];
+            $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+            $arr['order_num'] = $this->zeeloolde->where($order_where)->where('order_type', 1)->count();
+            //销售额
+            $arr['sales_total_money'] = $this->zeeloolde->where($order_where)->where('order_type', 1)->sum('base_grand_total');
+            //邮费
+            $arr['shipping_total_money'] = $this->zeeloolde->where($order_where)->where('order_type', 1)->sum('base_shipping_amount');
+            //客单价
+            $arr['order_unit_price'] = $arr['order_num'] ? round($arr['sales_total_money'] / $arr['order_num'], 2) : 0;
+            //中位数
+            $sales_total_money = $this->zeeloolde->where($order_where)->where('order_type', 1)->column('base_grand_total');
+            $arr['order_total_midnum'] = $this->median($sales_total_money);
+            //标准差
+            $arr['order_total_standard'] = $this->getVariance($sales_total_money);
+            //补发订单数
+            $arr['replacement_order_num'] = $this->zeeloolde->where($order_where)->where('order_type', 4)->count();
+            //补发销售额
+            $arr['replacement_order_total'] = $this->zeeloolde->where($order_where)->where('order_type', 4)->sum('base_grand_total');
+            //网红订单数
+            $arr['online_celebrity_order_num'] = $this->zeeloolde->where($order_where)->where('order_type', 3)->count();
+            //补发销售额
+            $arr['online_celebrity_order_total'] = $this->zeeloolde->where($order_where)->where('order_type', 3)->sum('base_grand_total');
+            //会话
+            $arr['sessions'] = $this->google_session(10, $val['date_time']);
+            //新建购物车数量
+            $cart_where1 = [];
+            $cart_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $val['date_time'] . "'")];
+            $arr['new_cart_num'] = $model->table('sales_flat_quote')->where($cart_where1)->where('base_grand_total', 'gt', 0)->count();
+            //更新购物车数量
+            $cart_where2 = [];
+            $cart_where2[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '" . $val['date_time'] . "'")];
+            $arr['update_cart_num'] = $model->table('sales_flat_quote')->where($cart_where2)->where('base_grand_total', 'gt', 0)->count();
+            //新增加购率
+            $arr['add_cart_rate'] = $arr['sessions'] ? round($arr['new_cart_num'] / $arr['sessions'] * 100, 2) : 0;
+            //更新加购率
+            $arr['update_add_cart_rate'] = $arr['sessions'] ? round($arr['update_cart_num'] / $arr['sessions'] * 100, 2) : 0;
+            //新增购物车转化率
+            $arr['cart_rate'] = $arr['new_cart_num'] ? round($arr['order_num'] / $arr['new_cart_num'] * 100, 2) : 0;
+            //更新购物车转化率
+            $arr['update_cart_cart'] = $arr['update_cart_num'] ? round($arr['order_num'] / $arr['update_cart_num'] * 100, 2) : 0;
+            if (!$is_exist) {
+                $arr['site'] = 10;
+                $arr['day_date'] = $val['date_time'];
+                //插入数据
+                Db::name('datacenter_day')->insert($arr);
+                echo $val['date_time'] .' ok'. "\n";
+                usleep(100000);
+            } else{
+                //更新数据
+                Db::name('datacenter_day')->where('id',$is_exist)->update($arr);
+                echo $val['date_time'] .' is ok'. "\n";
+                usleep(100000);
+            }
+        }
+    }
+    //运营数据中心--日本站
+    public function zeelool_jp_operate_data_center()
+    {
+        $model = Db::connect('database.db_zeelool_jp');
+        $model->table('customer_entity')->query("set time_zone='+8:00'");
+        $model->table('oc_vip_order')->query("set time_zone='+8:00'");
+        $model->table('sales_flat_quote')->query("set time_zone='+8:00'");
+
+        //查询时间
+        $date_time = $this->zeelooljp->query("SELECT DATE_FORMAT(payment_time, '%Y-%m-%d') AS date_time FROM `sales_flat_order` where payment_time between '2020-11-08' and '2021-03-18' GROUP BY DATE_FORMAT(payment_time, '%Y%m%d') order by DATE_FORMAT(payment_time, '%Y%m%d') asc");
+        foreach ($date_time as $val) {
+            $is_exist = Db::name('datacenter_day')->where('day_date', $val['date_time'])->where('site', 11)->value('id');
+            $arr = [];
+            //活跃用户数
+            $arr['active_user_num'] = $this->google_active_user(11, $val['date_time']);
+            //注册用户数
+            $register_where = [];
+            $register_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $val['date_time'] . "'")];
+            $arr['register_num'] = $model->table('customer_entity')->where($register_where)->count();
+            //新增vip用户数
+            $vip_where = [];
+            $vip_where[] = ['exp', Db::raw("DATE_FORMAT(start_time, '%Y-%m-%d') = '" . $val['date_time'] . "'")];
+            $vip_where['order_status'] = 'Success';
+            $arr['vip_user_num'] = $model->table('oc_vip_order')->where($vip_where)->count();
+            //订单数
+            $order_where = [];
+            $order_where[] = ['exp', Db::raw("DATE_FORMAT(payment_time, '%Y-%m-%d') = '" . $val['date_time'] . "'")];
+            $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+            $arr['order_num'] = $this->zeelooljp->where($order_where)->where('order_type', 1)->count();
+            //销售额
+            $arr['sales_total_money'] = $this->zeelooljp->where($order_where)->where('order_type', 1)->sum('base_grand_total');
+            //邮费
+            $arr['shipping_total_money'] = $this->zeelooljp->where($order_where)->where('order_type', 1)->sum('base_shipping_amount');
+            //客单价
+            $arr['order_unit_price'] = $arr['order_num'] ? round($arr['sales_total_money'] / $arr['order_num'], 2) : 0;
+            //中位数
+            $sales_total_money = $this->zeelooljp->where($order_where)->where('order_type', 1)->column('base_grand_total');
+            $arr['order_total_midnum'] = $this->median($sales_total_money);
+            //标准差
+            $arr['order_total_standard'] = $this->getVariance($sales_total_money);
+            //补发订单数
+            $arr['replacement_order_num'] = $this->zeelooljp->where($order_where)->where('order_type', 4)->count();
+            //补发销售额
+            $arr['replacement_order_total'] = $this->zeelooljp->where($order_where)->where('order_type', 4)->sum('base_grand_total');
+            //网红订单数
+            $arr['online_celebrity_order_num'] = $this->zeelooljp->where($order_where)->where('order_type', 3)->count();
+            //补发销售额
+            $arr['online_celebrity_order_total'] = $this->zeelooljp->where($order_where)->where('order_type', 3)->sum('base_grand_total');
+            //会话
+            $arr['sessions'] = $this->google_session(11, $val['date_time']);
+            //新建购物车数量
+            $cart_where1 = [];
+            $cart_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $val['date_time'] . "'")];
+            $arr['new_cart_num'] = $model->table('sales_flat_quote')->where($cart_where1)->where('base_grand_total', 'gt', 0)->count();
+            //更新购物车数量
+            $cart_where2 = [];
+            $cart_where2[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '" . $val['date_time'] . "'")];
+            $arr['update_cart_num'] = $model->table('sales_flat_quote')->where($cart_where2)->where('base_grand_total', 'gt', 0)->count();
+            //新增加购率
+            $arr['add_cart_rate'] = $arr['sessions'] ? round($arr['new_cart_num'] / $arr['sessions'] * 100, 2) : 0;
+            //更新加购率
+            $arr['update_add_cart_rate'] = $arr['sessions'] ? round($arr['update_cart_num'] / $arr['sessions'] * 100, 2) : 0;
+            //新增购物车转化率
+            $arr['cart_rate'] = $arr['new_cart_num'] ? round($arr['order_num'] / $arr['new_cart_num'] * 100, 2) : 0;
+            //更新购物车转化率
+            $arr['update_cart_cart'] = $arr['update_cart_num'] ? round($arr['order_num'] / $arr['update_cart_num'] * 100, 2) : 0;
+            if (!$is_exist) {
+                $arr['site'] = 11;
+                $arr['day_date'] = $val['date_time'];
+                //插入数据
+                Db::name('datacenter_day')->insert($arr);
+                echo $val['date_time'] .' ok'. "\n";
+                usleep(100000);
+            } else{
+                //更新数据
+                Db::name('datacenter_day')->where('id',$is_exist)->update($arr);
+                echo $val['date_time'] .' is ok'. "\n";
                 usleep(100000);
             }
         }
