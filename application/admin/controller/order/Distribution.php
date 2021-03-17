@@ -3619,7 +3619,7 @@ class Distribution extends Backend
     //导出配镜片记录数据
     public function with_the_lens(){
         $where['a.order_prescription_type'] = ['in',[2,3]];
-        $where['a.created_at'] = ['between',['1612108800','1614527999']];
+        $where['a.created_at'] = ['between',['1612108800','1612195199']];
         $total = $this->model
             ->alias('a')
             ->join(['fa_order' => 'b'], 'a.order_id=b.id')
@@ -3639,7 +3639,6 @@ class Distribution extends Backend
                 $total[$key]['mesage'] = collection($data)->toArray();
             }
         }
-        dump($total);die();
         $spreadsheet = new Spreadsheet();
         //常规方式：利用setCellValue()填充数据
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "子单创建时间")
@@ -3652,13 +3651,12 @@ class Distribution extends Backend
             ->setCellValue("H1", "站点")
             ->setCellValue("I1", "仓库审单时间");
         foreach ($total as $key => $value) {
-
             if ($value['order_prescription_type'] ==2){
                 $value['order_prescription_type'] = '现货处方镜';
             }else{
                 $value['order_prescription_type'] = '定制处方镜';
             }
-            $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), $value['created_at']);//子单创建时间
+            $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), date('Y-m-d H:i:s',$value['created_at']));//子单创建时间
             $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['item_order_number']);//子单号
             $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['order_prescription_type']);//处方类型
             switch ($value['distribution_status']) {
