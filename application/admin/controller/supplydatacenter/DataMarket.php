@@ -1186,7 +1186,7 @@ class DataMarket extends Backend
             $startime  = strtotime('-7 day');
             $endtime  = time();
         }
-        $map['p.delivery_time'] = ['between',[$startime,$endtime]];
+        $map['o.payment_time'] = ['between',[$startime,$endtime]];
         $deve_time_one[] = ['exp', Db::raw("( p.delivery_time - o.payment_time )/ 3600 > 24")];
         $deve_time_two[] = ['exp', Db::raw("( p.delivery_time - o.payment_time )/ 3600 > 72")];
         $deve_time_three[] = ['exp', Db::raw("( p.delivery_time - o.payment_time )/ 3600 > 168")];
@@ -1247,7 +1247,7 @@ class DataMarket extends Backend
 //        $list3 = $NewOrderProcess->query($sql3);
 
         $list = array_merge($list1, $list2, $list3);
-        
+
 
         $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
 
