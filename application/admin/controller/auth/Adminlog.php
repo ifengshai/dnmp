@@ -30,7 +30,7 @@ class Adminlog extends Backend
         $this->childrenGroupIds = $this->auth->getChildrenGroupIds($this->auth->isSuperAdmin() ? true : false);
 
         $groupName = AuthGroup::where('id', 'in', $this->childrenGroupIds)
-                ->column('id,name');
+            ->column('id,name');
 
         $this->view->assign('groupdata', $groupName);
     }
@@ -40,21 +40,22 @@ class Adminlog extends Backend
      */
     public function index()
     {
-        if ($this->request->isAjax())
-        {
+        if ($this->request->isAjax()) {
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
-                    ->where($where)
-                    ->where('admin_id', 'in', $this->childrenAdminIds)
-                    ->order($sort, $order)
-                    ->count();
+                ->where($where)
+                ->where(['createtime' => ['between', [strtotime('-3 month'), time()]]])
+                ->where('admin_id', 'in', $this->childrenAdminIds)
+                ->order($sort, $order)
+                ->count();
 
             $list = $this->model
-                    ->where($where)
-                    ->where('admin_id', 'in', $this->childrenAdminIds)
-                    ->order($sort, $order)
-                    ->limit($offset, $limit)
-                    ->select();
+                ->where($where)
+                ->where(['createtime' => ['between', [strtotime('-3 month'), time()]]])
+                ->where('admin_id', 'in', $this->childrenAdminIds)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();
             $result = array("total" => $total, "rows" => $list);
 
             return json($result);
@@ -97,21 +98,17 @@ class Adminlog extends Backend
      */
     public function del($ids = "")
     {
-        if ($ids)
-        {
+        if ($ids) {
             $childrenGroupIds = $this->childrenGroupIds;
-            $adminList = $this->model->where('id', 'in', $ids)->where('admin_id', 'in', function($query) use($childrenGroupIds) {
-                        $query->name('auth_group_access')->field('uid');
-                    })->select();
-            if ($adminList)
-            {
+            $adminList = $this->model->where('id', 'in', $ids)->where('admin_id', 'in', function ($query) use ($childrenGroupIds) {
+                $query->name('auth_group_access')->field('uid');
+            })->select();
+            if ($adminList) {
                 $deleteIds = [];
-                foreach ($adminList as $k => $v)
-                {
+                foreach ($adminList as $k => $v) {
                     $deleteIds[] = $v->id;
                 }
-                if ($deleteIds)
-                {
+                if ($deleteIds) {
                     $this->model->destroy($deleteIds);
                     $this->success();
                 }
@@ -129,10 +126,9 @@ class Adminlog extends Backend
         // 管理员禁止批量操作
         $this->error();
     }
-    
+
     public function selectpage()
     {
         return parent::selectpage();
     }
-
 }
