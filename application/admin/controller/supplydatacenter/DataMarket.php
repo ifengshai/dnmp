@@ -1216,31 +1216,31 @@ class DataMarket extends Backend
         $deve_time_three_type['p.order_prescription_type'] =3;
         $map['o.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','complete',  'delivered']];
         $table = Db::connect('database.db_mojing_order');
-        $list1 = $table->table('fa_order_process')
-            ->alias('p')
-            ->join('fa_order o','p.increment_id = o.increment_id')
-            ->field('p.increment_id,o.created_at,o.status,p.order_prescription_type,o.payment_time,o.site,p.delivery_time')
-            ->where($map)
-
-            ->where($deve_time_one)
-            ->where($deve_time_one_type)
-            ->select();
-        $list2 = $table->table('fa_order_process')
-            ->alias('p')
-            ->join('fa_order o','p.increment_id = o.increment_id')
-            ->field('p.increment_id,o.created_at,o.status,p.order_prescription_type,o.payment_time,o.site,p.delivery_time')
-            ->where($map)
-            ->where($deve_time_two)
-            ->where($deve_time_two_type)
-            ->select();
-        $list3 = $table->table('fa_order_process')
-            ->alias('p')
-            ->join('fa_order o','p.increment_id = o.increment_id')
-            ->field('p.increment_id,o.created_at,o.status,p.order_prescription_type,o.payment_time,o.site,p.delivery_time')
-            ->where($map)
-            ->where($deve_time_three)
-            ->where($deve_time_three_type)
-            ->select();
+//        $list1 = $table->table('fa_order_process')
+//            ->alias('p')
+//            ->join('fa_order o','p.increment_id = o.increment_id')
+//            ->field('p.increment_id,o.created_at,o.status,p.order_prescription_type,o.payment_time,o.site,p.delivery_time')
+//            ->where($map)
+//
+//            ->where($deve_time_one)
+//            ->where($deve_time_one_type)
+//            ->select();
+//        $list2 = $table->table('fa_order_process')
+//            ->alias('p')
+//            ->join('fa_order o','p.increment_id = o.increment_id')
+//            ->field('p.increment_id,o.created_at,o.status,p.order_prescription_type,o.payment_time,o.site,p.delivery_time')
+//            ->where($map)
+//            ->where($deve_time_two)
+//            ->where($deve_time_two_type)
+//            ->select();
+//        $list3 = $table->table('fa_order_process')
+//            ->alias('p')
+//            ->join('fa_order o','p.increment_id = o.increment_id')
+//            ->field('p.increment_id,o.created_at,o.status,p.order_prescription_type,o.payment_time,o.site,p.delivery_time')
+//            ->where($map)
+//            ->where($deve_time_three)
+//            ->where($deve_time_three_type)
+//            ->select();
         $list4 = $table->table('fa_order_process')
             ->alias('p')
             ->join('fa_order o','p.increment_id = o.increment_id')
@@ -1248,7 +1248,24 @@ class DataMarket extends Backend
             ->where($map)
             ->where('p.delivery_time is NULL')
             ->select();
-
+        foreach ($list4 as $key=>$value){
+            if ($value['order_prescription_type'] ==1){
+                if ((time() - $value['payment_time']) /3600 < 25){
+                    unset($key);
+                }
+            }
+            if ($value['order_prescription_type'] ==2){
+                if ((time() - $value['payment_time']) /3600 < 73){
+                    unset($key);
+                }
+            }
+            if ($value['order_prescription_type'] ==3){
+                if ((time() - $value['payment_time']) /3600 < 169){
+                    unset($key);
+                }
+            }
+        }
+dump($list4);die();
 
 //
 //        $sql1 = "SELECT p.increment_id,o.created_at,o.status,p.order_prescription_type,o.payment_time,o.site,p.delivery_time   FROM `fa_order_process` `p` INNER JOIN `fa_order` `o` ON `p`.`increment_id` = `o`.`increment_id`
