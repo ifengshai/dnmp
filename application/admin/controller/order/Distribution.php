@@ -3620,8 +3620,6 @@ class Distribution extends Backend
     public function with_the_lens(){
         $where['a.order_prescription_type'] = ['in',[2,3]];
         $where['a.created_at'] = ['between',['1612108800','1614527999']];
-
-
         $total = $this->model
             ->alias('a')
             ->join(['fa_order' => 'b'], 'a.order_id=b.id')
@@ -3629,7 +3627,7 @@ class Distribution extends Backend
             ->field('a.*,b.increment_id,c.check_time')
             ->where($where)
             ->order('a.created_at desc')
-            ->select(false);
+            ->select();
         $total = collection($total)->toArray();
         foreach ($total as $key=>$item){
                 $data = (new DistributionLog())
@@ -3641,7 +3639,7 @@ class Distribution extends Backend
                 $total[$key]['mesage'] = collection($data)->toArray();
             }
         }
-
+        dump($total);die();
         $spreadsheet = new Spreadsheet();
         //常规方式：利用setCellValue()填充数据
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "子单创建时间")
@@ -3726,6 +3724,7 @@ class Distribution extends Backend
             }
             $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2),$value['distribution_status']);
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), '配镜片完成');
+
             if (!empty($value['mesage'])){
                 foreach ($value['mesage'] as $k=>$v){
                     $bt[]= $v['create_person'].','.date('Y-m-d H:i:s', $v['create_time']);
@@ -3734,7 +3733,6 @@ class Distribution extends Backend
             }else{
                 $bt = '暂无数据';
             }
-
             $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $bt);
             unset($bt);
             $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['increment_id']);
