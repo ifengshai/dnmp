@@ -1250,17 +1250,17 @@ class DataMarket extends Backend
             ->select();
         foreach ($list4 as $key=>$value){
             if ($value['order_prescription_type'] ==1){
-                if ((time() - $value['payment_time']) /3600 < 25){
+                if ((time() - $value['payment_time']) /3600 < 24){
                     unset($key);
                 }
             }
             if ($value['order_prescription_type'] ==2){
-                if ((time() - $value['payment_time']) /3600 < 73){
+                if ((time() - $value['payment_time']) /3600 < 72){
                     unset($key);
                 }
             }
             if ($value['order_prescription_type'] ==3){
-                if ((time() - $value['payment_time']) /3600 < 169){
+                if ((time() - $value['payment_time']) /3600 < 168){
                     unset($key);
                 }
             }
@@ -1268,7 +1268,7 @@ class DataMarket extends Backend
 
 
         $list = array_merge($list1, $list2, $list3,$list4);
-        
+
         $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
 
         //从数据库查询需要的数据
