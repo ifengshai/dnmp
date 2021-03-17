@@ -1,0 +1,95 @@
+<style>
+    .table_list {
+        padding: 10px;
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .table_list #table_list-table {
+        width: 100%;
+        height: 130px;
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        text-align: center;
+
+    }
+
+    .table_list #table_list-table tr {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        line-height: 50px;
+    }
+
+    .table_list #table_list-table tr th {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        text-align: center;
+        font-size: 14px;
+    }
+
+    .table_list #table_list-table tr td {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+    }
+
+    .table_list #table_list-table tr td input {
+
+        width: 150px;
+    }
+</style>
+<form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">调拨单号:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-transfer_order_number" class="form-control" readonly name="row[transfer_order_number]"
+                value="{$row.transfer_order_number}" type="text">
+        </div>
+    </div>
+    <hr>
+    <div class='table_list' style="width: 80%;margin-left: 10%;">
+        <p style="font-size: 16px;text-align: center;"><b>调拨信息</b></p>
+        <div style="margin-bottom: 20px;">
+
+            <table id="table_list-table" class="purchase-table">
+                <tr>
+                    <th>SKU</td>
+                    <th>调拨数量</td>
+                    <th>调出库区</td>
+                    <th>调出库位</td>
+                    <th>调入库区</td>
+                    <th>调入库位</td>
+                </tr>
+                {foreach $item as $k => $v}
+                <tr>
+                    <input  class="form-control" name="item_id[]"  value="{$v.id}" type="hidden">
+                    <td>
+                        <input class="form-control sku" readonly name="sku[]" value="{$v.sku}" type="text">
+                    </td>
+                    <td><input class="form-control num" readonly name="num[]" type="text" value="{$v.num}"></td>
+                    <td><input class="form-control sku_stock" readonly name="sku_stock[]"  value="{$v.outarea}" type="text"></td>
+                    <td><input class="form-control sku_stock" readonly name="sku_stock[]"  value="{$v.call_out_site}" type="text"></td>
+                    <td><input class="form-control sku_stock" readonly name="sku_stock[]"  value="{$v.inarea}" type="text"></td>
+                    <td><input class="form-control sku_stock" readonly name="sku_stock[]"  value="{$v.call_in_site}" type="text"></td>
+                </tr>
+                {/foreach}
+
+            </table>
+        </div>
+
+
+    </div>
+    
+</form>
+

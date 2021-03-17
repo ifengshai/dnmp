@@ -3,13 +3,17 @@
 namespace app\admin\controller\finance;
 
 use app\common\controller\Backend;
-use think\Cache;
-use think\Controller;
-use think\Db;
-use think\Request;
+
 
 class CycleCarryOrder extends Backend
 {
+
+    /**
+     * 无需鉴权的方法,但需要登录
+     * @var array
+     */
+    protected $noNeedRight = ['detail'];
+
     public function _initialize()
     {
         parent::_initialize();
@@ -65,16 +69,18 @@ class CycleCarryOrder extends Backend
                 return $this->selectpage();
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-            
+            $map['bill_type'] = ['<>',1];
             $total = $this->cost
                 ->where($where)
                 ->where(['cycle_id' => $ids])
+                ->where($map)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->cost
                 ->where($where)
                 ->where(['cycle_id' => $ids])
+                ->where($map)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();

@@ -226,4 +226,10 @@ class Dashboard extends Backend
     public function voogmechic()
     {
     }
+    public function zeelool_cn()
+    {
+    }
+    public function alibaba()
+    {
+    }
 }

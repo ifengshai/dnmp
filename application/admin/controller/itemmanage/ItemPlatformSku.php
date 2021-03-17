@@ -13,6 +13,7 @@ use think\Exception;
 use think\exception\PDOException;
 use think\exception\ValidateException;
 use fast\Soap;
+use fast\Http;
 
 /**
  * 平台SKU管理
@@ -131,7 +132,7 @@ class ItemPlatformSku extends Backend
             $spreadsheet->getActiveSheet()->setCellValueExplicit("A" . ($key * 1 + 2), $value['sku'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
             $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['platform_sku']);
             $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['name']);
-            switch ($value['platform_type']){
+            switch ($value['platform_type']) {
                 case 1:
                     $plat_name = 'zeelool';
                     break;
@@ -151,7 +152,7 @@ class ItemPlatformSku extends Backend
                     $plat_name = 'amazon';
                     break;
             }
-            switch ($value['item']['item_status']){
+            switch ($value['item']['item_status']) {
                 case 1:
                     $item_status = '新建';
                     break;
@@ -168,7 +169,7 @@ class ItemPlatformSku extends Backend
                     $item_status = '取消';
                     break;
             }
-            switch ($value['outer_sku_status']){
+            switch ($value['outer_sku_status']) {
                 case 1:
                     $outer_sku_status = '上架';
                     break;
@@ -176,7 +177,7 @@ class ItemPlatformSku extends Backend
                     $outer_sku_status = '下架';
                     break;
             }
-            switch ($value['is_upload']){
+            switch ($value['is_upload']) {
                 case 1:
                     $is_upload = '已上传';
                     break;
@@ -595,7 +596,7 @@ class ItemPlatformSku extends Backend
             }
             //查询商品分类
             $item = new \app\admin\model\itemmanage\Item();
-            $res = $item->where(['sku' => $itemPlatformRow['sku'],'is_open' => 1,'is_del' => 1])->find();
+            $res = $item->where(['sku' => $itemPlatformRow['sku'], 'is_open' => 1, 'is_del' => 1])->find();
             //审核通过把SKU同步到有映射关系的平台
             if ($itemPlatformRow['platform_id'] == 12) {
                 $uploadItemArr['skus'][0]  = [
@@ -608,8 +609,20 @@ class ItemPlatformSku extends Backend
                 $uploadItemArr['skus']  = [$itemPlatformRow['platform_sku']];
             }
             $uploadItemArr['site'] = $itemPlatformRow['platform_id'];
-            $soap_res = Soap::createProduct($uploadItemArr);
-            if ($soap_res) {
+            if ($uploadItemArr['site'] == 13) {
+                $params['sku_info'] = implode(',', $uploadItemArr['skus']);
+                $params['platform_type'] = 1;
+                $third_res = Http::post('http://shop.mruilove.com/index.php/api/commodity/index', $params);
+                $third_res = json_decode($third_res, true);
+            } elseif ($uploadItemArr['site'] == 14) {
+                $params['sku_info'] = implode(',', $uploadItemArr['skus']);
+                $params['platform_type'] = 2;
+                $third_res = Http::post('http://shop.mruilove.com/index.php/api/commodity/index', $params);
+                $third_res = json_decode($third_res, true);
+            } else {
+                $soap_res = Soap::createProduct($uploadItemArr);
+            }
+            if ($soap_res || $third_res['code'] == 1) {
                 $this->model->where(['id' => $ids])->update(['is_upload' => 1]);
                 $this->success('同步成功！！');
             } else {
@@ -617,8 +630,7 @@ class ItemPlatformSku extends Backend
             }
         }
     }
-
-
+  
     /****
      * 编辑后面的商品上传至对应平台
      */

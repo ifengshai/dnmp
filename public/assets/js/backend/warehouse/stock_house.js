@@ -12,7 +12,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
             Table.api.init({
                 showJumpto: true,
                 searchFormVisible: true,
-                pageList: [10, 25, 50, 100],
+                pageList: [10, 25, 50, 100, 300],
                 extend: {
                     index_url: 'warehouse/stock_house/index' + location.search,
                     add_url: 'warehouse/stock_house/add?type=1',
@@ -46,7 +46,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             formatter: Table.api.formatter.shelf_number
 
                         },
-                        { field: 'coding', title: __('Coding'), operate: 'like' }, 
+                        { field: 'area_coding', title: __('库区编码') },
+                        { field: 'coding', title: __('Coding'), operate: 'like' },
+                        { field: 'volume', title: __('库容') },
                         { field: 'library_name', title: __('Library_name') },
                         {
                             field: 'status', title: __('Status'), custom: { 1: 'success', 2: 'danger' },
@@ -85,6 +87,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                     table.bootstrapTable('refresh');
                 });
             })
+
+            //批量打印条形码
+            $('.btn-batch-printed_test').click(function () {
+                var id_params = [];
+                $.each(table.bootstrapTable('getSelections'), function (index, row) {
+                    id_params.push(row['id']);
+                });
+                window.open(Config.moduleurl + '/warehouse/stock_house/stock_print_label/ids/' + id_params.join(','), '_blank');
+            });
         },
         add: function () {
             Controller.api.bindevent();

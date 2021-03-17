@@ -46,21 +46,38 @@ class StockSku extends Backend
         $this->relationSearch = true;
         //设置过滤方法
         $this->request->filter(['strip_tags']);
+
         if ($this->request->isAjax()) {
             //如果发送的来源是Selectpage，则转发到Selectpage
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
+            //自定义sku搜索
+            $filter = json_decode($this->request->get('filter'), true);
+            if ($filter['area_coding']) {
+                $area_id = Db::name('warehouse_area')->where('coding',$filter['area_coding'])->value('id');
+                $all_store_id = Db::name('store_house')->where('area_id',$area_id)->column('id');
+                $map['storehouse.id'] = ['in',$all_store_id];
+                unset($filter['area_coding']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
+            if ($filter['storehouse.status']) {
+                $map['storehouse.status'] = ['=',$filter['storehouse.status']];
+                unset($filter['storehouse.status']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->with(['storehouse'])
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
                 ->with(['storehouse'])
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
@@ -68,11 +85,18 @@ class StockSku extends Backend
             //查询商品SKU
             $item = new \app\admin\model\itemmanage\Item;
             $arr = $item->where('is_del', 1)->column('name,is_open', 'sku');
+            //所有库区编码id
+            $area_coding = Db::name('warehouse_area')->column('coding','id');
             foreach ($list as $k => $row) {
                 $row->getRelation('storehouse')->visible(['coding', 'library_name', 'status']);
                 $list[$k]['name'] = $arr[$row['sku']]['name'];
                 $list[$k]['is_open'] = $arr[$row['sku']]['is_open'];
+                $store_house = Db::name('store_house')->where('id',$row['store_id'])->find();
+                //获得库位所属库区编码
+                $list[$k]['area_coding'] = $area_coding[$store_house['area_id']];
+                $list[$k]['area_status'] = Db::name('warehouse_area')->where('id',$store_house['area_id'])->value('status');
             }
+
             $list = collection($list)->toArray();
 
             $result = array("total" => $total, "rows" => $list);
@@ -96,14 +120,24 @@ class StockSku extends Backend
                 if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
                     $params[$this->dataLimitField] = $this->auth->id;
                 }
+                empty($params['sku']) && $this->error('sku不能为空！');
+
+                $store_house = Db::name('store_house')->where('id',$params['store_id'])->find();
+                $warehouse_area = Db::name('warehouse_area')->where('id',$store_house['area_id'])->find();
+                //拣货货区一个库位号只能有一个sku
+                if ($warehouse_area['type'] !== 2){
+                    $map['sku'] = $params['sku'];
+                }
                 //判断选择的库位是否已存在
-                $map['store_id'] = $params['store_id'];
+                $map['store_id'] = $params['store_id'];//库位id
                 $map['is_del'] = 1;
                 $count = $this->model->where($map)->count();
                 if ($count > 0) {
                     $this->error('库位已绑定！！');
                 }
-
+                if ($store_house['area_id'] != $params['area_id']){
+                    $this->error('库位不在当前选择库区！！');
+                }
                 $result = false;
                 Db::startTrans();
                 try {
@@ -135,6 +169,9 @@ class StockSku extends Backend
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
+        //查询库区数据
+        $data1 = Db::name('warehouse_area')->column('coding','id');
+        $this->assign('data1', $data1);
         //查询库位数据
         $data = (new StockHouse())->getStockHouseData();
         $this->assign('data', $data);
@@ -151,6 +188,7 @@ class StockSku extends Backend
     public function edit($ids = null)
     {
         $row = $this->model->get($ids);
+        $row['area_id'] = Db::name('store_house')->where('id',$row['store_id'])->value('area_id');
         if (!$row) {
             $this->error(__('No Results were found'));
         }
@@ -165,7 +203,7 @@ class StockSku extends Backend
             $params = $this->request->post("row/a");
             if ($params) {
                 $params = $this->preExcludeFields($params);
-
+                empty($params['sku']) && $this->error('sku不能为空！');
                 //判断选择的库位是否已存在
                 $map['store_id'] = $params['store_id'];
                 $map['id'] = ['<>', $row->id];
@@ -174,7 +212,10 @@ class StockSku extends Backend
                 if ($count > 0) {
                     $this->error('库位已绑定！！');
                 }
-
+                $store_house = Db::name('store_house')->where('id',$params['store_id'])->find();
+                if ($store_house['area_id'] != $params['area_id']){
+                    $this->error('库位不在当前选择库区！！');
+                }
                 $result = false;
                 Db::startTrans();
                 try {
@@ -206,6 +247,9 @@ class StockSku extends Backend
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
+        //查询库区数据
+        $data1 = Db::name('warehouse_area')->column('coding','id');
+        $this->assign('data1', $data1);
         //查询库位数据
         $data = (new StockHouse())->getStockHouseData();
         $this->assign('data', $data);

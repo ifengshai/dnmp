@@ -93,7 +93,6 @@
             </td>
         </tr>
 
-        {if  condition="$v['site'] neq 12"}
         <tr>
             <td></td>
             <td>SPH</td>
@@ -108,7 +107,7 @@
             <td>Direc</td>
             {else/}
             <td colspan='4' rowspan="3">
-                {$v.web_lens_name}
+                {$v.web_lens_name} {if $v['site'] == 12}&nbsp;&nbsp;&nbsp;{/if}
             </td>
             {/if}
         </tr>
@@ -164,9 +163,11 @@
                 <br>
                 {/if}
                 {$v.lens_name}
+
+                {if $v['site'] == 12}&nbsp;&nbsp;&nbsp;{/if}
             </td>
         </tr>
-        {/if}
+
 
         </tbody>
 

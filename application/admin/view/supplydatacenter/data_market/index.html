@@ -685,15 +685,22 @@
                 <div class="widget-body no-padding">
                     <div class="new-background">
                         <div class="row">
-                            <div class="form-group" style="float:left;width: 100%;" >
-                                <label class="control-label col-xs-6">订单发货及时率</label>
+                            <div style="display: flow-root;">
+                                <div style="float: left;">
+                                    <label>订单发货及时率</label>
+                                </div>
                                 <div style="float: right;display: flex;">
                                     <div style="margin-right: 30px;">
-                                        <label style="text-align: right;margin-right: 100px;">时间:</label>
-                                        <div id="timetime3" role="form" style="float: right;margin-left: -91px;margin-top: -7px;">
+                                        <label style="text-align: right;margin-right: 100px;margin-top: 10px">时间:</label>
+                                        <div id="timetime3" role="form" style="float: right;margin-left: -91px;margin-top: 2px;">
                                             <input type="hidden" class="form-control operate" name="one_time-operate" data-name="time_str" value="RANGE" readonly="">
-                                            <input type="text" autocomplete="off" class="form-control datetimerange" name="time_str"  id="time_str3" value="{$time_str2}" data-index="14">
+                                            <input type="text" autocomplete="off" class="form-control datetimerange" name="time_str"  id="time_str3" value="" data-index="14">
                                         </div>
+                                    </div>
+                                    <div>
+                                        <a href="javascript:; " style="text-align: right;margin-right: 15px;"
+                                           class="btn btn-distribution btn-danger btn-batch-export-xls "
+                                           title="{:__('批量导出')}"><i class="fa fa-upload"></i> {:__('批量导出')}</a>
                                     </div>
                                 </div>
                             </div>

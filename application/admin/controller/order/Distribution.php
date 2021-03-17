@@ -30,6 +30,7 @@ use app\admin\model\order\order\LensData;
 use app\admin\model\saleaftermanage\WorkOrderMeasure;
 use app\admin\model\warehouse\ProductBarCodeItem;
 use GuzzleHttp\Client;
+use app\admin\model\warehouse\Inventory;
 
 /**
  * 配货列表
@@ -162,6 +163,7 @@ class Distribution extends Backend
         $this->_product_bar_code_item = new ProductBarCodeItem();
         $this->_outstock = new Outstock();
         $this->_outstock_item = new OutStockItem();
+        $this->_inventory = new Inventory();
     }
 
     /**
@@ -1601,6 +1603,16 @@ class Distribution extends Backend
      */
     public function tag_printed()
     {
+
+        /*****************限制如果有盘点单未结束不能操作配货完成*******************/
+        //拣货区盘点时不能操作
+        $count = $this->_inventory->alias('a')->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'b.area_id' => 3])->count();
+        if ($count > 0) {
+            $this->error(__('存在正在盘点的单据,暂无法审核'));
+        }
+        /****************************end*****************************************/
+
+
         $ids = input('id_params/a');
         !$ids && $this->error('请选择要标记的数据');
 
@@ -1650,6 +1662,14 @@ class Distribution extends Backend
      */
     public function batch_print_label()
     {
+        /*****************限制如果有盘点单未结束不能操作配货完成*******************/
+        //拣货区盘点时不能操作
+        $count = $this->_inventory->alias('a')->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'b.area_id' => 3])->count();
+        if ($count > 0) {
+            $this->error(__('存在正在盘点的单据,暂无法审核'));
+        }
+        /****************************end*****************************************/
+        
         //禁用默认模板
         $this->view->engine->layout(false);
         ob_start();
@@ -1674,7 +1694,7 @@ class Distribution extends Backend
         $order_list = $this->_new_order->where(['id' => ['in', array_unique($order_ids)]])->column('total_qty_ordered,increment_id', 'id');
 
         //查询产品货位号
-        $cargo_number = $this->_stock_house->alias('a')->where(['status' => 1, 'b.is_del' => 1, 'a.type' => 1])->join(['fa_store_sku' => 'b'], 'a.id=b.store_id')->column('coding', 'sku');
+        $cargo_number = $this->_stock_house->alias('a')->where(['status' => 1, 'b.is_del' => 1, 'a.type' => 1, 'a.area_id' => 3])->join(['fa_store_sku' => 'b'], 'a.id=b.store_id')->column('coding', 'sku');
 
         //获取更改镜框最新信息
         $change_sku = $this->_work_order_change_sku
@@ -2464,6 +2484,7 @@ class Distribution extends Backend
             $this->_item->startTrans();
             $this->_outstock->startTrans();
             $this->_stock_log->startTrans();
+            $this->_product_bar_code_item->startTrans();
             try {
                 //异常库位占用数量-1
                 $this->_stock_house
@@ -2609,6 +2630,7 @@ class Distribution extends Backend
                 $this->_item->commit();
                 $this->_outstock->commit();
                 $this->_stock_log->commit();
+                $this->_product_bar_code_item->commit();
             } catch (PDOException $e) {
                 $this->model->rollback();
                 $this->_distribution_abnormal->rollback();
@@ -2616,6 +2638,7 @@ class Distribution extends Backend
                 $this->_item->rollback();
                 $this->_outstock->rollback();
                 $this->_stock_log->rollback();
+                $this->_product_bar_code_item->rollback();
                 $this->error($e->getMessage());
             } catch (Exception $e) {
                 $this->model->rollback();
@@ -2624,6 +2647,7 @@ class Distribution extends Backend
                 $this->_item->rollback();
                 $this->_outstock->rollback();
                 $this->_stock_log->rollback();
+                $this->_product_bar_code_item->rollback();
                 $this->error($e->getMessage());
             }
 
