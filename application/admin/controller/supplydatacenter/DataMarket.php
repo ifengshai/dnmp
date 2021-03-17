@@ -1250,8 +1250,8 @@ class DataMarket extends Backend
             ->select();
 
         foreach ($list4 as $k=>$v){
+            $time = time();
             if ($v['order_prescription_type'] ==1){
-                $time = time();
                 if (($time - $v['payment_time'])/3600 < 24){
                     $ct[] = $k;
                     unset($list4[$k]);
