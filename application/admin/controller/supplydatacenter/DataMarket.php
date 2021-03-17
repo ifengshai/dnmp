@@ -1216,31 +1216,31 @@ class DataMarket extends Backend
         $deve_time_three_type['p.order_prescription_type'] =3;
         $map['o.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','complete',  'delivered']];
         $table = Db::connect('database.db_mojing_order');
-//        $list1 = $table->table('fa_order_process')
-//            ->alias('p')
-//            ->join('fa_order o','p.increment_id = o.increment_id')
-//            ->field('p.increment_id,o.created_at,o.status,p.order_prescription_type,o.payment_time,o.site,p.delivery_time')
-//            ->where($map)
-//
-//            ->where($deve_time_one)
-//            ->where($deve_time_one_type)
-//            ->select();
-//        $list2 = $table->table('fa_order_process')
-//            ->alias('p')
-//            ->join('fa_order o','p.increment_id = o.increment_id')
-//            ->field('p.increment_id,o.created_at,o.status,p.order_prescription_type,o.payment_time,o.site,p.delivery_time')
-//            ->where($map)
-//            ->where($deve_time_two)
-//            ->where($deve_time_two_type)
-//            ->select();
-//        $list3 = $table->table('fa_order_process')
-//            ->alias('p')
-//            ->join('fa_order o','p.increment_id = o.increment_id')
-//            ->field('p.increment_id,o.created_at,o.status,p.order_prescription_type,o.payment_time,o.site,p.delivery_time')
-//            ->where($map)
-//            ->where($deve_time_three)
-//            ->where($deve_time_three_type)
-//            ->select();
+        $list1 = $table->table('fa_order_process')
+            ->alias('p')
+            ->join('fa_order o','p.increment_id = o.increment_id')
+            ->field('p.increment_id,o.created_at,o.status,p.order_prescription_type,o.payment_time,o.site,p.delivery_time')
+            ->where($map)
+
+            ->where($deve_time_one)
+            ->where($deve_time_one_type)
+            ->select();
+        $list2 = $table->table('fa_order_process')
+            ->alias('p')
+            ->join('fa_order o','p.increment_id = o.increment_id')
+            ->field('p.increment_id,o.created_at,o.status,p.order_prescription_type,o.payment_time,o.site,p.delivery_time')
+            ->where($map)
+            ->where($deve_time_two)
+            ->where($deve_time_two_type)
+            ->select();
+        $list3 = $table->table('fa_order_process')
+            ->alias('p')
+            ->join('fa_order o','p.increment_id = o.increment_id')
+            ->field('p.increment_id,o.created_at,o.status,p.order_prescription_type,o.payment_time,o.site,p.delivery_time')
+            ->where($map)
+            ->where($deve_time_three)
+            ->where($deve_time_three_type)
+            ->select();
         $list4 = $table->table('fa_order_process')
             ->alias('p')
             ->join('fa_order o','p.increment_id = o.increment_id')
@@ -1248,30 +1248,29 @@ class DataMarket extends Backend
             ->where($map)
             ->where('p.delivery_time is NULL')
             ->select();
-        dump($list4);
+
         foreach ($list4 as $k=>$v){
             if ($v['order_prescription_type'] ==1){
                 $time = time();
                 if (($time - $v['payment_time'])/3600 < 24){
                     $ct[] = $k;
-                    unset($k);
+                    unset($list4[$k]);
                 }
             }
             if ($v['order_prescription_type'] ==2){
                 if ((time() - $v['payment_time']) /3600 < 72){
                     $ct[] = $k;
-                    unset($k);
+                    unset($list4[$k]);
                 }
             }
             if ($v['order_prescription_type'] ==3){
                 if ((time() - $v['payment_time']) /3600 < 168){
                     $ct[] = $k;
-                    unset($k);
+                    unset($list4[$k]);
                 }
             }
         }
 
-    dump($ct);die();
         $list = array_merge($list1, $list2, $list3,$list4);
 
         $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
