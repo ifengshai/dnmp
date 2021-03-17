@@ -1221,6 +1221,7 @@ class DataMarket extends Backend
             ->join('fa_order o','p.increment_id = o.increment_id')
             ->field('p.increment_id,o.created_at,o.status,p.order_prescription_type,o.payment_time,o.site,p.delivery_time')
             ->where($map)
+
             ->where($deve_time_one)
             ->where($deve_time_one_type)
             ->select();
@@ -1245,9 +1246,9 @@ class DataMarket extends Backend
             ->join('fa_order o','p.increment_id = o.increment_id')
             ->field('p.increment_id,o.created_at,o.status,p.order_prescription_type,o.payment_time,o.site,p.delivery_time')
             ->where($map)
-            ->where($cat)
-            ->select(false);
-        dump($list4);die();
+            ->where('p.delivery_time is NULL')
+            ->select();
+     dump($list4);die();
 
 //
 //        $sql1 = "SELECT p.increment_id,o.created_at,o.status,p.order_prescription_type,o.payment_time,o.site,p.delivery_time   FROM `fa_order_process` `p` INNER JOIN `fa_order` `o` ON `p`.`increment_id` = `o`.`increment_id`
