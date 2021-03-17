@@ -1248,7 +1248,7 @@ class DataMarket extends Backend
             ->where($map)
             ->where('p.delivery_time is NULL')
             ->select();
-     dump($list4);die();
+
 
 //
 //        $sql1 = "SELECT p.increment_id,o.created_at,o.status,p.order_prescription_type,o.payment_time,o.site,p.delivery_time   FROM `fa_order_process` `p` INNER JOIN `fa_order` `o` ON `p`.`increment_id` = `o`.`increment_id`
@@ -1279,7 +1279,7 @@ class DataMarket extends Backend
 //        $list2 = $NewOrderProcess->query($sql2);
 //        $list3 = $NewOrderProcess->query($sql3);
 
-        $list = array_merge($list1, $list2, $list3);
+        $list = array_merge($list1, $list2, $list3,$list4);
 
 
         $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
