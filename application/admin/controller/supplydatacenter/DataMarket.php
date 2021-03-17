@@ -1216,31 +1216,31 @@ class DataMarket extends Backend
         $deve_time_three_type['p.order_prescription_type'] =3;
         $map['o.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','complete',  'delivered']];
         $table = Db::connect('database.db_mojing_order');
-//        $list1 = $table->table('fa_order_process')
-//            ->alias('p')
-//            ->join('fa_order o','p.increment_id = o.increment_id')
-//            ->field('p.increment_id,o.created_at,o.status,p.order_prescription_type,o.payment_time,o.site,p.delivery_time')
-//            ->where($map)
-//
-//            ->where($deve_time_one)
-//            ->where($deve_time_one_type)
-//            ->select();
-//        $list2 = $table->table('fa_order_process')
-//            ->alias('p')
-//            ->join('fa_order o','p.increment_id = o.increment_id')
-//            ->field('p.increment_id,o.created_at,o.status,p.order_prescription_type,o.payment_time,o.site,p.delivery_time')
-//            ->where($map)
-//            ->where($deve_time_two)
-//            ->where($deve_time_two_type)
-//            ->select();
-//        $list3 = $table->table('fa_order_process')
-//            ->alias('p')
-//            ->join('fa_order o','p.increment_id = o.increment_id')
-//            ->field('p.increment_id,o.created_at,o.status,p.order_prescription_type,o.payment_time,o.site,p.delivery_time')
-//            ->where($map)
-//            ->where($deve_time_three)
-//            ->where($deve_time_three_type)
-//            ->select();
+        $list1 = $table->table('fa_order_process')
+            ->alias('p')
+            ->join('fa_order o','p.increment_id = o.increment_id')
+            ->field('p.increment_id,o.created_at,o.status,p.order_prescription_type,o.payment_time,o.site,p.delivery_time')
+            ->where($map)
+
+            ->where($deve_time_one)
+            ->where($deve_time_one_type)
+            ->select();
+        $list2 = $table->table('fa_order_process')
+            ->alias('p')
+            ->join('fa_order o','p.increment_id = o.increment_id')
+            ->field('p.increment_id,o.created_at,o.status,p.order_prescription_type,o.payment_time,o.site,p.delivery_time')
+            ->where($map)
+            ->where($deve_time_two)
+            ->where($deve_time_two_type)
+            ->select();
+        $list3 = $table->table('fa_order_process')
+            ->alias('p')
+            ->join('fa_order o','p.increment_id = o.increment_id')
+            ->field('p.increment_id,o.created_at,o.status,p.order_prescription_type,o.payment_time,o.site,p.delivery_time')
+            ->where($map)
+            ->where($deve_time_three)
+            ->where($deve_time_three_type)
+            ->select();
         $list4 = $table->table('fa_order_process')
             ->alias('p')
             ->join('fa_order o','p.increment_id = o.increment_id')
@@ -1267,38 +1267,8 @@ class DataMarket extends Backend
         }
 
 
-//
-//        $sql1 = "SELECT p.increment_id,o.created_at,o.status,p.order_prescription_type,o.payment_time,o.site,p.delivery_time   FROM `fa_order_process` `p` INNER JOIN `fa_order` `o` ON `p`.`increment_id` = `o`.`increment_id`
-//WHERE `o`.`status` IN ( 'free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal','payment_review')
-//	AND `p`.`order_prescription_type` = 1
-//	AND `p`.`delivery_time` BETWEEN $startime
-//	AND $endtime
-//	AND ( p.delivery_time - o.payment_time )/ 3600 > 24 GROUP BY `p`.`order_id` ORDER BY `p`.`delivery_time` ASC";
-//        $sql2 = "SELECT p.increment_id,o.created_at,o.status,p.order_prescription_type,o.payment_time,o.site,p.delivery_time   FROM `fa_order_process` `p` INNER JOIN `fa_order` `o` ON `p`.`increment_id` = `o`.`increment_id`
-//WHERE `o`.`status` IN ( 'free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal','payment_review')
-//	AND `p`.`order_prescription_type` = 2
-//	AND `p`.`delivery_time` BETWEEN 1590463258
-//	AND unix_timestamp(now())
-//	AND ( p.delivery_time - o.payment_time )/ 3600 > 72 GROUP BY
-//	`p`.`order_id` ORDER BY
-//	`p`.`delivery_time` ASC";
-//        $sql3 = "SELECT p.increment_id,o.created_at,o.status,p.order_prescription_type,o.payment_time,o.site,p.delivery_time   FROM `fa_order_process` `p` INNER JOIN `fa_order` `o` ON `p`.`increment_id` = `o`.`increment_id`
-//WHERE `o`.`status` IN ( 'free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal','payment_review')
-//	AND `p`.`order_prescription_type` = 3
-//	AND `p`.`delivery_time` BETWEEN 1590463258
-//	AND unix_timestamp(now())
-//	AND ( p.delivery_time - o.payment_time )/ 3600 > 168 GROUP BY
-//	`p`.`order_id` ORDER BY
-//	`p`.`delivery_time` ASC";
-//
-//        $NewOrderProcess = Db::connect('database.db_mojing_order');
-//        $list1 = $NewOrderProcess->query($sql1);
-//        $list2 = $NewOrderProcess->query($sql2);
-//        $list3 = $NewOrderProcess->query($sql3);
-
         $list = array_merge($list1, $list2, $list3,$list4);
-
-
+        
         $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
 
         //从数据库查询需要的数据
