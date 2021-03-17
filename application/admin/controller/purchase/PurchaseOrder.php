@@ -185,6 +185,7 @@ class PurchaseOrder extends Backend
                     }
                     $params['create_person'] = session('admin.nickname');
                     $params['createtime'] = date('Y-m-d H:i:s', time());
+                    $params['purchase_name'] = trim($params['purchase_name']);
 
                     $batch_sku = $this->request->post("batch_sku/a");
                     $arrival_num = $this->request->post("arrival_num/a");
@@ -479,6 +480,7 @@ class PurchaseOrder extends Backend
                             }
                         }
                     }
+                    $params['purchase_name'] = trim($params['purchase_name']);
                     $result = $row->allowField(true)->save($params);
 
                     //添加合同产品
