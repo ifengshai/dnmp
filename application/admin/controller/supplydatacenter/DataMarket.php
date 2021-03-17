@@ -1258,13 +1258,13 @@ class DataMarket extends Backend
                 }
             }
             if ($v['order_prescription_type'] ==2){
-                if ((time() - $v['payment_time']) /3600 < 72){
+                if (($time - $v['payment_time']) /3600 < 72){
                     $ct[] = $k;
                     unset($list4[$k]);
                 }
             }
             if ($v['order_prescription_type'] ==3){
-                if ((time() - $v['payment_time']) /3600 < 168){
+                if (($time - $v['payment_time']) /3600 < 168){
                     $ct[] = $k;
                     unset($list4[$k]);
                 }
