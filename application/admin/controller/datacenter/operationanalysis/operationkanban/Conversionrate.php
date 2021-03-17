@@ -25,11 +25,11 @@ class Conversionrate extends Backend{
         }
         $create_time = input('create_time');
         $platform    = input('order_platform', current($orderPlatform));
-        foreach ($platform as $k=>$v){
+        /*foreach ($platform as $k=>$v){
             if(in_array($k,[5,8,13,14])){
                 unset($platform[$k]);
             }
-        }
+        }*/
         //头部数据
         if($this->request->isAjax()){
             $params = $this->request->param();
