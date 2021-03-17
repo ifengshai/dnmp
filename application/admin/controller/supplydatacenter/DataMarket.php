@@ -1351,6 +1351,11 @@ class DataMarket extends Backend
             $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), date('Y-m-d H:i:s', $value['payment_time']));
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['site']);
             $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['work']);
+            if ($value['delivery_time']){
+                $value['delivery_time'] = date('Y-m-d H:i:s', $value['delivery_time']);
+            }else{
+                $value['delivery_time'] = '暂无打印面单时间';
+            }
             $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), date('Y-m-d H:i:s', $value['delivery_time']));
             $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['problem_type_content']);
 
