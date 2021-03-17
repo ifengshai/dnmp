@@ -1207,7 +1207,7 @@ class DataMarket extends Backend
 //        dump($untimeout_count);die();
 
         $map['o.payment_time'] = ['between',[$startime,$endtime]];
-        $cat['p.delivery_time'] = ['eq',null];
+        $cat['p.order_prescription_type'] = ['gt',0];
         $deve_time_one[] = ['exp', Db::raw("( p.delivery_time - o.payment_time )/ 3600 > 24")];
         $deve_time_two[] = ['exp', Db::raw("( p.delivery_time - o.payment_time )/ 3600 > 72")];
         $deve_time_three[] = ['exp', Db::raw("( p.delivery_time - o.payment_time )/ 3600 > 168")];
@@ -1246,6 +1246,7 @@ class DataMarket extends Backend
             ->join('fa_order o','p.increment_id = o.increment_id')
             ->field('p.increment_id,o.created_at,o.status,p.order_prescription_type,o.payment_time,o.site,p.delivery_time')
             ->where($map)
+            ->where($cat)
             ->where('p.delivery_time is NULL')
             ->select();
 
