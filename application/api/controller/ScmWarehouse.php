@@ -2471,9 +2471,28 @@ class ScmWarehouse extends Scm
             //查询条形码是否已绑定过sku
             $where = [];
             $where['code'] = ['in', array_unique($sku_code)];
-            $product_barcode_item_value = Db::table('fa_product_barcode_item')->where($where)->field('location_code,location_id,location_code_id')->select();
-            $product_barcode_item_value = collection($product_barcode_item_value)->toArray();
+//            $product_barcode_item_value = Db::table('fa_product_barcode_item')->where($where)->field('location_code,location_id,location_code_id')->select();
+            $product_barcode_item_value = Db::table('fa_product_barcode_item')->where($where)->column('location_code');
             dump($product_barcode_item_value);die();
+            $product_barcode_item_value = collection($product_barcode_item_value)->toArray();
+            if(!empty($product_barcode_item_value)){
+                foreach ($product_barcode_item_value as $k=>$v){
+                    //该sku条形码所绑定库区库位与所选盘点库区库位不相符
+                    if($v['location_code'] !==$value['library_name']){
+                        //查询对应的库位id
+                        $whe['coding'] = $value['library_name'];
+                        $whe['area_id'] = $value['area_id'];
+                        $code_id = Db::table('fa_store_house')->where($whe)->value('id');
+                        if (!$code_id){
+                            $this->error(__('未查询到对应的库位id'), [], 541);
+                        }
+                        $save_value['location_code'] = $value['library_name'];
+                        $save_value['location_id'] = $value['area_id'];
+                        $save_value['location_code_id'] = $code_id;
+                        Db::table('fa_product_barcode_item')->where($where)->update($save_value);
+                    }
+                }
+            }
 
             $where['sku'] = ['<>', $value['sku']];
             $code = $this->_product_bar_code_item
@@ -2507,6 +2526,28 @@ class ScmWarehouse extends Scm
                     $sku_item = $this->_item->where($item_map)->field('stock,available_stock,distribution_occupy_stock')->find();
                     if (empty($sku_item)) {
                         throw new Exception('SKU=>' . $v['sku'] . '不存在');
+                    }
+                    $sku_code = array_column($v['sku_agg'], 'code');
+                    $where['code'] = ['in', array_unique($sku_code)];
+                    $product_barcode_item_value = Db::table('fa_product_barcode_item')->where($where)->field('location_code,location_id,location_code_id')->select();
+                    $product_barcode_item_value = collection($product_barcode_item_value)->toArray();
+                    if(!empty($product_barcode_item_value)){
+                        foreach ($product_barcode_item_value as $ke=>$val){
+                            //该sku条形码所绑定库区库位与所选盘点库区库位不相符
+                            if($val['location_code'] !==$v['library_name']){
+                                //查询对应的库位id
+                                $whe['coding'] = $v['library_name'];
+                                $whe['area_id'] = $v['area_id'];
+                                $code_id = Db::table('fa_store_house')->where($whe)->value('id');
+                                if (!$code_id){
+                                    $this->error(__('未查询到对应的库位id'), [], 541);
+                                }
+                                $save_value['location_code'] = $v['library_name'];
+                                $save_value['location_id'] = $v['area_id'];
+                                $save_value['location_code_id'] = $code_id;
+                                Db::table('fa_product_barcode_item')->where($where)->update($save_value);
+                            }
+                        }
                     }
 
 
