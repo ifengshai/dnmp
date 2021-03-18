@@ -2,7 +2,6 @@
 
 namespace app\api\controller;
 
-use EasyWeChat\Support\Log;
 use think\Db;
 use think\Exception;
 use think\exception\PDOException;
@@ -28,6 +27,7 @@ use app\admin\model\saleaftermanage\OrderReturn;
 use app\admin\model\warehouse\Inventory;
 use app\admin\model\warehouse\InventoryItem;
 use app\admin\model\warehouse\StockSku;
+use Think\Log;
 
 /**
  * 供应链出入库接口类
@@ -2269,6 +2269,9 @@ class ScmWarehouse extends Scm
      */
     public function inventory_submit()
     {
+        $value = input('param.');
+        Log::write("______输出盘点数据________");
+        Log::write($value);
         $do_type = $this->request->request('do_type');
         $item_sku = $this->request->request("item_data");
         empty($item_sku) && $this->error(__('sku集合不能为空！！'), [], 508);
