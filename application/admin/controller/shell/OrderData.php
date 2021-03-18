@@ -1458,11 +1458,7 @@ class OrderData extends Backend
                 $arr['order_prescription_type'] = 3;
             }
         }
-        //定制处方镜
-        if ($arr['is_custom_lens'] == 1) {
-            $arr['order_prescription_type'] = 3;
-        }
-
+        
         //默认如果不是仅镜架 或定制片 则为现货处方镜
         if ($arr['order_prescription_type'] != 1 && $arr['order_prescription_type'] != 3) {
             $arr['order_prescription_type'] = 2;
