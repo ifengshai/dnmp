@@ -45,7 +45,7 @@ class OrderData extends Backend
          * 对 中台生产的  用户信息 进行消费
          */
         // 设置将要消费消息的主题
-        $topic = 'mojing_order';
+        $topic = 'test';
         $host = '127.0.0.1:9092';
         $group_id = '0';
         $conf = new \RdKafka\Conf();
@@ -109,25 +109,27 @@ class OrderData extends Backend
                     case RD_KAFKA_RESP_ERR_NO_ERROR: //没有错误
                         //拆解对象为数组，并根据业务需求处理数据
                         $payload = json_decode($message->payload, true);
+
+                        dump($payload);
                         $key = $message->key;
                         //根据kafka中不同key，调用对应方法传递处理数据
                         //对该条message进行处理，比如用户数据同步， 记录日志。
                         if ($payload) {
                             //根据库名判断站点
                             switch ($payload['database']) {
-                                case 'zeelool':
+                                case 'zeelool_test':
                                     $site = 1;
                                     break;
-                                case 'voogueme':
+                                case 'vuetest_voogueme':
                                     $site = 2;
                                     break;
-                                case 'nihao':
+                                case 'nihao_test':
                                     $site = 3;
                                     break;
                                 case 'meeloog':
                                     $site = 4;
                                     break;
-                                case 'wesee':
+                                case 'wesee_test':
                                     $site = 5;
                                     break;
                                 case 'zeelool_es':
@@ -139,17 +141,37 @@ class OrderData extends Backend
                                 case 'zeelool_jp':
                                     $site = 11;
                                     break;
-                                case 'morefun':
-                                    $site = 5;
-                                    break;
                                 case 'voogueme_acc':
                                     $site = 12;
+                                    break;
+                                case 'morefun':
+                                    $site = 5;
                                     break;
                             }
                             //主表
                             if ($payload['type'] == 'INSERT' && $payload['table'] == 'sales_flat_order') {
                                 $order_params = [];
                                 foreach ($payload['data'] as $k => $v) {
+
+                                                                       
+                                    $order_ids = $this->order->where('site=' . $site . ' and increment_id=' . $v['increment_id'])->value('id');
+                                    $order_ids2 = $this->order->where('site=' . $site . ' and entity_id=' . $v['entity_id'])->value('id');
+                                    if ($order_ids) {
+                                        $this->order->where('site=' . $site . ' and increment_id=' . $v['increment_id'])->delete();
+                                        $this->orderprocess->where('site=' . $site . ' and increment_id=' . $v['increment_id'])->delete();
+                                        
+                                        //删除子订单表
+                                        $this->orderitemoption->where('site=' . $site . ' and order_id=' . $order_ids)->delete();
+                                        $this->orderitemprocess->where('site=' . $site . ' and order_id=' . $order_ids)->delete();
+                                       
+                                    }
+
+                                    if ($order_ids2) {
+                                        $this->orderprocess->where('site=' . $site . ' and entity_id=' . $v['entity_id'])->delete();
+                                        $this->order->where('site=' . $site . ' and entity_id=' . $v['entity_id'])->delete();
+                                        $this->orderitemoption->where('site=' . $site . ' and order_id=' . $order_ids2)->delete();
+                                        $this->orderitemprocess->where('site=' . $site . ' and order_id=' . $order_ids2)->delete();
+                                    }
                                     $params = [];
                                     $params['entity_id'] = $v['entity_id'];
                                     $params['site'] = $site;
@@ -181,9 +203,9 @@ class OrderData extends Backend
                                     $params['created_at'] = strtotime($v['created_at']) + 28800;
                                     $params['updated_at'] = strtotime($v['updated_at']) + 28800;
                                     if (isset($v['payment_time'])) {
-                                        $params['payment_time'] = strtotime($v['payment_time']) + 28800;
+                                        $params['payment_time'] = (int)strtotime($v['payment_time']) + 28800;
                                     }
-
+                                    $params['payment_time'] = $params['payment_time'] < 0 ? 0 : $params['payment_time']; 
                                     //插入订单主表
                                     $order_id = $this->order->insertGetId($params);
                                     $order_params[$k]['site'] = $site;
@@ -311,9 +333,9 @@ class OrderData extends Backend
                                     $params['base_shipping_amount'] = $v['base_shipping_amount'];
                                     $params['updated_at'] = strtotime($v['updated_at']) + 28800;
                                     if (isset($v['payment_time'])) {
-                                        $params['payment_time'] = strtotime($v['payment_time']) + 28800;
+                                        $params['payment_time'] = (int)strtotime($v['payment_time']) + 28800;
                                     }
-
+                                    $params['payment_time'] = $params['payment_time'] < 0 ? 0 : $params['payment_time']; 
                                     $this->order->where(['entity_id' => $v['entity_id'], 'site' => $site])->update($params);
                                 }
                             }
@@ -323,6 +345,7 @@ class OrderData extends Backend
                                 foreach ($payload['data'] as $k => $v) {
                                     $params = [];
                                     if ($v['address_type'] == 'shipping') {
+
                                         $params['country_id'] = $v['country_id'];
                                         $params['region'] = $v['region'];
                                         $params['region_id'] = $v['region_id'];
@@ -365,7 +388,7 @@ class OrderData extends Backend
                                     if ($site == 5) {
                                         $options =  $this->wesee_prescription_analysis($orders_prescriptions_params[$v['orders_prescriptions_id']]['prescription']);
                                     }
-
+                                    
                                     $options['item_id'] = $v['id'];
                                     $options['site'] = $site;
                                     $options['magento_order_id'] = $v['order_id'];
@@ -396,6 +419,7 @@ class OrderData extends Backend
                                             $data[$i]['created_at'] = strtotime($v['created_at']) + 28800;
                                             $data[$i]['updated_at'] = strtotime($v['updated_at']) + 28800;
                                         }
+                                    
                                         $this->orderitemprocess->insertAll($data);
                                     }
                                 }
