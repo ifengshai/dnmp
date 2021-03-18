@@ -50,6 +50,8 @@ use app\admin\model\finance\FinanceCost;
  */
 class WorkOrderList extends Backend
 {
+
+
     protected $noNeedRight = ['getMeasureContent', 'batch_export_xls_bak', 'getProblemTypeContent', 'batch_export_xls', 'getDocumentaryRule'];
     /**
      * WorkOrderList模型对象
@@ -57,6 +59,8 @@ class WorkOrderList extends Backend
      */
     protected $model = null;
     protected $noNeedLogin = ['batch_export_xls_array','batch_export_xls_array_copy'];
+
+
 
     public function _initialize()
     {
@@ -73,6 +77,7 @@ class WorkOrderList extends Backend
         $this->order_change = new \app\admin\model\saleaftermanage\WorkOrderChangeSku;
         $this->order_remark = new \app\admin\model\saleaftermanage\WorkOrderRemark;
         $this->work_order_note = new \app\admin\model\saleaftermanage\WorkOrderNote;
+        $this->_product_bar_code_item = new ProductBarCodeItem();
         //$this->view->assign('step', config('workorder.step')); //措施
         $this->view->assign('step', $workOrderConfigValue['step']);
         //$this->assignconfig('workorder', config('workorder')); //JS专用，整个配置文件
@@ -104,6 +109,7 @@ class WorkOrderList extends Backend
         $this->assignconfig('userid', session('admin.id'));
         //查询当前登录用户所在A/B组
         $this->customer_group = session('admin.group_id') ?: 0;
+
     }
 
     /**
@@ -1855,6 +1861,20 @@ class WorkOrderList extends Backend
             } else {
                 $sku = trim($v);
             }
+            /*****************限制如果有盘点单未结束不能操作配货完成*******************/
+            //配货完成时判断
+            //拣货区盘点时不能操作
+            //查询条形码库区库位
+            $barcodedata = $this->_product_bar_code_item->where(['sku' => $sku])->column('location_code');
+            $count = $this->_inventory->alias('a')
+                ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata]])
+                ->count();
+            if ($count > 0) {
+                $this->error(__('此库位正在盘点,暂无法入库审核'), [], 403);
+            }
+            /****************************end*****************************************/
+
+
 
             //判断是否开启预售 并且预售时间是否满足 并且预售数量是否足够
             $res = $itemPlatFormSku->where(['outer_sku_status' => 1, 'platform_sku' => $sku, 'platform_type' => $siteType])->find();
@@ -1975,7 +1995,6 @@ class WorkOrderList extends Backend
                     //校验赠品、补发库存
                     if (array_intersect([6, 7], $measure_choose_id)) {
                         $original_sku = [];
-
                         //赠品
                         if (in_array(6, $measure_choose_id)) {
                             $gift_sku = $params['gift']['original_sku'];
@@ -1999,7 +2018,7 @@ class WorkOrderList extends Backend
 
                         //补发
                         if (in_array(7, $measure_choose_id)) {
-                            !$params['address']['shipping_type'] && $this->error("请选择Shipping Method");
+//                            !$params['address']['shipping_type'] && $this->error("请选择Shipping Method");
 
                             $replacement_sku = $params['replacement']['original_sku'];
                             !$replacement_sku && $this->error("补发sku不能为空");
@@ -2019,7 +2038,6 @@ class WorkOrderList extends Backend
                                 }
                             }
                         }
-
                         //校验库存
                         if ($original_sku) {
                             $back_data = $this->skuIsStock(array_keys($original_sku), $params['work_platform'], array_values($original_sku));
