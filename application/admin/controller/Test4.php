@@ -454,7 +454,7 @@ class Test4 extends Controller
         $model->table('sales_flat_quote')->query("set time_zone='+8:00'");
 
         //查询时间
-        $date_time = $this->zeeloolde->query("SELECT DATE_FORMAT(payment_time, '%Y-%m-%d') AS date_time FROM `sales_flat_order` where payment_time between '2020-09-17' and '2021-03-18' GROUP BY DATE_FORMAT(payment_time, '%Y%m%d') order by DATE_FORMAT(payment_time, '%Y%m%d') asc");
+        $date_time = $this->zeeloolde->query("SELECT DATE_FORMAT(payment_time, '%Y-%m-%d') AS date_time FROM `sales_flat_order` where payment_time between '2020-09-17' and '2021-03-17' GROUP BY DATE_FORMAT(payment_time, '%Y%m%d') order by DATE_FORMAT(payment_time, '%Y%m%d') asc");
         foreach ($date_time as $val) {
             $is_exist = Db::name('datacenter_day')->where('day_date', $val['date_time'])->where('site', 10)->value('id');
             $arr = [];
@@ -535,7 +535,7 @@ class Test4 extends Controller
         $model->table('sales_flat_quote')->query("set time_zone='+8:00'");
 
         //查询时间
-        $date_time = $this->zeelooljp->query("SELECT DATE_FORMAT(payment_time, '%Y-%m-%d') AS date_time FROM `sales_flat_order` where payment_time between '2020-11-08' and '2021-03-18' GROUP BY DATE_FORMAT(payment_time, '%Y%m%d') order by DATE_FORMAT(payment_time, '%Y%m%d') asc");
+        $date_time = $this->zeelooljp->query("SELECT DATE_FORMAT(payment_time, '%Y-%m-%d') AS date_time FROM `sales_flat_order` where payment_time between '2020-11-08' and '2021-03-17' GROUP BY DATE_FORMAT(payment_time, '%Y%m%d') order by DATE_FORMAT(payment_time, '%Y%m%d') asc");
         foreach ($date_time as $val) {
             $is_exist = Db::name('datacenter_day')->where('day_date', $val['date_time'])->where('site', 11)->value('id');
             $arr = [];
