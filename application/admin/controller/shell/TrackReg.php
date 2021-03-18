@@ -1766,6 +1766,64 @@ class TrackReg extends Backend
         Db::name('datacenter_day')->where(['day_date' => $date_time_behind, 'site' => 3])->update(['sessions'=>$date_time_behind_sessions_n]);
         usleep(100000);
 
+        //de站
+        $data = Db::name('datacenter_day')->where(['day_date' => $date_time, 'site' => 10])->field('order_num,new_cart_num,update_cart_num,active_user_num')->find();
+
+        //活跃用户数
+        $arr['active_user_num'] = $this->google_active_user(10, $date_time);
+        //会话
+        $arr['sessions'] = $this->google_session(10, $date_time);
+        //前天的ga会话数
+        $date_time_behind_sessions_z = $this->google_session(10, $date_time_behind);
+        //会话转化率
+        $arr['session_rate'] = $arr['sessions'] != 0 ? round($data['order_num'] / $arr['sessions'] * 100, 2) : 0;
+        //新增加购率
+        $arr['add_cart_rate'] = $arr['sessions'] ? round($data['new_cart_num'] / $arr['sessions'] * 100, 2) : 0;
+        //更新加购率
+        $arr['update_add_cart_rate'] = $arr['sessions'] ? round($data['update_cart_num'] / $arr['sessions'] * 100, 2) : 0;
+        $zeeloolde_data = new \app\admin\model\operatedatacenter\ZeeloolDe();
+        //着陆页数据
+        $arr['landing_num'] = $zeeloolde_data->google_landing(10, $date_time);
+        //产品详情页
+        $arr['detail_num'] = $zeeloolde_data->google_target13(10, $date_time);
+        //加购
+        $arr['cart_num'] = $zeeloolde_data->google_target1(10, $date_time);
+        //交易次数
+        $arr['complete_num'] = $zeeloolde_data->google_target_end(10, $date_time);
+        $update = Db::name('datacenter_day')->where(['day_date' => $date_time, 'site' => 10])->update($arr);
+        //更新前天的会话数 防止ga数据误差
+        Db::name('datacenter_day')->where(['day_date' => $date_time_behind, 'site' => 10])->update(['sessions'=>$date_time_behind_sessions_z]);
+        usleep(100000);
+
+        //jp站
+        $data = Db::name('datacenter_day')->where(['day_date' => $date_time, 'site' => 11])->field('order_num,new_cart_num,update_cart_num,active_user_num')->find();
+
+        //活跃用户数
+        $arr['active_user_num'] = $this->google_active_user(11, $date_time);
+        //会话
+        $arr['sessions'] = $this->google_session(11, $date_time);
+        //前天的ga会话数
+        $date_time_behind_sessions_z = $this->google_session(11, $date_time_behind);
+        //会话转化率
+        $arr['session_rate'] = $arr['sessions'] != 0 ? round($data['order_num'] / $arr['sessions'] * 100, 2) : 0;
+        //新增加购率
+        $arr['add_cart_rate'] = $arr['sessions'] ? round($data['new_cart_num'] / $arr['sessions'] * 100, 2) : 0;
+        //更新加购率
+        $arr['update_add_cart_rate'] = $arr['sessions'] ? round($data['update_cart_num'] / $arr['sessions'] * 100, 2) : 0;
+        $zeelooljp_data = new \app\admin\model\operatedatacenter\ZeeloolJp();
+        //着陆页数据
+        $arr['landing_num'] = $zeelooljp_data->google_landing(11, $date_time);
+        //产品详情页
+        $arr['detail_num'] = $zeelooljp_data->google_target13(11, $date_time);
+        //加购
+        $arr['cart_num'] = $zeelooljp_data->google_target1(11, $date_time);
+        //交易次数
+        $arr['complete_num'] = $zeelooljp_data->google_target_end(11, $date_time);
+        $update = Db::name('datacenter_day')->where(['day_date' => $date_time, 'site' => 11])->update($arr);
+        //更新前天的会话数 防止ga数据误差
+        Db::name('datacenter_day')->where(['day_date' => $date_time_behind, 'site' => 11])->update(['sessions'=>$date_time_behind_sessions_z]);
+        usleep(100000);
+
         if ($data['active_user_num'] == 0) {
             $this->only_ga_data();
         }
