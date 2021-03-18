@@ -2410,9 +2410,31 @@ class ScmWarehouse extends Scm
      */
     public function inventory_submit()
     {
-        $value_show = input('param.');
-        Log::write("--------输出请求数据--------");
-        Log::write($value_show);
+//        $value_show = input('param.');
+//        Log::write("--------输出请求数据--------");
+//        Log::write($value_show);
+//
+//        $data['sku'] = 'OT414973';
+//        $data['inventory_qty'] = 2;
+//        $data['error_qty'] = 0;
+//        $data['area_id'] = 1;
+//        $data['library_name'] = 'C-06-02';
+//        $data['sku_agg']=array(['code'=>'210205000000010','is_new'=>1],['code'=>'210205000000011','is_new'=>1]);
+//        $cat[] = $data;
+//        dump(json_encode($cat));die();
+
+
+
+
+//        'api_key' => '4c74eb14-affe-40b8-9605-a82a7f4b6530',
+//        'inventory_id' => '238',
+//        'item_data' => '[{sku:OT414973-02,inventory_qty:2,error_qty:0,area_id:1,library_name:C-06-02,
+//        sku_agg :[{ code : 210205000000010 , is_new :1},
+//                  { code : 210205000000011 , is_new :1}],
+//                   remove_agg :[]}]',
+//        'do_type' => '2',
+
+
         $do_type = $this->request->request('do_type');
         $item_sku = $this->request->request("item_data");
         empty($item_sku) && $this->error(__('sku集合不能为空！！'), [], 508);
@@ -2423,10 +2445,10 @@ class ScmWarehouse extends Scm
         empty($inventory_id) && $this->error(__('盘点单号不能为空'), [], 541);
         //获取盘点单数据
         $row = $this->_inventory->get($inventory_id);
-        empty($row) && $this->error(__('盘点单不存在'), [], 543);
-        if ($row['status'] > 1) {
-            $this->error(__('此状态不能编辑'), [], 544);
-        }
+//        empty($row) && $this->error(__('盘点单不存在'), [], 543);
+//        if ($row['status'] > 1) {
+//            $this->error(__('此状态不能编辑'), [], 544);
+//        }
 
         if ($do_type == 1) {
             //提交
@@ -2445,9 +2467,14 @@ class ScmWarehouse extends Scm
         foreach ($item_sku as $key => $value) {
 
             $sku_code = array_column($value['sku_agg'], 'code');
+
             //查询条形码是否已绑定过sku
             $where = [];
             $where['code'] = ['in', array_unique($sku_code)];
+            $product_barcode_item_value = Db::table('fa_product_barcode_item')->where($where)->field('location_code,location_id,location_code_id')->select();
+            $product_barcode_item_value = collection($product_barcode_item_value)->toArray();
+            dump($product_barcode_item_value);die();
+
             $where['sku'] = ['<>', $value['sku']];
             $code = $this->_product_bar_code_item
                 ->where($where)
