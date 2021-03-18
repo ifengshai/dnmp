@@ -101,7 +101,7 @@ class Statement extends Backend
                     $list[$k]['period'] = $supplier['period'] . '个月';
                 }
                 $list[$k]['purchase_person'] = $supplier['purchase_person'];
-                $statement = Db::name('finance_purchase')->where('pay_type', 3)->where('purchase_id', $v['id'])->where('status', 'in', [0, 1, 2, 3, 4, 6])->find();
+                $statement = Db::name('finance_purchase')->where('pay_type', 3)->where('purchase_id', $v['id'])->where('status', 'in', [0, 1, 2, 4])->find();
                 if (!empty($statement)) {
                     $list[$k]['can_create'] = 0;
                 } else {
@@ -219,7 +219,7 @@ class Statement extends Backend
             ->where('b.supplier_id', $supplier_id)
             ->where('a.id', 'in', $ids)
             ->where('a.status', 2)//已审核通过的入库单
-            ->where('c.id', '>', 16475)
+            ->where('c.id', '>', 0)
             ->field('c.purchase_number,a.id,d.purchase_price,c.purchase_freight,f.quantity_num,a.in_stock_number,b.check_order_number,b.purchase_id,b.batch_id,c.purchase_name,c.pay_type,e.in_stock_num,f.arrivals_num,f.quantity_num,f.unqualified_num')
             ->select();
         $all = 0;
@@ -795,7 +795,7 @@ class Statement extends Backend
                 ->where('b.supplier_id', $supplier_id)
                 ->where('a.id', 'in', $ids)
                 ->where('a.status', 2)//已审核通过的入库单
-                ->where('c.id', '>', 16475)
+                ->where('c.id', '>', 0)
                 ->field('c.purchase_number,a.id,d.purchase_price,f.quantity_num,a.in_stock_number,b.check_order_number,b.purchase_id,b.batch_id,c.purchase_name,c.pay_type,e.in_stock_num,f.arrivals_num,f.quantity_num,f.unqualified_num')
                 ->select();
             foreach ($list as $k => $v) {

@@ -57,25 +57,30 @@
         </div>
     </div>
     <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">是否为新品采购单:</label>
-        <div class="col-xs-12 col-sm-3">
-            <select name="row[is_new_product]" class="form-control">
-                <option value="">请选择</option>
-                <option value="1">是</option>
-                <option value="0">否</option>
-            </select>
-        </div>
-        <label class="control-label col-xs-12 col-sm-2" >工厂类型:</label>
+        <label class="control-label col-xs-12 col-sm-2">工厂类型:</label>
         <div class="col-xs-12 col-sm-3">
             <select name="row[factory_type]" class="form-control" id="factory_type">
-                <option value="0">工厂</option>
-                <option value="1">贸易</option>
+                <option value="1" {if condition="$supplier_detail['supplier_type_pattern'] eq 2" } selected{/if}>贸易</option>
+                <option value="0" {if condition="$supplier_detail['supplier_type_pattern'] eq 1" } selected{/if}>工厂</option>
+            </select>
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">采购单类型:</label>
+        <div class="col-xs-12 col-sm-3">
+            <select name="row[purchase_type]" class="form-control">
+                <option value="1" selected>线下采购单</option>
+                <option value="2">线上采购单</option>
             </select>
         </div>
     </div>
 
     <div class="form-group">
-
+        <label class="control-label col-xs-12 col-sm-2">是否为留样采购单:</label>
+        <div class="col-xs-12 col-sm-3">
+            <select name="row[is_sample]" class="form-control">
+                <option value="0">否</option>
+                <option value="1">是</option>
+            </select>
+        </div>
         <label class="control-label col-xs-12 col-sm-2">大货/现货:</label>
         <div class="col-xs-12 col-sm-3">
             <select name="row[type]" class="form-control">
@@ -84,21 +89,36 @@
                 <option value="2">大货</option>
             </select>
         </div>
-        <label class="control-label col-xs-12 col-sm-2">1688单号:</label>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">是否为新品采购单:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-1688_number" class="form-control"  name="row[1688_number]" value="" type="text">
+            <select name="row[is_new_product]" class="form-control" {if condition="!empty($new_old)"}disabled="disabled"{/if}>
+                <option value="">请选择</option>
+                <option value="1" {:$new_old==1 ?'selected' : '' }>是</option>
+                <option value="0" {:$new_old==2 ?'selected' : '' }>否</option>
+            </select>
+        </div>
+        <div  {if condition="(!empty($supplier_detail)) and ($supplier_detail['supplier_type_pattern'] eq 2) OR (empty($supplier_detail))"}style="display:none"{/if} id="is_first_purchase">
+            <label class="control-label col-xs-12 col-sm-2" id="is_first">是否首次定做采购:</label>
+            <div class="col-xs-12 col-sm-3" id="customized_procurement">
+                <select name="row[customized_procurement]" class="form-control">
+                    <option value="0">否</option>
+                    <option value="1">是</option>
+                </select>
+            </div>
         </div>
     </div>
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">采购单付款类型:</label>
         <div class="col-xs-12 col-sm-3">
-            <select name="row[pay_type]" class="form-control">
-                <option value="">请选择</option>
+            <select name="row[pay_type]" class="form-control" id="pay_type">
                 <option value="1">预付款</option>
                 <option value="2">全款预付</option>
                 <option value="3">货到付款</option>
             </select>
         </div>
+        <div id="pay_rate">
         <label class="control-label col-xs-12 col-sm-2">预付款比例:</label>
         <div class="col-xs-12 col-sm-3">
             <select name="row[pay_rate]" class="form-control">
@@ -106,39 +126,30 @@
                 <option value="1">30%</option>
             </select>
         </div>
-    </div>
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">是否为留样采购单:</label>
-        <div class="col-xs-12 col-sm-3">
-            <select name="row[is_sample]" class="form-control">
-                <option value="">请选择</option>
-                <option value="1">是</option>
-                <option value="0">否</option>
-            </select>
-        </div>
-        <label class="control-label col-xs-12 col-sm-2" id="is_first">是否首次定做采购:</label>
-        <div class="col-xs-12 col-sm-3" id="customized_procurement">
-            <select name="row[customized_procurement]" class="form-control">
-                <option value="">请选择</option>
-                <option value="1">是</option>
-                <option value="0">否</option>
-            </select>
         </div>
     </div>
 
+    <div id="time" {if condition="(!empty($supplier_detail)) and ($supplier_detail['supplier_type_pattern'] eq 2) OR (empty($supplier_detail))"}style="display:none"{/if}>
     <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">预计出货时间:</label>
-        <div class="col-xs-12 col-sm-3">
-            <input id="c-arrival_time" class="form-control datetimepicker arrival_time"
-                   data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[arrival_time]" type="text"
-                   value="{:date('Y-m-d H:i:s')}">
-        </div>
         <label class="control-label col-xs-12 col-sm-2">订单生效时间:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-arrival_time" class="form-control datetimepicker arrival_time"
-                   data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[effect_time]" type="text"
-                   value="{:date('Y-m-d H:i:s')}">
+            <input id="c-arrival_time" class="form-control datetimepicker arrival_time" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[effect_time]" type="text" value="{:date('Y-m-d H:i:s')}">
         </div>
+    </div>
+    </div>
+
+    <div class="form-group">
+    <label class="control-label col-xs-12 col-sm-2">预计出货时间:</label>
+    <div class="col-xs-12 col-sm-3">
+        <input id="c-arrival_time" class="form-control datetimepicker arrival_time" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[arrival_time]" type="text" value="{:date('Y-m-d H:i:s')}">
+    </div>
+    </div>
+
+    <div class="form-group" id="1688_number" {if condition="$supplier_detail['supplier_type_pattern'] eq 1"}style="display:none"{/if}>
+    <label class="control-label col-xs-12 col-sm-2">1688单号:</label>
+    <div class="col-xs-12 col-sm-3">
+        <input id="c-1688_number" class="form-control" name="row[1688_number]" value="" type="text">
+    </div>
     </div>
 
 
@@ -146,8 +157,7 @@
 
         <label class="control-label col-xs-12 col-sm-2">采购备注:</label>
         <div class="col-xs-12 col-sm-8">
-            <textarea id="c-purchase_remark" class="form-control " rows="5" name="row[purchase_remark]"
-                cols="50"></textarea>
+            <textarea id="c-purchase_remark" class="form-control " rows="5" name="row[purchase_remark]" cols="50"></textarea>
         </div>
     </div>
     <hr>
@@ -158,7 +168,7 @@
             <label class="control-label col-xs-12 col-sm-2">合同编号:</label>
             <div class="col-xs-12 col-sm-3">
                 <select name="row[contract_id]" class="form-control contract_id selectpicker" required
-                    data-live-search='true'>
+                        data-live-search='true'>
                     <option value="">请选择</option>
                     {foreach $contract_data as $k => $v}
                     <option value="{$v.id}">{$v.contract_number}</option>
@@ -175,13 +185,14 @@
             <label class="control-label col-xs-12 col-sm-2">交货地址:</label>
             <div class="col-xs-12 col-sm-3">
                 <input id="c-delivery_address" class="form-control address" readonly name="row[delivery_address]"
-                    type="text">
+                       type="text">
             </div>
             <label class="control-label col-xs-12 col-sm-2">交货时间:</label>
             <div class="col-xs-12 col-sm-3">
                 <input id="c-delivery_time" readonly class="form-control datetimepicker delivery_time"
-                    data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[delivery_time]" type="text"
-                    value="{:date('Y-m-d H:i:s')}">
+                       data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[delivery_time]"
+                       type="text"
+                       value="{:date('Y-m-d H:i:s')}">
             </div>
         </div>
 
@@ -189,24 +200,25 @@
             <label class="control-label col-xs-12 col-sm-2">合同有效期:</label>
             <div class="col-xs-12 col-sm-3">
                 <input id="c-contract_time" readonly class="form-control datetimepicker contract_time"
-                    data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="" type="text"
-                    value="{:date('Y-m-d H:i:s')}">
+                       data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="" type="text"
+                       value="{:date('Y-m-d H:i:s')}">
             </div>
             <label class="control-label col-xs-12 col-sm-2">合同附件:</label>
             <div class="col-xs-12 col-sm-3">
                 <div class="input-group">
                     <input id="c-contract_images" class="form-control contract_images" size="200" readonly
-                        name="row[contract_images]" type="text">
+                           name="row[contract_images]" type="text">
                     <div class="input-group-addon no-border no-padding">
                         <span><button type="button" id="plupload-contract_images" class="btn btn-danger plupload hidden"
-                                data-input-id="c-contract_images"
-                                data-mimetype="image/gif,image/jpeg,image/png,image/jpg,image/bmp" data-multiple="true"
-                                data-maxcount="5" data-preview-id="p-contract_images"><i class="fa fa-upload"></i>
+                                      data-input-id="c-contract_images"
+                                      data-mimetype="image/gif,image/jpeg,image/png,image/jpg,image/bmp"
+                                      data-multiple="true"
+                                      data-maxcount="5" data-preview-id="p-contract_images"><i class="fa fa-upload"></i>
                                 {:__('Upload')}</button></span>
                         <span><button type="button" id="fachoose-contract_images"
-                                class="btn btn-primary fachoose hidden" data-input-id="c-contract_images"
-                                data-mimetype="image/*" data-multiple="true" data-maxcount="5"><i
-                                    class="fa fa-list"></i> {:__('Choose')}</button></span>
+                                      class="btn btn-primary fachoose hidden" data-input-id="c-contract_images"
+                                      data-mimetype="image/*" data-multiple="true" data-maxcount="5"><i
+                                class="fa fa-list"></i> {:__('Choose')}</button></span>
                     </div>
                     <span class="msg-box n-right" for="c-contract_images"></span>
                 </div>
@@ -223,7 +235,8 @@
             <label class="control-label col-xs-12 col-sm-2">供应商名称:</label>
             <div class="col-xs-12 col-sm-3">
 
-                <select name="row[supplier_id]" class="form-control supplier selectpicker" data-rule='required' data-live-search='true'>
+                <select name="row[supplier_id]" class="form-control supplier selectpicker" data-rule='required'
+                        data-live-search='true'>
                     <option value="">请选择</option>
                     {foreach $supplier as $k => $v}
                     <option value="{$k}" {:$row[0]['supplier_id']==$k ? 'selected' : '' } {:$list[0]['supplier_id']==$k ? 'selected' : '' }>{$v}</option>
@@ -235,7 +248,7 @@
             <label class="control-label col-xs-12 col-sm-2">供应商地址:</label>
             <div class="col-xs-12 col-sm-3">
                 <input id="c-purchase_total" class="form-control supplier_address" readonly name="row[supplier_address]"
-                    type="text">
+                       type="text">
             </div>
         </div>
 
@@ -247,40 +260,47 @@
     <div class='caigou' style="width: 80%;margin-left: 10%;">
         <p style="font-size: 16px;text-align: center;"><b>商品信息</b></p>
         <div style="margin-bottom: 20px;">
-<!--            <div id="toolbar" class="toolbar">-->
-<!--                <a href="javascript:;" class="btn btn-success btn-add" title="增加"><i class="fa fa-plus"></i> 增加</a>-->
-<!--            </div>-->
+            <!--            <div id="toolbar" class="toolbar">-->
+            <!--                <a href="javascript:;" class="btn btn-success btn-add" title="增加"><i class="fa fa-plus"></i> 增加</a>-->
+            <!--            </div>-->
             <table id="caigou-table" class="purchase-table">
                 <tr>
-                    <th>SKU</td>
-                    <th>产品名称</td>
-                    <th>供应商sku</td>
-                    <th>采购数量（个）</td>
-                    <th>采购单价（元）</td>
-                    <th>总价（元）</td>
-<!--                    <th>操作</td>-->
+                    <th>SKU
+                    </td>
+                    <th>产品名称
+                    </td>
+                    <th>供应商sku
+                    </td>
+                    <th>采购数量（个）
+                    </td>
+                    <th>采购单价（元）
+                    </td>
+                    <th>总价（元）
+                    </td>
+                    <!--                    <th>操作</td>-->
                 </tr>
                 {if $list}
                 {foreach $list as $v}
-                <input  class="form-control"  name="row[replenish_id]" type="hidden" value="{$v.replenish_id}">
+                <input class="form-control" name="row[replenish_id]" type="hidden" value="{$v.replenish_id}">
                 <tr>
-                    <input  class="form-control replenish_list_id" name="replenish_list_id[]" type="hidden" value="{$v.id}">
+                    <input class="form-control replenish_list_id" name="replenish_list_id[]" type="hidden"
+                           value="{$v.id}">
                     <td>
                         <input id="c-purchase_remark" class="form-control sku" readonly name="sku[]" type="text"
-                            value="{$v.sku}">
+                               value="{$v.sku}">
                     </td>
                     <td><input id="c-purchase_remark" class="form-control product_name" readonly name="product_name[]"
-                            type="text" value="{$v.product_name}"></td>
+                               type="text" value="{$v.product_name}"></td>
                     <td><input id="c-purchase_remark" class="form-control supplier_sku" readonly name="supplier_sku[]"
-                            type="text" value="{$v.supplier_sku}"></td>
+                               type="text" value="{$v.supplier_sku}"></td>
                     <td><input id="c-purchase_remark" class="form-control purchase_num" name="purchase_num[]"
-                            type="text" value="{$v.distribute_num}"></td>
+                               type="text" value="{$v.distribute_num}"></td>
                     <td><input id="c-purchase_remark" class="form-control purchase_price" name="purchase_price[]"
-                            type="text"></td>
+                               type="text"></td>
                     <td><input id="c-purchase_remark" class="form-control goods_total" readonly name="purchase_total[]"
-                            type="text"></td>
-<!--                    <td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>-->
-<!--                            删除</a></td>-->
+                               type="text"></td>
+                    <!--                    <td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>-->
+                    <!--                            删除</a></td>-->
                 </tr>
                 {/foreach}
 
@@ -290,17 +310,17 @@
                         <input id="c-purchase_remark" class="form-control sku" name="sku[]" type="text">
                     </td>
                     <td><input id="c-purchase_remark" class="form-control product_name" readonly name="product_name[]"
-                            type="text"></td>
+                               type="text"></td>
                     <td><input id="c-purchase_remark" class="form-control supplier_sku" readonly name="supplier_sku[]"
-                            type="text"></td>
+                               type="text"></td>
                     <td><input id="c-purchase_remark" class="form-control purchase_num" name="purchase_num[]"
-                            type="text"></td>
+                               type="text"></td>
                     <td><input id="c-purchase_remark" class="form-control purchase_price" name="purchase_price[]"
-                            type="text"></td>
+                               type="text"></td>
                     <td><input id="c-purchase_remark" class="form-control goods_total" readonly name="purchase_total[]"
-                            type="text"></td>
-<!--                    <td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>-->
-<!--                            删除</a></td>-->
+                               type="text"></td>
+                    <!--                    <td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>-->
+                    <!--                            删除</a></td>-->
                 </tr>
                 {/if}
             </table>
@@ -311,13 +331,13 @@
             <label class="control-label col-xs-12 col-sm-2">商品总额:</label>
             <div class="col-xs-12 col-sm-3">
                 <input id="c-product_total" class="form-control total" readonly step="0.01" name="row[product_total]"
-                    type="number">
+                       type="number">
             </div>
 
             <label class="control-label col-xs-12 col-sm-2">运费:</label>
             <div class="col-xs-12 col-sm-3">
                 <input id="c-purchase_freight" class="form-control freight" step="0.01" name="row[purchase_freight]"
-                    type="number">
+                       type="number">
             </div>
         </div>
 
@@ -325,16 +345,16 @@
             <label class="control-label col-xs-12 col-sm-2">总计:</label>
             <div class="col-xs-12 col-sm-3">
                 <input id="c-purchase_total" class="form-control purchase_total" readonly step="0.01"
-                    name="row[purchase_total]" value="" type="number">
+                       name="row[purchase_total]" value="" type="number">
             </div>
-<!--            <label class="control-label col-xs-12 col-sm-2">{:__('Settlement_method')}:</label>-->
-<!--            <div class="col-xs-12 col-sm-3">-->
-<!--                <select name="row[settlement_method]" class="form-control settlement_method">-->
-<!--                    <option value="1">先付款</option>-->
-<!--                    <option value="2">货到付款</option>-->
-<!--                    <option value="3">付定金，货到付款</option>-->
-<!--                </select>-->
-<!--            </div>-->
+            <!--            <label class="control-label col-xs-12 col-sm-2">{:__('Settlement_method')}:</label>-->
+            <!--            <div class="col-xs-12 col-sm-3">-->
+            <!--                <select name="row[settlement_method]" class="form-control settlement_method">-->
+            <!--                    <option value="1">先付款</option>-->
+            <!--                    <option value="2">货到付款</option>-->
+            <!--                    <option value="3">付定金，货到付款</option>-->
+            <!--                </select>-->
+            <!--            </div>-->
 
 
         </div>
@@ -343,13 +363,13 @@
             <label class="control-label col-xs-12 col-sm-2">定金金额:</label>
             <div class="col-xs-12 col-sm-3">
                 <input id="c-deposit_amount" class="form-control deposit_amount" step="0.01" name="row[deposit_amount]"
-                    type="number">
+                       type="number">
             </div>
 
             <label class="control-label col-xs-12 col-sm-2">尾款金额:</label>
             <div class="col-xs-12 col-sm-3">
                 <input id="c-final_amount" class="form-control final_amount" step="0.01" name="row[final_amount]"
-                    type="number">
+                       type="number">
             </div>
 
         </div>
@@ -415,14 +435,14 @@
                 <input id="c-purchase_remark" class="form-control sku" name="sku[]" type="text">
             </td>
             <td><input id="c-purchase_remark" class="form-control product_name" readonly name="product_name[]"
-                    type="text"></td>
+                       type="text"></td>
             <td><input id="c-purchase_remark" class="form-control supplier_sku" readonly name="supplier_sku[]"
-                    type="text"></td>
+                       type="text"></td>
             <td><input id="c-purchase_remark" class="form-control purchase_num" name="purchase_num[]" type="text"></td>
             <td><input id="c-purchase_remark" class="form-control purchase_price" name="purchase_price[]" type="text">
             </td>
             <td><input id="c-purchase_remark" class="form-control goods_total" readonly name="purchase_total[]"
-                    type="text"></td>
+                       type="text"></td>
             <td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i> 删除</a></td>
         </tr>
     </table>

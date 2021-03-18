@@ -3197,7 +3197,7 @@ class WorkOrderList extends Backend
                     //赠品绑定条码
                     $_work_order_measure = new WorkOrderMeasure();
                     $measure_choose_id = $_work_order_measure->where('id',$receptInfo['measure_id'])->value('measure_choose_id');
-                    if(6 == $measure_choose_id){
+                    if(6 == $measure_choose_id && 1 == $params['success']){
                         $barcode = $params['barcode'];
                         $product_bar_code_item = new ProductBarCodeItem();
                         $work_order_change_sku = new WorkOrderChangeSku();
@@ -3890,9 +3890,9 @@ EOF;
                     $res_status = WorkOrderNote::create($data);
                     //查询用户的角色组id
                     $authGroupIds = AuthGroupAccess::where('uid', session('admin.id'))->column('group_id');
-                    Log::write("角色组");
+                    /*Log::write("角色组");
                     Log::write($authGroupIds);
-                    Log::write($workOrderConfigValue['warehouse_department_rule']);
+                    Log::write($workOrderConfigValue['warehouse_department_rule']);*/
 
                     $work = $this->model->find($params['work_id']);
                     $work_order_note_status = $work->work_order_note_status;
@@ -3923,8 +3923,8 @@ EOF;
                     }
                     $work->work_order_note_status = $work_order_note_status;
 
-                    Log::write("是否包含");
-                    Log::write($work_order_note_status);
+                    /*Log::write("是否包含");
+                    Log::write($work_order_note_status);*/
                     $work->save();
                     Db::commit();
                 } catch (\Exception $e) {

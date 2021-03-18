@@ -283,7 +283,7 @@ EOF;
                 unset($filter['purchase_number']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
-
+            $map['purchase_id'] = ['neq',0];
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->item
                 ->where($where)

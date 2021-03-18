@@ -30,7 +30,8 @@ class Zendesk extends Backend
     protected $model = null;
     protected $relationSearch = true;
     protected $noNeedLogin = ['asycTicketsUpdate','asycTicketsVooguemeUpdate','asycTicketsAll','asycTicketsAll2','asycTicketsAll3','asyncTicketHttps'];
-    protected $noNeedRight=['zendesk_export,email_toload_more,order_toload_more,email_toview'];
+    protected $noNeedRight=['zendesk_export','email_toload_more','order_toload_more'];
+
     /**
      * 无需鉴权的方法,但需要登录
      * @var array
@@ -1503,10 +1504,10 @@ DOC;
      */
     public function asyncTicketHttps()
     {
-        $ticketIds = (new Notice(request(), ['type' => 'voogueme']))->asyncUpdate();
+        $ticketIds = (new Notice(request(), ['type' => 'zeelool']))->asyncUpdate();
 
         //判断是否存在
-        $nowTicketsIds = $this->model->where("type",2)->column('ticket_id');
+        $nowTicketsIds = $this->model->where("type",1)->column('ticket_id');
 
         //求交集的更新
 
@@ -1518,12 +1519,12 @@ DOC;
         //$intersects = array('142871','142869');//测试是否更新
         //$diffs = array('144352','144349');//测试是否新增
         foreach($intersects as $intersect){
-            (new Notice(request(), ['type' => 'voogueme','id' => $intersect]))->update();
+            (new Notice(request(), ['type' => 'zeelool','id' => $intersect]))->update();
             echo $intersect.'is ok'."\n";
         }
         //新增
         foreach($diffs as $diff){
-            (new Notice(request(), ['type' => 'voogueme','id' => $diff]))->create();
+            (new Notice(request(), ['type' => 'zeelool','id' => $diff]))->create();
             echo $diff.'ok'."\n";
         }
         echo 'all ok';

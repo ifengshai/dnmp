@@ -10,6 +10,12 @@ use fast\Excel;
 
 class FinanceOrder extends Backend
 {
+     /**
+     * 无需鉴权的方法,但需要登录
+     * @var array
+     */
+    protected $noNeedRight = ['batch_export_xls'];
+
     public function _initialize()
     {
         parent::_initialize();
@@ -330,11 +336,6 @@ class FinanceOrder extends Backend
         $fi_actual_payment_fee = $model->table('ld_delivery_order_finance')->where(['increment_id' =>  ['in', $order_number]])->column('fi_actual_payment_fee', 'increment_id');
         $params = [];
         foreach ($list as $key => $value) {
-            $params[$key]['order_number'] = $value['order_number'];
-           
-            $params[$key]['order_number'] = $value['order_number'];
-            $params[$key]['order_number'] = $value['order_number'];
-            $params[$key]['order_number'] = $value['order_number'];
             $params[$key]['order_number'] = $value['order_number'];
             if ($value['site'] == 1) {
                 $site = 'Zeelool';

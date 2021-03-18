@@ -354,6 +354,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                     $items[$key]['prescription_image'] = null;
                 }
             }
+            $items[$key]['web_lens_name'] = $item['web_lens_name'] ?: $item['index_name'];
         }
         $this->view->assign("item", $items);
         $this->view->assign("row", $row);

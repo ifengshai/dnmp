@@ -100,7 +100,6 @@ class Auth
             return true;
         }
 
-
         if (is_string($name)) {
             $name = strtolower($name);
             if (strpos($name, ',') !== false) {
@@ -118,6 +117,7 @@ class Auth
             $url = array(
                 'url' => $_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'],
                 'time' => time(),
+                'status' => 0,
             );
             Cache::set('url',$url,0);
         }

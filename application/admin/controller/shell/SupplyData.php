@@ -283,6 +283,14 @@ class SupplyData extends Backend
         $c_info = $this->getDullStock($sku, 12);
         $sales_num10 = $c_info['sales_num'];
         $days[] = $j_info['days'];
+         //抖音
+         $c_info = $this->getDullStock($sku, 13);
+         $sales_num10 = $c_info['sales_num'];
+         $days[] = $j_info['days'];
+          //阿里巴巴国际站
+        $c_info = $this->getDullStock($sku, 14);
+        $sales_num10 = $c_info['sales_num'];
+        $days[] = $j_info['days'];
         $count = $sales_num1+$sales_num2+$sales_num3+$sales_num4+$sales_num5+$sales_num6+$sales_num7+$sales_num8+$sales_num9+$sales_num10;
         $days = max($days);
         $data = array(
@@ -437,7 +445,7 @@ class SupplyData extends Backend
                 //如果有月末数据，（月初数据+月末数据）/2
                 $dull_stock = round(($start_dull_stock['stock'] + $end_dull_stock['stock']) / 2, 2);
                 $arr1['avg_dull_stock'] = $dull_stock;
-                $arr1['avg_rate'] = $stock_info1['avg_stock'] ? round($arr1['avg_dull_stock']/$stock_info1['avg_stock'],2) : 0;
+                $arr1['avg_rate'] = $stock_info1['avg_stock'] ? round($arr1['avg_dull_stock']/$stock_info1['avg_stock']*100,2) : 0;
                 Db::name('datacenter_supply_month')->where('id',$stock_info1['id'])->update($arr1);
             }
         }

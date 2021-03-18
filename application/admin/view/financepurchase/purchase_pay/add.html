@@ -77,16 +77,14 @@
                 <input id="purchase_number" class="form-control form-empty" readonly {if !empty($purchase_order['purchase_number']) } readonly {/if} name="row[purchase_number]"
                        value="{$purchase_order.purchase_number}" type="text">
             </div>
-<!--            <label class="control-label col-xs-12 col-sm-2">采购单名称:</label>-->
-<!--            <div class="col-xs-12 col-sm-3">-->
-<!--                <input id="purchase_name" class="form-control form-empty" readonly name="row[purchase_name]" value="{$purchase_order.purchase_name}" type="text">-->
-<!--            </div>-->
-            <label class="control-label col-xs-12 col-sm-2">付款币种:</label>
+            <label class="control-label col-xs-12 col-sm-2" id="purchase_text">1688单号:</label>
             <div class="col-xs-12 col-sm-3">
-                <input id="base_currency_code" class="form-control form-empty" readonly name="row[base_currency_code]" value="{$supplier.currency}" type="text">
+                <input id="1688_number" class="form-control form-empty" readonly {if !empty($purchase_order['1688_number']) } readonly {/if} name="row[1688_number]"
+                       value="{$purchase_order.1688_number}" type="text">
             </div>
 
         </div>
+
         <div class="form-group">
             <label class="control-label col-xs-12 col-sm-2">供应商名称:</label>
             <div class="col-xs-12 col-sm-3">
@@ -123,6 +121,11 @@
             </div>
         </div>
         <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2">付款币种:</label>
+            <div class="col-xs-12 col-sm-3">
+                <input id="base_currency_code" class="form-control form-empty" readonly name="row[base_currency_code]" value="{$supplier.currency}" type="text">
+            </div>
+            
             <div class="hidden" id="fuikuanbili">
                 <label class="control-label col-xs-12 col-sm-2">付款比例:</label>
                 <div class="col-xs-12 col-sm-3">
@@ -133,6 +136,21 @@
                 </div>
             </div>
         </div>
+
+        <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2">{:__('上传附件')}:</label>
+            <div class="col-xs-12 col-sm-8">
+                <div class="input-group">
+                    <input id="c-upload_photos" data-rule="false" class="form-control" name="row[file]" type="text" value="">
+                    <div class="input-group-addon no-border no-padding">
+                        <span><button type="button" id="plupload-upload_photos"   class="btn btn-danger plupload" data-input-id="c-upload_photos"  data-url="ajax/upload?dir=purchase_pay/pay_order" data-multiple="true" data-preview-id="p-upload_photos" data-maxsize="10M"><i class="fa fa-upload"></i> 上传附件</button></span>
+                    </div>
+                    <span class="msg-box n-right" for="c-upload_photos"></span>
+                </div>
+                <ul class="row list-inline plupload-preview" id="p-upload_photos"></ul>
+            </div>
+        </div>
+
         <div class="form-group">
             <label class="control-label col-xs-12 col-sm-2">备注:</label>
             <div class="col-xs-12 col-sm-8">
@@ -218,11 +236,11 @@
         <br>
         审批人
         <br>
-        任萍->王涛->王剑
-        <br>
-        抄送
-        <br>
-        屈金金
+        {if $all > 300000}
+        采购主管->供应链总监->总监->财务主管
+        {else/}
+        采购主管->供应链总监->财务主管
+        {/if}
     </div>
     <hr>
     <div class="form-group layer-footer">
