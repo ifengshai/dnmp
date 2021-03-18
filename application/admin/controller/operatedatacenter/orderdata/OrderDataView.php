@@ -15,9 +15,13 @@ class OrderDataView extends Backend
         $this->zeelool = new \app\admin\model\order\order\Zeelool();
         $this->voogueme = new \app\admin\model\order\order\Voogueme();
         $this->nihao = new \app\admin\model\order\order\Nihao();
+        $this->zeeloolde = new \app\admin\model\order\order\ZeeloolDe();
+        $this->zeelooljp = new \app\admin\model\order\order\ZeeloolJp();
         $this->zeeloolOperate  = new \app\admin\model\operatedatacenter\Zeelool;
         $this->vooguemeOperate  = new \app\admin\model\operatedatacenter\Voogueme;
         $this->nihaoOperate  = new \app\admin\model\operatedatacenter\Nihao;
+        $this->zeelooldeOperate  = new \app\admin\model\operatedatacenter\ZeeloolDe();
+        $this->zeelooljpOperate  = new \app\admin\model\operatedatacenter\ZeeloolJp();
         $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform();
     }
 
@@ -83,6 +87,12 @@ class OrderDataView extends Backend
                 case 3:
                     $model = $this->nihaoOperate;
                     break;
+                case 10:
+                    $model = $this->zeelooldeOperate;
+                    break;
+                case 11:
+                    $model = $this->zeelooljpOperate;
+                    break;
             }
 
             $order_num = $model->getOrderNum($time_str,$compare_time_str);  //订单数
@@ -129,6 +139,12 @@ class OrderDataView extends Backend
             } elseif ($order_platform == 3) {
                 $where['site'] = 3;
                 $model = $this->nihaoOperate;
+            } elseif ($order_platform == 10) {
+                $where['site'] = 10;
+                $model = $this->zeelooldeOperate;
+            } elseif ($order_platform == 11) {
+                $where['site'] = 11;
+                $model = $this->zeelooljpOperate;
             }
             if ($time_str) {
                 $createat = explode(' ', $time_str);
@@ -178,6 +194,10 @@ class OrderDataView extends Backend
                 $model = $this->voogueme;
             } elseif ($order_platform == 3) {
                 $model = $this->nihao;
+            } elseif ($order_platform == 10) {
+                $model = $this->zeeloolde;
+            } elseif ($order_platform == 11) {
+                $model = $this->zeelooljp;
             }
             $time_str = $params['time_str'];
             if(!$time_str){
@@ -187,7 +207,7 @@ class OrderDataView extends Backend
             }
             $createat = explode(' ', $time_str);
             $order_where['o.created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
-            $order_where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+            $order_where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
             $order_where['oa.address_type'] = 'shipping';
             $order_where['o.order_type'] = 1;
             //获取所有的订单的国家
