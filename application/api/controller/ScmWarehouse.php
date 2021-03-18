@@ -32,6 +32,7 @@ use app\admin\model\warehouse\InventoryItem;
 use app\admin\model\warehouse\StockSku;
 use app\admin\model\warehouse\WarehouseArea;
 use app\admin\model\warehouse\StockHouse;
+use Think\Log;
 
 /**
  * 供应链出入库接口类
@@ -709,7 +710,7 @@ class ScmWarehouse extends Scm
                     // ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2, 'location_code' => '', 'location_code_id' => '', 'location_id' => '']); //出库解除库位号与商品条形码绑定
                     ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2]); //出库解除库位号与商品条形码绑定
 
-                //计算出库成本 
+                //计算出库成本
                 $financecost = new \app\admin\model\finance\FinanceCost();
                 $financecost->outstock_cost($out_stock_id, $row['out_stock_number']);
             } else { //审核拒绝解除条形码绑定关系
@@ -2409,6 +2410,9 @@ class ScmWarehouse extends Scm
      */
     public function inventory_submit()
     {
+        $value_show = input('param.');
+        Log::write("--------输出请求数据--------");
+        Log::write($value_show);
         $do_type = $this->request->request('do_type');
         $item_sku = $this->request->request("item_data");
         empty($item_sku) && $this->error(__('sku集合不能为空！！'), [], 508);
@@ -2439,7 +2443,7 @@ class ScmWarehouse extends Scm
 
         //检测条形码是否已绑定
         foreach ($item_sku as $key => $value) {
-           
+
             $sku_code = array_column($value['sku_agg'], 'code');
             //查询条形码是否已绑定过sku
             $where = [];
@@ -2478,7 +2482,7 @@ class ScmWarehouse extends Scm
                         throw new Exception('SKU=>' . $v['sku'] . '不存在');
                     }
 
-                   
+
                     //等PDA改为 以此为准
                     $item_list = $this->_inventory_item->where(['inventory_id' => $inventory_id, 'sku' => $v['sku'], 'area_id' => $v['area_id'], 'library_name' => $v['library_name']])->find();
                     $save_data = [];
@@ -2487,7 +2491,7 @@ class ScmWarehouse extends Scm
                     $save_data['error_qty'] = $v['inventory_qty'] - $item_list['real_time_qty']; //误差数量
                     $save_data['remark'] = $v['remark']; //备注
                     $save_data['real_time_qty'] = $item_list['real_time_qty']; //实时库存即为库位实时库存
-                    $save_data['sku_agg'] = count($v['sku_agg']) > 0 ? serialize($v['sku_agg']) : $item_list['sku_agg']; //SKU 条形码集合 
+                    $save_data['sku_agg'] = count($v['sku_agg']) > 0 ? serialize($v['sku_agg']) : $item_list['sku_agg']; //SKU 条形码集合
                     $save_data['remove_agg'] = count($v['remove_agg']) > 0 ? serialize($v['remove_agg']) : $item_list['remove_agg']; //SKU需移除的条形码集合
                     $this->_inventory_item->where(['inventory_id' => $inventory_id, 'sku' => $v['sku'], 'area_id' => $v['area_id'], 'library_name' => $v['library_name']])->update($save_data);
 
@@ -2758,7 +2762,7 @@ class ScmWarehouse extends Scm
 
                     //更新如果入库单id为空 添加入库单id
                     $this->_product_bar_code_item->where(['inventory_id' => $inventory_id, 'library_status' => 1, 'in_stock_id' => 0])
-                    ->update(['in_stock_id' => $this->_in_stock->id, 'in_stock_time' => date('Y-m-d H:i:s')]);
+                        ->update(['in_stock_id' => $this->_in_stock->id, 'in_stock_time' => date('Y-m-d H:i:s')]);
 
                     //添加入库信息
                     if ($instorck_res !== false) {
