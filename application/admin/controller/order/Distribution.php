@@ -1617,10 +1617,10 @@ class Distribution extends Backend
     {
         /*****************限制如果有盘点单未结束不能操作配货完成*******************/
         //拣货区盘点时不能操作
-        $count = $this->_inventory->alias('a')->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'b.area_id' => 3])->count();
-        if ($count > 0) {
-            $this->error(__('存在正在盘点的单据,暂无法审核'));
-        }
+        // $count = $this->_inventory->alias('a')->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'b.area_id' => 3])->count();
+        // if ($count > 0) {
+        //     $this->error(__('存在正在盘点的单据,暂无法审核'));
+        // }
         /****************************end*****************************************/
         
         //禁用默认模板
