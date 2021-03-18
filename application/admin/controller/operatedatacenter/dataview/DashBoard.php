@@ -59,10 +59,6 @@ class DashBoard extends Backend
      */
     public function index()
     {
-        $active_user_num = $this->zeeloolDeOperate->getActiveUser();
-        exit;
-
-
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getNewAuthSite();
         // dump(collection($magentoplatformarr)->toArray());
