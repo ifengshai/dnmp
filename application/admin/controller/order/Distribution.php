@@ -8,6 +8,7 @@ use app\admin\model\saleaftermanage\WorkOrderChangeSku;
 use app\admin\model\saleaftermanage\WorkOrderList;
 use app\common\controller\Backend;
 use fast\Excel;
+use Monolog\Handler\IFTTTHandler;
 use think\Request;
 use think\exception\PDOException;
 use think\Exception;
@@ -1631,7 +1632,7 @@ class Distribution extends Backend
         //获取子订单列表
         $list = $this->model
             ->alias('a')
-            ->field('a.site,a.item_order_number,a.order_id,a.created_at,b.os_add,b.od_add,b.pdcheck,b.prismcheck,b.pd_r,b.pd_l,b.pd,b.od_pv,b.os_pv,b.od_bd,b.os_bd,b.od_bd_r,b.os_bd_r,b.od_pv_r,b.os_pv_r,b.index_name,b.coating_name,b.prescription_type,b.sku,b.od_sph,b.od_cyl,b.od_axis,b.os_sph,b.os_cyl,b.os_axis,b.lens_number,b.web_lens_name')
+            ->field('a.site,a.item_order_number,a.order_id,a.created_at,b.os_add,b.od_add,b.pdcheck,b.prismcheck,b.pd_r,b.pd_l,b.pd,b.od_pv,b.os_pv,b.od_bd,b.os_bd,b.od_bd_r,b.os_bd_r,b.od_pv_r,b.os_pv_r,b.index_name,b.coating_name,b.prescription_type,b.sku,b.od_sph,b.od_cyl,b.od_axis,b.os_sph,b.os_cyl,b.os_axis,b.lens_number,b.web_lens_name,b.gra_certificate')
             ->join(['fa_order_item_option' => 'b'], 'a.option_id=b.id')
             ->where(['a.id' => ['in', $ids]])
             ->select();
@@ -3554,5 +3555,181 @@ class Distribution extends Backend
         } catch (Exception $e) {
             exception($e->getMessage());
         }
+    }
+
+
+
+    //导出配镜片记录数据
+    public function with_the_lens(){
+        $where['a.order_prescription_type'] = ['in',[2,3]];
+        $where['a.created_at'] = ['between',['1612108800','1612195199']];
+        $total = $this->model
+            ->alias('a')
+            ->join(['fa_order' => 'b'], 'a.order_id=b.id')
+            ->join(['fa_order_process' => 'c'], 'c.order_id=b.id')
+            ->field('a.*,b.increment_id,c.check_time')
+            ->where($where)
+            ->order('a.created_at desc')
+            ->select();
+        $total = collection($total)->toArray();
+        foreach ($total as $key=>$item){
+                $data = (new DistributionLog())
+                ->where(['item_process_id' => $item['id']])
+                ->where(['remark' => '配镜片完成'])
+                    ->field('create_person,create_time')
+                ->select();
+            if (!empty($data)){
+                $total[$key]['mesage'] = collection($data)->toArray();
+            }
+        }
+        $spreadsheet = new Spreadsheet();
+        //常规方式：利用setCellValue()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "子单创建时间")
+            ->setCellValue("B1", "子单号")
+            ->setCellValue("C1", "加工类型");   //利用setCellValues()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "子单状态")
+            ->setCellValue("E1", "操作内容")
+            ->setCellValue("F1", "配镜片操作记录")
+            ->setCellValue("G1", "订单号")
+            ->setCellValue("H1", "站点")
+            ->setCellValue("I1", "仓库审单时间");
+        foreach ($total as $key => $value) {
+            if ($value['order_prescription_type'] ==2){
+                $value['order_prescription_type'] = '现货处方镜';
+            }else{
+                $value['order_prescription_type'] = '定制处方镜';
+            }
+            $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), date('Y-m-d H:i:s',$value['created_at']));//子单创建时间
+            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['item_order_number']);//子单号
+            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['order_prescription_type']);//处方类型
+            switch ($value['distribution_status']) {
+                case 0:
+                    $value['distribution_status'] = '取消';
+                    break;
+                case 1:
+                    $value['distribution_status'] = '待打印标签';
+                    break;
+                case 2:
+                    $value['distribution_status'] = '待配货';
+                    break;
+                case 3:
+                    $value['distribution_status'] = '待配镜片';
+                    break;
+                case 4:
+                    $value['distribution_status'] = '待加工';
+                    break;
+                case 5:
+                    $value['distribution_status'] = '待印logo';
+                    break;
+                case 6:
+                    $value['distribution_status'] = '待成品质检';
+                    break;
+                case 7:
+                    $value['distribution_status'] = '待合单';
+                    break;
+                case 8:
+                    $value['distribution_status'] = '合单中';
+                    break;
+                case 9:
+                    $value['distribution_status'] = '合单完成';
+                    break;
+            }
+            switch ($value['site']) {
+                case 1:
+                    $value['site'] = 'zeelool';
+                    break;
+                case 2:
+                    $value['site'] = 'voogueme';
+                    break;
+                case 3:
+                    $value['site'] = 'nihao';
+                    break;
+                case 4:
+                    $value['site'] = 'meeloog';
+                    break;
+                case 5:
+                    $value['site'] = 'wesee';
+                    break;
+                case 9:
+                    $value['site'] = 'zeelool_es';
+                    break;
+                case 10:
+                    $value['site'] = 'zeelool_de';
+                    break;
+                case 11:
+                    $value['site'] = 'zeelool_jp';
+                    break;
+                case 12:
+                    $value['site'] = 'voogmechic';
+                    break;
+            }
+            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2),$value['distribution_status']);
+            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), '配镜片完成');
+
+            if (!empty($value['mesage'])){
+                foreach ($value['mesage'] as $k=>$v){
+                    $bt[]= $v['create_person'].','.date('Y-m-d H:i:s', $v['create_time']);
+                }
+                $bt = implode(';',$bt);
+            }else{
+                $bt = '暂无数据';
+            }
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $bt);
+            unset($bt);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['increment_id']);
+            $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['site']);
+            $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2),  date('Y-m-d H:i:s',$value['check_time']));
+
+
+        }
+        //设置宽度
+        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(40);
+        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('I')->setWidth(20);
+        //设置边框
+        $border = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
+                    'color' => ['argb' => 'FF000000'], // 设置border颜色
+                ],
+            ],
+        ];
+
+        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+
+
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
+        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
+
+        $spreadsheet->getActiveSheet()->getStyle('A1:I' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->setActiveSheetIndex(0);
+
+        $format = 'xlsx';
+        $savename = '数据查询' . date("YmdHis", time());;
+
+        if ($format == 'xls') {
+            //输出Excel03版本
+            header('Content-Type:application/vnd.ms-excel');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
+        } elseif ($format == 'xlsx') {
+            //输出07Excel版本
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
+        }
+
+        //输出名称
+        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
+        //禁止缓存
+        header('Cache-Control: max-age=0');
+        $writer = new $class($spreadsheet);
+
+        $writer->save('php://output');
     }
 }

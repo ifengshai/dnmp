@@ -113,7 +113,8 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
             });
             //批量导出xls
             $('.btn-batch-export-xls').click(function () {
-                window.open(Config.moduleurl + '/supplydatacenter/data_market/timeout_orders', '_blank');
+                var time_str = $('#time_str3').val()
+                window.open(Config.moduleurl + '/supplydatacenter/data_market/timeout_orders?time_str='+time_str, '_blank');
             });
         },
         add: function () {

@@ -988,7 +988,7 @@ class WorkOrderList extends Model
                     (!is_array($changeLens['original_sku']) || empty($changeLens['original_sku'])) && exception('sku不能为空');
 
                     //循环插入数据
-                    $original_sku = array_filter(array_unique($changeLens['original_sku']));
+                    $original_sku = array_filter($changeLens['original_sku']);
                     foreach ($original_sku as $key => $val) {
                         $lensId = $changeLens['lens_type'][$key];
                         $colorId = $changeLens['color_id'][$key];
@@ -2662,6 +2662,7 @@ class WorkOrderList extends Model
         $_stock_house = new StockHouse();
         $all_item_order_number = $_new_order_process->alias('a')//所有子单
             ->where('a.increment_id', $increment_id)
+            ->where(['distribution_status' => ['neq', 0]])
             ->join(['fa_order_item_process' => 'b'], 'a.order_id=b.order_id')
             ->column('b.item_order_number');
         $item_order_number_diff = array_diff($all_item_order_number,[$item_order_number]);//其余子单
@@ -2679,6 +2680,7 @@ class WorkOrderList extends Model
             $store_house_id = $_new_order_process->where(['increment_id' => $increment_id])->value('store_house_id');//store_house_id
             $_new_order_item_process
                 ->where(['order_id' => $order_id, 'item_order_number' => ['neq', $item_order_number]])
+                ->where(['distribution_status' => ['neq', 0]])
                 ->update(['distribution_status' => 9]);
             $_new_order_process
                 ->where(['order_id' => $order_id])
