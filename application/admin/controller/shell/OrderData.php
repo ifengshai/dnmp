@@ -1525,7 +1525,7 @@ class OrderData extends Backend
                 }
 
                 $item_params[$key]['item_order_number'] = $res->increment_id . '-' . $str;
-                $item_params[$key]['order_id'] = $res->id;
+                $item_params[$key]['order_id'] = $res->id ?: 0;
             }
             //更新数据
             if ($item_params) $this->orderitemprocess->saveAll($item_params);
