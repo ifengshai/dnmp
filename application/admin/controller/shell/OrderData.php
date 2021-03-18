@@ -1281,6 +1281,8 @@ class OrderData extends Backend
         $options = unserialize($data);
         //镜片类型
         $arr['ring_size'] = $options['info_buyRequest']['tmplens']['ring_size'] ?: '';
+        //证书
+        $arr['gra_certificate'] = $options['info_buyRequest']['tmplens']['gra_certificate'] ?: '';
 
         /**
          * 判断定制现片逻辑
