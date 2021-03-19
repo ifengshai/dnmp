@@ -2161,9 +2161,10 @@ class Crontab extends Backend
         }
 
         $max_item_id = $max_item_id > 0 ? $max_item_id : 0;
-        $order_item_prescription_querySql = "select sfoi.item_id,sfoi.order_id,sfoi.product_id,sfoi.`name`,sfoi.sku,sfoi.product_options,sfoi.created_at,sfoi.qty_ordered,sfoi.quote_item_id from sales_flat_order_item sfoi where sfoi.item_id > $max_item_id order by sfoi.item_id asc limit 1000";
+        $order_item_prescription_querySql = "select sfoi.item_id,sfoi.order_id,sfoi.product_id,sfoi.`name`,sfoi.sku,sfoi.product_options,sfoi.created_at,sfoi.qty_ordered,sfoi.quote_item_id from sales_flat_order_item sfoi where sfoi.item_id > $max_item_id order by sfoi.item_id asc limit 100";
         $order_item_list = Db::connect('database.db_zeelool_jp')->query($order_item_prescription_querySql);
-
+        dump($order_item_prescription_querySql);
+        dump($order_item_list);
         foreach ($order_item_list as $order_item_key => $order_item_value) {
             $product_options = unserialize($order_item_value['product_options']);
 
@@ -2233,8 +2234,6 @@ class Crontab extends Backend
                 $items[$order_item_key]['total_add'] = $final_params['os_add'];
             }
 
-
-
             if ($final_params['pdcheck'] == 'on') {
                 $items[$order_item_key]['pd_l'] = $final_params['pd_l'];
                 $items[$order_item_key]['pd_r'] = $final_params['pd_r'];
@@ -2267,57 +2266,13 @@ class Crontab extends Backend
                 $items[$order_item_key]['os_bd_r'] = '';
             }
 
-            /**
-             * 判断定制现片逻辑
-             * 1、渐进镜 Progressive
-             * 2、偏光镜 镜片类型包含Polarized
-             * 3、染色镜 镜片类型包含Lens with Color Tint
-             * 4、当cyl<=-4或cyl>=4
-             */
-            if ($final_params['prescription_type'] == '累進レンズ') {
-                $items[$order_item_key]['is_custom_lens'] = 1;
-            }
-
-            if (strpos($final_params['index_type'], '偏光レンズ') !== false) {
-                $items[$order_item_key]['is_custom_lens'] = 1;
-            }
-
-            if (strpos($final_params['index_type'], '色合い') !== false) {
-                $items[$order_item_key]['is_custom_lens'] = 1;
-            }
-
-            if ($final_params['od_cyl']) {
-                $final_params['od_cyl'] = urldecode($final_params['od_cyl']);
-                if ((float) $final_params['od_cyl'] * 1 <= -4 || (float) $final_params['od_cyl'] * 1 >= 4) {
-                    $items[$order_item_key]['is_custom_lens'] = 1;
-                }
-            }
-
-            if ($final_params['os_cyl']) {
-                $final_params['os_cyl'] = urldecode($final_params['os_cyl']);
-                if ((float) $final_params['os_cyl'] * 1 <= -4 || (float) $final_params['os_cyl'] * 1 >= 4) {
-                    $items[$order_item_key]['is_custom_lens'] = 1;
-                }
-            }
-
-            if ($final_params['od_sph']) {
-                if ((float) urldecode($final_params['od_sph']) * 1 < -8 || (float) urldecode($final_params['od_sph']) * 1 > 8) {
-                    $items[$order_item_key]['is_custom_lens'] = 1;
-                }
-            }
-
-            if ($final_params['os_sph']) {
-                if ((float) urldecode($final_params['os_sph']) * 1 < -8 || (float) urldecode($final_params['os_sph']) * 1 > 8) {
-                    $items[$order_item_key]['is_custom_lens'] = 1;
-                }
-            }
             $items[$order_item_key]['is_custom_lens'] = $items[$order_item_key]['is_custom_lens'] ?: 0;
             unset($final_params);
             unset($lens_params);
             unset($prescription_params);
             unset($product_options);
         }
-
+        dump($items);
 
         if ($items) {
             $result = Db::connect('database.db_zeelool_jp')->table('sales_flat_order_item_prescription')->insertAll($items);
