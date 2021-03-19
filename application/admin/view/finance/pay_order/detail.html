@@ -88,11 +88,22 @@
             <input class="form-control" readonly value="{$supplier.currency}" type="text">
         </div>
     </div>
-
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">供应商备注:</label>
+        <div class="col-xs-12 col-sm-8">
+            <textarea class="form-control" readonly rows="5" name="row[desc]" cols="50">{$supplier.remark}</textarea>
+        </div>
+    </div>
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">备注:</label>
         <div class="col-xs-12 col-sm-8">
             <textarea class="form-control" readonly rows="5" name="row[desc]" cols="50">{$pay_order.desc}</textarea>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">付款备注:</label>
+        <div class="col-xs-12 col-sm-8">
+            <textarea class="form-control" readonly rows="5" name="row[pay_remarks]" cols="50">{$pay_order.pay_remarks}</textarea>
         </div>
     </div>
     {if $imgs}

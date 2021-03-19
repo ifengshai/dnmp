@@ -94,7 +94,10 @@
                         <th>付款币种: {$supplier.currency}</th>
                         <th>备注: {$pay_order.desc}</th>
                     </tr>
-                    
+                    <tr>
+                        <th colspan="2">供应商备注: {$supplier.remark}</th>
+                    </tr>
+                   
                     <tr>
                         <th colspan="2">
                             {if $prepay}
@@ -169,8 +172,10 @@
                         </th>
                     </tr>
                     <tr>
-                        <td style="text-align: right;">合计应付：</td>
-                        <td>{$total}</td>
+                        <td colspan="2">合计应付: {$total}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">付款备注: {$pay_order.pay_remarks}</td>
                     </tr>
                 </table>
                 
