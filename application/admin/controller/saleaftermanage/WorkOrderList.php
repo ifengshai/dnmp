@@ -1857,6 +1857,21 @@ class WorkOrderList extends Backend
                 $sku = trim($v);
             }
 
+            /*****************限制如果有盘点单未结束不能操作配货完成*******************/
+            //配货完成时判断
+            //拣货区盘点时不能操作
+            //查询条形码库区库位
+            $barcodedata = $this->_product_bar_code_item->where(['sku' => $sku])->column('location_code');
+
+            $count = $this->_inventory->alias('a')
+                ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata]])
+                ->count();
+            if ($count > 0) {
+                return ['result' => false, 'msg' => '此'.$sku.'对应库位正在盘点,暂无法进行出入库操作'];
+            }
+            /****************************end*****************************************/
+
+
             //判断是否开启预售 并且预售时间是否满足 并且预售数量是否足够
             $res = $itemPlatFormSku->where(['outer_sku_status' => 1, 'platform_sku' => $sku, 'platform_type' => $siteType])->find();
             //判断是否开启预售
