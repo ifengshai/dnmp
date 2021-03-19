@@ -17,9 +17,13 @@ class OrderDataDetail extends Backend
         $this->zeelool = new \app\admin\model\order\order\Zeelool();
         $this->voogueme = new \app\admin\model\order\order\Voogueme();
         $this->nihao = new \app\admin\model\order\order\Nihao();
+        $this->zeeloolde = new \app\admin\model\order\order\ZeeloolDe();
+        $this->zeelooljp = new \app\admin\model\order\order\ZeeloolJp();
         $this->zeeloolOperate  = new \app\admin\model\operatedatacenter\Zeelool;
         $this->vooguemeOperate  = new \app\admin\model\operatedatacenter\Voogueme;
         $this->nihaoOperate  = new \app\admin\model\operatedatacenter\Nihao;
+        $this->zeelooldeOperate  = new \app\admin\model\operatedatacenter\ZeeloolDe();
+        $this->zeelooljpOperate  = new \app\admin\model\operatedatacenter\ZeeloolJp();
         $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform();
     }
     /**
@@ -49,6 +53,14 @@ class OrderDataDetail extends Backend
                 $order_model = $this->nihao;
                 $web_model = Db::connect('database.db_nihao');
                 $site = 3;
+            }elseif($filter['order_platform'] == 10){
+                $order_model = $this->zeeloolde;
+                $web_model = Db::connect('database.db_zeelool_de');
+                $site = 10;
+            }elseif($filter['order_platform'] == 11){
+                $order_model = $this->zeelooljp;
+                $web_model = Db::connect('database.db_zeelool_jp');
+                $site = 11;
             }else{
                 $order_model = $this->zeelool;
                 $web_model = Db::connect('database.db_zeelool');
@@ -436,6 +448,14 @@ class OrderDataDetail extends Backend
             $order_model = $this->nihao;
             $web_model = Db::connect('database.db_nihao');
             $site = 3;
+        }elseif($order_platform == 10){
+            $order_model = $this->zeeloolde;
+            $web_model = Db::connect('database.db_zeelool_de');
+            $site = 10;
+        }elseif($order_platform == 11){
+            $order_model = $this->zeelooljp;
+            $web_model = Db::connect('database.db_zeelool_jp');
+            $site = 11;
         }else{
             $order_model = $this->zeelool;
             $web_model = Db::connect('database.db_zeelool');

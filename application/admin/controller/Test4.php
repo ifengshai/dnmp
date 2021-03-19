@@ -218,7 +218,33 @@ class Test4 extends Controller
             return $finalResult;
         }
     }
-
+    //运营数据ga数据脚本
+    public function only_ga_data()
+    {
+        $where['site'] = ['in',[10,11]];
+        $days = Db::name('datacenter_day')->where($where)->field('id,site,day_date,order_num,sessions')->select();
+        foreach ($days as $data) {
+            $arr = [];
+            //会话转化率
+            $arr['session_rate'] = $data['sessions'] != 0 ? round($data['order_num'] / $data['sessions'] * 100, 2) : 0;
+            if ($data['site'] == 10) {
+                $model = new \app\admin\model\operatedatacenter\ZeeloolDe();
+            } else {
+                $model = new \app\admin\model\operatedatacenter\ZeeloolJp();
+            }
+            //着陆页数据
+            $arr['landing_num'] = $model->google_landing($data['site'], $data['day_date']);
+            //产品详情页
+            $arr['detail_num'] = $model->google_target13($data['site'], $data['day_date']);
+            //加购
+            $arr['cart_num'] = $model->google_target1($data['site'], $data['day_date']);
+            //交易次数
+            $arr['complete_num'] = $model->google_target_end($data['site'], $data['day_date']);
+            Db::name('datacenter_day')->where('id', $data['id'])->update($arr);
+            echo $data['id'].' is ok'."\n";
+            usleep(100000);
+        }
+    }
     //新增运营数据中心
     public function zeelool_operate_data_center()
     {
@@ -454,7 +480,7 @@ class Test4 extends Controller
         $model->table('sales_flat_quote')->query("set time_zone='+8:00'");
 
         //查询时间
-        $date_time = $this->zeeloolde->query("SELECT DATE_FORMAT(payment_time, '%Y-%m-%d') AS date_time FROM `sales_flat_order` where payment_time between '2020-09-17' and '2021-03-17' GROUP BY DATE_FORMAT(payment_time, '%Y%m%d') order by DATE_FORMAT(payment_time, '%Y%m%d') asc");
+        $date_time = $this->zeeloolde->query("SELECT DATE_FORMAT(payment_time, '%Y-%m-%d') AS date_time FROM `sales_flat_order` where payment_time between '2021-03-17' and '2021-03-18' GROUP BY DATE_FORMAT(payment_time, '%Y%m%d') order by DATE_FORMAT(payment_time, '%Y%m%d') asc");
         foreach ($date_time as $val) {
             $is_exist = Db::name('datacenter_day')->where('day_date', $val['date_time'])->where('site', 10)->value('id');
             $arr = [];
@@ -535,7 +561,7 @@ class Test4 extends Controller
         $model->table('sales_flat_quote')->query("set time_zone='+8:00'");
 
         //查询时间
-        $date_time = $this->zeelooljp->query("SELECT DATE_FORMAT(payment_time, '%Y-%m-%d') AS date_time FROM `sales_flat_order` where payment_time between '2020-11-08' and '2021-03-17' GROUP BY DATE_FORMAT(payment_time, '%Y%m%d') order by DATE_FORMAT(payment_time, '%Y%m%d') asc");
+        $date_time = $this->zeelooljp->query("SELECT DATE_FORMAT(payment_time, '%Y-%m-%d') AS date_time FROM `sales_flat_order` where payment_time between '2021-03-17' and '2021-03-18' GROUP BY DATE_FORMAT(payment_time, '%Y%m%d') order by DATE_FORMAT(payment_time, '%Y%m%d') asc");
         foreach ($date_time as $val) {
             $is_exist = Db::name('datacenter_day')->where('day_date', $val['date_time'])->where('site', 11)->value('id');
             $arr = [];

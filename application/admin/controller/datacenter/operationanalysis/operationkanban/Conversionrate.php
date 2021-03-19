@@ -51,7 +51,8 @@ class Conversionrate extends Backend{
                 $list = collection($list)->toArray();
                 $create_date = $shoppingCartUpdateTotal = $shoppingCartUpdateConversion = [];
                 $total_sales_money =  $total_shoppingcart_update_total = $total_sales_num = 0;
-                foreach ($list as $v) {
+                foreach ($list as $k=>$v) {
+                    $list[$k]['sales_money'] = round($v['sales_money'],2);
                     $shoppingCartUpdateTotal[]        = $v['shoppingcart_update_total'];
                     $shoppingCartUpdateConversion[]   = $v['shoppingcart_update_conversion'];
                     $create_date[]                    = $v['create_date'];
