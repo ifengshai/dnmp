@@ -1257,7 +1257,7 @@ class TrackReg extends Backend
     {
         $model = new \app\admin\model\itemmanage\ItemPlatformSku();
         $this->order = new \app\admin\model\order\order\ZeeloolDe();
-        $operate_model = Db::connect('database.db_zeeloolde');
+        $operate_model = Db::connect('database.db_zeelool_de');
         $operate_model->table('customer_entity')->query("set time_zone='+8:00'");
         $operate_model->table('oc_vip_order')->query("set time_zone='+8:00'");
         $operate_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
@@ -1380,7 +1380,7 @@ class TrackReg extends Backend
     {
         $model = new \app\admin\model\itemmanage\ItemPlatformSku();
         $this->order = new \app\admin\model\order\order\ZeeloolJp();
-        $operate_model = Db::connect('database.db_zeelooljp');
+        $operate_model = Db::connect('database.db_zeelool_jp');
         $operate_model->table('customer_entity')->query("set time_zone='+8:00'");
         $operate_model->table('oc_vip_order')->query("set time_zone='+8:00'");
         $operate_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
