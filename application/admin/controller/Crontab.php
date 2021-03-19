@@ -2160,13 +2160,11 @@ class Crontab extends Backend
         if ($max_item_id_list) {
             $max_item_id = $max_item_id_list[0]['max_item_id'];
         }
-        dump($max_item_id_list);
+
         $max_item_id = $max_item_id > 0 ? $max_item_id : 0;
-        dump($max_item_id);
         $order_item_prescription_querySql = "select sfoi.item_id,sfoi.order_id,sfoi.product_id,sfoi.`name`,sfoi.sku,sfoi.product_options,sfoi.created_at,sfoi.qty_ordered,sfoi.quote_item_id from sales_flat_order_item sfoi where sfoi.item_id > $max_item_id order by sfoi.item_id asc limit 100";
         $order_item_list = Db::connect('database.db_zeelool_jp')->query($order_item_prescription_querySql);
-        dump($order_item_prescription_querySql);
-        dump($order_item_list);
+      
         foreach ($order_item_list as $order_item_key => $order_item_value) {
             $product_options = unserialize($order_item_value['product_options']);
 
@@ -2267,15 +2265,12 @@ class Crontab extends Backend
                 $items[$order_item_key]['os_pv_r'] = '';
                 $items[$order_item_key]['os_bd_r'] = '';
             }
-
-            $items[$order_item_key]['is_custom_lens'] = $items[$order_item_key]['is_custom_lens'] ?: 0;
             unset($final_params);
             unset($lens_params);
             unset($prescription_params);
             unset($product_options);
         }
-        dump($items);
-
+       
         if ($items) {
             $result = Db::connect('database.db_zeelool_jp')->table('sales_flat_order_item_prescription')->insertAll($items);
             if ($result) {
