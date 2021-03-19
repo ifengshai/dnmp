@@ -13,6 +13,8 @@ class OrderDataChange extends Backend
         $this->zeeloolOperate  = new \app\admin\model\operatedatacenter\Zeelool;
         $this->vooguemeOperate  = new \app\admin\model\operatedatacenter\Voogueme;
         $this->nihaoOperate  = new \app\admin\model\operatedatacenter\Nihao;
+        $this->zeelooldeOperate  = new \app\admin\model\operatedatacenter\ZeeloolDe();
+        $this->zeelooljpOperate  = new \app\admin\model\operatedatacenter\ZeeloolJp();
         $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform();
     }
 
@@ -104,7 +106,7 @@ class OrderDataChange extends Backend
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
         foreach ($magentoplatformarr as $key=>$val){
-            if(!in_array($val['name'],['zeelool','voogueme','nihao'])){
+            if(!in_array($val['name'],['zeelool','voogueme','nihao','zeelool_de','zeelool_jp'])){
                 unset($magentoplatformarr[$key]);
             }
         }
