@@ -1856,6 +1856,7 @@ class WorkOrderList extends Backend
             } else {
                 $sku = trim($v);
             }
+            dump($sku);die();
             if(!empty($sku)){
                 /*****************限制如果有盘点单未结束不能操作配货完成*******************/
                 //配货完成时判断
