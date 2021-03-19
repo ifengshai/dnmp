@@ -1873,7 +1873,7 @@ class WorkOrderList extends Backend
                 ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata]])
                 ->count();
             if ($count > 0) {
-                $this->error(__('此库位正在盘点,暂无法入库审核'), [], 403);
+                return ['result' => false, 'msg' => '此库位正在盘点,暂无法入库审核'];
             }
             /****************************end*****************************************/
 
