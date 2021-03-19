@@ -9,6 +9,7 @@ use app\admin\model\order\order\NewOrder;
 use app\admin\model\order\order\NewOrderItemProcess;
 use app\admin\model\order\order\NewOrderProcess;
 use app\admin\model\saleaftermanage\WorkOrderNote;
+use app\admin\model\warehouse\Inventory;
 use app\admin\model\warehouse\StockHouse;
 use app\common\controller\Backend;
 use fast\Excel;
@@ -78,7 +79,8 @@ class WorkOrderList extends Backend
         $this->view->assign('step', $workOrderConfigValue['step']);
         //$this->assignconfig('workorder', config('workorder')); //JS专用，整个配置文件
         $this->assignconfig('workorder', $workOrderConfigValue);
-
+        $this->_product_bar_code_item = new ProductBarCodeItem();
+        $this->_inventory = new Inventory();
         //$this->view->assign('check_coupon', config('workorder.check_coupon')); //不需要审核的优惠券
         //$this->view->assign('need_check_coupon', config('workorder.need_check_coupon')); //需要审核的优惠券
         $this->view->assign('check_coupon', $workOrderConfigValue['check_coupon']);
@@ -1856,17 +1858,19 @@ class WorkOrderList extends Backend
             } else {
                 $sku = trim($v);
             }
+           
             if(!empty($sku)){
                 /*****************限制如果有盘点单未结束不能操作配货完成*******************/
                 //配货完成时判断
                 //拣货区盘点时不能操作
                 //查询条形码库区库位
-
-                $barcodedata = $this->_product_bar_code_item->where(['sku' => $sku])->column('location_code');
-
+                $whe_sku['sku'] = $sku;
+                $barcodedata = $this->_product_bar_code_item->where($whe_sku)->column('location_code');
+                dump($barcodedata);;
                 $count = $this->_inventory->alias('a')
                     ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata]])
                     ->count();
+                dump($count);die();
                 if ($count > 0) {
                     return ['result' => false, 'msg' => '此'.$sku.'对应库位正在盘点,暂无法进行出入库操作'];
                 }
