@@ -2156,11 +2156,13 @@ class Crontab extends Backend
     {
         $max_item_id_querySql = "select max(boi.item_id) max_item_id from sales_flat_order_item_prescription boi";
         $max_item_id_list = Db::connect('database.db_zeelool_jp')->query($max_item_id_querySql);
+        $max_item_id = 0;
         if ($max_item_id_list) {
             $max_item_id = $max_item_id_list[0]['max_item_id'];
         }
-
+        dump($max_item_id_list);
         $max_item_id = $max_item_id > 0 ? $max_item_id : 0;
+        dump($max_item_id);
         $order_item_prescription_querySql = "select sfoi.item_id,sfoi.order_id,sfoi.product_id,sfoi.`name`,sfoi.sku,sfoi.product_options,sfoi.created_at,sfoi.qty_ordered,sfoi.quote_item_id from sales_flat_order_item sfoi where sfoi.item_id > $max_item_id order by sfoi.item_id asc limit 100";
         $order_item_list = Db::connect('database.db_zeelool_jp')->query($order_item_prescription_querySql);
         dump($order_item_prescription_querySql);
