@@ -44,7 +44,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'customer_type',title: __('客户类型'),searchList: { 1: '普通', 2: '批发',4:'VIP' }, visible: false, formatter: Table.api.formatter.customer_type,operate:false},
                         {field: 'discount_rate',title: __('折扣百分比'),visible: false,operate:false},
                         {field: 'discount_money',title: __('折扣金额'),visible: false,operate:false},
-                        {field: 'is_refund', title: __('有无退款'), custom: { 1: 'danger', 2: 'success'}, searchList: { 1: '有', 2: '无'}, formatter: Table.api.formatter.store_id,visible: false,operate:false},
+                        /* {field: 'is_refund', title: __('有无退款'), custom: { 1: 'danger', 2: 'success'}, searchList: { 1: '有', 2: '无'}, formatter: Table.api.formatter.store_id,visible: false,operate:false}, */
                         {field: 'country_id',title: __('收货国家'),visible: false,operate:false},
                         {field: 'payment_method',title: __('支付方式'),visible: false,operate:false},
                         {field: 'frame_price',title: __('镜框价格'),visible: false,operate:false},
