@@ -9,6 +9,7 @@ use app\admin\model\order\order\NewOrder;
 use app\admin\model\order\order\NewOrderItemProcess;
 use app\admin\model\order\order\NewOrderProcess;
 use app\admin\model\saleaftermanage\WorkOrderNote;
+use app\admin\model\warehouse\Inventory;
 use app\admin\model\warehouse\StockHouse;
 use app\common\controller\Backend;
 use fast\Excel;
@@ -78,6 +79,7 @@ class WorkOrderList extends Backend
         $this->order_remark = new \app\admin\model\saleaftermanage\WorkOrderRemark;
         $this->work_order_note = new \app\admin\model\saleaftermanage\WorkOrderNote;
         $this->_product_bar_code_item = new ProductBarCodeItem();
+        $this->_inventory = new Inventory();
         //$this->view->assign('step', config('workorder.step')); //措施
         $this->view->assign('step', $workOrderConfigValue['step']);
         //$this->assignconfig('workorder', config('workorder')); //JS专用，整个配置文件
