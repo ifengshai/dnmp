@@ -69,13 +69,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                                 name: 'pay',
                                 text: __('付款'),
                                 title: __('付款'),
-                                classname: 'btn btn-xs btn-danger btn-ajax',
+                                classname: 'btn btn-xs btn-danger btn-dialog',
                                 url: 'finance/pay_order/pay',
-                                extend: 'data-area = \'["100%","100%"]\'',
-                                confirm: '确定要付款吗',
-                                success: function (data, ret) {
-                                    table.bootstrapTable('refresh');
-                                },
+                                extend: 'data-area = \'["50%","40%"]\'',
+                                // confirm: '确定要付款吗',       
                                 callback: function (data) {
                                 },
                                 visible: function (row) {
@@ -242,6 +239,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                 $("#status").val(2);
                 $("#add-form").submit();
             });
+            Controller.api.bindevent();
+        },
+        pay: function(){
             Controller.api.bindevent();
         },
         detail: function () {
