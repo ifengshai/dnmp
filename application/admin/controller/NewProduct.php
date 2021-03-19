@@ -1996,7 +1996,7 @@ class NewProduct extends Backend
 
             $list = $this->model->alias('a')
                 // ->field('a.*,sum(a.replenish_num) as replenish_count,b.status,c.real_dis_num,d.purchase_number,d.arrival_time,d.purchase_status,d.check_status,d.stock_status,d.id as purchase_id,sum(c.distribute_num) as distribute_count')
-                ->field('a.sku,a.type,a.create_time,a.replenish_num,c.status,c.real_dis_num,d.purchase_number,d.arrival_time,d.purchase_status,d.id as purchase_id,(c.distribute_num) as distribute_count')
+                ->field('a.sku,a.type,a.create_time,a.replenish_num,b.status,c.real_dis_num,d.purchase_number,d.arrival_time,d.purchase_status,d.id as purchase_id,(c.distribute_num) as distribute_count')
                 ->join(['fa_new_product_replenish' => 'b'], 'a.replenish_id=b.id', 'left')
                 ->join(['fa_new_product_replenish_list' => 'c'], 'a.replenish_id=c.replenish_id and a.sku = c.sku', 'left')
                 ->join(['fa_purchase_order' => 'd'], 'a.replenish_id=d.replenish_id and c.supplier_id = d.supplier_id and d.purchase_name = a.sku', 'left')
