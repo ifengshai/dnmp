@@ -56,11 +56,11 @@ class OrderDataDetail extends Backend
             }elseif($filter['order_platform'] == 10){
                 $order_model = $this->zeeloolde;
                 $web_model = Db::connect('database.db_zeelool_de');
-                $site = 3;
+                $site = 10;
             }elseif($filter['order_platform'] == 11){
                 $order_model = $this->zeelooljp;
                 $web_model = Db::connect('database.db_zeelool_jp');
-                $site = 3;
+                $site = 11;
             }else{
                 $order_model = $this->zeelool;
                 $web_model = Db::connect('database.db_zeelool');
@@ -451,11 +451,11 @@ class OrderDataDetail extends Backend
         }elseif($order_platform == 10){
             $order_model = $this->zeeloolde;
             $web_model = Db::connect('database.db_zeelool_de');
-            $site = 3;
+            $site = 10;
         }elseif($order_platform == 11){
             $order_model = $this->zeelooljp;
             $web_model = Db::connect('database.db_zeelool_jp');
-            $site = 3;
+            $site = 11;
         }else{
             $order_model = $this->zeelool;
             $web_model = Db::connect('database.db_zeelool');
