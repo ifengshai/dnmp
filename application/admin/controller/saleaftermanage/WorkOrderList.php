@@ -1867,13 +1867,11 @@ class WorkOrderList extends Backend
             //配货完成时判断
             //拣货区盘点时不能操作
             //查询条形码库区库位
-            dump($sku);
             $barcodedata = $this->_product_bar_code_item->where(['sku' => $sku])->column('location_code');
 
             $count = $this->_inventory->alias('a')
                 ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata]])
                 ->count();
-            dump($count);die();
             if ($count > 0) {
                 $this->error(__('此库位正在盘点,暂无法入库审核'), [], 403);
             }
