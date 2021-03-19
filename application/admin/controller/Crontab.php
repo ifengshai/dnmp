@@ -1997,6 +1997,7 @@ class Crontab extends Backend
             $items[$order_item_key]['index_id'] = $final_params['index_id'] = $product_options['info_buyRequest']['tmplens']['index_id'];
             $items[$order_item_key]['lens'] = $final_params['lens'] = $product_options['info_buyRequest']['tmplens']['lens'];
             $items[$order_item_key]['total'] = $final_params['total'] = $product_options['info_buyRequest']['tmplens']['total'];
+            $items[$order_item_key]['goods_type'] = $final_params['goods_type'] = $product_options['info_buyRequest']['tmplens']['goods_type'];
 
 
             $prescription_params = $product_options['info_buyRequest']['tmplens']['prescription'];
@@ -2148,120 +2149,6 @@ class Crontab extends Backend
         }
     }
 
-
-    /**
-     * 德语站
-     * 定时处理 订单列表分类
-     * 1：仅镜架
-     * 2：仅现货处方镜
-     * 3：仅定制处方镜
-     * 4：镜架+现货
-     * 5：镜架+定制
-     * 6：现片+定制片
-     */
-    public function zeelool_jp_order_custom_order_prescription()
-    {
-        $order_entity_id_querySql = "select sfo.entity_id from sales_flat_order sfo where sfo.custom_order_prescription_type = 0 order by entity_id desc limit 1000 ";
-        $order_entity_id_list = Db::connect('database.db_zeelool_jp')->query($order_entity_id_querySql);
-        if (empty($order_entity_id_list)) {
-            echo '处理完毕！';
-            exit;
-        }
-
-        /**
-         * 1：仅镜架
-         * 2：仅现货处方镜
-         * 3：仅定制处方镜
-         * 4：镜架+现货
-         * 5：镜架+定制
-         * 6：现片+定制片
-         */
-        $type_1_entity_id = [];
-        $type_2_entity_id = [];
-        $type_3_entity_id = [];
-        $type_4_entity_id = [];
-        $type_5_entity_id = [];
-        $type_6_entity_id = [];
-        foreach ($order_entity_id_list as $key => $value) {
-            $items = Db::connect('database.db_zeelool_jp')->table('sales_flat_order_item_prescription')->where('order_id=' . $value['entity_id'])->select();
-            if (!$items) {
-                continue;
-            }
-
-            $label = [];
-            foreach ($items as $k => $v) {
-                //如果镜片参数为真 或 不等于 Plastic Lenses 并且不等于 FRAME ONLY则此订单为含处方
-                if ($v['index_type'] == '' || $v['index_type'] == 'プラスチックレンズ' || stripos($v['index_type'], 'フレームのみ') !== false || stripos($v['index_type'], 'フレームのみ (プラスチックレンズ)') !== false) {
-                    $label[] = 1; //仅镜架
-                } elseif (($v['index_type'] && $v['index_type'] != 'プラスチックレンズ' && stripos($v['index_type'], 'フレームのみ') === false && stripos($v['index_type'], 'フレームのみ (プラスチックレンズ)') === false) && $v['is_custom_lens'] == 0) {
-                    $label[] = 2; //现片含处方
-                } elseif (($v['index_type'] && $v['index_type'] != 'プラスチックレンズ' && stripos($v['index_type'], 'フレームのみ') === false && stripos($v['index_type'], 'フレームのみ (プラスチックレンズ)') === false) && $v['is_custom_lens'] == 1) {
-                    $label[] = 3; //定制含处方
-                }
-            }
-
-            //如果订单包括 仅镜架和现货处方镜 类型则为 镜架 + 现货
-            if (in_array(1, $label) && in_array(2, $label) && !in_array(3, $label)) {
-                $type_4_entity_id[] = $value['entity_id']; //镜架 + 现货
-
-                //如果订单包括 仅镜架和定制处方镜 类型则为 镜架 + 定制
-            } elseif (in_array(1, $label) && in_array(3, $label) && !in_array(2, $label)) {
-                $type_5_entity_id[] = $value['entity_id']; //镜架 + 定制
-
-                //如果订单只有 仅镜架 类型则为 仅镜架
-            } elseif (in_array(1, $label) && !in_array(3, $label) && !in_array(2, $label)) {
-                $type_1_entity_id[] = $value['entity_id']; //仅镜架
-
-                //如果订单只有 现货 类型则为 现货处方镜
-            } elseif (!in_array(1, $label) && !in_array(3, $label) && in_array(2, $label)) {
-                $type_2_entity_id[] = $value['entity_id']; //仅现货处方镜
-
-                //如果订单只有 定制 类型则为 仅定制处方镜
-            } elseif (!in_array(1, $label) && in_array(3, $label) && !in_array(2, $label)) {
-                $type_3_entity_id[] = $value['entity_id']; //仅定制处方镜
-            } elseif (in_array(2, $label) && in_array(3, $label)) {
-                $type_6_entity_id[] = $value['entity_id']; //现片+定制片
-            } else {
-                $type_1_entity_id[] = $value['entity_id']; //仅镜架
-            }
-        }
-
-        if ($type_1_entity_id) {
-            $map['entity_id'] = ['in', $type_1_entity_id];
-            Db::connect('database.db_zeelool_jp')->table('sales_flat_order')->where($map)->update(['custom_order_prescription_type' => 1]);
-        }
-
-        if ($type_2_entity_id) {
-            $map['entity_id'] = ['in', $type_2_entity_id];
-            Db::connect('database.db_zeelool_jp')->table('sales_flat_order')->where($map)->update(['custom_order_prescription_type' => 2]);
-        }
-
-        if ($type_3_entity_id) {
-            $map['entity_id'] = ['in', $type_3_entity_id];
-            Db::connect('database.db_zeelool_jp')->table('sales_flat_order')->where($map)->update(['custom_order_prescription_type' => 3]);
-        }
-
-
-        if ($type_4_entity_id) {
-            $map['entity_id'] = ['in', $type_4_entity_id];
-            Db::connect('database.db_zeelool_jp')->table('sales_flat_order')->where($map)->update(['custom_order_prescription_type' => 4]);
-        }
-
-
-        if ($type_5_entity_id) {
-            $map['entity_id'] = ['in', $type_5_entity_id];
-            Db::connect('database.db_zeelool_jp')->table('sales_flat_order')->where($map)->update(['custom_order_prescription_type' => 5]);
-        }
-
-
-        if ($type_6_entity_id) {
-            $map['entity_id'] = ['in', $type_6_entity_id];
-            Db::connect('database.db_zeelool_jp')->table('sales_flat_order')->where($map)->update(['custom_order_prescription_type' => 6]);
-        }
-
-        echo "执行成功！！";
-    }
-
     /**
      * 定时处理订单处方表序列化数据
      */
@@ -2293,7 +2180,7 @@ class Crontab extends Backend
             $items[$order_item_key]['index_id'] = $final_params['index_id'] = $product_options['info_buyRequest']['tmplens']['index_id'];
             $items[$order_item_key]['lens'] = $final_params['lens'] = $product_options['info_buyRequest']['tmplens']['lens'];
             $items[$order_item_key]['total'] = $final_params['total'] = $product_options['info_buyRequest']['tmplens']['total'];
-
+            $items[$order_item_key]['goods_type'] = $final_params['goods_type'] = $product_options['info_buyRequest']['tmplens']['goods_type'];
 
             $prescription_params = $product_options['info_buyRequest']['tmplens']['prescription'];
             $prescription_params = explode("&", $prescription_params);
