@@ -1056,13 +1056,13 @@ class Distribution extends Backend
                     $model = Db::connect('database.db_weseeoptical');
                     break;
                 case 9:
-                    $model = Db::connect('database.db_zeelool_es');
+                    $model = Db::connect('database.db_zeelool_es_online');
                     break;
                 case 10:
-                    $model = Db::connect('database.db_zeelool_de');
+                    $model = Db::connect('database.db_zeelool_de_online');
                     break;
                 case 11:
-                    $model = Db::connect('database.db_zeelool_jp');
+                    $model = Db::connect('database.db_zeelool_jp_online');
                     break;
                 case 12:
                     $model = Db::connect('database.db_voogueme_acc');
