@@ -1865,7 +1865,9 @@ class WorkOrderList extends Backend
             //配货完成时判断
             //拣货区盘点时不能操作
             //查询条形码库区库位
+            dump($sku);
             $barcodedata = $this->_product_bar_code_item->where(['sku' => $sku])->column('location_code');
+            dump($barcodedata);die();
             $count = $this->_inventory->alias('a')
                 ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata]])
                 ->count();
