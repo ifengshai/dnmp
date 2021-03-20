@@ -435,11 +435,13 @@ class ZendeskMailTemplate extends Backend
             if (!empty($order_node_message['track_number'])){
                 $OrderNode = new OrderNode();
                 $where['track_number'] = $order_node_message['track_number'];
-                $shipment_last_msg  = $OrderNode
+                $shipment_last_msg_value  = $OrderNode
                     ->where($where)
-                    ->value('shipment_last_msg');
-                if (empty($shipment_last_msg)){
+                    ->field('shipment_last_msg,update_time')->find();
+                if (empty($shipment_last_msg_value)){
                     $shipment_last_msg = '物流信息暂未更新';
+                }else{
+                    $shipment_last_msg = 'time'.$shipment_last_msg_value['update_time'].'message:'.$shipment_last_msg_value['shipment_last_msg'];
                 }
             }else{
                 $shipment_last_msg = '暂无物流信息';
