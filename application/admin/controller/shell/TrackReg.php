@@ -674,6 +674,10 @@ class TrackReg extends Backend
             $VIEW_ID = config('VOOGUEME_GOOGLE_ANALYTICS_VIEW_ID');
         } elseif ($site == 3) {
             $VIEW_ID = config('NIHAO_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 10) {
+            $VIEW_ID = config('ZEELOOLDE_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 11) {
+            $VIEW_ID = config('ZEELOOLJP_GOOGLE_ANALYTICS_VIEW_ID');
         }
 
         // Replace with your view ID, for example XXXX.
@@ -739,6 +743,10 @@ class TrackReg extends Backend
             $VIEW_ID = config('VOOGUEME_GOOGLE_ANALYTICS_VIEW_ID');
         } elseif ($site == 3) {
             $VIEW_ID = config('NIHAO_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 10) {
+            $VIEW_ID = config('ZEELOOLDE_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 11) {
+            $VIEW_ID = config('ZEELOOLJP_GOOGLE_ANALYTICS_VIEW_ID');
         }
 
         // Replace with your view ID, for example XXXX.
@@ -1257,7 +1265,7 @@ class TrackReg extends Backend
     {
         $model = new \app\admin\model\itemmanage\ItemPlatformSku();
         $this->order = new \app\admin\model\order\order\ZeeloolDe();
-        $operate_model = Db::connect('database.db_zeeloolde');
+        $operate_model = Db::connect('database.db_zeelool_de');
         $operate_model->table('customer_entity')->query("set time_zone='+8:00'");
         $operate_model->table('oc_vip_order')->query("set time_zone='+8:00'");
         $operate_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
@@ -1380,7 +1388,7 @@ class TrackReg extends Backend
     {
         $model = new \app\admin\model\itemmanage\ItemPlatformSku();
         $this->order = new \app\admin\model\order\order\ZeeloolJp();
-        $operate_model = Db::connect('database.db_zeelooljp');
+        $operate_model = Db::connect('database.db_zeelool_jp');
         $operate_model->table('customer_entity')->query("set time_zone='+8:00'");
         $operate_model->table('oc_vip_order')->query("set time_zone='+8:00'");
         $operate_model->table('sales_flat_quote')->query("set time_zone='+8:00'");

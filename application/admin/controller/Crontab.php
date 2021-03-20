@@ -1997,6 +1997,7 @@ class Crontab extends Backend
             $items[$order_item_key]['index_id'] = $final_params['index_id'] = $product_options['info_buyRequest']['tmplens']['index_id'];
             $items[$order_item_key]['lens'] = $final_params['lens'] = $product_options['info_buyRequest']['tmplens']['lens'];
             $items[$order_item_key]['total'] = $final_params['total'] = $product_options['info_buyRequest']['tmplens']['total'];
+            $items[$order_item_key]['goods_type'] = $final_params['goods_type'] = $product_options['info_buyRequest']['tmplens']['goods_type'];
 
 
             $prescription_params = $product_options['info_buyRequest']['tmplens']['prescription'];
@@ -2148,120 +2149,6 @@ class Crontab extends Backend
         }
     }
 
-
-    /**
-     * 德语站
-     * 定时处理 订单列表分类
-     * 1：仅镜架
-     * 2：仅现货处方镜
-     * 3：仅定制处方镜
-     * 4：镜架+现货
-     * 5：镜架+定制
-     * 6：现片+定制片
-     */
-    public function zeelool_jp_order_custom_order_prescription()
-    {
-        $order_entity_id_querySql = "select sfo.entity_id from sales_flat_order sfo where sfo.custom_order_prescription_type = 0 order by entity_id desc limit 1000 ";
-        $order_entity_id_list = Db::connect('database.db_zeelool_jp')->query($order_entity_id_querySql);
-        if (empty($order_entity_id_list)) {
-            echo '处理完毕！';
-            exit;
-        }
-
-        /**
-         * 1：仅镜架
-         * 2：仅现货处方镜
-         * 3：仅定制处方镜
-         * 4：镜架+现货
-         * 5：镜架+定制
-         * 6：现片+定制片
-         */
-        $type_1_entity_id = [];
-        $type_2_entity_id = [];
-        $type_3_entity_id = [];
-        $type_4_entity_id = [];
-        $type_5_entity_id = [];
-        $type_6_entity_id = [];
-        foreach ($order_entity_id_list as $key => $value) {
-            $items = Db::connect('database.db_zeelool_jp')->table('sales_flat_order_item_prescription')->where('order_id=' . $value['entity_id'])->select();
-            if (!$items) {
-                continue;
-            }
-
-            $label = [];
-            foreach ($items as $k => $v) {
-                //如果镜片参数为真 或 不等于 Plastic Lenses 并且不等于 FRAME ONLY则此订单为含处方
-                if ($v['index_type'] == '' || $v['index_type'] == 'プラスチックレンズ' || stripos($v['index_type'], 'フレームのみ') !== false || stripos($v['index_type'], 'フレームのみ (プラスチックレンズ)') !== false) {
-                    $label[] = 1; //仅镜架
-                } elseif (($v['index_type'] && $v['index_type'] != 'プラスチックレンズ' && stripos($v['index_type'], 'フレームのみ') === false && stripos($v['index_type'], 'フレームのみ (プラスチックレンズ)') === false) && $v['is_custom_lens'] == 0) {
-                    $label[] = 2; //现片含处方
-                } elseif (($v['index_type'] && $v['index_type'] != 'プラスチックレンズ' && stripos($v['index_type'], 'フレームのみ') === false && stripos($v['index_type'], 'フレームのみ (プラスチックレンズ)') === false) && $v['is_custom_lens'] == 1) {
-                    $label[] = 3; //定制含处方
-                }
-            }
-
-            //如果订单包括 仅镜架和现货处方镜 类型则为 镜架 + 现货
-            if (in_array(1, $label) && in_array(2, $label) && !in_array(3, $label)) {
-                $type_4_entity_id[] = $value['entity_id']; //镜架 + 现货
-
-                //如果订单包括 仅镜架和定制处方镜 类型则为 镜架 + 定制
-            } elseif (in_array(1, $label) && in_array(3, $label) && !in_array(2, $label)) {
-                $type_5_entity_id[] = $value['entity_id']; //镜架 + 定制
-
-                //如果订单只有 仅镜架 类型则为 仅镜架
-            } elseif (in_array(1, $label) && !in_array(3, $label) && !in_array(2, $label)) {
-                $type_1_entity_id[] = $value['entity_id']; //仅镜架
-
-                //如果订单只有 现货 类型则为 现货处方镜
-            } elseif (!in_array(1, $label) && !in_array(3, $label) && in_array(2, $label)) {
-                $type_2_entity_id[] = $value['entity_id']; //仅现货处方镜
-
-                //如果订单只有 定制 类型则为 仅定制处方镜
-            } elseif (!in_array(1, $label) && in_array(3, $label) && !in_array(2, $label)) {
-                $type_3_entity_id[] = $value['entity_id']; //仅定制处方镜
-            } elseif (in_array(2, $label) && in_array(3, $label)) {
-                $type_6_entity_id[] = $value['entity_id']; //现片+定制片
-            } else {
-                $type_1_entity_id[] = $value['entity_id']; //仅镜架
-            }
-        }
-
-        if ($type_1_entity_id) {
-            $map['entity_id'] = ['in', $type_1_entity_id];
-            Db::connect('database.db_zeelool_jp')->table('sales_flat_order')->where($map)->update(['custom_order_prescription_type' => 1]);
-        }
-
-        if ($type_2_entity_id) {
-            $map['entity_id'] = ['in', $type_2_entity_id];
-            Db::connect('database.db_zeelool_jp')->table('sales_flat_order')->where($map)->update(['custom_order_prescription_type' => 2]);
-        }
-
-        if ($type_3_entity_id) {
-            $map['entity_id'] = ['in', $type_3_entity_id];
-            Db::connect('database.db_zeelool_jp')->table('sales_flat_order')->where($map)->update(['custom_order_prescription_type' => 3]);
-        }
-
-
-        if ($type_4_entity_id) {
-            $map['entity_id'] = ['in', $type_4_entity_id];
-            Db::connect('database.db_zeelool_jp')->table('sales_flat_order')->where($map)->update(['custom_order_prescription_type' => 4]);
-        }
-
-
-        if ($type_5_entity_id) {
-            $map['entity_id'] = ['in', $type_5_entity_id];
-            Db::connect('database.db_zeelool_jp')->table('sales_flat_order')->where($map)->update(['custom_order_prescription_type' => 5]);
-        }
-
-
-        if ($type_6_entity_id) {
-            $map['entity_id'] = ['in', $type_6_entity_id];
-            Db::connect('database.db_zeelool_jp')->table('sales_flat_order')->where($map)->update(['custom_order_prescription_type' => 6]);
-        }
-
-        echo "执行成功！！";
-    }
-
     /**
      * 定时处理订单处方表序列化数据
      */
@@ -2269,6 +2156,7 @@ class Crontab extends Backend
     {
         $max_item_id_querySql = "select max(boi.item_id) max_item_id from sales_flat_order_item_prescription boi";
         $max_item_id_list = Db::connect('database.db_zeelool_jp')->query($max_item_id_querySql);
+        $max_item_id = 0;
         if ($max_item_id_list) {
             $max_item_id = $max_item_id_list[0]['max_item_id'];
         }
@@ -2276,7 +2164,7 @@ class Crontab extends Backend
         $max_item_id = $max_item_id > 0 ? $max_item_id : 0;
         $order_item_prescription_querySql = "select sfoi.item_id,sfoi.order_id,sfoi.product_id,sfoi.`name`,sfoi.sku,sfoi.product_options,sfoi.created_at,sfoi.qty_ordered,sfoi.quote_item_id from sales_flat_order_item sfoi where sfoi.item_id > $max_item_id order by sfoi.item_id asc limit 1000";
         $order_item_list = Db::connect('database.db_zeelool_jp')->query($order_item_prescription_querySql);
-
+      
         foreach ($order_item_list as $order_item_key => $order_item_value) {
             $product_options = unserialize($order_item_value['product_options']);
 
@@ -2293,7 +2181,7 @@ class Crontab extends Backend
             $items[$order_item_key]['index_id'] = $final_params['index_id'] = $product_options['info_buyRequest']['tmplens']['index_id'];
             $items[$order_item_key]['lens'] = $final_params['lens'] = $product_options['info_buyRequest']['tmplens']['lens'];
             $items[$order_item_key]['total'] = $final_params['total'] = $product_options['info_buyRequest']['tmplens']['total'];
-
+            $items[$order_item_key]['goods_type'] = $final_params['goods_type'] = $product_options['info_buyRequest']['tmplens']['goods_type'];
 
             $prescription_params = $product_options['info_buyRequest']['tmplens']['prescription'];
             $prescription_params = explode("&", $prescription_params);
@@ -2346,8 +2234,6 @@ class Crontab extends Backend
                 $items[$order_item_key]['total_add'] = $final_params['os_add'];
             }
 
-
-
             if ($final_params['pdcheck'] == 'on') {
                 $items[$order_item_key]['pd_l'] = $final_params['pd_l'];
                 $items[$order_item_key]['pd_r'] = $final_params['pd_r'];
@@ -2379,59 +2265,12 @@ class Crontab extends Backend
                 $items[$order_item_key]['os_pv_r'] = '';
                 $items[$order_item_key]['os_bd_r'] = '';
             }
-
-            /**
-             * 判断定制现片逻辑
-             * 1、渐进镜 Progressive
-             * 2、偏光镜 镜片类型包含Polarized
-             * 3、染色镜 镜片类型包含Lens with Color Tint
-             * 4、当cyl<=-4或cyl>=4
-             */
-            if ($final_params['prescription_type'] == '累進レンズ') {
-                $items[$order_item_key]['is_custom_lens'] = 1;
-            }
-
-            if (strpos($final_params['index_type'], '偏光レンズ') !== false) {
-                $items[$order_item_key]['is_custom_lens'] = 1;
-            }
-
-            if (strpos($final_params['index_type'], '色合い') !== false) {
-                $items[$order_item_key]['is_custom_lens'] = 1;
-            }
-
-            if ($final_params['od_cyl']) {
-                $final_params['od_cyl'] = urldecode($final_params['od_cyl']);
-                if ((float) $final_params['od_cyl'] * 1 <= -4 || (float) $final_params['od_cyl'] * 1 >= 4) {
-                    $items[$order_item_key]['is_custom_lens'] = 1;
-                }
-            }
-
-            if ($final_params['os_cyl']) {
-                $final_params['os_cyl'] = urldecode($final_params['os_cyl']);
-                if ((float) $final_params['os_cyl'] * 1 <= -4 || (float) $final_params['os_cyl'] * 1 >= 4) {
-                    $items[$order_item_key]['is_custom_lens'] = 1;
-                }
-            }
-
-            if ($final_params['od_sph']) {
-                if ((float) urldecode($final_params['od_sph']) * 1 < -8 || (float) urldecode($final_params['od_sph']) * 1 > 8) {
-                    $items[$order_item_key]['is_custom_lens'] = 1;
-                }
-            }
-
-            if ($final_params['os_sph']) {
-                if ((float) urldecode($final_params['os_sph']) * 1 < -8 || (float) urldecode($final_params['os_sph']) * 1 > 8) {
-                    $items[$order_item_key]['is_custom_lens'] = 1;
-                }
-            }
-            $items[$order_item_key]['is_custom_lens'] = $items[$order_item_key]['is_custom_lens'] ?: 0;
             unset($final_params);
             unset($lens_params);
             unset($prescription_params);
             unset($product_options);
         }
-
-
+       
         if ($items) {
             $result = Db::connect('database.db_zeelool_jp')->table('sales_flat_order_item_prescription')->insertAll($items);
             if ($result) {
