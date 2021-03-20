@@ -1523,7 +1523,7 @@ class Index extends Backend
         }
         unset($v);
         $headlist = [
-            'sku', '可用库存', '在途库存', 'Z站销量', 'V站销量', 'N站销量', 'W站销量', '西语站销量', '德语站销量', '日语站销量', '总销量'
+            'sku', '可用库存', '在途库存', 'Z站销量', 'V站销量', 'N站销量','M站销量', 'W站销量', '西语站销量', '德语站销量', '日语站销量', '总销量'
         ];
         $fileName = 'SKU销量统计';
         Excel::writeCsv($list, $headlist, $fileName, true);
