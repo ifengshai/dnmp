@@ -38,7 +38,7 @@ class OrderPrescription extends Backend
         $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform();
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
         foreach ($magentoplatformarr as $key=>$val){
-            if(!in_array($val['name'],['zeelool','voogueme','nihao','zeelool_de','zeelool_jp'])){
+            if(!in_array($val['name'],['zeelool','voogueme','nihao'])){
                 unset($magentoplatformarr[$key]);
             }
         }
