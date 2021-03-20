@@ -106,7 +106,7 @@ class ThirdApi extends Api
             $contents = Db::name('order_node_courier')->where('track_number', $add['track_number'])->column('content');
             
             foreach ($trackdetail as $k => $v) {
-              
+
                 if (!in_array($v['z'], $contents)) {
                     $add['create_time'] = $v['a'];
                     $add['content'] = $v['z'];
@@ -211,6 +211,7 @@ class ThirdApi extends Api
                     }
                     $order_node_date = Db::name('order_node')->where(['track_number' => $add['track_number'], 'shipment_type' => $add['shipment_type']])->find();
                     $update_order_node = [];
+                    $update_order_node['update_time'] = $v['a'];
                     $update_order_node['shipment_last_msg'] =  $v['z'];
                     Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
                 }
