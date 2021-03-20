@@ -778,7 +778,73 @@ class Test4 extends Controller
             usleep(100000);
         }
     }
+    public function sku_day_data_ga()
+    {
+        $zeeloolOperate = new \app\admin\model\operatedatacenter\Zeelool;
+        set_time_limit(0);
+        //统计昨天的数据
+        $data = date('Y-m-d', strtotime('-1 day'));
+        // $data = '2020-11-11';
+        $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
+        
+        $sku_data = $_item_platform_sku
+            ->field('sku,grade,platform_sku,stock,plat_on_way_stock')
+            ->where(['platform_type' => 10, 'outer_sku_status' => 1])
+            ->select();
+        //当前站点的所有sku映射关系
+        $sku_data = collection($sku_data)->toArray();
+        //ga所有的sku唯一身份浏览量的数据
+        $ga_skus = $zeeloolOperate->google_sku_detail(10, $data);
+        $ga_skus = array_column($ga_skus, 'uniquePageviews', 'ga:pagePath');
 
+        foreach ($sku_data as $k => $v) {
+            $sku_data[$k]['unique_pageviews'] = 0;
+            $sku_data[$k]['goods_grade'] = $sku_data[$k]['grade'];
+            $sku_data[$k]['day_date'] = $data;
+            $sku_data[$k]['site'] = 10;
+            $sku_data[$k]['day_stock'] = $sku_data[$k]['stock'];
+            $sku_data[$k]['day_onway_stock'] = $sku_data[$k]['plat_on_way_stock'];
+            unset($sku_data[$k]['stock']);
+            unset($sku_data[$k]['grade']);
+            unset($sku_data[$k]['plat_on_way_stock']);
+            foreach ($ga_skus as $kk => $vv) {
+                if (strpos($kk, $v['sku']) != false) {
+                    $sku_data[$k]['unique_pageviews'] += $vv;
+                }
+            }
+            Db::name('datacenter_sku_day')->insert($sku_data[$k]);
+        }
+
+
+
+        $sku_data = $_item_platform_sku
+            ->field('sku,grade,platform_sku,stock,plat_on_way_stock')
+            ->where(['platform_type' => 11, 'outer_sku_status' => 1])
+            ->select();
+        //当前站点的所有sku映射关系
+        $sku_data = collection($sku_data)->toArray();
+        //ga所有的sku唯一身份浏览量的数据
+        $ga_skus = $zeeloolOperate->google_sku_detail(11, $data);
+        $ga_skus = array_column($ga_skus, 'uniquePageviews', 'ga:pagePath');
+
+        foreach ($sku_data as $k => $v) {
+            $sku_data[$k]['unique_pageviews'] = 0;
+            $sku_data[$k]['goods_grade'] = $sku_data[$k]['grade'];
+            $sku_data[$k]['day_date'] = $data;
+            $sku_data[$k]['site'] = 11;
+            $sku_data[$k]['day_stock'] = $sku_data[$k]['stock'];
+            $sku_data[$k]['day_onway_stock'] = $sku_data[$k]['plat_on_way_stock'];
+            unset($sku_data[$k]['stock']);
+            unset($sku_data[$k]['grade']);
+            unset($sku_data[$k]['plat_on_way_stock']);
+            foreach ($ga_skus as $kk => $vv) {
+                if (strpos($kk, $v['sku']) != false) {
+                    $sku_data[$k]['unique_pageviews'] += $vv;
+                }
+            }
+            Db::name('datacenter_sku_day')->insert($sku_data[$k]);
+        }
+    }
     //计划任务跑每天的分类销量的数据
     public function day_data_goods_type()
     {
