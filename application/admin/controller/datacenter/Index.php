@@ -34,10 +34,11 @@ class Index extends Backend
         $this->zeelool = new \app\admin\model\order\order\Zeelool;
         $this->voogueme = new \app\admin\model\order\order\Voogueme;
         $this->nihao = new \app\admin\model\order\order\Nihao;
-        $this->meeloog = new \app\admin\model\order\order\Meeloog;
+        //$this->meeloog = new \app\admin\model\order\order\Meeloog;
         $this->wesee = new \app\admin\model\order\order\Weseeoptical;
         $this->zeeloolDe = new \app\admin\model\order\order\ZeeloolDe;
         $this->zeeloolEs = new \app\admin\model\order\order\ZeeloolEs;
+        $this->zeeloolJp = new \app\admin\model\order\order\ZeeloolJp;
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
         $this->lens = new \app\admin\model\lens\Index;
@@ -102,31 +103,35 @@ class Index extends Backend
 
                 $v['n_sku'] = $this->itemplatformsku->getWebSku($v['sku'], 3);
 
-                $v['m_sku'] = $this->itemplatformsku->getWebSku($v['sku'], 4);
+                //$v['m_sku'] = $this->itemplatformsku->getWebSku($v['sku'], 4);
 
                 $v['w_sku'] = $this->itemplatformsku->getWebSku($v['sku'], 5);
 
                 $v['z_es_sku'] = $this->itemplatformsku->getWebSku($v['sku'], 9);
 
                 $v['z_de_sku'] = $this->itemplatformsku->getWebSku($v['sku'], 10);
+
+                $v['z_jp_sku'] = $this->itemplatformsku->getWebSku($v['sku'], 11);
             }
             unset($v);
             $z_sku = array_column($list, 'z_sku');
             $v_sku = array_column($list, 'v_sku');
             $n_sku = array_column($list, 'n_sku');
-            $m_sku = array_column($list, 'm_sku');
+            //$m_sku = array_column($list, 'm_sku');
             $w_sku = array_column($list, 'w_sku');
             $z_es_sku = array_column($list, 'z_es_sku');
             $z_de_sku = array_column($list, 'z_de_sku');
+            $z_jp_sku = array_column($list, 'z_jp_sku');
 
             //获取三个站销量数据
             $zeelool = $this->zeelool->getOrderSalesNum($z_sku, $map);
             $voogueme = $this->voogueme->getOrderSalesNum($v_sku, $map);
             $nihao = $this->nihao->getOrderSalesNum($n_sku, $map);
-            $meeloog = $this->meeloog->getOrderSalesNum($m_sku, $map);
+            //$meeloog = $this->meeloog->getOrderSalesNum($m_sku, $map);
             $wesee = $this->wesee->getOrderSalesNum($w_sku, $map);
             $zeelool_es = $this->zeeloolEs->getOrderSalesNum($z_es_sku, $map);
             $zeelool_de = $this->zeeloolDe->getOrderSalesNum($z_de_sku, $map);
+            $zeelool_jp = $this->zeeloolJp->getOrderSalesNum($z_jp_sku, $map);
             //重组数组
             foreach ($list as &$v) {
 
@@ -136,15 +141,17 @@ class Index extends Backend
 
                 $v['n_num'] = round($nihao[trim($v['n_sku'])]) ?? 0;
 
-                $v['m_num'] = round($meeloog[trim($v['m_sku'])]) ?? 0;
+                //$v['m_num'] = round($meeloog[trim($v['m_sku'])]) ?? 0;
 
                 $v['w_num'] = round($wesee[trim($v['w_sku'])]) ?? 0;
 
                 $v['z_es_num'] = round($zeelool_es[trim($v['z_es_sku'])]) ?? 0;
 
                 $v['z_de_num'] = round($zeelool_de[trim($v['z_de_sku'])]) ?? 0;
+                $v['z_jp_num'] = round($zeelool_de[trim($v['z_jp_sku'])]) ?? 0;
 
-                $v['all_num'] = $v['z_num'] + $v['v_num'] + $v['n_num'] + $v['m_num'] + $v['w_num'] + $v['z_es_num'] + $v['z_de_num'];
+                //$v['all_num'] = $v['z_num'] + $v['v_num'] + $v['n_num'] + $v['m_num'] + $v['w_num'] + $v['z_es_num'] + $v['z_de_num'];
+                $v['all_num'] = $v['z_num'] + $v['v_num'] + $v['n_num'] + $v['w_num'] + $v['z_es_num'] + $v['z_de_num'] + $v['z_jp_num'];
             }
             unset($v);
 
@@ -1509,7 +1516,7 @@ class Index extends Backend
 
             $v['n_sku'] = $this->itemplatformsku->getWebSku($v['sku'], 3);
 
-            $v['m_sku'] = $this->itemplatformsku->getWebSku($v['sku'], 4);
+            //$v['m_sku'] = $this->itemplatformsku->getWebSku($v['sku'], 4);
             $v['w_sku'] = $this->itemplatformsku->getWebSku($v['sku'], 5);
         }
         unset($v);
@@ -1517,13 +1524,13 @@ class Index extends Backend
         $z_sku = array_column($list, 'z_sku');
         $v_sku = array_column($list, 'v_sku');
         $n_sku = array_column($list, 'n_sku');
-        $m_sku = array_column($list, 'm_sku');
+        //$m_sku = array_column($list, 'm_sku');
         $w_sku = array_column($list, 'w_sku');
         //获取三个站销量数据
         $zeelool = $this->zeelool->getOrderSalesNum($z_sku, $map);
         $voogueme = $this->voogueme->getOrderSalesNum($v_sku, $map);
         $nihao = $this->nihao->getOrderSalesNum($n_sku, $map);
-        $meeloog = $this->meeloog->getOrderSalesNum($m_sku, $map);
+        //$meeloog = $this->meeloog->getOrderSalesNum($m_sku, $map);
         $weese = $this->wesee->getOrderSalesNum($w_sku, $map);
         //重组数组
         foreach ($list as &$v) {
@@ -1534,9 +1541,10 @@ class Index extends Backend
 
             $v['n_num'] = round($nihao[$v['n_sku']]) ?? 0;
 
-            $v['m_num'] = round($meeloog[$v['m_sku']]) ?? 0;
+            //$v['m_num'] = round($meeloog[$v['m_sku']]) ?? 0;
             $v['w_num'] = round($weese[$v['w_sku']]) ?? 0;
-            $v['all_num'] = $v['z_num'] + $v['v_num'] + $v['n_num'] + $v['m_num'] + $v['w_num'];
+            //$v['all_num'] = $v['z_num'] + $v['v_num'] + $v['n_num'] + $v['m_num'] + $v['w_num'];
+            $v['all_num'] = $v['z_num'] + $v['v_num'] + $v['n_num'] + $v['w_num'];
         }
         unset($v);
 
@@ -1549,11 +1557,11 @@ class Index extends Backend
             ->setCellValue("B1", "Z站销量")
             ->setCellValue("C1", "V站销量")
             ->setCellValue("D1", "N站销量");
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("E1", "M站销量");
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("F1", "W站销量")
-            ->setCellValue("G1", "总的销量")
-            ->setCellValue("H1", "可用库存");
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("I1", "在途库存");
+        //$spreadsheet->setActiveSheetIndex(0)->setCellValue("E1", "M站销量");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("E1", "W站销量")
+            ->setCellValue("F1", "总的销量")
+            ->setCellValue("G1", "可用库存");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("H1", "在途库存");
         $spreadsheet->setActiveSheetIndex(0)->setTitle('销量数据');
 
         foreach ($list as $key => $value) {
@@ -1562,11 +1570,12 @@ class Index extends Backend
             $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['z_num']);
             $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['v_num']);
             $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['n_num']);
-            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['m_num']);
-            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['w_num']);
-            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['all_num']);
-            $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['available_stock']);
-            $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), $value['on_way_stock']);
+            //$spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['m_num']);
+            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['w_num']);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['all_num']);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['available_stock']);
+            $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['on_way_stock']);
+            //$spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), $value['on_way_stock']);
         }
         //设置宽度
         $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(30);
@@ -1577,7 +1586,7 @@ class Index extends Backend
         $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(12);
         $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(40);
         $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(40);
-        $spreadsheet->getActiveSheet()->getColumnDimension('I')->setWidth(40);
+        //$spreadsheet->getActiveSheet()->getColumnDimension('I')->setWidth(40);
         //设置边框
         $border = [
             'borders' => [
