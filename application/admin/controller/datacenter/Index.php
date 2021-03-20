@@ -1512,6 +1512,14 @@ class Index extends Backend
             $v['de_num'] = $sales_num_list[10][$v['de_sku']] ?: 0;
             $v['jp_num'] = $sales_num_list[11][$v['jp_sku']] ?: 0;
             $v['all_num'] = $v['z_num'] + $v['v_num'] + $v['n_num'] + $v['m_num'] + $v['w_num'] + $v['es_num'] + $v['de_num'] + $v['jp_num'];
+            unset($v['z_sku']);
+            unset($v['v_sku']);
+            unset($v['n_sku']);
+            unset($v['m_sku']);
+            unset($v['w_sku']);
+            unset($v['es_sku']);
+            unset($v['de_sku']);
+            unset($v['jp_sku']);
         }
         unset($v);
         $headlist = [
