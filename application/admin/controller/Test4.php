@@ -787,39 +787,39 @@ class Test4 extends Controller
         foreach($date_time as $v){
             $res12 = Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(10, 1,$v));
             if ($res12) {
-                echo 'v站平光镜ok';
+                echo 'de站平光镜ok';
             } else {
-                echo 'v站平光镜不ok';
+                echo 'de站平光镜不ok';
             }
             $res13 = Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(10, 2,$v));
             if ($res13) {
-                echo 'v站太阳镜ok';
+                echo 'de站太阳镜ok';
             } else {
-                echo 'v站太阳镜不ok';
+                echo 'de站太阳镜不ok';
             }
             $res14 = Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(10, 6,$v));
             if ($res14) {
-                echo 'v站配饰ok';
+                echo 'de站配饰ok';
             } else {
-                echo 'v站配饰不ok';
+                echo 'de站配饰不ok';
             }
             $res15 = Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(11, 1,$v));
             if ($res15) {
-                echo 'v站平光镜ok';
+                echo 'jp站平光镜ok';
             } else {
-                echo 'v站平光镜不ok';
+                echo 'jp站平光镜不ok';
             }
             $res16 = Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(11, 2,$v));
             if ($res16) {
-                echo 'v站太阳镜ok';
+                echo 'jp站太阳镜ok';
             } else {
-                echo 'v站太阳镜不ok';
+                echo 'jp站太阳镜不ok';
             }
             $res17 = Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(11, 6,$v));
             if ($res17) {
-                echo 'v站配饰ok';
+                echo 'jp站配饰ok';
             } else {
-                echo 'v站配饰不ok';
+                echo 'jp站配饰不ok';
             }
 
         }
