@@ -38,8 +38,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj', 'custom
                         { field: 'v_num', title: __('V站销量'), operate: false },
                         { field: 'n_sku', title: __('Nihao_SKU'), operate: false },
                         { field: 'n_num', title: __('Nihao站销量'), operate: false },
-                        { field: 'm_sku', title: __('Meeloog_SKU'), operate: false },
-                        { field: 'm_num', title: __('Meeloog站销量'), operate: false },
+                       /*  { field: 'm_sku', title: __('Meeloog_SKU'), operate: false },
+                        { field: 'm_num', title: __('Meeloog站销量'), operate: false }, */
                         { field: 'w_sku', title: __('Wesee_SKU'), operate: false },
                         { field: 'w_num', title: __('Wesee站销量'), operate: false },
                         { field: 'es_sku', title: __('西语站SKU'), operate: false },

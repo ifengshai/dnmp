@@ -34,10 +34,11 @@ class Index extends Backend
         $this->zeelool = new \app\admin\model\order\order\Zeelool;
         $this->voogueme = new \app\admin\model\order\order\Voogueme;
         $this->nihao = new \app\admin\model\order\order\Nihao;
-        $this->meeloog = new \app\admin\model\order\order\Meeloog;
+        //$this->meeloog = new \app\admin\model\order\order\Meeloog;
         $this->wesee = new \app\admin\model\order\order\Weseeoptical;
         $this->zeeloolDe = new \app\admin\model\order\order\ZeeloolDe;
         $this->zeeloolEs = new \app\admin\model\order\order\ZeeloolEs;
+        $this->zeeloolJp = new \app\admin\model\order\order\ZeeloolJp;
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
         $this->lens = new \app\admin\model\lens\Index;
