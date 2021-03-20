@@ -2655,4 +2655,22 @@ class Test4 extends Controller
         }
 
     }
+
+    public function sku_code_review()
+    {
+        $skus = ['E10005-2','E10009-2','E10019-1','E10045-1','E10055-1','E10060-1','E10061-1','E10061-2','E10085-1','E10087-1','E20008-1','E20014-1','E20026-1','E20034-1','E20041-1','E50002-1','E50003-1','E50005-1','N10003-1','N10008-1','N10011-1','N10016-1','NBY001-1','NBY003-1','Box'];
+        foreach ($skus as $k=>$v){
+            $store_sku = Db::name('store_sku')
+                ->alias('a')
+                ->join(['fa_store_house' => 'b'], 'a.store_id=b.id')
+                ->where('a.is_del', 1)
+                ->where('a.sku', $v)
+                ->field('a.sku,a.store_id,b.id,b.coding,b.area_id')
+                ->find();
+            $res = Db::name('product_barcode_item')->where('sku', $store_sku['sku'])->update(['location_code' => $store_sku['coding'], 'location_id' => $store_sku['area_id'], 'location_code_id' => $store_sku['store_id']]);
+            echo $store_sku['sku'] . '更新' . $res . '条数据 is ok' . "\n";
+            usleep(10000);
+        }
+    }
+
 }
