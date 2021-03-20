@@ -5,7 +5,7 @@ namespace app\admin\controller\datacenter;
 use app\common\controller\Backend;
 use think\Db;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use function Aws\filter;
+use fast\Excel;
 
 /**
  * 数据中心
@@ -74,84 +74,69 @@ class Index extends Backend
             $filter = json_decode($this->request->get('filter'), true);
             if ($filter['created_at']) {
                 $createat = explode(' ', $filter['created_at']);
-                $map['a.created_at'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]]];
+                $map['a.created_at'] = ['between', [strtotime($createat[0] . ' ' . $createat[1]), strtotime($createat[3] . ' ' . $createat[4])]];
                 unset($filter['created_at']);
                 $this->request->get(['filter' => json_encode($filter)]);
             } else {
-                $map['a.created_at'] = ['between', [date("Y-m-d 00:00:00"), date("Y-m-d H:i:s", time())]];
+                $map['a.created_at'] = ['between', [strtotime(date("Y-m-d 00:00:00")), strtotime(date("Y-m-d H:i:s", time()))]];
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
 
             $total = $this->item
                 ->where($where)
                 ->where('is_open', 1)
+                ->where('is_del', 1)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->item
                 ->where($where)
                 ->where('is_open', 1)
+                ->where('is_del', 1)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
             $list = collection($list)->toArray();
+
+
+            $skus = [];
             foreach ($list as &$v) {
                 //sku转换
-                $v['z_sku'] = $this->itemplatformsku->getWebSku($v['sku'], 1);
+                $platform_list = $this->itemplatformsku->where(['sku' => $v['sku']])->column('platform_sku', 'platform_type');
 
-                $v['v_sku'] = $this->itemplatformsku->getWebSku($v['sku'], 2);
+                $v['z_sku'] = $platform_list[1];
 
-                $v['n_sku'] = $this->itemplatformsku->getWebSku($v['sku'], 3);
+                $v['v_sku'] = $platform_list[2];
 
-                //$v['m_sku'] = $this->itemplatformsku->getWebSku($v['sku'], 4);
+                $v['n_sku'] = $platform_list[3];
 
-                $v['w_sku'] = $this->itemplatformsku->getWebSku($v['sku'], 5);
+                $v['m_sku'] = $platform_list[4];
 
-                $v['z_es_sku'] = $this->itemplatformsku->getWebSku($v['sku'], 9);
+                $v['w_sku'] = $platform_list[5];
 
-                $v['z_de_sku'] = $this->itemplatformsku->getWebSku($v['sku'], 10);
+                $v['es_sku'] = $platform_list[9];
 
-                $v['z_jp_sku'] = $this->itemplatformsku->getWebSku($v['sku'], 11);
+                $v['de_sku'] = $platform_list[10];
+
+                $v['jp_sku'] = $platform_list[11];
+
+                $skus = array_merge($skus, array_values($platform_list));
             }
             unset($v);
-            $z_sku = array_column($list, 'z_sku');
-            $v_sku = array_column($list, 'v_sku');
-            $n_sku = array_column($list, 'n_sku');
-            //$m_sku = array_column($list, 'm_sku');
-            $w_sku = array_column($list, 'w_sku');
-            $z_es_sku = array_column($list, 'z_es_sku');
-            $z_de_sku = array_column($list, 'z_de_sku');
-            $z_jp_sku = array_column($list, 'z_jp_sku');
 
-            //获取三个站销量数据
-            $zeelool = $this->zeelool->getOrderSalesNum($z_sku, $map);
-            $voogueme = $this->voogueme->getOrderSalesNum($v_sku, $map);
-            $nihao = $this->nihao->getOrderSalesNum($n_sku, $map);
-            //$meeloog = $this->meeloog->getOrderSalesNum($m_sku, $map);
-            $wesee = $this->wesee->getOrderSalesNum($w_sku, $map);
-            $zeelool_es = $this->zeeloolEs->getOrderSalesNum($z_es_sku, $map);
-            $zeelool_de = $this->zeeloolDe->getOrderSalesNum($z_de_sku, $map);
-            $zeelool_jp = $this->zeeloolJp->getOrderSalesNum($z_jp_sku, $map);
+            $order = new \app\admin\model\order\order\NewOrder();
+            $sales_num_list = $order->getOrderSalesNum($skus, $map);
             //重组数组
             foreach ($list as &$v) {
-
-                $v['z_num'] = round($zeelool[trim($v['z_sku'])]) ?? 0;
-
-                $v['v_num'] = round($voogueme[trim($v['v_sku'])]) ?? 0;
-
-                $v['n_num'] = round($nihao[trim($v['n_sku'])]) ?? 0;
-
-                //$v['m_num'] = round($meeloog[trim($v['m_sku'])]) ?? 0;
-
-                $v['w_num'] = round($wesee[trim($v['w_sku'])]) ?? 0;
-
-                $v['z_es_num'] = round($zeelool_es[trim($v['z_es_sku'])]) ?? 0;
-
-                $v['z_de_num'] = round($zeelool_de[trim($v['z_de_sku'])]) ?? 0;
-                $v['z_jp_num'] = round($zeelool_de[trim($v['z_jp_sku'])]) ?? 0;
-
-                //$v['all_num'] = $v['z_num'] + $v['v_num'] + $v['n_num'] + $v['m_num'] + $v['w_num'] + $v['z_es_num'] + $v['z_de_num'];
-                $v['all_num'] = $v['z_num'] + $v['v_num'] + $v['n_num'] + $v['w_num'] + $v['z_es_num'] + $v['z_de_num'] + $v['z_jp_num'];
+                $v['z_num'] = $sales_num_list[1][$v['z_sku']] ?: 0;
+                $v['v_num'] = $sales_num_list[2][$v['v_sku']] ?: 0;
+                $v['n_num'] = $sales_num_list[3][$v['n_sku']] ?: 0;
+                $v['m_num'] = $sales_num_list[4][$v['m_sku']] ?: 0;
+                $v['w_num'] = $sales_num_list[5][$v['w_sku']] ?: 0;
+                $v['es_num'] = $sales_num_list[9][$v['es_sku']] ?: 0;
+                $v['de_num'] = $sales_num_list[10][$v['de_sku']] ?: 0;
+                $v['jp_num'] = $sales_num_list[11][$v['jp_sku']] ?: 0;
+                $v['all_num'] = $v['z_num'] + $v['v_num'] + $v['n_num'] + $v['m_num'] + $v['w_num'] + $v['es_num'] + $v['de_num'] + $v['jp_num'];
             }
             unset($v);
 
@@ -607,7 +592,7 @@ class Index extends Backend
 
             $swhere['platform_order'] = $value['increment_id'];
             $swhere['work_platform'] = $value['site'];
-//            $swhere['work_status'] = ['not in', [0,7]]; 产品要求工单状态不判断 只要有就显示
+            //            $swhere['work_status'] = ['not in', [0,7]]; 产品要求工单状态不判断 只要有就显示
             $work_type = $workorder->where($swhere)->field('work_type,create_user_name')->find();
             if (!empty($work_type)) {
                 $value['work'] = '是';
@@ -671,7 +656,6 @@ class Index extends Backend
             $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['work_status']);
             $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['create_user_name']);
             $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['order_prescription_type']);
-
         }
         //设置宽度
         $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(20);
@@ -721,7 +705,6 @@ class Index extends Backend
         $writer = new $class($spreadsheet);
 
         $writer->save('php://output');
-
     }
 
 
@@ -1455,24 +1438,6 @@ class Index extends Backend
     }
 
     /**
-     * 测试
-     *
-     * @Description
-     * @author wpl
-     * @since 2020/03/24 14:04:27 
-     * @return void
-     */
-    public function test()
-    {
-        $starttime = strtotime(date('Y-m-01 00:00:00', time())) - 8 * 3600;
-        $endtime = strtotime(date('Y-m-d H:i:s', time()));
-        $track = new Trackingmore();
-        $track = $track->getStatusNumberCount($starttime, $endtime);
-        dump($track);
-        die;
-    }
-
-    /**
      * 导出销量统计
      *
      * @Author lsw 1461069578@qq.com
@@ -1493,142 +1458,67 @@ class Index extends Backend
         $filter = json_decode($this->request->get('filter'), true);
         if ($filter['created_at']) {
             $createat = explode(' ', $filter['created_at']);
-            $map['a.created_at'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]]];
+            $map['a.created_at'] = ['between', [strtotime($createat[0] . ' ' . $createat[1]), strtotime($createat[3] . ' ' . $createat[4])]];
             unset($filter['created_at']);
             $this->request->get(['filter' => json_encode($filter)]);
         } else {
-            $map['a.created_at'] = ['between', [date("Y-m-d 00:00:00"), date("Y-m-d H:i:s", time())]];
+            $map['a.created_at'] = ['between', [strtotime(date("Y-m-d 00:00:00")), strtotime(date("Y-m-d H:i:s", time()))]];
         }
         list($where, $sort, $order, $offset, $limit) = $this->buildparams();
 
-        $list = $this->item
+        $list = $this->item->field('sku,available_stock,on_way_stock')
             ->where($where)
             ->where($addWhere)
+            ->where(['is_open' => 1, 'is_del' => 1])
             ->order($sort, $order)
             ->limit($offset, $limit)
             ->select();
-
+        $list = collection($list)->toArray();
+        $skus = [];
         foreach ($list as &$v) {
             //sku转换
-            $v['z_sku'] = $this->itemplatformsku->getWebSku($v['sku'], 1);
+            $platform_list = $this->itemplatformsku->where(['sku' => $v['sku']])->column('platform_sku', 'platform_type');
 
-            $v['v_sku'] = $this->itemplatformsku->getWebSku($v['sku'], 2);
+            $v['z_sku'] = $platform_list[1];
 
-            $v['n_sku'] = $this->itemplatformsku->getWebSku($v['sku'], 3);
+            $v['v_sku'] = $platform_list[2];
 
-            //$v['m_sku'] = $this->itemplatformsku->getWebSku($v['sku'], 4);
-            $v['w_sku'] = $this->itemplatformsku->getWebSku($v['sku'], 5);
+            $v['n_sku'] = $platform_list[3];
+
+            $v['m_sku'] = $platform_list[4];
+
+            $v['w_sku'] = $platform_list[5];
+
+            $v['es_sku'] = $platform_list[9];
+
+            $v['de_sku'] = $platform_list[10];
+
+            $v['jp_sku'] = $platform_list[11];
+
+            $skus = array_merge($skus, array_values($platform_list));
         }
         unset($v);
 
-        $z_sku = array_column($list, 'z_sku');
-        $v_sku = array_column($list, 'v_sku');
-        $n_sku = array_column($list, 'n_sku');
-        //$m_sku = array_column($list, 'm_sku');
-        $w_sku = array_column($list, 'w_sku');
-        //获取三个站销量数据
-        $zeelool = $this->zeelool->getOrderSalesNum($z_sku, $map);
-        $voogueme = $this->voogueme->getOrderSalesNum($v_sku, $map);
-        $nihao = $this->nihao->getOrderSalesNum($n_sku, $map);
-        //$meeloog = $this->meeloog->getOrderSalesNum($m_sku, $map);
-        $weese = $this->wesee->getOrderSalesNum($w_sku, $map);
+        $order = new \app\admin\model\order\order\NewOrder();
+        $sales_num_list = $order->getOrderSalesNum($skus, $map);
         //重组数组
         foreach ($list as &$v) {
-
-            $v['z_num'] = round($zeelool[$v['z_sku']]) ?? 0;
-
-            $v['v_num'] = round($voogueme[$v['v_sku']]) ?? 0;
-
-            $v['n_num'] = round($nihao[$v['n_sku']]) ?? 0;
-
-            //$v['m_num'] = round($meeloog[$v['m_sku']]) ?? 0;
-            $v['w_num'] = round($weese[$v['w_sku']]) ?? 0;
-            //$v['all_num'] = $v['z_num'] + $v['v_num'] + $v['n_num'] + $v['m_num'] + $v['w_num'];
-            $v['all_num'] = $v['z_num'] + $v['v_num'] + $v['n_num'] + $v['w_num'];
+            $v['z_num'] = $sales_num_list[1][$v['z_sku']] ?: 0;
+            $v['v_num'] = $sales_num_list[2][$v['v_sku']] ?: 0;
+            $v['n_num'] = $sales_num_list[3][$v['n_sku']] ?: 0;
+            $v['m_num'] = $sales_num_list[4][$v['m_sku']] ?: 0;
+            $v['w_num'] = $sales_num_list[5][$v['w_sku']] ?: 0;
+            $v['es_num'] = $sales_num_list[9][$v['es_sku']] ?: 0;
+            $v['de_num'] = $sales_num_list[10][$v['de_sku']] ?: 0;
+            $v['jp_num'] = $sales_num_list[11][$v['jp_sku']] ?: 0;
+            $v['all_num'] = $v['z_num'] + $v['v_num'] + $v['n_num'] + $v['m_num'] + $v['w_num'] + $v['es_num'] + $v['de_num'] + $v['jp_num'];
         }
         unset($v);
-
-        $list = collection($list)->toArray();
-        //从数据库查询需要的数据
-        $spreadsheet = new Spreadsheet();
-
-        //常规方式：利用setCellValue()填充数据
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "sku")
-            ->setCellValue("B1", "Z站销量")
-            ->setCellValue("C1", "V站销量")
-            ->setCellValue("D1", "N站销量");
-        //$spreadsheet->setActiveSheetIndex(0)->setCellValue("E1", "M站销量");
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("E1", "W站销量")
-            ->setCellValue("F1", "总的销量")
-            ->setCellValue("G1", "可用库存");
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("H1", "在途库存");
-        $spreadsheet->setActiveSheetIndex(0)->setTitle('销量数据');
-
-        foreach ($list as $key => $value) {
-
-            $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), $value['sku']);
-            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['z_num']);
-            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['v_num']);
-            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['n_num']);
-            //$spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['m_num']);
-            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['w_num']);
-            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['all_num']);
-            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['available_stock']);
-            $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['on_way_stock']);
-            //$spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), $value['on_way_stock']);
-        }
-        //设置宽度
-        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(30);
-        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(12);
-        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(30);
-        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(12);
-        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(30);
-        $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(12);
-        $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(40);
-        $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(40);
-        //$spreadsheet->getActiveSheet()->getColumnDimension('I')->setWidth(40);
-        //设置边框
-        $border = [
-            'borders' => [
-                'allBorders' => [
-                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
-                    'color' => ['argb' => 'FF000000'], // 设置border颜色
-                ],
-            ],
+        $headlist = [
+            'sku', '可用库存', '在途库存', 'Z站销量', 'V站销量', 'N站销量', 'W站销量', '西语站销量', '德语站销量', '日语站销量', '总销量'
         ];
-
-        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
-
-
-        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
-        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
-
-        $spreadsheet->getActiveSheet()->getStyle('A1:P' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-
-
-        $spreadsheet->setActiveSheetIndex(0);
-        // return exportExcel($spreadsheet, 'xls', '登陆日志');
-        $format = 'xlsx';
-        $savename = '销量数据' . date("YmdHis", time());;
-        // dump($spreadsheet);
-
-        // if (!$spreadsheet) return false;
-        if ($format == 'xls') {
-            //输出Excel03版本
-            header('Content-Type:application/vnd.ms-excel');
-            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
-        } elseif ($format == 'xlsx') {
-            //输出07Excel版本
-            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
-        }
-
-        //输出名称
-        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
-        //禁止缓存
-        header('Cache-Control: max-age=0');
-        $writer = new $class($spreadsheet);
-
-        $writer->save('php://output');
+        $fileName = 'SKU销量统计';
+        Excel::writeCsv($list, $headlist, $fileName, true);
+        die;
     }
 }
