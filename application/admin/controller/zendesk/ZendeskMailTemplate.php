@@ -438,10 +438,11 @@ class ZendeskMailTemplate extends Backend
                 $shipment_last_msg_value  = $OrderNode
                     ->where($where)
                     ->field('shipment_last_msg,update_time')->find();
-                if (empty($shipment_last_msg_value)){
+                if (empty($shipment_last_msg_value['shipment_last_msg'])){
                     $shipment_last_msg = '物流信息暂未更新';
                 }else{
-                    $shipment_last_msg = 'time'.$shipment_last_msg_value['update_time'].'message:'.$shipment_last_msg_value['shipment_last_msg'];
+
+                    $shipment_last_msg = 'Time:'.$shipment_last_msg_value['update_time'].',Message:'.$shipment_last_msg_value['shipment_last_msg'];
                 }
             }else{
                 $shipment_last_msg = '暂无物流信息';
