@@ -38,7 +38,7 @@ class OrderPrescription extends Backend
         $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform();
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
         foreach ($magentoplatformarr as $key=>$val){
-            if(!in_array($val['name'],['zeelool','voogueme','nihao'])){
+            if(!in_array($val['name'],['zeelool','voogueme','nihao','zeelool_de','zeelool_jp'])){
                 unset($magentoplatformarr[$key]);
             }
         }
@@ -69,6 +69,8 @@ class OrderPrescription extends Backend
         );
         if($site == 3){
             $reading_glasses_num = $this->prescrtion_num('Reading Glasses',$site,$time_str);
+        }elseif($site == 10 || $site == 11){
+            $reading_glasses_num = $this->prescrtion_num('ReadingGlasses',$site,$time_str);
         }else{
             $reading_glasses_num = $this->prescrtion_num('Readingglasses',$site,$time_str);
         }
@@ -78,7 +80,7 @@ class OrderPrescription extends Backend
             'num'=>$reading_glasses_num,
             'rate'=>$reading_glasses_rate
         );
-        if($site == 2){
+        if($site == 2 || $site == 10 || $site == 11){
             $reading_glassesno_num = $this->prescrtion_num('ReadingNoprescription',$site,$time_str);
         }elseif($site == 3){
             $reading_glassesno_num = $this->prescrtion_num('Reading Glasses2',$site,$time_str);
@@ -91,7 +93,7 @@ class OrderPrescription extends Backend
             'num'=>$reading_glassesno_num,
             'rate'=>$reading_glassesno_rate
         );
-        if($site == 2){
+        if($site == 2 || $site == 10 || $site == 11){
             $no_prescription_num1 = $this->prescrtion_num('NonPrescription',$site,$time_str);
             $no_prescription_num2 = $this->prescrtion_num('Noprescription',$site,$time_str);
             $no_prescription_num = $no_prescription_num1+$no_prescription_num2;
@@ -106,6 +108,8 @@ class OrderPrescription extends Backend
         );
         if($site == 3){
             $sunglasses_num = $this->prescrtion_num('SunSingleVision',$site,$time_str);
+        }elseif($site == 11){
+            $sunglasses_num = $this->prescrtion_num('SunGlasses',$site,$time_str);
         }else{
             $sunglasses_num = $this->prescrtion_num('Sunglasses',$site,$time_str);
         }
@@ -124,8 +128,10 @@ class OrderPrescription extends Backend
             $sunglassesno_num1 = $this->prescrtion_num('SunGlassesNoprescription',$site,$time_str);
             $sunglassesno_num2 = $this->prescrtion_num('Non',$site,$time_str);
             $sunglassesno_num = $sunglassesno_num1 + $sunglassesno_num2;
-        }else{
+        }elseif($site == 3){
             $sunglassesno_num = $this->prescrtion_num('SunNonPrescription',$site,$time_str);
+        }else{
+            $sunglassesno_num = $this->prescrtion_num('SunGlassesNoprescription',$site,$time_str);
         }
 
         $sunglassesno_rate = $order_num ? round($sunglassesno_num/$order_num*100,0).'%' : 0;
@@ -167,13 +173,17 @@ class OrderPrescription extends Backend
             $order_model = Db::connect('database.db_voogueme');
         }elseif($site == 3){
             $order_model = Db::connect('database.db_nihao');
+        }elseif($site == 10){
+            $order_model = Db::connect('database.db_zeelool_de');
+        }elseif($site == 11){
+            $order_model = Db::connect('database.db_zeelool_jp');
         }else{
             $order_model = Db::connect('database.db_zeelool');
         }
         $order_model->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
         $createat = explode(' ', $time_str);
-        $where['p.created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
-        $where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        $where['o.payment_time'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
+        $where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
         $where['o.order_type'] = 1;
         $map['p.prescription_type'] = $flag;
         if($flag){
@@ -189,6 +199,12 @@ class OrderPrescription extends Backend
         if($site == 2){
             $type = [4.95,8.95,9.95];
             $order_model = Db::connect('database.db_voogueme');
+        }elseif($site == 10){
+            $type = [4.95,8.95,9.95];
+            $order_model = Db::connect('database.db_zeelool_de');
+        }elseif($site == 11){
+            $type = [4.95,8.95,9.95];
+            $order_model = Db::connect('database.db_zeelool_jp');
         }else{
             $type = [0,5,9];
             $order_model = Db::connect('database.db_zeelool');
@@ -200,8 +216,8 @@ class OrderPrescription extends Backend
             $time_str = $start .' 00:00:00 - ' .$end.' 00:00:00';
         }
         $createat = explode(' ', $time_str);
-        $where['p.created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
-        $where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        $where['o.payment_time'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
+        $where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
         $where['o.order_type'] = 1;
         $coating_num1 = $order_model->table('sales_flat_order_item_prescription')->alias('p')->join('sales_flat_order o','p.order_id=o.entity_id')->where($where)->where('coating_id','coating_1')->count();
         $coating_num2 = $order_model->table('sales_flat_order_item_prescription')->alias('p')->join('sales_flat_order o','p.order_id=o.entity_id')->where($where)->where('coating_id','coating_2')->count();
