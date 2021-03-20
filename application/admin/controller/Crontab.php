@@ -1998,6 +1998,7 @@ class Crontab extends Backend
             $items[$order_item_key]['lens'] = $final_params['lens'] = $product_options['info_buyRequest']['tmplens']['lens'];
             $items[$order_item_key]['total'] = $final_params['total'] = $product_options['info_buyRequest']['tmplens']['total'];
             $items[$order_item_key]['goods_type'] = $final_params['goods_type'] = $product_options['info_buyRequest']['tmplens']['goods_type'];
+            $items[$order_item_key]['coating_id'] =  $product_options['info_buyRequest']['tmplens']['coating_id'];
 
 
             $prescription_params = $product_options['info_buyRequest']['tmplens']['prescription'];
@@ -2182,6 +2183,7 @@ class Crontab extends Backend
             $items[$order_item_key]['lens'] = $final_params['lens'] = $product_options['info_buyRequest']['tmplens']['lens'];
             $items[$order_item_key]['total'] = $final_params['total'] = $product_options['info_buyRequest']['tmplens']['total'];
             $items[$order_item_key]['goods_type'] = $final_params['goods_type'] = $product_options['info_buyRequest']['tmplens']['goods_type'];
+            $items[$order_item_key]['coating_id'] =  $product_options['info_buyRequest']['tmplens']['coating_id'];
 
             $prescription_params = $product_options['info_buyRequest']['tmplens']['prescription'];
             $prescription_params = explode("&", $prescription_params);
