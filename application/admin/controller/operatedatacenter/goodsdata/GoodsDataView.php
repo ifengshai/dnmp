@@ -37,6 +37,12 @@ class GoodsDataView extends Backend
             case 3:
                 $goods_type = [1 => '平光镜', 2 => '太阳镜'];
                 break;
+            case 10:
+                $goods_type = [1 => '平光镜', 2 => '太阳镜', 6 => '配饰'];
+                break;
+            case 11:
+                $goods_type = [1 => '平光镜', 2 => '太阳镜', 6 => '配饰'];
+                break;
         }
         $this->assign('goods_type', $goods_type);
         if ($this->request->isAjax()) {
@@ -47,7 +53,7 @@ class GoodsDataView extends Backend
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
         foreach ($magentoplatformarr as $key => $val) {
-            if (!in_array($val['name'], ['zeelool', 'voogueme', 'nihao'])) {
+            if (!in_array($val['name'], ['zeelool', 'voogueme', 'nihao','zeelool_de','zeelool_jp'])) {
                 unset($magentoplatformarr[$key]);
             }
         }
@@ -255,6 +261,58 @@ class GoodsDataView extends Backend
                         ],
                     ];
                     break;
+                case 10:
+                    $goods_type = [1 => '平光镜', 2 => '太阳镜', 6 => '配饰'];
+                    $json['xcolumnData'] = $date_arr;
+                    $arr[$value['goods_type']][$value['day_date']] = $value['total_sales_num'];
+                    $json['column'] = $goods_type;
+                    $json['columnData'] = [
+                        [
+                            'type' => 'line',
+                            'data' => array_values($arr[1] ? $arr[1] : $date_arrs),
+                            'name' => '平光镜',
+                            'smooth' => true //平滑曲线
+                        ],
+                        [
+                            'type' => 'line',
+                            'data' => array_values($arr[2] ? $arr[2] : $date_arrs),
+                            'name' => '太阳镜',
+                            'smooth' => true //平滑曲线
+                        ],
+                        [
+                            'type' => 'line',
+                            'data' => array_values($arr[6] ? $arr[6] : $date_arrs),
+                            'name' => '配饰',
+                            'smooth' => true //平滑曲线
+                        ],
+                    ];
+                    break;
+                case 11:
+                    $goods_type = [1 => '平光镜', 2 => '太阳镜', 6 => '配饰'];
+                    $json['xcolumnData'] = $date_arr;
+                    $arr[$value['goods_type']][$value['day_date']] = $value['total_sales_num'];
+                    $json['column'] = $goods_type;
+                    $json['columnData'] = [
+                        [
+                            'type' => 'line',
+                            'data' => array_values($arr[1] ? $arr[1] : $date_arrs),
+                            'name' => '平光镜',
+                            'smooth' => true //平滑曲线
+                        ],
+                        [
+                            'type' => 'line',
+                            'data' => array_values($arr[2] ? $arr[2] : $date_arrs),
+                            'name' => '太阳镜',
+                            'smooth' => true //平滑曲线
+                        ],
+                        [
+                            'type' => 'line',
+                            'data' => array_values($arr[6] ? $arr[6] : $date_arrs),
+                            'name' => '配饰',
+                            'smooth' => true //平滑曲线
+                        ],
+                    ];
+                    break;
             }
 
             return json(['code' => 1, 'data' => $json]);
@@ -300,6 +358,18 @@ class GoodsDataView extends Backend
                     $sun_glass_num = Db::name('datacenter_goods_type_data')->where($map)->where('goods_type', 2)->where('site', 3)->sum('glass_num');
                     $total_num = $glass_num + $sun_glass_num;
                     break;
+                case 10:
+                    $glass_num = Db::name('datacenter_goods_type_data')->where($map)->where('goods_type', 1)->where('site', 10)->sum('glass_num');
+                    $sun_glass_num = Db::name('datacenter_goods_type_data')->where($map)->where('goods_type', 2)->where('site', 10)->sum('glass_num');
+                    $other_num = Db::name('datacenter_goods_type_data')->where($map)->where('goods_type', 6)->where('site', 10)->sum('glass_num');
+                    $total_num = $glass_num + $sun_glass_num + $other_num;
+                    break;
+                case 11:
+                    $glass_num = Db::name('datacenter_goods_type_data')->where($map)->where('goods_type', 1)->where('site', 11)->sum('glass_num');
+                    $sun_glass_num = Db::name('datacenter_goods_type_data')->where($map)->where('goods_type', 2)->where('site', 11)->sum('glass_num');
+                    $other_num = Db::name('datacenter_goods_type_data')->where($map)->where('goods_type', 6)->where('site', 11)->sum('glass_num');
+                    $total_num = $glass_num + $sun_glass_num + $other_num;
+                    break;
                 default:
                     $model = false;
                     break;
@@ -332,6 +402,12 @@ class GoodsDataView extends Backend
                 break;
             case 3:
                 $model = Db::connect('database.db_nihao');
+                break;
+            case 10:
+                $model = Db::connect('database.db_zeelool_de');
+                break;
+            case 11:
+                $model = Db::connect('database.db_zeelool_jp');
                 break;
             default:
                 $model = false;
