@@ -103,27 +103,27 @@ class Index extends Backend
             foreach ($list as &$v) {
                 //sku转换
                 $platform_list = $this->itemplatformsku->where(['sku' => $v['sku']])->column('platform_sku', 'platform_type');
-    
+
                 $v['z_sku'] = $platform_list[1];
-    
+
                 $v['v_sku'] = $platform_list[2];
-    
+
                 $v['n_sku'] = $platform_list[3];
-    
+
                 $v['m_sku'] = $platform_list[4];
-    
+
                 $v['w_sku'] = $platform_list[5];
-    
+
                 $v['es_sku'] = $platform_list[9];
-    
+
                 $v['de_sku'] = $platform_list[10];
-    
+
                 $v['jp_sku'] = $platform_list[11];
-    
+
                 $skus = array_merge($skus, array_values($platform_list));
             }
             unset($v);
-    
+
             $order = new \app\admin\model\order\order\NewOrder();
             $sales_num_list = $order->getOrderSalesNum($skus, $map);
             //重组数组
@@ -1469,11 +1469,11 @@ class Index extends Backend
         $list = $this->item->field('sku,available_stock,on_way_stock')
             ->where($where)
             ->where($addWhere)
-            ->where(['is_open' => 1,'is_del' => 1])
+            ->where(['is_open' => 1, 'is_del' => 1])
             ->order($sort, $order)
             ->limit($offset, $limit)
             ->select();
-
+        $list = collection($list)->toArray();
         $skus = [];
         foreach ($list as &$v) {
             //sku转换
@@ -1515,7 +1515,7 @@ class Index extends Backend
         }
         unset($v);
         $headlist = [
-            'sku', '可用库存', '在途库存' , 'Z站销量', 'V站销量', 'N站销量', 'W站销量', '西语站销量', '德语站销量', '日语站销量', '总销量'
+            'sku', '可用库存', '在途库存', 'Z站销量', 'V站销量', 'N站销量', 'W站销量', '西语站销量', '德语站销量', '日语站销量', '总销量'
         ];
         $fileName = 'SKU销量统计';
         Excel::writeCsv($list, $headlist, $fileName, true);
