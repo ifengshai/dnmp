@@ -2729,7 +2729,7 @@ class TrackReg extends Backend
         }
         //de站
         //购物车数量
-        $zeelool_model = Db::connect('database.db_zeelool_de');
+        $zeelool_model = Db::connect('database.db_zeelool_de_online');
         $zeelool_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
         //统计昨天的数据
         $z_sku_list = Db::name('datacenter_sku_day')->where(['day_date' => $data, 'site' => 10])->select();
@@ -2744,7 +2744,7 @@ class TrackReg extends Backend
                 ->where('base_grand_total', 'gt', 0)
                 ->field('b.sku,a.base_grand_total,a.created_at')
                 ->count();
-            $z_sku_list[$k]['now_pricce'] = Db::connect('database.db_zeelool_de')
+            $z_sku_list[$k]['now_pricce'] = Db::connect('database.db_zeelool_de_online')
                 ->table('catalog_product_index_price') //为了获取现价找的表
                 ->alias('a')
                 ->join(['catalog_product_entity' => 'b'], 'a.entity_id=b.entity_id') //商品主表
@@ -2756,7 +2756,7 @@ class TrackReg extends Backend
         }
         //jp站
         //购物车数量
-        $zeelool_model = Db::connect('database.db_zeelool_jp');
+        $zeelool_model = Db::connect('database.db_zeelool_jp_online');
         $zeelool_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
         //统计昨天的数据
         $z_sku_list = Db::name('datacenter_sku_day')->where(['day_date' => $data, 'site' => 11])->select();
@@ -2771,7 +2771,7 @@ class TrackReg extends Backend
                 ->where('base_grand_total', 'gt', 0)
                 ->field('b.sku,a.base_grand_total,a.created_at')
                 ->count();
-            $z_sku_list[$k]['now_pricce'] = Db::connect('database.db_zeelool_jp')
+            $z_sku_list[$k]['now_pricce'] = Db::connect('database.db_zeelool_jp_online')
                 ->table('catalog_product_index_price') //为了获取现价找的表
                 ->alias('a')
                 ->join(['catalog_product_entity' => 'b'], 'a.entity_id=b.entity_id') //商品主表
