@@ -779,6 +779,120 @@ class Test4 extends Controller
         }
     }
 
+    //计划任务跑每天的分类销量的数据
+    public function day_data_goods_type()
+    {
+        $where['day_date'] = ['between',['2020-10-08','2021-03-20']];
+        $date_time = Db::name('datacenter_day')->where('site', 1)->where($where)->column('day_date');
+        foreach($date_time as $v){
+            $res12 = Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(10, 1,$v));
+            if ($res12) {
+                echo 'v站平光镜ok';
+            } else {
+                echo 'v站平光镜不ok';
+            }
+            $res13 = Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(10, 2,$v));
+            if ($res13) {
+                echo 'v站太阳镜ok';
+            } else {
+                echo 'v站太阳镜不ok';
+            }
+            $res14 = Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(10, 6,$v));
+            if ($res14) {
+                echo 'v站配饰ok';
+            } else {
+                echo 'v站配饰不ok';
+            }
+            $res15 = Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(11, 1,$v));
+            if ($res15) {
+                echo 'v站平光镜ok';
+            } else {
+                echo 'v站平光镜不ok';
+            }
+            $res16 = Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(11, 2,$v));
+            if ($res16) {
+                echo 'v站太阳镜ok';
+            } else {
+                echo 'v站太阳镜不ok';
+            }
+            $res17 = Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(11, 6,$v));
+            if ($res17) {
+                echo 'v站配饰ok';
+            } else {
+                echo 'v站配饰不ok';
+            }
+
+        }
+
+    }
+    //统计昨天各品类镜框的销量
+    public function goods_type_day_center($plat, $goods_type,$time)
+    {
+        $start = $time;
+        $seven_days = $start . ' 00:00:00 - ' . $start . ' 23:59:59';
+        $createat = explode(' ', $seven_days);
+        $itemMap['m.created_at'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]]];
+        //判断站点
+        switch ($plat) {
+            case 1:
+                $model = Db::connect('database.db_zeelool');
+                break;
+            case 2:
+                $model = Db::connect('database.db_voogueme');
+                break;
+            case 3:
+                $model = Db::connect('database.db_nihao');
+                break;
+            case 10:
+                $model = Db::connect('database.db_zeelool_de');
+                break;
+            case 11:
+                $model = Db::connect('database.db_zeelool_jp');
+                break;
+            default:
+                $model = false;
+                break;
+        }
+        $model->table('sales_flat_order')->query("set time_zone='+8:00'");
+        $model->table('sales_flat_order_item')->query("set time_zone='+8:00'");
+        $model->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
+        //$whereItem = " o.status in ('processing','complete','creditcard_proccessing','free_processing')";
+        $whereItem = " o.status in ('free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered')";
+        //某个品类眼镜的销售副数
+        $frame_sales_num = $model->table('sales_flat_order_item m')
+            ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
+            ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
+            ->where('p.goods_type', '=', $goods_type)
+            ->where($whereItem)
+            ->where($itemMap)
+            ->sum('m.qty_ordered');
+        //求出眼镜的销售额 base_price  base_discount_amount
+        $frame_money_price = $model->table('sales_flat_order_item m')
+            ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
+            ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
+            ->where($whereItem)
+            ->where('p.goods_type', '=', $goods_type)
+            ->where($itemMap)
+            ->sum('m.base_price');
+        //眼镜的折扣价格
+        $frame_money_discount = $model->table('sales_flat_order_item m')
+            ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
+            ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
+            ->where($whereItem)
+            ->where('p.goods_type', '=', $goods_type)
+            ->where($itemMap)
+            ->sum('m.base_discount_amount');
+        //眼镜的实际销售额
+        $frame_money = round(($frame_money_price - $frame_money_discount), 2);
+
+        $arr['day_date'] = $start;
+        $arr['site'] = $plat;
+        $arr['goods_type'] = $goods_type;
+        $arr['glass_num'] = $frame_sales_num;
+        $arr['sales_total_money'] = $frame_money;
+        return $arr;
+    }
+
     /**
      *计算中位数 中位数：是指一组数据从小到大排列，位于中间的那个数。可以是一个（数据为奇数），也可以是2个的平均（数据为偶数）
      */

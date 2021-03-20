@@ -1905,6 +1905,42 @@ class TrackReg extends Backend
         } else {
             echo 'nihao站配饰不ok';
         }
+        $res12 = Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(10, 1));
+        if ($res12) {
+            echo 'v站平光镜ok';
+        } else {
+            echo 'v站平光镜不ok';
+        }
+        $res13 = Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(10, 2));
+        if ($res13) {
+            echo 'v站太阳镜ok';
+        } else {
+            echo 'v站太阳镜不ok';
+        }
+        $res14 = Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(10, 6));
+        if ($res14) {
+            echo 'v站配饰ok';
+        } else {
+            echo 'v站配饰不ok';
+        }
+        $res15 = Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(11, 1));
+        if ($res15) {
+            echo 'v站平光镜ok';
+        } else {
+            echo 'v站平光镜不ok';
+        }
+        $res16 = Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(11, 2));
+        if ($res16) {
+            echo 'v站太阳镜ok';
+        } else {
+            echo 'v站太阳镜不ok';
+        }
+        $res17 = Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(11, 6));
+        if ($res17) {
+            echo 'v站配饰ok';
+        } else {
+            echo 'v站配饰不ok';
+        }
     }
     //统计昨天各品类镜框的销量
     public function goods_type_day_center($plat, $goods_type)
@@ -1923,6 +1959,12 @@ class TrackReg extends Backend
                 break;
             case 3:
                 $model = Db::connect('database.db_nihao');
+                break;
+            case 10:
+                $model = Db::connect('database.db_zeelool_de');
+                break;
+            case 11:
+                $model = Db::connect('database.db_zeelool_jp');
                 break;
             default:
                 $model = false;
