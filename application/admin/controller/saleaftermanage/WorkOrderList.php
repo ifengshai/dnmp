@@ -1370,7 +1370,9 @@ class WorkOrderList extends Backend
                             //拣货区盘点时不能操作
                             //查询条形码库区库位
                             $sonorder_new_sku['sku'] = $item['change_frame']['original_sku'];
+                            dump($sonorder_new_sku);
                             $barcodedata = $this->_product_bar_code_item->where($sonorder_new_sku)->column('location_code');
+                            dump($barcodedata);die();
                             Log::write($sonorder_sku);
                             if (!empty($barcodedata)){
                                 $count = $this->_inventory->alias('a')
@@ -2302,8 +2304,8 @@ class WorkOrderList extends Backend
                             //查询条形码库区库位
                             $sonorder_new_sku['sku'] = $item['change_frame']['original_sku'];
                             Log::write("======拣货区盘点时不能操作更改镜框措施======");
-                            Log::write($sonorder_sku);
-                            $barcodedata = $this->_product_bar_code_item->where($sonorder_sku)->column('location_code');
+                            Log::write($sonorder_new_sku);
+                            $barcodedata = $this->_product_bar_code_item->where($sonorder_new_sku)->column('location_code');
                             Log::write($sonorder_sku);
                             if (!empty($barcodedata)){
                                 $count = $this->_inventory->alias('a')
