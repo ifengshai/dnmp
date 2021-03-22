@@ -447,7 +447,7 @@ class ScmWarehouse extends Scm
             ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => $warehouse_area['coding'], 'area_id' => $warehouse_area['area_id']])
             ->count();
         if ($count > 0) {
-            $this->error(__('此库位正在盘点,暂无法入库提交'), [], 403);
+            $this->error(__('此库位正在盘点,暂无法出库提交'), [], 403);
         }
         /****************************end*****************************************/
 
