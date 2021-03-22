@@ -2497,6 +2497,8 @@ class ScmWarehouse extends Scm
                         $save_value['location_id'] = $v['area_id'];
                         $save_value['location_code_id'] = $code_id;
                         Log::write($save_value);
+                        Log::write("===输出where条件==");
+                        Log::write($where);
                         Db::table('fa_product_barcode_item')->where($where)->update($save_value);
                     }
                     //等PDA改为 以此为准
