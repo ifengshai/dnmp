@@ -798,7 +798,6 @@ class Test4 extends Controller
             $sku_id = $model->table('catalog_product_entity')->where('sku',$value['platform_sku'])->value('entity_id');
             $unique_pageviews = 0;
             foreach ($ga_skus as $kk => $vv) {
-                preg_match('/\d+/',$kk,$str_arr);
                 if ($kk == '/goods-detail/'.$sku_id) {
                     $unique_pageviews += $vv;
                 }
