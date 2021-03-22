@@ -78,6 +78,14 @@ class CoupnAnalytics extends Backend
                     $model = Db::connect('database.db_nihao');
                     $salesrule = Db::connect('database.db_nihao_online');
                     break;
+                case 10:
+                    $model = Db::connect('database.db_zeelool_de');
+                    $salesrule = Db::connect('database.db_zeelool_de_online');
+                    break;
+                case 11:
+                    $model = Db::connect('database.db_zeelool_jp');
+                    $salesrule = Db::connect('database.db_zeelool_jp_online');
+                    break;
             }
             $model->table('sales_flat_order')->query("set time_zone='+8:00'");
 
@@ -160,7 +168,7 @@ class CoupnAnalytics extends Backend
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
         foreach ($magentoplatformarr as $key => $val) {
-            if (!in_array($val['name'], ['zeelool', 'voogueme', 'nihao'])) {
+            if (!in_array($val['name'], ['zeelool', 'voogueme', 'nihao','zeelool_de','zeelool_jp'])) {
                 unset($magentoplatformarr[$key]);
             }
         }
@@ -201,6 +209,14 @@ class CoupnAnalytics extends Backend
                 case 3:
                     $model = Db::connect('database.db_nihao');
                     $salesrule = Db::connect('database.db_niaho_online');
+                    break;
+                case 10:
+                    $model = Db::connect('database.db_zeelool_de');
+                    $salesrule = Db::connect('database.db_zeelool_de_online');
+                    break;
+                case 11:
+                    $model = Db::connect('database.db_zeelool_jp');
+                    $salesrule = Db::connect('database.db_zeelool_jp_online');
                     break;
             }
             $model->table('sales_flat_order')->query("set time_zone='+8:00'");
@@ -312,6 +328,16 @@ class CoupnAnalytics extends Backend
                     $model = Db::connect('database.db_nihao');
                     $salesrule = Db::connect('database.db_nihao_online');
                     $plat = new \app\admin\model\operatedatacenter\Nihao();
+                    break;
+                case 10:
+                    $model = Db::connect('database.db_zeelool_de');
+                    $salesrule = Db::connect('database.db_zeelool_de_online');
+                    $plat = new \app\admin\model\operatedatacenter\ZeeloolDe();
+                    break;
+                case 11:
+                    $model = Db::connect('database.db_zeelool_jp');
+                    $salesrule = Db::connect('database.db_zeelool_jp_online');
+                    $plat = new \app\admin\model\operatedatacenter\ZeeloolJp();
                     break;
             }
 
@@ -445,6 +471,16 @@ class CoupnAnalytics extends Backend
                     $salesrule = Db::connect('database.db_nihao_online');
                     $plat = new \app\admin\model\operatedatacenter\Nihao();
                     break;
+                case 10:
+                    $model = Db::connect('database.db_zeelool_de');
+                    $salesrule = Db::connect('database.db_zeelool_de_online');
+                    $plat = new \app\admin\model\operatedatacenter\ZeeloolDe();
+                    break;
+                case 11:
+                    $model = Db::connect('database.db_zeelool_jp');
+                    $salesrule = Db::connect('database.db_zeelool_jp_online');
+                    $plat = new \app\admin\model\operatedatacenter\ZeeloolJp();
+                    break;
             }
             $model->table('sales_flat_order')->query("set time_zone='+8:00'");
 
@@ -550,7 +586,11 @@ class CoupnAnalytics extends Backend
         } elseif ($order_platform == 3) {
             $order_model = Db::connect('database.db_nihao');
             $field = 'p.id,o.increment_id,o.created_at,o.customer_email,p.prescription_type,p.frame_price,p.index_price';
-        } else {
+        } elseif($order_platform == 10){
+            $order_model = Db::connect('database.db_zeelool_de');
+        } elseif($order_platform == 11){
+            $order_model = Db::connect('database.db_zeelool_jp');
+        }else {
             $order_model = Db::connect('database.db_zeelool');
         }
         $order_model->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
