@@ -2146,6 +2146,7 @@ class WorkOrderList extends Backend
                             //拣货区盘点时不能操作
                             //查询条形码库区库位
                             $sonorder_sku['sku'] = $item['original_sku'];
+                            dump($item);
                             dump($sonorder_sku);die();
                             Log::write("======拣货区盘点时不能操作子单取消======");
                             Log::write($sonorder_sku);
