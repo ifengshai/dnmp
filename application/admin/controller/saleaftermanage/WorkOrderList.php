@@ -2109,7 +2109,7 @@ class WorkOrderList extends Backend
 
                 //检测子订单措施
                 if ($item_order_info) {
-                    echo  111;die();
+
                     $item_order_info = array_filter($item_order_info);
                     //查询所有子单数量
                     $_new_order_process = new NewOrderProcess();
@@ -2146,6 +2146,7 @@ class WorkOrderList extends Backend
                             //拣货区盘点时不能操作
                             //查询条形码库区库位
                             $sonorder_sku['sku'] = $item['original_sku'];
+                            dump($sonorder_sku);die();
                             Log::write("======拣货区盘点时不能操作子单取消======");
                             Log::write($sonorder_sku);
                             $barcodedata = $this->_product_bar_code_item->where($sonorder_sku)->column('location_code');
