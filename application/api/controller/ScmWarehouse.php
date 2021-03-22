@@ -2483,15 +2483,20 @@ class ScmWarehouse extends Scm
                     }
                     $sku_code = array_column($v['sku_agg'], 'code');
                     $where['code'] = ['in', array_unique($sku_code)];
-
+                    Log::write("====输出信息=====");
+                    Log::write($v['library_name']);
+                    Log::write($v['area_id']);
                     $whe['coding'] = $v['library_name'];
                     $whe['area_id'] = $v['area_id'];
 
                     $code_id = Db::table('fa_store_house')->where($whe)->value('id');
+                    Log::write("===========输出code=============");
+                    Log::write($code_id);
                     if (!empty($code_id)){
                         $save_value['location_code'] = $v['library_name'];
                         $save_value['location_id'] = $v['area_id'];
                         $save_value['location_code_id'] = $code_id;
+                        Log::write($save_value);
                         Db::table('fa_product_barcode_item')->where($where)->update($save_value);
                     }
                     //等PDA改为 以此为准
