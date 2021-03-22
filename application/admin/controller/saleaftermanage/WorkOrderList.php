@@ -1927,7 +1927,7 @@ class WorkOrderList extends Backend
 
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
-            dump($params);die();
+
             if ($params) {
                 $params = $this->preExcludeFields($params);
                 if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
@@ -2179,10 +2179,31 @@ class WorkOrderList extends Backend
                                     ->count();
                                 Log::write($count);
                                 if ($count > 0) {
-                                    return ['result' => false, 'msg' => '此'.$sku.'对应库位正在盘点,暂无法进行出入库操作'];
+                                    return ['result' => false, 'msg' => '此'.$item['cancel_order']['sku'].'对应库位正在盘点,暂无法进行出入库操作'];
                                 }
                             }
                             /****************************end*****************************************/
+
+                            /*****************限制如果有盘点单未结束不能操作配货完成*******************/
+                            //拣货区盘点时不能操作
+                            //查询条形码库区库位
+                            $sonorder_new_sku['sku'] = $item['change_frame']['original_sku'];
+                            Log::write("======拣货区盘点时不能操作更改镜框措施======");
+                            Log::write($sonorder_sku);
+                            $barcodedata = $this->_product_bar_code_item->where($sonorder_sku)->column('location_code');
+                            Log::write($sonorder_sku);
+                            if (!empty($barcodedata)){
+                                $count = $this->_inventory->alias('a')
+                                    ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata]])
+                                    ->count();
+                                Log::write($count);
+                                if ($count > 0) {
+                                    return ['result' => false, 'msg' => '此'.$item['change_frame']['original_sku'].'对应库位正在盘点,暂无法进行出入库操作'];
+                                }
+                            }
+                            /****************************end*****************************************/
+
+
                             //更改镜框校验库存
                             !$item['change_frame']['change_sku'] && $this->error("子订单：{$key} 的新sku不能为空");
                             $item['change_frame']['change_sku'] = trim($item['change_frame']['change_sku']);
