@@ -2954,7 +2954,7 @@ class ScmWarehouse extends Scm
                 $list[$k]['area_id'] = $area_id;
                 $list[$k]['area'] = Db::name('warehouse_area')->where('id',$area_id)->value('coding');
             }
-            $this->success('获取成功', $list, 200);
+            $this->success('获取成功', ['list' => $list], 200);
         }
         $this->error('网络异常', [], 401);
     }
