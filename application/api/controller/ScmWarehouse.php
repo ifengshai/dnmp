@@ -3358,7 +3358,7 @@ class ScmWarehouse extends Scm
                 //     $this->error(__('条形码' . $v['code'] . '当前未在调出库位！！' . $transfer_order_item['call_out_site']), '', 546);
                 // }
                 //调入仓库位id
-                $store_house_id = $this->_store_house->where(['coding' => $transfer_order_item['call_in_site'], 'area_id' => $area_all[$transfer_order_item['inarea']]])->value('id');
+                $store_house_id = $this->_store_house->where(['coding' => $transfer_order_item['call_in_site'], 'area_id' => $transfer_order_item['inarea_id']])->value('id');
                 //判断调入库位是否有sku跟库位的绑定关系
                 $store_sku = $this->_store_sku->where('sku', $transfer_order_item['sku'])->where('store_id', $store_house_id)->find();
                 empty($store_sku) && $this->error(__('调入库位' . $transfer_order_item['call_in_site'] . '与sku：' . $transfer_order_item['sku'] . '没有绑定关系！！'), '', 546);

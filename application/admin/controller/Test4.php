@@ -778,6 +778,186 @@ class Test4 extends Controller
             usleep(100000);
         }
     }
+    public function sku_day_data_ga()
+    {
+        $zeeloolOperate = new \app\admin\model\operatedatacenter\Zeelool;
+        set_time_limit(0);
+        //统计昨天的数据
+        $data = date('Y-m-d', strtotime('-1 day'));
+        // $data = '2020-11-11';
+        $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
+        
+        $sku_data = $_item_platform_sku
+            ->field('sku,grade,platform_sku,stock,plat_on_way_stock')
+            ->where(['platform_type' => 10, 'outer_sku_status' => 1])
+            ->select();
+        //当前站点的所有sku映射关系
+        $sku_data = collection($sku_data)->toArray();
+        //ga所有的sku唯一身份浏览量的数据
+        $ga_skus = $zeeloolOperate->google_sku_detail(10, $data);
+        $ga_skus = array_column($ga_skus, 'uniquePageviews', 'ga:pagePath');
+
+        foreach ($sku_data as $k => $v) {
+            $sku_data[$k]['unique_pageviews'] = 0;
+            $sku_data[$k]['goods_grade'] = $sku_data[$k]['grade'];
+            $sku_data[$k]['day_date'] = $data;
+            $sku_data[$k]['site'] = 10;
+            $sku_data[$k]['day_stock'] = $sku_data[$k]['stock'];
+            $sku_data[$k]['day_onway_stock'] = $sku_data[$k]['plat_on_way_stock'];
+            unset($sku_data[$k]['stock']);
+            unset($sku_data[$k]['grade']);
+            unset($sku_data[$k]['plat_on_way_stock']);
+            foreach ($ga_skus as $kk => $vv) {
+                if (strpos($kk, $v['sku']) != false) {
+                    $sku_data[$k]['unique_pageviews'] += $vv;
+                }
+            }
+            Db::name('datacenter_sku_day')->insert($sku_data[$k]);
+        }
+
+
+
+        $sku_data = $_item_platform_sku
+            ->field('sku,grade,platform_sku,stock,plat_on_way_stock')
+            ->where(['platform_type' => 11, 'outer_sku_status' => 1])
+            ->select();
+        //当前站点的所有sku映射关系
+        $sku_data = collection($sku_data)->toArray();
+        //ga所有的sku唯一身份浏览量的数据
+        $ga_skus = $zeeloolOperate->google_sku_detail(11, $data);
+        $ga_skus = array_column($ga_skus, 'uniquePageviews', 'ga:pagePath');
+
+        foreach ($sku_data as $k => $v) {
+            $sku_data[$k]['unique_pageviews'] = 0;
+            $sku_data[$k]['goods_grade'] = $sku_data[$k]['grade'];
+            $sku_data[$k]['day_date'] = $data;
+            $sku_data[$k]['site'] = 11;
+            $sku_data[$k]['day_stock'] = $sku_data[$k]['stock'];
+            $sku_data[$k]['day_onway_stock'] = $sku_data[$k]['plat_on_way_stock'];
+            unset($sku_data[$k]['stock']);
+            unset($sku_data[$k]['grade']);
+            unset($sku_data[$k]['plat_on_way_stock']);
+            foreach ($ga_skus as $kk => $vv) {
+                if (strpos($kk, $v['sku']) != false) {
+                    $sku_data[$k]['unique_pageviews'] += $vv;
+                }
+            }
+            Db::name('datacenter_sku_day')->insert($sku_data[$k]);
+        }
+    }
+    //计划任务跑每天的分类销量的数据
+    public function day_data_goods_type()
+    {
+        $where['day_date'] = ['between',['2020-10-08','2021-03-20']];
+        $date_time = Db::name('datacenter_day')->where('site', 1)->where($where)->column('day_date');
+        foreach($date_time as $v){
+            $res12 = Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(10, 1,$v));
+            if ($res12) {
+                echo 'de站平光镜ok';
+            } else {
+                echo 'de站平光镜不ok';
+            }
+            $res13 = Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(10, 2,$v));
+            if ($res13) {
+                echo 'de站太阳镜ok';
+            } else {
+                echo 'de站太阳镜不ok';
+            }
+            $res14 = Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(10, 6,$v));
+            if ($res14) {
+                echo 'de站配饰ok';
+            } else {
+                echo 'de站配饰不ok';
+            }
+            $res15 = Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(11, 1,$v));
+            if ($res15) {
+                echo 'jp站平光镜ok';
+            } else {
+                echo 'jp站平光镜不ok';
+            }
+            $res16 = Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(11, 2,$v));
+            if ($res16) {
+                echo 'jp站太阳镜ok';
+            } else {
+                echo 'jp站太阳镜不ok';
+            }
+            $res17 = Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(11, 6,$v));
+            if ($res17) {
+                echo 'jp站配饰ok';
+            } else {
+                echo 'jp站配饰不ok';
+            }
+
+        }
+
+    }
+    //统计昨天各品类镜框的销量
+    public function goods_type_day_center($plat, $goods_type,$time)
+    {
+        $start = $time;
+        $seven_days = $start . ' 00:00:00 - ' . $start . ' 23:59:59';
+        $createat = explode(' ', $seven_days);
+        $itemMap['m.created_at'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]]];
+        //判断站点
+        switch ($plat) {
+            case 1:
+                $model = Db::connect('database.db_zeelool');
+                break;
+            case 2:
+                $model = Db::connect('database.db_voogueme');
+                break;
+            case 3:
+                $model = Db::connect('database.db_nihao');
+                break;
+            case 10:
+                $model = Db::connect('database.db_zeelool_de');
+                break;
+            case 11:
+                $model = Db::connect('database.db_zeelool_jp');
+                break;
+            default:
+                $model = false;
+                break;
+        }
+        $model->table('sales_flat_order')->query("set time_zone='+8:00'");
+        $model->table('sales_flat_order_item')->query("set time_zone='+8:00'");
+        $model->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
+        //$whereItem = " o.status in ('processing','complete','creditcard_proccessing','free_processing')";
+        $whereItem = " o.status in ('free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered')";
+        //某个品类眼镜的销售副数
+        $frame_sales_num = $model->table('sales_flat_order_item m')
+            ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
+            ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
+            ->where('p.goods_type', '=', $goods_type)
+            ->where($whereItem)
+            ->where($itemMap)
+            ->sum('m.qty_ordered');
+        //求出眼镜的销售额 base_price  base_discount_amount
+        $frame_money_price = $model->table('sales_flat_order_item m')
+            ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
+            ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
+            ->where($whereItem)
+            ->where('p.goods_type', '=', $goods_type)
+            ->where($itemMap)
+            ->sum('m.base_price');
+        //眼镜的折扣价格
+        $frame_money_discount = $model->table('sales_flat_order_item m')
+            ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
+            ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
+            ->where($whereItem)
+            ->where('p.goods_type', '=', $goods_type)
+            ->where($itemMap)
+            ->sum('m.base_discount_amount');
+        //眼镜的实际销售额
+        $frame_money = round(($frame_money_price - $frame_money_discount), 2);
+
+        $arr['day_date'] = $start;
+        $arr['site'] = $plat;
+        $arr['goods_type'] = $goods_type;
+        $arr['glass_num'] = $frame_sales_num;
+        $arr['sales_total_money'] = $frame_money;
+        return $arr;
+    }
 
     /**
      *计算中位数 中位数：是指一组数据从小到大排列，位于中间的那个数。可以是一个（数据为奇数），也可以是2个的平均（数据为偶数）
@@ -2655,4 +2835,22 @@ class Test4 extends Controller
         }
 
     }
+
+    public function sku_code_review()
+    {
+        $skus = ['E10005-2','E10009-2','E10019-1','E10045-1','E10055-1','E10060-1','E10061-1','E10061-2','E10085-1','E10087-1','E20008-1','E20014-1','E20026-1','E20034-1','E20041-1','E50002-1','E50003-1','E50005-1','N10003-1','N10008-1','N10011-1','N10016-1','NBY001-1','NBY003-1','Box'];
+        foreach ($skus as $k=>$v){
+            $store_sku = Db::name('store_sku')
+                ->alias('a')
+                ->join(['fa_store_house' => 'b'], 'a.store_id=b.id')
+                ->where('a.is_del', 1)
+                ->where('a.sku', $v)
+                ->field('a.sku,a.store_id,b.id,b.coding,b.area_id')
+                ->find();
+            $res = Db::name('product_barcode_item')->where('sku', $store_sku['sku'])->update(['location_code' => $store_sku['coding'], 'location_id' => $store_sku['area_id'], 'location_code_id' => $store_sku['store_id']]);
+            echo $store_sku['sku'] . '更新' . $res . '条数据 is ok' . "\n";
+            usleep(10000);
+        }
+    }
+
 }

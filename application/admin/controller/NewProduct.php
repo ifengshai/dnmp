@@ -1989,7 +1989,7 @@ class NewProduct extends Backend
                 // ->where(['d.purchase_status' => ['in', [0, 1, 2, 5, 6, 7, 9, 10]]])
                 ->where('a.replenish_id<>0')
                 ->where($map)
-                ->group('d.id')
+                // ->group('d.id')
                 // ->group('a.sku')
                 ->order($sort, $order)
                 ->count();
@@ -2005,7 +2005,7 @@ class NewProduct extends Backend
                 // ->where(['d.purchase_status' => ['in', [0, 1, 2, 5, 6, 7, 9, 10]]])
                 ->where('a.replenish_id<>0')
                 ->where($map)
-                ->group('d.id')
+                // ->group('d.id')
                 // ->group('a.sku')
                 ->order($sort, $order)
                 ->limit($offset, $limit)
