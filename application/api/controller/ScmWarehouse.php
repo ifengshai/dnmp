@@ -2451,10 +2451,10 @@ class ScmWarehouse extends Scm
             $code = $this->_product_bar_code_item
                 ->where($where)
                 ->column('code');
-            if ($code) {
-                $this->error(__('条形码:' . implode(',', $code) . ' 已绑定,请移除'), [], 405);
-                exit;
-            }
+//            if ($code) {
+//                $this->error(__('条形码:' . implode(',', $code) . ' 已绑定,请移除'), [], 405);
+//                exit;
+//            }
         }
 
         //保存不需要编辑盘点单
