@@ -2477,9 +2477,9 @@ class ScmWarehouse extends Scm
                     $item_map['sku'] = $v['sku'];
                     $item_map['is_del'] = 1;
                     $sku_item = $this->_item->where($item_map)->field('stock,available_stock,distribution_occupy_stock')->find();
-                    if (empty($sku_item)) {
-                        throw new Exception('SKU=>' . $v['sku'] . '不存在');
-                    }
+//                    if (empty($sku_item)) {
+//                        throw new Exception('SKU=>' . $v['sku'] . '不存在');
+//                    }
 
                     $whe['coding'] = $v['library_name'];
                     $whe['area_id'] = $v['area_id'];
