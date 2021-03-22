@@ -167,6 +167,9 @@ class StockHouse extends Backend
         //        }
         $arr = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
         $this->assign('shelf_number', $arr);
+        //所有库区编码id
+        $area_coding = Db::name('warehouse_area')->column('coding','id');
+        $this->assign('area_coding',$area_coding);
         return $this->view->fetch();
     }
 
