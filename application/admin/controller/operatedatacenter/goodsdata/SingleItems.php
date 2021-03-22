@@ -64,11 +64,15 @@ class SingleItems extends Backend
                 $order_model = Db::connect('database.db_voogueme');
             } elseif ($site == 3) {
                 $order_model = Db::connect('database.db_nihao');
+            }elseif ($site == 10) {
+                $order_model = Db::connect('database.db_zeelool_de');
+            }elseif ($site == 11) {
+                $order_model = Db::connect('database.db_zeelool_jp');
             } else {
                 $order_model = Db::connect('database.db_zeelool');
             }
             $order_model->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
-            $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+            $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
             $map['o.order_type'] = 1;
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $order_model
@@ -96,7 +100,7 @@ class SingleItems extends Backend
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
         foreach ($magentoplatformarr as $key => $val) {
-            if (!in_array($val['name'], ['zeelool', 'voogueme', 'nihao'])) {
+            if (!in_array($val['name'], ['zeelool', 'voogueme', 'nihao','zeelool_de','zeelool_jp'])) {
                 unset($magentoplatformarr[$key]);
             }
         }
@@ -138,6 +142,14 @@ class SingleItems extends Backend
                 case 3:
                     $model = Db::connect('database.db_nihao');
                     $coatiing_price =[];
+                    break;
+                case 10:
+                    $model = Db::connect('database.db_zeelool_de');
+                    $coatiing_price['b.coatiing_price'] = ['=',0];
+                    break;
+                case 11:
+                    $model = Db::connect('database.db_zeelool_jp');
+                    $coatiing_price['b.coatiing_price'] = ['=',0];
                     break;
             }
             $model->table('sales_flat_order')->query("set time_zone='+8:00'");
@@ -370,6 +382,12 @@ class SingleItems extends Backend
                 break;
             case 3:
                 $model = Db::connect('database.db_nihao');
+                break;
+            case 10:
+                $model = Db::connect('database.db_zeelool_de');
+                break;
+            case 11:
+                $model = Db::connect('database.db_zeelool_jp');
                 break;
         }
         $model->table('sales_flat_order')->query("set time_zone='+8:00'");
