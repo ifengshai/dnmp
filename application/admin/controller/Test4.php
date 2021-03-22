@@ -798,11 +798,19 @@ class Test4 extends Controller
             $sku_id = $model->table('catalog_product_entity')->where('sku',$value['platform_sku'])->value('entity_id');
             $unique_pageviews = 0;
             foreach ($ga_skus as $kk => $vv) {
+                if($sku_id == 327){
+                    dump($vv);
+                    dump($kk);
+                    dump($unique_pageviews);
+                }
                 if ($kk == '/goods-detail/'.$sku_id) {
                     $unique_pageviews += $vv;
                 }
             }
             Db::name('datacenter_sku_day')->where('id',$value['id'])->update(['unique_pageviews'=>$unique_pageviews]);
+            if($value['id'] == 327){
+                die;
+            }
             echo $value['id'].' is ok'."\n";
             usleep(10000);
         }
