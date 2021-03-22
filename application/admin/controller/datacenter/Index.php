@@ -792,6 +792,8 @@ class Index extends Backend
                     $res = $this->zeeloolEs->getOrderSalesNumTop30([], $map);
                 } elseif ($params['site'] == 10) { //zeelool德语站
                     $res = $this->zeeloolDe->getOrderSalesNumTop30([], $map);
+                } elseif ($params['site'] == 11) { //zeelool日本站
+                    $res = $this->zeeloolJp->getOrderSalesNumTop30([], $map);
                 }
                 cache($cachename, $res, 7200);
             }
@@ -845,6 +847,10 @@ class Index extends Backend
                     //查询对应平台销量
                     $list = $this->zeeloolDe->getOrderSalesNum([], $map);
                     $skus = $itemPlatformSku->getWebSkuAll(10);
+                } elseif ($params['site'] == 11) { //zeelool日本站
+                    //查询对应平台销量
+                    $list = $this->zeeloolJp->getOrderSalesNum([], $map);
+                    $skus = $itemPlatformSku->getWebSkuAll(11);
                 }
                 $productInfo = $this->item->getSkuInfo();
                 $list = $list ?? [];
