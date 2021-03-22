@@ -67,7 +67,7 @@ class StockHouse extends Model
         if ($coding) {
             $where['coding'] = ['like', $coding . '%'];
         }
-        $list = $this->field('id,coding,library_name')->where($where)->where(['area_id' => ['in', $area_id], 'type' => 1, 'status' => 1])->select();
+        $list = $this->field('id as location_id,coding,library_name')->where($where)->where(['area_id' => ['in', $area_id], 'type' => 1, 'status' => 1])->select();
         return collection($list)->toArray();
     }
 }
