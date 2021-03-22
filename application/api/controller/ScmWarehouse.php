@@ -2482,14 +2482,14 @@ class ScmWarehouse extends Scm
                         throw new Exception('SKU=>' . $v['sku'] . '不存在');
                     }
                     $sku_code = array_column($v['sku_agg'], 'code');
-                    $where['code'] = ['in', array_unique($sku_code)];
+                    $whecat['code'] = ['in', array_unique($sku_code)];
                     Log::write("====输出信息=====");
                     Log::write($v['library_name']);
                     Log::write($v['area_id']);
                     $whe['coding'] = $v['library_name'];
                     $whe['area_id'] = $v['area_id'];
 
-                    $code_id = Db::table('fa_store_house')->where($whe)->value('id');
+                    $code_id = Db::table('fa_store_house')->where($whecat)->value('id');
                     Log::write("===========输出code=============");
                     Log::write($code_id);
                     if (!empty($code_id)){
