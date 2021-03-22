@@ -2451,10 +2451,10 @@ class ScmWarehouse extends Scm
             $code = $this->_product_bar_code_item
                 ->where($where)
                 ->column('code');
-//            if ($code) {
-//                $this->error(__('条形码:' . implode(',', $code) . ' 已绑定,请移除'), [], 405);
-//                exit;
-//            }
+            if ($code) {
+                $this->error(__('条形码:' . implode(',', $code) . ' 已绑定,请移除'), [], 405);
+                exit;
+            }
         }
 
         //保存不需要编辑盘点单
@@ -2477,23 +2477,22 @@ class ScmWarehouse extends Scm
                     $item_map['sku'] = $v['sku'];
                     $item_map['is_del'] = 1;
                     $sku_item = $this->_item->where($item_map)->field('stock,available_stock,distribution_occupy_stock')->find();
-//                    if (empty($sku_item)) {
-//                        throw new Exception('SKU=>' . $v['sku'] . '不存在');
-//                    }
+                    if (empty($sku_item)) {
+                        throw new Exception('SKU=>' . $v['sku'] . '不存在');
+                    }
+                    $sku_code = array_column($v['sku_agg'], 'code');
+                    $where['code'] = ['in', array_unique($sku_code)];
 
                     $whe['coding'] = $v['library_name'];
                     $whe['area_id'] = $v['area_id'];
-                    dump($whe);
+
                     $code_id = Db::table('fa_store_house')->where($whe)->value('id');
-                    dump($code_id);
-                    $save_value['location_code'] = $v['library_name'];
-                    $save_value['location_id'] = $v['area_id'];
-                    $save_value['location_code_id'] = $code_id;
-                    dump($save_value);die();
-                    Db::table('fa_product_barcode_item')->where($where)->update($save_value);
-
-
-
+                    if (!empty($code_id)){
+                        $save_value['location_code'] = $v['library_name'];
+                        $save_value['location_id'] = $v['area_id'];
+                        $save_value['location_code_id'] = $code_id;
+                        Db::table('fa_product_barcode_item')->where($where)->update($save_value);
+                    }
                     //等PDA改为 以此为准
                     $item_list = $this->_inventory_item->where(['inventory_id' => $inventory_id, 'sku' => $v['sku'], 'area_id' => $v['area_id'], 'library_name' => $v['library_name']])->find();
                     $save_data = [];
