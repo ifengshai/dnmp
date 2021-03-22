@@ -2214,7 +2214,7 @@ class TrackReg extends Backend
         //ga所有的sku唯一身份浏览量的数据
         $ga_skus = $zeeloolOperate->google_sku_detail(2, $data);
         $ga_skus = array_column($ga_skus, 'uniquePageviews', 'ga:pagePath');
-
+        $sku_id = Db::connect('database.db_voogueme_online')->table('catalog_product_entity')->column('entity_id','sku');
         foreach ($sku_data as $k => $v) {
             $sku_data[$k]['unique_pageviews'] = 0;
             $sku_data[$k]['goods_grade'] = $sku_data[$k]['grade'];
@@ -2222,11 +2222,12 @@ class TrackReg extends Backend
             $sku_data[$k]['site'] = 2;
             $sku_data[$k]['day_stock'] = $sku_data[$k]['stock'];
             $sku_data[$k]['day_onway_stock'] = $sku_data[$k]['plat_on_way_stock'];
+            $id = $sku_id[$v['sku']];
             unset($sku_data[$k]['stock']);
             unset($sku_data[$k]['grade']);
             unset($sku_data[$k]['plat_on_way_stock']);
             foreach ($ga_skus as $kk => $vv) {
-                if (strpos($kk, $v['sku']) != false) {
+                if ($kk == '/goods-detail/'.$id) {
                     $sku_data[$k]['unique_pageviews'] += $vv;
                 }
             }
@@ -2271,7 +2272,7 @@ class TrackReg extends Backend
         //ga所有的sku唯一身份浏览量的数据
         $ga_skus = $zeeloolOperate->google_sku_detail(10, $data);
         $ga_skus = array_column($ga_skus, 'uniquePageviews', 'ga:pagePath');
-
+        $sku_id = Db::connect('database.db_zeelool_de_online')->table('catalog_product_entity')->column('entity_id','sku');
         foreach ($sku_data as $k => $v) {
             $sku_data[$k]['unique_pageviews'] = 0;
             $sku_data[$k]['goods_grade'] = $sku_data[$k]['grade'];
@@ -2279,11 +2280,12 @@ class TrackReg extends Backend
             $sku_data[$k]['site'] = 10;
             $sku_data[$k]['day_stock'] = $sku_data[$k]['stock'];
             $sku_data[$k]['day_onway_stock'] = $sku_data[$k]['plat_on_way_stock'];
+            $id = $sku_id[$v['sku']];
             unset($sku_data[$k]['stock']);
             unset($sku_data[$k]['grade']);
             unset($sku_data[$k]['plat_on_way_stock']);
             foreach ($ga_skus as $kk => $vv) {
-                if (strpos($kk, $v['sku']) != false) {
+                if ($kk == '/goods-detail/'.$id) {
                     $sku_data[$k]['unique_pageviews'] += $vv;
                 }
             }
@@ -2301,7 +2303,7 @@ class TrackReg extends Backend
         //ga所有的sku唯一身份浏览量的数据
         $ga_skus = $zeeloolOperate->google_sku_detail(11, $data);
         $ga_skus = array_column($ga_skus, 'uniquePageviews', 'ga:pagePath');
-
+        $sku_id = Db::connect('database.db_zeelool_jp_online')->table('catalog_product_entity')->column('entity_id','sku');
         foreach ($sku_data as $k => $v) {
             $sku_data[$k]['unique_pageviews'] = 0;
             $sku_data[$k]['goods_grade'] = $sku_data[$k]['grade'];
@@ -2309,11 +2311,12 @@ class TrackReg extends Backend
             $sku_data[$k]['site'] = 11;
             $sku_data[$k]['day_stock'] = $sku_data[$k]['stock'];
             $sku_data[$k]['day_onway_stock'] = $sku_data[$k]['plat_on_way_stock'];
+            $id = $sku_id[$v['sku']];
             unset($sku_data[$k]['stock']);
             unset($sku_data[$k]['grade']);
             unset($sku_data[$k]['plat_on_way_stock']);
             foreach ($ga_skus as $kk => $vv) {
-                if (strpos($kk, $v['sku']) != false) {
+                if ($kk == '/goods-detail/'.$id) {
                     $sku_data[$k]['unique_pageviews'] += $vv;
                 }
             }
