@@ -2438,6 +2438,8 @@ class ScmWarehouse extends Scm
             $msg = '保存';
         }
 
+
+
         //检测条形码是否已绑定
         foreach ($item_sku as $key => $value) {
 
@@ -2478,6 +2480,18 @@ class ScmWarehouse extends Scm
                     if (empty($sku_item)) {
                         throw new Exception('SKU=>' . $v['sku'] . '不存在');
                     }
+
+                    $whe['coding'] = $v['library_name'];
+                    $whe['area_id'] = $v['area_id'];
+                    dump($whe);
+                    $code_id = Db::table('fa_store_house')->where($whe)->value('id');
+                    dump($code_id);
+                    $save_value['location_code'] = $v['library_name'];
+                    $save_value['location_id'] = $v['area_id'];
+                    $save_value['location_code_id'] = $code_id;
+                    dump($save_value);die();
+                    Db::table('fa_product_barcode_item')->where($where)->update($save_value);
+
 
 
                     //等PDA改为 以此为准
