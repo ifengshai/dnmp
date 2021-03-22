@@ -2109,6 +2109,7 @@ class WorkOrderList extends Backend
 
                 //检测子订单措施
                 if ($item_order_info) {
+                    echo  111;die();
                     $item_order_info = array_filter($item_order_info);
                     //查询所有子单数量
                     $_new_order_process = new NewOrderProcess();
