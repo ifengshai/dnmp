@@ -1032,6 +1032,7 @@ class WorkOrderList extends Backend
 
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
+            dump($params);die();
             if ($params) {
                 $params = $this->preExcludeFields($params);
                 if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
@@ -1297,6 +1298,8 @@ class WorkOrderList extends Backend
                         if (in_array(18, $item['item_choose'])) {
                             //检测之前是否处理过子单措施
                             array_intersect([3], $change_type) && $this->error("子订单：{$key} 措施已处理，不能取消");
+
+
                         } /*elseif (in_array(19, $item['item_choose'])) {//更改镜框
                             //检测之前是否处理过更改镜框措施
                             in_array(1, $change_type) && $this->error("子订单：{$key} 措施已处理，不能重复创建");
