@@ -1146,6 +1146,40 @@ class WorkOrderList extends Backend
                      * 5、运营客服组的优惠券都由客服经理审核
                      */
 
+                    //主单取消
+                    if (in_array(3, $measure_choose_id)) {
+                        $_new_order = new NewOrder();
+                        $order_id = $_new_order
+                            ->where('increment_id', $params['platform_order'])
+                            ->value('id');
+                        dump($order_id);
+                        if ($order_id){
+                            $order_item_where['order_id'] = $order_id;
+                            $_new_order_item_process = new NewOrderItemProcess();
+                            $order_item_list = $_new_order_item_process
+                                ->where($order_item_where)
+                                ->column('sku');
+                            dump($order_item_list);
+                            /*****************限制如果有盘点单未结束不能操作配货完成*******************/
+                            //配货完成时判断
+                            //拣货区盘点时不能操作
+                            //查询条形码库区库位
+                            $whe_sku['sku'] = ['in',$order_item_list];
+                            dump($whe_sku);die();
+                            $barcodedata = $this->_product_bar_code_item->where($whe_sku)->column('location_code');
+                            if (!empty($barcodedata)){
+                                $count = $this->_inventory->alias('a')
+                                    ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata]])
+                                    ->count();
+                                if ($count > 0) {
+                                    return ['result' => false, 'msg' => '此主单下的子订单SKU对应库位正在盘点,暂无法进行出入库操作'];
+                                }
+                            }
+                            /****************************end*****************************************/
+                        }
+                    }
+
+
                     $all_choose_ids = $measure_choose_id;
 
                     //校验退款、vip退款
@@ -1159,6 +1193,7 @@ class WorkOrderList extends Backend
                     //校验赠品、补发库存
                     if (array_intersect([6, 7], $measure_choose_id)) {
                         $original_sku = [];
+
 
                         //赠品
                         if (in_array(6, $measure_choose_id)) {
@@ -1297,20 +1332,75 @@ class WorkOrderList extends Backend
                         if (in_array(18, $item['item_choose'])) {
                             //检测之前是否处理过子单措施
                             array_intersect([3], $change_type) && $this->error("子订单：{$key} 措施已处理，不能取消");
+                            /*****************限制如果有盘点单未结束不能操作配货完成*******************/
+                            //拣货区盘点时不能操作
+                            //查询条形码库区库位
+                            $sonorder_sku['sku'] = $item['cancel_order']['sku'];
+                            Log::write("======拣货区盘点时不能操作子单取消======");
+                            Log::write($sonorder_sku);
+                            $barcodedata = $this->_product_bar_code_item->where($sonorder_sku)->column('location_code');
+                            Log::write($barcodedata);
+                            if (!empty($barcodedata)){
+                                $count = $this->_inventory->alias('a')
+                                    ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata]])
+                                    ->count();
+                                Log::write($count);
+                                if ($count > 0) {
+                                    return ['result' => false, 'msg' => '此'.$sku.'对应库位正在盘点,暂无法进行出入库操作'];
+                                }
+                            }
+                            /****************************end*****************************************/
 
+                        } elseif (in_array(19, $item['item_choose'])) {//更改镜框
+                            /*****************限制如果有盘点单未结束不能操作配货完成*******************/
+                            //拣货区盘点时不能操作
+                            //查询条形码库区库位
+                            $sonorder_sku['sku'] = $item['cancel_order']['sku'];
+                            Log::write("======拣货区盘点时不能操作更改镜框措施======");
+                            Log::write($sonorder_sku);
+                            $barcodedata = $this->_product_bar_code_item->where($sonorder_sku)->column('location_code');
+                            Log::write($sonorder_sku);
+                            if (!empty($barcodedata)){
+                                $count = $this->_inventory->alias('a')
+                                    ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata]])
+                                    ->count();
+                                Log::write($count);
+                                if ($count > 0) {
+                                    return ['result' => false, 'msg' => '此'.$item['cancel_order']['sku'].'对应库位正在盘点,暂无法进行出入库操作'];
+                                }
+                            }
+                            /****************************end*****************************************/
 
-                        } /*elseif (in_array(19, $item['item_choose'])) {//更改镜框
+                            /*****************限制如果有盘点单未结束不能操作配货完成*******************/
+                            //拣货区盘点时不能操作
+                            //查询条形码库区库位
+                            $sonorder_new_sku['sku'] = $item['change_frame']['original_sku'];
+                            Log::write("======拣货区盘点时不能操作更改镜框措施======");
+                            Log::write($sonorder_sku);
+                            $barcodedata = $this->_product_bar_code_item->where($sonorder_sku)->column('location_code');
+                            Log::write($sonorder_sku);
+                            if (!empty($barcodedata)){
+                                $count = $this->_inventory->alias('a')
+                                    ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata]])
+                                    ->count();
+                                Log::write($count);
+                                if ($count > 0) {
+                                    return ['result' => false, 'msg' => '此'.$item['change_frame']['original_sku'].'对应库位正在盘点,暂无法进行出入库操作'];
+                                }
+                            }
+                            /****************************end*****************************************/
                             //检测之前是否处理过更改镜框措施
-                            in_array(1, $change_type) && $this->error("子订单：{$key} 措施已处理，不能重复创建");
-
-                            //更改镜框校验库存
-                            !$item['change_frame']['change_sku'] && $this->error("子订单：{$key} 的新sku不能为空");
-                            $back_data = $this->skuIsStock([$item['change_frame']['change_sku']], $params['work_platform'], [1]);
-                            !$back_data['result'] && $this->error($back_data['msg']);
-                        } elseif (in_array(20, $item['item_choose'])) {//更改镜片
-                            //检测之前是否处理过更改镜片措施
-                            in_array(2, $change_type) && $this->error("子订单：{$key} 措施已处理，不能重复创建");
-                        }*/
+//                            in_array(1, $change_type) && $this->error("子订单：{$key} 措施已处理，不能重复创建");
+//
+//                            //更改镜框校验库存
+//                            !$item['change_frame']['change_sku'] && $this->error("子订单：{$key} 的新sku不能为空");
+//                            $back_data = $this->skuIsStock([$item['change_frame']['change_sku']], $params['work_platform'], [1]);
+//                            !$back_data['result'] && $this->error($back_data['msg']);
+                        }
+//                        elseif (in_array(20, $item['item_choose'])) {//更改镜片
+//                            //检测之前是否处理过更改镜片措施
+//                            in_array(2, $change_type) && $this->error("子订单：{$key} 措施已处理，不能重复创建");
+//                        }
                     }
                     unset($item);
                 }
