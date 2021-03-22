@@ -1575,21 +1575,17 @@ class Distribution extends Backend
         $ids = input('id_params/a');
         !$ids && $this->error('请选择要标记的数据');
         /*****************限制如果有盘点单未结束不能操作配货完成*******************/
-        //配货完成时判断
         //拣货区盘点时不能操作
         //查询条形码库区库位
         $sku = $this->model->where(['id' => ['in', $ids]])->column('sku');
-        dump($sku);
         $whe_sku['sku'] = ['in',$sku];
-        $whe_sku['location_code'] = ['neq',NULL];
         $barcodedata = $this->_product_bar_code_item->where($whe_sku)->column('location_code');
 
-        dump($barcodedata);
         if (!empty($barcodedata)){
             $count = $this->_inventory->alias('a')
                 ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata]])
                 ->count();
-            dump($count);
+
             if ($count > 0) {
                 $this->error(__('存在正在盘点的单据,暂无法审核'));
             }
