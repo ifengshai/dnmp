@@ -2450,6 +2450,7 @@ class ScmWarehouse extends Scm
             $where['sku'] = ['<>', $value['sku']];
             $code = $this->_product_bar_code_item
                 ->where($where)
+                ->where($where)
                 ->column('code');
             if ($code) {
                 $this->error(__('条形码:' . implode(',', $code) . ' 已绑定,请移除'), [], 405);
