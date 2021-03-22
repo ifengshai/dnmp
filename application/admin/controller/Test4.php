@@ -799,7 +799,7 @@ class Test4 extends Controller
             $unique_pageviews = 0;
             foreach ($ga_skus as $kk => $vv) {
                 preg_match('/\d+/',$kk,$str_arr);
-                if ($str_arr[0] == $sku_id) {
+                if ($kk == '/goods-detail/'.$sku_id) {
                     $unique_pageviews += $vv;
                 }
             }
