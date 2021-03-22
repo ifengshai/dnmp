@@ -2950,7 +2950,7 @@ class ScmWarehouse extends Scm
             foreach ($list as $k=>$v){
                 $list[$k]['sku'] = '';
                 $list[$k]['name'] = $v['library_name'];
-                $list[$k]['bind_id'] = '';
+                $list[$k]['bind_id'] = 1;
                 $list[$k]['area_id'] = $area_id;
                 $list[$k]['area'] = Db::name('warehouse_area')->where('id',$area_id)->value('coding');
             }
