@@ -2489,7 +2489,7 @@ class ScmWarehouse extends Scm
                     $whe['coding'] = $v['library_name'];
                     $whe['area_id'] = $v['area_id'];
 
-                    $code_id = Db::table('fa_store_house')->where($whecat)->value('id');
+                    $code_id = Db::table('fa_store_house')->where($whe)->value('id');
                     Log::write("===========输出code=============");
                     Log::write($code_id);
                     if (!empty($code_id)){
@@ -2498,8 +2498,7 @@ class ScmWarehouse extends Scm
                         $save_value['location_code_id'] = $code_id;
                         Log::write($save_value);
                         Log::write("===输出where条件==");
-                        Log::write($where);
-                        Db::table('fa_product_barcode_item')->where($where)->update($save_value);
+                        Db::table('fa_product_barcode_item')->where($whecat)->update($save_value);
                     }
                     //等PDA改为 以此为准
                     $item_list = $this->_inventory_item->where(['inventory_id' => $inventory_id, 'sku' => $v['sku'], 'area_id' => $v['area_id'], 'library_name' => $v['library_name']])->find();
