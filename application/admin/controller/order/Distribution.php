@@ -1581,7 +1581,9 @@ class Distribution extends Backend
         $sku = $this->model->where(['id' => ['in', $ids]])->column('sku');
         dump($sku);
         $whe_sku['sku'] = ['in',$sku];
+        $whe_sku['location_code'] = ['neq',NULL];
         $barcodedata = $this->_product_bar_code_item->where($whe_sku)->column('location_code');
+
         dump($barcodedata);
         if (!empty($barcodedata)){
             $count = $this->_inventory->alias('a')
