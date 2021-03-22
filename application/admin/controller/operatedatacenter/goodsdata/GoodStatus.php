@@ -119,7 +119,7 @@ class GoodStatus extends Backend
                 [
                     'type' => 'bar',
                     'barWidth' => '10%',
-                    'data' => [$platform_z_up_num,$platform_v_up_num,$platform_n_up_num,$platform_es_up_num,$platform_de_up_num,$platform_jp_up_num],
+                    'data' => [$platform_z_up_num,$platform_v_up_num,$platform_n_up_num,$platform_w_up_num,$platform_es_up_num,$platform_de_up_num,$platform_jp_up_num],
                     'name' => '在售'
                 ],
                 [
