@@ -2145,7 +2145,7 @@ class WorkOrderList extends Backend
                             /*****************限制如果有盘点单未结束不能操作配货完成*******************/
                             //拣货区盘点时不能操作
                             //查询条形码库区库位
-                            $sonorder_sku['sku'] = $item['original_sku'];
+                            $sonorder_sku['sku'] = $item['cancel_order']['sku'];
                             dump($item);
                             dump($sonorder_sku);die();
                             Log::write("======拣货区盘点时不能操作子单取消======");
@@ -2169,7 +2169,7 @@ class WorkOrderList extends Backend
                             /*****************限制如果有盘点单未结束不能操作配货完成*******************/
                             //拣货区盘点时不能操作
                             //查询条形码库区库位
-                            $sonorder_sku['sku'] = $item['original_sku'];
+                            $sonorder_sku['sku'] = $item['cancel_order']['sku'];
                             Log::write("======拣货区盘点时不能操作更改镜框措施======");
                             Log::write($sonorder_sku);
                             $barcodedata = $this->_product_bar_code_item->where($sonorder_sku)->column('location_code');
