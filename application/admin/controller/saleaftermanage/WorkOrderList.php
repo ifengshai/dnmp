@@ -1369,6 +1369,7 @@ class WorkOrderList extends Backend
                             /*****************限制如果有盘点单未结束不能操作配货完成*******************/
                             //拣货区盘点时不能操作
                             //查询条形码库区库位
+                            dump($item);
                             $sonorder_new_sku['sku'] = $item['change_frame']['original_sku'];
                             dump($sonorder_new_sku);
                             $barcodedata = $this->_product_bar_code_item->where($sonorder_new_sku)->column('location_code');
