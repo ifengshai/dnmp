@@ -788,7 +788,14 @@ class Test4 extends Controller
             $data = $value['day_date'];
             $ga_skus = $zeeloolOperate->google_sku_detail($value['site'], $data);
             $ga_skus = array_column($ga_skus, 'uniquePageviews', 'ga:pagePath');
-            $sku_id = Db::connect('database.db_zeelool_de_online')->table('catalog_product_entity')->where('sku',$value['platform_sku'])->value('entity_id');
+            if($value['site'] == 2){
+                $model = Db::connect('database.db_voogueme_online');
+            }elseif($value['site'] == 10){
+                $model = Db::connect('database.db_zeelool_de_online');
+            }else{
+                $model = Db::connect('database.db_zeelool_jp_online');
+            }
+            $sku_id = $model->table('catalog_product_entity')->where('sku',$value['platform_sku'])->value('entity_id');
             $unique_pageviews = 0;
             foreach ($ga_skus as $kk => $vv) {
                 preg_match('/\d+/',$kk,$str_arr);
