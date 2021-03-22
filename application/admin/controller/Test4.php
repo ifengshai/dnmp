@@ -786,7 +786,7 @@ class Test4 extends Controller
         $data = date('Y-m-d', strtotime('-1 day'));
         // $data = '2020-11-11';
         $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
-        
+
         $sku_data = $_item_platform_sku
             ->field('sku,grade,platform_sku,stock,plat_on_way_stock')
             ->where(['platform_type' => 10, 'outer_sku_status' => 1])
@@ -796,7 +796,7 @@ class Test4 extends Controller
         //ga所有的sku唯一身份浏览量的数据
         $ga_skus = $zeeloolOperate->google_sku_detail(10, $data);
         $ga_skus = array_column($ga_skus, 'uniquePageviews', 'ga:pagePath');
-
+        $sku_id = Db::connect('database.db_zeelool_de_online')->table('catalog_product_entity')->column('entity_id','sku');
         foreach ($sku_data as $k => $v) {
             $sku_data[$k]['unique_pageviews'] = 0;
             $sku_data[$k]['goods_grade'] = $sku_data[$k]['grade'];
@@ -804,11 +804,13 @@ class Test4 extends Controller
             $sku_data[$k]['site'] = 10;
             $sku_data[$k]['day_stock'] = $sku_data[$k]['stock'];
             $sku_data[$k]['day_onway_stock'] = $sku_data[$k]['plat_on_way_stock'];
+            $id = $sku_id[$v['sku']];
             unset($sku_data[$k]['stock']);
             unset($sku_data[$k]['grade']);
             unset($sku_data[$k]['plat_on_way_stock']);
             foreach ($ga_skus as $kk => $vv) {
-                if (strpos($kk, $v['sku']) != false) {
+                preg_match('/\d+/',$kk,$str_arr);
+                if ($str_arr[0] == $id) {
                     $sku_data[$k]['unique_pageviews'] += $vv;
                 }
             }
@@ -826,7 +828,7 @@ class Test4 extends Controller
         //ga所有的sku唯一身份浏览量的数据
         $ga_skus = $zeeloolOperate->google_sku_detail(11, $data);
         $ga_skus = array_column($ga_skus, 'uniquePageviews', 'ga:pagePath');
-
+        $sku_id = Db::connect('database.db_zeelool_de_online')->table('catalog_product_entity')->column('entity_id','sku');
         foreach ($sku_data as $k => $v) {
             $sku_data[$k]['unique_pageviews'] = 0;
             $sku_data[$k]['goods_grade'] = $sku_data[$k]['grade'];
@@ -834,11 +836,13 @@ class Test4 extends Controller
             $sku_data[$k]['site'] = 11;
             $sku_data[$k]['day_stock'] = $sku_data[$k]['stock'];
             $sku_data[$k]['day_onway_stock'] = $sku_data[$k]['plat_on_way_stock'];
+            $id = $sku_id[$v['sku']];
             unset($sku_data[$k]['stock']);
             unset($sku_data[$k]['grade']);
             unset($sku_data[$k]['plat_on_way_stock']);
             foreach ($ga_skus as $kk => $vv) {
-                if (strpos($kk, $v['sku']) != false) {
+                preg_match('/\d+/',$kk,$str_arr);
+                if ($str_arr[0] == $id) {
                     $sku_data[$k]['unique_pageviews'] += $vv;
                 }
             }
