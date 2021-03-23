@@ -1578,8 +1578,12 @@ class Distribution extends Backend
         //拣货区盘点时不能操作
         //查询条形码库区库位
         $sku = $this->model->where(['id' => ['in', $ids]])->column('sku');
-        $whe_sku['sku'] = ['in',$sku];
-        $barcodedata = $this->_product_bar_code_item->where($whe_sku)->column('location_code');
+        $whe_sku['platform_sku'] = ['in',$sku];
+        //转换sku
+        $item_platform_sku = new ItemPlatformSku();
+        $true_sku =  $item_platform_sku->where($whe_sku)->column('sku');
+        $whe['sku'] = ['in',$true_sku];
+        $barcodedata = $this->_product_bar_code_item->where($whe)->column('location_code');
 
         if (!empty($barcodedata)){
             $count = $this->_inventory->alias('a')

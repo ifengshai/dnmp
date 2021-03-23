@@ -2619,6 +2619,7 @@ class ScmWarehouse extends Scm
                     ->select();
                 $infos = collection($infos)->toArray();
                 $sku_code = [];
+
                 foreach ($infos as $k => $v) {
                     //如果误差为0则跳过
                     if ($v['error_qty'] == 0) {
