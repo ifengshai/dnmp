@@ -2278,7 +2278,7 @@ class TrackReg extends Backend
         set_time_limit(0);
         //统计昨天的数据
         $data = date('Y-m-d', strtotime('-1 day'));
-        $sku_data = Db::name('datacenter_sku_day')->where('day_date',$data)->where('site','in','10,11')->field('id,platform_sku,site')->select();
+        $sku_data = Db::name('datacenter_sku_day')->where('day_date',$data)->field('id,platform_sku,site')->select();
         foreach($sku_data as $key=>$value){
             $ga_skus = $zeeloolOperate->google_sku_detail($value['site'], $data);
             $ga_skus = array_column($ga_skus, 'uniquePageviews', 'ga:pagePath');
