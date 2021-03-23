@@ -2212,13 +2212,27 @@ class ScmWarehouse extends Scm
             empty($page) && $this->error(__('Page can not be empty'), [], 522);
             empty($page_size) && $this->error(__('Page size can not be empty'), [], 523);
             if ($query){
-                $cat['sku'] = ['like', '%' . $query . '%'];
-                $cat['inventory_id'] = ['neq',0];
-                $cat['is_add'] = ['eq',1];
+                $cat['a.sku'] = ['like', '%' . $query . '%'];
+                $cat['a.inventory_id'] = ['neq',0];
+                $cat['a.is_add'] = ['eq',1];
 
 //            //查询对应的库位id
 //                $store_house_id =  Db::table('fa_product_barcode_item')->where($cat)->column('location_code_id');
-                $library_name =  Db::table('fa_inventory_item')->where($cat)->column('library_name');
+                $library_name =  Db::table('fa_inventory_item')
+                    ->alias('a')
+                    ->join(['fa_inventory_list' => 'b'], 'a.inventory_id=b.id')
+                    ->where(['b.is_del' => 1, 'b.check_status' => ['in', [0, 1]]])
+                    ->where($cat)
+                    ->column('a.location_code_id');
+                dump($library_name);die();
+
+
+//                    ->where($cat)->column('library_name');
+//                $count = $this->_inventory->alias('a')
+//                    ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata]])
+//                    ->count();
+
+
                 foreach ($library_name as $k=>$v){
                     if (empty($v)){
                         unset($library_name[$k]);
