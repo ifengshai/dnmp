@@ -19,9 +19,13 @@ class UserDataView extends Backend
         $this->zeelool = new \app\admin\model\order\order\Zeelool;
         $this->voogueme = new \app\admin\model\order\order\Voogueme;
         $this->nihao = new \app\admin\model\order\order\Nihao;
+        $this->zeeloolde = new \app\admin\model\order\order\ZeeloolDe();
+        $this->zeelooljp = new \app\admin\model\order\order\ZeeloolJp();
         $this->zeeloolOperate = new \app\admin\model\operatedatacenter\Zeelool;
         $this->vooguemeOperate = new \app\admin\model\operatedatacenter\Voogueme;
         $this->nihaoOperate = new \app\admin\model\operatedatacenter\Nihao;
+        $this->zeelooldeOperate = new \app\admin\model\operatedatacenter\ZeeloolDe();
+        $this->zeelooljpOperate = new \app\admin\model\operatedatacenter\ZeeloolJp();
         $this->datacenterday = new \app\admin\model\operatedatacenter\Datacenter;
         $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform;
     }
@@ -37,7 +41,7 @@ class UserDataView extends Backend
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getNewAuthSite();
         foreach ($magentoplatformarr as $key => $val) {
-            if (!in_array($val, ['zeelool', 'voogueme', 'nihao'])) {
+            if (!in_array($val, ['zeelool', 'voogueme', 'nihao','zeelool_es','zeelool_jp'])) {
                 unset($magentoplatformarr[$key]);
             }
         }
@@ -92,6 +96,12 @@ class UserDataView extends Backend
                     case 3:
                         $model = $this->nihaoOperate;
                         break;
+                    case 10:
+                        $model = $this->zeelooldeOperate;
+                        break;
+                    case 11:
+                        $model = $this->zeelooljpOperate;
+                        break;
                 }
                 //活跃用户数
                 $active_user_num = $model->getActiveUser($time_str,$time_str2);
@@ -129,6 +139,12 @@ class UserDataView extends Backend
                         break;
                     case 3:
                         $model = $this->nihaoOperate;
+                        break;
+                    case 10:
+                        $model = $this->zeelooldeOperate;
+                        break;
+                    case 11:
+                        $model = $this->zeelooljpOperate;
                         break;
                 }
                 if ($order_platform) {
@@ -186,6 +202,12 @@ class UserDataView extends Backend
                 }elseif($order_platform == 3){
                     $where['site'] = 3;
                     $model = $this->nihaoOperate;
+                }elseif($order_platform == 10){
+                    $where['site'] = 10;
+                    $model = $this->zeelooldeOperate;
+                }elseif($order_platform == 11){
+                    $where['site'] = 11;
+                    $model = $this->zeelooljpOperate;
                 }else{
                     $where['site'] = 1;
                     $model = $this->zeeloolOperate;
@@ -262,6 +284,10 @@ class UserDataView extends Backend
                     $web_model = Db::connect('database.db_voogueme');
                 }elseif($order_platform == 3){
                     $web_model = Db::connect('database.db_nihao');
+                }elseif($order_platform == 10){
+                    $web_model = Db::connect('database.db_zeelool_de');
+                }elseif($order_platform == 11){
+                    $web_model = Db::connect('database.db_zeelool_jp');
                 }else{
                     $web_model = Db::connect('database.db_zeelool');
                 }
@@ -329,6 +355,10 @@ class UserDataView extends Backend
                     $model = $this->voogueme;
                 }elseif($order_platform == 3){
                     $model = $this->nihao;
+                }elseif($order_platform == 10){
+                    $model = $this->zeeloolde;
+                }elseif($order_platform == 3){
+                    $model = $this->zeelooljp;
                 }else{
                     $model = $this->zeelool;
                 }
