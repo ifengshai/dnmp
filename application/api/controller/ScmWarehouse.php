@@ -2224,12 +2224,13 @@ class ScmWarehouse extends Scm
                         unset($library_name[$k]);
                     }
                 }
+                dump($library_name);
                 if ($library_name){
                     $where['b.coding'] = ['not in', $library_name];
                 }
 
             }
-
+            dump($where);die();
 
             //排除待盘点sku
             $sku_arr = $this->_inventory_item->alias('a')->join(['fa_inventory_list' => 'b'], 'a.inventory_id=b.id')
