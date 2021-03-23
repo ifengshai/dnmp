@@ -2233,7 +2233,7 @@ class ScmWarehouse extends Scm
                 ->where(['b.status' => ['in', [0, 1]]])
 //                ->where(['a.sku' => ['neq', $query]])
                 ->column('sku');
-
+            dump($sku_arr);die();
             foreach ($sku_arr as $k=>$v){
                 $sku_arr_sku[] = $k;
                 $sku_area_id[] = $v;
