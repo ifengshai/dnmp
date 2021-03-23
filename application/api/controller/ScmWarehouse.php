@@ -2224,9 +2224,8 @@ class ScmWarehouse extends Scm
                         unset($library_name[$k]);
                     }
                 }
-                dump($library_name);
                 if ($library_name){
-                    $where['b.coding'] = ['not in', $library_name];
+                    $where['b.coding'] = ['not in', array_unique($library_name)];
                 }
 
             }
