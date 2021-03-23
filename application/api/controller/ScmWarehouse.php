@@ -2211,9 +2211,13 @@ class ScmWarehouse extends Scm
             $page_size = $this->request->request('page_size');
             empty($page) && $this->error(__('Page can not be empty'), [], 522);
             empty($page_size) && $this->error(__('Page size can not be empty'), [], 523);
-
+            $inventory_item_id = $this->_inventory_item->where('sku='.$query)->column('id');
+            dump($inventory_item_id);die();
             //排除待盘点sku
-            $sku_arr = $this->_inventory_item->alias('a')->join(['fa_inventory_list' => 'b'], 'a.inventory_id=b.id')->where(['b.status' => ['in', [0, 1]]])->column('sku,area_id');
+            $sku_arr = $this->_inventory_item->alias('a')->join(['fa_inventory_list' => 'b'], 'a.inventory_id=b.id')
+                ->where(['b.status' => ['in', [0, 1]]])
+                ->where(['.sku' => ['neq', $query]])
+                ->column('sku');
             foreach ($sku_arr as $k=>$v){
                 $sku_arr_sku[] = $k;
                 $sku_area_id[] = $v;
@@ -2221,6 +2225,11 @@ class ScmWarehouse extends Scm
 
             if ($sku_arr_sku) {
                 $where['sku'] = ['not in', $sku_arr_sku];
+                //  11  -- 1    11--2   11--3
+                // 11  --- 1  不能出现
+                //sku  not in  11  and
+
+
             }
             if ($sku_area_id) {
                 $where['b.area_id'] = ['not in', $sku_area_id];
