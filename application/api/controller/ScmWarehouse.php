@@ -2314,9 +2314,13 @@ class ScmWarehouse extends Scm
                 $arr['create_person'] = $this->auth->nickname;
                 $arr['createtime'] = date('Y-m-d H:i:s', time());
                 $result = $this->_inventory->allowField(true)->save($arr);
+                Log::write("===创建盘点单===");
+                Log::write($result);
                 if ($result) {
                     $list = [];
                     foreach (array_filter($item_sku) as $k => $v) {
+
+                        Log::write($this->_inventory->id);
                         $list[$k]['inventory_id'] = $this->_inventory->id;
                         $list[$k]['sku'] = $v['sku'];
                         $item = $this->_item->field('name,stock,available_stock,distribution_occupy_stock')->where('sku', $v['sku'])->find();
@@ -2336,7 +2340,7 @@ class ScmWarehouse extends Scm
                         $list[$k]['area_id'] = $v['area_id']; //库区id
                         $list[$k]['library_name'] = $v['library_name']; //库位编码
                     }
-
+                    Log::write($list);
                     //添加明细表数据
                     $result = $this->_inventory_item->allowField(true)->saveAll($list);
                 }
