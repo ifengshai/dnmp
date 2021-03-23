@@ -2213,28 +2213,21 @@ class ScmWarehouse extends Scm
             empty($page_size) && $this->error(__('Page size can not be empty'), [], 523);
 
             $cat['sku'] = ['like', '%' . $query . '%'];
-            $inventory_item_id = $this->_inventory_item->where($cat)->column('id');
-            dump($inventory_item_id);die();
-            if ($inventory_item_id){
+            $cat['area_id'] = ['gt',0];
+//            $inventory_item_id = $this->_inventory_item->where($cat)->column('id');
 
-            }
             //排除待盘点sku
             $sku_arr = $this->_inventory_item->alias('a')->join(['fa_inventory_list' => 'b'], 'a.inventory_id=b.id')
                 ->where(['b.status' => ['in', [0, 1]]])
-                ->where(['.sku' => ['neq', $query]])
+//                ->where(['.sku' => ['neq', $query]])
                 ->column('sku');
             foreach ($sku_arr as $k=>$v){
                 $sku_arr_sku[] = $k;
                 $sku_area_id[] = $v;
             }
 
-            if ($sku_arr_sku) {
-                $where['sku'] = ['not in', $sku_arr_sku];
-                //  11  -- 1    11--2   11--3
-                // 11  --- 1  不能出现
-                //sku  not in  11  and
-
-
+            if ($sku_arr) {
+                $where['sku'] = ['not in', $sku_arr];
             }
             if ($sku_area_id) {
                 $where['b.area_id'] = ['not in', $sku_area_id];
@@ -2278,8 +2271,7 @@ class ScmWarehouse extends Scm
                 ->join(['fa_warehouse_area' => 'c'], 'b.area_id=c.id')
                 ->order('a.id', 'desc')
                 ->limit($offset, $limit)
-                ->select(false);
-            dump($list);die();
+                ->select();
             $list = collection($list)->toArray();
 
             //盘点单所需数据
