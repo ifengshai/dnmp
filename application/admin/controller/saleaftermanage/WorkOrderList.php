@@ -1994,6 +1994,9 @@ class WorkOrderList extends Backend
                 $stock = $res['stock'];
             }
             //判断库存是否足够
+            Log::write("判断库存是否足够");
+            Log::write($stock);
+            Log::write( $num[$k]);
             if ($stock < $num[$k]) {
                 // $params = ['sku'=>$sku,'siteType'=>$siteType,'stock'=>$stock,'num'=>$num[$k]];
                 // file_put_contents('/www/wwwroot/mojing/runtime/log/stock.txt',json_encode($params),FILE_APPEND);
