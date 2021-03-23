@@ -2214,7 +2214,13 @@ class ScmWarehouse extends Scm
 
             //排除待盘点sku
             $sku_arr = $this->_inventory_item->alias('a')->join(['fa_inventory_list' => 'b'], 'a.inventory_id=b.id')->where(['b.status' => ['in', [0, 1]]])->column('sku,area_id');
-            dump($sku_arr);die();
+            foreach ($sku_arr as $k=>$v){
+                $sku_arr[] = $k;
+                $sku_area_id[] = $v;
+            }
+            dump($sku_arr);
+            dump($sku_area_id);
+            die();
             if ($sku_arr) {
                 $where['sku'] = ['not in', $sku_arr];
             }
