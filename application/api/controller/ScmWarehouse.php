@@ -2220,7 +2220,7 @@ class ScmWarehouse extends Scm
 //                $store_house_id =  Db::table('fa_product_barcode_item')->where($cat)->column('location_code_id');
                 $library_name =  Db::table('fa_inventory_item')->where($cat)->column('library_name');
                 foreach ($library_name as $k=>$v){
-                    if (!empty($v)){
+                    if (empty($v)){
                         unset($library_name[$k]);
                     }
                 }
