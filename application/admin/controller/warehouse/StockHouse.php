@@ -62,9 +62,9 @@ class StockHouse extends Backend
             //自定义sku搜索
             $filter = json_decode($this->request->get('filter'), true);
             if ($filter['area_coding']) {
-                $area_id = Db::name('warehouse_area')->where('coding',$filter['area_coding'])->value('id');
-                $all_store_id = Db::name('store_house')->where('area_id',$area_id)->column('id');
-                $map['id'] = ['in',$all_store_id];
+                $area_id = Db::name('warehouse_area')->where('coding', $filter['area_coding'])->value('id');
+                $all_store_id = Db::name('store_house')->where('area_id', $area_id)->column('id');
+                $map['id'] = ['in', $all_store_id];
                 unset($filter['area_coding']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
@@ -86,9 +86,9 @@ class StockHouse extends Backend
 
             $list = collection($list)->toArray();
             //所有库区编码id
-            $area_coding = Db::name('warehouse_area')->column('coding','id');
+            $area_coding = Db::name('warehouse_area')->column('coding', 'id');
             //获得库位所属库区编码
-            foreach ($list as $k=>$v){
+            foreach ($list as $k => $v) {
                 $list[$k]['area_coding'] = $area_coding[$v['area_id']];
             }
             $result = array("total" => $total, "rows" => $list);
@@ -112,8 +112,8 @@ class StockHouse extends Backend
                     $params[$this->dataLimitField] = $this->auth->id;
                 }
                 empty($params['coding']) && $this->error('库位编码不能为空！');
-                $warehouse_area = Db::name('warehouse_area')->where('id',$params['area_id'])->find();
-                if ($warehouse_area['status'] == 2){
+                $warehouse_area = Db::name('warehouse_area')->where('id', $params['area_id'])->find();
+                if ($warehouse_area['status'] == 2) {
                     $this->error('当前库区已禁用！');
                 }
                 //判断选择的库位是否已存在
@@ -168,8 +168,8 @@ class StockHouse extends Backend
         $arr = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
         $this->assign('shelf_number', $arr);
         //所有库区编码id
-        $area_coding = Db::name('warehouse_area')->column('coding','id');
-        $this->assign('area_coding',$area_coding);
+        $area_coding = Db::name('warehouse_area')->column('coding', 'id');
+        $this->assign('area_coding', $area_coding);
         return $this->view->fetch();
     }
 
@@ -194,8 +194,8 @@ class StockHouse extends Backend
             $params = $this->request->post("row/a");
             if ($params) {
                 $params = $this->preExcludeFields($params);
-                $warehouse_area = Db::name('warehouse_area')->where('id',$params['area_id'])->find();
-                if ($warehouse_area['status'] == 2){
+                $warehouse_area = Db::name('warehouse_area')->where('id', $params['area_id'])->find();
+                if ($warehouse_area['status'] == 2) {
                     $this->error('当前库区已禁用！');
                 }
                 empty($params['coding']) && $this->error('库位编码不能为空！');
@@ -251,8 +251,8 @@ class StockHouse extends Backend
         $this->view->assign("type", $type);
         $this->view->assign("row", $row);
         //所有库区编码id
-        $area_coding = Db::name('warehouse_area')->column('coding','id');
-        $this->assign('area_coding',$area_coding);
+        $area_coding = Db::name('warehouse_area')->column('coding', 'id');
+        $this->assign('area_coding', $area_coding);
         return $this->view->fetch();
     }
 
@@ -383,14 +383,13 @@ class StockHouse extends Backend
      */
     public function stock_print_label($ids = null)
     {
-        
+
         $stock_house_info = $this->model
-            ->where(['id' => ['in',$ids]])
+            ->where(['id' => ['in', $ids]])
             ->field('status,subarea,coding')
-            ->select()
-        ;
+            ->select();
         $stock_house_info = collection($stock_house_info)->toArray();
-        
+
         $status_arr = array_column($stock_house_info, 'status');
         if (in_array(2, $status_arr)) {
             $this->error('禁用状态无法打印！');
@@ -412,24 +411,24 @@ EOF;
 
         $file_content = '';
         foreach ($stock_house_info as $key => $value) {
-                //检测文件夹
-                $dir = ROOT_PATH . "public" . DS . "uploads" . DS . "stock_house" . DS . "all";
-                !file_exists($dir) && mkdir($dir, 0777, true);
+            //检测文件夹
+            $dir = ROOT_PATH . "public" . DS . "uploads" . DS . "stock_house" . DS . "all";
+            !file_exists($dir) && mkdir($dir, 0777, true);
 
-                //生成条形码
-                $fileName = $dir . DS . $value['coding'] .".png";
-                $this->generate_barcode($value['coding'], $fileName);
+            //生成条形码
+            $fileName = $dir . DS . $value['coding'] . ".png";
+            $this->generate_barcode($value['coding'], $fileName);
 
-                //拼接条形码
-                $img_url = "/uploads/stock_house/all/{$value['coding']}.png";
-                $file_content .= "
+            //拼接条形码
+            $img_url = "/uploads/stock_house/all/{$value['coding']}.png";
+            $file_content .= "
 <div style='display:list-item;margin: 0mm auto;padding-top:4mm;padding-right:2mm;text-align:center;'>
 <p>库位条形码</p>
 <img src='" . $img_url . "' style='width:36mm'>
 </div>";
         }
 
-    echo $file_header . $file_content;
+        echo $file_header . $file_content;
     }
 
 
@@ -621,6 +620,8 @@ EOF;
         if (!$data) {
             $this->error('未导入任何数据！！');
         }
+        dump($data);
+        die;
         //检测库存编码是否有重复
         $list = array_column($data, '0');
         if (count($list) != count(array_unique($list))) {
@@ -645,7 +646,11 @@ EOF;
     }
 
     /**
-     * 导入库位数据
+     * 库位列表批量导入
+     * Created by Phpstorm.
+     * User: jhh
+     * Date: 2021/3/23
+     * Time: 13:49:49
      */
     public function import()
     {
@@ -692,7 +697,7 @@ EOF;
         //导入文件首行类型,默认是注释,如果需要使用字段名称请使用name
         //$importHeadType = isset($this->importHeadType) ? $this->importHeadType : 'comment';
         //模板文件列名
-        //        $listName = ['折射率', '镜片类型', 'SPH', 'CYL', '库存数量', '镜片价格'];
+        $listName = ['货架号', '库区编码', '库位编码', '库容', '库位名称', '备注'];
         try {
             if (!$PHPExcel = $reader->load($filePath)) {
                 $this->error(__('Unknown data format'));
@@ -709,11 +714,10 @@ EOF;
                     $fields[] = $val;
                 }
             }
-            //模板文件不正确
-            //            if ($listName !== $fields) {
-            //                throw new Exception("模板文件不正确！！");
-            //            }
-
+            // 模板文件不正确
+            if ($listName !== $fields) {
+                throw new Exception("模板文件不正确！！");
+            }
             $data = [];
             for ($currentRow = 2; $currentRow <= $allRow; $currentRow++) {
                 for ($currentColumn = 1; $currentColumn <= $maxColumnNumber; $currentColumn++) {
@@ -727,24 +731,27 @@ EOF;
         if (!$data) {
             $this->error('未导入任何数据！！');
         }
-        // //检测库存编码是否有重复
-        $list = array_column($data, '0');
-        // if (count($list) != count(array_unique($list))) {
-        //     $this->error('库存编码有重复！！请仔细核对库存编码');
-        // }
-        $data = array_unique(array_column($data, '0'));
-        //批量添加产品
-        // foreach ($data as $k => $v) {
-        //     //检测库存编码是否已入库
-        //     $findDetection  = $this->model->where('coding',$v[0])->find();
-        //     if ($findDetection){
-        //         $result = $this->model->save(['coding'=>$v[0],'library_name'=>$v[1],'remark'=>$v[2],'create_person'=>$this->auth->username,'createtime'=>date('y-m-d h:i:s',time())],['id'=>$findDetection['id']]);
-        //     }else{
-        //         $result = $this->model->insert(['coding'=>$v[0],'library_name'=>$v[1],'remark'=>$v[2],'createtime'=>date('y-m-d h:i:s',time()),'create_person'=>$this->auth->username]);
-        //     }
-        // }
+        //检测库存编码是否有重复
+        $list = array_column($data, '2');
+        if (count($list) != count(array_unique($list))) {
+            $this->error('库位编码有重复！！请仔细核对库位编码');
+        }
         foreach ($data as $k => $v) {
-            $result = $this->model->insert(['coding' => $v, 'area_id' => 1,'createtime' => date('y-m-d h:i:s', time()), 'create_person' => $this->auth->username]);
+            if (empty($v[2]) || empty($v[1])){
+                $this->error('库位编码不能为空，请检查！！');
+            }
+            $area_id = Db::name('warehouse_area')->where('coding', $v[1])->value('id');
+            if (empty($area_id)){
+                $this->error('库区编码错误，请检查！！');
+            }
+            $is_exist_coding = $this->model->where('coding',$v[2])->where('area_id',$area_id)->find();
+            if (!empty($is_exist_coding)){
+                $this->error('当前库区已存在此库位编码，请检查！！');
+            }
+        }
+        foreach ($data as $k => $v) {
+            $area_id = Db::name('warehouse_area')->where('coding', $v[1])->value('id');
+            $result = $this->model->insert(['coding' => $v[2], 'library_name' => $v[4], 'remark' => $v[5], 'createtime' => date('y-m-d h:i:s', time()), 'create_person' => $this->auth->username, 'shelf_number' => $v[0], 'area_id' => $area_id, 'volume' => $v[3]]);
         }
         if ($result) {
             $this->success('导入成功！！');
