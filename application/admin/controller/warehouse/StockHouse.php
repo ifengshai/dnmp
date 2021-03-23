@@ -697,7 +697,7 @@ EOF;
         //导入文件首行类型,默认是注释,如果需要使用字段名称请使用name
         //$importHeadType = isset($this->importHeadType) ? $this->importHeadType : 'comment';
         //模板文件列名
-        $listName = ['货架号', '库区编码', '库位编码', '库容', '库位名称', '备注'];
+        $listName = ['货架号', '库区编码', '库位编码', '库容', '库位名称', '备注','拣货顺序'];
         try {
             if (!$PHPExcel = $reader->load($filePath)) {
                 $this->error(__('Unknown data format'));
@@ -751,7 +751,7 @@ EOF;
         }
         foreach ($data as $k => $v) {
             $area_id = Db::name('warehouse_area')->where('coding', $v[1])->value('id');
-            $result = $this->model->insert(['coding' => $v[2], 'library_name' => $v[4], 'remark' => $v[5], 'createtime' => date('y-m-d h:i:s', time()), 'create_person' => $this->auth->username, 'shelf_number' => $v[0], 'area_id' => $area_id, 'volume' => $v[3]]);
+            $result = $this->model->insert(['coding' => $v[2], 'library_name' => $v[4], 'remark' => $v[5], 'createtime' => date('y-m-d h:i:s', time()), 'create_person' => $this->auth->username, 'shelf_number' => $v[0], 'area_id' => $area_id, 'volume' => $v[3], 'picking_sort' => $v[6]]);
         }
         if ($result) {
             $this->success('导入成功！！');

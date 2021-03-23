@@ -350,27 +350,35 @@ class StockSku extends Backend
         if (!$data) {
             $this->error('未导入任何数据！！');
         }
-        //检测库存编码是否有重复
-        $list = array_column($data, '2');
-        if (count($list) != count(array_unique($list))) {
-            $this->error('库位编码有重复！！请仔细核对库位编码');
+
+        foreach ($data as $k => $v) {
+            if (empty($v[2]) || empty($v[1]) || empty($v[0])){
+                $this->error('参数不能为空，请检查！！');
+            }
+            $warehouse_area = Db::name('warehouse_area')->where('coding', $v[0])->find();
+            if (empty($warehouse_area)){
+                $this->error('sku:'.$v[2].'库区编码错误，请检查！！');
+            }
+            $store_house = Db::name('store_house')->where('coding',$v[1])->where('area_id',$warehouse_area['id'])->find();
+            if (empty($store_house)){
+                $this->error('sku:'.$v[2].'库位编码错误，请检查！！');
+            }
+            //拣货货区一个库位号只能有一个sku
+            if ($warehouse_area['type'] !== 2){
+                $map['sku'] = $v[2];
+            }
+            //判断选择的库位是否已存在
+            $map['store_id'] = $store_house['id'];//库位id
+            $map['is_del'] = 1;
+            $count = Db::name('store_sku')->where($map)->count();
+            if ($count > 0) {
+                $this->error('sku:'.$v[2].'库位已绑定！！');
+            }
         }
         foreach ($data as $k => $v) {
-            if (empty($v[2]) || empty($v[1])){
-                $this->error('库位编码不能为空，请检查！！');
-            }
-            $area_id = Db::name('warehouse_area')->where('coding', $v[1])->value('id');
-            if (empty($area_id)){
-                $this->error('库区编码错误，请检查！！');
-            }
-            $is_exist_coding = $this->model->where('coding',$v[2])->where('area_id',$area_id)->find();
-            if (!empty($is_exist_coding)){
-                $this->error('当前库区已存在此库位编码，请检查！！');
-            }
-        }
-        foreach ($data as $k => $v) {
-            $area_id = Db::name('warehouse_area')->where('coding', $v[1])->value('id');
-            $result = $this->model->insert(['coding' => $v[2], 'library_name' => $v[4], 'remark' => $v[5], 'createtime' => date('y-m-d h:i:s', time()), 'create_person' => $this->auth->username, 'shelf_number' => $v[0], 'area_id' => $area_id, 'volume' => $v[3]]);
+            $area_id = Db::name('warehouse_area')->where('coding', $v[0])->value('id');
+            $store_house = Db::name('store_house')->where('coding',$v[1])->where('area_id',$area_id)->find();
+            $result = Db::name('store_sku')->insert(['sku' => $v[2], 'store_id' => $store_house['id'], 'createtime' => date('y-m-d h:i:s', time()), 'create_person' => $this->auth->username]);
         }
         if ($result) {
             $this->success('导入成功！！');
