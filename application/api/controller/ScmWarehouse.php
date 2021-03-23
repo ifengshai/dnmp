@@ -2264,7 +2264,8 @@ class ScmWarehouse extends Scm
                 ->join(['fa_warehouse_area' => 'c'], 'b.area_id=c.id')
                 ->order('a.id', 'desc')
                 ->limit($offset, $limit)
-                ->select();
+                ->select(false);
+            dump($list);die();
             $list = collection($list)->toArray();
 
             //盘点单所需数据
