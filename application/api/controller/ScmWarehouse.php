@@ -2198,6 +2198,9 @@ class ScmWarehouse extends Scm
         //根据type值判断是筛选还是保存 type值为1是筛选 type值为2是保存
         $type = $this->request->request("type") ?? 1;
         $info = [];
+        $a = input('param.');
+        Log::write("============输出搜索内容====================");
+        Log::write($a);
         if ($type == 1) {
             //创建盘点单筛选 ok
             $query = $this->request->request('query'); //sku 、 库位编码筛选
