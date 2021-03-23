@@ -2767,6 +2767,7 @@ class Test4 extends Controller
             ->alias('a')
             ->join(['fa_store_house' => 'b'], 'a.store_id=b.id')
             ->where('a.is_del', 1)
+            ->where('a.id', 'between',[9672,9850])
             ->field('a.sku,a.store_id,b.id,b.coding,b.area_id')
             ->select();
         foreach ($store_sku as $k => $v) {
