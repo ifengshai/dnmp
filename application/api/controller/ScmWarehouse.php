@@ -2229,8 +2229,6 @@ class ScmWarehouse extends Scm
                 }
 
             }
-            dump($where);die();
-
             //排除待盘点sku
             $sku_arr = $this->_inventory_item->alias('a')->join(['fa_inventory_list' => 'b'], 'a.inventory_id=b.id')
                 ->where(['b.status' => ['in', [0, 1]]])
