@@ -2215,7 +2215,7 @@ class ScmWarehouse extends Scm
             $cat['sku'] = ['like', '%' . $query . '%'];
             $cat['inventory_id'] = ['gt',0];
 //            //查询对应的库位id
-            $store_house_id =  Db::table('fa_product_barcode_item')->where($cat)->column('location_code_id');
+            $store_house_id =  Db::table('fa_product_barcode_item')->where($cat)->column('location_code_id,id');
             dump($store_house_id);die();
             if ($store_house_id){
                 $where['b.id'] = ['not in', $store_house_id];
