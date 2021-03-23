@@ -2761,14 +2761,26 @@ class Test4 extends Controller
         $res = Db::name('magento_platform')->where(['id' => 14])->update(['name' => 'alibaba', 'prefix' => 'L', 'create_time' => time()]);
     }
 
+    /**
+     * 跑条形码库位库区绑定关系
+     * Created by Phpstorm.
+     * User: jhh
+     * Date: 2021/3/23
+     * Time: 15:05:16
+     */
     public function product_bar_code_warehouse()
     {
         $store_sku = Db::name('store_sku')
             ->alias('a')
             ->join(['fa_store_house' => 'b'], 'a.store_id=b.id')
             ->where('a.is_del', 1)
-            ->where('a.id', 'between',[9672,9850])
-            ->field('a.sku,a.store_id,b.id,b.coding,b.area_id')
+            ->where('a.id', 'between',[9672,9850])//178
+            ->whereOr('a.id', 'between',[9590,9604])//67
+            ->whereOr('a.id', 'between',[9606,9657])//67
+            ->whereOr('a.id', 'between',[3280,3287])//8
+            ->whereOr('a.id', 'between',[9549,9578])//30
+            ->whereOr('a.id', 'between',[9852,9876])//25
+            ->field('a.sku,a.store_id,a.id,b.coding,b.area_id')
             ->select();
         foreach ($store_sku as $k => $v) {
             $res = Db::name('product_barcode_item')->where('sku', $v['sku'])->update(['location_code' => $v['coding'], 'location_id' => $v['area_id'], 'location_code_id' => $v['store_id']]);
