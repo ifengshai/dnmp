@@ -2335,7 +2335,8 @@ class ScmWarehouse extends Scm
                         $real_time_qty = $this->_product_bar_code_item->where(['sku' => $v['sku'], 'location_id' => $v['area_id'], 'location_code' => $v['library_name'], 'library_status' => 1])->where("item_order_number=''")->count();
                         $list[$k]['real_time_qty'] = $real_time_qty; //库区实时库存
                         $list[$k]['available_stock'] = $item['available_stock'] ?? 0; //可用库存
-                        $list[$k]['remark'] = $v['remark']??'无'; //备注
+//                        $list[$k]['remark'] = $v['remark']; //备注
+                        $list[$k]['remark'] = isset($v['remark'])?$v['remark']:'无'; //备注
                         $list[$k]['warehouse_name'] = $v['warehouse_name']; //库区编码
                         $list[$k]['area_id'] = $v['area_id']; //库区id
                         $list[$k]['library_name'] = $v['library_name']; //库位编码
