@@ -783,7 +783,7 @@ class Test4 extends Controller
         $zeeloolOperate = new \app\admin\model\operatedatacenter\Zeelool;
         set_time_limit(0);
         //统计昨天的数据
-        $info = Db::name('datacenter_sku_day')->where('site','in','2,10,11')->field('id,platform_sku,day_date,site')->select();
+        $info = Db::name('datacenter_sku_day')->where('site','in','2,10,11')->where('id','>',16809)->field('id,platform_sku,day_date,site')->select();
         foreach($info as $key=>$value){
             $data = $value['day_date'];
             $ga_skus = $zeeloolOperate->google_sku_detail($value['site'], $data);
