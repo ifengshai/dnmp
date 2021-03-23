@@ -2221,6 +2221,7 @@ class ScmWarehouse extends Scm
                 ->column('b.id');
             Log::write("=====输出对应库位id=====");
             Log::write($store_house_id);
+            dump($store_house_id);die();
             if ($store_house_id){
                 $where['b.id'] = ['not in', $store_house_id];
             }
