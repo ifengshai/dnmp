@@ -2213,7 +2213,7 @@ class ScmWarehouse extends Scm
             empty($page_size) && $this->error(__('Page size can not be empty'), [], 523);
 
             $cat['a.sku'] = ['like', '%' . $query . '%'];
-            $cat['a.area_id'] = ['gt',0];
+            $cat['a.is_add'] = ['eq',1];
 //            //查询对应的库位id
             $store_house_id = $this->_inventory_item->where($cat)
                 ->alias('a')
@@ -2224,7 +2224,7 @@ class ScmWarehouse extends Scm
             if ($store_house_id){
                 $where['b.id'] = ['not in', $store_house_id];
             }
-            
+
 
             //排除待盘点sku
             $sku_arr = $this->_inventory_item->alias('a')->join(['fa_inventory_list' => 'b'], 'a.inventory_id=b.id')
