@@ -18,9 +18,13 @@ class UserDataViewVip extends Backend
         $this->zeelool = new \app\admin\model\order\order\Zeelool();
         $this->voogueme = new \app\admin\model\order\order\Voogueme();
         $this->nihao = new \app\admin\model\order\order\Nihao();
+        $this->zeeloolde = new \app\admin\model\order\order\ZeeloolDe();
+        $this->zeelooljp = new \app\admin\model\order\order\ZeeloolJp();
         $this->zeeloolOperate = new \app\admin\model\operatedatacenter\Zeelool;
         $this->vooguemeOperate = new \app\admin\model\operatedatacenter\Voogueme();
         $this->nihaoOperate = new \app\admin\model\operatedatacenter\Nihao();
+        $this->zeelooldeOperate = new \app\admin\model\operatedatacenter\ZeeloolDe();
+        $this->zeelooljpOperate = new \app\admin\model\operatedatacenter\ZeeloolJp();
         $this->datacenterday = new \app\admin\model\operatedatacenter\Datacenter();
         $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform();
     }
@@ -46,6 +50,12 @@ class UserDataViewVip extends Backend
             }elseif($filter['order_platform'] == 3){
                 $order_model = $this->nihao;
                 $web_model = Db::connect('database.db_nihao');
+            }elseif($filter['order_platform'] == 10){
+                $order_model = $this->zeeloolde;
+                $web_model = Db::connect('database.db_zeelool_de');
+            }elseif($filter['order_platform'] == 11){
+                $order_model = $this->zeelooljp;
+                $web_model = Db::connect('database.db_zeelool_jp');
             }else{
                 $order_model = $this->zeelool;
                 $web_model = Db::connect('database.db_zeelool');
@@ -104,7 +114,7 @@ class UserDataViewVip extends Backend
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
         foreach ($magentoplatformarr as $key=>$val){
-            if(!in_array($val['name'],['zeelool','voogueme'])){
+            if(!in_array($val['name'],['zeelool','voogueme','zeelool_de','zeelool_jp'])){
                 unset($magentoplatformarr[$key]);
             }
         }
@@ -133,6 +143,12 @@ class UserDataViewVip extends Backend
             }elseif($order_platform == 3){
                 $model = $this->nihaoOperate;
                 $web_model = Db::connect('database.db_nihao');
+            }elseif($order_platform == 10){
+                $model = $this->zeelooldeOperate;
+                $web_model = Db::connect('database.db_zeelool_de');
+            }elseif($order_platform == 11){
+                $model = $this->zeelooljpOperate;
+                $web_model = Db::connect('database.db_zeelool_jp');
             }else{
                 $model = $this->zeeloolOperate;
                 $web_model = Db::connect('database.db_zeelool');
@@ -179,6 +195,12 @@ class UserDataViewVip extends Backend
         }elseif($order_platform == 3){
             $order_model = $this->nihao;
             $web_model = Db::connect('database.db_nihao');
+        }elseif($order_platform == 10){
+            $order_model = $this->zeeloolde;
+            $web_model = Db::connect('database.db_zeelool_de');
+        }elseif($order_platform == 11){
+            $order_model = $this->zeelooljp;
+            $web_model = Db::connect('database.db_zeelool_jp');
         }else{
             $order_model = $this->zeelool;
             $web_model = Db::connect('database.db_zeelool');
