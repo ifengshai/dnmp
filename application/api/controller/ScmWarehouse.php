@@ -2211,8 +2211,13 @@ class ScmWarehouse extends Scm
             $page_size = $this->request->request('page_size');
             empty($page) && $this->error(__('Page can not be empty'), [], 522);
             empty($page_size) && $this->error(__('Page size can not be empty'), [], 523);
-            $inventory_item_id = $this->_inventory_item->where('sku='.$query)->column('id');
+
+            $cat['sku'] = ['like', '%' . $query . '%'];
+            $inventory_item_id = $this->_inventory_item->where($cat)->column('id');
             dump($inventory_item_id);die();
+            if ($inventory_item_id){
+
+            }
             //排除待盘点sku
             $sku_arr = $this->_inventory_item->alias('a')->join(['fa_inventory_list' => 'b'], 'a.inventory_id=b.id')
                 ->where(['b.status' => ['in', [0, 1]]])
