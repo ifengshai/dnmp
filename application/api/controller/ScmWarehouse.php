@@ -2212,8 +2212,8 @@ class ScmWarehouse extends Scm
             empty($page) && $this->error(__('Page can not be empty'), [], 522);
             empty($page_size) && $this->error(__('Page size can not be empty'), [], 523);
 
-            $cat['sku'] = ['like', '%' . $query . '%'];
-            $cat['area_id'] = ['gt',0];
+            $cat['a.sku'] = ['like', '%' . $query . '%'];
+            $cat['a.area_id'] = ['gt',0];
             //查询该sku是否绑定的有库区id
             $inventory_item_id = $this->_inventory_item->where($cat)
                 ->alias('a')
