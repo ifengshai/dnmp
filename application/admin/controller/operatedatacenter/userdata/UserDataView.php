@@ -41,7 +41,7 @@ class UserDataView extends Backend
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getNewAuthSite();
         foreach ($magentoplatformarr as $key => $val) {
-            if (!in_array($val, ['zeelool', 'voogueme', 'nihao','zeelool_es','zeelool_jp'])) {
+            if (!in_array($val, ['zeelool', 'voogueme', 'nihao','zeelool_de','zeelool_jp'])) {
                 unset($magentoplatformarr[$key]);
             }
         }
