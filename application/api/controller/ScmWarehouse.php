@@ -2219,6 +2219,7 @@ class ScmWarehouse extends Scm
                 ->alias('a')
                 ->join(['fa_store_house' => 'b'], 'a.library_name=b.coding')
                 ->field('b.id,a.sku,a.warehouse_name,a.library_name,a.area_id')->select();
+            $inventory_item_id = collection($inventory_item_id)->toArray();
             dump($inventory_item_id);die();
             //排除待盘点sku
             $sku_arr = $this->_inventory_item->alias('a')->join(['fa_inventory_list' => 'b'], 'a.inventory_id=b.id')
