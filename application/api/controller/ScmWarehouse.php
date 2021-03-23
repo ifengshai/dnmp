@@ -2215,18 +2215,16 @@ class ScmWarehouse extends Scm
             $cat['a.sku'] = ['like', '%' . $query . '%'];
             $cat['a.area_id'] = ['gt',0];
 //            //查询对应的库位id
-//            $store_house_id = $this->_inventory_item->where($cat)
-//                ->alias('a')
-//                ->join(['fa_store_house' => 'b'], 'a.library_name=b.coding')
-//                ->column('b.id');
-//            Log::write("=====输出对应库位id=====");
-//            Log::write($store_house_id);
-//            if ($store_house_id){
-//                $where['b.id'] = ['not in', $store_house_id];
-//            }
-//                ->field('b.id,a.sku,a.warehouse_name,a.library_name,a.area_id')->select();
-//            dump($inventory_item_id);die();
-//            $inventory_item_id = collection($inventory_item_id)->toArray();
+            $store_house_id = $this->_inventory_item->where($cat)
+                ->alias('a')
+                ->join(['fa_store_house' => 'b'], 'a.library_name=b.coding')
+                ->column('b.id');
+            Log::write("=====输出对应库位id=====");
+            Log::write($store_house_id);
+            if ($store_house_id){
+                $where['b.id'] = ['not in', $store_house_id];
+            }
+            
 
             //排除待盘点sku
             $sku_arr = $this->_inventory_item->alias('a')->join(['fa_inventory_list' => 'b'], 'a.inventory_id=b.id')
