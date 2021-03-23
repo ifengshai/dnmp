@@ -2218,7 +2218,7 @@ class ScmWarehouse extends Scm
             $inventory_item_id = $this->_inventory_item->where($cat)
                 ->alias('a')
                 ->join(['fa_store_house' => 'b'], 'a.library_name=b.coding')
-                ->colum('b.id');
+                ->column('b.id');
 //                ->field('b.id,a.sku,a.warehouse_name,a.library_name,a.area_id')->select();
             dump($inventory_item_id);die();
             $inventory_item_id = collection($inventory_item_id)->toArray();
