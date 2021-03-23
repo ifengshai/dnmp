@@ -783,66 +783,28 @@ class Test4 extends Controller
         $zeeloolOperate = new \app\admin\model\operatedatacenter\Zeelool;
         set_time_limit(0);
         //统计昨天的数据
-        $data = date('Y-m-d', strtotime('-1 day'));
-        // $data = '2020-11-11';
-        $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
-        
-        $sku_data = $_item_platform_sku
-            ->field('sku,grade,platform_sku,stock,plat_on_way_stock')
-            ->where(['platform_type' => 10, 'outer_sku_status' => 1])
-            ->select();
-        //当前站点的所有sku映射关系
-        $sku_data = collection($sku_data)->toArray();
-        //ga所有的sku唯一身份浏览量的数据
-        $ga_skus = $zeeloolOperate->google_sku_detail(10, $data);
-        $ga_skus = array_column($ga_skus, 'uniquePageviews', 'ga:pagePath');
-
-        foreach ($sku_data as $k => $v) {
-            $sku_data[$k]['unique_pageviews'] = 0;
-            $sku_data[$k]['goods_grade'] = $sku_data[$k]['grade'];
-            $sku_data[$k]['day_date'] = $data;
-            $sku_data[$k]['site'] = 10;
-            $sku_data[$k]['day_stock'] = $sku_data[$k]['stock'];
-            $sku_data[$k]['day_onway_stock'] = $sku_data[$k]['plat_on_way_stock'];
-            unset($sku_data[$k]['stock']);
-            unset($sku_data[$k]['grade']);
-            unset($sku_data[$k]['plat_on_way_stock']);
+        $info = Db::name('datacenter_sku_day')->where('site','in','2,10,11')->where('id','>',27326)->field('id,platform_sku,day_date,site')->select();
+        foreach($info as $key=>$value){
+            $data = $value['day_date'];
+            $ga_skus = $zeeloolOperate->google_sku_detail($value['site'], $data);
+            $ga_skus = array_column($ga_skus, 'uniquePageviews', 'ga:pagePath');
+            if($value['site'] == 2){
+                $model = Db::connect('database.db_voogueme_online');
+            }elseif($value['site'] == 10){
+                $model = Db::connect('database.db_zeelool_de_online');
+            }else{
+                $model = Db::connect('database.db_zeelool_jp_online');
+            }
+            $sku_id = $model->table('catalog_product_entity')->where('sku',$value['platform_sku'])->value('entity_id');
+            $unique_pageviews = 0;
             foreach ($ga_skus as $kk => $vv) {
-                if (strpos($kk, $v['sku']) != false) {
-                    $sku_data[$k]['unique_pageviews'] += $vv;
+                if ($kk == '/goods-detail/'.$sku_id) {
+                    $unique_pageviews += $vv;
                 }
             }
-            Db::name('datacenter_sku_day')->insert($sku_data[$k]);
-        }
-
-
-
-        $sku_data = $_item_platform_sku
-            ->field('sku,grade,platform_sku,stock,plat_on_way_stock')
-            ->where(['platform_type' => 11, 'outer_sku_status' => 1])
-            ->select();
-        //当前站点的所有sku映射关系
-        $sku_data = collection($sku_data)->toArray();
-        //ga所有的sku唯一身份浏览量的数据
-        $ga_skus = $zeeloolOperate->google_sku_detail(11, $data);
-        $ga_skus = array_column($ga_skus, 'uniquePageviews', 'ga:pagePath');
-
-        foreach ($sku_data as $k => $v) {
-            $sku_data[$k]['unique_pageviews'] = 0;
-            $sku_data[$k]['goods_grade'] = $sku_data[$k]['grade'];
-            $sku_data[$k]['day_date'] = $data;
-            $sku_data[$k]['site'] = 11;
-            $sku_data[$k]['day_stock'] = $sku_data[$k]['stock'];
-            $sku_data[$k]['day_onway_stock'] = $sku_data[$k]['plat_on_way_stock'];
-            unset($sku_data[$k]['stock']);
-            unset($sku_data[$k]['grade']);
-            unset($sku_data[$k]['plat_on_way_stock']);
-            foreach ($ga_skus as $kk => $vv) {
-                if (strpos($kk, $v['sku']) != false) {
-                    $sku_data[$k]['unique_pageviews'] += $vv;
-                }
-            }
-            Db::name('datacenter_sku_day')->insert($sku_data[$k]);
+            Db::name('datacenter_sku_day')->where('id',$value['id'])->update(['unique_pageviews'=>$unique_pageviews]);
+            echo $value['id'].' is ok'."\n";
+            usleep(10000);
         }
     }
     //计划任务跑每天的分类销量的数据
@@ -2799,13 +2761,26 @@ class Test4 extends Controller
         $res = Db::name('magento_platform')->where(['id' => 14])->update(['name' => 'alibaba', 'prefix' => 'L', 'create_time' => time()]);
     }
 
+    /**
+     * 跑条形码库位库区绑定关系
+     * Created by Phpstorm.
+     * User: jhh
+     * Date: 2021/3/23
+     * Time: 15:05:16
+     */
     public function product_bar_code_warehouse()
     {
         $store_sku = Db::name('store_sku')
             ->alias('a')
             ->join(['fa_store_house' => 'b'], 'a.store_id=b.id')
             ->where('a.is_del', 1)
-            ->field('a.sku,a.store_id,b.id,b.coding,b.area_id')
+            ->where('a.id', 'between',[9672,9850])//178
+            ->whereOr('a.id', 'between',[9590,9604])//67
+            ->whereOr('a.id', 'between',[9606,9657])//67
+            ->whereOr('a.id', 'between',[3280,3287])//8
+            ->whereOr('a.id', 'between',[9549,9578])//30
+            ->whereOr('a.id', 'between',[9852,9876])//25
+            ->field('a.sku,a.store_id,a.id,b.coding,b.area_id')
             ->select();
         foreach ($store_sku as $k => $v) {
             $res = Db::name('product_barcode_item')->where('sku', $v['sku'])->update(['location_code' => $v['coding'], 'location_id' => $v['area_id'], 'location_code_id' => $v['store_id']]);
