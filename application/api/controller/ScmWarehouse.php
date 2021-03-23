@@ -2212,15 +2212,10 @@ class ScmWarehouse extends Scm
             empty($page) && $this->error(__('Page can not be empty'), [], 522);
             empty($page_size) && $this->error(__('Page size can not be empty'), [], 523);
 
-            $cat['a.sku'] = ['like', '%' . $query . '%'];
-            $cat['a.is_add'] = ['eq',1];
+            $cat['sku'] = ['like', '%' . $query . '%'];
+            $cat['inventory_id'] = ['gt',0];
 //            //查询对应的库位id
-            $store_house_id = $this->_inventory_item->where($cat)
-                ->alias('a')
-                ->join(['fa_store_house' => 'b'], 'a.library_name=b.coding')
-                ->column('b.id');
-            Log::write("=====输出对应库位id=====");
-            Log::write($store_house_id);
+            $store_house_id =  Db::table('fa_product_barcode_item')->where($cat)->column('id');
             dump($store_house_id);die();
             if ($store_house_id){
                 $where['b.id'] = ['not in', $store_house_id];
