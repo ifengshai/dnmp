@@ -2214,11 +2214,11 @@ class ScmWarehouse extends Scm
             if ($query){
                 $cat['sku'] = ['like', '%' . $query . '%'];
                 $cat['inventory_id'] = ['neq',0];
-                $cat['library_status'] = ['eq',1];
 //            //查询对应的库位id
-                $store_house_id =  Db::table('fa_product_barcode_item')->where($cat)->column('location_code_id');
-                if ($store_house_id){
-                    $where['b.id'] = ['not in', $store_house_id];
+//                $store_house_id =  Db::table('fa_product_barcode_item')->where($cat)->column('location_code_id');
+                $library_name =  Db::table('fa_inventory_item')->where($cat)->column('library_name');
+                if ($library_name){
+                    $where['b.library_name'] = ['not in', $library_name];
                 }
 
             }
