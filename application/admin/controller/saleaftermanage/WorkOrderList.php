@@ -1339,7 +1339,7 @@ class WorkOrderList extends Backend
                             Log::write($barcodedata);
                             if (!empty($barcodedata)){
                                 $count = $this->_inventory->alias('a')
-                                    ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata]])
+                                    ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata],'area_id' => '3'])
                                     ->count();
                                 Log::write($count);
                                 if ($count > 0) {
@@ -1357,7 +1357,7 @@ class WorkOrderList extends Backend
                             Log::write($sonorder_sku);
                             if (!empty($barcodedata)){
                                 $count = $this->_inventory->alias('a')
-                                    ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata]])
+                                    ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata],'area_id' => '3'])
                                     ->count();
                                 Log::write($count);
                                 if ($count > 0) {
@@ -1375,7 +1375,7 @@ class WorkOrderList extends Backend
                             Log::write($sonorder_sku);
                             if (!empty($barcodedata)){
                                 $count = $this->_inventory->alias('a')
-                                    ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata]])
+                                    ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata],'area_id' => '3'])
                                     ->count();
                                 Log::write($count);
                                 if ($count > 0) {

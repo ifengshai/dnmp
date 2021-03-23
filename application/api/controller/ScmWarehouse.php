@@ -2216,8 +2216,7 @@ class ScmWarehouse extends Scm
                 $cat['a.inventory_id'] = ['neq',0];
                 $cat['a.is_add'] = ['eq',1];
 
-//            //查询对应的库位id
-//                $store_house_id =  Db::table('fa_product_barcode_item')->where($cat)->column('location_code_id');
+//            //通过盘点明细表+库存盘点单 过滤对应库位编码
                 $library_name =  Db::table('fa_inventory_item')
                     ->alias('a')
                     ->join(['fa_inventory_list' => 'b'], 'a.inventory_id=b.id')
@@ -2324,8 +2323,6 @@ class ScmWarehouse extends Scm
                 if ($result) {
                     $list = [];
                     foreach (array_filter($item_sku) as $k => $v) {
-
-                        Log::write($this->_inventory->id);
                         $list[$k]['inventory_id'] = $this->_inventory->id;
                         $list[$k]['sku'] = $v['sku'];
                         $item = $this->_item->field('name,stock,available_stock,distribution_occupy_stock')->where('sku', $v['sku'])->find();
