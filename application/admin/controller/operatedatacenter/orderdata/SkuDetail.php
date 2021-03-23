@@ -31,7 +31,7 @@ class SkuDetail extends Backend
             }
             if ($filter['time_str']) {
                 $createat = explode(' ', $filter['time_str']);
-                $map['p.created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
+                $map['o.payment_time'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
                 unset($filter['time_str']);
                 $this->request->get(['filter' => json_encode($filter)]);
             } else{
@@ -41,7 +41,7 @@ class SkuDetail extends Backend
                 }
                 $start = date('Y-m-d', strtotime('-6 day'));
                 $end   = date('Y-m-d 23:59:59');
-                $map['p.created_at'] = ['between', [$start,$end]];
+                $map['o.payment_time'] = ['between', [$start,$end]];
             }
 
             if($filter['sku']){
@@ -58,13 +58,16 @@ class SkuDetail extends Backend
             }else{
                 $site = 1;
             }
-            $field = 'p.id,o.increment_id,o.created_at,o.customer_email,p.prescription_type,p.coatiing_name,p.frame_price,p.index_price';
+            $field = 'p.id,o.increment_id,o.payment_time,o.customer_email,p.prescription_type,p.coatiing_name,p.frame_price,p.index_price';
             if($site == 2){
                 $order_model = Db::connect('database.db_voogueme');
-
             }elseif($site == 3){
                 $order_model = Db::connect('database.db_nihao');
-                $field = 'p.id,o.increment_id,o.created_at,o.customer_email,p.prescription_type,p.frame_price,p.index_price';
+                $field = 'p.id,o.increment_id,o.payment_time,o.customer_email,p.prescription_type,p.frame_price,p.index_price';
+            }elseif($site == 10){
+                $order_model = Db::connect('database.db_zeelool_de');
+            }elseif($site == 11){
+                $order_model = Db::connect('database.db_zeelool_jp');
             }else{
                 $order_model = Db::connect('database.db_zeelool');
             }
@@ -103,7 +106,7 @@ class SkuDetail extends Backend
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
         foreach ($magentoplatformarr as $key=>$val){
-            if(!in_array($val['name'],['zeelool','voogueme','nihao'])){
+            if(!in_array($val['name'],['zeelool','voogueme','nihao','zeelool_de','zeelool_jp'])){
                 unset($magentoplatformarr[$key]);
             }
         }
@@ -126,19 +129,23 @@ class SkuDetail extends Backend
             $site = $params['order_platform'] ? $params['order_platform'] : 1;
             if ($params['time_str']) {
                 $createat = explode(' ', $params['time_str']);
-                $map_where['o.created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
-                $order_where['o.created_at'] = ['lt',$createat[0]];
+                $map_where['o.payment_time'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
+                $order_where['o.payment_time'] = ['lt',$createat[0]];
             } else{
                 $start = date('Y-m-d', strtotime('-6 day'));
                 $end   = date('Y-m-d 23:59:59');
-                $map_where['o.created_at'] = ['between', [$start,$end]];
-                $order_where['o.created_at'] = ['lt',$start];
+                $map_where['o.payment_time'] = ['between', [$start,$end]];
+                $order_where['o.payment_time'] = ['lt',$start];
             }
             //首购人数
             if($site == 2){
                 $order_model = new \app\admin\model\order\order\Voogueme();
             }elseif($site == 3){
                 $order_model = new \app\admin\model\order\order\Nihao();
+            }elseif($site == 10){
+                $order_model = new \app\admin\model\order\order\ZeeloolDe();
+            }elseif($site == 11){
+                $order_model = new \app\admin\model\order\order\ZeeloolJp();
             }else{
                 $order_model = new \app\admin\model\order\order\Zeelool();
             }
@@ -227,6 +234,8 @@ class SkuDetail extends Backend
         );
         if($site == 3){
             $reading_glasses_num = $this->prescrtion_num('Reading Glasses',$site,$time_str,$sku);
+        }elseif($site == 10 || $site == 11){
+            $reading_glasses_num = $this->prescrtion_num('ReadingGlasses',$site,$time_str,$sku);
         }else{
             $reading_glasses_num = $this->prescrtion_num('Readingglasses',$site,$time_str,$sku);
         }
@@ -234,7 +243,7 @@ class SkuDetail extends Backend
             'name'=>'reading glasses',
             'value'=>$reading_glasses_num,
         );
-        if($site == 2){
+        if($site == 2 || $site == 10  || $site == 11){
             $reading_glassesno_num = $this->prescrtion_num('ReadingNoprescription',$site,$time_str,$sku);
         }elseif($site == 3){
             $reading_glassesno_num = $this->prescrtion_num('Reading Glasses2',$site,$time_str,$sku);
@@ -245,7 +254,7 @@ class SkuDetail extends Backend
             'name'=>'reading glasses no prescription',
             'value'=>$reading_glassesno_num,
         );
-        if($site == 2){
+        if($site == 2 || $site == 10 || $site == 11){
             $no_prescription_num1 = $this->prescrtion_num('NonPrescription',$site,$time_str,$sku);
             $no_prescription_num2 = $this->prescrtion_num('Noprescription',$site,$time_str,$sku);
             $no_prescription_num = $no_prescription_num1+$no_prescription_num2;
@@ -256,7 +265,11 @@ class SkuDetail extends Backend
             'name'=>'no prescription',
             'value'=>$no_prescription_num,
         );
-        $sunglasses_num = $this->prescrtion_num('Sunglasses',$site,$time_str,$sku);
+        if($site == 11){
+            $sunglasses_num = $this->prescrtion_num('SunGlasses',$site,$time_str,$sku);
+        }else{
+            $sunglasses_num = $this->prescrtion_num('Sunglasses',$site,$time_str,$sku);
+        }
         $sunglasses_arr = array(
             'name'=>'sunglasses',
             'value'=>$sunglasses_num,
@@ -265,12 +278,14 @@ class SkuDetail extends Backend
             $sunglassesno_num1 = $this->prescrtion_num('Sunglasses_NonPrescription',$site,$time_str,$sku);
             $sunglassesno_num2 = $this->prescrtion_num('SunGlassesNoprescription',$site,$time_str,$sku);
             $sunglassesno_num = $sunglassesno_num1+$sunglassesno_num2;
-
         }elseif($site == 1){
             $sunglassesno_num1 = $this->prescrtion_num('SunGlassesNoprescription',$site,$time_str,$sku);
             $sunglassesno_num2 = $this->prescrtion_num('Non',$site,$time_str,$sku);
             $sunglassesno_num = $sunglassesno_num1 + $sunglassesno_num2;
-        }else{
+        }elseif($site == 3){
+            $sunglassesno_num = $this->prescrtion_num('SunNonPrescription',$site,$time_str,$sku);
+        }
+        else{
             $sunglassesno_num = $this->prescrtion_num('SunGlassesNoprescription',$site,$time_str,$sku);
         }
         $sunglassesno_arr = array(
@@ -300,6 +315,10 @@ class SkuDetail extends Backend
             $order_model = Db::connect('database.db_voogueme');
         }elseif($site == 3){
             $order_model = Db::connect('database.db_nihao');
+        }elseif($site == 10){
+            $order_model = Db::connect('database.db_zeelool_de');
+        }elseif($site == 11){
+            $order_model = Db::connect('database.db_zeelool_jp');
         }else{
             $order_model = Db::connect('database.db_zeelool');
         }
@@ -310,7 +329,7 @@ class SkuDetail extends Backend
             $time_str = $start .' 00:00:00 - ' .$end.' 00:00:00';
         }
         $createat = explode(' ', $time_str);
-        $where['p.created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
+        $where['o.payment_time'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
         $where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
         $where['p.sku'] = $sku;
         $where['o.order_type'] = 1;
@@ -333,17 +352,21 @@ class SkuDetail extends Backend
 
         if ($time_str) {
             $createat = explode(' ', $time_str);
-            $map['p.created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
+            $map['o.payment_time'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
         }
         if($sku){
             $map['p.sku'] = $sku;
         }
-        $field = 'p.id,o.increment_id,o.created_at,o.customer_email,p.prescription_type,p.coatiing_name,p.frame_price,p.index_price';
+        $field = 'p.id,o.increment_id,o.payment_time,o.customer_email,p.prescription_type,p.coatiing_name,p.frame_price,p.index_price';
         if($order_platform == 2){
             $order_model = Db::connect('database.db_voogueme');
         }elseif($order_platform == 3){
             $order_model = Db::connect('database.db_nihao');
-            $field = 'p.id,o.increment_id,o.created_at,o.customer_email,p.prescription_type,p.frame_price,p.index_price';
+            $field = 'p.id,o.increment_id,o.payment_time,o.customer_email,p.prescription_type,p.frame_price,p.index_price';
+        }elseif($order_platform == 10){
+            $order_model = Db::connect('database.db_zeelool_de');
+        }elseif($order_platform == 11){
+            $order_model = Db::connect('database.db_zeelool_jp');
         }else{
             $order_model = Db::connect('database.db_zeelool');
         }
@@ -379,7 +402,7 @@ class SkuDetail extends Backend
         foreach ($list as $k=>$v){
             $spreadsheet->getActiveSheet()->setCellValue('A' . ($k * 1 + 2), $v['number']);
             $spreadsheet->getActiveSheet()->setCellValue('B' . ($k * 1 + 2), $v['increment_id']);
-            $spreadsheet->getActiveSheet()->setCellValue('C' . ($k * 1 + 2), $v['created_at']);
+            $spreadsheet->getActiveSheet()->setCellValue('C' . ($k * 1 + 2), $v['payment_time']);
             $spreadsheet->getActiveSheet()->setCellValue('D' . ($k * 1 + 2), $v['customer_email']);
             $spreadsheet->getActiveSheet()->setCellValue('E' . ($k * 1 + 2), $v['prescription_type']);
             $spreadsheet->getActiveSheet()->setCellValue('F' . ($k * 1 + 2), $v['coatiing_name']);

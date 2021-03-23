@@ -853,6 +853,9 @@ class PurchasePay extends Backend
 
                             //插入审核记录表
                             $this->workflowrecords->where(['finance_purchase_id' => $v['id'], 'assignee_id' => session('admin.id'), 'audit_status' => 0])->update(['handle_date' => time(), 'remarks' => $remarks, 'audit_status' => 1]);
+
+                            //审核完成添加钉钉通知 蔡鸣慧
+                            Ding::cc_ding(381, '', '【待付款列表】你有一个新的付款申请单需要处理', '请及时登录魔晶系统，进入"财务管理-待付款列表"功能处理');
                         } else {
                             //插入审核记录表
                             $this->workflowrecords->where(['finance_purchase_id' => $v['id'], 'assignee_id' => session('admin.id'), 'audit_status' => 0])->update(['handle_date' => time(), 'remarks' => $remarks, 'audit_status' => 1]);

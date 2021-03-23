@@ -1,13 +1,14 @@
 <?php
+
 namespace app\admin\model\operatedatacenter;
 
 use think\Db;
 use think\Model;
 
 
-class Nihao extends Model
+class ZeeloolDe extends Model
 {
-
+    const SITE = 10;
     // 表名
     protected $name = 'datacenter_day';
 
@@ -19,14 +20,15 @@ class Nihao extends Model
     protected $append = [
 
     ];
+
     public function __construct()
     {
-        $this->model = new \app\admin\model\order\order\Nihao();
+        $this->model = new \app\admin\model\order\order\ZeeloolDe();
     }
     //获取着陆页数据
     public function getLanding($time_str = '', $type = 0)
     {
-        $where['site'] = 3;
+        $where['site'] = self::SITE;
         $start = date('Y-m-d');
 
         if ($type == 1) {
@@ -53,7 +55,7 @@ class Nihao extends Model
     public function getDetail($time_str = '', $type = 0)
     {
         $start = date('Y-m-d');
-        $where['site'] = 3;
+        $where['site'] = self::SITE;
         if ($type == 1) {
             $createat = explode(' ', $time_str);
             $where['day_date'] = ['between', [$createat[0], $createat[3]]];
@@ -80,7 +82,7 @@ class Nihao extends Model
     public function getCart($time_str = '', $type = 0)
     {
         $start = date('Y-m-d');
-        $where['site'] = 3;
+        $where['site'] = self::SITE;
         if ($type == 1) {
             $createat = explode(' ', $time_str);
             $where['day_date'] = ['between', [$createat[0], $createat[3]]];
@@ -108,7 +110,7 @@ class Nihao extends Model
     public function getComplete($time_str = '', $type = 0)
     {
         $start = date('Y-m-d');
-        $where['site'] = 3;
+        $where['site'] = self::SITE;
         if ($type == 1) {
             $createat = explode(' ', $time_str);
             $where['day_date'] = ['between', [$createat[0], $createat[3]]];
@@ -137,7 +139,8 @@ class Nihao extends Model
      */
     public function getActiveUser($time_str = '',$time_str2 = '')
     {
-        $map['site'] = 3;
+        
+        $map['site'] = self::SITE;
         if (!$time_str) {
             $start = date('Y-m-d', strtotime('-6 day'));
             $end   = date('Y-m-d 23:59:59');
@@ -161,7 +164,7 @@ class Nihao extends Model
      */
     public function getRegisterUser($time_str = '',$time_str2 = '')
     {
-        $map['site'] = 3;
+        $map['site'] = self::SITE;
         if (!$time_str) {
             $start = date('Y-m-d', strtotime('-6 day'));
             $end   = date('Y-m-d 23:59:59');
@@ -182,11 +185,11 @@ class Nihao extends Model
     }
 
     /*
-     * 统计vip用户数 Nihao
+     * 统计vip用户数 zeelool
      */
     public function getVipUser($time_str = '',$time_str2 = '')
     {
-        $map['site'] = 3;
+        $map['site'] = self::SITE;
         //默认查询7天的数据
         if (!$time_str) {
             $start = date('Y-m-d', strtotime('-6 day'));
@@ -232,14 +235,16 @@ class Nihao extends Model
             $arrs['contrast_again_user_num'] = $contrast_again_num ? round(($arrs['again_user_num'] - $contrast_again_num) / $contrast_again_num * 100, 2) : 0;
         }
         return $arrs;
+
     }
-    //获取某一段时间内的复购用户数
+    //获取某一段时间内的复购用户数 old
     public function get_again_user1($createat){
 
         $where['payment_time'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
         $where['customer_id'] = ['>',0];
-        $map_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
         $where['order_type'] = 1;
+        $map_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+
         //查询时间段内的订单 根据customer_id先计算出此事件段内的复购用户数
         $order = $this->model
             ->where($map_where)
@@ -264,7 +269,9 @@ class Nihao extends Model
                     unset($new_arr[$k]);
                 }
             }
-            $wheres['created_at'] = ['<', $createat[0].' '.$createat[1]];
+
+            // $wheres['created_at'] = ['not between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
+            $wheres['payment_time'] = ['<', $createat[0].' '.$createat[1]];
             foreach ($new_arr as $key=>$val){
                 //判断之前是否有这些订单
                 $another_order = $this->model->where('customer_id',$key)->where($map_where)->where($wheres)->value('customer_id');
@@ -280,11 +287,11 @@ class Nihao extends Model
         $map_where['payment_time'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
         $order_where['payment_time'] = ['lt',$createat[0]];
 
-        $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
         $map['order_type'] = 1;
         $map1['customer_id'] = ['>',0];
 
-        $order_model = new \app\admin\model\order\order\Nihao();
+        $order_model = new \app\admin\model\order\order\ZeeloolDe();
         //复购用户数
         //查询时间段内的订单 根据customer_id先计算出此事件段内的复购用户数
         $again_buy_num1 = $order_model
@@ -327,12 +334,12 @@ class Nihao extends Model
         $map_where['o.payment_time'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
         $order_where['o.payment_time'] = ['lt',$createat[0]];
 
-        $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
         $map['o.order_type'] = 1;
         $map1['o.customer_id'] = ['>',0];
         $map['c.is_vip'] = 1;
 
-        $order_model = new \app\admin\model\order\order\Nihao();
+        $order_model = new \app\admin\model\order\order\ZeeloolDe();
         //复购用户数
         //查询时间段内的订单 根据customer_id先计算出此事件段内的复购用户数
         $again_buy_num1 = $order_model->alias('o')
@@ -357,11 +364,11 @@ class Nihao extends Model
             //查询时间段内是否进行购买行为
             $order_where_arr['customer_id'] = $v;
             $is_buy = $order_model->alias('o')
-                ->join('customer_entity c','o.customer_id=c.entity_id')
-                ->where($order_where)
-                ->where($order_where_arr)
-                ->where($map)
-                ->value('o.entity_id');
+                    ->join('customer_entity c','o.customer_id=c.entity_id')
+                    ->where($order_where)
+                    ->where($order_where_arr)
+                    ->where($map)
+                    ->value('o.entity_id');
             if($is_buy){
                 $again_buy_num2++;
             }
@@ -381,9 +388,9 @@ class Nihao extends Model
      * @since 2020/02/26 17:36:58
      * @author wpl
      */
-    public function getOrderNum($time_str = '',$time_str2 = '')
+    public function getOrderNum($time_str = '', $time_str2 = '')
     {
-        $map['site'] = 3;
+        $map['site'] = self::SITE;
             if(!$time_str){
                 $start = date('Y-m-d', strtotime('-6 day'));
                 $end   = date('Y-m-d 23:59:59');
@@ -399,14 +406,15 @@ class Nihao extends Model
                 $contrast_order_num = $this->where($map)->where($huan_where)->sum('order_num');
                 $arr['contrast_order_num'] = $contrast_order_num ? round(($arr['order_num'] - $contrast_order_num) / $contrast_order_num * 100, 2) : 0;
             }
+
         return $arr;
     }
     /*
      * 统计销售额
      * */
-    public function getSalesTotalMoney($time_str = '',$time_str2 = '')
+    public function getSalesTotalMoney($time_str = '', $time_str2 = '')
     {
-        $map['site'] = 3;
+        $map['site'] = self::SITE;
             if(!$time_str){
                 $start = date('Y-m-d', strtotime('-6 day'));
                 $end   = date('Y-m-d 23:59:59');
@@ -421,6 +429,7 @@ class Nihao extends Model
                 $contrast_order_num = $this->where($map)->where($huan_where)->sum('sales_total_money');
                 $arr['contrast_sales_total_num'] = $contrast_order_num ? round(($arr['sales_total_money'] - $contrast_order_num) / $contrast_order_num * 100, 2) : 0;
             }
+
         return $arr;
     }
     /**
@@ -433,7 +442,7 @@ class Nihao extends Model
      */
     public function getOrderUnitPrice($time_str = '',$time_str2 = '')
     {
-        $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
         $map['order_type'] = 1;
             if(!$time_str){
                 $start = date('Y-m-d', strtotime('-6 day'));
@@ -441,10 +450,11 @@ class Nihao extends Model
                 $time_str = $start .' 00:00:00 - ' .$end.' 00:00:00';
             }
             //时间段统计客单价
-            $order_total = $this->getSalesTotalMoney($time_str);
-            $order_num = $this->getOrderNum($time_str);
+            $order_total = $this->getSalesTotalMoney($time_str,'');
+            $order_num = $this->getOrderNum($time_str,'');
 
             $arr['order_unit_price'] = $order_num['order_num'] != 0 ? round($order_total['sales_total_money'] / $order_num['order_num'], 2) : 0;
+
             if($time_str2){
                 $huan_order_total = $this->getSalesTotalMoney($time_str2);
                 $huan_order_num = $this->getOrderNum($time_str2);
@@ -458,7 +468,7 @@ class Nihao extends Model
      * */
     public function getShippingTotalMoney($time_str = '',$time_str2 = '')
     {
-        $map['site'] = 3;
+        $map['site'] = self::SITE;
             if(!$time_str){
                 $start = date('Y-m-d', strtotime('-6 day'));
                 $end   = date('Y-m-d 23:59:59');
@@ -473,6 +483,7 @@ class Nihao extends Model
                 $contrast_order_num = $this->where($map)->where($huan_where)->sum('shipping_total_money');
                 $arr['contrast_shipping_total_money'] = $contrast_order_num ? round(($arr['shipping_total_money'] - $contrast_order_num) / $contrast_order_num * 100, 2) : 0;
             }
+
         return $arr;
     }
 
@@ -481,7 +492,7 @@ class Nihao extends Model
      * */
     public function getReplacementOrderNum($time_str = '')
     {
-        $map['site'] = 3;
+        $map['site'] = self::SITE;
         if ($time_str) {
             $createat = explode(' ', $time_str);
             $where['day_date'] = ['between', [$createat[0], $createat[3]]];
@@ -499,7 +510,7 @@ class Nihao extends Model
      * */
     public function getReplacementOrderTotal($time_str = '')
     {
-        $map['site'] = 3;
+        $map['site'] = self::SITE;
         if ($time_str) {
             $createat = explode(' ', $time_str);
             $where['day_date'] = ['between', [$createat[0], $createat[3]]];
@@ -518,7 +529,7 @@ class Nihao extends Model
      * */
     public function getOnlineCelebrityOrderNum($time_str = '')
     {
-        $map['site'] = 3;
+        $map['site'] = self::SITE;
         if ($time_str) {
             $createat = explode(' ', $time_str);
             $where['day_date'] = ['between', [$createat[0], $createat[3]]];
@@ -536,7 +547,7 @@ class Nihao extends Model
      * */
     public function getOnlineCelebrityOrderTotal($time_str = '')
     {
-        $map['site'] = 3;
+        $map['site'] = self::SITE;
         if ($time_str) {
             $createat = explode(' ', $time_str);
             $where['day_date'] = ['between', [$createat[0], $createat[3]]];
@@ -565,7 +576,7 @@ class Nihao extends Model
         return $arr;
     }
     public function getMoneyOrderNumInfo($num,$time_str = ''){
-        $map_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        $map_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
         $map_where['order_type'] = 1;
         switch ($num){
             case 0:
@@ -620,7 +631,7 @@ class Nihao extends Model
         return $arr;
     }
     public function getOrderShippingInfo($num,$time_str = ''){
-        $map_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        $map_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
         $map_where['order_type'] = 1;
         switch ($num){
             case 0:
@@ -675,18 +686,7 @@ class Nihao extends Model
 
     protected function getReport_active_user($site, $analytics, $startDate, $endDate)
     {
-
-        // Replace with your view ID, for example XXXX.
-        // $VIEW_ID = "168154683";
-        // $VIEW_ID = "172731925";
-        if ($site == 1) {
-            $VIEW_ID = config('ZEELOOL_GOOGLE_ANALYTICS_VIEW_ID');
-        } elseif ($site == 2) {
-            $VIEW_ID = config('VOOGUEME_GOOGLE_ANALYTICS_VIEW_ID');
-        } elseif ($site == 3) {
-            $VIEW_ID = config('NIHAO_GOOGLE_ANALYTICS_VIEW_ID');
-        }
-
+        $VIEW_ID = config('ZEELOOLDE_GOOGLE_ANALYTICS_VIEW_ID');
         // Replace with your view ID, for example XXXX.
         // $VIEW_ID = "<REPLACE_WITH_VIEW_ID>";
 
@@ -736,18 +736,7 @@ class Nihao extends Model
     //着陆页会话数
     protected function getReport_landing1($site, $analytics, $startDate, $endDate)
     {
-
-        // Replace with your view ID, for example XXXX.
-        // $VIEW_ID = "168154683";
-        // $VIEW_ID = "172731925";
-        if ($site == 1) {
-            $VIEW_ID = config('ZEELOOL_GOOGLE_ANALYTICS_VIEW_ID');
-        } elseif ($site == 2) {
-            $VIEW_ID = config('VOOGUEME_GOOGLE_ANALYTICS_VIEW_ID');
-        } elseif ($site == 3) {
-            $VIEW_ID = config('NIHAO_GOOGLE_ANALYTICS_VIEW_ID');
-        }
-
+        $VIEW_ID = config('ZEELOOLDE_GOOGLE_ANALYTICS_VIEW_ID');
         // Replace with your view ID, for example XXXX.
         // $VIEW_ID = "<REPLACE_WITH_VIEW_ID>";
 
@@ -799,18 +788,7 @@ class Nihao extends Model
     //目标13会话数 产品详情页数据
     protected function getReport_target13($site, $analytics, $startDate, $endDate)
     {
-
-        // Replace with your view ID, for example XXXX.
-        // $VIEW_ID = "168154683";
-        // $VIEW_ID = "172731925";
-        if ($site == 1) {
-            $VIEW_ID = config('ZEELOOL_GOOGLE_ANALYTICS_VIEW_ID');
-        } elseif ($site == 2) {
-            $VIEW_ID = config('VOOGUEME_GOOGLE_ANALYTICS_VIEW_ID');
-        } elseif ($site == 3) {
-            $VIEW_ID = config('NIHAO_GOOGLE_ANALYTICS_VIEW_ID');
-        }
-
+        $VIEW_ID = config('ZEELOOLDE_GOOGLE_ANALYTICS_VIEW_ID');
         // Replace with your view ID, for example XXXX.
         // $VIEW_ID = "<REPLACE_WITH_VIEW_ID>";
 
@@ -842,7 +820,109 @@ class Nihao extends Model
         $body->setReportRequests(array($request));
         return $analytics->reports->batchGet($body);
     }
+    //目标20会话数 调用此方法 产品详情页 v站单独用
+    public function google_target20($site, $start_time)
+    {
+        $end_time = $start_time;
+        $client = new \Google_Client();
+        $client->setAuthConfig('./oauth/oauth-credentials.json');
+        $client->addScope(\Google_Service_Analytics::ANALYTICS_READONLY);
+        // Create an authorized analytics service object.
+        $analytics = new \Google_Service_AnalyticsReporting($client);
+        // $analytics = $this->initializeAnalytics();
+        // Call the Analytics Reporting API V4.
+        $response = $this->getReport_target20($site, $analytics, $start_time, $end_time);
+        // Print the response.
+        $result = $this->printResults($response);
+        // return $result;
+        return $result[0]['ga:goal20Starts'] ? round($result[0]['ga:goal20Starts'], 2) : 0;
+    }
+    //目标20会话数 产品详情页数据 v站单独用
+    protected function getReport_target20($site, $analytics, $startDate, $endDate)
+    {
+        $VIEW_ID = config('ZEELOOLDE_GOOGLE_ANALYTICS_VIEW_ID');
+        // Replace with your view ID, for example XXXX.
+        // $VIEW_ID = "<REPLACE_WITH_VIEW_ID>";
 
+        $dateRange = new \Google_Service_AnalyticsReporting_DateRange();
+        $dateRange->setStartDate($startDate);
+        $dateRange->setEndDate($endDate);
+
+        $adCostMetric = new \Google_Service_AnalyticsReporting_Metric();
+        //着陆页的数量
+        // $adCostMetric->setExpression("ga:landingPagePath");
+        // $adCostMetric->setAlias("ga:landingPagePath");
+        // $adCostMetric->setExpression("ga:sessions");
+        // $adCostMetric->setAlias("ga:sessions");
+        //目标4的数量
+        $adCostMetric->setExpression("ga:goal20Starts");
+        $adCostMetric->setAlias("ga:goal20Starts");
+        $sessionDayDimension = new \Google_Service_AnalyticsReporting_Dimension();
+        $sessionDayDimension->setName("ga:day");
+        $sessionDayDimension->setName("ga:date");
+
+        // Create the ReportRequest object.
+        $request = new \Google_Service_AnalyticsReporting_ReportRequest();
+        $request->setViewId($VIEW_ID);
+        $request->setDateRanges($dateRange);
+        $request->setMetrics(array($adCostMetric));
+        $request->setDimensions(array($sessionDayDimension));
+
+        $body = new \Google_Service_AnalyticsReporting_GetReportsRequest();
+        $body->setReportRequests(array($request));
+        return $analytics->reports->batchGet($body);
+    }
+
+    //目标2会话数 调用此方法 加购数据 v站单独用
+    public function google_target2($site, $start_time)
+    {
+        $end_time = $start_time;
+        $client = new \Google_Client();
+        $client->setAuthConfig('./oauth/oauth-credentials.json');
+        $client->addScope(\Google_Service_Analytics::ANALYTICS_READONLY);
+        // Create an authorized analytics service object.
+        $analytics = new \Google_Service_AnalyticsReporting($client);
+        // $analytics = $this->initializeAnalytics();
+        // Call the Analytics Reporting API V4.
+        $response = $this->getReport_target2($site, $analytics, $start_time, $end_time);
+        // Print the response.
+        $result = $this->printResults($response);
+        // return $result;
+        return $result[0]['ga:goal2Starts'] ? round($result[0]['ga:goal2Starts'], 2) : 0;
+    }
+    //目标2会话数 加购数据 v站单独用
+    protected function getReport_target2($site, $analytics, $startDate, $endDate)
+    {
+        $VIEW_ID = config('ZEELOOLDE_GOOGLE_ANALYTICS_VIEW_ID');
+
+        $dateRange = new \Google_Service_AnalyticsReporting_DateRange();
+        $dateRange->setStartDate($startDate);
+        $dateRange->setEndDate($endDate);
+
+        $adCostMetric = new \Google_Service_AnalyticsReporting_Metric();
+        //着陆页的数量
+        // $adCostMetric->setExpression("ga:landingPagePath");
+        // $adCostMetric->setAlias("ga:landingPagePath");
+        // $adCostMetric->setExpression("ga:sessions");
+        // $adCostMetric->setAlias("ga:sessions");
+        //目标4的数量
+        $adCostMetric->setExpression("ga:goal2Starts");
+        $adCostMetric->setAlias("ga:goal2Starts");
+        $sessionDayDimension = new \Google_Service_AnalyticsReporting_Dimension();
+        $sessionDayDimension->setName("ga:day");
+        $sessionDayDimension->setName("ga:date");
+
+        // Create the ReportRequest object.
+        $request = new \Google_Service_AnalyticsReporting_ReportRequest();
+        $request->setViewId($VIEW_ID);
+        $request->setDateRanges($dateRange);
+        $request->setMetrics(array($adCostMetric));
+        $request->setDimensions(array($sessionDayDimension));
+
+        $body = new \Google_Service_AnalyticsReporting_GetReportsRequest();
+        $body->setReportRequests(array($request));
+        return $analytics->reports->batchGet($body);
+    }
     //目标1会话数 调用此方法 购物车页面
     public function google_target1($site, $start_time)
     {
@@ -863,20 +943,7 @@ class Nihao extends Model
     //目标1会话数 购物车页面数据
     protected function getReport_target1($site, $analytics, $startDate, $endDate)
     {
-
-        // Replace with your view ID, for example XXXX.
-        // $VIEW_ID = "168154683";
-        // $VIEW_ID = "172731925";
-        if ($site == 1) {
-            $VIEW_ID = config('ZEELOOL_GOOGLE_ANALYTICS_VIEW_ID');
-        } elseif ($site == 2) {
-            $VIEW_ID = config('VOOGUEME_GOOGLE_ANALYTICS_VIEW_ID');
-        } elseif ($site == 3) {
-            $VIEW_ID = config('NIHAO_GOOGLE_ANALYTICS_VIEW_ID');
-        }
-
-        // Replace with your view ID, for example XXXX.
-        // $VIEW_ID = "<REPLACE_WITH_VIEW_ID>";
+        $VIEW_ID = config('ZEELOOLDE_GOOGLE_ANALYTICS_VIEW_ID');
 
         $dateRange = new \Google_Service_AnalyticsReporting_DateRange();
         $dateRange->setStartDate($startDate);
@@ -927,21 +994,7 @@ class Nihao extends Model
     //最终电子商务页面交易次数数据
     protected function getReport_target_end($site, $analytics, $startDate, $endDate)
     {
-
-        // Replace with your view ID, for example XXXX.
-        // $VIEW_ID = "168154683";
-        // $VIEW_ID = "172731925";
-        if ($site == 1) {
-            $VIEW_ID = config('ZEELOOL_GOOGLE_ANALYTICS_VIEW_ID');
-        } elseif ($site == 2) {
-            $VIEW_ID = config('VOOGUEME_GOOGLE_ANALYTICS_VIEW_ID');
-        } elseif ($site == 3) {
-            $VIEW_ID = config('NIHAO_GOOGLE_ANALYTICS_VIEW_ID');
-        }
-
-        // Replace with your view ID, for example XXXX.
-        // $VIEW_ID = "<REPLACE_WITH_VIEW_ID>";
-
+        $VIEW_ID = config('ZEELOOLDE_GOOGLE_ANALYTICS_VIEW_ID');
         $dateRange = new \Google_Service_AnalyticsReporting_DateRange();
         $dateRange->setStartDate($startDate);
         $dateRange->setEndDate($endDate);
@@ -991,7 +1044,7 @@ class Nihao extends Model
     }
     protected function getReport_session($analytics, $startDate, $endDate)
     {
-        $VIEW_ID = config('NIHAO_GOOGLE_ANALYTICS_VIEW_ID');
+        $VIEW_ID = config('ZEELOOLDE_GOOGLE_ANALYTICS_VIEW_ID');
         $dateRange = new \Google_Service_AnalyticsReporting_DateRange();
         $dateRange->setStartDate($startDate);
         $dateRange->setEndDate($endDate);
@@ -1070,13 +1123,8 @@ class Nihao extends Model
 
     protected function getReport11($site,$analytics, $startDate, $endDate)
     {
-        if ($site == 1) {
-            $VIEW_ID = config('ZEELOOL_GOOGLE_ANALYTICS_VIEW_ID');
-        } elseif ($site == 2) {
-            $VIEW_ID = config('VOOGUEME_GOOGLE_ANALYTICS_VIEW_ID');
-        } elseif ($site == 3) {
-            $VIEW_ID = config('NIHAO_GOOGLE_ANALYTICS_VIEW_ID');
-        }
+       $VIEW_ID = config('ZEELOOLDE_GOOGLE_ANALYTICS_VIEW_ID');
+
 
         $dateRange = new \Google_Service_AnalyticsReporting_DateRange();
 
@@ -1172,7 +1220,7 @@ class Nihao extends Model
         }
         $createat = explode(' ', $time_str);
         $order_where['o.payment_time'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
-        $order_where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        $order_where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
         $order_where['oa.address_type'] = 'shipping';
         $order_where['o.order_type'] = 1;
         //获取所有的订单的国家

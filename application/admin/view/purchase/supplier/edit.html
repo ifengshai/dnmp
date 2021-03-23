@@ -90,7 +90,7 @@
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Supplier_type')}:</label>
         <div class="col-xs-12 col-sm-8">
-            <select class="selectpicker" name="row[supplier_type]">
+            <select class="selectpicker form-control" name="row[supplier_type]">
                 <option value="2" {:$row['supplier_type']==2 ? 'selected' : '' }>镜架</option>
                 <option value="1" {:$row['supplier_type']==1 ? 'selected' : '' }>镜片</option>
 
@@ -107,9 +107,9 @@
         </div>
     </div>
     <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Remark')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('供应商备注')}:</label>
         <div class="col-xs-12 col-sm-8">
-            <textarea id="c-remark" class="form-control editor" name="row[remark]">{$row.remark|htmlentities}</textarea>
+            <textarea id="c-remark" class="form-control" rows="5"  cols="50"  name="row[remark]">{$row.remark|htmlentities}</textarea>
         </div>
     </div>
     <div class="form-group">

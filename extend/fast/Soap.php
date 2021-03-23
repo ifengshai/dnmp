@@ -115,20 +115,17 @@ class Soap
         }
 
         $client = new Client(['verify' => false]);
-        try {
-            unset($params['site']);
-            $response = $client->request('POST', $url, array('form_params' => $params));
-            $body = $response->getBody();
-            $stringBody = (string) $body;
-            $res = json_decode($stringBody, true);
-            if ($res === null) {
-                return false;
-            }
-            if ($res['code'] == 200 || $res['status'] == 200) {
-                return true;
-            }
+        unset($params['site']);
+        $response = $client->request('POST', $url, array('form_params' => $params));
+        $body = $response->getBody();
+        $stringBody = (string) $body;
+        $res = json_decode($stringBody, true);
+        if ($res === null) {
             return false;
-        } catch (\Exception $e) {
+        }
+        if ($res['code'] == 200 || $res['status'] == 200) {
+            return true;
+        } else {
             return false;
         }
     }

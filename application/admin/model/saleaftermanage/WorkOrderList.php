@@ -988,7 +988,7 @@ class WorkOrderList extends Model
                     (!is_array($changeLens['original_sku']) || empty($changeLens['original_sku'])) && exception('sku不能为空');
 
                     //循环插入数据
-                    $original_sku = array_filter(array_unique($changeLens['original_sku']));
+                    $original_sku = array_filter($changeLens['original_sku']);
                     foreach ($original_sku as $key => $val) {
                         $lensId = $changeLens['lens_type'][$key];
                         $colorId = $changeLens['color_id'][$key];

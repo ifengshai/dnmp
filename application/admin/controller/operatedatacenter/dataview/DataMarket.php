@@ -40,7 +40,7 @@ class DataMarket extends Backend
     {
         $platform = $this->magentoplatform->getNewAuthSite();
         foreach ($platform as $k=>$v){
-            if(in_array($k,[8,13,14])){
+            if(in_array($k,[5,8,13,14])){
                 unset($platform[$k]);
             }
         }

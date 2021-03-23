@@ -19,6 +19,8 @@ class DashBoard extends Backend
         $this->zeeloolOperate = new \app\admin\model\operatedatacenter\Zeelool;
         $this->vooguemeOperate = new \app\admin\model\operatedatacenter\Voogueme();
         $this->nihaoOperate = new \app\admin\model\operatedatacenter\Nihao();
+        $this->zeeloolDeOperate = new \app\admin\model\operatedatacenter\ZeeloolDe;
+        $this->zeeloolJpOperate = new \app\admin\model\operatedatacenter\ZeeloolJp;
         $this->datacenterday = new \app\admin\model\operatedatacenter\Datacenter();
         $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform();
     }

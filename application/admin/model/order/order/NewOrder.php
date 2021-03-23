@@ -128,4 +128,37 @@ class NewOrder extends Model
             ->count(1);
         return $count;
     }
+
+
+    /**
+     * 统计订单SKU销量
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/02/06 16:42:25 
+     * @param [type] $sku 筛选条件
+     * @return object
+     */
+    public function getOrderSalesNum($sku = [], $where)
+    {
+        if ($sku) {
+            $map['sku'] = ['in', $sku];
+        } else {
+            $map['sku'] = ['not like', '%Price%'];
+        }
+        $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered']];
+        $list = $this
+            ->alias('a')
+            ->field('sku,count(1) as num,a.site')
+            ->where($map)
+            ->where($where)
+            ->join(['fa_order_item_process' => 'b'], 'a.id=b.order_id')
+            ->group('sku,a.site')
+            ->select();
+        $sales_num_list = [];
+        foreach($list as $k => $v) {
+            $sales_num_list[$v['site']][$v['sku']] = $v['num'];
+        }
+        return $sales_num_list;
+    }
 }
