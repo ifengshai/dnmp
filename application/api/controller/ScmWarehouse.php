@@ -2223,7 +2223,7 @@ class ScmWarehouse extends Scm
                     ->join(['fa_inventory_list' => 'b'], 'a.inventory_id=b.id')
                     ->where(['b.is_del' => 1, 'b.check_status' => ['in', [0, 1]]])
                     ->where($cat)
-                    ->column('a.location_code_id');
+                    ->column('a.library_name');
                 dump($library_name);die();
 
 
