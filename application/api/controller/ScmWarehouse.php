@@ -2224,20 +2224,6 @@ class ScmWarehouse extends Scm
                     ->where(['b.is_del' => 1, 'b.check_status' => ['in', [0, 1]]])
                     ->where($cat)
                     ->column('a.library_name');
-                dump($library_name);die();
-
-
-//                    ->where($cat)->column('library_name');
-//                $count = $this->_inventory->alias('a')
-//                    ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata]])
-//                    ->count();
-
-
-                foreach ($library_name as $k=>$v){
-                    if (empty($v)){
-                        unset($library_name[$k]);
-                    }
-                }
                 if ($library_name){
                     $where['b.coding'] = ['not in', array_unique($library_name)];
                 }
