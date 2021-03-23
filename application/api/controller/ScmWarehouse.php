@@ -2219,9 +2219,13 @@ class ScmWarehouse extends Scm
 //            //查询对应的库位id
 //                $store_house_id =  Db::table('fa_product_barcode_item')->where($cat)->column('location_code_id');
                 $library_name =  Db::table('fa_inventory_item')->where($cat)->column('library_name');
-                dump($library_name);die();
+                foreach ($library_name as $k=>$v){
+                    if (!empty($v)){
+                        unset($library_name[$k]);
+                    }
+                }
                 if ($library_name){
-                    $where['b.library_name'] = ['not in', $library_name];
+                    $where['b.coding'] = ['not in', $library_name];
                 }
 
             }
