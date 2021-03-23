@@ -1331,7 +1331,7 @@ class ScmWarehouse extends Scm
             $all_total = $value['price'] * $value['in_stock_num'];
             //生成采购单
             $purchase_number = 'PO' . date('YmdHis') . rand(100, 999) . rand(100, 999);
-            $purchase_data = ['purchase_number' => $purchase_number, 'purchase_name' => '退货入库', 'purchase_status' => 10, 'check_status' => 2, 'is_in_stock' => 1, 'stock_status' => 2, 'createtime' => date('Y-m-d H:i:s'), 'product_total' => $all_total, 'purchase_total' => $all_total];
+            $purchase_data = ['purchase_number' => $purchase_number, 'purchase_name' => $value['sku'], 'purchase_status' => 10, 'check_status' => 2, 'is_in_stock' => 1, 'stock_status' => 2, 'createtime' => date('Y-m-d H:i:s'), 'product_total' => $all_total, 'purchase_total' => $all_total];
 
             $purchase = $gen_purchase_order->insertGetId($purchase_data);
             //生成质检单

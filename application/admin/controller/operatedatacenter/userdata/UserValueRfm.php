@@ -16,9 +16,13 @@ class UserValueRfm extends Backend
         $this->zeelool = new \app\admin\model\order\order\Zeelool();
         $this->voogueme = new \app\admin\model\order\order\Voogueme();
         $this->nihao = new \app\admin\model\order\order\Nihao();
+        $this->zeeloolde = new \app\admin\model\order\order\ZeeloolDe();
+        $this->zeelooljp = new \app\admin\model\order\order\ZeeloolJp();
         $this->zeeloolOperate = new \app\admin\model\operatedatacenter\Zeelool;
         $this->vooguemeOperate = new \app\admin\model\operatedatacenter\Voogueme;
         $this->nihaoOperate = new \app\admin\model\operatedatacenter\Nihao;
+        $this->zeelooldeOperate = new \app\admin\model\operatedatacenter\ZeeloolDe();
+        $this->zeelooljpOperate = new \app\admin\model\operatedatacenter\ZeeloolJp();
         $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform();
     }
 
@@ -32,7 +36,7 @@ class UserValueRfm extends Backend
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
         foreach ($magentoplatformarr as $key => $val) {
-            if (!in_array($val['name'], ['zeelool', 'voogueme', 'nihao'])) {
+            if (!in_array($val['name'], ['zeelool', 'voogueme', 'nihao','zeelool_de','zeelool_jp'])) {
                 unset($magentoplatformarr[$key]);
             }
         }
@@ -104,6 +108,12 @@ class UserValueRfm extends Backend
         }elseif($order_platform == 3){
             $web_model = Db::connect('database.db_nihao');
             $order_model = $this->nihao;
+        }elseif($order_platform == 10){
+            $web_model = Db::connect('database.db_zeelool_de');
+            $order_model = $this->zeeloolde;
+        }elseif($order_platform == 11){
+            $web_model = Db::connect('database.db_zeelool_jp');
+            $order_model = $this->zeelooljp;
         }else{
             $web_model = Db::connect('database.db_zeelool');
             $order_model = $this->zeelool;
@@ -143,7 +153,7 @@ class UserValueRfm extends Backend
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
         foreach ($magentoplatformarr as $key => $val) {
-            if (!in_array($val['name'], ['zeelool', 'voogueme', 'nihao'])) {
+            if (!in_array($val['name'], ['zeelool', 'voogueme', 'nihao','zeelool_de','zeelool_jp'])) {
                 unset($magentoplatformarr[$key]);
             }
         }
@@ -211,6 +221,12 @@ class UserValueRfm extends Backend
         }elseif($order_platform == 3){
             $web_model = Db::connect('database.db_nihao');
             $order_model = $this->nihao;
+        }elseif($order_platform == 10){
+            $web_model = Db::connect('database.db_zeelool_de');
+            $order_model = $this->zeeloolde;
+        }elseif($order_platform == 11){
+            $web_model = Db::connect('database.db_zeelool_jp');
+            $order_model = $this->zeelooljp;
         }else{
             $web_model = Db::connect('database.db_zeelool');
             $order_model = $this->zeelool;
@@ -250,7 +266,7 @@ class UserValueRfm extends Backend
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
         foreach ($magentoplatformarr as $key => $val) {
-            if (!in_array($val['name'], ['zeelool', 'voogueme', 'nihao'])) {
+            if (!in_array($val['name'], ['zeelool', 'voogueme', 'nihao','zeelool_de','zeelool_jp'])) {
                 unset($magentoplatformarr[$key]);
             }
         }
@@ -318,6 +334,10 @@ class UserValueRfm extends Backend
             $web_model = Db::connect('database.db_voogueme');
         }elseif($order_platform == 3){
             $web_model = Db::connect('database.db_nihao');
+        }elseif($order_platform == 10){
+            $web_model = Db::connect('database.db_zeelool_de');
+        }elseif($order_platform == 11){
+            $web_model = Db::connect('database.db_zeelool_jp');
         }else{
             $web_model = Db::connect('database.db_zeelool');
         }

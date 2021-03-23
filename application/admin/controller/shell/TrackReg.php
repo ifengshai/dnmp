@@ -2170,7 +2170,6 @@ class TrackReg extends Backend
     //跑sku每天的数据 ga的数据
     public function sku_day_data_ga()
     {
-        $zeeloolOperate = new \app\admin\model\operatedatacenter\Zeelool;
         set_time_limit(0);
         //统计昨天的数据
         $data = date('Y-m-d', strtotime('-1 day'));
@@ -2183,9 +2182,6 @@ class TrackReg extends Backend
 
         //当前站点的所有sku映射关系
         $sku_data = collection($sku_data)->toArray();
-        //ga所有的sku唯一身份浏览量的数据
-        $ga_skus = $zeeloolOperate->google_sku_detail(1, $data);
-        $ga_skus = array_column($ga_skus, 'uniquePageviews', 'ga:pagePath');
         foreach ($sku_data as $k => $v) {
             $sku_data[$k]['unique_pageviews'] = 0;
             $sku_data[$k]['goods_grade'] = $sku_data[$k]['grade'];
@@ -2196,14 +2192,8 @@ class TrackReg extends Backend
             unset($sku_data[$k]['stock']);
             unset($sku_data[$k]['grade']);
             unset($sku_data[$k]['plat_on_way_stock']);
-            foreach ($ga_skus as $kk => $vv) {
-                if (strpos($kk, $v['sku']) != false) {
-                    $sku_data[$k]['unique_pageviews'] += $vv;
-                }
-            }
             Db::name('datacenter_sku_day')->insert($sku_data[$k]);
         }
-
 
         $sku_data = $_item_platform_sku
             ->field('sku,grade,platform_sku,stock,plat_on_way_stock')
@@ -2211,10 +2201,6 @@ class TrackReg extends Backend
             ->select();
         //当前站点的所有sku映射关系
         $sku_data = collection($sku_data)->toArray();
-        //ga所有的sku唯一身份浏览量的数据
-        $ga_skus = $zeeloolOperate->google_sku_detail(2, $data);
-        $ga_skus = array_column($ga_skus, 'uniquePageviews', 'ga:pagePath');
-
         foreach ($sku_data as $k => $v) {
             $sku_data[$k]['unique_pageviews'] = 0;
             $sku_data[$k]['goods_grade'] = $sku_data[$k]['grade'];
@@ -2225,11 +2211,6 @@ class TrackReg extends Backend
             unset($sku_data[$k]['stock']);
             unset($sku_data[$k]['grade']);
             unset($sku_data[$k]['plat_on_way_stock']);
-            foreach ($ga_skus as $kk => $vv) {
-                if (strpos($kk, $v['sku']) != false) {
-                    $sku_data[$k]['unique_pageviews'] += $vv;
-                }
-            }
             Db::name('datacenter_sku_day')->insert($sku_data[$k]);
         }
 
@@ -2239,9 +2220,6 @@ class TrackReg extends Backend
             ->select();
         //当前站点的所有sku映射关系
         $sku_data = collection($sku_data)->toArray();
-        //ga所有的sku唯一身份浏览量的数据
-        $ga_skus = $zeeloolOperate->google_sku_detail(3, $data);
-        $ga_skus = array_column($ga_skus, 'uniquePageviews', 'ga:pagePath');
 
         foreach ($sku_data as $k => $v) {
             $sku_data[$k]['unique_pageviews'] = 0;
@@ -2253,14 +2231,8 @@ class TrackReg extends Backend
             unset($sku_data[$k]['stock']);
             unset($sku_data[$k]['grade']);
             unset($sku_data[$k]['plat_on_way_stock']);
-            foreach ($ga_skus as $kk => $vv) {
-                if (strpos($kk, $v['sku']) != false) {
-                    $sku_data[$k]['unique_pageviews'] += $vv;
-                }
-            }
             Db::name('datacenter_sku_day')->insert($sku_data[$k]);
         }
-
 
         $sku_data = $_item_platform_sku
             ->field('sku,grade,platform_sku,stock,plat_on_way_stock')
@@ -2268,10 +2240,6 @@ class TrackReg extends Backend
             ->select();
         //当前站点的所有sku映射关系
         $sku_data = collection($sku_data)->toArray();
-        //ga所有的sku唯一身份浏览量的数据
-        $ga_skus = $zeeloolOperate->google_sku_detail(10, $data);
-        $ga_skus = array_column($ga_skus, 'uniquePageviews', 'ga:pagePath');
-
         foreach ($sku_data as $k => $v) {
             $sku_data[$k]['unique_pageviews'] = 0;
             $sku_data[$k]['goods_grade'] = $sku_data[$k]['grade'];
@@ -2282,15 +2250,8 @@ class TrackReg extends Backend
             unset($sku_data[$k]['stock']);
             unset($sku_data[$k]['grade']);
             unset($sku_data[$k]['plat_on_way_stock']);
-            foreach ($ga_skus as $kk => $vv) {
-                if (strpos($kk, $v['sku']) != false) {
-                    $sku_data[$k]['unique_pageviews'] += $vv;
-                }
-            }
             Db::name('datacenter_sku_day')->insert($sku_data[$k]);
         }
-
-
 
         $sku_data = $_item_platform_sku
             ->field('sku,grade,platform_sku,stock,plat_on_way_stock')
@@ -2298,10 +2259,6 @@ class TrackReg extends Backend
             ->select();
         //当前站点的所有sku映射关系
         $sku_data = collection($sku_data)->toArray();
-        //ga所有的sku唯一身份浏览量的数据
-        $ga_skus = $zeeloolOperate->google_sku_detail(11, $data);
-        $ga_skus = array_column($ga_skus, 'uniquePageviews', 'ga:pagePath');
-
         foreach ($sku_data as $k => $v) {
             $sku_data[$k]['unique_pageviews'] = 0;
             $sku_data[$k]['goods_grade'] = $sku_data[$k]['grade'];
@@ -2312,12 +2269,45 @@ class TrackReg extends Backend
             unset($sku_data[$k]['stock']);
             unset($sku_data[$k]['grade']);
             unset($sku_data[$k]['plat_on_way_stock']);
-            foreach ($ga_skus as $kk => $vv) {
-                if (strpos($kk, $v['sku']) != false) {
-                    $sku_data[$k]['unique_pageviews'] += $vv;
+            Db::name('datacenter_sku_day')->insert($sku_data[$k]);
+        }
+    }
+    //跑sku每天唯一身份浏览量
+    public function sku_day_unique_pageviews(){
+        $zeeloolOperate = new \app\admin\model\operatedatacenter\Zeelool;
+        set_time_limit(0);
+        //统计昨天的数据
+        $data = date('Y-m-d', strtotime('-1 day'));
+        $sku_data = Db::name('datacenter_sku_day')->where('day_date',$data)->field('id,platform_sku,site')->select();
+        foreach($sku_data as $key=>$value){
+            $ga_skus = $zeeloolOperate->google_sku_detail($value['site'], $data);
+            $ga_skus = array_column($ga_skus, 'uniquePageviews', 'ga:pagePath');
+            if($value['site'] == 2){
+                $model = Db::connect('database.db_voogueme_online');
+            }elseif($value['site'] == 10){
+                $model = Db::connect('database.db_zeelool_de_online');
+            }else{
+                $model = Db::connect('database.db_zeelool_jp_online');
+            }
+            $unique_pageviews = 0;
+
+            if($value['site'] == 1 || $value['site'] == 3){
+                foreach ($ga_skus as $kk => $vv) {
+                    if (strpos($kk, $value['sku']) != false) {
+                        $unique_pageviews += $vv;
+                    }
+                }
+            }else{
+                $sku_id = $model->table('catalog_product_entity')->where('sku',$value['platform_sku'])->value('entity_id');
+                foreach ($ga_skus as $kk => $vv) {
+                    if ($kk == '/goods-detail/'.$sku_id) {
+                        $unique_pageviews += $vv;
+                    }
                 }
             }
-            Db::name('datacenter_sku_day')->insert($sku_data[$k]);
+            Db::name('datacenter_sku_day')->where('id',$value['id'])->update(['unique_pageviews'=>$unique_pageviews]);
+            echo $value['id'].'--'.$unique_pageviews.' is ok'."\n";
+            usleep(10000);
         }
     }
     public function sku_day_data_order()

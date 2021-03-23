@@ -13,6 +13,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                     edit_url: 'warehouse/stock_sku/edit',
                     del_url: 'warehouse/stock_sku/del',
                     multi_url: 'warehouse/stock_sku/multi',
+                    import_url: 'warehouse/stock_sku/import',
                     table: 'store_sku',
                 }
             });
