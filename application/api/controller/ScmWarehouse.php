@@ -2231,7 +2231,7 @@ class ScmWarehouse extends Scm
             //排除待盘点sku
             $sku_arr = $this->_inventory_item->alias('a')->join(['fa_inventory_list' => 'b'], 'a.inventory_id=b.id')
                 ->where(['b.status' => ['in', [0, 1]]])
-//                ->where(['a.sku' => ['neq', $query]])
+                ->where(['a.sku' => ['like', '%' . $query . '%']])
                 ->column('sku');
             dump($sku_arr);die();
             foreach ($sku_arr as $k=>$v){
