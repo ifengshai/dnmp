@@ -780,7 +780,7 @@ class Wangpenglei extends Backend
     //导出订单数据
     public function derive_order_data()
     {
-
+        ini_set('memory_limit', '1512M');
         $order = new \app\admin\model\order\Order();
         $lensdata = new \app\admin\model\order\order\LensData();
         $where['a.created_at'] = ['between', [strtotime(date('2020-12-01 00:00:00')), strtotime(date('2020-12-31 23:59:59'))]];
