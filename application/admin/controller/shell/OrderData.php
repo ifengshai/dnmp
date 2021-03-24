@@ -1284,6 +1284,19 @@ class OrderData extends Backend
         //证书
         $arr['gra_certificate'] = $options['info_buyRequest']['tmplens']['gra_certificate'] ?: '';
 
+        $arr['type'] = $options['info_buyRequest']['tmplens']['type'] ?: '';
+
+        $arr['stone_shape'] = $options['info_buyRequest']['tmplens']['stone_shape'] ?: '';
+
+        $arr['stone_type'] = $options['info_buyRequest']['tmplens']['stone_type'] ?: '';
+
+        $arr['carat_weight'] = $options['info_buyRequest']['tmplens']['carat_weight'] ?: '';
+
+        $arr['metal'] = $options['info_buyRequest']['tmplens']['metal'] ?: '';
+
+        $arr['plating'] = $options['info_buyRequest']['tmplens']['plating'] ?: '';
+
+
         /**
          * 判断定制现片逻辑
          * 1、渐进镜 Progressive
