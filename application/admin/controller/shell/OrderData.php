@@ -1655,10 +1655,17 @@ class OrderData extends Backend
                 $wave_time_type = 8;
             }
             
-
-
-
-            $waveorder->where(['type' => $type])
+            $id = $waveorder->where(['type' => $type,'wave_time_type' => $wave_time_type,'createtime' => ['between', [strtotime(date('Y-m-d 00:00:00')), strtotime(date('Y-m-d 23:59:59'))]]])->value('id');
+            if ($id) {
+                $this->orderitemprocess->where(['id' => $v['id']])->update(['wave_order_id' => $id,'location_code' => '','picking_sort' => '']);
+            } else {
+                $params = [];
+                $params['wave_order_number'] = 'BC' . date('YmdHis') . rand(100, 999) . rand(100, 999);
+                $params['type'] = $type;
+                $params['wave_time_type'] = $wave_time_type;
+                $params['createtime'] = $wave_time_type;
+                $waveorder->insert();
+            }
         }
     }
 
