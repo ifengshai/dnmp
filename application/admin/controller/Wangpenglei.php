@@ -775,4 +775,60 @@ class Wangpenglei extends Backend
         Excel::writeCsv($list, $headlist, 'sku库龄数据');
         die;
     }
+
+
+    //导出订单数据
+    public function derive_order_data()
+    {
+        ini_set('memory_limit', '1512M');
+        $order = new \app\admin\model\order\Order();
+        $lensdata = new \app\admin\model\order\order\LensData();
+        $where['a.created_at'] = ['between', [strtotime(date('2020-02-01 00:00:00')), strtotime(date('2020-02-31 23:59:59'))]];
+        $list = $order->where($where)->alias('a')->field('b.item_order_number,b.sku,b.order_prescription_type,prescription_type,web_lens_name,coating_name,od_sph,os_sph,od_cyl,os_cyl,od_axis,os_axis,pd_l,pd_r,pd,os_add,od_add,od_pv,os_pv,od_pv_r,os_pv_r,od_bd,os_bd,od_bd_r,os_bd_r,lens_number')
+            ->join(['fa_order_item_process' => 'b'], 'a.id=b.order_id')
+            ->join(['fa_order_item_option' => 'c'], 'b.option_id=c.id')
+            ->select();
+        $lenslist = $lensdata->column('lens_name', 'lens_number');
+        $params = [];
+        foreach ($list as $k => $v) {
+            $params[$k]['item_order_number'] = $v['item_order_number'];
+            $params[$k]['sku'] = $v['sku'];
+            $str = '';
+            if ($v['order_prescription_type'] == 1) {
+                $str = '仅镜架';
+            } elseif ($v['order_prescription_type'] == 2) {
+                $str = '现货处方镜';
+            } elseif ($v['order_prescription_type'] == 3) {
+                $str = '定制处方镜';
+            }
+
+            $params[$k]['order_prescription_type'] = $str;
+            $params[$k]['prescription_type'] = $v['prescription_type'];
+            $params[$k]['lensname'] = $lenslist[$v['lens_number']];
+            $params[$k]['coating_name'] = $v['coating_name'];
+            $params[$k]['od_sph'] = $v['od_sph'];
+            $params[$k]['os_sph'] = $v['os_sph'];
+            $params[$k]['od_cyl'] = $v['od_cyl'];
+            $params[$k]['os_cyl'] = $v['os_cyl'];
+            $params[$k]['od_axis'] = $v['od_axis'];
+            $params[$k]['os_axis'] = $v['os_axis'];
+            $params[$k]['pd_r'] = $v['pd_r'];
+            $params[$k]['pd_l'] = $v['pd_l'];
+            $params[$k]['pd'] = $v['pd'];
+            $params[$k]['od_add'] = $v['od_add'];
+            $params[$k]['os_add'] = $v['os_add'];
+            $params[$k]['od_pv'] = $v['od_pv'];
+            $params[$k]['os_pv'] = $v['os_pv'];
+            $params[$k]['od_pv_r'] = $v['od_pv_r'];
+            $params[$k]['os_pv_r'] = $v['os_pv_r'];
+            $params[$k]['od_bd'] = $v['od_bd'];
+            $params[$k]['os_bd'] = $v['os_bd'];
+            $params[$k]['od_bd_r'] = $v['od_bd_r'];
+            $params[$k]['os_bd_r'] = $v['os_bd_r'];
+        }
+
+        $headlist = ['子单号',  'sku', '加工类型', '处方类型', '镜片名称', '镀膜名称', '右眼SPH', '左眼SPH', '右眼CYL', '左眼CYL', '右眼AXIS', '左眼AXIS', '左眼PD', '右眼PD', 'PD', '右眼ADD', '左眼ADD', '右眼Prism(out/in)', '左眼Prism(out/in)', '右眼Direction(out/in)', '左眼Direction(out/in)', '右眼Prism(up/down)', '左眼Prism(up/down)', '右眼Direction(up/down)', '左眼Direction(up/down)'];
+        Excel::writeCsv($params, $headlist, '2月份订单数据');
+        die;
+    }
 }
