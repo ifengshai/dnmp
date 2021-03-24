@@ -2663,7 +2663,7 @@ class WorkOrderList extends Model
         $_stock_house = new StockHouse();
         $all_item_order_number = $_new_order_process->alias('a')//所有子单
             ->where('a.increment_id', $increment_id)
-            ->where(['a.distribution_status' => ['neq', 0]])
+            ->where(['b.distribution_status' => ['neq', 0]])
             ->join(['fa_order_item_process' => 'b'], 'a.order_id=b.order_id')
             ->column('b.item_order_number');
         $item_order_number_diff = array_diff($all_item_order_number,[$item_order_number]);//其余子单
