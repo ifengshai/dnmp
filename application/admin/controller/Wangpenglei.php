@@ -828,7 +828,7 @@ class Wangpenglei extends Backend
         }
 
         $headlist = ['子单号',  'sku', '加工类型', '处方类型', '镜片名称', '镀膜名称', '右眼SPH', '左眼SPH', '右眼CYL', '左眼CYL', '右眼AXIS', '左眼AXIS', '左眼PD', '右眼PD', 'PD', '右眼ADD', '左眼ADD', '右眼Prism(out/in)', '左眼Prism(out/in)', '右眼Direction(out/in)', '左眼Direction(out/in)', '右眼Prism(up/down)', '左眼Prism(up/down)', '右眼Direction(up/down)', '左眼Direction(up/down)'];
-        Excel::writeCsv($list, $headlist, '12月份订单数据');
+        Excel::writeCsv($params, $headlist, '12月份订单数据');
         die;
     }
 }
