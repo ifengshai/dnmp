@@ -2628,9 +2628,9 @@ class ScmWarehouse extends Scm
                 foreach ($infos as $k => $v) {
                     Log::write($v);
                     //如果误差为0则跳过
-                    if ($v['error_qty'] == 0) {
-                        continue;
-                    }
+//                    if ($v['error_qty'] == 0) {
+//                        continue;
+//                    }
                     //同步对应SKU库存 更新商品表商品总库存 总库存
                     $item_map['sku'] = $v['sku'];
                     $item_map['is_del'] = 1;
@@ -2797,14 +2797,11 @@ class ScmWarehouse extends Scm
                             ->update(['library_status' => 2, 'inventory_id' => $inventory_id]);
                     } else {
                         if ($codes) {
-                            //查询该sku下所有的code
-                            $code_all =   $this->_product_bar_code_item->where(['sku' => $v['sku']])->column('code');
-                            $change_value = array_diff($code_all,$codes);
-                            Log::write("====输出不一致的值====");
-                            Log::write($change_value);
-
-
-
+//                            //查询该sku下所有的code
+//                            $code_all =   $this->_product_bar_code_item->where(['sku' => $v['sku']])->column('code');
+//                            $change_value = array_diff($code_all,$codes);
+//                            Log::write("====输出不一致的值====");
+//                            Log::write($change_value);
                             //查询库位id
                             $store_id = $this->_store_house->where(['area_id' => $v['area_id'], 'coding' => $v['library_name'], 'status' => 1])->value('id');
                             //更新如果出库单id为空 添加出库单id
@@ -2812,6 +2809,12 @@ class ScmWarehouse extends Scm
                                 ->where(['code' => ['in', $codes],  'sku' => $v['sku']])
                                 ->where("item_order_number=''")
                                 ->update(['inventory_id' => $inventory_id, 'library_status' => 1, 'location_code' => $v['library_name'], 'location_id' => $v['area_id'], 'location_code_id' => $store_id]);
+
+                            $this->_product_bar_code_item
+                                ->where(['code' => ['not in', $codes], 'location_code' => $v['library_name'], 'location_id' => $v['area_id'], 'sku' => $v['sku'], 'out_stock_id' => 0])
+                                ->where("item_order_number=''")
+                                ->update(['library_status' => 2, 'inventory_id' => $inventory_id]);
+
                         }
                     }
                 }
