@@ -318,6 +318,8 @@ class ScmWarehouse extends Scm
     public function out_stock_add()
     {
         $out_stock_id = $this->request->request('out_stock_id');
+        Log::write("输出出库单数据");
+        Log::write($out_stock_id);
         if ($out_stock_id) {
             $info = $this->_out_stock
                 ->field('out_stock_number,type_id,platform_id')
