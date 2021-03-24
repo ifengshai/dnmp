@@ -3139,8 +3139,8 @@ class ScmWarehouse extends Scm
             $whe_sku['platform_sku'] = ['eq',$value['sku']];
             //转换sku
             $item_platform_sku = new ItemPlatformSku();
-            $true_sku =  $item_platform_sku->where($whe_sku)->column('sku');
-            $whe['sku'] = ['in',$true_sku];
+            $true_sku =  $item_platform_sku->where($whe_sku)->value('sku');
+            $whe['sku'] = ['eq',$true_sku];
             $barcodedata = $this->_product_bar_code_item->where($whe)->column('location_code');
             if (!empty($barcodedata)){
                 $count = $this->_inventory->alias('a')
