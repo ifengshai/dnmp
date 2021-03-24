@@ -1438,11 +1438,15 @@ class ScmWarehouse extends Scm
         //获取入库单数据
         $_in_stock_info = $this->_in_stock->get($in_stock_id);
         empty($_in_stock_info) && $this->error(__('入库单不存在'), [], 515);
-
+        Log::write("输出入库单数据");
+        Log::write($in_stock_id);
         $item_list = $this->_in_stock_item
             ->where(['in_stock_id' => $in_stock_id])
             ->field('id,sku,in_stock_num,price')
             ->select();
+
+        Log::write("输出入库单数据02");
+        Log::write($item_list);
         empty($item_list) && $this->error(__('入库单子单数据异常'), [], 515);
 
         $item_list = collection($item_list)->toArray();
@@ -1455,6 +1459,8 @@ class ScmWarehouse extends Scm
             ->field('sku,code')
             ->order('id', 'desc')
             ->select();
+        Log::write("输出入库单数据03");
+        Log::write($bar_code_list);
         $bar_code_list = collection($bar_code_list)->toArray();
 
         foreach ($item_list as $key => $value) {
@@ -1490,6 +1496,8 @@ class ScmWarehouse extends Scm
         }
 
         $kuqu_kuwei = $this->_product_bar_code_item->where(['in_stock_id' => $in_stock_id])->find();
+        Log::write("输出库位信息");
+        Log::write($kuqu_kuwei);
         //入库单所需数据
         $info['in_stock_id'] = $_in_stock_info['id'];
         $info['in_stock_number'] = $_in_stock_info['in_stock_number'];
@@ -2514,25 +2522,25 @@ class ScmWarehouse extends Scm
                     if (empty($sku_item)) {
                         throw new Exception('SKU=>' . $v['sku'] . '不存在');
                     }
-                    $sku_code = array_column($v['sku_agg'], 'code');
-                    $whecat['code'] = ['in', array_unique($sku_code)];
-                    Log::write("====输出信息=====");
-                    Log::write($v['library_name']);
-                    Log::write($v['area_id']);
-                    $whe['coding'] = $v['library_name'];
-                    $whe['area_id'] = $v['area_id'];
-
-                    $code_id = Db::table('fa_store_house')->where($whe)->value('id');
-                    Log::write("===========输出code=============");
-                    Log::write($code_id);
-                    if (!empty($code_id)){
-                        $save_value['location_code'] = $v['library_name'];
-                        $save_value['location_id'] = $v['area_id'];
-                        $save_value['location_code_id'] = $code_id;
-                        Log::write($save_value);
-                        Log::write("===输出where条件==");
-                        Db::table('fa_product_barcode_item')->where($whecat)->update($save_value);
-                    }
+//                    $sku_code = array_column($v['sku_agg'], 'code');
+//                    $whecat['code'] = ['in', array_unique($sku_code)];
+//                    Log::write("====输出信息=====");
+//                    Log::write($v['library_name']);
+//                    Log::write($v['area_id']);
+//                    $whe['coding'] = $v['library_name'];
+//                    $whe['area_id'] = $v['area_id'];
+//
+//                    $code_id = Db::table('fa_store_house')->where($whe)->value('id');
+//                    Log::write("===========输出code=============");
+//                    Log::write($code_id);
+//                    if (!empty($code_id)){
+//                        $save_value['location_code'] = $v['library_name'];
+//                        $save_value['location_id'] = $v['area_id'];
+//                        $save_value['location_code_id'] = $code_id;
+//                        Log::write($save_value);
+//                        Log::write("===输出where条件==");
+//                        Db::table('fa_product_barcode_item')->where($whecat)->update($save_value);
+//                    }
                     //等PDA改为 以此为准
                     $item_list = $this->_inventory_item->where(['inventory_id' => $inventory_id, 'sku' => $v['sku'], 'area_id' => $v['area_id'], 'library_name' => $v['library_name']])->find();
                     $save_data = [];
@@ -2778,17 +2786,14 @@ class ScmWarehouse extends Scm
                         $info[$k]['in_stock_num'] = abs($v['error_qty']);
                         $info[$k]['no_stock_num'] = abs($v['error_qty']);
 
-                        //查询该sku下所有的code
-                        $code_all =   $this->_product_bar_code_item->where(['sku' => $v['sku']])->column('code');
-                        $change_value = array_diff($code_all,$codes);
-                        if (!empty($change_value)){
+                       $other_message =  $this->_product_bar_code_item
+                            ->where(['code' => ['not in', $codes], 'location_code' => $v['library_name'], 'location_id' => $v['area_id'], 'sku' => $v['sku'], 'out_stock_id' => 0])
+                            ->where("item_order_number=''")
+                            ->count();
+                        if ($other_message >0){
                             $list[$k]['sku'] = $v['sku'];
                             $list[$k]['out_stock_num'] = $v['error_qty'];
                         }
-                        Log::write("====输出不一致的值====");
-                        Log::write($change_value);
-                        Log::write($list);
-
 
                         //通过sku 查询应该包含的数据
                         //比对数据，将没有的设置成出库
