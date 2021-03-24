@@ -2580,6 +2580,7 @@ class ScmWarehouse extends Scm
         }
     }
 
+
     /**
      * 审核盘点单
      *
@@ -2781,14 +2782,15 @@ class ScmWarehouse extends Scm
                         $codes = array_unique(array_column(unserialize($v['sku_agg']), 'code'));
                     }
 
-
+                    Log::write("输出误差数");
+                    Log::write($v['error_qty']);
                     if ($v['error_qty'] > 0) {
                         //生成入库单
                         $info[$k]['sku'] = $v['sku'];
                         $info[$k]['in_stock_num'] = abs($v['error_qty']);
                         $info[$k]['no_stock_num'] = abs($v['error_qty']);
 
-                       $other_message =  $this->_product_bar_code_item
+                        $other_message =  $this->_product_bar_code_item
                             ->where(['code' => ['not in', $codes], 'location_code' => $v['library_name'], 'location_id' => $v['area_id'], 'sku' => $v['sku'], 'out_stock_id' => 0])
                             ->where("item_order_number=''")
                             ->count();
@@ -2796,7 +2798,8 @@ class ScmWarehouse extends Scm
                             $list[$k]['sku'] = $v['sku'];
                             $list[$k]['out_stock_num'] = $v['error_qty'];
                         }
-
+                        Log::write("输出出库单信息");
+                        Log::write($list);
                         //通过sku 查询应该包含的数据
                         //比对数据，将没有的设置成出库
                         //新增的这些设置为入库
@@ -2960,6 +2963,7 @@ class ScmWarehouse extends Scm
 
         $this->success($msg, ['info' => ''], 200);
     }
+
 
     /**
      * 盘点时检查条形码绑定关系是否正确
