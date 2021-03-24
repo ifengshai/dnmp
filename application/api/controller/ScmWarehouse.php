@@ -2787,6 +2787,11 @@ class ScmWarehouse extends Scm
                         $this->_product_bar_code_item
                             ->where(['code' => ['in', $codes]])
                             ->update(['inventory_id' => $inventory_id, 'library_status' => 1, 'location_code' => $v['library_name'], 'location_id' => $v['area_id'], 'location_code_id' => $store_id]);
+                        $this->_product_bar_code_item
+                            ->where(['code' => ['not in', $codes], 'location_code' => $v['library_name'], 'location_id' => $v['area_id'], 'sku' => $v['sku'], 'out_stock_id' => 0])
+                            ->where("item_order_number=''")
+                            ->update(['library_status' => 2, 'inventory_id' => $inventory_id]);
+
                     } elseif ($v['error_qty'] < 0) {
                         $list[$k]['sku'] = $v['sku'];
                         $list[$k]['out_stock_num'] = abs($v['error_qty']);
