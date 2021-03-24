@@ -285,13 +285,13 @@ class SupplyData extends Backend
         $days[] = $j_info['days'];
          //抖音
          $c_info = $this->getDullStock($sku, 13);
-         $sales_num10 = $c_info['sales_num'];
+         $sales_num11 = $c_info['sales_num'];
          $days[] = $j_info['days'];
           //阿里巴巴国际站
         $c_info = $this->getDullStock($sku, 14);
-        $sales_num10 = $c_info['sales_num'];
+        $sales_num12 = $c_info['sales_num'];
         $days[] = $j_info['days'];
-        $count = $sales_num1+$sales_num2+$sales_num3+$sales_num4+$sales_num5+$sales_num6+$sales_num7+$sales_num8+$sales_num9+$sales_num10;
+        $count = $sales_num1+$sales_num2+$sales_num3+$sales_num4+$sales_num5+$sales_num6+$sales_num7+$sales_num8+$sales_num9+$sales_num10+$sales_num11+$sales_num12;
         $days = max($days);
         $data = array(
             'count'=>$count,
