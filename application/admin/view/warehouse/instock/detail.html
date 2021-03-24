@@ -73,7 +73,28 @@
                 </select>
             </div>
         </div>
-
+        <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2">入库库区:</label>
+            <div class="col-xs-12 col-sm-8">
+                <select name="row[area]" class="form-control type" required disabled>
+                    <option value="">请选择</option>
+                    {foreach $warehouse_area as $k => $v}
+                    <option value="{$k}" {:$area['location_id'] == $k ? 'selected' : ''}>{$v}</option>
+                    {/foreach}
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2">入库库位:</label>
+            <div class="col-xs-12 col-sm-8">
+                <select name="row[location]" class="form-control type" required disabled>
+                    <option value="">请选择</option>
+                    {foreach $store_house as $k => $v}
+                    <option value="{$k}" {:$area['location_code_id'] == $k ? 'selected' : ''}>{$v}</option>
+                    {/foreach}
+                </select>
+            </div>
+        </div>
         {if condition="$types eq 1"}
         <div class="form-group purchase_id_number">
             <label class="control-label col-xs-12 col-sm-2">质检单:</label>

@@ -134,6 +134,11 @@ class PurchaseOrder extends Backend
      */
     public function add($ids = null)
     {
+        if ($ids){
+            $replenish_list_detail = Db::name('new_product_replenish_list')->where('id',$ids)->find();
+            $supplier_detail = Db::name('supplier')->where('id',$replenish_list_detail['supplier_id'])->find();
+            $this->assign('supplier_detail',$supplier_detail);
+        }
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
 
@@ -181,6 +186,7 @@ class PurchaseOrder extends Backend
                     }
                     $params['create_person'] = session('admin.nickname');
                     $params['createtime'] = date('Y-m-d H:i:s', time());
+                    $params['purchase_name'] = trim($params['purchase_name']);
 
                     $batch_sku = $this->request->post("batch_sku/a");
                     $arrival_num = $this->request->post("arrival_num/a");
@@ -300,7 +306,6 @@ class PurchaseOrder extends Backend
             $ids = $ids ? $ids : input('ids');
             $this->list = new \app\admin\model\purchase\NewProductReplenishList;
             $list = $this->list->where('id', 'in', $ids)->select();
-
             $item = new \app\admin\model\itemmanage\Item;
             $supplier = new \app\admin\model\purchase\SupplierSku;
             foreach ($list as &$v) {
@@ -313,8 +318,9 @@ class PurchaseOrder extends Backend
                 //查询供应商SKU
                 $v['supplier_sku'] = $supplier->getSupplierSkuData($v['sku'], $v['supplier_id']);
             }
-            unset($v);
+            $new_old =$item->where('sku',$list[0]['sku'])->value('is_new');
             if (count(array_unique(array_column($list, 'supplier_id'))) > 1) $this->error('必须选择相同的供应商！！');
+            $this->assign('new_old', $new_old);
             $this->assign('list', $list);
         }
 
@@ -415,7 +421,7 @@ class PurchaseOrder extends Backend
 
 
         //判断状态是否为新建
-        if (!in_array($row['purchase_status'], [0]) && $row['purchase_type'] == 1) {
+        if (!in_array($row['purchase_status'], [0])) {
             $this->error('只有新建状态才能编辑！！', url('index'));
         }
 
@@ -475,8 +481,7 @@ class PurchaseOrder extends Backend
                             }
                         }
                     }
-
-
+                    $params['purchase_name'] = trim($params['purchase_name']);
                     $result = $row->allowField(true)->save($params);
 
                     //添加合同产品
@@ -642,6 +647,7 @@ class PurchaseOrder extends Backend
      */
     public function logistics($ids = null)
     {
+        $logistics = new \app\admin\model\LogisticsInfo();
         $ids = $ids ?? input($ids);
         $ids = explode(',', $ids);
         if (count($ids) > 1) {
@@ -684,6 +690,10 @@ class PurchaseOrder extends Backend
                 $params = $this->preExcludeFields($params);
                 $result = false;
                 Db::startTrans();
+                $item = new \app\admin\model\itemmanage\Item();
+                $this->model->startTrans();
+                $item->startTrans();
+                $logistics->startTrans();
                 try {
                     //是否采用模型验证
                     if ($this->modelValidate) {
@@ -709,9 +719,6 @@ class PurchaseOrder extends Backend
                         }, array());
                     }
                     $have_logistics = $logistics->whereIn('logistics_number', $result)->where('status', 1)->count();
-                    Log::write("记录条数");
-                    Log::write($have_logistics);
-                    Log::write(count($result));
                     $count_result = count($result);
                     if ($have_logistics == 0) {
                         $purchase_status = 6;
@@ -741,9 +748,6 @@ class PurchaseOrder extends Backend
                                     $list['type'] = 1;
                                     $list['batch_id'] = $k;
                                 }
-
-                                Log::write("记录row");
-                                Log::write($row);
                                 $list['logistics_number'] = $logistics_number[$k][$key];
                                 $list['logistics_company_no'] = $val;
                                 //若物流单号已经签收的话直接更改采购单的状态为已签收
@@ -768,59 +772,59 @@ class PurchaseOrder extends Backend
                                         //在途库存数量
                                         $stock_num = $batch_arrival_num;
                                         //在途库存分站 更新映射关系表
-                                        foreach ($rate_arr as $key => $vall) {
-                                            //最后一个站点 剩余数量分给最后一个站
-                                            if (($all_num - $key) == 1) {
-                                                //插入日志表
-                                                (new StockLog())->setData([
-                                                    'type' => 2,
-                                                    'site' => $vall['website_type'],
-                                                    'modular' => 10,
-                                                    //采购单签收
-                                                    'change_type' => 24,
-                                                    'sku' => $val['sku'],
-                                                    'public_id' => $row['id'],
-                                                    'source' => 1,
-                                                    'on_way_stock_before' => ($item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->value('plat_on_way_stock')) ?: 0,
-                                                    'on_way_stock_change' => -$stock_num,
-                                                    'wait_instock_num_before' => ($item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->value('wait_instock_num')) ?: 0,
-                                                    'wait_instock_num_change' => $stock_num,
-                                                    'create_person' => session('admin.nickname'),
-                                                    'create_time' => time(),
-                                                    //关联采购单
-                                                    'number_type' => 7,
-                                                ]);
-                                                //根据sku站点类型进行在途库存的分配 签收完成之后在途库存就变成了待入库的数量
-                                                $item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->setDec('plat_on_way_stock', $stock_num);
-                                                //更新待入库数量
-                                                $item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->setInc('wait_instock_num', $stock_num);
-                                            } else {
-                                                $num = round($val['purchase_num'] * $vall['rate']);
-                                                $stock_num -= $num;
-                                                //插入日志表
-                                                (new StockLog())->setData([
-                                                    'type' => 2,
-                                                    'site' => $vall['website_type'],
-                                                    'modular' => 10,
-                                                    //采购单签收
-                                                    'change_type' => 24,
-                                                    'sku' => $val['sku'],
-                                                    'public_id' => $row['id'],
-                                                    'source' => 1,
-                                                    'on_way_stock_before' => ($item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->value('plat_on_way_stock')) ?: 0,
-                                                    'on_way_stock_change' => -$num,
-                                                    'wait_instock_num_before' => ($item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->value('wait_instock_num')) ?: 0,
-                                                    'wait_instock_num_change' => $num,
-                                                    'create_person' => session('admin.nickname'),
-                                                    'create_time' => time(),
-                                                    //关联采购单
-                                                    'number_type' => 7,
-                                                ]);
-                                                $item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->setDec('plat_on_way_stock', $num);
-                                                //更新待入库数量
-                                                $item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->setInc('wait_instock_num', $num);
-                                            }
-                                        }
+                                        // foreach ($rate_arr as $key => $vall) {
+                                        //     //最后一个站点 剩余数量分给最后一个站
+                                        //     if (($all_num - $key) == 1) {
+                                        //         //插入日志表
+                                        //         (new StockLog())->setData([
+                                        //             'type' => 2,
+                                        //             'site' => $vall['website_type'],
+                                        //             'modular' => 10,
+                                        //             //采购单签收
+                                        //             'change_type' => 24,
+                                        //             'sku' => $val['sku'],
+                                        //             'public_id' => $row['id'],
+                                        //             'source' => 1,
+                                        //             'on_way_stock_before' => ($item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->value('plat_on_way_stock')) ?: 0,
+                                        //             'on_way_stock_change' => -$stock_num,
+                                        //             'wait_instock_num_before' => ($item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->value('wait_instock_num')) ?: 0,
+                                        //             'wait_instock_num_change' => $stock_num,
+                                        //             'create_person' => session('admin.nickname'),
+                                        //             'create_time' => time(),
+                                        //             //关联采购单
+                                        //             'number_type' => 7,
+                                        //         ]);
+                                        //         //根据sku站点类型进行在途库存的分配 签收完成之后在途库存就变成了待入库的数量
+                                        //         $item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->setDec('plat_on_way_stock', $stock_num);
+                                        //         //更新待入库数量
+                                        //         $item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->setInc('wait_instock_num', $stock_num);
+                                        //     } else {
+                                        //         $num = round($val['purchase_num'] * $vall['rate']);
+                                        //         $stock_num -= $num;
+                                        //         //插入日志表
+                                        //         (new StockLog())->setData([
+                                        //             'type' => 2,
+                                        //             'site' => $vall['website_type'],
+                                        //             'modular' => 10,
+                                        //             //采购单签收
+                                        //             'change_type' => 24,
+                                        //             'sku' => $val['sku'],
+                                        //             'public_id' => $row['id'],
+                                        //             'source' => 1,
+                                        //             'on_way_stock_before' => ($item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->value('plat_on_way_stock')) ?: 0,
+                                        //             'on_way_stock_change' => -$num,
+                                        //             'wait_instock_num_before' => ($item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->value('wait_instock_num')) ?: 0,
+                                        //             'wait_instock_num_change' => $num,
+                                        //             'create_person' => session('admin.nickname'),
+                                        //             'create_time' => time(),
+                                        //             //关联采购单
+                                        //             'number_type' => 7,
+                                        //         ]);
+                                        //         $item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->setDec('plat_on_way_stock', $num);
+                                        //         //更新待入库数量
+                                        //         $item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->setInc('wait_instock_num', $num);
+                                        //     }
+                                        // }
                                         //插入日志表
                                         (new StockLog())->setData([
                                             'type' => 2,
@@ -851,10 +855,8 @@ class PurchaseOrder extends Backend
                                 $logistics->addLogisticsInfo($list);
                             }
                         }
-                    } else {
-                        Log::write("记录row02");
-                        Log::write($logistics_company_no);
-                        Log::write($row);
+                    }
+                    else {
                         if (count($ids) > 1) {
                             foreach ($row as $k => $v) {
                                 foreach ($logistics_company_no as $key => $val) {
@@ -876,7 +878,7 @@ class PurchaseOrder extends Backend
                                         //根据采购单id获取补货单id再获取最初提报的比例
                                         $replenish_id = Db::name('purchase_order')->where('id', $v['id'])->value('replenish_id');
                                         $item_platform = new ItemPlatformSku();
-                                        $item = new \app\admin\model\itemmanage\Item();
+
                                         foreach ($list as $val) {
                                             //比例
                                             $rate_arr = Db::name('new_product_mapping')
@@ -888,59 +890,59 @@ class PurchaseOrder extends Backend
                                             //在途库存数量
                                             $stock_num = $val['purchase_num'];
                                             //在途库存分站 更新映射关系表
-                                            foreach ($rate_arr as $key => $vall) {
-                                                //最后一个站点 剩余数量分给最后一个站
-                                                if (($all_num - $key) == 1) {
-                                                    //插入日志表
-                                                    (new StockLog())->setData([
-                                                        'type' => 2,
-                                                        'site' => $vall['website_type'],
-                                                        'modular' => 10,
-                                                        //采购单签收
-                                                        'change_type' => 24,
-                                                        'sku' => $val['sku'],
-                                                        'public_id' => $v['id'],
-                                                        'source' => 1,
-                                                        'on_way_stock_before' => ($item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->value('plat_on_way_stock')) ?: 0,
-                                                        'on_way_stock_change' => -$stock_num,
-                                                        'wait_instock_num_before' => ($item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->value('wait_instock_num')) ?: 0,
-                                                        'wait_instock_num_change' => $stock_num,
-                                                        'create_person' => session('admin.nickname'),
-                                                        'create_time' => time(),
-                                                        //关联采购单
-                                                        'number_type' => 7,
-                                                    ]);
-                                                    //根据sku站点类型进行在途库存的分配 签收完成之后在途库存就变成了待入库的数量
-                                                    $item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->setDec('plat_on_way_stock', $stock_num);
-                                                    //更新待入库数量
-                                                    $item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->setInc('wait_instock_num', $stock_num);
-                                                } else {
-                                                    $num = round($val['purchase_num'] * $vall['rate']);
-                                                    $stock_num -= $num;
-                                                    //插入日志表
-                                                    (new StockLog())->setData([
-                                                        'type' => 2,
-                                                        'site' => $vall['website_type'],
-                                                        'modular' => 10,
-                                                        //采购单签收
-                                                        'change_type' => 24,
-                                                        'sku' => $val['sku'],
-                                                        'public_id' => $v['id'],
-                                                        'source' => 1,
-                                                        'on_way_stock_before' => ($item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->value('plat_on_way_stock')) ?: 0,
-                                                        'on_way_stock_change' => -$num,
-                                                        'wait_instock_num_before' => ($item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->value('wait_instock_num')) ?: 0,
-                                                        'wait_instock_num_change' => $num,
-                                                        'create_person' => session('admin.nickname'),
-                                                        'create_time' => time(),
-                                                        //关联采购单
-                                                        'number_type' => 7,
-                                                    ]);
-                                                    $item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->setDec('plat_on_way_stock', $num);
-                                                    //更新待入库数量
-                                                    $item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->setInc('wait_instock_num', $num);
-                                                }
-                                            }
+                                            // foreach ($rate_arr as $key => $vall) {
+                                            //     //最后一个站点 剩余数量分给最后一个站
+                                            //     if (($all_num - $key) == 1) {
+                                            //         //插入日志表
+                                            //         (new StockLog())->setData([
+                                            //             'type' => 2,
+                                            //             'site' => $vall['website_type'],
+                                            //             'modular' => 10,
+                                            //             //采购单签收
+                                            //             'change_type' => 24,
+                                            //             'sku' => $val['sku'],
+                                            //             'public_id' => $v['id'],
+                                            //             'source' => 1,
+                                            //             'on_way_stock_before' => ($item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->value('plat_on_way_stock')) ?: 0,
+                                            //             'on_way_stock_change' => -$stock_num,
+                                            //             'wait_instock_num_before' => ($item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->value('wait_instock_num')) ?: 0,
+                                            //             'wait_instock_num_change' => $stock_num,
+                                            //             'create_person' => session('admin.nickname'),
+                                            //             'create_time' => time(),
+                                            //             //关联采购单
+                                            //             'number_type' => 7,
+                                            //         ]);
+                                            //         //根据sku站点类型进行在途库存的分配 签收完成之后在途库存就变成了待入库的数量
+                                            //         $item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->setDec('plat_on_way_stock', $stock_num);
+                                            //         //更新待入库数量
+                                            //         $item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->setInc('wait_instock_num', $stock_num);
+                                            //     } else {
+                                            //         $num = round($val['purchase_num'] * $vall['rate']);
+                                            //         $stock_num -= $num;
+                                            //         //插入日志表
+                                            //         (new StockLog())->setData([
+                                            //             'type' => 2,
+                                            //             'site' => $vall['website_type'],
+                                            //             'modular' => 10,
+                                            //             //采购单签收
+                                            //             'change_type' => 24,
+                                            //             'sku' => $val['sku'],
+                                            //             'public_id' => $v['id'],
+                                            //             'source' => 1,
+                                            //             'on_way_stock_before' => ($item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->value('plat_on_way_stock')) ?: 0,
+                                            //             'on_way_stock_change' => -$num,
+                                            //             'wait_instock_num_before' => ($item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->value('wait_instock_num')) ?: 0,
+                                            //             'wait_instock_num_change' => $num,
+                                            //             'create_person' => session('admin.nickname'),
+                                            //             'create_time' => time(),
+                                            //             //关联采购单
+                                            //             'number_type' => 7,
+                                            //         ]);
+                                            //         $item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->setDec('plat_on_way_stock', $num);
+                                            //         //更新待入库数量
+                                            //         $item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->setInc('wait_instock_num', $num);
+                                            //     }
+                                            // }
                                             //插入日志表
                                             (new StockLog())->setData([
                                                 'type' => 2,
@@ -991,12 +993,11 @@ class PurchaseOrder extends Backend
                                 if (!empty($have_logistics)){
                                     $this->model->where(['id' => $row['id']])->update(['purchase_status'=>$purchase_status]);
                                     //物流单已签收要减少在途增加待入库 这里是录入已经签收的物流单号要进行的操作
-                                    $list = Db::name('purchase_order_item')->where(['purchase_id' => $row['id']])->select();
+                                    $lists = Db::name('purchase_order_item')->where(['purchase_id' => $row['id']])->select();
                                     //根据采购单id获取补货单id再获取最初提报的比例
                                     $replenish_id = Db::name('purchase_order')->where('id', $row['id'])->value('replenish_id');
                                     $item_platform = new ItemPlatformSku();
-                                    $item = new \app\admin\model\itemmanage\Item();
-                                    foreach ($list as $val) {
+                                    foreach ($lists as $val) {
                                         //比例
                                         $rate_arr = Db::name('new_product_mapping')
                                             ->where(['sku' => $val['sku'], 'replenish_id' => $replenish_id])
@@ -1007,60 +1008,59 @@ class PurchaseOrder extends Backend
                                         //在途库存数量
                                         $stock_num = $val['purchase_num'];
                                         //在途库存分站 更新映射关系表
-                                        Log::write($rate_arr);
-                                        foreach ($rate_arr as $key => $vall) {
-                                            //最后一个站点 剩余数量分给最后一个站
-                                            if (($all_num - $key) == 1) {
-                                                //插入日志表
-                                                (new StockLog())->setData([
-                                                    'type' => 2,
-                                                    'site' => $vall['website_type'],
-                                                    'modular' => 10,
-                                                    //采购单签收
-                                                    'change_type' => 24,
-                                                    'sku' => $val['sku'],
-                                                    'public_id' => $row['id'],
-                                                    'source' => 1,
-                                                    'on_way_stock_before' => ($item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->value('plat_on_way_stock')) ?: 0,
-                                                    'on_way_stock_change' => -$stock_num,
-                                                    'wait_instock_num_before' => ($item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->value('wait_instock_num')) ?: 0,
-                                                    'wait_instock_num_change' => $stock_num,
-                                                    'create_person' => session('admin.nickname'),
-                                                    'create_time' => time(),
-                                                    //关联采购单
-                                                    'number_type' => 7,
-                                                ]);
-                                                //根据sku站点类型进行在途库存的分配 签收完成之后在途库存就变成了待入库的数量
-                                                $item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->setDec('plat_on_way_stock', $stock_num);
-                                                //更新待入库数量
-                                                $item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->setInc('wait_instock_num', $stock_num);
-                                            } else {
-                                                $num = round($val['purchase_num'] * $vall['rate']);
-                                                $stock_num -= $num;
-                                                //插入日志表
-                                                (new StockLog())->setData([
-                                                    'type' => 2,
-                                                    'site' => $vall['website_type'],
-                                                    'modular' => 10,
-                                                    //采购单签收
-                                                    'change_type' => 24,
-                                                    'sku' => $val['sku'],
-                                                    'public_id' => $row['id'],
-                                                    'source' => 1,
-                                                    'on_way_stock_before' => ($item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->value('plat_on_way_stock')) ?: 0,
-                                                    'on_way_stock_change' => -$num,
-                                                    'wait_instock_num_before' => ($item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->value('wait_instock_num')) ?: 0,
-                                                    'wait_instock_num_change' => $num,
-                                                    'create_person' => session('admin.nickname'),
-                                                    'create_time' => time(),
-                                                    //关联采购单
-                                                    'number_type' => 7,
-                                                ]);
-                                                $item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->setDec('plat_on_way_stock', $num);
-                                                //更新待入库数量
-                                                $item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->setInc('wait_instock_num', $num);
-                                            }
-                                        }
+                                        // foreach ($rate_arr as $key => $vall) {
+                                        //     //最后一个站点 剩余数量分给最后一个站
+                                        //     if (($all_num - $key) == 1) {
+                                        //         //插入日志表
+                                        //         (new StockLog())->setData([
+                                        //             'type' => 2,
+                                        //             'site' => $vall['website_type'],
+                                        //             'modular' => 10,
+                                        //             //采购单签收
+                                        //             'change_type' => 24,
+                                        //             'sku' => $val['sku'],
+                                        //             'public_id' => $row['id'],
+                                        //             'source' => 1,
+                                        //             'on_way_stock_before' => ($item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->value('plat_on_way_stock')) ?: 0,
+                                        //             'on_way_stock_change' => -$stock_num,
+                                        //             'wait_instock_num_before' => ($item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->value('wait_instock_num')) ?: 0,
+                                        //             'wait_instock_num_change' => $stock_num,
+                                        //             'create_person' => session('admin.nickname'),
+                                        //             'create_time' => time(),
+                                        //             //关联采购单
+                                        //             'number_type' => 7,
+                                        //         ]);
+                                        //         //根据sku站点类型进行在途库存的分配 签收完成之后在途库存就变成了待入库的数量
+                                        //         $item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->setDec('plat_on_way_stock', $stock_num);
+                                        //         //更新待入库数量
+                                        //         $item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->setInc('wait_instock_num', $stock_num);
+                                        //     } else {
+                                        //         $num = round($val['purchase_num'] * $vall['rate']);
+                                        //         $stock_num -= $num;
+                                        //         //插入日志表
+                                        //         (new StockLog())->setData([
+                                        //             'type' => 2,
+                                        //             'site' => $vall['website_type'],
+                                        //             'modular' => 10,
+                                        //             //采购单签收
+                                        //             'change_type' => 24,
+                                        //             'sku' => $val['sku'],
+                                        //             'public_id' => $row['id'],
+                                        //             'source' => 1,
+                                        //             'on_way_stock_before' => ($item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->value('plat_on_way_stock')) ?: 0,
+                                        //             'on_way_stock_change' => -$num,
+                                        //             'wait_instock_num_before' => ($item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->value('wait_instock_num')) ?: 0,
+                                        //             'wait_instock_num_change' => $num,
+                                        //             'create_person' => session('admin.nickname'),
+                                        //             'create_time' => time(),
+                                        //             //关联采购单
+                                        //             'number_type' => 7,
+                                        //         ]);
+                                        //         $item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->setDec('plat_on_way_stock', $num);
+                                        //         //更新待入库数量
+                                        //         $item_platform->where(['sku' => $val['sku'], 'platform_type' => $vall['website_type']])->setInc('wait_instock_num', $num);
+                                        //     }
+                                        // }
                                         //插入日志表
                                         (new StockLog())->setData([
                                             'type' => 2,
@@ -1093,14 +1093,26 @@ class PurchaseOrder extends Backend
                         }
                     }
                     Db::commit();
+                    $this->model->commit();
+                    $item->commit();
+                    $logistics->commit();
                 } catch (ValidateException $e) {
                     Db::rollback();
+                    $this->model->rollback();
+                    $item->rollback();
+                    $logistics->rollback();
                     $this->error($e->getMessage());
                 } catch (PDOException $e) {
                     Db::rollback();
+                    $this->model->rollback();
+                    $item->rollback();
+                    $logistics->rollback();
                     $this->error($e->getMessage());
                 } catch (Exception $e) {
                     Db::rollback();
+                    $this->model->rollback();
+                    $item->rollback();
+                    $logistics->rollback();
                     $this->error($e->getMessage());
                 }
                 if ($result !== false) {

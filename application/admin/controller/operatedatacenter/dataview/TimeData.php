@@ -16,6 +16,8 @@ class TimeData extends Backend
         $this->zeeloolOperate  = new \app\admin\model\operatedatacenter\Zeelool;
         $this->vooguemeOperate  = new \app\admin\model\operatedatacenter\Voogueme;
         $this->nihaoOperate  = new \app\admin\model\operatedatacenter\Nihao;
+        $this->zeelooldeOperate  = new \app\admin\model\operatedatacenter\ZeeloolDe();
+        $this->zeelooljpOperate  = new \app\admin\model\operatedatacenter\ZeeloolJp();
         $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform();
     }
     /**
@@ -32,7 +34,7 @@ class TimeData extends Backend
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
         foreach ($magentoplatformarr as $key=>$val){
-            if(!in_array($val['name'],['zeelool','voogueme','nihao'])){
+            if(!in_array($val['name'],['zeelool','voogueme','nihao','zeelool_de','zeelool_jp'])){
                 unset($magentoplatformarr[$key]);
             }
         }
@@ -81,6 +83,12 @@ class TimeData extends Backend
         }elseif ($site == 3){
             $model = $this->nihaoOperate;
             $web_model = Db::connect('database.db_nihao');
+        }elseif($site == 10){
+            $model = $this->zeelooldeOperate;
+            $web_model = Db::connect('database.db_zeelool_de');
+        }elseif($site == 11){
+            $model = $this->zeelooljpOperate;
+            $web_model = Db::connect('database.db_zeelool_jp');
         }else{
             $model = $this->zeeloolOperate;
             $web_model = Db::connect('database.db_zeelool');
@@ -93,7 +101,7 @@ class TimeData extends Backend
         if(!$cache_arr){
             $time_where['created_at'] = ['between', [$start.' 00:00:00',$end.' 23:59:59']];
             $itemtime_where['i.created_at'] = ['between', [$start.' 00:00:00',$end.' 23:59:59']];
-            $order_time['o.status'] = ['in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+            $order_time['o.status'] = ['in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
             $order_time['o.order_type'] = 1;
             //订单数据
             $order_resultList = $web_model->table('sales_flat_order')

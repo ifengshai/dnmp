@@ -9,6 +9,7 @@ use app\admin\model\order\order\NewOrder;
 use app\admin\model\order\order\NewOrderItemProcess;
 use app\admin\model\order\order\NewOrderProcess;
 use app\admin\model\saleaftermanage\WorkOrderNote;
+use app\admin\model\warehouse\Inventory;
 use app\admin\model\warehouse\StockHouse;
 use app\common\controller\Backend;
 use fast\Excel;
@@ -42,6 +43,7 @@ use app\admin\model\AuthGroup;
 use app\admin\model\warehouse\ProductBarCodeItem;
 use app\admin\model\itemmanage\ItemPlatformSku;
 use app\admin\model\finance\FinanceCost;
+
 
 /**
  * 售后工单列管理
@@ -77,7 +79,8 @@ class WorkOrderList extends Backend
         $this->view->assign('step', $workOrderConfigValue['step']);
         //$this->assignconfig('workorder', config('workorder')); //JS专用，整个配置文件
         $this->assignconfig('workorder', $workOrderConfigValue);
-
+        $this->_product_bar_code_item = new ProductBarCodeItem();
+        $this->_inventory = new Inventory();
         //$this->view->assign('check_coupon', config('workorder.check_coupon')); //不需要审核的优惠券
         //$this->view->assign('need_check_coupon', config('workorder.need_check_coupon')); //需要审核的优惠券
         $this->view->assign('check_coupon', $workOrderConfigValue['check_coupon']);
@@ -1143,6 +1146,41 @@ class WorkOrderList extends Backend
                      * 5、运营客服组的优惠券都由客服经理审核
                      */
 
+                    //主单取消
+                    if (in_array(3, $measure_choose_id)) {
+                        $_new_order = new NewOrder();
+                        $order_id = $_new_order
+                            ->where('increment_id', $params['platform_order'])
+                            ->value('id');
+                        if ($order_id){
+                            $order_item_where['order_id'] = $order_id;
+                            $_new_order_item_process = new NewOrderItemProcess();
+                            $order_item_list = $_new_order_item_process
+                                ->where($order_item_where)
+                                ->column('sku');
+                            /*****************限制如果有盘点单未结束不能操作配货完成*******************/
+                            //配货完成时判断
+                            //拣货区盘点时不能操作
+                            //查询条形码库区库位
+                            $whe_sku['platform_sku'] = ['in',$order_item_list];
+                            //转换sku
+                            $item_platform_sku = new ItemPlatformSku();
+                            $true_sku =  $item_platform_sku->where($whe_sku)->column('sku');
+                            $whe['sku'] = ['in',$true_sku];
+                            $barcodedata = $this->_product_bar_code_item->where($whe)->column('location_code');
+                            if (!empty($barcodedata)){
+                                $count = $this->_inventory->alias('a')
+                                    ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata],'area_id' => '3'])
+                                    ->count();
+                                if ($count > 0) {
+                                    return ['result' => false, 'msg' => '此主单下的子订单SKU对应库位正在盘点,暂无法进行出入库操作'];
+                                }
+                            }
+                            /****************************end*****************************************/
+                        }
+                    }
+
+
                     $all_choose_ids = $measure_choose_id;
 
                     //校验退款、vip退款
@@ -1156,6 +1194,7 @@ class WorkOrderList extends Backend
                     //校验赠品、补发库存
                     if (array_intersect([6, 7], $measure_choose_id)) {
                         $original_sku = [];
+
 
                         //赠品
                         if (in_array(6, $measure_choose_id)) {
@@ -1294,18 +1333,85 @@ class WorkOrderList extends Backend
                         if (in_array(18, $item['item_choose'])) {
                             //检测之前是否处理过子单措施
                             array_intersect([3], $change_type) && $this->error("子订单：{$key} 措施已处理，不能取消");
-                        } /*elseif (in_array(19, $item['item_choose'])) {//更改镜框
-                            //检测之前是否处理过更改镜框措施
-                            in_array(1, $change_type) && $this->error("子订单：{$key} 措施已处理，不能重复创建");
+                            /*****************限制如果有盘点单未结束不能操作配货完成*******************/
+                            //拣货区盘点时不能操作
+                            //查询条形码库区库位
 
-                            //更改镜框校验库存
-                            !$item['change_frame']['change_sku'] && $this->error("子订单：{$key} 的新sku不能为空");
-                            $back_data = $this->skuIsStock([$item['change_frame']['change_sku']], $params['work_platform'], [1]);
-                            !$back_data['result'] && $this->error($back_data['msg']);
-                        } elseif (in_array(20, $item['item_choose'])) {//更改镜片
-                            //检测之前是否处理过更改镜片措施
-                            in_array(2, $change_type) && $this->error("子订单：{$key} 措施已处理，不能重复创建");
-                        }*/
+                            $whe_sku['platform_sku'] = $item['cancel_order']['sku'];
+                            //转换sku
+                            $item_platform_sku = new ItemPlatformSku();
+                            $true_sku =  $item_platform_sku->where($whe_sku)->value('sku');
+                            $whe['sku'] = $true_sku;
+                            $barcodedata = $this->_product_bar_code_item->where($whe)->column('location_code');
+                            Log::write($barcodedata);
+                            if (!empty($barcodedata)){
+                                $count = $this->_inventory->alias('a')
+                                    ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata],'area_id' => '3'])
+                                    ->count();
+                                Log::write($count);
+                                if ($count > 0) {
+                                    return ['result' => false, 'msg' => '此'.$item['cancel_order']['sku'].'对应库位正在盘点,暂无法进行出入库操作'];
+                                }
+                            }
+                            /****************************end*****************************************/
+
+                        } elseif (in_array(19, $item['item_choose'])) {//更改镜框
+                            /*****************限制如果有盘点单未结束不能操作配货完成*******************/
+                            //拣货区盘点时不能操作
+                            //查询条形码库区库位
+
+                            //转换sku
+                            $whe_sku['platform_sku'] = $item['cancel_order']['sku'];
+                            //转换sku
+                            $item_platform_sku = new ItemPlatformSku();
+                            $true_sku =  $item_platform_sku->where($whe_sku)->value('sku');
+                            $whe['sku'] = $true_sku;
+                            $barcodedata = $this->_product_bar_code_item->where($whe)->column('location_code');
+
+                            if (!empty($barcodedata)){
+                                $count = $this->_inventory->alias('a')
+                                    ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata],'area_id' => '3'])
+                                    ->count();
+                                Log::write($count);
+                                if ($count > 0) {
+                                    return ['result' => false, 'msg' => '此'.$item['cancel_order']['sku'].'对应库位正在盘点,暂无法进行出入库操作'];
+                                }
+                            }
+                            /****************************end*****************************************/
+
+                            /*****************限制如果有盘点单未结束不能操作配货完成*******************/
+                            //拣货区盘点时不能操作
+                            //查询条形码库区库位
+                            //转换sku
+                            $whe_sku['platform_sku'] = ['eq',$item['change_frame']['change_sku']];
+                            //转换sku
+                            $item_platform_sku = new ItemPlatformSku();
+                            $true_sku =  $item_platform_sku->where($whe_sku)->value('sku');
+                            $whe['sku'] = $true_sku;
+                            $barcodedata = $this->_product_bar_code_item->where($whe)->column('location_code');
+
+                            if (!empty($barcodedata)){
+                                $count = $this->_inventory->alias('a')
+                                    ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata],'area_id' => '3'])
+                                    ->count();
+                                Log::write($count);
+                                if ($count > 0) {
+                                    return ['result' => false, 'msg' => '此'.$item['change_frame']['change_sku'].'对应库位正在盘点,暂无法进行出入库操作'];
+                                }
+                            }
+                            /****************************end*****************************************/
+                            //检测之前是否处理过更改镜框措施
+//                            in_array(1, $change_type) && $this->error("子订单：{$key} 措施已处理，不能重复创建");
+//
+//                            //更改镜框校验库存
+//                            !$item['change_frame']['change_sku'] && $this->error("子订单：{$key} 的新sku不能为空");
+//                            $back_data = $this->skuIsStock([$item['change_frame']['change_sku']], $params['work_platform'], [1]);
+//                            !$back_data['result'] && $this->error($back_data['msg']);
+                        }
+//                        elseif (in_array(20, $item['item_choose'])) {//更改镜片
+//                            //检测之前是否处理过更改镜片措施
+//                            in_array(2, $change_type) && $this->error("子订单：{$key} 措施已处理，不能重复创建");
+//                        }
                     }
                     unset($item);
                 }
@@ -1855,7 +1961,28 @@ class WorkOrderList extends Backend
             } else {
                 $sku = trim($v);
             }
-
+           
+            if(!empty($sku)){
+                /*****************限制如果有盘点单未结束不能操作配货完成*******************/
+                //配货完成时判断
+                //拣货区盘点时不能操作
+                //查询条形码库区库位
+                $whe_sku['platform_sku'] = ['in',$sku];
+                //转换sku
+                $item_platform_sku = new ItemPlatformSku();
+                $true_sku =  $item_platform_sku->where($whe_sku)->column('sku');
+                $whe['sku'] = ['in',$true_sku];
+                $barcodedata = $this->_product_bar_code_item->where($whe)->column('location_code');
+                if (!empty($barcodedata)){
+                    $count = $this->_inventory->alias('a')
+                        ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata],'area_id' => '3'])
+                        ->count();
+                    if ($count > 0) {
+                        return ['result' => false, 'msg' => '此'.$sku.'对应库位正在盘点,暂无法进行出入库操作'];
+                    }
+                }
+                /****************************end*****************************************/
+            }
             //判断是否开启预售 并且预售时间是否满足 并且预售数量是否足够
             $res = $itemPlatFormSku->where(['outer_sku_status' => 1, 'platform_sku' => $sku, 'platform_type' => $siteType])->find();
             //判断是否开启预售
@@ -1867,6 +1994,11 @@ class WorkOrderList extends Backend
                 $stock = $res['stock'];
             }
             //判断库存是否足够
+            Log::write("判断库存是否足够");
+            Log::write($stock);
+            Log::write($num[$k]);
+            Log::write($sku);
+            Log::write($siteType);
             if ($stock < $num[$k]) {
                 // $params = ['sku'=>$sku,'siteType'=>$siteType,'stock'=>$stock,'num'=>$num[$k]];
                 // file_put_contents('/www/wwwroot/mojing/runtime/log/stock.txt',json_encode($params),FILE_APPEND);
@@ -1905,6 +2037,7 @@ class WorkOrderList extends Backend
 
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
+
             if ($params) {
                 $params = $this->preExcludeFields($params);
                 if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
@@ -1963,6 +2096,40 @@ class WorkOrderList extends Backend
                      */
 
                     $all_choose_ids = $measure_choose_id;
+
+                    //主单取消
+                    if (in_array(3, $measure_choose_id)) {
+                        $_new_order = new NewOrder();
+                        $order_id = $_new_order
+                            ->where('increment_id', $params['platform_order'])
+                            ->value('id');
+                        if ($order_id){
+                            $order_item_where['order_id'] = $order_id;
+                            $_new_order_item_process = new NewOrderItemProcess();
+                            $order_item_list = $_new_order_item_process
+                                ->where($order_item_where)
+                                ->column('sku');
+                            /*****************限制如果有盘点单未结束不能操作配货完成*******************/
+                            //配货完成时判断
+                            //拣货区盘点时不能操作
+                            //查询条形码库区库位
+                            $whe_sku['platform_sku'] = ['in',$order_item_list];
+                            //转换sku
+                            $item_platform_sku = new ItemPlatformSku();
+                            $true_sku =  $item_platform_sku->where($whe_sku)->column('sku');
+                            $whe['sku'] = ['in',$true_sku];
+                            $barcodedata = $this->_product_bar_code_item->where($whe)->column('location_code');
+                            if (!empty($barcodedata)){
+                                $count = $this->_inventory->alias('a')
+                                    ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata],'area_id' => '3'])
+                                    ->count();
+                                if ($count > 0) {
+                                    return ['result' => false, 'msg' => '此主单下的子订单SKU对应库位正在盘点,暂无法进行出入库操作'];
+                                }
+                            }
+                            /****************************end*****************************************/
+                        }
+                    }
 
                     //校验退款、vip退款
                     if (array_intersect([2, 15], $measure_choose_id)) {
@@ -2087,6 +2254,7 @@ class WorkOrderList extends Backend
 
                 //检测子订单措施
                 if ($item_order_info) {
+
                     $item_order_info = array_filter($item_order_info);
                     //查询所有子单数量
                     $_new_order_process = new NewOrderProcess();
@@ -2095,6 +2263,7 @@ class WorkOrderList extends Backend
                     $count_item_num = $_new_order_item_process->where('order_id', $order_id)->count();
 
                     1 > count($item_order_info) && $this->error("子订单号错误");
+
                     foreach ($item_order_info as $key => &$item) {
                         $item['item_choose'] = array_unique(array_filter($item['item_choose']));
                         if ($count_item_num != count($item_order_info)) {
@@ -2118,9 +2287,71 @@ class WorkOrderList extends Backend
                         if (in_array(18, $item['item_choose'])) {
                             //检测之前是否处理过子单措施
                             array_intersect([1, 2, 3], $change_type) && $this->error("子订单：{$key} 措施已处理，不能取消");
+                            /*****************限制如果有盘点单未结束不能操作配货完成*******************/
+                            //拣货区盘点时不能操作
+                            //查询条形码库区库位
+                            $whe_sku['platform_sku'] = $item['cancel_order']['sku'];
+                            //转换sku
+                            $item_platform_sku = new ItemPlatformSku();
+                            $true_sku =  $item_platform_sku->where($whe_sku)->value('sku');
+                            $whe['sku'] = $true_sku;
+                            $barcodedata = $this->_product_bar_code_item->where($whe)->column('location_code');
+                            Log::write($barcodedata);
+                            if (!empty($barcodedata)){
+                                $count = $this->_inventory->alias('a')
+                                    ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata],'area_id' => '3'])
+                                    ->count();
+                                Log::write($count);
+                                if ($count > 0) {
+                                    return ['result' => false, 'msg' => '此'.$item['cancel_order']['sku'].'对应库位正在盘点,暂无法进行出入库操作'];
+                                }
+                            }
+                            /****************************end*****************************************/
+
                         } elseif (in_array(19, $item['item_choose'])) {//更改镜框
                             //检测之前是否处理过更改镜框措施
                             in_array(1, $change_type) && $this->error("子订单：{$key} 措施已处理，不能重复创建");
+                            /*****************限制如果有盘点单未结束不能操作配货完成*******************/
+                            //拣货区盘点时不能操作
+                            //查询条形码库区库位
+
+                            $whe_sku['platform_sku'] = $item['cancel_order']['sku'];
+                            //转换sku
+                            $item_platform_sku = new ItemPlatformSku();
+                            $true_sku =  $item_platform_sku->where($whe_sku)->value('sku');
+                            $whe['sku'] = $true_sku;
+                            $barcodedata = $this->_product_bar_code_item->where($whe)->column('location_code');
+                            if (!empty($barcodedata)){
+                                $count = $this->_inventory->alias('a')
+                                    ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata],'area_id' => '3'])
+                                    ->count();
+                                Log::write($count);
+                                if ($count > 0) {
+                                    return ['result' => false, 'msg' => '此'.$item['cancel_order']['sku'].'对应库位正在盘点,暂无法进行出入库操作'];
+                                }
+                            }
+                            /****************************end*****************************************/
+
+                            /*****************限制如果有盘点单未结束不能操作配货完成*******************/
+                            //拣货区盘点时不能操作
+                            //查询条形码库区库位
+                            $whe_sku['platform_sku'] = $item['change_frame']['change_sku'];
+                            //转换sku
+                            $item_platform_sku = new ItemPlatformSku();
+                            $true_sku =  $item_platform_sku->where($whe_sku)->value('sku');
+                            $whe['sku'] = $true_sku;
+                            $barcodedata = $this->_product_bar_code_item->where($whe)->column('location_code');
+                            if (!empty($barcodedata)){
+                                $count = $this->_inventory->alias('a')
+                                    ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata],'area_id' => '3'])
+                                    ->count();
+                                Log::write($count);
+                                if ($count > 0) {
+                                    return ['result' => false, 'msg' => '此'.$item['change_frame']['change_sku'].'对应库位正在盘点,暂无法进行出入库操作'];
+                                }
+                            }
+                            /****************************end*****************************************/
+
 
                             //更改镜框校验库存
                             !$item['change_frame']['change_sku'] && $this->error("子订单：{$key} 的新sku不能为空");
@@ -3197,7 +3428,7 @@ class WorkOrderList extends Backend
                     //赠品绑定条码
                     $_work_order_measure = new WorkOrderMeasure();
                     $measure_choose_id = $_work_order_measure->where('id',$receptInfo['measure_id'])->value('measure_choose_id');
-                    if(6 == $measure_choose_id){
+                    if(6 == $measure_choose_id && 1 == $params['success']){
                         $barcode = $params['barcode'];
                         $product_bar_code_item = new ProductBarCodeItem();
                         $work_order_change_sku = new WorkOrderChangeSku();
@@ -3236,6 +3467,7 @@ class WorkOrderList extends Backend
                     $result = $this->model->handleRecept($receptInfo['id'], $receptInfo['work_id'], $receptInfo['measure_id'], $receptInfo['recept_group_id'], $params['success'], $params['note'], $receptInfo['is_auto_complete'], $params['barcode']);
                 }
                 if ($result !== false) {
+
                     //措施表
                     $_work_order_measure = new WorkOrderMeasure();
                     $measure_choose_id = $_work_order_measure->where('id',$receptInfo['measure_id'])->value('measure_choose_id');
@@ -3890,9 +4122,9 @@ EOF;
                     $res_status = WorkOrderNote::create($data);
                     //查询用户的角色组id
                     $authGroupIds = AuthGroupAccess::where('uid', session('admin.id'))->column('group_id');
-                    Log::write("角色组");
+                    /*Log::write("角色组");
                     Log::write($authGroupIds);
-                    Log::write($workOrderConfigValue['warehouse_department_rule']);
+                    Log::write($workOrderConfigValue['warehouse_department_rule']);*/
 
                     $work = $this->model->find($params['work_id']);
                     $work_order_note_status = $work->work_order_note_status;
@@ -3923,8 +4155,8 @@ EOF;
                     }
                     $work->work_order_note_status = $work_order_note_status;
 
-                    Log::write("是否包含");
-                    Log::write($work_order_note_status);
+                    /*Log::write("是否包含");
+                    Log::write($work_order_note_status);*/
                     $work->save();
                     Db::commit();
                 } catch (\Exception $e) {

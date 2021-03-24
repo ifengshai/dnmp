@@ -988,7 +988,7 @@ class WorkOrderList extends Model
                     (!is_array($changeLens['original_sku']) || empty($changeLens['original_sku'])) && exception('sku不能为空');
 
                     //循环插入数据
-                    $original_sku = array_filter(array_unique($changeLens['original_sku']));
+                    $original_sku = array_filter($changeLens['original_sku']);
                     foreach ($original_sku as $key => $val) {
                         $lensId = $changeLens['lens_type'][$key];
                         $colorId = $changeLens['color_id'][$key];
@@ -1143,7 +1143,8 @@ class WorkOrderList extends Model
                 'platform_type'=>$params['work_platform'],
                 'original_sku'=>$change_frame['original_sku'],
                 'original_number'=>$change_frame['original_number'],
-                'change_sku'=>$change_frame['change_sku'],
+                //更改镜框的工单-匹配掉里面SKU的空格
+                'change_sku'=>trim($change_frame['change_sku']),
                 'change_number'=>$change_frame['change_number'],
                 'change_type'=>1,
                 'measure_id'=>$measure_id,
@@ -1992,7 +1993,7 @@ class WorkOrderList extends Model
                 }
             }
             //赠品绑定条码
-            if(6 == $measure_choose_id){
+            if(6 == $measure_choose_id && 1 == $success){
                 $product_bar_code_item = new ProductBarCodeItem();
                 $work_order_change_sku = new WorkOrderChangeSku();
                 $item_platform_sku = new ItemPlatformSku();
@@ -2016,16 +2017,19 @@ class WorkOrderList extends Model
                     }
                 }
             }
-            //更改镜框/或镜片子单定制片库位和状态处理（镜框不需要回退，之前处理库存的时候回退过）
-            if (19 == $measure_choose_id || 20 == $measure_choose_id) {
-                $item_order_number = $_work_order_measure->where('id',$measure_id)->value('item_order_number');
-                $this->back_frame_and_lens($measure_choose_id,$work_id,$work->platform_order,$item_order_number);
+            if (1 == $success) {
+                //更改镜框/或镜片子单定制片库位和状态处理（镜框不需要回退，之前处理库存的时候回退过）
+                if (19 == $measure_choose_id || 20 == $measure_choose_id) {
+                    $item_order_number = $_work_order_measure->where('id',$measure_id)->value('item_order_number');
+                    $this->back_frame_and_lens($measure_choose_id,$work_id,$work->platform_order,$item_order_number);
+                }
+                //子单取消处理完成后要判断订单中剩余子订单是否都是合单中状态
+                if (18 == $measure_choose_id) {
+                    $item_order_number = $_work_order_measure->where('id',$measure_id)->value('item_order_number');
+                    $this->other_item_order_auto($work->platform_order,$item_order_number);
+                }
             }
-            //子单取消处理完成后要判断订单中剩余子订单是否都是合单中状态
-            if (18 == $measure_choose_id) {
-                $item_order_number = $_work_order_measure->where('id',$measure_id)->value('item_order_number');
-                $this->other_item_order_auto($work->platform_order,$item_order_number);
-            }
+            
             //措施不是补发的时候扣减库存，是补发的时候不扣减库存，因为补发的时候库存已经扣减过了
             if ($resultInfo && 1 == $data['recept_status'] && 7 != $measure_choose_id && $success == 1){
                 $this->deductionStock($work_id, $measure_id);

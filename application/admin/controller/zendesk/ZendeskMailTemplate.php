@@ -1,6 +1,7 @@
 <?php
 
 namespace app\admin\controller\zendesk;
+use app\admin\model\OrderNode;
 use think\Db;
 use app\common\controller\Backend;
 use think\Exception;
@@ -8,6 +9,7 @@ use app\admin\model\zendesk\ZendeskTags;
 use think\exception\PDOException;
 use think\exception\ValidateException;
 use app\admin\model\platformmanage\MagentoPlatform;
+use Think\Log;
 
 /**
  * 自定义邮件模板管理
@@ -331,7 +333,7 @@ class ZendeskMailTemplate extends Backend
                 ->where('id',$id)
                 ->find();
             //获取邮件的信息
-            $ticket = \app\admin\model\zendesk\Zendesk::where('ticket_id',$ticket_id)->find();
+            $ticket = \app\admin\model\zendesk\Zendesk::where('ticket_id',$ticket_id)->where('type',$template['template_platform'])->find();
             if($ticket->type == 1){
                 $orderModel = new \app\admin\model\order\order\Zeelool;
             }elseif($ticket->type == 2){
@@ -347,13 +349,33 @@ class ZendeskMailTemplate extends Backend
             $order_node_message = Db::connect('database.db_mojing_order')
                 ->table('fa_order_process')
                 ->where('increment_id',$increment_id)
-                ->field('track_number,complete_time')
+                ->field('track_number,site,complete_time')
                 ->find();
-            if (!empty($order_node_message['track_number'])){
-                $shipment_last_msg  = Db::table('fa_order_node')->where('track_number ',$order_node_message['track_number'])->value('shipment_last_msg');
-            }else{
-                $shipment_last_msg = '';
+            if (empty($order_node_message['track_number'])){
+                $order_node_message['track_number'] = '暂无运单号';
             }
+            if (empty($order_node_message['complete_time'])){
+                $order_node_message['complete_time'] = '未发货';
+            }else{
+                $order_node_message['complete_time'] =  date('Y-m-d H:i:s',$order_node_message['complete_time']);
+            }
+
+            if (!empty($order_node_message['track_number'])){
+                $OrderNode = new OrderNode();
+                $where['track_number'] = $order_node_message['track_number'];
+                $shipment_last_msg_value  = $OrderNode
+                    ->where($where)
+                    ->field('shipment_last_msg,update_time')->find();
+                if (empty($shipment_last_msg_value['shipment_last_msg'])){
+                    $shipment_last_msg = '物流信息暂未更新';
+                }else{
+
+                    $shipment_last_msg = 'Time:'.$shipment_last_msg_value['update_time'].',Message:'.$shipment_last_msg_value['shipment_last_msg'];
+                }
+            }else{
+                $shipment_last_msg = '暂无物流信息';
+            }
+
             //替换模板内容
             $template['template_content'] = str_replace(['{{username}}','{{email}}','{{ticket_id}}','{{track_number}}','{{complete_time}}','{{shipment_last_msg}}','{{increment_id}}'],[$ticket->username,$ticket->email,$ticket->ticket_id,$order_node_message['track_number'],$order_node_message['complete_time'],$shipment_last_msg,$increment_id],$template['template_content']);
             //tags合并
@@ -364,7 +386,6 @@ class ZendeskMailTemplate extends Backend
         }
         $this->error('404 Not found');
     }
-
 
     /**
      * 新增的ticket添加模板
@@ -388,8 +409,52 @@ class ZendeskMailTemplate extends Backend
                 ->find();
             //获取用户的信息
             $ticket = \app\admin\model\zendesk\Zendesk::where('email',$email)->where('type',$type)->find();
+            if($ticket->type == 1){
+                $orderModel = new \app\admin\model\order\order\Zeelool;
+            }elseif($ticket->type == 2){
+                $orderModel = new \app\admin\model\order\order\Voogueme;
+            }else{
+                $orderModel = new \app\admin\model\order\order\Nihao;
+            }
+            //通过邮件获取最新的订单号
+            $increment_id = $orderModel
+                ->where('customer_email',$ticket->email)
+                ->order('entity_id desc')->value('increment_id');
+            //通过订单号获取运单号/发货时间
+            $order_node_message = Db::connect('database.db_mojing_order')
+                ->table('fa_order_process')
+                ->where('increment_id',$increment_id)
+                ->field('track_number,site,complete_time')
+                ->find();
+            if (empty($order_node_message['track_number'])){
+                $order_node_message['track_number'] = '暂无运单号';
+            }
+            if (empty($order_node_message['complete_time'])){
+                $order_node_message['complete_time'] = '未发货';
+            }else{
+                $order_node_message['complete_time'] =  date('Y-m-d H:i:s',$order_node_message['complete_time']);
+            }
+
+            if (!empty($order_node_message['track_number'])){
+                $OrderNode = new OrderNode();
+                $where['track_number'] = $order_node_message['track_number'];
+                $shipment_last_msg_value  = $OrderNode
+                    ->where($where)
+                    ->field('shipment_last_msg,update_time')->find();
+                if (empty($shipment_last_msg_value['shipment_last_msg'])){
+                    $shipment_last_msg = '物流信息暂未更新';
+                }else{
+
+                    $shipment_last_msg = 'Time:'.$shipment_last_msg_value['update_time'].',Message:'.$shipment_last_msg_value['shipment_last_msg'];
+                }
+            }else{
+                $shipment_last_msg = '暂无物流信息';
+            }
+
             //替换模板内容
-            $template['template_content'] = str_replace(['{{username}}','{{email}}','{{ticket_id}}'],[$ticket->username,$ticket->email,$ticket->ticket_id],$template['template_content']);
+            $template['template_content'] = str_replace(['{{username}}','{{email}}','{{ticket_id}}','{{track_number}}','{{complete_time}}','{{shipment_last_msg}}','{{increment_id}}'],[$ticket->username,$ticket->email,$ticket->ticket_id,$order_node_message['track_number'],$order_node_message['complete_time'],$shipment_last_msg,$increment_id],$template['template_content']);
+            //替换模板内容
+//            $template['template_content'] = str_replace(['{{username}}','{{email}}','{{ticket_id}}'],[$ticket->username,$ticket->email,$ticket->ticket_id],$template['template_content']);
             //tags合并
             //使用次数+1
             $this->model->where('id',$id)->setInc('used_time',1);

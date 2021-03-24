@@ -31,7 +31,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                     [
                         { field: 'number', title: __('序号') },
                         { field: 'increment_id', title: __('订单号') },
-                        { field: 'created_at', title: __('订单时间') },
+                        { field: 'payment_time', title: __('订单时间') },
                         { field: 'customer_email', title: __('支付邮箱') },
                         { field: 'prescription_type', title: __('处方类型') },
                         { field: 'coatiing_name', title: __('镀膜类型') },

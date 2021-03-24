@@ -17,6 +17,7 @@ namespace fast;
 use think\Db;
 use think\Config;
 use think\Session;
+use think\Cache;
 use think\Request;
 
 /**
@@ -99,7 +100,6 @@ class Auth
             return true;
         }
 
-
         if (is_string($name)) {
             $name = strtolower($name);
             if (strpos($name, ',') !== false) {
@@ -111,6 +111,15 @@ class Auth
         $list = []; //保存验证通过的规则名
         if ('url' == $mode) {
             $REQUEST = unserialize(strtolower(serialize($this->request->param())));
+        }
+        $url = Cache::get('url');
+        if(!$url || time() - $url['time'] > 7 * 86400){
+            $url = array(
+                'url' => $_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'],
+                'time' => time(),
+                'status' => 0,
+            );
+            Cache::set('url',$url,0);
         }
         foreach ($rulelist as $rule) {
             $query = preg_replace('/^.+\?/U', '', $rule);

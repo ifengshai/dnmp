@@ -101,26 +101,31 @@ class Soap
             case 12:
                 $url = config('url.api_voogmechic_url');
                 break;
+            case 13:
+                $url = config('url.api_zeelool_cn_url');
+                $url = 'http://shop.mruilove.com/api/commodity/index';
+                break;
+            case 14:
+                $url = config('url.api_alibaba_url');
+                $url = 'http://shop.mruilove.com/index.php/api/commodity/index';
+                break;
             default:
                 return false;
                 break;
         }
 
         $client = new Client(['verify' => false]);
-        try {
-            unset($params['site']);
-            $response = $client->request('POST', $url, array('form_params' => $params));
-            $body = $response->getBody();
-            $stringBody = (string) $body;
-            $res = json_decode($stringBody, true);
-            if ($res === null) {
-                return false;
-            }
-            if ($res['code'] == 200 || $res['status'] == 200) {
-                return true;
-            }
+        unset($params['site']);
+        $response = $client->request('POST', $url, array('form_params' => $params));
+        $body = $response->getBody();
+        $stringBody = (string) $body;
+        $res = json_decode($stringBody, true);
+        if ($res === null) {
             return false;
-        } catch (\Exception $e) {
+        }
+        if ($res['code'] == 200 || $res['status'] == 200) {
+            return true;
+        } else {
             return false;
         }
     }

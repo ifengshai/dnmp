@@ -28,10 +28,6 @@ class GoodsSaleDetail extends Backend
 
         $this->item_platform = new ItemPlatformSku();
         $this->item = new Item();
-        $this->zeelool = new \app\admin\model\order\order\Zeelool;
-        $this->voogueme = new \app\admin\model\order\order\Voogueme;
-        $this->nihao = new \app\admin\model\order\order\Nihao;
-
     }
 
     /*
@@ -158,6 +154,12 @@ class GoodsSaleDetail extends Backend
                 break;
             case 3:
                 $model = Db::connect('database.db_nihao');
+                break;
+            case 10:
+                $model = Db::connect('database.db_zeelool_de');
+                break;
+            case 11:
+                $model = Db::connect('database.db_zeelool_jp');
                 break;
             default:
                 $model = false;
@@ -465,7 +467,7 @@ class GoodsSaleDetail extends Backend
         //查询对应平台权限
         $magentoplatformarr = (new MagentoPlatform())->getAuthSite();
         foreach ($magentoplatformarr as $key => $val) {
-            if (!in_array($val['name'], ['zeelool', 'voogueme', 'nihao'])) {
+            if (!in_array($val['name'], ['zeelool', 'voogueme', 'nihao','zeelool_de','zeelool_jp'])) {
                 unset($magentoplatformarr[$key]);
             }
         }
@@ -603,6 +605,14 @@ class GoodsSaleDetail extends Backend
                     $glass = $this->other_key_plat($order_platform, 1, $time_str);
                     $sun_glass = $this->other_key_plat($order_platform, 2, $time_str);
                     break;
+                case 10:
+                    $glass = $this->other_key_plat($order_platform, 1, $time_str);
+                    $sun_glass = $this->other_key_plat($order_platform, 2, $time_str);
+                    break;
+                case 11:
+                    $glass = $this->other_key_plat($order_platform, 1, $time_str);
+                    $sun_glass = $this->other_key_plat($order_platform, 2, $time_str);
+                    break;
                 default:
                     break;
             }
@@ -640,6 +650,12 @@ class GoodsSaleDetail extends Backend
                 break;
             case 3:
                 $model = Db::connect('database.db_nihao');
+                break;
+            case 10:
+                $model = Db::connect('database.db_zeelool_de');
+                break;
+            case 11:
+                $model = Db::connect('database.db_zeelool_jp');
                 break;
             default:
                 $model = false;

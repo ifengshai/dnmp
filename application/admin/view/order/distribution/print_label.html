@@ -93,7 +93,19 @@
             </td>
         </tr>
 
-        {if  condition="$v['site'] neq 12"}
+        {if $v['site'] == 12}
+        <tr>
+            <td></td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td colspan='4' rowspan="3">
+                {$v['gra_certificate']}&nbsp;&nbsp;
+            </td>
+        </tr>
+        {else/}
         <tr>
             <td></td>
             <td>SPH</td>
@@ -112,6 +124,8 @@
             </td>
             {/if}
         </tr>
+        {/if}
+       
         <tr>
             <td>R</td>
             <td>{$v.od_sph}</td>
@@ -164,9 +178,11 @@
                 <br>
                 {/if}
                 {$v.lens_name}
+
+                {if $v['site'] == 12}{$v['gra_certificate']}&nbsp;&nbsp;{/if}
             </td>
         </tr>
-        {/if}
+
 
         </tbody>
 

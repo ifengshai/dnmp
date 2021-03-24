@@ -19,7 +19,7 @@
     }
     .btn-div.div{
         margin-right: 30px;
-        margin-left: 30px;
+        margin-left: 100px;
         width: 15%;
     }
     .btn-div.div1{
@@ -33,6 +33,11 @@
         margin-left: 60px;
         margin-top: 20px;
         width: 25%;
+    }
+    .btn-div.div3{
+        margin-right: 100px;
+        margin-left: 160px;
+        width: 15%;
     }
     .title{
         font-size: 18px;
@@ -218,7 +223,18 @@
     <div class="panel-body">
         <div class="tab-pane fade active in" id="one">
              <div class="new-background">
-                <b>库存总览</b>
+                 <div class="form-group" style="float:left;width: 100%;" >
+                     <label class="control-label col-xs-6">库存总览</label>
+                     <div style="float: right;display: flex;">
+                         <div style="margin-right: 30px;">
+                             <label style="text-align: right;margin-right: 100px;">时间:</label>
+                             <div id="timetime9" role="form" style="float: right;margin-left: -91px;margin-top: -7px;">
+                                 <input type="hidden" class="form-control operate" name="one_time-operate" data-name="time_str" value="RANGE" readonly="">
+                                 <input type="text" autocomplete="off" class="form-control datetimerange" name="time_str"  id="time_str9" value="{$time_str1}" data-index="14">
+                             </div>
+                         </div>
+                     </div>
+                 </div>
                 <div class="row">
                     <div class="margin-div" style="text-align: center">
                         <div class="btn btn-div div">
@@ -250,11 +266,6 @@
                                 <div class="title"><span style="float: left">待入库数量（个）</span><br/><span class="amount">{$stock_overview.wait_stock_num}</span></div>
                             </span>
                         </div>
-                        <div class="btn btn-div div">
-                            <span class="extend">
-                                <div class="title"><span style="float: left">库存单价（￥）</span><br/><span class="amount">{$stock_overview.stock_price}</span></div>
-                            </span>
-                        </div>
                     </div>
                 </div>
                 <div class="row">
@@ -279,13 +290,38 @@
                                 <div class="title"><span style="float: left">待入库金额（￥）</span><br/><span class="amount">{$stock_overview.wait_stock_amount}</span></div>
                             </span>
                         </div>
-                        <div class="btn btn-div div">
+                    </div>
+                </div>
+                 <div class="row">
+                     <div class="margin-div" style="text-align: center">
+                         <div class="btn btn-div div">
+                            <span tabindex="0" data-bs-toggle="tooltip" title="库存周转率反映库存周转快慢程&#10度。公式：阶段内库存消耗数量/&#10阶段内平均库存数量">
+                                <img src="/wenhao.jpg" class="wenhao-class">
+                            </span>
+                             <span class="extend">
+                                <div class="title"><span style="float: left">库存周转率</span><br/><span class="amount" id="turnover_rate">{$stock_measure_overview.turnover_rate}</span></div>
+                            </span>
+                         </div>
+                         <div class="btn btn-div div">
+                            <span tabindex="0" data-bs-toggle="tooltip" title="库存周转天数反映库存周转一次&#10的时间长度。公式：阶段天数/库&#10存周转率">
+                                <img src="/wenhao.jpg" class="wenhao-class">
+                            </span>
+                             <span class="extend">
+                                <div class="title"><span style="float: left">库存周转天数</span><br/><span class="amount" id="turnover_days_rate">{$stock_measure_overview.turnover_days_rate}</span></div>
+                            </span>
+                         </div>
+                         <div class="btn btn-div div">
                             <span class="extend">
                                 <div class="title"><span style="float: left">在途库存单价（￥）</span><br/><span class="amount">{$stock_overview.onway_stock_price}</span></div>
                             </span>
-                        </div>
-                    </div>
-                </div>
+                         </div>
+                         <div class="btn btn-div div">
+                            <span class="extend">
+                                <div class="title"><span style="float: left">库存单价（￥）</span><br/><span class="amount">{$stock_overview.stock_price}</span></div>
+                            </span>
+                         </div>
+                     </div>
+                 </div>
              </div>
             <div class="widget-body no-padding">
                 <div class="new-background">
@@ -340,7 +376,7 @@
             <div class="new-background">
                 <div style="display: flow-root;">
                     <div style="float: left;">
-                        <label>仓库指标总览</label>
+                        <label>虚拟仓概况</label>
                     </div>
                     <div style="float: right;display: flex;">
                         <div style="margin-right: 30px;">
@@ -362,66 +398,22 @@
                 </div>
                 <div class="row">
                     <div class="margin-div" style="text-align: center">
-                        <div class="btn btn-div div">
-                            <span tabindex="0" data-bs-toggle="tooltip" title="库存周转率反映库存周转快慢程&#10度。公式：阶段内库存消耗数量/&#10阶段内平均库存数量">
-                                <img src="/wenhao.jpg" class="wenhao-class">
-                            </span>
-                            <span class="extend">
-                                <div class="title2">库存周转率<br/><span style="color: #396fff;" id="turnover_rate">{$stock_measure_overview.turnover_rate}</span></div>
-                            </span>
-                        </div>
-                        <div class="btn btn-div div">
-                            <span class="extend">
-                                <div class="title2">库存精度<br/><span style="color: #396fff;">{$stock_measure_overview.stock_accuracy}</span></div>
-                            </span>
-                        </div>
-                        <div class="btn btn-div div">
-                            <span class="extend">
-                                <div class="title2">库销比<br/><span style="color: #396fff;" id="stock_sales_rate">{$stock_measure_overview.stock_sales_rate}</span></div>
-                            </span>
-                        </div>
-                        <div class="btn btn-div div">
-                            <span class="extend">
-                                <div class="title2">缺货率<br/><span style="color: #396fff;">{$stock_measure_overview.stockout_rate}</span></div>
-                            </span>
-                        </div>
-                        <div class="btn btn-div div">
+                        <div class="btn btn-div div3">
                             <span class="extend">
                                 <div class="title2">虚拟仓库存周转率<br/><span style="color: #396fff;" id="virtual_turnover_rate"></span></div>
                             </span>
                         </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="margin-div" style="text-align: center">
-                        <div class="btn btn-div div">
-                            <span tabindex="0" data-bs-toggle="tooltip" title="库存周转天数反映库存周转一次&#10的时间长度。公式：阶段天数/库&#10存周转率">
-                                <img src="/wenhao.jpg" class="wenhao-class">
-                            </span>
-                            <span class="extend">
-                                <div class="title2">库存周转天数<br/><span style="color: #396fff;" id="turnover_days_rate">{$stock_measure_overview.turnover_days_rate}</span></div>
-                            </span>
-                        </div>
-                        <div class="btn btn-div div">
-                            <span class="extend">
-                                <div class="title2">sku库存精度<br/><span style="color: #396fff;">{$stock_measure_overview.sku_accuracy}</span></div>
-                            </span>
-                        </div>
-                        <div class="btn btn-div div">
-                            <span class="extend">
-                                <div class="title2">月度进销比<br/><span style="color: #396fff;" id="month_in_out_rate">{$stock_measure_overview.month_in_out_rate}</span></div>
-                            </span>
-                        </div>
-                        <div class="btn btn-div div">
+                        <div class="btn btn-div div3">
                             <span class="extend">
                                 <div class="title2">虚拟仓库存周转天数<br/><span style="color: #396fff;" id="virtual_turnover_days_rate"></span></div>
                             </span>
                         </div>
-                        <div class="btn btn-div div">
+                        <div class="btn btn-div div3">
                             <span class="extend">
                                 <div class="title2">虚拟仓月度进销比<br/><span style="color: #396fff;" id="virtual_month_in_out_rate"></span></div>
                             </span>
                         </div>
+
                     </div>
                 </div>
             </div>
@@ -631,17 +623,17 @@
                                     <div class="margin-div" style="text-align: center">
                                         <div class="btn btn-div div1">
                                             <span class="extend">
-                                                <div class="title1">采购总数（个）<br/><br/><span style="color: #396fff;font-size: 24px" id="purchase_num">{$purchase_overview.purchase_num}</span><hr><span style="font-size: 14px;">大货：<span id="purchase_num_big">{$purchase_overview.purchase_num_big}</span><br>现货：<span id="purchase_num_now">{$purchase_overview.purchase_num_now}</span></span></div>
+                                                <div class="title1">采购总数（个）<br/><br/><span style="color: #396fff;font-size: 24px" id="purchase_num">{$purchase_overview.purchase_num}</span><hr><span style="font-size: 14px;">大货：<span id="purchase_num_big">{$purchase_overview.purchase_num_big}</span>（<span id="purchase_num_big_rate">{$purchase_overview.purchase_num_big_rate}</span>）<br>现货：<span id="purchase_num_now">{$purchase_overview.purchase_num_now}</span>（<span id="purchase_num_now_rate">{$purchase_overview.purchase_num_now_rate}</span>）</span></div>
                                             </span>
                                         </div>
                                         <div class="btn btn-div div1">
                                             <span class="extend">
-                                                <div class="title1">采购总金额（￥）<br/><br/><span style="color: #396fff;font-size: 24px" id="purchase_amount">{$purchase_overview.purchase_amount}</span><hr><span style="font-size: 14px;">大货：<span id="purchase_amount_big">{$purchase_overview.purchase_amount_big}</span><br>现货：<span id="purchase_amount_now">{$purchase_overview.purchase_amount_now}</span></span></div>
+                                                <div class="title1">采购总金额（￥）<br/><br/><span style="color: #396fff;font-size: 24px" id="purchase_amount">{$purchase_overview.purchase_amount}</span><hr><span style="font-size: 14px;">大货：<span id="purchase_amount_big">{$purchase_overview.purchase_amount_big}</span>（<span id="purchase_amount_big_rate">{$purchase_overview.purchase_amount_big_rate}</span>）<br>现货：<span id="purchase_amount_now">{$purchase_overview.purchase_amount_now}</span>（<span id="purchase_amount_now_rate">{$purchase_overview.purchase_amount_now_rate}</span>）</span></div>
                                             </span>
                                         </div>
                                         <div class="btn btn-div div1">
                                             <span class="extend">
-                                                <div class="title1">采购总SKU数（个）<br/><br/><span style="color: #396fff;font-size: 24px" id="purchase_sku_num">{$purchase_overview.purchase_sku_num}</span><hr><span style="font-size: 14px;">大货：<span id="purchase_sku_num_big">{$purchase_overview.purchase_sku_num_big}</span><br>现货：<span id="purchase_sku_num_now">{$purchase_overview.purchase_sku_num_now}</span></span></div>
+                                                <div class="title1">采购总SKU数（个）<br/><br/><span style="color: #396fff;font-size: 24px" id="purchase_sku_num">{$purchase_overview.purchase_sku_num}</span><hr><span style="font-size: 14px;">大货：<span id="purchase_sku_num_big">{$purchase_overview.purchase_sku_num_big}</span>（<span id="purchase_sku_num_big_rate">{$purchase_overview.purchase_sku_num_big_rate}</span>）<br>现货：<span id="purchase_sku_num_now">{$purchase_overview.purchase_sku_num_now}</span>（<span id="purchase_sku_num_now_rate">{$purchase_overview.purchase_sku_num_now_rate}</span>）</span></div>
                                             </span>
                                         </div>
                                         <div class="btn btn-div div1">
@@ -651,12 +643,12 @@
                                         </div>
                                         <div class="btn btn-div div1">
                                             <span class="extend">
-                                                <div class="title3"><span style="float: left">采购批次到货延时率</span><br/><span class="amount1" id="purchase_delay_rate">{$purchase_overview.purchase_delay_rate}</span></div>
+                                                <div class="title1">采购批次到货延时率<br/><br/><span style="color: #396fff;font-size: 24px" id="purchase_delay_rate">{$purchase_overview.purchase_delay_rate}</span><hr><span style="font-size: 14px;">大货：<span id="purchase_delay_rate_big">{$purchase_overview.purchase_delay_rate_big}</span><br>现货：<span id="purchase_delay_rate_now">{$purchase_overview.purchase_delay_rate_now}</span></span></div>
                                             </span>
                                         </div>
                                         <div class="btn btn-div div1">
                                             <span class="extend">
-                                                <div class="title3"><span style="float: left">采购批次到货合格率</span><br/><span class="amount1" id="purchase_qualified_rate">{$purchase_overview.purchase_qualified_rate}</span></div>
+                                                <div class="title1">采购批次到货合格率<br/><br/><span style="color: #396fff;font-size: 24px" id="purchase_qualified_rate">{$purchase_overview.purchase_qualified_rate}</span><hr><span style="font-size: 14px;">大货：<span id="purchase_qualified_rate_big">{$purchase_overview.purchase_qualified_rate_big}</span><br>现货：<span id="purchase_qualified_rate_now">{$purchase_overview.purchase_qualified_rate_now}</span></span></div>
                                             </span>
                                         </div>
                                     </div>
@@ -693,15 +685,22 @@
                 <div class="widget-body no-padding">
                     <div class="new-background">
                         <div class="row">
-                            <div class="form-group" style="float:left;width: 100%;" >
-                                <label class="control-label col-xs-6">订单发货及时率</label>
+                            <div style="display: flow-root;">
+                                <div style="float: left;">
+                                    <label>订单发货及时率</label>
+                                </div>
                                 <div style="float: right;display: flex;">
                                     <div style="margin-right: 30px;">
-                                        <label style="text-align: right;margin-right: 100px;">时间:</label>
-                                        <div id="timetime3" role="form" style="float: right;margin-left: -91px;margin-top: -7px;">
+                                        <label style="text-align: right;margin-right: 100px;margin-top: 10px">时间:</label>
+                                        <div id="timetime3" role="form" style="float: right;margin-left: -91px;margin-top: 2px;">
                                             <input type="hidden" class="form-control operate" name="one_time-operate" data-name="time_str" value="RANGE" readonly="">
-                                            <input type="text" autocomplete="off" class="form-control datetimerange" name="time_str"  id="time_str3" value="{$time_str2}" data-index="14">
+                                            <input type="text" autocomplete="off" class="form-control datetimerange" name="time_str"  id="time_str3" value="" data-index="14">
                                         </div>
+                                    </div>
+                                    <div>
+                                        <a href="javascript:; " style="text-align: right;margin-right: 15px;"
+                                           class="btn btn-distribution btn-danger btn-batch-export-xls "
+                                           title="{:__('批量导出')}"><i class="fa fa-upload"></i> {:__('批量导出')}</a>
                                     </div>
                                 </div>
                             </div>

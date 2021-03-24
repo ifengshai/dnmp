@@ -768,10 +768,10 @@ class SaleAfterTask extends Model
                 $order_vip = Db::connect($db_online)->table('oc_vip_order')->where(['customer_email' => $customer_email])->field('id,customer_email,order_number,order_amount,order_status,order_type,start_time,end_time,is_active_status,admin_name')->select();
             }
             $result = Db::connect($db)->table('sales_flat_order o')
-                ->join('sales_flat_shipment_track s', 'o.entity_id=s.order_id', 'left')
+                // ->join('sales_flat_shipment_track s', 'o.entity_id=s.order_id', 'left')
                 ->join('sales_flat_order_payment p', 'o.entity_id=p.parent_id', 'left')
                 ->where('customer_email', $customer_email)
-                ->field('o.is_modify_address,o.base_to_order_rate,o.base_total_paid,o.base_total_due,o.entity_id,o.mw_rewardpoint,o.mw_rewardpoint_discount_show,o.status,o.coupon_code,o.coupon_rule_name,o.store_id,o.increment_id,o.customer_email,o.customer_firstname,o.customer_lastname,o.order_currency_code,o.total_item_count,o.grand_total,o.base_grand_total,o.base_shipping_amount,o.shipping_description,o.base_total_paid,o.base_total_due,o.created_at,round(o.total_qty_ordered,0) total_qty_ordered,o.order_type,s.track_number,s.title,p.base_amount_paid,p.base_amount_ordered,p.base_amount_authorized,p.method,p.last_trans_id,p.additional_information')
+                ->field('o.is_modify_address,o.base_to_order_rate,o.base_total_paid,o.base_total_due,o.entity_id,o.mw_rewardpoint,o.mw_rewardpoint_discount_show,o.status,o.coupon_code,o.coupon_rule_name,o.store_id,o.increment_id,o.customer_email,o.customer_firstname,o.customer_lastname,o.order_currency_code,o.total_item_count,o.grand_total,o.base_grand_total,o.base_shipping_amount,o.shipping_description,o.base_total_paid,o.base_total_due,o.created_at,round(o.total_qty_ordered,0) total_qty_ordered,o.order_type,p.base_amount_paid,p.base_amount_ordered,p.base_amount_authorized,p.method,p.last_trans_id,p.additional_information')
                 ->group('o.entity_id')
                 ->order('o.entity_id desc')->select();
             if (!$result) {
@@ -781,6 +781,10 @@ class SaleAfterTask extends Model
 //            Log::write("$result");
 //            Log::write("$order_platform");
             foreach ($result as $k => $v) {
+                $ship =  Db::connect($db)->table('sales_flat_shipment_track')->where(['order_id' => $v['entity_id']])->order('entity_id desc')->find();
+                $result[$k]['track_number'] = $ship['track_number'];
+                $result[$k]['titel'] = $ship['titel'];
+
                 //$result[$k]['item'] = Db::connect($db)->table('sales_flat_order_item')->where('order_id','=',$v['entity_id'])->field('item_id,name,sku,qty_ordered,product_options')->select();
                 if ($order_platform == 1) {
                     $result[$k]['item'] = ZeeloolPrescriptionDetailHelper::get_one_by_increment_id($v['increment_id']);

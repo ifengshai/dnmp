@@ -23,6 +23,8 @@ class SupplyData extends Backend
         $this->order = new \app\admin\model\order\order\NewOrder();
         $this->process = new \app\admin\model\order\order\NewOrderProcess;
         $this->ordernode = new \app\admin\model\OrderNode();
+        $this->productAllStockLog = new \app\admin\model\ProductAllStock();
+        $this->dullstock = new \app\admin\model\supplydatacenter\DullStock();
     }
     /**
      * 呆滞数据
@@ -53,6 +55,16 @@ class SupplyData extends Backend
             //实际周转天数
             $sku_info  = $this->getSkuSales($value['true_sku']);
             $actual_day = $sku_info['days']!=0 && $sku_info['count']!=0 ? round($real_time_stock/($sku_info['count']/$sku_info['days']),2) : 0;
+            if($value['grade'] == 'F'){
+                $count += $real_time_stock;
+                $total += $sku_amount;
+                $count3 += $real_time_stock;
+                $total3 += $sku_amount;
+                $arr8['stock'] += $real_time_stock;
+                $arr8['total'] += $sku_amount;
+                $arr8['high_stock'] += $real_time_stock;
+                $arr8['high_total'] += $sku_amount;
+            }
             if($actual_day >120 && $actual_day<=144){
                 $count += $real_time_stock;
                 $total += $sku_amount;
@@ -93,11 +105,6 @@ class SupplyData extends Backend
                     $arr7['total'] += $sku_amount;
                     $arr7['low_stock'] += $real_time_stock;
                     $arr7['low_total'] += $sku_amount;
-                }else{
-                    $arr8['stock'] += $real_time_stock;
-                    $arr8['total'] += $sku_amount;
-                    $arr8['low_stock'] += $real_time_stock;
-                    $arr8['low_total'] += $sku_amount;
                 }
             }elseif($actual_day > 144 && $actual_day<=168){
                 $count += $real_time_stock;
@@ -139,11 +146,6 @@ class SupplyData extends Backend
                     $arr7['total'] += $sku_amount;
                     $arr7['center_stock'] += $real_time_stock;
                     $arr7['center_total'] += $sku_amount;
-                }else{
-                    $arr8['stock'] += $real_time_stock;
-                    $arr8['total'] += $sku_amount;
-                    $arr8['center_stock'] += $real_time_stock;
-                    $arr8['center_total'] += $sku_amount;
                 }
             }elseif($actual_day>168){
                 $count += $real_time_stock;
@@ -185,24 +187,19 @@ class SupplyData extends Backend
                     $arr7['total'] += $sku_amount;
                     $arr7['high_stock'] += $real_time_stock;
                     $arr7['high_total'] += $sku_amount;
-                }else{
-                    $arr8['stock'] += $real_time_stock;
-                    $arr8['total'] += $sku_amount;
-                    $arr8['high_stock'] += $real_time_stock;
-                    $arr8['high_total'] += $sku_amount;
                 }
             }
         }
         $gradeSkuStock = $this->productGrade->getSkuStock();
         //计算产品等级的数量
-        $a1_stock_num = $gradeSkuStock['aa_stock_num'];
-        $a_stock_num = $gradeSkuStock['a_stock_num'];
-        $b_stock_num = $gradeSkuStock['b_stock_num'];
-        $c1_stock_num = $gradeSkuStock['ca_stock_num'];
-        $c_stock_num = $gradeSkuStock['c_stock_num'];
-        $d_stock_num = $gradeSkuStock['d_stock_num'];
-        $e_stock_num = $gradeSkuStock['e_stock_num'];
-        $f_stock_num = $gradeSkuStock['f_stock_num'];
+        $a1_stock_num = $gradeSkuStock['aa_realstock_num'];
+        $a_stock_num = $gradeSkuStock['a_realstock_num'];
+        $b_stock_num = $gradeSkuStock['b_realstock_num'];
+        $c1_stock_num = $gradeSkuStock['ca_realstock_num'];
+        $c_stock_num = $gradeSkuStock['c_realstock_num'];
+        $d_stock_num = $gradeSkuStock['d_realstock_num'];
+        $e_stock_num = $gradeSkuStock['e_realstock_num'];
+        $f_stock_num = $gradeSkuStock['f_realstock_num'];
 
         $date_time = date('Y-m-d', strtotime("-1 day"));
         $arr1['day_date'] = $arr2['day_date'] = $arr3['day_date'] = $arr4['day_date'] = $arr5['day_date'] = $arr6['day_date'] = $arr7['day_date'] = $arr8['day_date'] = $sum['day_date'] = $date_time;
@@ -284,6 +281,14 @@ class SupplyData extends Backend
         $days[] = $j_info['days'];
         //voogmechic
         $c_info = $this->getDullStock($sku, 12);
+        $sales_num10 = $c_info['sales_num'];
+        $days[] = $j_info['days'];
+         //抖音
+         $c_info = $this->getDullStock($sku, 13);
+         $sales_num10 = $c_info['sales_num'];
+         $days[] = $j_info['days'];
+          //阿里巴巴国际站
+        $c_info = $this->getDullStock($sku, 14);
         $sales_num10 = $c_info['sales_num'];
         $days[] = $j_info['days'];
         $count = $sales_num1+$sales_num2+$sales_num3+$sales_num4+$sales_num5+$sales_num6+$sales_num7+$sales_num8+$sales_num9+$sales_num10;
@@ -373,25 +378,21 @@ class SupplyData extends Backend
     public function getSendLogistics($date){
         $arr = [];
         //订单数
-        $start = strtotime($date);
-        $end = strtotime($date.' 23:59:59');
+        $start = $date;
+        $end = $date.' 23:59:59';
         $where['delivery_time'] = ['between',[$start,$end]];
         $arr['send_num'] = $this->ordernode->where($where)->count();
-        $sql1 = $this->ordernode->field('(signing_time-delivery_time)/3600/24 AS total')->where($where)->group('order_id')->buildSql();
+        $sql1 = $this->ordernode->field('(UNIX_TIMESTAMP(signing_time)-UNIX_TIMESTAMP(delivery_time))/3600/24 AS total')->where($where)->group('order_id')->buildSql();
         $count = $this->ordernode->table([$sql1=>'t2'])->value('sum( IF ( total <= 15, 1, 0) ) AS a');
         $arr['logistics_rate'] = $arr['send_num'] ? round($count/$arr['send_num']*100,2) : 0;
         return $arr;
     }
     //每月数据(平均总库存、平均呆滞库存)
     public function supply_month_data(){
-        $this->productAllStockLog = new \app\admin\model\ProductAllStock();
-        $this->dullstock = new \app\admin\model\supplydatacenter\DullStock();
         $time = date('Y-m');
         $lastmonth = date('Y-m',strtotime("$time -1 month"));
-
         $startday = $lastmonth.'-01';
         $endday = $lastmonth.'-'.date('t', strtotime($startday));
-
         $start_stock = $this->productAllStockLog->where("DATE_FORMAT(createtime,'%Y-%m-%d')='$startday'")->field('id,allnum')->find();
         //判断是否有月初数据
         if($start_stock['id']) {
@@ -399,22 +400,23 @@ class SupplyData extends Backend
             $end_stock = $this->productAllStockLog->where("DATE_FORMAT(createtime,'%Y-%m-%d')='$endday'")->field('id,allnum')->find();
             if ($end_stock['id']) {
                 //如果有月末数据，（月初数据+月末数据）/2
-                $stock = round(($start_stock['allnum'] + $end_stock['allnum']) / 2, 2);
+                $stock = round(($start_stock['allnum'] + $end_stock['allnum']) / 2, 0);
                 $arr['day_date'] = $lastmonth;
                 $arr['avg_stock'] = $stock;
                 Db::name('datacenter_supply_month')->insert($arr);
+                echo "success";
             }
         }
         //获取当前上个月份的库存数据
         $stock_info = Db::name('datacenter_supply_month')->where('day_date',$lastmonth)->field('id,avg_stock')->find();
-        $map['create_time'] = $where['payment_time'] = ['between',[$startday.' 00:00:00',$endday.' 23:59:59']];
+        $map['create_time'] = ['between',[$startday.' 00:00:00',$endday.' 23:59:59']];
+        $where['payment_time'] = ['between',[strtotime($startday.' 00:00:00'),strtotime($endday.' 23:59:59')]];
         if ($stock_info['id']){
             //上个月总的采购数量（副数）
             $purchase_num = Db::name('warehouse_data')->where($map)->sum('all_purchase_num');
-            $order = new \app\admin\model\order\Order();
             //上个月总的销售数量（副数）
             $where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
-            $sales_num = $order->where($where)->sum('total_qty_ordered');
+            $sales_num = $this->order->where($where)->sum('total_qty_ordered');
             $arr2['purchase_num'] = $purchase_num;
             $arr2['sales_num'] = $sales_num;
             $arr2['purchase_sales_rate'] = $sales_num!=0 ? round($purchase_num/$sales_num*100,2):0;
@@ -422,15 +424,15 @@ class SupplyData extends Backend
         }else{
             //上个月总的采购数量（副数）
             $purchase_num = Db::name('warehouse_data')->where($map)->sum('all_purchase_num');
-            $order = new \app\admin\model\order\Order();
             //上个月总的销售数量（副数）
             $where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
-            $sales_num = $order->where($where)->sum('total_qty_ordered');
+            $sales_num = $this->order->where($where)->sum('total_qty_ordered');
             $arr3['purchase_num'] = $purchase_num;
             $arr3['sales_num'] = $sales_num;
             $arr3['purchase_sales_rate'] = $sales_num!=0 ? round($purchase_num/$sales_num*100,2):0;
             $arr3['day_date'] = $lastmonth;
             Db::name('datacenter_supply_month')->insert($arr3);
+            echo "success";
         }
         //获取月初呆滞库存数据
         $start_dull_stock = $this->dullstock->where("DATE_FORMAT(day_date,'%Y-%m-%d')='$startday'")->where('grade','Z')->field('id,stock')->find();
@@ -439,12 +441,12 @@ class SupplyData extends Backend
             //判断是否有月末数据
             $end_dull_stock = $this->dullstock->where("DATE_FORMAT(day_date,'%Y-%m-%d')='$endday'")->where('grade','Z')->field('id,stock')->find();
             if ($end_dull_stock['id']) {
+                $stock_info1 = Db::name('datacenter_supply_month')->where('day_date',$lastmonth)->field('id,avg_stock')->find();
                 //如果有月末数据，（月初数据+月末数据）/2
                 $dull_stock = round(($start_dull_stock['stock'] + $end_dull_stock['stock']) / 2, 2);
                 $arr1['avg_dull_stock'] = $dull_stock;
-                $arr1['avg_rate'] = $stock_info['avg_stock'] ? round($arr1['avg_dull_stock']/$stock_info['avg_stock'],2) : 0;
-                Db::name('datacenter_supply_month')->where('id',$stock_info['id'])->update($arr1);
-                echo "success";
+                $arr1['avg_rate'] = $stock_info1['avg_stock'] ? round($arr1['avg_dull_stock']/$stock_info1['avg_stock']*100,2) : 0;
+                Db::name('datacenter_supply_month')->where('id',$stock_info1['id'])->update($arr1);
             }
         }
     }

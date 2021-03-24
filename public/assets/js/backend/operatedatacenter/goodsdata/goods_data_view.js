@@ -33,7 +33,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                     $('.nihao-div').hide();
                     $('#c-order_platform').hide();
 
-                } else if (order_platform == 2) {
+                } else if (order_platform == 2 || order_platform == 10 || order_platform == 11) {
                     $('.zeelool-div').hide();
                     $('.voogueme-div').show();
                     $('.nihao-div').hide();

@@ -17,9 +17,13 @@ class OrderDataDetail extends Backend
         $this->zeelool = new \app\admin\model\order\order\Zeelool();
         $this->voogueme = new \app\admin\model\order\order\Voogueme();
         $this->nihao = new \app\admin\model\order\order\Nihao();
+        $this->zeeloolde = new \app\admin\model\order\order\ZeeloolDe();
+        $this->zeelooljp = new \app\admin\model\order\order\ZeeloolJp();
         $this->zeeloolOperate  = new \app\admin\model\operatedatacenter\Zeelool;
         $this->vooguemeOperate  = new \app\admin\model\operatedatacenter\Voogueme;
         $this->nihaoOperate  = new \app\admin\model\operatedatacenter\Nihao;
+        $this->zeelooldeOperate  = new \app\admin\model\operatedatacenter\ZeeloolDe();
+        $this->zeelooljpOperate  = new \app\admin\model\operatedatacenter\ZeeloolJp();
         $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform();
     }
     /**
@@ -49,6 +53,14 @@ class OrderDataDetail extends Backend
                 $order_model = $this->nihao;
                 $web_model = Db::connect('database.db_nihao');
                 $site = 3;
+            }elseif($filter['order_platform'] == 10){
+                $order_model = $this->zeeloolde;
+                $web_model = Db::connect('database.db_zeelool_de');
+                $site = 10;
+            }elseif($filter['order_platform'] == 11){
+                $order_model = $this->zeelooljp;
+                $web_model = Db::connect('database.db_zeelool_jp');
+                $site = 11;
             }else{
                 $order_model = $this->zeelool;
                 $web_model = Db::connect('database.db_zeelool');
@@ -83,6 +95,7 @@ class OrderDataDetail extends Backend
                 }elseif ($filter['order_status'] == 5){
                     $node_where['node_type'] = 35;
                 }
+                $node_where['site'] = $site;
                 $order_ids = Db::name('order_node')->where($node_where)->column('order_id');
                 $map['o.entity_id'] = ['in',$order_ids];
             }
@@ -146,7 +159,7 @@ class OrderDataDetail extends Backend
                         $list[$key]['order_type']  = '补发';
                         break;
                 }
-                $order_node = Db::name('order_node')->where('order_id',$value['entity_id'])->value('node_type');
+                $order_node = Db::name('order_node')->where('order_id',$value['entity_id'])->where('site',$site)->value('node_type');
                 if($order_node == 7){
                     $order_shipping_status = '已发货';
                 }elseif ($order_node == 8 && $order_node == 10){
@@ -268,7 +281,7 @@ class OrderDataDetail extends Backend
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
         foreach ($magentoplatformarr as $key=>$val){
-            if(!in_array($val['name'],['zeelool','voogueme','nihao'])){
+            if(!in_array($val['name'],['zeelool','voogueme','nihao','zeelool_de','zeelool_jp'])){
                 unset($magentoplatformarr[$key]);
             }
         }
@@ -435,6 +448,14 @@ class OrderDataDetail extends Backend
             $order_model = $this->nihao;
             $web_model = Db::connect('database.db_nihao');
             $site = 3;
+        }elseif($order_platform == 10){
+            $order_model = $this->zeeloolde;
+            $web_model = Db::connect('database.db_zeelool_de');
+            $site = 10;
+        }elseif($order_platform == 11){
+            $order_model = $this->zeelooljp;
+            $web_model = Db::connect('database.db_zeelool_jp');
+            $site = 11;
         }else{
             $order_model = $this->zeelool;
             $web_model = Db::connect('database.db_zeelool');

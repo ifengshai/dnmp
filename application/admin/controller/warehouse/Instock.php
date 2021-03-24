@@ -402,6 +402,16 @@ class Instock extends Backend
         $type = $this->type->where('is_del', 1)->select();
         $this->assign('type', $type);
 
+        //查询入库库区库位
+        $product_bar_code = new ProductBarCodeItem();
+        $area =$product_bar_code->where('in_stock_id',$ids)->field('location_id,location_code_id')->find();
+
+        $warehouse_area = Db::name('warehouse_area')->column('coding','id');
+        $this->assign('warehouse_area', $warehouse_area);
+        $store_house = Db::name('store_house')->column('coding','id');
+        $this->assign('store_house', $store_house);
+        $this->assign('area', $area);
+
         //查询质检单
         $check = new \app\admin\model\warehouse\Check;
         $map['status'] = 2;
@@ -449,12 +459,27 @@ class Instock extends Backend
      */
     public function setStatus()
     {
-
-
+        $this->_inventory = new \app\admin\model\warehouse\Inventory();
+        $this->_product_bar_code_item = new \app\admin\model\warehouse\ProductBarCodeItem();
         $ids = $this->request->post("ids/a");
         if (!$ids) {
             $this->error('缺少参数！！');
         }
+
+        /*****************限制如果有盘点单未结束不能操作配货完成*******************/
+        //配货完成时判断
+        //拣货区盘点时不能操作
+        //查询条形码库区库位
+        $barcodedata = $this->_product_bar_code_item->where(['in_stock_id' => ['in', $ids]])->column('location_code');
+        $count = $this->_inventory->alias('a')
+            ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata]])
+            ->count();
+        if ($count > 0) {
+            $this->error(__('此库位正在盘点,暂无法入库审核'), [], 403);
+        }
+        /****************************end*****************************************/
+
+
         $map['id'] = ['in', $ids];
         $row = $this->model->where($map)->select();
 
@@ -552,11 +577,11 @@ class Instock extends Backend
                                     //当前sku映射关系详情
                                     $sku_platform = $platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->find();
                                     //如果站点是Z站 且虚拟仓库存为0
-                                    if ($val['website_type'] ==1){
-                                        if ($sku_platform->stock == 0  && $stock_num > 0){
+                                    if ($val['website_type'] == 1) {
+                                        if ($sku_platform->stock == 0  && $stock_num > 0) {
                                             $value['sku'] = $sku_platform->platform_sku;
-                                            $url  =  config('url.zeelool_url').'magic/product/productArrival';
-                                            $this->submission_post($url,$value);
+                                            $url  =  config('url.zeelool_url') . 'magic/product/productArrival';
+                                            $this->submission_post($url, $value);
                                         }
                                     }
                                     //增加站点虚拟仓库存
@@ -588,11 +613,11 @@ class Instock extends Backend
                                     $should_arrivals_num -= $should_arrivals_num_plat;
                                     $sku_platform = $platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->find();
                                     //如果站点是Z站 且虚拟仓库存为0
-                                    if ($val['website_type'] ==1){
-                                        if ($sku_platform['stock'] == 0  && $num > 0){
+                                    if ($val['website_type'] == 1) {
+                                        if ($sku_platform['stock'] == 0  && $num > 0) {
                                             $value['sku'] = $sku_platform['platform_sku'];
-                                            $url  =  config('url.zeelool_url').'magic/product/productArrival';
-                                            $this->submission_post($url,$value);
+                                            $url  =  config('url.zeelool_url') . 'magic/product/productArrival';
+                                            $this->submission_post($url, $value);
                                         }
                                     }
                                     //增加站点虚拟仓库存
@@ -677,15 +702,15 @@ class Instock extends Backend
                         ]);
                         //如果站点信息等于1 zeelool站点
                         //虚拟库存为0时  讲信息通知到网站端
-//                        if ($v['platform_id'] ==1){
-//                            Log::write("第三次");
-//                            Log::write($item_platform_sku);
-//                            if ($item_platform_sku->stock == 0  && $v['in_stock_num'] > 0){
-//                                $value['sku'] = $item_platform_sku->platform_sku;
-//                                $url  =  config('url.zeelool_url').'magic/product/productArrival';
-//                                $this->submission_post($url,$value);
-//                            }
-//                        }
+                        //                        if ($v['platform_id'] ==1){
+                        //                            Log::write("第三次");
+                        //                            Log::write($item_platform_sku);
+                        //                            if ($item_platform_sku->stock == 0  && $v['in_stock_num'] > 0){
+                        //                                $value['sku'] = $item_platform_sku->platform_sku;
+                        //                                $url  =  config('url.zeelool_url').'magic/product/productArrival';
+                        //                                $this->submission_post($url,$value);
+                        //                            }
+                        //                        }
                     } //没有采购单也没有站点id 说明是盘点过来的
                     else {
                         //盘点
@@ -703,15 +728,15 @@ class Instock extends Backend
                             $rate_rate = 1 / $all_num;
                             foreach ($item_platform_sku as $key => $val) {
                                 $item_platform_sku_detail = $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->find();
-//                                if ($val['platform_type'] ==1){
-//                                    Log::write("第四次");
-//                                    Log::write($item_platform_sku_detail);
-//                                    if ($item_platform_sku_detail->stock ==0 && $stock_num >0 ){
-//                                        $value['sku'] = $item_platform_sku_detail->platform_sku;
-//                                        $url  =  config('url.zeelool_url').'magic/product/productArrival';
-//                                        $this->submission_post($url,$value);
-//                                    }
-//                                }
+                                //                                if ($val['platform_type'] ==1){
+                                //                                    Log::write("第四次");
+                                //                                    Log::write($item_platform_sku_detail);
+                                //                                    if ($item_platform_sku_detail->stock ==0 && $stock_num >0 ){
+                                //                                        $value['sku'] = $item_platform_sku_detail->platform_sku;
+                                //                                        $url  =  config('url.zeelool_url').'magic/product/productArrival';
+                                //                                        $this->submission_post($url,$value);
+                                //                                    }
+                                //                                }
                                 //最后一个站点 剩余数量分给最后一个站
                                 if (($all_num - $key) == 1) {
                                     $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setInc('stock', $stock_num);
@@ -758,15 +783,15 @@ class Instock extends Backend
                             $stock_num = $v['in_stock_num'];
                             foreach ($item_platform_sku as $key => $val) {
                                 $item_platform_sku_detail = $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->find();
-//                                if ($val['platform_type'] ==1){
-//                                    Log::write("第五次");
-//                                    Log::write($item_platform_sku_detail);
-//                                    if ($item_platform_sku_detail->stock ==0 && $stock_num >0 ){
-//                                        $value['sku'] = $item_platform_sku_detail->platform_sku;
-//                                        $url  =  config('url.zeelool_url').'magic/product/productArrival';
-//                                        $this->submission_post($url,$value);
-//                                    }
-//                                }
+                                //                                if ($val['platform_type'] ==1){
+                                //                                    Log::write("第五次");
+                                //                                    Log::write($item_platform_sku_detail);
+                                //                                    if ($item_platform_sku_detail->stock ==0 && $stock_num >0 ){
+                                //                                        $value['sku'] = $item_platform_sku_detail->platform_sku;
+                                //                                        $url  =  config('url.zeelool_url').'magic/product/productArrival';
+                                //                                        $this->submission_post($url,$value);
+                                //                                    }
+                                //                                }
                                 //最后一个站点 剩余数量分给最后一个站
                                 if (($all_num - $key) == 1) {
                                     $platform->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setInc('stock', $stock_num);
@@ -960,8 +985,7 @@ class Instock extends Backend
         curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_TIMEOUT, 20);
-
-        $content =json_decode(curl_exec($curl),true);
+        $content = json_decode(curl_exec($curl), true);
         curl_close($curl);
         return $content;
     }
@@ -1340,7 +1364,7 @@ class Instock extends Backend
                 }
             }
             //校验模板文件格式
-            $listName = ['入库分类', '平台', 'SKU', '入库数量', '商品条码','采购单价'];
+            $listName = ['入库分类', '平台', 'SKU', '入库数量', '商品条码', '采购单价'];
 
             $listName !== $fields && $this->error(__('模板文件格式错误！'));
 
@@ -1359,10 +1383,10 @@ class Instock extends Backend
             foreach ($data as $k => $v) {
                 //获取sku
                 $sku = trim($v[2]);
-                if ($first_sku != $sku){
+                if ($first_sku != $sku) {
                     $this->error(__('导入失败,必须导入同一个sku'));
                 }
-                if ($first_price != trim($v[4])){
+                if ($first_price != trim($v[4])) {
                     $this->error(__('导入失败,同一个sku采购单价必须相同'));
                 }
                 $type = trim($v[0]);
@@ -1379,7 +1403,7 @@ class Instock extends Backend
             //检测条形码是否重复
             if (count($data) != count(array_unique($sku_code)))  $this->error(__(' 条形码有重复，请检查'));
             //校验一个入库单只能有一个站点
-            if  (1 != count(array_unique($plat)))  $this->error(__('一个入库单只能有一个站点'));
+            if (1 != count(array_unique($plat)))  $this->error(__('一个入库单只能有一个站点'));
             //检测条形码是否已绑定
             $where['in_stock_id'] = [['>', 0]];
             $where['code'] = ['in', $sku_code];
@@ -1439,8 +1463,8 @@ class Instock extends Backend
                 $save_code_data['in_stock_id'] = $transfer_order_id;
                 $save_code_data['sku'] = $sku;
                 $res = $this->_product_bar_code_item->where(['code' => trim($v[4])])->update($save_code_data);
-                if ($res == false){
-                    $this->error(__('导入失败,条码 ' . trim($v[4]) .'更新失败！'));
+                if ($res == false) {
+                    $this->error(__('导入失败,条码 ' . trim($v[4]) . '更新失败！'));
                 }
                 //校验当前平台是否存在此sku映射关系
                 if (empty($_platform->where(['platform_type' => $out_label, 'sku' => $sku])->find())) {
@@ -1449,9 +1473,9 @@ class Instock extends Backend
                 //获取入库数量
                 $replenish_num = 1;
                 //拼接参数 插入入库单详情表中
-                if ($params[$sku]){
+                if ($params[$sku]) {
                     $params[$sku]['in_stock_num'] += $replenish_num;
-                }else{
+                } else {
                     $params[$sku] = [
                         'in_stock_num' => $replenish_num,
                         'sku' => $sku,

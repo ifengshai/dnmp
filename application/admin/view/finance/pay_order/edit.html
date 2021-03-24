@@ -103,27 +103,43 @@
                     <th rowspan="{$count1+2}">结算金额</th>
                     <th>序号</td>
                     <th>采购单号</td>
+                    <th>1688单号</td>
+                    <th>采购方式</td>
+                    <th>付款类型</td>
                     <th>采购批次ID</td>
                     <th>已支付金额</td>
                     <th>批次入库金额</td>
                     <th>扣款</td>
                     <th>扣款原因</td>
                     <th>总待结算金额</td>
+                    <th>申请人</td>
                 </tr>
                 {foreach $settle as $k=>$val}
                 <tr>
                     <td>{$k+1}</td>
-                    <td>{$val.purchase_order}</td>
+                    <td>{$val.purchase_number}</td>
+                    <td >{$val.1688_number}</td>
+                    <td>{:$val['purchase_type'] == 1 ? '线下' : '线上'}</td>
+                    <td>
+                        {if $val['pay_type'] == 1} 
+                        预付款
+                        {elseif($val['pay_type'] == 2)}
+                        全款预付
+                        {else/}
+                        货到付款
+                        {/if}
+                    </td>
                     <td>{$val.purchase_batch_id}</td>
                     <td>{$val.now_before_total}</td>
                     <td>{$val.instock_total}</td>
                     <td>{$val.deduction_total}</td>
                     <td>{$val.deduction_reason}</td>
                     <td>{$val.wait_statement_total}</td>
+                    <td>{$val.create_person}</td>
                 </tr>
                 {/foreach}
                 <tr>
-                    <td colspan="7" style="text-align: right">待结算款金额合计：</td>
+                    <td colspan="11" style="text-align: right">待结算款金额合计：</td>
                     <td>{$total1}</td>
                 </tr>
                 {/if}
@@ -132,27 +148,48 @@
                     <th rowspan="{$count2+2}">预付信息</th>
                     <th>序号</td>
                     <th colspan="2">采购单号</td>
+                    <th colspan="2">1688单号</td>
                     <th colspan="2">采购单金额</td>
-                    <th colspan="2">预付款比例</td>
+                    <th colspan="2">采购方式</td>
+                    <th colspan="2">付款类型</td>
+                    <th>预付款比例</td>
                     <th>预付款金额</td>
+                    <th>申请人</td>
                 </tr>
                 {foreach $prepay as $key=>$value}
                 <tr>
                     <td>{$key+1}</td>
-                    <td colspan="2">{$value.purchase_order}</td>
+                    <td colspan="2">{$value.purchase_number}</td>
+                    <td colspan="2">{$value.1688_number}</td>
                     <td colspan="2">{$value.purchase_total}</td>
-                    <td colspan="2">{$value.pay_rate}</td>
+                    <td colspan="2">{:$value['purchase_type'] == 1 ? '线下' : '线上'}</td>
+                    <td colspan="2">
+                        {if $value['pay_type'] == 1} 
+                        预付款
+                        {elseif($value['pay_type'] == 2)}
+                        全款预付
+                        {else/}
+                        货到付款
+                        {/if}
+                    </td>
+                    <td >{$value.pay_rate}%</td>
                     <td>{$value.pay_grand_total}</td>
+                    <td>{$value.create_person}</td>
                 </tr>
                 {/foreach}
                 <tr>
-                    <td colspan="7" style="text-align: right">预付款金额合计：</td>
+                    <td colspan="13" style="text-align: right">预付款金额合计：</td>
                     <td>{$total2}</td>
                 </tr>
                 {/if}
-                {if $settle || $prepay}
+                {if $prepay || ($settle && $prepay)}
                 <tr>
-                    <td colspan="8" style="text-align: right">合计应付：</td>
+                    <td colspan="14" style="text-align: right">合计应付：</td>
+                    <td>{$total}</td>
+                </tr>
+                {else}
+                <tr>
+                    <td colspan="12" style="text-align: right">合计应付：</td>
                     <td>{$total}</td>
                 </tr>
                 {/if}

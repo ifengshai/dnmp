@@ -934,6 +934,8 @@ class Item extends Backend
                     $v['zeelool_de_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 10])->value('stock');
                     $v['zeelool_jp_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 11])->value('stock');
                     $v['voogmechic_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 12])->value('stock');
+                    $v['douyin_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 13])->value('stock');
+                    $v['alibaba_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 14])->value('stock');
                 }
                 unset($v);
             } else {
@@ -1033,9 +1035,11 @@ class Item extends Backend
             $v['zeelool_de_stock'] = $item_stock[$v['sku']][10];
             $v['zeelool_jp_stock'] = $item_stock[$v['sku']][11];
             $v['voogmechic_stock'] = $item_stock[$v['sku']][12];
+            $v['douyin_stock'] = $item_stock[$v['sku']][13];
+            $v['alibaba_stock'] = $item_stock[$v['sku']][14];
         }
 
-        $headlist = ['商品sku', '总库存', '可用库存', '虚拟库存Zeelool', '虚拟库存Voogueme', '虚拟库存Nihao', '虚拟库存Meeloog', '虚拟库存Wesee', '虚拟库存Amazon', '虚拟库存ZeeloolEs', '虚拟库存ZeeloolDe', '虚拟库存ZeeloolJp', '虚拟库存Voogmechic'];
+        $headlist = ['商品sku', '总库存', '可用库存', '虚拟库存Zeelool', '虚拟库存Voogueme', '虚拟库存Nihao', '虚拟库存Meeloog', '虚拟库存Wesee', '虚拟库存Amazon', '虚拟库存ZeeloolEs', '虚拟库存ZeeloolDe', '虚拟库存ZeeloolJp', '虚拟库存Voogmechic', '虚拟库存ZeeloolCn', '虚拟库存Alibaba'];
         $filename = '商品虚拟库存';
         Excel::writeCsv($list, $headlist, $filename, true);
         die;
@@ -1304,31 +1308,31 @@ class Item extends Backend
                     throw new Exception('审核失败！！');
                 }
 
-                //查询同步的平台
-                $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
-                $platformArr = $platform->where(['sku' => $row['sku'], 'is_upload' => 2])->select();
-                $error_num = [];
-                $uploadItemArr = [];
-                foreach ($platformArr as $k => $v) {
-                    //审核通过把SKU同步到有映射关系的平台
-                    if ($v['platform_type'] == 12) {
-                        $uploadItemArr['skus'][0]  = [
-                            'sku' =>  $v['platform_sku'],
-                            'type' =>  $row['category_id'] == 53 ? 1 : 2
-                        ];
-                        $uploadItemArr['sku']  = $v['platform_sku'];
-                        $uploadItemArr['site']  = $v['platform_type'];
-                    } else {
-                        $uploadItemArr['skus']  = [$v['platform_sku']];
-                    }
+                // //查询同步的平台
+                // $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
+                // $platformArr = $platform->where(['sku' => $row['sku'], 'is_upload' => 2])->select();
+                // $error_num = [];
+                // $uploadItemArr = [];
+                // foreach ($platformArr as $k => $v) {
+                //     //审核通过把SKU同步到有映射关系的平台
+                //     if ($v['platform_type'] == 12) {
+                //         $uploadItemArr['skus'][0]  = [
+                //             'sku' =>  $v['platform_sku'],
+                //             'type' =>  $row['category_id'] == 53 ? 1 : 2
+                //         ];
+                //         $uploadItemArr['sku']  = $v['platform_sku'];
+                //         $uploadItemArr['site']  = $v['platform_type'];
+                //     } else {
+                //         $uploadItemArr['skus']  = [$v['platform_sku']];
+                //     }
 
-                    $soap_res = Soap::createProduct($uploadItemArr);
-                    if (!$soap_res) {
-                        $error_num[] = $v['platform_type'];
-                    } else {
-                        $platform->where(['sku' => $row['sku'], 'platform_type' => $v['platform_type']])->update(['is_upload' => 1]);
-                    }
-                }
+                //     $soap_res = Soap::createProduct($uploadItemArr);
+                //     if (!$soap_res) {
+                //         $error_num[] = $v['platform_type'];
+                //     } else {
+                //         $platform->where(['sku' => $row['sku'], 'platform_type' => $v['platform_type']])->update(['is_upload' => 1]);
+                //     }
+                // }
                 Db::commit();
             } catch (ValidateException $e) {
                 Db::rollback();
@@ -1339,10 +1343,6 @@ class Item extends Backend
             } catch (Exception $e) {
                 Db::rollback();
                 $this->error($e->getMessage());
-            }
-
-            if ($error_num) {
-                $this->error('站点同步失败:' . implode(',', $error_num));
             }
 
             $this->success('审核成功！！');
@@ -1459,33 +1459,33 @@ class Item extends Backend
             $data['check_time']  = date("Y-m-d H:i:s", time());
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
             if ($res !== false) {
-                foreach ($row as $val) {
-                    //查询同步的平台
-                    $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
-                    // $magento_platform = new \app\admin\model\platformmanage\MagentoPlatform();
-                    $platformArr = $platform->where(['sku' => $val['sku'], 'is_upload' => 2])->select();
-                    $uploadItemArr = [];
-                    foreach ($platformArr as $k => $v) {
-                        // $magentoArr = $magento_platform->where('id', '=', $v['platform_type'])->find();
-                        //审核通过把SKU同步到有映射关系的平台
+                // foreach ($row as $val) {
+                //     //查询同步的平台
+                //     $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
+                //     // $magento_platform = new \app\admin\model\platformmanage\MagentoPlatform();
+                //     $platformArr = $platform->where(['sku' => $val['sku'], 'is_upload' => 2])->select();
+                //     $uploadItemArr = [];
+                //     foreach ($platformArr as $k => $v) {
+                //         // $magentoArr = $magento_platform->where('id', '=', $v['platform_type'])->find();
+                //         //审核通过把SKU同步到有映射关系的平台
 
-                        if ($v['platform_type'] == 12) {
-                            $uploadItemArr['skus'][0]  = [
-                                'sku' => $v['platform_sku'],
-                                'type' => $val['category_id'] == 53 ? 1 : 2
-                            ];
-                            $uploadItemArr['sku']  = $v['platform_sku'];
-                            $uploadItemArr['type']  = $val['category_id'] == 53 ? 1 : 2;
-                        } else {
-                            $uploadItemArr['skus']  = [$v['platform_sku']];
-                        }
-                        $uploadItemArr['site']  = $v['platform_type'];
-                        $soap_res = Soap::createProduct($uploadItemArr);
-                        if ($soap_res) {
-                            $platform->where(['sku' => $val['sku'], 'platform_type' => $v['platform_type']])->update(['is_upload' => 1]);
-                        }
-                    }
-                }
+                //         if ($v['platform_type'] == 12) {
+                //             $uploadItemArr['skus'][0]  = [
+                //                 'sku' => $v['platform_sku'],
+                //                 'type' => $val['category_id'] == 53 ? 1 : 2
+                //             ];
+                //             $uploadItemArr['sku']  = $v['platform_sku'];
+                //             $uploadItemArr['type']  = $val['category_id'] == 53 ? 1 : 2;
+                //         } else {
+                //             $uploadItemArr['skus']  = [$v['platform_sku']];
+                //         }
+                //         $uploadItemArr['site']  = $v['platform_type'];
+                //         $soap_res = Soap::createProduct($uploadItemArr);
+                //         if ($soap_res) {
+                //             $platform->where(['sku' => $val['sku'], 'platform_type' => $v['platform_type']])->update(['is_upload' => 1]);
+                //         }
+                //     }
+                // }
                 $this->success('审核成功');
             } else {
                 $this->error('审核失败');

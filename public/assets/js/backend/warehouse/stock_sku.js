@@ -13,6 +13,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                     edit_url: 'warehouse/stock_sku/edit',
                     del_url: 'warehouse/stock_sku/del',
                     multi_url: 'warehouse/stock_sku/multi',
+                    import_url: 'warehouse/stock_sku/import',
                     table: 'store_sku',
                 }
             });
@@ -28,6 +29,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                     [
                         { checkbox: true },
                         { field: 'id', title: __('Id') },
+                        { field: 'area_coding', title: __('库区编码'), operate: 'like' },
+                        { field: 'storehouse.coding', title: __('库位编码'), operate: 'like' },
                         { field: 'sku', title: __('Sku'), operate: 'like' },
                         { field: 'name', title: __('商品名称'), operate: false },
                         // {
@@ -36,11 +39,21 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                         //     formatter: Table.api.formatter.status
                         // },
 
-                        { field: 'storehouse.coding', title: __('Storehouse.coding'), operate: 'like' },
+
                         { field: 'storehouse.library_name', title: __('Storehouse.library_name'), operate: 'like' },
                         {
-                            field: 'storehouse.status', title: __('Storehouse.status'), custom: { 1: 'success', 2: 'danger' },
+                            field: 'storehouse.status', title: __('库位状态'), custom: { 1: 'success', 2: 'danger' },
                             searchList: { 1: '启用', 2: '禁用' },
+                            formatter: Table.api.formatter.status
+                        },
+                        {
+                            field: 'area_status', title: __('库区状态'), custom: { 1: 'success', 2: 'danger' },
+                            searchList: { 1: '启用', 2: '禁用' },operate: false,
+                            formatter: Table.api.formatter.status
+                        },
+                        {
+                            field: 'is_open', title: __('SKU启用状态'), custom: { 1: 'success', 2: 'danger' },
+                            searchList: { 1: '启用', 2: '禁用' }, operate: false,
                             formatter: Table.api.formatter.status
                         },
                         { field: 'create_person', title: __('Create_person') },

@@ -20,11 +20,16 @@ class Conversionrate extends Backend{
         //     $this->error('您没有权限访问','general/profile?ref=addtabs');
         // }
         $orderPlatform = (new MagentoPlatform())->getNewAuthSite();
+        foreach ($orderPlatform as $k=>$v){
+            if(in_array($k,[5,8,13,14])){
+                unset($orderPlatform[$k]);
+            }
+        }
         if(empty($orderPlatform)){
             $this->error('您没有权限访问','general/profile?ref=addtabs');
         }
         $create_time = input('create_time');
-        $platform    = input('order_platform', current($orderPlatform));	
+        $platform    = input('order_platform', current($orderPlatform));
         //头部数据
         if($this->request->isAjax()){
             $params = $this->request->param();
@@ -46,7 +51,8 @@ class Conversionrate extends Backend{
                 $list = collection($list)->toArray();
                 $create_date = $shoppingCartUpdateTotal = $shoppingCartUpdateConversion = [];
                 $total_sales_money =  $total_shoppingcart_update_total = $total_sales_num = 0;
-                foreach ($list as $v) {
+                foreach ($list as $k=>$v) {
+                    $list[$k]['sales_money'] = round($v['sales_money'],2);
                     $shoppingCartUpdateTotal[]        = $v['shoppingcart_update_total'];
                     $shoppingCartUpdateConversion[]   = $v['shoppingcart_update_conversion'];
                     $create_date[]                    = $v['create_date'];

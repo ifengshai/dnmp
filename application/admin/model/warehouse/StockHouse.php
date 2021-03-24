@@ -42,13 +42,32 @@ class StockHouse extends Model
      */
     public function get_shelf_number()
     {
-        $shelf_number = $this->where('status',1)->field('id,coding')->select();
+        $shelf_number = $this->where('status', 1)->field('id,coding')->select();
         $shelf_number = collection($shelf_number)->toArray();
-        foreach ($shelf_number as $k=>$v){
-            $shelf_number[$k]['shelf_number'] = preg_replace("/\\d+/",'', (explode('-',$v['coding']))[0]);
+        foreach ($shelf_number as $k => $v) {
+            $shelf_number[$k]['shelf_number'] = preg_replace("/\\d+/", '', (explode('-', $v['coding']))[0]);
             unset($shelf_number[$k]['coding']);
         }
         $arr = array_values(array_column($shelf_number, 'shelf_number', 'shelf_number'));
         return $arr;
+    }
+
+    /**
+     * 获取库位
+     *
+     * @Description
+     * @author wpl
+     * @since 2021/03/03 11:31:55 
+     * @param [type] $area_id 库区id
+     * @param [type] $coding 库位编码
+     * @return void
+     */
+    public function getLocationData($area_id = null, $coding = null)
+    {
+        if ($coding) {
+            $where['coding'] = ['like', $coding . '%'];
+        }
+        $list = $this->field('id as location_id,coding,library_name')->where($where)->where(['area_id' => ['in', $area_id], 'type' => 1, 'status' => 1])->select();
+        return collection($list)->toArray();
     }
 }

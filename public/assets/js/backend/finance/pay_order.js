@@ -21,10 +21,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                 sortName: 'id',
                 columns: [
                     [
-                        {field: 'id', title: __('序号'),operate:false},
+                        {checkbox: true},
+                        {field: 'id', title: __('序号'), operate:false},
                         {field: 'pay_number', title: __('付款单号'),},
                         {field: 'supplier_name', title: __('供应商名称')},
-                        {field: 'status', title: __('状态'),custom: { 1: 'danger', 2: 'success', 3: 'orange', 4: 'warning', 5: 'purple', 6: 'primary' , 7: 'primary'}, searchList: { 1: '新建', 2: '待审核', 3: '待付款', 4: '待上传发票', 5: '已完成',6:'已拒绝' ,7:'已取消'},formatter: Table.api.formatter.status},
+                        {field: 'status', title: __('状态'),custom: { 1: 'danger', 2: 'success', 3: 'orange', 4: 'warning', 5: 'purple', 6: 'primary' , 7: 'primary'}, searchList: { 1: '新建', 2: '待审核', 3: '待付款', 4: '待上传付款凭证', 5: '已完成',6:'已拒绝' ,7:'已取消'},formatter: Table.api.formatter.status},
                         {field: 'create_user', title: __('创建人')},
                         {field: 'create_time', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime},
                         {field: 'check_user', title: __('审批人')},
@@ -68,13 +69,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                                 name: 'pay',
                                 text: __('付款'),
                                 title: __('付款'),
-                                classname: 'btn btn-xs btn-danger btn-ajax',
+                                classname: 'btn btn-xs btn-danger btn-dialog',
                                 url: 'finance/pay_order/pay',
-                                extend: 'data-area = \'["100%","100%"]\'',
-                                confirm: '确定要付款吗',
-                                success: function (data, ret) {
-                                    table.bootstrapTable('refresh');
-                                },
+                                extend: 'data-area = \'["50%","40%"]\'',
+                                // confirm: '确定要付款吗',       
                                 callback: function (data) {
                                 },
                                 visible: function (row) {
@@ -150,8 +148,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                             },
                             {
                                 name: 'upload',
-                                text: '上传发票',
-                                title: __('上传发票'),
+                                text: '上传付款凭证',
+                                title: __('上传付款凭证'),
                                 classname: 'btn btn-xs btn-success btn-dialog',
                                 icon: 'fa fa-pencil',
                                 url: 'finance/pay_order/upload',
@@ -170,7 +168,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                                     }
                                 }
                             },
-                                ],
+                            {
+                                name: 'print',
+                                text: '打印',
+                                title: __('打印'),
+                                classname: 'btn btn-xs btn-warning btn-addtabs',
+                                icon: 'fa fa-print',
+                                url: 'finance/pay_order/print',
+                            }
+                            ],
                             formatter: Table.api.formatter.operate
                         }
                     ]
@@ -188,6 +194,18 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                 }
                 )
             })
+
+            //打印
+            // $('.print').click(function () {
+            //     var ids = Table.api.selectedids(table);
+            //     console.log(ids);
+            //     if (ids.length <= 0) {
+            //         Layer.alert('请先选择单据！！');
+            //         return false;
+            //     }
+            //     window.open(Config.moduleurl + '/finance/pay_order/print?ids=' + ids.join(','), '_blank');
+            // })
+
             // 为表格绑定事件
             Table.api.bindevent(table);
         },
@@ -223,13 +241,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
             });
             Controller.api.bindevent();
         },
+        pay: function(){
+            Controller.api.bindevent();
+        },
         detail: function () {
             var index = 0;
             $(document).on('click', '#imgs', function(){
                 var src = this.src; //图片地址
                 index = layer.open({
                     type: 1, //open的类型 1为页面层
-                    title:'发票',
+                    title:'付款凭证',
                     shadeClose: true,  //点击遮罩关闭
                     shade: "background-color: #000", //遮罩的颜色以及透明度(与官网不同)
                     content: '<div id="layui-layer-photos" style="width: 100%;"><img src="'+src+'" style="width: 100%;"/></div>' 

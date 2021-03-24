@@ -241,7 +241,7 @@ class Voogueme extends Model
     //获取某一段时间内的复购用户数
     public function get_again_user1($createat){
 
-        $where['created_at'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
+        $where['payment_time'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
         $where['customer_id'] = ['>',0];
         $map_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
         $where['order_type'] = 1;
@@ -269,9 +269,7 @@ class Voogueme extends Model
                     unset($new_arr[$k]);
                 }
             }
-
-            // $wheres['created_at'] = ['not between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
-            $wheres['created_at'] = ['<', $createat[0].' '.$createat[1]];
+            $wheres['payment_time'] = ['<', $createat[0].' '.$createat[1]];
             foreach ($new_arr as $key=>$val){
                 //判断之前是否有这些订单
                 $another_order = $this->model->where('customer_id',$key)->where($map_where)->where($wheres)->value('customer_id');
@@ -284,8 +282,8 @@ class Voogueme extends Model
     }
     //获取某一段时间内的复购用户数 new
     public function get_again_user($createat){
-        $map_where['created_at'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
-        $order_where['created_at'] = ['lt',$createat[0]];
+        $map_where['payment_time'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
+        $order_where['payment_time'] = ['lt',$createat[0]];
 
         $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
         $map['order_type'] = 1;
@@ -330,8 +328,8 @@ class Voogueme extends Model
             $createat = $start .' 00:00:00 - ' .$end;
         }
         $createat = explode(' ', $createat);
-        $map_where['o.created_at'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
-        $order_where['o.created_at'] = ['lt',$createat[0]];
+        $map_where['o.payment_time'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
+        $order_where['o.payment_time'] = ['lt',$createat[0]];
 
         $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
         $map['o.order_type'] = 1;
@@ -604,11 +602,11 @@ class Voogueme extends Model
         }
         if($time_str){
             $createat = explode(' ', $time_str);
-            $map['created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
+            $map['payment_time'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
         }else{
             $start = date('Y-m-d', strtotime('-6 day'));
             $end   = date('Y-m-d 23:59:59');
-            $map['created_at'] = ['between', [$start, $end]];
+            $map['payment_time'] = ['between', [$start, $end]];
         }
         $arr['order_num'] = $this->model->where($map_where)->where($arr_where)->where($map)->count();
         $order_num = $this->model->where($map_where)->where($map)->count();
@@ -648,11 +646,11 @@ class Voogueme extends Model
         }
         if($time_str){
             $createat = explode(' ', $time_str);
-            $map['created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
+            $map['payment_time'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
         }else{
             $start = date('Y-m-d', strtotime('-6 day'));
             $end   = date('Y-m-d 23:59:59');
-            $map['created_at'] = ['between', [$start, $end]];
+            $map['payment_time'] = ['between', [$start, $end]];
         }
         $arr['order_num'] = $this->model->where($map_where)->where($arr_where)->where($map)->count();
         $order_num = $this->model->where($map_where)->where($map)->count();
@@ -1177,7 +1175,7 @@ class Voogueme extends Model
             $time_str = $start . ' - '. $end;
         }
         $createat = explode(' ', $time_str);
-        $order_where['o.created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
+        $order_where['o.payment_time'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
         $order_where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
         $order_where['oa.address_type'] = 'shipping';
         $order_where['o.order_type'] = 1;

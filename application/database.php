@@ -314,4 +314,49 @@ return [
         'charset'     => Env::get('db_wesee_temp.charset'),
         'prefix'      => Env::get('db_wesee_temp.prefix'),
     ],
+    'db_zeelool_es_online' => [
+        // 数据库类型
+        'type'        => Env::get('db_zeelool_es_online.type'),
+        // 服务器地址
+        'hostname'    => Env::get('db_zeelool_es_online.hostname'),
+        // 数据库名
+        'database'    => Env::get('db_zeelool_es_online.database'),
+        // 数据库用户名
+        'username'    => Env::get('db_zeelool_es_online.username'),
+        // 密码
+        'password'    => Env::get('db_zeelool_es_online.password'),
+        // 数据库编码默认采用utf8
+        'charset'     => Env::get('db_zeelool_es_online.charset'),
+        'prefix'      => Env::get('db_zeelool_es_online.prefix'),
+    ],
+    'db_zeelool_de_online' => [
+        // 数据库类型
+        'type'        => Env::get('db_zeelool_de_online.type'),
+        // 服务器地址
+        'hostname'    => Env::get('db_zeelool_de_online.hostname'),
+        // 数据库名
+        'database'    => Env::get('db_zeelool_de_online.database'),
+        // 数据库用户名
+        'username'    => Env::get('db_zeelool_de_online.username'),
+        // 密码
+        'password'    => Env::get('db_zeelool_de_online.password'),
+        // 数据库编码默认采用utf8
+        'charset'     => Env::get('db_zeelool_de_online.charset'),
+        'prefix'      => Env::get('db_zeelool_de_online.prefix'),
+    ],
+    'db_zeelool_jp_online' => [
+        // 数据库类型
+        'type'        => Env::get('db_zeelool_jp_online.type'),
+        // 服务器地址
+        'hostname'    => Env::get('db_zeelool_jp_online.hostname'),
+        // 数据库名
+        'database'    => Env::get('db_zeelool_jp_online.database'),
+        // 数据库用户名
+        'username'    => Env::get('db_zeelool_jp_online.username'),
+        // 密码
+        'password'    => Env::get('db_zeelool_jp_online.password'),
+        // 数据库编码默认采用utf8
+        'charset'     => Env::get('db_zeelool_jp_online.charset'),
+        'prefix'      => Env::get('db_zeelool_jp_online.prefix'),
+    ],
 ];

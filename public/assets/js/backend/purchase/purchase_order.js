@@ -237,7 +237,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
-                                        if (row.can_create_pay == 1 && row.purchase_status == 2  && row.pay_type !=3 && row.id > 16475) {
+                                        // && row.id > 16475
+                                        if (row.can_create_pay == 1 && row.purchase_status == 2  && row.pay_type !=3 ) {
                                             return true;
                                         } else {
                                             return false;
@@ -373,19 +374,29 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
             })
 
 
+            //批量创建付款申请单
+            $(document).on('click', ".btn-pay-order", function () {
+                var ids = Table.api.selectedids(table);
+                if (ids.length <= 0) {
+                    Toastr.error('至少选择一个采购单');
+                    return false;
+                }
+                layer.load();
+                var url = 'financepurchase/purchase_pay/is_conditions';
+                Backend.api.ajax({
+                    url: url,
+                    data: {
+                        'ids':ids
+                    }
+                }, function (data, ret) {
+                    var url = 'financepurchase/purchase_pay/batch_add?ids=' + ids;
+                    Fast.api.open(url, __('创建付款申请单'), {area: ['900px', '500px']});
+                });
 
-            // // 导入按钮事件
-            // Upload.api.plupload($('.btn-import'), function (data, ret) {
-            //     Fast.api.ajax({
-            //         url: 'purchase/purchase_order/logistics_info_import',
-            //         data: { file: data.url },
-            //     }, function (data, ret) {
-            //         layer.msg('导入成功！！', { time: 3000, icon: 6 }, function () {
-            //             location.reload();
-            //         });
 
-            //     });
-            // });
+               
+                return false;
+            });
         },
         add: function () {
             Controller.api.bindevent();
@@ -438,13 +449,25 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
             })
             $(document).on('change','#factory_type',function (){
                 var fac_val = $('#factory_type').val();
-                console.log(fac_val)
                 if (fac_val ==0){
                     $('#is_first').show();
+                    $('#time').show();
+                    $('#is_first_purchase').show();
+                    $('#1688_number').hide();
                     $('#customized_procurement').show();
                 }else{
                     $('#is_first').hide();
+                    $('#time').hide();
+                    $('#1688_number').show();
                     $('#customized_procurement').hide();
+                }
+            });
+            $(document).on('change','#pay_type',function (){
+                var pay_type = $('#pay_type').val();
+                if (pay_type ==1){
+                    $('#pay_rate').show();
+                }else{
+                    $('#pay_rate').hide();
                 }
             })
 
@@ -611,19 +634,21 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 $(this).parent().remove();
                 z--;
             })
-
             $(document).on('change','#factory_type',function (){
                 var fac_val = $('#factory_type').val();
-                console.log(fac_val)
                 if (fac_val ==0){
                     $('#is_first').show();
+                    $('#is_first_purchase').show();
+                    $('#1688_number').hide();
+                    $('#time').show();
                     $('#customized_procurement').show();
                 }else{
                     $('#is_first').hide();
+                    $('#1688_number').show();
+                    $('#time').hide();
                     $('#customized_procurement').hide();
                 }
-            })
-
+            });
             $(document).on('click', '.btn-addplus', function () {
                 // var content = $('#arrival-content').html();
                 // $('#arrival_div').append(content);

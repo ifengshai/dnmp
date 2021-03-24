@@ -76,6 +76,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                                 10: 'zeelool_es',
                                 11: 'zeelool_jp',
                                 12: 'voogmechic',
+                                13: 'zeelool_cn',
+                                14: 'alibaba',
                             },
                             formatter: Table.api.formatter.status
                         },
@@ -1006,6 +1008,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                     $('#table-content .c-price').attr('value',price_copy_value);
                     var content = $('#table-content table tbody').html();
                     $('.caigou table tbody').append(content);
+                    $('#table-content .c-name').attr('value','');
+                    $('#table-content .c-price').attr('value','');
                     $(".selectpicker").selectpicker('refresh');
                 });
                 $(document).on('click', '.btn-del', function () {
@@ -1117,6 +1121,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                         var resultData = ret.data;
                         if (resultData != false) {
                             $('.ajax-add').remove();
+                            $('#table-content').remove();
                             $('.upload-photo').remove();
                             $('#item-stock').after(resultData);
                             Form.api.bindevent($("form[role=form]"));

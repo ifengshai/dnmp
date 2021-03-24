@@ -75,8 +75,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
             table.bootstrapTable({
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
                 pk: 'id',
-                sortName: 'a.sku',
-                sortOrder: 'asc',
+                sortName: 'a.created_at',
+                sortOrder: 'desc',
                 columns: [
                     [
                         { checkbox: true },
@@ -105,16 +105,18 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                         {
                             field: 'site', title: __('站点'), addClass: 'selectpicker', data: 'multiple',
                             searchList: {
-                                1 : 'Zeelool',
-                                2 : 'Voogueme',
-                                3 : 'Nihao',
-                                4 : 'Meeloog',
-                                5 : 'Wesee',
-                                8 : 'Amazon',
-                                9 : 'Zeelool_es',
-                                10 : 'Zeelool_de',
-                                11 : 'Zeelool_jp',
-                                12 : 'Voogmechic',
+                                1: 'Zeelool',
+                                2: 'Voogueme',
+                                3: 'Nihao',
+                                4: 'Meeloog',
+                                5: 'Wesee',
+                                8: 'Amazon',
+                                9: 'Zeelool_es',
+                                10: 'Zeelool_de',
+                                11: 'Zeelool_jp',
+                                12: 'Voogueme_acc',
+                                13: 'Zeelool_cn',
+                                14: 'Alibaba',
                             }, operate: 'IN',
                             formatter: Table.api.formatter.status
                         },

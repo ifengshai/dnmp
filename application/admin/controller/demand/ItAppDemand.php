@@ -79,10 +79,28 @@ class ItAppDemand extends Backend
     }
 
     /**
-     * 编辑
+     * 查看
      */
     public function edit($ids = null)
     {
+        $row = $this->model->get($ids);
+        $row = $row->toArray();
+        $row['site_type_arr'] = explode(',', $row['site_type']);
+        $row['copy_to_user_id_arr'] = explode(',', $row['copy_to_user_id']);
+        $row['important_reasons'] = explode(',', $row['important_reasons']);
+        $this->view->assign('demand_type', input('demand_type'));
+        $this->view->assign("type", input('type'));
+        $this->view->assign("row", $row);
+        //确认权限
+        $this->view->assign('pm_status', $this->auth->check('demand/it_web_demand/pm_status'));
+        $this->view->assign('admin_id', session('admin.id'));
+        return $this->view->fetch();
+    }
+
+    /**
+     * 编辑操作
+     */
+    public function edit_operation(){
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
@@ -126,18 +144,6 @@ class ItAppDemand extends Backend
                 $this->error('操作失败');
             }
         }
-        $row = $this->model->get($ids);
-        $row = $row->toArray();
-        $row['site_type_arr'] = explode(',', $row['site_type']);
-        $row['copy_to_user_id_arr'] = explode(',', $row['copy_to_user_id']);
-        $row['important_reasons'] = explode(',', $row['important_reasons']);
-        $this->view->assign('demand_type', input('demand_type'));
-        $this->view->assign("type", input('type'));
-        $this->view->assign("row", $row);
-        //确认权限
-        $this->view->assign('pm_status', $this->auth->check('demand/it_web_demand/pm_status'));
-        $this->view->assign('admin_id', session('admin.id'));
-        return $this->view->fetch();
     }
 
     /**

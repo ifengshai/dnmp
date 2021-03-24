@@ -568,6 +568,12 @@ class NewProductReplenishOrder extends Backend
                     case 12:
                         $website_type = 'Voogmehic';
                         break;
+                    case 12:
+                        $website_type = 'Zeelool_cn';
+                        break;
+                    case 12:
+                        $website_type = 'Alibaba';
+                        break;
                 }
                 $list[$k]['num'] = $new_product_replenish_order;
                 $list[$k]['website_type'] = $website_type;
