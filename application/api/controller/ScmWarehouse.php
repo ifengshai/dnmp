@@ -2785,10 +2785,15 @@ class ScmWarehouse extends Scm
                     Log::write("输出误差数");
                     Log::write($v['error_qty']);
                     if ($v['error_qty'] > 0) {
+
+                        $other_message_one =  $this->_product_bar_code_item
+                            ->where(['location_code' => $v['library_name'], 'location_id' => $v['area_id'], 'sku' => $v['sku'], 'out_stock_id' => 0])
+                            ->where("item_order_number=''")
+                            ->count();
                         //生成入库单
                         $info[$k]['sku'] = $v['sku'];
 //                        $info[$k]['in_stock_num'] = abs($v['error_qty']);
-                        $info[$k]['in_stock_num'] = count($codes);
+                        $info[$k]['in_stock_num'] = count($codes) - $other_message_one ;
                         $info[$k]['no_stock_num'] = abs($v['error_qty']);
                         Log::write("===入库单内容==");
                         Log::write($info);
