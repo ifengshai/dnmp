@@ -2800,7 +2800,7 @@ class ScmWarehouse extends Scm
                         Log::write($codes);
                         if ($other_message >0){
                             $list[$k]['sku'] = $v['sku'];
-                            $list[$k]['out_stock_num'] = $v['error_qty'];
+                            $list[$k]['out_stock_num'] = $other_message;
                         }
                         Log::write("输出出库单信息");
                         Log::write($list);
