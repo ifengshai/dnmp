@@ -3138,13 +3138,17 @@ class ScmWarehouse extends Scm
         Log::write($item_sku);
 
         $codes = array_column($item_sku, 'call_out_site');
+        $call_in_site_id = array_column($item_sku, 'call_in_site_id');
         Log::write($codes);
         if (!empty($codes)){
+            $call_in_site_coding =     $this->_store_house->where(['id' => ['in',$call_in_site_id]])->column('coding');
+            $vat = array_merge($codes,$call_in_site_coding);
+            Log::write("输出001");
+            Log::write($call_in_site_coding);
+            Log::write($vat);
             $count = $this->_inventory->alias('a')
-                ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'b.library_name' => ['in', $codes],'b.area_id' => '3'])
+                ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'b.library_name' => ['in', $vat],'b.area_id' => '3'])
                 ->count();
-            Log::write("是否进入");
-            Log::write($count);
             if ($count > 0) {
                     $this->error(__('此数据下对应库位正在盘点,暂无法进行出入库操作'), '', 525);
                 }
