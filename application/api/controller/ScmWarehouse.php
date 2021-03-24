@@ -2522,25 +2522,25 @@ class ScmWarehouse extends Scm
                     if (empty($sku_item)) {
                         throw new Exception('SKU=>' . $v['sku'] . '不存在');
                     }
-                    $sku_code = array_column($v['sku_agg'], 'code');
-                    $whecat['code'] = ['in', array_unique($sku_code)];
-                    Log::write("====输出信息=====");
-                    Log::write($v['library_name']);
-                    Log::write($v['area_id']);
-                    $whe['coding'] = $v['library_name'];
-                    $whe['area_id'] = $v['area_id'];
-
-                    $code_id = Db::table('fa_store_house')->where($whe)->value('id');
-                    Log::write("===========输出code=============");
-                    Log::write($code_id);
-                    if (!empty($code_id)){
-                        $save_value['location_code'] = $v['library_name'];
-                        $save_value['location_id'] = $v['area_id'];
-                        $save_value['location_code_id'] = $code_id;
-                        Log::write($save_value);
-                        Log::write("===输出where条件==");
-                        Db::table('fa_product_barcode_item')->where($whecat)->update($save_value);
-                    }
+//                    $sku_code = array_column($v['sku_agg'], 'code');
+//                    $whecat['code'] = ['in', array_unique($sku_code)];
+//                    Log::write("====输出信息=====");
+//                    Log::write($v['library_name']);
+//                    Log::write($v['area_id']);
+//                    $whe['coding'] = $v['library_name'];
+//                    $whe['area_id'] = $v['area_id'];
+//
+//                    $code_id = Db::table('fa_store_house')->where($whe)->value('id');
+//                    Log::write("===========输出code=============");
+//                    Log::write($code_id);
+//                    if (!empty($code_id)){
+//                        $save_value['location_code'] = $v['library_name'];
+//                        $save_value['location_id'] = $v['area_id'];
+//                        $save_value['location_code_id'] = $code_id;
+//                        Log::write($save_value);
+//                        Log::write("===输出where条件==");
+//                        Db::table('fa_product_barcode_item')->where($whecat)->update($save_value);
+//                    }
                     //等PDA改为 以此为准
                     $item_list = $this->_inventory_item->where(['inventory_id' => $inventory_id, 'sku' => $v['sku'], 'area_id' => $v['area_id'], 'library_name' => $v['library_name']])->find();
                     $save_data = [];
