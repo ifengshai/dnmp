@@ -1458,7 +1458,7 @@ class OrderData extends Backend
                 $arr['order_prescription_type'] = 3;
             }
         }
-        
+
         //默认如果不是仅镜架 或定制片 则为现货处方镜
         if ($arr['order_prescription_type'] != 1 && $arr['order_prescription_type'] != 3) {
             $arr['order_prescription_type'] = 2;
@@ -1581,6 +1581,88 @@ class OrderData extends Backend
         return $sku;
     }
 
+
+    #######################################生成波次单################################################
+    /**
+     * 创建波次单
+     *
+     * @Description
+     * @author wpl
+     * @since 2021/03/23 17:47:29 
+     * @return void
+     */
+    public function create_wave_order()
+    {
+        /**
+         * 
+         * 生成规则
+
+         * 1）按业务模式：品牌独立站、第三方平台店铺
+
+         * 2）按时间段
+
+         * 第一波次：00:00-2:59:59
+
+         * 第二波次：3：00-5:59:59
+
+         * 第三波次：6:00-8:59:59
+
+         * 第四波次：9:00-11:59:59
+
+         * 第五波次：12:00-14:59:59
+
+         * 第六波次：15:00-17:59:59
+
+         * 第七波次：18:00-20:59:59
+
+         * 第八波次：21:00-23:59:59
+         *
+         */
+        //查询今天的订单
+        $where['a.created_at'] = ['between', [strtotime(date('Y-m-d 00:00:00')), strtotime(date('Y-m-d 23:59:59'))]];
+        $where['b.wave_order_id'] = 0;
+        $list = $this->order->where($where)->alias('a')->field('b.id,b.sku,a.created_at,entity_id,a.site')
+            ->join(['fa_order_tiem_process' => 'b'], 'a.entity_id=b.magento_order_id and a.site=b.site')
+            ->select();
+        $list = collection($list)->toArray();
+        //第三方站点id
+        $third_site = [13, 14];
+        $waveorder = new \app\admin\model\order\order\WaveOrder();
+        foreach ($list as $k => $v) {
+            //判断波次类型
+            $type = 0;
+            if (in_array($v['site'], $third_site)) {
+                $type = 2;
+            } else {
+                $type = 1;
+            }
+            //判断波次时间段
+            if (strtotime(date('Y-m-d 00:00:00')) <= $v['createtime'] and $v['createtime'] <= strtotime(date('Y-m-d 02:59:59'))) {
+                $wave_time_type = 1;
+            } elseif (strtotime(date('Y-m-d 03:00:00')) <= $v['createtime'] and $v['createtime'] <= strtotime(date('Y-m-d 05:59:59'))) {
+                $wave_time_type = 2;
+            } elseif (strtotime(date('Y-m-d 06:00:00')) <= $v['createtime'] and $v['createtime'] <= strtotime(date('Y-m-d 08:59:59'))) {
+                $wave_time_type = 3;
+            } elseif (strtotime(date('Y-m-d 09:00:00')) <= $v['createtime'] and $v['createtime'] <= strtotime(date('Y-m-d 11:59:59'))) {
+                $wave_time_type = 4;
+            } elseif (strtotime(date('Y-m-d 12:00:00')) <= $v['createtime'] and $v['createtime'] <= strtotime(date('Y-m-d 14:59:59'))) {
+                $wave_time_type = 5;
+            } elseif (strtotime(date('Y-m-d 15:00:00')) <= $v['createtime'] and $v['createtime'] <= strtotime(date('Y-m-d 17:59:59'))) {
+                $wave_time_type = 6;
+            } elseif (strtotime(date('Y-m-d 18:00:00')) <= $v['createtime'] and $v['createtime'] <= strtotime(date('Y-m-d 20:59:59'))) {
+                $wave_time_type = 7;
+            } elseif (strtotime(date('Y-m-d 21:00:00')) <= $v['createtime'] and $v['createtime'] <= strtotime(date('Y-m-d 23:59:59'))) {
+                $wave_time_type = 8;
+            }
+            
+
+
+
+            $waveorder->where(['type' => $type])
+        }
+    }
+
+    ########################################end##############################################
 
 
     ################################################处理旧数据脚本##########################################################################

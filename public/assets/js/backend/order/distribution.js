@@ -64,7 +64,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                 searchFormVisible: true,
                 pageList: [10, 25, 50, 100, 300],
                 extend: {
-                    index_url: 'order/distribution/index' + location.search + '&label=' + Config.label,
+                    index_url: 'order/distribution/index' + location.search + (location.search ? '&label=' + Config.label : '?label=' + Config.label),
                     table: 'distribution'
                 }
             });
@@ -477,6 +477,145 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                     }
                 );
             });
+        },
+        wave_order_list: function () {
+            // 初始化表格参数配置
+            Table.api.init({
+                showJumpto: true,
+                searchFormVisible: true,
+                pageList: [10, 25, 50, 100, 300],
+                extend: {
+                    index_url: 'order/distribution/wave_order_list' + location.search,
+                    table: 'distribution'
+                }
+            });
+
+            var table = $("#table");
+
+            // 初始化表格
+            table.bootstrapTable({
+                url: $.fn.bootstrapTable.defaults.extend.index_url,
+                pk: 'id',
+                sortName: 'createtime',
+                sortOrder: 'desc',
+                columns: [
+                    [
+                        { checkbox: true },
+                        {
+                            field: '', title: __('序号'), operate: false,
+                            formatter: function (value, row, index) {
+                                return index + 1;
+                            }
+                        },
+                        { field: 'wave_order_number', title: __('波次单号'), operate: 'LIKE' },
+                        { field: 'wave_time', title: __('波次'), operate: false },
+                        {
+                            field: 'type', title: __('类型'), addClass: 'selectpicker',
+                            searchList: {
+                                1: '品牌独立站',
+                                2: '第三方平台店铺'
+                            },
+                            formatter: Table.api.formatter.status
+                        },
+                        {
+                            field: 'status', title: __('打印状态'), addClass: 'selectpicker', 
+                            custom: { 0: 'gray', 1: 'green', 2: 'green' },
+                            searchList: { 0: '未打印', 1: '部分打印', 2: '已打印' },
+                            formatter: Table.api.formatter.status
+                        },
+                       
+                        { field: 'createtime', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange' },
+                        // { field: 'created_at', title: __('创建时间'), operate: false },
+
+                        {
+                            field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate,
+                            buttons: [
+                               
+                                {
+                                    name: 'detail',
+                                    text: '操作记录',
+                                    title: __('操作记录'),
+                                    classname: 'btn btn-xs btn-primary btn-dialog',
+                                    icon: 'fa fa-list',
+                                    url: 'order/distribution/operation_log',
+                                    extend: 'data-area = \'["60%","50%"]\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        return true;
+                                    }
+                                }
+                            ], formatter: Table.api.formatter.operate
+                        }
+                    ]
+                ]
+            });
+
+            // 为表格绑定事件
+            Table.api.bindevent(table);
+
+
+            //批量导出xls
+            $('.btn-batch-export-xls').click(function () {
+                var ids = Table.api.selectedids(table);
+                var params = '';
+                if (ids.length > 0) {
+                    params = 'ids=' + ids;
+                } else {
+                    var options = table.bootstrapTable('getOptions');
+                    var search = options.queryParams({});
+                    var filter = search.filter;
+                    var op = search.op;
+                    params = 'filter=' + filter + '&op=' + op + '&label=' + Config.label;
+                }
+                window.open(Config.moduleurl + '/order/distribution/batch_export_xls?' + params, '_blank');
+            });
+
+            //批量导出xls
+            $('.btn-batch-export-xlsz').click(function () {
+                var ids = Table.api.selectedids(table);
+                var params = '';
+                if (ids.length > 0) {
+                    params = 'ids=' + ids;
+                } else {
+                    var options = table.bootstrapTable('getOptions');
+                    var search = options.queryParams({});
+                    var filter = search.filter;
+                    var op = search.op;
+                    params = 'filter=' + filter + '&op=' + op + '&label=' + Config.label;
+                }
+                window.open(Config.moduleurl + '/order/distribution/printing_batch_export_xls?' + params, '_blank');
+            });
+
+            //批量打印
+            $('.btn-batch-printed').click(function () {
+                var ids = Table.api.selectedids(table);
+                window.open(Config.moduleurl + '/order/distribution/batch_print_label/ids/' + ids, '_blank');
+            });
+
+            //批量标记已打印
+            $('.btn-tag-printed').click(function () {
+                var ids = Table.api.selectedids(table);
+                Layer.confirm(
+                    __('确定要标记这%s条记录已打印吗?', ids.length),
+                    { icon: 3, title: __('Warning'), shadeClose: true },
+                    function (index) {
+                        Layer.close(index);
+                        Backend.api.ajax({
+                            url: Config.moduleurl + '/order/distribution/tag_printed',
+                            data: { id_params: ids },
+                            type: 'post'
+                        }, function (data, ret) {
+                            if (data == 'success') {
+                                table.bootstrapTable('refresh');
+                            }
+                        });
+                    }
+                );
+            });
+
         },
         handle_abnormal: function () {
             Controller.api.bindevent();

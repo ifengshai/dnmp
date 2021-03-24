@@ -165,6 +165,7 @@ class Distribution extends Backend
         $this->_outstock = new Outstock();
         $this->_outstock_item = new OutStockItem();
         $this->_inventory = new Inventory();
+        $this->_wave_order = new \app\admin\model\order\order\WaveOrder();
     }
 
     /**
@@ -381,7 +382,7 @@ class Distribution extends Backend
                     ];
                 }
             }
-            
+
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             if ($sort_flag == 1) {
                 $sort = 'a.sku';
@@ -417,8 +418,8 @@ class Distribution extends Backend
                 $list[$key]['label'] = $label;
                 //订单副数，去除掉取消的子单
                 $list[$key]['total_qty_ordered'] = $this->model
-                ->where(['order_id' => $list[$key]['order_id'], 'distribution_status' => ['neq', 0]])
-                ->count();
+                    ->where(['order_id' => $list[$key]['order_id'], 'distribution_status' => ['neq', 0]])
+                    ->count();
                 //待打印标签时间
                 if ($label == 2) {
                     $list[$key]['created_at'] = Db::table('fa_distribution_log')->where('item_process_id', $item['id'])->where('distribution_node', 1)->value('create_time');
@@ -526,6 +527,50 @@ class Distribution extends Backend
 
         return $this->view->fetch();
     }
+
+    /**
+     * 波次单列表
+     *
+     * @Description
+     * @author wpl
+     * @since 2021/03/23 15:48:02 
+     * @return void
+     */
+    public function wave_order_list()
+    {
+        $label = $this->request->get('label', 0);
+        //设置过滤方法
+        $this->request->filter(['strip_tags']);
+        if ($this->request->isAjax()) {
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
+            }
+
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $total = $this->_wave_order
+                ->where($where)
+                ->count();
+
+            $list = $this->_wave_order
+                ->where($where)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();
+            $list = collection($list)->toArray();
+
+            $result = array("total" => $total, "rows" => $list);
+            return json($result);
+        }
+        $this->assign('label', $label);
+        $this->assignconfig('label', $label);
+
+        $label_list = ['全部', '待打印标签', '待配货', '待配镜片', '待加工', '待印logo', '待成品质检', '待合单', '跟单'];
+        $this->assign('label_list', $label_list);
+
+        return $this->view->fetch();
+    }
+
 
 
     public function csv_array()
@@ -1670,7 +1715,7 @@ class Distribution extends Backend
             $this->error(__('存在正在盘点的单据,暂无法审核'));
         }
         /****************************end*****************************************/
-        
+
         //禁用默认模板
         $this->view->engine->layout(false);
         ob_start();
@@ -1687,7 +1732,7 @@ class Distribution extends Backend
             ->select();
         $list = collection($list)->toArray();
         $order_ids = array_column($list, 'order_id');
-        
+
         //查询sku映射表
         // $item_res = $this->_item_platform_sku->cache(3600)->where(['platform_sku' => ['in', array_unique($sku_arr)]])->column('sku', 'platform_sku');
 
@@ -3617,9 +3662,10 @@ class Distribution extends Backend
 
 
     //导出配镜片记录数据
-    public function with_the_lens(){
-        $where['a.order_prescription_type'] = ['in',[2,3]];
-        $where['a.created_at'] = ['between',['1612108800','1612195199']];
+    public function with_the_lens()
+    {
+        $where['a.order_prescription_type'] = ['in', [2, 3]];
+        $where['a.created_at'] = ['between', ['1612108800', '1612195199']];
         $total = $this->model
             ->alias('a')
             ->join(['fa_order' => 'b'], 'a.order_id=b.id')
@@ -3629,13 +3675,13 @@ class Distribution extends Backend
             ->order('a.created_at desc')
             ->select();
         $total = collection($total)->toArray();
-        foreach ($total as $key=>$item){
-                $data = (new DistributionLog())
+        foreach ($total as $key => $item) {
+            $data = (new DistributionLog())
                 ->where(['item_process_id' => $item['id']])
                 ->where(['remark' => '配镜片完成'])
-                    ->field('create_person,create_time')
+                ->field('create_person,create_time')
                 ->select();
-            if (!empty($data)){
+            if (!empty($data)) {
                 $total[$key]['mesage'] = collection($data)->toArray();
             }
         }
@@ -3651,14 +3697,14 @@ class Distribution extends Backend
             ->setCellValue("H1", "站点")
             ->setCellValue("I1", "仓库审单时间");
         foreach ($total as $key => $value) {
-            if ($value['order_prescription_type'] ==2){
+            if ($value['order_prescription_type'] == 2) {
                 $value['order_prescription_type'] = '现货处方镜';
-            }else{
+            } else {
                 $value['order_prescription_type'] = '定制处方镜';
             }
-            $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), date('Y-m-d H:i:s',$value['created_at']));//子单创建时间
-            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['item_order_number']);//子单号
-            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['order_prescription_type']);//处方类型
+            $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), date('Y-m-d H:i:s', $value['created_at'])); //子单创建时间
+            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['item_order_number']); //子单号
+            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['order_prescription_type']); //处方类型
             switch ($value['distribution_status']) {
                 case 0:
                     $value['distribution_status'] = '取消';
@@ -3720,24 +3766,22 @@ class Distribution extends Backend
                     $value['site'] = 'voogmechic';
                     break;
             }
-            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2),$value['distribution_status']);
+            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['distribution_status']);
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), '配镜片完成');
 
-            if (!empty($value['mesage'])){
-                foreach ($value['mesage'] as $k=>$v){
-                    $bt[]= $v['create_person'].','.date('Y-m-d H:i:s', $v['create_time']);
+            if (!empty($value['mesage'])) {
+                foreach ($value['mesage'] as $k => $v) {
+                    $bt[] = $v['create_person'] . ',' . date('Y-m-d H:i:s', $v['create_time']);
                 }
-                $bt = implode(';',$bt);
-            }else{
+                $bt = implode(';', $bt);
+            } else {
                 $bt = '暂无数据';
             }
             $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $bt);
             unset($bt);
             $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['increment_id']);
             $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['site']);
-            $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2),  date('Y-m-d H:i:s',$value['check_time']));
-
-
+            $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2),  date('Y-m-d H:i:s', $value['check_time']));
         }
         //设置宽度
         $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(20);
