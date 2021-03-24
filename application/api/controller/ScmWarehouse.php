@@ -2800,7 +2800,7 @@ class ScmWarehouse extends Scm
                         Log::write("===入库单内容==");
                         Log::write($info);
                         $other_message =  $this->_product_bar_code_item
-                            ->where(['code' => ['not in', $codes], 'location_code' => $v['library_name'], 'location_id' => $v['area_id'], 'sku' => $v['sku']])
+                            ->where(['code' => ['not in', $codes], 'location_code' => $v['library_name'], 'location_id' => $v['area_id'],'library_status'=>1, 'sku' => $v['sku']])
                             ->where("item_order_number=''")
                             ->count();
                         Log::write("===输出条数==");
