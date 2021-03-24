@@ -2027,7 +2027,7 @@ class WorkOrderList extends Model
                 //子单取消处理完成后要判断订单中剩余子订单是否都是合单中状态
                 if (18 == $measure_choose_id) {
                     $item_order_number = $_work_order_measure->where('id',$measure_id)->value('item_order_number');
-                    $this->other_item_order_auto($work->platform_order,$item_order_number);
+                    $this->other_item_order_auto($work->platform_order,$item_order_number,$work_id);
                 }
             }
             
@@ -2657,13 +2657,24 @@ class WorkOrderList extends Model
     }
 
 
-    public function other_item_order_auto($increment_id,$item_order_number){
+    public function other_item_order_auto($increment_id,$item_order_number,$work_id){
         $_new_order_process = new NewOrderProcess();
         $_new_order_item_process = new NewOrderItemProcess();
         $_stock_house = new StockHouse();
+        //措施表
+        $_work_order_measure = new WorkOrderMeasure();
+        //除当前子单外的子单取消是否完成
+        $map = [];
+        $measure_item_order_number = $_work_order_measure->where(['work_id'=>$work_id,'measure_choose_id'=>18])->column('item_order_number');
+        $count = $_work_order_measure->where(['work_id'=>$work_id,'measure_choose_id'=>18])->count('item_order_number');
+        $count_s = $_work_order_measure->where(['work_id'=>$work_id,'operation_type'=>1,'measure_choose_id'=>18])->count('item_order_number');
+        if ($count == $count_s+1) {//最后一个子单取消完成
+            $map['b.item_order_number'] = ['not in', $measure_item_order_number];
+        }
         $all_item_order_number = $_new_order_process->alias('a')//所有子单
             ->where('a.increment_id', $increment_id)
             ->where(['b.distribution_status' => ['neq', 0]])
+            ->where($map)
             ->join(['fa_order_item_process' => 'b'], 'a.order_id=b.order_id')
             ->column('b.item_order_number');
         $item_order_number_diff = array_diff($all_item_order_number,[$item_order_number]);//其余子单
