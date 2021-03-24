@@ -2818,7 +2818,6 @@ class ScmWarehouse extends Scm
 
                         //查询库位id
                         $store_id = $this->_store_house->where(['area_id' => $v['area_id'], 'coding' => $v['library_name'], 'status' => 1])->value('id');
-
                         $this->_product_bar_code_item
                             ->where(['code' => ['in', $codes]])
                             ->update(['inventory_id' => $inventory_id, 'library_status' => 1, 'location_code' => $v['library_name'], 'location_id' => $v['area_id'], 'location_code_id' => $store_id]);
@@ -2828,8 +2827,12 @@ class ScmWarehouse extends Scm
                             ->update(['library_status' => 2, 'inventory_id' => $inventory_id]);
 
                     } elseif ($v['error_qty'] < 0) {
+                        $other_message =  $this->_product_bar_code_item
+                            ->where(['code' => ['not in', $codes], 'location_code' => $v['library_name'], 'location_id' => $v['area_id'],'library_status'=>1, 'sku' => $v['sku']])
+                            ->where("item_order_number=''")
+                            ->count();
                         $list[$k]['sku'] = $v['sku'];
-                        $list[$k]['out_stock_num'] = abs($v['error_qty']);
+                        $list[$k]['out_stock_num'] = $other_message;
                         //更新如果出库单id为空 添加出库单id
                         $this->_product_bar_code_item
                             ->where(['code' => ['not in', $codes], 'location_code' => $v['library_name'], 'location_id' => $v['area_id'], 'sku' => $v['sku']])
