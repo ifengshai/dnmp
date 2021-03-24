@@ -2800,7 +2800,7 @@ class ScmWarehouse extends Scm
                         Log::write("===入库单内容==");
                         Log::write($info);
                         $other_message =  $this->_product_bar_code_item
-                            ->where(['code' => ['not in', $codes], 'location_code' => $v['library_name'], 'location_id' => $v['area_id'], 'sku' => $v['sku'], 'out_stock_id' => 0])
+                            ->where(['code' => ['not in', $codes], 'location_code' => $v['library_name'], 'location_id' => $v['area_id'], 'sku' => $v['sku']])
                             ->where("item_order_number=''")
                             ->count();
                         Log::write("===输出条数==");
@@ -2823,7 +2823,7 @@ class ScmWarehouse extends Scm
                             ->where(['code' => ['in', $codes]])
                             ->update(['inventory_id' => $inventory_id, 'library_status' => 1, 'location_code' => $v['library_name'], 'location_id' => $v['area_id'], 'location_code_id' => $store_id]);
                         $this->_product_bar_code_item
-                            ->where(['code' => ['not in', $codes], 'location_code' => $v['library_name'], 'location_id' => $v['area_id'], 'sku' => $v['sku'], 'out_stock_id' => 0])
+                            ->where(['code' => ['not in', $codes], 'location_code' => $v['library_name'], 'location_id' => $v['area_id'], 'sku' => $v['sku']])
                             ->where("item_order_number=''")
                             ->update(['library_status' => 2, 'inventory_id' => $inventory_id]);
 
@@ -2832,7 +2832,7 @@ class ScmWarehouse extends Scm
                         $list[$k]['out_stock_num'] = abs($v['error_qty']);
                         //更新如果出库单id为空 添加出库单id
                         $this->_product_bar_code_item
-                            ->where(['code' => ['not in', $codes], 'location_code' => $v['library_name'], 'location_id' => $v['area_id'], 'sku' => $v['sku'], 'out_stock_id' => 0])
+                            ->where(['code' => ['not in', $codes], 'location_code' => $v['library_name'], 'location_id' => $v['area_id'], 'sku' => $v['sku']])
                             ->where("item_order_number=''")
                             ->update(['library_status' => 2, 'inventory_id' => $inventory_id]);
                     } else {
@@ -2847,7 +2847,7 @@ class ScmWarehouse extends Scm
                                 ->update(['inventory_id' => $inventory_id, 'library_status' => 1, 'location_code' => $v['library_name'], 'location_id' => $v['area_id'], 'location_code_id' => $store_id]);
 
                             $this->_product_bar_code_item
-                                ->where(['code' => ['not in', $codes], 'location_code' => $v['library_name'], 'location_id' => $v['area_id'], 'sku' => $v['sku'], 'out_stock_id' => 0])
+                                ->where(['code' => ['not in', $codes], 'location_code' => $v['library_name'], 'location_id' => $v['area_id'], 'sku' => $v['sku']])
                                 ->where("item_order_number=''")
                                 ->update(['library_status' => 2, 'inventory_id' => $inventory_id]);
 
