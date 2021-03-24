@@ -2813,7 +2813,7 @@ class Test4 extends Controller
 
     public function sku_code_review()
     {
-        $skus = ['E10005-2','E10009-2','E10019-1','E10045-1','E10055-1','E10060-1','E10061-1','E10061-2','E10085-1','E10087-1','E20008-1','E20014-1','E20026-1','E20034-1','E20041-1','E50002-1','E50003-1','E50005-1','N10003-1','N10008-1','N10011-1','N10016-1','NBY001-1','NBY003-1','Box'];
+        $skus = ['1E10005-2','E10009-2','E10019-1','E10045-1','E10055-1','E10060-1','E10061-1','E10061-2','E10085-1','E10087-1','E20008-1','E20014-1','E20026-1','E20034-1','E20041-1','E50002-1','E50003-1','E50005-1','N10003-1','N10008-1','N10011-1','N10016-1','NBY001-1','NBY003-1','Box'];
         foreach ($skus as $k=>$v){
             $store_sku = Db::name('store_sku')
                 ->alias('a')
@@ -2826,6 +2826,53 @@ class Test4 extends Controller
             echo $store_sku['sku'] . '更新' . $res . '条数据 is ok' . "\n";
             usleep(10000);
         }
+    }
+
+    public function update_bar_code_data()
+    {
+        $res = Db::connect('database.db_mojing_order')->table('fa_order_item_process')->where('magento_order_id',390286)->where('site',2)->update(['abnormal_house_id' => 0]);
+        dump($res);
+    }
+
+    public function update_lens_data()
+    {
+        // Db::name('lens_price')->where(['lens_number'=>23100000,'price'=>10])->update(['sph_start'=>'-7.00','sph_end'=>'0.00','cyl_start'=>'-4.00','cyl_end'=>'0.00','type'=>1]);
+        // Db::name('lens_price')->where(['lens_number'=>23100000,'price'=>15])->update(['sph_start'=>'-10.00','sph_end'=>'-7.25','cyl_start'=>'-4.00','cyl_end'=>'0.00','type'=>2]);
+        // Db::name('lens_price')->where(['lens_number'=>23100000,'price'=>11])->update(['sph_start'=>'0.00','sph_end'=>'4.00','cyl_start'=>'-2.00','cyl_end'=>'0.00','type'=>1]);
+        // Db::name('lens_price')->where(['lens_number'=>23100000,'price'=>50])->update(['sph_start'=>'4.25','sph_end'=>'6.00','cyl_start'=>'-6.00','cyl_end'=>'0.00','type'=>1]);
+        // Db::name('lens_price')->where(['lens_number'=>23100001,'price'=>10])->update(['sph_start'=>'-7.00','sph_end'=>'0.00','cyl_start'=>'-4.00','cyl_end'=>'0.00','type'=>1]);
+        // Db::name('lens_price')->where(['lens_number'=>23100001,'price'=>15])->update(['sph_start'=>'-10.00','sph_end'=>'-7.25','cyl_start'=>'-4.00','cyl_end'=>'0.00','type'=>2]);
+        // Db::name('lens_price')->where(['lens_number'=>23100001,'price'=>11])->update(['sph_start'=>'0.00','sph_end'=>'4.00','cyl_start'=>'-2.00','cyl_end'=>'0.00','type'=>1]);
+        // Db::name('lens_price')->where(['lens_number'=>23100001,'price'=>50])->update(['sph_start'=>'4.25','sph_end'=>'6.00','cyl_start'=>'-6.00','cyl_end'=>'0.00','type'=>2]);
+        // Db::name('lens_price')->where(['id'=>31])->update(['sph_start'=>'-12.00','sph_end'=>'-3.00','cyl_start'=>'-2.00','cyl_end'=>'-0.50','type'=>1]);
+        // Db::name('lens_price')->where(['id'=>36])->update(['type'=>2]);
+        // Db::name('lens_price')->where(['id'=>39])->update(['type'=>2]);
+        // Db::name('lens_price')->where(['id'=>45])->update(['sph_start'=>'-7.00','sph_end'=>'0.00','cyl_start'=>'-4.00','cyl_end'=>'0.00','type'=>1]);
+        // Db::name('lens_price')->where(['id'=>46])->update(['sph_start'=>'-10.00','sph_end'=>'-7.25','cyl_start'=>'-4.00','cyl_end'=>'0.00','type'=>2]);
+        // Db::name('lens_price')->where(['id'=>48])->update(['sph_start'=>'0.00','sph_end'=>'4.00','cyl_start'=>'-2.00','cyl_end'=>'0.00','type'=>1]);
+        // Db::name('lens_price')->where(['id'=>49])->update(['sph_start'=>'4.25','sph_end'=>'6.00','cyl_start'=>'-6.00','cyl_end'=>'0.00','type'=>2]);
+        // Db::name('lens_price')->where(['id'=>50])->update(['sph_start'=>'-7.00','sph_end'=>'0.00','cyl_start'=>'-4.00','cyl_end'=>'0.00','type'=>1]);
+        // Db::name('lens_price')->where(['id'=>51])->update(['sph_start'=>'-10.00','sph_end'=>'-7.25','cyl_start'=>'-4.00','cyl_end'=>'0.00','type'=>2]);
+        // Db::name('lens_price')->where(['id'=>53])->update(['sph_start'=>'0.00','sph_end'=>'4.00','cyl_start'=>'-2.00','cyl_end'=>'0.00','type'=>1]);
+        // Db::name('lens_price')->where(['id'=>54])->update(['sph_start'=>'4.25','sph_end'=>'6.00','cyl_start'=>'-6.00','cyl_end'=>'0.00','type'=>2]);
+        // Db::name('lens_price')->where(['id'=>55])->update(['sph_start'=>'-12.00','sph_end'=>'-3.00','cyl_start'=>'-2.00','cyl_end'=>'-0.50','type'=>1]);
+        // Db::name('lens_price')->where(['id'=>56])->update(['type'=>2]);
+        // Db::name('lens_price')->where(['id'=>60])->update(['type'=>2]);
+        // Db::name('lens_price')->where(['id'=>67])->update(['type'=>2]);
+        // Db::name('lens_price')->where(['id'=>69])->update(['type'=>2]);
+        // Db::name('lens_price')->where(['id'=>71])->update(['type'=>2]);
+        // Db::name('lens_price')->where(['id'=>73])->update(['sph_start'=>'-5.00','sph_end'=>'0.00','cyl_start'=>'-1.50','cyl_end'=>'0.00','type'=>1]);
+        // Db::name('lens_price')->where(['id'=>74])->update(['sph_start'=>'-8.00','sph_end'=>'-5.25','cyl_start'=>'-6.00','cyl_end'=>'0.00','type'=>2]);
+        // Db::name('lens_price')->where(['id'=>76])->update(['type'=>2]);
+        // Db::name('lens_price')->where(['id'=>79])->update(['type'=>2]);
+        // Db::name('lens_price')->where(['id'=>82])->update(['type'=>2]);
+        // Db::name('lens_price')->where(['id'=>85])->update(['type'=>2]);
+        // Db::name('lens_price')->where(['id'=>88])->update(['sph_start'=>'-5.00','sph_end'=>'0.00','cyl_start'=>'-1.50','cyl_end'=>'0.00','type'=>1]);
+        // Db::name('lens_price')->where(['id'=>89])->update(['sph_start'=>'-8.00','sph_end'=>'-5.25','cyl_start'=>'-6.00','cyl_end'=>'0.00','type'=>2]);
+        // Db::name('lens_price')->where(['id'=>91])->update(['type'=>2]);
+        // Db::name('lens_price')->where(['id'=>98])->update(['type'=>2]);
+        // Db::name('lens_price')->where(['id'=>101])->update(['price'=>400]);
+        Db::name('lens_price')->where(['id'=>28])->update(['sph_start'=>'-8.00','sph_end'=>'0.00','cyl_start'=>'-6.00','cyl_end'=>'-4.25','type'=>2]);
     }
 
 }
