@@ -2224,7 +2224,7 @@ class ScmWarehouse extends Scm
             if ($query){
                 $cat['a.sku'] = ['like', '%' . $query . '%'];
                 $cat['a.inventory_id'] = ['neq',0];
-                $cat['a.is_add'] = ['eq',1];
+//                $cat['a.is_add'] = ['eq',1];
 
 //            //通过盘点明细表+库存盘点单 过滤对应库位编码
                 $library_name =  Db::table('fa_inventory_item')
