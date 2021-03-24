@@ -2777,6 +2777,19 @@ class ScmWarehouse extends Scm
                         $info[$k]['sku'] = $v['sku'];
                         $info[$k]['in_stock_num'] = abs($v['error_qty']);
                         $info[$k]['no_stock_num'] = abs($v['error_qty']);
+
+                        //查询该sku下所有的code
+                        $code_all =   $this->_product_bar_code_item->where(['sku' => $v['sku']])->column('code');
+                        $change_value = array_diff($code_all,$codes);
+                        if (!empty($change_value)){
+                            $list[$k]['sku'] = $v['sku'];
+                            $list[$k]['out_stock_num'] = $v['error_qty'];
+                        }
+                        Log::write("====输出不一致的值====");
+                        Log::write($change_value);
+                        Log::write($list);
+
+
                         //通过sku 查询应该包含的数据
                         //比对数据，将没有的设置成出库
                         //新增的这些设置为入库
@@ -2802,11 +2815,7 @@ class ScmWarehouse extends Scm
                             ->update(['library_status' => 2, 'inventory_id' => $inventory_id]);
                     } else {
                         if ($codes) {
-//                            //查询该sku下所有的code
-//                            $code_all =   $this->_product_bar_code_item->where(['sku' => $v['sku']])->column('code');
-//                            $change_value = array_diff($code_all,$codes);
-//                            Log::write("====输出不一致的值====");
-//                            Log::write($change_value);
+
                             //查询库位id
                             $store_id = $this->_store_house->where(['area_id' => $v['area_id'], 'coding' => $v['library_name'], 'status' => 1])->value('id');
                             //更新如果出库单id为空 添加出库单id
