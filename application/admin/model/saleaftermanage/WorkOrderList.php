@@ -2658,6 +2658,7 @@ class WorkOrderList extends Model
         $_stock_house = new StockHouse();
         $all_item_order_number = $_new_order_process->alias('a')//所有子单
             ->where('a.increment_id', $increment_id)
+            ->where(['a.distribution_status' => ['neq', 0]])
             ->join(['fa_order_item_process' => 'b'], 'a.order_id=b.order_id')
             ->column('b.item_order_number');
         $item_order_number_diff = array_diff($all_item_order_number,[$item_order_number]);//其余子单
@@ -2675,6 +2676,7 @@ class WorkOrderList extends Model
             $store_house_id = $_new_order_process->where(['increment_id' => $increment_id])->value('store_house_id');//store_house_id
             $_new_order_item_process
                 ->where(['order_id' => $order_id, 'item_order_number' => ['neq', $item_order_number]])
+                ->where(['distribution_status' => ['neq', 0]])
                 ->update(['distribution_status' => 9]);
             $_new_order_process
                 ->where(['order_id' => $order_id])
