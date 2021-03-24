@@ -3134,24 +3134,36 @@ class ScmWarehouse extends Scm
         if (count(array_filter($item_sku)) < 1) {
             $this->error(__('调拨单子数据集合不能为空！！'), '', 524);
         }
+//
+//        foreach ($item_sku as $key => $value) {
+//            $whe_sku['platform_sku'] = ['eq',$value['sku']];
+//            //转换sku
+//            $item_platform_sku = new ItemPlatformSku();
+//            $true_sku =  $item_platform_sku->where($whe_sku)->value('sku');
+//            $whe['sku'] = ['eq',$true_sku];
+//            $barcodedata = $this->_product_bar_code_item->where($whe)->column('location_code');
+//            if (!empty($barcodedata)){
+//                $count = $this->_inventory->alias('a')
+//                    ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata],'area_id' => '3'])
+//                    ->count();
+//                if ($count > 0) {
+//                    $this->error(__('此'.$value['sku'].'对应库位正在盘点,暂无法进行出入库操作'), '', 525);
+//                }
+//            }
+//        }
+        Log::write("输出sku集合");
+        Log::write($item_sku);
 
-        foreach ($item_sku as $key => $value) {
-            $whe_sku['platform_sku'] = ['eq',$value['sku']];
-            //转换sku
-            $item_platform_sku = new ItemPlatformSku();
-            $true_sku =  $item_platform_sku->where($whe_sku)->value('sku');
-            $whe['sku'] = ['eq',$true_sku];
-            $barcodedata = $this->_product_bar_code_item->where($whe)->column('location_code');
-            if (!empty($barcodedata)){
-                $count = $this->_inventory->alias('a')
-                    ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata],'area_id' => '3'])
-                    ->count();
-                if ($count > 0) {
-                    $this->error(__('此'.$value['sku'].'对应库位正在盘点,暂无法进行出入库操作'), '', 525);
+        $codes = array_column($item_sku, 'call_out_site');
+        Log::write($codes);
+        if (!empty($codes)){
+            $count = $this->_inventory->alias('a')
+                ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $codes],'area_id' => '3'])
+                ->count();
+            if ($count > 0) {
+                    $this->error(__('此数据下对应库位正在盘点,暂无法进行出入库操作'), '', 525);
                 }
-            }
         }
-
 
 
         if (!empty($number) && !$id) {
