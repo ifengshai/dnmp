@@ -2787,7 +2787,8 @@ class ScmWarehouse extends Scm
                     if ($v['error_qty'] > 0) {
                         //生成入库单
                         $info[$k]['sku'] = $v['sku'];
-                        $info[$k]['in_stock_num'] = abs($v['error_qty']);
+//                        $info[$k]['in_stock_num'] = abs($v['error_qty']);
+                        $info[$k]['in_stock_num'] = count($codes);
                         $info[$k]['no_stock_num'] = abs($v['error_qty']);
                         Log::write("===入库单内容==");
                         Log::write($info);
