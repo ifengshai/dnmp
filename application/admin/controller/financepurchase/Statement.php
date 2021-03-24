@@ -20,7 +20,7 @@ use think\Request;
 
 class Statement extends Backend
 {
-    protected $noNeedRight = [];
+    protected $noNeedRight = ['detail'];
 
     protected $model = null;
 
