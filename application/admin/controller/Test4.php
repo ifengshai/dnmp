@@ -2828,4 +2828,10 @@ class Test4 extends Controller
         }
     }
 
+    public function update_bar_code_data()
+    {
+        $res = Db::connect('database.db_mojing_order')->table('fa_order_item_process')->where('magento_order_id',390286)->where('site',2)->update(['abnormal_house_id' => 0]);
+        dump($res);
+    }
+
 }
