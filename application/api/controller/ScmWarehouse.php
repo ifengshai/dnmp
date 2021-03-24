@@ -1438,11 +1438,15 @@ class ScmWarehouse extends Scm
         //获取入库单数据
         $_in_stock_info = $this->_in_stock->get($in_stock_id);
         empty($_in_stock_info) && $this->error(__('入库单不存在'), [], 515);
-
+        Log::write("输出入库单数据");
+        Log::write($in_stock_id);
         $item_list = $this->_in_stock_item
             ->where(['in_stock_id' => $in_stock_id])
             ->field('id,sku,in_stock_num,price')
             ->select();
+
+        Log::write("输出入库单数据02");
+        Log::write($item_list);
         empty($item_list) && $this->error(__('入库单子单数据异常'), [], 515);
 
         $item_list = collection($item_list)->toArray();
@@ -1455,6 +1459,8 @@ class ScmWarehouse extends Scm
             ->field('sku,code')
             ->order('id', 'desc')
             ->select();
+        Log::write("输出入库单数据03");
+        Log::write($bar_code_list);
         $bar_code_list = collection($bar_code_list)->toArray();
 
         foreach ($item_list as $key => $value) {
@@ -1490,6 +1496,8 @@ class ScmWarehouse extends Scm
         }
 
         $kuqu_kuwei = $this->_product_bar_code_item->where(['in_stock_id' => $in_stock_id])->find();
+        Log::write("输出库位信息");
+        Log::write($kuqu_kuwei);
         //入库单所需数据
         $info['in_stock_id'] = $_in_stock_info['id'];
         $info['in_stock_number'] = $_in_stock_info['in_stock_number'];
