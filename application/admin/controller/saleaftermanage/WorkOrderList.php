@@ -1996,8 +1996,8 @@ class WorkOrderList extends Backend
             //判断库存是否足够
             Log::write("判断库存是否足够");
             Log::write($stock);
-            Log::write( $num[$k]);
-            Log::write( $sku);
+            Log::write($num[$k]);
+            Log::write($sku);
             Log::write($siteType);
             if ($stock < $num[$k]) {
                 // $params = ['sku'=>$sku,'siteType'=>$siteType,'stock'=>$stock,'num'=>$num[$k]];

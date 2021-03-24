@@ -2619,8 +2619,10 @@ class ScmWarehouse extends Scm
                     ->select();
                 $infos = collection($infos)->toArray();
                 $sku_code = [];
-
+                Log::write("====输出审核盘点单======");
+                Log::write($infos);
                 foreach ($infos as $k => $v) {
+                    Log::write($v);
                     //如果误差为0则跳过
                     if ($v['error_qty'] == 0) {
                         continue;
@@ -2770,6 +2772,9 @@ class ScmWarehouse extends Scm
                         $info[$k]['sku'] = $v['sku'];
                         $info[$k]['in_stock_num'] = abs($v['error_qty']);
                         $info[$k]['no_stock_num'] = abs($v['error_qty']);
+                        //通过sku 查询应该包含的数据
+                        //比对数据，将没有的设置成出库
+                        //新增的这些设置为入库
 
                         //查询库位id
                         $store_id = $this->_store_house->where(['area_id' => $v['area_id'], 'coding' => $v['library_name'], 'status' => 1])->value('id');
