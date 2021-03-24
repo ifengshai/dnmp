@@ -2233,6 +2233,7 @@ class ScmWarehouse extends Scm
                     ->where(['b.is_del' => 1, 'b.check_status' => ['in', [0, 1]]])
                     ->where($cat)
                     ->column('a.library_name');
+                dump($library_name);die();
                 if ($library_name){
                     $where['b.coding'] = ['not in', array_unique($library_name)];
                 }
