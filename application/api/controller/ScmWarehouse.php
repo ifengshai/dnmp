@@ -2580,6 +2580,9 @@ class ScmWarehouse extends Scm
      */
     public function inventory_examine()
     {
+        $data = input('param.');
+        Log::write("===========输出所传参数====================");
+        Log::write($data);
         $do_type = $this->request->request('do_type');
 
         $inventory_id = $this->request->request("inventory_id");
@@ -2768,6 +2771,7 @@ class ScmWarehouse extends Scm
                         $codes = array_unique(array_column(unserialize($v['sku_agg']), 'code'));
                     }
 
+
                     if ($v['error_qty'] > 0) {
                         //生成入库单
                         $info[$k]['sku'] = $v['sku'];
@@ -2793,6 +2797,14 @@ class ScmWarehouse extends Scm
                             ->update(['library_status' => 2, 'inventory_id' => $inventory_id]);
                     } else {
                         if ($codes) {
+                            //查询该sku下所有的code
+                            $code_all =   $this->_product_bar_code_item->where(['sku' => $v['sku']])->column('code');
+                            $change_value = array_diff($code_all,$codes);
+                            Log::write("====输出不一致的值====");
+                            Log::write($change_value);
+
+
+
                             //查询库位id
                             $store_id = $this->_store_house->where(['area_id' => $v['area_id'], 'coding' => $v['library_name'], 'status' => 1])->value('id');
                             //更新如果出库单id为空 添加出库单id
