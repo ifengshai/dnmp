@@ -2786,17 +2786,14 @@ class ScmWarehouse extends Scm
                         $info[$k]['in_stock_num'] = abs($v['error_qty']);
                         $info[$k]['no_stock_num'] = abs($v['error_qty']);
 
-                        //查询该sku下所有的code
-                        $code_all =   $this->_product_bar_code_item->where(['sku' => $v['sku']])->column('code');
-                        $change_value = array_diff($code_all,$codes);
-                        if (!empty($change_value)){
+                       $other_message =  $this->_product_bar_code_item
+                            ->where(['code' => ['not in', $codes], 'location_code' => $v['library_name'], 'location_id' => $v['area_id'], 'sku' => $v['sku'], 'out_stock_id' => 0])
+                            ->where("item_order_number=''")
+                            ->count();
+                        if ($other_message >0){
                             $list[$k]['sku'] = $v['sku'];
                             $list[$k]['out_stock_num'] = $v['error_qty'];
                         }
-                        Log::write("====输出不一致的值====");
-                        Log::write($change_value);
-                        Log::write($list);
-
 
                         //通过sku 查询应该包含的数据
                         //比对数据，将没有的设置成出库
