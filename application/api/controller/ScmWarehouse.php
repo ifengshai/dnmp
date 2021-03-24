@@ -2224,7 +2224,7 @@ class ScmWarehouse extends Scm
             if ($query){
                 $cat['a.sku'] = ['like', '%' . $query . '%'];
                 $cat['a.inventory_id'] = ['neq',0];
-                $cat['a.is_add'] = ['eq',1];
+//                $cat['a.is_add'] = ['eq',1];
 
 //            //通过盘点明细表+库存盘点单 过滤对应库位编码
                 $library_name =  Db::table('fa_inventory_item')
@@ -2233,7 +2233,6 @@ class ScmWarehouse extends Scm
                     ->where(['b.is_del' => 1, 'b.check_status' => ['in', [0, 1]]])
                     ->where($cat)
                     ->column('a.library_name');
-                dump($library_name);die();
                 if ($library_name){
                     $where['b.coding'] = ['not in', array_unique($library_name)];
                 }
