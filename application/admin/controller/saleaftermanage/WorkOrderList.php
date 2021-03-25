@@ -91,7 +91,7 @@ class WorkOrderList extends Backend
         $this->recept = new \app\admin\model\saleaftermanage\WorkOrderRecept;
         $this->item = new \app\admin\model\itemmanage\Item;
         $this->item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku;
-
+        $this->_work_order_change_sku = new WorkOrderChangeSku();
         //获取当前登录用户所属主管id
         //$this->assign_user_id = searchForId(session('admin.id'), config('workorder.kefumanage'));
         $this->assign_user_id = searchForId(session('admin.id'), $workOrderConfigValue['kefumanage']);
