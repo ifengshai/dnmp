@@ -2632,7 +2632,6 @@ class ScmWarehouse extends Scm
                 $infos = $this->_inventory_item->where(['inventory_id' => $inventory_id])
                     ->field('sku,error_qty,inventory_id,area_id,library_name,sku_agg')
                     ->select();
-                dump($infos);die();
                 $infos = collection($infos)->toArray();
                 $sku_code = [];
                 Log::write("====输出审核盘点单======");
