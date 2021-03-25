@@ -8,6 +8,7 @@ namespace app\admin\controller\shell;
 
 use app\admin\model\operatedatacenter\Zeelool;
 use app\common\controller\Backend;
+use fast\Excel;
 use GuzzleHttp\Client;
 use think\Db;
 use SchGroup\SeventeenTrack\Connectors\TrackingConnector;
