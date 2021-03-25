@@ -1360,6 +1360,9 @@ class WorkOrderList extends Backend
                             //拣货区盘点时不能操作
                             //查询条形码库区库位
                             //转换sku
+                            Log::write("请求参数新旧SKU");
+                            Log::write($item['cancel_order']['sku']);
+                            Log::write($item['change_frame']['original_sku']);
                             if ($item['cancel_order']['sku']){
                                 $whe_sku['platform_sku'] = $item['cancel_order']['sku'];
                             }else{
