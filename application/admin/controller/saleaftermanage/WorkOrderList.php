@@ -1359,26 +1359,22 @@ class WorkOrderList extends Backend
                             /*****************限制如果有盘点单未结束不能操作配货完成*******************/
                             //拣货区盘点时不能操作
                             //查询条形码库区库位
-                            dump($item);
                             //转换sku
                             if ($item['cancel_order']['sku']){
                                 $whe_sku['platform_sku'] = $item['cancel_order']['sku'];
                             }else{
                                 $whe_sku['platform_sku'] = $item['change_frame']['original_sku'];
                             }
-                            dump($whe_sku);die();
                             //转换sku
                             $item_platform_sku = new ItemPlatformSku();
                             $true_sku =  $item_platform_sku->where($whe_sku)->value('sku');
                             $whe['sku'] = $true_sku;
                             $barcodedata = $this->_product_bar_code_item->where($whe)->column('location_code');
-                            dump($barcodedata);
                             if (!empty($barcodedata)){
                                 $count = $this->_inventory->alias('a')
                                     ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata],'area_id' => '3'])
                                     ->count();
                                 Log::write($count);
-                                dump($count);die();
                                 if ($count > 0) {
                                     return ['result' => false, 'msg' => '此'.$item['cancel_order']['sku'].'对应库位正在盘点,暂无法进行出入库操作'];
                                 }
@@ -2321,7 +2317,12 @@ class WorkOrderList extends Backend
                             //拣货区盘点时不能操作
                             //查询条形码库区库位
 
-                            $whe_sku['platform_sku'] = $item['cancel_order']['sku'];
+//                            $whe_sku['platform_sku'] = $item['cancel_order']['sku'];
+                            if ($item['cancel_order']['sku']){
+                                $whe_sku['platform_sku'] = $item['cancel_order']['sku'];
+                            }else{
+                                $whe_sku['platform_sku'] = $item['change_frame']['original_sku'];
+                            }
                             //转换sku
                             $item_platform_sku = new ItemPlatformSku();
                             $true_sku =  $item_platform_sku->where($whe_sku)->value('sku');
