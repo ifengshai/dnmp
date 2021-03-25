@@ -1368,9 +1368,11 @@ class WorkOrderList extends Backend
                 if (!$params['assign_user_id']) {
                     $params['is_check'] = 0;
                 }else{
-                    if ($params['assign_user_id'] == 95 && $admin_id == 198){
+                    //所有工单都不需要审核（产品确认要改）
+                    $params['is_check'] = 0;
+                    /*if ($params['assign_user_id'] == 95 && $admin_id == 198){
                         $params['assign_user_id'] = 117;
-                    }
+                    }*/
                 }
 
                 /**获取审核人 end*/
@@ -2206,6 +2208,8 @@ class WorkOrderList extends Backend
 
                 //没有审核人则不需要审核
                 if (!$params['assign_user_id']) {
+                    $params['is_check'] = 0;
+                }else{
                     $params['is_check'] = 0;
                 }
                 /**获取审核人 end*/
