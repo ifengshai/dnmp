@@ -1361,7 +1361,12 @@ class WorkOrderList extends Backend
                             //查询条形码库区库位
                             dump($item);
                             //转换sku
-                            $whe_sku['platform_sku'] = $item['cancel_order']['sku'];
+                            if ($item['cancel_order']['sku']){
+                                $whe_sku['platform_sku'] = $item['cancel_order']['sku'];
+                            }else{
+                                $whe_sku['platform_sku'] = $item['change_frame']['original_sku'];
+                            }
+                            dump($whe_sku);die();
                             //转换sku
                             $item_platform_sku = new ItemPlatformSku();
                             $true_sku =  $item_platform_sku->where($whe_sku)->value('sku');
