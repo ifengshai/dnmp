@@ -97,7 +97,12 @@
         <tr>
             <td colspan='2'>Type</td>
             <td colspan='2'>{$v.type}&nbsp;</td>
-            <td colspan='3'>Ring Size</td>
+            <td colspan='3'>
+                {if $v['ring_size']}
+                Ring Size
+                {/if}
+                &nbsp;
+            </td>
             <td colspan='3'>{$v.ring_size}&nbsp;</td>
         </tr>
         {else/}
