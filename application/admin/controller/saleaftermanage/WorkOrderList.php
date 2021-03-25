@@ -2187,7 +2187,7 @@ class WorkOrderList extends Backend
                                         dump($barcodedatas);
                                         if (!empty($barcodedatas)){
                                             $counts = $this->_inventory->alias('a')
-                                                ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata],'area_id' => '3'])
+                                                ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', array_filter($barcodedatas)],'area_id' => '3'])
                                                 ->count();
                                             dump($counts);die();
                                             if ($counts > 0) {
