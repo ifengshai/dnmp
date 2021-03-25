@@ -80,7 +80,7 @@
 
             <td rowspan='' colspan='2' style="padding:2px;">
                 {$v.created_at} <br>
-                {$v.coding}
+                {$v.coding}&nbsp;
             </td>
             <td rowspan='' colspan='8' style='padding:10px;'>
                 <img style='width:100%;height:80%;' src='{$v.img_url}'><br></td>
@@ -95,15 +95,10 @@
 
         {if $v['site'] == 12}
         <tr>
-            <td></td>
-            <td>&nbsp;</td>
-            <td>&nbsp;</td>
-            <td>&nbsp;</td>
-            <td>&nbsp;</td>
-            <td>&nbsp;</td>
-            <td colspan='4' rowspan="3">
-                {$v['gra_certificate']}&nbsp;&nbsp;
-            </td>
+            <td colspan='2'>Type</td>
+            <td colspan='2'>{$v.type}&nbsp;</td>
+            <td colspan='3'>Ring Size</td>
+            <td colspan='3'>{$v.ring_size}&nbsp;</td>
         </tr>
         {else/}
         <tr>
@@ -125,7 +120,24 @@
             {/if}
         </tr>
         {/if}
-       
+        
+
+        {if $v['site'] == 12}
+        <tr>
+            <td colspan="5">Stone Type</td>
+            <td colspan="5">{$v.stone_type}&nbsp;</td>
+        </tr>
+        <tr>
+            <td colspan="5">Metal</td>
+            <td colspan="5">{$v.Metal}&nbsp;</td>
+        </tr>
+        <tr>
+            <td colspan="10">{$v.gra_certificate}&nbsp; &nbsp;&nbsp;
+                <br/>&nbsp;
+            </td>
+        </tr>
+      
+        {else/}
         <tr>
             <td>R</td>
             <td>{$v.od_sph}</td>
@@ -178,11 +190,9 @@
                 <br>
                 {/if}
                 {$v.lens_name}
-
-                {if $v['site'] == 12}{$v['gra_certificate']}&nbsp;&nbsp;{/if}
             </td>
         </tr>
-
+        {/if}
 
         </tbody>
 
