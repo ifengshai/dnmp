@@ -2161,9 +2161,9 @@ class WorkOrderList extends Backend
                                 $counts = $this->_inventory->alias('a')
                                     ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', array_filter($barcodedatas)],'area_id' => '3'])
                                     ->count();
-                                if ($counts > 0) {
-                                    return ['result' => false, 'msg' => '此主单下的子订单SKU对应库位正在盘点,暂无法进行出入库操作'];
-                                }else{
+//                                if ($counts > 0) {
+//                                    return ['result' => false, 'msg' => '此主单下的子订单SKU对应库位正在盘点,暂无法进行出入库操作'];
+//                                }else{
                                     //如果未查询到当前数据有工单 则查询该主单号下的所有sku是否有盘点单状态数据
                                     $_new_order = new NewOrder();
                                     $order_id = $_new_order
@@ -2197,7 +2197,7 @@ class WorkOrderList extends Backend
                                         }
                                     }
 
-                                }
+//                                }
                             }
                         }
 
