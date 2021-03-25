@@ -1191,14 +1191,14 @@ class WorkOrderList extends Backend
                                         $whes_sku['platform_sku'] = ['eq',$change_sku];
                                         //转换sku
                                         $item_platform_sku = new ItemPlatformSku();
-                                        $true_sku =  $item_platform_sku->where($whes_sku)->column('sku');
-                                        $whes['sku'] = ['in',$true_sku];
+                                        $true_skuz =  $item_platform_sku->where($whes_sku)->column('sku');
+                                        $whes['sku'] = ['in',$true_skuz];
                                         $barcodedatas = $this->_product_bar_code_item->where($whes)->column('location_code');
                                         if (!empty($barcodedatas)){
-                                            $count = $this->_inventory->alias('a')
-                                                ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata],'area_id' => '3'])
+                                            $counts = $this->_inventory->alias('a')
+                                                ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', array_filter($barcodedatas)],'area_id' => '3'])
                                                 ->count();
-                                            if ($count > 0) {
+                                            if ($counts > 0) {
                                                 return ['result' => false, 'msg' => '此主单下的子订单SKU对应库位正在盘点,暂无法进行出入库操作'];
                                             }
                                         }
@@ -2181,15 +2181,12 @@ class WorkOrderList extends Backend
                                         //转换sku
                                         $item_platform_sku = new ItemPlatformSku();
                                         $true_skuz =  $item_platform_sku->where($whes_sku)->column('sku');
-                                        dump($true_skuz);
                                         $whes['sku'] = ['in',$true_skuz];
                                         $barcodedatas = $this->_product_bar_code_item->where($whes)->column('location_code');
-                                        dump($barcodedatas);
                                         if (!empty($barcodedatas)){
                                             $counts = $this->_inventory->alias('a')
                                                 ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', array_filter($barcodedatas)],'area_id' => '3'])
                                                 ->count();
-                                            dump($counts);die();
                                             if ($counts > 0) {
                                                 return ['result' => false, 'msg' => '此主单下的子订单SKU对应库位正在盘点,暂无法进行出入库操作'];
                                             }
