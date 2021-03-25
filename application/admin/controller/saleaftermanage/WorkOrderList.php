@@ -2137,6 +2137,25 @@ class WorkOrderList extends Backend
 
                     //主单取消
                     if (in_array(3, $measure_choose_id)) {
+                        //查询是否有更改镜框操作 获取最近的记录
+                        $change_sku = $this->_work_order_change_sku
+                            ->alias('a')
+                            ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
+                            ->where([
+                                'a.change_type' => 1,
+                                'a.increment_id' => $params['platform_order'],
+                                'b.operation_type' => 1
+                            ])
+                            ->order('a.id', 'desc')
+                            ->limit(1)
+                            ->colum('a.change_sku,a.original_sku');
+                        dump($change_sku);die();
+
+
+
+
+
+
                         $_new_order = new NewOrder();
                         $order_id = $_new_order
                             ->where('increment_id', $params['platform_order'])
