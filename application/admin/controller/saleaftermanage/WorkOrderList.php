@@ -1166,6 +1166,7 @@ class WorkOrderList extends Backend
                             //转换sku
                             $item_platform_sku = new ItemPlatformSku();
                             $true_sku =  $item_platform_sku->where($whe_sku)->column('sku');
+                            dump($true_sku);die();
                             $whe['sku'] = ['in',$true_sku];
                             $barcodedata = $this->_product_bar_code_item->where($whe)->column('location_code');
                             if (!empty($barcodedata)){
@@ -2146,6 +2147,7 @@ class WorkOrderList extends Backend
                             $order_item_list = $_new_order_item_process
                                 ->where($order_item_where)
                                 ->column('sku');
+                            dump($order_item_list);die();
                             /*****************限制如果有盘点单未结束不能操作配货完成*******************/
                             //配货完成时判断
                             //拣货区盘点时不能操作
