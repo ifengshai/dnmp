@@ -2148,7 +2148,7 @@ class WorkOrderList extends Backend
                             ])
                             ->order('a.id', 'desc')
                             ->limit(1)
-                            ->colum('a.change_sku,a.original_sku');
+                            ->column('a.change_sku,a.original_sku');
                         dump($change_sku);die();
 
 
