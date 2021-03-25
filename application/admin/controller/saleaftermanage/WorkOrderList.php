@@ -2173,6 +2173,7 @@ class WorkOrderList extends Backend
                                         ->order('a.id', 'desc')
                                         ->limit(1)
                                         ->value('a.change_sku');
+                                    dump($change_sku);die();
                                     if ($change_sku) {
                                         $whes_sku['platform_sku'] = ['eq',$change_sku];
                                         //转换sku
