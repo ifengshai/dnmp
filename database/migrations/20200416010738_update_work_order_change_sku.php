@@ -13,5 +13,6 @@ class UpdateWorkOrderChangeSku extends Migrator
             ->update();
         //test
         //test
+        //test2
     }
 }
