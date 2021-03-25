@@ -91,7 +91,7 @@ class WorkOrderList extends Backend
         $this->recept = new \app\admin\model\saleaftermanage\WorkOrderRecept;
         $this->item = new \app\admin\model\itemmanage\Item;
         $this->item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku;
-
+        $this->_work_order_change_sku = new WorkOrderChangeSku();
         //获取当前登录用户所属主管id
         //$this->assign_user_id = searchForId(session('admin.id'), config('workorder.kefumanage'));
         $this->assign_user_id = searchForId(session('admin.id'), $workOrderConfigValue['kefumanage']);
@@ -1174,6 +1174,36 @@ class WorkOrderList extends Backend
                                     ->count();
                                 if ($count > 0) {
                                     return ['result' => false, 'msg' => '此主单下的子订单SKU对应库位正在盘点,暂无法进行出入库操作'];
+                                }else{
+                                    //如果没有找到符合条件  则需要查询是否有更改镜架的记录
+                                    $change_sku = $this->_work_order_change_sku
+                                        ->alias('a')
+                                        ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
+                                        ->where([
+                                            'a.change_type' => 1,
+                                            'a.increment_id' => $params['platform_order'],
+                                            'b.operation_type' => 1
+                                        ])
+                                        ->order('a.id', 'desc')
+                                        ->limit(1)
+                                        ->value('a.change_sku');
+                                    if ($change_sku) {
+                                        $whes_sku['platform_sku'] = ['eq',$change_sku];
+                                        //转换sku
+                                        $item_platform_sku = new ItemPlatformSku();
+                                        $true_sku =  $item_platform_sku->where($whes_sku)->column('sku');
+                                        $whes['sku'] = ['in',$true_sku];
+                                        $barcodedatas = $this->_product_bar_code_item->where($whes)->column('location_code');
+                                        if (!empty($barcodedatas)){
+                                            $count = $this->_inventory->alias('a')
+                                                ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata],'area_id' => '3'])
+                                                ->count();
+                                            if ($count > 0) {
+                                                return ['result' => false, 'msg' => '此主单下的子订单SKU对应库位正在盘点,暂无法进行出入库操作'];
+                                            }
+                                        }
+                                    }
+
                                 }
                             }
                             /****************************end*****************************************/
