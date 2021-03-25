@@ -1,0 +1,21 @@
+stages:
+  - deploy-test-env
+  - deploy-master-env
+jobTest_env:
+  stage: deploy-test-env
+  script:
+    - cd /www/wwwroot/mojing
+    - sudo git pull origin test
+  tags:
+    - mojing-test-runner
+  only:
+    - test
+jobMaster_env:
+  stage: deploy-master-env
+  script:
+    - cd /www/wwwroot/mojing
+    - sudo git pull origin master
+  tags:
+    - mojing-runner
+  only:
+    - master
