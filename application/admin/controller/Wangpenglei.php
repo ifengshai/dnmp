@@ -784,7 +784,7 @@ class Wangpenglei extends Backend
         $order = new \app\admin\model\order\Order();
         $lensdata = new \app\admin\model\order\order\LensData();
         $where['a.status'] = ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered']];
-        $where['a.created_at'] = ['between', [strtotime(date('2021-02-01 00:00:00')), strtotime(date('2021-02-31 23:59:59'))]];
+        $where['a.created_at'] = ['between', [strtotime(date('2021-03-01 00:00:00')), strtotime(date('2021-03-24 23:59:59'))]];
         $where['d.is_repeat'] = 0;
         $where['d.is_split'] = 0;
         $list = $order->where($where)->alias('a')->field('a.increment_id,b.item_order_number,b.sku,d.order_prescription_type,prescription_type,web_lens_name,coating_name,od_sph,os_sph,od_cyl,os_cyl,od_axis,os_axis,pd_l,pd_r,pd,os_add,od_add,od_pv,os_pv,od_pv_r,os_pv_r,od_bd,os_bd,od_bd_r,os_bd_r,lens_number')
@@ -833,7 +833,7 @@ class Wangpenglei extends Backend
         }
 
         $headlist = ['订单号', '子单号',  'sku', '加工类型', '处方类型', '镜片名称', '镀膜名称', '右眼SPH', '左眼SPH', '右眼CYL', '左眼CYL', '右眼AXIS', '左眼AXIS', '左眼PD', '右眼PD', 'PD', '右眼ADD', '左眼ADD', '右眼Prism(out/in)', '左眼Prism(out/in)', '右眼Direction(out/in)', '左眼Direction(out/in)', '右眼Prism(up/down)', '左眼Prism(up/down)', '右眼Direction(up/down)', '左眼Direction(up/down)'];
-        Excel::writeCsv($params, $headlist, '2月份订单数据');
+        Excel::writeCsv($params, $headlist, '3月份订单数据');
         die;
     }
 }
