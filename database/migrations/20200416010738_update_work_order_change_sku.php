@@ -11,7 +11,5 @@ class UpdateWorkOrderChangeSku extends Migrator
         $table = $this->table('work_order_change_sku');
         $table->addColumn('prescription_option', 'text', array('null' => true,'comment' => '处方序列化的值'))
             ->update();
-        //test
-        //test
     }
 }
