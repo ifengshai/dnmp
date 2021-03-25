@@ -426,9 +426,9 @@ class TrackReg extends Backend
             $data[$k]['days90_data'] = array_sum($days90_data);
         }
 
-        $header = 'SKU,供应商,等级,7天销量,1个月销量近3个月的销量';
+        $header = ['SKU','供应商','等级','7天销量','1个月销量近3个月的销量'];
         $filename = 'sku数据导出.csv';
-        Excel::create_csv($data, $header, $filename);
+        Excel::writeCsv($data, $header, $filename);
     }
 
 
