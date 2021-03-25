@@ -2149,7 +2149,57 @@ class WorkOrderList extends Backend
                             ->order('a.id', 'desc')
                             ->limit(1)
                             ->column('a.change_sku,a.original_sku');
-                        dump($change_sku);die();
+                        if ($change_sku) {
+                            dump(array_keys($change_sku));
+                            $whes_sku['platform_sku'] = ['in',array_keys($change_sku)];
+                            //转换sku
+                            $item_platform_sku = new ItemPlatformSku();
+                            $true_skuz =  $item_platform_sku->where($whes_sku)->column('sku');
+                            $whes['sku'] = ['in',$true_skuz];
+                            $barcodedatas = $this->_product_bar_code_item->where($whes)->column('location_code');
+                            if (!empty($barcodedatas)){
+                                $counts = $this->_inventory->alias('a')
+                                    ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', array_filter($barcodedatas)],'area_id' => '3'])
+                                    ->count();
+                                if ($counts > 0) {
+                                    return ['result' => false, 'msg' => '此主单下的子订单SKU对应库位正在盘点,暂无法进行出入库操作'];
+                                }else{
+                                    //如果未查询到当前数据有工单 则查询该主单号下的所有sku是否有盘点单状态数据
+                                    $_new_order = new NewOrder();
+                                    $order_id = $_new_order
+                                        ->where('increment_id', $params['platform_order'])
+                                        ->value('id');
+                                    if ($order_id) {
+                                        $order_item_where['order_id'] = $order_id;
+                                        $_new_order_item_process = new NewOrderItemProcess();
+                                        $order_item_list = $_new_order_item_process
+                                            ->where($order_item_where)
+                                            ->column('sku');
+                                        dump(array_values($change_sku));
+                                        $order_item_list = array_merge(array_diff($order_item_list, array_values($change_sku)));
+                                        dump($order_item_list);
+
+                                        die();
+                                        /*****************限制如果有盘点单未结束不能操作配货完成*******************/
+                                        //配货完成时判断
+                                        //拣货区盘点时不能操作
+                                        //查询条形码库区库位
+                                        $whe_sku['platform_sku'] = ['in', $order_item_list];
+                                        //转换sku
+                                        $item_platform_sku = new ItemPlatformSku();
+                                        $true_sku = $item_platform_sku->where($whe_sku)->column('sku');
+                                        $whe['sku'] = ['in', $true_sku];
+                                        $barcodedata = $this->_product_bar_code_item->where($whe)->column('location_code');
+                                        if (!empty($barcodedata)) {
+                                            $count = $this->_inventory->alias('a')
+                                                ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata], 'area_id' => '3'])
+                                                ->count();
+                                        }
+                                    }
+
+                                }
+                            }
+                        }
 
 
 
