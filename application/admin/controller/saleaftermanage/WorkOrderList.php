@@ -3627,6 +3627,17 @@ class WorkOrderList extends Backend
                         //主单取消收入核算冲减
                         $FinanceCost = new FinanceCost();
                         $FinanceCost->cancel_order_subtract($receptInfo['work_id']);
+                        //主单取消解绑所有子单条码
+                        $ProductBarCodeItem = new ProductBarCodeItem();
+                        $fa_order = new NewOrder();
+                        $_new_order_item_process = new NewOrderItemProcess();
+                        $order_id = $fa_order->where(['increment_id' => $row['platform_order']])->value('id');
+                        $item_order_arr = $_new_order_item_process->where(['order_id'=>$order_id])->column('item_order_number');
+                        if (!empty($item_order_arr)) {
+                            foreach ($item_order_arr as $key => $value) {
+                                $ProductBarCodeItem->where(['item_order_number'=>$value])->update(['item_order_number' => '','library_status' => 1,'out_stock_time' => null,'out_stock_id' => 0]);
+                            }
+                        }
                     }
                     if (15 == $measure_choose_id) { 
                         //vip退款收入核算冲减
