@@ -784,7 +784,7 @@ class Wangpenglei extends Backend
         $order = new \app\admin\model\order\Order();
         $lensdata = new \app\admin\model\order\order\LensData();
         $where['a.status'] = ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered']];
-        $where['a.created_at'] = ['between', [strtotime(date('2021-03-01 00:00:00')), strtotime(date('2021-03-24 23:59:59'))]];
+        $where['a.created_at'] = ['between', [strtotime(date('2021-03-01 00:00:00')), strtotime(date('2021-03-25 23:59:59'))]];
         $where['d.is_repeat'] = 0;
         $where['d.is_split'] = 0;
         $list = $order->where($where)->alias('a')->field('a.increment_id,b.item_order_number,b.sku,d.order_prescription_type,prescription_type,web_lens_name,coating_name,od_sph,os_sph,od_cyl,os_cyl,od_axis,os_axis,pd_l,pd_r,pd,os_add,od_add,od_pv,os_pv,od_pv_r,os_pv_r,od_bd,os_bd,od_bd_r,os_bd_r,lens_number')
