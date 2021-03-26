@@ -1623,6 +1623,7 @@ class OrderData extends Backend
         $where['b.wave_order_id'] = 0;
         $list = $this->order->where($where)->alias('a')->field('b.id,b.sku,a.created_at,entity_id,a.site')
             ->join(['fa_order_item_process' => 'b'], 'a.entity_id=b.magento_order_id and a.site=b.site')
+            ->order('id desc')
             ->limit(1000)
             ->select();
         $list = collection($list)->toArray();

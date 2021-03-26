@@ -842,7 +842,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
              Table.api.init({
                 showJumpto: true,
                 searchFormVisible: true,
-                pageList: [10, 25, 50, 100, 300],
+                pageSize: 100,
+                pageList: [10, 25, 50, 100, 300, 500],
                 extend: {
                     index_url: 'order/distribution/wave_order_detail' + location.search + (location.search ? '&ids=' + Config.ids : '?ids=' + Config.ids),
                 }
@@ -998,7 +999,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                 "processing": __('processing'),
                                 "unpaid": __('unpaid')
                             },
-                            operate: false,
                             formatter: Table.api.formatter.status
                         },
                         {
@@ -1086,6 +1086,38 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
 
             // 为表格绑定事件
             Table.api.bindevent(table);
+
+            //批量打印
+            $('.btn-batch-printed').click(function () {
+                var ids = Table.api.selectedids(table);
+                window.open(Config.moduleurl + '/order/distribution/batch_print_label/ids/' + ids, '_blank');
+            });
+
+            //批量标记已打印
+            $('.btn-tag-printed').click(function () {
+                var ids = Table.api.selectedids(table);
+                Layer.confirm(
+                    __('确定要标记这%s条记录已打印吗?', ids.length), {
+                        icon: 3,
+                        title: __('Warning'),
+                        shadeClose: true
+                    },
+                    function (index) {
+                        Layer.close(index);
+                        Backend.api.ajax({
+                            url: Config.moduleurl + '/order/distribution/tag_printed',
+                            data: {
+                                id_params: ids
+                            },
+                            type: 'post'
+                        }, function (data, ret) {
+                            if (data == 'success') {
+                                table.bootstrapTable('refresh');
+                            }
+                        });
+                    }
+                );
+            });
         },
         handle_abnormal: function () {
             Controller.api.bindevent();

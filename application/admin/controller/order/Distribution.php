@@ -602,7 +602,7 @@ class Distribution extends Backend
                 'work_status' => ['in', $work_order_status_map],
                 'work_type' => ['in', $work_order_type]
             ])->group('platform_order')->column('platform_order');
-            
+
             //波次单id
             $ids = input('ids');
             if ($ids) $map['wave_order_id'] = $ids;
@@ -626,29 +626,21 @@ class Distribution extends Backend
                 ->select();
             $list = collection($list)->toArray();
 
-            //库位号列表
-            $stock_house_data = $this->_stock_house
-                ->where(['status' => 1, 'type' => ['>', 1], 'occupy' => ['>', 0]])
-                ->column('coding', 'id');
-            //获取异常数据
-            $abnormal_data = $this->_distribution_abnormal
-                ->where(['item_process_id' => ['in', array_column($list, 'id')], 'status' => 1])
-                ->column('work_id', 'item_process_id');
             foreach ($list as $key => $value) {
                 //订单副数，去除掉取消的子单
                 $list[$key]['total_qty_ordered'] = $this->model
                     ->where(['order_id' => $list[$key]['order_id'], 'distribution_status' => ['neq', 0]])
                     ->count();
-                
+
                 if ($list[$key]['created_at'] == '') {
                     $list[$key]['created_at'] == '暂无';
                 } else {
                     $list[$key]['created_at'] = date('Y-m-d H:i:s', $value['created_at']);
                 }
-               
+
                 //判断是否显示工单按钮
                 $list[$key]['task_info'] = in_array($value['increment_id'], $platform_order) ? 1 : 0;
-            
+
                 //获取工单更改镜框最新信息
                 $change_sku = $this->_work_order_change_sku
                     ->alias('a')
@@ -1770,18 +1762,28 @@ class Distribution extends Backend
         $count = $this->model->where($where)->count();
         0 < $count && $this->error('存在非当前节点的子订单');
 
+
         //标记打印状态
         $this->model->startTrans();
         try {
-            $distribution_value = $this->model->where(['id' => ['in', $ids]])->field('magento_order_id,order_id, item_order_number,site')->select();
+            $distribution_value = $this->model->where(['id' => ['in', $ids]])->field('magento_order_id,order_id, item_order_number,site,wave_order_id')->select();
             $distribution_value = collection($distribution_value)->toArray();
-
             foreach ($distribution_value as $key => $value) {
                 $value['item_order_number'] =  substr($value['item_order_number'], 0, strpos($value['item_order_number'], '-'));
                 Order::rulesto_adjust($value['magento_order_id'], $value['item_order_number'], $value['site'], 2, 2);
+                $wave_order_id = $value['wave_order_id'];
             }
             //标记状态
-            $this->model->where(['id' => ['in', $ids]])->update(['distribution_status' => 2]);
+            $this->model->where(['id' => ['in', $ids]])->update(['distribution_status' => 2, 'is_print' => 1]);
+
+            //添加波次单打印状态为已打印
+            $count = $this->model->where(['wave_order_id' => $wave_order_id, 'is_print' => 0])->count();
+            if ($count > 0) {
+                $status = 1;
+            } elseif ($count == 0) {
+                $status = 2;
+            }
+            $this->_wave_order->where(['id' => $wave_order_id])->update(['status' => $status]);
 
             //记录配货日志
             $admin = (object)session('admin');
