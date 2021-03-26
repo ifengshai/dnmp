@@ -601,7 +601,7 @@ class TransferOrder extends Backend
                 $sku_arr[] = $sku;
             }
             //获取导出仓和导入仓
-            dump($data);
+
             $out_plat = $data[0][0];
             switch (trim($out_plat)) {
                 case 'zeelool':
@@ -688,7 +688,6 @@ class TransferOrder extends Backend
                 default:
                     $this->error(__('请检查表格中调出仓的名称'));
             }
-            dump($out_label);
             //获取站点sku列表 及当前调出仓的虚拟仓库存
             $list = $_platform
                 ->where('platform_type', $out_label)
@@ -696,8 +695,6 @@ class TransferOrder extends Backend
                 ->field('sku,stock')
                 ->select();
             $platform_arr = array_column(collection($list)->toArray(), 'stock', 'sku');
-            dump($platform_arr);
-
             //插入一条数据到调拨单主表
             $transfer_order['transfer_order_number'] = 'TO' . date('YmdHis') . rand(100, 999) . rand(100, 999);
             $transfer_order['call_out_site'] = $out_label;
@@ -719,8 +716,6 @@ class TransferOrder extends Backend
                 //获取调出数量
                 $replenish_num = (int)$v[3];
                 empty($replenish_num) && $this->model->where('id', $transfer_order_id)->delete() && $this->error(__('导入失败,商品 ' . $sku . ' 调出数量不能为空！'));
-                dump($replenish_num);
-                dump($platform_arr[$sku]);
                 //校验调出数量是否大于当前调出仓库存
                 if ($replenish_num > $platform_arr[$sku]) {
                     $this->model->where('id', $transfer_order_id)->delete();
