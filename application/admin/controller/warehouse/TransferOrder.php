@@ -601,6 +601,7 @@ class TransferOrder extends Backend
                 $sku_arr[] = $sku;
             }
             //获取导出仓和导入仓
+            dump($data);
             $out_plat = $data[0][0];
             switch (trim($out_plat)) {
                 case 'zeelool':
@@ -673,16 +674,16 @@ class TransferOrder extends Backend
                     $in_label = 10;
                     break;
                 case 'zeelool_jp':
-                    $out_label = 11;
+                    $in_label = 11;
                     break;
                 case 'voogmechic':
-                    $out_label = 12;
+                    $in_label = 12;
                     break;
                 case 'zeelool_cn':
-                    $out_label = 13;
+                    $in_label = 13;
                     break;
                 case 'alibaba':
-                    $out_label = 14;
+                    $in_label = 14;
                     break;
                 default:
                     $this->error(__('请检查表格中调出仓的名称'));
