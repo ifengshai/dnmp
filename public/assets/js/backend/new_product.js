@@ -334,7 +334,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
             $(document).on('click', '.btn-ok', function () {
                 $('#status').val(0);
             })
-            Form.api.bindevent($("form[role=form]"));
+
 
             //采集1688商品信息
             $(document).on('click', '.btn-caiji', function () {
@@ -391,6 +391,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                     }
 
                     $('.caigou table tbody').append(shtml);
+                    Form.api.bindevent($("form[role=form]"));
 
                 }, function (data, ret) {
                     //失败的回调
