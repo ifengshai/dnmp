@@ -559,6 +559,11 @@ class Distribution extends Backend
                 ->select();
             $list = collection($list)->toArray();
 
+            foreach ($list as $k => $v) {
+                $list[$k]['order_date'] = date('Y-m-d H:i:s', $v['order_date']);
+                $list[$k]['createtime'] = date('Y-m-d H:i:s', $v['createtime']);
+            }
+
             $result = array("total" => $total, "rows" => $list);
             return json($result);
         }
@@ -571,6 +576,101 @@ class Distribution extends Backend
         return $this->view->fetch();
     }
 
+
+    /**
+     * 波次单列表
+     *
+     * @Description
+     * @author wpl
+     * @since 2021/03/23 15:48:02 
+     * @return void
+     */
+    public function wave_order_detail($ids = null)
+    {
+        //设置过滤方法
+        $this->request->filter(['strip_tags']);
+        if ($this->request->isAjax()) {
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
+            }
+            //工单状态
+            $work_order_status_map = [1, 2, 3, 5];
+            //工单类型
+            $work_order_type = [1, 2];
+            $platform_order = $this->_work_order_list->where([
+                'work_status' => ['in', $work_order_status_map],
+                'work_type' => ['in', $work_order_type]
+            ])->group('platform_order')->column('platform_order');
+            
+            //波次单id
+            $ids = input('ids');
+            if ($ids) $map['wave_order_id'] = $ids;
+
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+
+            $total = $this->model
+                ->alias('a')
+                ->join(['fa_order' => 'b'], 'a.order_id=b.id')
+                ->where($where)
+                ->where($map)
+                ->count();
+            $list = $this->model
+                ->alias('a')
+                ->field('a.id,a.order_id,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.total_qty_ordered,b.site,b.order_type,b.status,a.distribution_status,a.created_at')
+                ->join(['fa_order' => 'b'], 'a.order_id=b.id')
+                ->where($where)
+                ->where($map)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();
+            $list = collection($list)->toArray();
+
+            //库位号列表
+            $stock_house_data = $this->_stock_house
+                ->where(['status' => 1, 'type' => ['>', 1], 'occupy' => ['>', 0]])
+                ->column('coding', 'id');
+            //获取异常数据
+            $abnormal_data = $this->_distribution_abnormal
+                ->where(['item_process_id' => ['in', array_column($list, 'id')], 'status' => 1])
+                ->column('work_id', 'item_process_id');
+            foreach ($list as $key => $value) {
+                //订单副数，去除掉取消的子单
+                $list[$key]['total_qty_ordered'] = $this->model
+                    ->where(['order_id' => $list[$key]['order_id'], 'distribution_status' => ['neq', 0]])
+                    ->count();
+                
+                if ($list[$key]['created_at'] == '') {
+                    $list[$key]['created_at'] == '暂无';
+                } else {
+                    $list[$key]['created_at'] = date('Y-m-d H:i:s', $value['created_at']);
+                }
+               
+                //判断是否显示工单按钮
+                $list[$key]['task_info'] = in_array($value['increment_id'], $platform_order) ? 1 : 0;
+            
+                //获取工单更改镜框最新信息
+                $change_sku = $this->_work_order_change_sku
+                    ->alias('a')
+                    ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
+                    ->where([
+                        'a.change_type' => 1,
+                        'a.item_order_number' => $value['item_order_number'],
+                        'b.operation_type' => 1
+                    ])
+                    ->order('a.id', 'desc')
+                    ->limit(1)
+                    ->value('a.change_sku');
+                if ($change_sku) {
+                    $list[$key]['sku'] = $change_sku;
+                }
+            }
+            $result = array("total" => $total, "rows" => $list);
+            return json($result);
+        }
+        $this->assignconfig('ids', $ids);
+        return $this->view->fetch();
+    }
 
 
     public function csv_array()

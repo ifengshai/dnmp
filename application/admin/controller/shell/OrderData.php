@@ -1619,15 +1619,18 @@ class OrderData extends Backend
          *
          */
         //查询今天的订单
-        $where['a.created_at'] = ['between', [strtotime(date('Y-m-d 00:00:00')), strtotime(date('Y-m-d 23:59:59'))]];
+        // $where['a.created_at'] = ['between', [strtotime(date('Y-m-d 00:00:00')), strtotime(date('Y-m-d 23:59:59'))]];
         $where['b.wave_order_id'] = 0;
         $list = $this->order->where($where)->alias('a')->field('b.id,b.sku,a.created_at,entity_id,a.site')
-            ->join(['fa_order_tiem_process' => 'b'], 'a.entity_id=b.magento_order_id and a.site=b.site')
+            ->join(['fa_order_item_process' => 'b'], 'a.entity_id=b.magento_order_id and a.site=b.site')
+            ->limit(1000)
             ->select();
         $list = collection($list)->toArray();
         //第三方站点id
         $third_site = [13, 14];
         $waveorder = new \app\admin\model\order\order\WaveOrder();
+        $itemplaform = new \app\admin\model\itemmanage\ItemPlatformSku();
+        $storesku = new \app\admin\model\warehouse\StockHouse();
         foreach ($list as $k => $v) {
             //判断波次类型
             $type = 0;
@@ -1637,35 +1640,42 @@ class OrderData extends Backend
                 $type = 1;
             }
             //判断波次时间段
-            if (strtotime(date('Y-m-d 00:00:00')) <= $v['createtime'] and $v['createtime'] <= strtotime(date('Y-m-d 02:59:59'))) {
+            if (strtotime(date('Y-m-d 00:00:00', $v['created_at'])) <= $v['created_at'] and $v['created_at'] <= strtotime(date('Y-m-d 02:59:59', $v['created_at']))) {
                 $wave_time_type = 1;
-            } elseif (strtotime(date('Y-m-d 03:00:00')) <= $v['createtime'] and $v['createtime'] <= strtotime(date('Y-m-d 05:59:59'))) {
+            } elseif (strtotime(date('Y-m-d 03:00:00', $v['created_at'])) <= $v['created_at'] and $v['created_at'] <= strtotime(date('Y-m-d 05:59:59', $v['created_at']))) {
                 $wave_time_type = 2;
-            } elseif (strtotime(date('Y-m-d 06:00:00')) <= $v['createtime'] and $v['createtime'] <= strtotime(date('Y-m-d 08:59:59'))) {
+            } elseif (strtotime(date('Y-m-d 06:00:00', $v['created_at'])) <= $v['created_at'] and $v['created_at'] <= strtotime(date('Y-m-d 08:59:59', $v['created_at']))) {
                 $wave_time_type = 3;
-            } elseif (strtotime(date('Y-m-d 09:00:00')) <= $v['createtime'] and $v['createtime'] <= strtotime(date('Y-m-d 11:59:59'))) {
+            } elseif (strtotime(date('Y-m-d 09:00:00', $v['created_at'])) <= $v['created_at'] and $v['created_at'] <= strtotime(date('Y-m-d 11:59:59', $v['created_at']))) {
                 $wave_time_type = 4;
-            } elseif (strtotime(date('Y-m-d 12:00:00')) <= $v['createtime'] and $v['createtime'] <= strtotime(date('Y-m-d 14:59:59'))) {
+            } elseif (strtotime(date('Y-m-d 12:00:00', $v['created_at'])) <= $v['created_at'] and $v['created_at'] <= strtotime(date('Y-m-d 14:59:59', $v['created_at']))) {
                 $wave_time_type = 5;
-            } elseif (strtotime(date('Y-m-d 15:00:00')) <= $v['createtime'] and $v['createtime'] <= strtotime(date('Y-m-d 17:59:59'))) {
+            } elseif (strtotime(date('Y-m-d 15:00:00', $v['created_at'])) <= $v['created_at'] and $v['created_at'] <= strtotime(date('Y-m-d 17:59:59', $v['created_at']))) {
                 $wave_time_type = 6;
-            } elseif (strtotime(date('Y-m-d 18:00:00')) <= $v['createtime'] and $v['createtime'] <= strtotime(date('Y-m-d 20:59:59'))) {
+            } elseif (strtotime(date('Y-m-d 18:00:00', $v['created_at'])) <= $v['created_at'] and $v['created_at'] <= strtotime(date('Y-m-d 20:59:59', $v['created_at']))) {
                 $wave_time_type = 7;
-            } elseif (strtotime(date('Y-m-d 21:00:00')) <= $v['createtime'] and $v['createtime'] <= strtotime(date('Y-m-d 23:59:59'))) {
+            } elseif (strtotime(date('Y-m-d 21:00:00', $v['created_at'])) <= $v['created_at'] and $v['created_at'] <= strtotime(date('Y-m-d 23:59:59', $v['created_at']))) {
                 $wave_time_type = 8;
             }
-            
-            $id = $waveorder->where(['type' => $type,'wave_time_type' => $wave_time_type,'createtime' => ['between', [strtotime(date('Y-m-d 00:00:00')), strtotime(date('Y-m-d 23:59:59'))]]])->value('id');
-            if ($id) {
-                $this->orderitemprocess->where(['id' => $v['id']])->update(['wave_order_id' => $id,'location_code' => '','picking_sort' => '']);
-            } else {
+
+            $id = $waveorder->where(['type' => $type, 'wave_time_type' => $wave_time_type, 'order_date' => ['between', [strtotime(date('Y-m-d 00:00:00', $v['created_at'])), strtotime(date('Y-m-d 23:59:59', $v['created_at']))]]])->value('id');
+            if (!$id) {
                 $params = [];
                 $params['wave_order_number'] = 'BC' . date('YmdHis') . rand(100, 999) . rand(100, 999);
                 $params['type'] = $type;
                 $params['wave_time_type'] = $wave_time_type;
-                $params['createtime'] = $wave_time_type;
-                $waveorder->insert();
+                $params['order_date'] =  $v['created_at'];
+                $params['createtime'] = time();
+                $id = $waveorder->insertGetId($params);
             }
+
+            //转换平台SKU
+            $sku = $itemplaform->getWebSku($v['sku'], $v['site']);
+            //根据sku查询库位排序
+            $storesku = new \app\admin\model\warehouse\StockSku();
+            $where['b.area_id'] = 3;//默认拣货区
+            $location_data = $storesku->alias('a')->where(['a.sku' => $sku])->field('coding,picking_sort')->join(['fa_store_house' => 'b'],'a.store_id=b.id')->find();
+            $this->orderitemprocess->where(['id' => $v['id']])->update(['wave_order_id' => $id, 'location_code' => $location_data['coding'], 'picking_sort' =>  $location_data['picking_sort']]);
         }
     }
 
