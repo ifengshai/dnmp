@@ -687,6 +687,7 @@ class TransferOrder extends Backend
                 default:
                     $this->error(__('请检查表格中调出仓的名称'));
             }
+            dump($out_label);
             //获取站点sku列表 及当前调出仓的虚拟仓库存
             $list = $_platform
                 ->where('platform_type', $out_label)
