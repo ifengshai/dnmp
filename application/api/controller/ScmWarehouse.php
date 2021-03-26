@@ -3007,7 +3007,14 @@ class ScmWarehouse extends Scm
             $coding = $this->request->request('coding'); //库位编码
             empty($area_id) && $this->error(__('库区id不能为空'), '', 403);
             $list = $this->_store_house->getLocationData($area_id, $coding);
-            $this->success('获取成功', $list, 200);
+            foreach ($list as $k=>$v){
+                $list[$k]['sku'] = '';
+                $list[$k]['name'] = $v['library_name'];
+                $list[$k]['bind_id'] = 1;
+                $list[$k]['area_id'] = $area_id;
+                $list[$k]['area'] = Db::name('warehouse_area')->where('id',$area_id)->value('coding');
+            }
+            $this->success('获取成功', ['list' => $list], 200);
         }
         $this->error('网络异常', [], 401);
     }
