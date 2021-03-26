@@ -628,6 +628,18 @@ class TransferOrder extends Backend
                 case 'zeelool_de':
                     $out_label = 10;
                     break;
+                case 'zeelool_jp':
+                    $out_label = 11;
+                    break;
+                case 'voogmechic':
+                    $out_label = 12;
+                    break;
+                case 'zeelool_cn':
+                    $out_label = 13;
+                    break;
+                case 'alibaba':
+                    $out_label = 14;
+                    break;
                 default:
                     $this->error(__('请检查表格中调出仓的名称'));
             };
@@ -658,6 +670,18 @@ class TransferOrder extends Backend
                 //     $label = 1;
                 case 'zeelool_de':
                     $in_label = 10;
+                    break;
+                case 'zeelool_jp':
+                    $out_label = 11;
+                    break;
+                case 'voogmechic':
+                    $out_label = 12;
+                    break;
+                case 'zeelool_cn':
+                    $out_label = 13;
+                    break;
+                case 'alibaba':
+                    $out_label = 14;
                     break;
                 default:
                     $this->error(__('请检查表格中调出仓的名称'));

@@ -2,6 +2,7 @@
 
 namespace app\admin\controller;
 
+use app\admin\model\warehouse\ProductBarCodeItem;
 use think\Controller;
 use app\Common\model\Auth;
 use GuzzleHttp\Client;
@@ -1287,7 +1288,7 @@ class Test4 extends Controller
                             $update_order_node['node_type'] = $data['e'];
                             $update_order_node['update_time'] = $v['a'];
                             if ($data['e'] == 40) {
-                                $update_order_node['signing_time'] = $v['a']; //更新签收时间 
+                                $update_order_node['signing_time'] = $v['a']; //更新签收时间
                             }
                             Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
 
@@ -1399,7 +1400,7 @@ class Test4 extends Controller
                             $update_order_node['node_type'] = $data['e'];
                             $update_order_node['update_time'] = $v['a'];
                             if ($data['e'] == 40) {
-                                $update_order_node['signing_time'] = $v['a']; //更新签收时间 
+                                $update_order_node['signing_time'] = $v['a']; //更新签收时间
                             }
                             Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
 
@@ -1530,7 +1531,7 @@ class Test4 extends Controller
                             $update_order_node['node_type'] = $data['e'];
                             $update_order_node['update_time'] = $v['a'];
                             if ($data['e'] == 40) {
-                                $update_order_node['signing_time'] = $v['a']; //更新签收时间 
+                                $update_order_node['signing_time'] = $v['a']; //更新签收时间
                             }
                             Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
 
@@ -1669,7 +1670,7 @@ class Test4 extends Controller
                             $update_order_node['node_type'] = $data['e'];
                             $update_order_node['update_time'] = $v['a'];
                             if ($data['e'] == 40) {
-                                $update_order_node['signing_time'] = $v['a']; //更新签收时间 
+                                $update_order_node['signing_time'] = $v['a']; //更新签收时间
                             }
                             Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
 
@@ -1771,7 +1772,7 @@ class Test4 extends Controller
             $update_order_node['node_type'] = $data['e'];
             $update_order_node['update_time'] = $data['z0']['a'];
             if ($data['e'] == 40) {
-                $update_order_node['signing_time'] = $data['z0']['a']; //更新签收时间 
+                $update_order_node['signing_time'] = $data['z0']['a']; //更新签收时间
             }
             Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
 
@@ -2873,6 +2874,24 @@ class Test4 extends Controller
         // Db::name('lens_price')->where(['id'=>98])->update(['type'=>2]);
         // Db::name('lens_price')->where(['id'=>101])->update(['price'=>400]);
         Db::name('lens_price')->where(['id'=>28])->update(['sph_start'=>'-8.00','sph_end'=>'0.00','cyl_start'=>'-6.00','cyl_end'=>'-4.25','type'=>2]);
+    }
+
+    /**
+     * 跑入库单老数据 条形码与库位号绑定关系
+     * Created by Phpstorm.
+     * User: jhh
+     * Date: 2021/3/25
+     * Time: 14:18:26
+     */
+    public function update_bar_code_datas()
+    {
+        $data = Db::query('SELECT a.id, a.check_id, b.sku, a.in_stock_number, c.store_id, d.coding, d.area_id FROM `fa_in_stock` `a` LEFT JOIN `fa_in_stock_item` `b` ON `a`.`id` = `b`.`in_stock_id` JOIN `fa_store_sku` `c` ON `b`.`sku` = `c`.`sku` LEFT JOIN `fa_store_house` `d` ON `c`.`store_id` = `d`.`id` WHERE in_stock_number IN ( \'IN20210302090825772230\', \'IN20210302090829480510\', \'IN20210302090834209386\', \'IN20210302090840913439\', \'IN20210302090845487953\', \'IN20210302090849562833\', \'IN20210302090853861218\', \'IN20210302090857353890\', \'IN20210302090902864240\', \'IN20210302090907101523\', \'IN20210302090911359925\', \'IN20210302090915328422\', \'IN20210302090923837238\', \'IN20210302090929532973\', \'IN20210302090934608811\', \'IN20210302090954633838\', \'IN20210302091016827115\', \'IN20210302091042660609\', \'IN20210302091046585208\', \'IN20210302091051652988\', \'IN20210302091055273368\', \'IN20210311160016883690\', \'IN20210313131741682819\', \'IN20210316112712383364\', \'IN20210316112718558198\', \'IN20210316112722422461\', \'IN20210316112727225594\', \'IN20210316112731775127\', \'IN20210316130758346411\', \'IN20210316130803593610\', \'IN20210316130807203669\', \'IN20210316130819991528\', \'IN20210316130823863185\', \'IN20210316130843263882\', \'IN20210316130853784318\', \'IN20210316130858704453\', \'IN20210316130902938350\', \'IN20210316130908161545\', \'IN20210316130912626138\', \'IN20210316133717246103\', \'IN20210318182425735576\' ) AND d.area_id = 3 AND c.is_del = 1 GROUP BY b.sku ORDER BY c.store_id');
+        $product_bar_code_item = new ProductBarCodeItem();
+        foreach ($data as $k=>$v){
+            $res = $product_bar_code_item->where(['sku'=>$v['sku'],'check_id'=>$v['check_id'],'is_sample'=>0])->update(['location_code'=>$v['coding'],'location_code_id'=>$v['store_id'],'location_id'=>$v['area_id'],'in_stock_id'=>$v['id']]);
+            echo $v['sku'] . '更新' . $res . '条数据 is ok' . "\n";
+        }
+
     }
 
 }
