@@ -349,7 +349,7 @@ class DataMarket extends Backend
             $json['columnData'] = [
                 [
                     'type' => 'bar',
-                    'barWidth' => '20%',
+                    'barWidth' => '15%',
                     'data' => array_column($data, 'virtual_stock'),
                     'name' => '虚拟仓库存'
                 ],
