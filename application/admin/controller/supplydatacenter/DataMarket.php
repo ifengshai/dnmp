@@ -240,12 +240,12 @@ class DataMarket extends Backend
         $end_stock = Db::table('fa_product_allstock_log')->where($end_stock_where)->value('realtime_stock');
         $sum = $start_stock + $end_stock;
         //库存周转率
-        $arr['turnover_rate'] = $sum ? round($stock_consume_num / ($sum / 2), 2) : 0;
+        $arr['turnover_rate'] = $sum ? round($stock_consume_num / ($sum / 2), 4) : 0;
         /*
          * 库存周转天数：所选时间段的天数/库存周转率
          * */
         //库存周转天数
-        $days = round(($end - $start) / 3600 / 24);
+        $days = round(($end - $start) / 3600 / 24)+1;
         $arr['turnover_days_rate'] = $arr['turnover_rate'] ? round($days / $arr['turnover_rate']) : 0;
         Cache::set('Supplydatacenter_datamarket' . $time_str . md5(serialize('stock_measure_overview')), $arr, 7200);
         return $arr;
@@ -291,12 +291,12 @@ class DataMarket extends Backend
                 $end_stock = Db::table('fa_datacenter_day')->where($end_stock_where)->where('site', $order_platform)->value('virtual_stock');
                 $sum = $start_stock + $end_stock;
                 //虚拟仓库存周转率
-                $arr['virtual_turnover_rate'] = $sum ? round($stock_consume_num / ($sum / 2), 2) : 0;
+                $arr['virtual_turnover_rate'] = $sum ? round($stock_consume_num / ($sum / 2), 4) : 0;
                 /*
                  * 虚拟仓库存周转天数：所选时间段的天数/库存周转率
                  * */
                 //库存周转天数
-                $days = round(($end - $start) / 3600 / 24);
+                $days = round(($end - $start) / 3600 / 24)+1;
                 $arr['virtual_turnover_days_rate'] = $arr['virtual_turnover_rate'] ? round($days / $arr['virtual_turnover_rate']) : 0;
                 /*
                  * 虚拟仓月度进销比：（所选时间包含的月份整月）所选站点月度虚拟仓入库数量/站点虚拟仓月度销售数量（订单、出库）

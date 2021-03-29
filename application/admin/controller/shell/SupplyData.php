@@ -453,7 +453,6 @@ class SupplyData extends Backend
     }
     //每月数据(虚拟仓库存、周转天数)
     public function supply_month_virtual(){
-        $this->getVirtualData(5);
         $this->getVirtualData(1);
         $this->getVirtualData(2);
         $this->getVirtualData(3);
@@ -510,18 +509,13 @@ class SupplyData extends Backend
         $sum = $start_stock + $end_stock;
 
         //虚拟仓库存周转率
-        $virtual_turnover_rate = $sum ? round($stock_consume_num / ($sum / 2), 2) : 0;
+        $virtual_turnover_rate = $sum ? round($stock_consume_num / ($sum / 2), 4) : 0;
         /*
          * 虚拟仓库存周转天数：所选时间段的天数/库存周转率
          * */
         //库存周转天数
-        $days = round(($end - $start) / 3600 / 24);
+        $days = round(($end - $start) / 3600 / 24)+1;
         $arr['turnover_day'] = $virtual_turnover_rate ? round($days / $virtual_turnover_rate) : 0;
-        dump($stock_consume_num);
-        dump($sum);
-        dump($virtual_turnover_rate);
-        dump($days);
-        dump($arr['turnover_day']);exit;
         Db::name('datacenter_supply_month_web')->insert($arr);
         echo $site."-".$lastmonth." is ok"."\n";
     }
