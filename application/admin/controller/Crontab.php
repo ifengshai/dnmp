@@ -3349,14 +3349,20 @@ class Crontab extends Backend
      * @since 2020/03/02 17:39:31
      * @return void
      */
+    public function update_ashboard_data_two_zeelool(){
+        $this->get_update_ashboard_data_two(1);
+    }
     public function update_ashboard_data_two()
+    {
+        //求出平台
+        $platform = $this->request->get('platform', 1);
+        $this->get_update_ashboard_data_two($platform);
+    }
+    public function get_update_ashboard_data_two($platform)
     {
         ini_set('memory_limit', '1512M');
         set_time_limit(0);
-        //求出平台
-        $platform = $this->request->get('platform', 1);
 
-       
         if (!$platform) {
             return false;
         }
