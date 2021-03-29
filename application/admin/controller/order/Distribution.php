@@ -594,6 +594,20 @@ class Distribution extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
+            $filter = json_decode($this->request->get('filter'), true);
+            //默认展示订单状态
+            if ($filter) {
+                if ($filter['status']) {
+                    $map['b.status'] = ['in', $filter['status']];
+                    unset($filter['status']);
+                } else {
+                    $map['b.status'] = ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal']];
+                }
+            } else {
+                $map['b.status'] = ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal']];
+                unset($filter['status']);
+            }
+
             //工单状态
             $work_order_status_map = [1, 2, 3, 5];
             //工单类型

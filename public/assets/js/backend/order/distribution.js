@@ -934,7 +934,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             title: __('加工类型'),
                             addClass: 'selectpicker',
                             data: 'multiple',
-                            operate: false,
+                            operate: 'IN',
                             custom: {
                                 0: 'gray',
                                 1: 'green',
@@ -999,6 +999,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                 "processing": __('processing'),
                                 "unpaid": __('unpaid')
                             },
+                            operate: 'IN',
                             formatter: Table.api.formatter.status
                         },
                         {
