@@ -466,7 +466,7 @@ class SupplyData extends Backend
     //获取虚拟仓、周转天数方法
     public function getVirtualData($site){
         $time = date('Y-m');
-        $lastmonth = date('Y-m',strtotime("$time -2 month"));
+        $lastmonth = date('Y-m',strtotime("$time -1 month"));
         $startday = $lastmonth.'-01';
         $endday = $lastmonth.'-'.date('t', strtotime($startday));
         $start = strtotime($startday);
