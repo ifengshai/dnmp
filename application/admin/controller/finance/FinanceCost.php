@@ -16,7 +16,7 @@ class FinanceCost extends Backend
      * 无需鉴权的方法,但需要登录
      * @var array
      */
-    protected $noNeedRight = ['income', 'cost'];
+    protected $noNeedRight = ['income', 'cost','batch_export_xls'];
 
     public function _initialize()
     {
@@ -113,7 +113,6 @@ class FinanceCost extends Backend
     //导出数据
     public function batch_export_xls()
     {
-//设置过滤方法
         $ids = input('ids');
         $type = json_decode($this->request->get('type'), true);
         !empty($type) && $where['type'] = $type;
