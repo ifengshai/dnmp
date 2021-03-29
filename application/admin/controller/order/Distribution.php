@@ -1795,7 +1795,11 @@ class Distribution extends Backend
             $this->model->where(['id' => ['in', $ids]])->update(['distribution_status' => 2, 'is_print' => 1]);
 
             //添加波次单打印状态为已打印
-            $count = $this->model->where(['wave_order_id' => $wave_order_id, 'is_print' => 0])->count();
+            $count = $this->model->alias('a')
+                ->join(['fa_order' => 'b'], 'a.order_id=b.id')
+                ->where(['wave_order_id' => $wave_order_id, 'is_print' => 0, 'distribution_status' => ['<>', 0]])
+                ->where(['b.status' => ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered']]])
+                ->count();
             if ($count > 0) {
                 $status = 1;
             } elseif ($count == 0) {
