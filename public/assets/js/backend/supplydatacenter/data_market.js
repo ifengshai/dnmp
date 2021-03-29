@@ -285,7 +285,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                                     type: 'shadow' //指示器类型。可选项'line' 直线指示器。'shadow' 阴影指示器。'cross' 十字准星指示器。其实是种简写，表示启用两个正交的轴的 axisPointer。
                                 },
                                 formatter: function (param) { //格式化提示信息
-                                    return param[0].name + '<br/>' + param[0].seriesName + '：' + param[0].value + '<br/>' + param[1].seriesName + '：' + param[1].value + '%';
+                                    return param[0].name + '<br/>' + param[0].seriesName + '：' + param[0].value + '<br/>' + param[1].seriesName + '：' + param[1].value + '天';
                                 }
                             },
                             grid: { //直角坐标系内绘图网格
@@ -317,7 +317,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                                     type: 'value',
                                     name: '库存周转天数',
                                     axisLabel: {
-                                        formatter: '{value} %'
+                                        formatter: '{value} 天'
                                     }
                                 },
                             ],
