@@ -42,6 +42,7 @@ class DataMarket extends Backend
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku();
         $this->productAllStockLog = new \app\admin\model\ProductAllStock();
         $this->supplymonth = new \app\admin\model\supplydatacenter\SupplyMonth();
+        $this->supplymonthweb = new \app\admin\model\supplydatacenter\SupplyMonthWeb();
     }
 
     /**
@@ -328,6 +329,38 @@ class DataMarket extends Backend
                 $arr = $cache_data;
             }
             $this->success('', '', $arr);
+        }
+    }
+
+    //虚拟仓库指标折线图柱状图
+    public function virtual_change_barline()
+    {
+        if ($this->request->isAjax()) {
+            $params = $this->request->param();
+            $order_platform = $params['order_platform'] ? $params['order_platform'] : 1;
+            $start = date('Y-m', strtotime('-12 months'));
+            $end = date('Y-m');
+
+            $where['day_date'] = ['between', [$start, $end]];
+            $where['site'] = $order_platform;
+            $data = $this->supplymonthweb->where($where)->field('id,virtual_stock,turnover_day,day_date')->order('day_date', 'asc')->select();
+            $json['xColumnName'] = array_column($data, 'day_date');
+            $json['column'] = ['虚拟仓库存、库存周转天数'];
+            $json['columnData'] = [
+                [
+                    'type' => 'bar',
+                    'data' => array_column($data, 'virtual_stock'),
+                    'name' => '虚拟仓库存'
+                ],
+                [
+                    'type' => 'line',
+                    'data' => array_column($data, 'turnover_day'),
+                    'name' => '库存周转天数',
+                    'yAxisIndex' => 1,
+                    'smooth' => true //平滑曲线
+                ],
+            ];
+            return json(['code' => 1, 'data' => $json]);
         }
     }
 
