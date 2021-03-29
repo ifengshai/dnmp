@@ -1621,6 +1621,7 @@ class OrderData extends Backend
         //查询今天的订单
         // $where['a.created_at'] = ['between', [strtotime(date('Y-m-d 00:00:00')), strtotime(date('Y-m-d 23:59:59'))]];
         $where['b.wave_order_id'] = 0;
+        $where['b.is_print'] = 0;
         $list = $this->order->where($where)->alias('a')->field('b.id,b.sku,a.created_at,entity_id,a.site')
             ->join(['fa_order_item_process' => 'b'], 'a.entity_id=b.magento_order_id and a.site=b.site')
             ->order('id desc')
