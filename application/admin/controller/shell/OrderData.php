@@ -1354,7 +1354,11 @@ class OrderData extends Backend
             $arr['order_prescription_type'] = 3;
             $arr['is_custom_lens'] = 1;
         }
-
+        $od_sph = (float) urldecode($params['od_sph']);
+        $os_sph = (float) urldecode($params['os_sph']);
+        $od_cyl = (float) urldecode($params['od_cyl']);
+        $os_cyl = (float) urldecode($params['os_cyl']);
+       
         //仅镜框
         if ($params['lens_number'] == '10000000' || !$params['lens_number']) {
             $arr['order_prescription_type'] = 1;
@@ -1365,39 +1369,24 @@ class OrderData extends Backend
              * 1.61非球面绿膜 定制片
              * SPH:0.00～-8.00 CYL:-4.25～-6.00
              */
-            if ((((float) urldecode($params['od_sph']) >= -8 && (float) urldecode($params['od_sph']) <= 0) || ((float) urldecode($params['os_sph']) >= -8 && (float) urldecode($params['os_sph']) <= 0)) && (((float) urldecode($params['od_cyl']) >= -6 && (float) urldecode($params['od_cyl']) <= -4.25) || ((float) urldecode($params['os_cyl']) >= -6 && (float) urldecode($params['os_cyl']) <= -4.25))) {
+            if ((($od_sph >= -8 && $od_sph <= 0) || ($os_sph >= -8 && $os_sph <= 0)) && (($od_cyl >= -6 && $od_cyl <= -4.25) || ($os_cyl >= -6 && $os_cyl <= -4.25))) {
                 $arr['is_custom_lens'] = 1;
                 $arr['order_prescription_type'] = 3;
             }
-            if ((((float) urldecode($params['od_sph']) >= -7 && (float) urldecode($params['od_sph']) <= 0) || ((float) urldecode($params['os_sph']) >= -7 && (float) urldecode($params['os_sph']) <= 0)) && (((float) urldecode($params['od_cyl']) >= -4 && (float) urldecode($params['od_cyl']) <= 0) || ((float) urldecode($params['os_cyl']) >= -4 && (float) urldecode($params['os_cyl']) <= 0))) {
+           
+            if ((($od_sph >= -7 && $od_sph <= 0) || ($os_sph >= -7 && $os_sph <= 0)) && (($od_cyl >= -4 && $od_cyl <= 0) || ($os_cyl >= -4 && $os_cyl <= 0))) {
                 $arr['is_custom_lens'] = 1;
                 $arr['order_prescription_type'] = 2;
             }
-            if ((((float) urldecode($params['od_sph']) >= -10 && (float) urldecode($params['od_sph']) <= -7.25) || ((float) urldecode($params['os_sph']) >= -10 && (float) urldecode($params['os_sph']) <= -7.25)) && (((float) urldecode($params['od_cyl']) >= -4 && (float) urldecode($params['od_cyl']) <= 0) || ((float) urldecode($params['os_cyl']) >= -4 && (float) urldecode($params['os_cyl']) <= 0))) {
+            if ((($od_sph >= -10 && $od_sph <= -7.25) || ($os_sph >= -10 && $os_sph <= -7.25)) && (($od_cyl >= -4 && $od_cyl <= 0) || ($os_cyl >= -4 && $os_cyl <= 0))) {
                 $arr['is_custom_lens'] = 1;
                 $arr['order_prescription_type'] = 3;
             }
-            if ((((float) urldecode($params['od_sph']) >= 0 && (float) urldecode($params['od_sph']) <= 4) || ((float) urldecode($params['os_sph']) >= 0 && (float) urldecode($params['os_sph']) <= 4)) && (((float) urldecode($params['od_cyl']) >= -2 && (float) urldecode($params['od_cyl']) <= 0) || ((float) urldecode($params['os_cyl']) >= -2 && (float) urldecode($params['os_cyl']) <= 0))) {
+            if ((($od_sph >= 0 && $od_sph <= 4) || ($os_sph >= 0 && $os_sph <= 4)) && (($od_cyl >= -2 && $od_cyl <= 0) || ($os_cyl >= -2 && $os_cyl <= 0))) {
                 $arr['is_custom_lens'] = 1;
                 $arr['order_prescription_type'] = 2;
             }
-            if ((((float) urldecode($params['od_sph']) >= 4.25 && (float) urldecode($params['od_sph']) <= 6) || ((float) urldecode($params['os_sph']) >= 4.25 && (float) urldecode($params['os_sph']) <= 6)) && (((float) urldecode($params['od_cyl']) >= -6 && (float) urldecode($params['od_cyl']) <= 0) || ((float) urldecode($params['os_cyl']) >= -6 && (float) urldecode($params['os_cyl']) <= 0))) {
-                $arr['is_custom_lens'] = 1;
-                $arr['order_prescription_type'] = 2;
-            }
-            if ((((float) urldecode($params['od_sph']) >= -7 && (float) urldecode($params['od_sph']) <= 0) || ((float) urldecode($params['os_sph']) >= -7 && (float) urldecode($params['os_sph']) <= 0)) && (((float) urldecode($params['od_cyl']) >= -4 && (float) urldecode($params['od_cyl']) <= 0) || ((float) urldecode($params['os_cyl']) >= -4 && (float) urldecode($params['os_cyl']) <= 0))) {
-                $arr['is_custom_lens'] = 1;
-                $arr['order_prescription_type'] = 2;
-            }
-            if ((((float) urldecode($params['od_sph']) >= -10 && (float) urldecode($params['od_sph']) <= -7.25) || ((float) urldecode($params['os_sph']) >= -10 && (float) urldecode($params['os_sph']) <= -7.25)) && (((float) urldecode($params['od_cyl']) >= -4 && (float) urldecode($params['od_cyl']) <= 0) || ((float) urldecode($params['os_cyl']) >= -4 && (float) urldecode($params['os_cyl']) <= 0))) {
-                $arr['is_custom_lens'] = 1;
-                $arr['order_prescription_type'] = 3;
-            }
-            if ((((float) urldecode($params['od_sph']) >= 0 && (float) urldecode($params['od_sph']) <= 4) || ((float) urldecode($params['os_sph']) >= 0 && (float) urldecode($params['os_sph']) <= 4)) && (((float) urldecode($params['od_cyl']) >= -2 && (float) urldecode($params['od_cyl']) <= 0) || ((float) urldecode($params['os_cyl']) >= -2 && (float) urldecode($params['os_cyl']) <= 0))) {
-                $arr['is_custom_lens'] = 1;
-                $arr['order_prescription_type'] = 2;
-            }
-            if ((((float) urldecode($params['od_sph']) >= 4.25 && (float) urldecode($params['od_sph']) <= 6) || ((float) urldecode($params['os_sph']) >= 4.25 && (float) urldecode($params['os_sph']) <= 6)) && (((float) urldecode($params['od_cyl']) >= -6 && (float) urldecode($params['od_cyl']) <= 0) || ((float) urldecode($params['os_cyl']) >= -6 && (float) urldecode($params['os_cyl']) <= 0))) {
+            if ((($od_sph >= 4.25 && $od_sph <= 6) || ($os_sph >= 4.25 && $os_sph <= 6)) && (($od_cyl >= -6 && $od_cyl <= 0) || ($os_cyl >= -6 && $os_cyl <= 0))) {
                 $arr['is_custom_lens'] = 1;
                 $arr['order_prescription_type'] = 3;
             }
@@ -1408,9 +1397,9 @@ class OrderData extends Backend
              * 1.67非球面绿膜 现片
              * SPH:-3.00～-12.00 CYL:0.00～-2.00（不含-0.25）
              */
-            if ((((float) urldecode($params['od_sph']) >= -12 && (float) urldecode($params['od_sph']) <= -3) || ((float) urldecode($params['os_sph']) >= -12 && (float) urldecode($params['os_sph']) <= -3)) && (((float) urldecode($params['od_cyl']) >= -2 && (float) urldecode($params['od_cyl']) < -0.5 && (float) urldecode($params['od_cyl']) != -0.25) || ((float) urldecode($params['os_cyl']) >= -2 && (float) urldecode($params['os_cyl']) <= -0.5 && (float) urldecode($params['od_cyl']) != -0.25))) {
+            if ((($od_sph >= -12 && $od_sph <= -3) || ($os_sph >= -12 && $os_sph <= -3)) && (($od_cyl >= -2 && $od_cyl < -0.5 && $od_cyl != -0.25) || ($os_cyl >= -2 && $os_cyl <= -0.5 && $od_cyl != -0.25))) {
                 $arr['order_prescription_type'] = 2;
-            } elseif ((float) urldecode($params['od_sph']) == 0 && (float) urldecode($params['os_sph']) == 0) {
+            } elseif ($od_sph == 0 && $os_sph == 0) {
                 $arr['order_prescription_type'] = 2;
             } else {
                 $arr['is_custom_lens'] = 1;
@@ -1423,9 +1412,9 @@ class OrderData extends Backend
              * 1.71非球面绿膜 现片
              * SPH:0.00～-15.00 CYL:0.00～-2.00（不含-0.25）
              */
-            if ((((float) urldecode($params['od_sph']) >= -15 && (float) urldecode($params['od_sph']) <= 0) || ((float) urldecode($params['os_sph']) >= -15 && (float) urldecode($params['os_sph']) <= 0)) && (((float) urldecode($params['od_cyl']) >= -2 && (float) urldecode($params['od_cyl']) <= 0 && (float) urldecode($params['od_cyl']) != -0.25) || ((float) urldecode($params['os_cyl']) >= -2 && (float) urldecode($params['os_cyl']) <= 0 && (float) urldecode($params['od_cyl']) != -0.25))) {
+            if ((($od_sph >= -15 && $od_sph <= 0) || ($os_sph >= -15 && $os_sph <= 0)) && (($od_cyl >= -2 && $od_cyl <= 0 && $od_cyl != -0.25) || ($os_cyl >= -2 && $os_cyl <= 0 && $od_cyl != -0.25))) {
                 $arr['order_prescription_type'] = 3;
-            } elseif ((float) urldecode($params['od_sph']) == 0 && (float) urldecode($params['os_sph']) == 0) {
+            } elseif ($od_sph == 0 && $os_sph == 0) {
                 $arr['order_prescription_type'] = 3;
             } else {
                 $arr['is_custom_lens'] = 1;
@@ -1438,9 +1427,9 @@ class OrderData extends Backend
              * 1.74非球面绿膜 现片
              * SPH:-3.00～-13.00 CYL:0.00～-2.00（不含-0.25）
              */
-            if ((((float) urldecode($params['od_sph']) >= -13 && (float) urldecode($params['od_sph']) <= -3) || ((float) urldecode($params['os_sph']) >= -13 && (float) urldecode($params['os_sph']) <= -3)) && (((float) urldecode($params['od_cyl']) >= -2 && (float) urldecode($params['od_cyl']) <= 0 && (float) urldecode($params['od_cyl']) != -0.25) || ((float) urldecode($params['os_cyl']) >= -2 && (float) urldecode($params['os_cyl']) <= 0 && (float) urldecode($params['od_cyl']) != -0.25))) {
+            if ((($od_sph >= -13 && $od_sph <= -3) || ($os_sph >= -13 && $os_sph <= -3)) && (($od_cyl >= -2 && $od_cyl <= 0 && $od_cyl != -0.25) || ($os_cyl >= -2 && $os_cyl <= 0 && $od_cyl != -0.25))) {
                 $arr['order_prescription_type'] = 3;
-            } elseif ((float) urldecode($params['od_sph']) == 0 && (float) urldecode($params['os_sph']) == 0) {
+            } elseif ($od_sph == 0 && $os_sph == 0) {
                 $arr['order_prescription_type'] = 3;
             } else {
                 $arr['is_custom_lens'] = 1;
@@ -1455,11 +1444,11 @@ class OrderData extends Backend
              * SPH:0.00～-8.00 CYL:-2.25～-4.00
              * SPH:0.00～+6.00 CYL:0.00～-2.00
              */
-            if ((((float) urldecode($params['od_sph']) >= -7 && (float) urldecode($params['od_sph']) <= 0) || ((float) urldecode($params['os_sph']) >= -7 && (float) urldecode($params['os_sph']) <= 0)) && (((float) urldecode($params['od_cyl']) >= -4 && (float) urldecode($params['od_cyl']) <= 0) || ((float) urldecode($params['os_cyl']) >= -4 && (float) urldecode($params['os_cyl']) <= 0))) {
+            if ((($od_sph >= -7 && $od_sph <= 0) || ($os_sph >= -7 && $os_sph <= 0)) && (($od_cyl >= -4 && $od_cyl <= 0) || ($os_cyl >= -4 && $os_cyl <= 0))) {
                 $arr['order_prescription_type'] = 2;
-            } elseif ((((float) urldecode($params['od_sph']) >= 0 && (float) urldecode($params['od_sph']) <= 4) || ((float) urldecode($params['os_sph']) >= 0 && (float) urldecode($params['os_sph']) <= 4)) && (((float) urldecode($params['od_cyl']) >= -2 && (float) urldecode($params['od_cyl']) <= 0) || ((float) urldecode($params['os_cyl']) >= -2 && (float) urldecode($params['os_cyl']) <= 0))) {
+            } elseif ((($od_sph >= 0 && $od_sph <= 4) || ($os_sph >= 0 && $os_sph <= 4)) && (($od_cyl >= -2 && $od_cyl <= 0) || ($os_cyl >= -2 && $os_cyl <= 0))) {
                 $arr['order_prescription_type'] = 2;
-            } elseif ((float) urldecode($params['od_sph']) == 0 && (float) urldecode($params['os_sph']) == 0) {
+            } elseif ($od_sph == 0 && $os_sph == 0) {
                 $arr['order_prescription_type'] = 2;
             } else {
                 $arr['is_custom_lens'] = 1;
@@ -1472,9 +1461,9 @@ class OrderData extends Backend
              * 1.57变色 现片 1.71变色灰
              * SPH:0.00～-3.00 CYL:0.00～-2.00
              */
-            if ((((float) urldecode($params['od_sph']) >= -12 && (float) urldecode($params['od_sph']) <= 0) || ((float) urldecode($params['os_sph']) >= -12 && (float) urldecode($params['os_sph']) <= 0)) && (((float) urldecode($params['od_cyl']) >= -2 && (float) urldecode($params['od_cyl']) <= 0 && (float) urldecode($params['od_cyl']) != -0.25) || ((float) urldecode($params['os_cyl']) >= -2 && (float) urldecode($params['os_cyl']) <= 0 && (float) urldecode($params['od_cyl']) != -0.25))) {
+            if ((($od_sph >= -12 && $od_sph <= 0) || ($os_sph >= -12 && $os_sph <= 0)) && (($od_cyl >= -2 && $od_cyl <= 0 && $od_cyl != -0.25) || ($os_cyl >= -2 && $os_cyl <= 0 && $od_cyl != -0.25))) {
                 $arr['order_prescription_type'] = 3;
-            } elseif ((float) urldecode($params['od_sph']) == 0 && (float) urldecode($params['os_sph']) == 0) {
+            } elseif ($od_sph == 0 && $os_sph == 0) {
                 $arr['order_prescription_type'] = 2;
             } else {
                 $arr['is_custom_lens'] = 1;
@@ -1487,9 +1476,9 @@ class OrderData extends Backend
              * 1.71防蓝光 现片
              * SPH:0.00～-12.00 CYL:0.00～-2.00（不含-0.25）
              */
-            if ((((float) urldecode($params['od_sph']) >= -3 && (float) urldecode($params['od_sph']) <= 0) || ((float) urldecode($params['os_sph']) >= -3 && (float) urldecode($params['os_sph']) <= 0)) && (((float) urldecode($params['od_cyl']) >= -2 && (float) urldecode($params['od_cyl']) <= 0) || ((float) urldecode($params['os_cyl']) >= -2 && (float) urldecode($params['os_cyl']) <= 0))) {
+            if ((($od_sph >= -3 && $od_sph <= 0) || ($os_sph >= -3 && $os_sph <= 0)) && (($od_cyl >= -2 && $od_cyl <= 0) || ($os_cyl >= -2 && $os_cyl <= 0))) {
                 $arr['order_prescription_type'] = 3;
-            } elseif ((float) urldecode($params['od_sph']) == 0 && (float) urldecode($params['os_sph']) == 0) {
+            } elseif ($od_sph == 0 && $os_sph == 0) {
                 $arr['order_prescription_type'] = 2;
             } else {
                 $arr['is_custom_lens'] = 1;
@@ -1503,9 +1492,9 @@ class OrderData extends Backend
              * 1.61变色灰 现片
              * SPH:0.00～-8.00 CYL:0.00～-2.00
              */
-            if ((((float) urldecode($params['od_sph']) >= -5 && (float) urldecode($params['od_sph']) <= 0) || ((float) urldecode($params['os_sph']) >= -5 && (float) urldecode($params['os_sph']) <= 0)) && (((float) urldecode($params['od_cyl']) >= -1.5 && (float) urldecode($params['od_cyl']) <= 0) || ((float) urldecode($params['os_cyl']) >= -1.5 && (float) urldecode($params['os_cyl']) <= 0))) {
+            if ((($od_sph >= -5 && $od_sph <= 0) || ($os_sph >= -5 && $os_sph <= 0)) && (($od_cyl >= -1.5 && $od_cyl <= 0) || ($os_cyl >= -1.5 && $os_cyl <= 0))) {
                 $arr['order_prescription_type'] = 2;
-            } elseif ((float) urldecode($params['od_sph']) == 0 && (float) urldecode($params['os_sph']) == 0) {
+            } elseif ($od_sph == 0 && $os_sph == 0) {
                 $arr['order_prescription_type'] = 2;
             } else {
                 $arr['is_custom_lens'] = 1;
@@ -1523,9 +1512,9 @@ class OrderData extends Backend
              * 1.61变色蓝 现片
              * SPH:0.00～-8.00 CYL:0.00～-2.00
              */
-            if ((((float) urldecode($params['od_sph']) >= -8 && (float) urldecode($params['od_sph']) <= 0) || ((float) urldecode($params['os_sph']) >= -8 && (float) urldecode($params['os_sph']) <= 0)) && (((float) urldecode($params['od_cyl']) >= -2 && (float) urldecode($params['od_cyl']) <= 0.5) || ((float) urldecode($params['os_cyl']) >= -2 && (float) urldecode($params['os_cyl']) <= 0.5))) {
+            if ((($od_sph >= -8 && $od_sph <= 0) || ($os_sph >= -8 && $os_sph <= 0)) && (($od_cyl >= -2 && $od_cyl <= 0.5) || ($os_cyl >= -2 && $os_cyl <= 0.5))) {
                 $arr['order_prescription_type'] = 3;
-            } elseif ((float) urldecode($params['od_sph']) == 0 && (float) urldecode($params['os_sph']) == 0) {
+            } elseif ($od_sph == 0 && $os_sph == 0) {
                 $arr['order_prescription_type'] = 2;
             } else {
                 $arr['is_custom_lens'] = 1;
