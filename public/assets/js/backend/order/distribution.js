@@ -672,6 +672,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             title: __('Id')
                         },
                         {
+                            field: 'item_order_number',
+                            title: __('子单号'),
+                            operate: 'like',
+                            visible: false
+                        },
+                        {
                             field: 'wave_time_type',
                             title: __('波次'),
                             addClass: 'selectpicker',
@@ -836,10 +842,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
             });
 
         },
-        wave_order_detail:function()
-        {
-             // 初始化表格参数配置
-             Table.api.init({
+        wave_order_detail: function () {
+            // 初始化表格参数配置
+            Table.api.init({
                 showJumpto: true,
                 searchFormVisible: true,
                 pageSize: 100,
@@ -1022,7 +1027,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             operate: false,
                             formatter: Table.api.formatter.status
                         },
-                       
+
                         {
                             field: 'a.created_at',
                             title: __('创建时间'),
@@ -1041,8 +1046,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             title: __('Operate'),
                             table: table,
                             events: Table.api.events.operate,
-                            buttons: [
-                                {
+                            buttons: [{
                                     name: 'detail',
                                     text: '镜片参数',
                                     title: __('镜片参数'),

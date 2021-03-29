@@ -522,7 +522,7 @@ class Distribution extends Backend
         $this->assign('label', $label);
         $this->assignconfig('label', $label);
 
-        $label_list = ['全部', '待打印标签', '待配货', '待配镜片', '待加工', '待印logo', '待成品质检', '待合单', '跟单'];
+        $label_list = [2 => '待配货', 3 => '待配镜片', 4 => '待加工', 5 => '待印logo', 6 => '待成品质检', 7 => '待合单', 8 => '跟单', 0 => '全部'];
         $this->assign('label_list', $label_list);
 
         return $this->view->fetch();
@@ -547,6 +547,16 @@ class Distribution extends Backend
                 return $this->selectpage();
             }
 
+            $filter = json_decode($this->request->get('filter'), true);
+            //查询子订单
+            if ($filter['item_order_number']) {
+                $map['item_order_number'] = ['like', $filter['item_order_number'] . '%'];
+                $wave_order_id = $this->_new_order_process->where($map)->value('wave_order_id');
+                $where['id'] = $wave_order_id;
+                unset($filter['item_order_number']);
+            }
+            $this->request->get(['filter' => json_encode($filter)]);
+
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->_wave_order
                 ->where($where)
@@ -570,7 +580,7 @@ class Distribution extends Backend
         $this->assign('label', $label);
         $this->assignconfig('label', $label);
 
-        $label_list = ['全部', '待打印标签', '待配货', '待配镜片', '待加工', '待印logo', '待成品质检', '待合单', '跟单'];
+        $label_list = [2 => '待配货', 3 => '待配镜片', 4 => '待加工', 5 => '待印logo', 6 => '待成品质检', 7 => '待合单', 8 => '跟单', 0 => '全部'];
         $this->assign('label_list', $label_list);
 
         return $this->view->fetch();
@@ -620,6 +630,8 @@ class Distribution extends Backend
             //波次单id
             $ids = input('ids');
             if ($ids) $map['wave_order_id'] = $ids;
+
+            $this->request->get(['filter' => json_encode($filter)]);
 
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
 
