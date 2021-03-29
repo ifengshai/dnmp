@@ -25,6 +25,7 @@ class SupplyData extends Backend
         $this->ordernode = new \app\admin\model\OrderNode();
         $this->productAllStockLog = new \app\admin\model\ProductAllStock();
         $this->dullstock = new \app\admin\model\supplydatacenter\DullStock();
+        $this->outstock = new \app\admin\model\warehouse\Outstock;
     }
     /**
      * 呆滞数据
