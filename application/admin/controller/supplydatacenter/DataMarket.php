@@ -42,6 +42,7 @@ class DataMarket extends Backend
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku();
         $this->productAllStockLog = new \app\admin\model\ProductAllStock();
         $this->supplymonth = new \app\admin\model\supplydatacenter\SupplyMonth();
+        $this->supplymonthweb = new \app\admin\model\supplydatacenter\SupplyMonthWeb();
     }
 
     /**
@@ -240,12 +241,12 @@ class DataMarket extends Backend
         $end_stock = Db::table('fa_product_allstock_log')->where($end_stock_where)->value('realtime_stock');
         $sum = $start_stock + $end_stock;
         //库存周转率
-        $arr['turnover_rate'] = $sum ? round($stock_consume_num / $sum / 2, 2) : 0;
+        $arr['turnover_rate'] = $sum ? round($stock_consume_num / ($sum / 2), 4) : 0;
         /*
          * 库存周转天数：所选时间段的天数/库存周转率
          * */
         //库存周转天数
-        $days = round(($end - $start) / 3600 / 24);
+        $days = round(($end - $start) / 3600 / 24)+1;
         $arr['turnover_days_rate'] = $arr['turnover_rate'] ? round($days / $arr['turnover_rate']) : 0;
         Cache::set('Supplydatacenter_datamarket' . $time_str . md5(serialize('stock_measure_overview')), $arr, 7200);
         return $arr;
@@ -257,12 +258,9 @@ class DataMarket extends Backend
         if ($this->request->isAjax()) {
             $params = $this->request->param();
             $order_platform = $params['order_platform'] ? $params['order_platform'] : 1;
-            $time_str = $params['time_str'] ? $params['time_str'] : '';
-            if (!$params['time_str']) {
-                $start = date('Y-m-d 00:00:00', strtotime('-6 day'));
-                $end = date('Y-m-d 23:59:59');
-                $time_str = $start . ' - ' . $end;
-            }
+            $start = date('Y-m-01');
+            $end = date('Y-m-d 23:59:59');
+            $time_str = $start . ' - ' . $end;
             $cache_data = Cache::get('Supplydatacenter_datamarket' . $order_platform . $time_str . md5(serialize('stock_measure_overview_platform')));
             if (!$cache_data) {
                 /*
@@ -294,12 +292,12 @@ class DataMarket extends Backend
                 $end_stock = Db::table('fa_datacenter_day')->where($end_stock_where)->where('site', $order_platform)->value('virtual_stock');
                 $sum = $start_stock + $end_stock;
                 //虚拟仓库存周转率
-                $arr['virtual_turnover_rate'] = $sum ? round($stock_consume_num / $sum / 2, 2) : 0;
+                $arr['virtual_turnover_rate'] = $sum ? round($stock_consume_num / ($sum / 2), 4) : 0;
                 /*
                  * 虚拟仓库存周转天数：所选时间段的天数/库存周转率
                  * */
                 //库存周转天数
-                $days = round(($end - $start) / 3600 / 24);
+                $days = round(($end - $start) / 3600 / 24)+1;
                 $arr['virtual_turnover_days_rate'] = $arr['virtual_turnover_rate'] ? round($days / $arr['virtual_turnover_rate']) : 0;
                 /*
                  * 虚拟仓月度进销比：（所选时间包含的月份整月）所选站点月度虚拟仓入库数量/站点虚拟仓月度销售数量（订单、出库）
@@ -331,6 +329,38 @@ class DataMarket extends Backend
                 $arr = $cache_data;
             }
             $this->success('', '', $arr);
+        }
+    }
+
+    //虚拟仓库指标折线图柱状图
+    public function virtual_change_barline()
+    {
+        if ($this->request->isAjax()) {
+            $params = $this->request->param();
+            $order_platform = $params['order_platform'] ? $params['order_platform'] : 1;
+            $start = date('Y-m', strtotime('-12 months'));
+            $end = date('Y-m');
+
+            $where['day_date'] = ['between', [$start, $end]];
+            $where['site'] = $order_platform;
+            $data = $this->supplymonthweb->where($where)->field('id,virtual_stock,turnover_day,day_date')->order('day_date', 'asc')->select();
+            $json['xColumnName'] = array_column($data, 'day_date');
+            $json['column'] = ['虚拟仓库存、库存周转天数'];
+            $json['columnData'] = [
+                [
+                    'type' => 'bar',
+                    'data' => array_column($data, 'virtual_stock'),
+                    'name' => '虚拟仓库存'
+                ],
+                [
+                    'type' => 'line',
+                    'data' => array_column($data, 'turnover_day'),
+                    'name' => '库存周转天数',
+                    'yAxisIndex' => 1,
+                    'smooth' => true //平滑曲线
+                ],
+            ];
+            return json(['code' => 1, 'data' => $json]);
         }
     }
 

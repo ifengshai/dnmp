@@ -370,13 +370,6 @@
                         <label>虚拟仓概况</label>
                     </div>
                     <div style="float: right;display: flex;">
-                        <div style="margin-right: 30px;">
-                            <label style="text-align: right;margin-right: 100px;">时间:</label>
-                            <div id="timetime1" role="form" style="float: right;margin-left: -91px;margin-top: -7px;">
-                                <input type="hidden" class="form-control operate" name="one_time-operate" data-name="time_str" value="RANGE" readonly="">
-                                <input type="text" autocomplete="off" class="form-control datetimerange" name="time_str"  id="time_str1" value="{$time_str1}" data-index="14">
-                            </div>
-                        </div>
                         <div>
                             <label style="float: right;margin-right: 120px">站点：</label>
                             <select data-rule="required" class="platform-select" id="order_platform">
@@ -391,20 +384,25 @@
                     <div class="margin-div" style="text-align: center">
                         <div class="btn btn-div div3">
                             <span class="extend">
-                                <div class="title2">虚拟仓库存周转率<br/><span style="color: #396fff;" id="virtual_turnover_rate"></span></div>
+                                <div class="title2">当月虚拟仓库存周转率<br/><span style="color: #396fff;" id="virtual_turnover_rate"></span></div>
                             </span>
                         </div>
                         <div class="btn btn-div div3">
                             <span class="extend">
-                                <div class="title2">虚拟仓库存周转天数<br/><span style="color: #396fff;" id="virtual_turnover_days_rate"></span></div>
+                                <div class="title2">当月虚拟仓库存周转天数<br/><span style="color: #396fff;" id="virtual_turnover_days_rate"></span></div>
                             </span>
                         </div>
                         <div class="btn btn-div div3">
                             <span class="extend">
-                                <div class="title2">虚拟仓月度进销比<br/><span style="color: #396fff;" id="virtual_month_in_out_rate"></span></div>
+                                <div class="title2">当月虚拟仓进销比<br/><span style="color: #396fff;" id="virtual_month_in_out_rate"></span></div>
                             </span>
                         </div>
 
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="margin-div" style="text-align: center">
+                        <div id="echart7" style="height:300px;margin: 10px 0px 10px 0px;"></div>
                     </div>
                 </div>
             </div>
