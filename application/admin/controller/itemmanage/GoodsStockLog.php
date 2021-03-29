@@ -3,6 +3,7 @@
 namespace app\admin\controller\itemmanage;
 
 use app\common\controller\Backend;
+use think\Db;
 
 /**
  * 商品库存变化管理
@@ -65,6 +66,11 @@ class GoodsStockLog extends Backend
 
             $list = collection($list)->toArray();
             foreach ($list as $k=>$v){
+                //如果是盘点模块  获取对应的盘点单号
+                if ($v['modular'] ==12){
+                    $list[$k]['order_number'] = Db::name('inventory_list')->where('id',$v['order_number'])->value('number');
+                }
+
                 if ($v['stock_change'] == 0 && $v['stock_before'] == 0){
                     $list[$k]['stock_change'] = '-';
                     $list[$k]['stock_before'] = '-';

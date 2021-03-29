@@ -51,19 +51,6 @@ class DataMarket extends Backend
      */
     public function index()
     {
-        if ($this->request->isAjax()) {
-            $params = $this->request->param();
-            if (!$params['time_str']) {
-                $start = date('Y-m-d 00:00:00', strtotime('-6 day'));
-                $end = date('Y-m-d 23:59:59');
-                $time_str = $start . ' - ' . $end;
-            } else {
-                $time_str = $params['time_str'];
-            }
-            //仓库指标总览
-            $stock_measure_overview = $this->stock_measure_overview($time_str);
-            $this->success('', '', $stock_measure_overview);
-        }
         //默认7天数据
         $start1 = date('Y-m-d 00:00:00', strtotime('-6 day'));
         $end1 = date('Y-m-d 23:59:59');
@@ -217,13 +204,11 @@ class DataMarket extends Backend
     }
 
     //仓库指标总览
-    public function stock_measure_overview($time_str = '')
+    public function stock_measure_overview()
     {
-        if (!$time_str) {
-            $start = date('Y-m-d 00:00:00', strtotime('-6 day'));
-            $end = date('Y-m-d 23:59:59');
-            $time_str = $start . ' - ' . $end;
-        }
+        $start = date('Y-m-01 00:00:00', strtotime('-12 months'));
+        $end = date('Y-m-d 23:59:59');
+        $time_str = $start . ' - ' . $end;
         $cache_data = Cache::get('Supplydatacenter_datamarket' . $time_str . md5(serialize('stock_measure_overview')));
         if ($cache_data) {
             return $cache_data;

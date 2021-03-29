@@ -221,7 +221,7 @@ class OrderDataDetail extends Backend
                     $register_email = '';
                 }
                 $arr[$i]['customer_type'] = $group;   //客户类型
-                $arr[$i]['discount_rate'] = $value['base_grand_total'] ? round(($value['base_discount_amount']/$value['base_grand_total']),2).'%' : 0;  //折扣百分比
+                $arr[$i]['discount_rate'] = $value['base_grand_total'] ? round(($value['base_discount_amount']/$value['base_grand_total']*(-1)),2).'%' : 0;  //折扣百分比
                 $arr[$i]['discount_money'] = round($value['base_discount_amount'],2);  //折扣金额
                 $work_list_where['platform_order'] = $value['increment_id'];
                 $work_list = Db::name('work_order_list')->where($work_list_where)->field('id,is_refund')->select();
@@ -666,7 +666,7 @@ class OrderDataDetail extends Backend
                 }
                 if(in_array('discount_rate',$column_name)){
                     $index = array_keys($column_name,'discount_rate');
-                    $tmpRow[$index[0]] =$val['base_grand_total'] ? round(($val['base_discount_amount']/$val['base_grand_total']),2).'%' : 0;//折扣百分比
+                    $tmpRow[$index[0]] =$val['base_grand_total'] ? round(($val['base_discount_amount']/$val['base_grand_total']*(-1)),2).'%' : 0;//折扣百分比
                 }
                 if(in_array('discount_money',$column_name)){
                     $index = array_keys($column_name,'discount_money');
