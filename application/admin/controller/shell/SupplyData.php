@@ -508,7 +508,7 @@ class SupplyData extends Backend
         $end_stock = Db::table('fa_datacenter_day')->where($end_stock_where)->where('site', $site)->value('virtual_stock');
         $sum = $start_stock + $end_stock;
         //虚拟仓库存周转率
-        $virtual_turnover_rate = $sum ? round($stock_consume_num / $sum / 2, 2) : 0;
+        $virtual_turnover_rate = $sum ? round($stock_consume_num / ($sum / 2), 2) : 0;
         /*
          * 虚拟仓库存周转天数：所选时间段的天数/库存周转率
          * */
