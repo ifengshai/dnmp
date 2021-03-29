@@ -882,17 +882,17 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                         {
                             field: 'increment_id',
                             title: __('订单号'),
-                            operate: false
+                            operate: 'like'
                         },
                         {
                             field: 'item_order_number',
                             title: __('子单号'),
-                            operate: false
+                            operate: 'like'
                         },
                         {
                             field: 'sku',
                             title: __('SKU'),
-                            operate: false
+                            operate: 'like'
                         },
                         {
                             field: 'total_qty_ordered',
@@ -931,7 +931,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                 13: 'Zeelool_cn',
                                 14: 'Alibaba',
                             },
-                            operate: false,
+                            operate: 'IN',
                             formatter: Table.api.formatter.status
                         },
                         {
@@ -979,7 +979,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                 10: '货到付款',
                                 11: '普通订单'
                             },
-                            operate: false,
+                            operate: 'IN',
                             formatter: Table.api.formatter.status
                         },
                         {
@@ -1024,7 +1024,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                 8: __('合单中'),
                                 9: __('合单完成')
                             },
-                            operate: false,
+                            operate: 'IN',
                             formatter: Table.api.formatter.status
                         },
 

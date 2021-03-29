@@ -620,6 +620,18 @@ class Distribution extends Backend
 
             $map['a.distribution_status'] = ['<>', 0];
 
+            //筛选站点
+            if ($filter['site']) {
+                $map['a.site'] = ['in', $filter['site']];
+                unset($filter['site']);
+            }
+
+            //加工类型筛选
+            if (isset($filter['order_prescription_type'])) {
+                $map['a.order_prescription_type'] = ['in', $filter['order_prescription_type']];
+                unset($filter['order_prescription_type']);
+            }
+
             //工单状态
             $work_order_status_map = [1, 2, 3, 5];
             //工单类型
