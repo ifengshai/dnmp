@@ -257,12 +257,9 @@ class DataMarket extends Backend
         if ($this->request->isAjax()) {
             $params = $this->request->param();
             $order_platform = $params['order_platform'] ? $params['order_platform'] : 1;
-            $time_str = $params['time_str'] ? $params['time_str'] : '';
-            if (!$params['time_str']) {
-                $start = date('Y-m-d 00:00:00', strtotime('-6 day'));
-                $end = date('Y-m-d 23:59:59');
-                $time_str = $start . ' - ' . $end;
-            }
+            $start = date('Y-m-01');
+            $end = date('Y-m-d 23:59:59');
+            $time_str = $start . ' - ' . $end;
             $cache_data = Cache::get('Supplydatacenter_datamarket' . $order_platform . $time_str . md5(serialize('stock_measure_overview_platform')));
             if (!$cache_data) {
                 /*

@@ -52,17 +52,6 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                     Controller.api.formatter.track_logistics_barline();   //物流妥投概况折线图
                 }, 0)
             })
-            $("#time_str9").on("apply.daterangepicker", function () {
-                setTimeout(() => {
-                    index_data();   //仓库指标总览
-                }, 0)
-            })
-            $("#time_str9").on("cancel.daterangepicker", function () {
-                setTimeout(() => {
-                    index_data();   //仓库指标总览
-                }, 0)
-            })
-
             $("#time_str1").on("apply.daterangepicker", function () {
                 setTimeout(() => {
                     stock_measure_overview_platform();   //仓库和站点有关的指标
@@ -512,22 +501,6 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
     };
     return Controller;
 });
-function index_data(){
-    var time_str = $('#time_str9').val();
-    Backend.api.ajax({
-        url: 'supplydatacenter/data_market/index',
-        data: {time_str: time_str}
-    }, function (data, ret) {
-        var stock_measure_overview = ret.data;
-        //仓库指标总览
-        $('#turnover_rate').html(stock_measure_overview.turnover_rate);
-        $('#turnover_days_rate').html(stock_measure_overview.turnover_days_rate);
-        return false;
-    }, function (data, ret) {
-        Layer.alert(ret.msg);
-        return false;
-    });
-}
 function purchase_data(){
     var time_str = $('#time_str2').val();
     Backend.api.ajax({
@@ -592,10 +565,9 @@ function track_data(){
 }
 function stock_measure_overview_platform() {
     var order_platform = $('#order_platform').val();
-    var time_str = $('#time_str1').val();
     Backend.api.ajax({
         url: 'supplydatacenter/data_market/stock_measure_overview_platform',
-        data: { order_platform: order_platform, time_str: time_str}
+        data: { order_platform: order_platform}
     }, function (data, ret) {
         var virtual_turnover_rate = ret.data.virtual_turnover_rate;
         var virtual_turnover_days_rate = ret.data.virtual_turnover_days_rate;
