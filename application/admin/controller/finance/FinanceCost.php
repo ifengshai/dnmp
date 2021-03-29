@@ -201,7 +201,7 @@ class FinanceCost extends Backend
                     $value['payment_time'] = '无';
                 }
                 if ($value['createtime']) {
-                    $value['createtime'] = date('Y-d-m H:i:s', $value['payment_time']);
+                    $value['createtime'] = date('Y-d-m H:i:s', $value['createtime']);
                 }
                 if ($value['is_carry_forward'] == 1) {
                     $value['is_carry_forward'] = '是';
@@ -239,7 +239,7 @@ class FinanceCost extends Backend
                     $value['is_carry_forward'] = '否';
                 }
                 if ($value['createtime']) {
-                    $value['createtime'] = date('Y-d-m H:i:s', $value['payment_time']);
+                    $value['createtime'] = date('Y-d-m H:i:s', $value['createtime']);
                 }
                 $spreadsheet->getActiveSheet()->setCellValueExplicit("A" . ($key * 1 + 2), $value['id'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
                 $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $type_document[$value['bill_type']]);
