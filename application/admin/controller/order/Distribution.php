@@ -600,6 +600,8 @@ class Distribution extends Backend
                 unset($filter['status']);
             }
 
+            $map['a.distribution_status'] = ['<>', 0];
+
             //工单状态
             $work_order_status_map = [1, 2, 3, 5];
             //工单类型
