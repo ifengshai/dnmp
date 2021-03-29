@@ -77,6 +77,24 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'upload'], function (
 
                 // 为表格1绑定事件
                 Table.api.bindevent(table1);
+                $('#account_order_batch_export_xls').click(function () {
+                    var type = 1;
+                    var ids = Table.api.selectedids(table1);
+                    var params = '';
+                    if (ids.length > 0) {
+                        params = 'ids=' + ids + '&type=' + type;
+                    } else {
+                        var options = table1.bootstrapTable('getOptions');
+                        var search = options.queryParams({});
+                        var filter = search.filter;
+                        var op = search.op;
+
+                        params = 'filter=' + filter + '&op=' + op + '&type=' + type;
+                    }
+
+                    window.open(Config.moduleurl + '/finance/finance_cost/batch_export_xls?' + params, '_blank');
+                });
+
             },
             second: function () {
                 // 表格2
@@ -120,6 +138,26 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'upload'], function (
 
                 // 为表格2绑定事件
                 Table.api.bindevent(table2);
+
+                $('#account_order_batch_export_xls_two').click(function () {
+                    var type = 2;
+                    var ids = Table.api.selectedids(table2);
+                    var params = '';
+                    if (ids.length > 0) {
+                        params = 'ids=' + ids + '&type=' + type;
+                    } else {
+                        var options = table2.bootstrapTable('getOptions');
+                        var search = options.queryParams({});
+                        var filter = search.filter;
+                        var op = search.op;
+
+                        params = 'filter=' + filter + '&op=' + op + '&type=' + type;
+                    }
+
+                    window.open(Config.moduleurl + '/finance/finance_cost/batch_export_xls?' + params, '_blank');
+
+                });
+
             }
         },
         api: {
