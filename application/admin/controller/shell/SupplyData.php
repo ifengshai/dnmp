@@ -450,4 +450,72 @@ class SupplyData extends Backend
             }
         }
     }
+    //每月数据(虚拟仓库存、周转天数)
+    public function supply_month_virtual(){
+        $this->getVirtualData(1);
+        $this->getVirtualData(2);
+        $this->getVirtualData(3);
+        $this->getVirtualData(4);
+        $this->getVirtualData(5);
+        $this->getVirtualData(8);
+        $this->getVirtualData(9);
+        $this->getVirtualData(10);
+        $this->getVirtualData(11);
+    }
+    //获取虚拟仓、周转天数方法
+    public function getVirtualData($site){
+        $time = date('Y-m');
+        $lastmonth = date('Y-m',strtotime("$time -1 month"));
+        $startday = $lastmonth.'-01';
+        $endday = $lastmonth.'-'.date('t', strtotime($startday));
+        $start = strtotime($startday);
+        $end = strtotime($endday);
+
+        $start_stock = Db::name('datacenter_day')->where("DATE_FORMAT(day_date,'%Y-%m-%d')='$startday'")->where('site',$site)->field('id,virtual_stock')->find();
+        //判断是否有月初数据
+        if($start_stock['id']) {
+            //判断是否有月末数据
+            $end_stock = Db::name('datacenter_day')->where("DATE_FORMAT(day_date,'%Y-%m-%d')='$endday'")->where('site',$site)->field('id,virtual_stock')->find();
+            if ($end_stock['id']) {
+                //如果有月末数据，（月初数据+月末数据）/2
+                $stock = round(($start_stock['virtual_stock'] + $end_stock['virtual_stock']) / 2, 0);
+                $arr['day_date'] = $lastmonth;
+                $arr['site'] = $site;
+                $arr['virtual_stock'] = $stock;
+            }
+        }
+
+        $where['createtime'] = ['between', [$startday, $endday]];
+        $where['platform_id'] = $site;
+        $where['status'] = 2;
+        $order_where['payment_time'] = ['between', [$start, $end]];  //修改
+        $order_where['order_type'] = ['<>', 5];
+        $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
+        $order_where['o.site'] = $site;
+        //站点订单销售数量
+        $order_sales_num = $this->order->alias('o')->join('fa_order_item_option i', 'o.entity_id=i.order_id')->where($order_where)->sum('i.qty');
+        //站点出库单出库数量
+        $out_stock_num = $this->outstock->alias('o')->join('fa_out_stock_item i', 'o.id=i.out_stock_id')->where($where)->sum('out_stock_num');
+        $stock_consume_num = $order_sales_num + $out_stock_num;
+        //站点虚拟仓期初实时库存
+        $start_stock_where = [];
+        $start_stock_where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $startday . "'")];
+        $start_stock = Db::table('fa_datacenter_day')->where($start_stock_where)->where('site', $site)->value('virtual_stock');
+        //站点虚拟仓期末实时库存
+        $end_stock_where = [];
+        $end_stock_where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $endday . "'")];
+        $end_stock = Db::table('fa_datacenter_day')->where($end_stock_where)->where('site', $site)->value('virtual_stock');
+        $sum = $start_stock + $end_stock;
+        //虚拟仓库存周转率
+        $virtual_turnover_rate = $sum ? round($stock_consume_num / $sum / 2, 2) : 0;
+        /*
+         * 虚拟仓库存周转天数：所选时间段的天数/库存周转率
+         * */
+        //库存周转天数
+        $days = round(($end - $start) / 3600 / 24);
+        $arr['turnover_day'] = $virtual_turnover_rate ? round($days / $virtual_turnover_rate) : 0;
+
+        Db::name('datacenter_supply_month_web')->insert($arr);
+        echo $site."-".$lastmonth." is ok"."\n";
+    }
 }
