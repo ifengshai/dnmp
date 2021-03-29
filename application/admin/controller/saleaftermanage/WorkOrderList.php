@@ -1367,7 +1367,6 @@ class WorkOrderList extends Backend
                             $true_sku =  $item_platform_sku->where($whe_sku)->value('sku');
                             $whe['sku'] = $true_sku;
                             $barcodedata = $this->_product_bar_code_item->where($whe)->column('location_code');
-
                             if (!empty($barcodedata)){
                                 $count = $this->_inventory->alias('a')
                                     ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata],'area_id' => '3'])
@@ -1969,11 +1968,15 @@ class WorkOrderList extends Backend
                 //配货完成时判断
                 //拣货区盘点时不能操作
                 //查询条形码库区库位
-                $whe_sku['sku'] = $sku;
-                $barcodedata = $this->_product_bar_code_item->where($whe_sku)->column('location_code');
+                $whe_sku['platform_sku'] = ['in',$sku];
+                //转换sku
+                $item_platform_sku = new ItemPlatformSku();
+                $true_sku =  $item_platform_sku->where($whe_sku)->column('sku');
+                $whe['sku'] = ['in',$true_sku];
+                $barcodedata = $this->_product_bar_code_item->where($whe)->column('location_code');
                 if (!empty($barcodedata)){
                     $count = $this->_inventory->alias('a')
-                        ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata]])
+                        ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata],'area_id' => '3'])
                         ->count();
                     if ($count > 0) {
                         return ['result' => false, 'msg' => '此'.$sku.'对应库位正在盘点,暂无法进行出入库操作'];
@@ -1992,6 +1995,11 @@ class WorkOrderList extends Backend
                 $stock = $res['stock'];
             }
             //判断库存是否足够
+            Log::write("判断库存是否足够");
+            Log::write($stock);
+            Log::write($num[$k]);
+            Log::write($sku);
+            Log::write($siteType);
             if ($stock < $num[$k]) {
                 // $params = ['sku'=>$sku,'siteType'=>$siteType,'stock'=>$stock,'num'=>$num[$k]];
                 // file_put_contents('/www/wwwroot/mojing/runtime/log/stock.txt',json_encode($params),FILE_APPEND);
@@ -2076,7 +2084,6 @@ class WorkOrderList extends Backend
 
                 //主单和子单全部的措施id
                 $all_choose_ids = [];
-
                 //检测主订单措施
                 if (!empty($measure_choose_id)) {
                     /**
@@ -2089,9 +2096,9 @@ class WorkOrderList extends Backend
                      */
 
                     $all_choose_ids = $measure_choose_id;
-
                     //主单取消
                     if (in_array(3, $measure_choose_id)) {
+
                         $_new_order = new NewOrder();
                         $order_id = $_new_order
                             ->where('increment_id', $params['platform_order'])
@@ -2307,7 +2314,6 @@ class WorkOrderList extends Backend
                             /*****************限制如果有盘点单未结束不能操作配货完成*******************/
                             //拣货区盘点时不能操作
                             //查询条形码库区库位
-
                             $whe_sku['platform_sku'] = $item['cancel_order']['sku'];
                             //转换sku
                             $item_platform_sku = new ItemPlatformSku();

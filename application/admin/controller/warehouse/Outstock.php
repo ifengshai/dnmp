@@ -595,6 +595,8 @@ class Outstock extends Backend
                             $financecost->outstock_cost($v['out_stock_id'], $v['out_stock_number']);
                         }
                     }
+                    //先入先出逻辑
+                    //                $this->item->setPurchaseOrder($list);
                 } else {
                     //审核拒绝解除条形码绑定关系
                     $_product_bar_code_item = new ProductBarCodeItem();
@@ -941,7 +943,7 @@ class Outstock extends Backend
 
                 //获取出库数量
                 $replenish_num = (int)$v[3];
-                empty($replenish_num) && $this->model->where('id', $transfer_order_id)->delete() && $this->error(__('导入失败,商品 ' . $sku . ' 出库库数量不能为空！'));
+                empty($replenish_num) && $this->model->where('id', $transfer_order_id)->delete() && $this->error(__('导入失败,商品 ' . $sku . '出库数量不能为空！'));
 
 
                 //校验出库数量是否大于当前虚拟仓库存量

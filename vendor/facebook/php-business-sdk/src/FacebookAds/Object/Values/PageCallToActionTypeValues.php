@@ -37,6 +37,7 @@ use FacebookAds\Enum\AbstractEnum;
  */
 class PageCallToActionTypeValues extends AbstractEnum {
 
+  const BECOME_A_VOLUNTEER = 'BECOME_A_VOLUNTEER';
   const BOOK_APPOINTMENT = 'BOOK_APPOINTMENT';
   const BOOK_NOW = 'BOOK_NOW';
   const BUY_TICKETS = 'BUY_TICKETS';
@@ -45,6 +46,7 @@ class PageCallToActionTypeValues extends AbstractEnum {
   const CONTACT_US = 'CONTACT_US';
   const DONATE_NOW = 'DONATE_NOW';
   const EMAIL = 'EMAIL';
+  const FOLLOW_PAGE = 'FOLLOW_PAGE';
   const GET_DIRECTIONS = 'GET_DIRECTIONS';
   const GET_OFFER = 'GET_OFFER';
   const GET_OFFER_VIEW = 'GET_OFFER_VIEW';
@@ -54,13 +56,17 @@ class PageCallToActionTypeValues extends AbstractEnum {
   const LOCAL_DEV_PLATFORM = 'LOCAL_DEV_PLATFORM';
   const MESSAGE = 'MESSAGE';
   const OPEN_APP = 'OPEN_APP';
+  const ORDER_FOOD = 'ORDER_FOOD';
   const PLAY_MUSIC = 'PLAY_MUSIC';
   const PLAY_NOW = 'PLAY_NOW';
+  const PURCHASE_GIFT_CARDS = 'PURCHASE_GIFT_CARDS';
   const REQUEST_APPOINTMENT = 'REQUEST_APPOINTMENT';
   const REQUEST_QUOTE = 'REQUEST_QUOTE';
   const SHOP_NOW = 'SHOP_NOW';
   const SHOP_ON_FACEBOOK = 'SHOP_ON_FACEBOOK';
   const SIGN_UP = 'SIGN_UP';
+  const VIEW_INVENTORY = 'VIEW_INVENTORY';
+  const VIEW_SHOP = 'VIEW_SHOP';
   const VISIT_GROUP = 'VISIT_GROUP';
   const WATCH_NOW = 'WATCH_NOW';
   const WOODHENGE_SUPPORT = 'WOODHENGE_SUPPORT';

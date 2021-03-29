@@ -776,9 +776,9 @@ class TransferOrder extends Backend
         ini_set('memory_limit', '512M');
         $list = Db::table('fa_transfer_order')
             ->select(function($query){
-                $query->where('call_out_site',8)
-                    ->whereOr('call_in_site',8);
-            });
+            $query->where('call_out_site',8)
+                ->whereOr('call_in_site',8);
+        });
         $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
 
         //从数据库查询需要的数据
@@ -922,4 +922,6 @@ class TransferOrder extends Backend
         $writer->save('php://output');
 
     }
+
+
 }

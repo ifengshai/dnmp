@@ -4,6 +4,7 @@ namespace app\api\controller;
 
 use app\common\controller\Api;
 use think\Db;
+use Think\Log;
 
 
 /**
@@ -71,9 +72,6 @@ class ThirdApi extends Api
         }
         // }
     }
-
-
-
 
 
 

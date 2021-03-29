@@ -925,7 +925,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                         { field: 'sku', title: __('Sku'), operate: 'like' },
                         {
                             field: 'type', title: __('类型'), custom: { 1: 'success'},
+
                             searchList: { 1: '月度计划'}, operate: false,
+
                             formatter: Table.api.formatter.status
                         },
                         {

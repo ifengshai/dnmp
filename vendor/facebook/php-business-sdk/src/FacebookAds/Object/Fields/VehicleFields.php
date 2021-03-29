@@ -41,6 +41,7 @@ class VehicleFields extends AbstractEnum {
   const APPLINKS = 'applinks';
   const AVAILABILITY = 'availability';
   const BODY_STYLE = 'body_style';
+  const CATEGORY_SPECIFIC_FIELDS = 'category_specific_fields';
   const CONDITION = 'condition';
   const CURRENCY = 'currency';
   const CUSTOM_LABEL_0 = 'custom_label_0';
@@ -85,9 +86,10 @@ class VehicleFields extends AbstractEnum {
   public function getFieldTypes() {
     return array(
       'address' => 'Object',
-      'applinks' => 'AppLinks',
+      'applinks' => 'CatalogItemAppLinks',
       'availability' => 'string',
       'body_style' => 'string',
+      'category_specific_fields' => 'CatalogSubVerticalList',
       'condition' => 'string',
       'currency' => 'string',
       'custom_label_0' => 'string',

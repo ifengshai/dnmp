@@ -1534,6 +1534,8 @@ class SaleAfterTask extends Backend
         if(!$result){
             return false;
         }
+        //dump($result);
+        exit;
         $arr = [];
         foreach($result as $k =>$v){
             $arr[$k]['work_id']         = $v['wid'];
@@ -1589,7 +1591,6 @@ class SaleAfterTask extends Backend
      */
     public function updateTime()
     {
-        // $result = Db::name('order_complate')->select();
-        // $sql 
+        $result = Db::name('info_synergy_task_change_sku')->alias('m')->join('work_order_list w','m.tid=w.synergy_id','left')->field('m.*,w.id as wid')->limit(0,10)->select();
     }
 }

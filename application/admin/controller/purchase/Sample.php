@@ -698,7 +698,7 @@ class Sample extends Backend
                 ->where($where)
                 ->where($where_arr)
                 ->where($map)
-                ->order($sort, $order)
+                ->order('id desc')
                 ->limit($offset, $limit)
                 ->select();
 
@@ -723,6 +723,8 @@ class Sample extends Backend
         }
         return $this->view->fetch();
     }
+
+
     /**
      * 入库添加
      *
@@ -977,6 +979,9 @@ class Sample extends Backend
             $this->success();
         }
     }
+
+
+
     /**
      * 出库列表
      *

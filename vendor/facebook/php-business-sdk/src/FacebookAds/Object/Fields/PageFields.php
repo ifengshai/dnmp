@@ -42,7 +42,6 @@ class PageFields extends AbstractEnum {
   const AD_CAMPAIGN = 'ad_campaign';
   const AFFILIATION = 'affiliation';
   const APP_ID = 'app_id';
-  const APP_LINKS = 'app_links';
   const ARTISTS_WE_LIKE = 'artists_we_like';
   const ATTIRE = 'attire';
   const AWARDS = 'awards';
@@ -62,14 +61,15 @@ class PageFields extends AbstractEnum {
   const COMPANY_OVERVIEW = 'company_overview';
   const CONNECTED_INSTAGRAM_ACCOUNT = 'connected_instagram_account';
   const CONTACT_ADDRESS = 'contact_address';
-  const CONTEXT = 'context';
   const COPYRIGHT_WHITELISTED_IG_PARTNERS = 'copyright_whitelisted_ig_partners';
   const COUNTRY_PAGE_LIKES = 'country_page_likes';
   const COVER = 'cover';
   const CULINARY_TEAM = 'culinary_team';
   const CURRENT_LOCATION = 'current_location';
+  const DELIVERY_AND_PICKUP_OPTION_INFO = 'delivery_and_pickup_option_info';
   const DESCRIPTION = 'description';
   const DESCRIPTION_HTML = 'description_html';
+  const DIFFERENTLY_OPEN_OFFERINGS = 'differently_open_offerings';
   const DIRECTED_BY = 'directed_by';
   const DISPLAY_SUBTEXT = 'display_subtext';
   const DISPLAYED_MESSAGE_RESPONSE_TIME = 'displayed_message_response_time';
@@ -108,7 +108,6 @@ class PageFields extends AbstractEnum {
   const IS_VERIFIED = 'is_verified';
   const IS_WEBHOOKS_SUBSCRIBED = 'is_webhooks_subscribed';
   const KEYWORDS = 'keywords';
-  const LEADGEN_FORM_PREVIEW_DETAILS = 'leadgen_form_preview_details';
   const LEADGEN_TOS_ACCEPTANCE_TIME = 'leadgen_tos_acceptance_time';
   const LEADGEN_TOS_ACCEPTED = 'leadgen_tos_accepted';
   const LEADGEN_TOS_ACCEPTING_USER = 'leadgen_tos_accepting_user';
@@ -129,7 +128,6 @@ class PageFields extends AbstractEnum {
   const NEW_LIKE_COUNT = 'new_like_count';
   const OFFER_ELIGIBLE = 'offer_eligible';
   const OVERALL_STAR_RATING = 'overall_star_rating';
-  const PAGE_ABOUT_STORY = 'page_about_story';
   const PAGE_TOKEN = 'page_token';
   const PARENT_PAGE = 'parent_page';
   const PARKING = 'parking';
@@ -138,6 +136,7 @@ class PageFields extends AbstractEnum {
   const PERSONAL_INTERESTS = 'personal_interests';
   const PHARMA_SAFETY_INFO = 'pharma_safety_info';
   const PHONE = 'phone';
+  const PICKUP_OPTIONS = 'pickup_options';
   const PLACE_TYPE = 'place_type';
   const PLOT_OUTLINE = 'plot_outline';
   const PREFERRED_AUDIENCE = 'preferred_audience';
@@ -165,8 +164,10 @@ class PageFields extends AbstractEnum {
   const STORE_LOCATION_DESCRIPTOR = 'store_location_descriptor';
   const STORE_NUMBER = 'store_number';
   const STUDIO = 'studio';
+  const SUPPORTS_DONATE_BUTTON_IN_LIVE_VIDEO = 'supports_donate_button_in_live_video';
   const SUPPORTS_INSTANT_ARTICLES = 'supports_instant_articles';
   const TALKING_ABOUT_COUNT = 'talking_about_count';
+  const TEMPORARY_STATUS = 'temporary_status';
   const UNREAD_MESSAGE_COUNT = 'unread_message_count';
   const UNREAD_NOTIF_COUNT = 'unread_notif_count';
   const UNSEEN_MESSAGE_COUNT = 'unseen_message_count';
@@ -185,7 +186,6 @@ class PageFields extends AbstractEnum {
       'ad_campaign' => 'AdSet',
       'affiliation' => 'string',
       'app_id' => 'string',
-      'app_links' => 'AppLinks',
       'artists_we_like' => 'string',
       'attire' => 'string',
       'awards' => 'string',
@@ -205,14 +205,15 @@ class PageFields extends AbstractEnum {
       'company_overview' => 'string',
       'connected_instagram_account' => 'IGUser',
       'contact_address' => 'MailingAddress',
-      'context' => 'OpenGraphContext',
       'copyright_whitelisted_ig_partners' => 'list<string>',
       'country_page_likes' => 'unsigned int',
       'cover' => 'CoverPhoto',
       'culinary_team' => 'string',
       'current_location' => 'string',
+      'delivery_and_pickup_option_info' => 'list<string>',
       'description' => 'string',
       'description_html' => 'string',
+      'differently_open_offerings' => 'map<string, bool>',
       'directed_by' => 'string',
       'display_subtext' => 'string',
       'displayed_message_response_time' => 'string',
@@ -251,7 +252,6 @@ class PageFields extends AbstractEnum {
       'is_verified' => 'bool',
       'is_webhooks_subscribed' => 'bool',
       'keywords' => 'Object',
-      'leadgen_form_preview_details' => 'LeadGenFormPreviewDetails',
       'leadgen_tos_acceptance_time' => 'datetime',
       'leadgen_tos_accepted' => 'bool',
       'leadgen_tos_accepting_user' => 'User',
@@ -272,7 +272,6 @@ class PageFields extends AbstractEnum {
       'new_like_count' => 'unsigned int',
       'offer_eligible' => 'bool',
       'overall_star_rating' => 'float',
-      'page_about_story' => 'PageAboutStory',
       'page_token' => 'string',
       'parent_page' => 'Page',
       'parking' => 'PageParking',
@@ -281,6 +280,7 @@ class PageFields extends AbstractEnum {
       'personal_interests' => 'string',
       'pharma_safety_info' => 'string',
       'phone' => 'string',
+      'pickup_options' => 'list<string>',
       'place_type' => 'string',
       'plot_outline' => 'string',
       'preferred_audience' => 'Targeting',
@@ -308,8 +308,10 @@ class PageFields extends AbstractEnum {
       'store_location_descriptor' => 'string',
       'store_number' => 'unsigned int',
       'studio' => 'string',
+      'supports_donate_button_in_live_video' => 'bool',
       'supports_instant_articles' => 'bool',
       'talking_about_count' => 'unsigned int',
+      'temporary_status' => 'string',
       'unread_message_count' => 'unsigned int',
       'unread_notif_count' => 'unsigned int',
       'unseen_message_count' => 'unsigned int',

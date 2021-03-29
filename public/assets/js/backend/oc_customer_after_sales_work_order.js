@@ -35,11 +35,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             }, operate: false
                         },
                         {field: 'id', title: __('ID')},
-                        {
-                            field: 'site',
-                            title: __('站点'),
-                            searchList: { 1: 'zeelool', 2: 'voogueme'}
-                        },
+                        // {
+                        //     field: 'site',
+                        //     title: __('站点'),
+                        //     searchList: { 1: 'Z站', 2: 'V站'},
+                        //     custom: { 1: 'black', 2: 'red' },
+                        //     formatter: Table.api.formatter.status,
+                        // },
                         {field: 'increment_id', title: __('订单号'),
                             events: Controller.api.events.gettitle,
 
