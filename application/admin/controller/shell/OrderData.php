@@ -1664,7 +1664,7 @@ class OrderData extends Backend
             $params['wave_order_number'] = 'BC'.date('YmdHis').rand(100, 999).rand(100, 999);
             $params['type'] = $type;
             $params['wave_time_type'] = $wave_time_type;
-            $params['order_date'] = $v['created_at'];
+            $params['order_date'] = $v['updated_at'];
             $params['createtime'] = time();
             $id = $waveorder->insertGetId($params);
 
