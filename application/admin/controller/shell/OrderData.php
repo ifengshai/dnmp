@@ -1695,7 +1695,7 @@ class OrderData extends Backend
         $where['b.wave_order_id'] = 0;
         $where['a.status'] = ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal']];
 
-        $list = $this->order->where($where)->alias('a')->field('b.id,b.sku,a.created_at,entity_id,a.site')
+        $list = $this->order->where($where)->alias('a')->field('b.id,b.sku,a.updated_at,entity_id,a.site')
             ->join(['fa_order_item_process' => 'b'], 'a.entity_id=b.magento_order_id and a.site=b.site')
             ->order('id desc')
             ->limit(1000)
@@ -1738,7 +1738,7 @@ class OrderData extends Backend
             $params['wave_order_number'] = 'BC'.date('YmdHis').rand(100, 999).rand(100, 999);
             $params['type'] = $type;
             $params['wave_time_type'] = $wave_time_type;
-            $params['order_date'] = $v['created_at'];
+            $params['order_date'] = $v['updated_at'];
             $params['createtime'] = time();
             $id = $waveorder->insertGetId($params);
 
