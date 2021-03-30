@@ -1569,7 +1569,6 @@ class OrderData extends Backend
                 } else {
                     $str = $key + 1;
                 }
-
                 $item_params[$key]['item_order_number'] = $res->increment_id . '-' . $str;
                 $item_params[$key]['order_id'] = $res->id ?: 0;
             }
@@ -1733,15 +1732,16 @@ class OrderData extends Backend
                 $wave_time_type = 8;
             }
 
-//            $id = $waveorder->where(['type' => $type, 'wave_time_type' => $wave_time_type, 'order_date' => ['between', [strtotime(date('Y-m-d 00:00:00', $v['updated_at'])), strtotime(date('Y-m-d 23:59:59', $v['updated_at']))]]])->value('id');
-            $params = [];
-            $params['wave_order_number'] = 'BC'.date('YmdHis').rand(100, 999).rand(100, 999);
-            $params['type'] = $type;
-            $params['wave_time_type'] = $wave_time_type;
-            $params['order_date'] = $v['updated_at'];
-            $params['createtime'] = time();
-            $id = $waveorder->insertGetId($params);
-
+            $id = $waveorder->where(['type' => $type, 'wave_time_type' => $wave_time_type, 'order_date' => ['between', [strtotime(date('Y-m-d 00:00:00', $v['updated_at'])), strtotime(date('Y-m-d 23:59:59', $v['updated_at']))]]])->value('id');
+            if (!$id) {
+                $params = [];
+                $params['wave_order_number'] = 'BC'.date('YmdHis').rand(100, 999).rand(100, 999);
+                $params['type'] = $type;
+                $params['wave_time_type'] = $wave_time_type;
+                $params['order_date'] = $v['updated_at'];
+                $params['createtime'] = time();
+                $id = $waveorder->insertGetId($params);
+            }
             //转换平台SKU
             $sku = $itemplaform->getWebSku($v['sku'], $v['site']);
             //根据sku查询库位排序
@@ -1750,6 +1750,7 @@ class OrderData extends Backend
             $where['b.area_id'] = 3;//默认拣货区
             $location_data = $storesku->alias('a')->where($where)->where(['a.sku' => $sku])->field('coding,picking_sort')->join(['fa_store_house' => 'b'], 'a.store_id=b.id')->find();
             $this->orderitemprocess->where(['id' => $v['id']])->update(['wave_order_id' => $id, 'location_code' => $location_data['coding'], 'picking_sort' => $location_data['picking_sort']]);
+
         }
     }
 
