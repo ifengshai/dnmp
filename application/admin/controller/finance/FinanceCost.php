@@ -105,10 +105,7 @@ class FinanceCost extends Backend
         }
         return $this->view->fetch('index');
     }
-
-
-
-    //导出数据
+    //导出数据测试
     public function batch_export_xls()
     {
         $ids = input('ids');
