@@ -10,12 +10,12 @@ jobTest_env:
     - mojing-test-runner
   only:
     - test
-# jobMaster_env:
-#   stage: deploy-master-env
-#   script:
-#     - cd /www/wwwroot/mojing
-#     - sudo git pull origin master
-#   tags:
-#     - mojing-runner
-#   only:
-#     - master
+jobMaster_env:
+  stage: deploy-master-env
+  script:
+    - cd /www/wwwroot/mojing
+    - sudo git pull origin master
+  tags:
+    - mojing-runner
+  only:
+    - master
