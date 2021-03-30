@@ -146,21 +146,16 @@ class FinanceCost extends Backend
             !empty($filter['is_carry_forward']) && $where['is_carry_forward'] = $filter['is_carry_forward'];
 
             if ($filter['createtime']) {
-
                 $createtime = explode(' - ', $filter['createtime']);
-
-                $where['action_type'] = ['between', $createtime[0], $createtime[1]];
-
+                $where['createtime'] = ['between',  [strtotime($createtime[0]), strtotime($createtime[1])]];
             }
 
         }
-
 
         $list = $this->model
             ->where($where)
             ->order('id desc')
             ->select();
-
         $list = collection($list)->toArray();
 
         //站点列表
