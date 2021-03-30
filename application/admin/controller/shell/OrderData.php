@@ -1672,6 +1672,7 @@ class OrderData extends Backend
             $sku = $itemplaform->getWebSku($v['sku'], $v['site']);
             //根据sku查询库位排序
             $storesku = new \app\admin\model\warehouse\StockSku();
+            $where = [];
             $where['b.area_id'] = 3;//默认拣货区
             $location_data = $storesku->alias('a')->where($where)->where(['a.sku' => $sku])->field('coding,picking_sort')->join(['fa_store_house' => 'b'], 'a.store_id=b.id')->find();
             $this->orderitemprocess->where(['id' => $v['id']])->update(['wave_order_id' => $id, 'location_code' => $location_data['coding'], 'picking_sort' => $location_data['picking_sort']]);
