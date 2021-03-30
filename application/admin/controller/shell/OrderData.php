@@ -45,7 +45,7 @@ class OrderData extends Backend
          * 对 中台生产的  用户信息 进行消费
          */
         // 设置将要消费消息的主题
-        $topic = 'test';
+        $topic = 'mojing_order';
         $host = '127.0.0.1:9092';
         $group_id = '0';
         $conf = new \RdKafka\Conf();
@@ -109,27 +109,25 @@ class OrderData extends Backend
                     case RD_KAFKA_RESP_ERR_NO_ERROR: //没有错误
                         //拆解对象为数组，并根据业务需求处理数据
                         $payload = json_decode($message->payload, true);
-
-                        dump($payload);
                         $key = $message->key;
                         //根据kafka中不同key，调用对应方法传递处理数据
                         //对该条message进行处理，比如用户数据同步， 记录日志。
                         if ($payload) {
                             //根据库名判断站点
                             switch ($payload['database']) {
-                                case 'zeelool_test':
+                                case 'zeelool':
                                     $site = 1;
                                     break;
-                                case 'vuetest_voogueme':
+                                case 'voogueme':
                                     $site = 2;
                                     break;
-                                case 'nihao_test':
+                                case 'nihao':
                                     $site = 3;
                                     break;
                                 case 'meeloog':
                                     $site = 4;
                                     break;
-                                case 'wesee_test':
+                                case 'wesee':
                                     $site = 5;
                                     break;
                                 case 'zeelool_es':
@@ -141,37 +139,17 @@ class OrderData extends Backend
                                 case 'zeelool_jp':
                                     $site = 11;
                                     break;
-                                case 'voogueme_acc':
-                                    $site = 12;
-                                    break;
                                 case 'morefun':
                                     $site = 5;
+                                    break;
+                                case 'voogueme_acc':
+                                    $site = 12;
                                     break;
                             }
                             //主表
                             if ($payload['type'] == 'INSERT' && $payload['table'] == 'sales_flat_order') {
                                 $order_params = [];
                                 foreach ($payload['data'] as $k => $v) {
-
-                                                                       
-                                    $order_ids = $this->order->where('site=' . $site . ' and increment_id=' . $v['increment_id'])->value('id');
-                                    $order_ids2 = $this->order->where('site=' . $site . ' and entity_id=' . $v['entity_id'])->value('id');
-                                    if ($order_ids) {
-                                        $this->order->where('site=' . $site . ' and increment_id=' . $v['increment_id'])->delete();
-                                        $this->orderprocess->where('site=' . $site . ' and increment_id=' . $v['increment_id'])->delete();
-                                        
-                                        //删除子订单表
-                                        $this->orderitemoption->where('site=' . $site . ' and order_id=' . $order_ids)->delete();
-                                        $this->orderitemprocess->where('site=' . $site . ' and order_id=' . $order_ids)->delete();
-                                       
-                                    }
-
-                                    if ($order_ids2) {
-                                        $this->orderprocess->where('site=' . $site . ' and entity_id=' . $v['entity_id'])->delete();
-                                        $this->order->where('site=' . $site . ' and entity_id=' . $v['entity_id'])->delete();
-                                        $this->orderitemoption->where('site=' . $site . ' and order_id=' . $order_ids2)->delete();
-                                        $this->orderitemprocess->where('site=' . $site . ' and order_id=' . $order_ids2)->delete();
-                                    }
                                     $params = [];
                                     $params['entity_id'] = $v['entity_id'];
                                     $params['site'] = $site;
@@ -203,9 +181,9 @@ class OrderData extends Backend
                                     $params['created_at'] = strtotime($v['created_at']) + 28800;
                                     $params['updated_at'] = strtotime($v['updated_at']) + 28800;
                                     if (isset($v['payment_time'])) {
-                                        $params['payment_time'] = (int)strtotime($v['payment_time']) + 28800;
+                                        $params['payment_time'] = strtotime($v['payment_time']) + 28800;
                                     }
-                                    $params['payment_time'] = $params['payment_time'] < 0 ? 0 : $params['payment_time']; 
+
                                     //插入订单主表
                                     $order_id = $this->order->insertGetId($params);
                                     $order_params[$k]['site'] = $site;
@@ -333,9 +311,9 @@ class OrderData extends Backend
                                     $params['base_shipping_amount'] = $v['base_shipping_amount'];
                                     $params['updated_at'] = strtotime($v['updated_at']) + 28800;
                                     if (isset($v['payment_time'])) {
-                                        $params['payment_time'] = (int)strtotime($v['payment_time']) + 28800;
+                                        $params['payment_time'] = strtotime($v['payment_time']) + 28800;
                                     }
-                                    $params['payment_time'] = $params['payment_time'] < 0 ? 0 : $params['payment_time']; 
+
                                     $this->order->where(['entity_id' => $v['entity_id'], 'site' => $site])->update($params);
                                 }
                             }
@@ -345,7 +323,6 @@ class OrderData extends Backend
                                 foreach ($payload['data'] as $k => $v) {
                                     $params = [];
                                     if ($v['address_type'] == 'shipping') {
-
                                         $params['country_id'] = $v['country_id'];
                                         $params['region'] = $v['region'];
                                         $params['region_id'] = $v['region_id'];
@@ -388,7 +365,7 @@ class OrderData extends Backend
                                     if ($site == 5) {
                                         $options =  $this->wesee_prescription_analysis($orders_prescriptions_params[$v['orders_prescriptions_id']]['prescription']);
                                     }
-                                    
+
                                     $options['item_id'] = $v['id'];
                                     $options['site'] = $site;
                                     $options['magento_order_id'] = $v['order_id'];
@@ -419,7 +396,6 @@ class OrderData extends Backend
                                             $data[$i]['created_at'] = strtotime($v['created_at']) + 28800;
                                             $data[$i]['updated_at'] = strtotime($v['updated_at']) + 28800;
                                         }
-                                    
                                         $this->orderitemprocess->insertAll($data);
                                     }
                                 }
@@ -1521,7 +1497,7 @@ class OrderData extends Backend
                 $arr['order_prescription_type'] = 3;
             }
         }
-
+        
         //默认如果不是仅镜架 或定制片 则为现货处方镜
         if ($arr['order_prescription_type'] != 1 && $arr['order_prescription_type'] != 3) {
             $arr['order_prescription_type'] = 2;
@@ -1560,7 +1536,7 @@ class OrderData extends Backend
                 }
 
                 $item_params[$key]['item_order_number'] = $res->increment_id . '-' . $str;
-                $item_params[$key]['order_id'] = $res->id ?: 0;
+                $item_params[$key]['order_id'] = $res->id;
             }
             //更新数据
             if ($item_params) $this->orderitemprocess->saveAll($item_params);
@@ -1590,7 +1566,7 @@ class OrderData extends Backend
         foreach ($list as $k => $v) {
             $order_id = $this->order->where(['entity_id' => $v['magento_order_id'], 'site' => $v['site']])->value('id');
             $params[$k]['id'] = $v['id'];
-            $params[$k]['order_id'] = $order_id ?: 0;
+            $params[$k]['order_id'] = $order_id;
             echo $v['id'] . "\n";
         }
         //更新数据
@@ -1644,107 +1620,6 @@ class OrderData extends Backend
         return $sku;
     }
 
-
-    #######################################生成波次单################################################
-    /**
-     * 创建波次单
-     *
-     * @Description
-     * @author wpl
-     * @since 2021/03/23 17:47:29 
-     * @return void
-     */
-    public function create_wave_order()
-    {
-        /**
-         * 
-         * 生成规则
-
-         * 1）按业务模式：品牌独立站、第三方平台店铺
-
-         * 2）按时间段
-
-         * 第一波次：00:00-2:59:59
-
-         * 第二波次：3：00-5:59:59
-
-         * 第三波次：6:00-8:59:59
-
-         * 第四波次：9:00-11:59:59
-
-         * 第五波次：12:00-14:59:59
-
-         * 第六波次：15:00-17:59:59
-
-         * 第七波次：18:00-20:59:59
-
-         * 第八波次：21:00-23:59:59
-         *
-         */
-        //查询今天的订单
-        // $where['a.created_at'] = ['between', [strtotime(date('Y-m-d 00:00:00')), strtotime(date('Y-m-d 23:59:59'))]];
-        $where['b.wave_order_id'] = 0;
-        $where['b.is_print'] = 0;
-        $list = $this->order->where($where)->alias('a')->field('b.id,b.sku,a.created_at,entity_id,a.site')
-            ->join(['fa_order_item_process' => 'b'], 'a.entity_id=b.magento_order_id and a.site=b.site')
-            ->order('id desc')
-            ->limit(1000)
-            ->select();
-        $list = collection($list)->toArray();
-        //第三方站点id
-        $third_site = [13, 14];
-        $waveorder = new \app\admin\model\order\order\WaveOrder();
-        $itemplaform = new \app\admin\model\itemmanage\ItemPlatformSku();
-        $storesku = new \app\admin\model\warehouse\StockHouse();
-        foreach ($list as $k => $v) {
-            //判断波次类型
-            $type = 0;
-            if (in_array($v['site'], $third_site)) {
-                $type = 2;
-            } else {
-                $type = 1;
-            }
-            //判断波次时间段
-            if (strtotime(date('Y-m-d 00:00:00', $v['created_at'])) <= $v['created_at'] and $v['created_at'] <= strtotime(date('Y-m-d 02:59:59', $v['created_at']))) {
-                $wave_time_type = 1;
-            } elseif (strtotime(date('Y-m-d 03:00:00', $v['created_at'])) <= $v['created_at'] and $v['created_at'] <= strtotime(date('Y-m-d 05:59:59', $v['created_at']))) {
-                $wave_time_type = 2;
-            } elseif (strtotime(date('Y-m-d 06:00:00', $v['created_at'])) <= $v['created_at'] and $v['created_at'] <= strtotime(date('Y-m-d 08:59:59', $v['created_at']))) {
-                $wave_time_type = 3;
-            } elseif (strtotime(date('Y-m-d 09:00:00', $v['created_at'])) <= $v['created_at'] and $v['created_at'] <= strtotime(date('Y-m-d 11:59:59', $v['created_at']))) {
-                $wave_time_type = 4;
-            } elseif (strtotime(date('Y-m-d 12:00:00', $v['created_at'])) <= $v['created_at'] and $v['created_at'] <= strtotime(date('Y-m-d 14:59:59', $v['created_at']))) {
-                $wave_time_type = 5;
-            } elseif (strtotime(date('Y-m-d 15:00:00', $v['created_at'])) <= $v['created_at'] and $v['created_at'] <= strtotime(date('Y-m-d 17:59:59', $v['created_at']))) {
-                $wave_time_type = 6;
-            } elseif (strtotime(date('Y-m-d 18:00:00', $v['created_at'])) <= $v['created_at'] and $v['created_at'] <= strtotime(date('Y-m-d 20:59:59', $v['created_at']))) {
-                $wave_time_type = 7;
-            } elseif (strtotime(date('Y-m-d 21:00:00', $v['created_at'])) <= $v['created_at'] and $v['created_at'] <= strtotime(date('Y-m-d 23:59:59', $v['created_at']))) {
-                $wave_time_type = 8;
-            }
-
-            $id = $waveorder->where(['type' => $type, 'wave_time_type' => $wave_time_type, 'order_date' => ['between', [strtotime(date('Y-m-d 00:00:00', $v['created_at'])), strtotime(date('Y-m-d 23:59:59', $v['created_at']))]]])->value('id');
-            if (!$id) {
-                $params = [];
-                $params['wave_order_number'] = 'BC' . date('YmdHis') . rand(100, 999) . rand(100, 999);
-                $params['type'] = $type;
-                $params['wave_time_type'] = $wave_time_type;
-                $params['order_date'] =  $v['created_at'];
-                $params['createtime'] = time();
-                $id = $waveorder->insertGetId($params);
-            }
-
-            //转换平台SKU
-            $sku = $itemplaform->getWebSku($v['sku'], $v['site']);
-            //根据sku查询库位排序
-            $storesku = new \app\admin\model\warehouse\StockSku();
-            $where['b.area_id'] = 3;//默认拣货区
-            $location_data = $storesku->alias('a')->where(['a.sku' => $sku])->field('coding,picking_sort')->join(['fa_store_house' => 'b'],'a.store_id=b.id')->find();
-            $this->orderitemprocess->where(['id' => $v['id']])->update(['wave_order_id' => $id, 'location_code' => $location_data['coding'], 'picking_sort' =>  $location_data['picking_sort']]);
-        }
-    }
-
-    ########################################end##############################################
 
 
     ################################################处理旧数据脚本##########################################################################

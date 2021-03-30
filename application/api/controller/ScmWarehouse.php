@@ -318,8 +318,6 @@ class ScmWarehouse extends Scm
     public function out_stock_add()
     {
         $out_stock_id = $this->request->request('out_stock_id');
-        Log::write("输出出库单数据");
-        Log::write($out_stock_id);
         if ($out_stock_id) {
             $info = $this->_out_stock
                 ->field('out_stock_number,type_id,platform_id')
@@ -1444,9 +1442,6 @@ class ScmWarehouse extends Scm
             ->where(['in_stock_id' => $in_stock_id])
             ->field('id,sku,in_stock_num,price')
             ->select();
-
-        Log::write("输出入库单数据02");
-        Log::write($item_list);
         empty($item_list) && $this->error(__('入库单子单数据异常'), [], 515);
 
         $item_list = collection($item_list)->toArray();
@@ -1459,8 +1454,6 @@ class ScmWarehouse extends Scm
             ->field('sku,code')
             ->order('id', 'desc')
             ->select();
-        Log::write("输出入库单数据03");
-        Log::write($bar_code_list);
         $bar_code_list = collection($bar_code_list)->toArray();
 
         foreach ($item_list as $key => $value) {
@@ -1496,8 +1489,6 @@ class ScmWarehouse extends Scm
         }
 
         $kuqu_kuwei = $this->_product_bar_code_item->where(['in_stock_id' => $in_stock_id])->find();
-        Log::write("输出库位信息");
-        Log::write($kuqu_kuwei);
         //入库单所需数据
         $info['in_stock_id'] = $_in_stock_info['id'];
         $info['in_stock_number'] = $_in_stock_info['in_stock_number'];
@@ -2206,9 +2197,6 @@ class ScmWarehouse extends Scm
         //根据type值判断是筛选还是保存 type值为1是筛选 type值为2是保存
         $type = $this->request->request("type") ?? 1;
         $info = [];
-//        $a = input('param.');
-//        Log::write("============输出搜索内容====================");
-//        Log::write($a);
         if ($type == 1) {
             //创建盘点单筛选 ok
             $query = $this->request->request('query'); //sku 、 库位编码筛选
@@ -2326,8 +2314,6 @@ class ScmWarehouse extends Scm
                 $arr['create_person'] = $this->auth->nickname;
                 $arr['createtime'] = date('Y-m-d H:i:s', time());
                 $result = $this->_inventory->allowField(true)->save($arr);
-                Log::write("===创建盘点单===");
-                Log::write($result);
                 if ($result) {
                     $list = [];
                     foreach (array_filter($item_sku) as $k => $v) {
@@ -2522,6 +2508,7 @@ class ScmWarehouse extends Scm
                     if (empty($sku_item)) {
                         throw new Exception('SKU=>' . $v['sku'] . '不存在');
                     }
+
                     //等PDA改为 以此为准
                     $item_list = $this->_inventory_item->where(['inventory_id' => $inventory_id, 'sku' => $v['sku'], 'area_id' => $v['area_id'], 'library_name' => $v['library_name']])->find();
                     $save_data = [];
@@ -3153,12 +3140,15 @@ class ScmWarehouse extends Scm
         if (count(array_filter($item_sku)) < 1) {
             $this->error(__('调拨单子数据集合不能为空！！'), '', 524);
         }
+
+
         $codes = array_column($item_sku, 'call_out_site');
         $call_in_site_id = array_column($item_sku, 'call_in_site_id');
 
         if (!empty($codes)){
             $call_in_site_coding =     $this->_store_house->where(['id' => ['in',$call_in_site_id]])->column('coding');
             $vat = array_merge($codes,$call_in_site_coding);
+
             $count = $this->_inventory->alias('a')
                 ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'b.library_name' => ['in', $vat],'b.area_id' => '3'])
                 ->count();

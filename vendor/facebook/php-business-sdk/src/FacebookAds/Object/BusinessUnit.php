@@ -215,7 +215,7 @@ class BusinessUnit extends AbstractCrudObject {
 
     $param_types = array(
       'click_lookback_window' => 'unsigned int',
-      'date_range' => 'map',
+      'date_range' => 'Object',
       'fb_conversion_event_id' => 'unsigned int',
       'limit' => 'unsigned int',
       'metric_context' => 'map',

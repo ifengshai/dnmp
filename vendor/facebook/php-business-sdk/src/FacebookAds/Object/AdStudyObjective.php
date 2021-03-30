@@ -245,7 +245,6 @@ class AdStudyObjective extends AbstractCrudObject {
 
     $param_types = array(
       'breakdowns' => 'list<breakdowns_enum>',
-      'ds' => 'string',
     );
     $enums = array(
       'breakdowns_enum' => array(
@@ -282,7 +281,6 @@ class AdStudyObjective extends AbstractCrudObject {
       'name' => 'string',
       'offline_conversion_data_sets' => 'list<Object>',
       'offsitepixels' => 'list<Object>',
-      'product_catalogs' => 'list<Object>',
       'product_sets' => 'list<Object>',
       'type' => 'type_enum',
     );

@@ -159,7 +159,6 @@ class FinanceCost extends Backend
         $list = $this->model
             ->where($where)
             ->order('id desc')
-            ->limit(10)
             ->select();
 
         $list = collection($list)->toArray();
