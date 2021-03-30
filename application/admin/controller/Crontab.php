@@ -3167,8 +3167,8 @@ class Crontab extends Backend
         $thismonth_sales_money = $model->table('sales_flat_order')->where($thismonth_where)->where($order_where)->where($order_success_where)->field('sum(base_grand_total) base_grand_total,count(entity_id) order_num')->find();
         $thismonth_sales_money_data           = round($thismonth_sales_money['base_grand_total'], 2);
         //上月销售额
-        $lastmonth_start = date('Y-m-01', strtotime("$today -1 month"));
-        $lastmonth_end = date('Y-m-t 23:59:59', strtotime("$today -1 month"));
+        $lastmonth_start = date('Y-m-d', strtotime("first day of -1 month"));
+        $lastmonth_end = date('Y-m-d 23:59:59', strtotime("last day of -1 month"));
         $lastmonth_where['created_at'] = $lastmonth_where1['updated_at'] = ['between', [$lastmonth_start, $lastmonth_end]];
         $lastmonth_sales_money = $model->table('sales_flat_order')->where($lastmonth_where)->where($order_where)->where($order_success_where)->field('sum(base_grand_total) base_grand_total,count(entity_id) order_num')->find();
         $lastmonth_sales_money_data           = round($lastmonth_sales_money['base_grand_total'], 2);
@@ -3431,8 +3431,8 @@ class Crontab extends Backend
         $thismonth_where1['updated_at'] = ['between', [$thismonth_start, $thismonth_end]];
         $thismonth_order_success_data = $model->table('sales_flat_order')->where($thismonth_where)->where($order_where)->where($order_success_where)->count();
         //上月支付成功数
-        $lastmonth_start = date('Y-m-01', strtotime("$today -1 month"));
-        $lastmonth_end = date('Y-m-t 23:59:59', strtotime("$today -1 month"));
+        $lastmonth_start = date('Y-m-d', strtotime("first day of -1 month"));
+        $lastmonth_end = date('Y-m-d 23:59:59', strtotime("last day of -1 month"));
         $lastmonth_where['created_at'] = $lastmonth_where1['updated_at'] = ['between', [$lastmonth_start, $lastmonth_end]];
         $lastmonth_order_success_data = $model->table('sales_flat_order')->where($lastmonth_where)->where($order_where)->where($order_success_where)->count();
         //今年支付成功数
