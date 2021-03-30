@@ -208,7 +208,7 @@ class DataMarket extends Backend
     public function stock_measure_overview()
     {
         $start = date('Y-m-01 00:00:00', strtotime('-12 months'));
-        $start = '2020-12-28  00:00:00';
+        $start = '2020-12-28 00:00:00';
         $end = date('Y-m-d 23:59:59', strtotime("last day of -1 month"));
         $time_str = $start . ' - ' . $end;
         $cache_data = Cache::get('Supplydatacenter_datamarket' . $time_str . md5(serialize('stock_measure_overview')));
