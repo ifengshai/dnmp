@@ -1673,7 +1673,7 @@
                     $id = $waveorder->insertGetId($params);
                 }
                 //转换平台SKU
-                $sku = $itemplaform->getWebSku($v['sku'], $v['site']);
+                $sku = $itemplaform->getTrueSku($v['sku'], $v['site']);
                 //根据sku查询库位排序
                 $storesku = new \app\admin\model\warehouse\StockSku();
                 $where = [];
