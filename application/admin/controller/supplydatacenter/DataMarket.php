@@ -208,7 +208,7 @@ class DataMarket extends Backend
     public function stock_measure_overview()
     {
         $start = date('Y-m-01 00:00:00', strtotime('-12 months'));
-        $end = date('Y-m-d 23:59:59');
+        $end = date('Y-m-01 23:59:59');
         $time_str = $start . ' - ' . $end;
         $cache_data = Cache::get('Supplydatacenter_datamarket' . $time_str . md5(serialize('stock_measure_overview')));
         if ($cache_data) {
@@ -246,7 +246,7 @@ class DataMarket extends Backend
          * 库存周转天数：所选时间段的天数/库存周转率
          * */
         //库存周转天数
-        $days = round(($end - $start) / 3600 / 24)+1;
+        $days = round(($end - $start) / 3600 / 24);
         $arr['turnover_days_rate'] = $arr['turnover_rate'] ? round($days / $arr['turnover_rate']) : 0;
         Cache::set('Supplydatacenter_datamarket' . $time_str . md5(serialize('stock_measure_overview')), $arr, 7200);
         return $arr;
