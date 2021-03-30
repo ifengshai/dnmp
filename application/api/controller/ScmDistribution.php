@@ -1523,6 +1523,9 @@ class ScmDistribution extends Scm
     public function merge()
     {
         $item_order_number = $this->request->request('item_order_number');
+        Log::write("合单扫描子单号001");
+        Log::write($item_order_number);
+
         empty($item_order_number) && $this->error(__('子订单号不能为空'), [], 403);
 
         //获取子订单数据
@@ -1656,7 +1659,8 @@ class ScmDistribution extends Scm
             'coding' => $store_house_info['coding'],
             'abnormal_list' => $abnormal_list
         ];
-
+        Log::write("输出合单扫描子单号数据");
+        Log::write($info);
         $this->success('', ['info' => $info], 200);
     }
 
