@@ -199,7 +199,10 @@ class ItemPlatformSku extends Model
     {
         $map['sku'] = $sku;
         $map['platform_type'] = $platform_type;
-        return $this->where($map)->value('platform_sku');
+        $this->where($map)->value('platform_sku');
+        echo $this->getLastSql();
+
+        return false;
     }
 
     /**
