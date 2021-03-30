@@ -1662,15 +1662,16 @@
                     $wave_time_type = 8;
                 }
 
-//            $id = $waveorder->where(['type' => $type, 'wave_time_type' => $wave_time_type, 'order_date' => ['between', [strtotime(date('Y-m-d 00:00:00', $v['updated_at'])), strtotime(date('Y-m-d 23:59:59', $v['updated_at']))]]])->value('id');
-                $params = [];
-                $params['wave_order_number'] = 'BC'.date('YmdHis').rand(100, 999).rand(100, 999);
-                $params['type'] = $type;
-                $params['wave_time_type'] = $wave_time_type;
-                $params['order_date'] = $v['updated_at'];
-                $params['createtime'] = time();
-                $id = $waveorder->insertGetId($params);
-
+                $id = $waveorder->where(['type' => $type, 'wave_time_type' => $wave_time_type, 'order_date' => ['between', [strtotime(date('Y-m-d 00:00:00', $v['updated_at'])), strtotime(date('Y-m-d 23:59:59', $v['updated_at']))]]])->value('id');
+                if (!$id) {
+                    $params = [];
+                    $params['wave_order_number'] = 'BC'.date('YmdHis').rand(100, 999).rand(100, 999);
+                    $params['type'] = $type;
+                    $params['wave_time_type'] = $wave_time_type;
+                    $params['order_date'] = $v['updated_at'];
+                    $params['createtime'] = time();
+                    $id = $waveorder->insertGetId($params);
+                }
                 //转换平台SKU
                 $sku = $itemplaform->getWebSku($v['sku'], $v['site']);
                 //根据sku查询库位排序
