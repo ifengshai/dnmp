@@ -471,15 +471,7 @@ class FinanceCost extends Backend
         header('Cache-Control: max-age=0');
 
         $writer = new $class($spreadsheet);
-
-
         $writer->save('php://output');
-
-        dump($list);
-
-        die();
-
-
     }
 
 }
