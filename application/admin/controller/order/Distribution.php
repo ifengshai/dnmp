@@ -152,9 +152,10 @@ class Distribution extends Backend
         $this->_lens_data = new LensData();
         $this->_stock_house = new StockHouse();
         $this->_distribution_abnormal = new DistributionAbnormal();
-        $this->_new_order_item_option = new NewOrderItemOption();
         $this->_new_order = new NewOrder();
+        $this->_new_order_item_option = new NewOrderItemOption();
         $this->_new_order_process = new NewOrderProcess();
+        $this->_new_order_item_process = new NewOrderItemProcess();
         $this->_item_platform_sku = new ItemPlatformSku();
         $this->_item = new Item();
         $this->_stock_log = new StockLog();
@@ -550,9 +551,9 @@ class Distribution extends Backend
             $filter = json_decode($this->request->get('filter'), true);
             //查询子订单
             if ($filter['item_order_number']) {
-                $map['item_order_number'] = ['like', $filter['item_order_number'] . '%'];
-                $wave_order_id = $this->_new_order_process->where($map)->value('wave_order_id');
-                $where['id'] = $wave_order_id;
+                $smap['item_order_number'] = ['like', $filter['item_order_number'].'%'];
+                $wave_order_id = $this->_new_order_item_process->where($smap)->value('wave_order_id');
+                $map['id'] = $wave_order_id;
                 unset($filter['item_order_number']);
             }
             $this->request->get(['filter' => json_encode($filter)]);
@@ -560,10 +561,12 @@ class Distribution extends Backend
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->_wave_order
                 ->where($where)
+                ->where($map)
                 ->count();
 
             $list = $this->_wave_order
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();

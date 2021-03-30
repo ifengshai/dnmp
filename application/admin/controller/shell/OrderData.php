@@ -1666,7 +1666,7 @@ class OrderData extends Backend
                 $params['wave_order_number'] = 'BC' . date('YmdHis') . rand(100, 999) . rand(100, 999);
                 $params['type'] = $type;
                 $params['wave_time_type'] = $wave_time_type;
-                $params['order_date'] =  $v['created_at'];
+                $params['order_date'] = $v['created_at'];
                 $params['createtime'] = time();
                 $id = $waveorder->insertGetId($params);
             }
@@ -1676,8 +1676,8 @@ class OrderData extends Backend
             //根据sku查询库位排序
             $storesku = new \app\admin\model\warehouse\StockSku();
             $where['b.area_id'] = 3;//默认拣货区
-            $location_data = $storesku->alias('a')->where(['a.sku' => $sku])->field('coding,picking_sort')->join(['fa_store_house' => 'b'],'a.store_id=b.id')->find();
-            $this->orderitemprocess->where(['id' => $v['id']])->update(['wave_order_id' => $id, 'location_code' => $location_data['coding'], 'picking_sort' =>  $location_data['picking_sort']]);
+            $location_data = $storesku->alias('a')->where($where)->where(['a.sku' => $sku])->field('coding,picking_sort')->join(['fa_store_house' => 'b'], 'a.store_id=b.id')->find();
+            $this->orderitemprocess->where(['id' => $v['id']])->update(['wave_order_id' => $id, 'location_code' => $location_data['coding'], 'picking_sort' => $location_data['picking_sort']]);
         }
     }
 
