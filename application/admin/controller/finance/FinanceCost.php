@@ -261,7 +261,7 @@ class FinanceCost extends Backend
 
                 if ($value['payment_time']) {
 
-                    $value['payment_time'] = date('Y-d-m H:i:s', $value['payment_time']);
+                    $value['payment_time'] = date('Y-m-d H:i:s', $value['payment_time']);
 
                 } else {
 
@@ -271,7 +271,7 @@ class FinanceCost extends Backend
 
                 if ($value['createtime']) {
 
-                    $value['createtime'] = date('Y-d-m H:i:s', $value['createtime']);
+                    $value['createtime'] = date('Y-m-d H:i:s', $value['createtime']);
 
                 }
 
@@ -340,7 +340,7 @@ class FinanceCost extends Backend
 
                 if ($value['createtime']) {
 
-                    $value['createtime'] = date('Y-d-m H:i:s', $value['createtime']);
+                    $value['createtime'] = date('Y-m-d H:i:s', $value['createtime']);
 
                 }
 
