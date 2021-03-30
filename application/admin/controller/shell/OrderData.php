@@ -1742,6 +1742,7 @@ class OrderData extends Backend
                 $params['createtime'] = time();
                 $id = $waveorder->insertGetId($params);
             }
+            dump($v);
             //转换平台SKU
             $sku = $itemplaform->getWebSku($v['sku'], $v['site']);
             dump($sku);
