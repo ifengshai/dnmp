@@ -847,7 +847,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
             Table.api.init({
                 showJumpto: true,
                 searchFormVisible: true,
-                pageSize: 100,
+                pageSize: 10,
                 pageList: [10, 25, 50, 100, 300, 500],
                 extend: {
                     index_url: 'order/distribution/wave_order_detail' + location.search + (location.search ? '&ids=' + Config.ids : '?ids=' + Config.ids),
