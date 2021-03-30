@@ -15,7 +15,7 @@ use fast\Trackingmore;
  */
 class Crontab extends Backend
 {
-    protected $noNeedLogin = ['*'];
+    protected $noNeedLogin = ['*,update_ashboard_data_two_zeelool'];
 
     public function _initialize()
     {
