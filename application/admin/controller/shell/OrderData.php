@@ -173,7 +173,7 @@ class OrderData extends Backend
                                     $params['customer_email'] = $v['customer_email'];
                                     $params['customer_firstname'] = $v['customer_firstname'];
                                     $params['customer_lastname'] = $v['customer_lastname'];
-                                    $params['taxno'] = $v['taxno'];
+                                    $params['taxno'] = $v['cpf'];
                                     $params['base_to_order_rate'] = $v['base_to_order_rate'];
                                     $params['mw_rewardpoint'] = $v['mw_rewardpoint'];
                                     $params['mw_rewardpoint_discount'] = $v['mw_rewardpoint_discount'];
@@ -304,7 +304,7 @@ class OrderData extends Backend
                                     $params['customer_email'] = $v['customer_email'];
                                     $params['customer_firstname'] = $v['customer_firstname'];
                                     $params['customer_lastname'] = $v['customer_lastname'];
-                                    $params['taxno'] = $v['taxno'];
+                                    $params['taxno'] = $v['cpf'];
                                     $params['base_to_order_rate'] = $v['base_to_order_rate'];
                                     $params['mw_rewardpoint'] = $v['mw_rewardpoint'];
                                     $params['mw_rewardpoint_discount'] = $v['mw_rewardpoint_discount'];
@@ -1835,7 +1835,7 @@ class OrderData extends Backend
             $params['customer_email'] = $v['customer_email'];
             $params['customer_firstname'] = $v['customer_firstname'];
             $params['customer_lastname'] = $v['customer_lastname'];
-            $params['taxno'] = $v['taxno'];
+            $params['taxno'] = $v['cpf'];
             $params['base_to_order_rate'] = $v['base_to_order_rate'];
             $params['mw_rewardpoint'] = $v['mw_rewardpoint'];
             $params['mw_rewardpoint_discount'] = $v['mw_rewardpoint_discount'];
