@@ -1693,7 +1693,7 @@ class OrderData extends Backend
         $where['b.is_print'] = 0;
         $where['b.wave_order_id'] = 0;
         $where['a.status'] = ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal']];
-
+        $where['b.item_order_number'] = '100146318-01';
         $list = $this->order->where($where)->alias('a')->field('b.id,b.sku,a.updated_at,entity_id,a.site')
             ->join(['fa_order_item_process' => 'b'], 'a.entity_id=b.magento_order_id and a.site=b.site')
             ->order('id desc')
@@ -1744,11 +1744,13 @@ class OrderData extends Backend
             }
             //转换平台SKU
             $sku = $itemplaform->getWebSku($v['sku'], $v['site']);
+            dump($sku);
             //根据sku查询库位排序
             $storesku = new \app\admin\model\warehouse\StockSku();
             $where = [];
             $where['b.area_id'] = 3;//默认拣货区
             $location_data = $storesku->alias('a')->where($where)->where(['a.sku' => $sku])->field('coding,picking_sort')->join(['fa_store_house' => 'b'], 'a.store_id=b.id')->find();
+            dump($location_data);
             $this->orderitemprocess->where(['id' => $v['id']])->update(['wave_order_id' => $id, 'location_code' => $location_data['coding'], 'picking_sort' => $location_data['picking_sort']]);
 
         }
