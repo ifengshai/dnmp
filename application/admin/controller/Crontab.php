@@ -3349,7 +3349,7 @@ class Crontab extends Backend
      * @since 2020/03/02 17:39:31
      * @return void
      */
-    public function update_ashboard_data_two_zeelool(){
+    public function update_ashboard_data_twoz(){
         $this->get_update_ashboard_data_two(1);
     }
     public function update_ashboard_data_two()
