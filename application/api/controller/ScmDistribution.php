@@ -26,6 +26,7 @@ use app\admin\model\order\order\LensData;
 use app\admin\model\saleaftermanage\WorkOrderList;
 use app\admin\model\finance\FinanceCost;
 use app\admin\model\warehouse\Inventory;
+use Think\Log;
 
 /**
  * 供应链配货接口类
@@ -1674,7 +1675,9 @@ class ScmDistribution extends Scm
         $store_house_id = $this->request->request('store_house_id');
         empty($item_order_number) && $this->error(__('子订单号不能为空'), [], 403);
         empty($store_house_id) && $this->error(__('合单库位号不能为空'), [], 403);
-
+        Log::write("输出合单时的参数");
+        Log::write($item_order_number);
+        Log::write($store_house_id);
         //获取子订单数据
         $item_process_info = $this->_new_order_item_process
             ->where('item_order_number', $item_order_number)
@@ -1690,10 +1693,14 @@ class ScmDistribution extends Scm
             ->join(['fa_order_process' => 'b'], 'a.id=b.order_id', 'left')
             ->field('a.id,a.increment_id,b.entity_id,b.store_house_id')
             ->find();
+        Log::write("======输出查询数据========");
+        Log::write($order_process_info);
         empty($order_process_info) && $this->error(__('主订单不存在'), [], 403);
 
         //获取库位信息
         $store_house_info = $this->_stock_house->field('id,coding,subarea,occupy,fictitious_occupy_time,order_id')->where('id', $store_house_id)->find(); //查询合单库位--占用数量
+        Log::write("====获取库位信息====");
+        Log::write($store_house_info);
         empty($store_house_info) && $this->error(__('合单库位不存在'), [], 403);
 
         if ($order_process_info['store_house_id'] != $store_house_id) {
