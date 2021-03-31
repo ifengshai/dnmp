@@ -22,7 +22,7 @@ class NewProductDesign extends Backend
     {
         parent::_initialize();
         $this->model = new \app\admin\model\NewProductDesign;
-
+        $this->view->assign('getTabList', $this->model->getTabList());
     }
     
     /**
@@ -37,27 +37,37 @@ class NewProductDesign extends Backend
      */
     public function index()
     {
+
         //当前是否为关联查询
         $this->relationSearch = false;
         //设置过滤方法
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax())
         {
+            $filter = json_decode($this->request->get('filter'), true);
+            if ($filter['label']){
+                $map['status'] = $filter['label'];
+            }
+            unset($filter['label']);
+            $this->request->get(['filter' => json_encode($filter)]);
+
             //如果发送的来源是Selectpage，则转发到Selectpage
             if ($this->request->request('keyField'))
             {
                 return $this->selectpage();
             }
+
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                     
                     ->where($where)
+                    ->where($map)
                     ->order($sort, $order)
                     ->count();
 
             $list = $this->model
-                    
                     ->where($where)
+                    ->where($map)
                     ->order($sort, $order)
                     ->limit($offset, $limit)
                     ->select();
@@ -72,5 +82,11 @@ class NewProductDesign extends Backend
             return json($result);
         }
         return $this->view->fetch();
+    }
+
+
+    public function detail(){
+        echo 111;
+
     }
 }
