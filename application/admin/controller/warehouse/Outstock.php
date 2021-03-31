@@ -1145,7 +1145,7 @@ class Outstock extends Backend
                             $params[$sku_k] = [
                                 'out_stock_num' => count($sku_v),
                                 'sku' => $sku_k,
-                                'out_stock_id' => 1,
+                                'out_stock_id' => $transfer_order_id,
                             ];
                         }
                     } else {
@@ -1153,7 +1153,7 @@ class Outstock extends Backend
                     }
                 }
             }
-            $_item->allowField(true)->saveAll($params) ? $this->success('导入成功！') : $this->error('导入失败！');
+            $_item->allowField(true)->saveAll($params);
 
 
             $this->model->commit();
