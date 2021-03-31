@@ -2823,7 +2823,6 @@ class ScmWarehouse extends Scm
                             ->update(['library_status' => 2, 'inventory_id' => $inventory_id]);
                     } else {
                         if ($codes) {
-
                             //查询库位id
                             $store_id = $this->_store_house->where(['area_id' => $v['area_id'], 'coding' => $v['library_name'], 'status' => 1])->value('id');
                             //更新如果出库单id为空 添加出库单id
@@ -2836,7 +2835,6 @@ class ScmWarehouse extends Scm
                                 ->where(['code' => ['not in', $codes],'library_status' => 1, 'location_code' => $v['library_name'], 'location_id' => $v['area_id'], 'sku' => $v['sku']])
                                 ->where("item_order_number=''")
                                 ->update(['library_status' => 2, 'inventory_id' => $inventory_id]);
-
                         }
                     }
                 }
