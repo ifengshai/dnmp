@@ -87,6 +87,9 @@ class NewProductDesign extends Backend
 
             }
             $list = collection($list)->toArray();
+            foreach ($list as $key=>$item){
+                $list[$key]['label'] = $map['status']?$map['status']:0;
+            }
             $result = array("total" => $total, "rows" => $list);
 
             return json($result);

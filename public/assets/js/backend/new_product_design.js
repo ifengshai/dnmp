@@ -65,9 +65,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     name: 'edit_recipient',
                                     text:__('录尺寸'),
                                     title:__('录尺寸'),
-                                    hidden:function(row){
-                                        return row.status !== 1? true : false;
-                                    },
                                     extend: 'data-area = \'["50%","50%"]\'',
                                     classname: 'btn btn-xs btn-primary btn-dialog',
                                     url: 'new_product_design/record_size',
@@ -78,7 +75,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function(row){
-                                        return true;
+                                        return row.status == 1? true : false;
                                     }
                                 },
                                 {
