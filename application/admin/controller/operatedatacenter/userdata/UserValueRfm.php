@@ -36,7 +36,7 @@ class UserValueRfm extends Backend
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
         foreach ($magentoplatformarr as $key => $val) {
-            if (!in_array($val['name'], ['zeelool', 'voogueme', 'nihao','zeelool_de','zeelool_jp'])) {
+            if (!in_array($val['name'], ['zeelool', 'voogueme', 'nihao', 'zeelool_de', 'zeelool_jp'])) {
                 unset($magentoplatformarr[$key]);
             }
         }
@@ -102,19 +102,19 @@ class UserValueRfm extends Backend
     */
     public function getOrderAmountUserNum($order_platform)
     {
-        if($order_platform == 2){
+        if ($order_platform == 2) {
             $web_model = Db::connect('database.db_voogueme');
             $order_model = $this->voogueme;
-        }elseif($order_platform == 3){
+        } elseif ($order_platform == 3) {
             $web_model = Db::connect('database.db_nihao');
             $order_model = $this->nihao;
-        }elseif($order_platform == 10){
+        } elseif ($order_platform == 10) {
             $web_model = Db::connect('database.db_zeelool_de');
             $order_model = $this->zeeloolde;
-        }elseif($order_platform == 11){
+        } elseif ($order_platform == 11) {
             $web_model = Db::connect('database.db_zeelool_jp');
             $order_model = $this->zeelooljp;
-        }else{
+        } else {
             $web_model = Db::connect('database.db_zeelool');
             $order_model = $this->zeelool;
         }
@@ -153,7 +153,7 @@ class UserValueRfm extends Backend
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
         foreach ($magentoplatformarr as $key => $val) {
-            if (!in_array($val['name'], ['zeelool', 'voogueme', 'nihao','zeelool_de','zeelool_jp'])) {
+            if (!in_array($val['name'], ['zeelool', 'voogueme', 'nihao', 'zeelool_de', 'zeelool_jp'])) {
                 unset($magentoplatformarr[$key]);
             }
         }
@@ -215,19 +215,19 @@ class UserValueRfm extends Backend
     */
     public function getOrderNumUserNum($order_platform)
     {
-        if($order_platform == 2){
+        if ($order_platform == 2) {
             $web_model = Db::connect('database.db_voogueme');
             $order_model = $this->voogueme;
-        }elseif($order_platform == 3){
+        } elseif ($order_platform == 3) {
             $web_model = Db::connect('database.db_nihao');
             $order_model = $this->nihao;
-        }elseif($order_platform == 10){
+        } elseif ($order_platform == 10) {
             $web_model = Db::connect('database.db_zeelool_de');
             $order_model = $this->zeeloolde;
-        }elseif($order_platform == 11){
+        } elseif ($order_platform == 11) {
             $web_model = Db::connect('database.db_zeelool_jp');
             $order_model = $this->zeelooljp;
-        }else{
+        } else {
             $web_model = Db::connect('database.db_zeelool');
             $order_model = $this->zeelool;
         }
@@ -266,7 +266,7 @@ class UserValueRfm extends Backend
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
         foreach ($magentoplatformarr as $key => $val) {
-            if (!in_array($val['name'], ['zeelool', 'voogueme', 'nihao','zeelool_de','zeelool_jp'])) {
+            if (!in_array($val['name'], ['zeelool', 'voogueme', 'nihao', 'zeelool_de', 'zeelool_jp'])) {
                 unset($magentoplatformarr[$key]);
             }
         }
@@ -330,15 +330,15 @@ class UserValueRfm extends Backend
     */
     public function getUserNearDays($order_platform)
     {
-        if($order_platform == 2){
+        if ($order_platform == 2) {
             $web_model = Db::connect('database.db_voogueme');
-        }elseif($order_platform == 3){
+        } elseif ($order_platform == 3) {
             $web_model = Db::connect('database.db_nihao');
-        }elseif($order_platform == 10){
+        } elseif ($order_platform == 10) {
             $web_model = Db::connect('database.db_zeelool_de');
-        }elseif($order_platform == 11){
+        } elseif ($order_platform == 11) {
             $web_model = Db::connect('database.db_zeelool_jp');
-        }else{
+        } else {
             $web_model = Db::connect('database.db_zeelool');
         }
         $today = date('Y-m-d');

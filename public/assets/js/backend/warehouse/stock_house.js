@@ -50,6 +50,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                         { field: 'coding', title: __('Coding'), operate: 'like' },
                         { field: 'volume', title: __('库容') },
                         { field: 'library_name', title: __('Library_name') },
+                        { field: 'picking_sort', title: __('库位顺序') },
                         {
                             field: 'status', title: __('Status'), custom: { 1: 'success', 2: 'danger' },
                             searchList: { 1: '启用', 2: '禁用' },

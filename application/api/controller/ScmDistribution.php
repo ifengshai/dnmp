@@ -1649,15 +1649,15 @@ class ScmDistribution extends Scm
 
         //异常原因列表
         $abnormal_list = [
-            ['id' => 12, 'name' => '缺货']
+            ['id' => 12, 'name' => '缺货'],
         ];
 
         $info = [
             'item_order_number' => $item_order_number,
-            'sku' => $item_process_info['sku'],
-            'store_id' => $store_house_info['id'],
-            'coding' => $store_house_info['coding'],
-            'abnormal_list' => $abnormal_list
+            'sku'               => $item_process_info['sku'],
+            'store_id'          => $store_house_info['id'],
+            'coding'            => $store_house_info['coding'],
+            'abnormal_list'     => $abnormal_list,
         ];
         Log::write("输出合单扫描子单号数据");
         Log::write($info);
@@ -1714,7 +1714,7 @@ class ScmDistribution extends Scm
                 empty($new_store_house_info) && $this->error(__('合单库位已用完，请检查合单库位情况'), [], 403);
 
                 $info['store_id'] = $new_store_house_info['id'];
-                $this->error(__('合单架' . $store_house_info['coding'] . '库位已被占用，' . '请将子单号' . $item_order_number . '的商品放入新合单架' . $new_store_house_info['coding'] . '库位'), ['info' => $info], 2001);
+                $this->error(__('合单架'.$store_house_info['coding'].'库位已被占用，'.'请将子单号'.$item_order_number.'的商品放入新合单架'.$new_store_house_info['coding'].'库位'), ['info' => $info], 2001);
             }
         }
 

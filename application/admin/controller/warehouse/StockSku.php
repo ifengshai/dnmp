@@ -70,7 +70,7 @@ class StockSku extends Backend
                 unset($filter['storehouse.status']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $this->model
                 ->with(['storehouse'])
                 ->where($where)
@@ -262,8 +262,10 @@ class StockSku extends Backend
         $info = (new Item())->getItemSkuInfo();
         $this->assign('info', $info);
         $this->view->assign("row", $row);
+
         return $this->view->fetch();
     }
+
     /**
      * sku库位绑定批量导入
      * Created by Phpstorm.
@@ -277,7 +279,7 @@ class StockSku extends Backend
         if (!$file) {
             $this->error(__('Parameter %s can not be empty', 'file'));
         }
-        $filePath = ROOT_PATH . DS . 'public' . DS . $file;
+        $filePath = ROOT_PATH.DS.'public'.DS.$file;
         if (!is_file($filePath)) {
             $this->error(__('No results were found'));
         }
@@ -298,9 +300,9 @@ class StockSku extends Backend
                     $line = mb_convert_encoding($line, 'utf-8', $encoding);
                 }
                 if ($n == 0 || preg_match('/^".*"$/', $line)) {
-                    fwrite($fp, $line . "\n");
+                    fwrite($fp, $line."\n");
                 } else {
-                    fwrite($fp, '"' . str_replace(['"', ','], ['""', '","'], $line) . "\"\n");
+                    fwrite($fp, '"'.str_replace(['"', ','], ['""', '","'], $line)."\"\n");
                 }
                 $n++;
             }
@@ -352,19 +354,19 @@ class StockSku extends Backend
         }
 
         foreach ($data as $k => $v) {
-            if (empty($v[2]) || empty($v[1]) || empty($v[0])){
+            if (empty($v[2]) || empty($v[1]) || empty($v[0])) {
                 $this->error('参数不能为空，请检查！！');
             }
             $warehouse_area = Db::name('warehouse_area')->where('coding', $v[0])->find();
-            if (empty($warehouse_area)){
+            if (empty($warehouse_area)) {
                 $this->error('sku:'.$v[2].'库区编码错误，请检查！！');
             }
-            $store_house = Db::name('store_house')->where('coding',$v[1])->where('area_id',$warehouse_area['id'])->find();
-            if (empty($store_house)){
+            $store_house = Db::name('store_house')->where('coding', $v[1])->where('area_id', $warehouse_area['id'])->find();
+            if (empty($store_house)) {
                 $this->error('sku:'.$v[2].'库位编码错误，请检查！！');
             }
             //拣货货区一个库位号只能有一个sku
-            if ($warehouse_area['type'] !== 2){
+            if ($warehouse_area['type'] !== 2) {
                 $map['sku'] = $v[2];
             }
             //判断选择的库位是否已存在
@@ -377,7 +379,7 @@ class StockSku extends Backend
         }
         foreach ($data as $k => $v) {
             $area_id = Db::name('warehouse_area')->where('coding', $v[0])->value('id');
-            $store_house = Db::name('store_house')->where('coding',$v[1])->where('area_id',$area_id)->find();
+            $store_house = Db::name('store_house')->where('coding', $v[1])->where('area_id', $area_id)->find();
             $result = Db::name('store_sku')->insert(['sku' => $v[2], 'store_id' => $store_house['id'], 'createtime' => date('y-m-d h:i:s', time()), 'create_person' => $this->auth->username]);
         }
         if ($result) {

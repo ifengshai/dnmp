@@ -121,7 +121,7 @@ class OrderDataDetail extends Backend
             unset($filter['store_id']);
             unset($filter['is_refund']);
             $this->request->get(['filter' => json_encode($filter)]);
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $sort = 'o.entity_id';
             $total = $order_model->alias('o')
                 ->join('customer_entity c','o.customer_id=c.entity_id','left')
@@ -215,22 +215,22 @@ class OrderDataDetail extends Backend
                     }
                     $register_time = $customer['created_at'];
                     $register_email = $customer['email'];
-                }else{
+                } else {
                     $group = '游客';
                     $register_time = '';
                     $register_email = '';
                 }
                 $arr[$i]['customer_type'] = $group;   //客户类型
-                $arr[$i]['discount_rate'] = $value['base_grand_total'] ? round(($value['base_discount_amount']/$value['base_grand_total']*(-1)),2).'%' : 0;  //折扣百分比
-                $arr[$i]['discount_money'] = round($value['base_discount_amount'],2);  //折扣金额
+                $arr[$i]['discount_rate'] = $value['base_grand_total'] ? round(($value['base_discount_amount'] / $value['base_grand_total'] * (-1)), 2).'%' : 0;  //折扣百分比
+                $arr[$i]['discount_money'] = round($value['base_discount_amount'], 2);  //折扣金额
                 $work_list_where['platform_order'] = $value['increment_id'];
                 $work_list = Db::name('work_order_list')->where($work_list_where)->field('id,is_refund')->select();
                 $work_list = collection($work_list)->toArray();
                 $work_list_num = count($work_list);
-                $work_list_is_refund = array_column($work_list,'is_refund');
-                if(in_array(1,$work_list_is_refund)){
+                $work_list_is_refund = array_column($work_list, 'is_refund');
+                if (in_array(1, $work_list_is_refund)) {
                     $is_refund = '有';
-                }else{
+                } else {
                     $is_refund = '无';
                 }
                 $arr[$i]['is_refund'] = $is_refund;  //是否退款
@@ -238,7 +238,7 @@ class OrderDataDetail extends Backend
                 //支付信息
                 $payment_where['parent_id'] = $value['entity_id'];
                 $payment = $web_model->table('sales_flat_order_payment')->where($payment_where)->value('method');
-                $arr[$i]['payment_method'] =  $payment == 'oceanpayment_creditcard' ? '钱海' : 'Paypal';  //支付方式
+                $arr[$i]['payment_method'] = $payment == 'oceanpayment_creditcard' ? '钱海' : 'Paypal';  //支付方式
                 //处方信息
                 $prescription_where['order_id'] = $value['entity_id'];
                 $frame_price = $web_model->table('sales_flat_order_item_prescription')->where($prescription_where)->sum('frame_price');
@@ -664,9 +664,9 @@ class OrderDataDetail extends Backend
                         $tmpRow[$index3[0]] =$register_email;
                     }
                 }
-                if(in_array('discount_rate',$column_name)){
-                    $index = array_keys($column_name,'discount_rate');
-                    $tmpRow[$index[0]] =$val['base_grand_total'] ? round(($val['base_discount_amount']/$val['base_grand_total']*(-1)),2).'%' : 0;//折扣百分比
+                if(in_array('discount_rate',$column_name)) {
+                    $index = array_keys($column_name, 'discount_rate');
+                    $tmpRow[$index[0]] = $val['base_grand_total'] ? round(($val['base_discount_amount'] / $val['base_grand_total'] * (-1)), 2).'%' : 0;//折扣百分比
                 }
                 if(in_array('discount_money',$column_name)){
                     $index = array_keys($column_name,'discount_money');

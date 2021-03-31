@@ -44,19 +44,19 @@ class UserDataViewVip extends Backend
                 return $this->selectpage();
             }
             $filter = json_decode($this->request->get('filter'), true);
-            if($filter['order_platform'] == 2){
+            if ($filter['order_platform'] == 2) {
                 $order_model = $this->voogueme;
                 $web_model = Db::connect('database.db_voogueme');
-            }elseif($filter['order_platform'] == 3){
+            } elseif ($filter['order_platform'] == 3) {
                 $order_model = $this->nihao;
                 $web_model = Db::connect('database.db_nihao');
-            }elseif($filter['order_platform'] == 10){
+            } elseif ($filter['order_platform'] == 10) {
                 $order_model = $this->zeeloolde;
                 $web_model = Db::connect('database.db_zeelool_de');
-            }elseif($filter['order_platform'] == 11){
+            } elseif ($filter['order_platform'] == 11) {
                 $order_model = $this->zeelooljp;
                 $web_model = Db::connect('database.db_zeelool_jp');
-            }else{
+            } else {
                 $order_model = $this->zeelool;
                 $web_model = Db::connect('database.db_zeelool');
             }
@@ -68,7 +68,7 @@ class UserDataViewVip extends Backend
             unset($filter['time_str2']);
             unset($filter['order_platform']);
             $this->request->get(['filter' => json_encode($filter)]);
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $web_model
                 ->table('oc_vip_order')
                 ->where($where)
@@ -114,7 +114,7 @@ class UserDataViewVip extends Backend
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
         foreach ($magentoplatformarr as $key=>$val){
-            if(!in_array($val['name'],['zeelool','voogueme','zeelool_de'])){
+            if (!in_array($val['name'], ['zeelool', 'voogueme', 'zeelool_de'])) {
                 unset($magentoplatformarr[$key]);
             }
         }
@@ -137,19 +137,19 @@ class UserDataViewVip extends Backend
             $params = $this->request->param();
             //站点
             $order_platform = $params['order_platform'] ? $params['order_platform'] : 1;
-            if($order_platform == 2){
+            if ($order_platform == 2) {
                 $model = $this->vooguemeOperate;
                 $web_model = Db::connect('database.db_voogueme');
-            }elseif($order_platform == 3){
+            } elseif ($order_platform == 3) {
                 $model = $this->nihaoOperate;
                 $web_model = Db::connect('database.db_nihao');
-            }elseif($order_platform == 10){
+            } elseif ($order_platform == 10) {
                 $model = $this->zeelooldeOperate;
                 $web_model = Db::connect('database.db_zeelool_de');
-            }elseif($order_platform == 11){
+            } elseif ($order_platform == 11) {
                 $model = $this->zeelooljpOperate;
                 $web_model = Db::connect('database.db_zeelool_jp');
-            }else{
+            } else {
                 $model = $this->zeeloolOperate;
                 $web_model = Db::connect('database.db_zeelool');
             }
@@ -189,19 +189,19 @@ class UserDataViewVip extends Backend
         // 将标题名称通过fputcsv写到文件句柄
         fputcsv($fp, $field_arr);
 
-        if($order_platform == 2){
+        if ($order_platform == 2) {
             $order_model = $this->voogueme;
             $web_model = Db::connect('database.db_voogueme');
-        }elseif($order_platform == 3){
+        } elseif ($order_platform == 3) {
             $order_model = $this->nihao;
             $web_model = Db::connect('database.db_nihao');
-        }elseif($order_platform == 10){
+        } elseif ($order_platform == 10) {
             $order_model = $this->zeeloolde;
             $web_model = Db::connect('database.db_zeelool_de');
-        }elseif($order_platform == 11){
+        } elseif ($order_platform == 11) {
             $order_model = $this->zeelooljp;
             $web_model = Db::connect('database.db_zeelool_jp');
-        }else{
+        } else {
             $order_model = $this->zeelool;
             $web_model = Db::connect('database.db_zeelool');
         }

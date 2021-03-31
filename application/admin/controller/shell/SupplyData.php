@@ -284,20 +284,21 @@ class SupplyData extends Backend
         $c_info = $this->getDullStock($sku, 12);
         $sales_num10 = $c_info['sales_num'];
         $days[] = $j_info['days'];
-         //抖音
-         $c_info = $this->getDullStock($sku, 13);
-         $sales_num11 = $c_info['sales_num'];
-         $days[] = $j_info['days'];
-          //阿里巴巴国际站
+        //抖音
+        $c_info = $this->getDullStock($sku, 13);
+        $sales_num11 = $c_info['sales_num'];
+        $days[] = $j_info['days'];
+        //阿里巴巴国际站
         $c_info = $this->getDullStock($sku, 14);
         $sales_num12 = $c_info['sales_num'];
         $days[] = $j_info['days'];
-        $count = $sales_num1+$sales_num2+$sales_num3+$sales_num4+$sales_num5+$sales_num6+$sales_num7+$sales_num8+$sales_num9+$sales_num10+$sales_num11+$sales_num12;
+        $count = $sales_num1 + $sales_num2 + $sales_num3 + $sales_num4 + $sales_num5 + $sales_num6 + $sales_num7 + $sales_num8 + $sales_num9 + $sales_num10 + $sales_num11 + $sales_num12;
         $days = max($days);
-        $data = array(
-            'count'=>$count,
-            'days'=>$days,
-        );
+        $data = [
+            'count' => $count,
+            'days'  => $days,
+        ];
+
         return $data;
     }
     //查询sku的有效天数的销量和有效天数
@@ -442,17 +443,19 @@ class SupplyData extends Backend
             //判断是否有月末数据
             $end_dull_stock = $this->dullstock->where("DATE_FORMAT(day_date,'%Y-%m-%d')='$endday'")->where('grade','Z')->field('id,stock')->find();
             if ($end_dull_stock['id']) {
-                $stock_info1 = Db::name('datacenter_supply_month')->where('day_date',$lastmonth)->field('id,avg_stock')->find();
+                $stock_info1 = Db::name('datacenter_supply_month')->where('day_date', $lastmonth)->field('id,avg_stock')->find();
                 //如果有月末数据，（月初数据+月末数据）/2
                 $dull_stock = round(($start_dull_stock['stock'] + $end_dull_stock['stock']) / 2, 2);
                 $arr1['avg_dull_stock'] = $dull_stock;
-                $arr1['avg_rate'] = $stock_info1['avg_stock'] ? round($arr1['avg_dull_stock']/$stock_info1['avg_stock']*100,2) : 0;
-                Db::name('datacenter_supply_month')->where('id',$stock_info1['id'])->update($arr1);
+                $arr1['avg_rate'] = $stock_info1['avg_stock'] ? round($arr1['avg_dull_stock'] / $stock_info1['avg_stock'] * 100, 2) : 0;
+                Db::name('datacenter_supply_month')->where('id', $stock_info1['id'])->update($arr1);
             }
         }
     }
+
     //每月数据(虚拟仓库存、周转天数)
-    public function supply_month_virtual(){
+    public function supply_month_virtual()
+    {
         $this->getVirtualData(1);
         $this->getVirtualData(2);
         $this->getVirtualData(3);
@@ -463,20 +466,22 @@ class SupplyData extends Backend
         $this->getVirtualData(10);
         $this->getVirtualData(11);
     }
+
     //获取虚拟仓、周转天数方法
-    public function getVirtualData($site){
+    public function getVirtualData($site)
+    {
         $time = date('Y-m');
-        $lastmonth = date('Y-m',strtotime("$time -1 month"));
+        $lastmonth = date('Y-m', strtotime("$time -1 month"));
         $startday = $lastmonth.'-01';
         $endday = $lastmonth.'-'.date('t', strtotime($startday));
         $start = strtotime($startday);
         $end = strtotime($endday);
 
-        $start_stock = Db::name('datacenter_day')->where("DATE_FORMAT(day_date,'%Y-%m-%d')='$startday'")->where('site',$site)->field('id,virtual_stock')->find();
+        $start_stock = Db::name('datacenter_day')->where("DATE_FORMAT(day_date,'%Y-%m-%d')='$startday'")->where('site', $site)->field('id,virtual_stock')->find();
         //判断是否有月初数据
-        if($start_stock['id']) {
+        if ($start_stock['id']) {
             //判断是否有月末数据
-            $end_stock = Db::name('datacenter_day')->where("DATE_FORMAT(day_date,'%Y-%m-%d')='$endday'")->where('site',$site)->field('id,virtual_stock')->find();
+            $end_stock = Db::name('datacenter_day')->where("DATE_FORMAT(day_date,'%Y-%m-%d')='$endday'")->where('site', $site)->field('id,virtual_stock')->find();
             if ($end_stock['id']) {
                 //如果有月末数据，（月初数据+月末数据）/2
                 $stock = round(($start_stock['virtual_stock'] + $end_stock['virtual_stock']) / 2, 0);
@@ -500,11 +505,11 @@ class SupplyData extends Backend
         $stock_consume_num = $order_sales_num + $out_stock_num;
         //站点虚拟仓期初实时库存
         $start_stock_where = [];
-        $start_stock_where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $startday . "'")];
+        $start_stock_where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '".$startday."'")];
         $start_stock = Db::table('fa_datacenter_day')->where($start_stock_where)->where('site', $site)->value('virtual_stock');
         //站点虚拟仓期末实时库存
         $end_stock_where = [];
-        $end_stock_where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $endday . "'")];
+        $end_stock_where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '".$endday."'")];
         $end_stock = Db::table('fa_datacenter_day')->where($end_stock_where)->where('site', $site)->value('virtual_stock');
         $sum = $start_stock + $end_stock;
 
@@ -514,7 +519,7 @@ class SupplyData extends Backend
          * 虚拟仓库存周转天数：所选时间段的天数/库存周转率
          * */
         //库存周转天数
-        $days = round(($end - $start) / 3600 / 24)+1;
+        $days = round(($end - $start) / 3600 / 24) + 1;
         $arr['turnover_day'] = $virtual_turnover_rate ? round($days / $virtual_turnover_rate) : 0;
         Db::name('datacenter_supply_month_web')->insert($arr);
         echo $site."-".$lastmonth." is ok"."\n";
