@@ -262,7 +262,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                             ],
                         }
                     };
-        
+
                     var options = {
                         type: 'post',
                         url: 'supplydatacenter/data_market/dull_stock_change_barline',
@@ -332,7 +332,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                     }
                     EchartObj.api.ajax(options, chartOptions)
                 },
-                purchase_sales_barline: function (){
+                purchase_sales_barline: function () {
                     //柱状图和折线图的结合
                     var chartOptions = {
                         targetId: 'echart5',
@@ -619,7 +619,7 @@ function stock_measure_overview_platform() {
     var order_platform = $('#order_platform').val();
     Backend.api.ajax({
         url: 'supplydatacenter/data_market/stock_measure_overview_platform',
-        data: { order_platform: order_platform}
+        data: {order_platform: order_platform}
     }, function (data, ret) {
         var virtual_turnover_rate = ret.data.virtual_turnover_rate;
         var virtual_turnover_days_rate = ret.data.virtual_turnover_days_rate;

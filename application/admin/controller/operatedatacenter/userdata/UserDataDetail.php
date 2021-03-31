@@ -36,37 +36,37 @@ class UserDataDetail extends Backend
                 return $this->selectpage();
             }
             $filter = json_decode($this->request->get('filter'), true);
-            if($filter['order_platform'] == 2){
+            if ($filter['order_platform'] == 2) {
                 $order_model = $this->voogueme;
                 $web_model = Db::connect('database.db_voogueme');
                 $site = 2;
-            }elseif($filter['order_platform'] == 3){
+            } elseif ($filter['order_platform'] == 3) {
                 $order_model = $this->nihao;
                 $web_model = Db::connect('database.db_nihao');
                 $site = 3;
-            }elseif($filter['order_platform'] == 10){
+            } elseif ($filter['order_platform'] == 10) {
                 $order_model = $this->zeeloolde;
                 $web_model = Db::connect('database.db_zeelool_de');
                 $site = 10;
-            }elseif($filter['order_platform'] == 11){
+            } elseif ($filter['order_platform'] == 11) {
                 $order_model = $this->zeelooljp;
                 $web_model = Db::connect('database.db_zeelool_jp');
                 $site = 11;
-            }else{
+            } else {
                 $order_model = $this->zeelool;
                 $web_model = Db::connect('database.db_zeelool');
                 $site = 1;
             }
-            if($filter['customer_type']){
+            if ($filter['customer_type']) {
                 $map['c.group_id'] = $filter['customer_type'];
             }
-            if($filter['time_str']){
+            if ($filter['time_str']) {
                 $createat = explode(' ', $filter['time_str']);
                 $map['o.created_at'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
-            }else{
+            } else {
                 $start = date('Y-m-d', strtotime('-6 day'));
-                $end   = date('Y-m-d 23:59:59');
-                $map['o.created_at'] = ['between', [$start,$end]];
+                $end = date('Y-m-d 23:59:59');
+                $map['o.created_at'] = ['between', [$start, $end]];
             }
             $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
             $map['o.customer_id'] = ['>',0];
@@ -76,11 +76,11 @@ class UserDataDetail extends Backend
             unset($filter['order_platform']);
             unset($filter['customer_type']);
             $this->request->get(['filter' => json_encode($filter)]);
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $web_model
                 ->table('sales_flat_order')
                 ->alias('o')
-                ->join('customer_entity c','o.customer_id=c.entity_id')
+                ->join('customer_entity c', 'o.customer_id=c.entity_id')
                 ->where($where)
                 ->where($map)
                 ->group('c.entity_id')
@@ -139,7 +139,7 @@ class UserDataDetail extends Backend
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
         foreach ($magentoplatformarr as $key=>$val){
-            if(!in_array($val['name'],['zeelool','voogueme','nihao','zeelool_de','zeelool_jp'])){
+            if (!in_array($val['name'], ['zeelool', 'voogueme', 'nihao', 'zeelool_de', 'zeelool_jp'])) {
                 unset($magentoplatformarr[$key]);
             }
         }
@@ -229,23 +229,23 @@ class UserDataDetail extends Backend
         // 将标题名称通过fputcsv写到文件句柄
         fputcsv($fp, $field_arr);
 
-        if($order_platform == 2){
+        if ($order_platform == 2) {
             $order_model = $this->voogueme;
             $web_model = Db::connect('database.db_voogueme');
             $site = 2;
-        }elseif($order_platform == 3){
+        } elseif ($order_platform == 3) {
             $order_model = $this->nihao;
             $web_model = Db::connect('database.db_nihao');
             $site = 3;
-        }elseif($order_platform == 10){
+        } elseif ($order_platform == 10) {
             $order_model = $this->zeeloolde;
             $web_model = Db::connect('database.db_zeelool_de');
             $site = 10;
-        }elseif($order_platform == 11){
+        } elseif ($order_platform == 11) {
             $order_model = $this->zeelooljp;
             $web_model = Db::connect('database.db_zeelool_jp');
             $site = 11;
-        }else{
+        } else {
             $order_model = $this->zeelool;
             $web_model = Db::connect('database.db_zeelool');
             $site = 1;

@@ -76,7 +76,7 @@ class TransferOrder extends Backend
                 $map = array();
             }
             $this->request->get(['filter' => json_encode($filter)]);
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $this->model
                 ->where($where)
                 ->where($map)

@@ -50,7 +50,7 @@ class GoodsStockLog extends Backend
                 unset($filter['order_number']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $this->model
                 ->where($map)
                 ->where($where)
@@ -65,25 +65,25 @@ class GoodsStockLog extends Backend
                 ->select();
 
             $list = collection($list)->toArray();
-            foreach ($list as $k=>$v){
+            foreach ($list as $k=>$v) {
                 //如果是盘点模块  获取对应的盘点单号
-                if ($v['modular'] ==12){
-                    $list[$k]['order_number'] = Db::name('inventory_list')->where('id',$v['order_number'])->value('number');
+                if ($v['modular'] == 12) {
+                    $list[$k]['order_number'] = Db::name('inventory_list')->where('id', $v['order_number'])->value('number');
                 }
 
-                if ($v['stock_change'] == 0 && $v['stock_before'] == 0){
+                if ($v['stock_change'] == 0 && $v['stock_before'] == 0) {
                     $list[$k]['stock_change'] = '-';
                     $list[$k]['stock_before'] = '-';
                 }
-                if ($v['available_stock_before'] == 0 && $v['available_stock_change'] == 0){
+                if ($v['available_stock_before'] == 0 && $v['available_stock_change'] == 0) {
                     $list[$k]['available_stock_before'] = '-';
                     $list[$k]['available_stock_change'] = '-';
                 }
-                if ($v['fictitious_before'] == 0 && $v['fictitious_change'] == 0){
+                if ($v['fictitious_before'] == 0 && $v['fictitious_change'] == 0) {
                     $list[$k]['fictitious_before'] = '-';
                     $list[$k]['fictitious_change'] = '-';
                 }
-                if ($v['occupy_stock_before'] == 0 && $v['occupy_stock_change'] == 0){
+                if ($v['occupy_stock_before'] == 0 && $v['occupy_stock_change'] == 0) {
                     $list[$k]['occupy_stock_before'] = '-';
                     $list[$k]['occupy_stock_change'] = '-';
                 }
