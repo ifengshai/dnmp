@@ -2440,6 +2440,7 @@ class PurchaseOrder extends Backend
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("T1", "揽件时间");
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("U1", "订单生效时间");
 
+
         foreach ($list as $key => $value) {
             $spreadsheet->getActiveSheet()->setCellValueExplicit("A" . ($key * 1 + 2), $value['purchase_number'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
             $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['purchase_name']);
@@ -2473,7 +2474,8 @@ class PurchaseOrder extends Backend
 
             //反序列化处理物流返回信息
             $logistics_info = unserialize($value['logistics_info']);
-            $readly_logistics_info = $logistics_info['lastResult']['data'][count($logistics_info)-2];
+            $logisticsInfoDataCount = count($logistics_info['lastResult']['data']);
+            $readly_logistics_info = $logistics_info['lastResult']['data'][$logisticsInfoDataCount-1];
             $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 1 + 2), $is_new_product);
             $spreadsheet->getActiveSheet()->setCellValue("P" . ($key * 1 + 2), $is_sample);
             $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 1 + 2), $value['purchase_total']);
