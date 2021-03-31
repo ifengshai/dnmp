@@ -325,7 +325,8 @@ class FinanceCost extends Backend
                 ->setCellValue("E1", "镜片成本")
                 ->setCellValue("F1", "是否结转")
                 ->setCellValue("G1", "创建时间")
-                ->setCellValue("H1", "币种");
+                ->setCellValue("H1", "币种")
+                ->setCellValue("I1", "站点");
 
             foreach ($list as $key => $value) {
 
@@ -361,6 +362,8 @@ class FinanceCost extends Backend
 
                 $spreadsheet->getActiveSheet()->setCellValue("H".($key * 1 + 2), $value['order_currency_code']);
 
+                $spreadsheet->getActiveSheet()->setCellValue("I".($key * 1 + 2), $site_list[$value['type']]);
+
             }
 
         }
@@ -383,6 +386,8 @@ class FinanceCost extends Backend
         $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(20);
 
         $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(20);
+
+        $spreadsheet->getActiveSheet()->getColumnDimension('I')->setWidth(20);
 
         if ($type == 1) {
 
