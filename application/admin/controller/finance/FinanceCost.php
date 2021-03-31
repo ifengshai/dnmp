@@ -4,10 +4,6 @@ namespace app\admin\controller\finance;
 
 use app\common\controller\Backend;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use think\Cache;
-use think\Controller;
-use think\Db;
-use think\Request;
 
 class FinanceCost extends Backend
 {
@@ -63,10 +59,11 @@ class FinanceCost extends Backend
                 ->limit($offset, $limit)
                 ->select();
 
-            $result = array("total" => $total, "rows" => $list);
+            $result = ["total" => $total, "rows" => $list];
 
             return json($result);
         }
+
         return $this->view->fetch('index');
     }
 
@@ -134,7 +131,7 @@ class FinanceCost extends Backend
 
             !empty($filter['bill_type']) && $where['bill_type'] = ['in', $filter['bill_type']];
 
-            !empty($filter['order_number']) && $where['order_number'] = ['like', '%'.$filter['order_number'].'%'];
+            !empty($filter['order_number']) && $where['order_number'] = ['like', '%' . $filter['order_number'] . '%'];
 
             !empty($filter['site']) && $where['site'] = ['in', $filter['site']];
 
@@ -286,31 +283,31 @@ class FinanceCost extends Backend
 
                 }
 
-                $spreadsheet->getActiveSheet()->setCellValueExplicit("A".($key * 1 + 2), $value['id'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+                $spreadsheet->getActiveSheet()->setCellValueExplicit("A" . ($key * 1 + 2), $value['id'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
 
-                $spreadsheet->getActiveSheet()->setCellValue("B".($key * 1 + 2), $type_document[$value['bill_type']]);
+                $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $type_document[$value['bill_type']]);
 
-                $spreadsheet->getActiveSheet()->setCellValue("C".($key * 1 + 2), $value['order_number']);
+                $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['order_number']);
 
-                $spreadsheet->getActiveSheet()->setCellValue("D".($key * 1 + 2), $site_list[$value['site']]);
+                $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $site_list[$value['site']]);
 
-                $spreadsheet->getActiveSheet()->setCellValue("E".($key * 1 + 2), $order_type[$value['order_type']]);
+                $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $order_type[$value['order_type']]);
 
-                $spreadsheet->getActiveSheet()->setCellValue("F".($key * 1 + 2), $value['order_money']);
+                $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['order_money']);
 
-                $spreadsheet->getActiveSheet()->setCellValue("G".($key * 1 + 2), $value['income_amount']);
+                $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['income_amount']);
 
-                $spreadsheet->getActiveSheet()->setCellValue("H".($key * 1 + 2), $value['order_currency_code']);
+                $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['order_currency_code']);
 
-                $spreadsheet->getActiveSheet()->setCellValue("I".($key * 1 + 2), $value['is_carry_forward']);
+                $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), $value['is_carry_forward']);
 
-                $spreadsheet->getActiveSheet()->setCellValue("J".($key * 1 + 2), $value['action_type']);
+                $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 1 + 2), $value['action_type']);
 
-                $spreadsheet->getActiveSheet()->setCellValue("K".($key * 1 + 2), $value['payment_time']);
+                $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 1 + 2), $value['payment_time']);
 
-                $spreadsheet->getActiveSheet()->setCellValue("L".($key * 1 + 2), $value['payment_method']);
+                $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 1 + 2), $value['payment_method']);
 
-                $spreadsheet->getActiveSheet()->setCellValue("M".($key * 1 + 2), $value['createtime']);
+                $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 1 + 2), $value['createtime']);
 
             }
 
@@ -346,23 +343,23 @@ class FinanceCost extends Backend
 
                 }
 
-                $spreadsheet->getActiveSheet()->setCellValueExplicit("A".($key * 1 + 2), $value['id'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+                $spreadsheet->getActiveSheet()->setCellValueExplicit("A" . ($key * 1 + 2), $value['id'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
 
-                $spreadsheet->getActiveSheet()->setCellValue("B".($key * 1 + 2), $type_document[$value['bill_type']]);
+                $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $type_document[$value['bill_type']]);
 
-                $spreadsheet->getActiveSheet()->setCellValue("C".($key * 1 + 2), $value['order_number']);
+                $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['order_number']);
 
-                $spreadsheet->getActiveSheet()->setCellValue("D".($key * 1 + 2), $value['frame_cost']);
+                $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['frame_cost']);
 
-                $spreadsheet->getActiveSheet()->setCellValue("E".($key * 1 + 2), $value['lens_cost']);
+                $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['lens_cost']);
 
-                $spreadsheet->getActiveSheet()->setCellValue("F".($key * 1 + 2), $value['is_carry_forward']);
+                $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['is_carry_forward']);
 
-                $spreadsheet->getActiveSheet()->setCellValue("G".($key * 1 + 2), $value['createtime']);
+                $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['createtime']);
 
-                $spreadsheet->getActiveSheet()->setCellValue("H".($key * 1 + 2), $value['order_currency_code']);
+                $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['order_currency_code']);
 
-                $spreadsheet->getActiveSheet()->setCellValue("I".($key * 1 + 2), $site_list[$value['type']]);
+                $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), $site_list[$value['site']]);
 
             }
 
@@ -422,12 +419,12 @@ class FinanceCost extends Backend
         $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
 
 
-        $setBorder = 'A1:'.$spreadsheet->getActiveSheet()->getHighestColumn().$spreadsheet->getActiveSheet()->getHighestRow();
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
 
         $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
 
 
-        $spreadsheet->getActiveSheet()->getStyle('A1:M'.$spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle('A1:M' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
         $spreadsheet->setActiveSheetIndex(0);
 
@@ -436,11 +433,11 @@ class FinanceCost extends Backend
 
         if ($type == 1) {
 
-            $savename = '订单成本明细-收入'.date("YmdHis", time());
+            $savename = '订单成本明细-收入' . date("YmdHis", time());
 
         } else {
 
-            $savename = '订单成本明细-成本'.date("YmdHis", time());
+            $savename = '订单成本明细-成本' . date("YmdHis", time());
 
         }
 
@@ -465,7 +462,7 @@ class FinanceCost extends Backend
 
         //输出名称
 
-        header('Content-Disposition: attachment;filename="'.$savename.'.'.$format.'"');
+        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
 
         //禁止缓存
 
