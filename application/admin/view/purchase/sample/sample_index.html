@@ -16,32 +16,6 @@
                     </table>
                 </div>
             </div>
-            <div class="form-group" style="float: right; margin-top: -12px">
-                <form class="form-horizontal" role="form" method="POST" action="">
-            <span>
-                <a type="button" id="add-form" class="btn btn-danger plupload" data-input-id="c-image" data-url="purchase/sample/upload" data-mimetype="image/*,mp4" data-multiple="true" data-preview-id="p-image">
-                    <i class="fa fa-upload"></i> 上传
-                </a>
-            </span>
-                    <ul class="row list-inline plupload-preview" id="p-image"></ul>
-                </form>
-            </div>
-
-            <div class="form-group">
-                <label class="control-label col-xs-12 col-sm-2">{:__('Ziliao')}:</label>
-                <div class="col-xs-12 col-sm-8">
-                    <div class="input-group">
-                        <input id="c-ziliao" class="form-control" size="50" name="row[ziliao]" type="text" value="{$row.ziliao|htmlentities}">
-                        <div class="input-group-addon no-border no-padding">
-                            <span><button type="button" id="plupload-ziliao" class="btn btn-danger plupload" data-input-id="c-ziliao" data-mimetype="mp4/*/" data-multiple="true" data-preview-id="p-ziliao"><i class="fa fa-upload"></i> {:__('Upload')}</button></span>
-                            <span><button type="button" id="fachoose-ziliao" class="btn btn-primary fachoose" data-input-id="c-ziliao" data-mimetype="*" data-multiple="true"><i class="fa fa-list"></i> {:__('Choose')}</button></span>
-                        </div>
-                        <span class="msg-box n-right" for="c-ziliao"></span>
-                    </div>
-                    <ul class="row list-inline plupload-preview" id="p-ziliao"></ul>
-                </div>
-            </div>
-
         </div>
     </div>
 

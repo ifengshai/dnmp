@@ -2,6 +2,7 @@
 
 namespace app\admin\controller\purchase;
 
+use app\admin\model\NewProductDesign;
 use app\common\controller\Backend;
 use Aws\S3\S3Client;
 use think\Db;
@@ -36,14 +37,6 @@ class Sample extends Backend
         $this->sampleworkorder = new \app\admin\model\purchase\SampleWorkorder;
         $this->samplelendlog = new \app\admin\model\purchase\SampleLendlog;
         $this->item = new \app\admin\model\itemmanage\Item;
-        $this->client = new S3Client([
-            'version' => 'latest',
-            'region' => 'us-west-2', # 可用区必须是这个
-            'credentials' => [
-                'key' => 'AKIAT2RCARUTCLJLTCDL',
-                'secret' => 'JDdEcIL5ViLh8PMm/fXRlWOiQyhk0J19AgJ2Xw2W',
-            ],
-        ]);
     }
 
     /**
@@ -51,61 +44,14 @@ class Sample extends Backend
      * 因此在当前控制器中可不用编写增删改查的代码,除非需要自己控制这部分逻辑
      * 需要将application/admin/library/traits/Backend.php中对应的方法复制到当前控制器,然后进行修改
      */
-    //文件上传提交 批量上传会请求多次接口
-    public function upload()
-    {
-        if (Request()->isGet()) {
-            return "ok";
-        }
-        //获取表单上传文件
-        $file = $this->request->file('file');
-        if (empty($file)) {
-            $this->error('请选择上传文件');
-        }
-        // 移动到服务器的上传目录 并且使用原文件名
-        $key = $file->getInfo('name');
-        $file->move('./uploads/', '');
-        $file_url = './uploads/' . $key;
-        //私有
-        $acl = 'private';
-        //公开
-        $acl = 'public-read';
-        //上传至桶的名称
-        $bucket = 'xmslaravel';
-        try {
-            $sku = 'SO00689-02';
-            //$result = $this->client->upload($bucket, $key, fopen($file_url, 'rb'), $acl);
-            $result = $this->client->putObject(array(
-                'Bucket' => $bucket,
-                'Key' => 'skupic/' . $sku,
-                'Body' => fopen($file_url, 'rb'),
-                'ACL' => $acl,
-            ));
-            //上传成功--返回上传后的地址
-            $data = [
-                'type' => '1',
-                'data' => urldecode($result['ObjectURL']),
-            ];
-            unlink($file_url);
-        } catch (Aws\Exception\MultipartUploadExcepti $e) {
-            //上传失败--返回错误信息
-            $uploader = new Aws\S3\MultipartUploader($this->client, $file_url, [
-                'state' => $e->getState(),
-            ]);
-            $data = [
-                'type' => '0',
-                'data' => $e->getMessage(),
-            ];
-        }
-        $this->success('上传成功', 'index');
-    }
+
     /**
      * 样品间列表
      *
      * @Description
-     * @author mjj
-     * @since 2020/05/23 15:04:06
      * @return void
+     * @since 2020/05/23 15:04:06
+     * @author mjj
      */
     public function sample_index()
     {
@@ -157,9 +103,9 @@ class Sample extends Backend
      * 导入样品入库单
      *
      * @Description
-     * @author mjj
-     * @since 2020/05/23 15:08:22
      * @return void
+     * @since 2020/05/23 15:08:22
+     * @author mjj
      */
     public function sample_import_xls_copy()
     {
@@ -281,9 +227,9 @@ class Sample extends Backend
      * sku和商品的绑定关系
      *
      * @Description
-     * @author mjj
-     * @since 2020/05/23 14:59:04
      * @return void
+     * @since 2020/05/23 14:59:04
+     * @author mjj
      */
     public function sample_add()
     {
@@ -335,10 +281,10 @@ class Sample extends Backend
      * sku，库位绑定修改
      *
      * @Description
-     * @author mjj
-     * @since 2020/06/05 13:53:33
      * @param [type] $ids
      * @return void
+     * @author mjj
+     * @since 2020/06/05 13:53:33
      */
     public function sample_edit($ids = null)
     {
@@ -391,10 +337,10 @@ class Sample extends Backend
      * sku，库位绑定删除
      *
      * @Description
-     * @author mjj
-     * @since 2020/06/05 14:05:10
      * @param [type] $ids
      * @return void
+     * @author mjj
+     * @since 2020/06/05 14:05:10
      */
     public function sample_del($ids = null)
     {
@@ -410,9 +356,9 @@ class Sample extends Backend
      * 库位批量导入
      *
      * @Description
-     * @author mjj
-     * @since 2020/06/05 13:52:57
      * @return void
+     * @since 2020/06/05 13:52:57
+     * @author mjj
      */
     public function sample_import_xls()
     {
@@ -545,9 +491,9 @@ class Sample extends Backend
      * 库位列表
      *
      * @Description
-     * @author mjj
-     * @since 2020/05/23 15:03:40
      * @return void
+     * @since 2020/05/23 15:03:40
+     * @author mjj
      */
     public function sample_location_index()
     {
@@ -585,9 +531,9 @@ class Sample extends Backend
      * 库位增加
      *
      * @Description
-     * @author mjj
-     * @since 2020/05/23 14:59:04
      * @return void
+     * @since 2020/05/23 14:59:04
+     * @author mjj
      */
     public function sample_location_add()
     {
@@ -644,10 +590,10 @@ class Sample extends Backend
      * 库位编辑
      *
      * @Description
-     * @author mjj
-     * @since 2020/05/23 15:05:29
      * @param [type] $ids
      * @return void
+     * @author mjj
+     * @since 2020/05/23 15:05:29
      */
     public function sample_location_edit($ids = null)
     {
@@ -709,10 +655,10 @@ class Sample extends Backend
      * 库位删除
      *
      * @Description
-     * @author mjj
-     * @since 2020/05/23 15:05:41
      * @param string $ids
      * @return void
+     * @author mjj
+     * @since 2020/05/23 15:05:41
      */
     public function sample_location_del($ids = "")
     {
@@ -727,9 +673,9 @@ class Sample extends Backend
      * 入库列表
      *
      * @Description
-     * @author mjj
-     * @since 2020/05/23 15:08:11
      * @return void
+     * @since 2020/05/23 15:08:11
+     * @author mjj
      */
     public function sample_workorder_index()
     {
@@ -794,9 +740,9 @@ class Sample extends Backend
      * 入库添加
      *
      * @Description
-     * @author mjj
-     * @since 2020/05/23 15:08:22
      * @return void
+     * @since 2020/05/23 15:08:22
+     * @author mjj
      */
     public function sample_workorder_add()
     {
@@ -862,10 +808,10 @@ class Sample extends Backend
      * 入库编辑
      *
      * @Description
-     * @author mjj
-     * @since 2020/05/23 15:08:32
      * @param [type] $ids
      * @return void
+     * @author mjj
+     * @since 2020/05/23 15:08:32
      */
     public function sample_workorder_edit($ids = null)
     {
@@ -945,10 +891,10 @@ class Sample extends Backend
      * 入库详情
      *
      * @Description
-     * @author mjj
-     * @since 2020/05/23 15:38:27
      * @param [type] $ids
      * @return void
+     * @author mjj
+     * @since 2020/05/23 15:38:27
      */
     public function sample_workorder_detail($ids = null)
     {
@@ -979,9 +925,9 @@ class Sample extends Backend
      * 入库批量审核
      *
      * @Description
-     * @author mjj
-     * @since 2020/05/23 17:26:57
      * @return void
+     * @since 2020/05/23 17:26:57
+     * @author mjj
      */
     public function sample_workorder_setstatus($ids = null)
     {
@@ -1024,7 +970,9 @@ class Sample extends Backend
         if (count($location_error_sku) != 0) {
             $this->error('SKU:' . implode(',', array_unique($location_error_sku)) . '库位号不存在，无法审核！！');
         }
+        $newProductDesign = new NewProductDesign();
         $this->sampleworkorder->startTrans();
+        $newProductDesign->startTrans();
         $this->sample->startTrans();
         $this->samplelendlog->startTrans();
         try {
@@ -1037,7 +985,7 @@ class Sample extends Backend
                         foreach ($product_arr as $item) {
                             $is_exist = $this->sample->where('sku', $item['sku'])->value('id');
                             if ($is_exist) {
-                                $this->sample->where('sku', $item['sku'])->inc('stock', $item['stock'])->inc('lend_num', 1)->update(['is_lend'=>1]);
+                                $this->sample->where('sku', $item['sku'])->inc('stock', $item['stock'])->inc('lend_num', 1)->update(['is_lend' => 1]);
                                 //自动生成一条样品借出记录
                                 $lendlog['status'] = 2;
                                 $lendlog['create_user'] = session('admin.nickname');
@@ -1045,6 +993,7 @@ class Sample extends Backend
                                 $lendlog['sku'] = $item['sku'];
                                 $lendlog['lend_num'] = 1;
                                 $this->samplelendlog->insert($lendlog);
+                                $newProductDesign->insert(['sku'=>$item['sku'],'status'=>1,'create_time'=>date('Y-m-d H:i:s', time()),'update_time'=>date('Y-m-d H:i:s', time())]);
                             } else {
                                 $sample['sku'] = $item['sku'];
                                 $sample['location_id'] = $this->sample->getlocation($item['sku']);
@@ -1059,26 +1008,31 @@ class Sample extends Backend
                                 $lendlog['sku'] = $item['sku'];
                                 $lendlog['lend_num'] = 1;
                                 $this->samplelendlog->insert($lendlog);
+                                $newProductDesign->insert(['sku'=>$item['sku'],'status'=>1,'create_time'=>date('Y-m-d H:i:s', time()),'update_time'=>date('Y-m-d H:i:s', time())]);
                             }
                         }
                     }
                 }
             }
             $this->sampleworkorder->commit();
+            $newProductDesign->commit();
             $this->sample->commit();
             $this->samplelendlog->commit();
         } catch (ValidateException $e) {
             $this->sampleworkorder->rollback();
+            $newProductDesign->rollback();
             $this->sample->rollback();
             $this->samplelendlog->rollback();
             $this->error($e->getMessage(), [], 406);
         } catch (PDOException $e) {
             $this->sampleworkorder->rollback();
+            $newProductDesign->rollback();
             $this->sample->rollback();
             $this->samplelendlog->rollback();
             $this->error($e->getMessage(), [], 407);
         } catch (Exception $e) {
             $this->sampleworkorder->rollback();
+            $newProductDesign->rollback();
             $this->sample->rollback();
             $this->samplelendlog->rollback();
             $this->error($e->getMessage(), [], 408);
@@ -1091,9 +1045,9 @@ class Sample extends Backend
      * 出库列表
      *
      * @Description
-     * @author mjj
-     * @since 2020/05/23 15:08:11
      * @return void
+     * @since 2020/05/23 15:08:11
+     * @author mjj
      */
     public function sample_workorder_out_index()
     {
@@ -1154,9 +1108,9 @@ class Sample extends Backend
      * 出库添加
      *
      * @Description
-     * @author mjj
-     * @since 2020/05/23 15:08:22
      * @return void
+     * @since 2020/05/23 15:08:22
+     * @author mjj
      */
     public function sample_workorder_out_add()
     {
@@ -1218,10 +1172,10 @@ class Sample extends Backend
      * 出库编辑
      *
      * @Description
-     * @author mjj
-     * @since 2020/05/23 15:08:32
      * @param [type] $ids
      * @return void
+     * @author mjj
+     * @since 2020/05/23 15:08:32
      */
     public function sample_workorder_out_edit($ids = null)
     {
@@ -1303,10 +1257,10 @@ class Sample extends Backend
      * 出库详情/审核
      *
      * @Description
-     * @author mjj
-     * @since 2020/05/23 15:38:27
      * @param [type] $ids
      * @return void
+     * @author mjj
+     * @since 2020/05/23 15:38:27
      */
     public function sample_workorder_out_detail($ids = null)
     {
@@ -1337,9 +1291,9 @@ class Sample extends Backend
      * 出库批量审核
      *
      * @Description
-     * @author mjj
-     * @since 2020/05/23 17:26:57
      * @return void
+     * @since 2020/05/23 17:26:57
+     * @author mjj
      */
     public function sample_workorder_out_setstatus($ids = null)
     {
@@ -1414,9 +1368,9 @@ class Sample extends Backend
      * 借出记录列表
      *
      * @Description
-     * @author mjj
-     * @since 2020/05/25 09:49:12
      * @return void
+     * @since 2020/05/25 09:49:12
+     * @author mjj
      */
     public function sample_lendlog_index()
     {
@@ -1466,9 +1420,9 @@ class Sample extends Backend
      * 借出记录申请
      *
      * @Description
-     * @author mjj
-     * @since 2020/05/25 17:02:44
      * @return void
+     * @since 2020/05/25 17:02:44
+     * @author mjj
      */
     public function sample_lendlog_add($ids = null)
     {
@@ -1542,10 +1496,10 @@ class Sample extends Backend
      * 借出记录编辑
      *
      * @Description
-     * @author mjj
-     * @since 2020/05/25 17:23:40
      * @param [type] $ids
      * @return void
+     * @author mjj
+     * @since 2020/05/25 17:23:40
      */
     public function sample_lendlog_edit($ids = null)
     {
@@ -1593,9 +1547,9 @@ class Sample extends Backend
      * 借出记录批量审核
      *
      * @Description
-     * @author mjj
-     * @since 2020/05/26 11:52:38
      * @return void
+     * @since 2020/05/26 11:52:38
+     * @author mjj
      */
     public function sample_lendlog_setstatus($ids = null)
     {
@@ -1662,9 +1616,9 @@ class Sample extends Backend
      * 借出记录归还
      *
      * @Description
-     * @author mjj
-     * @since 2020/05/26 10:25:09
      * @return void
+     * @since 2020/05/26 10:25:09
+     * @author mjj
      */
     public function sample_lendlog_check($ids = null)
     {

@@ -189,22 +189,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                 },
                                 {
                                     name: 'upload_pictures',
-                                    text:__('上传图片'),
-                                    title:__('上传图片'),
-                                    hidden:function(row){
-                                        return row.status !== 6? true : false;
-                                    },
-                                    extend: 'data-area = \'["50%","50%"]\'',
-                                    classname: 'btn btn-xs btn-primary btn-dialog',
+                                    text: __('上传图片'),
+                                    title: __('上传图片'),
+                                    extend: 'data-area = \'["100%", "100%"]\' data-shade = \'[0.3, "#393D49"]\'',
+                                    icon: 'fa fa-plus',
+                                    classname: 'btn btn-xs btn-info btn-dialog',
                                     url: 'new_product_design/add_img',
-                                    icon: '',
-                                    area: ['50%', '45%'],
-                                    //extend: 'data-area = \'["100%","100%"]\' target=\'_blank\'',
-                                    callback: function (data) {
-                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    visible: function (row) {
+                                        return row.status == 6? true : false;
                                     },
-                                    visible: function(row){
-                                        return true;
+                                    callback: function (data) {
                                     }
                                 },
                                 {
@@ -274,6 +268,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         },
         edit: function () {
             Controller.api.bindevent();
+        },
+        add_img: function () {
+            Form.api.bindevent($("form[role=form]"));
+            $(document).on('click', '.btn-status', function () {
+                $('#status').val(2);
+            });
         },
         api: {
             bindevent: function () {
