@@ -6,6 +6,7 @@ use app\admin\controller\itemmanage\Item;
 use app\admin\model\itemmanage\ItemPlatformSku;
 use app\admin\model\StockLog;
 use app\common\controller\Backend;
+use fast\Excel;
 use think\Db;
 use think\Exception;
 use think\exception\PDOException;
@@ -2835,5 +2836,35 @@ class PurchaseOrder extends Backend
             }
             return $this->error();
         }
+    }
+
+
+    //采购单数据导出
+    public function export_sku_many(){
+        $purchase_order_item =  Db::name('purchase_order_item')->order('id desc')->limit(100)->column('purchase_id,sku');
+        $purchase_order_item = array_unique($purchase_order_item);
+        $data = [];
+        foreach ($purchase_order_item as $key=>$item){
+            $where['id'] = ['eq',$key];
+            $whe['purchase_id'] = ['eq',$key];
+
+            $val =  Db::name('purchase_order')->where($where)->field('type,createtime')->find();
+            $check_order = Db::name('check_order')->where($whe)->order('id desc')->value('id');
+            $check_time = Db::name('in_stock')->where('check_id',$check_order)->order('id desc')->value('check_time');
+            if ($val['type'] ==1){
+                $data[$key]['type']='现货';
+            }else{
+                $data[$key]['type']='大货';
+            }
+           $data[$key]['createtime'] = $val['createtime'];
+           $data[$key]['check_time'] = $check_time;
+           $data[$key]['sku'] = $item;
+        }
+        $data = array_values($data);
+        $headlist = ['类型', '创建时间', '审单时间','SKU'];
+        $path = "/uploads/";
+        $fileName = '导出SKU数据';
+
+        Excel::writeCsv($data, $headlist, $path.$fileName);
     }
 }
