@@ -15,6 +15,7 @@ use think\Db;
 use think\Exception;
 use think\exception\PDOException;
 use think\exception\ValidateException;
+use Think\Log;
 
 /**
  * 调拨单
@@ -600,6 +601,7 @@ class TransferOrder extends Backend
                 $sku_arr[] = $sku;
             }
             //获取导出仓和导入仓
+
             $out_plat = $data[0][0];
             switch (trim($out_plat)) {
                 case 'zeelool':
@@ -627,6 +629,18 @@ class TransferOrder extends Backend
                 //     $label = 1;
                 case 'zeelool_de':
                     $out_label = 10;
+                    break;
+                case 'zeelool_jp':
+                    $out_label = 11;
+                    break;
+                case 'voogmechic':
+                    $out_label = 12;
+                    break;
+                case 'zeelool_cn':
+                    $out_label = 13;
+                    break;
+                case 'alibaba':
+                    $out_label = 14;
                     break;
                 default:
                     $this->error(__('请检查表格中调出仓的名称'));
@@ -659,6 +673,18 @@ class TransferOrder extends Backend
                 case 'zeelool_de':
                     $in_label = 10;
                     break;
+                case 'zeelool_jp':
+                    $in_label = 11;
+                    break;
+                case 'voogmechic':
+                    $in_label = 12;
+                    break;
+                case 'zeelool_cn':
+                    $in_label = 13;
+                    break;
+                case 'alibaba':
+                    $in_label = 14;
+                    break;
                 default:
                     $this->error(__('请检查表格中调出仓的名称'));
             }
@@ -669,7 +695,6 @@ class TransferOrder extends Backend
                 ->field('sku,stock')
                 ->select();
             $platform_arr = array_column(collection($list)->toArray(), 'stock', 'sku');
-
             //插入一条数据到调拨单主表
             $transfer_order['transfer_order_number'] = 'TO' . date('YmdHis') . rand(100, 999) . rand(100, 999);
             $transfer_order['call_out_site'] = $out_label;
@@ -691,7 +716,6 @@ class TransferOrder extends Backend
                 //获取调出数量
                 $replenish_num = (int)$v[3];
                 empty($replenish_num) && $this->model->where('id', $transfer_order_id)->delete() && $this->error(__('导入失败,商品 ' . $sku . ' 调出数量不能为空！'));
-
                 //校验调出数量是否大于当前调出仓库存
                 if ($replenish_num > $platform_arr[$sku]) {
                     $this->model->where('id', $transfer_order_id)->delete();
