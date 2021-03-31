@@ -75,7 +75,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function(row){
-                                        return row.status == 1? true : false;
+                                        if (row.status ==1 && row.label !==0){
+                                            return  true;
+                                        }else{
+                                            return false;
+                                        }
+
                                     }
                                 },
                                 {
@@ -92,17 +97,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
-                                        return row.status<2? true : false;
-
+                                        return row.label == 0? true : false;
                                     }
                                 },
                                 {
                                     name: 'start_shooting',
                                     text: '开始拍摄',
                                     title: __('开始拍摄'),
-                                    hidden:function(row){
-                                        return row.status !== 2? true : false;
-                                    },
                                     classname: 'btn btn-xs btn-danger  btn-magic btn-dialog',
                                     icon: 'fa fa-magic',
                                     url: 'new_product_design/change_status?status=3',
@@ -116,17 +117,17 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         return false;
                                     },
                                     visible: function (row) {
-                                        //返回true时按钮显示,返回false隐藏
-                                        return true;
+                                        if (row.status ==2 && row.label !==0){
+                                            return  true;
+                                        }else{
+                                            return false;
+                                        }
                                     }
                                 },
                                 {
                                     name: 'shot_over',
                                     text: '拍摄完成',
                                     title: __('拍摄完成'),
-                                    hidden:function(row){
-                                        return row.status !== 3? true : false;
-                                    },
                                     classname: 'btn btn-xs btn-danger  btn-magic btn-dialog',
                                     icon: 'fa fa-magic',
                                     url: 'new_product_design/change_status?status=4',
@@ -140,17 +141,17 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         return false;
                                     },
                                     visible: function (row) {
-                                        //返回true时按钮显示,返回false隐藏
-                                        return true;
+                                        if (row.status ==3 && row.label !==0){
+                                            return  true;
+                                        }else{
+                                            return false;
+                                        }
                                     }
                                 },
                                 {
                                     name: 'distr_user',
                                     text:'分配',
                                     title:__('分配'),
-                                    hidden:function(row){
-                                        return row.status !== 4? true : false;
-                                    },
                                     classname: 'btn btn-xs btn-primary btn-dialog',
                                     icon: '',
                                     url: 'new_product_design/allocate_personnel/id/{row.id}',
@@ -159,17 +160,17 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function (row) {
-                                        //返回true时按钮显示,返回false隐藏
-                                        return true;
+                                        if (row.status ==4 && row.label !==0){
+                                            return  true;
+                                        }else{
+                                            return false;
+                                        }
                                     }
                                 },
                                 {
                                     name: 'tarted_making',
                                     text: '开始制作',
                                     title: __('开始制作'),
-                                    hidden:function(row){
-                                        return row.status !== 5? true : false;
-                                    },
                                     classname: 'btn btn-xs btn-danger  btn-magic btn-dialog',
                                     icon: 'fa fa-magic',
                                     url: 'new_product_design/change_status?status=6',
@@ -183,8 +184,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         return false;
                                     },
                                     visible: function (row) {
-                                        //返回true时按钮显示,返回false隐藏
-                                        return true;
+                                        if (row.status ==5 && row.label !==0){
+                                            return  true;
+                                        }else{
+                                            return false;
+                                        }
                                     }
                                 },
                                 {
@@ -196,7 +200,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     classname: 'btn btn-xs btn-info btn-dialog',
                                     url: 'new_product_design/add_img',
                                     visible: function (row) {
-                                        return row.status == 6? true : false;
+                                        if (row.status ==6 && row.label !==0){
+                                            return  true;
+                                        }else{
+                                            return false;
+                                        }
                                     },
                                     callback: function (data) {
                                     }
@@ -205,9 +213,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     name: 'approved',
                                     text:__('审核通过'),
                                     title:__('审核通过'),
-                                    hidden:function(row){
-                                        return row.status !== 7? true : false;
-                                    },
                                     classname: 'btn btn-xs btn-primary btn-dialog',
                                     icon: 'fa fa-magic',
                                     url: 'new_product_design/change_status?status=8',
@@ -221,17 +226,17 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         return false;
                                     },
                                     visible: function (row) {
-                                        //返回true时按钮显示,返回false隐藏
-                                        return true;
+                                        if (row.status ==7 && row.label !==0){
+                                            return  true;
+                                        }else{
+                                            return false;
+                                        }
                                     }
                                 },
                                 {
                                     name: 'audit_refused',
                                     text:__('审核拒绝'),
                                     title:__('审核拒绝'),
-                                    hidden:function(row){
-                                        return row.status !== 7? true : false;
-                                    },
                                     classname: 'btn btn-xs btn-danger  btn-magic btn-dialog',
                                     icon: 'fa fa-magic',
                                     url: 'new_product_design/change_status?status=9',
@@ -245,8 +250,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         return false;
                                     },
                                     visible: function (row) {
-                                        //返回true时按钮显示,返回false隐藏
-                                        return true;
+                                        if (row.status ==7 && row.label !==0){
+                                            return  true;
+                                        }else{
+                                            return false;
+                                        }
                                     }
                                 },
 
