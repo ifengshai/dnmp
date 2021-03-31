@@ -79,7 +79,7 @@ class Aws3 extends Addons
     {
         $sourceFile = $attachment['url'];
         $fileName = substr($attachment['url'], 1);
-        $this->s3Upload($fileName, $sourceFile);
+        return $this->s3Upload($fileName, $sourceFile);
     }
 
     /**
