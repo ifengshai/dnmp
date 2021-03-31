@@ -2848,7 +2848,7 @@ class PurchaseOrder extends Backend
             $where['id'] = ['eq',$key];
             $whe['purchase_id'] = ['eq',$key];
 
-            $val =  Db::name('purchase_order')->where($where)->field('type,effect_time')->find();
+            $val =  Db::name('purchase_order')->where($where)->field('type,arrival_time')->find();
             $check_order = Db::name('check_order')->where($whe)->order('id desc')->value('id');
             $check_time = Db::name('in_stock')->where('check_id',$check_order)->order('id desc')->value('check_time');
             $data[$key]['id'] = $key;
@@ -2857,12 +2857,12 @@ class PurchaseOrder extends Backend
             }else{
                 $data[$key]['type']='大货';
             }
-           $data[$key]['createtime'] = $val['effect_time'];
+           $data[$key]['createtime'] = $val['arrival_time'];
            $data[$key]['check_time'] = $check_time;
            $data[$key]['sku'] = $item;
         }
         $data = array_values($data);
-        $headlist = ['id','类型', '生效时间', '入库单审核完成时间','SKU'];
+        $headlist = ['id','类型', '预计出货时间', '入库单审核完成时间','SKU'];
         $path = "/uploads/";
         $fileName = '导出所有SKU数据';
 
