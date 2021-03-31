@@ -86,7 +86,24 @@ class NewProductDesign extends Backend
 
 
     public function detail(){
-        echo 111;
+
+        return $this->view->fetch();
+    }
+    //录尺寸
+    public function record_size(){
+        return $this->view->fetch();
+    }
+    //更改状态
+    public function change_status(){
 
     }
+    //分配人员
+    public function allocate_personnel(){
+        return $this->view->fetch();
+    }
+    //上传图片
+    public function add_img(){
+        return $this->view->fetch();
+    }
+
 }

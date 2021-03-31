@@ -1,0 +1,96 @@
+<style>
+    .caigou {
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        padding: 10px;
+        width: 70%;
+        margin-left: 13%;
+        margin-bottom: 10px;
+    }
+
+    .caigou #caigou-table {
+        width: 100%;
+        height: 130px;
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        text-align: center;
+    }
+
+    .caigou #caigou-table tr {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        line-height: 50px;
+    }
+
+    .caigou #caigou-table tr th {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        text-align: center;
+        font-size: 14px;
+    }
+
+    .caigou #caigou-table tr td {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+    }
+
+    .caigou #caigou-table tr td input {
+
+        width: 250px;
+    }
+</style>
+
+<form id="edit-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+
+    <div class="form-group ajax-add">
+        <label class="control-label col-xs-12 col-sm-2">{:__('镜面高（mm）')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-frame_bridge" data-rule="required" class="form-control" name="row[frame_bridge]" type="number" value="" >
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('镜框宽（mm）')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-mirror_width" data-rule="required" class="form-control" name="row[mirror_width]" type="number" value="" >
+        </div>
+    </div>
+    <div class="form-group ajax-add">
+        <label class="control-label col-xs-12 col-sm-2">{:__('桥（mm）')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-attribute-type" type="hidden" name="row[attribute_type]" value="1"/>
+            <input id="c-frame_height" data-rule="required" class="form-control" name="row[frame_height]" type="number" value="" >
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('镜腿长（mm）')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-frame_width" data-rule="required" class="form-control" step="0.01" name="row[frame_width]" type="number" value="" >
+        </div>
+    </div>
+    <div class="form-group ajax-add">
+        <label class="control-label col-xs-12 col-sm-2">{:__('镜框总长（mm）')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-frame_length" data-rule="required" class="form-control" name="row[frame_length]" type="number" value="" >
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('重量（mm）')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-frame_temple_length" data-rule="required" class="form-control" step="0.01" name="row[frame_temple_length]" type="number" value="" >
+        </div>
+    </div>
+    <div class="form-group ajax-add">
+        <label class="control-label col-xs-12 col-sm-2">{:__('镜面宽（mm）')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-weight" data-rule="required" class="form-control" name="row[weight]" type="number" value="" >
+        </div>
+    </div>
+
+</form>

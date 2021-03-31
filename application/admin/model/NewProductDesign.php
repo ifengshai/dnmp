@@ -35,7 +35,7 @@ class NewProductDesign extends Model
             ['name' => '待拍摄', 'field' => 'label', 'value' => 2],
             ['name' => '拍摄中', 'field' => 'label', 'value' => 3],
             ['name' => '待分配', 'field' => 'label', 'value' => 4],
-            ['name' => '带修图', 'field' => 'label', 'value' => 5],
+            ['name' => '待修图', 'field' => 'label', 'value' => 5],
             ['name' => '修图中', 'field' => 'label', 'value' => 6],
             ['name' => '待审核', 'field' => 'label', 'value' => 7],
 
