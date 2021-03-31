@@ -16,6 +16,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
             $('select[name="abnormal"]').parents('.form-group').show();
             $('.btn-batch-export-xls').removeClass('hide');
             $('.btn-batch-printed').removeClass('hide');
+            $('.btn-tag-printed').removeClass('hide');
         } else if (1 == value) {
             $('.btn-batch-printed').removeClass('hide');
             $('.btn-tag-printed').removeClass('hide');
@@ -98,6 +99,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             field: 'item_order_number',
                             title: __('子单号'),
                             operate: 'LIKE'
+                        },
+                        {
+                            field: 'wave_order_id',
+                            title: __('波次单id')
                         },
                         {
                             field: 'sku',
