@@ -1643,6 +1643,7 @@ class OrderData extends Backend
      */
     public function create_wave_order()
     {
+        ini_set('memory_limit', '1024M');
         /**
          *
          * 生成规则
@@ -1663,11 +1664,9 @@ class OrderData extends Backend
         $where['b.is_print'] = 0;
         $where['b.wave_order_id'] = 0;
         $where['a.status'] = ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal']];
-
         $list = $this->order->where($where)->alias('a')->field('b.id,b.sku,a.updated_at,entity_id,a.site')
             ->join(['fa_order_item_process' => 'b'], 'a.entity_id=b.magento_order_id and a.site=b.site')
             ->order('id desc')
-            ->limit(1000)
             ->select();
         $list = collection($list)->toArray();
         //第三方站点id
