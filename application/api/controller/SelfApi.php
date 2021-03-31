@@ -967,4 +967,5 @@ class SelfApi extends Api
             $this->error('失败', [], 400);
         }
     }
+    
 }

@@ -6,16 +6,47 @@
 
 namespace addons\aws3\controller;
 
+use Aws\S3\S3Client;
 use fast\Random;
 use think\addons\Controller;
 use think\Config;
+use think\Request;
 
 class Index extends Controller
 {
 
+    protected $s3Client = null;
+    protected $config = [];
+
+    public function __construct(Request $request = null)
+    {
+        parent::__construct($request);
+        $this->config = get_addon_config('aws3');
+        $this->s3Client = new S3Client([
+            'version' => 'latest',
+            'region'  => $this->config['default_region'],
+        ]);
+
+    }
+
     public function index()
     {
         $this->error("当前插件暂无前台页面");
+    }
+
+    public function s3Upload($fileName,$sourceFile)
+    {
+
+        try {
+            $this->s3Client->putObject([
+                'Bucket' => $this->config['bucket'],
+                'Key'    => 'mojing',
+                'SourceFile'   => $sourceFile,
+                'ACL'    => 'public-read',
+            ]);
+        } catch (Aws\S3\Exception\S3Exception $e) {
+            echo "There was an error uploading the file.\n";
+        }
     }
 
     /**
@@ -37,7 +68,7 @@ class Index extends Controller
         preg_match('/(\d+)(\w+)/', $upload['maxsize'], $matches);
         $type = strtolower($matches[2]);
         $typeDict = ['b' => 0, 'k' => 1, 'kb' => 1, 'm' => 2, 'mb' => 2, 'gb' => 3, 'g' => 3];
-        $size = (int) $upload['maxsize'] * pow(1024, isset($typeDict[$type]) ? $typeDict[$type] : 0);
+        $size = (int)$upload['maxsize'] * pow(1024, isset($typeDict[$type]) ? $typeDict[$type] : 0);
         $fileInfo = $file->getInfo();
         $suffix = strtolower(pathinfo($fileInfo['name'], PATHINFO_EXTENSION));
         $suffix = $suffix && preg_match("/^[a-zA-Z0-9]+$/", $suffix) ? $suffix : 'file';
@@ -83,41 +114,15 @@ class Index extends Controller
 
         $changeDir = $this->request->param('dir');
 
-        //        //$savekey = $upload['savekey'];
         $savekey = $changeDir ? "/uploads/{$changeDir}/{year}{mon}{day}/{filemd5}{.suffix}" : $upload['savekey'];
         $savekey = str_replace(array_keys($replaceArr), array_values($replaceArr), $savekey);
 
         $uploadDir = substr($savekey, 0, strripos($savekey, '/') + 1);
         $fileName = substr($savekey, strripos($savekey, '/') + 1);
-        //
-        $splInfo = $file->validate(['size' => $size])->move(ROOT_PATH . '/public' . $uploadDir, $fileName);
-        if ($splInfo) {
-            $params = array(
-                'admin_id'    => (int) $this->auth->id,
-                'user_id'     => 0,
-                'filesize'    => $fileInfo['size'],
-                'imagewidth'  => $imagewidth,
-                'imageheight' => $imageheight,
-                'imagetype'   => $suffix,
-                'imageframes' => 0,
-                'mimetype'    => $fileInfo['type'],
-                'url'         => $uploadDir . $splInfo->getSaveName(),
-                'uploadtime'  => time(),
-                'storage'     => 'local',
-                'sha1'        => $sha1,
-                'extparam'    => json_encode($extparam),
-            );
-            $attachment = model("attachment");
-            $attachment->data(array_filter($params));
-            $attachment->save();
-            \think\Hook::listen("upload_after", $attachment);
-            $this->success(__('Upload successful'), null, [
-                'url' => $uploadDir . $splInfo->getSaveName()
-            ]);
-        } else {
-            // 上传失败获取错误信息
-            $this->error($file->getError());
-        }
+        $this->s3Upload($fileName,$file->getInfo('tmp_name'));
+        $this->success(__('Upload successful'), null, [
+            'url' => $uploadDir ,
+        ]);
     }
 
 }

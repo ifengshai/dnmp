@@ -4,6 +4,19 @@ return array (
   'autoload' => false,
   'hooks' => 
   array (
+    'config_init' => 
+    array (
+      0 => 'aws3',
+      1 => 'nkeditor',
+    ),
+    'upload' => 
+    array (
+      0 => 'aws3',
+    ),
+    's3_upload' => 
+    array (
+      0 => 'aws3',
+    ),
     'express_query' => 
     array (
       0 => 'express',
@@ -19,10 +32,6 @@ return array (
     'testhook' => 
     array (
       0 => 'markdown',
-    ),
-    'config_init' => 
-    array (
-      0 => 'nkeditor',
     ),
   ),
   'route' => 
