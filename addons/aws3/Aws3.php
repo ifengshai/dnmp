@@ -4,7 +4,6 @@ namespace addons\aws3;
 
 use Aws\S3\S3Client;
 use think\Addons;
-use think\Request;
 
 /**
  * 插件
@@ -54,6 +53,7 @@ class Aws3 extends Addons
 
         return true;
     }
+
     /**
      * @param $params
      */
@@ -62,36 +62,59 @@ class Aws3 extends Addons
         $config = $this->getConfig();
         $params['upload'] = [
             'uploadurl' => $config['uploadurl'],
-            'savekey' => $config['savekey'],
-            'maxsize' => $config['maxsize'],
-            'mimetype' => $config['mimetype']
+            'savekey'   => $config['savekey'],
+            'maxsize'   => $config['maxsize'],
+            'mimetype'  => $config['mimetype'],
         ];
     }
-    public function upload($file)
+
+    /**
+     * 上传方法
+     *
+     * @param $attachment 文件信息
+     *
+     * @date   2021/3/31 15:01
+     */
+    public function uploadAfter($attachment)
     {
-        $fileName = '1111';
-        $this->s3Upload($fileName,$file->getInfo('tmp_name'));
+        $sourceFile = $attachment['url'];
+        $fileName = substr($attachment['url'], 1);
+        $this->s3Upload($fileName, $sourceFile);
     }
-    public function s3Upload($fileName,$sourceFile)
+
+    /**
+     * s3上传
+     *
+     * @param $fileName   文件名
+     * @param $sourceFile 文件路径
+     *
+     * @date   2021/3/31 15:02
+     */
+    public function s3Upload($fileName, $sourceFile)
     {
         $this->config = get_addon_config('aws3');
+        //获取s3client
         $this->s3Client = new S3Client([
-            'version' => 'latest',
-            'region'  => $this->config['default_region'],
+            'version'     => 'latest',
+            'region'      => $this->config['default_region'],
             'credentials' => [
-                'key' => $this->config['access_key_id'],
-                'secret'  => $this->config['secret_access_key']
-            ]
+                'key'    => $this->config['access_key_id'],
+                'secret' => $this->config['secret_access_key'],
+            ],
         ]);
+        //上传文件
         try {
-            $result = $this->s3Client->putObject([
+            $this->s3Client->putObject([
                 'Bucket' => $this->config['bucket'],
-                'Key'    => '',
-                'Body'   => '',
+                'Key'    => $fileName,
+                'Body'   => $sourceFile,
                 'ACL'    => 'public-read',
             ]);
-        } catch (Aws\S3\Exception\S3Exception $e) {
-            echo "There was an error uploading the file.\n";
+        } catch (\Aws\S3\Exception\S3Exception $e) {
+            return ['code' => 0, 'msg' => $e->getMessage()];
         }
+        //删除原文件
+        @unlink($sourceFile);
+        return ['code' => 1, 'msg' => '上传成功','url' => $this->config['s3_url'] . $fileName];
     }
 }
