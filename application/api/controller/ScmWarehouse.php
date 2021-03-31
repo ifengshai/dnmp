@@ -2833,6 +2833,10 @@ class ScmWarehouse extends Scm
                             ->count();
                         $list[$k]['sku'] = $v['sku'];
                         $list[$k]['out_stock_num'] = $other_message;
+                        $store_id = $this->_store_house->where(['area_id' => $v['area_id'], 'coding' => $v['library_name'], 'status' => 1])->value('id');
+                        $this->_product_bar_code_item
+                            ->where(['code' => ['in', $codes]])
+                            ->update(['inventory_id' => $inventory_id, 'library_status' => 1, 'location_code' => $v['library_name'], 'location_id' => $v['area_id'], 'location_code_id' => $store_id]);
                         //更新如果出库单id为空 添加出库单id
                         $this->_product_bar_code_item
                             ->where(['code' => ['not in', $codes],'library_status' => 1, 'location_code' => $v['library_name'], 'location_id' => $v['area_id'], 'sku' => $v['sku']])
