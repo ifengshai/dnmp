@@ -3,6 +3,7 @@
 namespace app\admin\controller\purchase;
 
 use app\common\controller\Backend;
+use Aws\S3\S3Client;
 use think\Db;
 use think\Exception;
 use think\exception\PDOException;
@@ -13,19 +14,20 @@ use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 
 /**
- * 
+ *
  *
  * @icon fa fa-circle-o
  */
 class Sample extends Backend
 {
-    
+
     /**
      * Sample模型对象
      * @var \app\admin\model\purchase\Sample
      */
     protected $model = null;
     protected $noNeedRight = ['sample_import_xls_copy'];
+
     public function _initialize()
     {
         parent::_initialize();
@@ -34,23 +36,77 @@ class Sample extends Backend
         $this->sampleworkorder = new \app\admin\model\purchase\SampleWorkorder;
         $this->samplelendlog = new \app\admin\model\purchase\SampleLendlog;
         $this->item = new \app\admin\model\itemmanage\Item;
-
+        $this->client = new S3Client([
+            'version' => 'latest',
+            'region' => 'us-west-2', # 可用区必须是这个
+            'credentials' => [
+                'key' => 'AKIAT2RCARUTCLJLTCDL',
+                'secret' => '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',
+            ],
+        ]);
     }
-    
+
     /**
      * 默认生成的控制器所继承的父类中有index/add/edit/del/multi五个基础方法、destroy/restore/recyclebin三个回收站方法
      * 因此在当前控制器中可不用编写增删改查的代码,除非需要自己控制这部分逻辑
      * 需要将application/admin/library/traits/Backend.php中对应的方法复制到当前控制器,然后进行修改
      */
-
-   /**
-    * 样品间列表
-    *
-    * @Description
-    * @author mjj
-    * @since 2020/05/23 15:04:06 
-    * @return void
-    */
+    //文件上传提交 批量上传会请求多次接口
+    public function upload()
+    {
+        if (Request()->isGet()) {
+            return "ok";
+        }
+        //获取表单上传文件
+        $file = $this->request->file('file');
+        if (empty($file)) {
+            $this->error('请选择上传文件');
+        }
+        // 移动到服务器的上传目录 并且使用原文件名
+        $key = $file->getInfo('name');
+        $file->move('./uploads/', '');
+        $file_url = './uploads/' . $key;
+        //私有
+        $acl = 'private';
+        //公开
+        $acl = 'public-read';
+        //上传至桶的名称
+        $bucket = 'xmslaravel';
+        try {
+            $sku = 'SO00689-02';
+            //$result = $this->client->upload($bucket, $key, fopen($file_url, 'rb'), $acl);
+            $result = $this->client->putObject(array(
+                'Bucket' => $bucket,
+                'Key' => 'skupic/' . $sku,
+                'Body' => fopen($file_url, 'rb'),
+                'ACL' => $acl,
+            ));
+            //上传成功--返回上传后的地址
+            $data = [
+                'type' => '1',
+                'data' => urldecode($result['ObjectURL']),
+            ];
+            unlink($file_url);
+        } catch (Aws\Exception\MultipartUploadExcepti $e) {
+            //上传失败--返回错误信息
+            $uploader = new Aws\S3\MultipartUploader($this->client, $file_url, [
+                'state' => $e->getState(),
+            ]);
+            $data = [
+                'type' => '0',
+                'data' => $e->getMessage(),
+            ];
+        }
+        $this->success('上传成功', 'index');
+    }
+    /**
+     * 样品间列表
+     *
+     * @Description
+     * @author mjj
+     * @since 2020/05/23 15:04:06
+     * @return void
+     */
     public function sample_index()
     {
         //设置过滤方法
@@ -85,10 +141,10 @@ class Sample extends Backend
                 ->select();
 
             $list = collection($list)->toArray();
-            foreach ($list as $key=>$value){
+            foreach ($list as $key => $value) {
                 $list[$key]['location_id'] = $this->samplelocation->getLocationName($value['location_id']);
                 $list[$key]['is_lend'] = $value['is_lend'] == 1 ? '是' : '否';
-                $list[$key]['product_name'] = $this->item->where('sku',$value['sku'])->value('name');
+                $list[$key]['product_name'] = $this->item->where('sku', $value['sku'])->value('name');
             }
             $result = array("total" => $total, "rows" => $list);
 
@@ -101,8 +157,8 @@ class Sample extends Backend
      * 导入样品入库单
      *
      * @Description
-     * @author mjj
-     * @since 2020/05/23 15:08:22 
+     * @author mjj
+     * @since 2020/05/23 15:08:22
      * @return void
      */
     public function sample_import_xls_copy()
@@ -213,7 +269,7 @@ class Sample extends Backend
         $result_index = Db::table('fa_purchase_sample_workorder_item')->insertAll($sku);
         if (!$result_index) {
             $this->error('导入失败！！');
-        }else{
+        } else {
             $this->success('导入成功');
         }
 
@@ -225,8 +281,8 @@ class Sample extends Backend
      * sku和商品的绑定关系
      *
      * @Description
-     * @author mjj
-     * @since 2020/05/23 14:59:04 
+     * @author mjj
+     * @since 2020/05/23 14:59:04
      * @return void
      */
     public function sample_add()
@@ -240,8 +296,8 @@ class Sample extends Backend
                     $params[$this->dataLimitField] = $this->auth->id;
                 }
                 //判断sku是否重复
-                $sku_arr = $this->sample->where('is_del',1)->column('sku');
-                if(in_array($params['sku'],$sku_arr)){
+                $sku_arr = $this->sample->where('is_del', 1)->column('sku');
+                if (in_array($params['sku'], $sku_arr)) {
                     $this->error(__('sku不能重复'));
                 }
                 Db::startTrans();
@@ -274,12 +330,13 @@ class Sample extends Backend
 
         return $this->view->fetch();
     }
+
     /**
      * sku，库位绑定修改
      *
      * @Description
-     * @author mjj
-     * @since 2020/06/05 13:53:33 
+     * @author mjj
+     * @since 2020/06/05 13:53:33
      * @param [type] $ids
      * @return void
      */
@@ -302,7 +359,7 @@ class Sample extends Backend
                 Db::startTrans();
                 try {
                     //是否采用模型验证
-                    $result = $this->sample->where('id',$ids)->update(['location_id'=>$params['location_id']]);
+                    $result = $this->sample->where('id', $ids)->update(['location_id' => $params['location_id']]);
                     Db::commit();
                 } catch (ValidateException $e) {
                     Db::rollback();
@@ -329,32 +386,36 @@ class Sample extends Backend
         $this->view->assign("row", $row);
         return $this->view->fetch();
     }
+
     /**
      * sku，库位绑定删除
      *
      * @Description
-     * @author mjj
-     * @since 2020/06/05 14:05:10 
+     * @author mjj
+     * @since 2020/06/05 14:05:10
      * @param [type] $ids
      * @return void
      */
-    public function sample_del($ids = null){
-        $result = $this->sample->where('id',$ids)->update(['is_del'=>2]);
-        if($result){
+    public function sample_del($ids = null)
+    {
+        $result = $this->sample->where('id', $ids)->update(['is_del' => 2]);
+        if ($result) {
             $this->success();
-        }else{
+        } else {
             $this->error(__('删除失败'));
         }
     }
+
     /**
      * 库位批量导入
      *
      * @Description
-     * @author mjj
-     * @since 2020/06/05 13:52:57 
+     * @author mjj
+     * @since 2020/06/05 13:52:57
      * @return void
      */
-    public function sample_import_xls(){
+    public function sample_import_xls()
+    {
         set_time_limit(0);
         $file = $this->request->request('file');
         if (!$file) {
@@ -399,7 +460,7 @@ class Sample extends Backend
         //导入文件首行类型,默认是注释,如果需要使用字段名称请使用name
         //$importHeadType = isset($this->importHeadType) ? $this->importHeadType : 'comment';
         //模板文件列名
-         $listName = ['SKU', '库位号'];
+        $listName = ['SKU', '库位号'];
         try {
             if (!$PHPExcel = $reader->load($filePath)) {
                 $this->error(__('Unknown data format'));
@@ -444,47 +505,48 @@ class Sample extends Backend
         $result_index = 0;
         foreach ($data as $k => $v) {
             //查询样品间是否存在该商品
-            $sample = $this->sample->where('sku',$v[0])->value('id');
-            if($sample){
-                $location_id = $this->samplelocation->where('location',trim($v[1]))->value('id');
-                if($location_id){
-                    $result = $this->sample->where('sku',$v[0])->update(['location_id'=>$location_id]);
+            $sample = $this->sample->where('sku', $v[0])->value('id');
+            if ($sample) {
+                $location_id = $this->samplelocation->where('location', trim($v[1]))->value('id');
+                if ($location_id) {
+                    $result = $this->sample->where('sku', $v[0])->update(['location_id' => $location_id]);
                     if ($result) {
                         $result_index = 1;
                     }
-                }else{
+                } else {
                     $no_location[] = $v[0];
                 }
-            }else{
+            } else {
                 $sku['sku'] = $v[0];
-                $location_id = $this->samplelocation->where('location',trim($v[1]))->value('id');
-                if($location_id){
+                $location_id = $this->samplelocation->where('location', trim($v[1]))->value('id');
+                if ($location_id) {
                     $sku['location_id'] = $location_id;
                     $result = $this->sample->insert($sku);
                     if ($result) {
                         $result_index = 1;
                     }
-                }else{
+                } else {
                     $no_location[] = $v[0];
                 }
             }
         }
-        if(count($no_location) != 0){
-            $str = ' SKU:'.implode(',',$no_location).'这些sku库位号有误';
+        if (count($no_location) != 0) {
+            $str = ' SKU:' . implode(',', $no_location) . '这些sku库位号有误';
         }
         if ($result_index == 1) {
-            $this->success('导入成功！！'.$str);
+            $this->success('导入成功！！' . $str);
         } else {
-            $this->error('导入失败！！'.$str);
-        } 
+            $this->error('导入失败！！' . $str);
+        }
         /*********************end***********************/
     }
+
     /**
      * 库位列表
      *
      * @Description
-     * @author mjj
-     * @since 2020/05/23 15:03:40 
+     * @author mjj
+     * @since 2020/05/23 15:03:40
      * @return void
      */
     public function sample_location_index()
@@ -518,12 +580,13 @@ class Sample extends Backend
         }
         return $this->view->fetch();
     }
+
     /**
      * 库位增加
      *
      * @Description
-     * @author mjj
-     * @since 2020/05/23 14:59:04 
+     * @author mjj
+     * @since 2020/05/23 14:59:04
      * @return void
      */
     public function sample_location_add()
@@ -538,12 +601,12 @@ class Sample extends Backend
                 }
                 //判断库位号是否重复
                 $location_repeat = Db::name('purchase_sample_location')
-                    ->where(['location'=>$params['location'],'is_del'=>1])
+                    ->where(['location' => $params['location'], 'is_del' => 1])
                     ->find();
-                if($location_repeat){
+                if ($location_repeat) {
                     $this->error(__('库位号不能重复'));
                 }
-                $params['createtime'] = date('Y-m-d H:i:s',time());
+                $params['createtime'] = date('Y-m-d H:i:s', time());
                 $params['create_user'] = session('admin.nickname');
                 $result = false;
                 Db::startTrans();
@@ -581,8 +644,8 @@ class Sample extends Backend
      * 库位编辑
      *
      * @Description
-     * @author mjj
-     * @since 2020/05/23 15:05:29 
+     * @author mjj
+     * @since 2020/05/23 15:05:29
      * @param [type] $ids
      * @return void
      */
@@ -604,9 +667,9 @@ class Sample extends Backend
                 $params = $this->preExcludeFields($params);
                 //判断库位号是否重复
                 $location_repeat = Db::name('purchase_sample_location')
-                    ->where(['location'=>$params['location'],'is_del'=>1])
+                    ->where(['location' => $params['location'], 'is_del' => 1])
                     ->find();
-                if($location_repeat){
+                if ($location_repeat) {
                     $this->error(__('库位号不能重复'));
                 }
                 $result = false;
@@ -641,12 +704,13 @@ class Sample extends Backend
         $this->view->assign("row", $row);
         return $this->view->fetch();
     }
+
     /**
      * 库位删除
      *
      * @Description
-     * @author mjj
-     * @since 2020/05/23 15:05:41 
+     * @author mjj
+     * @since 2020/05/23 15:05:41
      * @param string $ids
      * @return void
      */
@@ -658,12 +722,13 @@ class Sample extends Backend
         $this->samplelocation->where('id', $ids)->update(['is_del' => 2]);
         $this->success();
     }
+
     /**
      * 入库列表
      *
      * @Description
-     * @author mjj
-     * @since 2020/05/23 15:08:11 
+     * @author mjj
+     * @since 2020/05/23 15:08:11
      * @return void
      */
     public function sample_workorder_index()
@@ -686,7 +751,7 @@ class Sample extends Backend
             $where_arr['type'] = 1;
             $where_arr['is_del'] = 1;
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-            
+
             $total = $this->sampleworkorder
                 ->where($where)
                 ->where($where_arr)
@@ -703,17 +768,17 @@ class Sample extends Backend
                 ->select();
 
             $list = collection($list)->toArray();
-            foreach ($list as $key=>$value){
+            foreach ($list as $key => $value) {
                 $list[$key]['status_id'] = $value['status'];
-                if($value['status'] == 1){
+                if ($value['status'] == 1) {
                     $list[$key]['status'] = '新建';
-                }elseif($value['status'] == 2){
+                } elseif ($value['status'] == 2) {
                     $list[$key]['status'] = '待审核';
-                }elseif($value['status'] == 3){
+                } elseif ($value['status'] == 3) {
                     $list[$key]['status'] = '已审核';
-                }elseif($value['status'] == 4){
+                } elseif ($value['status'] == 4) {
                     $list[$key]['status'] = '已拒绝';
-                }elseif($value['status'] == 5){
+                } elseif ($value['status'] == 5) {
                     $list[$key]['status'] = '已取消';
                 }
             }
@@ -729,13 +794,13 @@ class Sample extends Backend
      * 入库添加
      *
      * @Description
-     * @author mjj
-     * @since 2020/05/23 15:08:22 
+     * @author mjj
+     * @since 2020/05/23 15:08:22
      * @return void
      */
     public function sample_workorder_add()
     {
-        $location_number = 'IN2'.date('YmdHis').rand(100,999).rand(100,999);
+        $location_number = 'IN2' . date('YmdHis') . rand(100, 999) . rand(100, 999);
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
@@ -744,32 +809,32 @@ class Sample extends Backend
                 if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
                     $params[$this->dataLimitField] = $this->auth->id;
                 }
-                if(!$params['goods']){
+                if (!$params['goods']) {
                     $this->error(__('提交信息不能为空', ''));
                 }
                 //判断数据中是否有空值
-                $sku_arr = array_column($params['goods'],'sku');
-                $stock_arr = array_column($params['goods'],'stock');
+                $sku_arr = array_column($params['goods'], 'sku');
+                $stock_arr = array_column($params['goods'], 'stock');
                 //判断是否有重复项
-                if (count($sku_arr) != count(array_unique($sku_arr))) { 
+                if (count($sku_arr) != count(array_unique($sku_arr))) {
                     $this->error(__('sku不能重复', ''));
                 }
-                if(in_array('',$sku_arr)){
+                if (in_array('', $sku_arr)) {
                     $this->error(__('商品信息不能为空', ''));
                 }
-                if(in_array('',$stock_arr)){
+                if (in_array('', $stock_arr)) {
                     $this->error(__('库存不能为空', ''));
                 }
                 //生成入库主表数据
                 $workorder['location_number'] = $location_number;
                 $workorder['status'] = $params['status'];
                 $workorder['create_user'] = session('admin.nickname');
-                $workorder['createtime'] = date('Y-m-d H:i:s',time());
+                $workorder['createtime'] = date('Y-m-d H:i:s', time());
                 $workorder['type'] = 1;
                 $workorder['description'] = $params['description'];
                 $this->sampleworkorder->save($workorder);
                 $parent_id = $this->sampleworkorder->id;
-                foreach ($params['goods'] as $value){
+                foreach ($params['goods'] as $value) {
                     $workorder_item['parent_id'] = $parent_id;
                     $workorder_item['sku'] = $value['sku'];
                     $workorder_item['stock'] = $value['stock'];
@@ -781,10 +846,10 @@ class Sample extends Backend
         }
 
         //获取样品间数据
-        $sample_list = $this->sample->where('is_del',1)->select();
+        $sample_list = $this->sample->where('is_del', 1)->select();
         $sample_list = collection($sample_list)->toArray();
-        foreach($sample_list as $k=>$v){
-            $sample_list[$k]['location'] = $this->samplelocation->where('id',$v['location_id'])->value('location');
+        foreach ($sample_list as $k => $v) {
+            $sample_list[$k]['location'] = $this->samplelocation->where('id', $v['location_id'])->value('location');
         }
         $this->assign('sample_list', $sample_list);
 
@@ -792,12 +857,13 @@ class Sample extends Backend
 
         return $this->view->fetch();
     }
+
     /**
      * 入库编辑
      *
      * @Description
-     * @author mjj
-     * @since 2020/05/23 15:08:32 
+     * @author mjj
+     * @since 2020/05/23 15:08:32
      * @param [type] $ids
      * @return void
      */
@@ -817,32 +883,32 @@ class Sample extends Backend
             $params = $this->request->post("row/a");
             if ($params) {
                 $params = $this->preExcludeFields($params);
-                if(!$params['goods']){
+                if (!$params['goods']) {
                     $this->error(__('提交信息不能为空', ''));
                 }
                 //判断数据中是否有空值
-                $sku_arr = array_column($params['goods'],'sku');
-                $stock_arr = array_column($params['goods'],'stock');
-                if(in_array('',$sku_arr)){
+                $sku_arr = array_column($params['goods'], 'sku');
+                $stock_arr = array_column($params['goods'], 'stock');
+                if (in_array('', $sku_arr)) {
                     $this->error(__('商品信息不能为空', ''));
                 }
-                if(in_array('',$stock_arr)){
+                if (in_array('', $stock_arr)) {
                     $this->error(__('库存不能为空', ''));
                 }
                 //获取该入库单下的商品sku，并将不在该列表的数据进行删除
-                $save_sku_arr = Db('purchase_sample_workorder_item')->where(['parent_id'=>$ids])->column('sku');
-                $diff_sku_arr = array_diff($save_sku_arr,$sku_arr);
-                Db('purchase_sample_workorder_item')->where('sku','in',$diff_sku_arr)->where('parent_id',$ids)->delete();
+                $save_sku_arr = Db('purchase_sample_workorder_item')->where(['parent_id' => $ids])->column('sku');
+                $diff_sku_arr = array_diff($save_sku_arr, $sku_arr);
+                Db('purchase_sample_workorder_item')->where('sku', 'in', $diff_sku_arr)->where('parent_id', $ids)->delete();
                 //处理商品
-                foreach($params['goods'] as $value){
+                foreach ($params['goods'] as $value) {
                     //判断入库表中是否有该商品
-                    $is_exist = Db('purchase_sample_workorder_item')->where(['sku'=>$value['sku'],'parent_id'=>$ids])->value('id');
+                    $is_exist = Db('purchase_sample_workorder_item')->where(['sku' => $value['sku'], 'parent_id' => $ids])->value('id');
                     $workorder_item = array();
-                    if($is_exist){
+                    if ($is_exist) {
                         //更新
                         $workorder_item['stock'] = $value['stock'];
-                        Db::name('purchase_sample_workorder_item')->where(['sku'=>$value['sku'],'parent_id'=>$ids])->update($workorder_item);
-                    }else{
+                        Db::name('purchase_sample_workorder_item')->where(['sku' => $value['sku'], 'parent_id' => $ids])->update($workorder_item);
+                    } else {
                         //插入
                         $workorder_item['parent_id'] = $ids;
                         $workorder_item['sku'] = $value['sku'];
@@ -853,33 +919,34 @@ class Sample extends Backend
                 //更新备注
                 $workorder['description'] = $params['description'];
                 $workorder['status'] = $params['status'];
-                $this->sampleworkorder->save($workorder,['id'=> input('ids')]);
+                $this->sampleworkorder->save($workorder, ['id' => input('ids')]);
                 $this->success();
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
         $this->view->assign("row", $row);
         //获取样品间数据
-        $sample_list = $this->sample->where('is_del',1)->select();
+        $sample_list = $this->sample->where('is_del', 1)->select();
         $sample_list = collection($sample_list)->toArray();
-        foreach($sample_list as $k=>$v){
-            $sample_list[$k]['location'] = $this->samplelocation->where('id',$v['location_id'])->value('location');
+        foreach ($sample_list as $k => $v) {
+            $sample_list[$k]['location'] = $this->samplelocation->where('id', $v['location_id'])->value('location');
         }
         $this->assign('sample_list', $sample_list);
         //获取入库商品信息
-        $product_list = Db::name('purchase_sample_workorder_item')->where('parent_id',$ids)->order('id asc')->select();
-        foreach ($product_list as $key=>$value){
+        $product_list = Db::name('purchase_sample_workorder_item')->where('parent_id', $ids)->order('id asc')->select();
+        foreach ($product_list as $key => $value) {
             $product_list[$key]['location'] = $this->sample->getlocation($value['sku']);
         }
         $this->assign('product_list', $product_list);
         return $this->view->fetch();
     }
+
     /**
      * 入库详情
      *
      * @Description
-     * @author mjj
-     * @since 2020/05/23 15:38:27 
+     * @author mjj
+     * @since 2020/05/23 15:38:27
      * @param [type] $ids
      * @return void
      */
@@ -895,27 +962,29 @@ class Sample extends Backend
                 $this->error(__('You have no permission'));
             }
         }
-        
+
         $this->view->assign("row", $row);
 
         //获取入库商品信息
-        $product_list = Db::name('purchase_sample_workorder_item')->where('parent_id',$ids)->order('id asc')->select();
-        foreach ($product_list as $key=>$value){
+        $product_list = Db::name('purchase_sample_workorder_item')->where('parent_id', $ids)->order('id asc')->select();
+        foreach ($product_list as $key => $value) {
             $product_list[$key]['location'] = $this->sample->getlocation($value['sku']);
         }
         $this->assign('product_list', $product_list);
 
         return $this->view->fetch();
     }
+
     /**
      * 入库批量审核
      *
      * @Description
-     * @author mjj
-     * @since 2020/05/23 17:26:57 
+     * @author mjj
+     * @since 2020/05/23 17:26:57
      * @return void
      */
-    public function sample_workorder_setstatus($ids = null){
+    public function sample_workorder_setstatus($ids = null)
+    {
         $ids = $this->request->post("ids/a");
         $status = input('status');
         if (!$ids) {
@@ -930,64 +999,100 @@ class Sample extends Backend
                     $this->error('只有待审核状态才能操作！！');
                     $is_update = 0;
                     break;
-                }else{
+                } else {
                     $is_update = 1;
                 }
             }
-            if($status == 5){
+            if ($status == 5) {
                 if ($v['status'] != 1) {
                     $this->error('只有新建状态才能操作！！');
                     $is_update = 0;
                     break;
-                }else{
+                } else {
                     $is_update = 1;
                 }
             }
         }
-        $workorder_item = Db::name('purchase_sample_workorder_item')->where('parent_id','in',$ids)->select();
+        $workorder_item = Db::name('purchase_sample_workorder_item')->where('parent_id', 'in', $ids)->select();
         $location_error_sku = array();
-        foreach($workorder_item as $val){
+        foreach ($workorder_item as $val) {
             $location = $this->sample->getlocation($val['sku']);
-            if(!$location){
+            if (!$location) {
                 $location_error_sku[] = $val['sku'];
             }
         }
-        if(count($location_error_sku) != 0){
-            $this->error('SKU:'.implode(',',array_unique($location_error_sku)).'库位号不存在，无法审核！！');
+        if (count($location_error_sku) != 0) {
+            $this->error('SKU:' . implode(',', array_unique($location_error_sku)) . '库位号不存在，无法审核！！');
         }
-        if($is_update == 1){
-            $this->sampleworkorder->where($where)->update(['status'=>$status]);
-            if($status == 3){
-                //审核通过后将商品信息添加到样品间列表
-                foreach($ids as $id){
-                    $product_arr = Db::name('purchase_sample_workorder_item')->where('parent_id',$id)->order('id asc')->select();
-                    foreach($product_arr as $item){
-                        $is_exist = $this->sample->where('sku',$item['sku'])->value('id');
-                        if($is_exist){
-                            $this->sample->where('sku',$item['sku'])->inc('stock',$item['stock'])->update();
-                        }else{
-                            $sample['sku'] = $item['sku'];
-                            $sample['location_id'] = $this->sample->getlocation($item['sku']);
-                            $sample['stock'] = $item['stock'];
-                            $sample['is_lend'] = 0;
-                            $sample['lend_num'] = 0;
-                            $this->sample->insert($sample);
+        $this->sampleworkorder->startTrans();
+        $this->sample->startTrans();
+        $this->samplelendlog->startTrans();
+        try {
+            if ($is_update == 1) {
+                $this->sampleworkorder->where($where)->update(['status' => $status]);
+                if ($status == 3) {
+                    //审核通过后将商品信息添加到样品间列表
+                    foreach ($ids as $id) {
+                        $product_arr = Db::name('purchase_sample_workorder_item')->where('parent_id', $id)->order('id asc')->select();
+                        foreach ($product_arr as $item) {
+                            $is_exist = $this->sample->where('sku', $item['sku'])->value('id');
+                            if ($is_exist) {
+                                $this->sample->where('sku', $item['sku'])->inc('stock', $item['stock'])->inc('lend_num', 1)->update(['is_lend'=>1]);
+                                //自动生成一条样品借出记录
+                                $lendlog['status'] = 2;
+                                $lendlog['create_user'] = session('admin.nickname');
+                                $lendlog['createtime'] = date('Y-m-d H:i:s', time());
+                                $lendlog['sku'] = $item['sku'];
+                                $lendlog['lend_num'] = 1;
+                                $this->samplelendlog->insert($lendlog);
+                            } else {
+                                $sample['sku'] = $item['sku'];
+                                $sample['location_id'] = $this->sample->getlocation($item['sku']);
+                                $sample['stock'] = $item['stock'];
+                                $sample['is_lend'] = 1;//是否借出：是
+                                $sample['lend_num'] = 1;//借出数量1
+                                $this->sample->insert($sample);
+                                //自动生成一条样品借出记录
+                                $lendlog['status'] = 2;
+                                $lendlog['create_user'] = session('admin.nickname');
+                                $lendlog['createtime'] = date('Y-m-d H:i:s', time());
+                                $lendlog['sku'] = $item['sku'];
+                                $lendlog['lend_num'] = 1;
+                                $this->samplelendlog->insert($lendlog);
+                            }
                         }
                     }
                 }
             }
-            $this->success();
+            $this->sampleworkorder->commit();
+            $this->sample->commit();
+            $this->samplelendlog->commit();
+        } catch (ValidateException $e) {
+            $this->sampleworkorder->rollback();
+            $this->sample->rollback();
+            $this->samplelendlog->rollback();
+            $this->error($e->getMessage(), [], 406);
+        } catch (PDOException $e) {
+            $this->sampleworkorder->rollback();
+            $this->sample->rollback();
+            $this->samplelendlog->rollback();
+            $this->error($e->getMessage(), [], 407);
+        } catch (Exception $e) {
+            $this->sampleworkorder->rollback();
+            $this->sample->rollback();
+            $this->samplelendlog->rollback();
+            $this->error($e->getMessage(), [], 408);
         }
+        $this->success();
     }
-
 
 
     /**
      * 出库列表
      *
      * @Description
-     * @author mjj
-     * @since 2020/05/23 15:08:11 
+     * @author mjj
+     * @since 2020/05/23 15:08:11
      * @return void
      */
     public function sample_workorder_out_index()
@@ -1005,36 +1110,36 @@ class Sample extends Backend
 
             $total = $this->sampleworkorder
                 ->alias('a')
-                ->join(['fa_purchase_sample_workorder_item' => 'b'], 'a.id = b.parent_id','LEFT')
+                ->join(['fa_purchase_sample_workorder_item' => 'b'], 'a.id = b.parent_id', 'LEFT')
                 ->where($where)
                 ->where($where_arr)
                 ->group('a.id')
-                ->order('a.'.$sort, $order)
+                ->order('a.' . $sort, $order)
                 ->count();
 
             $list = $this->sampleworkorder
                 ->alias('a')
                 ->field('a.id,a.location_number,a.status,a.create_user,a.createtime')
-                ->join(['fa_purchase_sample_workorder_item' => 'b'], 'a.id = b.parent_id','LEFT')
+                ->join(['fa_purchase_sample_workorder_item' => 'b'], 'a.id = b.parent_id', 'LEFT')
                 ->where($where)
                 ->where($where_arr)
                 ->group('a.id')
-                ->order('a.'.$sort, $order)
+                ->order('a.' . $sort, $order)
                 ->limit($offset, $limit)
                 ->select();
 
             $list = collection($list)->toArray();
-            foreach ($list as $key=>$value){
+            foreach ($list as $key => $value) {
                 $list[$key]['status_id'] = $value['status'];
-                if($value['status'] == 1){
+                if ($value['status'] == 1) {
                     $list[$key]['status'] = '新建';
-                }elseif($value['status'] == 2){
+                } elseif ($value['status'] == 2) {
                     $list[$key]['status'] = '待审核';
-                }elseif($value['status'] == 3){
+                } elseif ($value['status'] == 3) {
                     $list[$key]['status'] = '已审核';
-                }elseif($value['status'] == 4){
+                } elseif ($value['status'] == 4) {
                     $list[$key]['status'] = '已拒绝';
-                }elseif($value['status'] == 5){
+                } elseif ($value['status'] == 5) {
                     $list[$key]['status'] = '已取消';
                 }
             }
@@ -1044,17 +1149,18 @@ class Sample extends Backend
         }
         return $this->view->fetch();
     }
+
     /**
      * 出库添加
      *
      * @Description
-     * @author mjj
-     * @since 2020/05/23 15:08:22 
+     * @author mjj
+     * @since 2020/05/23 15:08:22
      * @return void
      */
     public function sample_workorder_out_add()
     {
-        $location_number = 'OUT2'.date('YmdHis').rand(100,999).rand(100,999);
+        $location_number = 'OUT2' . date('YmdHis') . rand(100, 999) . rand(100, 999);
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
@@ -1063,32 +1169,32 @@ class Sample extends Backend
                 if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
                     $params[$this->dataLimitField] = $this->auth->id;
                 }
-                if(!$params['goods']){
+                if (!$params['goods']) {
                     $this->error(__('提交信息不能为空', ''));
                 }
-                $sku_arr = array_column($params['goods'],'sku');
-                $stock_arr = array_column($params['goods'],'stock');
+                $sku_arr = array_column($params['goods'], 'sku');
+                $stock_arr = array_column($params['goods'], 'stock');
                 //判断是否有重复项
-                if (count($sku_arr) != count(array_unique($sku_arr))) { 
+                if (count($sku_arr) != count(array_unique($sku_arr))) {
                     $this->error(__('sku不能重复', ''));
                 }
                 //判断数据中是否有空值
-                if(in_array('',$sku_arr)){
+                if (in_array('', $sku_arr)) {
                     $this->error(__('商品信息不能为空', ''));
                 }
-                if(in_array('',$stock_arr)){
+                if (in_array('', $stock_arr)) {
                     $this->error(__('出库数量不能为空', ''));
                 }
                 //生成出库主表数据
                 $workorder['location_number'] = $location_number;
                 $workorder['status'] = $params['status'];
                 $workorder['create_user'] = session('admin.nickname');
-                $workorder['createtime'] = date('Y-m-d H:i:s',time());
+                $workorder['createtime'] = date('Y-m-d H:i:s', time());
                 $workorder['type'] = 2;
                 $workorder['description'] = $params['description'];
                 $this->sampleworkorder->save($workorder);
                 $parent_id = $this->sampleworkorder->id;
-                foreach ($params['goods'] as $key=>$value){
+                foreach ($params['goods'] as $key => $value) {
                     $workorder_item['parent_id'] = $parent_id;
                     $workorder_item['sku'] = $value['sku'];
                     $workorder_item['stock'] = $value['stock'];
@@ -1107,12 +1213,13 @@ class Sample extends Backend
 
         return $this->view->fetch();
     }
-     /**
+
+    /**
      * 出库编辑
      *
      * @Description
-     * @author mjj
-     * @since 2020/05/23 15:08:32 
+     * @author mjj
+     * @since 2020/05/23 15:08:32
      * @param [type] $ids
      * @return void
      */
@@ -1132,33 +1239,33 @@ class Sample extends Backend
             $params = $this->request->post("row/a");
             if ($params) {
                 $params = $this->preExcludeFields($params);
-                if(!$params['goods']){
+                if (!$params['goods']) {
                     $this->error(__('提交信息不能为空', ''));
                 }
-                $sku_arr = array_column($params['goods'],'sku');
-                $stock_arr = array_column($params['goods'],'stock');
+                $sku_arr = array_column($params['goods'], 'sku');
+                $stock_arr = array_column($params['goods'], 'stock');
                 //判断是否有重复项
-                if (count($sku_arr) != count(array_unique($sku_arr))) { 
+                if (count($sku_arr) != count(array_unique($sku_arr))) {
                     $this->error(__('sku不能重复', ''));
                 }
                 //判断数据中是否有空值
-                if(in_array('',$sku_arr)){
+                if (in_array('', $sku_arr)) {
                     $this->error(__('商品信息不能为空', ''));
                 }
-                if(in_array('',$stock_arr)){
+                if (in_array('', $stock_arr)) {
                     $this->error(__('出库数量不能为空', ''));
                 }
                 //获取该入库单下的商品sku，并将不在该列表的数据进行删除
-                $save_sku_arr = Db('purchase_sample_workorder_item')->where(['parent_id'=>$ids])->column('sku');
-                $diff_sku_arr = array_diff($save_sku_arr,$sku_arr);
-                Db('purchase_sample_workorder_item')->where('sku','in',$diff_sku_arr)->where('parent_id',$ids)->delete();
+                $save_sku_arr = Db('purchase_sample_workorder_item')->where(['parent_id' => $ids])->column('sku');
+                $diff_sku_arr = array_diff($save_sku_arr, $sku_arr);
+                Db('purchase_sample_workorder_item')->where('sku', 'in', $diff_sku_arr)->where('parent_id', $ids)->delete();
                 //处理商品
-                foreach ($params['goods'] as $key=>$value){
-                    $is_exist = Db::name('purchase_sample_workorder_item')->where(['sku'=>$value['sku'],'parent_id'=>$ids])->value('id');
-                    if($is_exist){
+                foreach ($params['goods'] as $key => $value) {
+                    $is_exist = Db::name('purchase_sample_workorder_item')->where(['sku' => $value['sku'], 'parent_id' => $ids])->value('id');
+                    if ($is_exist) {
                         //更新
-                        Db::name('purchase_sample_workorder_item')->where(['sku'=>$value['sku'],'parent_id'=>$ids])->update(['stock'=>$value['stock']]);
-                    }else{
+                        Db::name('purchase_sample_workorder_item')->where(['sku' => $value['sku'], 'parent_id' => $ids])->update(['stock' => $value['stock']]);
+                    } else {
                         //插入
                         $workorder_item = array();
                         $workorder_item['parent_id'] = $ids;
@@ -1169,7 +1276,7 @@ class Sample extends Backend
                 }
                 $workorder['description'] = $params['description'];
                 $workorder['status'] = $params['status'];
-                $this->sampleworkorder->save($workorder,['id'=> input('ids')]);
+                $this->sampleworkorder->save($workorder, ['id' => input('ids')]);
 
                 $this->success();
             }
@@ -1182,8 +1289,8 @@ class Sample extends Backend
         $this->assign('sku_data', $sku_data);
 
         //获取出库商品信息
-        $product_list = Db::name('purchase_sample_workorder_item')->where('parent_id',$ids)->order('id asc')->select();
-        foreach ($product_list as $key=>$value){
+        $product_list = Db::name('purchase_sample_workorder_item')->where('parent_id', $ids)->order('id asc')->select();
+        foreach ($product_list as $key => $value) {
             $product_list[$key]['location'] = $this->sample->getlocation($value['sku']);
         }
         $this->assign('product_list', $product_list);
@@ -1191,12 +1298,13 @@ class Sample extends Backend
 
         return $this->view->fetch();
     }
+
     /**
      * 出库详情/审核
      *
      * @Description
-     * @author mjj
-     * @since 2020/05/23 15:38:27 
+     * @author mjj
+     * @since 2020/05/23 15:38:27
      * @param [type] $ids
      * @return void
      */
@@ -1212,27 +1320,29 @@ class Sample extends Backend
                 $this->error(__('You have no permission'));
             }
         }
-        
+
         $this->view->assign("row", $row);
 
         //获取出库商品信息
-        $product_list = Db::name('purchase_sample_workorder_item')->where('parent_id',$ids)->order('id asc')->select();
-        foreach ($product_list as $key=>$value){
+        $product_list = Db::name('purchase_sample_workorder_item')->where('parent_id', $ids)->order('id asc')->select();
+        foreach ($product_list as $key => $value) {
             $product_list[$key]['location'] = $this->sample->getlocation($value['sku']);
         }
         $this->assign('product_list', $product_list);
 
         return $this->view->fetch();
     }
+
     /**
      * 出库批量审核
      *
      * @Description
-     * @author mjj
-     * @since 2020/05/23 17:26:57 
+     * @author mjj
+     * @since 2020/05/23 17:26:57
      * @return void
      */
-    public function sample_workorder_out_setstatus($ids = null){
+    public function sample_workorder_out_setstatus($ids = null)
+    {
         $ids = $this->request->post("ids/a");
         $status = input('status');
         if (!$ids) {
@@ -1247,7 +1357,7 @@ class Sample extends Backend
                     $this->error('只有待审核状态才能操作！！');
                     $is_update = 0;
                     break;
-                }else{
+                } else {
                     $is_update = 1;
                 }
             }
@@ -1256,55 +1366,56 @@ class Sample extends Backend
                     $this->error('只有新建状态才能操作！！');
                     $is_update = 0;
                     break;
-                }else{
+                } else {
                     $is_update = 1;
                 }
             }
         }
-        if($is_update == 1){
-            if($status == 3){
+        if ($is_update == 1) {
+            if ($status == 3) {
                 $is_check = 0;
                 $check_arr = array();
                 //审核通过后将商品信息添加到样品间列表
-                foreach($ids as $id){
-                    $product_arr = Db::name('purchase_sample_workorder_item')->where('parent_id',$id)->order('id asc')->select();
-                    foreach($product_arr as $item){
-                        $sample = $this->sample->where('sku',$item['sku'])->find();
+                foreach ($ids as $id) {
+                    $product_arr = Db::name('purchase_sample_workorder_item')->where('parent_id', $id)->order('id asc')->select();
+                    foreach ($product_arr as $item) {
+                        $sample = $this->sample->where('sku', $item['sku'])->find();
                         $rest_stock = $sample['stock'] - $sample['lend_num'];
-                        if($rest_stock >= $item['stock']){
+                        if ($rest_stock >= $item['stock']) {
                             $check_arr[] = array(
-                                'sku'=>$item['sku'],
-                                'stock'=>$item['stock'],
+                                'sku' => $item['sku'],
+                                'stock' => $item['stock'],
                             );
-                        }else{
+                        } else {
                             $is_check++;
                             break;
                         }
                     }
                 }
-                if($is_check == 0){
+                if ($is_check == 0) {
                     //审核通过
-                    if(count($check_arr) > 0){
-                        foreach($check_arr as $value){
-                            $this->sample->where('sku',$value['sku'])->dec('stock',$value['stock'])->update();
+                    if (count($check_arr) > 0) {
+                        foreach ($check_arr as $value) {
+                            $this->sample->where('sku', $value['sku'])->dec('stock', $value['stock'])->update();
                         }
-                        $this->sampleworkorder->where($where)->update(['status'=>$status]);
+                        $this->sampleworkorder->where($where)->update(['status' => $status]);
                     }
-                }else{
+                } else {
                     $this->error(__('样品间商品不足', ''));
                 }
-            }else{
-                $this->sampleworkorder->where($where)->update(['status'=>$status]);
+            } else {
+                $this->sampleworkorder->where($where)->update(['status' => $status]);
             }
             $this->success();
         }
     }
+
     /**
      * 借出记录列表
      *
      * @Description
-     * @author mjj
-     * @since 2020/05/25 09:49:12 
+     * @author mjj
+     * @since 2020/05/25 09:49:12
      * @return void
      */
     public function sample_lendlog_index()
@@ -1318,7 +1429,7 @@ class Sample extends Backend
             }
             $filter = json_decode($this->request->get('filter'), true);
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-            
+
             $total = $this->samplelendlog
                 ->where($where)
                 ->count();
@@ -1328,21 +1439,21 @@ class Sample extends Backend
                 ->limit($offset, $limit)
                 ->select();
             $list = collection($list)->toArray();
-            foreach ($list as $key=>$value){
+            foreach ($list as $key => $value) {
                 $list[$key]['status_id'] = $value['status'];
-                if($value['status'] == 1){
+                if ($value['status'] == 1) {
                     $list[$key]['status'] = '待审核';
-                }elseif($value['status'] == 2){
+                } elseif ($value['status'] == 2) {
                     $list[$key]['status'] = '已借出';
-                }elseif($value['status'] == 3){
+                } elseif ($value['status'] == 3) {
                     $list[$key]['status'] = '已拒绝';
-                }elseif($value['status'] == 4){
+                } elseif ($value['status'] == 4) {
                     $list[$key]['status'] = '已归还';
-                }elseif($value['status'] == 5){
+                } elseif ($value['status'] == 5) {
                     $list[$key]['status'] = '已取消';
                 }
-                $location_id = $this->sample->where('sku',$value['sku'])->value('location_id');
-                $list[$key]['location'] = $this->samplelocation->where('id',$location_id)->value('location');
+                $location_id = $this->sample->where('sku', $value['sku'])->value('location_id');
+                $list[$key]['location'] = $this->samplelocation->where('id', $location_id)->value('location');
             }
             $result = array("total" => $total, "rows" => $list);
 
@@ -1350,15 +1461,16 @@ class Sample extends Backend
         }
         return $this->view->fetch();
     }
+
     /**
      * 借出记录申请
      *
      * @Description
-     * @author mjj
-     * @since 2020/05/25 17:02:44 
+     * @author mjj
+     * @since 2020/05/25 17:02:44
      * @return void
      */
-    public function sample_lendlog_add($ids=null)
+    public function sample_lendlog_add($ids = null)
     {
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
@@ -1368,36 +1480,36 @@ class Sample extends Backend
                 if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
                     $params[$this->dataLimitField] = $this->auth->id;
                 }
-                if(!$params['goods']){
+                if (!$params['goods']) {
                     $this->error(__('提交信息不能为空', ''));
                 }
-                $sku_arr = array_column($params['goods'],'sku');
-                $lend_num_arr = array_column($params['goods'],'lend_num');
+                $sku_arr = array_column($params['goods'], 'sku');
+                $lend_num_arr = array_column($params['goods'], 'lend_num');
                 //判断是否有重复项
-                if (count($sku_arr) != count(array_unique($sku_arr))) { 
+                if (count($sku_arr) != count(array_unique($sku_arr))) {
                     $this->error(__('sku不能重复', ''));
                 }
                 //判断数据中是否有空值
-                if(in_array('',$sku_arr)){
+                if (in_array('', $sku_arr)) {
                     $this->error(__('商品信息不能为空', ''));
                 }
-                if(in_array('',$lend_num_arr)){
+                if (in_array('', $lend_num_arr)) {
                     $this->error(__('借出数量不能为空', ''));
                 }
                 // dump($params);
                 // exit;
                 //判断库存是否足够
-                $info = $this->check_stock_enough($params['goods'],$sku_arr);
-                if($info && (1!=$info)){
+                $info = $this->check_stock_enough($params['goods'], $sku_arr);
+                if ($info && (1 != $info)) {
                     $this->error("sku{$info}借出库存不足,请重新尝试");
-                }elseif(1 == $info){
+                } elseif (1 == $info) {
                     $this->error("无法找到相关库存不足,请重新尝试");
                 }
                 //生成入库数据
-                foreach ($params['goods'] as $value){
+                foreach ($params['goods'] as $value) {
                     $lendlog['status'] = 1;
                     $lendlog['create_user'] = session('admin.nickname');
-                    $lendlog['createtime'] = date('Y-m-d H:i:s',time());
+                    $lendlog['createtime'] = date('Y-m-d H:i:s', time());
                     $lendlog['sku'] = $value['sku'];
                     $lendlog['lend_num'] = $value['lend_num'];
                     $this->samplelendlog->insert($lendlog);
@@ -1405,17 +1517,17 @@ class Sample extends Backend
                 $this->success();
             }
             $this->error(__('Parameter %s can not be empty', ''));
-        }else{
-            if(!empty($ids)){
-                $idArr = explode(',',$ids);
-                $list = $this->sample->where('id','in',$idArr)->select();
+        } else {
+            if (!empty($ids)) {
+                $idArr = explode(',', $ids);
+                $list = $this->sample->where('id', 'in', $idArr)->select();
                 $list = collection($list)->toArray();
-                foreach ($list as $key=>$value){
+                foreach ($list as $key => $value) {
                     $list[$key]['location_id'] = $this->samplelocation->getLocationName($value['location_id']);
                     $list[$key]['is_lend'] = $value['is_lend'] == 1 ? '是' : '否';
-                    $list[$key]['product_name'] = $this->item->where('sku',$value['sku'])->value('name');
+                    $list[$key]['product_name'] = $this->item->where('sku', $value['sku'])->value('name');
                 }
-                $this->assign('info',$list);
+                $this->assign('info', $list);
             }
         }
 
@@ -1425,16 +1537,18 @@ class Sample extends Backend
 
         return $this->view->fetch();
     }
+
     /**
      * 借出记录编辑
      *
      * @Description
-     * @author mjj
-     * @since 2020/05/25 17:23:40 
+     * @author mjj
+     * @since 2020/05/25 17:23:40
      * @param [type] $ids
      * @return void
      */
-    public function sample_lendlog_edit($ids = null){
+    public function sample_lendlog_edit($ids = null)
+    {
         $row = $this->samplelendlog->get($ids);
         if (!$row) {
             $this->error(__('No Results were found'));
@@ -1452,11 +1566,11 @@ class Sample extends Backend
                 if (!$params['sku']) {
                     $this->error(__('sku不能为空', ''));
                 }
-                if(!$params['lend_num']){
+                if (!$params['lend_num']) {
                     $this->error(__('借出数量不能为空', ''));
                 }
                 //更新
-                Db::name('purchase_sample_lendlog')->where(['id'=>$ids])->update(['lend_num'=>$params['lend_num'],'sku'=>$params['sku']]);
+                Db::name('purchase_sample_lendlog')->where(['id' => $ids])->update(['lend_num' => $params['lend_num'], 'sku' => $params['sku']]);
 
                 $this->success();
             }
@@ -1468,21 +1582,23 @@ class Sample extends Backend
         $this->assign('sku_data', $sku_data);
 
         //获取样品借出商品信息
-        $location_id = $this->sample->where('sku',$row->sku)->value('location_id');
-        $row->location = $this->samplelocation->where('id',$location_id)->value('location');
+        $location_id = $this->sample->where('sku', $row->sku)->value('location_id');
+        $row->location = $this->samplelocation->where('id', $location_id)->value('location');
         $this->assign('row', $row);
 
         return $this->view->fetch();
     }
+
     /**
      * 借出记录批量审核
      *
      * @Description
-     * @author mjj
-     * @since 2020/05/26 11:52:38 
+     * @author mjj
+     * @since 2020/05/26 11:52:38
      * @return void
      */
-    public function sample_lendlog_setstatus($ids = null){
+    public function sample_lendlog_setstatus($ids = null)
+    {
         $ids = $this->request->post("ids/a");
         $status = input('status');
         if (!$ids) {
@@ -1497,60 +1613,62 @@ class Sample extends Backend
                     $this->error('只有待审核状态才能操作！！');
                     $is_update = 0;
                     break;
-                }else{
+                } else {
                     $is_update = 1;
                 }
             }
         }
-        if($is_update == 1){
-            if($status == 2){
-                $skus = Db::name('purchase_sample_lendlog')->field('sum(lend_num) lend_num,sku')->where('id','in',$ids)->group('sku')->select();
+        if ($is_update == 1) {
+            if ($status == 2) {
+                $skus = Db::name('purchase_sample_lendlog')->field('sum(lend_num) lend_num,sku')->where('id', 'in', $ids)->group('sku')->select();
                 //批量审核通过
                 $is_check = array();
                 $lend_arr = array();
-                foreach($skus as $sku){
-                    $sample = $this->sample->where('sku',$sku['sku'])->find();
+                foreach ($skus as $sku) {
+                    $sample = $this->sample->where('sku', $sku['sku'])->find();
                     $rest_stock = $sample->stock - $sample->lend_num;
-                    if($rest_stock>=$sku['lend_num']){
+                    if ($rest_stock >= $sku['lend_num']) {
                         //借出商品并更新状态
                         $lend_arr[] = array(
-                            'sku'=>$sku['sku'],
-                            'lend_num'=>$sku['lend_num']
+                            'sku' => $sku['sku'],
+                            'lend_num' => $sku['lend_num']
                         );
-                    }else{
+                    } else {
                         //借出单中存在商品数量不足，无法借出
                         $is_check[] = $sku['sku'];
                         break;
                     }
                 }
-                if(count($is_check) == 0){
+                if (count($is_check) == 0) {
                     //审核通过
-                    foreach($lend_arr as $value){
-                        $this->sample->where('sku',$value['sku'])->inc('lend_num',$value['lend_num'])->update(); 
-                        $this->sample->where('sku',$value['sku'])->update(['is_lend'=>1]); 
+                    foreach ($lend_arr as $value) {
+                        $this->sample->where('sku', $value['sku'])->inc('lend_num', $value['lend_num'])->update();
+                        $this->sample->where('sku', $value['sku'])->update(['is_lend' => 1]);
                     }
-                    $this->samplelendlog->where($where)->update(['status'=>$status]);
-                }else{
-                    $sku_str = implode(',',$is_check);
-                    $this->error('sku：'.$sku_str.'商品数量不足，无法借出');
+                    $this->samplelendlog->where($where)->update(['status' => $status]);
+                } else {
+                    $sku_str = implode(',', $is_check);
+                    $this->error('sku：' . $sku_str . '商品数量不足，无法借出');
                 }
-            }else{
+            } else {
                 //批量审核拒绝
-                $this->samplelendlog->where($where)->update(['status'=>$status]);
+                $this->samplelendlog->where($where)->update(['status' => $status]);
             }
             $this->success();
         }
     }
-     /**
+
+    /**
      * 借出记录归还
      *
      * @Description
-     * @author mjj
-     * @since 2020/05/26 10:25:09 
+     * @author mjj
+     * @since 2020/05/26 10:25:09
      * @return void
      */
-    public function sample_lendlog_check($ids = null){
-        if($this->request->isAjax()){
+    public function sample_lendlog_check($ids = null)
+    {
+        if ($this->request->isAjax()) {
             $params = input();
             if (!$params['ids']) {
                 $this->error('缺少参数！！');
@@ -1559,21 +1677,22 @@ class Sample extends Backend
             //判断是否是本人归还，如果是本人，才允许归还
             //$admin_user = $this->samplelendlog->where($where)->value('create_user');
             //if($admin_user == session('admin.nickname')){
-                //归还
-                $lendlog = Db::name('purchase_sample_lendlog')->where('id',$ids)->find();
-                $this->sample->where('sku',$lendlog['sku'])->dec('lend_num',$lendlog['lend_num'])->update();
-                //判断是否没有借出数量，如果没有修改样品间列表的状态
-                $already_lend_num = $this->sample->where('sku',$lendlog['sku'])->value('lend_num');
-                if($already_lend_num == 0){
-                    $this->sample->where('sku',$lendlog['sku'])->update(['is_lend'=>0]);
-                }
-                $this->samplelendlog->where($where)->update(['status'=>$params['status']]);
-                $this->success();
+            //归还
+            $lendlog = Db::name('purchase_sample_lendlog')->where('id', $ids)->find();
+            $this->sample->where('sku', $lendlog['sku'])->dec('lend_num', $lendlog['lend_num'])->update();
+            //判断是否没有借出数量，如果没有修改样品间列表的状态
+            $already_lend_num = $this->sample->where('sku', $lendlog['sku'])->value('lend_num');
+            if ($already_lend_num == 0) {
+                $this->sample->where('sku', $lendlog['sku'])->update(['is_lend' => 0]);
+            }
+            $this->samplelendlog->where($where)->update(['status' => $params['status']]);
+            $this->success();
             // }else{
             //     $this->error('只有本人才能归还');
             // }
         }
     }
+
     /**
      * 判断库存是否足够
      *
@@ -1581,24 +1700,24 @@ class Sample extends Backend
      * @DateTime 2020-07-22 14:08:00
      * @return void
      */
-    public function check_stock_enough($goods,$sku_arr)
+    public function check_stock_enough($goods, $sku_arr)
     {
         //求出所有的sku的留样库存和借出的数量
-        $info = $this->sample->where('sku','in',$sku_arr)->field('sku,stock-lend_num as new_stock')->select();
-        if(!$info){
+        $info = $this->sample->where('sku', 'in', $sku_arr)->field('sku,stock-lend_num as new_stock')->select();
+        if (!$info) {
             return 1;
         }
         $info = collection($info)->toArray();
         //return $info;
         //组装传入的sku信息
         $arr = [];
-        foreach($goods as $v){
-             $arr[$v['sku']] = $v['lend_num'];
+        foreach ($goods as $v) {
+            $arr[$v['sku']] = $v['lend_num'];
         }
         $not_enough = 0;
-        foreach($info as $vv){
-            if(array_key_exists($vv['sku'],$arr)){
-                if($arr[$vv['sku']]>$vv['new_stock']){
+        foreach ($info as $vv) {
+            if (array_key_exists($vv['sku'], $arr)) {
+                if ($arr[$vv['sku']] > $vv['new_stock']) {
                     $not_enough = 1;
                     return $vv['sku'];
                 }
@@ -1607,3 +1726,4 @@ class Sample extends Backend
         return $not_enough ? true : false;
     }
 }
+
