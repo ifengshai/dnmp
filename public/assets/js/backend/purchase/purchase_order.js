@@ -469,6 +469,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 }else{
                     $('#pay_rate').hide();
                 }
+            });
+            $(document).on('click','.tijiao',function (){
+               $('#is_new_product').attr("disabled",false);
+            });
+            $(document).on('click','.tijaio1',function (){
+               $('#is_new_product').attr("disabled",false);
             })
 
             $(document).on('click', '.btn-addplus', function () {

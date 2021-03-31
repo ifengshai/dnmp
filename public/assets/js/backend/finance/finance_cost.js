@@ -94,6 +94,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'upload'], function (
 
                     window.open(Config.moduleurl + '/finance/finance_cost/batch_export_xls?' + params, '_blank');
                 });
+
             },
             second: function () {
                 // 表格2
@@ -137,6 +138,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'upload'], function (
 
                 // 为表格2绑定事件
                 Table.api.bindevent(table2);
+
                 $('#account_order_batch_export_xls_two').click(function () {
                     var type = 2;
                     var ids = Table.api.selectedids(table2);
@@ -155,6 +157,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'upload'], function (
                     window.open(Config.moduleurl + '/finance/finance_cost/batch_export_xls?' + params, '_blank');
 
                 });
+
             }
         },
         api: {
