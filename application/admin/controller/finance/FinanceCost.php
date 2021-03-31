@@ -110,9 +110,9 @@ class FinanceCost extends Backend
     //导出数据
 
     public function batch_export_xls()
-
     {
-
+        set_time_limit(0);
+        ini_set('memory_limit', '1024M');
         //设置过滤方法
 
         $ids = input('ids');
