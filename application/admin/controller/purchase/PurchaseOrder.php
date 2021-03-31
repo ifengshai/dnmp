@@ -2841,14 +2841,14 @@ class PurchaseOrder extends Backend
 
     //采购单数据导出
     public function export_sku_many(){
-        $purchase_order_item =  Db::name('purchase_order_item')->order('id desc')->limit(100)->column('purchase_id,sku');
+        $purchase_order_item =  Db::name('purchase_order_item')->order('id desc')->column('purchase_id,sku');
         $purchase_order_item = array_unique($purchase_order_item);
         $data = [];
         foreach ($purchase_order_item as $key=>$item){
             $where['id'] = ['eq',$key];
             $whe['purchase_id'] = ['eq',$key];
 
-            $val =  Db::name('purchase_order')->where($where)->field('type,createtime')->find();
+            $val =  Db::name('purchase_order')->where($where)->field('type,effect_time')->find();
             $check_order = Db::name('check_order')->where($whe)->order('id desc')->value('id');
             $check_time = Db::name('in_stock')->where('check_id',$check_order)->order('id desc')->value('check_time');
             if ($val['type'] ==1){
@@ -2856,12 +2856,12 @@ class PurchaseOrder extends Backend
             }else{
                 $data[$key]['type']='大货';
             }
-           $data[$key]['createtime'] = $val['createtime'];
+           $data[$key]['createtime'] = $val['effect_time'];
            $data[$key]['check_time'] = $check_time;
            $data[$key]['sku'] = $item;
         }
         $data = array_values($data);
-        $headlist = ['类型', '创建时间', '审单时间','SKU'];
+        $headlist = ['类型', '生效时间', '入库单审核完成时间','SKU'];
         $path = "/uploads/";
         $fileName = '导出SKU数据';
 
