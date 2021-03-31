@@ -141,7 +141,6 @@ class PurchaseOrder extends Backend
         }
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
-
             if ($params) {
                 $params = $this->preExcludeFields($params);
                 if (empty($params['supplier_id']) || empty($params['supplier_address'])){

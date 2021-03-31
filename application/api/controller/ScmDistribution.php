@@ -26,6 +26,7 @@ use app\admin\model\order\order\LensData;
 use app\admin\model\saleaftermanage\WorkOrderList;
 use app\admin\model\finance\FinanceCost;
 use app\admin\model\warehouse\Inventory;
+use Think\Log;
 
 /**
  * 供应链配货接口类
@@ -227,7 +228,6 @@ class ScmDistribution extends Scm
         }
 
         $this->success(__("请将子单号{$item_order_number}的商品放入异常暂存架{$stock_house_info['coding']}库位"), ['coding' => $stock_house_info['coding']], 200);
-
     }
 
     /**
@@ -1523,6 +1523,9 @@ class ScmDistribution extends Scm
     public function merge()
     {
         $item_order_number = $this->request->request('item_order_number');
+        Log::write("合单扫描子单号001");
+        Log::write($item_order_number);
+
         empty($item_order_number) && $this->error(__('子订单号不能为空'), [], 403);
 
         //获取子订单数据
@@ -1562,7 +1565,6 @@ class ScmDistribution extends Scm
                 }
             }
             foreach ($check_work_order as $val) {
-
                 3 == $val['measure_choose_id'] && $this->error(__("子订单存在工单"), [], 405); //主单取消措施未处理
 
                 if ($val['measure_choose_id'] == 21) {
@@ -1657,7 +1659,8 @@ class ScmDistribution extends Scm
             'coding' => $store_house_info['coding'],
             'abnormal_list' => $abnormal_list
         ];
-
+        Log::write("输出合单扫描子单号数据");
+        Log::write($info);
         $this->success('', ['info' => $info], 200);
     }
 
@@ -1676,7 +1679,9 @@ class ScmDistribution extends Scm
         $store_house_id = $this->request->request('store_house_id');
         empty($item_order_number) && $this->error(__('子订单号不能为空'), [], 403);
         empty($store_house_id) && $this->error(__('合单库位号不能为空'), [], 403);
-
+        Log::write("输出合单时的参数");
+        Log::write($item_order_number);
+        Log::write($store_house_id);
         //获取子订单数据
         $item_process_info = $this->_new_order_item_process
             ->where('item_order_number', $item_order_number)
@@ -1692,10 +1697,14 @@ class ScmDistribution extends Scm
             ->join(['fa_order_process' => 'b'], 'a.id=b.order_id', 'left')
             ->field('a.id,a.increment_id,b.entity_id,b.store_house_id')
             ->find();
+        Log::write("======输出查询数据========");
+        Log::write($order_process_info);
         empty($order_process_info) && $this->error(__('主订单不存在'), [], 403);
 
         //获取库位信息
-        $store_house_info = $this->_stock_house->field('id,coding,subarea,occupy,fictitious_occupy_time,order_id')->where('id', $store_house_id)->find();//查询合单库位--占用数量
+        $store_house_info = $this->_stock_house->field('id,coding,subarea,occupy,fictitious_occupy_time,order_id')->where('id', $store_house_id)->find(); //查询合单库位--占用数量
+        Log::write("====获取库位信息====");
+        Log::write($store_house_info);
         empty($store_house_info) && $this->error(__('合单库位不存在'), [], 403);
 
         if ($order_process_info['store_house_id'] != $store_house_id) {
@@ -1713,7 +1722,7 @@ class ScmDistribution extends Scm
             //重复扫描子单号--提示语句
             // $this->error(__('请将子单号' . $item_order_number . '的商品放入合单架' . $store_house_info['coding'] . '库位'), [], 511);
             $codeing = $store_house_info['coding'];
-            $this->error(__("请放在合单架"."<br><b>$codeing</b>"), [], 511);
+            $this->error(__("请放在合单架" . "<br><b>$codeing</b>"), [], 511);
         }
 
         if (!empty($store_house_info['order_id'])) {
@@ -1727,7 +1736,6 @@ class ScmDistribution extends Scm
                     $this->error(__('库位预占用超10分钟，请重新操作'), [], 403);
                 }
             }
-
         }
 
 
@@ -2244,7 +2252,7 @@ class ScmDistribution extends Scm
             $this->success('审单已通过，请勿重复操作！', [], 200);
         }
 
-        $abnormal_house_id = $this->_new_order_item_process->where(['id' => ['in', $item_ids], 'abnormal_house_id' => ['>', 1]])->column('abnormal_house_id');//查询当前主单下面是否有已标记异常的子单
+        $abnormal_house_id = $this->_new_order_item_process->where(['id' => ['in', $item_ids], 'abnormal_house_id' => ['>', 1]])->column('abnormal_house_id'); //查询当前主单下面是否有已标记异常的子单
 
         !empty($abnormal_house_id) && $this->error(__('有子单存在异常'), [], 403);
         if (999 == $check_refuse) {
@@ -2392,7 +2400,7 @@ class ScmDistribution extends Scm
                             //条码出库
                             $this->_product_bar_code_item
                                 ->allowField(true)
-                                ->isUpdate(true, ['item_order_number' => $value['item_order_number'],'is_loss_report_out' => 0])
+                                ->isUpdate(true, ['item_order_number' => $value['item_order_number']])
                                 ->save(['out_stock_time' => date('Y-m-d H:i:s'), 'library_status' => 2, 'is_loss_report_out' => 1, 'out_stock_id' => $outstock_id]);
 
                             //计算出库成本
@@ -2660,7 +2668,6 @@ class ScmDistribution extends Scm
         } catch (Exception $e) {
             $this->error(__('审单已通过,成本核算逻辑有误,请联系魔晶'), [], 405);
         }
-
         $this->success($msg . '成功', [], 200);
     }
 
@@ -2677,5 +2684,4 @@ class ScmDistribution extends Scm
         empty($purchase_price['purchase_price']) && $this->error(__('没有采购单价'), ['purchase_price' => ''], 405);
         $this->success('成功', ['purchase_price' => $purchase_price['purchase_price']], 200);
     }
-
 }
