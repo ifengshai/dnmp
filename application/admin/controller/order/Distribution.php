@@ -403,7 +403,7 @@ class Distribution extends Backend
 
             $list = $this->model
                 ->alias('a')
-                ->field('a.id,a.order_id,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.total_qty_ordered,b.site,b.order_type,b.status,a.distribution_status,a.temporary_house_id,a.abnormal_house_id,a.created_at')
+                ->field('a.id,a.wave_order_id,a.order_id,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.total_qty_ordered,b.site,b.order_type,b.status,a.distribution_status,a.temporary_house_id,a.abnormal_house_id,a.created_at')
                 ->join(['fa_order' => 'b'], 'a.order_id=b.id')
                 ->where($where)
                 ->where($map)
