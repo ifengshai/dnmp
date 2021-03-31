@@ -2443,6 +2443,7 @@ class PurchaseOrder extends Backend
 
         foreach ($list as $key => $value) {
             $logistics_info = [];
+            $readly_logistics_info = [];
             $spreadsheet->getActiveSheet()->setCellValueExplicit("A" . ($key * 1 + 2), $value['purchase_number'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
             $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['purchase_name']);
             $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['supplier_name']);
