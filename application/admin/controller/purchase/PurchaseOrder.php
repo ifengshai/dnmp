@@ -2851,6 +2851,7 @@ class PurchaseOrder extends Backend
             $val =  Db::name('purchase_order')->where($where)->field('type,effect_time')->find();
             $check_order = Db::name('check_order')->where($whe)->order('id desc')->value('id');
             $check_time = Db::name('in_stock')->where('check_id',$check_order)->order('id desc')->value('check_time');
+            $data[$key]['id'] = $key;
             if ($val['type'] ==1){
                 $data[$key]['type']='现货';
             }else{
@@ -2861,9 +2862,9 @@ class PurchaseOrder extends Backend
            $data[$key]['sku'] = $item;
         }
         $data = array_values($data);
-        $headlist = ['类型', '生效时间', '入库单审核完成时间','SKU'];
+        $headlist = ['id','类型', '生效时间', '入库单审核完成时间','SKU'];
         $path = "/uploads/";
-        $fileName = '导出SKU数据';
+        $fileName = '导出所有SKU数据';
 
         Excel::writeCsv($data, $headlist, $path.$fileName);
     }
