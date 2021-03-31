@@ -3500,7 +3500,9 @@ class WorkOrderList extends Backend
                         //更改镜框解绑子单所绑定的条形码
                         $ProductBarCodeItem = new ProductBarCodeItem();
                         //查询子单号
-                        $item_order_number = $this->order_change->where(['work_id' => $receptInfo['work_id'],'change_type' => $change_type])->value('item_order_number');
+                        $item_order_number = $this->order_change
+                        ->where(['work_id' => $receptInfo['work_id'],'change_type' => $change_type,'measure_id' => $receptInfo['measure_id']])
+                        ->value('item_order_number');
                         if (!empty($item_order_number)) {
                             $ProductBarCodeItem->where(['item_order_number'=>$item_order_number])->update(['item_order_number' => '','library_status' => 1,'out_stock_time' => null,'out_stock_id' => 0]);
                         }
