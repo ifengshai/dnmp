@@ -7,7 +7,7 @@
             <select name="responsible_id" class="form-control"  data-rule="required">
                 <option value="">请选择</option>
                 {volist name="auth_user" id="vo"}
-                    <option value="vo.id">{$vo.nickname}</option>
+                    <option value="{$vo.id}">{$vo.nickname}</option>
                 {/volist}
             </select>
         </div>
