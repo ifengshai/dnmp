@@ -45,8 +45,10 @@ class Distribution extends Backend
         'account_order_batch_export_xls',
         'add',
         'detail',
-        'operation_log'
+        'operation_log',
+        'batch_export_xls_copy'
     ];
+    protected  $noNeedLogin = ['batch_export_xls_copy'];
     /**
      * 子订单模型对象
      * @var object
