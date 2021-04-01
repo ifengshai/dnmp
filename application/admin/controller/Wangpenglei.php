@@ -862,23 +862,22 @@ class Wangpenglei extends Backend
         $barcode = new \app\admin\model\warehouse\ProductBarCodeItem();
         $list = $finace_cost->where(['type' => 2, 'frame_cost' => 0, 'bill_type' => 8])->select();
         $list = collection($list)->toArray();
-        dump($list);
         $params = [];
+        $i = 0;
         foreach ($list as $k => $v) {
             $data = $barcode->alias('a')
                 ->where(['item_order_number' => ['like', $v['order_number'].'%']])
                 ->field('a.sku,a.in_stock_id,b.price')
                 ->join(['fa_in_stock_item' => 'b'], 'a.in_stock_id=b.in_stock_id and a.sku=b.sku')
                 ->select();
-            echo $barcode->getLastSql();
-            dump($data);
+            $data = collection($data)->toArray();
             foreach ($data as $key => $val) {
-                $params[$key]['order_number'] = $v['order_number'];
-                $params[$key]['sku'] = $val['sku'];
-                $params[$key]['price'] = $val['price'];
+                $params[$i]['order_number'] = $v['order_number'];
+                $params[$i]['sku'] = $val['sku'];
+                $params[$i]['price'] = $val['price'];
+                $i++;
             }
         }
-
         $headlist = ['订单号', 'sku', '采购成本'];
         Excel::writeCsv($params, $headlist, '采购成本');
         die;
