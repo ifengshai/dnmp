@@ -1383,6 +1383,11 @@ class Distribution extends Backend
                 $map['b.order_type'] = ['in', $filter['order_type']];
                 unset($filter['order_type']);
             }
+            if ($filter['check_time']){
+                $check_time = explode(' - ',$filter['check_time']);
+                $map['d.check_time'] = ['between',[strtotime($check_time[0]),strtotime($check_time[1])]];
+                unset($filter['check_time']);
+            }
             if ($filter['distribution_status']) {
                 $map['a.distribution_status'] = ['in', $filter['distribution_status']];
                 unset($filter['distribution_status']);
