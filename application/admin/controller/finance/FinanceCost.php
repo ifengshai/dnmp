@@ -4,10 +4,6 @@ namespace app\admin\controller\finance;
 
 use app\common\controller\Backend;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use think\Cache;
-use think\Controller;
-use think\Db;
-use think\Request;
 
 class FinanceCost extends Backend
 {
@@ -16,7 +12,7 @@ class FinanceCost extends Backend
      * 无需鉴权的方法,但需要登录
      * @var array
      */
-    protected $noNeedRight = ['income', 'cost','batch_export_xls'];
+    protected $noNeedRight = ['income', 'cost', 'batch_export_xls'];
 
     public function _initialize()
     {
@@ -49,7 +45,7 @@ class FinanceCost extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $this->model
                 ->where($where)
                 ->where('type=1')
@@ -63,10 +59,11 @@ class FinanceCost extends Backend
                 ->limit($offset, $limit)
                 ->select();
 
-            $result = array("total" => $total, "rows" => $list);
+            $result = ["total" => $total, "rows" => $list];
 
             return json($result);
         }
+
         return $this->view->fetch('index');
     }
 
@@ -88,7 +85,7 @@ class FinanceCost extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $this->model
                 ->where($where)
                 ->where('type=2')
@@ -102,19 +99,20 @@ class FinanceCost extends Backend
                 ->limit($offset, $limit)
                 ->select();
 
-            $result = array("total" => $total, "rows" => $list);
+            $result = ["total" => $total, "rows" => $list];
 
             return json($result);
         }
+
         return $this->view->fetch('index');
     }
 
     //导出数据
 
     public function batch_export_xls()
-
     {
-
+        set_time_limit(0);
+        ini_set('memory_limit', '1024M');
         //设置过滤方法
 
         $ids = input('ids');
@@ -147,7 +145,7 @@ class FinanceCost extends Backend
 
             if ($filter['createtime']) {
                 $createtime = explode(' - ', $filter['createtime']);
-                $where['createtime'] = ['between',  [strtotime($createtime[0]), strtotime($createtime[1])]];
+                $where['createtime'] = ['between', [strtotime($createtime[0]), strtotime($createtime[1])]];
             }
 
         }
@@ -178,7 +176,7 @@ class FinanceCost extends Backend
 
             10 => 'Zeelool_de',
 
-            11 => 'Zeelool_jp'
+            11 => 'Zeelool_jp',
 
         ];
 
@@ -261,7 +259,7 @@ class FinanceCost extends Backend
 
                 if ($value['payment_time']) {
 
-                    $value['payment_time'] = date('Y-d-m H:i:s', $value['payment_time']);
+                    $value['payment_time'] = date('Y-m-d H:i:s', $value['payment_time']);
 
                 } else {
 
@@ -271,7 +269,7 @@ class FinanceCost extends Backend
 
                 if ($value['createtime']) {
 
-                    $value['createtime'] = date('Y-d-m H:i:s', $value['createtime']);
+                    $value['createtime'] = date('Y-m-d H:i:s', $value['createtime']);
 
                 }
 
@@ -324,7 +322,8 @@ class FinanceCost extends Backend
                 ->setCellValue("E1", "镜片成本")
                 ->setCellValue("F1", "是否结转")
                 ->setCellValue("G1", "创建时间")
-                ->setCellValue("H1", "币种");
+                ->setCellValue("H1", "币种")
+                ->setCellValue("I1", "站点");
 
             foreach ($list as $key => $value) {
 
@@ -340,7 +339,7 @@ class FinanceCost extends Backend
 
                 if ($value['createtime']) {
 
-                    $value['createtime'] = date('Y-d-m H:i:s', $value['createtime']);
+                    $value['createtime'] = date('Y-m-d H:i:s', $value['createtime']);
 
                 }
 
@@ -359,6 +358,8 @@ class FinanceCost extends Backend
                 $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['createtime']);
 
                 $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['order_currency_code']);
+
+                $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), $site_list[$value['site']]);
 
             }
 
@@ -382,6 +383,8 @@ class FinanceCost extends Backend
         $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(20);
 
         $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(20);
+
+        $spreadsheet->getActiveSheet()->getColumnDimension('I')->setWidth(20);
 
         if ($type == 1) {
 

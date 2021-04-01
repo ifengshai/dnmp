@@ -390,7 +390,6 @@ class TrackReg extends Backend
     }
 
 
-
     public function export_get_days_num()
     {
         $item = new \app\admin\model\itemmanage\Item();
@@ -403,10 +402,10 @@ class TrackReg extends Backend
         //获取所有符合条件的sku
         $list = $item->where(['is_open' => 1, 'is_del' => 1, 'category_id' => ['<>', 43]])->column('sku');
         //获取对应供应商关系
-        foreach ($list as $key=>$value){
+        foreach ($list as $key => $value) {
 
-            $where['a.sku'] = ['eq',$value];
-            $whe['true_sku'] = ['eq',$value];
+            $where['a.sku'] = ['eq', $value];
+            $whe['true_sku'] = ['eq', $value];
             $data[] = Db::name('supplier_sku')->alias('a')
                 ->join(['fa_supplier' => 'b'], 'a.supplier_id=b.id')
                 ->where($where)
@@ -414,29 +413,27 @@ class TrackReg extends Backend
             $data[$key]['grade'] = Db::name('product_grade')->where($whe)->value('grade');
 
         }
-        foreach ($data as $k=>$v){
+        foreach ($data as $k => $v) {
             //7天日均销量
             $days7s_data = $skuSalesNum->where(['sku' => $v['sku'], 'createtime' => ['<', $date]])->limit(7)->order('createtime desc')->column('sales_num');
             $data[$k]['days7s_data'] = array_sum($days7s_data);
 
-            $days30_data = $skuSalesNum->where(['sku' => $v['sku'],  'createtime' => ['<', $date]])->limit(30)->order('createtime desc')->column('sales_num');
+            $days30_data = $skuSalesNum->where(['sku' => $v['sku'], 'createtime' => ['<', $date]])->limit(30)->order('createtime desc')->column('sales_num');
             $data[$k]['days30_data'] = array_sum($days30_data);
 
             $days90_data = $skuSalesNum->where(['sku' => $v['sku'], 'createtime' => ['<', $date]])->limit(90)->order('createtime desc')->column('sales_num');
             $data[$k]['days90_data'] = array_sum($days90_data);
         }
 
-        $header = ['SKU','供应商','等级','7天销量','1个月销量近3个月的销量'];
+        $header = ['SKU', '供应商', '等级', '7天销量', '1个月销量近3个月的销量'];
         $filename = 'sku数据导出.csv';
         Excel::writeCsv($data, $header, $filename);
     }
 
 
-
-
     /**
      * 每天9点 根据销量计算产品分级
-     * 
+     *
      * 30天有效销量计算产品等级 - 按sku分等级
      *
      * @Description

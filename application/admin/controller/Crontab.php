@@ -15,7 +15,7 @@ use fast\Trackingmore;
  */
 class Crontab extends Backend
 {
-    protected $noNeedLogin = ['*,update_ashboard_data_two_zeelool'];
+    protected $noNeedLogin = ['*'];
 
     public function _initialize()
     {
@@ -3159,31 +3159,31 @@ class Crontab extends Backend
         $thirty_end = date("Y-m-d 23:59:59", strtotime("-1 day"));
         $thirty_where['created_at'] = $thirty_where1['updated_at'] = ['between', [$thirty_start, $thirty_end]];
         $pastthirtyday_sales_money = $model->table('sales_flat_order')->where($thirty_where)->where($order_where)->where($order_success_where)->field('sum(base_grand_total) base_grand_total,count(entity_id) order_num')->find();
-        $pastthirtyday_sales_money_data       = round($pastthirtyday_sales_money['base_grand_total'], 2);
+        $pastthirtyday_sales_money_data = round($pastthirtyday_sales_money['base_grand_total'], 2);
         //当月销售额
         $thismonth_start = date('Y-m-01', strtotime($today));
-        $thismonth_end =  $today;
+        $thismonth_end = $today;
         $thismonth_where['created_at'] = $thismonth_where1['updated_at'] = ['between', [$thismonth_start, $thismonth_end]];
         $thismonth_sales_money = $model->table('sales_flat_order')->where($thismonth_where)->where($order_where)->where($order_success_where)->field('sum(base_grand_total) base_grand_total,count(entity_id) order_num')->find();
-        $thismonth_sales_money_data           = round($thismonth_sales_money['base_grand_total'], 2);
+        $thismonth_sales_money_data = round($thismonth_sales_money['base_grand_total'], 2);
         //上月销售额
         $lastmonth_start = date('Y-m-d', strtotime("first day of -1 month"));
         $lastmonth_end = date('Y-m-d 23:59:59', strtotime("last day of -1 month"));
         $lastmonth_where['created_at'] = $lastmonth_where1['updated_at'] = ['between', [$lastmonth_start, $lastmonth_end]];
         $lastmonth_sales_money = $model->table('sales_flat_order')->where($lastmonth_where)->where($order_where)->where($order_success_where)->field('sum(base_grand_total) base_grand_total,count(entity_id) order_num')->find();
-        $lastmonth_sales_money_data           = round($lastmonth_sales_money['base_grand_total'], 2);
+        $lastmonth_sales_money_data = round($lastmonth_sales_money['base_grand_total'], 2);
         //今年销售额
-        $thisyear_start = date("Y", time()) . "-1" . "-1"; //本年开始
+        $thisyear_start = date("Y", time())."-1"."-1"; //本年开始
         $thisyear_end = $today;
         $thisyear_where['created_at'] = $thisyear_where1['updated_at'] = ['between', [$thisyear_start, $thisyear_end]];
         $thisyear_sales_money = $model->table('sales_flat_order')->where($thisyear_where)->where($order_where)->where($order_success_where)->field('sum(base_grand_total) base_grand_total,count(entity_id) order_num')->find();
-        $thisyear_sales_money_data            = round($thisyear_sales_money['base_grand_total'], 2);
+        $thisyear_sales_money_data = round($thisyear_sales_money['base_grand_total'], 2);
         //上年销售额
         $lastyear_start = date('Y-01-01 00:00:00', strtotime('last year'));
         $lastyear_end = date('Y-12-31 23:59:59', strtotime('last year'));
         $lastyear_where['created_at'] = $lastyear_where1['updated_at'] = ['between', [$lastyear_start, $lastyear_end]];
         $lastyear_sales_money = $model->table('sales_flat_order')->where($lastyear_where)->where($order_where)->where($order_success_where)->field('sum(base_grand_total) base_grand_total,count(entity_id) order_num')->find();
-        $lastyear_sales_money_data            = round($lastyear_sales_money['base_grand_total'], 2);
+        $lastyear_sales_money_data = round($lastyear_sales_money['base_grand_total'], 2);
         //总共销售额
         $total_sales_money = $model->table('sales_flat_order')->where($order_where)->where($order_success_where)->field('sum(base_grand_total) base_grand_total,count(entity_id) order_num')->find();
         $total_sales_money_data               = round($total_sales_money['base_grand_total'], 2);
@@ -3340,24 +3340,28 @@ class Crontab extends Backend
             echo 'error';
         }
     }
+
     /**
      * 更新zeelool站仪表盘数据
      *
-     * z站今天的销售额($) 订单数	订单支付成功数	客单价($)	购物车总数	购物车总转化率(%)	新增购物车数	新增购物车转化率	新增注册用户数
+     * z站今天的销售额($) 订单数    订单支付成功数    客单价($)    购物车总数    购物车总转化率(%)    新增购物车数    新增购物车转化率    新增注册用户数
      * @Description created by lsw
-     * @author lsw
-     * @since 2020/03/02 17:39:31
      * @return void
+     * @since 2020/03/02 17:39:31
+     * @author lsw
      */
-    public function update_ashboard_data_twoz(){
+    public function update_ashboard_data_twoz()
+    {
         $this->get_update_ashboard_data_two(1);
     }
+
     public function update_ashboard_data_two()
     {
         //求出平台
         $platform = $this->request->get('platform', 1);
         $this->get_update_ashboard_data_two($platform);
     }
+
     public function get_update_ashboard_data_two($platform)
     {
         ini_set('memory_limit', '1512M');
@@ -3426,7 +3430,7 @@ class Crontab extends Backend
         $pastthirtyday_order_success_data = $model->table('sales_flat_order')->where($thirty_where)->where($order_where)->where($order_success_where)->count();
         //当月支付成功数
         $thismonth_start = date('Y-m-01', strtotime($today));
-        $thismonth_end =  $today;
+        $thismonth_end = $today;
         $thismonth_where['created_at'] = ['between', [$thismonth_start, $thismonth_end]];
         $thismonth_where1['updated_at'] = ['between', [$thismonth_start, $thismonth_end]];
         $thismonth_order_success_data = $model->table('sales_flat_order')->where($thismonth_where)->where($order_where)->where($order_success_where)->count();
@@ -3436,7 +3440,7 @@ class Crontab extends Backend
         $lastmonth_where['created_at'] = $lastmonth_where1['updated_at'] = ['between', [$lastmonth_start, $lastmonth_end]];
         $lastmonth_order_success_data = $model->table('sales_flat_order')->where($lastmonth_where)->where($order_where)->where($order_success_where)->count();
         //今年支付成功数
-        $thisyear_start = date("Y", time()) . "-1" . "-1"; //本年开始
+        $thisyear_start = date("Y", time())."-1"."-1"; //本年开始
         $thisyear_end = $today;
         $thisyear_where['created_at'] = $thisyear_where1['updated_at'] = ['between', [$thisyear_start, $thisyear_end]];
         $thisyear_order_success_data = $model->table('sales_flat_order')->where($thisyear_where)->where($order_where)->where($order_success_where)->count();

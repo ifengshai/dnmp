@@ -68,6 +68,7 @@ class Test4 extends Controller
         $response = $this->getReport_active_user($site, $analytics, $start_time, $end_time);
         // Print the response.
         $result = $this->printResults($response);
+
         return $result[0]['ga:1dayUsers'] ? round($result[0]['ga:1dayUsers'], 2) : 0;
     }
 
@@ -115,6 +116,7 @@ class Test4 extends Controller
 
         $body = new \Google_Service_AnalyticsReporting_GetReportsRequest();
         $body->setReportRequests(array($request));
+
         return $analytics->reports->batchGet($body);
     }
 
@@ -183,6 +185,7 @@ class Test4 extends Controller
 
         $body = new \Google_Service_AnalyticsReporting_GetReportsRequest();
         $body->setReportRequests(array($request));
+
         return $analytics->reports->batchGet($body);
     }
 
@@ -216,9 +219,11 @@ class Test4 extends Controller
                     }
                 }
             }
+
             return $finalResult;
         }
     }
+
     //运营数据ga数据脚本
     public function only_ga_data()
     {
@@ -246,6 +251,7 @@ class Test4 extends Controller
             usleep(100000);
         }
     }
+
     //新增运营数据中心
     public function zeelool_operate_data_center()
     {
@@ -553,6 +559,7 @@ class Test4 extends Controller
             }
         }
     }
+
     //运营数据中心--日本站
     public function zeelool_jp_operate_data_center()
     {
@@ -779,21 +786,22 @@ class Test4 extends Controller
             usleep(100000);
         }
     }
+
     public function sku_day_data_ga()
     {
         $zeeloolOperate = new \app\admin\model\operatedatacenter\Zeelool;
         set_time_limit(0);
         //统计昨天的数据
         $info = Db::name('datacenter_sku_day')->where('site','in','2,10,11')->where('id','>',27326)->field('id,platform_sku,day_date,site')->select();
-        foreach($info as $key=>$value){
+        foreach ($info as $key => $value) {
             $data = $value['day_date'];
             $ga_skus = $zeeloolOperate->google_sku_detail($value['site'], $data);
             $ga_skus = array_column($ga_skus, 'uniquePageviews', 'ga:pagePath');
-            if($value['site'] == 2){
+            if ($value['site'] == 2) {
                 $model = Db::connect('database.db_voogueme_online');
-            }elseif($value['site'] == 10){
+            } elseif ($value['site'] == 10) {
                 $model = Db::connect('database.db_zeelool_de_online');
-            }else{
+            } else {
                 $model = Db::connect('database.db_zeelool_jp_online');
             }
             $sku_id = $model->table('catalog_product_entity')->where('sku',$value['platform_sku'])->value('entity_id');
@@ -803,11 +811,12 @@ class Test4 extends Controller
                     $unique_pageviews += $vv;
                 }
             }
-            Db::name('datacenter_sku_day')->where('id',$value['id'])->update(['unique_pageviews'=>$unique_pageviews]);
+            Db::name('datacenter_sku_day')->where('id',$value['id'])->update(['unique_pageviews' =>$unique_pageviews]);
             echo $value['id'].' is ok'."\n";
             usleep(10000);
         }
     }
+
     //计划任务跑每天的分类销量的数据
     public function day_data_goods_type()
     {
@@ -854,6 +863,7 @@ class Test4 extends Controller
         }
 
     }
+
     //统计昨天各品类镜框的销量
     public function goods_type_day_center($plat, $goods_type,$time)
     {
@@ -919,6 +929,7 @@ class Test4 extends Controller
         $arr['goods_type'] = $goods_type;
         $arr['glass_num'] = $frame_sales_num;
         $arr['sales_total_money'] = $frame_money;
+
         return $arr;
     }
 
@@ -953,6 +964,7 @@ class Test4 extends Controller
             $count += pow($average - $v, 2);
         }
         $variance = $count / $length;
+
         return sqrt($variance);
     }
 
@@ -961,18 +973,19 @@ class Test4 extends Controller
 
         $carrier = $this->getCarrier('usps');
         $trackingConnector = new TrackingConnector($this->apiKey);
-        $trackInfo = $trackingConnector->getTrackInfoMulti([[
-            'number' => '92001902551561000101621623',
-            'carrier' => $carrier['carrierId']
-            /*'number' => 'LO546092713CN',//E邮宝
-            'carrier' => '03011'*/
-            /* 'number' => '3616952791',//DHL
-            'carrier' => '100001' */
-            /* 'number' => '74890988318620573173', //Fedex
-            'carrier' => '100003' */
-            /* 'number' => '92001902551559000101352584', //usps郭伟峰
-            'carrier' => '21051' */
-        ]]);
+        $trackInfo = $trackingConnector->getTrackInfoMulti([
+            [
+                'number'  => '92001902551561000101621623',
+                'carrier' => $carrier['carrierId']
+                /*'number' => 'LO546092713CN',//E邮宝
+                'carrier' => '03011'*/
+                /* 'number' => '3616952791',//DHL
+                'carrier' => '100001' */
+                /* 'number' => '74890988318620573173', //Fedex
+                'carrier' => '100003' */
+                /* 'number' => '92001902551559000101352584', //usps郭伟峰
+                'carrier' => '21051' */
+            ]]);
         dump($trackInfo['data']['accepted'][0]['track']['z1']);
         die;
     }
@@ -1183,18 +1196,19 @@ class Test4 extends Controller
 
             $carrier = $this->getCarrier($title);
 
-            $trackInfo = $trackingConnector->getTrackInfoMulti([[
-                'number' => $v['track_number'],
-                'carrier' => $carrier['carrierId']
-                /*'number' => 'LO546092713CN',//E邮宝
-                'carrier' => '03011'*/
-                /* 'number' => '3616952791',//DHL
-                'carrier' => '100001' */
-                /* 'number' => '74890988318620573173', //Fedex
-                'carrier' => '100003' */
-                /* 'number' => '92001902551559000101352584', //usps郭伟峰
-                'carrier' => '21051' */
-            ]]);
+            $trackInfo = $trackingConnector->getTrackInfoMulti([
+                [
+                    'number'  => $v['track_number'],
+                    'carrier' => $carrier['carrierId']
+                    /*'number' => 'LO546092713CN',//E邮宝
+                    'carrier' => '03011'*/
+                    /* 'number' => '3616952791',//DHL
+                    'carrier' => '100001' */
+                    /* 'number' => '74890988318620573173', //Fedex
+                    'carrier' => '100003' */
+                    /* 'number' => '92001902551559000101352584', //usps郭伟峰
+                    'carrier' => '21051' */
+                ]]);
 
             $add['site'] = $v['site'];
             $add['order_id'] = $v['order_id'];
@@ -1831,17 +1845,18 @@ class Test4 extends Controller
             $title = 'Canada Post';
         }
         $carrier = [
-            'dhl' => '100001',
+            'dhl'       => '100001',
             'chinapost' => '03011',
-            'chinaems' => '03013',
-            'cpc' => '03041',
-            'fedex' => '100003',
-            'usps' => '21051',
-            'yanwen' => '190012'
+            'chinaems'  => '03013',
+            'cpc'       => '03041',
+            'fedex'     => '100003',
+            'usps'      => '21051',
+            'yanwen'    => '190012',
         ];
         if ($carrierId) {
             return ['title' => $title, 'carrierId' => $carrier[$carrierId]];
         }
+
         return ['title' => $title, 'carrierId' => $carrierId];
     }
 
@@ -2069,6 +2084,7 @@ class Test4 extends Controller
         $arr = array(
             $grade1, $grade2, $grade3, $grade4, $grade5, $grade6, $grade7, $grade8
         );
+
         return $arr;
 
     }
@@ -2364,10 +2380,11 @@ class Test4 extends Controller
         $days[] = $j_info['days'];
         $count = $sales_num1 + $sales_num2 + $sales_num3 + $sales_num4 + $sales_num5 + $sales_num6 + $sales_num7 + $sales_num8 + $sales_num9 + $sales_num10;
         $days = max($days);
-        $data = array(
+        $data = [
             'count' => $count,
-            'days' => $days,
-        );
+            'days'  => $days,
+        ];
+
         return $data;
     }
 
@@ -2383,6 +2400,7 @@ class Test4 extends Controller
         $data['sales_num'] = Db::table($sql . ' a')->sum('a.sales_num');
         $days = Db::name('sku_sales_num')->where($map)->count();
         $data['days'] = $days > 30 ? 30 : $days;
+
         return $data;
     }
 
@@ -2775,12 +2793,12 @@ class Test4 extends Controller
             ->alias('a')
             ->join(['fa_store_house' => 'b'], 'a.store_id=b.id')
             ->where('a.is_del', 1)
-            ->where('a.id', 'between',[9672,9850])//178
-            ->whereOr('a.id', 'between',[9590,9604])//67
-            ->whereOr('a.id', 'between',[9606,9657])//67
-            ->whereOr('a.id', 'between',[3280,3287])//8
-            ->whereOr('a.id', 'between',[9549,9578])//30
-            ->whereOr('a.id', 'between',[9852,9876])//25
+            ->where('a.id', 'between', [9672, 9850])//178
+            ->whereOr('a.id', 'between', [9590, 9604])//67
+            ->whereOr('a.id', 'between', [9606, 9657])//67
+            ->whereOr('a.id', 'between', [3280, 3287])//8
+            ->whereOr('a.id', 'between', [9549, 9578])//30
+            ->whereOr('a.id', 'between', [9852, 9876])//25
             ->field('a.sku,a.store_id,a.id,b.coding,b.area_id')
             ->select();
         foreach ($store_sku as $k => $v) {
@@ -2815,7 +2833,7 @@ class Test4 extends Controller
     public function sku_code_review()
     {
         $skus = ['E10005-2','E10009-2','E10019-1','E10045-1','E10055-1','E10060-1','E10061-1','E10061-2','E10085-1','E10087-1','E20008-1','E20014-1','E20026-1','E20034-1','E20041-1','E50002-1','E50003-1','E50005-1','N10003-1','N10008-1','N10011-1','N10016-1','NBY001-1','NBY003-1','Box'];
-        foreach ($skus as $k=>$v){
+        foreach ($skus as $k => $v) {
             $store_sku = Db::name('store_sku')
                 ->alias('a')
                 ->join(['fa_store_house' => 'b'], 'a.store_id=b.id')
@@ -2824,14 +2842,14 @@ class Test4 extends Controller
                 ->field('a.sku,a.store_id,b.id,b.coding,b.area_id')
                 ->find();
             $res = Db::name('product_barcode_item')->where('sku', $store_sku['sku'])->update(['location_code' => $store_sku['coding'], 'location_id' => $store_sku['area_id'], 'location_code_id' => $store_sku['store_id']]);
-            echo $store_sku['sku'] . '更新' . $res . '条数据 is ok' . "\n";
+            echo $store_sku['sku'].'更新'.$res.'条数据 is ok'."\n";
             usleep(10000);
         }
     }
 
     public function update_bar_code_data()
     {
-        $res = Db::connect('database.db_mojing_order')->table('fa_order_item_process')->where('magento_order_id',390286)->where('site',2)->update(['abnormal_house_id' => 0]);
+        $res = Db::connect('database.db_mojing_order')->table('fa_order_item_process')->where('magento_order_id', 390286)->where('site', 2)->update(['abnormal_house_id' => 0]);
         dump($res);
     }
 
@@ -2873,7 +2891,7 @@ class Test4 extends Controller
         // Db::name('lens_price')->where(['id'=>91])->update(['type'=>2]);
         // Db::name('lens_price')->where(['id'=>98])->update(['type'=>2]);
         // Db::name('lens_price')->where(['id'=>101])->update(['price'=>400]);
-        Db::name('lens_price')->where(['id'=>28])->update(['sph_start'=>'-8.00','sph_end'=>'0.00','cyl_start'=>'-6.00','cyl_end'=>'-4.25','type'=>2]);
+        Db::name('lens_price')->where(['id' => 28])->update(['sph_start' => '-8.00', 'sph_end' => '0.00', 'cyl_start' => '-6.00', 'cyl_end' => '-4.25', 'type' => 2]);
     }
 
     /**
@@ -2887,9 +2905,9 @@ class Test4 extends Controller
     {
         $data = Db::query('SELECT a.id, a.check_id, b.sku, a.in_stock_number, c.store_id, d.coding, d.area_id FROM `fa_in_stock` `a` LEFT JOIN `fa_in_stock_item` `b` ON `a`.`id` = `b`.`in_stock_id` JOIN `fa_store_sku` `c` ON `b`.`sku` = `c`.`sku` LEFT JOIN `fa_store_house` `d` ON `c`.`store_id` = `d`.`id` WHERE in_stock_number IN ( \'IN20210302090825772230\', \'IN20210302090829480510\', \'IN20210302090834209386\', \'IN20210302090840913439\', \'IN20210302090845487953\', \'IN20210302090849562833\', \'IN20210302090853861218\', \'IN20210302090857353890\', \'IN20210302090902864240\', \'IN20210302090907101523\', \'IN20210302090911359925\', \'IN20210302090915328422\', \'IN20210302090923837238\', \'IN20210302090929532973\', \'IN20210302090934608811\', \'IN20210302090954633838\', \'IN20210302091016827115\', \'IN20210302091042660609\', \'IN20210302091046585208\', \'IN20210302091051652988\', \'IN20210302091055273368\', \'IN20210311160016883690\', \'IN20210313131741682819\', \'IN20210316112712383364\', \'IN20210316112718558198\', \'IN20210316112722422461\', \'IN20210316112727225594\', \'IN20210316112731775127\', \'IN20210316130758346411\', \'IN20210316130803593610\', \'IN20210316130807203669\', \'IN20210316130819991528\', \'IN20210316130823863185\', \'IN20210316130843263882\', \'IN20210316130853784318\', \'IN20210316130858704453\', \'IN20210316130902938350\', \'IN20210316130908161545\', \'IN20210316130912626138\', \'IN20210316133717246103\', \'IN20210318182425735576\' ) AND d.area_id = 3 AND c.is_del = 1 GROUP BY b.sku ORDER BY c.store_id');
         $product_bar_code_item = new ProductBarCodeItem();
-        foreach ($data as $k=>$v){
-            $res = $product_bar_code_item->where(['sku'=>$v['sku'],'check_id'=>$v['check_id'],'is_sample'=>0])->update(['location_code'=>$v['coding'],'location_code_id'=>$v['store_id'],'location_id'=>$v['area_id'],'in_stock_id'=>$v['id']]);
-            echo $v['sku'] . '更新' . $res . '条数据 is ok' . "\n";
+        foreach ($data as $k => $v) {
+            $res = $product_bar_code_item->where(['sku' => $v['sku'], 'check_id' => $v['check_id'], 'is_sample' => 0])->update(['location_code' => $v['coding'], 'location_code_id' => $v['store_id'], 'location_id' => $v['area_id'], 'in_stock_id' => $v['id']]);
+            echo $v['sku'].'更新'.$res.'条数据 is ok'."\n";
         }
 
     }

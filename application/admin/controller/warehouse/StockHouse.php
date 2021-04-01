@@ -68,7 +68,7 @@ class StockHouse extends Backend
                 unset($filter['area_coding']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $this->model
                 ->where(['type' => 1])
                 ->where($where)
@@ -119,7 +119,7 @@ class StockHouse extends Backend
                 //判断选择的库位是否已存在
                 if (2 == $type) {
                     $params['location'] = $params['coding'];
-                    $params['coding'] = $params['subarea'] . '-' . $params['location'];
+                    $params['coding'] = $params['subarea'].'-'.$params['location'];
                 }
                 $map['type'] = $type;
                 $map['coding'] = $params['coding'];
@@ -170,6 +170,7 @@ class StockHouse extends Backend
         //所有库区编码id
         $area_coding = Db::name('warehouse_area')->column('coding', 'id');
         $this->assign('area_coding', $area_coding);
+
         return $this->view->fetch();
     }
 
@@ -202,7 +203,7 @@ class StockHouse extends Backend
                 //判断选择的库位是否已存在
                 if (2 == $type) {
                     $params['location'] = $params['coding'];
-                    $params['coding'] = $params['subarea'] . '-' . $params['location'];
+                    $params['coding'] = $params['subarea'].'-'.$params['location'];
                 }
                 $map['type'] = $type;
                 $map['coding'] = $params['coding'];
@@ -253,6 +254,7 @@ class StockHouse extends Backend
         //所有库区编码id
         $area_coding = Db::name('warehouse_area')->column('coding', 'id');
         $this->assign('area_coding', $area_coding);
+
         return $this->view->fetch();
     }
 
@@ -287,7 +289,7 @@ class StockHouse extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $this->model
                 ->where(['type' => 2])
                 ->where($where)
@@ -321,7 +323,7 @@ class StockHouse extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $this->model
                 ->where(['type' => 3])
                 ->where($where)
@@ -355,7 +357,7 @@ class StockHouse extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $this->model
                 ->where(['type' => 4])
                 ->where($where)
@@ -412,11 +414,11 @@ EOF;
         $file_content = '';
         foreach ($stock_house_info as $key => $value) {
             //检测文件夹
-            $dir = ROOT_PATH . "public" . DS . "uploads" . DS . "stock_house" . DS . "all";
+            $dir = ROOT_PATH."public".DS."uploads".DS."stock_house".DS."all";
             !file_exists($dir) && mkdir($dir, 0777, true);
 
             //生成条形码
-            $fileName = $dir . DS . $value['coding'] . ".png";
+            $fileName = $dir.DS.$value['coding'].".png";
             $this->generate_barcode($value['coding'], $fileName);
 
             //拼接条形码
@@ -424,11 +426,11 @@ EOF;
             $file_content .= "
 <div style='display:list-item;margin: 0mm auto;padding-top:4mm;padding-right:2mm;text-align:center;'>
 <p>库位条形码</p>
-<img src='" . $img_url . "' style='width:36mm'>
+<img src='".$img_url."' style='width:36mm'>
 </div>";
         }
 
-        echo $file_header . $file_content;
+        echo $file_header.$file_content;
     }
 
 
@@ -697,7 +699,7 @@ EOF;
         //导入文件首行类型,默认是注释,如果需要使用字段名称请使用name
         //$importHeadType = isset($this->importHeadType) ? $this->importHeadType : 'comment';
         //模板文件列名
-        $listName = ['货架号', '库区编码', '库位编码', '库容', '库位名称', '备注','拣货顺序'];
+        $listName = ['货架号', '库区编码', '库位编码', '库容', '库位名称', '备注', '拣货顺序'];
         try {
             if (!$PHPExcel = $reader->load($filePath)) {
                 $this->error(__('Unknown data format'));
@@ -737,15 +739,15 @@ EOF;
             $this->error('库位编码有重复！！请仔细核对库位编码');
         }
         foreach ($data as $k => $v) {
-            if (empty($v[2]) || empty($v[1])){
+            if (empty($v[2]) || empty($v[1])) {
                 $this->error('库位编码不能为空，请检查！！');
             }
             $area_id = Db::name('warehouse_area')->where('coding', $v[1])->value('id');
-            if (empty($area_id)){
+            if (empty($area_id)) {
                 $this->error('库区编码错误，请检查！！');
             }
-            $is_exist_coding = $this->model->where('coding',$v[2])->where('area_id',$area_id)->find();
-            if (!empty($is_exist_coding)){
+            $is_exist_coding = $this->model->where('coding', $v[2])->where('area_id', $area_id)->find();
+            if (!empty($is_exist_coding)) {
                 $this->error('当前库区已存在此库位编码，请检查！！');
             }
         }
