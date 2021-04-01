@@ -147,9 +147,12 @@ class NewProductDesign extends Backend
 
         $img = explode(',',$row->frame_aws_imgs);
         $net = 'https://mojing.s3-us-west-2.amazonaws.com/';
-        foreach ($img as $key=>$value){
-            $img[$key] = $net.$value;
+        if (!empty($img)){
+            foreach ($img as $key=>$value){
+                $img[$key] = $net.$value;
+            }
         }
+
         $this->assign('attributeType',$attributeType);
         $this->assign('goodsId',$goodsId);
         $this->assign('ids',$ids);
