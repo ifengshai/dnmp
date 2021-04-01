@@ -478,7 +478,14 @@ class WorkOrderList extends Model
             }else{
                 $url = 'magic/product/lensData';
             }
-            $data = $this->httpRequest($siteType, $url);
+            if ($siteType == 13 || $siteType == 14) {//第三方平台接口
+                $data = [];
+                $data['lens_list'] = ['Plastic lenses','Standard Eyeglass Lenses','Beyond UV Blue Blockers','Photochromic Lenses','Color Tint','Mid-Index Mirrored lenses','Polarized'];   
+                $data['color_list'] = []; 
+                $data['coating_list'] = [];
+            }else{
+                $data = $this->httpRequest($siteType, $url);
+            }
             Cache::set($key, $data, 3600 * 24);
         }
 
@@ -516,9 +523,16 @@ class WorkOrderList extends Model
     {
         //从网站端获取镜片、镀膜、颜色等列表数据
         $cache_key = $siteType . '_get_lens';
-        $data = Cache::get($cache_key);
+        //$data = Cache::get($cache_key);
         if (!$data) {
-            $data = $this->httpRequest($siteType, 'magic/product/lensData');
+            if ($siteType == 13 || $siteType == 14) {//第三方平台接口
+                $data = [];
+                $data['lens_list'] = ['Plastic lenses' => 'Plastic lenses','Standard Eyeglass Lenses' => 'Standard Eyeglass Lenses','Beyond UV Blue Blockers' => 'Beyond UV Blue Blockers','Photochromic Lenses' => 'Photochromic Lenses','Color Tint' => 'Color Tint','Mid-Index Mirrored lenses' => 'Mid-Index Mirrored lenses','Polarized' => 'Polarized'];   
+                $data['color_list'] = []; 
+                $data['coating_list'] = [];
+            }else{
+                $data = $this->httpRequest($siteType, 'magic/product/lensData');
+            }
             Cache::set($cache_key, $data, 3600 * 24);
         }
 
@@ -588,6 +602,12 @@ class WorkOrderList extends Model
             case 11:
                 $url = config('url.zeelooljp_url');
                 break;
+            case 13:
+                $url = config('url.zeeloolcn_url');//抖音
+                break;
+            case 14:
+                $url = config('url.zeeloolcn_url');//阿里
+                break;
             default:
                 return false;
                 break;
@@ -603,19 +623,20 @@ class WorkOrderList extends Model
                 $response = $client->request('POST', $url, array('form_params' => $params));
             }
             $body = $response->getBody();
+
             //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$body,FILE_APPEND);
             $stringBody = (string) $body;
             $res = json_decode($stringBody, true);
+
             //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$stringBody,FILE_APPEND);
             if ($res === null) {
                 exception('网络异常');
             }
 
-            $status = -1 == $siteType ? $res['code'] : $res['status'];
+            $status = -1 == $siteType || 13 == $siteType || 14 == $siteType? $res['code'] : $res['status'];
             if (200 == $status) {
                 return $res['data'];
             }
-
             exception($res['msg']);
         } catch (Exception $e) {
             exception($e->getMessage());
@@ -1281,7 +1302,14 @@ class WorkOrderList extends Model
         $key = $siteType . '_get_lens';
         $data = Cache::get($key);
         if (!$data) {
-            $data = $this->httpRequest($siteType, 'magic/product/lensData');
+            if ($siteType == 13 || $siteType == 14) {//第三方平台接口
+                $data = [];
+                $data['lens_list'] = ['Plastic lenses' => 'Plastic lenses','Standard Eyeglass Lenses' => 'Standard Eyeglass Lenses','Beyond UV Blue Blockers' => 'Beyond UV Blue Blockers','Photochromic Lenses' => 'Photochromic Lenses','Color Tint' => 'Color Tint','Mid-Index Mirrored lenses' => 'Mid-Index Mirrored lenses','Polarized' => 'Polarized'];   
+                $data['color_list'] = []; 
+                $data['coating_list'] = [];
+            }else{
+                $data = $this->httpRequest($siteType, 'magic/product/lensData');
+            }
             Cache::set($key, $data, 3600 * 24);
         }
         $prescription = $data['lens_list'];
@@ -1425,7 +1453,13 @@ class WorkOrderList extends Model
             $postData = array_merge($postData, $postDataCommon);
             if(!empty($postData)){
                 try {
-                    $res = $this->httpRequest($siteType, 'magic/order/createOrder', $postData, 'POST');
+                    $pathinfo = 'magic/order/createOrder';
+                    $siteType = 13;
+                    if ($siteType == 13 || $siteType == 14) {
+                        $pathinfo = 'api/mojing/reissue_order';//第三方平台补发接口
+                        $postData['site'] = $siteType;
+                    }
+                    $res = $this->httpRequest($siteType, $pathinfo, $postData, 'POST');
                     $increment_id = $res['increment_id'];
 
                     //添加补发的订单号
@@ -1545,9 +1579,16 @@ class WorkOrderList extends Model
     {
         //从网站端获取镜片、镀膜、颜色等列表数据
         $cache_key = $siteType . '_get_lens';
-        $data = Cache::get($cache_key);
+        //$data = Cache::get($cache_key);
         if (!$data) {
-            $data = $this->httpRequest($siteType, 'magic/product/lensData');
+            if ($siteType == 13 || $siteType == 14) {//第三方平台接口
+                $data = [];
+                $data['lens_list'] = ['Plastic lenses' => 'Plastic lenses','Standard Eyeglass Lenses' => 'Standard Eyeglass Lenses','Beyond UV Blue Blockers' => 'Beyond UV Blue Blockers','Photochromic Lenses' => 'Photochromic Lenses','Color Tint' => 'Color Tint','Mid-Index Mirrored lenses' => 'Mid-Index Mirrored lenses','Polarized' => 'Polarized'];   
+                $data['color_list'] = []; 
+                $data['coating_list'] = [];
+            }else{
+                $data = $this->httpRequest($siteType, 'magic/product/lensData');
+            }
             Cache::set($cache_key, $data, 3600 * 24);
         }
 
@@ -1574,7 +1615,6 @@ class WorkOrderList extends Model
         } else {
             $rendering[] = 'showPrescriptions';
         }
-
         //拼接html页面
         $html = (new View)->fetch('saleaftermanage/work_order_list/ajax_reissue_edit', compact($rendering));
         return ['data' => $data, 'html' => $html];

@@ -1982,7 +1982,7 @@ class WorkOrderList extends Backend
                 /****************************end*****************************************/
             }
             //判断是否开启预售 并且预售时间是否满足 并且预售数量是否足够
-            $res = $itemPlatFormSku->where(['outer_sku_status' => 1, 'platform_sku' => $sku, 'platform_type' => $siteType])->find();
+            $res = $itemPlatFormSku->where(['outer_sku_status' => 1, 'platform_sku' => $sku, 'platform_type' => 11])->find();
             //判断是否开启预售
             if ($res['stock'] >= 0 && $res['presell_status'] == 1 && strtotime($res['presell_create_time']) <= time() && strtotime($res['presell_end_time']) >= time()) {
                 $stock = $res['stock'] + $res['presell_residue_num'];
@@ -2922,12 +2922,21 @@ class WorkOrderList extends Backend
             $siteType = input('site_type');
             $prescriptionType = input('prescription_type', '');
             $key = $siteType . '_get_lens';
-            $data = Cache::get($key);
+            //$data = Cache::get($key);
             if (!$data) {
-                $data = $this->model->httpRequest($siteType, 'magic/product/lensData');
+                if ($siteType == 13 || $siteType == 14) {
+                    $data = $this->model->httpRequest($siteType, 'api/mojing/lens_data',['prescriptionType'=>$prescriptionType], 'POST');
+                }else{
+                    $data = $this->model->httpRequest($siteType, 'magic/product/lensData');
+                }
                 Cache::set($key, $data, 3600 * 24);
             }
-            $lensType = $data['lens_list'][$prescriptionType] ?: [];
+            if ($siteType == 13 || $siteType == 14) {
+                $lensType = $data;
+            }else{
+                $lensType = $data['lens_list'][$prescriptionType] ?: [];
+            }
+            
             $this->success('操作成功！！', '', $lensType);
         } else {
             $this->error('404 not found');
@@ -2945,7 +2954,7 @@ class WorkOrderList extends Backend
     public function ajax_get_order($ordertype = null, $order_number = null)
     {
         if ($this->request->isAjax()) {
-            if ($ordertype < 1 || $ordertype > 11) { //不在平台之内
+            if ($ordertype < 1 || $ordertype > 15) { //不在平台之内
                 return $this->error('选择平台错误,请重新选择', '', 'error', 0);
             }
             if (!$order_number) {
@@ -2994,7 +3003,7 @@ class WorkOrderList extends Backend
     public function ajax_edit_order($ordertype = null, $order_number = null, $work_id = null, $change_type = null)
     {
         if ($this->request->isAjax()) {
-            if ($ordertype < 1 || $ordertype > 11) { //不在平台之内
+            if ($ordertype < 1 || $ordertype > 15) { //不在平台之内
                 return $this->error('选择平台错误,请重新选择', '', 'error', 0);
             }
             if (!$order_number) {
@@ -3236,7 +3245,7 @@ class WorkOrderList extends Backend
     public function ajax_change_order($work_id = null, $order_type = null, $order_number = null, $change_type = null, $operate_type = '', $item_order_number = null)
     {
         if ($this->request->isAjax()) {
-            (1 > $order_type || 11 < $order_type) && $this->error('选择平台错误,请重新选择', '', 'error', 0);
+            (1 > $order_type || 15 < $order_type) && $this->error('选择平台错误,请重新选择', '', 'error', 0);
             !$order_number && $this->error('订单号不存在，请重新选择', '', 'error', 0);
             !$work_id && $this->error('工单不存在，请重新选择', '', 'error', 0);
 
