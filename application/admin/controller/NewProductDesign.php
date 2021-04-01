@@ -147,7 +147,7 @@ class NewProductDesign extends Backend
 
         $img = explode(',',$row->frame_aws_imgs);
         $net = 'https://mojing.s3-us-west-2.amazonaws.com/';
-        if (!empty($img)){
+        if (is_array($img)){
             foreach ($img as $key=>$value){
                 $img[$key] = $net.$value;
             }
