@@ -2282,7 +2282,7 @@ class PurchaseOrder extends Backend
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("T1", "揽件时间");
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("U1", "订单生效时间");
 
-
+        $logistic = new \app\admin\model\warehouse\LogisticsInfo();
         foreach ($list as $key => $value) {
             $logistics_info = [];
             $readly_logistics_info = [];
@@ -2316,16 +2316,14 @@ class PurchaseOrder extends Backend
                 $is_sample = '否';
             }
 
-            //反序列化处理物流返回信息
-            $logistics_info = unserialize($value['logistics_info']);
-            $logisticsInfoDataCount = count($logistics_info['lastResult']['data']);
-            $readly_logistics_info = $logistics_info['lastResult']['data'][$logisticsInfoDataCount - 1];
+            //查询揽收时间
+            $collect_time = $logistic->where(['purchase_id' => $value['id']])->value('collect_time');
             $spreadsheet->getActiveSheet()->setCellValue("O".($key * 1 + 2), $is_new_product);
             $spreadsheet->getActiveSheet()->setCellValue("P".($key * 1 + 2), $is_sample);
             $spreadsheet->getActiveSheet()->setCellValue("Q".($key * 1 + 2), $value['purchase_total']);
             $spreadsheet->getActiveSheet()->setCellValueExplicit("R".($key * 1 + 2), $value['1688_number'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
             $spreadsheet->getActiveSheet()->setCellValue("S".($key * 1 + 2), $value['type']);
-            $spreadsheet->getActiveSheet()->setCellValue("T".($key * 1 + 2), $readly_logistics_info['time']);
+            $spreadsheet->getActiveSheet()->setCellValue("T".($key * 1 + 2), $collect_time);
             $spreadsheet->getActiveSheet()->setCellValue("U".($key * 1 + 2), $value['effect_time']);
         }
 
