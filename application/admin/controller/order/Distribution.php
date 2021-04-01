@@ -404,10 +404,9 @@ class Distribution extends Backend
                 ->order($sort, $order)
                 ->count();
             //combine_time  合单时间  delivery_time 打印时间 check_time审单时间  update_time更新时间  created_at创建时间
-
             $list = $this->model
                 ->alias('a')
-                ->field('a.id,a.wave_order_id,a.order_id,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.total_qty_ordered,b.site,b.order_type,b.status,a.distribution_status,a.temporary_house_id,a.abnormal_house_id,a.created_at')
+                ->field('a.id,a.wave_order_id,a.order_id,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.total_qty_ordered,b.site,b.order_type,b.status,a.distribution_status,a.temporary_house_id,a.abnormal_house_id,a.created_at,c.check_time')
                 ->join(['fa_order' => 'b'], 'a.order_id=b.id')
                 ->join(['fa_order_process' => 'c'], 'a.order_id=c.order_id')
                 ->where($where)
@@ -1415,6 +1414,7 @@ class Distribution extends Backend
             ->where($map)
             ->order($sort, $order)
             ->select();
+
         $list = collection($list)->toArray();
         //从数据库查询需要的数据
         $spreadsheet = new Spreadsheet();
@@ -1581,6 +1581,7 @@ class Distribution extends Backend
             $data[$value['increment_id']]['base_grand_total'] = $value['base_grand_total'];
             $data[$value['increment_id']]['payment_method'] = $value['payment_method'];
             $data[$value['increment_id']]['payment_time'] = $value['payment_time'];
+            $data[$value['increment_id']]['check_time'] = $value['check_time'];
         }
         unset($value);
         $cat = '0';
