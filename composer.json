@@ -15,7 +15,7 @@
         }
     ],
     "require": {
-        "php": ">=5.6.0",
+        "php": ">=7.0",
         "topthink/framework": "~5.0.24",
         "overtrue/wechat": "~3.1",
         "endroid/qr-code": "^1.9",
@@ -33,7 +33,8 @@
         "league/html-to-markdown": "^4.9",
         "sch-group/17track": "^1.7",
         "google/apiclient": "^2.0",
-        "facebook/php-business-sdk": "5.0.5"
+        "facebook/php-business-sdk": "5.0.5",
+        "elasticsearch/elasticsearch": "v7.11.0"
     },
     "config": {
         "preferred-install": "dist"

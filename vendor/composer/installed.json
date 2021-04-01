@@ -1,5 +1,98 @@
 [
     {
+        "name": "aws/aws-sdk-php",
+        "version": "3.176.4",
+        "version_normalized": "3.176.4.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/aws/aws-sdk-php.git",
+            "reference": "7cafb35d3ef9944f542a97dde4a6bb52ad0f45d1"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/7cafb35d3ef9944f542a97dde4a6bb52ad0f45d1",
+            "reference": "7cafb35d3ef9944f542a97dde4a6bb52ad0f45d1",
+            "shasum": "",
+            "mirrors": [
+                {
+                    "url": "https://mirrors.aliyun.com/composer/dists/%package%/%reference%.%type%",
+                    "preferred": true
+                }
+            ]
+        },
+        "require": {
+            "ext-json": "*",
+            "ext-pcre": "*",
+            "ext-simplexml": "*",
+            "guzzlehttp/guzzle": "^5.3.3|^6.2.1|^7.0",
+            "guzzlehttp/promises": "^1.4.0",
+            "guzzlehttp/psr7": "^1.7.0",
+            "mtdowling/jmespath.php": "^2.6",
+            "php": ">=5.5"
+        },
+        "require-dev": {
+            "andrewsville/php-token-reflection": "^1.4",
+            "aws/aws-php-sns-message-validator": "~1.0",
+            "behat/behat": "~3.0",
+            "doctrine/cache": "~1.4",
+            "ext-dom": "*",
+            "ext-openssl": "*",
+            "ext-pcntl": "*",
+            "ext-sockets": "*",
+            "nette/neon": "^2.3",
+            "paragonie/random_compat": ">= 2",
+            "phpunit/phpunit": "^4.8.35|^5.4.3",
+            "psr/cache": "^1.0",
+            "psr/simple-cache": "^1.0",
+            "sebastian/comparator": "^1.2.3"
+        },
+        "suggest": {
+            "aws/aws-php-sns-message-validator": "To validate incoming SNS notifications",
+            "doctrine/cache": "To use the DoctrineCacheAdapter",
+            "ext-curl": "To send requests using cURL",
+            "ext-openssl": "Allows working with CloudFront private distributions and verifying received SNS messages",
+            "ext-sockets": "To use client-side monitoring"
+        },
+        "time": "2021-03-30T18:17:07+00:00",
+        "type": "library",
+        "extra": {
+            "branch-alias": {
+                "dev-master": "3.0-dev"
+            }
+        },
+        "installation-source": "dist",
+        "autoload": {
+            "psr-4": {
+                "Aws\\": "src/"
+            },
+            "files": [
+                "src/functions.php"
+            ]
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "Apache-2.0"
+        ],
+        "authors": [
+            {
+                "name": "Amazon Web Services",
+                "homepage": "http://aws.amazon.com"
+            }
+        ],
+        "description": "AWS SDK for PHP - Use Amazon Web Services in your PHP project",
+        "homepage": "http://aws.amazon.com/sdkforphp",
+        "keywords": [
+            "amazon",
+            "aws",
+            "cloud",
+            "dynamodb",
+            "ec2",
+            "glacier",
+            "s3",
+            "sdk"
+        ]
+    },
+    {
         "name": "defuse/php-encryption",
         "version": "v2.2.1",
         "version_normalized": "2.2.1.0",
@@ -149,6 +242,79 @@
         ]
     },
     {
+        "name": "elasticsearch/elasticsearch",
+        "version": "v7.11.0",
+        "version_normalized": "7.11.0.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/elastic/elasticsearch-php.git",
+            "reference": "277cd5e182827c59c23e146a836a30470c0f879d"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/elastic/elasticsearch-php/zipball/277cd5e182827c59c23e146a836a30470c0f879d",
+            "reference": "277cd5e182827c59c23e146a836a30470c0f879d",
+            "shasum": "",
+            "mirrors": [
+                {
+                    "url": "https://mirrors.aliyun.com/composer/dists/%package%/%reference%.%type%",
+                    "preferred": true
+                }
+            ]
+        },
+        "require": {
+            "ext-json": ">=1.3.7",
+            "ezimuel/ringphp": "^1.1.2",
+            "php": "^7.1 || ^8.0",
+            "psr/log": "~1.0"
+        },
+        "require-dev": {
+            "cpliakas/git-wrapper": "~2.0 || ~3.0",
+            "doctrine/inflector": "^1.3",
+            "ext-yaml": "*",
+            "ext-zip": "*",
+            "mockery/mockery": "^1.2",
+            "phpstan/phpstan": "^0.12",
+            "phpunit/phpunit": "^7.5 || ^8.5 || ^9.3",
+            "squizlabs/php_codesniffer": "^3.4",
+            "symfony/finder": "~4.0",
+            "symfony/yaml": "~4.0"
+        },
+        "suggest": {
+            "ext-curl": "*",
+            "monolog/monolog": "Allows for client-level logging and tracing"
+        },
+        "time": "2021-02-11T11:04:51+00:00",
+        "type": "library",
+        "installation-source": "dist",
+        "autoload": {
+            "files": [
+                "src/autoload.php"
+            ],
+            "psr-4": {
+                "Elasticsearch\\": "src/Elasticsearch/"
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "Apache-2.0"
+        ],
+        "authors": [
+            {
+                "name": "Zachary Tong"
+            },
+            {
+                "name": "Enrico Zimuel"
+            }
+        ],
+        "description": "PHP Client for Elasticsearch",
+        "keywords": [
+            "client",
+            "elasticsearch",
+            "search"
+        ]
+    },
+    {
         "name": "endroid/qr-code",
         "version": "1.9.3",
         "version_normalized": "1.9.3.0",
@@ -215,6 +381,123 @@
             "qrcode",
             "symfony"
         ]
+    },
+    {
+        "name": "ezimuel/guzzlestreams",
+        "version": "3.0.1",
+        "version_normalized": "3.0.1.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/ezimuel/guzzlestreams.git",
+            "reference": "abe3791d231167f14eb80d413420d1eab91163a8"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/ezimuel/guzzlestreams/zipball/abe3791d231167f14eb80d413420d1eab91163a8",
+            "reference": "abe3791d231167f14eb80d413420d1eab91163a8",
+            "shasum": "",
+            "mirrors": [
+                {
+                    "url": "https://mirrors.aliyun.com/composer/dists/%package%/%reference%.%type%",
+                    "preferred": true
+                }
+            ]
+        },
+        "require": {
+            "php": ">=5.4.0"
+        },
+        "require-dev": {
+            "phpunit/phpunit": "~4.0"
+        },
+        "time": "2020-02-14T23:11:50+00:00",
+        "type": "library",
+        "extra": {
+            "branch-alias": {
+                "dev-master": "3.0-dev"
+            }
+        },
+        "installation-source": "dist",
+        "autoload": {
+            "psr-4": {
+                "GuzzleHttp\\Stream\\": "src/"
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "Michael Dowling",
+                "email": "mtdowling@gmail.com",
+                "homepage": "https://github.com/mtdowling"
+            }
+        ],
+        "description": "Fork of guzzle/streams (abandoned) to be used with elasticsearch-php",
+        "homepage": "http://guzzlephp.org/",
+        "keywords": [
+            "Guzzle",
+            "stream"
+        ]
+    },
+    {
+        "name": "ezimuel/ringphp",
+        "version": "1.1.2",
+        "version_normalized": "1.1.2.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/ezimuel/ringphp.git",
+            "reference": "0b78f89d8e0bb9e380046c31adfa40347e9f663b"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/ezimuel/ringphp/zipball/0b78f89d8e0bb9e380046c31adfa40347e9f663b",
+            "reference": "0b78f89d8e0bb9e380046c31adfa40347e9f663b",
+            "shasum": "",
+            "mirrors": [
+                {
+                    "url": "https://mirrors.aliyun.com/composer/dists/%package%/%reference%.%type%",
+                    "preferred": true
+                }
+            ]
+        },
+        "require": {
+            "ezimuel/guzzlestreams": "^3.0.1",
+            "php": ">=5.4.0",
+            "react/promise": "~2.0"
+        },
+        "require-dev": {
+            "ext-curl": "*",
+            "phpunit/phpunit": "~4.0"
+        },
+        "suggest": {
+            "ext-curl": "Guzzle will use specific adapters if cURL is present"
+        },
+        "time": "2020-02-14T23:51:21+00:00",
+        "type": "library",
+        "extra": {
+            "branch-alias": {
+                "dev-master": "1.1-dev"
+            }
+        },
+        "installation-source": "dist",
+        "autoload": {
+            "psr-4": {
+                "GuzzleHttp\\Ring\\": "src/"
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "Michael Dowling",
+                "email": "mtdowling@gmail.com",
+                "homepage": "https://github.com/mtdowling"
+            }
+        ],
+        "description": "Fork of guzzle/RingPHP (abandoned) to be used with elasticsearch-php"
     },
     {
         "name": "facebook/php-business-sdk",
@@ -571,17 +854,17 @@
     },
     {
         "name": "guzzlehttp/promises",
-        "version": "v1.3.1",
-        "version_normalized": "1.3.1.0",
+        "version": "1.4.0",
+        "version_normalized": "1.4.0.0",
         "source": {
             "type": "git",
             "url": "https://github.com/guzzle/promises.git",
-            "reference": "a59da6cf61d80060647ff4d3eb2c03a2bc694646"
+            "reference": "60d379c243457e073cff02bc323a2a86cb355631"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/guzzle/promises/zipball/a59da6cf61d80060647ff4d3eb2c03a2bc694646",
-            "reference": "a59da6cf61d80060647ff4d3eb2c03a2bc694646",
+            "url": "https://api.github.com/repos/guzzle/promises/zipball/60d379c243457e073cff02bc323a2a86cb355631",
+            "reference": "60d379c243457e073cff02bc323a2a86cb355631",
             "shasum": "",
             "mirrors": [
                 {
@@ -591,12 +874,12 @@
             ]
         },
         "require": {
-            "php": ">=5.5.0"
+            "php": ">=5.5"
         },
         "require-dev": {
-            "phpunit/phpunit": "^4.0"
+            "symfony/phpunit-bridge": "^4.4 || ^5.1"
         },
-        "time": "2016-12-20T10:07:11+00:00",
+        "time": "2020-09-30T07:37:28+00:00",
         "type": "library",
         "extra": {
             "branch-alias": {
@@ -630,17 +913,17 @@
     },
     {
         "name": "guzzlehttp/psr7",
-        "version": "1.6.1",
-        "version_normalized": "1.6.1.0",
+        "version": "1.7.0",
+        "version_normalized": "1.7.0.0",
         "source": {
             "type": "git",
             "url": "https://github.com/guzzle/psr7.git",
-            "reference": "239400de7a173fe9901b9ac7c06497751f00727a"
+            "reference": "53330f47520498c0ae1f61f7e2c90f55690c06a3"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/guzzle/psr7/zipball/239400de7a173fe9901b9ac7c06497751f00727a",
-            "reference": "239400de7a173fe9901b9ac7c06497751f00727a",
+            "url": "https://api.github.com/repos/guzzle/psr7/zipball/53330f47520498c0ae1f61f7e2c90f55690c06a3",
+            "reference": "53330f47520498c0ae1f61f7e2c90f55690c06a3",
             "shasum": "",
             "mirrors": [
                 {
@@ -659,16 +942,16 @@
         },
         "require-dev": {
             "ext-zlib": "*",
-            "phpunit/phpunit": "~4.8.36 || ^5.7.27 || ^6.5.8"
+            "phpunit/phpunit": "~4.8.36 || ^5.7.27 || ^6.5.14 || ^7.5.20 || ^8.5.8 || ^9.3.10"
         },
         "suggest": {
-            "zendframework/zend-httphandlerrunner": "Emit PSR-7 responses"
+            "laminas/laminas-httphandlerrunner": "Emit PSR-7 responses"
         },
-        "time": "2019-07-01T23:21:34+00:00",
+        "time": "2020-09-30T07:37:11+00:00",
         "type": "library",
         "extra": {
             "branch-alias": {
-                "dev-master": "1.6-dev"
+                "dev-master": "1.7-dev"
             }
         },
         "installation-source": "dist",
@@ -834,24 +1117,6 @@
         "keywords": [
             "html",
             "markdown"
-        ],
-        "funding": [
-            {
-                "url": "https://www.colinodell.com/sponsor",
-                "type": "custom"
-            },
-            {
-                "url": "https://www.paypal.me/colinpodell/10.00",
-                "type": "custom"
-            },
-            {
-                "url": "https://github.com/colinodell",
-                "type": "github"
-            },
-            {
-                "url": "https://www.patreon.com/colinodell",
-                "type": "patreon"
-            }
         ]
     },
     {
@@ -1239,16 +1504,6 @@
             "log",
             "logging",
             "psr-3"
-        ],
-        "funding": [
-            {
-                "url": "https://github.com/Seldaek",
-                "type": "github"
-            },
-            {
-                "url": "https://tidelift.com/funding/github/packagist/monolog/monolog",
-                "type": "tidelift"
-            }
         ]
     },
     {
@@ -1326,12 +1581,6 @@
             "pdf",
             "php",
             "utf-8"
-        ],
-        "funding": [
-            {
-                "url": "https://www.paypal.me/mpdf",
-                "type": "custom"
-            }
         ]
     },
     {
@@ -1388,6 +1637,71 @@
         "abandoned": "dragonmantank/cron-expression"
     },
     {
+        "name": "mtdowling/jmespath.php",
+        "version": "2.6.0",
+        "version_normalized": "2.6.0.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/jmespath/jmespath.php.git",
+            "reference": "42dae2cbd13154083ca6d70099692fef8ca84bfb"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/jmespath/jmespath.php/zipball/42dae2cbd13154083ca6d70099692fef8ca84bfb",
+            "reference": "42dae2cbd13154083ca6d70099692fef8ca84bfb",
+            "shasum": "",
+            "mirrors": [
+                {
+                    "url": "https://mirrors.aliyun.com/composer/dists/%package%/%reference%.%type%",
+                    "preferred": true
+                }
+            ]
+        },
+        "require": {
+            "php": "^5.4 || ^7.0 || ^8.0",
+            "symfony/polyfill-mbstring": "^1.17"
+        },
+        "require-dev": {
+            "composer/xdebug-handler": "^1.4",
+            "phpunit/phpunit": "^4.8.36 || ^7.5.15"
+        },
+        "time": "2020-07-31T21:01:56+00:00",
+        "bin": [
+            "bin/jp.php"
+        ],
+        "type": "library",
+        "extra": {
+            "branch-alias": {
+                "dev-master": "2.6-dev"
+            }
+        },
+        "installation-source": "dist",
+        "autoload": {
+            "psr-4": {
+                "JmesPath\\": "src/"
+            },
+            "files": [
+                "src/JmesPath.php"
+            ]
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "Michael Dowling",
+                "email": "mtdowling@gmail.com",
+                "homepage": "https://github.com/mtdowling"
+            }
+        ],
+        "description": "Declaratively specify how to extract elements from a JSON document",
+        "keywords": [
+            "json",
+            "jsonpath"
+        ]
+    },
+    {
         "name": "myclabs/deep-copy",
         "version": "1.10.1",
         "version_normalized": "1.10.1.0",
@@ -1441,12 +1755,6 @@
             "duplicate",
             "object",
             "object graph"
-        ],
-        "funding": [
-            {
-                "url": "https://tidelift.com/funding/github/packagist/myclabs/deep-copy",
-                "type": "tidelift"
-            }
         ]
     },
     {
@@ -1622,12 +1930,12 @@
         "version_normalized": "3.3.33.0",
         "source": {
             "type": "git",
-            "url": "https://github.com/overtrue/wechat.git",
+            "url": "https://github.com/w7corp/easywechat.git",
             "reference": "78e5476df330754040d1c400d0bca640d5b77cb7"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/overtrue/wechat/zipball/78e5476df330754040d1c400d0bca640d5b77cb7",
+            "url": "https://api.github.com/repos/w7corp/easywechat/zipball/78e5476df330754040d1c400d0bca640d5b77cb7",
             "reference": "78e5476df330754040d1c400d0bca640d5b77cb7",
             "shasum": "",
             "mirrors": [
@@ -1990,21 +2298,7 @@
                 "name": "Brent R. Matzelle"
             }
         ],
-        "description": "PHPMailer is a full-featured email creation and transfer class for PHP",
-        "funding": [
-            {
-                "url": "https://marcus.bointon.com/donations/",
-                "type": "custom"
-            },
-            {
-                "url": "https://github.com/Synchro",
-                "type": "github"
-            },
-            {
-                "url": "https://www.patreon.com/marcusbointon",
-                "type": "patreon"
-            }
-        ]
+        "description": "PHPMailer is a full-featured email creation and transfer class for PHP"
     },
     {
         "name": "phpoffice/phpspreadsheet",
@@ -2205,20 +2499,6 @@
             "twofish",
             "x.509",
             "x509"
-        ],
-        "funding": [
-            {
-                "url": "https://github.com/terrafrost",
-                "type": "github"
-            },
-            {
-                "url": "https://www.patreon.com/phpseclib",
-                "type": "patreon"
-            },
-            {
-                "url": "https://tidelift.com/funding/github/packagist/phpseclib/phpseclib",
-                "type": "tidelift"
-            }
         ]
     },
     {
@@ -2608,6 +2888,60 @@
         "description": "A polyfill for getallheaders."
     },
     {
+        "name": "react/promise",
+        "version": "v2.8.0",
+        "version_normalized": "2.8.0.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/reactphp/promise.git",
+            "reference": "f3cff96a19736714524ca0dd1d4130de73dbbbc4"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/reactphp/promise/zipball/f3cff96a19736714524ca0dd1d4130de73dbbbc4",
+            "reference": "f3cff96a19736714524ca0dd1d4130de73dbbbc4",
+            "shasum": "",
+            "mirrors": [
+                {
+                    "url": "https://mirrors.aliyun.com/composer/dists/%package%/%reference%.%type%",
+                    "preferred": true
+                }
+            ]
+        },
+        "require": {
+            "php": ">=5.4.0"
+        },
+        "require-dev": {
+            "phpunit/phpunit": "^7.0 || ^6.5 || ^5.7 || ^4.8.36"
+        },
+        "time": "2020-05-12T15:16:56+00:00",
+        "type": "library",
+        "installation-source": "dist",
+        "autoload": {
+            "psr-4": {
+                "React\\Promise\\": "src/"
+            },
+            "files": [
+                "src/functions_include.php"
+            ]
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "Jan Sorgalla",
+                "email": "jsorgalla@gmail.com"
+            }
+        ],
+        "description": "A lightweight implementation of CommonJS Promises/A for PHP",
+        "keywords": [
+            "promise",
+            "promises"
+        ]
+    },
+    {
         "name": "sch-group/17track",
         "version": "v1.7",
         "version_normalized": "1.7.0.0",
@@ -2725,12 +3059,6 @@
             "fpdf",
             "fpdi",
             "pdf"
-        ],
-        "funding": [
-            {
-                "url": "https://tidelift.com/funding/github/packagist/setasign/fpdi",
-                "type": "tidelift"
-            }
         ]
     },
     {
@@ -2818,20 +3146,6 @@
         "keywords": [
             "caching",
             "psr6"
-        ],
-        "funding": [
-            {
-                "url": "https://symfony.com/sponsor",
-                "type": "custom"
-            },
-            {
-                "url": "https://github.com/fabpot",
-                "type": "github"
-            },
-            {
-                "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
-                "type": "tidelift"
-            }
         ]
     },
     {
@@ -2902,20 +3216,6 @@
             "interfaces",
             "interoperability",
             "standards"
-        ],
-        "funding": [
-            {
-                "url": "https://symfony.com/sponsor",
-                "type": "custom"
-            },
-            {
-                "url": "https://github.com/fabpot",
-                "type": "github"
-            },
-            {
-                "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
-                "type": "tidelift"
-            }
         ]
     },
     {
@@ -2978,21 +3278,7 @@
             }
         ],
         "description": "Symfony HttpFoundation Component",
-        "homepage": "https://symfony.com",
-        "funding": [
-            {
-                "url": "https://symfony.com/sponsor",
-                "type": "custom"
-            },
-            {
-                "url": "https://github.com/fabpot",
-                "type": "github"
-            },
-            {
-                "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
-                "type": "tidelift"
-            }
-        ]
+        "homepage": "https://symfony.com"
     },
     {
         "name": "symfony/options-resolver",
@@ -3054,20 +3340,6 @@
             "config",
             "configuration",
             "options"
-        ],
-        "funding": [
-            {
-                "url": "https://symfony.com/sponsor",
-                "type": "custom"
-            },
-            {
-                "url": "https://github.com/fabpot",
-                "type": "github"
-            },
-            {
-                "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
-                "type": "tidelift"
-            }
         ]
     },
     {
@@ -3138,20 +3410,6 @@
             "ctype",
             "polyfill",
             "portable"
-        ],
-        "funding": [
-            {
-                "url": "https://symfony.com/sponsor",
-                "type": "custom"
-            },
-            {
-                "url": "https://github.com/fabpot",
-                "type": "github"
-            },
-            {
-                "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
-                "type": "tidelift"
-            }
         ]
     },
     {
@@ -3223,20 +3481,6 @@
             "polyfill",
             "portable",
             "shim"
-        ],
-        "funding": [
-            {
-                "url": "https://symfony.com/sponsor",
-                "type": "custom"
-            },
-            {
-                "url": "https://github.com/fabpot",
-                "type": "github"
-            },
-            {
-                "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
-                "type": "tidelift"
-            }
         ]
     },
     {
@@ -3309,20 +3553,6 @@
             "polyfill",
             "portable",
             "shim"
-        ],
-        "funding": [
-            {
-                "url": "https://symfony.com/sponsor",
-                "type": "custom"
-            },
-            {
-                "url": "https://github.com/fabpot",
-                "type": "github"
-            },
-            {
-                "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
-                "type": "tidelift"
-            }
         ]
     },
     {
@@ -3402,20 +3632,6 @@
             "polyfill",
             "portable",
             "shim"
-        ],
-        "funding": [
-            {
-                "url": "https://symfony.com/sponsor",
-                "type": "custom"
-            },
-            {
-                "url": "https://github.com/fabpot",
-                "type": "github"
-            },
-            {
-                "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
-                "type": "tidelift"
-            }
         ]
     },
     {
@@ -3491,20 +3707,6 @@
             "polyfill",
             "portable",
             "shim"
-        ],
-        "funding": [
-            {
-                "url": "https://symfony.com/sponsor",
-                "type": "custom"
-            },
-            {
-                "url": "https://github.com/fabpot",
-                "type": "github"
-            },
-            {
-                "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
-                "type": "tidelift"
-            }
         ]
     },
     {
@@ -3576,20 +3778,6 @@
             "polyfill",
             "portable",
             "shim"
-        ],
-        "funding": [
-            {
-                "url": "https://symfony.com/sponsor",
-                "type": "custom"
-            },
-            {
-                "url": "https://github.com/fabpot",
-                "type": "github"
-            },
-            {
-                "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
-                "type": "tidelift"
-            }
         ]
     },
     {
@@ -3661,20 +3849,6 @@
             "polyfill",
             "portable",
             "shim"
-        ],
-        "funding": [
-            {
-                "url": "https://symfony.com/sponsor",
-                "type": "custom"
-            },
-            {
-                "url": "https://github.com/fabpot",
-                "type": "github"
-            },
-            {
-                "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
-                "type": "tidelift"
-            }
         ]
     },
     {
@@ -3742,20 +3916,6 @@
             "polyfill",
             "portable",
             "shim"
-        ],
-        "funding": [
-            {
-                "url": "https://symfony.com/sponsor",
-                "type": "custom"
-            },
-            {
-                "url": "https://github.com/fabpot",
-                "type": "github"
-            },
-            {
-                "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
-                "type": "tidelift"
-            }
         ]
     },
     {
@@ -3899,20 +4059,6 @@
             "interfaces",
             "interoperability",
             "standards"
-        ],
-        "funding": [
-            {
-                "url": "https://symfony.com/sponsor",
-                "type": "custom"
-            },
-            {
-                "url": "https://github.com/fabpot",
-                "type": "github"
-            },
-            {
-                "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
-                "type": "tidelift"
-            }
         ]
     },
     {
@@ -3981,20 +4127,6 @@
             "hydrate",
             "instantiate",
             "serialize"
-        ],
-        "funding": [
-            {
-                "url": "https://symfony.com/sponsor",
-                "type": "custom"
-            },
-            {
-                "url": "https://github.com/fabpot",
-                "type": "github"
-            },
-            {
-                "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
-                "type": "tidelift"
-            }
         ]
     },
     {
@@ -4263,28 +4395,6 @@
             "clean",
             "security",
             "xss"
-        ],
-        "funding": [
-            {
-                "url": "https://www.paypal.me/moelleken",
-                "type": "custom"
-            },
-            {
-                "url": "https://github.com/voku",
-                "type": "github"
-            },
-            {
-                "url": "https://opencollective.com/anti-xss",
-                "type": "open_collective"
-            },
-            {
-                "url": "https://www.patreon.com/voku",
-                "type": "patreon"
-            },
-            {
-                "url": "https://tidelift.com/funding/github/packagist/voku/anti-xss",
-                "type": "tidelift"
-            }
         ]
     },
     {
@@ -4349,28 +4459,6 @@
             "methods",
             "utility",
             "utils"
-        ],
-        "funding": [
-            {
-                "url": "https://www.paypal.me/moelleken",
-                "type": "custom"
-            },
-            {
-                "url": "https://github.com/voku",
-                "type": "github"
-            },
-            {
-                "url": "https://opencollective.com/arrayy",
-                "type": "open_collective"
-            },
-            {
-                "url": "https://www.patreon.com/voku",
-                "type": "patreon"
-            },
-            {
-                "url": "https://tidelift.com/funding/github/packagist/voku/arrayy",
-                "type": "tidelift"
-            }
         ]
     },
     {
@@ -4489,28 +4577,6 @@
             "ascii",
             "clean",
             "php"
-        ],
-        "funding": [
-            {
-                "url": "https://www.paypal.me/moelleken",
-                "type": "custom"
-            },
-            {
-                "url": "https://github.com/voku",
-                "type": "github"
-            },
-            {
-                "url": "https://opencollective.com/portable-ascii",
-                "type": "open_collective"
-            },
-            {
-                "url": "https://www.patreon.com/voku",
-                "type": "patreon"
-            },
-            {
-                "url": "https://tidelift.com/funding/github/packagist/voku/portable-ascii",
-                "type": "tidelift"
-            }
         ]
     },
     {
@@ -4592,28 +4658,6 @@
             "unicode",
             "utf-8",
             "utf8"
-        ],
-        "funding": [
-            {
-                "url": "https://www.paypal.me/moelleken",
-                "type": "custom"
-            },
-            {
-                "url": "https://github.com/voku",
-                "type": "github"
-            },
-            {
-                "url": "https://opencollective.com/portable-utf8",
-                "type": "open_collective"
-            },
-            {
-                "url": "https://www.patreon.com/voku",
-                "type": "patreon"
-            },
-            {
-                "url": "https://tidelift.com/funding/github/packagist/voku/portable-utf8",
-                "type": "tidelift"
-            }
         ]
     },
     {
@@ -4746,24 +4790,6 @@
             "utf-8",
             "utility",
             "utils"
-        ],
-        "funding": [
-            {
-                "url": "https://www.paypal.me/moelleken",
-                "type": "custom"
-            },
-            {
-                "url": "https://github.com/voku",
-                "type": "github"
-            },
-            {
-                "url": "https://www.patreon.com/voku",
-                "type": "patreon"
-            },
-            {
-                "url": "https://tidelift.com/funding/github/packagist/voku/stringy",
-                "type": "tidelift"
-            }
         ]
     },
     {
@@ -4840,12 +4866,12 @@
         "version_normalized": "1.9.1.0",
         "source": {
             "type": "git",
-            "url": "https://github.com/webmozart/assert.git",
+            "url": "https://github.com/webmozarts/assert.git",
             "reference": "bafc69caeb4d49c39fd0779086c03a3738cbb389"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/webmozart/assert/zipball/bafc69caeb4d49c39fd0779086c03a3738cbb389",
+            "url": "https://api.github.com/repos/webmozarts/assert/zipball/bafc69caeb4d49c39fd0779086c03a3738cbb389",
             "reference": "bafc69caeb4d49c39fd0779086c03a3738cbb389",
             "shasum": "",
             "mirrors": [
