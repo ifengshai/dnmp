@@ -120,11 +120,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
-                                        if (row.status == 0) {
-                                            return true;
-                                        } else {
-                                            return false;
-                                        }
+                                        return false;
                                     }
                                 }
 
