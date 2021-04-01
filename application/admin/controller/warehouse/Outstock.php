@@ -966,6 +966,9 @@ class Outstock extends Backend
 
     public function import()
     {
+        set_time_limit(0);
+        ini_set('memory_limit', '512M');
+
         $this->model = new \app\admin\model\warehouse\Outstock();
         $_item = new \app\admin\model\warehouse\OutStockItem();
         $_platform = new \app\admin\model\itemmanage\ItemPlatformSku();
@@ -1075,6 +1078,9 @@ class Outstock extends Backend
             $database_data = array_column($selectlist, 'code');
             foreach ($data as $check_k => $check_v) {
                 if (!in_array($check_v[2], $database_data)) {
+//                    $msg['code']=$check_v[2];
+//                    $msg['msg']='条码不存在';
+//                    array_push($result_msg,$msg);
                     $this->error('条码[' . $check_v[2] . ']不存在');
                 }
             }
@@ -1084,26 +1090,21 @@ class Outstock extends Backend
             //数据库中条码信息进行验证与数据拼装   如果验证不通过则记录原因
             foreach ($selectlist as $k => $v) {
                 if ($v['library_status'] == 2) {
-                    $msg['code']=$v['code'];
-                    $msg['msg']='条码已出库';
-                    array_push($result_msg,$msg);
-                } elseif ($v['out_stock_id']) {
-                    $msg['code']=$v['code'];
-                    $msg['msg']='条码已存在出库单,请检查出库单' . $v['out_stock_id'];
-                    array_push($result_msg,$msg);
-                } elseif (!$v['location_id']) {
-                    $msg['code']=$v['code'];
-                    $msg['msg']='条码未绑定库区';
-                    array_push($result_msg,$msg);
-                } elseif (!$v['location_code_id']) {
-                    $msg['code']=$v['code'];
-                    $msg['msg']='条码未绑定库位';
-                    array_push($result_msg,$msg);
-                }else{
-                    $un_key = $v['location_id'] . $v['location_code_id'];
-                    $insert_out_stoce[$un_key][$v['code']] = $v['id'];
-                    $insert_out_stoce[$un_key]['sku'][$v['sku']][$k]=1;
+                    $this->error(__('条码[' . $v['code'] . ']已出库'));
                 }
+                if ($v['out_stock_id']) {
+                    $this->error(__('条码[' . $v['code'] . ']已存在出库单,请检查出库单' . $v['out_stock_id']));
+                }
+                if (!$v['location_id']) {
+                    $this->error(__('条码[' . $v['code'] . ']未绑定库区'));
+                }
+                if (!$v['location_code_id']) {
+                    $this->error(__('条码[' . $v['code'] . ']未绑定库位'));
+                }
+                $un_key = $v['location_id'] . $v['location_code_id'];
+                $insert_out_stoce[$un_key][$v['code']] = $v['id'];
+
+                $insert_out_stoce[$un_key]['sku'][$v['sku']][$k]=1;
 
             }
             $out_plat = $data[0][1];
@@ -1133,6 +1134,18 @@ class Outstock extends Backend
                 //     $label = 1;
                 case 'zeelool_de':
                     $out_label = 10;
+                    break;
+                case 'Zeelool_jp':
+                    $out_label = 11;
+                    break;
+                case 'Voogueme_acc':
+                    $out_label = 12;
+                    break;
+                case 'Zeelool_cn':
+                    $out_label = 13;
+                    break;
+                case 'Alibaba':
+                    $out_label = 14;
                     break;
                 default:
                     $this->error(__('请检查表格中调出仓的名称'));

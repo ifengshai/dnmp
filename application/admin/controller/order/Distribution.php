@@ -1308,7 +1308,7 @@ class Distribution extends Backend
     public function batch_export_xls()
     {
         set_time_limit(0);
-        ini_set('memory_limit', '512M');
+        ini_set('memory_limit', '2048M');
         //根据传的标签切换状态
         $label = $this->request->get('label', 0);
         $ids = input('ids');
