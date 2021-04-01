@@ -861,6 +861,8 @@ class Wangpenglei extends Backend
         $finace_cost = new \app\admin\model\finance\FinanceCost();
         $barcode = new \app\admin\model\warehouse\ProductBarCodeItem();
         $list = $finace_cost->where(['type' => 2, 'frame_cost' => 0, 'bill_type' => 8])->select();
+        $list = collection($list)->toArray();
+        dump($list);
         $params = [];
         foreach ($list as $k => $v) {
             $data = $barcode->alias('a')
@@ -868,6 +870,8 @@ class Wangpenglei extends Backend
                 ->field('a.sku,a.in_stock_id,b.price')
                 ->join(['fa_in_stock_item' => 'b'], 'a.in_stock_id=b.in_stock_id and a.sku=b.sku')
                 ->select();
+            echo $barcode->getLastSql();
+            dump($data);
             foreach ($data as $key => $val) {
                 $params[$key]['order_number'] = $v['order_number'];
                 $params[$key]['sku'] = $val['sku'];
