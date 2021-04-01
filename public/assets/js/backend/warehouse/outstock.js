@@ -204,8 +204,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                     url: 'warehouse/outstock/import',
                     data: {file: data.url},
                 }, function (data, ret) {
-                    console.info(data);
-                    console.info(ret);
                     if ('uploads'== ret.msg){
                         window.open  (ret.url, '_blank');
                     } else {
