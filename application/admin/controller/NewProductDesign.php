@@ -5,9 +5,7 @@ namespace app\admin\controller;
 use app\admin\model\Admin;
 use app\admin\model\AuthGroup;
 use app\admin\model\AuthGroupAccess;
-use app\admin\model\itemmanage\attribute\ItemAttribute;
 use app\admin\model\itemmanage\Item;
-use app\admin\model\itemmanage\ItemCategory;
 use app\common\controller\Backend;
 use Aws\S3\S3Client;
 use think\Db;
@@ -118,6 +116,7 @@ class NewProductDesign extends Backend
     //录尺寸
     public function record_size($ids =null)
     {
+
         if ($this->request->post()){
            $data = $this->request->post();
            //更新设计表
@@ -128,7 +127,10 @@ class NewProductDesign extends Backend
             if ($res){
                 //更新商品属性表
                 $whe['item_id'] = $data['goodsId'];
+
                $save_item =  ItemAttribute::update($data['row'],$whe);
+                new ItemA
+                dump($save_item);die();
                if (!$save_item){
                    $this->error('商品属性更新失败');
                }
