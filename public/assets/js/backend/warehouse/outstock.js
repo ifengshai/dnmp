@@ -1,4 +1,4 @@
-define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-table-jump-to'], function ($, undefined, Backend, Table, Form) {
+define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-table-jump-to','upload'], function ($, undefined, Backend, Table, Form, undefined, undefined, Upload) {
 
     var Controller = {
         index: function () {
@@ -204,10 +204,17 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                     url: 'warehouse/outstock/import',
                     data: {file: data.url},
                 }, function (data, ret) {
-                    layer.msg('导入成功！！', {time: 3000, icon: 6}, function () {
-                        location.reload();
-                    });
-                });
+                    console.info(data);
+                    console.info(ret);
+                    if ('uploads'== ret.msg){
+                        window.open  (ret.url, '_blank');
+                    } else {
+                        layer.msg('导入成功！！', {time: 3000, icon: 6}, function () {
+                            location.reload();
+                        });
+                    }
+                }
+                );
             });
 
             //审核取消
