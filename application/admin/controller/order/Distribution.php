@@ -1814,6 +1814,7 @@ class Distribution extends Backend
             ->join(['fa_order_item_option' => 'c'], 'a.option_id=c.id')
             ->join(['fa_order_process' => 'd'], 'a.order_id=d.order_id')
             ->where($map)
+            ->limit(20000)
             ->select();
 
         $list = collection($list)->toArray();
