@@ -848,4 +848,35 @@ class Wangpenglei extends Backend
             $storehouse->where(['type' => 1, 'area_id' => 3, 'coding' => $v['store_house']])->update(['picking_sort' => $v['sort']]);
         }
     }
+
+    /**
+     *  处理采购成本单价
+     * @Description
+     * @author: wpl
+     * @since: 2021/4/1 17:40
+     */
+    public function getPurchasePrice()
+    {
+        //查询镜架成本为0的财务数据
+        $finace_cost = new \app\admin\model\finance\FinanceCost();
+        $barcode = new \app\admin\model\warehouse\ProductBarCodeItem();
+        $list = $finace_cost->where(['type' => 2, 'frame_cost' => 0, 'bill_type' => 8])->select();
+        $params = [];
+        foreach ($list as $k => $v) {
+            $data = $barcode->alias('a')
+                ->where(['item_order_number' => ['like', $v['order_number'].'%']])
+                ->field('a.sku,a.in_stock_id,b.price')
+                ->join(['fa_in_stock_item' => 'b'], 'a.in_stock_id=b.in_stock_id and a.sku=b.sku')
+                ->select();
+            foreach ($data as $key => $val) {
+                $params[$key]['order_number'] = $v['order_number'];
+                $params[$key]['sku'] = $val['sku'];
+                $params[$key]['price'] = $val['price'];
+            }
+        }
+
+        $headlist = ['订单号', 'sku', '采购成本'];
+        Excel::writeCsv($params, $headlist, '采购成本');
+        die;
+    }
 }
