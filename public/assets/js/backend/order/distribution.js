@@ -11,12 +11,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
         $('select[name="work_type"]').parents('.form-group').hide();
         $('select[name="is_work_order"]').parents('.form-group').hide();
         $('select[name="shelf_number"]').parents('.form-group').hide();
+        $('#check_time').parents('.form-group').hide();
         $('.btn-distribution').addClass('hide');
         if (0 == value) {
             $('select[name="abnormal"]').parents('.form-group').show();
+            $('#check_time').parents('.form-group').show();
             $('.btn-batch-export-xls').removeClass('hide');
             $('.btn-batch-printed').removeClass('hide');
+            $('.btn-tag-printed').removeClass('hide');
         } else if (1 == value) {
+            $('#check_time').hide();
             $('.btn-batch-printed').removeClass('hide');
             $('.btn-tag-printed').removeClass('hide');
             $('.btn-batch-export-xlsz').removeClass('hide');
@@ -98,6 +102,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             field: 'item_order_number',
                             title: __('子单号'),
                             operate: 'LIKE'
+                        },
+                        {
+                            field: 'wave_order_id',
+                            title: __('波次单id')
                         },
                         {
                             field: 'sku',
@@ -340,6 +348,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                         {
                             field: 'a.created_at',
                             title: __('创建时间'),
+                            operate: 'RANGE',
+                            addclass: 'datetimerange',
+                            visible: false
+                        },
+                        {
+                            field: 'check_time',
+                            title: __('审单时间'),
                             operate: 'RANGE',
                             addclass: 'datetimerange',
                             visible: false
@@ -728,12 +743,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                 2: '已打印'
                             },
                             formatter: Table.api.formatter.status
-                        },
-                        {
-                            field: 'order_date',
-                            title: __('波次单日期'),
-                            operate: 'RANGE',
-                            addclass: 'datetimerange'
                         },
                         {
                             field: 'createtime',

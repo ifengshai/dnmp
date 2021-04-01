@@ -41,7 +41,6 @@ use FacebookAds\Object\Values\AdSetDestinationTypeValues;
 use FacebookAds\Object\Values\AdSetEffectiveStatusValues;
 use FacebookAds\Object\Values\AdSetExecutionOptionsValues;
 use FacebookAds\Object\Values\AdSetFullFunnelExplorationModeValues;
-use FacebookAds\Object\Values\AdSetMultiOptimizationGoalWeightValues;
 use FacebookAds\Object\Values\AdSetOperatorValues;
 use FacebookAds\Object\Values\AdSetOptimizationGoalValues;
 use FacebookAds\Object\Values\AdSetOptimizationSubEventValues;
@@ -101,7 +100,6 @@ class AdSet extends AbstractArchivableCrudObject
     $ref_enums['DestinationType'] = AdSetDestinationTypeValues::getInstance()->getValues();
     $ref_enums['ExecutionOptions'] = AdSetExecutionOptionsValues::getInstance()->getValues();
     $ref_enums['FullFunnelExplorationMode'] = AdSetFullFunnelExplorationModeValues::getInstance()->getValues();
-    $ref_enums['MultiOptimizationGoalWeight'] = AdSetMultiOptimizationGoalWeightValues::getInstance()->getValues();
     $ref_enums['OptimizationSubEvent'] = AdSetOptimizationSubEventValues::getInstance()->getValues();
     $ref_enums['TuneForCategory'] = AdSetTuneForCategoryValues::getInstance()->getValues();
     $ref_enums['Operator'] = AdSetOperatorValues::getInstance()->getValues();
@@ -267,8 +265,11 @@ class AdSet extends AbstractArchivableCrudObject
     $this->assureId();
 
     $param_types = array(
+      'ad_draft_id' => 'string',
       'date_preset' => 'date_preset_enum',
       'effective_status' => 'list<string>',
+      'include_deleted' => 'bool',
+      'include_drafts' => 'bool',
       'time_range' => 'Object',
       'updated_since' => 'int',
     );
@@ -602,7 +603,6 @@ class AdSet extends AbstractArchivableCrudObject
         'last_week_sun_sat',
         'last_year',
         'lifetime',
-        'maximum',
         'this_month',
         'this_quarter',
         'this_week_mon_today',
@@ -656,7 +656,6 @@ class AdSet extends AbstractArchivableCrudObject
       'lifetime_imps' => 'unsigned int',
       'lifetime_min_spend_target' => 'unsigned int',
       'lifetime_spend_cap' => 'unsigned int',
-      'multi_optimization_goal_weight' => 'multi_optimization_goal_weight_enum',
       'name' => 'string',
       'optimization_goal' => 'optimization_goal_enum',
       'optimization_sub_event' => 'optimization_sub_event_enum',
@@ -680,7 +679,6 @@ class AdSet extends AbstractArchivableCrudObject
       'destination_type_enum' => AdSetDestinationTypeValues::getInstance()->getValues(),
       'execution_options_enum' => AdSetExecutionOptionsValues::getInstance()->getValues(),
       'full_funnel_exploration_mode_enum' => AdSetFullFunnelExplorationModeValues::getInstance()->getValues(),
-      'multi_optimization_goal_weight_enum' => AdSetMultiOptimizationGoalWeightValues::getInstance()->getValues(),
       'optimization_goal_enum' => AdSetOptimizationGoalValues::getInstance()->getValues(),
       'optimization_sub_event_enum' => AdSetOptimizationSubEventValues::getInstance()->getValues(),
       'status_enum' => AdSetStatusValues::getInstance()->getValues(),

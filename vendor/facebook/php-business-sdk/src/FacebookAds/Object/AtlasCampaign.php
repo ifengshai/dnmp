@@ -110,13 +110,10 @@ class AtlasCampaign extends AbstractCrudObject {
       'dimensions' => 'list<dimensions_enum>',
       'granularity' => 'granularity_enum',
       'metric_scope' => 'map',
-      'order_by' => 'list<map>',
+      'order_by' => 'list',
     );
     $enums = array(
       'dimensions_enum' => array(
-        'AD_ID',
-        'AD_SET_ID',
-        'CAMPAIGN_ID',
         'DEVICE_TYPE',
         'SOURCE_CHANNEL',
       ),
@@ -124,7 +121,7 @@ class AtlasCampaign extends AbstractCrudObject {
         'DAY',
         'HOUR',
         'MONTH',
-        'WEEK_SUNDAY',
+        'WEEK',
         'YEAR',
       ),
     );

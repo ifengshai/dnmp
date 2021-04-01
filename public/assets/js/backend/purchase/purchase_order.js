@@ -237,8 +237,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
-                                        // && row.id > 16475
-                                        if (row.can_create_pay == 1 && row.purchase_status == 2  && row.pay_type !=3 ) {
+                                        if (row.can_create_pay == 1 && row.purchase_status == 2  && row.pay_type !=3 && row.id > 16475) {
                                             return true;
                                         } else {
                                             return false;
@@ -469,6 +468,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 }else{
                     $('#pay_rate').hide();
                 }
+            });
+            $(document).on('click','.tijiao',function (){
+               $('#is_new_product').attr("disabled",false);
+            });
+            $(document).on('click','.tijaio1',function (){
+               $('#is_new_product').attr("disabled",false);
             })
 
             $(document).on('click', '.btn-addplus', function () {

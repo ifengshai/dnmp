@@ -23,20 +23,20 @@ class Wangpenglei extends Backend
         $this->app_id = $this->facebook->app_id;
         $this->app_secret = $this->facebook->app_secret;
         $this->access_token = $this->facebook->access_token;
-        $this->accounts   = $this->facebook->accounts;
+        $this->accounts = $this->facebook->accounts;
     }
 
     /************************跑库存数据用START*****勿删*****************************/
     //导入实时库存 第一步
     public function set_product_relstock()
     {
-
+        $this->item = new \app\admin\model\itemmanage\Item;
         $list = Db::table('fa_zz_temp2')->select();
         foreach ($list as $k => $v) {
             $p_map['sku'] = $v['sku'];
             $data['real_time_qty'] = $v['stock'];
             $res = $this->item->where($p_map)->update($data);
-            echo $v['sku'] . "\n";
+            echo $v['sku']."\n";
         }
         echo 'ok';
         die;
@@ -80,7 +80,7 @@ class Wangpenglei extends Backend
                 $zeelool_es_sku,
                 $zeelool_de_sku,
                 $zeelool_jp_sku,
-                $voogueme_acc_sku
+                $voogueme_acc_sku,
             ];
 
             $map['a.sku'] = ['in', array_filter($skus)];
@@ -96,7 +96,7 @@ class Wangpenglei extends Backend
             $p_map['sku'] = $v;
             $data['distribution_occupy_stock'] = $distribution_occupy_stock;
             $this->item->where($p_map)->update($data);
-            echo $v . "\n";
+            echo $v."\n";
             usleep(20000);
         }
         echo 'ok';
@@ -140,7 +140,7 @@ class Wangpenglei extends Backend
                 $zeelool_es_sku,
                 $zeelool_de_sku,
                 $zeelool_jp_sku,
-                $voogueme_acc_sku
+                $voogueme_acc_sku,
             ];
 
             $map['a.sku'] = ['in', array_filter($skus)];
@@ -156,7 +156,7 @@ class Wangpenglei extends Backend
             $p_map['sku'] = $v;
             $data['occupy_stock'] = $occupy_stock;
             $this->item->where($p_map)->update($data);
-            echo $v . "\n";
+            echo $v."\n";
             usleep(20000);
         }
         echo 'ok';
@@ -184,7 +184,7 @@ class Wangpenglei extends Backend
             $p_map['sku'] = $v['sku'];
             $res = $this->item->where($p_map)->update($data);
 
-            echo $k . "\n";
+            echo $k."\n";
             usleep(20000);
         }
         echo 'ok';
@@ -203,8 +203,8 @@ class Wangpenglei extends Backend
     {
         $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
         $item = new \app\admin\model\itemmanage\Item();
-        $skus1 = $platform->where(['stock' => ['<', 0]])->column('sku');
-        $skus = Db::table('fa_zz_temp2')->where(['sku' => ['in', $skus1]])->column('sku');
+//        $skus1 = $platform->where(['stock' => ['<', 0]])->column('sku');
+        $skus = Db::table('fa_zz_temp2')->column('sku');
         // dump($skus);die;
         foreach ($skus as $k => $v) {
             // $v = 'OA01901-06';
@@ -261,9 +261,9 @@ class Wangpenglei extends Backend
                         if (($all_num - $key) == 1) {
                             $platform->where(['sku' => $v, 'platform_type' => $val['platform_type']])->update(['stock' => $stock_num]);
                         } else {
-                            if ($num_num  == 0) {
+                            if ($num_num == 0) {
                                 $rate_rate = 1 / $all_num;
-                                $num_num =  round($available_stock * $rate_rate);
+                                $num_num = round($available_stock * $rate_rate);
                             } else {
 
                                 $num = round($available_stock * abs($val['stock']) / $num_num);
@@ -276,13 +276,12 @@ class Wangpenglei extends Backend
                 }
             }
             usleep(10000);
-            echo $k . "\n";
+            echo $k."\n";
         }
         echo "ok";
     }
 
     /************************跑库存数据用END**********************************/
-
 
 
     /**
@@ -301,9 +300,9 @@ class Wangpenglei extends Backend
         $accounts = explode(",", $this->accounts);
         foreach ($accounts as $key => $value) {
             $campaign = new Campaign($value);
-            $params = array(
-                'time_range' => array('since' => $start_time, 'until' => $end_time),
-            );
+            $params = [
+                'time_range' => ['since' => $start_time, 'until' => $end_time],
+            ];
             $cursor = $campaign->getInsights([], $params);
             foreach ($cursor->getObjects() as $key => $value) {
                 if ($value) {
@@ -311,6 +310,7 @@ class Wangpenglei extends Backend
                 }
             }
         }
+
         return $all_facebook_spend ? round($all_facebook_spend, 2) : 0;
     }
 
@@ -362,7 +362,7 @@ class Wangpenglei extends Backend
                     $params[$k]['sales_num'] = $order->getSkuSalesNumTest($v['platform_sku'], $map, $v['site']);
                     $params[$k]['id'] = $v['id'];
                 }
-                echo $v['id'] . "\n";
+                echo $v['id']."\n";
                 usleep(100000);
             }
             if ($params) {
@@ -391,7 +391,7 @@ class Wangpenglei extends Backend
             $create_time = $this->ordernodedetail->where(['order_number' => $v['order_number'], 'site' => $v['site'], 'order_node' => 2, 'node_type' => 7])->order('id asc')->value('create_time');
             $params[$k]['delivery_time'] = $create_time;
             $params[$k]['id'] = $v['id'];
-            echo $k . "\n";
+            echo $k."\n";
         }
         $this->ordernode->saveAll($params);
         echo "ok";
@@ -428,7 +428,7 @@ class Wangpenglei extends Backend
                     $params[$k]['id'] = $v['id'];
                 }
 
-                echo $k . "\n";
+                echo $k."\n";
                 usleep(50000);
             }
             if ($params) {
@@ -458,7 +458,7 @@ class Wangpenglei extends Backend
             $check_time = $instock->where(['id' => $v['in_stock_id']])->value('check_time');
             $product_barcode->where(['id' => $v['id']])->update(['in_stock_time' => $check_time]);
 
-            echo $k . "\n";
+            echo $k."\n";
             usleep(50000);
         }
     }
@@ -481,7 +481,7 @@ class Wangpenglei extends Backend
         $params = [];
         foreach ($list as $k => $v) {
             //查询子表商品总价
-            $product_price =  $purchase_item->where(['purchase_id' => $v['id']])->sum('purchase_price*purchase_num');
+            $product_price = $purchase_item->where(['purchase_id' => $v['id']])->sum('purchase_price*purchase_num');
             $params[$k]['id'] = $v['id'];
             $params[$k]['product_total'] = $product_price;
             $params[$k]['purchase_total'] = $product_price + $v['purchase_freight'];
@@ -508,7 +508,7 @@ class Wangpenglei extends Backend
             if ($content) {
                 $ordernode->where(['id' => $v['id']])->update(['shipment_last_msg' => $content]);
             }
-            echo $k . "\n";
+            echo $k."\n";
             usleep(100000);
         }
         echo 'ok';
@@ -539,7 +539,7 @@ class Wangpenglei extends Backend
             }
             $skus = [];
             $skus = [
-                $sku
+                $sku,
             ];
 
             $map['a.sku'] = ['in', array_filter($skus)];
@@ -600,7 +600,7 @@ class Wangpenglei extends Backend
             // } elseif ($v['site'] == 11) {
             //     $sku = $this->itemplatformsku->getWebSku($v['sku'], 11);
             // }
-            $skus =  $this->itemplatformsku->where(['sku' => $v])->column('platform_sku');
+            $skus = $this->itemplatformsku->where(['sku' => $v])->column('platform_sku');
             // $skus = [
             //     $sku
             // ];
@@ -634,7 +634,7 @@ class Wangpenglei extends Backend
             $params[$k]['all_sales_num'] = $all_sales_num;
             // $list[$k]['sales_money'] = $sales_money;
         }
-        $headlist = ['sku',  '近3个月销量', '历史累计销量'];
+        $headlist = ['sku', '近3个月销量', '历史累计销量'];
         Excel::writeCsv($params, $headlist, 'sku销量');
         die;
     }
@@ -674,12 +674,12 @@ class Wangpenglei extends Backend
             $count = $orderItem->where(['distribution_status' => ['in', [0, 8, 9]], 'order_id' => $v['order_id']])->count();
 
             //查询工单是否处理完成
-            $workcount = $worklist->where(['order_item_numbers' => ['like', '%' . $v['item_order_number'] . '%'], 'work_status' => ['in', [1, 2, 3, 5]]])->count();
+            $workcount = $worklist->where(['order_item_numbers' => ['like', '%'.$v['item_order_number'].'%'], 'work_status' => ['in', [1, 2, 3, 5]]])->count();
             if ($allcount == $count && $workcount < 1) {
                 $orderItem->where(['order_id' => $v['order_id'], 'distribution_status' => 8])->update(['distribution_status' => 9]);
                 $orderProcess->where(['order_id' => $v['order_id']])->update(['combine_status' => 1, 'combine_time' => time()]);
 
-                echo $v['id'] . "\n";
+                echo $v['id']."\n";
             }
 
             usleep(100000);
@@ -712,11 +712,10 @@ class Wangpenglei extends Backend
                 $type = 1;
             }
             $process->where('order_id', $value)->update(['order_prescription_type' => $type]);
-            echo $value . ' is ok' . "\n";
+            echo $value.' is ok'."\n";
             usleep(100000);
         }
     }
-
 
 
     /**
@@ -771,7 +770,7 @@ class Wangpenglei extends Backend
             $total = $barcode->alias('i')->join('fa_purchase_order_item oi', 'i.purchase_id=oi.purchase_id and i.sku=oi.sku')->join('fa_purchase_order o', 'o.id=i.purchase_id')->where($where)->where('in_stock_time is not null')->value('SUM(IF(actual_purchase_price,actual_purchase_price,o.purchase_total/purchase_num)) price');
             $list[$k]['price'] = $total;
         }
-        $headlist = ['sku',  '库龄', '库存', '库存金额'];
+        $headlist = ['sku', '库龄', '库存', '库存金额'];
         Excel::writeCsv($list, $headlist, 'sku库龄数据');
         die;
     }
@@ -832,8 +831,21 @@ class Wangpenglei extends Backend
             $params[$k]['os_bd_r'] = $v['os_bd_r'];
         }
 
-        $headlist = ['订单号', '子单号',  'sku', '加工类型', '处方类型', '镜片名称', '镀膜名称', '右眼SPH', '左眼SPH', '右眼CYL', '左眼CYL', '右眼AXIS', '左眼AXIS', '左眼PD', '右眼PD', 'PD', '右眼ADD', '左眼ADD', '右眼Prism(out/in)', '左眼Prism(out/in)', '右眼Direction(out/in)', '左眼Direction(out/in)', '右眼Prism(up/down)', '左眼Prism(up/down)', '右眼Direction(up/down)', '左眼Direction(up/down)'];
+        $headlist = ['订单号', '子单号', 'sku', '加工类型', '处方类型', '镜片名称', '镀膜名称', '右眼SPH', '左眼SPH', '右眼CYL', '左眼CYL', '右眼AXIS', '左眼AXIS', '左眼PD', '右眼PD', 'PD', '右眼ADD', '左眼ADD', '右眼Prism(out/in)', '左眼Prism(out/in)', '右眼Direction(out/in)', '左眼Direction(out/in)', '右眼Prism(up/down)', '左眼Prism(up/down)', '右眼Direction(up/down)', '左眼Direction(up/down)'];
         Excel::writeCsv($params, $headlist, '3月份订单数据');
         die;
+    }
+
+
+    /**
+     * 处理库位顺序
+     */
+    public function process_store_sort()
+    {
+        $list = db('zz_temp2')->select();
+        $storehouse = new \app\admin\model\warehouse\StockHouse();
+        foreach ($list as $k => $v) {
+            $storehouse->where(['type' => 1, 'area_id' => 3, 'coding' => $v['store_house']])->update(['picking_sort' => $v['sort']]);
+        }
     }
 }

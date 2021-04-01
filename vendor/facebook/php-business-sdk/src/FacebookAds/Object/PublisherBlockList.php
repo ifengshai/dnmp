@@ -61,11 +61,11 @@ class PublisherBlockList extends AbstractCrudObject {
   }
 
 
-  public function createAppendPublisherUrl(array $fields = array(), array $params = array(), $pending = false) {
+  public function getPagedAppPublishers(array $fields = array(), array $params = array(), $pending = false) {
     $this->assureId();
 
     $param_types = array(
-      'publisher_urls' => 'list<string>',
+      'draft_id' => 'string',
     );
     $enums = array(
     );
@@ -73,8 +73,8 @@ class PublisherBlockList extends AbstractCrudObject {
     $request = new ApiRequest(
       $this->api,
       $this->data['id'],
-      RequestInterface::METHOD_POST,
-      '/append_publisher_urls',
+      RequestInterface::METHOD_GET,
+      '/paged_app_publishers',
       new AbstractCrudObject(),
       'EDGE',
       array(),

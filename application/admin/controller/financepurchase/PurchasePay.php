@@ -56,16 +56,19 @@ class PurchasePay extends Backend
                 unset($filter['supplier_name']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
-
+            $userid = session('admin.id');
             if ($filter['label'] == 1) {
                 //查询我的待审核列表
-                $userid = session('admin.id');
                 //查询审批记录表我的待审核
                 $finance_purchase_id = Db::name('finance_purchase_workflow_records')->where(['assignee_id' => $userid, 'audit_status' => 0])->column('finance_purchase_id');
                 $map['id'] = ['in', $finance_purchase_id];
             } else {
-                //创建人
-                $map['create_person'] = session('admin.nickname');
+                //审核人可以看所有的 其他人只能看自己创建的
+                $audit = ['1','50','56','154'];
+                if (!in_array($userid,$audit)){
+                    //创建人
+                    $map['create_person'] = session('admin.nickname');
+                }
             }
 
             if ($filter['check_user_id']) {
@@ -855,7 +858,7 @@ class PurchasePay extends Backend
                             $this->workflowrecords->where(['finance_purchase_id' => $v['id'], 'assignee_id' => session('admin.id'), 'audit_status' => 0])->update(['handle_date' => time(), 'remarks' => $remarks, 'audit_status' => 1]);
 
                             //审核完成添加钉钉通知 蔡鸣慧
-                            Ding::cc_ding(381, '', '【测试站-待付款列表】你有一个新的付款申请单需要处理', '请及时登录魔晶系统，进入"财务管理-待付款列表"功能处理');
+                            Ding::cc_ding(381, '', '【待付款列表】你有一个新的付款申请单需要处理', '请及时登录魔晶系统，进入"财务管理-待付款列表"功能处理');
                         } else {
                             //插入审核记录表
                             $this->workflowrecords->where(['finance_purchase_id' => $v['id'], 'assignee_id' => session('admin.id'), 'audit_status' => 0])->update(['handle_date' => time(), 'remarks' => $remarks, 'audit_status' => 1]);
@@ -866,7 +869,7 @@ class PurchasePay extends Backend
                             $post_id = $this->workflow->where(['finance_purchase_id' => $v['id'], 'flow_sort' => $flow_sort + 1])->value('post_id');
                             $this->workflowrecords->insert(['finance_purchase_id' => $v['id'], 'assignee_id' => $post_id, 'createtime' => time()]);
 
-                            Ding::cc_ding($post_id, '', '【测试站】魔晶系统有一个新的付款申请单需要你审核', '有一个新的付款申请单需要你审核,申请单id为' . $v['id']);
+                            Ding::cc_ding($post_id, '', '魔晶系统有一个新的付款申请单需要你审核', '有一个新的付款申请单需要你审核,申请单id为' . $v['id']);
                         }
                     } else {
                         //更新主表状态

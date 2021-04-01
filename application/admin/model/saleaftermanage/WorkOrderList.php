@@ -708,6 +708,7 @@ class WorkOrderList extends Model
             'city'=>$changeAddress['city'],
             'street'=>$changeAddress['street'],
             'postcode'=>$changeAddress['postcode'],
+            'taxno'=>$changeAddress['taxno'],
         );
         $this->httpRequest($work->work_platform, 'magic/order/editAddress', $postData, 'POST');
 
@@ -1360,6 +1361,7 @@ class WorkOrderList extends Model
                     'region_id' => $address['region_id'],
                     'street' => $address['street'],
                     'pay_method' => $address['pay_method'],
+                    'taxno' => $address['taxno'],
                 ];
                 $pdCheck = $pd = $prismCheck = '';
                 $pd_r = $pd_l = '';
@@ -1427,6 +1429,7 @@ class WorkOrderList extends Model
                 try {
                     $res = $this->httpRequest($siteType, 'magic/order/createOrder', $postData, 'POST');
                     $increment_id = $res['increment_id'];
+
                     //添加补发的订单号
                     WorkOrderChangeSku::where(['work_id' => $work_id, 'change_type' => 5])->setField('replacement_order', $increment_id);
                     self::where(['id' => $work_id])->setField('replacement_order', $increment_id);
@@ -2025,8 +2028,8 @@ class WorkOrderList extends Model
                 }
                 //子单取消处理完成后要判断订单中剩余子订单是否都是合单中状态
                 if (18 == $measure_choose_id) {
-                    $item_order_number = $_work_order_measure->where('id',$measure_id)->value('item_order_number');
-                    $this->other_item_order_auto($work->platform_order,$item_order_number,$work_id);
+                    $item_order_number = $_work_order_measure->where('id', $measure_id)->value('item_order_number');
+                    $this->other_item_order_auto($work->platform_order, $item_order_number, $work_id);
                 }
             }
             
@@ -2648,7 +2651,7 @@ class WorkOrderList extends Model
                 $fictitious_time = time();
                 $store_house_info = $_stock_house->field('id,coding,subarea')->where(['status' => 1, 'type' => 2, 'occupy' => 0, 'fictitious_occupy_time' => ['<', $fictitious_time]])->find();
                 //绑定预占用库存和有效时间
-                $_stock_house->where(['id' => $store_house_info['id']])->update(['fictitious_occupy_time' => $fictitious_time + 600, 'order_id' => $order_id,'occupy'=>1]);
+                $_stock_house->where(['id' => $store_house_info['id']])->update(['fictitious_occupy_time' => $fictitious_time + 600, 'order_id' => $order_id, 'occupy' => 1]);
                 //绑定合单库位
                 $_new_order_process->where(['increment_id' => $increment_id])->update(['store_house_id' => $store_house_info['id']]);
             }
@@ -2656,7 +2659,8 @@ class WorkOrderList extends Model
     }
 
 
-    public function other_item_order_auto($increment_id,$item_order_number,$work_id){
+    public function other_item_order_auto($increment_id, $item_order_number, $work_id)
+    {
         $_new_order_process = new NewOrderProcess();
         $_new_order_item_process = new NewOrderItemProcess();
         $_stock_house = new StockHouse();
@@ -2664,27 +2668,27 @@ class WorkOrderList extends Model
         $_work_order_measure = new WorkOrderMeasure();
         //除当前子单外的子单取消是否完成
         $map = [];
-        $measure_item_order_number = $_work_order_measure->where(['work_id'=>$work_id,'measure_choose_id'=>18])->column('item_order_number');
-        $count = $_work_order_measure->where(['work_id'=>$work_id,'measure_choose_id'=>18])->count('item_order_number');
-        $count_s = $_work_order_measure->where(['work_id'=>$work_id,'operation_type'=>1,'measure_choose_id'=>18])->count('item_order_number');
-        if ($count == $count_s+1) {//最后一个子单取消完成
+        $measure_item_order_number = $_work_order_measure->where(['work_id' => $work_id, 'measure_choose_id' => 18])->column('item_order_number');
+        $count = $_work_order_measure->where(['work_id' => $work_id, 'measure_choose_id' => 18])->count('item_order_number');
+        $count_s = $_work_order_measure->where(['work_id' => $work_id, 'operation_type' => 1, 'measure_choose_id' => 18])->count('item_order_number');
+        if ($count == $count_s + 1) {//最后一个子单取消完成
             $map['b.item_order_number'] = ['not in', $measure_item_order_number];
         }
         $all_item_order_number = $_new_order_process->alias('a')//所有子单
-            ->where('a.increment_id', $increment_id)
+        ->where('a.increment_id', $increment_id)
             ->where(['b.distribution_status' => ['neq', 0]])
             ->where($map)
             ->join(['fa_order_item_process' => 'b'], 'a.order_id=b.order_id')
             ->column('b.item_order_number');
-        $item_order_number_diff = array_diff($all_item_order_number,[$item_order_number]);//其余子单
+        $item_order_number_diff = array_diff($all_item_order_number, [$item_order_number]);//其余子单
         //查询是否其他子单为合单中
         $flag = 1;
         foreach ($item_order_number_diff as $key => $value) {
-           $distribution_status = $_new_order_item_process->where(['item_order_number' => $value])->value('distribution_status');
-           $order_prescription_type = $_new_order_item_process->where(['item_order_number' => $value])->value('order_prescription_type');
-           if ($distribution_status != 8) {
+            $distribution_status = $_new_order_item_process->where(['item_order_number' => $value])->value('distribution_status');
+            $order_prescription_type = $_new_order_item_process->where(['item_order_number' => $value])->value('order_prescription_type');
+            if ($distribution_status != 8) {
                 $flag = 0;
-           }
+            }
         }
         if ($flag) {
             $order_id = $_new_order_process->where(['increment_id' => $increment_id])->value('order_id');//order_id

@@ -39,7 +39,6 @@ class ContentDeliveryReportPlatformValues extends AbstractEnum {
 
   const AUDIENCE_NETWORK = 'AUDIENCE_NETWORK';
   const FACEBOOK = 'FACEBOOK';
-  const HIDDEN_AAA = 'HIDDEN_AAA';
   const INSTAGRAM = 'INSTAGRAM';
   const MESSENGER = 'MESSENGER';
   const UNKNOWN = 'UNKNOWN';

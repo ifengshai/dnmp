@@ -93,7 +93,7 @@
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">是否为新品采购单:</label>
         <div class="col-xs-12 col-sm-3">
-            <select name="row[is_new_product]" class="form-control" {if condition="!empty($new_old)"}disabled="disabled"{/if}>
+            <select name="row[is_new_product]" class="form-control" id="is_new_product" {if condition="!empty($new_old)"}disabled="disabled"{/if}>
                 <option value="">请选择</option>
                 <option value="1" {:$new_old==1 ?'selected' : '' }>是</option>
                 <option value="0" {:$new_old==2 ?'selected' : '' }>否</option>
@@ -151,6 +151,7 @@
         <input id="c-1688_number" class="form-control" name="row[1688_number]" value="" type="text">
     </div>
     </div>
+
 
 
     <div class="form-group">
@@ -421,8 +422,8 @@
     <div class="form-group layer-footer">
         <label class="control-label col-xs-12 col-sm-2"></label>
         <div class="col-xs-12 col-sm-8">
-            <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
-            <button type="submit" class="btn btn-success btn-status btn-embossed disabled">提交审核</button>
+            <button type="submit" class="btn btn-success btn-embossed disabled tijaio1">{:__('OK')}</button>
+            <button type="submit" class="btn btn-success btn-status btn-embossed disabled tijiao">提交审核</button>
             <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
         </div>
     </div>

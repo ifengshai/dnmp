@@ -33,7 +33,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         { field: 'work_type_str', title: __('Work_type'), operate: false },
                         { field: 'work_type', title: __('Work_type'), searchList: { 1: '客服工单', 2: '仓库工单' }, visible: false, formatter: Table.api.formatter.status },
                         { field: 'platform_order', title: __('Platform_order') },
-
                         { field: 'order_status', title: __('订单状态') , operate: false },
                         {
                             field: 'order_item_numbers',
@@ -82,7 +81,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             field: 'problem_type_content',
                             title: __('Problem_type_content'),
                             align: 'left',
-                            searchList: $.getJSON('saleaftermanage/work_order_list/ ')
+                            searchList: $.getJSON('saleaftermanage/work_order_list/getProblemTypeContent')
                         },
                         {
                             field: 'measure_choose_id',
@@ -2718,6 +2717,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     if (!id) {
                         return false;
                     }
+                    if (id == 'BR') {
+                        $('#c-taxno').attr('disabled',false);
+                    }else{
+                        $('#c-taxno').attr('disabled',true);
+                    }
                     $.ajax({
                         type: "POST",
                         url: "saleaftermanage/work_order_list/ajaxGetProvince",
@@ -2743,6 +2747,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     var id = $(this).val();
                     if (!id) {
                         return false;
+                    }
+                    if (id == 'BR') {
+                        $('#c-taxno1').attr('disabled',false);
+                    }else{
+                        $('#c-taxno1').attr('disabled',true);
                     }
                     $.ajax({
                         type: "POST",

@@ -37,17 +37,7 @@ class Item extends Backend
      * 无需鉴权的方法,但需要登录
      * @var array
      */
-    //protected $noNeedLogin = ['pullMagentoProductInfo', 'analyticMagentoField', 'analyticUpdate', 'ceshi', 'optimizeSku', 'pullMagentoProductInfoTwo', 'changeSkuToPlatformSku', 'findSku', 'skuMap', 'ajaxGoodsInfo'];
-
-    /**
-     * 无需鉴权的方法,但需要登录
-     * @var array
-     */
-    // protected $noNeedRight = ['ajaxGoodsInfo'];
-
-    protected $noNeedRight = ['ajaxGetItemCategoryList', 'ajaxItemInfo', 'ajaxCategoryInfo', 'ajaxGetProOrigin', 'ajaxGetLikeOriginSku', 'ajaxGetInfoName'];
-
-
+    protected $noNeedRight = ['ajaxGetItemCategoryList', 'ajaxItemInfo', 'ajaxCategoryInfo', 'ajaxGetProOrigin', 'ajaxGetLikeOriginSku', 'ajaxGetInfoName', 'export_csv'];
 
     public function _initialize()
     {

@@ -208,9 +208,10 @@ class DataMarket extends Backend
     public function stock_measure_overview()
     {
         $start = date('Y-m-01 00:00:00', strtotime('-12 months'));
-        $end = date('Y-m-d 23:59:59');
-        $time_str = $start . ' - ' . $end;
-        $cache_data = Cache::get('Supplydatacenter_datamarket' . $time_str . md5(serialize('stock_measure_overview')));
+        $start = '2020-12-28 00:00:00';
+        $end = date('Y-m-d 23:59:59', strtotime("last day of -1 month"));
+        $time_str = $start.' - '.$end;
+        $cache_data = Cache::get('Supplydatacenter_datamarket'.$time_str.md5(serialize('stock_measure_overview')));
         if ($cache_data) {
             return $cache_data;
         }
@@ -246,7 +247,7 @@ class DataMarket extends Backend
          * 库存周转天数：所选时间段的天数/库存周转率
          * */
         //库存周转天数
-        $days = round(($end - $start) / 3600 / 24)+1;
+        $days = round(($end - $start) / 3600 / 24);
         $arr['turnover_days_rate'] = $arr['turnover_rate'] ? round($days / $arr['turnover_rate']) : 0;
         Cache::set('Supplydatacenter_datamarket' . $time_str . md5(serialize('stock_measure_overview')), $arr, 7200);
         return $arr;
@@ -260,8 +261,8 @@ class DataMarket extends Backend
             $order_platform = $params['order_platform'] ? $params['order_platform'] : 1;
             $start = date('Y-m-01');
             $end = date('Y-m-d 23:59:59');
-            $time_str = $start . ' - ' . $end;
-            $cache_data = Cache::get('Supplydatacenter_datamarket' . $order_platform . $time_str . md5(serialize('stock_measure_overview_platform')));
+            $time_str = $start.' - '.$end;
+            $cache_data = Cache::get('Supplydatacenter_datamarket'.$order_platform.$time_str.md5(serialize('stock_measure_overview_platform')));
             if (!$cache_data) {
                 /*
              * 虚拟仓库存周转率：时间段内所选站点虚拟仓库存消耗数量/[（该站点虚拟仓期初实时库存+该站点虚拟仓期末实时库存）/2]；
@@ -297,7 +298,7 @@ class DataMarket extends Backend
                  * 虚拟仓库存周转天数：所选时间段的天数/库存周转率
                  * */
                 //库存周转天数
-                $days = round(($end - $start) / 3600 / 24)+1;
+                $days = round(($end - $start) / 3600 / 24) + 1;
                 $arr['virtual_turnover_days_rate'] = $arr['virtual_turnover_rate'] ? round($days / $arr['virtual_turnover_rate']) : 0;
                 /*
                  * 虚拟仓月度进销比：（所选时间包含的月份整月）所选站点月度虚拟仓入库数量/站点虚拟仓月度销售数量（订单、出库）
@@ -324,7 +325,7 @@ class DataMarket extends Backend
                 $month_sales_num = $month_sales_num1 + $month_sales_num2;
                 //虚拟仓月度进销比
                 $arr['virtual_month_in_out_rate'] = $month_sales_num ? round($instock_num / $month_sales_num, 2) : 0;
-                Cache::set('Supplydatacenter_datamarket' . $order_platform . $time_str . md5(serialize('stock_measure_overview_platform')), $arr, 7200);
+                Cache::set('Supplydatacenter_datamarket'.$order_platform.$time_str.md5(serialize('stock_measure_overview_platform')), $arr, 7200);
             } else {
                 $arr = $cache_data;
             }
@@ -348,19 +349,20 @@ class DataMarket extends Backend
             $json['column'] = ['虚拟仓库存、库存周转天数'];
             $json['columnData'] = [
                 [
-                    'type' => 'bar',
-                    'barWidth' => '30%',
-                    'data' => array_column($data, 'virtual_stock'),
-                    'name' => '虚拟仓库存'
+                    'type'     => 'bar',
+                    'barWidth' => '15%',
+                    'data'     => array_column($data, 'virtual_stock'),
+                    'name'     => '虚拟仓库存',
                 ],
                 [
-                    'type' => 'line',
-                    'data' => array_column($data, 'turnover_day'),
-                    'name' => '库存周转天数',
+                    'type'       => 'line',
+                    'data'       => array_column($data, 'turnover_day'),
+                    'name'       => '库存周转天数',
                     'yAxisIndex' => 1,
-                    'smooth' => true //平滑曲线
+                    'smooth'     => true //平滑曲线
                 ],
             ];
+
             return json(['code' => 1, 'data' => $json]);
         }
     }
@@ -368,7 +370,7 @@ class DataMarket extends Backend
     //库存分级概况
     public function stock_level_overview()
     {
-        $cache_data = Cache::get('Supplydatacenter_datamarket' . md5(serialize('stock_level_overview')));
+        $cache_data = Cache::get('Supplydatacenter_datamarket'.md5(serialize('stock_level_overview')));
         if ($cache_data) {
             return $cache_data;
         }

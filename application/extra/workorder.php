@@ -87,19 +87,19 @@ return [
     //客服问题类型组 id大于5 采用step04措施
     'customer_problem_group' => [
         1 => [ //更改镜框
-               'step' => 'step06',
+            'step' => 'step06',
         ],
         2 => [ //更改镜片
-               'step' => 'step07'
+            'step' => 'step07'
         ],
         3 => [ //更改地址
-               'step' => 'step01'
+            'step' => 'step01'
         ],
         4 => [ //更改快递
-               'step' => 'step05'
+            'step' => 'step05'
         ],
         5 => [ //关税
-               'step' => 'step03'
+            'step' => 'step03'
         ],
         6 => [
             'step' => 'step04'
@@ -111,7 +111,7 @@ return [
             'step_id' => 1, //更改
             'is_check' => 0,
             'appoint_group' => [ //承接组
-                                 'warehouse_group' //仓库跟单
+                'warehouse_group' //仓库跟单
             ],
         ],
     ],
@@ -120,7 +120,7 @@ return [
             'step_id' => 2, //退款
             'is_check' => 1,
             'appoint_group' => [ //承接组
-                                 'cashier_group' //出纳
+                'cashier_group' //出纳
             ],
         ],
     ],
@@ -129,14 +129,14 @@ return [
             'step_id' => 1, //更改
             'is_check' => 0,
             'appoint_group' => [ //承接组
-                                 'warehouse_group' //仓库跟单
+                'warehouse_group' //仓库跟单
             ],
         ],
         [
             'step_id' => 2, //退款
             'is_check' => 1,
             'appoint_group' => [ //承接组
-                                 'cashier_group' //出纳
+                'cashier_group' //出纳
             ],
         ],
         [
@@ -152,14 +152,14 @@ return [
             'step_id' => 1, //更改
             'is_check' => 0,
             'appoint_group' => [ //承接组
-                                 'warehouse_group' //仓库跟单
+                'warehouse_group' //仓库跟单
             ],
         ],
         [
             'step_id' => 2, //退款
             'is_check' => 1,
             'appoint_group' => [ //承接组
-                                 'cashier_group' //出纳
+                'cashier_group' //出纳
             ],
         ],
         [
@@ -175,14 +175,14 @@ return [
             'step_id' => 1, //更改
             'is_check' => 0,
             'appoint_group' => [ //承接组
-                                 'warehouse_lens_group' //仓库镜片负责人
+                'warehouse_lens_group' //仓库镜片负责人
             ],
         ],
         [
             'step_id' => 2, //退款
             'is_check' => 1,
             'appoint_group' => [ //承接组
-                                 'cashier_group' //出纳
+                'cashier_group' //出纳
             ],
         ],
         [
@@ -198,16 +198,16 @@ return [
     //仓库问题类型组  id大于4 采用step04措施
     'warehouse_problem_group' => [
         1 => [ //核实处方
-               'step' => 'step02' //措施key
+            'step' => 'step02' //措施key
         ],
         2 => [ //不可加工
-               'step' => 'step08' //措施key
+            'step' => 'step08' //措施key
         ],
         3 => [ //镜框缺货
-               'step' => 'step08' //措施key
+            'step' => 'step08' //措施key
         ],
         4 => [ //镜片缺货
-               'step' => 'step04' //为空没有后续
+            'step' => 'step04' //为空没有后续
         ],
         5 => [
             'step' => 'step04' //措施key
@@ -220,21 +220,21 @@ return [
             'step_id' => 1, //更改
             'is_check' => 0,
             'appoint_group' => [ //承接组
-                                 'warehouse_lens_group' //仓库镜片负责人
+                'warehouse_lens_group' //仓库镜片负责人
             ],
         ],
         [
             'step_id' => 2, //退款
             'is_check' => 1,
             'appoint_group' => [ //承接组
-                                 'cashier_group' //出纳
+                'cashier_group' //出纳
             ],
         ],
         [
             'step_id' => 3, //取消
             'is_check' => 1,
             'appoint_group' => [ //承接组
-                                 'warehouse_group' //仓库跟单员
+                'warehouse_group' //仓库跟单员
             ],
         ],
 
@@ -242,28 +242,28 @@ return [
             'step_id' => 4, //催单
             'is_check' => 0,
             'appoint_group' => [ //承接组
-                                 'warehouse_group' //仓库跟单员
+                'warehouse_group' //仓库跟单员
             ],
         ],
         [
             'step_id' => 5, //暂缓
             'is_check' => 0,
             'appoint_group' => [ //承接组
-                                 'warehouse_group' //仓库跟单员
+                'warehouse_group' //仓库跟单员
             ],
         ],
         [
             'step_id' => 6, //赠品
             'is_check' => 1,
             'appoint_group' => [ //承接组
-                                 'warehouse_group' //仓库跟单员
+                'warehouse_group' //仓库跟单员
             ],
         ],
         [
             'step_id' => 7, //补发
             'is_check' => 1,
             'appoint_group' => [ //承接组
-                                 //'warehouse_group' //仓库跟单员
+                //'warehouse_group' //仓库跟单员
             ],
         ],
         [
@@ -300,21 +300,21 @@ return [
             'step_id' => 1, //更改
             'is_check' => 0,
             'appoint_group' => [ //承接组
-                                 'warehouse_group' //仓库跟单
+                'warehouse_group' //仓库跟单
             ],
         ],
         [
             'step_id' => 2, //退款
             'is_check' => 1,
             'appoint_group' => [ //承接组
-                                 'cashier_group' //出纳
+                'cashier_group' //出纳
             ],
         ],
         [
             'step_id' => 3, //取消
             'is_check' => 1,
             'appoint_group' => [ //承接组
-                                 'warehouse_group' //仓库跟单员
+                'warehouse_group' //仓库跟单员
             ],
         ],
 
@@ -322,28 +322,28 @@ return [
             'step_id' => 4, //催单
             'is_check' => 0,
             'appoint_group' => [ //承接组
-                                 'warehouse_group' //仓库跟单员
+                'warehouse_group' //仓库跟单员
             ],
         ],
         [
             'step_id' => 5, //暂缓
             'is_check' => 0,
             'appoint_group' => [ //承接组
-                                 'warehouse_group' //仓库跟单员
+                'warehouse_group' //仓库跟单员
             ],
         ],
         [
             'step_id' => 6, //赠品
             'is_check' => 1,
             'appoint_group' => [ //承接组
-                                 'warehouse_group' //仓库跟单员
+                'warehouse_group' //仓库跟单员
             ],
         ],
         [
             'step_id' => 7, //补发
             'is_check' => 1,
             'appoint_group' => [ //承接组
-                                 //'warehouse_group' //仓库跟单员
+                //'warehouse_group' //仓库跟单员
             ],
         ],
         [
@@ -384,14 +384,14 @@ return [
             'step_id' => 2, //退款
             'is_check' => 1,
             'appoint_group' => [ //承接组
-                                 'cashier_group' //出纳
+                'cashier_group' //出纳
             ],
         ],
         [
             'step_id' => 3, //取消
             'is_check' => 1,
             'appoint_group' => [ //承接组
-                                 'warehouse_group' //仓库跟单员
+                'warehouse_group' //仓库跟单员
             ],
         ],
 
@@ -399,28 +399,28 @@ return [
             'step_id' => 4, //催单
             'is_check' => 0,
             'appoint_group' => [ //承接组
-                                 'warehouse_group' //仓库跟单员
+                'warehouse_group' //仓库跟单员
             ],
         ],
         [
             'step_id' => 5, //暂缓
             'is_check' => 0,
             'appoint_group' => [ //承接组
-                                 'warehouse_group' //仓库跟单员
+                'warehouse_group' //仓库跟单员
             ],
         ],
         [
             'step_id' => 6, //赠品
             'is_check' => 1,
             'appoint_group' => [ //承接组
-                                 'warehouse_group' //仓库跟单员
+                'warehouse_group' //仓库跟单员
             ],
         ],
         [
             'step_id' => 7, //补发
             'is_check' => 1,
             'appoint_group' => [ //承接组
-                                 //'warehouse_group' //仓库跟单员
+                //'warehouse_group' //仓库跟单员
             ],
         ],
         [
@@ -481,7 +481,7 @@ return [
             87, //王一安
             // 105, //郭亚敏
             123, //袁倩倩
-
+            
             156, //刘梦楠
             114,  //李昱皓
             // 205,//冯俊伟
@@ -490,17 +490,17 @@ return [
             245, //任雪姣
             246,  //闫梦琦
             250,  //张一凡
-            256   //赵寒星
+            256   //赵寒星  
             // 228  //李鑫
         ],
         //韩雨薇组
         117 => [
-            //108, //吴帆
+            //108, //吴帆     
             88,  //赵津津
             125, //马雨萌
             // 155, //李森
             116,//彭梦莹
-            198,//李丹
+            198,//李丹 
             203,//李赵恒
             209,//杨欢欢
             208,//代阿敏
@@ -515,7 +515,7 @@ return [
             267,//刘丹
             268,//赵文静
 
-
+            
         ]
     ],
 
@@ -604,101 +604,101 @@ return [
             'site' => 3
         ],
         '14' => [
-            'id' => '113',
+            'id'   => '113',
             'desc' => '20美金',
-            'sum' => '20',
-            'site' => 3
+            'sum'  => '20',
+            'site' => 3,
         ],
         '15' => [
-            'id' => '112',
+            'id'   => '112',
             'desc' => '15% off',
-            'sum' => '15',
-            'site' => 3
+            'sum'  => '15',
+            'site' => 3,
         ],
         '16' => [
-            'id' => '52',
+            'id'   => '52',
             'desc' => '50% off仅镜架',
-            'sum' => '50',
-            'site' => 1
+            'sum'  => '50',
+            'site' => 1,
         ],
         '17' => [
-            'id' => '274',
+            'id'   => '274',
             'desc' => '50% off整单',
-            'sum' => '50',
-            'site' => 1
+            'sum'  => '50',
+            'site' => 1,
         ],
         '18' => [
-            'id' => '289',
+            'id'   => '289',
             'desc' => '镜架免费',
-            'sum' => '100',
-            'site' => 1
+            'sum'  => '100',
+            'site' => 1,
         ],
         '19' => [
-            'id' => '674',
+            'id'   => '674',
             'desc' => '50% off仅镜架',
-            'sum' => '50',
-            'site' => 2
+            'sum'  => '50',
+            'site' => 2,
         ],
         '20' => [
-            'id' => '668',
+            'id'   => '668',
             'desc' => '50% off整单',
-            'sum' => '50',
-            'site' => 2
+            'sum'  => '50',
+            'site' => 2,
         ],
         '21' => [
-            'id' => '675',
+            'id'   => '675',
             'desc' => '镜架免费',
-            'sum' => '100',
-            'site' => 2
+            'sum'  => '100',
+            'site' => 2,
         ],
         '22' => [
-            'id' => '39',
+            'id'   => '39',
             'desc' => '50% off仅镜架',
-            'sum' => '50',
-            'site' => 3
+            'sum'  => '50',
+            'site' => 3,
         ],
         '23' => [
-            'id' => '22',
+            'id'   => '22',
             'desc' => '50% off整单',
-            'sum' => '50',
-            'site' => 3
+            'sum'  => '50',
+            'site' => 3,
         ],
         '24' => [
-            'id' => '111',
+            'id'   => '111',
             'desc' => '镜架免费',
-            'sum' => '100',
-            'site' => 3
+            'sum'  => '100',
+            'site' => 3,
         ],
-        '25' =>   [
-            'id' => '981',
+        '25' => [
+            'id'   => '981',
             'desc' => '售后镜框免费优惠券（如追加处方、折扣买新等）——客服',
-            'sum' => '0',
-            'site' => 10
+            'sum'  => '0',
+            'site' => 10,
         ],
         '26' => [
-            'id' => '999',
+            'id'   => '999',
             'desc' => '售后优惠券： 15% off 老顾客安抚',
-            'sum' => '15',
-            'site' => 10
+            'sum'  => '15',
+            'site' => 10,
         ],
         '27' => [
-            'id' => '1000',
+            'id'   => '1000',
             'desc' => '售后优惠券：老客买新29-10',
-            'sum' => '15',
-            'site' => 10
+            'sum'  => '15',
+            'site' => 10,
         ],
         '28' => [
-            'id' => '1001',
+            'id'   => '1001',
             'desc' => '售后优惠券：5欧元 排除under 10的商品',
-            'sum' => '5',
-            'site' => 10
+            'sum'  => '5',
+            'site' => 10,
         ],
         '29' => [
-            'id' => '1002',
+            'id'   => '1002',
             'desc' => '售后优惠券：10欧元 排除under 10的商品',
-            'sum' => '10',
-            'site' => 10
-        ]
+            'sum'  => '10',
+            'site' => 10,
+        ],
     ],
     //需要审核的优惠券
     'need_check_coupon' => [
@@ -825,10 +825,10 @@ return [
     ],
     'customer_problem_classify_arr' => [
         //订单修改
-        1=>[1,2,3,4,6,7],
-        2=>[8,9,10,11,12,5],
-        3=>[13,14,15,16],
-        4=>[17,18,19,20,21,22,23]
+         1=>[1,2,3,4,6,7],
+         2=>[8,9,10,11,12,5],
+         3=>[13,14,15,16],
+         4=>[17,18,19,20,21,22,23]
     ],
     //新的分类
     'new_customer_problem_classify_arr' =>[
