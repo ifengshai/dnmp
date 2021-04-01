@@ -9,7 +9,11 @@ return array (
       0 => 'aws3',
       1 => 'nkeditor',
     ),
-    'upload_after' =>
+    'upload_after' => 
+    array (
+      0 => 'aws3',
+    ),
+    's3_upload' => 
     array (
       0 => 'aws3',
     ),
