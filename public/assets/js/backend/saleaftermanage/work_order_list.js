@@ -923,6 +923,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     $('#c-city').val(data.address.city);
                                     $('#c-street').val(data.address.street);
                                     $('#c-postcode').val(data.address.postcode);
+                                    $('#c-taxno').val(data.address.taxno);
                                     $('#c-currency_code').val(order_pay_currency);
                                 /*} else {
                                     address += '<option value="' + i + '">' + data.address[i].address_type + '</option>';
@@ -945,6 +946,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 $('#c-city').val(address.city);
                                 $('#c-street').val(address.street);
                                 $('#c-postcode').val(address.postcode);
+                                $('#c-taxno').val(address.taxno);
                             })
 
                             //追加
@@ -1652,6 +1654,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                         $('#c-city').val(data.address.city);
                                         $('#c-street').val(data.address.street);
                                         $('#c-postcode').val(data.address.postcode);
+                                        $('#c-taxno').val(data.address.taxno);
                                         $('#c-currency_code').val(order_pay_currency);
                                     /*} else {
                                         address += '<option value="' + i + '">' + data.address[i].address_type + '</option>';
@@ -1678,6 +1681,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     $('#c-city').val(address.city);
                                     $('#c-street').val(address.street);
                                     $('#c-postcode').val(address.postcode);
+                                    $('#c-taxno').val(address.taxno);
                                 })
 
                                 //追加
@@ -2422,6 +2426,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     $('#c-city').val(real_address.city);
                                     $('#c-street').val(real_address.street);
                                     $('#c-postcode').val(real_address.postcode);
+                                    $('#c-taxno').val(real_address.taxno);
                                     $('#c-currency_code').val(order_pay_currency);
                                     $('#shipping_type').val(real_address.shipping_type);
                                     $('#pay_method').val(real_address.pay_method);
@@ -2448,6 +2453,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                             $('#c-city').val(data.address.city);
                                             $('#c-street').val(data.address.street);
                                             $('#c-postcode').val(data.address.postcode);
+                                            $('#c-taxno').val(data.address.taxno);
                                             $('#c-currency_code').val(order_pay_currency);
                                         /*} else {
                                             address += '<option value="' + i + '">' + data.address[i].address_type + '</option>';
@@ -2471,6 +2477,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     $('#c-city').val(address.city);
                                     $('#c-street').val(address.street);
                                     $('#c-postcode').val(address.postcode);
+                                    $('#c-taxno').val(address.taxno);
                                 })
 
                                 //追加
