@@ -1633,7 +1633,7 @@ class WorkOrderList extends Backend
                             $appoint_users = $params['order_recept']['appoint_users'][$v];
                             $appoint_group = $params['order_recept']['appoint_group'][$v];
                             $auto_complete = $params['order_recept']['auto_complete'][$v];
-
+print_r($params);die;
                             //插入措施、承接人数据
                             $res = $this->handle_measure($work_id, $v, $appoint_ids, $appoint_users, $appoint_group, $auto_complete, $this->assign_user_id, $admin_id, $nickname, $params, '');
                             if (!$res['result']) throw new Exception($res['msg']);
