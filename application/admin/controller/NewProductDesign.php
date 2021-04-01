@@ -5,6 +5,7 @@ namespace app\admin\controller;
 use app\admin\model\Admin;
 use app\admin\model\AuthGroup;
 use app\admin\model\AuthGroupAccess;
+use app\admin\model\itemmanage\attribute\ItemAttribute;
 use app\admin\model\itemmanage\Item;
 use app\common\controller\Backend;
 use Aws\S3\S3Client;
@@ -210,47 +211,54 @@ class NewProductDesign extends Backend
     public function add_img()
     {
         $item = new \app\admin\model\itemmanage\Item;
-        $row = $item->get(14584, 'itemAttribute');
+        $itemAttribute = new ItemAttribute();
+        $newProductDesign = new \app\admin\model\NewProductDesign();
+        $newProductDesignDetail = $newProductDesign->where('id', input('ids'))->find();
+        $itemId = $item->where('sku', $newProductDesignDetail['sku'])->value('id');
+        $row = $item->get($itemId, 'itemAttribute');
         if ($this->request->isAjax()) {
             $params = $this->request->post("row/a");
             $item_status = $params['item_status'];
             $itemAttrData['frame_images'] = $params['frame_images'];
             $itemAttrData['create_frame_images_time'] = date("Y-m-d H:i:s", time());
-            Db::connect('database.db_stock')->name('item_attribute')->startTrans();
-            Db::connect('database.db_stock')->name('item')->startTrans();
+            $imgsArr = [];
+            $net = 'https://mojing.s3-us-west-2.amazonaws.com/';
+            $itemAttribute->startTrans();
+            $item->startTrans();
+            $newProductDesign->startTrans();
             try {
-                $itemAttrResult = Db::connect('database.db_stock')->name('item_attribute')->where('item_id', '=', 14584)->update($itemAttrData);
-                if ($item_status == 2) {
-                    $itemResult = Db::connect('database.db_stock')->name('item')->where('id', '=', 14584)->update(['item_status' => $item_status]);
-                    $imgArr = explode(',', $params['frame_images']);
-                    foreach ($imgArr as $k => $v) {
-                        $arr = explode("/", $v);
-                        //获取最后一个/后边的字符
-                        $sku = $arr[count($arr) - 1];
-                        $file_url = '.' . $v;
-                        //私有
-                        $acl = 'private';
-                        //上传至桶的名称
-                        $bucket = 'xmslaravel';
-
-                        $result = $this->client->putObject(array(
-                            'Bucket' => $bucket,
-                            'Key' => 'skupic/' . $sku,
-                            'Body' => fopen($file_url, 'rb'),
-                            'ACL' => $acl,
-                        ));
-                        //上传成功--返回上传后的地址
-                        $data = [
-                            'type' => '1',
-                            'data' => urldecode($result['ObjectURL']),
-                        ];
-                        unlink($file_url);
-                    }
-                } else {
-                    $itemResult = true;
+                $itemResult = $item->where('id', '=', $itemId)->update(['item_status' => $item_status]);
+                $imgArr = explode(',', $params['frame_images']);
+                foreach ($imgArr as $k => $v) {
+                    $arr = explode("/", $v);
+                    //获取最后一个/后边的字符
+                    $sku = $arr[count($arr) - 1];
+                    $imgsArr[$k] = 'skupic/' . $sku;
+                    $file_url = '.' . $v;
+                    //私有
+                    $acl = 'private';
+                    $acl = 'public-read';
+                    //上传至桶的名称
+                    $bucket = 'mojing';
+                    $result = $this->client->putObject(array(
+                        'Bucket' => $bucket,
+                        'Key' => 'skupic/' . $sku,
+                        'Body' => fopen($file_url, 'rb'),
+                        'ACL' => $acl,
+                    ));
+                    //上传成功--返回上传后的地址
+                    $data = [
+                        'type' => '1',
+                        'data' => urldecode($result['ObjectURL']),
+                    ];
+                    // unlink($file_url);
                 }
-                Db::connect('database.db_stock')->name('item_attribute')->commit();
-                Db::connect('database.db_stock')->name('item')->commit();
+                $itemAttrData['frame_aws_imgs'] = implode(',', $imgsArr);
+                $itemAttrResult = $itemAttribute->where('item_id', '=', $itemId)->update($itemAttrData);
+                $newProductDesignResult = $newProductDesign->where('id', '=', input('ids'))->update(['status'=>7,'update_time'=>date("Y-m-d H:i:s", time())]);
+                $itemAttribute->commit();
+                $item->commit();
+                $newProductDesign->commit();
             } catch (Aws\Exception\MultipartUploadExcepti $e) {
                 //上传失败--返回错误信息
                 $uploader = new Aws\S3\MultipartUploader($this->client, $file_url, [
@@ -261,19 +269,22 @@ class NewProductDesign extends Backend
                     'data' => $e->getMessage(),
                 ];
             } catch (ValidateException $e) {
-                Db::connect('database.db_stock')->name('item_attribute')->rollback();
-                Db::connect('database.db_stock')->name('item')->rollback();
+                $itemAttribute->rollback();
+                $item->rollback();
+                $newProductDesign->rollback();
                 $this->error($e->getMessage(), [], 406);
             } catch (PDOException $e) {
-                Db::connect('database.db_stock')->name('item_attribute')->rollback();
-                Db::connect('database.db_stock')->name('item')->rollback();
+                $itemAttribute->rollback();
+                $item->rollback();
+                $newProductDesign->rollback();
                 $this->error($e->getMessage(), [], 407);
             } catch (Exception $e) {
-                Db::connect('database.db_stock')->name('item_attribute')->rollback();
-                Db::connect('database.db_stock')->name('item')->rollback();
+                $itemAttribute->rollback();
+                $item->rollback();
+                $newProductDesign->rollback();
                 $this->error($e->getMessage(), [], 408);
             }
-            if (($itemAttrResult !== false) && ($itemResult !== false) && ($data['type'] == 1)) {
+            if (($itemAttrResult !== false) && ($itemResult !== false) && ($data['type'] == 1) && ($newProductDesignResult !== false)){
                 $this->success();
             } else {
                 $this->error(__('Failed to upload product picture, please try again'));
