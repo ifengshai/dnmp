@@ -97,14 +97,18 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
-                                        return row.label == 0? true : false;
+                                        if (row.label ==0 || row.status ==1){
+                                            return  true;
+                                        }else{
+                                            return  false;
+                                        }
                                     }
                                 },
                                 {
                                     name: 'start_shooting',
                                     text: '开始拍摄',
                                     title: __('开始拍摄'),
-                                    classname: 'btn btn-xs btn-danger  btn-magic btn-dialog',
+                                    classname: 'btn btn-xs btn-success btn-magic btn-ajax',
                                     icon: 'fa fa-magic',
                                     url: 'new_product_design/change_status?status=3',
                                     success: function (data, ret) {
@@ -124,11 +128,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         }
                                     }
                                 },
+
                                 {
                                     name: 'shot_over',
                                     text: '拍摄完成',
                                     title: __('拍摄完成'),
-                                    classname: 'btn btn-xs btn-danger  btn-magic btn-dialog',
+                                    classname: 'btn btn-xs btn-success btn-magic btn-ajax',
                                     icon: 'fa fa-magic',
                                     url: 'new_product_design/change_status?status=4',
                                     success: function (data, ret) {
@@ -151,11 +156,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                 {
                                     name: 'distr_user',
                                     text:'分配',
-                                    title:__('分配'),
+                                    title:__('分配人员'),
                                     classname: 'btn btn-xs btn-primary btn-dialog',
                                     icon: '',
-                                    url: 'new_product_design/allocate_personnel/id/{row.id}',
-                                    area: ['50%', '45%'],
+                                    url: 'new_product_design/allocate_personnel?ids={row.id}',
+                                    area: ['30%', '20%'],
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
@@ -171,7 +176,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     name: 'tarted_making',
                                     text: '开始制作',
                                     title: __('开始制作'),
-                                    classname: 'btn btn-xs btn-danger  btn-magic btn-dialog',
+                                    classname: 'btn btn-xs btn-success btn-magic btn-ajax',
                                     icon: 'fa fa-magic',
                                     url: 'new_product_design/change_status?status=6',
                                     success: function (data, ret) {
@@ -213,7 +218,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     name: 'approved',
                                     text:__('审核通过'),
                                     title:__('审核通过'),
-                                    classname: 'btn btn-xs btn-primary btn-dialog',
+                                    classname: 'btn btn-xs btn-success btn-magic btn-ajax',
                                     icon: 'fa fa-magic',
                                     url: 'new_product_design/change_status?status=8',
                                     success: function (data, ret) {

@@ -2,6 +2,10 @@
 
 namespace app\admin\controller;
 
+use app\admin\model\Admin;
+use app\admin\model\AuthGroup;
+use app\admin\model\AuthGroupAccess;
+use app\admin\model\itemmanage\Item;
 use app\common\controller\Backend;
 use Aws\S3\S3Client;
 use think\Db;
@@ -50,7 +54,7 @@ class NewProductDesign extends Backend
      */
     public function index()
     {
-
+        $admin = new Admin();
         //当前是否为关联查询
         $this->relationSearch = false;
         //设置过滤方法
@@ -89,6 +93,11 @@ class NewProductDesign extends Backend
             $list = collection($list)->toArray();
             foreach ($list as $key=>$item){
                 $list[$key]['label'] = $map['status']?$map['status']:0;
+                if ($item['responsible_id'] !==null){
+                    $list[$key]['responsible_id'] = $admin->where('id',$item['responsible_id'])->value('nickname');
+                }else{
+                    $list[$key]['responsible_id'] = '暂无';
+                }
             }
             $result = array("total" => $total, "rows" => $list);
 
@@ -105,21 +114,71 @@ class NewProductDesign extends Backend
     }
 
     //录尺寸
-    public function record_size()
+    public function record_size($ids =null)
     {
+        $item = new Item();
+        $value = $this->model->get($ids);
+        $where['sku'] = $value->sku;
+        $data = $item->alias('a')
+            ->join(['fa_item_attribute'=>'b'],'a.id = b.item_id')
+            ->where($where)
+            ->field('a.id,b.attribute_type')
+            ->find();
+         $attribute_type = $data->attribute_type;
+         $goods_id = $data->id;
+        $this->assign('attribute_type',$attribute_type);
+        $this->assign('goods_id',$goods_id);
         return $this->view->fetch();
     }
 
     //更改状态
     public function change_status()
     {
+       $ids =  $this->request->get('ids');
+       $status =  $this->request->get('status');
+       empty($ids) && $this->error('缺少重要参数');
+       empty($status) && $this->error('数据异常');
+        $map['id'] = $ids;
+        $data['status'] = $status;
+        $data['update_time']  = date("Y-m-d H:i:s", time());
+        $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+        if ($res){
+            $this->success('操作成功');
+        }else{
+            $this->error('操作失败');
+        }
 
     }
 
     //分配人员
-    public function allocate_personnel()
+    public function allocate_personnel($ids = null)
     {
+        if($this->request->post()){
+            $ids =  $this->request->post('ids');
+            $responsible_id =  $this->request->post('responsible_id');
+            $map['id'] = $ids;
+            $data['responsible_id'] = $responsible_id;
+            $data['status'] = 5;
+            $data['update_time']  = date("Y-m-d H:i:s", time());
+            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+            if ($res){
+                $this->success('人员分配成功');
+            }else{
+                $this->error('人员分配失败');
+            }
+        }
+        //获取筛选人
+        $authGroupAccess= new AuthGroupAccess();
+        $auth_user = $authGroupAccess
+            ->alias('a')
+            ->join(['fa_admin'=>'b'],'a.uid=b.id')
+            ->where('a.group_id=71')
+            ->field('id,nickname')
+            ->select();
+        $this->assign('ids',$ids);
+        $this->assign('auth_user',collection($auth_user)->toArray());
         return $this->view->fetch();
+
     }
 
     //上传图片
