@@ -266,7 +266,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     name: 'audit_refused',
                                     text:__('审核拒绝'),
                                     title:__('审核拒绝'),
-                                    classname: 'btn btn-xs btn-danger  btn-magic btn-dialog',
+                                    classname: 'btn btn-xs btn-danger  btn-magic btn-ajax',
                                     icon: 'fa fa-magic',
                                     url: 'new_product_design/change_status?status=9',
                                     success: function (data, ret) {
