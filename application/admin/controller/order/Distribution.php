@@ -743,6 +743,7 @@ class Distribution extends Backend
             ->join(['fa_order_process' => 'c'], 'a.order_id=c.order_id')
             ->where($where)
             ->where($map)
+            ->limit(20000)
             ->order($sort, $order)
             ->select();
 
