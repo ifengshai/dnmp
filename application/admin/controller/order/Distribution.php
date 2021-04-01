@@ -218,8 +218,11 @@ class Distribution extends Backend
                 $map['b.status'] = ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal']];
                 unset($filter['status']);
             }
-
-
+            if ($filter['check_time']){
+                $check_time = explode(' - ',$filter['check_time']);
+                $map['c.check_time'] = ['between',[strtotime($check_time[0]),strtotime($check_time[1])]];
+                unset($filter['check_time']);
+            }
             //查询子单ID合集
             $item_process_ids = [];
 
@@ -392,6 +395,7 @@ class Distribution extends Backend
             $total = $this->model
                 ->alias('a')
                 ->join(['fa_order' => 'b'], 'a.order_id=b.id')
+                ->join(['fa_order_process' => 'c'], 'a.order_id=c.order_id')
                 ->where($where)
                 ->where($map)
                 ->where(function ($query) use ($whereOr) {
@@ -405,6 +409,7 @@ class Distribution extends Backend
                 ->alias('a')
                 ->field('a.id,a.wave_order_id,a.order_id,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.total_qty_ordered,b.site,b.order_type,b.status,a.distribution_status,a.temporary_house_id,a.abnormal_house_id,a.created_at')
                 ->join(['fa_order' => 'b'], 'a.order_id=b.id')
+                ->join(['fa_order_process' => 'c'], 'a.order_id=c.order_id')
                 ->where($where)
                 ->where($map)
                 ->where(function ($query) use ($whereOr) {
@@ -1402,16 +1407,15 @@ class Distribution extends Backend
 
         $list = $this->model
             ->alias('a')
-            ->field('a.id as aid,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.status,b.total_qty_ordered,b.site,a.distribution_status,a.created_at,c.*,b.base_grand_total,b.order_type,b.base_currency_code,b.payment_time,b.payment_method')
+            ->field('a.id as aid,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.status,b.total_qty_ordered,b.site,a.distribution_status,a.created_at,c.*,b.base_grand_total,b.order_type,b.base_currency_code,b.payment_time,b.payment_method,d.check_time')
             ->join(['fa_order' => 'b'], 'a.order_id=b.id')
             ->join(['fa_order_item_option' => 'c'], 'a.option_id=c.id')
+            ->join(['fa_order_process' => 'd'], 'a.order_id=d.order_id')
             ->where($where)
             ->where($map)
             ->order($sort, $order)
             ->select();
         $list = collection($list)->toArray();
-
-
         //从数据库查询需要的数据
         $spreadsheet = new Spreadsheet();
 
@@ -1444,7 +1448,8 @@ class Distribution extends Backend
             ->setCellValue("Y1", "原币种")
             ->setCellValue("Z1", "原支付金额")
             ->setCellValue("AA1", "支付方式")
-            ->setCellValue("AB1", "订单支付时间");
+            ->setCellValue("AB1", "订单支付时间")
+            ->setCellValue("AC1", "审单时间");
         $spreadsheet->setActiveSheetIndex(0)->setTitle('订单处方');
 
         //站点列表
@@ -1696,6 +1701,12 @@ class Distribution extends Backend
             $spreadsheet->getActiveSheet()->setCellValue("Z" . ($num), $value['base_grand_total']); //原支付金额
             $spreadsheet->getActiveSheet()->setCellValue("AA" . ($num), $value['payment_method']); //支付方式
             $spreadsheet->getActiveSheet()->setCellValue("AB" . ($num),  date('Y-m-d H:i:s', $value['payment_time'])); //订单支付时间
+            if (empty($value['check_time'])){
+                $value['check_time'] = '暂无';
+            }else{
+                $value['check_time'] = date('Y-m-d H:i:s', $value['check_time']);
+            }
+            $spreadsheet->getActiveSheet()->setCellValue("AC" . ($num),  $value['check_time'] ); //审单时间
 
             //合并单元格
 
@@ -1714,6 +1725,7 @@ class Distribution extends Backend
             $spreadsheet->getActiveSheet()->mergeCells("Z" . ($num) . ":Z" . ($cat + 1));
             $spreadsheet->getActiveSheet()->mergeCells("AA" . ($num) . ":AA" . ($cat + 1));
             $spreadsheet->getActiveSheet()->mergeCells("AB" . ($num) . ":AB" . ($cat + 1));
+            $spreadsheet->getActiveSheet()->mergeCells("AC" . ($num) . ":AC" . ($cat + 1));
         }
 
         //设置宽度
@@ -1740,6 +1752,7 @@ class Distribution extends Backend
         $spreadsheet->getActiveSheet()->getColumnDimension('V')->setWidth(15);
         $spreadsheet->getActiveSheet()->getColumnDimension('AA')->setWidth(30);
         $spreadsheet->getActiveSheet()->getColumnDimension('AB')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AC')->setWidth(30);
         //自动换行
         $spreadsheet->getDefaultStyle()->getAlignment()->setWrapText(true);
         $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
@@ -1758,8 +1771,8 @@ class Distribution extends Backend
         $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
         $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
 
-        $spreadsheet->getActiveSheet()->getStyle('A1:AB' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-        $spreadsheet->getActiveSheet()->getStyle('A1:AB' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle('A1:AC' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle('A1:AC' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
 
         $spreadsheet->setActiveSheetIndex(0);
 
