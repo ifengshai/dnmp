@@ -5,8 +5,11 @@ namespace app\admin\controller;
 use app\admin\model\Admin;
 use app\admin\model\AuthGroup;
 use app\admin\model\AuthGroupAccess;
+use app\admin\model\DistributionLog;
 use app\admin\model\itemmanage\attribute\ItemAttribute;
 use app\admin\model\itemmanage\Item;
+use app\admin\model\itemmanage\ItemBrand;
+use app\admin\model\order\Order;
 use app\common\controller\Backend;
 use Aws\S3\S3Client;
 use think\Db;
@@ -32,7 +35,15 @@ class NewProductDesign extends Backend
     {
         parent::_initialize();
         $this->model = new \app\admin\model\NewProductDesign;
+        $this->itemAttribute = new \app\admin\model\itemmanage\attribute\ItemAttribute;
+        $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform();
+        $this->category = new \app\admin\model\itemmanage\ItemCategory;
         $this->view->assign('getTabList', $this->model->getTabList());
+        $this->view->assign('categoryList', $this->category->categoryList());
+        $this->view->assign('brandList', (new ItemBrand())->getBrandList());
+        $this->view->assign('AllFrameColor', $this->itemAttribute->getFrameColor());
+        $this->view->assign('AllDecorationColor', $this->itemAttribute->getFrameColor(3));
+        $this->view->assign('AllProductSize', config('FRAME_SIZE'));
         $this->client = new S3Client([
             'version' => 'latest',
             'region' => 'us-west-2', # 可用区必须是这个
@@ -62,17 +73,26 @@ class NewProductDesign extends Backend
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
             $filter = json_decode($this->request->get('filter'), true);
+
             if ($filter['label']) {
                 $map['status'] = $filter['label'];
             }
             unset($filter['label']);
+            if ($filter['responsible_id']){
+                $whe_like['nickname'] = ['like','%'.$filter['responsible_id'].'%'];
+                $responsible_id =  $admin->where($whe_like)->column('id');
+                if ($responsible_id){
+                    $map['responsible_id'] = ['in',$responsible_id];
+                }else{
+                    $map['responsible_id'] = ['eq','999999999'];
+                }
+            }
+            unset($filter['responsible_id']);
             $this->request->get(['filter' => json_encode($filter)]);
-
             //如果发送的来源是Selectpage，则转发到Selectpage
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
-
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->where($where)
@@ -86,12 +106,12 @@ class NewProductDesign extends Backend
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
-
             foreach ($list as $row) {
                 $row->visible(['id', 'sku', 'status', 'responsible_id', 'create_time']);
 
             }
             $list = collection($list)->toArray();
+
             foreach ($list as $key=>$item){
                 $list[$key]['label'] = $map['status']?$map['status']:0;
                 if ($item['responsible_id'] !==null){
@@ -108,9 +128,33 @@ class NewProductDesign extends Backend
     }
 
 
-    public function detail()
+    public function detail($ids=null)
     {
+        $item = new Item();
+        $itemAttribute = new \app\admin\model\itemmanage\ItemAttribute();
+        $value = $this->model->get($ids);
+        $where['sku'] = $value->sku;
+        $data = $item->where($where)
+            ->field('id,category_id')
+            ->find();
+        $attributeType = $data->category_id;
+        $goodsId = $data->id;
+        $compareValue = ['32','34','35','38','39'];
+        if (!in_array($attributeType,$compareValue)){
+            $attributeType = true;
+        }
+        $row =$itemAttribute->where('item_id',$goodsId)->find();
 
+        $img = explode(',',$row->frame_aws_imgs);
+        $net = 'https://mojing.s3-us-west-2.amazonaws.com/';
+        foreach ($img as $key=>$value){
+            $img[$key] = $net.$value;
+        }
+        $this->assign('attributeType',$attributeType);
+        $this->assign('goodsId',$goodsId);
+        $this->assign('ids',$ids);
+        $this->assign('row',$row);
+        $this->assign('img',$img);
         return $this->view->fetch();
     }
 
@@ -120,23 +164,32 @@ class NewProductDesign extends Backend
 
         if ($this->request->post()){
            $data = $this->request->post();
-           //更新设计表
-            $map['id'] = $ids;
-            $data['status'] = 2;
-            $data['update_time']  = date("Y-m-d H:i:s", time());
-            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
-            if ($res){
-                //更新商品属性表
-                $whe['item_id'] = $data['goodsId'];
-
-               $save_item =  ItemAttribute::update($data['row'],$whe);
-                dump($save_item);die();
-               if (!$save_item){
-                   $this->error('商品属性更新失败');
-               }
-               $this->success('操作成功');
+            $itemAttribute = new \app\admin\model\itemmanage\ItemAttribute();
+            //标记打印状态
+            $this->model->startTrans();
+            $itemAttribute->startTrans();
+            try {
+                //更新设计表
+                $map['id'] = $ids;
+                $data['status'] = 2;
+                $data['update_time']  = date("Y-m-d H:i:s", time());
+                $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+                if ($res){
+                    //更新商品属性表
+                    $whe['item_id'] = $data['goodsId'];
+                    $itemAttribute->where($whe)->update($data['row']);
+                }
+                $this->model->commit();
+                $itemAttribute->commit();
+            } catch (PDOException $e) {
+                $this->model->rollback();
+                $itemAttribute->rollback();
+                $this->error($e->getMessage());
+            } catch (Exception $e) {
+                $itemAttribute->rollback();
+                $this->error($e->getMessage());
             }
-            $this->error('选品数据更新失败');
+            $this->success('操作成功');
         }
         $item = new Item();
         $value = $this->model->get($ids);
