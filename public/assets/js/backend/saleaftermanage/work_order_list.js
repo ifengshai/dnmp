@@ -3169,6 +3169,7 @@ function changeOrderAddress(){
                     $('#c-city1').val(data.address.city);
                     $('#c-street1').val(data.address.street);
                     $('#c-postcode1').val(data.address.postcode);
+                    $('#c-taxno1').val(data.address.taxno);
                     $('#c-currency_code1').val(order_pay_currency);
                 /*}else{
                     address1 += '<option value="' + i + '">' + data.address.address_type + '</option>';
@@ -3190,6 +3191,7 @@ function changeOrderAddress(){
                 $('#c-city1').val(address.city);
                 $('#c-street1').val(address.street);
                 $('#c-postcode1').val(address.postcode);
+                $('#c-taxno1').val(address.taxno);
             })
             $('.selectpicker ').selectpicker('refresh');
         });
