@@ -1155,7 +1155,7 @@ class Outstock extends Backend
             $instock_type = array_column(collection($instock_type)->toArray(), 'id', 'name');
 
             $params=array();
-            /*foreach ($insert_out_stoce as $inset_k => $insert_v) {
+            foreach ($insert_out_stoce as $inset_k => $insert_v) {
                 $transfer_order['out_stock_number'] = 'OUT' . date('YmdHis') . rand(100, 999) . rand(100, 999);
                 $transfer_order['type_id'] = $instock_type[$data[0][0]];
                 $transfer_order['status'] = 0;
@@ -1179,7 +1179,7 @@ class Outstock extends Backend
             }
             if ($params){
                 $_item->allowField(true)->saveAll($params);
-            }*/
+            }
             $this->model->commit();
             $_item->commit();
             $_product_bar_code_item->commit();
