@@ -41,7 +41,7 @@ class UserDataView extends Backend
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getNewAuthSite();
         foreach ($magentoplatformarr as $key => $val) {
-            if (!in_array($val, ['zeelool', 'voogueme', 'nihao','zeelool_de','zeelool_jp'])) {
+            if (!in_array($val, ['zeelool', 'voogueme', 'nihao', 'zeelool_de', 'zeelool_jp'])) {
                 unset($magentoplatformarr[$key]);
             }
         }
@@ -196,19 +196,19 @@ class UserDataView extends Backend
             if ($arr) {
                 $data = $arr;
             }else{
-                if($order_platform == 2){
+                if ($order_platform == 2) {
                     $where['site'] = 2;
                     $model = $this->vooguemeOperate;
-                }elseif($order_platform == 3){
+                } elseif ($order_platform == 3) {
                     $where['site'] = 3;
                     $model = $this->nihaoOperate;
-                }elseif($order_platform == 10){
+                } elseif ($order_platform == 10) {
                     $where['site'] = 10;
                     $model = $this->zeelooldeOperate;
-                }elseif($order_platform == 11){
+                } elseif ($order_platform == 11) {
                     $where['site'] = 11;
                     $model = $this->zeelooljpOperate;
-                }else{
+                } else {
                     $where['site'] = 1;
                     $model = $this->zeeloolOperate;
                 }
@@ -216,9 +216,9 @@ class UserDataView extends Backend
                     $createat = explode(' ', $time_str);
                     $start = $createat[0];
                     $end = $createat[3];
-                } else{
+                } else {
                     $start = date('Y-m-d', strtotime('-6 day'));
-                    $end   = date('Y-m-d', strtotime('-1 day'));
+                    $end = date('Y-m-d', strtotime('-1 day'));
                 }
                 $where['day_date'] = ['between', [$start, $end]];
 
@@ -275,20 +275,20 @@ class UserDataView extends Backend
                 if ($time_str) {
                     $createat = explode(' ', $time_str);
                     $map_where['created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
-                } else{
+                } else {
                     $start = date('Y-m-d', strtotime('-6 day'));
-                    $end   = date('Y-m-d 23:59:59', strtotime('-1 day'));
-                    $map_where['created_at'] = ['between', [$start,$end]];
+                    $end = date('Y-m-d 23:59:59', strtotime('-1 day'));
+                    $map_where['created_at'] = ['between', [$start, $end]];
                 }
-                if($order_platform == 2){
+                if ($order_platform == 2) {
                     $web_model = Db::connect('database.db_voogueme');
-                }elseif($order_platform == 3){
+                } elseif ($order_platform == 3) {
                     $web_model = Db::connect('database.db_nihao');
-                }elseif($order_platform == 10){
+                } elseif ($order_platform == 10) {
                     $web_model = Db::connect('database.db_zeelool_de');
-                }elseif($order_platform == 11){
+                } elseif ($order_platform == 11) {
                     $web_model = Db::connect('database.db_zeelool_jp');
-                }else{
+                } else {
                     $web_model = Db::connect('database.db_zeelool');
                 }
                 $web_model->table('customer_entity')->query("set time_zone='+8:00'");
@@ -351,15 +351,15 @@ class UserDataView extends Backend
                 }
                 $map_where['o.status'] = $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
                 $map_where['o.order_type'] = $order_where['order_type'] = 1;
-                if($order_platform == 2){
+                if ($order_platform == 2) {
                     $model = $this->voogueme;
-                }elseif($order_platform == 3){
+                } elseif ($order_platform == 3) {
                     $model = $this->nihao;
-                }elseif($order_platform == 10){
+                } elseif ($order_platform == 10) {
                     $model = $this->zeeloolde;
-                }elseif($order_platform == 3){
+                } elseif ($order_platform == 3) {
                     $model = $this->zeelooljp;
-                }else{
+                } else {
                     $model = $this->zeelool;
                 }
                 $count = $model->where($order_where)->count();  //总订单

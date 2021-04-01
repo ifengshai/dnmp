@@ -30,7 +30,7 @@ class Wangpenglei extends Backend
     //导入实时库存 第一步
     public function set_product_relstock()
     {
-
+        $this->item = new \app\admin\model\itemmanage\Item;
         $list = Db::table('fa_zz_temp2')->select();
         foreach ($list as $k => $v) {
             $p_map['sku'] = $v['sku'];
@@ -203,8 +203,8 @@ class Wangpenglei extends Backend
     {
         $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
         $item = new \app\admin\model\itemmanage\Item();
-        $skus1 = $platform->where(['stock' => ['<', 0]])->column('sku');
-        $skus = Db::table('fa_zz_temp2')->where(['sku' => ['in', $skus1]])->column('sku');
+//        $skus1 = $platform->where(['stock' => ['<', 0]])->column('sku');
+        $skus = Db::table('fa_zz_temp2')->column('sku');
         // dump($skus);die;
         foreach ($skus as $k => $v) {
             // $v = 'OA01901-06';
