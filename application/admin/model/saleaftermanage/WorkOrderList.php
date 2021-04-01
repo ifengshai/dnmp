@@ -708,6 +708,7 @@ class WorkOrderList extends Model
             'city'=>$changeAddress['city'],
             'street'=>$changeAddress['street'],
             'postcode'=>$changeAddress['postcode'],
+            'taxno'=>$changeAddress['taxno'],
         );
         $this->httpRequest($work->work_platform, 'magic/order/editAddress', $postData, 'POST');
 

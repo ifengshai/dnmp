@@ -2717,6 +2717,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     if (!id) {
                         return false;
                     }
+                    if (id == 'BR') {
+                        $('#c-taxno').attr('disabled',false);
+                    }else{
+                        $('#c-taxno').attr('disabled',true);
+                    }
                     $.ajax({
                         type: "POST",
                         url: "saleaftermanage/work_order_list/ajaxGetProvince",
