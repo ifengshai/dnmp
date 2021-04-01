@@ -120,12 +120,12 @@ class NewProductDesign extends Backend
         $value = $this->model->get($ids);
         $where['sku'] = $value->sku;
         $data = $item->alias('a')
-            ->join(['fa_item_attribute'=>'b'],'a.id = b.item_id')
+            ->join(['fa_item_category'=>'b'],'a.category_id = b.id')
             ->where($where)
-            ->field('a.id,b.attribute_type')
+            ->field('a.id,b.name')
             ->find();
-         $attribute_type = $data->attribute_type;
-         $goods_id = $data->id;
+        $attribute_type = $data->name;
+        $goods_id = $data->id;
         $this->assign('attribute_type',$attribute_type);
         $this->assign('goods_id',$goods_id);
         return $this->view->fetch();
