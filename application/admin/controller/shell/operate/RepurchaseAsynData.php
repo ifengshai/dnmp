@@ -10,9 +10,9 @@ use think\Db;
 
 class RepurchaseAsynData extends Command
 {
-    public function _initialize()
+    public function __construct()
     {
-        parent::_initialize();
+        parent::__construct();
         $this->order = new \app\admin\model\order\order\NewOrder();
     }
 
@@ -79,7 +79,7 @@ class RepurchaseAsynData extends Command
                     'againbuy_num_rate'=>$repurchaseDataOne['againbuy_num_rate'],  //复购频次
                 );
                 Db::name('datacenter_month_repurchase')->insert($oneMonthArr);
-                echo "站点：".$site." 一月期复购 is ok"."\n";
+                echo $v."站点：".$site." 一月期复购 is ok"."\n";
             }
             #############################################   一月期复购率end    #########################################
             #############################################   三月期复购率start  #########################################
@@ -99,7 +99,7 @@ class RepurchaseAsynData extends Command
                     'againbuy_num_rate'=>$repurchaseDataThree['againbuy_num_rate'],  //复购频次
                 );
                 Db::name('datacenter_month_repurchase')->insert($threeMonthArr);
-                echo "站点：".$site." 三月期复购 is ok"."\n";
+                echo $v."站点：".$site." 三月期复购 is ok"."\n";
             }
             #############################################   三月期复购率end    #########################################
             #############################################   半年期复购率start  #########################################
@@ -119,7 +119,7 @@ class RepurchaseAsynData extends Command
                     'againbuy_num_rate'=>$repurchaseDataSix['againbuy_num_rate'],  //复购频次
                 );
                 Db::name('datacenter_month_repurchase')->insert($halfYearArr);
-                echo "站点：".$site." 半年期复购 is ok"."\n";
+                echo $v."站点：".$site." 半年期复购 is ok"."\n";
             }
             #############################################   半年期复购率end    #########################################
             #############################################  一年期复购率start #########################################
@@ -140,7 +140,7 @@ class RepurchaseAsynData extends Command
                     'againbuy_num_rate'=>$repurchaseDataThirteen['againbuy_num_rate'],  //复购频次
                 );
                 Db::name('datacenter_month_repurchase')->insert($oneYearArr);
-                echo "站点：".$site." 一年期复购 is ok"."\n";
+                echo $v."站点：".$site." 一年期复购 is ok"."\n";
             }
             usleep(10000);
             #############################################  一年期复购率end   #########################################
