@@ -2240,7 +2240,7 @@ class PurchaseOrder extends Backend
 
         [$where] = $this->buildparams();
         $list = $this->model->alias('purchase_order')
-            ->field('effect_time,type,logistics_info,receiving_time,purchase_number,purchase_name,supplier_name,sku,supplier_sku,is_new_product,is_sample,product_total,purchase_freight,purchase_num,purchase_price,purchase_remark,b.purchase_total,purchase_order.create_person,purchase_order.createtime,arrival_time,receiving_time,1688_number')
+            ->field('purchase_order.id,effect_time,type,logistics_info,receiving_time,purchase_number,purchase_name,supplier_name,sku,supplier_sku,is_new_product,is_sample,product_total,purchase_freight,purchase_num,purchase_price,purchase_remark,b.purchase_total,purchase_order.create_person,purchase_order.createtime,arrival_time,receiving_time,1688_number')
             ->join(['fa_purchase_order_item' => 'b'], 'b.purchase_id=purchase_order.id')
             ->join(['fa_supplier' => 'c'], 'c.id=purchase_order.supplier_id')
             ->where($where)
