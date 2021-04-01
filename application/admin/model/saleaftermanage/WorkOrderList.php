@@ -1361,6 +1361,7 @@ class WorkOrderList extends Model
                     'region_id' => $address['region_id'],
                     'street' => $address['street'],
                     'pay_method' => $address['pay_method'],
+                    'taxno' => $address['taxno'],
                 ];
                 $pdCheck = $pd = $prismCheck = '';
                 $pd_r = $pd_l = '';
