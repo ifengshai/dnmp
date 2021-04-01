@@ -130,6 +130,7 @@ class NewProductDesign extends Backend
 
     public function detail($ids=null)
     {
+        echo 111;die();
         $item = new Item();
         $itemAttribute = new \app\admin\model\itemmanage\ItemAttribute();
         $value = $this->model->get($ids);
