@@ -129,11 +129,26 @@ return array (
     'content' => 
     array (
     ),
-    'value' => 'https://xmslaravel.s3-us-west-2.amazonaws.com/',
+    'value' => 'https://mojing.s3-us-west-2.amazonaws.com',
     'rule' => '',
     'msg' => '',
     'tip' => '',
     'ok' => '',
     'extend' => '',
+  ),
+    9 =>
+  array (
+      'name' => 'cdnurl',
+      'title' => 'cdn url',
+      'type' => 'string',
+      'content' =>
+          array (
+          ),
+      'value' => 'https://mojing.s3-us-west-2.amazonaws.com',
+      'rule' => '',
+      'msg' => '',
+      'tip' => '',
+      'ok' => '',
+      'extend' => '',
   ),
 );

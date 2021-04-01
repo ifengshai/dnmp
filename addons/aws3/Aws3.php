@@ -65,6 +65,7 @@ class Aws3 extends Addons
             'savekey'   => $config['savekey'],
             'maxsize'   => $config['maxsize'],
             'mimetype'  => $config['mimetype'],
+            'cdnurl'  => $config['cdnurl'],
         ];
     }
 
@@ -77,7 +78,7 @@ class Aws3 extends Addons
      */
     public function uploadAfter($attachment)
     {
-        $sourceFile = $attachment['url'];
+        $sourceFile = '.' . $attachment['url'];
         $fileName = substr($attachment['url'], 1);
         return $this->s3Upload($fileName, $sourceFile);
     }
@@ -107,7 +108,7 @@ class Aws3 extends Addons
             $this->s3Client->putObject([
                 'Bucket' => $this->config['bucket'],
                 'Key'    => $fileName,
-                'Body'   => $sourceFile,
+                'SourceFile'   => $sourceFile,
                 'ACL'    => 'public-read',
             ]);
         } catch (\Aws\S3\Exception\S3Exception $e) {
