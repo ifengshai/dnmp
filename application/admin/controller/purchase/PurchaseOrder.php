@@ -2397,7 +2397,7 @@ class PurchaseOrder extends Backend
             $this->request->get(['filter' => json_encode($filter)]);
         }
 
-        list($where) = $this->buildparams();
+        [$where] = $this->buildparams();
         $list = $this->model->alias('purchase_order')
             ->field('effect_time,type,logistics_info,receiving_time,purchase_number,purchase_name,supplier_name,sku,supplier_sku,is_new_product,is_sample,product_total,purchase_freight,purchase_num,purchase_price,purchase_remark,b.purchase_total,purchase_order.create_person,purchase_order.createtime,arrival_time,receiving_time,1688_number')
             ->join(['fa_purchase_order_item' => 'b'], 'b.purchase_id=purchase_order.id')
@@ -2415,6 +2415,7 @@ class PurchaseOrder extends Backend
             'label' => 1
         ])->column('product_cycle', 'sku');
 
+        $logistic = new \app\admin\model\warehouse\LogisticsInfo();
         //从数据库查询需要的数据
         $spreadsheet = new Spreadsheet();
 
@@ -2472,16 +2473,17 @@ class PurchaseOrder extends Backend
                 $is_sample = '否';
             }
 
-            //反序列化处理物流返回信息
-            $logistics_info = unserialize($value['logistics_info']);
-            $readly_logistics_info = $logistics_info['lastResult']['data'][count($logistics_info)-2];
-            $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 1 + 2), $is_new_product);
-            $spreadsheet->getActiveSheet()->setCellValue("P" . ($key * 1 + 2), $is_sample);
-            $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 1 + 2), $value['purchase_total']);
-            $spreadsheet->getActiveSheet()->setCellValueExplicit("R" . ($key * 1 + 2), $value['1688_number'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-            $spreadsheet->getActiveSheet()->setCellValue("S" . ($key * 1 + 2), $value['type']);
-            $spreadsheet->getActiveSheet()->setCellValue("T" . ($key * 1 + 2), $readly_logistics_info['time']);
-            $spreadsheet->getActiveSheet()->setCellValue("U" . ($key * 1 + 2), $value['effect_time']);
+            //查询揽收时间
+            $collect_time = $logistic->where(['purchase_id' => $value['id']])->value('collect_time');
+
+            //反序列化处理物流返回信
+            $spreadsheet->getActiveSheet()->setCellValue("O".($key * 1 + 2), $is_new_product);
+            $spreadsheet->getActiveSheet()->setCellValue("P".($key * 1 + 2), $is_sample);
+            $spreadsheet->getActiveSheet()->setCellValue("Q".($key * 1 + 2), $value['purchase_total']);
+            $spreadsheet->getActiveSheet()->setCellValueExplicit("R".($key * 1 + 2), $value['1688_number'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $spreadsheet->getActiveSheet()->setCellValue("S".($key * 1 + 2), $value['type']);
+            $spreadsheet->getActiveSheet()->setCellValue("T".($key * 1 + 2), $collect_time);
+            $spreadsheet->getActiveSheet()->setCellValue("U".($key * 1 + 2), $value['effect_time']);
         }
 
         //设置宽度
