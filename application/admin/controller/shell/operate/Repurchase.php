@@ -10,9 +10,9 @@ use think\Db;
 
 class Repurchase extends Command
 {
-    public function _initialize()
+    public function __construct()
     {
-        parent::_initialize();
+        parent::__construct();
         $this->order = new \app\admin\model\order\order\NewOrder();
     }
 
