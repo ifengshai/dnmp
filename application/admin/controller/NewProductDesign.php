@@ -130,7 +130,6 @@ class NewProductDesign extends Backend
 
     public function detail($ids=null)
     {
-        echo 111;die();
         $item = new Item();
         $itemAttribute = new \app\admin\model\itemmanage\ItemAttribute();
         $value = $this->model->get($ids);
@@ -145,9 +144,7 @@ class NewProductDesign extends Backend
             $attributeType = true;
         }
         $row =$itemAttribute->where('item_id',$goodsId)->find();
-        dump($row);
         $img = explode(',',$row->frame_aws_imgs);
-        dump($img);die();
         $net = 'https://mojing.s3-us-west-2.amazonaws.com/';
         if (is_array($img)){
             foreach ($img as $key=>$value){
