@@ -27,6 +27,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                 cardView: false,
                 searchFormVisible:false,
                 commonSearch: false,
+                exportOptions: {
+                    fileName: 'export_' + Moment().format("YYYY-MM-DD"),
+                },
                 columns: [
                     [
                         {field: 'day_date', title: __('日期'),sortable: true},
