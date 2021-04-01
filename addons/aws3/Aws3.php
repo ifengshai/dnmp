@@ -55,7 +55,12 @@ class Aws3 extends Addons
     }
 
     /**
-     * @param $params
+     * 配置初始化
+     *
+     * @param $params 上传图片参数
+     *
+     * @author crasphb
+     * @date   2021/4/1 9:53
      */
     public function configInit(&$params)
     {
@@ -74,7 +79,8 @@ class Aws3 extends Addons
      *
      * @param $attachment 文件信息
      *
-     * @date   2021/3/31 15:01
+     * @author crasphb
+     * @date   2021/4/1 9:53
      */
     public function uploadAfter($attachment)
     {
@@ -89,7 +95,8 @@ class Aws3 extends Addons
      * @param $fileName   文件名
      * @param $sourceFile 文件路径
      *
-     * @date   2021/3/31 15:02
+     * @author crasphb
+     * @date   2021/4/1 9:53
      */
     public function s3Upload($fileName, $sourceFile)
     {
