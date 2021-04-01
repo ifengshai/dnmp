@@ -966,6 +966,9 @@ class Outstock extends Backend
 
     public function import()
     {
+        set_time_limit(0);
+        ini_set('memory_limit', '512M');
+
         $this->model = new \app\admin\model\warehouse\Outstock();
         $_item = new \app\admin\model\warehouse\OutStockItem();
         $_platform = new \app\admin\model\itemmanage\ItemPlatformSku();
