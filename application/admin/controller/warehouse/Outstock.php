@@ -1075,7 +1075,9 @@ class Outstock extends Backend
             $database_data = array_column($selectlist, 'code');
             foreach ($data as $check_k => $check_v) {
                 if (!in_array($check_v[2], $database_data)) {
-                    $this->error('条码[' . $check_v[2] . ']不存在');
+                    $msg['code']=$check_v[2];
+                    $msg['msg']='条码不存在';
+                    array_push($result_msg,$msg);
                 }
             }
 
@@ -1134,6 +1136,18 @@ class Outstock extends Backend
                 case 'zeelool_de':
                     $out_label = 10;
                     break;
+                case 'Zeelool_jp':
+                    $out_label = 11;
+                    break;
+                case 'Voogueme_acc':
+                    $out_label = 12;
+                    break;
+                case 'Zeelool_cn':
+                    $out_label = 13;
+                    break;
+                case 'Alibaba':
+                    $out_label = 14;
+                    break;
                 default:
                     $this->error(__('请检查表格中调出仓的名称'));
             };
@@ -1141,7 +1155,7 @@ class Outstock extends Backend
             $instock_type = array_column(collection($instock_type)->toArray(), 'id', 'name');
 
             $params=array();
-            foreach ($insert_out_stoce as $inset_k => $insert_v) {
+            /*foreach ($insert_out_stoce as $inset_k => $insert_v) {
                 $transfer_order['out_stock_number'] = 'OUT' . date('YmdHis') . rand(100, 999) . rand(100, 999);
                 $transfer_order['type_id'] = $instock_type[$data[0][0]];
                 $transfer_order['status'] = 0;
@@ -1165,7 +1179,7 @@ class Outstock extends Backend
             }
             if ($params){
                 $_item->allowField(true)->saveAll($params);
-            }
+            }*/
             $this->model->commit();
             $_item->commit();
             $_product_bar_code_item->commit();
