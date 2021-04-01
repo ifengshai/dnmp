@@ -30,7 +30,7 @@ class Wangpenglei extends Backend
     //导入实时库存 第一步
     public function set_product_relstock()
     {
-
+        $this->item = new \app\admin\model\itemmanage\Item;
         $list = Db::table('fa_zz_temp2')->select();
         foreach ($list as $k => $v) {
             $p_map['sku'] = $v['sku'];
