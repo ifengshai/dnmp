@@ -141,13 +141,6 @@ class Repurchase extends Command
         $where['order_type'] = 1;
         $where['status'] = ['in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
         $where['payment_time'] = ['between',[$startTime,$endTime]];
-        //获取当前时间段内的用户邮箱
-        $email = $this->order
-            ->where($where)
-            ->where('customer_email is not null')
-            ->field('customer_email')
-            ->group('customer_email')
-            ->select();
         //获取当前时间段内的用户人数
         $sql1 = $this->order
             ->where($where)
@@ -158,11 +151,7 @@ class Repurchase extends Command
         $count = $this->order
             ->table([$sql1=>'t2'])
             ->count();
-        $arr = array(
-            'email'=>$email,
-            'count'=>$count,
-        );
-        return $arr;
+        return $count;
     }
 
     /**
@@ -176,20 +165,36 @@ class Repurchase extends Command
      * @date   2021/4/1 09:58:28
      */
     protected function getRepurchaseUserNum($site,$startDate1,$endDate1,$endDate2){
-        //获取当前时间段内的用户邮箱
-        $user = $this->getUser($site,$startDate1,$endDate1);
-        $orderNum = 0;   //复购客户订单数
-        $orderCount = 0;  //复购客户数
-        foreach($user['email'] as $key=>$value){
-            //判断该用户在未来一段时间段内的购买次数是否>=2,是->复购
-            $count = $this->getUserBuyNum($value['customer_email'],$site,$startDate1,$endDate2);
-            if($count>=2){
-                $orderCount++;
-                $orderNum+=$count;
-            }
-        }
+        $startTime1 = strtotime($startDate1);
+        $endTime1 = strtotime($endDate1);
+        $endTime2 = strtotime($endDate2);
+        $where['site'] = $site;
+        $where['order_type'] = 1;
+        $where['status'] = ['in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
+        $where1['payment_time'] = ['between',[$startTime1,$endTime1]];
+        $sql1 = $this->order
+            ->where($where)
+            ->where($where1)
+            ->field('customer_email')
+            ->buildSql();
+
+        $where2 = [];
+        $where2[] = ['exp', Db::raw("customer_email in " . $sql1)];
+        $where3['payment_time'] = ['between',[$startTime1,$endTime2]];
+        $sql2 = $this->order
+            ->alias('t1')
+            ->field('customer_email,count(*) as count')
+            ->where($where)
+            ->where($where2)
+            ->where($where3)
+            ->group('customer_email')
+            ->having('count(*)> 1')
+            ->buildSql();
+        $userOrderInfo = $this->order->table([$sql2=>'t2'])->field('count(*) as count,sum(count) as num')->select();
+        $orderCount = $userOrderInfo['count'] ? $userOrderInfo['count'] : 0;//复购客户数
+        $orderNum = $userOrderInfo['num'] ? $userOrderInfo['num'] : 0;//复购客户订单数
         //客户数
-        $userNum = $user['count'];
+        $userNum = $this->getUser($site,$startDate1,$endDate1);
         //复购率：复购用户数/客户数
         $repurchaseRate = $userNum ? round($orderCount/$userNum*100,2) : 0;
         //复购频次：复购客户订单数/复购客户数
@@ -202,30 +207,6 @@ class Repurchase extends Command
              'againbuy_num_rate'=>$repurchaseNumRate,   //复购频次
          );
         return $arr;
-    }
-    /**
-     * 获取用户未来时间段内购买次数及购买的订单数
-     * @param $email   用户邮箱
-     * @param $site    站点
-     * @param $startDate   用户行为开始时间
-     * @param $endDate   用户行为结束时间
-     * @return mixed
-     * @author mjj
-     * @date   2021/4/1 09:59:52
-     */
-    protected function getUserBuyNum($email,$site,$startDate,$endDate){
-        $startTime = strtotime($startDate);
-        $endTime = strtotime($endDate);
-        $where['customer_email'] = $email;
-        $where['site'] = $site;
-        $where['order_type'] = 1;
-        $where['status'] = ['in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
-        $where['payment_time'] = ['between',[$startTime,$endTime]];
-        //购买次数
-        $count = $this->order
-            ->where($where)
-            ->count();
-        return $count;
     }
     /**
      * 获取用户新老数据
