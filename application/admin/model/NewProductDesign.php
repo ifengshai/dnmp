@@ -41,14 +41,4 @@ class NewProductDesign extends Model
 
         ];
     }
-    
-
-    
-
-
-
-
-
-
-
 }

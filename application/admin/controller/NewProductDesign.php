@@ -5,7 +5,9 @@ namespace app\admin\controller;
 use app\admin\model\Admin;
 use app\admin\model\AuthGroup;
 use app\admin\model\AuthGroupAccess;
+use app\admin\model\itemmanage\attribute\ItemAttribute;
 use app\admin\model\itemmanage\Item;
+use app\admin\model\itemmanage\ItemCategory;
 use app\common\controller\Backend;
 use Aws\S3\S3Client;
 use think\Db;
@@ -116,18 +118,39 @@ class NewProductDesign extends Backend
     //录尺寸
     public function record_size($ids =null)
     {
+        if ($this->request->post()){
+           $data = $this->request->post();
+           //更新设计表
+            $map['id'] = $ids;
+            $data['status'] = 2;
+            $data['update_time']  = date("Y-m-d H:i:s", time());
+            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+            if ($res){
+                //更新商品属性表
+                $whe['item_id'] = $data['goodsId'];
+               $save_item =  ItemAttribute::update($data['row'],$whe);
+               if (!$save_item){
+                   $this->error('商品属性更新失败');
+               }
+               $this->success('操作成功');
+            }
+            $this->error('选品数据更新失败');
+        }
         $item = new Item();
         $value = $this->model->get($ids);
         $where['sku'] = $value->sku;
-        $data = $item->alias('a')
-            ->join(['fa_item_category'=>'b'],'a.category_id = b.id')
-            ->where($where)
-            ->field('a.id,b.name')
+        $data = $item->where($where)
+            ->field('id,category_id')
             ->find();
-        $attribute_type = $data->name;
-        $goods_id = $data->id;
-        $this->assign('attribute_type',$attribute_type);
-        $this->assign('goods_id',$goods_id);
+        $attributeType = $data->category_id;
+        $goodsId = $data->id;
+        $compareValue = ['32','34','35','38','39'];
+        if (!in_array($attributeType,$compareValue)){
+            $attributeType = true;
+        }
+        $this->assign('attributeType',$attributeType);
+        $this->assign('goodsId',$goodsId);
+        $this->assign('ids',$ids);
         return $this->view->fetch();
     }
 
