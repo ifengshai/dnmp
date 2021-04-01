@@ -130,7 +130,6 @@ class NewProductDesign extends Backend
                 $whe['item_id'] = $data['goodsId'];
 
                $save_item =  ItemAttribute::update($data['row'],$whe);
-                new ItemA
                 dump($save_item);die();
                if (!$save_item){
                    $this->error('商品属性更新失败');
