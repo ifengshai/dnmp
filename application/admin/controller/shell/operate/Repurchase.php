@@ -24,9 +24,9 @@ class Repurchase extends Command
 
     protected function execute(Input $input, Output $output)
     {
-        $this->getUserRepurchase(1);  //zeelool复购数据
+        /*$this->getUserRepurchase(1);  //zeelool复购数据
         $this->getUserRepurchase(2);  //voogueme复购数据
-        $this->getUserRepurchase(3);  //nihao复购数据
+        $this->getUserRepurchase(3);  //nihao复购数据*/
         $this->getOldNewUser(1);  //zeelool新老用户数据
         $this->getOldNewUser(2);  //voogueme新老用户数据
         $this->getOldNewUser(3);  //nihao新老用户数据
