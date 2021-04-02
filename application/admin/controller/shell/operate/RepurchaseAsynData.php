@@ -24,9 +24,9 @@ class RepurchaseAsynData extends Command
 
     protected function execute(Input $input, Output $output)
     {
-        $this->getUserRepurchase(1);  //zeelool复购数据
+       /* $this->getUserRepurchase(1);  //zeelool复购数据
         $this->getUserRepurchase(2);  //voogueme复购数据
-        $this->getUserRepurchase(3);  //nihao复购数据
+        $this->getUserRepurchase(3);  //nihao复购数据*/
         $this->getOldNewUser(1);  //zeelool新老用户数据
         $this->getOldNewUser(2);  //voogueme新老用户数据
         $this->getOldNewUser(3);  //nihao新老用户数据
@@ -238,23 +238,36 @@ class RepurchaseAsynData extends Command
     protected function getOldNewUser($site){
         $today = date('Y-m-d');
         $allMonth = $this->getDateFromRange('2018-02-01','2021-03-01');
+        $where['site'] = $site;
+        $where['order_type'] = 1;
+        $where['status'] = ['in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
         foreach ($allMonth as $v) {
             //获取当前月份的开始时间和结束时间
             $nowMonthStart = $v . '-01';
             $nowMonthEnd = date('Y-m-t 23:59:59', strtotime($v));
-            //获取用户邮箱及用户数
-            $user = $this->getUser($site,$nowMonthStart,$nowMonthEnd);
-            $userCount = $user['count'];  //用户数
-            $oldUserCount = 0;  //老用户数
-            $newUserCount = 0;   //新用户数
-            foreach($user['email'] as $key=>$value){
-                $count = $this->getOldUserBuyNum($site,$value['customer_email'],$nowMonthStart);
-                if($count>=1){
-                    $oldUserCount++;
-                }else{
-                    $newUserCount++;
-                }
-            }
+            $nowMonthTimeStart = strtotime($nowMonthStart);
+            $nowMonthTimeEnd = strtotime($nowMonthEnd);
+            $where1['payment_time'] = ['between',[$nowMonthTimeStart,$nowMonthTimeEnd]];
+            $sql1 = $this->order
+                ->where($where)
+                ->where($where1)
+                ->field('customer_email')
+                ->buildSql();
+            $where2 = [];
+            $where2[] = ['exp', Db::raw("customer_email in " . $sql1)];
+            $where3['payment_time'] = ['<',$nowMonthTimeStart];
+            $sql2 = $this->order
+                ->alias('t1')
+                ->field('count(*) as count')
+                ->where($where)
+                ->where($where2)
+                ->where($where3)
+                ->group('customer_email')
+                ->having('count(*)>= 1')
+                ->buildSql();
+            $oldUserCount = $this->order->table([$sql2=>'t2'])->value('count(*) as count');
+            $userCount = $this->getUser($site,$nowMonthStart,$nowMonthEnd);  //用户数
+            $newUserCount = intval($userCount)-intval($oldUserCount);   //新用户数
             $oldUserRate = $userCount ? round($oldUserCount/$userCount*100,2) : 0; //老用户数占比
             //获取上个月的用户信息
             $lastMonth = date("Y-m", strtotime("first day of -1 month", strtotime($today)));
@@ -262,11 +275,18 @@ class RepurchaseAsynData extends Command
                 ->where('day_date',$lastMonth)
                 ->where('site',$site)
                 ->find();
-            //老客户环比变动
-            $oldSequential = $lastData['old_usernum'] ? round($oldUserCount/$lastData['old_usernum']*100,2) : 0;
-            //新用户环比变动
-            $lastMonthNewUser = $lastData['usernum'] - $lastData['old_usernum'];
-            $newSequential = $lastMonthNewUser ? round($newUserCount/$lastMonthNewUser*100,2) : 0;
+            if($lastData['id']){
+                //老客户环比变动
+                $oldSequential = $lastData['old_usernum'] ? round($oldUserCount/$lastData['old_usernum']*100,2) : 0;
+                //新用户环比变动
+                $lastMonthNewUser = $lastData['usernum'] - $lastData['old_usernum'];
+                $newSequential = $lastMonthNewUser ? round($newUserCount/$lastMonthNewUser*100,2) : 0;
+            }else{
+                //老客户环比变动
+                $oldSequential = 100;
+                //新用户环比变动
+                $newSequential = 100;
+            }
             $arr = array(
                 'usernum'=>$userCount,
                 'old_usernum'=>$oldUserCount,
@@ -281,27 +301,4 @@ class RepurchaseAsynData extends Command
             usleep(10000);
         }
     }
-    /**
-     * 获取用户过去时间段内的购买次数
-     * @param $site   站点
-     * @param $email   邮箱
-     * @param $limitDate   过去时间段的临界时间
-     * @return mixed
-     * @author mjj
-     * @date   2021/4/1 10:13:53
-     */
-    protected function getOldUserBuyNum($site,$email,$limitDate){
-        $limitTime = strtotime($limitDate);
-        $where['customer_email'] = $email;
-        $where['site'] = $site;
-        $where['order_type'] = 1;
-        $where['status'] = ['in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
-        $where['payment_time'] = ['<',$limitTime];
-        //购买次数
-        $count = $this->order
-            ->where($where)
-            ->count();
-        return $count;
-    }
-
 }
