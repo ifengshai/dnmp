@@ -167,27 +167,54 @@ class NewProductDesign extends Backend
         if ($this->request->post()){
            $data = $this->request->post();
             if ($data['attributeType'] ==1){
-                empty($data['row']['frame_height'])&& $this->error('镜框高数值不能为空');
-                empty($data['row']['frame_bridge'])&& $this->error('桥数值不能为空');
-                empty($data['row']['frame_temple_length'])&& $this->error('镜腿长数值不能为空');
-                empty($data['row']['frame_height'])&& $this->error('镜架总长数值不能为空');
-                empty($data['row']['frame_weight'])&& $this->error('重量数值不能为空');
-                empty($data['row']['mirror_width'])&& $this->error('镜面宽数值不能为空');
+                if ($data['row']['frame_height'] < 0.1){
+                    $this->error('请输入正确的镜框高数值');
+                }
+                if($data['row']['frame_bridge']<0.1){
+                    $this->error('请输入正确的桥数值');
+                }
+                if($data['row']['frame_temple_length']<0.1){
+                    $this->error('请输入正确的镜腿长数值');
+                }
+                if($data['row']['frame_height']<0.1){
+                    $this->error('请输入正确的镜架总长数值');
+                }
+                if($data['row']['frame_weight']<0.1){
+                    $this->error('请输入正确的重量数值');
+                }
+                if($data['row']['mirror_width']<0.1){
+                    $this->error('请输入正确的镜面宽数值');
+                }
+
             }
             if ($data['attributeType'] ==32){
-                empty($data['row']['box_height'])&& $this->error('高度数值不能为空');
-                empty($data['row']['box_width'])&& $this->error('宽度数值不能为空');
+                if($data['row']['box_height']<0.1){
+                    $this->error('请输入正确的高度数值');
+                }
+                if($data['row']['box_width']<0.1){
+                    $this->error('请输入正确的宽度数值');
+                }
             }
             if ($data['attributeType'] ==35){
-                empty($data['row']['earrings_height'])&& $this->error('高度数值不能为空');
-                empty($data['row']['earrings_width'])&& $this->error('宽度数值不能为空');
+                if($data['row']['earrings_height']<0.1){
+                    $this->error('请输入正确的高度数值');
+                }
+                if($data['row']['earrings_width']<0.1){
+                    $this->error('请输入正确的宽度数值');
+                }
             }
             if ($data['attributeType'] ==38){
-                empty($data['row']['eyeglasses_chain'])&& $this->error('周长数值不能为空');
+                if($data['row']['eyeglasses_chain']<0.1){
+                    $this->error('请输入正确的周长数值数值');
+                }
             }
             if ($data['attributeType'] ==32 ||$data['attributeType'] ==39){
-                empty($data['row']['necklace_perimeter'])&& $this->error('周长数值不能为空');
-                empty($data['row']['necklace_chain'])&& $this->error('延长链数值不能为空');
+                if($data['row']['necklace_perimeter']<0.1){
+                    $this->error('请输入正确的周长数值');
+                }
+                if($data['row']['necklace_chain']<0.1){
+                    $this->error('请输入正确的延长链数值');
+                }
             }
             $itemAttribute = new \app\admin\model\itemmanage\ItemAttribute();
             //标记打印状态
@@ -242,6 +269,9 @@ class NewProductDesign extends Backend
        empty($ids) && $this->error('缺少重要参数');
        empty($status) && $this->error('数据异常');
         $map['id'] = $ids;
+        if ($status ==9){
+            $status =6;
+        }
         $data['status'] = $status;
         $data['update_time']  = date("Y-m-d H:i:s", time());
         $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
