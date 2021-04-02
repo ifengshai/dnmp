@@ -55,8 +55,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'upload'], function (
                             { field: 'order_type', title: __('订单类型'), custom: { 1: 'success', 2: 'orange', 3: 'danger', 4: 'warning', 5: 'purple', 9: 'warning' }, searchList: { 1: '普通订单', 2: '批发', 3: '网红单', 4: '补发', 5: '补差价', 9: 'vip订单' }, formatter: Table.api.formatter.status },
                             { field: 'order_money', title: __('订单金额'), operate: false, formatter: Controller.api.float_format },
                             {
-                                field: 'income_amount', title: __('收入金额'), operate: false, formatter: function (value, row, index) {
-                                    if (row.action_type == 2 && value && typeof(value)!="undefined") {
+                                field: 'income_amount',
+                                title: __('收入金额'),
+                                operate: false,
+                                formatter: function (value, row, index) {
+                                    if (row.action_type == 2 && value && typeof (value) != "undefined") {
                                         return '<b style = "color:red">-' + parseFloat(value).toFixed(2) + '</b>';
                                     } else {
                                         if (value && value && typeof (value) != "undefined") {
@@ -65,7 +68,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'upload'], function (
                                     }
                                 }
                             },
-                            {field: 'order_currency_code', title: __('币种')},
+                            {field: 'order_currency_code', title: __('支付币种')},
                             {
                                 field: 'is_carry_forward',
                                 title: __('是否结转'),
