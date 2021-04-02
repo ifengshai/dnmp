@@ -2066,7 +2066,7 @@ class OrderData extends Backend
      */
     protected function order_data($site)
     {
-        $list = $this->order->where('grand_total < 1 and site = '.$site)->where(['created_at' => ['>', '1612108800']])->limit(4000)->select();
+        $list = $this->order->where('grand_total is null and site = '.$site)->where(['created_at' => ['>', '1612108800']])->limit(4000)->select();
         $list = collection($list)->toArray();
         $entity_id = array_column($list, 'entity_id');
         if ($site == 1) {
@@ -2088,6 +2088,9 @@ class OrderData extends Backend
         } elseif ($site == 12) {
             $res = Db::connect('database.db_voogueme_acc')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('grand_total', 'entity_id');
         }
+        dump($res);
+        die;
+
         $params = [];
         foreach ($list as $k => $v) {
             $params[$k]['id'] = $v['id'];
