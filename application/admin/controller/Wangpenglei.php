@@ -882,4 +882,26 @@ class Wangpenglei extends Backend
         Excel::writeCsv($params, $headlist, '采购成本');
         die;
     }
+
+    /**
+     *  重新计算三月份财务成本
+     * @Description
+     * @author: wpl
+     * @since: 2021/4/2 11:52
+     */
+    public function getFinanceCost()
+    {
+
+    }
+
+    /**
+     *  获取订单支付金额
+     * @Description
+     * @author: wpl
+     * @since: 2021/4/2 11:52
+     */
+    public function getOrderGrandTotal()
+    {
+
+    }
 }
