@@ -1078,10 +1078,10 @@ class Outstock extends Backend
             $database_data = array_column($selectlist, 'code');
             foreach ($data as $check_k => $check_v) {
                 if (!in_array($check_v[2], $database_data)) {
-                    $msg['code']=$check_v[2];
+                    /*$msg['code']=$check_v[2];
                     $msg['msg']='条码不存在';
-                    array_push($result_msg,$msg);
-//                    $this->error('条码[' . $check_v[2] . ']不存在');
+                    array_push($result_msg,$msg);*/
+                    $this->error('条码[' . $check_v[2] . ']不存在');
                 }
             }
 
@@ -1089,7 +1089,7 @@ class Outstock extends Backend
             $insert_out_stoce=array();
             //数据库中条码信息进行验证与数据拼装   如果验证不通过则记录原因
             foreach ($selectlist as $k => $v) {
-                /*if ($v['library_status'] == 2) {
+                if ($v['library_status'] == 2) {
                     $this->error(__('条码[' . $v['code'] . ']已出库'));
                 }
                 if ($v['out_stock_id']) {
@@ -1104,9 +1104,9 @@ class Outstock extends Backend
                 $un_key = $v['location_id'] . $v['location_code_id'];
                 $insert_out_stoce[$un_key][$v['code']] = $v['id'];
 
-                $insert_out_stoce[$un_key]['sku'][$v['sku']][$k]=1;*/
+                $insert_out_stoce[$un_key]['sku'][$v['sku']][$k]=1;
 
-                if ($v['library_status'] == 2) {
+                /*if ($v['library_status'] == 2) {
                     $msg['code']=$v['code'];
                     $msg['msg']='条码已出库';
                     array_push($result_msg,$msg);
@@ -1126,7 +1126,7 @@ class Outstock extends Backend
                     $un_key = $v['location_id'] . $v['location_code_id'];
                     $insert_out_stoce[$un_key][$v['code']] = $v['id'];
                     $insert_out_stoce[$un_key]['sku'][$v['sku']][$k]=1;
-                }
+                }*/
 
             }
             $out_plat = $data[0][1];
@@ -1223,7 +1223,7 @@ class Outstock extends Backend
         if ($result_msg){
         $savename = '/uploads/批量出库剩余数据' . date("YmdHis", time());
         $this->writeCsv($result_msg,array('code','msg'),$savename,false);
-        return json(['msg' => "uploads",'code'=>1,'url' => "http://".$_SERVER['HTTP_HOST']."/".$savename.".csv"]);
+        return json(['msg' => "uploads",'code'=>1,'url' => "https://".$_SERVER['HTTP_HOST']."/".$savename.".csv"]);
         }else{
             $this->success("导入成功");
         }
