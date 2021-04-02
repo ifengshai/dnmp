@@ -708,6 +708,7 @@ class WorkOrderList extends Model
             'city'=>$changeAddress['city'],
             'street'=>$changeAddress['street'],
             'postcode'=>$changeAddress['postcode'],
+            'cpf'=>$changeAddress['taxno'],
         );
         $this->httpRequest($work->work_platform, 'magic/order/editAddress', $postData, 'POST');
 
@@ -1360,6 +1361,7 @@ class WorkOrderList extends Model
                     'region_id' => $address['region_id'],
                     'street' => $address['street'],
                     'pay_method' => $address['pay_method'],
+                    'cpf' => $address['taxno'],
                 ];
                 $pdCheck = $pd = $prismCheck = '';
                 $pd_r = $pd_l = '';
