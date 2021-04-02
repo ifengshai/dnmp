@@ -653,6 +653,7 @@ class ItemPlatformSku extends Backend
     {
         if ($this->request->isAjax()) {
             $itemPlatformRow = $this->model->findItemPlatform($ids);
+            $itemPlatformDetail = $this->model->where('id',$ids)->find();
             if ($itemPlatformRow['is_upload'] == 1) { //商品已经上传，无需再次上传
                 $this->error(__('The product has been uploaded, there is no need to upload again'));
             }
@@ -695,6 +696,7 @@ class ItemPlatformSku extends Backend
             $uploadItemArr['silk_length'] = $itemAttributeDetail['silk_length'];
             $uploadItemArr['silk_width'] = $itemAttributeDetail['silk_width'];
             $uploadItemArr['site'] = $itemPlatformRow['platform_id'];
+            $uploadItemArr['status'] = $itemPlatformDetail['outer_sku_status'];
             $uploadItemArr['picture'] = $itemAttributeDetail['frame_aws_imgs'];
             $uploadItemArr['pic'] = $itemAttributeDetail['frame_aws_imgs'];
             if ($uploadItemArr['site'] == 13) {
