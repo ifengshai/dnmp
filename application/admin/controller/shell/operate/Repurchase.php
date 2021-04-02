@@ -191,8 +191,8 @@ class Repurchase extends Command
             ->having('count(*)> 1')
             ->buildSql();
         $userOrderInfo = $this->order->table([$sql2=>'t2'])->field('count(*) as count,sum(count) as num')->select();
-        $orderCount = $userOrderInfo['count'] ? $userOrderInfo['count'] : 0;//复购客户数
-        $orderNum = $userOrderInfo['num'] ? $userOrderInfo['num'] : 0;//复购客户订单数
+        $orderCount = $userOrderInfo[0]['count'] ? $userOrderInfo[0]['count'] : 0;//复购客户数
+        $orderNum = $userOrderInfo[0]['num'] ? $userOrderInfo[0]['num'] : 0;//复购客户订单数
         //客户数
         $userNum = $this->getUser($site,$startDate1,$endDate1);
         //复购率：复购用户数/客户数
