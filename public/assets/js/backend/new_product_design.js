@@ -80,7 +80,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             custom: { 1: 'black', 2: 'black', 3: 'black', 4: 'black', 5: 'black', 6: 'black', 7: 'black', 8: 'black', 9: 'black', 10: 'black', 11: 'black' },
                             formatter: Table.api.formatter.status
                         },
-                        {field: 'responsible_id', title: __('Responsible_id')},
+                        {field: 'responsible_id', title: __('Responsible_id'),
+                            visible: function(row){
+                                if (row.status ==3){
+                                    return  true;
+                                }else{
+                                    return false;
+                                }
+
+                            }},
                         {field: 'create_time', title: __('Create_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
@@ -121,7 +129,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
-                                        if (row.label ==0 || row.status ==1){
+                                        if (row.label ==0){
                                             return  true;
                                         }else{
                                             return  false;

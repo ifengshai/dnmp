@@ -56,54 +56,50 @@
 <form id="edit-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
     <input type="hidden" name="goodsId" value="{$goodsId}">
     <input type="hidden" name="ids" value="{$ids}">
+    <input type="hidden" name="attributeType" value="{$attributeType}">
     {if $attributeType == 'true'}
     <div class="form-group ajax-add">
         <label class="control-label col-xs-12 col-sm-2">{:__('镜框高（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-frame_bridge" data-rule="required" class="form-control" name="row[frame_height]" type="number" value="" >
+            <input id="frame_height" data-rule="" class="form-control" name="row[frame_height]" type="number" value="" >
         </div>
-        <label class="control-label col-xs-12 col-sm-2">{:__('镜框宽（mm）')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('镜面宽（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-mirror_width" data-rule="required" class="form-control" name="row[frame_width]" type="number" value="" >
+            <input id="mirror_width" data-rule="" class="form-control" name="row[mirror_width]" type="number" value="" >
         </div>
     </div>
     <div class="form-group ajax-add">
         <label class="control-label col-xs-12 col-sm-2">{:__('桥（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
             <input id="c-attribute-type" type="hidden" name="row[attribute_type]" value="1"/>
-            <input id="c-frame_height" data-rule="required" class="form-control" name="row[frame_bridge]" type="number" value="" >
+            <input id="frame_bridge" data-rule="" class="form-control" name="row[frame_bridge]" type="number" value="" >
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('镜腿长（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-frame_width" data-rule="required" class="form-control" step="0.01" name="row[frame_temple_length]" type="number" value="" >
+            <input id="frame_temple_length" data-rule="" class="form-control" step="0.01" name="row[frame_temple_length]" type="number" value="" >
         </div>
     </div>
     <div class="form-group ajax-add">
         <label class="control-label col-xs-12 col-sm-2">{:__('镜架总长（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-frame_length" data-rule="required" class="form-control" name="row[frame_length]" type="number" value="" >
+            <input id="frame_length" data-rule="" class="form-control" name="row[frame_length]" type="number" value="" >
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('重量（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-frame_temple_length" data-rule="required" class="form-control" step="0.01" name="row[frame_weight]" type="number" value="" >
+            <input id="frame_weight" data-rule="" class="form-control" step="0.01" name="row[frame_weight]" type="number" value="" >
         </div>
     </div>
-    <div class="form-group ajax-add">
-        <label class="control-label col-xs-12 col-sm-2">{:__('镜面宽（mm）')}:</label>
-        <div class="col-xs-12 col-sm-3">
-            <input id="c-weight" data-rule="required" class="form-control" name="row[mirror_width]" type="number" value="" >
-        </div>
-    </div>
+
     <!--镜盒-->
     {elseif $attributeType == '32'}
     <div class="form-group ajax-add">
         <label class="control-label col-xs-12 col-sm-2">{:__('高度（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-frame_bridge" data-rule="required" class="form-control" name="row[box_height]" type="number" value="" >
+            <input id="box_height" class="form-control" name="row[box_height]" type="number" value="" >
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('宽度（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-mirror_width" data-rule="required" class="form-control" name="row[box_width]" type="number" value="" >
+            <input id="box_width" data-rule="" class="form-control" name="row[box_width]" type="number" value="" >
         </div>
     </div>
     <!--手链-->
@@ -111,11 +107,11 @@
     <div class="form-group ajax-add">
         <label class="control-label col-xs-12 col-sm-2">{:__('周长（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-frame_bridge" data-rule="required" class="form-control" name="row[necklace_perimeter]" type="number" value="" >
+            <input id="necklace_perimeter" data-rule="" class="form-control" name="row[necklace_perimeter]" type="number" value="" >
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('延长链（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-mirror_width" data-rule="required" class="form-control" name="row[necklace_chain]" type="number" value="" >
+            <input id="necklace_chain" data-rule="" class="form-control" name="row[necklace_chain]" type="number" value="" >
         </div>
     </div>
     <!--耳饰-->
@@ -123,11 +119,11 @@
     <div class="form-group ajax-add">
         <label class="control-label col-xs-12 col-sm-2">{:__('高度（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-frame_bridge" data-rule="required" class="form-control" name="row[earrings_height]" type="number" value="" >
+            <input id="earrings_height" data-rule="" class="form-control" name="row[earrings_height]" type="number" value="" >
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('宽度（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-mirror_width" data-rule="required" class="form-control" name="row[earrings_width]" type="number" value="" >
+            <input id="earrings_width" data-rule="" class="form-control" name="row[earrings_width]" type="number" value="" >
         </div>
     </div>
     <!--眼镜链-->
@@ -135,7 +131,7 @@
     <div class="form-group ajax-add">
         <label class="control-label col-xs-12 col-sm-2">{:__('周长（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-frame_bridge" data-rule="required" class="form-control" name="row[eyeglasses_chain]" type="number" value="" >
+            <input id="eyeglasses_chain" data-rule="" class="form-control" name="row[eyeglasses_chain]" type="number" value="" >
         </div>
     </div>
     <!--项链-->
@@ -143,11 +139,11 @@
     <div class="form-group ajax-add">
         <label class="control-label col-xs-12 col-sm-2">{:__('周长（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-frame_bridge" data-rule="required" class="form-control" name="row[necklace_perimeter]" type="number" value="" >
+            <input id="necklace_perimeter" data-rule="" class="form-control" name="row[necklace_perimeter]" type="number" value="" >
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('延长链（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-mirror_width" data-rule="required" class="form-control" name="row[necklace_chain]" type="number" value="" >
+            <input id="necklace_chain" data-rule="" class="form-control" name="row[necklace_chain]" type="number" value="" >
         </div>
     </div>
     {else}

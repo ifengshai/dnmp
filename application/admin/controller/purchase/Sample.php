@@ -835,11 +835,15 @@ class Sample extends Backend
                 //判断数据中是否有空值
                 $sku_arr = array_column($params['goods'], 'sku');
                 $stock_arr = array_column($params['goods'], 'stock');
+                $warehouseHouse = array_column($params['goods'], 'warehouse');
                 if (in_array('', $sku_arr)) {
                     $this->error(__('商品信息不能为空', ''));
                 }
                 if (in_array('', $stock_arr)) {
                     $this->error(__('库存不能为空', ''));
+                }
+                if (in_array('', $warehouseHouse)) {
+                    $this->error(__('库位号不能为空', ''));
                 }
                 //获取该入库单下的商品sku，并将不在该列表的数据进行删除
                 $save_sku_arr = Db('purchase_sample_workorder_item')->where(['parent_id' => $ids])->column('sku');
