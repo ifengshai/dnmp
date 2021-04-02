@@ -16,10 +16,20 @@ class Hour extends BaseElasticsearch
     {
         $start = '2018020500';
         $end = '2021020531';
-        $order = $this->getPurchaseSearch(1, $start, $end);
+        $this->getPurchaseSearch(1, $start, $end);
     }
 
-    public function getPurchaseSearch($site = 1, $start, $end)
+    /**
+     * 订单数据统计（包含几乎所有的聚合和统计）
+     *
+     * @param     $start
+     * @param     $end
+     *
+     * @return mixed
+     * @author crasphb
+     * @date   2021/4/2 15:14
+     */
+    public function getPurchaseSearch($start, $end)
     {
         $params = [
             'index' => 'mojing_order',
@@ -35,56 +45,163 @@ class Hour extends BaseElasticsearch
                                     ],
                                 ],
                             ],
+                            //in查询
+//                            [
+//                                'terms' => [
+//                                    'id' => [13,42]
+//                                ]
+//                            ]
                         ],
                     ],
                 ],
                 "aggs"  => [
-                    'allDaySalesAmount' => [
-                        "sum" => [
-                            'field' => 'base_grand_total',
-                        ]
-                    ],
-                    'allQtyOrdered' => [
-                        "sum" => [
-                            'field' => 'total_qty_ordered',
-                        ]
-                    ],
-                    'allAvgPrice' => [
-                        "avg" => [
-                            'field' => 'base_grand_total',
-                        ]
-                    ],
-                    "hourSale" => [
+                    'site' => [
                         "terms" => [
-                            "field" => 'hour',
-                            'size'  => '24',
-                            'order' => [
-                                '_key' => 'asc'
-                            ]
+                            "field" => 'site',
                         ],
                         "aggs"  => [
-                            "daySalesAmount"  => [
+                            //总数聚合
+                            'allDaySalesAmount' => [
                                 "sum" => [
-                                    "field" => "base_grand_total",
+                                    'field' => 'base_grand_total',
                                 ],
                             ],
-                            "totalQtyOrdered" => [
-                                "sum" => [
-                                    "field" => "total_qty_ordered",
+                            'allShippingAmount' => [
+                                'sum' => [
+                                    'field' => 'base_shipping_amount',
                                 ],
                             ],
-                            "avgPrice"        => [
+                            'allQtyOrdered'     => [
+                                "sum" => [
+                                    'field' => 'total_qty_ordered',
+                                ],
+                            ],
+                            'allAvgPrice'       => [
                                 "avg" => [
-                                    "field" => "base_grand_total",
+                                    'field' => 'base_grand_total',
+                                ],
+                            ],
+                            //国家求订单
+                            "countrySale"       => [
+                                "terms" => [
+                                    "field" => 'country_id',
+                                    'size'  => '150',
+                                    'order' => [
+                                        '_count' => 'desc',
+                                    ],
+                                ],
+                            ],
+
+                            //价格区间聚合
+                            'price_ranges'      => [
+                                'range' => [
+                                    'field'  => 'base_grand_total',
+                                    'ranges' => [
+                                        ['from' => '0', 'to' => '19.99'],
+                                        ['from' => '20', 'to' => '29.99'],
+                                        ['from' => '30', 'to' => '39.99'],
+                                        ['from' => '40', 'to' => '49.99'],
+                                        ['from' => '50', 'to' => '59.99'],
+                                        ['from' => '60', 'to' => '79.99'],
+                                        ['from' => '80', 'to' => '99.99'],
+                                        ['from' => '100', 'to' => '199.99'],
+                                        ['from' => '200', 'to' => '5000000'],
+                                    ],
+                                ],
+                            ],
+                            //小时聚合
+                            "hourSale"          => [
+                                "terms" => [
+                                    "field" => 'hour',
+                                    'size'  => '24',
+                                    'order' => [
+                                        '_key' => 'asc',
+                                    ],
+                                ],
+                                "aggs"  => [
+                                    "daySalesAmount"  => [
+                                        "sum" => [
+                                            "field" => "base_grand_total",
+                                        ],
+                                    ],
+                                    "totalQtyOrdered" => [
+                                        "sum" => [
+                                            "field" => "total_qty_ordered",
+                                        ],
+                                    ],
+                                    "avgPrice"        => [
+                                        "avg" => [
+                                            "field" => "base_grand_total",
+                                        ],
+                                    ],
+                                ],
+                            ],
+                            //天聚合
+                            "daySale"           => [
+                                "terms" => [
+                                    "field" => 'day_date',
+                                    'size'  => '10000',
+                                    'order' => [
+                                        '_key' => 'asc',
+                                    ],
+                                ],
+                                "aggs"  => [
+                                    "daySalesAmount"  => [
+                                        "sum" => [
+                                            "field" => "base_grand_total",
+                                        ],
+                                    ],
+                                    "totalQtyOrdered" => [
+                                        "sum" => [
+                                            "field" => "total_qty_ordered",
+                                        ],
+                                    ],
+                                    "avgPrice"        => [
+                                        "avg" => [
+                                            "field" => "base_grand_total",
+                                        ],
+                                    ],
+                                ],
+                            ],
+                            //订单类型聚合
+                            "orderType"         => [
+                                "terms" => [
+                                    "field" => 'order_type',
+                                    'order' => [
+                                        '_key' => 'asc',
+                                    ],
+                                ],
+                                "aggs"  => [
+                                    "salesAmount" => [
+                                        "sum" => [
+                                            "field" => "base_grand_total",
+                                        ],
+                                    ],
+                                ],
+                            ],
+                            //运输方式聚合
+                            "shipType"          => [
+                                'terms' => [
+                                    "field" => 'shipping_method',
+                                ],
+                                'aggs'  => [
+                                    'allShippingAmount' => [
+                                        'sum' => [
+                                            'field' => 'base_shipping_amount',
+                                        ],
+                                    ],
                                 ],
                             ],
                         ],
                     ],
                 ],
-
             ],
         ];
         $results = $this->esClient->search($params);
+        //dump($results);die;
+        file_put_contents('./b.json', json_encode($results));
+        die;
+
         return $results['aggregations']['hourSale']['buckets'];
     }
 

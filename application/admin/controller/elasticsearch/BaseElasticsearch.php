@@ -84,7 +84,8 @@ class BaseElasticsearch extends Backend
                 'type' => 'integer',
             ],
             'base_grand_total' => [
-                'type' => 'float',
+                'type' => 'scaled_float',
+                'scaling_factor' => 10000
             ],
             'total_qty_ordered'        => [
                 'type' => 'integer',
@@ -144,16 +145,19 @@ class BaseElasticsearch extends Backend
                 'type' => 'keyword',
             ],
             'mw_rewardpoint_discount'   => [
-                'type' => 'float',
+                'type' => 'scaled_float',
+                'scaling_factor' => 10000
             ],
             'last_trans_id'       => [
                 'type' => 'keyword',
             ],
             'mw_rewardpoint'  => [
-                'type' => 'float',
+                'type' => 'scaled_float',
+                'scaling_factor' => 10000
             ],
             'base_shipping_amount'   => [
-                'type' => 'float',
+                'type' => 'scaled_float',
+                'scaling_factor' => 10000
             ],
             'payment_time'       => [
                 'type' => 'date',
