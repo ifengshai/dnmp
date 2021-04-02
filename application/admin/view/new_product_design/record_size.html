@@ -63,9 +63,9 @@
         <div class="col-xs-12 col-sm-3">
             <input id="frame_height" data-rule="" class="form-control" name="row[frame_height]" type="number" value="" >
         </div>
-        <label class="control-label col-xs-12 col-sm-2">{:__('镜框宽（mm）')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('镜面宽（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="frame_width" data-rule="" class="form-control" name="row[frame_width]" type="number" value="" >
+            <input id="mirror_width" data-rule="" class="form-control" name="row[mirror_width]" type="number" value="" >
         </div>
     </div>
     <div class="form-group ajax-add">
@@ -89,12 +89,7 @@
             <input id="frame_weight" data-rule="" class="form-control" step="0.01" name="row[frame_weight]" type="number" value="" >
         </div>
     </div>
-    <div class="form-group ajax-add">
-        <label class="control-label col-xs-12 col-sm-2">{:__('镜面宽（mm）')}:</label>
-        <div class="col-xs-12 col-sm-3">
-            <input id="mirror_width" data-rule="" class="form-control" name="row[mirror_width]" type="number" value="" >
-        </div>
-    </div>
+
     <!--镜盒-->
     {elseif $attributeType == '32'}
     <div class="form-group ajax-add">

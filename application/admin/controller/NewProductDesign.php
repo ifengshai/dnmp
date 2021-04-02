@@ -168,7 +168,6 @@ class NewProductDesign extends Backend
            $data = $this->request->post();
             if ($data['attributeType'] ==1){
                 empty($data['row']['frame_height'])&& $this->error('镜框高数值不能为空');
-                empty($data['row']['frame_width'])&& $this->error('镜框宽数值不能为空');
                 empty($data['row']['frame_bridge'])&& $this->error('桥数值不能为空');
                 empty($data['row']['frame_temple_length'])&& $this->error('镜腿长数值不能为空');
                 empty($data['row']['frame_height'])&& $this->error('镜架总长数值不能为空');
