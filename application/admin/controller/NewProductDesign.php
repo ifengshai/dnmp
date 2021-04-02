@@ -120,7 +120,7 @@ class NewProductDesign extends Backend
                     $list[$key]['responsible_id'] = '暂无';
                 }
             }
-            $result = array("total" => $total, "rows" => $list);
+            $result = array("total" => $total,"label"=>$map['status']?$map['status']:0, "rows" => $list);
 
             return json($result);
         }
