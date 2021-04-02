@@ -696,7 +696,7 @@ class ItemPlatformSku extends Backend
             $uploadItemArr['silk_width'] = $itemAttributeDetail['silk_width'];
             $uploadItemArr['site'] = $itemPlatformRow['platform_id'];
             $uploadItemArr['picture'] = $itemAttributeDetail['frame_aws_imgs'];
-            // dump($uploadItemArr);die;
+            $uploadItemArr['pic'] = $itemAttributeDetail['frame_aws_imgs'];
             if ($uploadItemArr['site'] == 13) {
                 $params['sku_info'] = implode(',', $uploadItemArr['skus']);
                 $params['platform_type'] = 1;
